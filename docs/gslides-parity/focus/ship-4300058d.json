@@ -1,0 +1,122 @@
+{
+  "commit": "4300058d",
+  "renderedFrom": ["docs/gslides-parity/focus/verification/people-ship-preview10-run1.json"],
+  "rule": "docs/PEOPLE.md 6.2 and docs/RETURN.md section 1 rule 2: parkedFeaturesOf over the last readings of the one gate run of record on the enforce preview https://turboslide-46wkqjmuw-kl01s-projects.vercel.app built from 2fcbfb86 (the ship step's run on the tree with the fix round and its two applied requests), with its once reruns narrowed to the rows read beside it; the ten local rows of the accounts spec are judged by the local accounts run alone and listed apart on a deployment; a row carrying parks red in the run of record and in its once rerun parks the controls it names, a parkable feature red through a row without parks is parked whole, a row of a feature parked whole is not listed a second time, and a row red in the run of record and green on its once rerun narrowed to it is flaky and is not listed; the previous ship's list (ship-c1a7ff3.json) is carried forward where its rows did not read green, since the menu model's advanced flags and packages/chrome/src/parked-controls.ts follow this list, and a carried row green in the run of record leaves it (leaves); the exceptions the ship rule makes over the gate's mechanical wouldPark are in notParked, each with its reason; the ship step's gate on the rebased tree's preview reads the list again before the push",
+  "parkedFeatures": ["inbox", "templates"],
+  "parkedRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": ["toolbar.group.text"]
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": ["panel.brand.logo.find"]
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"]
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": ["dialog.background.shader.addToTheme"]
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": ["dialog.background.shader"]
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"]
+    },
+    {
+      "id": "shaders.library.glyph-engines-render",
+      "parks": ["dialog.shader.engine.glyph"]
+    },
+    {
+      "id": "svg.copy.markup",
+      "parks": ["picture.svg.copy"]
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": ["bar.table"]
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": ["file.versionHistory.showChanges"]
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+    }
+  ],
+  "notParked": [
+    {
+      "feature": "brand",
+      "why": "the gate's wouldPark names it; the gate's wouldPark names it on brand.objects.kit-colours-first alone, a P1 row not on the build (docs/FEATURES.md section 1; the control formatOptions.chart.swatches.primary), and on brand.appearance.default, skipped by its spec on a preview; every other brand row on the build is green in the run of record"
+    },
+    {
+      "feature": "fonts",
+      "why": "the gate's wouldPark names it; its entries fonts.picker.specimen-rows and fonts.table.takes-family are P1 rows not on the build (docs/FEATURES.md section 1); fonts.export.editable-names-face read red once (the download event past its 90 s bound at load 15 to 25) and green on the once rerun narrowed to it (people-ship-preview10-rows-rerun.json); fonts.preload.italic-on-edit-only read red in the run of record and on that rerun in the brand spec file's own teardown check alone (its scratch deck untitled-20260930-rvg2, then untitled-20260930-t4dw, still answering after the trash and the delete within the check's bound; the row's own assertions green both times; both decks removed by id by the ship step, deck.info 404 after), the blob tier's timing class of docs/VECTOR.md 6.2 recorded by id for the production gate to read again; every other fonts row on the build is green in the run of record"
+    },
+    {
+      "feature": "assist",
+      "why": "the gate's wouldPark names it; assist.quota.429 is not driven with no Upstash on the preview, which docs/PRODUCT.md 8.2 exempts as the environment's; every other assist row is green in the run of record"
+    },
+    {
+      "id": "decks.file.open-list-search",
+      "controls": ["file.open"],
+      "why": "Kevin's standing row, never chased (107 decks listed after 11.4 s on the shared store against the row's bound); file.open stays in the default view"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "controls": ["insert.logo"],
+      "why": "not driven by design on the fixture preview (TURBOSLIDE_LOGO_UPSTREAM=fixture, not the outage; docs/FEATURES.md 4.3, 4.8, 7.2); the unit test apps/studio/src/server/logos.test.ts is named; parking insert.logo would hide Insert > Logo for a row the fixture preview cannot drive"
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "controls": ["insert.logo"],
+      "why": "a fixture only row production never drives by its rule (the index reads thesvg.org there); red on every fixture preview since the vector round because the fixture's manifest is computed from the answering instance's copy of the shared index (the same TypeError); parking insert.logo would hide Insert > Logo for a row production cannot drive (the same exception in the vector round's, ship two's and the objects round's lists)"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "controls": ["insert.logo"],
+      "why": "red in the run of record and green on its once rerun narrowed to it (people-ship-preview10-rows-rerun.json): flaky by the rule, not listed; the reading in the run of record (cachedMarks rose by two against the one insert the row makes) is another run's insert on the shared store the previews and production share (the polish round's gates ran beside this one), not the licence rule"
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "controls": ["insert.shader"],
+      "why": "red in the run of record and green on its once rerun narrowed to it (people-ship-preview10-rows-rerun.json): flaky by the rule, not listed; the reading (the 1.2 frame not on the deck within the bound) is ship two's F8 class, the client's frame write landing late, the same recorded flake as at the objects round's ship"
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "controls": ["formatOptions.shader.color"],
+      "why": "red in the run of record on the re capture's time alone (the frame re keyed 19,374 ms after the kit write against 5 s, the block's mean colour moved 82.5, the six swatches read; ship two's recorded class, the capture in the runner's Chromium at load 15 to 25 with the polish round's gate beside this one) and green on the once rerun of the shaders area narrowed to it (people-ship-preview10-shaders-rerun.json, load 2 to 3): flaky by the rule, not listed; the same reading and ruling as in ship two's list"
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "controls": ["formatOptions.shader.strength"],
+      "why": "red in the run of record (the drag changed the canvas and the release wrote no block.set within the row's read: revision 1165 before and after, the value 3.2 to 5.6 in the block's controls, so there was nothing for Cmd+Z to undo; the deployment's write path answering late for that tab, the blob tier's class of docs/VECTOR.md 6.2, the same reading as in the integrator's run of record on preview 2) and green on the once rerun of the shaders area narrowed to it (people-ship-preview10-shaders-rerun.json): flaky by the rule, not listed; green on preview 7 in the verifier's pass 1 and at the objects round's ship"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "controls": ["view.playShaders", "formatOptions.shader.play"],
+      "why": "a P1 row not on the build (the show's ShaderLayer, FEATURES.md 5.6, B5 with B1); its parks name view.playShaders, which is on the build and green in the run of record and on the shaders rerun through shaders.view.play-setting (the P1 setting item that landed), and formatOptions.shader.play, which exists in no state; parking view.playShaders on a row the P1 condition of section 1 records not driven would hide a control its own row reads green (ship two's ruling in ship-f0279e1.json, which the objects round's list did not carry because its run of record predates the 29 shader rows on that tree)"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "controls": ["view.playShaders"],
+      "why": "a P1 row not on the build (the show's ShaderLayer, FEATURES.md 5.6, B5 with B1); its one park view.playShaders is on the build and green in the run of record and on the shaders rerun through shaders.view.play-setting (ship two's ruling in ship-f0279e1.json, carried for the same reason as the row above)"
+    },
+    {
+      "id": "svg.sanitize.broken",
+      "controls": ["intake.svg.upload"],
+      "why": "red in the run of record (the spec's setup slide split-4 gone at the row's read, RangeError No slide split-4 from the window API, the svg spec's own earlier rows' state under load; not the sanitizer, which the rerun read as the row expects) and green on its once rerun narrowed to it (people-ship-preview10-rows-rerun.json): flaky by the rule, not listed; green in every earlier run of this round and at the objects round's ship"
+    },
+    {
+      "id": "svg.render.vector-at-zoom",
+      "controls": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "why": "the blob tier's timing class of docs/VECTOR.md 6.2, recorded by id: the viewer at /deck/<id> loaded right after the row's own writes drew the same img as the sheet's (the reading 'the viewer draws the same img'), while the sheet at 100 and at 200 percent and the show drew the svg; red in the run of record and not rerun by this ship, as at the objects round's ship where it read red twice; green on the memory tier in every local run of record; parking the four intake.svg.* ids would hide the SVG import whose own five svg.import.* rows read green in every run; for the vector round's owner (the viewer route's read behind the store), and the production gate reads it again"
+    }
+  ],
+  "leaves": []
+}

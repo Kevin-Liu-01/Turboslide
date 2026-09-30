@@ -33,6 +33,8 @@ export type ProfileStore = {
   markDeleted: (userId: string, now?: Date) => Promise<Profile>;
   /** Every admin's user id, for the deployment admin rule. */
   admins: () => Promise<string[]>;
+  /** Every picture key a profile names, for the orphan sweep (PEOPLE.md 4.6). */
+  avatarKeys: () => Promise<string[]>;
 };
 
 function parseAvatar(value: string | null): AvatarChoice | null {
@@ -122,6 +124,14 @@ export function dbProfileStore(db: Kysely<AuthDatabase>): ProfileStore {
         .execute();
       return rows.map((row) => row.userId);
     },
+    async avatarKeys() {
+      const rows = await db
+        .selectFrom('ts_profile')
+        .select('avatarKey')
+        .where('avatarKey', 'is not', null)
+        .execute();
+      return rows.flatMap((row) => (row.avatarKey === null ? [] : [row.avatarKey]));
+    },
   };
   return store;
 }
@@ -175,6 +185,10 @@ export function memoryProfileStore(): ProfileStore {
     admins: () =>
       Promise.resolve(
         [...rows.values()].filter((p) => p.admin && p.deletedAt === null).map((p) => p.userId),
+      ),
+    avatarKeys: () =>
+      Promise.resolve(
+        [...rows.values()].flatMap((p) => (p.avatarKey === null ? [] : [p.avatarKey])),
       ),
   };
   return store;

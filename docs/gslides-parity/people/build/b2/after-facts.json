@@ -1,0 +1,665 @@
+{
+  "deck.id": "untitled-20260929-agwm",
+  "namePrompt.firstEdit": false,
+  "setName.A": {
+    "principal": {
+      "id": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+      "kind": "anonymous",
+      "admin": false
+    },
+    "trust": "guest",
+    "label": "Ada Lovelace",
+    "name": "Ada Lovelace",
+    "mark": {
+      "density": 4,
+      "glyphSeed": 2598758923,
+      "presenter": false,
+      "self": true,
+      "trust": "guest",
+      "label": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "hue": null
+    },
+    "avatar": {
+      "variant": "initials"
+    }
+  },
+  "versions.A.light": {
+    "rows": [
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": null,
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL01:48 PM to 01:48 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "stripW": 16,
+        "more": null,
+        "hoverBg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px",
+      "borderLeft": "1px"
+    },
+    "dayHeadX": 17,
+    "blankChips": []
+  },
+  "versionChips.A.light": [
+    {
+      "holder": "versionHistory.window.w3",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    }
+  ],
+  "shot.versions.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-A-light.png",
+  "versionsHover.A.light": {
+    "rows": [
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": null,
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "flex",
+          "visible": true
+        },
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL01:48 PM to 01:48 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "stripW": 16,
+        "more": null,
+        "hoverBg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px",
+      "borderLeft": "1px"
+    },
+    "dayHeadX": 17,
+    "blankChips": []
+  },
+  "shot.versionsHover.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-hover-A-light.png",
+  "versionsMore.A.light": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version",
+      "disabled": null
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version",
+      "disabled": null
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy",
+      "disabled": null
+    },
+    {
+      "id": "file.versionHistory.deleteOlder",
+      "text": "Delete this and older versions",
+      "disabled": "true"
+    },
+    {
+      "id": "file.versionHistory.deleteHistory",
+      "text": "Delete history",
+      "disabled": "true"
+    }
+  ],
+  "shot.versionsMore.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-more-A-light.png",
+  "versions.A.dark": {
+    "rows": [
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": null,
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL01:48 PM to 01:48 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "stripW": 16,
+        "more": null,
+        "hoverBg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px",
+      "borderLeft": "1px"
+    },
+    "dayHeadX": 17,
+    "blankChips": []
+  },
+  "versionChips.A.dark": [
+    {
+      "holder": "versionHistory.window.w3",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 18,
+      "cellsExtent": {
+        "fromLeft": 2,
+        "fromTop": 2,
+        "fromRight": 2,
+        "fromBottom": 2
+      },
+      "initials": "AL"
+    }
+  ],
+  "shot.versions.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-A-dark.png",
+  "versionsHover.A.dark": {
+    "rows": [
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": null,
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "flex",
+          "visible": true
+        },
+        "badge": false
+      },
+      {
+        "author": "anon_a6cd2657-7504-4f76-9dd6-d2d6cfe94365",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "metaWidths": {
+          "scroll": 207,
+          "client": 207
+        },
+        "chipX": 41,
+        "chipSize": "16",
+        "chipW": 16,
+        "textX": 65,
+        "restore": {
+          "display": "none",
+          "visible": false
+        },
+        "badge": false
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL01:48 PM to 01:48 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "stripW": 16,
+        "more": null,
+        "hoverBg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px",
+      "borderLeft": "1px"
+    },
+    "dayHeadX": 17,
+    "blankChips": []
+  },
+  "shot.versionsHover.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-hover-A-dark.png",
+  "versionsMore.A.dark": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version",
+      "disabled": null
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version",
+      "disabled": null
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy",
+      "disabled": null
+    },
+    {
+      "id": "file.versionHistory.deleteOlder",
+      "text": "Delete this and older versions",
+      "disabled": "true"
+    },
+    {
+      "id": "file.versionHistory.deleteHistory",
+      "text": "Delete history",
+      "disabled": "true"
+    }
+  ],
+  "shot.versionsMore.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/after-versions-more-A-dark.png",
+  "deck.removed": "untitled-20260929-agwm"
+}

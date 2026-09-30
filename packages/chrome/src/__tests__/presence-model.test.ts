@@ -7,25 +7,23 @@ import { PRESENCE } from '../menus/strings';
 import {
   Announcer,
   canFollow,
+  chipTipDocOf,
   chipTipOf,
   displayNameFor,
   flagText,
+  isRoleWordView,
+  meOf,
   participantsOnSlide,
   pointersDrawn,
   rosterRoleWord,
   slideNumberOf,
   slotChips,
   stackFlags,
+  trustSentenceOf,
+  trustWordFor,
 } from '../presence/presence-model';
-import {
-  agentCells,
-  bayerCells,
-  glyphCells,
-  glyphGrid,
-  litFraction,
-  markCells,
-} from '../presence/mark-svg';
-import { chipName, markOf, nameOf } from '../presence/IdentityChip';
+import { litFraction, markCells, plateOf } from '../presence/mark-svg';
+import { chipName, markOf, nameOf, trustMarkOf, trustWordOf } from '../presence/IdentityChip';
 
 // The presence rules (gslides-parity SPEC-3 4.2 to 4.9; research 11 sections 3, 4, 6): the four
 // slots and the +N count, the names a link visitor sees, who can be followed, the chip tooltip,
@@ -179,33 +177,37 @@ describe('the collaborator announcements (4.9)', () => {
   });
 });
 
-describe('the mark grid (11 6.1, 3.3)', () => {
-  it('lights d/8 of the Bayer field and never more than half', () => {
-    const plate = 22;
-    const cells = 11 * 11;
-    for (const density of [1, 2, 3, 4] as const) {
-      const lit = bayerCells(24, density).length;
-      expect(lit).toBeGreaterThan(0);
-      expect(lit / cells).toBeCloseTo(density / 8, 1);
+describe('the mark grid (11 6.1, 3.3; docs/PEOPLE.md 3.4, 3.5)', () => {
+  const guest = {
+    principalId: 'anon_x',
+    label: 'Titanium 471',
+    name: 'Maya Chen',
+    trust: 'guest' as const,
+    kind: 'anonymous' as const,
+  };
+
+  it('draws the field at size - 4 in field coordinates and lights d/8 of the initials field', () => {
+    const spec = markOf(guest);
+    for (const size of [24, 16, 14, 12] as const) {
+      expect(plateOf(size)).toBe(size - 4);
+      const cells = markCells(spec, size);
+      expect(cells.length).toBeGreaterThan(0);
+      for (const cell of cells) {
+        expect(cell.x).toBeGreaterThanOrEqual(0);
+        expect(cell.y).toBeGreaterThanOrEqual(0);
+        expect(cell.x + cell.w).toBeLessThanOrEqual(size - 4);
+        expect(cell.y + cell.h).toBeLessThanOrEqual(size - 4);
+      }
     }
-    expect(plate).toBe(22);
+    for (const density of [1, 2, 3, 4] as const)
+      expect(Math.abs(litFraction({ ...spec, density }, 24) - density / 8)).toBeLessThan(0.1);
+    // a picture field carries no cells; the chip draws the picture in its place
+    expect(markCells({ ...spec, variant: 'picture', pictureUrl: '/u/k/d-64.webp' }, 24)).toEqual(
+      [],
+    );
   });
 
-  it('mirrors the glyph field left to right and keeps a seed deterministic', () => {
-    const grid = glyphGrid(0x9e3779b9);
-    for (const row of grid) {
-      expect(row[0]).toBe(row[4]);
-      expect(row[1]).toBe(row[3]);
-    }
-    expect(glyphCells(24, 7)).toEqual(glyphCells(24, 7));
-    expect(glyphCells(16, 7).every((cell) => cell.w === 2 && cell.h === 2)).toBe(true);
-  });
-
-  it('lights half of the agent plate with a centred square', () => {
-    const cells = agentCells(24);
-    const square = cells[cells.length - 1]!;
-    expect(square.w).toBe(square.h);
-    expect(square.x).toBe(square.y);
+  it('lights half of the agent field with a centred square', () => {
     const identity = {
       principalId: 'agent:t1',
       label: 'ci',
@@ -217,25 +219,105 @@ describe('the mark grid (11 6.1, 3.3)', () => {
     expect(spec.variant).toBe('agent');
     expect(litFraction(spec, 24)).toBeGreaterThan(0.45);
     expect(litFraction(spec, 24)).toBeLessThan(0.6);
+    // the 7 px square at field 6 to 12 (chip 8 to 14) is solid: one run at least 7 wide covers it
+    const wide = markCells(spec, 24).filter((cell) => cell.x <= 6 && cell.x + cell.w >= 13);
+    expect(wide.length).toBeGreaterThan(0);
     expect(nameOf(identity)).toBe('Agent · run-1');
   });
 
   it('computes initials and a monochrome spec without a hue unless the room granted one', () => {
-    const identity = {
-      principalId: 'anon_x',
-      label: 'Titanium 471',
-      name: 'Maya Chen',
-      trust: 'guest' as const,
-      kind: 'anonymous' as const,
-    };
-    const spec = markOf(identity);
+    const spec = markOf(guest);
     expect(spec.variant).toBe('initials');
     expect(spec.initials).toBe('MC');
     expect(spec.hue).toBeNull();
-    expect(markOf(identity, { hueSlot: 3 }).hue).toEqual({ slot: 3, hex: '#0f6a6a' });
+    expect(markOf(guest, { hueSlot: 3 }).hue).toEqual({ slot: 3, hex: '#0f6a6a' });
     expect(markCells(spec, 14).length).toBeGreaterThan(0);
-    expect(chipName(identity)).toBe('Maya Chen, guest');
+    expect(chipName(guest)).toBe('Maya Chen, guest');
     /* a label's chip carries the label's initial alone */
-    expect(markOf({ ...identity, name: undefined, trust: 'label' }).initials).toBe('T');
+    expect(markOf({ ...guest, name: undefined, trust: 'label' }).initials).toBe('T');
+  });
+});
+
+describe('the trust word, the badge, the tooltip sentence and the own identity (docs/PEOPLE.md 3.7, 3.11)', () => {
+  const verified = person('v', {
+    principalId: 'usr_1',
+    name: 'Ada Lovelace',
+    trust: 'verified',
+    kind: 'account',
+    email: 'ada@example.test',
+    slideId: firstSlide,
+  });
+  const viewer = { viaLink: false, showNames: false };
+
+  it('answers "signed in" for a verified account, "guest" for a typed name, nothing for a label, a deleted account or an agent', () => {
+    expect(trustWordFor({ trust: 'verified' })).toBe(PRESENCE.signedIn);
+    expect(trustWordFor({ trust: 'guest' })).toBe('guest');
+    expect(trustWordFor({ trust: 'label' })).toBeNull();
+    expect(trustWordFor({ trust: 'agent' })).toBeNull();
+    expect(trustWordFor({ trust: 'verified', deleted: true })).toBeNull();
+    expect(trustWordOf(verified)).toBe('signed in');
+    expect(trustMarkOf(verified)).toBe('check-badge');
+    expect(trustMarkOf({ trust: 'verified', deleted: true })).toBeNull();
+    expect(trustMarkOf({ trust: 'guest' })).toBeNull();
+    expect(chipName(verified)).toBe('Ada Lovelace, signed in');
+    expect(chipTipOf(verified, viewer, 1)).toBe('Ada Lovelace · signed in · slide 1');
+    /* the flag keeps the name alone for an account */
+    expect(flagText('Ada Lovelace', 'verified')).toBe('Ada');
+  });
+
+  it('opens the tooltip doc with the trust sentence and follows it with the action', () => {
+    const label = person('l', { slideId: firstSlide });
+    expect(trustSentenceOf(label)).toBe('Not signed in. A generated label for this browser.');
+    expect(chipTipDocOf(label, viewer)).toBe('Not signed in. A generated label for this browser.');
+    expect(chipTipDocOf(label, viewer, 'Go to slide 1')).toBe(
+      'Not signed in. A generated label for this browser. Go to slide 1',
+    );
+    expect(chipTipDocOf(person('g', { name: 'Maya', trust: 'guest' }), viewer)).toBe(
+      'Not signed in. This name was typed, not verified.',
+    );
+    expect(chipTipDocOf(verified, viewer)).toBe('Signed in as ada@example.test');
+    expect(chipTipDocOf({ ...verified, email: undefined }, viewer)).toBe('Signed in');
+    /* a link visitor without the names switch never reads the address */
+    expect(chipTipDocOf(verified, { viaLink: true, showNames: false })).toBe('Signed in');
+    /* the server's rewrite of a verified entry for a link visitor is a role word with the label
+       trust (room.ts rosterEntryForReader; build/b1.md R2): "Signed in", never the label sentence */
+    const roleWord = person('r', { label: 'An editor', trust: 'label', role: 'editor' });
+    expect(isRoleWordView(roleWord)).toBe(true);
+    expect(isRoleWordView(person('l2'))).toBe(false);
+    expect(chipTipDocOf(roleWord, { viaLink: true, showNames: false })).toBe('Signed in');
+    expect(
+      chipTipDocOf(person('o', { label: 'The owner', trust: 'label', role: 'owner' }), viewer),
+    ).toBe('Signed in');
+    expect(chipTipDocOf(verified, { viaLink: true, showNames: true })).toBe(
+      'Signed in as ada@example.test',
+    );
+  });
+
+  it('reads one own identity: the account when signed in, else the account principal naming a real id, else the roster self', () => {
+    const payload = {
+      principalId: 'anon_p',
+      label: 'Iron 200',
+      trust: 'label' as const,
+      kind: 'anonymous' as const,
+    };
+    const self = person('s', { principalId: 'anon_p', name: 'Ada', trust: 'guest' });
+    expect(meOf({ account: { principal: verified, signedIn: true }, presence: { self } })).toBe(
+      verified,
+    );
+    /* the editor builds the anonymous principal from the roster's own row under the last answer
+       (docs/PEOPLE.md 3.11), so it is the fresher reading and the own chip follows the answer */
+    expect(meOf({ account: { principal: payload, signedIn: false }, presence: { self } })).toBe(
+      payload,
+    );
+    expect(
+      meOf({ account: { principal: payload, signedIn: false }, presence: { others: [] } as never }),
+    ).toBe(payload);
+    /* the author fallback names no principal: the roster row stands in */
+    const fallback = { ...payload, principalId: 'studio' };
+    expect(meOf({ account: { principal: fallback, signedIn: false }, presence: { self } })).toBe(
+      self,
+    );
+    expect(meOf({ presence: { self } })).toBe(self);
+    expect(meOf({})).toBeNull();
   });
 });

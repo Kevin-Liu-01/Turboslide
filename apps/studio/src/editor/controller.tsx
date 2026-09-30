@@ -162,7 +162,15 @@ import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportRepor
 import type { ShellState } from '@turboslide/chrome/shell-context';
 import type { ShellMode } from '@turboslide/chrome/shell-data';
 import { planPlayList } from '@turboslide/export/batch/plan';
-import { labelFor } from '@turboslide/identity/labels';
+import {
+  identityIndex,
+  identityOfPrincipal,
+  identityView,
+  participantOf,
+  replaceRosterRow,
+} from './identity-index';
+import type { MeAnswerFacts } from './own-identity';
+import { rowReflects } from './own-identity';
 import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
 import {
   clearPendingMirror,
@@ -269,7 +277,7 @@ import {
   saveVersion,
   writeDeck,
 } from '../server/write';
-import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
+import type { DeckCreatedDetail, EditorDeck } from '../server/write';
 import { partitionRoster, readClientIds, rememberClientId, tabToken } from './client-ids';
 
 /**
@@ -293,63 +301,9 @@ import { partitionRoster, readClientIds, rememberClientId, tabToken } from './cl
 // 0.44; PP 7 row 1): the controller, its types and the helpers it reads. EditorRoot.tsx renders
 // it and shell-bridge.tsx wires the shell to it; the route file holds the route options alone.
 
-/** The identity as the chrome draws it (SPEC-3 7.8). */
-export function identityView(identity: EditorIdentity | undefined, author: Author): IdentityView {
-  if (identity === undefined) {
-    return { principalId: author.name, label: author.name, trust: 'guest', kind: 'anonymous' };
-  }
-  return {
-    principalId: identity.principalId,
-    label: identity.label,
-    ...(identity.name !== undefined ? { name: identity.name } : {}),
-    trust: identity.trust,
-    kind: identity.kind,
-    ...(identity.email !== undefined ? { email: identity.email } : {}),
-  };
-}
-
-/** A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's PresenceParticipant). */
-export function participantOf(entry: RosterEntry, now: string): PresenceParticipant {
-  const named = entry.trust === 'guest' || entry.trust === 'verified';
-  return {
-    principalId: entry.principalId,
-    label: entry.label,
-    ...(named ? { name: entry.label } : {}),
-    trust: entry.trust,
-    kind:
-      entry.kind === 'agent'
-        ? 'agent'
-        : entry.principalId.startsWith('usr_')
-          ? 'account'
-          : 'anonymous',
-    mark: entry.mark as PresenceParticipant['mark'],
-    clientId: entry.clientId,
-    role: entry.role,
-    ...(entry.kind === 'agent' ? {} : { hue: entry.hueSlot }),
-    ...(entry.slideId !== undefined ? { slideId: entry.slideId } : {}),
-    ...(entry.selection !== undefined
-      ? {
-          selection: {
-            blockIds: entry.selection.blockIds,
-            ...(entry.selection.caret !== undefined
-              ? {
-                  caret: {
-                    blockId: entry.selection.caret.blockId,
-                    path: entry.selection.caret.path,
-                    offset: entry.selection.caret.offset ?? entry.selection.caret.range?.[0] ?? 0,
-                  },
-                }
-              : {}),
-          },
-        }
-      : {}),
-    pointer: entry.pointer ?? null,
-    following: entry.follow ?? null,
-    presenting: entry.presenting,
-    idle: false,
-    lastSeenAt: now,
-  };
-}
+/* the identity views the editor root reads (docs/PEOPLE.md 3.11, 3.15): identity-index.ts holds
+   them beside the index, so the unit test reads them without this module's graph */
+export { identityView, participantOf };
 
 /**
  * The browser's transport of the room (SPEC-3 3.3): a streamed fetch down, fetch up, same origin.
@@ -547,47 +501,6 @@ export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
 
 // ---------------------------------------------------------------------------------------------
 // Comments, the inbox and the sign in exchanges as the chrome reads them (SPEC-3 5.3, 5.5, 7.3)
-
-/** An identity the chrome can draw for a principal the roster does not hold (a past commenter, a mention). */
-function identityOfPrincipal(
-  principalId: string,
-  label?: string,
-  kind?: 'human' | 'agent',
-): IdentityView {
-  const agent = kind === 'agent' || principalId.startsWith('agent:');
-  const account = principalId.startsWith('usr_');
-  return {
-    principalId,
-    label: label ?? labelFor(principalId),
-    trust: agent ? 'agent' : account ? 'verified' : 'label',
-    kind: agent ? 'agent' : account ? 'account' : 'anonymous',
-  };
-}
-
-/**
- * Who is who on this deck: the roster's rows (with their marks and trust), the caller, and the
- * authors the threads name, so a comment by someone who left still shows the label they wrote as.
- */
-function identityIndex(
-  roster: readonly RosterEntry[],
-  identity: EditorIdentity | undefined,
-  author: Author,
-  threads: readonly Thread[],
-): ReadonlyMap<string, IdentityView> {
-  const out = new Map<string, IdentityView>();
-  for (const thread of threads) {
-    for (const comment of [thread.comment, ...thread.replies]) {
-      const { principalId, label, kind } = comment.author;
-      if (!out.has(principalId))
-        out.set(principalId, identityOfPrincipal(principalId, label, kind));
-    }
-  }
-  const now = new Date().toISOString();
-  for (const entry of roster) out.set(entry.principalId, participantOf(entry, now));
-  const me = identityView(identity, author);
-  out.set(me.principalId, me);
-  return out;
-}
 
 function resolveIdentity(
   names: ReadonlyMap<string, IdentityView>,
@@ -846,6 +759,8 @@ export type EditorController = {
   ) => Promise<{ revision: number; slideIds: string[]; sentence: string }>;
   /** re-posts this tab's presence now, so a typed display name reaches the other browsers' chips ahead of the heartbeat (b1.md R18) */
   refreshPresence: () => void;
+  /** the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), so describe().state.account reads what the own chip draws until the room's own row carries it */
+  noteOwnAnswer: (facts: MeAnswerFacts) => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
   /** one Write: applied locally now, sent through the room; resolves when the room admitted it */
@@ -868,6 +783,12 @@ export type EditorController = {
   /* round three comments and the inbox (SPEC-3 5.3, 5.5) */
   /** the threads as the chrome reads them, anchors resolved against the current document */
   threadViews: () => readonly CommentThreadView[];
+  /**
+   * who is who on this deck (docs/PEOPLE.md 3.8, 3.17): the payload's resolved people under the
+   * roster and the caller, labels disambiguated, keyed by principal id; the shell input's
+   * `identities` for the version rows, the comment cards and the Share dialog
+   */
+  identities: () => Readonly<Record<string, IdentityView>>;
   inboxViews: () => readonly InboxItemView[];
   /** `comment.list` again; the stream's comment entries schedule it too */
   refreshComments: () => Promise<void>;
@@ -1959,7 +1880,14 @@ export function createEditorController(init: {
     ) {
       return viewsCache.views;
     }
-    const names = identityIndex(current.roster, identity, author, current.comments.threads);
+    const names = identityIndex({
+      roster: current.roster,
+      identity,
+      author,
+      threads: current.comments.threads,
+      resolved: init.payload.identities,
+      versions: current.versions,
+    });
     const me = identity?.principalId ?? author.name;
     const views = current.comments.threads.map((thread) =>
       threadViewOf(thread, current.document, me, names),
@@ -1976,9 +1904,50 @@ export function createEditorController(init: {
   const inboxViews = (): readonly InboxItemView[] => {
     const current = snapshot;
     if (inboxCache !== null && inboxCache.items === current.inbox.items) return inboxCache.views;
-    const names = identityIndex(current.roster, identity, author, current.comments.threads);
+    const names = identityIndex({
+      roster: current.roster,
+      identity,
+      author,
+      threads: current.comments.threads,
+      resolved: init.payload.identities,
+      versions: current.versions,
+    });
     const views = current.inbox.items.map((item) => inboxItemViewOf(item, names));
     inboxCache = { items: current.inbox.items, views };
+    return views;
+  };
+  /* the merged people map, computed once per (roster, threads, versions) for the shell input */
+  let identitiesCache: {
+    roster: readonly RosterEntry[];
+    threads: readonly Thread[];
+    versions: readonly Version[];
+    views: Readonly<Record<string, IdentityView>>;
+  } | null = null;
+  const identities = (): Readonly<Record<string, IdentityView>> => {
+    const current = snapshot;
+    if (
+      identitiesCache !== null &&
+      identitiesCache.roster === current.roster &&
+      identitiesCache.threads === current.comments.threads &&
+      identitiesCache.versions === current.versions
+    ) {
+      return identitiesCache.views;
+    }
+    const names = identityIndex({
+      roster: current.roster,
+      identity,
+      author,
+      threads: current.comments.threads,
+      resolved: init.payload.identities,
+      versions: current.versions,
+    });
+    const views = Object.fromEntries(names);
+    identitiesCache = {
+      roster: current.roster,
+      threads: current.comments.threads,
+      versions: current.versions,
+      views,
+    };
     return views;
   };
   /**
@@ -2076,8 +2045,9 @@ export function createEditorController(init: {
             if (event.role === 'viewer' && event.editing >= 100) say(REFUSALS.tooManyEditors);
             return;
           case 'presence': {
-            const rest = latest().roster.filter((row) => row.clientId !== event.clientId);
-            publish({ roster: [...rest, event.state] });
+            // the row replaced where it stands (docs/PEOPLE.md 3.16): join order holds, so the
+            // slots and the filmstrip never swap chips on a caret move
+            publish({ roster: replaceRosterRow(latest().roster, event.state) });
             // Follow (SPEC-3 4.4): the stage moves with the followed client's slide
             const following = latest().following;
             if (
@@ -4438,8 +4408,22 @@ export function createEditorController(init: {
    * of the stream refreshes, so a share write based on `state.access.revision` never meets a
    * stale record (comments.spec.ts, share.spec.ts).
    */
+  /* the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), held
+     until the room's own row carries it (own-identity.ts rowReflects): on the blob tier the row
+     lags the answer for the room's 5 s identity cache and the own chip follows the answer, so the
+     state reads the answer too or the two disagree in that window (the integrator's preview
+     readings of people.mark-renderers-agree) */
+  let ownAnswer: MeAnswerFacts | null = null;
   const stateOf = (): Record<string, unknown> => {
     const record = snapshot.access.record;
+    /* the caller's mark as the own chip draws it (build/b5.md R1; the row
+       people.mark-renderers-agree): the last answer while the room's own row lags it, else the
+       roster's own row when the room holds one (self set, the picture URL on it), else the
+       payload's own identity */
+    const ownRow = participants().self;
+    if (ownAnswer !== null && rowReflects(ownAnswer, ownRow)) ownAnswer = null;
+    const ownMark = ownAnswer?.mark ?? ownRow?.mark ?? identity?.mark;
+    const ownName = ownAnswer?.name ?? identity?.name;
     return {
       deckId,
       // the revision a caller reads is the one a base check enforces (SPEC-3 3.10; VERIFICATION-3
@@ -4489,10 +4473,17 @@ export function createEditorController(init: {
       // and others[]) beside the count the round two readers had
       presence: (() => {
         const { self, others } = participants();
+        /* the address the room wrote for this reader (docs/PEOPLE.md 3.7: the owner and a grant
+           holder, on a verified entry) rides describe() beside the contract's fields; the
+           `presence.list` answer keeps its strict shape without it */
+        const withEmail = (row: PresenceParticipant) => ({
+          ...participantOut(row),
+          ...(row.email !== undefined ? { email: row.email } : {}),
+        });
         return {
           clientId: room?.clientId() ?? null,
-          ...(self === null ? {} : { self: participantOut(self) }),
-          others: others.map(participantOut),
+          ...(self === null ? {} : { self: withEmail(self) }),
+          others: others.map(withEmail),
           count: others.length,
           following: snapshot.following,
           pointersVisible: snapshot.pointersVisible,
@@ -4528,11 +4519,16 @@ export function createEditorController(init: {
       account: {
         principalId: identity?.principalId ?? null,
         label: identity?.label ?? author.name,
-        ...(identity?.name !== undefined ? { name: identity.name } : {}),
-        trust: identity?.trust ?? 'guest',
+        ...(ownName !== undefined ? { name: ownName } : {}),
+        trust: ownAnswer?.trust ?? identity?.trust ?? 'guest',
         signedIn: identity?.kind === 'account',
         signInAvailable: init.payload.auth?.signIn ?? false,
+        ...(ownMark === undefined ? {} : { mark: ownMark }),
       },
+      /* who is who on this deck (docs/PEOPLE.md 3.8, 3.17), as the shell input's `identities`
+         reads it: the payload's resolved people under the roster and the caller, keyed by
+         principal id, labels disambiguated; the people rows read an author's trust and mark here */
+      identities: identities(),
       // the sidecar as the chrome reads it (SPEC-3 3.10; comments.spec.ts reads threads[], revision)
       comments: {
         threads: threadViews(),
@@ -4719,6 +4715,9 @@ export function createEditorController(init: {
     refreshPresence() {
       room?.refreshPresence();
     },
+    noteOwnAnswer(facts) {
+      ownAnswer = facts;
+    },
     setActiveSlide(slideId) {
       if (slideId === snapshot.activeSlide) return;
       const selection =
@@ -4763,6 +4762,7 @@ export function createEditorController(init: {
       room?.setPresence(state);
     },
     threadViews,
+    identities,
     inboxViews,
     refreshComments,
     refreshInbox,

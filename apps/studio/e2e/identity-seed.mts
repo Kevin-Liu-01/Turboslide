@@ -11,28 +11,104 @@
 //   node identity-seed.mts mail <dbPath> <email>                       -> { code, link } of the newest sign in mail
 //   node identity-seed.mts alias <dbPath> <anonymousId>                -> { userId }
 //   node identity-seed.mts avatar <stateDir> <pngBase64>               -> { relative, url }
+//   node identity-seed.mts principals <stateDir>                       -> { ids: [a, b], label } two records whose ids share a label (PEOPLE.md 3.17)
+//   node identity-seed.mts oriented                                    -> { base64, mime, width, height, orientation } a 64 by 32 JPEG with EXIF orientation 6 (PEOPLE.md 4.1)
+//   node identity-seed.mts picture <jpeg|png|webp|gif> <w> <h> [noise|gradient]
+//                                                                      -> { base64, mime, bytes } a picture of that size (gradient by default; noise does not compress)
+//   node identity-seed.mts cookie <principalId> <origin>              -> { name, value } the sealed identity cookie of an anonymous record (build/b5.md R2): `ts_id` on an http origin, `__Host-ts_id` on https; sealed under TURBOSLIDE_SESSION_SECRET, else the overlay's state folder's file
+import { randomUUID } from 'node:crypto';
+import { join } from 'node:path';
+
+import { anonymousPrincipalId } from '@turboslide/identity/ids';
+import { labelFor } from '@turboslide/identity/labels';
+import { markHash } from '@turboslide/identity/marks';
+import { newPrincipalRecord } from '@turboslide/identity/principal';
+import type { Scope } from '@turboslide/schema/access';
+import sharp from 'sharp';
+import type { Sharp } from 'sharp';
+
 import { dbAliasStore } from '../src/server/auth/alias.ts';
 import { fileAvatarStore, newAvatarKey, processAvatar } from '../src/server/auth/avatar.ts';
 import { migrateAuthDb, openAuthDb } from '../src/server/auth/db.ts';
 import type { AuthDb } from '../src/server/auth/db.ts';
 import { dbCaptureStore } from '../src/server/auth/mail/mailer.ts';
+import { PRINCIPALS_DIR, filePrincipalStore } from '../src/server/auth/principal.ts';
+import { sessionSecret } from '../src/server/auth/secret.ts';
+import { sealPrincipalCookie } from '../src/server/auth/session.ts';
 import { dbApiKeyStore } from '../src/server/auth/tokens.ts';
-import type { Scope } from '@turboslide/schema/access';
-import sharp from 'sharp';
 
-async function gradientPng(width: number, height: number): Promise<Uint8Array> {
+type SeedFormat = 'jpeg' | 'png' | 'webp' | 'gif';
+
+/** The raw RGB field of a test picture: a horizontal red ramp and a vertical blue ramp, or noise. */
+function rawField(width: number, height: number, fill: 'gradient' | 'noise'): Buffer {
   const raw = new Uint8Array(width * height * 3);
+  let seed = 0x9e3779b9;
+  const next = (): number => {
+    // xorshift32, so a noise picture is the same bytes on every run
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return (seed >>> 0) & 255;
+  };
   for (let y = 0; y < height; y += 1)
     for (let x = 0; x < width; x += 1) {
       const i = (y * width + x) * 3;
-      raw[i] = Math.round((x / (width - 1)) * 255);
-      raw[i + 1] = 96;
-      raw[i + 2] = Math.round((y / (height - 1)) * 255);
+      if (fill === 'noise') {
+        raw[i] = next();
+        raw[i + 1] = next();
+        raw[i + 2] = next();
+      } else {
+        raw[i] = Math.round((x / Math.max(1, width - 1)) * 255);
+        raw[i + 1] = 96;
+        raw[i + 2] = Math.round((y / Math.max(1, height - 1)) * 255);
+      }
     }
-  const png = await sharp(Buffer.from(raw), { raw: { width, height, channels: 3 } })
-    .png()
-    .toBuffer();
-  return new Uint8Array(png.buffer, png.byteOffset, png.byteLength);
+  return Buffer.from(raw);
+}
+
+function encoded(
+  base: Sharp,
+  format: SeedFormat,
+  options: { quality?: number } = {},
+): Promise<Buffer> {
+  switch (format) {
+    case 'jpeg':
+      return base.jpeg({ quality: options.quality ?? 90 }).toBuffer();
+    case 'png':
+      return base.png().toBuffer();
+    case 'webp':
+      return base.webp({ quality: options.quality ?? 90 }).toBuffer();
+    case 'gif':
+      return base.gif().toBuffer();
+  }
+}
+
+async function testPicture(
+  format: SeedFormat,
+  width: number,
+  height: number,
+  fill: 'gradient' | 'noise' = 'gradient',
+): Promise<Uint8Array> {
+  const out = await encoded(
+    sharp(rawField(width, height, fill), { raw: { width, height, channels: 3 } }),
+    format,
+  );
+  return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
+}
+
+async function gradientPng(width: number, height: number): Promise<Uint8Array> {
+  return testPicture('png', width, height);
+}
+
+const MIME: Record<SeedFormat, string> = {
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+};
+
+function isSeedFormat(value: string | undefined): value is SeedFormat {
+  return value === 'jpeg' || value === 'png' || value === 'webp' || value === 'gif';
 }
 
 function open(path: string): AuthDb {
@@ -126,6 +202,88 @@ async function main(): Promise<unknown> {
         relative: first?.relative ?? '',
         url: url.replace(/[^/]+$/, `${processed.digest}-32.webp`),
       };
+    }
+    case 'principals': {
+      // two anonymous records whose ids share a label (PEOPLE.md 3.17, 6.1): random v4 UUIDs
+      // until two hash to one label (the space is 57,280, so a few hundred draws suffice), written
+      // where the server reads them (`<stateDir>/principals/`)
+      const [stateDir] = rest;
+      const store = filePrincipalStore(`${stateDir ?? '.turboslide'}/${PRINCIPALS_DIR}`);
+      const seen = new Map<string, string>();
+      let pair: [string, string] | null = null;
+      let label = '';
+      for (let i = 0; i < 200_000 && pair === null; i += 1) {
+        const id = anonymousPrincipalId(randomUUID());
+        const found = labelFor(id);
+        const other = seen.get(found);
+        /* the pair's plates must differ too (the row reads "the two chips' plates differ"): the
+           initials field's density is two bits of the id's hash, so one pair in four draws one
+           field; such a pair is passed over and the search goes on */
+        if (
+          other !== undefined &&
+          other !== id &&
+          markHash(other).density !== markHash(id).density
+        ) {
+          pair = [other, id];
+          label = found;
+        } else if (other === undefined) seen.set(found, id);
+      }
+      if (pair === null) throw new Error('no label collision found');
+      const now = new Date();
+      for (const id of pair) await store.put(newPrincipalRecord(id, now));
+      return { ids: pair, label };
+    }
+    case 'oriented': {
+      // a 64 by 32 JPEG whose orientation tag says 6 (rotate 90 clockwise), so the served files
+      // are upright only when the pipeline applied the tag (PEOPLE.md 4.1, people.avatar-metadata-stripped)
+      const width = 64;
+      const height = 32;
+      const jpeg = await sharp(rawField(width, height, 'gradient'), {
+        raw: { width, height, channels: 3 },
+      })
+        .jpeg({ quality: 95 })
+        .withMetadata({ orientation: 6 })
+        .toBuffer();
+      return {
+        base64: jpeg.toString('base64'),
+        mime: 'image/jpeg',
+        width,
+        height,
+        orientation: 6,
+      };
+    }
+    case 'picture': {
+      const [format, w, h, fill] = rest;
+      if (!isSeedFormat(format)) throw new Error('picture wants jpeg, png, webp or gif');
+      const width = Math.max(1, Math.floor(Number(w ?? '256')));
+      const height = Math.max(1, Math.floor(Number(h ?? '256')));
+      const bytes = await testPicture(
+        format,
+        width,
+        height,
+        fill === 'noise' ? 'noise' : 'gradient',
+      );
+      return {
+        base64: Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64'),
+        mime: MIME[format],
+        bytes: bytes.byteLength,
+      };
+    }
+    case 'cookie': {
+      /* the sealed identity cookie of an existing anonymous record (build/b5.md R2), so a spec
+         opens a browser context as a seeded principal: the name the server accepts on the origin
+         (session.ts: `ts_id` over plain http, `__Host-ts_id` over https; the reader takes both),
+         the value sealed under the server's session secret (TURBOSLIDE_SESSION_SECRET in this
+         process's environment, else the overlay's state folder's file), never printed by name */
+      const [principalId, origin] = rest;
+      const overlay = process.env.TURBOSLIDE_OVERLAY_DIR;
+      const { secret } = sessionSecret(
+        process.env,
+        overlay === undefined || overlay === '' ? undefined : join(overlay, '.turboslide'),
+        () => undefined,
+      );
+      const value = await sealPrincipalCookie(principalId ?? '', secret);
+      return { name: (origin ?? '').startsWith('https:') ? '__Host-ts_id' : 'ts_id', value };
     }
     default:
       throw new Error(`unknown mode ${mode ?? ''}`);

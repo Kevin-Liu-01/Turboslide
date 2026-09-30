@@ -42,6 +42,9 @@ import {
   shipVerdict,
   tally,
   validateCoreMatrix,
+  LOCAL_SPEC_DRIVERS,
+  isLocalRow,
+  localRows,
 } from './core-matrix.mjs';
 
 // The core matrix module (docs/FOCUS.md section 6; the integrator's day 0; docs/RETURN.md section 5
@@ -80,8 +83,14 @@ describe('the committed matrix', () => {
     expect(
       probeRows().length +
         costRows().length +
-        CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0),
+        CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0) +
+        /* the people round (docs/PEOPLE.md 6.2): the local rows of the accounts spec */
+        localRows().length,
     ).toBe(CORE_MATRIX.length);
+    expect(localRows()).toEqual(rowsForDriver('e2e/accounts.spec.ts'));
+    for (const row of localRows()) expect(isLocalRow(row), row.id).toBe(true);
+    for (const row of probeRows()) expect(isLocalRow(row), row.id).toBe(false);
+    expect(LOCAL_SPEC_DRIVERS).toEqual(['e2e/accounts.spec.ts']);
     for (const row of CORE_MATRIX.filter((each) => areaOf(each.id) === 'collab'))
       expect(row.feature, row.id).toBe('share');
     for (const row of rowsForFeature('surface')) expect(areaOf(row.id)).toBe('surface');
@@ -237,13 +246,18 @@ describe('the ship helpers of 6.2', () => {
       CORE_MATRIX.filter((row) => !isParkable(row.feature) && row.parks === undefined).length -
         1 -
         CORE_MATRIX.filter((row) => isManualRow(row) && !isParkable(row.feature)).length -
-        CORE_MATRIX.filter((row) => isMeasureRow(row) && !isParkable(row.feature)).length,
+        CORE_MATRIX.filter((row) => isMeasureRow(row) && !isParkable(row.feature)).length -
+        /* a local row the run did not record is listed apart, never blocking (PEOPLE.md 6.2) */
+        localRows().filter((row) => !isParkable(row.feature) && row.parks === undefined).length,
+    );
+    expect(parkedFeaturesOf(partial).local.map((row) => row.id)).toEqual(
+      localRows().map((row) => row.id),
     );
     expect(() => parkedFeaturesOf(results({ [text]: 'green' }))).toThrow(/unknown result green/);
   });
 
   it('exits clean only when every row outside the committed parked list passed', () => {
-    expect(shipVerdict(results())).toEqual({ ok: true, failures: [], measured: [] });
+    expect(shipVerdict(results())).toEqual({ ok: true, failures: [], measured: [], local: [] });
     const shapes = rowsForFeature('shapes')[0].id;
     const decks = rowsForFeature('decks')[0].id;
     const red = results({ [shapes]: 'not driven', [decks]: 'failed' });
@@ -278,7 +292,7 @@ describe('the ship helpers of 6.2', () => {
           { id: zip.id, parks: [...zip.parks] },
         ],
       }),
-    ).toEqual({ ok: true, failures: [], measured: [] });
+    ).toEqual({ ok: true, failures: [], measured: [], local: [] });
     expect(() =>
       shipVerdict(both, { parkedFeatures: [], parkedRows: [{ id: decks, parks: [] }] }),
     ).toThrow(/carries no parks/);
@@ -295,7 +309,12 @@ describe('the ship helpers of 6.2', () => {
     const own = {};
     for (const row of probe) own[row.id] = 'passed';
     /* every spec row is unrecorded, and the narrowed reading does not count it */
-    expect(shipVerdict(own, [], probe)).toEqual({ ok: true, failures: [], measured: [] });
+    expect(shipVerdict(own, [], probe)).toEqual({
+      ok: true,
+      failures: [],
+      measured: [],
+      local: [],
+    });
     expect(parkedFeaturesOf(own, probe).parked).toEqual([]);
     const red = probe.find((row) => row.feature === 'text').id;
     const narrowed = shipVerdict({ ...own, [red]: 'failed' }, [], probe);
@@ -319,7 +338,7 @@ describe('the ship helpers of 6.2', () => {
     for (const row of CORE_MATRIX) everything[row.id] = 'passed';
     const paste = 'text.clipboard.paste-without-formatting';
     const notDriven = { ...everything, [paste]: 'not driven' };
-    expect(shipVerdict(notDriven)).toEqual({ ok: true, failures: [], measured: [] });
+    expect(shipVerdict(notDriven)).toEqual({ ok: true, failures: [], measured: [], local: [] });
     expect(parkedFeaturesOf(notDriven).parked).toEqual([]);
     const failed = { ...everything, [paste]: 'failed' };
     expect(shipVerdict(failed).failures).toEqual([
@@ -408,8 +427,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
        rows and retired logos.intake.svg-sentence; the objects round (docs/OBJECTS.md 6.1) added 33 rows
        and carried five; the field fonts hotfix (build/field-fonts.md 4) added one */
     /* the polish round (docs/POLISH.md 5.1): 130 rows added and one replaced; its fix round added
-       text.title.second-session-survives-reload (VERIFICATION.md "Polish round, pass 1" finding 1) */
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1);
+       text.title.second-session-survives-reload (VERIFICATION.md "Polish round, pass 1" finding 1);
+       the people round (docs/PEOPLE.md 6.1) added 21 rows: eleven on every origin and ten local */
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
@@ -551,6 +571,9 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       'shaders.export.html-frame': 'export',
       'shaders.export.missing-frame-row': 'export',
       'shaders.view.play-setting': 'view',
+      /* the people round (docs/PEOPLE.md 6.1): two rows of the people area under comments and versions */
+      'people.comment-departed-guest': 'comments',
+      'people.versions-author-account': 'versions',
     });
     expect(isCoreId('logos.intake.svg-sentence'), 'retired in the vector round (4.7)').toBe(false);
     for (const [id, feature] of Object.entries(ROW_FEATURE)) {
@@ -782,7 +805,13 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
   it('holds the svg feature, the menus area under chrome, the svg spec and the 43 added rows', () => {
     expect(CORE_FEATURES).toContain('svg');
     expect(isParkable('svg')).toBe(true);
-    expect(AREA_FEATURE).toEqual({ collab: 'share', menus: 'chrome', gestures: 'arrange' });
+    /* the people round (docs/PEOPLE.md 6.1) added the people area under share */
+    expect(AREA_FEATURE).toEqual({
+      collab: 'share',
+      menus: 'chrome',
+      gestures: 'arrange',
+      people: 'share',
+    });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
     /* the polish round adds two rows to the svg spec (docs/POLISH.md 2.4, 2.5) */
     expect(rowsForDriver('core/svg.spec.ts').length).toBe(12 + 2);
@@ -1046,5 +1075,132 @@ describe('the polish round (docs/POLISH.md section 5)', () => {
     /* the surface row of section 0 reads the build's commit on the gate's origin */
     expect(coreRow('surface.domain.build-commit').driver).toBe('core/surface.spec.ts');
     expect(coreRow('surface.domain.build-commit').feature).toBe('surface');
+  });
+});
+
+describe('the people round (docs/PEOPLE.md section 6)', () => {
+  /* the 21 added rows; the two carried rows (versions.panel.author-you, share.dialog.you-label)
+     name the round in their note too and are read apart below */
+  const carried = ['versions.panel.author-you', 'share.dialog.you-label'];
+  const people = CORE_MATRIX.filter(
+    (row) => /^People round;/.test(row.note ?? '') && !carried.includes(row.id),
+  );
+
+  it('holds the 21 rows under the people area, the versions and comments features and the local driver', () => {
+    expect(people.length).toBe(21);
+    expect(AREA_FEATURE.people).toBe('share');
+    expect(isParkable('share')).toBe(false);
+    expect(ROW_FEATURE['people.comment-departed-guest']).toBe('comments');
+    expect(ROW_FEATURE['people.versions-author-account']).toBe('versions');
+    for (const row of CORE_MATRIX.filter((each) => areaOf(each.id) === 'people'))
+      expect(row.feature, row.id).toBe(ROW_FEATURE[row.id] ?? 'share');
+    expect(people.filter((row) => row.driver === PROBE_DRIVER).length).toBe(7);
+    expect(people.filter((row) => row.driver === 'core/share.spec.ts').length).toBe(4);
+    expect(people.filter(isLocalRow).length).toBe(10);
+    expect(localRows().map((row) => row.id)).toEqual([
+      'people.verified-badge',
+      'people.versions-author-account',
+      'people.labels-disambiguated',
+      'share.dialog.grant-email-line',
+      'people.avatar-upload',
+      'people.avatar-cap-refusal',
+      'people.avatar-rotation',
+      'people.avatar-fallback-plate',
+      'people.avatar-link-visitor',
+      'people.avatar-metadata-stripped',
+    ]);
+    /* every local row is not driven today: production holds no account (6.1) */
+    for (const row of localRows()) expect(row.today, row.id).toBe('not driven');
+    /* the picture rows and the two own chip rows carry parks (6.1); every other people row parks nothing */
+    const picture = ['dialog.avatarBuilder.panel.picture', 'dialog.avatarBuilder.file'];
+    for (const id of [
+      'people.avatar-upload',
+      'people.avatar-cap-refusal',
+      'people.avatar-rotation',
+      'people.avatar-fallback-plate',
+      'people.avatar-metadata-stripped',
+    ])
+      expect(coreRow(id).parks, id).toEqual(picture);
+    expect(coreRow('people.own-chip-follows-name').parks).toEqual([
+      'title.account',
+      'title.presence.me',
+    ]);
+    expect(coreRow('people.own-chip-follows-avatar').parks).toEqual(['title.account.changeAvatar']);
+    for (const row of people)
+      if (
+        !/^people\.(avatar-(upload|cap-refusal|rotation|fallback-plate|metadata-stripped)|own-chip-follows-(name|avatar))$/.test(
+          row.id,
+        )
+      )
+        expect(row.parks, row.id).toBeUndefined();
+    /* the two carried rows name the round */
+    expect(coreRow('versions.panel.author-you').note).toContain(
+      'People round; docs/PEOPLE.md 3.11',
+    );
+    expect(coreRow('share.dialog.you-label').note).toContain('People round; docs/PEOPLE.md 3.11');
+    /* the declared ids of PEOPLE.md 5.2 are known before the lanes' files hold them */
+    for (const id of [
+      'dialog.avatarBuilder.panel.picture',
+      'version.restore',
+      'dialog.share.row.email',
+    ])
+      expect(isKnownControl(id), id).toBe(true);
+  });
+
+  it('lists a local row absent from a run apart, never as passed and never as a reason to park, and judges a recorded one like any row', () => {
+    const results = {};
+    for (const row of CORE_MATRIX) if (!isLocalRow(row)) results[row.id] = 'passed';
+    /* a deployment run: no local row recorded */
+    const run = parkedFeaturesOf(results);
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([]);
+    expect(run.parkedRows).toEqual([]);
+    expect(run.local.map((row) => row.id)).toEqual(localRows().map((row) => row.id));
+    for (const row of run.local) expect(row.reason).toBe('no identity database on this base');
+    const verdict = shipVerdict(results);
+    expect(verdict.ok).toBe(true);
+    expect(verdict.failures).toEqual([]);
+    expect(verdict.local.map((row) => row.id)).toEqual(localRows().map((row) => row.id));
+    /* the accounts run: a recorded local row is judged; a red one without parks blocks share, a
+       red picture row parks its controls alone */
+    const badge = 'people.verified-badge';
+    const upload = 'people.avatar-upload';
+    const local = { ...results, [badge]: 'failed', [upload]: 'not driven' };
+    const judged = parkedFeaturesOf(local);
+    expect(judged.local.map((row) => row.id)).toEqual(
+      localRows()
+        .map((row) => row.id)
+        .filter((id) => id !== badge && id !== upload),
+    );
+    expect(judged.blocking).toEqual([{ id: badge, feature: 'share', result: 'failed' }]);
+    expect(judged.parkedRows).toEqual([
+      {
+        id: upload,
+        parks: ['dialog.avatarBuilder.panel.picture', 'dialog.avatarBuilder.file'],
+        result: 'not driven',
+      },
+    ]);
+    expect(judged.parked).toEqual([]);
+    const red = shipVerdict(local);
+    expect(red.ok).toBe(false);
+    expect(red.failures.map((f) => f.id)).toEqual([badge, upload]);
+    /* narrowed to the local rows alone (the gate's --only accounts) the reading is the same, and
+       the eight local rows this run did not record stay listed apart */
+    const narrowed = shipVerdict(local, [], localRows());
+    expect(narrowed.failures.map((f) => f.id)).toEqual([badge, upload]);
+    expect(narrowed.local.map((row) => row.id)).toEqual(
+      localRows()
+        .map((row) => row.id)
+        .filter((id) => id !== badge && id !== upload),
+    );
+    /* every local row recorded: nothing listed apart */
+    const all = { ...results };
+    for (const row of localRows()) all[row.id] = 'passed';
+    expect(shipVerdict(all, [], localRows())).toEqual({
+      ok: true,
+      failures: [],
+      measured: [],
+      local: [],
+    });
   });
 });

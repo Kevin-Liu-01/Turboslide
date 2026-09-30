@@ -3,8 +3,8 @@ import { useRef, useState } from 'react';
 
 import type { CommentBodyInput, IdentityView } from '../editor-shell';
 import { cn } from '../lib/cn';
-import { COMMENTS, REFUSALS } from '../menus/strings';
-import { IdentityChip, nameOf } from '../presence/IdentityChip';
+import { COMMENTS, PRESENCE, REFUSALS } from '../menus/strings';
+import { IdentityChip, TrustMark, nameOf, trustMarkOf } from '../presence/IdentityChip';
 import { tipProps } from '../Tooltip';
 import {
   draftBody,
@@ -184,8 +184,10 @@ export function ReplyBox({
               >
                 <IdentityChip identity={identity} size={16} />
                 <span className="ts-reply-mention-name">{nameOf(identity)}</span>
-                {identity.trust === 'guest' ? (
-                  <span className="ts-reply-mention-trust">guest</span>
+                {trustMarkOf(identity) !== null ? (
+                  <TrustMark identity={identity} />
+                ) : identity.trust === 'guest' ? (
+                  <span className="ts-reply-mention-trust">{PRESENCE.guest}</span>
                 ) : null}
               </button>
             </li>

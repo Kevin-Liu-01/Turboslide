@@ -86,7 +86,8 @@ function input(extra: Partial<EditorShellInput> = {}): EditorShellInput {
 
 function account(over: Record<string, unknown> = {}): NonNullable<EditorShellInput['account']> {
   return {
-    principal: { id: 'anon_1', label: 'Titanium 101', name: null, kind: 'anonymous' },
+    /* the people round's identity view (docs/PEOPLE.md 3.11): the own chip hashes principalId */
+    principal: { principalId: 'anon_1', label: 'Titanium 101', trust: 'label', kind: 'anonymous' },
     namePrompt: { open: true, prefilled: '' },
     onNamePrompt: vi.fn(),
     setName: vi.fn(() => Promise.resolve()),

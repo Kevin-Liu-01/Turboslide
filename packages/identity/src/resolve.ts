@@ -8,20 +8,25 @@
 // records, the alias table, the account profiles, the token records): this module never reads a
 // store, so the chrome, the CLI and the server resolve the same way from their own caches.
 import type { AgentContext } from './access.ts';
-import { parsePrincipalId } from './ids.ts';
+import { accountPrincipalId, parsePrincipalId } from './ids.ts';
 import { labelFor } from './labels.ts';
 import type { MarkSpec } from './marks.ts';
+import { PICTURE_MARK_SIZE, pictureUrlOf } from './picture.ts';
 import type { AvatarChoice, PrincipalRecord } from './principal.ts';
 import { DEFAULT_AVATAR } from './principal.ts';
 
 /** The three trust states of a person and the agent (SPEC-3 0.19; research 11 5.2). */
 export type Trust = 'label' | 'guest' | 'verified' | 'agent';
 
-/** The words a surface shows beside a name for each trust state (research 11 5.2). */
+/**
+ * The words a surface shows beside a name for each trust state (research 11 5.2; docs/PEOPLE.md
+ * default 3): "signed in" beside the check badge of a verified account, so the accessible name
+ * reads "<name>, signed in" and the badge is never shape alone.
+ */
 export const TRUST_WORDS: Readonly<Record<Trust, string>> = {
   label: '',
   guest: 'guest',
-  verified: '',
+  verified: 'signed in',
   agent: 'Agent',
 };
 
@@ -82,6 +87,11 @@ export type ResolvedIdentity = {
   /** The account behind an aliased anonymous id, when one exists. */
   accountId?: string;
   avatar: AvatarChoice;
+  /**
+   * The 64 px file of a picture avatar (docs/PEOPLE.md 4.4; picture.ts), so `markSpec` draws the
+   * picture with no per caller argument; absent for every other choice.
+   */
+  pictureUrl?: string;
   /** The sanitized run id of an agent, when the request carried one (research 10 F45). */
   runId?: string;
   deleted: boolean;
@@ -104,7 +114,10 @@ function fromAccount(
   profile: AccountProfile,
   record: PrincipalRecord | null | undefined,
 ): ResolvedIdentity {
-  const label = labelFor(principalId);
+  /* the account's own label on every id that renders as it (docs/PEOPLE.md 3.18): an aliased
+     anonymous id and the account id are one person and one word, so the label is the account
+     id's, never the anonymous id's */
+  const label = labelFor(accountPrincipalId(profile.userId));
   if (profile.deleted === true) {
     return {
       principalId,
@@ -118,18 +131,29 @@ function fromAccount(
       admin: false,
     };
   }
+  /* an account without a typed name is its label, never its address (docs/PEOPLE.md 3.18): the
+     address travels in `email` under `showEmail` alone, and the author name the server writes
+     for such an account is the label too, so one account is one word everywhere */
+  const avatar = profile.avatar ?? record?.avatar ?? { ...DEFAULT_AVATAR };
   return {
     principalId,
     kind,
-    displayName: profile.name.trim() || profile.email,
+    displayName: profile.name.trim() || label,
     label,
     trust: 'verified',
     email: profile.email,
     accountId: profile.userId,
-    avatar: profile.avatar ?? record?.avatar ?? { ...DEFAULT_AVATAR },
+    avatar,
+    ...withPictureUrl(avatar),
     deleted: false,
     admin: profile.admin,
   };
+}
+
+/** The `pictureUrl` field of a resolved identity: the 64 px file when the choice is a picture. */
+function withPictureUrl(avatar: AvatarChoice): { pictureUrl?: string } {
+  const url = pictureUrlOf(avatar, PICTURE_MARK_SIZE);
+  return url === undefined ? {} : { pictureUrl: url };
 }
 
 /**
@@ -198,13 +222,15 @@ export function resolvePrincipal(
   }
   const record = lookup.record(principalId) ?? null;
   const name = record?.name?.trim();
+  const avatar = record?.avatar ?? { ...DEFAULT_AVATAR };
   return {
     principalId,
     kind: 'anonymous',
     displayName: name && name.length > 0 ? name : (record?.label ?? label),
     label: record?.label ?? label,
     trust: name && name.length > 0 ? 'guest' : 'label',
-    avatar: record?.avatar ?? { ...DEFAULT_AVATAR },
+    avatar,
+    ...withPictureUrl(avatar),
     deleted: false,
     admin: false,
   };
@@ -226,6 +252,14 @@ export type IdentityView = {
   email?: string;
   mark?: MarkSpec;
   runId?: string;
+  /** Set for a deleted account (SPEC-3 7.4), so the chrome draws no badge beside "Deleted account". */
+  deleted?: boolean;
+  /**
+   * The account principal id (`usr_<id>`) behind an aliased anonymous id, so two ids of one
+   * person are one person to the label suffix (docs/PEOPLE.md 3.17); absent on the account's own
+   * id and on every other principal.
+   */
+  accountId?: string;
 };
 
 export function toIdentityView(
@@ -244,6 +278,9 @@ export function toIdentityView(
     view.email = identity.email;
   if (options.mark !== undefined) view.mark = options.mark;
   if (identity.runId !== undefined) view.runId = identity.runId;
+  if (identity.deleted) view.deleted = true;
+  if (identity.kind === 'anonymous' && identity.accountId !== undefined && !identity.deleted)
+    view.accountId = accountPrincipalId(identity.accountId);
   return view;
 }
 

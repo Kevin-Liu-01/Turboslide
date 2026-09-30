@@ -5,7 +5,7 @@ import { isPresent, itemById } from '../menus/model';
 import type { MenuContext, MenuItem } from '../menus/model';
 import { ACCOUNT } from '../menus/strings';
 import { tipProps } from '../Tooltip';
-import { IdentityChip } from './IdentityChip';
+import { IdentityChip, TrustMark } from './IdentityChip';
 import { PlateMenu } from './PlateMenu';
 
 /**
@@ -53,7 +53,10 @@ export function AccountMenu({
         <div className="ts-account-head" data-control="account.sentence">
           <IdentityChip identity={identity} size={24} self />
           <span className="ts-account-words">
-            <span className="ts-account-name">{identity.name ?? identity.label}</span>
+            <span className="ts-account-name">
+              {identity.name ?? identity.label}
+              <TrustMark identity={identity} />
+            </span>
             <span className="ts-account-sentence">{sentence}</span>
           </span>
         </div>

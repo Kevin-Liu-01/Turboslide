@@ -29,6 +29,7 @@ import type {
   AccessStore,
   CachedAccessStore,
   HeadCache,
+  IndexAvatarChoice,
   IndexStore,
   LinkIndex,
   StoredAccess,
@@ -37,7 +38,9 @@ import type {
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
-import type { LinkGrant } from '@turboslide/identity/access';
+import { isPendingEmailGrantFor } from '@turboslide/identity/access';
+import type { LinkGrant, Principal } from '@turboslide/identity/access';
+import type { PrincipalRecord } from '@turboslide/identity/principal';
 import { denialBody } from './authorize';
 import type { RequestIdentity } from './room';
 import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
@@ -164,8 +167,12 @@ export async function readStoredAccessFresh(deckId: string): Promise<StoredAcces
 /** How long an instance trusts the index's grants it read for a principal. */
 export const LINK_GRANT_TTL_MS = 5_000;
 
-/* the index's link grants and its display name (b1.md R17), one read per principal per 5 s */
-const grantCache = new Map<string, { grants: LinkGrant[]; name?: string; at: number }>();
+/** What the principal's deck index carries beside its decks: the link grants, the typed name (b1.md R17) and the non picture avatar choice (docs/PEOPLE.md 3.13). */
+export type IndexFacts = { grants: LinkGrant[]; name?: string; avatar?: IndexAvatarChoice };
+
+/* the index's link grants, its display name (b1.md R17) and its avatar choice (docs/PEOPLE.md
+   3.13), one read per principal per 5 s */
+const grantCache = new Map<string, IndexFacts & { at: number }>();
 
 /**
  * Records a link grant on the principal's deck index (`users/<principalId>/decks.json`, a `shared`
@@ -195,20 +202,33 @@ export async function linkGrantsFromIndex(
   return (await indexFactsFor(principalId, now)).grants;
 }
 
-/** The index's link grants and display name, read once per principal per 5 s (the grant cache). */
-async function indexFactsFor(
+/**
+ * The index's link grants, display name and avatar choice, read once per principal per 5 s (the
+ * grant cache). `fresh` reads the store past this instance's row and fills the row with what it
+ * read, so the reads that follow in the same request take it: the drop bus is process local, so
+ * a name or a choice written on another instance reaches this one only when its row expires or
+ * a caller asks for the store (docs/PEOPLE.md 6.4; `refreshIndexFacts`).
+ */
+export async function indexFactsFor(
   principalId: string,
   now: number = Date.now(),
-): Promise<{ grants: LinkGrant[]; name?: string }> {
+  options: { fresh?: boolean } = {},
+): Promise<IndexFacts> {
   const cached = grantCache.get(principalId);
-  if (cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS) return cached;
+  if (options.fresh !== true && cached !== undefined && now - cached.at < LINK_GRANT_TTL_MS)
+    return cached;
   const index = await (await indexStore()).read(principalId);
   const grants: LinkGrant[] = [];
   for (const row of index.shared) {
     if (row.via !== 'link' || row.linkId === undefined) continue;
     grants.push({ linkId: row.linkId, deckId: row.deckId, role: row.role });
   }
-  const facts = { grants, ...(index.name === undefined ? {} : { name: index.name }), at: now };
+  const facts = {
+    grants,
+    ...(index.name === undefined ? {} : { name: index.name }),
+    ...(index.avatar === undefined ? {} : { avatar: index.avatar }),
+    at: now,
+  };
   grantCache.set(principalId, facts);
   return facts;
 }
@@ -230,6 +250,77 @@ export async function displayNameFromIndex(
 export async function noteDisplayName(principalId: string, name: string): Promise<void> {
   grantCache.delete(principalId);
   await (await indexStore()).update(principalId, indexUpdates.name(name));
+}
+
+/**
+ * The non picture avatar choice the principal's deck index carries (docs/PEOPLE.md 3.13; AUDIT.md
+ * defect 13): `account.setAvatar` writes a glyph, dither or initials choice here beside the
+ * record, so the instance that serves the next presence post draws the same plate. Undefined
+ * when none was chosen or the choice is a picture (which the index never carries).
+ */
+export async function avatarChoiceFromIndex(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<IndexAvatarChoice | undefined> {
+  return (await indexFactsFor(principalId, now)).avatar;
+}
+
+/** Writes the non picture avatar choice onto the principal's deck index, or clears it with null. */
+export async function noteAvatarChoice(
+  principalId: string,
+  choice: IndexAvatarChoice | null,
+): Promise<void> {
+  grantCache.delete(principalId);
+  await (await indexStore()).update(principalId, indexUpdates.avatar(choice));
+}
+
+/**
+ * The index's facts read from the store past this instance's cache and kept for the next 5 s
+ * (docs/PEOPLE.md 6.4, the fix round of the verifier's pass 1 finding 3): the editor boot and a
+ * client's first presence post read the choice `account.setAvatar` wrote on another instance
+ * at once instead of after the cache's window, so the payload of a reload and the roster's own
+ * row draw the new plate on any instance. One proven read on the blob tier (a head and a get), a
+ * file read on a checkout; never on the presence ticks between, which keep the 5 s row.
+ */
+export async function refreshIndexFacts(
+  principalId: string,
+  now: number = Date.now(),
+): Promise<IndexFacts> {
+  return indexFactsFor(principalId, now, { fresh: true });
+}
+
+/**
+ * The principal record with what the deck index carries, by the rules of b1.md R17 and
+ * docs/PEOPLE.md 3.13 (b4.md R4): the index's typed name when the record carries none (a record
+ * that carries a name keeps it), and the index's non picture choice whenever the index carries
+ * one, unless the record's choice is a picture (the index never carries a picture and the
+ * handler clears the field when one is chosen, so a stale glyph cannot outlive a picture). Pure;
+ * the same record object when nothing applies, so a caller can tell a change by identity. The
+ * room's `requestIdentity` and its resolver read the index through this one rule.
+ */
+export function recordWithIndexFacts(record: PrincipalRecord, facts: IndexFacts): PrincipalRecord {
+  const name = record.name === undefined && facts.name !== undefined ? facts.name : undefined;
+  const avatar =
+    facts.avatar !== undefined &&
+    record.avatar.variant !== 'picture' &&
+    !sameChoice(record.avatar, facts.avatar)
+      ? facts.avatar
+      : undefined;
+  if (name === undefined && avatar === undefined) return record;
+  return {
+    ...record,
+    ...(name !== undefined ? { name } : {}),
+    ...(avatar !== undefined ? { avatar } : {}),
+  };
+}
+
+/** Whether the record's choice is the index's (the variant, the letters and the salt). */
+function sameChoice(record: PrincipalRecord['avatar'], index: IndexAvatarChoice): boolean {
+  return (
+    record.variant === index.variant &&
+    record.initials === index.initials &&
+    record.salt === index.salt
+  );
 }
 
 /** Forgets the cached grants (a test, a hook that knows the index moved). */
@@ -499,6 +590,45 @@ export function hostedAccessHooks(
       await d.announce(deckId, parsed.revision).catch(() => undefined);
     },
   };
+}
+
+/**
+ * Binds the deck's pending grants by email to the signed in principal whose verified address they
+ * name (SPEC-3 6.5; docs/PEOPLE.md 3.10; build/b5.md R7). The store keeps no index of grants by
+ * address, so the identity runtime's `bindInvitations` hook has nothing to bind through at sign
+ * in and stays null; the binding happens where the invitee first reads the deck (the editor
+ * boot, write.ts), after `decide()` admitted them through the pure address match
+ * (identity/access.ts `isPendingEmailGrantFor`). A bound grant names the principal and drops the
+ * address (the schema names one or the other, never both); the payload's resolved view carries
+ * the address for a sharer from then on. One write, based on the fresh record, announced to the
+ * room's open tabs like a share write; a conflict with another instance's write answers null and
+ * the next read binds. Answers the bound record, or null when no grant named the address.
+ */
+export async function bindEmailGrants(
+  deckId: string,
+  principal: Pick<Principal, 'id' | 'kind' | 'email' | 'admin'>,
+  deps?: AccessHookDeps,
+): Promise<AccessRecord | null> {
+  if (principal.kind !== 'account' || principal.email === undefined) return null;
+  const hooks = hostedAccessHooks(deckId, deps);
+  const record = await hooks.load();
+  if (record === null) return null;
+  const now = (deps?.now ?? (() => new Date().toISOString()))();
+  const at = Date.parse(now);
+  const grants = record.grants.map((grant) =>
+    isPendingEmailGrantFor(grant, principal, at)
+      ? { ...grant, principalId: principal.id, email: null, acceptedAt: now, expiresAt: null }
+      : grant,
+  );
+  if (grants.every((grant, i) => grant === record.grants[i])) return null;
+  const next: AccessRecord = { ...record, grants, revision: record.revision + 1 };
+  try {
+    await hooks.save(next);
+  } catch {
+    return null;
+  }
+  dropLinkGrantCache(principal.id);
+  return next;
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -11,6 +11,7 @@ import type { ExportCapabilities } from '@turboslide/chrome/ExportMenu';
 import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
 import type { EditorDispatch } from '@turboslide/chrome/dispatch';
 import type {
+  AvatarChoiceView,
   CommentAnchorView,
   CommentBodyInput,
   DrawTool,
@@ -27,6 +28,7 @@ import type {
   EditorSync,
   IdentityView,
   PictureTarget,
+  PresenceParticipant,
   ShellSettings,
 } from '@turboslide/chrome/editor-shell';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
@@ -120,6 +122,15 @@ import {
   toViewerDeck,
   triggerDownload,
 } from './controller';
+import {
+  meAnswerFacts,
+  ownPictureUrlOf,
+  ownPrincipalOf,
+  rosterKeyOf,
+  rowReflects,
+  shellIdentitiesOf,
+} from './own-identity';
+import type { MeAnswerFacts } from './own-identity';
 import type {
   EditorController,
   EditorSnapshot,
@@ -808,9 +819,25 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
     [rosterRows, snap.ownClientIds, ownClientId],
   );
+  /* the last answer of Change name or Change avatar, with the own row's key at the moment it
+     arrived; read by the account block below (docs/PEOPLE.md 3.11; own-identity.ts) */
+  const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
+  /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
+  const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
+  const ownRowRef = useRef<PresenceParticipant | null>(null);
+  ownRowRef.current = ownRow;
+  /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
+     the merged map (docs/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
+     map's text replaces the row's own, the row's live facts stay */
+  const suffixed = controller.identities();
+  const withText = (row: PresenceParticipant): PresenceParticipant => {
+    const view = suffixed[row.principalId];
+    if (view === undefined) return row;
+    return { ...row, label: view.label, ...(view.name !== undefined ? { name: view.name } : {}) };
+  };
   const presence: EditorPresence = {
-    ...(ownRow !== null ? { self: ownRow } : {}),
-    others: otherRows,
+    ...(ownRow !== null ? { self: withText(ownRow) } : {}),
+    others: otherRows.map(withText),
     cap: 20,
     /* View > Live pointers > Show collaborator pointers (SPEC-3 4.6): the controller's setting */
     pointersVisible: snap.pointersVisible,
@@ -845,17 +872,69 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         }
       : {}),
   };
-  const selfIdentity = identityView(payload.identity, author);
+  /* the caller as every own surface reads it (docs/PEOPLE.md 3.11): the payload's identity with
+     the server's mark and choice (write.ts EditorIdentity, build/b3.md R1), under the roster's
+     own row while the room holds one, under the answer of Change name or Change avatar until the
+     room's own row moves past the state it held when the answer arrived */
+  const payloadIdentity: IdentityView = {
+    ...identityView(payload.identity, author),
+    ...(payload.identity?.mark !== undefined ? { mark: payload.identity.mark } : {}),
+  };
+  /* the answer's overlay stands until the room's own row carries what the answer said (the
+     name, the mark), not until the row's key moves: on the blob tier the row's mark moves on
+     presence ticks with no identity change (own-identity.ts rowReflects says how the chip fell
+     back to the stale row) */
+  const overlay = me !== null && !rowReflects(me.facts, ownRow) ? me.facts : null;
+  const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
+  /* the builder starts from the choice (docs/PEOPLE.md 3.11): the last answer's, else the room's
+     own row's variant when it differs from the payload's (after a reload within the room's 5 s
+     identity cache the payload carries the old choice on the blob tier while the row already draws
+     the new mark; the integrator's preview readings of people.own-chip-follows-avatar), else the
+     payload's; the row carries no salt, so a rerolled glyph or dither starts from its first */
+  const payloadAvatar: AvatarChoiceView | undefined = payload.identity?.avatar ?? undefined;
+  const rowMark = ownRow?.mark;
+  const rowAvatar: AvatarChoiceView | undefined =
+    rowMark !== undefined &&
+    rowMark.variant !== 'agent' &&
+    payloadAvatar !== undefined &&
+    rowMark.variant !== payloadAvatar.variant
+      ? {
+          variant: rowMark.variant,
+          ...(rowMark.variant === 'initials' && rowMark.initials
+            ? { initials: rowMark.initials }
+            : {}),
+          ...(rowMark.variant === 'picture' && rowMark.pictureUrl
+            ? { url: rowMark.pictureUrl }
+            : {}),
+        }
+      : undefined;
+  const avatarChoice: AvatarChoiceView | undefined =
+    chosenAvatar !== undefined ? (chosenAvatar ?? undefined) : (rowAvatar ?? payloadAvatar);
+  const pictureUrl = ownPictureUrlOf(avatarChoice, principal.mark);
+  /* the answer of a write is the newest fact: written back into the account and the room asked
+     to re-read the identity, so the own chip changes with no reload and the other browsers'
+     chips inside the matrix's 5 s (b1.md R18; docs/PEOPLE.md 3.11) */
+  const takeAnswer = (answer: unknown): unknown => {
+    const facts = meAnswerFacts(answer);
+    setMe({ facts, rosterKey: rosterKeyOf(ownRowRef.current) });
+    if (facts.avatar !== undefined) setChosenAvatar(facts.avatar);
+    /* the window API's state reads the answer too until the room's own row carries it */
+    controller.noteOwnAnswer(facts);
+    controller.refreshPresence();
+    return answer;
+  };
   /* the deployment's sign in facts (SPEC-3 7.3): the row exists when a database is configured;
      the dialog's exchanges run over better-auth's own routes and the page reloads with the
      account's identity once one lands (B2 R19; VERIFICATION-3 finding 9) */
   const auth = payload.auth;
   const account: EditorAccount = {
-    principal: selfIdentity,
+    principal,
     signedIn: payload.identity?.kind === 'account',
     signInAvailable: auth?.signIn ?? false,
     passkeysAvailable: auth?.passkeys ?? false,
     githubAvailable: auth?.github ?? false,
+    ...(avatarChoice !== undefined ? { avatar: avatarChoice } : {}),
+    ...(pictureUrl !== undefined ? { pictureUrl } : {}),
     namePrompt: {
       open: snap.namePrompt,
       /* a name the person chose alone, never the generated label or the fallback author
@@ -863,18 +942,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       prefilled: payload.identity?.name ?? '',
     },
     onNamePrompt: (open) => controller.promptName(open),
-    setName: (name) =>
-      controller.invoke('account.setName', { name }).then((answer) => {
-        /* the chip in the other browsers inside the matrix's 5 s (b1.md R18) */
-        controller.refreshPresence();
-        return answer;
-      }),
+    setName: (name) => controller.invoke('account.setName', { name }).then(takeAnswer),
+    /* the picture travels as the data URL the builder encoded (docs/PEOPLE.md 4.1); the salt as
+       the number the server stores */
     setAvatar: (choice) =>
-      controller.invoke('account.setAvatar', {
-        variant: choice.variant,
-        ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
-        ...(choice.salt !== undefined ? { salt: Number(choice.salt) } : {}),
-      }),
+      controller
+        .invoke('account.setAvatar', {
+          variant: choice.variant,
+          ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
+          ...(choice.salt !== undefined ? { salt: choice.salt } : {}),
+          ...(choice.picture !== undefined ? { picture: choice.picture } : {}),
+        })
+        .then(takeAnswer),
     forget: () => controller.invoke('account.forget', {}),
     ...(auth?.email === true
       ? {
@@ -917,6 +996,52 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         }
       : {}),
   };
+  /* the room's own row moved past the state the answer overlaid: the room is the source again */
+  useEffect(() => {
+    if (me !== null && rowReflects(me.facts, ownRow)) setMe(null);
+  }, [me, ownRow]);
+  /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10, 3.17; build/b3.md
+     R2, R3): the payload's map for the Share dialog's people; for the version rows and the
+     roster the controller's merged and disambiguated map (controller.identities(), cached per
+     roster, threads and versions and read here on every snapshot), with the payload's map under
+     the roster rows and the caller as the fallback should the controller answer none */
+  const payloadIdentities = payload.identities;
+  const merged = shellIdentitiesOf(
+    controller.identities(),
+    payloadIdentities,
+    rosterRows,
+    principal,
+  );
+  /* the caller's row of the merged map reads the answer's overlay too (ownPrincipalOf), so the
+     version rows and the comment rows draw what the own chip draws while the room's own row lags
+     the answer (own-identity.ts rowReflects); the row's own mark keeps its self flag */
+  const ownView = merged[principal.principalId];
+  const identities =
+    ownView === undefined
+      ? merged
+      : {
+          ...merged,
+          [principal.principalId]: {
+            ...ownView,
+            ...(principal.name !== undefined ? { name: principal.name } : {}),
+            trust: principal.trust,
+            ...(principal.mark !== undefined
+              ? { mark: { ...principal.mark, self: ownView.mark?.self ?? false } }
+              : {}),
+          },
+        };
+  /* a person of the access record as the payload resolved them (name, trust, mark, the email a
+     sharer may see), else the view built from the id alone */
+  const personOf = (principalId: string, fallback: IdentityView): IdentityView =>
+    payloadIdentities?.[principalId] ?? fallback;
+  /* the address of a bound grant's holder as the payload resolved it (the view carries it for a
+     sharer alone): a bound grant names a principal and no address (the schema names one or the
+     other, never both; server/access.ts bindEmailGrants), so the Share row's line under the name
+     reads it here (docs/PEOPLE.md 3.10) */
+  const inviteeEmailOf = (principalId: string | null): { email?: string } => {
+    const email = principalId === null ? undefined : payloadIdentities?.[principalId]?.email;
+    return email === undefined ? {} : { email };
+  };
   const record = snap.access.record ?? undefined;
   const access: EditorAccess | undefined =
     record === undefined
@@ -926,26 +1051,26 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           owner:
             record.owner === null
               ? null
-              : {
+              : personOf(record.owner, {
                   principalId: record.owner,
                   label: labelFor(record.owner),
                   trust: record.owner.startsWith('usr_') ? 'verified' : 'label',
                   kind: record.owner.startsWith('usr_') ? 'account' : 'anonymous',
-                },
+                }),
           pendingOwner:
             record.pendingOwner === null || record.pendingOwner.principalId === null
               ? null
-              : {
+              : personOf(record.pendingOwner.principalId, {
                   principalId: record.pendingOwner.principalId,
                   label: labelFor(record.pendingOwner.principalId),
                   trust: 'verified',
                   kind: 'account',
-                },
+                }),
           generalAccess: record.generalAccess,
           grants: record.grants.map((grant) => ({
             ...(grant.principalId !== null
               ? {
-                  principal: {
+                  principal: personOf(grant.principalId, {
                     principalId: grant.principalId,
                     label: labelFor(grant.principalId),
                     trust: grant.principalId.startsWith('usr_')
@@ -954,10 +1079,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                     kind: grant.principalId.startsWith('usr_')
                       ? ('account' as const)
                       : ('anonymous' as const),
-                  },
+                  }),
                 }
               : {}),
-            ...(grant.email !== null ? { email: grant.email } : {}),
+            ...(grant.email !== null ? { email: grant.email } : inviteeEmailOf(grant.principalId)),
             role: grant.role,
             invitedAt: grant.invitedAt,
             ...(grant.acceptedAt !== null ? { acceptedAt: grant.acceptedAt } : {}),
@@ -986,12 +1111,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
               id: request.id,
               ...(request.principalId !== null
                 ? {
-                    principal: {
+                    principal: personOf(request.principalId, {
                       principalId: request.principalId,
                       label: labelFor(request.principalId),
                       trust: 'label' as const,
                       kind: 'anonymous' as const,
-                    },
+                    }),
                   }
                 : {}),
               ...(request.email !== null ? { email: request.email } : {}),
@@ -1345,7 +1470,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const mentionables = useMemo<IdentityView[]>(() => {
     const seen = new Map<string, IdentityView>();
     for (const row of rosterRows) seen.set(row.principalId, row);
-    seen.set(selfIdentity.principalId, selfIdentity);
+    seen.set(principal.principalId, principal);
     for (const thread of threadViews) {
       for (const comment of [thread.comment, ...thread.replies]) {
         if (!seen.has(comment.author.principalId))
@@ -1353,7 +1478,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       }
     }
     return [...seen.values()];
-  }, [rosterRows, selfIdentity.principalId, threadViews]);
+  }, [rosterRows, principal, threadViews]);
   /* a viewer or a commenter whose role holds readComments takes the editing stage too, in the
      role's forced mode (Viewing or Commenting, SPEC-3 5.3): the comment markers mount inside the
      stage's overlay, and the plain Stage has none (docs/FOCUS.md `comments.reaches-second-browser`
@@ -1506,6 +1631,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     presence,
     sync,
     account,
+    /* the version rows and the comment authors the route resolved (docs/PEOPLE.md 3.8) */
+    identities,
     ...(comments !== undefined ? { comments } : {}),
     inbox,
     ...(access !== undefined ? { access } : {}),

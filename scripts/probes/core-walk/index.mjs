@@ -46,6 +46,7 @@ import * as images from './areas/images.mjs';
 import * as inbox from './areas/inbox.mjs';
 import * as lines from './areas/lines.mjs';
 import * as logos from './areas/logos.mjs';
+import * as people from './areas/people.mjs';
 import * as shapes from './areas/shapes.mjs';
 import * as shaders from './areas/shaders.mjs';
 import * as share from './areas/share.mjs';
@@ -91,6 +92,10 @@ export const AREAS = [
      own slides, so every block kind the frames read is the walk's own */
   gestures,
   share,
+  /* the people round (docs/PEOPLE.md 6.1): how a person is drawn, after the share and versions
+     rows on the same deck: the chip geometry, the renderers' agreement, the own chip following
+     the name and the avatar, the anonymous picture refusal */
+  people,
   exportArea,
   help,
   view,

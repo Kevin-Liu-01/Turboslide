@@ -11,6 +11,7 @@
 // passes the granted slot, so a stored surface (comments, versions, Show changes) never colours.
 import type { HueSlot } from './hues.ts';
 import { hueFor, isHueSlot } from './hues.ts';
+import { accountPrincipalId } from './ids.ts';
 import type { ResolvedIdentity, Trust } from './resolve.ts';
 import { digestUint32, sha256 } from './sha256.ts';
 
@@ -39,7 +40,10 @@ export type MarkOptions = {
   hueSlot?: HueSlot | null;
   presenter?: boolean;
   self?: boolean;
-  /** The public URL of the 32 or 64 px picture when the variant is `picture`. */
+  /**
+   * The public URL of the 64 px picture when the variant is `picture`; absent, the resolved
+   * identity's own `pictureUrl` is read (docs/PEOPLE.md 4.4), so no caller passes one today.
+   */
   pictureUrl?: string;
 };
 
@@ -89,7 +93,14 @@ export function accessibleName(identity: ResolvedIdentity): string {
 /** The mark for a resolved identity (research 11 7.1). */
 export function markSpec(identity: ResolvedIdentity, options: MarkOptions = {}): MarkSpec {
   const salt = identity.avatar.salt ?? 0;
-  const { density, glyphSeed } = markHash(identity.principalId, salt);
+  /* one person, one mark (SPEC-3 7.4; docs/PEOPLE.md 6.1 people.versions-author-account): an
+     aliased anonymous id hashes the account it renders as, so a record written before the sign
+     in and one written after draw one field */
+  const seedId =
+    identity.accountId !== undefined
+      ? accountPrincipalId(identity.accountId)
+      : identity.principalId;
+  const { density, glyphSeed } = markHash(seedId, salt);
   const hue =
     options.hueSlot !== undefined && options.hueSlot !== null && isHueSlot(options.hueSlot)
       ? { slot: options.hueSlot, hex: hueFor(options.hueSlot) }
@@ -106,8 +117,9 @@ export function markSpec(identity: ResolvedIdentity, options: MarkOptions = {}):
     return { ...base, variant: 'agent', initials: '', hue: null };
   }
   const chosen = identity.avatar.variant;
-  if (chosen === 'picture' && options.pictureUrl) {
-    return { ...base, variant: 'picture', initials: '', pictureUrl: options.pictureUrl, hue };
+  const pictureUrl = options.pictureUrl ?? identity.pictureUrl;
+  if (chosen === 'picture' && pictureUrl) {
+    return { ...base, variant: 'picture', initials: '', pictureUrl, hue };
   }
   if (chosen === 'glyph' || chosen === 'dither') {
     return { ...base, variant: chosen, initials: '', hue };

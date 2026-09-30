@@ -18,7 +18,8 @@ import { hideTooltip } from './Tooltip';
 // The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
 // draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
-// parked list of the ship (ship-c1a7ff3.json), and the Logo dialog and the Shader gallery (ship
+// parked list of the ship (ship-4300058d.json, the people round's, which carries the objects round's
+// list unchanged), and the Logo dialog and the Shader gallery (ship
 // two) are the surfaces this lane owns; Overlay.tsx (the handles and the bar, B3) and the Shader
 // section (B5, ship two) pin their reads in their own lanes' tests, as 7.3 lists them.
 
@@ -52,10 +53,14 @@ describe('isParkedIn', () => {
     expect(isParkedIn('dialog.logo.everySlide', set, { advancedTools: 'true' })).toBe(true);
   });
 
-  it('binds the committed set, the parked list of the objects round', async () => {
+  it("binds the committed set, the parked list of the people round's ship", async () => {
     /* the module is mocked below for the dialog's surface; the committed module is read here. The
-       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-c1a7ff3.json,
-       which carries ship two's list (ship-f0279e1.json) forward where its rows did not read green in
+       set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-4300058d.json
+       (the people round's ship of 2026-09-30, docs/PEOPLE.md section 7), which carries the objects
+       round's list (ship-c1a7ff3.json) unchanged: nothing of the people round parks, its two rows with
+       parks (people.own-chip-follows-name, people.own-chip-follows-avatar) green on the enforce
+       preview and on the memory tier and its picture rows green on the local accounts run, and
+       nothing leaves; the objects round's list carries ship two's list (ship-f0279e1.json) forward where its rows did not read green in
        the objects round's run of record: the union of the `parks` of its eleven parkedRows (the two
        carried rows of the earlier ships, the four P1 rows of ship one whose controls are not on the
        build, ship two's Background dialog Shader row on shaders.background.place-answers and its
@@ -98,6 +103,13 @@ describe('isParkedIn', () => {
     expect(real.isParked('view.livePointers.mine', DEFAULT_SETTINGS)).toBe(true);
     expect(real.isParked('picture.svg.copy', DEFAULT_SETTINGS)).toBe(true);
     expect(real.isParked('picture.svg.copy', { advancedTools: true })).toBe(false);
+    /* the people round: the own chip and the roster's own row (title.account, title.presence.me),
+       Change avatar and the builder's Picture tab and file control stay in the default view */
+    expect(real.isParked('title.account', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('title.presence.me', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('title.account.changeAvatar', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('dialog.avatarBuilder.panel.picture', DEFAULT_SETTINGS)).toBe(false);
+    expect(real.isParked('dialog.avatarBuilder.file', DEFAULT_SETTINGS)).toBe(false);
     /* a control of the picker that ships is not in the set; the Go to slide word left the list */
     expect(real.isParked('dialog.logo.everySlide', DEFAULT_SETTINGS)).toBe(false);
     expect(real.isParked('dialog.logo.search', DEFAULT_SETTINGS)).toBe(false);

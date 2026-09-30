@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { CORE_MATRIX, CORE_SPEC_DRIVERS } from './core-matrix.mjs';
+import { CORE_MATRIX, CORE_SPEC_DRIVERS, localRows } from './core-matrix.mjs';
 import { AREAS } from './core-walk/index.mjs';
 
 // The core gate's tail (docs/FOCUS.md 6.2; VERIFICATION.md F3): after the drivers the gate merges
@@ -100,7 +100,7 @@ describe('the core gate renders its verdict from a finished run', () => {
     const table = readFileSync(join(out, 'core-matrix.md'), 'utf8');
     for (const row of specRows) expect(table).toContain(`| \`${row.id}\` | ${row.feature} |`);
     expect(run.stdout).toMatch(
-      /core-gate: \d+ rows: \d+ passed, 0 failed, 0 not driven \(0 manual\), 0 no step; verdict ok; retries zero/,
+      /core-gate: \d+ rows: \d+ passed, 0 failed, 0 not driven \(0 manual\), 0 no step, 0 local rows not recorded; verdict ok; retries zero/,
     );
   }, 30_000);
 
@@ -328,7 +328,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(2);
-    expect(run.stderr).toContain('--only takes probe, specs or cost, not "text,slides"');
+    expect(run.stderr).toContain('--only takes probe, specs, cost or accounts, not "text,slides"');
     expect(run.stderr).toContain('--spec <areas>');
     expect(run.stderr).toContain('usage: node scripts/probes/core-gate.mjs');
     expect(run.stdout).toBe('');
@@ -342,7 +342,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(0);
-    expect(run.stderr).not.toContain('--only takes probe, specs or cost');
+    expect(run.stderr).not.toContain('--only takes probe, specs, cost or accounts');
   }, 30_000);
 });
 
@@ -435,7 +435,18 @@ describe('the gate narrows one driver to rows or areas (the objects round fix ro
     expect(run.stderr, run.stderr).toBe('');
     expect(run.status).toBe(0);
     expect(run.stdout).toContain(
-      `the walk probe over the areas tables (${tables.length} rows judged)`,
+      `the walk probe over the areas tables (${tables.length} rows judged; the walk's modules tables)`,
+    );
+    /* an id area whose rows another module declares (the versions rows live in the share module;
+       the people round, build/b5.md): the walk's --only names the module, the gate judges the ids */
+    const versions = CORE_MATRIX.filter(
+      (row) => row.driver === 'probe --core' && row.id.startsWith('versions.'),
+    );
+    const byModule = dryRun(['--only', 'probe', '--areas', 'versions']);
+    expect(byModule.stderr, byModule.stderr).toBe('');
+    expect(byModule.status).toBe(0);
+    expect(byModule.stdout).toContain(
+      `the walk probe over the areas versions (${versions.length} rows judged; the walk's modules share)`,
     );
     const unknown = dryRun(['--only', 'probe', '--areas', 'tables,nosuch']);
     expect(unknown.status).toBe(2);
@@ -491,4 +502,189 @@ describe('the gate narrows one driver to rows or areas (the objects round fix ro
     expect(summary.narrowed.areas).toEqual(['tables']);
     expect(summary.narrowed.only).toBe('probe');
   }, 30_000);
+});
+
+// The people round (docs/PEOPLE.md 6.2): `--only accounts` runs apps/studio/e2e/accounts.spec.ts
+// against a node server with an identity database and judges the ten local rows alone; in every
+// other run a local row is absent from the results and is listed apart under `local` with the
+// reason, never counted as passed, never "no step" and never a reason to park.
+describe('the gate judges the local rows through --only accounts and lists them apart otherwise', () => {
+  const local = localRows();
+  const accountsSpec = 'apps/studio/e2e/accounts.spec.ts';
+
+  /** A Playwright JSON report of the accounts spec: one passed test per local row, `failing` failed, plus one untitled test. */
+  function accountsReport(failing = []) {
+    const specs = local.map((row) => {
+      const failed = failing.includes(row.id);
+      return {
+        title: `${row.id}: ${row.interaction}`,
+        file: accountsSpec,
+        tests: [
+          {
+            status: failed ? 'unexpected' : 'expected',
+            results: [
+              failed
+                ? {
+                    status: 'failed',
+                    retry: 0,
+                    error: { message: 'Error: the stub failed this row' },
+                  }
+                : { status: 'passed', retry: 0 },
+            ],
+            annotations: [],
+          },
+        ],
+      };
+    });
+    /* the spec's older tests carry no matrix id and are not judged */
+    specs.push({
+      title: 'the device authorization flow: a code from the terminal',
+      file: accountsSpec,
+      tests: [{ status: 'expected', results: [{ status: 'passed', retry: 0 }], annotations: [] }],
+    });
+    return {
+      config: { projects: [{ retries: 0 }] },
+      suites: [{ title: accountsSpec, specs }],
+    };
+  }
+
+  function reportRun(files, extra) {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-accounts-'));
+    for (const [name, json] of Object.entries(files))
+      writeFileSync(join(dir, name), JSON.stringify(json));
+    const out = join(dir, 'out');
+    const run = spawnSync(
+      'node',
+      [GATE, '--base', 'http://stub.invalid', '--report', dir, '--out', out, ...extra],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    return { run, out };
+  }
+
+  it('plans the accounts spec in a dry run and refuses a spec row under --rows', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-accounts-dry-'));
+    const plan = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'http://127.0.0.1:1',
+        '--only',
+        'accounts',
+        '--decks',
+        join(dir, 'decks'),
+        '--out',
+        join(dir, 'out'),
+        '--lock',
+        join(dir, 'e2e.lock'),
+        '--dry-run',
+      ],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    expect(plan.stderr, plan.stderr).toBe('');
+    expect(plan.status).toBe(0);
+    expect(plan.stdout).toContain(`the accounts spec ${accountsSpec}`);
+    expect(plan.stdout).toContain(`${local.length} local rows judged`);
+    expect(plan.stdout).toContain(`the run would take the lock ${join(dir, 'e2e.lock')}`);
+    const narrowed = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'https://stub.invalid',
+        '--only',
+        'accounts',
+        '--rows',
+        `${local[0].id},${local[1].id}`,
+        '--out',
+        join(dir, 'out2'),
+        '--dry-run',
+      ],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    expect(narrowed.status).toBe(0);
+    expect(narrowed.stdout).toContain(`narrowed to the local rows ${local[0].id}, ${local[1].id}`);
+    expect(narrowed.stdout).toContain('2 local rows judged');
+    const specRow = specRows[0].id;
+    const refused = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'https://stub.invalid',
+        '--only',
+        'accounts',
+        '--rows',
+        specRow,
+        '--dry-run',
+      ],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+    expect(refused.status).toBe(2);
+    expect(refused.stderr).toContain(`not a local row: ${JSON.stringify(specRow)}`);
+  }, 40_000);
+
+  it('judges the ten local rows alone from an accounts run, red rows included', () => {
+    const clean = reportRun({ 'accounts.json': accountsReport() }, ['--only', 'accounts']);
+    expect(clean.run.stderr, clean.run.stderr).toBe('');
+    expect(clean.run.status).toBe(0);
+    const summary = JSON.parse(readFileSync(join(clean.out, 'core-gate.json'), 'utf8'));
+    expect(summary.rows).toBe(local.length);
+    expect(summary.passed).toBe(local.length);
+    expect(summary.noStep).toEqual([]);
+    expect(summary.local).toEqual([]);
+    expect(summary.accounts.retries).toBe(0);
+    expect(summary.specs).toBeNull();
+    expect(summary.narrowed.only).toBe('accounts');
+    expect(summary.table.map((r) => r.id)).toEqual(local.map((r) => r.id));
+    /* a red local row without parks blocks share; a red picture row parks its two controls */
+    const badge = 'people.verified-badge';
+    const upload = 'people.avatar-upload';
+    const red = reportRun({ 'accounts.json': accountsReport([badge, upload]) }, [
+      '--only',
+      'accounts',
+    ]);
+    expect(red.run.status).toBe(1);
+    const again = JSON.parse(readFileSync(join(red.out, 'core-gate.json'), 'utf8'));
+    expect(again.failed).toBe(2);
+    expect(again.results[badge]).toBe('failed');
+    expect(again.blocking.map((b) => b.id)).toEqual([badge]);
+    expect(again.wouldParkRows).toEqual([
+      {
+        id: upload,
+        parks: ['dialog.avatarBuilder.panel.picture', 'dialog.avatarBuilder.file'],
+        result: 'failed',
+      },
+    ]);
+    expect(again.wouldPark).toEqual([]);
+    expect(red.run.stdout).toContain(`failing the gate: ${badge} (failed), ${upload} (failed)`);
+  }, 40_000);
+
+  it('lists the local rows apart in a run that did not record them, never as no step and never blocking', () => {
+    /* a specs run over the whole matrix's judgement: every core spec row passed, the walk and the
+       cost probe unrun (their rows read no step, which is what fails this run), the local rows
+       absent and listed apart */
+    const { run, out } = reportRun({ 'specs.json': stubReport() }, []);
+    const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
+    expect(summary.local).toEqual(local.map((r) => r.id));
+    for (const id of local.map((r) => r.id)) {
+      expect(summary.noStep).not.toContain(id);
+      const row = summary.table.find((r) => r.id === id);
+      expect(row.result).toBe('not driven');
+      expect(row.reason).toBe('no identity database on this base');
+    }
+    expect(summary.verdict.failures.map((f) => f.id)).not.toContain(local[0].id);
+    expect(summary.blocking.map((b) => b.id)).not.toContain(local[0].id);
+    expect(summary.wouldParkRows.map((r) => r.id)).not.toContain('people.avatar-upload');
+    const table = readFileSync(join(out, 'core-matrix.md'), 'utf8');
+    expect(table).toContain('## Local rows this run did not record (docs/PEOPLE.md 6.2)');
+    expect(table).toContain(`${local.length} local rows this run did not record`);
+    expect(run.stdout).toContain(`${local.length} local rows not recorded`);
+    /* the walk probe's rows are no step in this stub, so the run exits 1 for them and not for the local rows */
+    expect(run.status).toBe(1);
+    expect(summary.noStep.length).toBe(
+      CORE_MATRIX.filter((r) => !CORE_SPEC_DRIVERS.includes(r.driver) && !localRows().includes(r))
+        .length,
+    );
+  }, 40_000);
 });

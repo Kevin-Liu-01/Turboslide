@@ -225,6 +225,14 @@
       "control.set",
       "artifact.download"
     ],
+    "admin": [
+      "admin.avatar.sweep",
+      "admin.bootstrap",
+      "admin.assignOwner",
+      "admin.flag",
+      "admin.migrateStorage",
+      "admin.mail.list"
+    ],
     "presence": [
       "presence.list",
       "presence.follow",
@@ -288,16 +296,9 @@
       "account.sessions",
       "account.signOut",
       "account.forget"
-    ],
-    "admin": [
-      "admin.bootstrap",
-      "admin.assignOwner",
-      "admin.flag",
-      "admin.migrateStorage",
-      "admin.mail.list"
     ]
   },
-  "actionCount": 192,
+  "actionCount": 193,
   "resources": [
     {
       "uri": "deck://manifest",

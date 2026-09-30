@@ -1,0 +1,263 @@
+diff --git a/apps/studio/src/server/room.ts b/apps/studio/src/server/room.ts
+index b62577e9..2a940f45 100644
+--- a/apps/studio/src/server/room.ts
++++ b/apps/studio/src/server/room.ts
+@@ -76,7 +76,10 @@ import {
+   displayNameFromIndex,
+   dropLinkGrantCache,
+   effectiveAccess,
++  indexFactsFor,
+   readAccess,
++  recordWithIndexFacts,
++  refreshIndexFacts,
+ } from './access';
+ import { agentAuth } from './auth';
+ import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
+@@ -329,6 +332,15 @@ export type RequestIdentity = {
+   account?: AccountProfile | null;
+ };
+ 
++export type RequestIdentityOptions = {
++  /**
++   * read the principal's deck index past this instance's 5 s row (access.ts refreshIndexFacts):
++   * the editor boot, so a reload's payload carries the name and the choice written on another
++   * instance at once (docs/PEOPLE.md 6.4); the routes between keep the row
++   */
++  freshIndex?: boolean;
++};
++
+ /**
+  * The identity of a request on the room routes: the bearer as the bootstrap admin agent (SPEC-3
+  * 0.23), else the account session when the deployment has an identity database (docs/PEOPLE.md
+@@ -337,7 +349,10 @@ export type RequestIdentity = {
+  * writes), else the sealed anonymous cookie (minted here when absent, so a stream opened before
+  * the middleware ran still gets an id), else a stranger.
+  */
+-export async function requestIdentity(request: Request): Promise<RequestIdentity> {
++export async function requestIdentity(
++  request: Request,
++  options: RequestIdentityOptions = {},
++): Promise<RequestIdentity> {
+   const secret = studioSessionSecret();
+   if (request.headers.get('authorization') !== null) {
+     const bearer = bearerAuthorize(request, process.env);
+@@ -391,26 +406,24 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
+   const touched = await principalStore()
+     .touch(principal.id, new Date(), true)
+     .catch(() => null);
+-  /* the display name typed on another instance (b1.md R17): the principal store of the blob tier
+-     is a file store per instance, so the name `account.setName` wrote elsewhere rides the
+-     principal's deck index on the Blob store (access.ts displayNameFromIndex, the carrier the
+-     link grants use), read past the same 5 s cache; a record that carries a name keeps it */
+-  const named =
+-    touched !== null && touched.name === undefined
+-      ? await displayNameFromIndex(principal.id)
+-          .then((name) => (name === undefined ? touched : { ...touched, name }))
+-          .catch(() => touched)
+-      : touched;
+-  /* the avatar choice chosen on another instance rides the same index (docs/PEOPLE.md 3.13;
+-     b4.md R4: `account.setAvatar` writes a non picture choice there and clears it on a picture):
+-     the index's choice replaces the record's whenever the index carries one, unless the record's
+-     choice is a picture, which the index never carries and a stale glyph must not outlive */
++  /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
++     (docs/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
++     instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
++     principal's deck index on the Blob store (the carrier the link grants use), read through
++     this instance's 5 s row (access.ts indexFactsFor) or past it when the caller asks
++     (`freshIndex`, the editor boot; docs/PEOPLE.md 6.4), and applied by access.ts
++     recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
++     replaces the record's unless the record's choice is a picture, which the index never carries
++     and a stale glyph must not outlive */
++  const facts =
++    touched === null
++      ? null
++      : await (options.freshIndex === true
++          ? refreshIndexFacts(principal.id)
++          : indexFactsFor(principal.id)
++        ).catch(() => null);
+   const record =
+-    named !== null && named.avatar.variant !== 'picture'
+-      ? await avatarChoiceFromIndex(principal.id)
+-          .then((avatar) => (avatar === undefined ? named : { ...named, avatar }))
+-          .catch(() => named)
+-      : named;
++    touched !== null && facts !== null ? recordWithIndexFacts(touched, facts) : touched;
+   return {
+     /* the link grants are the union of the principal record's and the deck index's, so a grant
+        exchanged on another instance admits the visitor on the ops, stream, presence and comments
+@@ -2305,7 +2318,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
+ // ---------------------------------------------------------------------------------------------
+ // Presence (SPEC-3 3.8) and the roster by role (4.8)
+ 
+-type IdentityCacheRow = { at: number; identity: ResolvedIdentity };
++type IdentityCacheRow = { at: number; facts: string; identity: ResolvedIdentity };
+ const identityCache = new Map<string, IdentityCacheRow>();
+ const IDENTITY_CACHE_MS = 5000;
+ 
+@@ -2315,6 +2328,37 @@ export function forgetIdentity(identity: string): void {
+   emailMemory.delete(identity);
+ }
+ 
++/**
++ * The facts of a request its resolution depends on, the cache row's validator (docs/PEOPLE.md
++ * 6.4): a request whose record or account carries another name or choice than the row was
++ * resolved from (the index read past its cache at a boot or a first presence post, a record
++ * another route wrote on this instance) is resolved again inside the 5 s, so the index row's
++ * window and this one never add up to ten.
++ */
++function identityFactsKey(identity: RequestIdentity): string {
++  return JSON.stringify([
++    identity.record?.name ?? null,
++    identity.record?.avatar ?? null,
++    identity.account?.name ?? null,
++    identity.account?.avatar ?? null,
++  ]);
++}
++
++/**
++ * The request identity with its record read against the deck index past this instance's 5 s row
++ * (access.ts refreshIndexFacts and recordWithIndexFacts; docs/PEOPLE.md 6.4): a client's first
++ * presence post after its boot. The same identity for a bearer, a request without a record, a
++ * store that did not answer, or an index that carries nothing new.
++ */
++export async function withFreshIndexFacts(identity: RequestIdentity): Promise<RequestIdentity> {
++  if (identity.ctx.agent !== undefined || identity.principalId === null || identity.record === null)
++    return identity;
++  const facts = await refreshIndexFacts(identity.principalId).catch(() => null);
++  if (facts === null) return identity;
++  const record = recordWithIndexFacts(identity.record, facts);
++  return record === identity.record ? identity : { ...identity, record };
++}
++
+ /**
+  * The resolved identity of a request, through the 5 s cache (docs/PEOPLE.md 3.6): a bearer as
+  * its agent, a signed in request as the account the session resolved to, an anonymous request as
+@@ -2323,11 +2367,13 @@ export function forgetIdentity(identity: string): void {
+  */
+ export async function resolveRequestIdentity(identity: RequestIdentity): Promise<ResolvedIdentity> {
+   const key = identity.identity;
++  const facts = identityFactsKey(identity);
+   const hit = identityCache.get(key);
+   const now = Date.now();
+-  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS) return hit.identity;
++  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS && hit.facts === facts)
++    return hit.identity;
+   const resolved = noteResolved(await resolveFresh(identity));
+-  identityCache.set(key, { at: now, identity: resolved });
++  identityCache.set(key, { at: now, facts, identity: resolved });
+   return resolved;
+ }
+ 
+@@ -2376,7 +2422,12 @@ export async function rosterEntryFor(
+   post: PresencePost,
+   existing: readonly RosterEntry[],
+ ): Promise<RosterEntry> {
+-  const resolved = await cachedIdentity(identity);
++  /* a client's first post after its boot reads the person's index past this instance's 5 s row
++     (docs/PEOPLE.md 6.4): the boot's payload read the store on its instance, and the instance
++     that serves the first post may hold the row from before the choice; the ticks after keep
++     the row, so the cost is one index read per client, never per tick */
++  const first = existing.every((row) => row.clientId !== post.clientId);
++  const resolved = await cachedIdentity(first ? await withFreshIndexFacts(identity) : identity);
+   const principalId =
+     identity.ctx.agent !== undefined ? `agent:${identity.ctx.agent.tokenId}` : identity.identity;
+   const slot = grantHueSlot(principalId, existing);
+diff --git a/apps/studio/src/server/write.ts b/apps/studio/src/server/write.ts
+index 4d1b1208..6de1ccb0 100644
+--- a/apps/studio/src/server/write.ts
++++ b/apps/studio/src/server/write.ts
+@@ -411,7 +411,9 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
+     const room = await import('./room');
+     const access = await import('./access');
+     const auth = await import('./auth/identity');
+-    const identity = await room.requestIdentity(getRequest());
++    /* the caller's index read past this instance's cache (docs/PEOPLE.md 6.4): a reload's payload
++       carries the name and the choice written on another instance at once */
++    const identity = await room.requestIdentity(getRequest(), { freshIndex: true });
+     sendMintedCookie(identity.setCookie);
+     const decision = await room.decideFor(identity, data.deckId, 'read', 'readEditorDeck');
+     if (!decision.ok) return JSON.stringify(null);
+@@ -566,7 +568,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
+      Sign in row exists on /new where the deployment offers one */
+   const room = await import('./room');
+   const auth = await import('./auth/identity');
+-  const identity = await room.requestIdentity(getRequest());
++  const identity = await room.requestIdentity(getRequest(), { freshIndex: true });
+   sendMintedCookie(identity.setCookie);
+   const resolved = await room.resolveRequestIdentity(identity);
+   const runtime = auth.identityRuntime();
+diff --git a/apps/studio/src/server/room.test.ts b/apps/studio/src/server/room.test.ts
+index e4481ce6..992315be 100644
+--- a/apps/studio/src/server/room.test.ts
++++ b/apps/studio/src/server/room.test.ts
+@@ -23,8 +23,11 @@ import {
+   resolvePrincipalId,
+   resolveRequestIdentity,
+   roleMark,
++  rosterEntryFor,
+   rosterEntryForReader,
++  withFreshIndexFacts,
+ } from './room';
++import type { Room } from './room';
+ import type { ViewerFacts } from './room';
+ import { stateDir } from './root';
+ 
+@@ -381,6 +384,58 @@ describe('identityViewsFor', () => {
+   });
+ });
+ 
++describe('the caller\'s own index facts past the cache (docs/PEOPLE.md 6.4)', () => {
++  it('the boot reads the choice another instance wrote at once, the presence tick keeps the row, and the resolution follows the facts inside the 5 s', async () => {
++    /* people.own-chip-follows-avatar red on preview 7 (the verifier's pass 1 finding 3): the
++       choice `account.setAvatar` wrote on one instance reached the instance that served the
++       reload only when its index row expired, and the resolution cached over that row held the
++       old plate for another 5 s. The write below skips the writer's cache drop, the way another
++       instance's write reaches this one. */
++    const minted = await requestIdentity(request('/api/decks/q4/presence', { cookie: 'ts.session_token=nonsense' }));
++    const id = minted.principalId ?? '';
++    expect(id).toMatch(/^anon_/);
++    const cookie = (minted.setCookie ?? '').split(';')[0] ?? '';
++    const again = () => requestIdentity(request('/api/decks/q4/presence', { cookie }));
++    const folder = join(stateDir(), 'users', principalFolder(id));
++    const glyph = { variant: 'glyph' as const, salt: 7 };
++    try {
++      // this instance read the row before the write: initials, cached for 5 s
++      expect((await again()).record?.avatar).toEqual({ variant: 'initials' });
++      const before = await resolveRequestIdentity(minted);
++      expect(before.avatar.variant).toBe('initials');
++      await (await indexStore()).update(id, indexUpdates.avatar(glyph));
++      // a presence tick keeps the row: the old choice, and the resolution cached over it
++      const tick = await again();
++      expect(tick.record?.avatar).toEqual({ variant: 'initials' });
++      expect((await resolveRequestIdentity(tick)).avatar.variant).toBe('initials');
++      // the boot reads the store, and its resolution misses the row cached seconds ago
++      const boot = await requestIdentity(request('/api/decks/q4/presence', { cookie }), {
++        freshIndex: true,
++      });
++      expect(boot.record?.avatar).toEqual(glyph);
++      expect((await resolveRequestIdentity(boot)).avatar).toEqual(glyph);
++      // the reads after the boot on this instance take the filled row
++      expect((await again()).record?.avatar).toEqual(glyph);
++      // a first presence post reads the store the same way on an instance that holds the old row
++      await (await indexStore()).update(id, indexUpdates.avatar({ variant: 'dither', salt: 2 }));
++      const stale = await again();
++      expect(stale.record?.avatar).toEqual(glyph);
++      const fresh = await withFreshIndexFacts(stale);
++      expect(fresh.record?.avatar).toEqual({ variant: 'dither', salt: 2 });
++      expect(await withFreshIndexFacts(fresh)).toBe(fresh);
++      const post = { clientId: 'b'.repeat(32), clock: 1, pointerOn: false, presenting: false };
++      const entry = await rosterEntryFor({} as Room, stale, 'editor', post, []);
++      expect(entry.mark).toMatchObject({ variant: 'dither' });
++      // the second post of the client keeps the row (one read per client, never per tick)
++      await (await indexStore()).update(id, indexUpdates.avatar(glyph));
++      const second = await rosterEntryFor({} as Room, await again(), 'editor', post, [entry]);
++      expect(second.mark).toMatchObject({ variant: 'dither' });
++    } finally {
++      rmSync(folder, { recursive: true, force: true });
++    }
++  });
++});
++
+ describe('resolvePrincipalId', () => {
+   it('reads the name another instance wrote onto the deck index past this instance cache', async () => {
+     /* the blob tier's principal store is a file store per instance and the index cache of

@@ -1,0 +1,3800 @@
+{
+  "base": "http://localhost:4468",
+  "tag": "ship-local",
+  "width": 1440,
+  "accounts": true,
+  "signinFirst": false,
+  "startedAt": "2026-09-30T10:13:22.095Z",
+  "uptime": "3:13  up 5 days, 17:10, 2 users, load averages: 4.26 7.20 9.87",
+  "deck.id": "untitled-20260930-j6vp",
+  "account.A.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+      "trust": "label",
+      "label": "Titanium 869",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+      "trust": "label",
+      "label": "Titanium 869",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "shot.namePrompt.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-name-prompt-A-light.png",
+  "shot.namePrompt.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-name-prompt-A-dark.png",
+  "ownChip.A.afterContinue": {
+    "ms": 314,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "4",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "AV",
+      "badgeAfter": null
+    }
+  },
+  "account.A.afterName": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+      "trust": "label",
+      "label": "Titanium 869",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+      "trust": "guest",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "hue": "4",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "AV",
+      "badgeAfter": null
+    }
+  ],
+  "emailA": "people-verifier-1790763209234@example.test",
+  "signIn.A.afterDeck": 200,
+  "account.A.afterSignIn": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+      "trust": "verified",
+      "label": "Vanadium 230",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "ownChip.A.afterSignIn": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "V2",
+      "badgeAfter": null
+    }
+  ],
+  "setName.A.afterSignIn": {
+    "ok": true,
+    "name": "Ada Verifier",
+    "trust": "verified"
+  },
+  "account.A.afterSignInName": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+      "trust": "verified",
+      "label": "Vanadium 230",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": {
+      "principalId": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+      "trust": "verified",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "initials"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "versions.A.afterSignIn": {
+    "panelWidth": 320,
+    "rows": [],
+    "windows": [
+      {
+        "text": "V203:13 AM to 03:13 AMYou · 0 changes▸",
+        "firstMarkX": 17,
+        "textX": 41,
+        "marksWidth": 16,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": null,
+    "dayHeadX": 17
+  },
+  "versionChips.A.afterSignIn": [
+    {
+      "holder": "versionHistory.window.w2",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    }
+  ],
+  "builder.A.open": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "true"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "false"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.initials",
+    "cap": null,
+    "privacy": null,
+    "cache": null,
+    "error": "",
+    "applyDisabled": false,
+    "cropLoaded": null,
+    "cropSentence": null,
+    "signInSentence": null,
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.strip.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-strip-A-light.png",
+  "shot.builder.strip.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-strip-A-dark.png",
+  "builder.A.picture": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "true"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches",
+    "error": "",
+    "applyDisabled": true,
+    "cropLoaded": "false",
+    "cropSentence": null,
+    "signInSentence": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.picture.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-picture-A-light.png",
+  "shot.builder.picture.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-picture-A-dark.png",
+  "capRefusal.A": {
+    "error": "The resized picture is over 512 KB. Choose another picture",
+    "setAvatarRequests": 0,
+    "dialogOpen": true
+  },
+  "shot.capRefusal.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-cap-refusal-A-light.png",
+  "shot.capRefusal.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-cap-refusal-A-dark.png",
+  "builder.A.loaded": {
+    "tabs": [
+      {
+        "id": "dialog.avatarBuilder.tab.initials",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.glyph",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.dither",
+        "selected": "false"
+      },
+      {
+        "id": "dialog.avatarBuilder.tab.picture",
+        "selected": "true"
+      }
+    ],
+    "panel": "dialog.avatarBuilder.panel.picture",
+    "cap": "Cropped to a square and sent at 256 px, under 512 KB. JPEG, PNG, WebP or GIF",
+    "privacy": "Your picture shows on every presentation you open while signed in, to people invited by email. People who arrive by a link see a role initial instead",
+    "cache": "A replaced or removed picture can stay readable at its old address for up to a year in caches",
+    "error": "The resized picture is over 512 KB. Choose another picture",
+    "applyDisabled": false,
+    "cropLoaded": "true",
+    "cropSentence": "Drag to crop",
+    "signInSentence": "Drag to crop",
+    "previewSizes": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "shot.builder.loaded.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-picture-loaded-A-light.png",
+  "shot.builder.loaded.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-builder-picture-loaded-A-dark.png",
+  "upload.A": {
+    "ms": 95,
+    "requestBytes": null,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    "grammar": true,
+    "key": "8E-ceFOHLbU_7qVYHDKkDA"
+  },
+  "account.A.afterUpload": {
+    "account": {
+      "signedIn": true,
+      "principalId": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+      "trust": "verified",
+      "label": "Vanadium 230",
+      "name": null,
+      "email": null,
+      "markVariant": "picture",
+      "pictureUrl": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    },
+    "self": {
+      "principalId": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+      "trust": "verified",
+      "label": "Ada Verifier",
+      "name": null,
+      "markVariant": "picture"
+    },
+    "access": {
+      "role": "owner",
+      "via": "owner"
+    }
+  },
+  "share.get.A": {
+    "revision": 0,
+    "owner": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf"
+  },
+  "link": "minted",
+  "namesSwitch.off": {
+    "ok": true,
+    "revision": 2
+  },
+  "account.B.boot": {
+    "account": {
+      "signedIn": false,
+      "principalId": "anon_0dc6145a-9a63-4cdc-aa88-ec2656e02b9b",
+      "trust": "label",
+      "label": "Cork 999",
+      "name": null,
+      "email": null,
+      "markVariant": "initials",
+      "pictureUrl": null
+    },
+    "self": null,
+    "access": {
+      "role": "editor",
+      "via": "link"
+    }
+  },
+  "linkVisitor.C.off.presence": [
+    {
+      "label": "The owner",
+      "name": null,
+      "trust": "label",
+      "initials": "O",
+      "variant": "initials",
+      "picture": null
+    },
+    {
+      "label": "Cork 999",
+      "name": null,
+      "trust": "label",
+      "initials": "C",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "linkVisitor.C.off.chips.light": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "The owner (2)",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.659d6e1537039b9cc7d696ac331dd731",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.off.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-link-visitor-role-initial-C-light.png",
+  "linkVisitor.C.off.tip.light": {
+    "name": "The owner (2) · slide 1",
+    "text": "The owner (2) · slide 1Not signed in. A generated label for this browser. Click to follow; click again to stop"
+  },
+  "linkVisitor.C.off.chips.dark": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "The owner (2)",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.659d6e1537039b9cc7d696ac331dd731",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.off.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-link-visitor-role-initial-C-dark.png",
+  "linkVisitor.C.off.tip.dark": {
+    "name": "The owner (2) · slide 1",
+    "text": "The owner (2) · slide 1Not signed in. A generated label for this browser. Click to follow; click again to stop"
+  },
+  "linkEditor.B.off.chips": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "The owner (2)",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "5",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 38,
+      "initials": "O",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.04d8747ac2e8af81c7af2c3234575b2b",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "namesSwitch.on": {
+    "ok": true,
+    "revision": 3
+  },
+  "linkVisitor.C.on.chips.light": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.659d6e1537039b9cc7d696ac331dd731",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.on.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-link-visitor-names-on-C-light.png",
+  "linkVisitor.C.on.tip.light": {
+    "name": "Ada Verifier · signed in · slide 1",
+    "text": "Ada Verifier · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "linkVisitor.C.on.chips.dark": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.659d6e1537039b9cc7d696ac331dd731",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.linkVisitor.on.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-link-visitor-names-on-C-dark.png",
+  "linkVisitor.C.on.tip.dark": {
+    "name": "Ada Verifier · signed in · slide 1",
+    "text": "Ada Verifier · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "otherChip.B.pictureOfA": {
+    "ms": 1,
+    "chip": {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    "sameKey": true
+  },
+  "slot.A.light": [
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.A.light": [
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "presence.chip.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(7, 7, 7)"
+    }
+  ],
+  "shot.slot.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-slot-A-light.png",
+  "shot.zoom.own.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-zoom-own-chip-A-light.png",
+  "shot.zoom.other.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-zoom-other-chip-A-light.png",
+  "tooltip.A.light": {
+    "name": "Pewter 262 · slide 1",
+    "text": "Pewter 262 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-tooltip-A-light.png",
+  "tooltip.own.A.light": {
+    "name": "Ada Verifier (you)",
+    "text": "Ada Verifier (you)Your name and avatar; nothing else asks for an account"
+  },
+  "slot.A.dark": [
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.A.dark": [
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "presence.chip.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(242, 242, 240)"
+    }
+  ],
+  "shot.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-slot-A-dark.png",
+  "shot.zoom.own.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-zoom-own-chip-A-dark.png",
+  "shot.zoom.other.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-zoom-other-chip-A-dark.png",
+  "tooltip.A.dark": {
+    "name": "Pewter 262 · slide 1",
+    "text": "Pewter 262 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-tooltip-A-dark.png",
+  "tooltip.own.A.dark": {
+    "name": "Ada Verifier (you)",
+    "text": "Ada Verifier (you)Your name and avatar; nothing else asks for an account"
+  },
+  "slot.B.light": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.B.light": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(7, 7, 7)"
+    }
+  ],
+  "shot.slot.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-slot-B-light.png",
+  "tooltip.B.light": {
+    "name": "Ada Verifier · signed in · slide 1",
+    "text": "Ada Verifier · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "shot.tooltip.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-tooltip-B-light.png",
+  "slot.B.dark": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.slot.B.dark": [
+    {
+      "holder": "presence.chip.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "presence.chip.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "title.account",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgb(242, 242, 240)"
+    }
+  ],
+  "shot.slot.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-slot-B-dark.png",
+  "tooltip.B.dark": {
+    "name": "Ada Verifier · signed in · slide 1",
+    "text": "Ada Verifier · signed in · slide 1Signed in Click to follow; click again to stop"
+  },
+  "shot.tooltip.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-tooltip-B-dark.png",
+  "flag.A.light": {
+    "caret": "rgb(47, 92, 224)",
+    "flagText": "CCork",
+    "flagBackground": "rgb(7, 7, 7)",
+    "flagChip": "Cork 999",
+    "flagChipSize": "14",
+    "flagBadge": null,
+    "chipHue": "1",
+    "stripe": "rgb(47, 92, 224)"
+  },
+  "shot.flag.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-caret-flag-A-light.png",
+  "flag.A.dark": {
+    "caret": "rgb(47, 92, 224)",
+    "flagText": "CCork",
+    "flagBackground": "rgb(242, 242, 240)",
+    "flagChip": "Cork 999",
+    "flagChipSize": "14",
+    "flagBadge": null,
+    "chipHue": "1",
+    "stripe": "rgb(47, 92, 224)"
+  },
+  "shot.flag.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-caret-flag-A-dark.png",
+  "flag.drawn": true,
+  "namePrompt.B.afterFlagEdit": true,
+  "shot.namePrompt.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-name-prompt-B-light.png",
+  "shot.namePrompt.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-name-prompt-B-dark.png",
+  "namePrompt.B.dismiss": {
+    "scrim": false,
+    "dialogs": [
+      "dialog.namePrompt",
+      "dialog.namePrompt.close",
+      "dialog.namePrompt.name",
+      "dialog.namePrompt.signIn",
+      "dialog.namePrompt.error",
+      "dialog.namePrompt.continue"
+    ]
+  },
+  "namePrompt.B.dismiss.closed": {
+    "after": 1
+  },
+  "roster.A.light": [
+    {
+      "control": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "name": "Vanadium 230 (you)",
+      "meta": "slide 1",
+      "chip": "Vanadium 230, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in",
+      "title": null
+    },
+    {
+      "control": "presence.roster.927891b13b02134da7916517b185f006",
+      "name": "Pewter 262",
+      "meta": "editor · slide 1",
+      "chip": "Pewter 262",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "name": "Cork 999",
+      "meta": "editor · slide 1",
+      "chip": "Cork 999",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.A.light": [
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.A.light": [
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(7, 7, 7)"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.roster.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-roster-A-light.png",
+  "roster.A.dark": [
+    {
+      "control": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "name": "Vanadium 230 (you)",
+      "meta": "slide 1",
+      "chip": "Vanadium 230, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in",
+      "title": null
+    },
+    {
+      "control": "presence.roster.927891b13b02134da7916517b185f006",
+      "name": "Pewter 262",
+      "meta": "editor · slide 1",
+      "chip": "Pewter 262",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "name": "Cork 999",
+      "meta": "editor · slide 1",
+      "chip": "Cork 999",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.A.dark": [
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.A.dark": [
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(242, 242, 240)"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.roster.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-roster-A-dark.png",
+  "roster.B.light": [
+    {
+      "control": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "name": "Cork 999 (you)",
+      "meta": "slide 1",
+      "chip": "Cork 999",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "name": "Ada Verifier",
+      "meta": "owner · slide 1",
+      "chip": "Ada Verifier, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in",
+      "title": null
+    },
+    {
+      "control": "presence.roster.927891b13b02134da7916517b185f006",
+      "name": "Pewter 262",
+      "meta": "editor · slide 1",
+      "chip": "Pewter 262",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.B.light": [
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.B.light": [
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(7, 7, 7)"
+    },
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.roster.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-roster-B-light.png",
+  "roster.B.dark": [
+    {
+      "control": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "name": "Cork 999 (you)",
+      "meta": "slide 1",
+      "chip": "Cork 999",
+      "variant": "initials",
+      "initials": "C",
+      "picture": null,
+      "badge": null,
+      "title": null
+    },
+    {
+      "control": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "name": "Ada Verifier",
+      "meta": "owner · slide 1",
+      "chip": "Ada Verifier, signed in",
+      "variant": "picture",
+      "initials": null,
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "badge": "signed in",
+      "title": null
+    },
+    {
+      "control": "presence.roster.927891b13b02134da7916517b185f006",
+      "name": "Pewter 262",
+      "meta": "editor · slide 1",
+      "chip": "Pewter 262",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null,
+      "title": null
+    }
+  ],
+  "rosterChips.B.dark": [
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 25,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(20, 141, 81)"
+      },
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.roster.B.dark": [
+    {
+      "holder": "presence.roster.8dbbe22c156f66647052c0a67a764365",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgb(242, 242, 240)"
+    },
+    {
+      "holder": "presence.roster.2d91fad497fac045e7ec09836075d6c9",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "presence.roster.927891b13b02134da7916517b185f006",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.roster.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-roster-B-dark.png",
+  "accountMenu.A.light": {
+    "name": "Ada Verifier",
+    "sentence": "Signed in as people-verifier-1790763209234@example.test",
+    "chip": "Ada Verifier, signed in",
+    "badge": "signed in",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "accountChips.A.light": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.account.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-account-menu-A-light.png",
+  "accountMenu.A.dark": {
+    "name": "Ada Verifier",
+    "sentence": "Signed in as people-verifier-1790763209234@example.test",
+    "chip": "Ada Verifier, signed in",
+    "badge": "signed in",
+    "rows": [
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signOut",
+      "account.forget",
+      "account.sessions"
+    ]
+  },
+  "accountChips.A.dark": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "24",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": "signed in"
+    }
+  ],
+  "shot.account.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-account-menu-A-dark.png",
+  "versions.A.light": {
+    "panelWidth": 320,
+    "rows": [
+      {
+        "author": "anon_0dc6145a-9a63-4cdc-aa88-ec2656e02b9b",
+        "inWindow": true,
+        "current": true,
+        "word": "Cork 999",
+        "meta": "Cork 999 · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      }
+    ],
+    "windows": [
+      {
+        "text": "CV203:13 AM to 03:16 AMCork 999, You, You · 0 changes▾",
+        "firstMarkX": 17,
+        "textX": 77,
+        "marksWidth": 52,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.light": [
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.versions.A.light": [
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.versions.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-A-light.png",
+  "versions.windowHover.A.light": "rgba(7, 7, 7, 0.06)",
+  "versions.hovered.A.light": {
+    "restore": "flex",
+    "metaClipped": false,
+    "meta": "You · named"
+  },
+  "shot.versionsHover.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-hover-A-light.png",
+  "versionsMore.A.light": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-more-A-light.png",
+  "versions.A.dark": {
+    "panelWidth": 320,
+    "rows": [
+      {
+        "author": "anon_0dc6145a-9a63-4cdc-aa88-ec2656e02b9b",
+        "inWindow": true,
+        "current": true,
+        "word": "Cork 999",
+        "meta": "Cork 999 · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "usr_SjXpTLfwQfjEKuNY6lyyYHv1YM4lJhGn",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      },
+      {
+        "author": "anon_2aa7ba22-393f-4923-854a-f3cda7000ecf",
+        "inWindow": true,
+        "current": false,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": "signed in"
+      }
+    ],
+    "windows": [
+      {
+        "text": "CV203:13 AM to 03:16 AMCork 999, You, You · 0 changes▾",
+        "firstMarkX": 17,
+        "textX": 77,
+        "marksWidth": 52,
+        "more": null,
+        "moreFont": null,
+        "hoverBackground": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px",
+      "paddingLeft": "0px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.dark": [
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "C",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "picture",
+      "trust": "verified",
+      "size": "16",
+      "hue": "5",
+      "picture": "loaded",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "IMG",
+      "img": {
+        "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+        "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+        "decoding": "async",
+        "alt": "",
+        "natural": {
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stripe": null,
+      "cells": 0,
+      "initials": null,
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Vanadium 230, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "16",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "V2",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.versions.A.dark": [
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "versionHistory.window.w5",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    },
+    {
+      "holder": "panel.versionHistory",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.versions.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-A-dark.png",
+  "versions.windowHover.A.dark": "rgba(242, 242, 240, 0.08)",
+  "versions.hovered.A.dark": {
+    "restore": "flex",
+    "metaClipped": false,
+    "meta": "You · named"
+  },
+  "shot.versionsHover.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-hover-A-dark.png",
+  "versionsMore.A.dark": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-versions-more-A-dark.png",
+  "commentCard.A.light": null,
+  "commentCard.A.dark": null,
+  "marker.B.light": {
+    "count": 1,
+    "plate": {
+      "text": "1",
+      "chip": "Ada Verifier, signed in",
+      "plate": true
+    }
+  },
+  "shot.marker.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comment-marker-B-light.png",
+  "commentsPanel.B.light": [
+    {
+      "text": "Ada Verifierslide 1Can you check the title on this slide?now",
+      "chip": "Ada Verifier, signed in",
+      "badge": "signed in"
+    }
+  ],
+  "commentsPanelChips.B.light": [
+    {
+      "holder": "panel.comments.open.01m3rx1y6epzkypz6ah27e82pz",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.commentsPanel.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comments-panel-B-light.png",
+  "commentCard.B.light": {
+    "name": "Ada Verifier",
+    "trust": null,
+    "badge": "signed in",
+    "chip": "Ada Verifier, signed in",
+    "title": null
+  },
+  "commentCardChips.B.light": [
+    {
+      "holder": "comment.card.first",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.commentCard.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comment-card-B-light.png",
+  "marker.B.dark": {
+    "count": 1,
+    "plate": {
+      "text": "1",
+      "chip": "Ada Verifier, signed in",
+      "plate": true
+    }
+  },
+  "shot.marker.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comment-marker-B-dark.png",
+  "commentsPanel.B.dark": [
+    {
+      "text": "Ada Verifierslide 1Can you check the title on this slide?now",
+      "chip": "Ada Verifier, signed in",
+      "badge": "signed in"
+    }
+  ],
+  "commentsPanelChips.B.dark": [
+    {
+      "holder": "panel.comments.open.01m3rx1y6epzkypz6ah27e82pz",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.commentsPanel.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comments-panel-B-dark.png",
+  "commentCard.B.dark": {
+    "name": "Ada Verifier",
+    "trust": null,
+    "badge": "signed in",
+    "chip": "Ada Verifier, signed in",
+    "title": null
+  },
+  "commentCardChips.B.dark": [
+    {
+      "holder": "comment.card.first",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.commentCard.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-comment-card-B-dark.png",
+  "share.step.A.light": "start",
+  "share.open.A.light": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 798
+  },
+  "share.band.A.light": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.A.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Vanadium 230",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Vanadium 230, signed in",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.A.light": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.share.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-share-A-light.png",
+  "share.step.A.dark": "start",
+  "share.open.A.dark": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 17
+  },
+  "share.band.A.dark": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.A.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Vanadium 230",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Vanadium 230, signed in",
+      "variant": "initials",
+      "picture": null
+    }
+  ],
+  "shareChips.A.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.share.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-share-A-dark.png",
+  "share.step.B.light": "start",
+  "share.open.B.light": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 292
+  },
+  "share.band.B.light": {
+    "present": true,
+    "firstInBody": true,
+    "words": "Your name, shown to collaboratorsSkipContinueSign in",
+    "field": "Cork 999",
+    "skip": true,
+    "continueDisabled": false,
+    "signIn": true,
+    "error": "",
+    "frame": "rgba(7, 7, 7, 0.18)",
+    "focus": "dialog.namePrompt.name",
+    "dialogs": 1
+  },
+  "shot.share.band.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-share-band-B-light.png",
+  "share.band.skip.B.light": {
+    "gone": true,
+    "ms": 20,
+    "dialogStill": true,
+    "focus": "dialog.share.done"
+  },
+  "share.B.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Ada Verifier",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Ada Verifier, signed in",
+      "variant": "picture",
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    }
+  ],
+  "shareChips.B.light": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.share.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-share-B-light.png",
+  "share.step.B.dark": "start",
+  "share.open.B.dark": {
+    "shown": true,
+    "attempts": 1,
+    "late": null,
+    "ms": 24
+  },
+  "share.band.B.dark": {
+    "present": false,
+    "dialogs": 1,
+    "focus": "dialog.share.mode"
+  },
+  "share.B.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Ada Verifier",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": "signed in",
+      "chip": "Ada Verifier, signed in",
+      "variant": "picture",
+      "picture": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp"
+    }
+  ],
+  "shareChips.B.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "size": 24,
+      "fieldOk": true,
+      "stripeOk": null,
+      "border": "1px solid rgba(242, 242, 240, 0.55)"
+    }
+  ],
+  "shot.share.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-share-B-dark.png",
+  "profileHead.A.light": {
+    "text": "Ada VerifierSigned in as people-verifier-1790763209234@example.test, verifiedChange nameChange avatar",
+    "badge": "signed in",
+    "img": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp",
+    "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 2x"
+  },
+  "shot.profileHead.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-profile-head-A-light.png",
+  "shot.profile.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-profile-A-light.png",
+  "profileHead.A.dark": {
+    "text": "Ada VerifierSigned in as people-verifier-1790763209234@example.test, verifiedChange nameChange avatar",
+    "badge": "signed in",
+    "img": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp",
+    "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-128.webp 2x"
+  },
+  "shot.profileHead.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-profile-head-A-dark.png",
+  "shot.profile.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-profile-A-dark.png",
+  "filmstripChips.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Pewter 262",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "2",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(120, 144, 0)"
+      },
+      "cells": 5,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Cork 999",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "hue": "1",
+      "picture": null,
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "padding": "1px",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2,
+        "color": "rgb(47, 92, 224)"
+      },
+      "cells": 9,
+      "initials": "C",
+      "badgeAfter": null
+    }
+  ],
+  "geometry.filmstrip.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    },
+    {
+      "holder": "filmstrip.slide.title",
+      "size": 16,
+      "fieldOk": true,
+      "stripeOk": true,
+      "border": "1px solid rgba(7, 7, 7, 0.62)"
+    }
+  ],
+  "shot.filmstrip.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-filmstrip-marks-A-light.png",
+  "shot.filmstrip.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-filmstrip-marks-A-dark.png",
+  "fallback.folder": {
+    "folder": "/Users/kevinliu/repos/Turboslide-people/.turboslide/overlay-ship/.turboslide/users/u/8E-ceFOHLbU_7qVYHDKkDA",
+    "candidates": [
+      "/Users/kevinliu/repos/Turboslide-people/.turboslide/overlay-ship/.turboslide/users/u/8E-ceFOHLbU_7qVYHDKkDA",
+      "/Users/kevinliu/repos/Turboslide-people/.turboslide/overlay-ship/users/u/8E-ceFOHLbU_7qVYHDKkDA"
+    ]
+  },
+  "fallback.A2": {
+    "ms": 157,
+    "chip": {
+      "holder": "title.account",
+      "ariaLabel": "Ada Verifier, signed in",
+      "variant": "initials",
+      "trust": "verified",
+      "size": "24",
+      "hue": null,
+      "picture": null,
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "padding": "1px",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AV",
+      "badgeAfter": null
+    }
+  },
+  "shot.fallback.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-fallback-plate-A2-light.png",
+  "shot.fallback.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/focus/verification/people-ship-local-1440-fallback-plate-A2-dark.png",
+  "fallback.A.ownReload": {
+    "holder": "title.account",
+    "ariaLabel": "Ada Verifier, signed in",
+    "variant": "picture",
+    "trust": "verified",
+    "size": "24",
+    "hue": "5",
+    "picture": "loaded",
+    "box": {
+      "w": 24,
+      "h": 24
+    },
+    "border": "1px solid rgb(7, 7, 7)",
+    "padding": "1px",
+    "field": {
+      "w": 20,
+      "h": 20,
+      "l": 2,
+      "t": 2,
+      "r": 2,
+      "b": 2
+    },
+    "fieldTag": "IMG",
+    "img": {
+      "src": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp",
+      "srcset": "/api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-32.webp 1x, /api/avatar/u/8E-ceFOHLbU_7qVYHDKkDA/54de2eadbf195094ee7b734c10f0cb2144b7debde40604ce57e59b8cb3c8cf02-64.webp 2x",
+      "decoding": "async",
+      "alt": "",
+      "natural": {
+        "w": 32,
+        "h": 32
+      }
+    },
+    "stripe": null,
+    "cells": 0,
+    "initials": null,
+    "badgeAfter": null
+  },
+  "uptime.end": "3:17  up 5 days, 17:14, 2 users, load averages: 4.04 5.16 8.31",
+  "endedAt": "2026-09-30T10:17:11.649Z",
+  "deck.teardown": {
+    "deckId": "untitled-20260930-j6vp",
+    "trashed": "deck.trash ok at 5",
+    "removed": "deck.remove ok at 5",
+    "after": "still answers"
+  }
+}

@@ -1,0 +1,445 @@
+{
+  "base": "http://localhost:4467",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-30T08:56:07.913Z",
+  "ms": 232161,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 232149,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/verifier2/gate-local-share/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": [
+      "share"
+    ],
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 34,
+  "passed": 33,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "http://localhost:4467",
+  "date": "2026-09-30",
+  "results": {
+    "share.dialog.open": "passed",
+    "share.copy-view-link": "passed",
+    "share.copy-present-link": "passed",
+    "share.copy-edit-link": "passed",
+    "share.escape": "passed",
+    "share.file-menu-copy-link": "passed",
+    "share.view-link-lands-viewer": "passed",
+    "share.edit-link-lands-editor": "passed",
+    "share.view-link-cannot-edit": "passed",
+    "share.stranger-cannot-edit": "passed",
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "passed",
+    "collab.presence-chips": "passed",
+    "collab.rename-reaches-second-browser": "passed",
+    "share.view-link-excludes-skipped-and-notes": "passed",
+    "share.present-link-excludes-skipped": "passed",
+    "comments.reaches-second-browser": "passed",
+    "versions.restore": "passed",
+    "collab.roster.go-to-slide": "passed",
+    "view.live-pointers.second-browser": "failed",
+    "inbox.notification-arrives": "passed",
+    "share.dialog.one-link": "passed",
+    "share.dialog.slideshow-checkbox": "passed",
+    "share.dialog.you-label": "passed",
+    "share.name-prompt.first-share": "passed",
+    "share.dialog.co-edit-from-copied-link": "passed",
+    "brand.colors.collab-rerender": "passed",
+    "brand.surfaces.viewer-and-show": "passed",
+    "assist.viewer.disabled": "passed",
+    "people.chip-tooltip-trust": "passed",
+    "people.comment-departed-guest": "passed",
+    "share.dialog.owner-resolved": "passed",
+    "collab.caret-hue-matches-chip": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "view.live-pointers.second-browser",
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.collaborators"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "share.dialog.open",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-view-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-edit-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.escape",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.file-menu-copy-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-lands-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.edit-link-lands-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.stranger-cannot-edit",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.view-link-excludes-skipped-and-notes",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.present-link-excludes-skipped",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.copy-present-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reaches-second-browser",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore",
+      "feature": "versions",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "view.live-pointers.second-browser",
+      "feature": "view",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the second browser's pointer is drawn on the first within 10 s"
+    },
+    {
+      "id": "inbox.notification-arrives",
+      "feature": "inbox",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.one-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.slideshow-checkbox",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.you-label",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.first-share",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.collab-rerender",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.surfaces.viewer-and-show",
+      "feature": "brand",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.viewer.disabled",
+      "feature": "assist",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.chip-tooltip-trust",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.comment-departed-guest",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.owner-resolved",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.caret-hue-matches-chip",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

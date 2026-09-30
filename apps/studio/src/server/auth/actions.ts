@@ -14,13 +14,25 @@ import { NAME_REFUSALS, normalizeName } from '@turboslide/identity/names';
 import type { AvatarChoice, AvatarVariant, PrincipalRecord } from '@turboslide/identity/principal';
 import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { Scope } from '@turboslide/schema/access';
+import { isActionId } from '@turboslide/schema/actions';
+import type { IndexAvatarChoice } from '@turboslide/store/hosted';
 import type { DeckHead } from '@turboslide/store/templates';
 
 import { openDeckStore } from '../root';
-import { fileAvatarStore, pictureUrl, setPictureAvatar } from './avatar.ts';
+import {
+  AVATAR_MAX_DATA_URL_LENGTH,
+  AVATAR_SWEEP_NEEDS_DATABASE,
+  AVATAR_TOO_LARGE,
+  AVATAR_USERS_DIR,
+  AvatarRefusal,
+  fileAvatarStore,
+  pictureUrl,
+  setPictureAvatar,
+  sweepOrphanAvatars,
+} from './avatar.ts';
 import type { AvatarStore } from './avatar.ts';
 import { deckIndexFor, identityRuntime, identityViewFor } from './identity.ts';
-import type { DeckIndexView, IdentityRuntime, RequestIdentity } from './identity.ts';
+import type { AccountFacts, DeckIndexView, IdentityRuntime, RequestIdentity } from './identity.ts';
 import { ANON_COOKIE, sealPrincipalCookie, serializeAnonymousCookie } from './session.ts';
 import type { ApiKeyRecord } from './tokens.ts';
 
@@ -52,7 +64,72 @@ export const SIGN_IN_FOR_KEYS = 'Sign in to create an API key';
 export const NOT_SIGNED_IN = 'Not signed in';
 export const ADMIN_ONLY = 'This action is the deployment admin’s';
 export const CAPTURE_ONLY = 'Captured mail exists only under TURBOSLIDE_MAIL=capture';
-export const AVATAR_USERS_DIR = 'users';
+/** An API key without the write scope may read its owner's account and not change it. */
+export const KEY_SCOPE_FOR_ACCOUNT =
+  'This API key cannot change its owner’s name or avatar: it needs the write scope';
+/** The id of the janitor's action; registered once the schema header declares it (PEOPLE.md 4.6). */
+export const AVATAR_SWEEP_ACTION = 'admin.avatar.sweep';
+
+/**
+ * The person an account action changes (docs/PEOPLE.md 4.7): the anonymous or account principal
+ * of the request, or the owner of an API key with the write scope, so `turboslide account
+ * avatar --picture` and `account name` through `turboslide login`'s key act on the owner's own
+ * record. A checkout's holder, the bootstrap bearer and a refused bearer have no subject.
+ */
+type Subject = {
+  principalId: string;
+  account: AccountFacts | null;
+  /** True when the subject is an API key's owner, so the answer is the owner's `me`. */
+  viaKey: boolean;
+};
+
+function subjectOf(identity: RequestIdentity): Subject | null {
+  if (
+    identity.principalId !== null &&
+    (identity.kind === 'anonymous' || identity.kind === 'account')
+  )
+    return { principalId: identity.principalId, account: identity.account, viaKey: false };
+  if (identity.kind === 'agent' && identity.agent !== null && identity.account !== null) {
+    if (identity.account.profile.deletedAt !== null) return null;
+    const scopes = identity.agent.scopes as readonly string[];
+    if (!scopes.includes('write') && !scopes.includes('admin'))
+      throw new TypeError(KEY_SCOPE_FOR_ACCOUNT);
+    return { principalId: identity.account.principalId, account: identity.account, viaKey: true };
+  }
+  return null;
+}
+
+/** The request identity `meOf` reads for the subject: the owner's account when a key acted for it. */
+function identityForSubject(
+  identity: RequestIdentity,
+  subject: Subject,
+  record: PrincipalRecord,
+): RequestIdentity {
+  if (!subject.viaKey || subject.account === null) return { ...identity, record };
+  const account = subject.account;
+  return {
+    ...identity,
+    kind: 'account',
+    ctx: {
+      principal: {
+        id: account.principalId,
+        kind: 'account',
+        email: account.email,
+        admin: account.admin,
+      },
+      linkGrants: record.linkGrants,
+    },
+    principalId: account.principalId,
+    author: {
+      kind: 'human',
+      name: account.name.trim() || record.name?.trim() || record.label,
+      principalId: account.principalId,
+    },
+    account,
+    agent: null,
+    record,
+  };
+}
 
 type MeAnswer = {
   principal: {
@@ -294,13 +371,29 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     deps.avatarStore ?? (() => fileAvatarStore(`${runtime().stateDir}/${AVATAR_USERS_DIR}`));
   const namesInUse = deps.namesInUse ?? namesInVersionLog;
 
-  const recordOf = async (identity: RequestIdentity): Promise<PrincipalRecord> => {
-    if (!isRecordKind(identity)) throw new TypeError(NOT_SIGNED_IN);
-    return (
-      identity.record ??
-      (await runtime().principals.touch(identity.principalId, now(), true)) ??
-      newPrincipalRecord(identity.principalId, now())
-    );
+  const recordOf = async (
+    identity: RequestIdentity,
+  ): Promise<{ subject: Subject; record: PrincipalRecord }> => {
+    const subject = subjectOf(identity);
+    if (subject === null) throw new TypeError(NOT_SIGNED_IN);
+    const record =
+      (!subject.viaKey ? identity.record : null) ??
+      (await runtime().principals.touch(subject.principalId, now(), true)) ??
+      newPrincipalRecord(subject.principalId, now());
+    return { subject, record };
+  };
+
+  /* the choice and the name out of this instance's identity cache, so the next presence post
+     resolves the new record at once (b1.md R18), and onto the principal's deck index, the
+     carrier every instance reads (R17; PEOPLE.md 3.13): a refused index write leaves the record
+     standing */
+  const propagate = async (
+    principalId: string,
+    write: (access: typeof import('../access')) => Promise<void>,
+  ): Promise<void> => {
+    const [access, room] = await Promise.all([import('../access'), import('../room')]);
+    await write(access).catch(() => undefined);
+    room.forgetIdentity(principalId);
   };
 
   dispatcher.register('account.me', async () => {
@@ -314,28 +407,21 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const { name } = input as { name: string };
     const facts = await deps.facts();
     const rt = runtime();
-    const record = await recordOf(facts.identity);
-    const taken = await namesInUse(facts.deckId, facts.identity.principalId);
+    const { subject, record } = await recordOf(facts.identity);
+    const taken = await namesInUse(facts.deckId, subject.principalId);
     const result = normalizeName(name, { taken });
     if (!result.ok) throw new TypeError(result.message);
     await rt.principals.put({ ...record, name: result.name, lastSeenAt: now().toISOString() });
-    if (facts.identity.principalId !== null) {
-      /* the name onto the principal's deck index, the carrier every instance reads (b1.md R17),
-         and out of this instance's identity cache, so the next presence post resolves the new
-         record at once (R18); a refused index write leaves the record's name standing */
-      const principalId = facts.identity.principalId;
-      const [access, room] = await Promise.all([import('../access'), import('../room')]);
-      await access.noteDisplayName(principalId, result.name).catch(() => undefined);
-      room.forgetIdentity(principalId);
-    }
-    if (facts.identity.kind === 'account' && facts.identity.account !== null && rt.db !== null)
+    await propagate(subject.principalId, (access) =>
+      access.noteDisplayName(subject.principalId, result.name),
+    );
+    if (subject.account !== null && rt.db !== null)
       await rt.db.db
         .updateTable('user')
         .set({ name: result.name, updatedAt: now().toISOString() })
-        .where('id', '=', facts.identity.account.userId)
+        .where('id', '=', subject.account.userId)
         .execute();
-    const next = { ...facts.identity, record: { ...record, name: result.name } };
-    return meOf(rt, next);
+    return meOf(rt, identityForSubject(facts.identity, subject, { ...record, name: result.name }));
   });
 
   dispatcher.register('account.setAvatar', async (input) => {
@@ -347,10 +433,12 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     };
     const facts = await deps.facts();
     const rt = runtime();
-    const record = await recordOf(facts.identity);
+    const { subject, record } = await recordOf(facts.identity);
     let choice: AvatarChoice;
     if (variant === 'picture') {
       if (picture === undefined) throw new TypeError('picture is required for the picture variant');
+      // the cap on the string before Buffer.from, so an oversized body is refused undecoded (4.2)
+      if (picture.length > AVATAR_MAX_DATA_URL_LENGTH) throw new AvatarRefusal(AVATAR_TOO_LARGE);
       choice = await setPictureAvatar(
         {
           store: avatarStore(),
@@ -362,18 +450,26 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
         record.principalId,
         dataUrlBytes(picture),
       );
+      // a picture is never carried on the index: it needs an account, which needs the database
+      await propagate(subject.principalId, (access) =>
+        access.noteAvatarChoice(subject.principalId, null),
+      );
     } else {
-      choice = { variant };
-      if (initials !== undefined && initials.trim() !== '') choice.initials = initials.trim();
-      if (salt !== undefined) choice.salt = salt;
+      const plain: IndexAvatarChoice = { variant };
+      if (initials !== undefined && initials.trim() !== '') plain.initials = initials.trim();
+      if (salt !== undefined) plain.salt = salt;
+      choice = plain;
       await rt.principals.put({ ...record, avatar: choice, lastSeenAt: now().toISOString() });
-      if (facts.identity.kind === 'account' && facts.identity.account !== null) {
-        const profile = await rt.profiles.get(facts.identity.account.userId);
-        await rt.profiles.setAvatar(facts.identity.account.userId, choice, null, now());
+      if (subject.account !== null) {
+        const profile = await rt.profiles.get(subject.account.userId);
+        await rt.profiles.setAvatar(subject.account.userId, choice, null, now());
         if (profile?.avatarKey) await avatarStore().removeKey(profile.avatarKey);
       }
+      await propagate(subject.principalId, (access) =>
+        access.noteAvatarChoice(subject.principalId, plain),
+      );
     }
-    return meOf(rt, { ...facts.identity, record: { ...record, avatar: choice } });
+    return meOf(rt, identityForSubject(facts.identity, subject, { ...record, avatar: choice }));
   });
 
   dispatcher.register('account.sessions', async () => {
@@ -509,6 +605,23 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
 export function registerAdminActions(dispatcher: Dispatcher, deps: AccountActionDeps): void {
   const runtime = (): IdentityRuntime => deps.runtime ?? identityRuntime();
   const now = deps.now ?? (() => new Date());
+  const avatarStore =
+    deps.avatarStore ?? (() => fileAvatarStore(`${runtime().stateDir}/${AVATAR_USERS_DIR}`));
+
+  /* the janitor for orphan files under u/ (PEOPLE.md 4.6): the admin group, HTTP and CLI; the id
+     is registered once the schema header declares it (the integrator's, by b4.md's request) */
+  if (isActionId(AVATAR_SWEEP_ACTION))
+    dispatcher.register(AVATAR_SWEEP_ACTION, async (input) => {
+      const { dryRun } = input as { dryRun?: boolean };
+      const facts = await deps.facts();
+      requireAdmin(facts.identity);
+      const rt = runtime();
+      if (rt.db === null) throw new RangeError(AVATAR_SWEEP_NEEDS_DATABASE);
+      return sweepOrphanAvatars(avatarStore(), rt.profiles, {
+        dryRun: dryRun ?? false,
+        now,
+      });
+    });
 
   dispatcher.register('admin.bootstrap', async (input) => {
     const { email } = input as { email: string };

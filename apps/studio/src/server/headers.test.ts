@@ -13,6 +13,8 @@ import {
   effectiveHost,
   embedAncestors,
   isLocalRequest,
+  publicStoreHost,
+  publicStoreOrigin,
   refuseForeignOrigin,
   refuseSpoofedLocalhost,
   requiresJsonBody,
@@ -303,6 +305,18 @@ describe('firewall/rules.json (SPEC-3 0.25, 8.3, 11.5 R0)', () => {
     expect(bypass?.value.action.mitigate.action).toBe('log');
     expect(bypass?.enforce.mitigate.action).toBe('bypass');
     expect(bypass?.value.conditionGroup.every((group) => group.conditions.length >= 2)).toBe(true);
+  });
+});
+
+describe('the public store host (docs/PEOPLE.md 4.3)', () => {
+  it('reads the variable as a bare host and answers the https origin the picture URLs are built from', () => {
+    const host = 'ggmycvj7j6224ay5.public.blob.vercel-storage.com';
+    expect(publicStoreHost({ TURBOSLIDE_PUBLIC_STORE_HOST: host })).toBe(host);
+    expect(publicStoreHost({ TURBOSLIDE_PUBLIC_STORE_HOST: ` https://${host}/ ` })).toBe(host);
+    expect(publicStoreOrigin({ TURBOSLIDE_PUBLIC_STORE_HOST: host })).toBe(`https://${host}`);
+    expect(publicStoreHost({})).toBeNull();
+    expect(publicStoreHost({ TURBOSLIDE_PUBLIC_STORE_HOST: '   ' })).toBeNull();
+    expect(publicStoreOrigin({})).toBeNull();
   });
 });
 

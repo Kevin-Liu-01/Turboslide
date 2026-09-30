@@ -10,6 +10,7 @@ import { parsePrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
 
 import { actionOfRequest, agentAuthWith } from '../auth.ts';
+import { ensureUserByEmail } from './actions.ts';
 import {
   accountFacts,
   buildIdentityRuntime,
@@ -291,6 +292,53 @@ describe('requestIdentity', () => {
   });
 });
 
+describe('the account profile', () => {
+  test('the avatar choice reads the profile row first and the principal record second (PEOPLE.md 3.13)', async () => {
+    const { id } = await ensureUserByEmail(runtime, 'choice@example.test');
+    const principalId = `usr_${id}`;
+    // no choice anywhere: the default
+    expect((await resolveIdentity(runtime, principalId)).avatar).toEqual({ variant: 'initials' });
+    // the record alone: an account whose profile row never wrote a choice
+    const record = (await runtime.principals.touch(principalId, new Date(), true))!;
+    await runtime.principals.put({ ...record, avatar: { variant: 'dither', salt: 5 } });
+    expect((await resolveIdentity(runtime, principalId)).avatar).toEqual({
+      variant: 'dither',
+      salt: 5,
+    });
+    // the profile row wins: it outlives the record's 90 day TTL
+    await runtime.profiles.setAvatar(id, { variant: 'glyph', salt: 9 }, null);
+    expect((await resolveIdentity(runtime, principalId)).avatar).toEqual({
+      variant: 'glyph',
+      salt: 9,
+    });
+    await runtime.principals.delete(principalId);
+    expect((await resolveIdentity(runtime, principalId)).avatar).toEqual({
+      variant: 'glyph',
+      salt: 9,
+    });
+    // a picture choice on the profile draws through the view with no per caller argument (4.4)
+    const key = 'AbCdEfGhIjKlMnOpQrStUv';
+    const digest = 'a'.repeat(64);
+    await runtime.profiles.setAvatar(
+      id,
+      {
+        variant: 'picture',
+        picture: {
+          avatarKey: key,
+          digest,
+          sizes: [32, 64, 128, 256],
+          base: `https://s.test/u/${key}`,
+        },
+      },
+      key,
+    );
+    const { mark, view } = await identityViewFor(runtime, principalId);
+    expect(mark.variant).toBe('picture');
+    expect(mark.pictureUrl).toBe(`https://s.test/u/${key}/${digest}-64.webp`);
+    expect(view.mark?.pictureUrl).toBe(mark.pictureUrl);
+  });
+});
+
 describe('sign in through the library', () => {
   test('a magic link request captures one mail with a link and a code, the code signs in, and the anonymous id links to the account', async () => {
     const first = await requestIdentity(request('/edit/q4'), runtime);
@@ -329,7 +377,11 @@ describe('sign in through the library', () => {
     expect(resolved.trust).toBe('verified');
     expect(resolved.accountId).toBe(userId);
     expect(resolved.email).toBe('maya@example.test');
-    expect(resolved.displayName).toBe('maya@example.test');
+    // an account without a typed name on its user row is its label, never its address, and the
+    // label is the account's own on every id that renders as it (docs/PEOPLE.md 3.18,
+    // resolve.ts); the address travels in `email` alone
+    expect(resolved.displayName).toBe(labelFor(`usr_${userId}`));
+    expect(resolved.label).toBe(labelFor(`usr_${userId}`));
     // the merged record kept the typed name; the view carries the mark and hides the address by default
     expect((await runtime.principals.get(`usr_${userId}`))?.name).toBe('Maya');
     const { view, mark } = await identityViewFor(runtime, `usr_${userId}`, { hueSlot: 2 });

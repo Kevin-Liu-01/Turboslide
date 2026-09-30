@@ -22,7 +22,12 @@ import {
 import type { AccessStore } from '@turboslide/store/access-store';
 
 import type { AccessHookDeps, ShareLinkLookupDeps } from './access';
-import { SHARE_CONFLICT_SENTENCE, findShareLink, hostedAccessHooks } from './access';
+import {
+  SHARE_CONFLICT_SENTENCE,
+  bindEmailGrants,
+  findShareLink,
+  hostedAccessHooks,
+} from './access';
 import { authorize, bindAuthorize, contextForIdentity } from './authorize';
 import { setSecurityLogSink } from './log';
 
@@ -65,6 +70,82 @@ function instance(
     announced,
   };
 }
+
+describe('bindEmailGrants (docs/PEOPLE.md 3.10; SPEC-3 6.5)', () => {
+  const invite = (record: AccessRecord, email: string): AccessRecord => ({
+    ...record,
+    revision: record.revision + 1,
+    grants: [
+      {
+        principalId: null,
+        email,
+        role: 'editor',
+        invitedBy: record.owner ?? 'anon_owner',
+        invitedAt: NOW,
+        acceptedAt: null,
+        expiresAt: '2026-10-14T00:00:00.000Z',
+      },
+    ],
+  });
+
+  it('binds the pending grant that names the account address to the account id, drops the address, bumps the revision and announces', async () => {
+    const inner = memoryAccessStore();
+    const one = instance(inner);
+    await one.store.write(DECK, invite(recordBy('anon_owner'), 'lee@example.com'), {});
+    const bound = await bindEmailGrants(
+      DECK,
+      { id: 'usr_lee', kind: 'account', email: 'Lee@Example.com', admin: false },
+      one,
+    );
+    expect(bound?.revision).toBe(2);
+    expect(bound?.grants).toEqual([
+      expect.objectContaining({
+        principalId: 'usr_lee',
+        email: null,
+        acceptedAt: NOW,
+        expiresAt: null,
+        role: 'editor',
+      }),
+    ]);
+    const stored = await inner.read(DECK);
+    expect(stored?.record.grants[0]?.principalId).toBe('usr_lee');
+    expect(one.announced).toEqual([{ deckId: DECK, revision: 2 }]);
+  });
+
+  it('writes nothing for an anonymous browser, an account with no verified address, another address or a grant already bound', async () => {
+    const inner = memoryAccessStore();
+    const one = instance(inner);
+    await one.store.write(DECK, invite(recordBy('anon_owner'), 'lee@example.com'), {});
+    expect(
+      await bindEmailGrants(DECK, { id: 'anon_x', kind: 'anonymous', admin: false }, one),
+    ).toBeNull();
+    expect(
+      await bindEmailGrants(DECK, { id: 'usr_lee', kind: 'account', admin: false }, one),
+    ).toBeNull();
+    expect(
+      await bindEmailGrants(
+        DECK,
+        { id: 'usr_kim', kind: 'account', email: 'kim@example.com', admin: false },
+        one,
+      ),
+    ).toBeNull();
+    expect((await inner.read(DECK))?.record.revision).toBe(1);
+    expect(one.announced).toEqual([]);
+    await bindEmailGrants(
+      DECK,
+      { id: 'usr_lee', kind: 'account', email: 'lee@example.com', admin: false },
+      one,
+    );
+    expect(
+      await bindEmailGrants(
+        DECK,
+        { id: 'usr_lee', kind: 'account', email: 'lee@example.com', admin: false },
+        one,
+      ),
+    ).toBeNull();
+    expect((await inner.read(DECK))?.record.revision).toBe(2);
+  });
+});
 
 describe('hostedAccessHooks', () => {
   it('synthesizes the legacy record for an unclaimed deck, indexes the links a save mints before the write, and announces the change', async () => {

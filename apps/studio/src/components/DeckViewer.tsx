@@ -213,7 +213,7 @@ export function DeckViewer({
           <>
             {deck.fallback ? (
               <span
-                className="ts-chip"
+                className="ts-word-chip"
                 title={`decks/${deck.fallback} stands in for decks/${deck.id}`}
               >
                 fixture

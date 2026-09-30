@@ -13,13 +13,21 @@
 // the list says. Not driven rows are listed by id and reason and are never counted as passed.
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
-//     [--only probe|specs|cost] [--spec <area>[,<area>]] [--rows <id>[,<id>]]
+//     [--only probe|specs|cost|accounts] [--spec <area>[,<area>]] [--rows <id>[,<id>]]
 //     [--areas <area>[,<area>]] [--cost-rows <id>[,<id>]]
 //     [--cost-minutes <n>] [--shots] [--matrix <path>] [--report <dir>]
 //     [--allow-scratch] [--decks <dir>] [--dry-run] [--lock <path>]
 // `--only cost` runs the cost probe alone and judges its rows alone; `--only specs` judges the spec
 // rows alone and `--only probe` the walk probe's, so a driver's partial run never reads another
-// driver's rows as "no step". `--cost-rows` narrows the cost probe to the rows named and
+// driver's rows as "no step". The people round (docs/PEOPLE.md 6.2): `--only accounts` runs
+// apps/studio/e2e/accounts.spec.ts with the JSON reporter against a node server started with an
+// identity database (`TURBOSLIDE_AUTH_DB`, `TURBOSLIDE_MAIL=capture`; the spec reads the same
+// `TURBOSLIDE_AUTH_DB` and `TURBOSLIDE_OVERLAY_DIR` from this process's environment to find the
+// server's database and state folder) and judges the ten local rows alone (`--rows` narrows them);
+// in every other run a local row is absent from the results and is listed apart under `local`
+// with the reason "no identity database on this base", never counted as passed, never "no step"
+// and never a reason to park, while a local row a run did record is judged like any row.
+// `--cost-rows` narrows the cost probe to the rows named and
 // `--cost-minutes` shortens each state's window for a smoke (the run of record keeps 3; the JSON
 // names the minutes it ran). On a deployment the cost probe reads the bearer for sync.status
 // from TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json and never prints it.
@@ -95,13 +103,17 @@ import {
   CORE_MATRIX,
   CORE_SPEC_DRIVERS,
   COST_PROBE_DRIVER,
+  LOCAL_ABSENT_REASON,
+  LOCAL_SPEC_DRIVERS,
   PROBE_DRIVER,
   areaOf,
   coreRow,
   costRows,
   isCostRow,
+  isLocalRow,
   isManualRow,
   isMeasureRow,
+  localRows,
   parkedFeaturesOf,
   readParkedList,
   rowsForDriver,
@@ -118,7 +130,7 @@ const arg = (name, fallback) => {
 const flag = (name) => argv.includes(`--${name}`);
 const BASE = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$/, '');
 const USAGE =
-  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
+  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost|accounts] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
 if (!BASE) {
   console.error(USAGE);
   process.exit(2);
@@ -126,16 +138,20 @@ if (!BASE) {
 const OUT = resolve(ROOT, arg('out', '.turboslide/core-gate'));
 const PARKED = arg('parked', null);
 const ONLY = arg('only', null);
-if (ONLY !== null && ONLY !== 'probe' && ONLY !== 'specs' && ONLY !== 'cost') {
+/** The four drivers `--only` names (docs/PEOPLE.md 6.2 added the accounts spec). */
+const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts'];
+if (ONLY !== null && !ONLY_VALUES.includes(ONLY)) {
   // `--only` names a driver, never an area: an unknown value used to run the whole matrix without
   // a word (s2.md S2-R4, `--only text,slides`); the areas go to `--spec` here and to the walk
   // probe's own `--only`
   console.error(
-    `core-gate: --only takes probe, specs or cost, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
+    `core-gate: --only takes probe, specs, cost or accounts, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
   );
   console.error(USAGE);
   process.exit(2);
 }
+/** The accounts spec of the local rows (docs/PEOPLE.md 6.2), as the gate runs it. */
+const ACCOUNTS_SPEC = 'apps/studio/e2e/accounts.spec.ts';
 const SPEC_ONLY = arg('spec', null);
 /** A comma list flag as its trimmed, non empty items; null when absent. */
 const listArg = (name) => {
@@ -156,21 +172,40 @@ const ROWS_ONLY = listArg('rows');
 const AREAS_ONLY = listArg('areas');
 /** Every probe row's walk module (core-walk/index.mjs `declaredIds`: id to module name). */
 const WALK_MODULE_OF = declaredIds();
+/** The walk's module names, the names its `--only` takes. */
+const WALK_MODULES = new Set([...WALK_MODULE_OF.values()]);
+/**
+ * True when a probe row is in the area `--areas` names. A module's name names the rows that
+ * module declares and no other (the polish round, docs/POLISH.md 5.1: `polish-tables` drives
+ * `tables.*` rows, so `tables` is the tables module's own 48 rows); a name that is no module is
+ * an id area, the rows whose id starts with it wherever they are declared (the people round,
+ * build/b5.md: the versions and comments rows live in the share module). The ship step's third
+ * attempt merged the two rules.
+ */
+function inArea(row, area) {
+  return (
+    WALK_MODULE_OF.get(row.id) === area || (!WALK_MODULES.has(area) && areaOf(row.id) === area)
+  );
+}
 if (ROWS_ONLY !== null) {
-  if (ONLY !== 'specs') {
+  if (ONLY !== 'specs' && ONLY !== 'accounts') {
     console.error(
-      `core-gate: --rows narrows the core specs and needs --only specs (the walk probe's rows are narrowed by area with --areas, the cost probe's with --cost-rows)`,
+      `core-gate: --rows narrows the core specs and needs --only specs, or the local rows and needs --only accounts (the walk probe's rows are narrowed by area with --areas, the cost probe's with --cost-rows)`,
     );
     console.error(USAGE);
     process.exit(2);
   }
+  /* `--only specs` takes core spec rows, `--only accounts` the local rows (docs/PEOPLE.md 6.2) */
+  const drivers = ONLY === 'accounts' ? LOCAL_SPEC_DRIVERS : CORE_SPEC_DRIVERS;
   const unknown = ROWS_ONLY.filter((id) => {
     const row = CORE_MATRIX.find((r) => r.id === id);
-    return row === undefined || !CORE_SPEC_DRIVERS.includes(row.driver);
+    return row === undefined || !drivers.includes(row.driver);
   });
   if (ROWS_ONLY.length === 0 || unknown.length > 0) {
     console.error(
-      `core-gate: --rows takes core spec row ids (a row whose driver is core/<area>.spec.ts); not a spec row: ${unknown.map((id) => JSON.stringify(id)).join(', ') || '(none named)'}`,
+      ONLY === 'accounts'
+        ? `core-gate: --rows with --only accounts takes local row ids (a row whose driver is e2e/accounts.spec.ts); not a local row: ${unknown.map((id) => JSON.stringify(id)).join(', ') || '(none named)'}`
+        : `core-gate: --rows takes core spec row ids (a row whose driver is core/<area>.spec.ts); not a spec row: ${unknown.map((id) => JSON.stringify(id)).join(', ') || '(none named)'}`,
     );
     console.error(USAGE);
     process.exit(2);
@@ -195,11 +230,16 @@ if (AREAS_ONLY !== null) {
     console.error(USAGE);
     process.exit(2);
   }
-  /* the walk's own modules (core-walk/index.mjs AREAS), the names its `--only` takes: since the
-     polish round (docs/POLISH.md 5.1) a module's name can differ from its rows' id area
-     (`polish-tables` drives `tables.*` rows), so a run over an area judges the rows the named
-     modules declare, never every row whose id starts with the name */
-  const known = new Set([...WALK_MODULE_OF.values()]);
+  /* the walk's own modules (core-walk/index.mjs AREAS), the names its `--only` takes, and the id
+     areas of the probe rows: since the polish round (docs/POLISH.md 5.1) a module's name can
+     differ from its rows' id area (`polish-tables` drives `tables.*` rows), so a run over a
+     module's name judges the rows that module declares, never every row whose id starts with
+     the name; an id area no module carries (`versions`, `comments`, in the share module) judges
+     its ids wherever they are declared (`inArea`) */
+  const known = new Set([
+    ...WALK_MODULES,
+    ...rowsForDriver(PROBE_DRIVER).map((row) => areaOf(row.id)),
+  ]);
   const unknown = AREAS_ONLY.filter((area) => !known.has(area));
   if (AREAS_ONLY.length === 0 || unknown.length > 0) {
     console.error(
@@ -208,6 +248,20 @@ if (AREAS_ONLY !== null) {
     console.error(USAGE);
     process.exit(2);
   }
+}
+/**
+ * The walk modules that declare the rows of the id areas named (`--areas`): the walk's `--only`
+ * takes module names, and an id area can live in another module (the versions and comments rows
+ * in `share`), so the gate passes the modules and judges the ids (the people round, build/b5.md).
+ */
+function walkModulesOf(areas) {
+  const modules = new Set();
+  for (const row of rowsForDriver(PROBE_DRIVER))
+    if (areas.some((area) => inArea(row, area))) {
+      const module = WALK_MODULE_OF.get(row.id);
+      if (module !== undefined && module !== 'cleanup' && module !== 'walk') modules.add(module);
+    }
+  return [...modules];
 }
 /** The cost rows the cost probe drives (`--cost-rows`); every cost row when absent. */
 const COST_ROWS = arg('cost-rows', null);
@@ -239,10 +293,14 @@ const specRowsJudged = CORE_MATRIX.filter(
     (ROWS_ONLY === null || ROWS_ONLY.includes(r.id)),
 );
 const probeRowsJudged = rowsForDriver(PROBE_DRIVER).filter(
-  (r) => AREAS_ONLY === null || AREAS_ONLY.includes(WALK_MODULE_OF.get(r.id) ?? areaOf(r.id)),
+  (r) => AREAS_ONLY === null || AREAS_ONLY.some((area) => inArea(r, area)),
 );
 const costRowsJudged = costRows().filter(
   (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),
+);
+/* the local rows an `--only accounts` run drives and judges alone (docs/PEOPLE.md 6.2), narrowed by `--rows` */
+const accountsRowsJudged = localRows().filter(
+  (r) => ROWS_ONLY === null || ROWS_ONLY.includes(r.id),
 );
 const judged =
   ONLY === 'probe'
@@ -251,7 +309,9 @@ const judged =
       ? specRowsJudged
       : ONLY === 'cost'
         ? costRowsJudged
-        : CORE_MATRIX;
+        : ONLY === 'accounts'
+          ? accountsRowsJudged
+          : CORE_MATRIX;
 
 /**
  * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
@@ -336,8 +396,10 @@ function runProbe() {
   ];
   if (flag('shots')) args.push('--shots', join(OUT, 'shots'));
   if (PARKED) args.push('--parked', resolve(ROOT, PARKED));
-  /* the walk's own `--only`: the areas an `--areas` run drives, judged alone below */
-  if (AREAS_ONLY !== null) args.push('--only', AREAS_ONLY.join(','));
+  /* the walk's own `--only`: the modules that declare the rows of the id areas an `--areas` run
+     judges (the versions and comments rows live in the share module, the people round's two
+     versions rows among them), so a narrowed run drives what it judges */
+  if (AREAS_ONLY !== null) args.push('--only', walkModulesOf(AREAS_ONLY).join(','));
   console.log(`core-gate: node ${args.join(' ')}`);
   const t = Date.now();
   const result = spawnSync('node', args, { cwd: ROOT, stdio: 'inherit', env: process.env });
@@ -467,14 +529,17 @@ function rowsGrep(rowsOnly = ROWS_ONLY) {
   return `(^| )(${escaped.join('|')}): `;
 }
 
-function runSpecs() {
-  const files = specFiles();
-  const report = join(OUT, 'specs.json');
+/**
+ * Runs Playwright over `files` with the JSON reporter into `report` (specs.json for the core
+ * specs, accounts.json for the local rows' spec) and its own output folder under `OUT`; the
+ * `--rows` grep narrows either run to the rows named.
+ */
+function runPlaywright(files, report, output) {
   rmSync(report, { force: true });
   /* the run's own output folder for traces and screenshots: every Playwright start on the
      machine clears the shared `.turboslide/playwright`, which deleted a failed row's trace mid
      run (b4.md fix round, b3 R22) */
-  const args = ['test', ...files, '--reporter=list,json', '--output', join(OUT, 'playwright')];
+  const args = ['test', ...files, '--reporter=list,json', '--output', join(OUT, output)];
   if (ROWS_ONLY !== null) args.push('--grep', rowsGrep());
   console.log(
     `core-gate: node_modules/.bin/playwright ${args.join(' ')} (PLAYWRIGHT_BASE_URL=${BASE})`,
@@ -486,6 +551,21 @@ function runSpecs() {
     env: { ...process.env, PLAYWRIGHT_BASE_URL: BASE, PLAYWRIGHT_JSON_OUTPUT_NAME: report },
   });
   return readSpecs(report, result.status, Date.now() - t);
+}
+
+function runSpecs() {
+  return runPlaywright(specFiles(), join(OUT, 'specs.json'), 'playwright');
+}
+
+/**
+ * The local rows' spec (docs/PEOPLE.md 6.2): apps/studio/e2e/accounts.spec.ts against a node
+ * server with an identity database. The spec titles its rows by `coreTitle(id)` the way the
+ * core specs do, so `readSpecs` maps the report back to the ten local rows; its other tests
+ * (the share link exchange, the device flow, the seeded route) carry no id and are not judged.
+ * The spec reads `TURBOSLIDE_AUTH_DB` and `TURBOSLIDE_OVERLAY_DIR` from this environment.
+ */
+function runAccounts() {
+  return runPlaywright([ACCOUNTS_SPEC], join(OUT, 'accounts.json'), 'playwright-accounts');
 }
 
 /** The specs' rows from Playwright's JSON report: every matrix id in a title with its outcome. */
@@ -554,8 +634,15 @@ let probe = null;
 let defaultTemplate = null;
 let specs = null;
 let cost = null;
-/** Which drivers this run covers: every one, or the one `--only` names. */
-const runs = (driver) => ONLY === null || ONLY === driver;
+/** The accounts spec's run (docs/PEOPLE.md 6.2): `--only accounts` alone runs it. */
+let accounts = null;
+/**
+ * Which drivers this run covers: the walk probe, the core specs and the cost probe when `--only`
+ * is absent, else the one it names; the accounts spec runs only when named, since a deployment
+ * has no identity database and its local rows are listed apart (6.2).
+ */
+const runs = (driver) =>
+  driver === 'accounts' ? ONLY === 'accounts' : ONLY === null || ONLY === driver;
 if (REPORT !== null) {
   const dir = resolve(ROOT, REPORT);
   console.log(`core-gate: re-rendering the run under ${dir} (no driver runs)`);
@@ -564,6 +651,7 @@ if (REPORT !== null) {
   /* a run from before the sync and costs round has no cost-probe.json; its rows then read no step */
   if (runs('cost') && existsSync(join(dir, 'cost-probe.json')))
     cost = readCost(join(dir, 'cost-probe.json'), null, 0);
+  if (runs('accounts')) accounts = readSpecs(join(dir, 'accounts.json'), null, 0);
 } else {
   if (UNDER_VITEST && LOCAL && !DRY_RUN && !LOCK_NAMED) {
     console.error(
@@ -595,7 +683,7 @@ if (REPORT !== null) {
       ONLY === 'probe'
         ? AREAS_ONLY === null
           ? 'the walk probe'
-          : `the walk probe over the areas ${AREAS_ONLY.join(', ')} (${probeRowsJudged.length} rows judged)`
+          : `the walk probe over the areas ${AREAS_ONLY.join(', ')} (${probeRowsJudged.length} rows judged; the walk's modules ${walkModulesOf(AREAS_ONLY).join(', ') || 'none'})`
         : ONLY === 'specs'
           ? ROWS_ONLY === null
             ? SPEC_ONLY === null
@@ -604,7 +692,9 @@ if (REPORT !== null) {
             : `the core spec rows ${ROWS_ONLY.join(', ')} (${specFiles().join(', ')} with --grep ${JSON.stringify(rowsGrep())}; ${specRowsJudged.length} rows judged)`
           : ONLY === 'cost'
             ? 'the cost probe'
-            : 'the walk probe, the core specs and the cost probe';
+            : ONLY === 'accounts'
+              ? `the accounts spec ${ACCOUNTS_SPEC}${ROWS_ONLY === null ? '' : ` narrowed to the local rows ${ROWS_ONLY.join(', ')} (--grep ${JSON.stringify(rowsGrep())})`} (${accountsRowsJudged.length} local rows judged; the server needs an identity database)`
+              : 'the walk probe, the core specs and the cost probe';
     console.log(
       `core-gate: dry run against ${BASE}: ${scratchLine}; the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}. Nothing ran and no lock was taken; exit 0.`,
     );
@@ -615,6 +705,7 @@ if (REPORT !== null) {
     if (runs('probe')) probe = runProbe();
     if (runs('specs')) specs = runSpecs();
     if (runs('cost')) cost = runCost();
+    if (runs('accounts')) accounts = runAccounts();
   } finally {
     releaseLock(held);
   }
@@ -679,21 +770,35 @@ const results = {
   ...(probe?.results ?? {}),
   ...(specs?.results ?? {}),
   ...(cost?.results ?? {}),
+  ...(accounts?.results ?? {}),
 };
 const reasons = {
   ...(probe?.reasons ?? {}),
   ...(specs?.reasons ?? {}),
   ...(cost?.reasons ?? {}),
+  ...(accounts?.reasons ?? {}),
 };
+/**
+ * A local row this run did not record (docs/PEOPLE.md 6.2): the accounts run's, listed apart
+ * with the reason, never counted as passed and never "no step"; a local row the run did record
+ * (an `--only accounts` run) is judged like any row below.
+ */
+const localAbsent = (row) => isLocalRow(row) && results[row.id] === undefined;
 const table = judged.map((row) => ({
   id: row.id,
   feature: row.feature,
   driver: row.driver,
   today: row.today,
-  result: results[row.id] ?? 'no step',
-  reason: results[row.id] === undefined ? 'no driver recorded this row' : (reasons[row.id] ?? ''),
+  result: localAbsent(row) ? 'not driven' : (results[row.id] ?? 'no step'),
+  reason: localAbsent(row)
+    ? LOCAL_ABSENT_REASON
+    : results[row.id] === undefined
+      ? 'no driver recorded this row'
+      : (reasons[row.id] ?? ''),
 }));
 const noStep = table.filter((r) => r.result === 'no step').map((r) => r.id);
+/* the local rows this run did not record, by id (PEOPLE.md 6.2) */
+const local = judged.filter(localAbsent).map((row) => row.id);
 /* the manual rows of ruling (3): not driven by design, listed apart, never counted as passed */
 const manual = table
   .filter((r) => r.result === 'not driven' && isManualRow(coreRow(r.id)))
@@ -720,7 +825,10 @@ const costOverCeiling = table
   .map((r) => r.id);
 const verdict = shipVerdict(results, parked, judged);
 const parking = parkedFeaturesOf(results, judged);
-const retriesOk = specs === null || (specs.retries === 0 && specs.retried === 0);
+/* the accounts run reads its retries the way the core specs do (6.2: zero, or the row is flaky) */
+const retriesOk =
+  (specs === null || (specs.retries === 0 && specs.retried === 0)) &&
+  (accounts === null || (accounts.retries === 0 && accounts.retried === 0));
 const count = (word) => table.filter((r) => r.result === word).length;
 const exitCode =
   verdict.ok && noStep.length === 0 && retriesOk && costOverCeiling.length === 0 ? 0 : 1;
@@ -756,6 +864,15 @@ const summary = {
     instances: cost.instances,
     error: cost.error,
   },
+  /* the accounts spec's run (PEOPLE.md 6.2): the local rows' driver on a node server with an identity database */
+  accounts: accounts && {
+    exit: accounts.exit,
+    ms: accounts.ms,
+    report: accounts.report,
+    retries: accounts.retries,
+    retried: accounts.retried,
+    error: accounts.error,
+  },
   /* the cost rows over their ceiling in this run (SYNC.md 6.2: on the preview they hold the ship) */
   costOverCeiling,
   /* how this run was narrowed, if it was: a narrowed run's ledger stands beside the run of record */
@@ -774,6 +891,8 @@ const summary = {
   /* the measurement rows with their recorded numbers (PRODUCT.md 8.2); a red one never fails the verdict */
   measured,
   noStep,
+  /* the local rows this run did not record (PEOPLE.md 6.2): listed apart, never passed, never a reason to park */
+  local,
   /* the run's results by row id, the shape docs/readme/what-works.mjs --results reads (b5.md R10) */
   commit: gitCommit(),
   origin: BASE,
@@ -803,7 +922,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step. Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step, ${local.length} local rows this run did not record (listed apart below, never counted as passed). Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',
@@ -822,6 +941,15 @@ const lines = [
   '',
 ];
 if (noStep.length > 0) lines.push('## No step', '', ...noStep.map((id) => `- \`${id}\``), '');
+if (local.length > 0)
+  lines.push(
+    '## Local rows this run did not record (docs/PEOPLE.md 6.2)',
+    '',
+    `Driven by ${LOCAL_SPEC_DRIVERS.join(', ')} on a node server with an identity database (\`--only accounts\`), never by a deployment run; listed apart with the reason "${LOCAL_ABSENT_REASON}", never counted as passed and never a reason to park.`,
+    '',
+    ...local.map((id) => `- \`${id}\``),
+    '',
+  );
 if (measured.length > 0)
   lines.push(
     '## Measurement rows, by id (PRODUCT.md 8.2; the cost rows of SYNC.md 6.1)',
@@ -835,7 +963,7 @@ if (measured.length > 0)
 writeFileSync(join(OUT, 'core-matrix.md'), `${lines.join('\n')}\n`);
 
 console.log(
-  `\ncore-gate: ${table.length} rows: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} manual), ${noStep.length} no step; verdict ${verdict.ok ? 'ok' : 'failed'}; retries ${retriesOk ? 'zero' : 'NOT zero'}; cost rows over their ceiling ${costOverCeiling.length}; ${Math.round(summary.ms / 1000)} s against ${BASE}; table ${join(OUT, 'core-matrix.md')}; exit ${exitCode}`,
+  `\ncore-gate: ${table.length} rows: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} manual), ${noStep.length} no step, ${local.length} local rows not recorded; verdict ${verdict.ok ? 'ok' : 'failed'}; retries ${retriesOk ? 'zero' : 'NOT zero'}; cost rows over their ceiling ${costOverCeiling.length}; ${Math.round(summary.ms / 1000)} s against ${BASE}; table ${join(OUT, 'core-matrix.md')}; exit ${exitCode}`,
 );
 if (!verdict.ok)
   console.log(

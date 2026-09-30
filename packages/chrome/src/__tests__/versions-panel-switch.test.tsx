@@ -71,7 +71,8 @@ describe('the Version history panel under Tools > Advanced tools', () => {
     expect(control('versionHistory.showChanges.row')).toBeNull();
     expect(control('versionHistory.namedOnly'), 'Only named is not parked').not.toBeNull();
     openMore(1);
-    expect(menuRows()).toEqual(['version.name', 'version.copy']);
+    /* Restore this version leads the menu since the people round (docs/PEOPLE.md 3.19) */
+    expect(menuRows()).toEqual(['version.restore', 'version.name', 'version.copy']);
   });
 
   it('draws both with the switch on, the delete rows disabled with their clause', () => {
@@ -82,6 +83,7 @@ describe('the Version history panel under Tools > Advanced tools', () => {
     expect(control('versionHistory.showChanges.row')?.textContent).toContain('Show changes');
     openMore(1);
     expect(menuRows()).toEqual([
+      'version.restore',
       'version.name',
       'version.copy',
       'file.versionHistory.deleteOlder',
@@ -99,6 +101,7 @@ describe('the Version history panel under Tools > Advanced tools', () => {
     mount(undefined);
     expect(control('versionHistory.showChanges')).toBeNull();
     openMore(1);
-    expect(menuRows()).toEqual(['version.name', 'version.copy']);
+    /* Restore this version leads the menu since the people round (docs/PEOPLE.md 3.19) */
+    expect(menuRows()).toEqual(['version.restore', 'version.name', 'version.copy']);
   });
 });

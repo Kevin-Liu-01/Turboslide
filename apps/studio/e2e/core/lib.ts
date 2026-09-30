@@ -690,8 +690,22 @@ export async function ownerContext(
     acceptDownloads: true,
     permissions: ['clipboard-read', 'clipboard-write'],
   });
+  await quietDevServer(context);
   const page = await context.newPage();
   return { context, page };
+}
+
+/**
+ * On a localhost base the dev server's HMR socket is mocked (the people round, build/b2.md item
+ * 6e): a worktree shared by several lanes changes under a running spec, and Vite's client would
+ * reload the page or swap a module mid row; with the socket answered by nobody the client boots
+ * and styles the page and nothing reaches it. A deployment carries no such socket and the mock
+ * is not installed there. The product's own realtime is a streamed fetch, never a WebSocket.
+ */
+async function quietDevServer(context: BrowserContext): Promise<void> {
+  const base = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321';
+  if (!isLocalBase(base)) return;
+  await context.routeWebSocket('**', () => undefined);
 }
 
 /** A second person: another context with the same header and no cookie of the first. */
@@ -718,6 +732,7 @@ export async function sameCookiesContext(
     permissions: ['clipboard-read', 'clipboard-write'],
     storageState: await of.storageState(),
   });
+  await quietDevServer(context);
   const page = await context.newPage();
   return { context, page };
 }

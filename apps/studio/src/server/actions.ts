@@ -80,6 +80,7 @@ import {
   registerAdminActions as registerAccountAdminActions,
 } from './auth/actions';
 import type { ActionRequestFacts } from './auth/actions';
+import { selectAvatarStore } from './auth/avatar-tier';
 import { requestIdentity } from './auth/identity';
 import type { RequestIdentity } from './auth/identity';
 import { isSecureRequest } from './auth/session';
@@ -712,6 +713,11 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
     kind: identity.kind === 'account' ? 'account' : agentish ? 'agent' : 'anonymous',
     ...(identity.account?.email !== undefined ? { email: identity.account.email } : {}),
     ...(admin ? { admin: true } : {}),
+    /* the anonymous ids the alias table linked to the account (docs/PEOPLE.md 3.6): a deck made
+       before the sign in stays the account's own at the share records too (b1.md R1) */
+    ...(identity.ctx.principal?.aliases !== undefined && identity.ctx.principal.aliases.length > 0
+      ? { aliases: identity.ctx.principal.aliases }
+      : {}),
   };
   const author: Author = identity.author ?? {
     kind: 'human',
@@ -1253,8 +1259,17 @@ export async function deckDispatcher(
   if (request !== undefined) {
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);
-    registerAccountActions(dispatcher, { facts: accountFactsFor(request, deckId) });
-    registerAccountAdminActions(dispatcher, { facts: accountFactsFor(request, deckId) });
+    // the picture files go to the public store on the blob tier and to the state folder
+    // elsewhere (docs/PEOPLE.md 4.3; AUDIT.md defect 12), one selection for the writer, the
+    // route and the janitor
+    registerAccountActions(dispatcher, {
+      facts: accountFactsFor(request, deckId),
+      avatarStore: selectAvatarStore,
+    });
+    registerAccountAdminActions(dispatcher, {
+      facts: accountFactsFor(request, deckId),
+      avatarStore: selectAvatarStore,
+    });
   }
   registerMigrateStorage(dispatcher);
   // the asset ids last, so the materials package's picture.materialize replaces the store

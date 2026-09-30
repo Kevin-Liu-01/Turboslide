@@ -31,8 +31,9 @@ body {
   overflow: hidden;
 }
 
-/* the fixture chip beside the sidebar title: 11px titanium in a hair box */
-.ts-chip {
+/* the fixture word chip beside the sidebar title: 11px titanium in a hair box (.ts-chip is the
+   identity chip of packages/chrome/src/presence/presence.css; docs/PEOPLE.md 3.3 renamed this one) */
+.ts-word-chip {
   flex: 0 0 auto;
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';

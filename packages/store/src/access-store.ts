@@ -603,7 +603,26 @@ export type DeckIndex = {
    * index every instance reads, the way the link grants do.
    */
   name?: string;
+  /**
+   * The avatar choice of the builder's Initials, Glyph and Dither tabs (docs/PEOPLE.md 3.13), on
+   * the index for the same reason as the name; a picture choice is never carried here, because it
+   * needs an account, which needs the database. Absent when the choice is a picture or none.
+   */
+  avatar?: IndexAvatarChoice;
 };
+
+/** The non picture avatar choice as the index carries it (docs/PEOPLE.md 3.13). */
+export type IndexAvatarChoice = {
+  variant: 'initials' | 'glyph' | 'dither';
+  initials?: string;
+  salt?: number;
+};
+
+export const indexAvatarChoiceSchema = z.strictObject({
+  variant: z.enum(['initials', 'glyph', 'dither']),
+  initials: z.string().max(3).optional(),
+  salt: z.number().int().nonnegative().optional(),
+}) satisfies z.ZodType<IndexAvatarChoice>;
 
 export const deckIndexSchema = z.strictObject({
   owned: z.array(z.string().min(1)),
@@ -620,6 +639,7 @@ export const deckIndexSchema = z.strictObject({
   recent: z.array(z.strictObject({ deckId: z.string().min(1), at: z.string() })),
   pendingOwnership: z.array(z.string().min(1)).optional(),
   name: z.string().min(1).max(120).optional(),
+  avatar: indexAvatarChoiceSchema.optional(),
 }) satisfies z.ZodType<DeckIndex>;
 
 export function emptyDeckIndex(): DeckIndex {
@@ -744,6 +764,28 @@ export const indexUpdates = {
   /** the typed display name (R17); null when the index carries it already */
   name(name: string): (index: DeckIndex) => DeckIndex | null {
     return (index) => (index.name === name ? null : { ...index, name });
+  },
+  /**
+   * the non picture avatar choice (docs/PEOPLE.md 3.13); `null` clears it (a picture chosen, which
+   * the index never carries); null when the index carries the same choice already
+   */
+  avatar(choice: IndexAvatarChoice | null): (index: DeckIndex) => DeckIndex | null {
+    return (index) => {
+      if (choice === null) {
+        if (index.avatar === undefined) return null;
+        const { avatar: _dropped, ...rest } = index;
+        return rest;
+      }
+      const next: IndexAvatarChoice = { variant: choice.variant };
+      if (choice.initials !== undefined) next.initials = choice.initials;
+      if (choice.salt !== undefined) next.salt = choice.salt;
+      const same =
+        index.avatar !== undefined &&
+        index.avatar.variant === next.variant &&
+        index.avatar.initials === next.initials &&
+        index.avatar.salt === next.salt;
+      return same ? null : { ...index, avatar: next };
+    };
   },
   owned(deckId: string): (index: DeckIndex) => DeckIndex | null {
     return (index) =>

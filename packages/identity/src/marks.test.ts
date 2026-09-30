@@ -117,3 +117,31 @@ describe('markSpec', () => {
     });
   });
 });
+
+describe('one person, one mark (docs/PEOPLE.md 6.1 people.versions-author-account)', () => {
+  test('an aliased anonymous id hashes the account it renders as, so its field equals the account own', () => {
+    const account = identity({
+      principalId: 'usr_01JKEVINLIU',
+      kind: 'account',
+      accountId: '01JKEVINLIU',
+      trust: 'verified',
+      displayName: 'Grace Hopper',
+    });
+    const aliased = identity({
+      principalId: ANON,
+      kind: 'anonymous',
+      accountId: '01JKEVINLIU',
+      trust: 'verified',
+      displayName: 'Grace Hopper',
+    });
+    const own = markSpec(account);
+    const alias = markSpec(aliased);
+    expect(alias.density).toBe(own.density);
+    expect(alias.glyphSeed).toBe(own.glyphSeed);
+    expect(alias.initials).toBe(own.initials);
+    /* a plain anonymous id keeps the hash of its own id */
+    const plain = markSpec(identity({ principalId: ANON, kind: 'anonymous' }));
+    expect(markHash(ANON).density).toBe(plain.density);
+    expect(markHash(ANON).glyphSeed).toBe(plain.glyphSeed);
+  });
+});

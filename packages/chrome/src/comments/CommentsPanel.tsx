@@ -6,7 +6,13 @@ import type { CommentThreadView, EditorComments, IdentityView } from '../editor-
 import { cn } from '../lib/cn';
 import { COMMENTS, INBOX } from '../menus/strings';
 import { Panel } from '../Panel';
-import { IdentityChip, nameOf, trustWordOf } from '../presence/IdentityChip';
+import {
+  IdentityChip,
+  TrustMark,
+  nameOf,
+  trustMarkOf,
+  trustWordOf,
+} from '../presence/IdentityChip';
 import { slideNumberOf } from '../presence/presence-model';
 import { tipProps } from '../Tooltip';
 import { filterThreads, firstLine, shortTime, sortThreads } from './comments-model';
@@ -192,7 +198,9 @@ export function CommentsPanel({
                   <span className="ts-comments-row-text">
                     <span className="ts-comments-row-head">
                       <span className="ts-comments-row-name">{nameOf(thread.comment.author)}</span>
-                      {trust !== null ? (
+                      {trustMarkOf(thread.comment.author) !== null ? (
+                        <TrustMark identity={thread.comment.author} />
+                      ) : trust !== null ? (
                         <span className="ts-comments-row-trust">{trust}</span>
                       ) : null}
                       {n !== null ? <span className="ts-comments-row-slide">slide {n}</span> : null}

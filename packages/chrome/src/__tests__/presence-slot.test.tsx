@@ -146,10 +146,11 @@ describe('the title row slots', () => {
     const presence = right.querySelector('[data-control="title.presence"]')!;
     expect(presence.querySelectorAll('.ts-presence-slot.is-empty')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('');
-    /* the own chip (the account menu's opener) and the inbox plate are parked (docs/FOCUS.md
+    /* the own chip (the account menu's opener) and its rule are in the default view since the
+       people round (docs/PEOPLE.md 3.14, default 2); the inbox plate stays parked (docs/FOCUS.md
        3.2): absent in the default view, the inbox slot kept empty for the row's geometry */
-    expect(presence.querySelector('.ts-presence-rule')).toBeNull();
-    expect(presence.querySelector('[data-control="title.account"]')).toBeNull();
+    expect(presence.querySelector('.ts-presence-rule')).not.toBeNull();
+    expect(presence.querySelector('[data-control="title.account"]')).not.toBeNull();
     expect(right.querySelector('[data-control="title.inbox"]')).toBeNull();
     expect(
       right.querySelector('[data-control="title.inbox.slot"]')?.classList.contains('is-empty'),
@@ -172,7 +173,7 @@ describe('the title row slots', () => {
     ).toBe(false);
   });
 
-  it("draws four chips and +16 for twenty people, the roster with every row; the own row and the Join chat stub stay behind Tools > Advanced tools, and the Go to slide word is in the default view since the features round's ship one", () => {
+  it("draws four chips and +16 for twenty people, the roster with every row; the own row is in the default view since the people round, the Join chat stub stays behind Tools > Advanced tools, and the Go to slide word is in the default view since the features round's ship one", () => {
     const others = Array.from({ length: 20 }, (_, i) => person(i + 1));
     const self = person(0, { clientId: 'me', name: 'Kevin', trust: 'guest' });
     const onFollow = vi.fn();
@@ -191,9 +192,11 @@ describe('the title row slots', () => {
     );
     fireEvent.click(plain.container.querySelector('[data-control="presence.more"]')!);
     const plainRoster = document.getElementById('ts-menu-roster')!;
-    /* the twenty people; the own row (the account menu's opener, `title.presence.me`) is parked */
-    expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(20);
-    expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).toBeNull();
+    /* the twenty people and the own row (the account menu's opener, `title.presence.me`), in the
+       default view since the people round (docs/PEOPLE.md 3.14, default 2); the Join chat stub
+       stays behind the switch */
+    expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(21);
+    expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).not.toBeNull();
     expect(plainRoster.querySelector('[data-menu-item="title.presence.joinChat"]')).toBeNull();
     expect(plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
       'Go to slide',
@@ -325,13 +328,9 @@ describe('the title row slots', () => {
     const rows = Array.from(menu.querySelectorAll('[role="menuitem"]')).map(
       (row) => row.textContent,
     );
-    expect(rows).toEqual([
-      'Change name',
-      'Change avatar',
-      'Sign in',
-      'Forget this browser',
-      'Sessions',
-    ]);
+    /* Sessions is an account's row (docs/PEOPLE.md 3.14; accounts 8): an anonymous person is not
+       offered a list that answers [] */
+    expect(rows).toEqual(['Change name', 'Change avatar', 'Sign in', 'Forget this browser']);
   });
 
   it('counts the inbox plate to 99+, dots Share on a pending request, and reads the offline phrase and the last editor', () => {

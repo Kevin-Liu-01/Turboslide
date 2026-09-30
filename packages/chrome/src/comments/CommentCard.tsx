@@ -17,7 +17,13 @@ import { useMountEffect } from '../lib/useMountEffect';
 import { focusableIn } from '../Dialog';
 import { PlateMenu } from '../presence/PlateMenu';
 import { COMMENTS } from '../menus/strings';
-import { IdentityChip, nameOf, trustWordOf } from '../presence/IdentityChip';
+import {
+  IdentityChip,
+  TrustMark,
+  nameOf,
+  trustMarkOf,
+  trustWordOf,
+} from '../presence/IdentityChip';
 import { tipProps } from '../Tooltip';
 import { bodySegments, shortTime } from './comments-model';
 import { ReplyBox } from './ReplyBox';
@@ -170,7 +176,12 @@ function CommentRow({
         <IdentityChip identity={comment.author} size={24} />
         <span className="ts-comment-who">
           <span className="ts-comment-name">{nameOf(comment.author)}</span>
-          {trust !== null ? <span className="ts-comment-trust">{trust}</span> : null}
+          {/* the badge for a verified author, the guest word for a typed name (docs/PEOPLE.md 3.7) */}
+          {trustMarkOf(comment.author) !== null ? (
+            <TrustMark identity={comment.author} className="ts-comment-badge" />
+          ) : trust !== null ? (
+            <span className="ts-comment-trust">{trust}</span>
+          ) : null}
         </span>
         <time className="ts-comment-time" dateTime={comment.createdAt}>
           {shortTime(comment.createdAt)}

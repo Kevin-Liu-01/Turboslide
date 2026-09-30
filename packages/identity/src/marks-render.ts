@@ -4,17 +4,23 @@
 // drives both, so a chip in the title row and the PNG `turboslide account me --avatar-png` writes
 // show one mark; marks-render.test.ts asserts it over a thousand random specs.
 //
-// Geometry, in CSS pixels at 1x (11 6.1): the chip is a square of `size`; the plate is the chip
-// less a 1 px border; the Bayer field has 2 px cells aligned to the plate's top left so the same
-// cells light at every size; the initials variant lights d eighths of the field (d from two hash
-// bits) and draws one or two letters as text; the glyph variant is a 5 by 5 grid of cells inside
-// the plate with a 1 px inset, each cell empty or one of five glyphs, mirrored left to right, from
-// the seed; the dither variant is a Bayer dithered ramp whose centre, angle and curve come from
-// the seed; the picture variant is the uploaded picture in the SVG and a bare plate in the bits;
-// the agent variant is a 50 percent field with a centred solid square and a dashed border. A
-// presenter gains a right pointing triangle at the plate's bottom right; a live chip a 2 px stripe
-// in its hue; a chip over a picture the two ring halo. Every bit of ink is 1 in the raster; the
-// theme picks the two colours (ink on paper in light chrome, paper on ink in dark).
+// Geometry, in CSS pixels at 1x (11 6.1; docs/PEOPLE.md 3.4): the chip is a square of `size`;
+// the ring is its 1 px border at pixel 0; pixel 1 is a paper gap on every side; the field (the
+// plate) starts at pixel 2 and is `size - 4` wide (20 at 24, 12 at 16, 10 at 14, 8 at 12), so no
+// cell, picture edge or stripe touches the ring. The Bayer field has 2 px cells aligned to the
+// field's top left so the same cells light at every size; the initials variant lights d eighths
+// of the field (d from two hash bits) and draws one or two letters as text; the glyph variant is a
+// 5 by 5 grid of cells that fills the field at 24 (4 px cells) and is centred in it below (2 px
+// cells at 16 and 14, 1 px at 12), each cell empty or one of five glyphs, mirrored left to right,
+// from the seed; the dither variant is a Bayer dithered ramp whose centre, angle and curve come
+// from the seed; the picture variant is the uploaded picture in the SVG and a bare field in the
+// bits; the agent variant is a 50 percent field with a centred solid square of
+// `max(4, round(field / 3))` and a dashed ring. A presenter gains a right pointing triangle at
+// the field's bottom right over a 1 px paper gap; a live chip a 2 px stripe in its hue over the
+// field's bottom two rows; a chip over a picture the two ring halo. Every bit of ink is 1 in the
+// raster; the theme picks the two colours (ink on paper in light chrome, paper on ink in dark).
+// The chrome's chip draws this raster's field through `packages/chrome/src/presence/mark-svg.ts`,
+// so a chip and the CLI's PNG carry one mark (mark-agreement.test.ts in the chrome).
 //
 // Browser safe: `bayer8` is the deck's screen (no I/O); the PNG encoder, which imports
 // node:zlib, lives behind marks-png.ts.
@@ -28,8 +34,8 @@ export type MarkBits = { width: number; height: number; bits: Uint8Array };
 
 export type MarkTheme = 'light' | 'dark';
 
-/** The chip sizes the chrome draws (11 6.1); the builder's previews and the CLI's PNG add 32, 64 and 256. */
-export const MARK_SIZES: readonly number[] = [24, 16, 14];
+/** The chip sizes the chrome draws (11 6.1; the outline row's 12 px chip since the people round); the builder's previews and the CLI's PNG add 32, 64 and 256. */
+export const MARK_SIZES: readonly number[] = [24, 16, 14, 12];
 export const MARK_PREVIEW_SIZES: readonly number[] = [24, 32, 64, 256];
 export const MARK_MIN_SIZE = 8;
 export const MARK_MAX_SIZE = 1024;
@@ -114,8 +120,11 @@ export function glyphInk(glyph: MarkGlyph, u: number, v: number): boolean {
   }
 }
 
-function plateOf(size: number): { origin: number; extent: number } {
-  return { origin: 1, extent: size - 2 };
+/** The field's first pixel and its extent: the ring at 0, a paper gap at 1, the field from 2 (docs/PEOPLE.md 3.4). */
+export const MARK_FIELD_ORIGIN = 2;
+
+export function plateOf(size: number): { origin: number; extent: number } {
+  return { origin: MARK_FIELD_ORIGIN, extent: size - MARK_FIELD_ORIGIN * 2 };
 }
 
 /** True where the agent ring leaves a gap: two on, two off, the corners always on. */
@@ -155,9 +164,9 @@ export function renderMarkBits(spec: MarkSpec, size: number): MarkBits {
     }
     case 'glyph': {
       const grid = glyphGrid(spec.glyphSeed);
-      const inner = extent - 2;
-      const cell = Math.max(1, Math.floor(inner / 5));
-      const offset = origin + 1 + Math.floor((inner - cell * 5) / 2);
+      // 4 px cells fill the 20 px field at 24; below, 2 px cells (1 px at 12) centred in the field
+      const cell = Math.max(1, Math.floor(extent / 5));
+      const offset = origin + Math.floor((extent - cell * 5) / 2);
       for (let gy = 0; gy < 5; gy += 1)
         for (let gx = 0; gx < 5; gx += 1) {
           const glyph = grid[gy]?.[gx] ?? 'empty';
@@ -195,8 +204,8 @@ export function renderMarkBits(spec: MarkSpec, size: number): MarkBits {
           const c = Math.floor(x / MARK_CELL);
           set(origin + x, origin + y, bayer8(r, c) >= 32);
         }
-      // the centred solid square: 8 px at 24, 5 at 16, 4 at 14 (11 3.3)
-      const square = size >= 24 ? Math.round(size / 3) : size >= 16 ? 5 : 4;
+      // the centred solid square: a third of the field, never under 4 px (7 at 24, 4 at 16, 14 and 12)
+      const square = Math.max(4, Math.round(extent / 3));
       const start = origin + Math.floor((extent - square) / 2);
       for (let y = 0; y < square; y += 1)
         for (let x = 0; x < square; x += 1) set(start + x, start + y, true);

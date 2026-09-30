@@ -265,6 +265,37 @@ export type IdentityView = {
   mark?: MarkSpecLike;
   /** an agent's run id, shown as "Agent · <runId>" (4.7) */
   runId?: string;
+  /** the account was deleted (7.4): the name reads "Deleted account" and no badge is drawn (docs/PEOPLE.md 3.7) */
+  deleted?: boolean;
+  /**
+   * the account (`usr_<id>`) an aliased anonymous id renders as (7.4; docs/PEOPLE.md 3.17): the
+   * two ids are one person to the label suffix and to the version panel's You (build/b5.md R9)
+   */
+  accountId?: string;
+};
+
+/**
+ * The avatar choice as the shell reads it (SPEC-3 7.6; docs/PEOPLE.md 3.11, 4.1): the
+ * `account.me` answer's `avatar`, the salt a number as the server stores it, the picture as its
+ * 64 px URL and never the key.
+ */
+export type AvatarChoiceView = {
+  variant: 'initials' | 'glyph' | 'dither' | 'picture';
+  /** one or two letters typed over the display name's own, Initials tab only */
+  initials?: string;
+  /** the salt "Another" rerolls on the Glyph and Dither tabs */
+  salt?: number;
+  /** the 64 px file of a picture choice */
+  url?: string;
+};
+
+/** What the builder hands to `account.setAvatar` (docs/PEOPLE.md 4.1): the picture as a data URL the browser encoded. */
+export type AvatarChoiceInput = {
+  variant: 'initials' | 'glyph' | 'dither' | 'picture';
+  initials?: string;
+  salt?: number;
+  /** a `data:image/webp;base64,` URL of the 256 px crop, under 512 KB; the server sniffs and re-encodes it */
+  picture?: string;
 };
 
 /** One participant of the room (SPEC-3 4.11 `Participant`), with the facts the chips and the roster draw. */
@@ -530,22 +561,14 @@ export type EditorAccount = {
   githubAvailable?: boolean;
   sessions?: readonly SessionView[];
   tokens?: readonly TokenView[];
-  /** the avatar choice on the principal record (7.6) */
-  avatar?: {
-    variant: 'initials' | 'glyph' | 'dither' | 'picture';
-    initials?: string;
-    salt?: string;
-  };
+  /** the avatar choice on the principal record (7.6): the builder starts from it (docs/PEOPLE.md 3.11) */
+  avatar?: AvatarChoiceView;
   /** the name prompt fires on the first edit, comment or lease (0.18); the route says when */
   namePrompt?: { open: boolean; prefilled: string };
   onNamePrompt?: (open: boolean) => void;
   setName?: (name: string) => Promise<unknown>;
-  setAvatar?: (choice: {
-    variant: 'initials' | 'glyph' | 'dither' | 'picture';
-    initials?: string;
-    salt?: string;
-    picture?: File;
-  }) => Promise<unknown>;
+  /** writes the choice; the route writes the answer's name, mark, avatar and picture URL back into this account (3.11) */
+  setAvatar?: (choice: AvatarChoiceInput) => Promise<unknown>;
   signIn?: () => void;
   signOut?: (sessionId?: string | 'all') => Promise<unknown>;
   forget?: () => Promise<unknown>;
@@ -559,7 +582,7 @@ export type EditorAccount = {
   revokeToken?: (tokenId: string) => Promise<unknown>;
   /** Delete account (7.4); refused while other people hold grants on decks the caller owns */
   deleteAccount?: () => Promise<unknown>;
-  /** the public URL of the picture avatar, when one is set */
+  /** the 64 px URL of the picture avatar, when one is set; the chip and the head derive the other sizes (docs/PEOPLE.md 4.4) */
   pictureUrl?: string;
 };
 

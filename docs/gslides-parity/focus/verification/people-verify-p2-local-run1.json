@@ -1,0 +1,145 @@
+{
+  "base": "http://localhost:4467",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-30T08:52:26.951Z",
+  "ms": 79667,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 0,
+    "ms": 79655,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/verifier2/gate-accounts-1/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 10,
+  "passed": 10,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e5dd8584",
+  "origin": "http://localhost:4467",
+  "date": "2026-09-30",
+  "results": {
+    "people.verified-badge": "passed",
+    "people.versions-author-account": "passed",
+    "people.labels-disambiguated": "passed",
+    "share.dialog.grant-email-line": "passed",
+    "people.avatar-upload": "passed",
+    "people.avatar-cap-refusal": "passed",
+    "people.avatar-rotation": "passed",
+    "people.avatar-fallback-plate": "passed",
+    "people.avatar-link-visitor": "passed",
+    "people.avatar-metadata-stripped": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

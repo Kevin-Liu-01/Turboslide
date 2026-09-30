@@ -24,7 +24,7 @@
 // return (docs/FOCUS.md section 8).
 
 /* parked-controls:begin */
-// written by scripts/probes/core-matrix.mjs --emit-parked from ship-c1a7ff3.json; 14 controls
+// written by scripts/probes/core-matrix.mjs --emit-parked from ship-4300058d.json; 14 controls
 export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([
   'bar.table',
   'dialog.background.shader',

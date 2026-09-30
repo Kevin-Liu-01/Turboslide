@@ -7,11 +7,12 @@ import type { Dispatcher } from '@turboslide/agent/dispatch';
 import { labelFor } from '@turboslide/identity/labels';
 import { NAME_REFUSALS } from '@turboslide/identity/names';
 import sharp from 'sharp';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   ADMIN_ONLY,
   FORGET_HEADER,
+  KEY_SCOPE_FOR_ACCOUNT,
   SIGN_IN_FOR_KEYS,
   avatarAnswer,
   dataUrlBytes,
@@ -20,7 +21,19 @@ import {
   registerAdminActions,
 } from './actions.ts';
 import type { ActionRequestFacts } from './actions.ts';
+import { AVATAR_MAX_DATA_URL_LENGTH, AVATAR_TOO_LARGE } from './avatar.ts';
 import type { AvatarFile, AvatarStore } from './avatar.ts';
+
+/* the two modules the handlers reach by dynamic import to propagate a change (PEOPLE.md 3.11,
+   3.13): the room's identity cache and the deck index carrier, stubbed so the test reads the calls */
+const forgetIdentity = vi.fn((_id: string) => undefined);
+const noteDisplayName = vi.fn((_id: string, _name: string) => Promise.resolve());
+const noteAvatarChoice = vi.fn((_id: string, _choice: unknown) => Promise.resolve());
+vi.mock('../room', () => ({ forgetIdentity: (id: string) => forgetIdentity(id) }));
+vi.mock('../access', () => ({
+  noteDisplayName: (id: string, name: string) => noteDisplayName(id, name),
+  noteAvatarChoice: (id: string, choice: unknown) => noteAvatarChoice(id, choice),
+}));
 import { buildIdentityRuntime, requestIdentity } from './identity.ts';
 import type { IdentityRuntime, RequestIdentity } from './identity.ts';
 
@@ -48,6 +61,7 @@ const store: AvatarStore & { files: Map<string, AvatarFile> } = {
     return Promise.resolve(n);
   },
   base: (key) => `https://store.test/u/${key}`,
+  listKeys: () => Promise.resolve([]),
 };
 
 beforeEach(async () => {
@@ -67,6 +81,9 @@ beforeEach(async () => {
   await runtime.ready;
   headers.length = 0;
   store.files.clear();
+  forgetIdentity.mockClear();
+  noteDisplayName.mockClear();
+  noteAvatarChoice.mockClear();
   dispatcher = createDispatcher();
   const deps = {
     runtime,
@@ -189,6 +206,12 @@ describe('account.setAvatar', () => {
     };
     expect(glyph.avatar).toEqual({ variant: 'glyph', salt: 7 });
     expect(glyph.mark.variant).toBe('glyph');
+    // the choice out of the room's identity cache and onto the deck index (PEOPLE.md 3.11, 3.13)
+    expect(forgetIdentity).toHaveBeenCalledWith(identity.principalId);
+    expect(noteAvatarChoice).toHaveBeenCalledWith(identity.principalId, {
+      variant: 'glyph',
+      salt: 7,
+    });
     const png = await sharp({
       create: { width: 64, height: 64, channels: 3, background: '#406080' },
     })
@@ -227,6 +250,61 @@ describe('account.setAvatar', () => {
       /^https:\/\/store\.test\/u\/[A-Za-z0-9_-]{22}\/[0-9a-f]{64}-64\.webp$/,
     );
     expect(store.files.size).toBe(5);
+    // the answer's mark draws the picture with no per caller argument (PEOPLE.md 4.4)
+    expect(me.mark.variant).toBe('picture');
+    expect(me.mark.pictureUrl).toBe(me.avatar.url);
+    // a picture is never carried on the index; the cache is dropped
+    expect(noteAvatarChoice).toHaveBeenCalledWith(facts.identity.principalId, null);
+    expect(forgetIdentity).toHaveBeenCalledWith(facts.identity.principalId);
+    // account.me reads the same picture back from the profile row
+    const again = (await run('account.me')) as { mark: { pictureUrl?: string } };
+    expect(again.mark.pictureUrl).toBe(me.avatar.url);
+  });
+
+  test('an oversized data URL is refused on its length before any decode', async () => {
+    facts = { identity: await asAccount('kai@example.test') };
+    // not a data URL at all: had the string been decoded first, the refusal would name that
+    await expect(
+      run('account.setAvatar', {
+        variant: 'picture',
+        picture: 'x'.repeat(AVATAR_MAX_DATA_URL_LENGTH + 1),
+      }),
+    ).rejects.toThrow(AVATAR_TOO_LARGE);
+    expect(store.files.size).toBe(0);
+    expect(noteAvatarChoice).not.toHaveBeenCalled();
+  });
+
+  test('an API key with the write scope acts on its owner; a read only key is refused in words', async () => {
+    const { id } = await ensureUserByEmail(runtime, 'owner@example.test');
+    const mint = async (scopes: ('read' | 'write')[]) => {
+      const { secret } = await runtime.keys.create({ userId: id, name: 'cli', scopes });
+      return requestIdentity(
+        request('/api/actions/account.setAvatar', {
+          headers: { authorization: `Bearer ${secret}` },
+        }),
+        runtime,
+      );
+    };
+    facts = { identity: await mint(['read']) };
+    await expect(run('account.setAvatar', { variant: 'dither', salt: 3 })).rejects.toThrow(
+      KEY_SCOPE_FOR_ACCOUNT,
+    );
+    facts = { identity: await mint(['read', 'write']) };
+    const me = (await run('account.setAvatar', { variant: 'dither', salt: 3 })) as {
+      principal: { id: string; kind: string };
+      avatar: { variant: string; salt?: number };
+    };
+    expect(me.principal).toMatchObject({ id: `usr_${id}`, kind: 'account' });
+    expect(me.avatar).toEqual({ variant: 'dither', salt: 3 });
+    expect((await runtime.principals.get(`usr_${id}`))?.avatar).toEqual({
+      variant: 'dither',
+      salt: 3,
+    });
+    expect((await runtime.profiles.get(id))?.avatar).toEqual({ variant: 'dither', salt: 3 });
+    expect(forgetIdentity).toHaveBeenCalledWith(`usr_${id}`);
+    const named = (await run('account.setName', { name: 'Owner Name' })) as { name?: string };
+    expect(named.name).toBe('Owner Name');
+    expect(noteDisplayName).toHaveBeenCalledWith(`usr_${id}`, 'Owner Name');
   });
 });
 

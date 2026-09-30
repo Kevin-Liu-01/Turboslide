@@ -4936,6 +4936,32 @@
       "milestone": "P1"
     },
     {
+      "action": "admin.avatar.sweep",
+      "usage": "turboslide admin avatar-sweep --to <to> [--dry-run]",
+      "command": [
+        "admin",
+        "avatar-sweep"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false,
+          "description": "List the orphans and remove nothing"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
       "action": "presence.list",
       "usage": "turboslide presence list",
       "command": [
@@ -6450,7 +6476,7 @@
     },
     {
       "action": "account.setAvatar",
-      "usage": "turboslide account avatar --variant <variant> --another",
+      "usage": "turboslide account avatar --variant <variant> --initials <initials> --another --picture <file>",
       "command": [
         "account",
         "avatar"
@@ -6487,12 +6513,13 @@
           "flag": "--picture",
           "type": "string",
           "required": false,
-          "description": "A file path or a data URL; sharp re-encodes it and keeps no original"
+          "description": "A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original"
         }
       ],
       "custom": [
         {
-          "flag": "--another"
+          "flag": "--picture",
+          "template": "<file>"
         }
       ],
       "mutates": true,

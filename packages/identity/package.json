@@ -17,6 +17,7 @@
     "./marks": "./src/marks.ts",
     "./marks-render": "./src/marks-render.ts",
     "./marks-png": "./src/marks-png.ts",
+    "./picture": "./src/picture.ts",
     "./principal": "./src/principal.ts",
     "./sha256": "./src/sha256.ts",
     "./index": "./src/index.ts",

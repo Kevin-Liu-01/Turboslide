@@ -7,12 +7,20 @@ import { afterEach, describe, expect, test } from 'vitest';
 
 import { memoryPrincipalStore } from '@turboslide/identity/principal';
 
+import type { BlobClient, BlobEntry, BlobPutOptions } from '@turboslide/store/blob-store';
+
 import {
+  AVATAR_CACHE_MAX_AGE_S,
+  AVATAR_MAX_BYTES,
+  AVATAR_MAX_DATA_URL_LENGTH,
   AVATAR_QUOTA,
   AVATAR_SIZES,
+  AVATAR_STORE_UNAVAILABLE,
   AVATAR_TOO_LARGE,
+  AVATAR_TOO_MANY_PIXELS,
   AvatarRefusal,
   SIGN_IN_TO_UPLOAD,
+  blobAvatarStore,
   fileAvatarStore,
   newAvatarKey,
   parseAvatarPath,
@@ -21,6 +29,7 @@ import {
   removePictureFiles,
   setPictureAvatar,
   sniffAvatar,
+  sweepOrphanAvatars,
 } from './avatar.ts';
 import type { AvatarFile, AvatarStore } from './avatar.ts';
 import { memoryProfileStore } from './profile.ts';
@@ -53,12 +62,19 @@ async function picture(format: 'png' | 'jpeg' | 'webp' | 'gif', width = 300, hei
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 }
 
-function fakeStore(): AvatarStore & { files: Map<string, AvatarFile>; removed: string[] } {
+function fakeStore(): AvatarStore & {
+  files: Map<string, AvatarFile>;
+  removed: string[];
+  /** the write time per key the listing reports; unset keys report null */
+  times: Map<string, string>;
+} {
   const files = new Map<string, AvatarFile>();
   const removed: string[] = [];
+  const times = new Map<string, string>();
   return {
     files,
     removed,
+    times,
     put(file) {
       files.set(file.relative, file);
       return Promise.resolve(`https://store.test/${file.relative}`);
@@ -74,7 +90,58 @@ function fakeStore(): AvatarStore & { files: Map<string, AvatarFile>; removed: s
       return Promise.resolve(n);
     },
     base: (key) => `https://store.test/u/${key}`,
+    listKeys() {
+      const keys = new Map<string, number>();
+      for (const relative of files.keys()) {
+        const key = relative.split('/')[1] ?? '';
+        keys.set(key, (keys.get(key) ?? 0) + 1);
+      }
+      return Promise.resolve(
+        [...keys.entries()].map(([avatarKey, count]) => ({
+          avatarKey,
+          files: count,
+          newestAt: times.get(avatarKey) ?? null,
+        })),
+      );
+    },
   };
+}
+
+/** A Blob client over a map, the shape `blobAvatarStore` needs and nothing more. */
+function fakeBlobClient(
+  origin = 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com',
+): BlobClient & {
+  puts: { pathname: string; options: BlobPutOptions }[];
+  blobs: Map<string, BlobEntry>;
+} {
+  const blobs = new Map<string, BlobEntry>();
+  const puts: { pathname: string; options: BlobPutOptions }[] = [];
+  const client = {
+    puts,
+    blobs,
+    head: (pathname: string) => Promise.resolve(blobs.get(pathname) ?? null),
+    get: () => Promise.resolve(null),
+    list: (prefix: string) =>
+      Promise.resolve([...blobs.values()].filter((entry) => entry.pathname.startsWith(prefix))),
+    folders: () => Promise.resolve([]),
+    put: (pathname: string, bytes: Uint8Array, options: BlobPutOptions) => {
+      puts.push({ pathname, options });
+      const entry: BlobEntry = {
+        pathname,
+        url: `${origin}/${pathname}`,
+        size: bytes.byteLength,
+        version: 'v1',
+        uploadedAt: '2026-09-29T10:00:00.000Z',
+      };
+      blobs.set(pathname, entry);
+      return Promise.resolve(entry);
+    },
+    del: (pathnames: ReadonlyArray<string>) => {
+      for (const pathname of pathnames) blobs.delete(pathname);
+      return Promise.resolve();
+    },
+  };
+  return client as unknown as typeof client & BlobClient;
 }
 
 describe('sniffAvatar', () => {
@@ -130,10 +197,168 @@ describe('processAvatar', () => {
     const lying = await picture('png');
     lying.set([0xff, 0xd8, 0xff], 0);
     await expect(processAvatar(lying, newAvatarKey())).rejects.toThrow(AvatarRefusal);
-    const huge = new Uint8Array(5 * 1024 * 1024 + 1);
+    // the request cap of PEOPLE.md 4.2: 512 KB plus one byte is refused before the sniff
+    expect(AVATAR_MAX_BYTES).toBe(512 * 1024);
+    const huge = new Uint8Array(AVATAR_MAX_BYTES + 1);
     await expect(processAvatar(huge, newAvatarKey())).rejects.toThrow(AVATAR_TOO_LARGE);
+    expect(sniffAvatar(huge)).toBeNull();
+    // the data URL bound admits the cap's bytes in base64 with a header and nothing more
+    expect(AVATAR_MAX_DATA_URL_LENGTH).toBeGreaterThanOrEqual(
+      Math.ceil(AVATAR_MAX_BYTES / 3) * 4 + 23,
+    );
+    expect(AVATAR_MAX_DATA_URL_LENGTH).toBeLessThan(700_000);
     const tiny = await picture('png', 4, 4);
     await expect(processAvatar(tiny, newAvatarKey())).rejects.toThrow(AvatarRefusal);
+  });
+
+  test('the pixel cap refuses a 2048 by 2048 picture in words and takes 1024 by 1024', async () => {
+    // a flat picture is a few KB, so the byte cap passes and the pixel cap is what answers
+    const flat = async (side: number) =>
+      new Uint8Array(
+        await sharp({ create: { width: side, height: side, channels: 3, background: '#406080' } })
+          .png()
+          .toBuffer(),
+      );
+    const large = await flat(2048);
+    expect(large.byteLength).toBeLessThan(AVATAR_MAX_BYTES);
+    await expect(processAvatar(large, newAvatarKey())).rejects.toThrow(AVATAR_TOO_MANY_PIXELS);
+    const edge = await processAvatar(await flat(1024), newAvatarKey());
+    expect(edge.files).toHaveLength(5);
+  });
+
+  test('an orientation 6 JPEG lands upright with no Exif in the files', async () => {
+    // a 64 by 32 gradient (red along x) stored with orientation 6: rotated 90 degrees clockwise
+    // it is 32 wide and 64 tall with red running down the rows, so the 256 px PNG's red is flat
+    // along x and ramps along y; a pipeline that ignored the tag would ramp along x
+    const width = 64;
+    const height = 32;
+    const raw = new Uint8Array(width * height * 3);
+    for (let y = 0; y < height; y += 1)
+      for (let x = 0; x < width; x += 1) {
+        const i = (y * width + x) * 3;
+        raw[i] = Math.round((x / (width - 1)) * 255);
+        raw[i + 1] = 96;
+        raw[i + 2] = Math.round((y / (height - 1)) * 255);
+      }
+    const jpeg = await sharp(Buffer.from(raw), { raw: { width, height, channels: 3 } })
+      .jpeg({ quality: 95 })
+      .withMetadata({ orientation: 6 })
+      .toBuffer();
+    expect((await sharp(jpeg).metadata()).orientation).toBe(6);
+    const processed = await processAvatar(
+      new Uint8Array(jpeg.buffer, jpeg.byteOffset, jpeg.byteLength),
+      newAvatarKey(),
+    );
+    const png = processed.files.find((file) => file.contentType === 'image/png');
+    expect(png).toBeDefined();
+    const { data, info } = await sharp(Buffer.from(png!.bytes))
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const red = (x: number, y: number): number => data[(y * info.width + x) * info.channels] ?? -1;
+    expect(Math.abs(red(16, 16) - red(240, 16))).toBeLessThan(24);
+    expect(red(128, 240) - red(128, 16)).toBeGreaterThan(60);
+    for (const file of processed.files) {
+      const meta = await sharp(Buffer.from(file.bytes)).metadata();
+      expect(meta.exif).toBeUndefined();
+      expect(meta.orientation).toBeUndefined();
+    }
+  });
+});
+
+describe('blobAvatarStore', () => {
+  test('the base is computed from the public store origin on every call, the put carries a year of cache, and keys list', async () => {
+    const client = fakeBlobClient();
+    const store = blobAvatarStore(client, {
+      origin: 'https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/',
+    });
+    const key = newAvatarKey();
+    // before any put in this process, the base is already the public URL of the key's folder
+    expect(store.base(key)).toBe(
+      `https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/u/${key}`,
+    );
+    const processed = await processAvatar(await picture('png'), key);
+    for (const file of processed.files) {
+      const url = await store.put(file);
+      expect(url).toBe(`${store.base(key)}/${file.relative.split('/')[2]}`);
+    }
+    expect(client.puts).toHaveLength(5);
+    for (const put of client.puts) {
+      expect(put.options.overwrite).toBe(false);
+      expect(put.options.cacheControlMaxAge).toBe(AVATAR_CACHE_MAX_AGE_S);
+      expect(put.options.contentType).toMatch(/^image\/(webp|png)$/);
+    }
+    expect(await store.listKeys()).toEqual([
+      { avatarKey: key, files: 5, newestAt: '2026-09-29T10:00:00.000Z' },
+    ]);
+    expect(await store.removeKey(key)).toBe(5);
+    expect(await store.listKeys()).toEqual([]);
+    expect(await store.removeKey('../..')).toBe(0);
+  });
+
+  test('without an origin the base is relative until a put names one; a lazy client answering null refuses', async () => {
+    const client = fakeBlobClient('https://other.test');
+    const store = blobAvatarStore(() => Promise.resolve(client));
+    const key = newAvatarKey();
+    expect(store.base(key)).toBe(`u/${key}`);
+    const processed = await processAvatar(await picture('png', 16, 16), key);
+    await store.put(processed.files[0]!);
+    expect(store.base(key)).toBe(`https://other.test/u/${key}`);
+    const none = blobAvatarStore(() => Promise.resolve(null), { origin: 'https://x.test' });
+    expect(none.base(key)).toBe(`https://x.test/u/${key}`);
+    await expect(none.put(processed.files[0]!)).rejects.toThrow(AVATAR_STORE_UNAVAILABLE);
+  });
+});
+
+describe('sweepOrphanAvatars', () => {
+  test("keeps a profile's key and a young key, removes an old orphan, and lists only on a dry run", async () => {
+    const store = fakeStore();
+    const profiles = memoryProfileStore();
+    const principals = memoryPrincipalStore();
+    const deps = { store, profiles, principals, quotas: memoryQuotaStore() };
+    const bytes = await picture('png', 16, 16);
+    const named = await setPictureAvatar(deps, 'usr_maya', bytes);
+    const namedKey = named.picture?.avatarKey ?? '';
+    // an orphan: files written under a key no profile names (a put that never reached the record)
+    const orphanKey = newAvatarKey();
+    for (const file of (await processAvatar(bytes, orphanKey)).files) await store.put(file);
+    const youngKey = newAvatarKey();
+    for (const file of (await processAvatar(bytes, youngKey)).files) await store.put(file);
+    const unknownAgeKey = newAvatarKey();
+    for (const file of (await processAvatar(bytes, unknownAgeKey)).files) await store.put(file);
+    const now = new Date('2026-09-29T12:00:00.000Z');
+    store.times.set(namedKey, '2026-09-01T00:00:00.000Z');
+    store.times.set(orphanKey, '2026-09-27T12:00:00.000Z');
+    store.times.set(youngKey, '2026-09-29T11:30:00.000Z');
+    const dry = await sweepOrphanAvatars(store, profiles, { dryRun: true, now: () => now });
+    expect(dry).toEqual({
+      dryRun: true,
+      scanned: 4,
+      kept: 1,
+      young: 2,
+      orphans: [orphanKey],
+      filesRemoved: 0,
+    });
+    expect(store.files.size).toBe(20);
+    const swept = await sweepOrphanAvatars(store, profiles, { now: () => now });
+    expect(swept).toEqual({
+      dryRun: false,
+      scanned: 4,
+      kept: 1,
+      young: 2,
+      orphans: [orphanKey],
+      filesRemoved: 5,
+    });
+    expect(store.removed).toEqual([orphanKey]);
+    expect([...store.files.keys()].some((relative) => relative.startsWith(`u/${orphanKey}/`))).toBe(
+      false,
+    );
+    expect([...store.files.keys()].some((relative) => relative.startsWith(`u/${namedKey}/`))).toBe(
+      true,
+    );
+    // a window of zero hours makes the unknown age key stay young still: no time, no removal
+    const again = await sweepOrphanAvatars(store, profiles, { olderThanHours: 0, now: () => now });
+    expect(again.orphans).toEqual([youngKey]);
+    expect(again.young).toBe(1);
   });
 });
 
@@ -212,8 +437,13 @@ describe('the file store of a checkout', () => {
     expect(read?.bytes.byteLength).toBe(processed.files[0]?.bytes.byteLength);
     expect(store.read('u/nope/x.webp')).toBeNull();
     expect(existsSync(join(dir, 'u', key))).toBe(true);
+    const listed = await store.listKeys();
+    expect(listed.map((row) => row.avatarKey)).toEqual([key]);
+    expect(listed[0]?.files).toBe(5);
+    expect(Date.parse(listed[0]?.newestAt ?? '')).toBeGreaterThan(0);
     expect(await store.removeKey(key)).toBe(5);
     expect(existsSync(join(dir, 'u', key))).toBe(false);
+    expect(await store.listKeys()).toEqual([]);
     expect(await store.removeKey(key)).toBe(0);
     expect(await store.removeKey('../..')).toBe(0);
   });

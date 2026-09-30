@@ -306,8 +306,9 @@
           "maximum": 9007199254740991
         },
         "picture": {
-          "description": "A file path or a data URL; sharp re-encodes it and keeps no original",
-          "type": "string"
+          "description": "A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original",
+          "type": "string",
+          "maxLength": 700000
         }
       },
       "required": [
@@ -87673,8 +87674,9 @@
             "maximum": 9007199254740991
           },
           "picture": {
-            "description": "A file path or a data URL; sharp re-encodes it and keeps no original",
-            "type": "string"
+            "description": "A data URL of a JPEG, PNG, WebP or GIF under 512 KB; sharp re-encodes it and keeps no original",
+            "type": "string",
+            "maxLength": 700000
           }
         },
         "required": [

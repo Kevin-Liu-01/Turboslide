@@ -52,6 +52,15 @@ the deployment admin, else the anonymous principal of the sealed `__Host-ts_id` 
 from that context (`authorFor`): the anonymous label with the principal id, an agent's token id;
 `?author=` and the body's author are never trusted for identity (8.2).
 
+A signed in account is one person with the anonymous ids the alias table links to it (SPEC-3 7.4;
+docs/PEOPLE.md 3.6): its `Principal` carries `aliases`, and `standingOf` matches the record's
+owner and grant holders against the account and its aliases, so a deck made before the sign in
+keeps its creator as the owner. The `Principal` of an account also carries its verified address
+and nothing else's: a pending grant by email admits the account whose address it names
+(`isPendingEmailGrantFor`), and the studio binds the grant to the account's id at that first read
+of the deck (`server/access.ts` `bindEmailGrants`, one announced record write; the store keeps no
+index of grants by address, so nothing binds at sign in). An unverified address admits nobody.
+
 The twenty capabilities and the matrix are 6.2; the least role a capability needs is data in the
 identity package. Deny by default: a caller who may not read a deck gets one 404 whether the deck
 exists or not; a caller who may read but lacks the capability gets 403 with the capability named;
@@ -328,11 +337,17 @@ production.
 ## 10. Uploads and the dependency gate
 
 `apps/studio/src/server/upload.ts`, `packages/headless/src/capture/intake.ts` (0.29, 8.5). One
-pipeline for every picture: a size cap by tier (25 MB anonymous, 50 MB signed in, 5 MB avatar),
-the magic byte sniff (png, jpeg, webp, gif; svg refused hosted), sharp 0.35.4 with
-`limitInputPixels` at 64 megapixels and `failOn: 'error'`, HEIF and JXL blocked at process start,
-animated GIFs flattened, a re-encode hosted so no byte of the input survives, digest named twins
-through the store's `putAsset` with nothing ever overwritten. Above 3 MB hosted the presigned path:
+pipeline for every picture: a size cap by tier (25 MB anonymous, 50 MB signed in, 512 KB avatar
+after the browser's 256 px resize, checked on the data URL string before any decode and again on
+the bytes; `limitInputPixels` 1024 by 1024 for that path, docs/PEOPLE.md 4.2), the magic byte
+sniff (png, jpeg, webp, gif; svg refused hosted), sharp 0.35.4 with `limitInputPixels` at 64
+megapixels and `failOn: 'error'`, HEIF and JXL blocked at process start, animated GIFs flattened,
+a re-encode hosted so no byte of the input survives, digest named twins through the store's
+`putAsset` with nothing ever overwritten. The avatar files land under the public `u/<avatarKey>/`
+prefix of the public store on the blob tier, put once with a year of cache because the digest is
+in the name and the key rotates on every change; a replaced picture can stay readable at its old
+unguessable address until that cache expires, and only `admin.avatar.sweep` removes files under
+`u/`, by key, never a sweep by date or name. Above 3 MB hosted the presigned path:
 `POST /api/x/upload/picture` runs `authorize(write)`, the `uploads` switch and the picture quotas
 and issues a ten minute token for `uploads/<principalId>/<uuid>`; the browser PUTs the bytes (on
 the local backend to `/api/x/upload/put/<token>`, streamed under the cap and sniffed before it is

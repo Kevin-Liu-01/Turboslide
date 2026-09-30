@@ -5,9 +5,11 @@ import { newPrincipalRecord } from './principal.ts';
 import type { AccountProfile, ResolveLookup } from './resolve.ts';
 import {
   DELETED_ACCOUNT,
+  TRUST_WORDS,
   displayWithTrust,
   resolvePrincipal,
   sanitizeRunId,
+  toIdentityView,
   trustTooltip,
 } from './resolve.ts';
 
@@ -79,7 +81,9 @@ describe('resolvePrincipal', () => {
       email: 'kevin@example.com',
       accountId: '01JKEVIN',
       admin: true,
-      label: labelFor(ANON),
+      // the account's own label, so one account is one word on every id that renders as it
+      // (docs/PEOPLE.md 3.18)
+      label: labelFor('usr_01JKEVIN'),
     });
     expect(trustTooltip(r.trust, r.email)).toBe('Signed in as kevin@example.com');
     // An alias to a missing account falls back to the record.
@@ -116,7 +120,9 @@ describe('resolvePrincipal', () => {
       'usr_01JKEVIN',
       lookup({ account: () => ({ ...KEVIN, name: '  ' }) }),
     );
-    expect(blankName.displayName).toBe('kevin@example.com');
+    // the label, never the address (docs/PEOPLE.md 3.18; AUDIT.md defect 21)
+    expect(blankName.displayName).toBe(labelFor('usr_01JKEVIN'));
+    expect(blankName.email).toBe('kevin@example.com');
   });
 
   test('an agent renders the token name and a sanitized run id, never a header name', () => {
@@ -154,5 +160,98 @@ describe('resolvePrincipal', () => {
     expect(resolvePrincipal(ANON2, lookup()).label).not.toBe(
       resolvePrincipal(ANON, lookup()).label,
     );
+  });
+});
+
+// The people round (docs/PEOPLE.md 3.7, 3.18, 4.4; 6.5): the account without a typed name, the
+// picture URL on the resolved identity, the word beside the badge, the deleted flag on the view.
+describe('the people round', () => {
+  const USR = `usr_${KEVIN.userId}`;
+  const DIGEST = 'b'.repeat(64);
+  const PICTURE = {
+    variant: 'picture' as const,
+    picture: {
+      avatarKey: 'AbCdEfGhIjKlMnOpQrStUv',
+      digest: DIGEST,
+      sizes: [32, 64, 128, 256],
+      base: 'https://store.example.test/u/AbCdEfGhIjKlMnOpQrStUv',
+    },
+  };
+
+  test('an account without a typed name resolves to its label, never its address', () => {
+    const r = resolvePrincipal(USR, lookup({ account: () => ({ ...KEVIN, name: '   ' }) }));
+    expect(r.displayName).toBe(labelFor(USR));
+    expect(r.trust).toBe('verified');
+    expect(r.email).toBe('kevin@example.com');
+    const view = toIdentityView(r);
+    expect(view.name).toBeUndefined();
+    expect(view.label).toBe(labelFor(USR));
+    expect(view.email).toBeUndefined();
+    expect(toIdentityView(r, { showEmail: true }).email).toBe('kevin@example.com');
+    expect(displayWithTrust(r)).toBe(labelFor(USR));
+  });
+
+  test('a typed account name still wins', () => {
+    expect(resolvePrincipal(USR, lookup({ account: () => KEVIN })).displayName).toBe('Kevin Liu');
+  });
+
+  test('pictureUrl is the 64 px file of a picture choice and absent otherwise', () => {
+    const account = resolvePrincipal(
+      USR,
+      lookup({ account: () => ({ ...KEVIN, avatar: PICTURE }) }),
+    );
+    expect(account.pictureUrl).toBe(`${PICTURE.picture.base}/${DIGEST}-64.webp`);
+    const record = { ...newPrincipalRecord(ANON), avatar: PICTURE };
+    const anonymous = resolvePrincipal(ANON, lookup({ record: () => record }));
+    expect(anonymous.pictureUrl).toBe(`${PICTURE.picture.base}/${DIGEST}-64.webp`);
+    expect(resolvePrincipal(USR, lookup({ account: () => KEVIN })).pictureUrl).toBeUndefined();
+    expect(resolvePrincipal(ANON, lookup()).pictureUrl).toBeUndefined();
+    const deleted = resolvePrincipal(
+      USR,
+      lookup({ account: () => ({ ...KEVIN, avatar: PICTURE, deleted: true }) }),
+    );
+    expect(deleted.pictureUrl).toBeUndefined();
+    expect(deleted.displayName).toBe(DELETED_ACCOUNT);
+  });
+
+  test('the word beside the verified badge is "signed in"', () => {
+    expect(TRUST_WORDS.verified).toBe('signed in');
+    expect(TRUST_WORDS.guest).toBe('guest');
+    expect(TRUST_WORDS.label).toBe('');
+    expect(trustTooltip('verified', 'kevin@example.com')).toBe('Signed in as kevin@example.com');
+    expect(trustTooltip('verified')).toBe('Signed in');
+  });
+
+  test('the view names the account behind an aliased anonymous id, and nothing else', () => {
+    const aliased = resolvePrincipal(
+      ANON,
+      lookup({
+        alias: (id) => (id === ANON ? 'usr_01JKEVIN' : null),
+        account: (userId) => (userId === '01JKEVIN' ? KEVIN : null),
+      }),
+    );
+    expect(toIdentityView(aliased).accountId).toBe('usr_01JKEVIN');
+    expect(
+      toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).accountId,
+    ).toBeUndefined();
+    expect(toIdentityView(resolvePrincipal(ANON, lookup())).accountId).toBeUndefined();
+    const deleted = resolvePrincipal(
+      ANON,
+      lookup({
+        alias: () => 'usr_01JKEVIN',
+        account: () => ({ ...KEVIN, deleted: true }),
+      }),
+    );
+    expect(toIdentityView(deleted).accountId).toBeUndefined();
+  });
+
+  test('the view carries deleted for a deleted account only', () => {
+    const gone = resolvePrincipal(USR, lookup());
+    expect(toIdentityView(gone).deleted).toBe(true);
+    expect(toIdentityView(gone, { showEmail: true }).email).toBeUndefined();
+    expect(
+      toIdentityView(resolvePrincipal(USR, lookup({ account: () => KEVIN }))).deleted,
+    ).toBeUndefined();
+    expect(toIdentityView(resolvePrincipal(ANON, lookup())).deleted).toBeUndefined();
   });
 });

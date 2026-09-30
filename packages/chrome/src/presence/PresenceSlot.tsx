@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { COLLAB_CLASSES } from '@turboslide/render/collab';
 
 import { useEditorShell } from '../editor-shell-context';
-import type { EditorPresence, IdentityView, PresenceParticipant } from '../editor-shell';
+import type { EditorPresence, PresenceParticipant } from '../editor-shell';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { isPresent, itemById } from '../menus/model';
@@ -12,7 +12,15 @@ import { tipProps } from '../Tooltip';
 import { AccountMenu } from './AccountMenu';
 import { IdentityChip } from './IdentityChip';
 import { RosterMenu } from './RosterMenu';
-import { canFollow, chipTipOf, slideNumberOf, slotChips, viewerFactsOf } from './presence-model';
+import {
+  canFollow,
+  chipTipDocOf,
+  chipTipOf,
+  meOf,
+  slideNumberOf,
+  slotChips,
+  viewerFactsOf,
+} from './presence-model';
 
 /**
  * The presence slot of the title row (gslides-parity SPEC-3 4.2, 9.3; research 11 6.2, 8 P1):
@@ -75,22 +83,15 @@ export function presenceSlotTip(others: number): { name: string; doc: string } {
 }
 const EMPTY: EditorPresence = { others: [] };
 
-/** The identity the own chip shows when the route passed no account: a label from the presence self, else nothing. */
-function selfIdentity(
-  presence: EditorPresence,
-  account: { principal: IdentityView } | undefined,
-): IdentityView | null {
-  if (account !== undefined) return account.principal;
-  return presence.self ?? null;
-}
-
 export function PresenceSlot() {
   const shell = useEditorShell();
   const { input } = shell;
   const presence = input.presence ?? EMPTY;
   const viewer = viewerFactsOf(input.access, presence);
   const { shown, more } = slotChips(presence.others);
-  const self = selfIdentity(presence, input.account);
+  /* the own chip reads what others see (docs/PEOPLE.md 3.11): one source with the roster's own
+     row, the account head, the Profile head, the version rows and the Share dialog */
+  const self = meOf({ account: input.account, presence });
   const [roster, setRoster] = useState<HTMLElement | null>(null);
   const [account, setAccount] = useState<HTMLElement | null>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -149,12 +150,18 @@ export function PresenceSlot() {
               name: following
                 ? PRESENCE.following(participant.name ?? participant.label)
                 : chipTipOf(participant, viewer, n),
-              doc:
+              /* the trust sentence first (docs/PEOPLE.md 3.7), then what a click does: the chip's
+                 click is the one time jump; Follow is in the list while its row is offered
+                 (docs/POLISH.md item 104) */
+              doc: chipTipDocOf(
+                participant,
+                viewer,
                 n === null
                   ? 'This person has no slide open'
                   : follows
                     ? 'Jumps to the slide this person has open. Follow is in the list'
                     : 'Jumps to the slide this person has open',
+              ),
             })}
           >
             <IdentityChip

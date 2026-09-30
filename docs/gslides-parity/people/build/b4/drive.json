@@ -1,0 +1,275 @@
+{
+  "base": "http://localhost:4464",
+  "at": "2026-09-29T20:13:24.746Z",
+  "load": [8.0859375, 8.73046875, 9.6064453125],
+  "steps": {
+    "probe": {
+      "getSession": 200
+    },
+    "anonymous-refused": {
+      "status": 400,
+      "sentence": "Sign in to upload a picture",
+      "keysOnDisk": 0,
+      "cookie": ["__Host-ts_id"]
+    },
+    "sign-in": {
+      "asked": 200,
+      "code": "captured",
+      "verified": 200,
+      "me": {
+        "kind": "account",
+        "trust": "verified",
+        "avatar": {
+          "variant": "initials"
+        },
+        "cookies": ["__Host-ts_id", "__Secure-ts.session_token", "__Secure-ts.session_data"]
+      }
+    },
+    "upload-1": {
+      "status": 200,
+      "sentence": null,
+      "requestBytes": 13889,
+      "fixtureBytes": 10372,
+      "avatar": {
+        "variant": "picture",
+        "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-64.webp"
+      },
+      "markVariant": "picture",
+      "markPictureUrl": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-64.webp",
+      "markEqualsAvatarUrl": true,
+      "urlGrammar": true,
+      "keysOnDisk": 1,
+      "served": {
+        "webp32": {
+          "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-32.webp",
+          "status": 200,
+          "bytes": 144,
+          "contentType": "image/webp",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "corp": "same-origin",
+          "nosniff": "nosniff",
+          "width": 32,
+          "height": 32,
+          "format": "webp",
+          "exif": "none",
+          "orientationTag": null
+        },
+        "webp64": {
+          "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-64.webp",
+          "status": 200,
+          "bytes": 210,
+          "contentType": "image/webp",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "corp": "same-origin",
+          "nosniff": "nosniff",
+          "width": 64,
+          "height": 64,
+          "format": "webp",
+          "exif": "none",
+          "orientationTag": null
+        },
+        "webp128": {
+          "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-128.webp",
+          "status": 200,
+          "bytes": 392,
+          "contentType": "image/webp",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "corp": "same-origin",
+          "nosniff": "nosniff",
+          "width": 128,
+          "height": 128,
+          "format": "webp",
+          "exif": "none",
+          "orientationTag": null
+        },
+        "webp256": {
+          "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-256.webp",
+          "status": 200,
+          "bytes": 884,
+          "contentType": "image/webp",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "corp": "same-origin",
+          "nosniff": "nosniff",
+          "width": 256,
+          "height": 256,
+          "format": "webp",
+          "exif": "none",
+          "orientationTag": null
+        },
+        "png256": {
+          "url": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-256.png",
+          "status": 200,
+          "bytes": 100431,
+          "contentType": "image/png",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "corp": "same-origin",
+          "nosniff": "nosniff",
+          "width": 256,
+          "height": 256,
+          "format": "png",
+          "exif": "none",
+          "orientationTag": null
+        }
+      }
+    },
+    "glyph-on-index": {
+      "meAfterUploadPictureUrl": "/api/avatar/u/gJp4QlygLkrFMwc051RWKQ/ee5ed2766184a19fecd40bd55867d9d6c851cddbbe40e78fd4c0e988af731951-64.webp",
+      "glyph": {
+        "status": 200,
+        "avatar": {
+          "variant": "glyph",
+          "salt": 7
+        },
+        "markVariant": "glyph"
+      },
+      "keysOnDiskAfterGlyph": 0,
+      "indexFile": "<overlay>/.turboslide/users/usr_wcD2m6qwxCETLVbB9YmqNlBcpGw1teLN/decks.json",
+      "indexAvatar": {
+        "variant": "glyph",
+        "salt": 7
+      }
+    },
+    "upload-2-oriented": {
+      "status": 200,
+      "newKey": true,
+      "oldUrlStatus": 404,
+      "keysOnDisk": ["NbbmHsUc1n-JSVOksFQeZg"],
+      "keysOnDiskCount": 1,
+      "onlyNewKeyOnDisk": true,
+      "png": {
+        "url": "/api/avatar/u/NbbmHsUc1n-JSVOksFQeZg/f69717de9baa5fc6c5532202a8ee37810aa61160582343ab2e91413791fec1ad-256.png",
+        "status": 200,
+        "bytes": 79819,
+        "contentType": "image/png",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "corp": "same-origin",
+        "nosniff": "nosniff",
+        "width": 256,
+        "height": 256,
+        "format": "png",
+        "exif": "none",
+        "orientationTag": null
+      },
+      "webp64": {
+        "url": "/api/avatar/u/NbbmHsUc1n-JSVOksFQeZg/f69717de9baa5fc6c5532202a8ee37810aa61160582343ab2e91413791fec1ad-64.webp",
+        "status": 200,
+        "bytes": 184,
+        "contentType": "image/webp",
+        "cacheControl": "public, max-age=31536000, immutable",
+        "corp": "same-origin",
+        "nosniff": "nosniff",
+        "width": 64,
+        "height": 64,
+        "format": "webp",
+        "exif": "none",
+        "orientationTag": null
+      },
+      "upright": {
+        "redFlatAlongX": true,
+        "redRampsAlongY": true,
+        "samples": {
+          "r16_16": 136,
+          "r240_16": 135,
+          "r128_240": 250
+        }
+      },
+      "indexAvatarAfterPicture": null
+    },
+    "cap-refusal": {
+      "longString": {
+        "length": 699200,
+        "status": 400,
+        "sentence": "Pictures up to 512 KB after resizing"
+      },
+      "noiseWebp": {
+        "bytes": 684690,
+        "overCap": true,
+        "dataUrlLength": 912943,
+        "status": 400,
+        "sentence": "Pictures up to 512 KB after resizing"
+      },
+      "keysOnDiskUnchanged": true
+    },
+    "pixel-cap": {
+      "fixtureBytes": 212265,
+      "underByteCap": true,
+      "status": 400,
+      "sentence": "Pictures up to 1024 by 1024 pixels",
+      "keysOnDiskUnchanged": true
+    },
+    "cli": {
+      "upload": {
+        "status": 0,
+        "principal": {
+          "id": "usr_wcD2m6qwxCETLVbB9YmqNlBcpGw1teLN",
+          "kind": "account",
+          "email": "b4-drive@example.test",
+          "admin": true
+        },
+        "avatarUrl": "/api/avatar/u/Wd41BDbQc_eB5DsWNtpKkQ/deef5a5b922727ef5e48bbb4728fa997bd42f9821a2967439933880afe532ef6-64.webp",
+        "markVariant": "picture",
+        "urlGrammar": true,
+        "stderr": "Copper 454 (verified) usr_wcD2m6qwxCETLVbB9YmqNlBcpGw1teLN; avatar picture /api/avatar/u/Wd41BDbQc_eB5DsWNtpKkQ/deef5a5b922727ef5e48bbb4728fa997bd42f9821a2967439933880afe532ef6-64.webp"
+      },
+      "keysOnDiskAfterCli": 1,
+      "sessionSeesCliPicture": true,
+      "readOnlyKey": {
+        "status": 2,
+        "stderr": "turboslide: This API key cannot change its owner’s name or avatar: it needs the write scope"
+      },
+      "overCap": {
+        "status": 2,
+        "stderr": "turboslide: Pictures up to 512 KB after resizing"
+      },
+      "notAPicture": {
+        "status": 2,
+        "stderr": "turboslide: Use a JPEG, PNG, WebP or GIF picture"
+      },
+      "avatarPng": {
+        "status": 0,
+        "principalKind": "agent",
+        "markVariant": "agent",
+        "avatarPng": "<b4>/cli-me-avatar.png",
+        "file": {
+          "width": 256,
+          "height": 256,
+          "format": "png",
+          "depth": "uchar",
+          "channels": 3
+        }
+      }
+    },
+    "janitor": {
+      "action": {
+        "status": 404,
+        "sentence": "Unknown action \"admin.avatar.sweep\"; GET /api/agent lists them"
+      },
+      "seeded": {
+        "orphanKey": "B4orphanB4orphanB4orph",
+        "youngKey": "B4youngB4youngB4youngB",
+        "namedKeys": ["Wd41BDbQc_eB5DsWNtpKkQ"]
+      },
+      "sweep": {
+        "dry": {
+          "dryRun": true,
+          "scanned": 3,
+          "kept": 1,
+          "young": 1,
+          "orphans": ["B4orphanB4orphanB4orph"],
+          "filesRemoved": 0
+        },
+        "run": {
+          "dryRun": false,
+          "scanned": 3,
+          "kept": 1,
+          "young": 1,
+          "orphans": ["B4orphanB4orphanB4orph"],
+          "filesRemoved": 1
+        },
+        "profileKeys": 1
+      },
+      "keysOnDiskAfter": ["B4youngB4youngB4youngB", "Wd41BDbQc_eB5DsWNtpKkQ"]
+    }
+  },
+  "loadAfter": [7.67822265625, 8.63525390625, 9.5673828125]
+}

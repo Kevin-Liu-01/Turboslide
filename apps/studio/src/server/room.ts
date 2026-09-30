@@ -6,10 +6,18 @@ import { authorize as bearerAuthorize } from '@turboslide/agent/http/auth';
 import type { AuthContext, Principal, Role } from '@turboslide/identity/access';
 import { assignHueSlot, preferredHueSlot } from '@turboslide/identity/hues';
 import type { HueSlot } from '@turboslide/identity/hues';
+import { isPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import { markSpec } from '@turboslide/identity/marks';
+import type { MarkSpec } from '@turboslide/identity/marks';
+import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
-import { resolvePrincipal } from '@turboslide/identity/resolve';
-import type { ResolvedIdentity, Trust } from '@turboslide/identity/resolve';
+import { resolvePrincipal, toIdentityView } from '@turboslide/identity/resolve';
+import type {
+  AccountProfile,
+  IdentityView,
+  ResolvedIdentity,
+  Trust,
+} from '@turboslide/identity/resolve';
 import { appendWithRetry, CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admission';
 import type { IdentityKind } from '@turboslide/realtime/admission';
 import { blobChannel, synthesizeReplayed } from '@turboslide/realtime/blob';
@@ -62,13 +70,30 @@ import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pul
 import { touchedSlides } from '@turboslide/store/store';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
-import { capabilitiesOf, displayNameFromIndex, effectiveAccess, readAccess } from './access';
+import {
+  avatarChoiceFromIndex,
+  capabilitiesOf,
+  displayNameFromIndex,
+  dropLinkGrantCache,
+  effectiveAccess,
+  indexFactsFor,
+  readAccess,
+  recordWithIndexFacts,
+  refreshIndexFacts,
+} from './access';
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
+import { sessionOf } from './auth/better-auth';
+import {
+  accountFacts,
+  identityRuntime,
+  linkAnonymous,
+  resolveIdentity as resolveThroughRuntime,
+} from './auth/identity';
 import { studioSessionSecret } from './auth/middleware';
 import { selectPrincipalStore } from './auth/principal';
-import { ensurePrincipal, readPrincipal } from './auth/session';
+import { boundPrincipal, ensurePrincipal, readPrincipal } from './auth/session';
 import { applyStreamEntries, createCheckpointer, coveredSeq } from './checkpoint';
 import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comments';
 import type { CommentActionId, CommentCaller } from './comments';
@@ -299,14 +324,35 @@ export type RequestIdentity = {
   /** the Set-Cookie value when this request minted the anonymous id */
   setCookie?: string;
   record: PrincipalRecord | null;
+  /**
+   * the account a sign in session resolved to (docs/PEOPLE.md 3.6; SPEC-3 7.4), so the author,
+   * the boot identity and the roster entry render the account without a store read; null or
+   * absent for an anonymous browser and a bearer
+   */
+  account?: AccountProfile | null;
+};
+
+export type RequestIdentityOptions = {
+  /**
+   * read the principal's deck index past this instance's 5 s row (access.ts refreshIndexFacts):
+   * the editor boot, so a reload's payload carries the name and the choice written on another
+   * instance at once (docs/PEOPLE.md 6.4); the routes between keep the row
+   */
+  freshIndex?: boolean;
 };
 
 /**
- * The identity of a request on the room routes: the sealed cookie (minted here when absent, so
- * a stream opened before the middleware ran still gets an id), else the bearer as the bootstrap
- * admin agent (SPEC-3 0.23; B3's key resolver binds records on day four), else a stranger.
+ * The identity of a request on the room routes: the bearer as the bootstrap admin agent (SPEC-3
+ * 0.23), else the account session when the deployment has an identity database (docs/PEOPLE.md
+ * 3.6: a signed in browser is its account on the editor boot, presence, ops, the stream, share,
+ * access, notify, assist and the version authors, one id with the comments the actions transport
+ * writes), else the sealed anonymous cookie (minted here when absent, so a stream opened before
+ * the middleware ran still gets an id), else a stranger.
  */
-export async function requestIdentity(request: Request): Promise<RequestIdentity> {
+export async function requestIdentity(
+  request: Request,
+  options: RequestIdentityOptions = {},
+): Promise<RequestIdentity> {
   const secret = studioSessionSecret();
   if (request.headers.get('authorization') !== null) {
     const bearer = bearerAuthorize(request, process.env);
@@ -320,18 +366,25 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
         record: null,
       };
     }
-  } else if (request.headers.get('cookie') === null) {
+  } else if (request.headers.get('cookie') === null && boundPrincipal(request) === undefined) {
     // a cookieless request the localhost rule admits (SPEC-3 0.23: curl, the CLI's --to, an MCP
     // client on a checkout's dev server) is the checkout holder, as the agent routes decide;
     // minting an anonymous principal per call would make every call a different stranger (the
-    // integrator at merge 2, seen on the merge 2 action walk)
+    // integrator at merge 2, seen on the merge 2 action walk). A browser's first request carries
+    // no cookie either, but the request middleware minted its principal and bound it to the
+    // request (session.ts bindRequestPrincipal), so that request is the person, never the holder
+    // (the people round: the draft on /new read as the checkout holder before the first cookie)
     const local = agentAuth(request);
     if (local.ok && local.mode === 'localhost') {
       const ctx = bootstrapAgentContext('localhost');
       return { ctx, principalId: null, identity: 'agent:localhost', kind: 'agent', record: null };
     }
   }
-  const existing = await readPrincipal(request, secret);
+  /* the principal the request middleware minted for this very request rides the binding (its
+     cookie is on the response, not in the request), so no route mints a second one */
+  const existing = boundPrincipal(request)?.principal ?? (await readPrincipal(request, secret));
+  const signedIn = await sessionIdentity(request, existing);
+  if (signedIn !== null) return signedIn;
   let principal: Principal | null = existing;
   let setCookie: string | undefined;
   if (principal === null) {
@@ -353,16 +406,25 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
   const touched = await principalStore()
     .touch(principal.id, new Date(), true)
     .catch(() => null);
-  /* the display name typed on another instance (b1.md R17): the principal store of the blob tier
-     is a file store per instance, so the name `account.setName` wrote elsewhere rides the
-     principal's deck index on the Blob store (access.ts displayNameFromIndex, the carrier the
-     link grants use), read past the same 5 s cache; a record that carries a name keeps it */
+  /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
+     (docs/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
+     instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
+     principal's deck index on the Blob store (the carrier the link grants use), read through
+     this instance's 5 s row (access.ts indexFactsFor) or past it when the caller asks
+     (`freshIndex`, the editor boot; docs/PEOPLE.md 6.4), and applied by access.ts
+     recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
+     replaces the record's unless the record's choice is a picture, which the index never carries
+     and a stale glyph must not outlive */
+  const facts =
+    touched === null
+      ? null
+      : await (
+          options.freshIndex === true
+            ? refreshIndexFacts(principal.id)
+            : indexFactsFor(principal.id)
+        ).catch(() => null);
   const record =
-    touched !== null && touched.name === undefined
-      ? await displayNameFromIndex(principal.id)
-          .then((name) => (name === undefined ? touched : { ...touched, name }))
-          .catch(() => touched)
-      : touched;
+    touched !== null && facts !== null ? recordWithIndexFacts(touched, facts) : touched;
   return {
     /* the link grants are the union of the principal record's and the deck index's, so a grant
        exchanged on another instance admits the visitor on the ops, stream, presence and comments
@@ -376,6 +438,75 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
   };
 }
 
+/**
+ * The account session of a request, as the room reads it (docs/PEOPLE.md 3.6): the better-auth
+ * session before the anonymous cookie when the deployment has an identity database. The rule is
+ * the auth runtime's `requestIdentity` (auth/identity.ts): the account principal `usr_<id>` with
+ * its address and the admin flag, the anonymous cookie beside it linked to the account if it is
+ * not yet (7.4), the account's own record touched. Null for no database, no session, a deleted
+ * account, or a database that did not answer (logged once per minute; the browser is then its
+ * anonymous cookie for this request, as before this round).
+ */
+async function sessionIdentity(
+  request: Request,
+  anonymous: Principal | null,
+): Promise<RequestIdentity | null> {
+  const runtime = identityRuntime();
+  if (runtime.auth === null) return null;
+  try {
+    await runtime.ready;
+    const found = await sessionOf(runtime.auth, request);
+    if (found === null) return null;
+    const facts = await accountFacts(runtime, found.user.id);
+    if (facts === null || facts.profile.deletedAt !== null) return null;
+    if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, facts.userId);
+    const now = new Date();
+    const record =
+      (await runtime.principals.touch(facts.principalId, now, true)) ??
+      newPrincipalRecord(facts.principalId, now);
+    /* the choice on the profile row first, the record second (docs/PEOPLE.md 3.13): the profile
+       outlives the record's 90 day TTL */
+    const avatar = facts.profile.avatar ?? record.avatar;
+    const account: AccountProfile = {
+      userId: facts.userId,
+      name: facts.name,
+      email: facts.email,
+      emailVerified: facts.emailVerified,
+      admin: facts.admin,
+      avatar,
+    };
+    /* the verified address, so a pending grant by email admits the invitee (identity/access.ts
+       isPendingEmailGrantFor), and the anonymous ids linked to the account, so a deck made
+       before the sign in keeps its creator as the owner (standingOf; b1.md R3) */
+    const aliases = await runtime.aliases.aliasesOf(facts.userId).catch(() => []);
+    const principal: Principal = {
+      id: facts.principalId,
+      kind: 'account',
+      ...(facts.emailVerified ? { email: facts.email } : {}),
+      admin: facts.admin,
+      ...(aliases.length > 0 ? { aliases } : {}),
+    };
+    return {
+      ctx: { principal, linkGrants: await linkGrantsFor(facts.principalId, record) },
+      principalId: facts.principalId,
+      identity: facts.principalId,
+      kind: 'signedIn',
+      record,
+      account,
+    };
+  } catch (error) {
+    const now = Date.now();
+    if (now - sessionErrorLoggedAt > 60_000) {
+      sessionErrorLoggedAt = now;
+      log(
+        `the account session was not read: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    return null;
+  }
+}
+let sessionErrorLoggedAt = 0;
+
 /** The author a server derived identity writes as (SPEC-3 0.17): the label or the typed name, the principal id. */
 export function authorOf(identity: RequestIdentity): Author {
   if (identity.ctx.agent !== undefined) {
@@ -386,7 +517,11 @@ export function authorOf(identity: RequestIdentity): Author {
       principalId: `agent:${identity.ctx.agent.tokenId}`,
     };
   }
-  const resolved = resolveIdentity(identity.principalId ?? identity.identity, identity.record);
+  const resolved = resolveIdentity(
+    identity.principalId ?? identity.identity,
+    identity.record,
+    identity.account ?? null,
+  );
   return {
     kind: 'human',
     name: resolved.displayName,
@@ -394,24 +529,187 @@ export function authorOf(identity: RequestIdentity): Author {
   };
 }
 
-/** The resolved identity of a principal id from its record (the alias and account lookups are B3's day four). */
+/**
+ * The resolved identity of a principal id from its record and, for a signed in request, the
+ * account the session resolved to (docs/PEOPLE.md 3.6). Synchronous: the author of a write and
+ * the boot identity read it on the request's own facts. An anonymous id linked to an account by
+ * the alias table is resolved by `resolvePrincipalId` and `resolveRequestIdentity`, which read
+ * the runtime's alias and account stores.
+ */
 export function resolveIdentity(
   principalId: string,
   record: PrincipalRecord | null,
+  account: AccountProfile | null = null,
 ): ResolvedIdentity {
+  const parsed = parsePrincipalId(principalId);
+  const own =
+    account !== null && parsed?.kind === 'account' && parsed.userId === account.userId
+      ? account
+      : null;
   return resolvePrincipal(principalId, {
     record: () => record,
     alias: () => null,
-    account: () => null,
+    account: () => own,
   });
 }
 
-/** The same resolution over the store, for ids the request did not carry (the version history, comments). */
+/**
+ * The resolution over the stores for an id the request did not carry (the version history, the
+ * comment authors, the access record's people; docs/PEOPLE.md 3.6, 3.8): an account id and an
+ * anonymous id the alias table links to an account resolve through the auth runtime (its
+ * profile, its picture, "Deleted account" for a profile that is gone), an agent id through its
+ * token record, and an anonymous id nobody linked from the room's principal record.
+ */
 export async function resolvePrincipalId(principalId: string): Promise<ResolvedIdentity> {
+  const parsed = parsePrincipalId(principalId);
+  const runtime = identityRuntime();
+  if (parsed?.kind === 'account' || parsed?.kind === 'agent')
+    return noteResolved(await resolveThroughRuntime(runtime, principalId));
+  if (parsed?.kind === 'anonymous') {
+    const alias = await runtime.aliases.accountOf(principalId).catch(() => null);
+    if (alias !== null) return noteResolved(await resolveThroughRuntime(runtime, principalId));
+  }
   const record = await principalStore()
     .get(principalId)
     .catch(() => null);
-  return resolveIdentity(principalId, record);
+  /* the name and the choice typed on another instance ride the principal's deck index (b1.md
+     R17; docs/PEOPLE.md 3.13), read here the way requestIdentity reads them for the request's
+     own principal: the blob tier's principal store is a file store per instance, so a departed
+     guest's comment read on another instance drew the label without this (the integrator's
+     preview run, people.comment-departed-guest) */
+  const carried =
+    record !== null && record.name !== undefined ? record : await carriedFacts(principalId, record);
+  return resolveIdentity(principalId, carried);
+}
+
+/**
+ * The record with the name and the non picture choice the deck index carries, when it carries
+ * any, read past this instance's 5 s index cache (access.ts `indexFactsFor`): `account.setName`
+ * drops the cache on the instance that wrote the index and no bus reaches the others, so an
+ * instance that read the person's index row before the write (their join, a presence post)
+ * answered the old row for up to 5 s and A's reload drew the departed guest's label (the
+ * verifier's pass 1 finding 2, `people.comment-departed-guest` red twice on preview 7 about 2 s
+ * after the reload). The drop costs one store read per person per boot on the blob tier; the
+ * name's read fills the cache and the choice's read takes it.
+ */
+async function carriedFacts(
+  principalId: string,
+  record: PrincipalRecord | null,
+): Promise<PrincipalRecord | null> {
+  dropLinkGrantCache(principalId);
+  const name = await displayNameFromIndex(principalId).catch(() => undefined);
+  const avatar = await avatarChoiceFromIndex(principalId).catch(() => undefined);
+  if (name === undefined && avatar === undefined) return record;
+  const base = record ?? newPrincipalRecord(principalId, new Date());
+  return {
+    ...base,
+    ...(name !== undefined ? { name } : {}),
+    ...(avatar !== undefined && base.avatar.variant !== 'picture' ? { avatar } : {}),
+  };
+}
+
+/**
+ * The address of a verified person this instance resolved lately, for the roster entry a grant
+ * holder or the owner reads (docs/PEOPLE.md 3.7): never on the shared roster, so the reader's
+ * instance answers from what it resolved itself (the presence post it served, the boot payload
+ * it built) within EMAIL_MEMORY_MS; a person resolved on another instance alone reads with no
+ * address until this instance resolves them.
+ */
+const emailMemory = new Map<string, { at: number; email: string }>();
+const EMAIL_MEMORY_MS = 90_000;
+
+function noteResolved(resolved: ResolvedIdentity): ResolvedIdentity {
+  if (resolved.trust === 'verified' && !resolved.deleted && resolved.email !== undefined)
+    emailMemory.set(resolved.principalId, { at: Date.now(), email: resolved.email });
+  else emailMemory.delete(resolved.principalId);
+  return resolved;
+}
+
+function rememberedEmail(principalId: string): string | undefined {
+  const hit = emailMemory.get(principalId);
+  if (hit === undefined) return undefined;
+  if (Date.now() - hit.at > EMAIL_MEMORY_MS) {
+    emailMemory.delete(principalId);
+    return undefined;
+  }
+  return hit.email;
+}
+
+/** The mark of a role word (docs/PEOPLE.md 3.27): a plate keyed by the role, never the person's, the room's hue kept. */
+export function roleMark(role: Role, hueSlot: HueSlot | null): MarkSpec {
+  const word = roleWord(role);
+  const synthetic: ResolvedIdentity = {
+    principalId: `role:${role}`,
+    kind: 'anonymous',
+    displayName: word,
+    label: word,
+    trust: 'label',
+    avatar: { variant: 'initials' },
+    deleted: false,
+    admin: false,
+  };
+  const spec = markSpec(synthetic, { hueSlot });
+  return { ...spec, initials: word.split(' ').pop()?.[0]?.toUpperCase() ?? '', label: word };
+}
+
+/** The view of a role word in place of a verified person (SPEC-3 0.12), for the payload's map. */
+function roleView(principalId: string, role: Role): IdentityView {
+  const word = roleWord(role);
+  return {
+    principalId,
+    label: word,
+    trust: 'label',
+    kind: 'anonymous',
+    mark: roleMark(role, null),
+  };
+}
+
+/** The role a person holds on the record, for the role word a link visitor reads them as. */
+function roleOnRecord(principalId: string, record: AccessRecord | null): Role {
+  if (record === null) return 'editor';
+  if (record.owner === principalId) return 'owner';
+  const grant = record.grants.find((row) => row.principalId === principalId);
+  if (grant !== undefined) return grant.role;
+  return record.generalAccess.role;
+}
+
+export type IdentityViewsOptions = {
+  /** the reader holds a grant or owns the deck: the address travels (SPEC-3 4.8) */
+  showEmail: boolean;
+  /** the reader arrived by link or the open mode and the owner's names switch is off: a verified person reads as a role word (0.12) */
+  roleWords: boolean;
+  /** the record, for the role a verified person reads as */
+  access: AccessRecord | null;
+};
+
+/**
+ * The resolved views of the people a page names (docs/PEOPLE.md 3.8): the version authors, the
+ * comment authors, the owner, the pending owner and the grants, keyed by principal id, with the
+ * mark and, for a reader who may see it, the address. An id of no known format (a round one
+ * author name) is left out and renders by the chrome's fallback.
+ */
+export async function identityViewsFor(
+  ids: Iterable<string>,
+  options: IdentityViewsOptions,
+): Promise<Record<string, IdentityView>> {
+  const wanted = [...new Set(ids)].filter((id) => isPrincipalId(id));
+  const out: Record<string, IdentityView> = {};
+  const BATCH = 8;
+  for (let i = 0; i < wanted.length; i += BATCH) {
+    const views = await Promise.all(
+      wanted.slice(i, i + BATCH).map(async (id) => {
+        const resolved = await resolvePrincipalId(id);
+        if (options.roleWords && resolved.trust === 'verified' && !resolved.deleted)
+          return [id, roleView(id, roleOnRecord(id, options.access))] as const;
+        return [
+          id,
+          toIdentityView(resolved, { mark: markSpec(resolved), showEmail: options.showEmail }),
+        ] as const;
+      }),
+    );
+    for (const [id, view] of views) out[id] = view;
+  }
+  return out;
 }
 
 /** `authorize()` for a request on a deck, with the route's transport word. */
@@ -2021,36 +2319,89 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
 // ---------------------------------------------------------------------------------------------
 // Presence (SPEC-3 3.8) and the roster by role (4.8)
 
-type IdentityCacheRow = { at: number; identity: ResolvedIdentity };
+type IdentityCacheRow = { at: number; facts: string; identity: ResolvedIdentity };
 const identityCache = new Map<string, IdentityCacheRow>();
 const IDENTITY_CACHE_MS = 5000;
 
-/** Drops the cached resolution of one identity (a rename on this instance, b1.md R18), so the next presence post reads the new record. */
+/** Drops the cached resolution of one identity (a rename or an avatar change on this instance, b1.md R18), so the next presence post reads the new record. */
 export function forgetIdentity(identity: string): void {
   identityCache.delete(identity);
+  emailMemory.delete(identity);
 }
 
-async function cachedIdentity(identity: RequestIdentity): Promise<ResolvedIdentity> {
+/**
+ * The facts of a request its resolution depends on, the cache row's validator (docs/PEOPLE.md
+ * 6.4): a request whose record or account carries another name or choice than the row was
+ * resolved from (the index read past its cache at a boot or a first presence post, a record
+ * another route wrote on this instance) is resolved again inside the 5 s, so the index row's
+ * window and this one never add up to ten.
+ */
+function identityFactsKey(identity: RequestIdentity): string {
+  return JSON.stringify([
+    identity.record?.name ?? null,
+    identity.record?.avatar ?? null,
+    identity.account?.name ?? null,
+    identity.account?.avatar ?? null,
+  ]);
+}
+
+/**
+ * The request identity with its record read against the deck index past this instance's 5 s row
+ * (access.ts refreshIndexFacts and recordWithIndexFacts; docs/PEOPLE.md 6.4): a client's first
+ * presence post after its boot. The same identity for a bearer, a request without a record, a
+ * store that did not answer, or an index that carries nothing new.
+ */
+export async function withFreshIndexFacts(identity: RequestIdentity): Promise<RequestIdentity> {
+  if (identity.ctx.agent !== undefined || identity.principalId === null || identity.record === null)
+    return identity;
+  const facts = await refreshIndexFacts(identity.principalId).catch(() => null);
+  if (facts === null) return identity;
+  const record = recordWithIndexFacts(identity.record, facts);
+  return record === identity.record ? identity : { ...identity, record };
+}
+
+/**
+ * The resolved identity of a request, through the 5 s cache (docs/PEOPLE.md 3.6): a bearer as
+ * its agent, a signed in request as the account the session resolved to, an anonymous request as
+ * its record, or as the account the alias table links it to (a browser that signed in once and
+ * carries the old cookie; SPEC-3 7.4). The boot payload and the roster entry read it.
+ */
+export async function resolveRequestIdentity(identity: RequestIdentity): Promise<ResolvedIdentity> {
   const key = identity.identity;
+  const facts = identityFactsKey(identity);
   const hit = identityCache.get(key);
   const now = Date.now();
-  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS) return hit.identity;
-  const resolved =
-    identity.ctx.agent !== undefined
-      ? resolvePrincipal(`agent:${identity.ctx.agent.tokenId}`, {
-          record: () => null,
-          alias: () => null,
-          account: () => null,
-          token: () => ({
-            tokenId: identity.ctx.agent?.tokenId ?? '',
-            ownerId: identity.ctx.agent?.ownerId ?? '',
-            name: identity.ctx.agent?.name ?? 'Agent',
-          }),
-        })
-      : resolveIdentity(identity.principalId ?? identity.identity, identity.record);
-  identityCache.set(key, { at: now, identity: resolved });
+  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS && hit.facts === facts)
+    return hit.identity;
+  const resolved = noteResolved(await resolveFresh(identity));
+  identityCache.set(key, { at: now, facts, identity: resolved });
   return resolved;
 }
+
+async function resolveFresh(identity: RequestIdentity): Promise<ResolvedIdentity> {
+  if (identity.ctx.agent !== undefined)
+    return resolvePrincipal(`agent:${identity.ctx.agent.tokenId}`, {
+      record: () => null,
+      alias: () => null,
+      account: () => null,
+      token: () => ({
+        tokenId: identity.ctx.agent?.tokenId ?? '',
+        ownerId: identity.ctx.agent?.ownerId ?? '',
+        name: identity.ctx.agent?.name ?? 'Agent',
+      }),
+    });
+  const principalId = identity.principalId ?? identity.identity;
+  if (identity.account !== undefined && identity.account !== null)
+    return resolveIdentity(principalId, identity.record, identity.account);
+  if (parsePrincipalId(principalId)?.kind === 'anonymous') {
+    const runtime = identityRuntime();
+    const alias = await runtime.aliases.accountOf(principalId).catch(() => null);
+    if (alias !== null) return resolveThroughRuntime(runtime, principalId);
+  }
+  return resolveIdentity(principalId, identity.record);
+}
+
+const cachedIdentity = resolveRequestIdentity;
 
 /** The hue slot the room grants a principal (SPEC-3 3.8; research 11 3.1): its preferred slot, else the least used, held for the entry's life. */
 export function grantHueSlot(principalId: string, roster: readonly RosterEntry[]): HueSlot {
@@ -2072,7 +2423,12 @@ export async function rosterEntryFor(
   post: PresencePost,
   existing: readonly RosterEntry[],
 ): Promise<RosterEntry> {
-  const resolved = await cachedIdentity(identity);
+  /* a client's first post after its boot reads the person's index past this instance's 5 s row
+     (docs/PEOPLE.md 6.4): the boot's payload read the store on its instance, and the instance
+     that serves the first post may hold the row from before the choice; the ticks after keep
+     the row, so the cost is one index read per client, never per tick */
+  const first = existing.every((row) => row.clientId !== post.clientId);
+  const resolved = await cachedIdentity(first ? await withFreshIndexFacts(identity) : identity);
   const principalId =
     identity.ctx.agent !== undefined ? `agent:${identity.ctx.agent.tokenId}` : identity.identity;
   const slot = grantHueSlot(principalId, existing);
@@ -2128,19 +2484,28 @@ export type ViewerFacts = {
  */
 export function rosterEntryForReader(entry: RosterEntry, reader: ViewerFacts): RosterEntry {
   const byLink = reader.via === 'link' || reader.via === 'open';
-  if (!byLink || reader.showNames) return entry;
+  /* the address is never the shared entry's (docs/PEOPLE.md 3.7): whatever a stored entry
+     carries is dropped and the reader's own view decides below */
+  const { email: _email, ...bare } = entry;
+  if (!byLink || reader.showNames) {
+    const email =
+      bare.trust === 'verified' && (reader.via === 'owner' || reader.via === 'grant')
+        ? rememberedEmail(bare.principalId)
+        : undefined;
+    return email === undefined ? bare : { ...bare, email };
+  }
   /* a generated label, a typed name and an agent's name pass through (b1.md R16; docs/PRODUCT.md
      section 2 rank 4: the typed name is what the presence chips show to collaborators, and the
      prompt's own words are "Your name, shown to collaborators"); the role word stays for a
      verified account's name while the owner's switch is off (SPEC-3 0.12) */
-  if (entry.trust === 'label' || entry.trust === 'guest' || entry.trust === 'agent') return entry;
-  const word = roleWord(entry.role);
-  const mark = {
-    ...entry.mark,
-    initials: word.split(' ').pop()?.[0]?.toUpperCase() ?? '',
-    label: word,
-  };
-  return { ...entry, label: word, trust: 'label', mark };
+  if (bare.trust === 'label' || bare.trust === 'guest' || bare.trust === 'agent') return bare;
+  const word = roleWord(bare.role);
+  /* the whole mark is the role's (docs/PEOPLE.md 3.27; default 6): a plate keyed by the role
+     word, no picture, no glyph seed of the person's, the hue kept because it is the room's grant
+     and not the person's, so a visitor who later gains a grant cannot pair the plates */
+  const slot = bare.hueSlot + 1;
+  const mark = roleMark(bare.role, slot >= 1 && slot <= 6 ? (slot as HueSlot) : null);
+  return { ...bare, label: word, trust: 'label', mark: mark as unknown as Record<string, unknown> };
 }
 
 /** A slide field the reader may not see: the notes below editor (report 10 F21). */

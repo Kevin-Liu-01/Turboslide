@@ -149,6 +149,12 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    * deck, and at the end to judge `decks.save.acknowledged`, the product row the stall fails.
    */
   t.stalls = [];
+  /**
+   * The prompts the walk closed on its own (docs/PEOPLE.md 6.1): the name prompt of the first
+   * edit, recorded once with the deck, the area and the step it interrupted, so the people row
+   * that claims it fires can read the record after the decks area typed the walk's title.
+   */
+  t.prompts = { namePrompt: null };
   t.invoke = (action, input = {}, ms = t.INVOKE_TIMEOUT_MS) => {
     let timer;
     const late = new Promise((_, reject) => {
@@ -354,6 +360,15 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       else if ((await skip.count()) > 0) await skip.click({ timeout: 2000 }).catch(() => undefined);
       else await t.press('Escape').catch(() => undefined);
       await sleep(200);
+      /* the prompt fired on the first edit (SPEC-3 0.18): recorded for the people row
+         `people.own-chip-follows-name` (docs/PEOPLE.md 6.1), which reads it after the walk's
+         title was typed in the decks area and never sees the prompt itself */
+      t.prompts.namePrompt ??= {
+        at: new Date().toISOString(),
+        deck: t.deck?.id ?? null,
+        area: current?.name ?? null,
+        step: activeStep,
+      };
       console.log('       prompt: the name prompt was closed before the step');
       const after = await t.activeSlide().catch(() => null);
       if (before !== null && after !== before) {
@@ -1365,8 +1380,15 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
             ok: false,
             observed: `${info.id}: no run to type the title into; ${t.describeGroundPaint(paint)}`,
           };
-        if (await t.visible('dialog.namePrompt'))
+        if (await t.visible('dialog.namePrompt')) {
+          t.prompts.namePrompt ??= {
+            at: new Date().toISOString(),
+            deck: info.id,
+            area: current?.name ?? null,
+            step: activeStep,
+          };
           await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+        }
         const on = await t.openRun(head);
         await t.typeHuman(TITLE);
         await t.sleep(300);
@@ -1374,8 +1396,15 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
         await t.waitRevision(1, 30_000);
         const s1 = await t.settled();
         await page.waitForURL(/\/edit\//, { timeout: 30_000 }).catch(() => undefined);
-        if (await t.visible('dialog.namePrompt'))
+        if (await t.visible('dialog.namePrompt')) {
+          t.prompts.namePrompt ??= {
+            at: new Date().toISOString(),
+            deck: info.id,
+            area: current?.name ?? null,
+            step: activeStep,
+          };
           await t.clickControl('dialog.namePrompt.close').catch(() => undefined);
+        }
         const second = await t.setupSlide(t.deck.titleSlide);
         t.deck.secondSlide = second;
         await t.clickCard(t.deck.titleSlide);

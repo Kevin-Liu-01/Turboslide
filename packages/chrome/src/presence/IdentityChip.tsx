@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { hueFor, isHueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
+import { pictureUrlAt } from '@turboslide/identity/picture';
+import type { PictureSize } from '@turboslide/identity/picture';
 import type { ResolvedIdentity } from '@turboslide/identity/resolve';
 
 import type { IdentityView } from '../editor-shell';
+import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { AGENT_SENTENCES, PRESENCE } from '../menus/strings';
 import { initialsFontSize, markCells, plateOf } from './mark-svg';
@@ -14,13 +18,18 @@ import type { MarkSize } from './mark-svg';
 import './presence.css';
 
 /**
- * The identity chip (gslides-parity SPEC-3 4.1, 4.2, 7.8; research 11 6.1): one monochrome mark
- * per principal at 24, 16 or 14 px, a 1 px `--pt-edge` border (`--pt-ink` for the own chip), the
- * plate's cells from `mark-svg.ts`, the initials in ink, the uploaded picture when the variant is
- * `picture`, a dashed border for an agent, the 2 px live stripe in the participant's hue while
- * the roster holds a live entry, the presenter's 6 px triangle, and the two ring halo over a
- * picture. Every chip carries its accessible name (the name and the trust word) so no fact is
- * colour alone (4.9). Names are text: the initials render through a text node.
+ * The identity chip (gslides-parity SPEC-3 4.1, 4.2, 7.8; research 11 6.1; docs/PEOPLE.md 3.4,
+ * 3.7, 4.4): one monochrome mark per principal at 24, 16, 14 or 12 px, a 1 px `--pt-edge` ring
+ * (`--pt-ink` for the own chip), a 1 px paper gap inside it, then the field: the package raster's
+ * cells through `mark-svg.ts`, the initials in ink, or the uploaded picture when the variant is
+ * `picture` (32 px at 1x and 64 px at 2x through `srcset`, the initials field under it when the
+ * picture fails to load); a dashed ring for an agent, the 2 px live stripe in the participant's
+ * hue over the field's bottom two rows while the roster holds a live entry, the presenter's 6 px
+ * triangle, and the two ring halo over a picture. Every chip carries its accessible name (the
+ * name and the trust word: "Maya, guest", "Ada Lovelace, signed in") so no fact is colour alone
+ * (4.9). Names are text: the initials render through a text node. The verified badge beside a
+ * name on the text surfaces is `TrustMark`, drawn by the roster row, the comment card and list,
+ * the version row, the account head, the Share rows and the Profile head.
  */
 export type IdentityChipProps = {
   identity: IdentityView;
@@ -34,7 +43,7 @@ export type IdentityChipProps = {
   /** over a dithered picture: the two ring halo outside the border */
   halo?: boolean;
   className?: string;
-  /** the picture URL of a `picture` avatar, when the caller resolved one */
+  /** the picture URL of a `picture` avatar, when the caller resolved one (the 64 px file, or the 128 px file for a head) */
   pictureUrl?: string;
 };
 
@@ -75,7 +84,7 @@ export function markOf(
   });
 }
 
-/** The name a chip shows: the typed or account name, else the label (7.8). */
+/** The name a chip shows: the typed or account name, else the label (7.8); the "(2)" suffix of a colliding label travels in them (docs/PEOPLE.md 3.17). */
 export function nameOf(identity: IdentityView): string {
   if (identity.trust === 'agent')
     return identity.runId === undefined
@@ -84,12 +93,46 @@ export function nameOf(identity: IdentityView): string {
   return identity.name ?? identity.label;
 }
 
-/** The trust word beside a name (15): "guest" for a typed name, nothing for a label or a verified account. */
-export function trustWordOf(identity: IdentityView): string | null {
-  return identity.trust === 'guest' ? PRESENCE.guest : null;
+/** What the trust helpers read: the trust state and, once the shell carries it, the deleted flag (docs/PEOPLE.md 3.7). */
+export type TrustFacts = Pick<IdentityView, 'trust'> & { deleted?: boolean };
+
+/**
+ * The trust word beside a name (15; docs/PEOPLE.md 2.2 default 3): "guest" for a typed name,
+ * "signed in" for a verified account (the accessible word; the text surfaces draw the badge in
+ * its place), nothing for a label, an agent or a deleted account.
+ */
+export function trustWordOf(identity: TrustFacts): string | null {
+  if (identity.trust === 'guest') return PRESENCE.guest;
+  if (identity.trust === 'verified' && identity.deleted !== true) return PRESENCE.signedIn;
+  return null;
 }
 
-/** The accessible name of a chip: the name and the trust word (4.9). */
+/** The glyph after a verified account's name (docs/PEOPLE.md 3.7): the 14 px check badge, never for a deleted account, never in a hue. */
+export function trustMarkOf(identity: TrustFacts): 'check-badge' | null {
+  return identity.trust === 'verified' && identity.deleted !== true ? 'check-badge' : null;
+}
+
+/**
+ * The verified badge as the text surfaces draw it after a name: 14 px, `--pt-ink-2`, with the
+ * accessible word "signed in" (research 11 5.2; docs/PEOPLE.md 3.7). Draws nothing for anyone
+ * `trustMarkOf` answers null for, so a surface can render it unconditionally after the name.
+ */
+export function TrustMark({ identity, className }: { identity: TrustFacts; className?: string }) {
+  const mark = trustMarkOf(identity);
+  if (mark === null) return null;
+  return (
+    <span
+      className={cn('ts-trust-mark', className)}
+      role="img"
+      aria-label={PRESENCE.signedIn}
+      data-trust-mark={mark}
+    >
+      <Icon name={mark} size={14} />
+    </span>
+  );
+}
+
+/** The accessible name of a chip: the name and the trust word (4.9): "Maya, guest", "Ada Lovelace, signed in". */
 export function chipName(identity: IdentityView): string {
   const trust = trustWordOf(identity);
   const name = nameOf(identity);
@@ -99,6 +142,19 @@ export function chipName(identity: IdentityView): string {
 /** The hex of a granted slot, or null. */
 export function hueHexOf(slot: number | null | undefined): string | null {
   return isHueSlot(slot) ? hueFor(slot) : null;
+}
+
+/**
+ * The picture files a chip loads (docs/PEOPLE.md 4.4): the file named at 2x and the file half its
+ * size at 1x through `srcset` (32 and 64 for a chip, 64 and 128 for the Profile head), both
+ * derived by the store's path grammar through `pictureUrlAt` of `packages/identity`; a URL of
+ * another shape loads as given with no `srcset`.
+ */
+export function pictureSources(url: string): { src: string; srcSet?: string } {
+  const match = /-(64|128|256)\.webp$/.exec(url);
+  if (match === null) return { src: url };
+  const half = pictureUrlAt(url, (Number(match[1]) / 2) as PictureSize);
+  return half === undefined ? { src: url } : { src: url, srcSet: `${half} 1x, ${url} 2x` };
 }
 
 export function IdentityChip({
@@ -114,14 +170,30 @@ export function IdentityChip({
 }: IdentityChipProps) {
   const spec = markOf(identity, { hueSlot, self, presenter });
   const plate = plateOf(size);
-  const cells = markCells(spec, size);
   const hue = spec.hue?.hex ?? null;
+  /* a picture that failed to load draws the initials field in its place, so a 404 never leaves an
+     empty box (parity, "the picture's limits and fallbacks"); keyed by the URL so a new picture
+     after a rotation loads again */
+  const [failed, setFailed] = useState<string | null>(null);
   const style: CSSProperties = {
     width: size,
     height: size,
     ...(hue === null ? {} : ({ '--ts-hue': hue } as CSSProperties)),
   };
-  const picture = spec.variant === 'picture' ? (pictureUrl ?? spec.pictureUrl) : undefined;
+  const wanted = spec.variant === 'picture' ? (pictureUrl ?? spec.pictureUrl) : undefined;
+  const picture = wanted !== undefined && failed !== wanted ? pictureSources(wanted) : undefined;
+  /* the field a picture spec falls back to (build/b5.md R10): the initials mark of the identity
+     itself (its letters, the density of its own id, the hue kept), never the picture spec's own
+     cells, which are none and drew an empty box */
+  const drawn: MarkSpec =
+    spec.variant === 'picture' && picture === undefined
+      ? markSpec(resolvedOf(identity), {
+          hueSlot: spec.hue?.slot ?? null,
+          self: spec.self,
+          presenter: spec.presenter,
+        })
+      : spec;
+  const cells = markCells(drawn, size);
   return (
     <span
       className={cn(
@@ -135,15 +207,25 @@ export function IdentityChip({
       )}
       style={style}
       data-size={size}
-      data-variant={spec.variant}
+      data-variant={picture === undefined && spec.variant === 'picture' ? 'initials' : spec.variant}
       data-trust={identity.trust}
       data-principal={identity.principalId}
       data-hue={spec.hue?.slot ?? undefined}
+      data-picture={picture === undefined ? undefined : 'loaded'}
       role="img"
-      aria-label={spec.label || chipName(identity)}
+      aria-label={chipName(identity)}
     >
       {picture !== undefined ? (
-        <img className="ts-chip-picture" src={picture} alt="" width={plate} height={plate} />
+        <img
+          className="ts-chip-picture"
+          src={picture.src}
+          srcSet={picture.srcSet}
+          decoding="async"
+          alt=""
+          width={plate}
+          height={plate}
+          onError={() => setFailed(wanted ?? null)}
+        />
       ) : (
         <svg
           className="ts-chip-plate"
@@ -156,7 +238,7 @@ export function IdentityChip({
           {cells.map((cell, i) => (
             <rect key={i} x={cell.x} y={cell.y} width={cell.w} height={cell.h} />
           ))}
-          {spec.variant === 'initials' && spec.initials !== '' ? (
+          {drawn.variant === 'initials' && drawn.initials !== '' ? (
             <text
               className="ts-chip-initials"
               x={plate / 2}
@@ -165,7 +247,7 @@ export function IdentityChip({
               dominantBaseline="central"
               fontSize={initialsFontSize(size)}
             >
-              {spec.initials}
+              {drawn.initials}
             </text>
           ) : null}
         </svg>

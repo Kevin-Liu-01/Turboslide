@@ -1,0 +1,1395 @@
+{
+  "base": "https://turboslide-6nn6drhcy-kl01s-projects.vercel.app",
+  "tag": "preview",
+  "accounts": false,
+  "uptime": "15:57  up 5 days,  5:54, 2 users, load averages: 30.21 20.82 18.02",
+  "deck.id": "untitled-20260929-hiff",
+  "account.A.boot": {
+    "account": {
+      "principalId": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+      "label": "Pewter 106",
+      "trust": "label",
+      "signedIn": false,
+      "signInAvailable": false,
+      "mark": {
+        "density": 2,
+        "glyphSeed": 503147483,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Pewter 106",
+        "variant": "initials",
+        "initials": "P",
+        "hue": {
+          "slot": 6,
+          "hex": "#5533ff"
+        }
+      }
+    },
+    "self": {
+      "clientId": "da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "principalId": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+      "kind": "human",
+      "label": "Pewter 106",
+      "trust": "label",
+      "mark": {
+        "density": 2,
+        "glyphSeed": 503147483,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Pewter 106",
+        "variant": "initials",
+        "initials": "P",
+        "hue": {
+          "slot": 6,
+          "hex": "#5533ff"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-09-29T22:57:17.069Z"
+    }
+  },
+  "namePrompt.firstEdit": true,
+  "ownChip.A.afterName": [
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pewter 106",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "link": "minted",
+  "slot.A.light": [
+    {
+      "holder": "presence.chip.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-slot-A-light.png",
+  "shot.zoom.own.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-zoom-own-chip-light.png",
+  "shot.zoom.other.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-zoom-other-chip-light.png",
+  "tooltip.A.light": {
+    "name": "Pumice 736 · slide 1",
+    "text": "Pumice 736 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-tooltip-A-light.png",
+  "slot.A.dark": [
+    {
+      "holder": "presence.chip.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-slot-A-dark.png",
+  "shot.zoom.own.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-zoom-own-chip-dark.png",
+  "shot.zoom.other.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-zoom-other-chip-dark.png",
+  "tooltip.A.dark": {
+    "name": "Pumice 736 · slide 1",
+    "text": "Pumice 736 · slide 1Not signed in. A generated label for this browser. Go to slide 1"
+  },
+  "shot.tooltip.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-tooltip-A-dark.png",
+  "slot.B.light": [
+    {
+      "holder": "presence.chip.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-slot-B-light.png",
+  "tooltip.B.light": {
+    "name": "Ada Lovelace · guest · slide 1",
+    "text": "Ada Lovelace · guest · slide 1Not signed in. This name was typed, not verified. Go to slide 1"
+  },
+  "shot.tooltip.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-tooltip-B-light.png",
+  "slot.B.dark": [
+    {
+      "holder": "presence.chip.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "title.account",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.slot.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-slot-B-dark.png",
+  "tooltip.B.dark": {
+    "name": "Ada Lovelace · guest · slide 1",
+    "text": "Ada Lovelace · guest · slide 1Not signed in. This name was typed, not verified. Go to slide 1"
+  },
+  "shot.tooltip.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-tooltip-B-dark.png",
+  "roster.A.light": [
+    {
+      "control": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "name": "Ada Lovelace (you) · guest",
+      "meta": "slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "name": "Pumice 736",
+      "meta": "editor · slide 1",
+      "chip": "Pumice 736",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.A.light": [
+    {
+      "holder": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-roster-A-light.png",
+  "roster.A.dark": [
+    {
+      "control": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "name": "Ada Lovelace (you) · guest",
+      "meta": "slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "name": "Pumice 736",
+      "meta": "editor · slide 1",
+      "chip": "Pumice 736",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.A.dark": [
+    {
+      "holder": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-roster-A-dark.png",
+  "roster.B.light": [
+    {
+      "control": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "name": "Pumice 736 (you)",
+      "meta": "slide 1",
+      "chip": "Pumice 736",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "name": "Ada Lovelace · guest",
+      "meta": "owner · slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.B.light": [
+    {
+      "holder": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-roster-B-light.png",
+  "roster.B.dark": [
+    {
+      "control": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "name": "Pumice 736 (you)",
+      "meta": "slide 1",
+      "chip": "Pumice 736",
+      "variant": "initials",
+      "initials": "P",
+      "picture": null,
+      "badge": null
+    },
+    {
+      "control": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "name": "Ada Lovelace · guest",
+      "meta": "owner · slide 1",
+      "chip": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "picture": null,
+      "badge": null
+    }
+  ],
+  "rosterChips.B.dark": [
+    {
+      "holder": "presence.roster.989087f674d4779b08149c96aecc396a",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 13,
+      "initials": "P",
+      "badgeAfter": null
+    },
+    {
+      "holder": "presence.roster.da3f1f9b2648d5e8e4b2bf93aa8d455d",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.roster.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-roster-B-dark.png",
+  "accountMenu.A.light": {
+    "name": "Ada Lovelace",
+    "sentence": "Not signed in",
+    "chip": "Ada Lovelace, guest",
+    "badge": null,
+    "rows": ["account.changeName", "account.changeAvatar", "account.forget"]
+  },
+  "accountChips.A.light": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(7, 7, 7)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.account.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-account-menu-A-light.png",
+  "accountMenu.A.dark": {
+    "name": "Ada Lovelace",
+    "sentence": "Not signed in",
+    "chip": "Ada Lovelace, guest",
+    "badge": null,
+    "rows": ["account.changeName", "account.changeAvatar", "account.forget"]
+  },
+  "accountChips.A.dark": [
+    {
+      "holder": "account.sentence",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgb(242, 242, 240)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.account.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-account-menu-A-dark.png",
+  "versions.A.light": {
+    "rows": [
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL03:57 PM to 03:58 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "more": null
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.light": [
+    {
+      "holder": "versionHistory.window.w4",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.versions.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-A-light.png",
+  "shot.versionsHover.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-hover-A-light.png",
+  "versionsMore.A.light": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-more-A-light.png",
+  "versions.A.dark": {
+    "rows": [
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named · current",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": null,
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · named",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      },
+      {
+        "author": "anon_9b8dafe8-74c0-4cc2-a09f-23a4a1ae078c",
+        "inWindow": true,
+        "word": "You",
+        "meta": "You · 1 change",
+        "metaClipped": false,
+        "chipX": 41,
+        "textX": 65,
+        "restore": {
+          "display": "none"
+        },
+        "badge": null
+      }
+    ],
+    "windows": [
+      {
+        "text": "AL03:57 PM to 03:58 PMYou · 1 change▾",
+        "firstMarkX": 17,
+        "textX": 41,
+        "more": null
+      }
+    ],
+    "nested": {
+      "ruleX": 24,
+      "marginLeft": "23px"
+    },
+    "dayHeadX": 17
+  },
+  "versionChips.A.dark": [
+    {
+      "holder": "versionHistory.window.w4",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    },
+    {
+      "holder": "panel.versionHistory",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 9,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.versions.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-A-dark.png",
+  "shot.versionsHover.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-hover-A-dark.png",
+  "versionsMore.A.dark": [
+    {
+      "id": "version.restore",
+      "text": "Restore this version"
+    },
+    {
+      "id": "version.name",
+      "text": "Name this version"
+    },
+    {
+      "id": "version.copy",
+      "text": "Make a copy"
+    }
+  ],
+  "shot.versionsMore.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-versions-more-A-dark.png",
+  "commentsPanel.B.light": [
+    {
+      "text": "ALAda Lovelaceguestslide 1Can you check the title on this slide?now",
+      "chip": "Ada Lovelace, guest",
+      "badge": null
+    }
+  ],
+  "shot.commentsPanel.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-comments-panel-B-light.png",
+  "commentCard.B.light": {
+    "name": "Ada Lovelace",
+    "trust": "guest",
+    "badge": null,
+    "chip": "Ada Lovelace, guest"
+  },
+  "shot.commentCard.B.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-comment-card-B-light.png",
+  "commentsPanel.B.dark": [
+    {
+      "text": "ALAda Lovelaceguestslide 1Can you check the title on this slide?now",
+      "chip": "Ada Lovelace, guest",
+      "badge": null
+    }
+  ],
+  "shot.commentsPanel.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-comments-panel-B-dark.png",
+  "commentCard.B.dark": {
+    "name": "Ada Lovelace",
+    "trust": "guest",
+    "badge": null,
+    "chip": "Ada Lovelace, guest"
+  },
+  "shot.commentCard.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-comment-card-B-dark.png",
+  "share.A.light": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Pewter 106"
+    }
+  ],
+  "shareChips.A.light": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Pewter 106",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.share.A.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-share-A-light.png",
+  "share.A.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "You",
+      "title": null,
+      "email": null,
+      "trust": null,
+      "badge": null,
+      "chip": "Pewter 106"
+    }
+  ],
+  "shareChips.A.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Pewter 106",
+      "variant": "initials",
+      "trust": "label",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.share.A.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-share-A-dark.png",
+  "share.B.light": "not driven: the Share dialog did not open within 10 s of share.open",
+  "share.B.dark": [
+    {
+      "control": "dialog.share.owner",
+      "name": "Ada Lovelace · guest",
+      "title": null,
+      "email": null,
+      "trust": " · guest",
+      "badge": null,
+      "chip": "Ada Lovelace, guest"
+    }
+  ],
+  "shareChips.B.dark": [
+    {
+      "holder": "dialog.share.owner",
+      "ariaLabel": "Ada Lovelace, guest",
+      "variant": "initials",
+      "trust": "guest",
+      "size": "24",
+      "box": {
+        "w": 24,
+        "h": 24
+      },
+      "border": "1px solid rgba(242, 242, 240, 0.55)",
+      "field": {
+        "w": 20,
+        "h": 20,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": null,
+      "cells": 25,
+      "initials": "AL",
+      "badgeAfter": null
+    }
+  ],
+  "shot.share.B.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-share-B-dark.png",
+  "profile.A.light": "no Sessions row (anonymous): the Profile head is an account surface",
+  "profile.A.dark": "no Sessions row (anonymous): the Profile head is an account surface",
+  "filmstripChips.A": [
+    {
+      "holder": "filmstrip.slide.title",
+      "ariaLabel": "Pumice 736",
+      "variant": "initials",
+      "trust": "label",
+      "size": "16",
+      "box": {
+        "w": 16,
+        "h": 16
+      },
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "field": {
+        "w": 12,
+        "h": 12,
+        "l": 2,
+        "t": 2,
+        "r": 2,
+        "b": 2
+      },
+      "fieldTag": "svg",
+      "img": null,
+      "stripe": {
+        "l": 2,
+        "r": 2,
+        "b": 2,
+        "h": 2
+      },
+      "cells": 5,
+      "initials": "P",
+      "badgeAfter": null
+    }
+  ],
+  "shot.filmstrip.A": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/integrator/preview-filmstrip-marks-A-light.png",
+  "uptime.end": "15:59  up 5 days,  5:56, 2 users, load averages: 32.40 24.50 19.80",
+  "deck.teardown": {
+    "deckId": "untitled-20260929-hiff",
+    "trashed": "trashed",
+    "removed": "removed",
+    "after": "still answers"
+  }
+}

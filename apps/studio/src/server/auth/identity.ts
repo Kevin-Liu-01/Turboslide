@@ -342,13 +342,17 @@ async function accountProfile(
   const facts = await accountFacts(runtime, userId);
   if (facts === null) return null;
   const record = await runtime.principals.get(facts.principalId);
+  /* one source for the choice (PEOPLE.md 3.13; avatars 11): the profile row first, because it
+     outlives the principal record's 90 day sliding TTL and is the one place deletion finds the
+     files; the record second, for an account whose profile row never wrote a choice */
+  const avatar = facts.profile.avatar ?? record?.avatar;
   return {
     userId,
     name: facts.name,
     email: facts.email,
     emailVerified: facts.emailVerified,
     admin: facts.admin,
-    ...(record?.avatar !== undefined ? { avatar: record.avatar } : {}),
+    ...(avatar !== undefined && avatar !== null ? { avatar } : {}),
     ...(facts.profile.deletedAt !== null ? { deleted: true } : {}),
   };
 }
@@ -468,10 +472,19 @@ export async function requestIdentity(
     const record = bearer.record;
     void runtime.keys.touch(record.id, now).catch(() => undefined);
     const owner = await accountFacts(runtime, record.userId);
+    /* the owner's verified address and aliases, as the session branch carries them below */
+    const ownerAliases =
+      owner === null ? [] : await runtime.aliases.aliasesOf(owner.userId).catch(() => []);
     const principal: Principal | null =
       owner === null
         ? null
-        : { id: owner.principalId, kind: 'account', email: owner.email, admin: owner.admin };
+        : {
+            id: owner.principalId,
+            kind: 'account',
+            ...(owner.emailVerified ? { email: owner.email } : {}),
+            admin: owner.admin,
+            ...(ownerAliases.length > 0 ? { aliases: ownerAliases } : {}),
+          };
     const agent: AgentContext = {
       tokenId: record.id,
       ownerId: owner?.principalId ?? accountPrincipalId(record.userId),
@@ -546,14 +559,19 @@ export async function requestIdentity(
           (await runtime.principals.touch(account.principalId, now, true)) ??
           newPrincipalRecord(account.principalId, now);
         const name = account.name.trim() || displayNameOf(record, account.principalId);
+        /* the verified address and the aliased anonymous ids (docs/PEOPLE.md 3.6; b1.md R3), as
+           the room's session branch carries them (room.ts sessionIdentity): a pending grant by
+           email admits the invitee and a deck made before the sign in keeps its creator as owner */
+        const aliases = await runtime.aliases.aliasesOf(account.userId).catch(() => []);
         return {
           kind: 'account',
           ctx: {
             principal: {
               id: account.principalId,
               kind: 'account',
-              email: account.email,
+              ...(account.emailVerified ? { email: account.email } : {}),
               admin: account.admin,
+              ...(aliases.length > 0 ? { aliases } : {}),
             },
             linkGrants: record.linkGrants,
           },
@@ -709,6 +727,9 @@ export async function identityViewFor(
     principalId,
     options.agent !== undefined ? { agent: options.agent } : {},
   );
+  /* the picture's 64 px URL rides the resolved identity itself (PEOPLE.md 4.4; resolve.ts
+     `pictureUrl`, B1), so `markSpec` draws a picture avatar with no per caller argument; the
+     option stays for a caller that already knows a URL */
   const mark = markSpec(identity, {
     ...(options.hueSlot !== undefined ? { hueSlot: options.hueSlot } : {}),
     ...(options.presenter !== undefined ? { presenter: options.presenter } : {}),

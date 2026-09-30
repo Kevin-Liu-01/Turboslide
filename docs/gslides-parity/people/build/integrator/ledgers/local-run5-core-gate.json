@@ -1,0 +1,167 @@
+{
+  "base": "http://localhost:4466",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-29T23:56:00.043Z",
+  "ms": 425453,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 1,
+    "ms": 425396,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/integrator/gate-accounts-5/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 10,
+  "passed": 8,
+  "failed": 2,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "3dd737a6",
+  "origin": "http://localhost:4466",
+  "date": "2026-09-29",
+  "results": {
+    "people.verified-badge": "failed",
+    "people.versions-author-account": "passed",
+    "people.labels-disambiguated": "passed",
+    "share.dialog.grant-email-line": "failed",
+    "people.avatar-upload": "passed",
+    "people.avatar-cap-refusal": "passed",
+    "people.avatar-rotation": "passed",
+    "people.avatar-fallback-plate": "passed",
+    "people.avatar-link-visitor": "passed",
+    "people.avatar-metadata-stripped": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.verified-badge",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.grant-email-line",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

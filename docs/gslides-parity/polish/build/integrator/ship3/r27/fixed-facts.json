@@ -1,0 +1,118 @@
+{
+  "base": "https://turboslide-bcuqh2q3t-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-30T14:38:04.406Z",
+  "steps": [],
+  "deck": "untitled-20260930-t7mr",
+  "blockId": "shader",
+  "posAtInsert": {
+    "x": 646,
+    "y": 129,
+    "w": 480,
+    "h": 270,
+    "z": 3
+  },
+  "asset": "frame-a268e10e909c3673",
+  "frameMs": 3202,
+  "pos": {
+    "x": 646,
+    "y": 129,
+    "w": 480,
+    "h": 270,
+    "z": 3
+  },
+  "assetRecord": null,
+  "editor": {
+    "sheet": {
+      "w": 1128,
+      "h": 634.5
+    },
+    "figClass": "material-fig",
+    "figure": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "box": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "img": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "grid": {
+      "display": "grid",
+      "rows": "270px",
+      "gap": "0px",
+      "columns": "480px"
+    },
+    "boxStyle": {
+      "aspectRatio": "auto",
+      "height": "270px"
+    },
+    "imgNatural": {
+      "w": 3200,
+      "h": 1800,
+      "fit": "cover"
+    },
+    "caption": false
+  },
+  "print": {
+    "sheet": {
+      "w": 878,
+      "h": 493.875
+    },
+    "figClass": "material-fig",
+    "figure": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "box": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "img": {
+      "x": 646,
+      "y": 129,
+      "w": 480,
+      "h": 270
+    },
+    "grid": {
+      "display": "grid",
+      "rows": "270px",
+      "gap": "0px",
+      "columns": "480px"
+    },
+    "boxStyle": {
+      "aspectRatio": "auto",
+      "height": "270px"
+    },
+    "imgNatural": {
+      "w": 3200,
+      "h": 1800,
+      "fit": "cover"
+    },
+    "caption": false
+  },
+  "reading": {
+    "boxAspect": 1.778,
+    "imgAspect": 1.778,
+    "frameAspect": 1.778,
+    "imgShortBy": 0
+  },
+  "sweep": {
+    "trashed": true,
+    "deleted": true,
+    "status": 404
+  },
+  "endedAt": "2026-09-30T14:39:23.568Z"
+}

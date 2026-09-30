@@ -1144,6 +1144,12 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(
       dialog!.querySelector<HTMLInputElement>('[data-control="dialog.namePrompt.name"]')?.value,
     ).toBe('Ink 100');
+    /* the field's placeholder is the prompt's (docs/POLISH.md 2.6 item 63) */
+    expect(
+      dialog!
+        .querySelector<HTMLInputElement>('[data-control="dialog.namePrompt.name"]')
+        ?.getAttribute('placeholder'),
+    ).toBe('Your name');
     /* the record's rows stand under the band from the first paint */
     expect(dialog!.querySelector('[data-control="dialog.share.general"]')).not.toBeNull();
     expect(dialog!.querySelector('[data-control="dialog.share.owner"]')).not.toBeNull();

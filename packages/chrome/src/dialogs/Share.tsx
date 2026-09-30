@@ -499,7 +499,10 @@ export async function loadAccess(
  * 7.1), so a driver that passes the prompt with Skip after `share.open` passes the band. Enter in
  * the field keeps the name and never runs the dialog's Done: the field handles the key itself
  * (Dialog's `defaultPrevented` rule). The server's refusal sentence shows in the error row and the
- * band stays; Skip keeps the label.
+ * band stays; Skip keeps the label. The field's placeholder is "Your name" (docs/POLISH.md 2.6
+ * item 63), the one prompt grammar whichever surface asks: the plate hides while a dialog is open
+ * (TitleRow.tsx), so on the first Share this band is the one prompt a driver or a seller reads (the
+ * ship step's third attempt, share.name-prompt.empty-field on the memory tier).
  */
 function ShareNameAsk({
   account,
@@ -555,6 +558,7 @@ function ShareNameAsk({
           className="ts-share-name-ask-field"
           value={name}
           maxLength={80}
+          placeholder="Your name"
           aria-label={ACCOUNT.namePrompt.name}
           data-control="dialog.namePrompt.name"
           autoComplete="nickname"

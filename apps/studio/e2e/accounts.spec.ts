@@ -1623,7 +1623,10 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       expect(lines).toBe(0);
     } finally {
       await closeSecond(cCtx, C);
-      await setLinkAccess(A, 'editor');
+      /* the role change back mints a new editor link and revokes the viewer one: the rows after
+         this one follow the address it answers (the eighth local run of the integrator sent the
+         upload row's second person to the address beforeAll minted, revoked by this row) */
+      link = await setLinkAccess(A, 'editor');
     }
   });
 

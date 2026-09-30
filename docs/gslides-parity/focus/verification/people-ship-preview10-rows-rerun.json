@@ -1,0 +1,261 @@
+{
+  "base": "https://turboslide-46wkqjmuw-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T13:25:43.505Z",
+  "ms": 842468,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 841593,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/people/ship/gate-p10-rows-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "share.dialog.co-edit-from-copied-link",
+      "people.comment-departed-guest",
+      "share.dialog.more-row",
+      "chrome.toolbar.fold-any-width",
+      "decks.nav.back-forward",
+      "fonts.preload.italic-on-edit-only",
+      "fonts.export.editable-names-face",
+      "logos.cache.open-licence-only",
+      "shaders.frame.reuse-and-prune",
+      "svg.sanitize.broken",
+      "sync.reload.same-document"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 11,
+  "passed": 9,
+  "failed": 2,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "4300058d",
+  "origin": "https://turboslide-46wkqjmuw-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "fonts.preload.italic-on-edit-only": "failed",
+    "share.dialog.more-row": "passed",
+    "chrome.toolbar.fold-any-width": "passed",
+    "decks.nav.back-forward": "passed",
+    "fonts.export.editable-names-face": "passed",
+    "logos.cache.open-licence-only": "passed",
+    "shaders.frame.reuse-and-prune": "passed",
+    "share.dialog.co-edit-from-copied-link": "failed",
+    "people.comment-departed-guest": "passed",
+    "svg.sanitize.broken": "passed",
+    "sync.reload.same-document": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "share.dialog.co-edit-from-copied-link",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "fonts.preload.italic-on-edit-only",
+        "feature": "fonts",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "fonts"
+  ],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.co-edit-from-copied-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the copied address opens"
+    },
+    {
+      "id": "chrome.toolbar.fold-any-width",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.editable-names-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.preload.italic-on-edit-only",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: every scratch deck is trashed, deleted forever and answers 404"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.frame.reuse-and-prune",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.sanitize.broken",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.comment-departed-guest",
+      "feature": "comments",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

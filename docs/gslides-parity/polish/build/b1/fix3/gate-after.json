@@ -1,0 +1,200 @@
+{
+  "base": "https://turboslide-r28dpthlt-kl01s-projects.vercel.app",
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-09-30T12:44:01.588Z",
+  "ms": 225849,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 225846,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/b1fix3/gate-after/core-walk.json",
+    "deckId": "untitled-20260930-u5bq",
+    "steps": 33
+  },
+  "specs": null,
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "polish-text"
+    ],
+    "costRows": null
+  },
+  "rows": 14,
+  "passed": 14,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "commit": "b501e505",
+  "origin": "https://turboslide-r28dpthlt-kl01s-projects.vercel.app",
+  "date": "2026-09-30",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "text.bold.toolbar-marks-run": "passed",
+    "text.paragraph.toolbar-live": "passed",
+    "text.list.enter-tab-no-error": "passed",
+    "text.size.run-and-typed-value": "passed",
+    "text.marks.whole-block-from-menu": "passed",
+    "text.tail.heading-takes-list-indent": "passed",
+    "text.heading.enter-keeps-session": "passed",
+    "text.link.chip-on-click": "passed",
+    "text.title.shrink-on-overflow": "passed",
+    "text.title.second-session-survives-reload": "passed",
+    "text.link.popover-anchored": "passed",
+    "text.link.detection-setting": "passed",
+    "text.tail.size-reads-heading": "passed",
+    "text.polish.highlight-console": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

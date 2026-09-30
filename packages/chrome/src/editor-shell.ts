@@ -218,6 +218,12 @@ export type EditorHandle = {
   ) => void;
   /** Add a caption on the selected picture: writes the caption field and opens it; false with no picture selected */
   addCaption?: () => boolean;
+  /* the polish round fix round 3 (docs/POLISH.md 2.3 item 18; B5's R19 to B1): the toolbar's
+     Paint format button reads pressed while the brush is armed, from the stage's own store */
+  /** true while Paint format is armed (the snapshot the button reads) */
+  paintArmed?: () => boolean;
+  /** tells `listener` each time the brush arms or disarms; answers the unsubscribe */
+  subscribePaint?: (listener: (armed: boolean) => void) => () => void;
 };
 
 // ---------------------------------------------------------------------------------------------

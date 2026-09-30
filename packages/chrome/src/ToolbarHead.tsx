@@ -1,5 +1,5 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 
 import { ZOOM_LADDER, clampZoomPercent, effectiveZoomPercent, zoomStepFrom } from './editor-shell';
 import { useEditorShell } from './editor-shell-context';
@@ -263,8 +263,22 @@ export function ZoomBox({ control }: { control: TailControl }) {
   );
 }
 
+/** The store of a shell without a stage (the viewer's tests, an agent's shell): never armed, never changes. */
+const noPaintStore = () => () => undefined;
+
 export function ToolbarHead() {
   const shell = useEditorShell();
+  const editor = shell.input.editor;
+  /* Paint format reads pressed while the brush is armed (docs/POLISH.md 2.3 item 18; the polish
+     round fix round 3, B5's R19: the button armed on the title placeholder and said nothing, so the
+     walk row `text.tail.heading-takes-list-indent` read it as not armed): the stage's handle is the
+     store, `subscribePaint` its subscription and `paintArmed` the snapshot, so nothing is wired
+     through the route; the server render reads it off */
+  const paintArmed = useSyncExternalStore(
+    editor?.subscribePaint ?? noPaintStore,
+    () => editor?.paintArmed?.() ?? false,
+    () => false,
+  );
   /* a parked control leaves the head while Tools > Advanced tools is off (docs/FOCUS.md 3.1, 3.3) */
   const controls = presentControls(TOOLBAR_HEAD, shell.menuContext);
   return (
@@ -314,7 +328,13 @@ export function ToolbarHead() {
             key={control.control}
             control={control}
             onClick={(anchor) => shell.runControl(control, anchor)}
-            pressed={control.control === 'toolbar.search' ? shell.toolFinderOpen : undefined}
+            pressed={
+              control.control === 'toolbar.search'
+                ? shell.toolFinderOpen
+                : control.control === 'toolbar.paintFormat'
+                  ? paintArmed
+                  : undefined
+            }
           />
         );
       })}

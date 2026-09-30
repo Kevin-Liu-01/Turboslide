@@ -1,0 +1,127 @@
+{
+  "started": "2026-09-30T12:41:22.353Z",
+  "base": "https://turboslide-lav4xmwv1-kl01s-projects.vercel.app",
+  "tag": "before",
+  "deck": "untitled-20260930-e85m",
+  "rows": [
+    {
+      "n": 1,
+      "name": "new-deck",
+      "expected": "open /new; the editor is ready on the cover; a blank slide with a 20 px text box added through the window API; back on the cover",
+      "observed": "deck untitled-20260930-e85m; cover title; blank slide blank-1 with fx-agenda at 20 px",
+      "ok": true,
+      "shot": "01-before-01-cover.png",
+      "ms": 5050
+    },
+    {
+      "n": 2,
+      "name": "title-select",
+      "expected": "one click on the title placeholder: the heading is selected with its ring and chip, no session; Paint format on the toolbar reads enabled and not pressed",
+      "observed": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false; Paint format aria-disabled null, aria-pressed null, is-on false; 03-before-03-title-selected.png",
+      "ok": true,
+      "shot": "02-before-02-title-selected-head-2x.png",
+      "ms": 1552
+    },
+    {
+      "n": 3,
+      "name": "paint-arm",
+      "expected": "Paint format clicked with the title placeholder selected: the brush arms (the stage carries data-paint), the button reads aria-pressed true with the pressed ground, no snackbar",
+      "observed": "stage data-paint true; button aria-pressed null, is-on false; snackbar none; 05-before-05-paint-armed.png",
+      "ok": false,
+      "shot": "04-before-04-paint-armed-head-2x.png",
+      "ms": 2218
+    },
+    {
+      "n": 4,
+      "name": "paint-apply",
+      "expected": "the blank slide's card clicked with the brush armed, then the 20 px text box: the box takes the cover heading's size and weight in one write; Cmd+Z takes it back",
+      "observed": "brush armed before the card true, on the card true; fx-agenda {\"size\":20} -> {\"size\":88,\"weight\":500,\"align\":\"left\"}; brush after the paint false, button aria-pressed null; after Cmd+Z {\"size\":20}",
+      "ok": true,
+      "shot": "06-before-06-painted.png",
+      "ms": 2956
+    },
+    {
+      "n": 5,
+      "name": "paint-escape",
+      "expected": "back on the cover, the title selected and Paint format clicked, then Escape: the brush disarms and the button reads not pressed",
+      "observed": "armed: stage true, button aria-pressed null; after Escape: stage false, button aria-pressed null, is-on false",
+      "ok": false,
+      "shot": "07-before-07-paint-escaped-head-2x.png",
+      "ms": 3447
+    }
+  ],
+  "consoleErrors": [],
+  "facts": {
+    "titleSelect": {
+      "sel": "selected true; resize handles 8; rotate true; ring true; chip \"Title\"; session false; caret false",
+      "button": {
+        "pressed": null,
+        "disabled": null,
+        "on": false,
+        "rect": {
+          "x": 216,
+          "y": 75.5,
+          "w": 32,
+          "h": 32
+        }
+      }
+    },
+    "paintArm": {
+      "button": {
+        "pressed": null,
+        "disabled": null,
+        "on": false,
+        "rect": {
+          "x": 216,
+          "y": 75.5,
+          "w": 32,
+          "h": 32
+        }
+      },
+      "armed": true,
+      "snack": null
+    },
+    "paintApply": {
+      "before": {
+        "size": 20
+      },
+      "after": {
+        "size": 88,
+        "weight": 500,
+        "align": "left"
+      },
+      "undone": {
+        "size": 20
+      },
+      "armedBefore": true,
+      "armedOnCard": true,
+      "armedAfter": false
+    },
+    "paintEscape": {
+      "armed": {
+        "pressed": null,
+        "disabled": null,
+        "on": false,
+        "rect": {
+          "x": 216,
+          "y": 75.5,
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stageArmed": true,
+      "button": {
+        "pressed": null,
+        "disabled": null,
+        "on": false,
+        "rect": {
+          "x": 216,
+          "y": 75.5,
+          "w": 32,
+          "h": 32
+        }
+      },
+      "stageAfter": false
+    }
+  }
+}

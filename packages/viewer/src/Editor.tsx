@@ -646,6 +646,14 @@ export type EditorHandle = {
   armPaint: (keep?: boolean) => boolean;
   disarmPaint: () => void;
   paintArmed: () => boolean;
+  /**
+   * The brush as a store the toolbar's Paint format button follows (docs/POLISH.md 2.3 item 18;
+   * the polish round fix round 3, B5's R19): `listener` is told `true` when Paint format arms and
+   * `false` when it disarms (a paint, Escape, Cmd+Option+V); answers the unsubscribe. The
+   * subscription of a `useSyncExternalStore` whose snapshot is `paintArmed`, so the pressed state
+   * needs no wiring through the route.
+   */
+  subscribePaint: (listener: (armed: boolean) => void) => () => void;
   /** ends an editing session as Esc does */
   commitText: () => void;
   focus: () => void;
@@ -1308,6 +1316,13 @@ export function Editor({
   const lastCell = useRef<{ blockId: string; cell: CellAddress } | null>(null);
   const paintRef = useRef(paint);
   paintRef.current = paint;
+  /* the listeners of the handle's `subscribePaint` (the toolbar's Paint format button reads
+     pressed while the brush is armed), told after every change of `paint` */
+  const paintListeners = useRef(new Set<(armed: boolean) => void>());
+  useEffect(() => {
+    const armed = paint !== null;
+    for (const listener of paintListeners.current) listener(armed);
+  }, [paint]);
   const toolRef = useRef(tool);
   toolRef.current = tool;
   /* true while the selection came from a key that left a session (item 19): cleared by a press */
@@ -5341,6 +5356,12 @@ export function Editor({
       armPaint,
       disarmPaint,
       paintArmed: () => paintRef.current !== null,
+      subscribePaint: (listener) => {
+        paintListeners.current.add(listener);
+        return () => {
+          paintListeners.current.delete(listener);
+        };
+      },
       commitText: () => {
         editingRef.current?.element.blur();
       },

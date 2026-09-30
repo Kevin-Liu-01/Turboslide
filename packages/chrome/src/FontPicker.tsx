@@ -2,8 +2,14 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Block } from '@turboslide/schema/blocks';
+import {
+  fieldTypographyMutation,
+  slideFieldFamily,
+  slideFieldTypography,
+} from '@turboslide/schema/field-typography';
 import type { FontId } from '@turboslide/schema/fonts';
 import { DEFAULT_FONT_ID, isFontId } from '@turboslide/schema/fonts';
+import { slideFieldOf } from '@turboslide/schema/mutations';
 
 import { fontRows } from '@turboslide/render/fonts';
 
@@ -555,11 +561,15 @@ export function FontDropdown({
  *
  * A fixed kind's field (the cover's heading and lead, a statement's big line, a picture kind's
  * plate) reaches the text tail as a pseudo block (editor-shell.ts `tailKindOf`) and this control
- * as no block at all (ToolbarTail's `selectedBlock` walks the slide's blocks alone), and it
- * carries no `typography`: the kit's Display face draws the heading and its Text face the rest.
- * The control reads that face and its tooltip says where it is set, disabled, instead of reading
- * the theme's face and opening nothing on a click (docs/gslides-parity/focus/VERIFICATION.md F.5
- * F8; b1.md, the fix round). A typography of the fields' own is Kevin's call (F.10 item 5).
+ * as no block at all (ToolbarTail's `selectedBlock` walks the slide's blocks alone). Since the
+ * field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md 2; Kevin's call on
+ * VERIFICATION.md F.10 item 5) the cover's heading and lead and a statement's big line take a
+ * face of their own: the control opens on them, its label reads the field's own family when set
+ * and the kit's face for the field's role otherwise, and a pick writes the field's record on the
+ * slide (`slide.update` carrying one `slide.set /typography/<field>`, landed at the shallowest
+ * missing ancestor by `fieldTypographyMutation`), one revision, one Undo. A picture kind's plate
+ * and photograph carry no text of their own, so on them the control still reads the kit's face
+ * and its tooltip says where it is set, disabled (F.5 F8; b1.md, the fix round).
  */
 export function FontField({
   control,
@@ -572,30 +582,52 @@ export function FontField({
 }) {
   const shell = useEditorShell();
   const { input } = shell;
-  const takes = takesFamily(block);
-  const enabled = control.status === 'now' && evaluate(control.enabled, shell.menuContext) && takes;
   /* the fixed field under the selection, when the tail has no block for it */
   const slide = input.document.slides[input.slideId];
   const fixed =
     block === undefined && slide !== undefined && input.selection?.blockId !== undefined
       ? pseudoBlockOf(slide, input.selection.blockId)
       : undefined;
+  /* the text fields take a face of their own; the plate and the photograph do not */
+  const field = fixed !== undefined && slide !== undefined ? slideFieldOf(slide, fixed.id) : null;
+  const takes = takesFamily(block) || field !== null;
+  const enabled = control.status === 'now' && evaluate(control.enabled, shell.menuContext) && takes;
   const role = fixed === undefined ? null : fixedFieldRole(fixed);
   const tip = controlTip(
     {
       ...control,
       ...(block !== undefined && !takes
         ? { disabledReason: FONT_PICKER.tableDoc }
-        : role !== null
+        : role !== null && field === null
           ? { disabledReason: fixedFieldDoc(role) }
           : {}),
     },
     shell.platform,
     enabled,
   );
+  const kitFamily = role !== null ? fixedFieldFamily(input.document.deck.brand, role) : null;
   const family =
-    role !== null ? fixedFieldFamily(input.document.deck.brand, role) : familyOf(block);
+    field !== null && slide !== undefined
+      ? (slideFieldFamily(slide, field) ?? kitFamily)
+      : role !== null
+        ? kitFamily
+        : familyOf(block);
   const apply = (next: FontId | null) => {
+    if (field !== null && slide !== undefined) {
+      const current = (slideFieldTypography(slide, field) ?? {}) as Record<string, unknown>;
+      const mutation = fieldTypographyMutation(slide, field, typographyWithFamily(current, next));
+      if (mutation === null) return;
+      input
+        .dispatch('slide.update', {
+          slideId: slide.id,
+          baseRevision: input.revision,
+          mutations: [mutation],
+        })
+        .catch((failure: unknown) =>
+          shell.say(failure instanceof Error ? failure.message : String(failure)),
+        );
+      return;
+    }
     if (block === undefined) return;
     const typography =
       'typography' in block && typeof block.typography === 'object' && block.typography !== null

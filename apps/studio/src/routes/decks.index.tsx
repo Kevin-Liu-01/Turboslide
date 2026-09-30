@@ -1030,6 +1030,7 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
           openedAt={props.opened[card.id]}
           renaming={false}
           menuOpen={false}
+          plate={!(card.id in props.heads)}
           onOpen={() => props.onOpen(card)}
           onMenu={() => undefined}
           onRename={() => undefined}
@@ -1198,6 +1199,7 @@ function DeckList({
     [listed, renamed, recent, heads],
   );
   /* the decks of this browser the listing does not hold, once the listing has landed */
+  const listedIds = useMemo(() => new Set(listed.map((card) => card.id)), [listed]);
   const listedKey = listed.map((card) => card.id).join('|');
   const unlistedKey = recent
     .filter((entry) => !listed.some((card) => card.id === entry.id))
@@ -1307,6 +1309,7 @@ function DeckList({
               renaming={renaming === card.id}
               menuOpen={menu?.deckId === card.id}
               busy={busyDownload === card.id}
+              plate={!listedIds.has(card.id) && !(card.id in heads)}
               onOpen={() => onOpen(card)}
               onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
               onRename={(name) => rename(card, name)}
@@ -1393,6 +1396,8 @@ type CardViewProps = {
   menuOpen: boolean;
   /** the card's PowerPoint file is being made (item 85) */
   busy?: boolean;
+  /** the thumbnail is not asked for yet: the deck is this browser's memory alone until the listing or a head confirms it */
+  plate?: boolean;
   onOpen: () => void;
   onMenu: (anchor: HTMLElement) => void;
   onRename: (name: string) => void;
@@ -1514,9 +1519,12 @@ export const THUMB_ASKS_PER_VIEW_MAX = 3;
 export function Thumb({
   card,
   eager = false,
+  plate = false,
 }: {
   card: Pick<DeckCard, 'id' | 'title' | 'firstSlide' | 'appearance' | 'revision'>;
   eager?: boolean;
+  /** true draws the plate alone: a card this browser remembers before the listing or the store's own head confirms the deck still exists (main's cdbd0dd5; the round folds those cards into the grid) */
+  plate?: boolean;
 }) {
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -1524,7 +1532,7 @@ export function Thumb({
   /* the card left the viewport after its failed ask: the next entry is a new view */
   const wasOut = useRef(false);
   const box = useRef<HTMLSpanElement>(null);
-  const base = cardThumbUrl(card);
+  const base = plate ? null : cardThumbUrl(card);
   const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
   useEffect(() => {
     const el = box.current;
@@ -1592,6 +1600,7 @@ function DeckCardView({
   renaming,
   menuOpen,
   busy = false,
+  plate = false,
   onOpen,
   onMenu,
   onRename,
@@ -1615,7 +1624,7 @@ function DeckCardView({
           onOpen();
         }}
       >
-        <Thumb card={card} />
+        <Thumb card={card} plate={plate} />
       </Link>
       <div className="ts-hm-card-body">
         {renaming ? (

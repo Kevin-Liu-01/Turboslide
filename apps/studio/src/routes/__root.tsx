@@ -132,9 +132,11 @@ export const Route = createRootRoute({
         { rel: 'manifest', href: SITE.icons.manifest },
         /* the upright starts with the HTML on every route (SPEC-3 9.2 G1): the request no longer
            waits for the stylesheet, and the metric matched fallback face of inter.css covers the
-           swap; the italic is preloaded on the editor alone (docs/FEATURES.md 3.1, the fonts P1
-           item; audit-fonts 12: /decks, /deck and /present painted none and downloaded it), and
-           loads through `font-display: swap` where a page first draws it */
+           swap; the italic is prefetched on the editor alone (docs/FEATURES.md 3.1, the fonts P1
+           item; audit-fonts 12: /decks, /deck and /present painted none and downloaded it): a
+           prefetch warms the cache at low priority without the browser's warning a preload draws
+           on every editor load whose deck draws no italic within seconds, and the face loads
+           through `font-display: swap` where a page first draws it */
         {
           rel: 'preload',
           href: interWoff2,
@@ -145,7 +147,7 @@ export const Route = createRootRoute({
         ...(editor
           ? [
               {
-                rel: 'preload',
+                rel: 'prefetch',
                 href: interItalicWoff2,
                 as: 'font',
                 type: 'font/woff2',

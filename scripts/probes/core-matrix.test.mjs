@@ -406,10 +406,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
     /* the features round's ship two added 29 rows; the vector round (docs/VECTOR.md 6.1) added 43
        rows and retired logos.intake.svg-sentence; the objects round (docs/OBJECTS.md 6.1) added 33 rows
-       and carried five */
+       and carried five; the field fonts hotfix (build/field-fonts.md 4) added one */
     /* the polish round (docs/POLISH.md 5.1): 130 rows added and one replaced; its fix round added
        text.title.second-session-survives-reload (VERIFICATION.md "Polish round, pass 1" finding 1) */
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 - 1 + 130 + 1);
+    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1);
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',

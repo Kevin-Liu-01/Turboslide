@@ -17,6 +17,7 @@ import { ASSISTANT_NAME } from '@turboslide/store/store';
 
 import {
   ASSIST_MAX_INPUT_TOKENS,
+  ASSIST_ROUTER_MODEL,
   ASSIST_SENTENCES,
   ASSIST_SYSTEM,
   AssistUnavailableError,
@@ -28,6 +29,8 @@ import {
   modelFromEnv,
   proposeCards,
   registerAssistActions,
+  routerModel,
+  strictSchema,
   verifyCard,
 } from './assist';
 import type { AssistLogLine, ModelAnswer, ModelClient } from './assist';
@@ -446,6 +449,190 @@ describe('the switches', () => {
     expect(off.status).toBe(503);
     expect(off.message).toBe(ASSIST_SENTENCES.off);
     expect(typeof (await modelFromEnv({ TURBOSLIDE_ASSIST: 'fixture' }))).toBe('function');
+    /* the router's key alone is the model mode too, and it wins when both keys are set */
+    expect(assistMode({ RAMP_ROUTER_API_KEY: 'sk-routgw-fake' })).toBe('model');
+    expect(assistMode({ RAMP_ROUTER_API_KEY: '  ' })).toBe('unconfigured');
+    expect(typeof (await modelFromEnv({ RAMP_ROUTER_API_KEY: 'sk-routgw-fake' }))).toBe('function');
+  });
+
+  it('the router client sends one strict Responses request and reads the answer, the cut and the refusal', async () => {
+    const calls: { url: string; init: RequestInit }[] = [];
+    const answerWith = (body: unknown, status = 200): typeof fetch =>
+      (async (url: string | URL | Request, init?: RequestInit) => {
+        calls.push({ url: String(url), init: init ?? {} });
+        return new Response(JSON.stringify(body), {
+          status,
+          headers: { 'content-type': 'application/json' },
+        });
+      }) as typeof fetch;
+    const document = workedDocument();
+    const prompt = buildPrompt(document, {
+      intent: 'ask',
+      prompt: 'shorter please',
+      slideIds: ['content-rule'],
+      baseRevision: 412,
+    });
+    const request = {
+      system: prompt.system,
+      user: prompt.user,
+      schema: prompt.schema,
+      maxTokens: 4000,
+      context: { intent: 'ask' as const, prompt: 'shorter please', slides: prompt.slides },
+    };
+    const completed = {
+      model: 'gpt-6-luna',
+      status: 'completed',
+      output: [
+        { type: 'reasoning', summary: [] },
+        {
+          type: 'message',
+          content: [
+            {
+              type: 'output_text',
+              text: JSON.stringify({
+                intent: 'notes',
+                sentence: '',
+                texts: [],
+                notes: 'A talk track.',
+              }),
+            },
+          ],
+        },
+      ],
+      usage: { input_tokens: 900, output_tokens: 30, input_tokens_details: { cached_tokens: 800 } },
+    };
+    const client = routerModel(
+      { RAMP_ROUTER_API_KEY: 'sk-routgw-fake', TURBOSLIDE_ASSIST_MODEL: ' ' },
+      answerWith(completed),
+    );
+    const answer = await client(request);
+    expect(answer).toEqual({
+      json: { intent: 'notes', sentence: '', texts: [], notes: 'A talk track.' },
+      stop: 'end_turn',
+      usage: { inputTokens: 900, outputTokens: 30, cacheReadInputTokens: 800 },
+      model: 'gpt-6-luna',
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.url).toBe('https://api.router.com/v1/responses');
+    const headers = calls[0]?.init.headers as Record<string, string>;
+    expect(headers['authorization']).toBe('Bearer sk-routgw-fake');
+    const body = JSON.parse(String(calls[0]?.init.body)) as Record<string, unknown>;
+    expect(body['model']).toBe(ASSIST_ROUTER_MODEL);
+    expect(body['instructions']).toBe(prompt.system);
+    expect(body['input']).toEqual([{ role: 'user', content: prompt.user }]);
+    expect(body['max_output_tokens']).toBe(4000);
+    expect(body['reasoning']).toEqual({ effort: 'low' });
+    expect(body['allow_flex_tier']).toBe(false);
+    expect(body['metadata']).toEqual({ app: 'turboslide', feature: 'assist', intent: 'ask' });
+    const format = (body['text'] as { format: Record<string, unknown> }).format;
+    expect(format['type']).toBe('json_schema');
+    expect(format['strict']).toBe(true);
+    expect(format['schema']).toEqual(strictSchema(prompt.schema));
+    /* the deck text travels in the user turn only, never in the instructions */
+    expect(String(body['instructions'])).not.toContain('The content rule');
+    /* the named model and base */
+    const named = routerModel(
+      {
+        RAMP_ROUTER_API_KEY: 'sk-routgw-fake',
+        TURBOSLIDE_ASSIST_MODEL: 'deepseek-v4-flash',
+        RAMP_ROUTER_BASE_URL: 'https://router.example/v1/',
+      },
+      answerWith(completed),
+    );
+    await named(request);
+    expect(calls[1]?.url).toBe('https://router.example/v1/responses');
+    expect((JSON.parse(String(calls[1]?.init.body)) as { model: string }).model).toBe(
+      'deepseek-v4-flash',
+    );
+    /* the cut answer and the refusal */
+    const cut = await routerModel(
+      { RAMP_ROUTER_API_KEY: 'k' },
+      answerWith({
+        status: 'incomplete',
+        incomplete_details: { reason: 'max_output_tokens' },
+        output: [{ type: 'message', content: [{ type: 'output_text', text: '{"intent"' }] }],
+      }),
+    )(request);
+    expect(cut.stop).toBe('max_tokens');
+    const refused = await routerModel(
+      { RAMP_ROUTER_API_KEY: 'k' },
+      answerWith({
+        status: 'completed',
+        output: [{ type: 'message', content: [{ type: 'refusal', refusal: 'No.' }] }],
+      }),
+    )(request);
+    expect(refused.stop).toBe('refusal');
+    expect(refused.json).toBeUndefined();
+    /* a provider status other than 200 is the call error with the status, never the body */
+    await expect(
+      routerModel(
+        { RAMP_ROUTER_API_KEY: 'k' },
+        answerWith({ error: { message: 'secret' } }, 429),
+      )(request),
+    ).rejects.toMatchObject({ name: 'ModelCallError', status: 429 });
+    expect(() => routerModel({})).toThrow(ASSIST_SENTENCES.unconfigured);
+  });
+
+  it('the strict schema requires every property, closes every object and folds the ask’s union', () => {
+    const document = workedDocument();
+    const shorter = buildPrompt(document, {
+      intent: 'shorter',
+      prompt: '',
+      slideIds: ['content-rule'],
+      baseRevision: 412,
+    }).schema;
+    const strict = strictSchema(shorter) as {
+      required: string[];
+      additionalProperties: boolean;
+      properties: { texts: { items: { required: string[]; additionalProperties: boolean } } };
+    };
+    expect(strict.required).toEqual(['intent', 'sentence', 'texts']);
+    expect(strict.additionalProperties).toBe(false);
+    expect(strict.properties.texts.items.required).toEqual(['target', 'text']);
+    expect(strict.properties.texts.items.additionalProperties).toBe(false);
+    const ask = buildPrompt(document, {
+      intent: 'ask',
+      prompt: 'help',
+      slideIds: ['content-rule'],
+      baseRevision: 412,
+    }).schema;
+    expect(ask['anyOf']).toBeDefined();
+    const folded = strictSchema(ask) as {
+      type: string;
+      anyOf?: unknown;
+      required: string[];
+      properties: Record<string, { enum?: string[]; description?: string }>;
+    };
+    expect(folded.type).toBe('object');
+    expect(folded.anyOf).toBeUndefined();
+    expect(folded.properties['intent']?.enum).toEqual(['shorter', 'notes', 'none']);
+    expect(folded.required).toEqual(['intent', 'sentence', 'texts', 'notes']);
+    expect(folded.properties['notes']?.description).toContain('empty string');
+    /* the folded answers read as the three shapes do */
+    expect(
+      draftFromAnswer(
+        { intent: 'none', sentence: '', texts: [], notes: '' },
+        buildPrompt(document, {
+          intent: 'ask',
+          prompt: 'x',
+          slideIds: ['content-rule'],
+          baseRevision: 412,
+        }).slides,
+        NOW,
+      ),
+    ).toBeNull();
+    expect(
+      draftFromAnswer(
+        { intent: 'notes', sentence: '', texts: [], notes: '' },
+        buildPrompt(document, {
+          intent: 'ask',
+          prompt: 'x',
+          slideIds: ['content-rule'],
+          baseRevision: 412,
+        }).slides,
+        NOW,
+      ),
+    ).toBeNull();
   });
 
   it('reads the fixture model as the kill switch answers 503 through the route’s error shape', () => {

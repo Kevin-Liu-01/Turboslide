@@ -25,5 +25,5 @@ In the page, `window.turboslide.studio.invoke('assist.propose', input)` posts to
 - The server never writes on a propose; the seller's Accept is the only path to a write.
 - A card holds only text rewrites of the named slide (`text.replace` or `slide.set` on a text field) or its speaker notes; an answer of any other shape earns no card, and an answer that names a text the slide lacks is dropped.
 - Slide text is data: it travels in the user turn inside a fenced block and never in the system block, and a sentence on a slide that reads like an instruction produces a card about that slide's words or nothing.
-- The mode: `TURBOSLIDE_ASSIST=fixture` answers canned cards (the preview's gate runs), `off` is the switch, and without the provider key the route answers 503 with "The assistant is not set up on this Turboslide yet".
+- The mode: `TURBOSLIDE_ASSIST=fixture` answers canned cards (the preview's gate runs), `off` is the switch, and without a model key (`RAMP_ROUTER_API_KEY` for Ramp Router, the production path since 2026-09-29, else `ANTHROPIC_API_KEY`) the route answers 503 with "The assistant is not set up on this Turboslide yet".
 - Every write the assistant makes carries `ext.assist = { at, runId, card }` on the block or the slide; the seller's next edit of that block clears it.

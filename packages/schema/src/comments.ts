@@ -12,6 +12,7 @@ import type { DeckDocument, Slide } from './deck.ts';
 import type { BlockId, SlideId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import type { Mutation } from './mutations.ts';
+import { isFieldTypographyPath } from './mutations.ts';
 import { getAt } from './pointer.ts';
 import { plainLength, plainOf } from './text.ts';
 import { shiftRange } from './transform.ts';
@@ -668,8 +669,10 @@ function rewritesText(
         (anchor.path === mutation.path || anchor.path.startsWith(`${mutation.path}/`))
       );
     case 'slide.replace':
-    case 'slide.set':
       return mutation.slideId === anchor.slideId;
+    case 'slide.set':
+      // a field's own face (build/field-fonts.md 2: `/typography/<field>`) rewrites no Text
+      return mutation.slideId === anchor.slideId && !isFieldTypographyPath(mutation.path);
     default:
       return false;
   }

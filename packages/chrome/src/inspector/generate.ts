@@ -430,7 +430,9 @@ export function controlsFor(
 
 /** Fields the inspector never draws as controls: the identity and the escape hatch. */
 const BLOCK_SKIP = new Set(['/id', '/type', '/ext']);
-const SLIDE_SKIP = new Set(['/id', '/ext']);
+/* `/typography` is the fields' own faces (build/field-fonts.md 2): the Font dropdown and Format >
+   Text > Font are its surface, never a raw record in the slide section */
+const SLIDE_SKIP = new Set(['/id', '/ext', '/typography']);
 
 /** The block's position box (schema/position.ts), offered on a freeform slide only. */
 export const POSITION_PATH = '/pos';

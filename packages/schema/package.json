@@ -16,6 +16,7 @@
     "./annotate": "./src/annotate.ts",
     "./color": "./src/color.ts",
     "./typography": "./src/typography.ts",
+    "./field-typography": "./src/field-typography.ts",
     "./fonts": "./src/fonts.ts",
     "./brand": "./src/brand.ts",
     "./position": "./src/position.ts",

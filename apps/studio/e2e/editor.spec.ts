@@ -509,7 +509,7 @@ test('Cmd Down on the focused move chip sends the block one place back in its sl
      order key, Google's Send backward (gslides-parity SPEC 10.1); SPEC 10.2 retires the Alt chord
      of the editor depth round, so the tooltip names the Cmd keys */
   await chip.focus();
-  await expect(chip).toHaveAttribute('data-tip', `${first}: Move`);
+  await expect(chip).toHaveAttribute('data-tip', 'Move');
   await expect(page.locator('#pt-tip .pt-tip-doc')).toContainText('Down move it one step');
   const before = (await versions(page)).length;
   await page.keyboard.press('ControlOrMeta+ArrowDown');

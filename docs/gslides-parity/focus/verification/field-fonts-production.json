@@ -1,0 +1,758 @@
+{
+  "base": "https://www.turboslide.com",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-09-29T06:05:39.738Z",
+  "ms": 1789836,
+  "parked": {
+    "commit": "c1a7ff3",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 1785461,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/fonts/prod/gate-production/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": [
+      "brand",
+      "chrome",
+      "export"
+    ],
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 62,
+  "passed": 55,
+  "failed": 1,
+  "notDriven": 6,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "PDF: GT brand deck.pdf, 85 slides in 7.5 s, 0.09 s per slide",
+        "PDF: GT brand deck.pdf, 85 slides in 7.5 s, 0.09 s per slide"
+      ]
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 217.0 s, 2.55 s per slide",
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 85 slides in 217.0 s, 2.55 s per slide"
+      ]
+    }
+  ],
+  "noStep": [],
+  "commit": "14a30476",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-09-29",
+  "results": {
+    "templates.save.as-template": "not driven",
+    "templates.save.same-name-replaces": "not driven",
+    "templates.card.rename-and-delete": "not driven",
+    "templates.default.use-for-new": "not driven",
+    "templates.deck.read-only": "not driven",
+    "brand.logo.replace-every-slide": "passed",
+    "fonts.budget.no-load-before-ready": "passed",
+    "fonts.inter.italic-release": "passed",
+    "fonts.picker.specimen-rows": "not driven",
+    "fonts.picker.recent-group": "passed",
+    "fonts.preload.italic-on-edit-only": "passed",
+    "slides.layout.plate-four-columns": "passed",
+    "share.dialog.more-row": "passed",
+    "chrome.toolbar.fold-any-width": "passed",
+    "logos.picker.chrome-1280": "passed",
+    "shaders.panel.section-groups": "passed",
+    "export.pdf.file": "passed",
+    "export.pdf.include-skipped": "passed",
+    "export.pdf.notes-honest": "passed",
+    "export.pptx.perfect": "passed",
+    "export.pptx.editable": "passed",
+    "export.pptx.notes-and-skipped": "passed",
+    "images.export.pdf-with-picture": "passed",
+    "shapes.export.pdf": "passed",
+    "shapes.export.pptx": "passed",
+    "export.print.download-pdf-follows-preview": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.jpg.current-slide": "passed",
+    "export.png.current-slide": "passed",
+    "tables.export.pdf": "passed",
+    "tables.export.pptx-editable": "passed",
+    "tables.show.rules-only": "passed",
+    "charts.export.pdf": "passed",
+    "charts.export.pptx-native": "passed",
+    "wordart.export.pdf": "passed",
+    "lines.connector.export-pptx": "passed",
+    "export.download.named-after-title": "passed",
+    "export.download.pdf-direct": "passed",
+    "export.download.pptx-direct": "passed",
+    "export.download.options-dialog": "passed",
+    "export.download.progress-per-slide": "passed",
+    "export.download.mode-sentence": "passed",
+    "export.download.large-deck-pdf": "passed",
+    "export.download.large-deck-pptx": "passed",
+    "brand.footer.text": "passed",
+    "brand.export.pdf-logo": "passed",
+    "fonts.export.editable-names-face": "passed",
+    "fonts.export.pdf-face": "passed",
+    "diagrams.export.step-label": "passed",
+    "logos.export.pdf-pptx-crisp": "passed",
+    "shapes.geometry.text-rect": "passed",
+    "shapes.geometry.export.pptx-prst-avlst": "passed",
+    "shapes.geometry.export.raster-modes": "passed",
+    "svg.export.pdf-vector": "passed",
+    "svg.export.pptx-svgblip": "passed",
+    "svg.export.pptx-fallback": "passed",
+    "svg.export.web-page": "passed",
+    "shaders.export.pdf-frame": "passed",
+    "shaders.export.pptx-frame": "passed",
+    "shaders.export.html-frame": "passed",
+    "shaders.export.missing-frame-row": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "fonts.picker.specimen-rows",
+        "feature": "fonts",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.export.missing-frame-row",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "measured": []
+  },
+  "wouldPark": [
+    "fonts",
+    "templates"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "templates.save.as-template",
+      "parks": [
+        "file.saveAsTemplate"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "templates.save.same-name-replaces",
+      "parks": [
+        "file.saveAsTemplate"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "parks": [
+        "templates.card.menu"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "templates.default.use-for-new",
+      "parks": [
+        "panel.brand.template.useForNew"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.export.pdf-with-picture",
+      "feature": "images",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pdf",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.export.pptx",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.file",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.include-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pdf.notes-honest",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.perfect",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.editable",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.pptx.notes-and-skipped",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.download-pdf-follows-preview",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.connector.export-pptx",
+      "feature": "lines",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pdf",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.export.pptx-editable",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pdf",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.export.pptx-native",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.export.pdf",
+      "feature": "wordart",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.jpg.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.png.current-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.plate-four-columns",
+      "feature": "slides",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.more-row",
+      "feature": "share",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.save.as-template",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's"
+    },
+    {
+      "id": "templates.save.same-name-replaces",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's"
+    },
+    {
+      "id": "templates.card.rename-and-delete",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's"
+    },
+    {
+      "id": "templates.default.use-for-new",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's"
+    },
+    {
+      "id": "templates.deck.read-only",
+      "feature": "templates",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven on production: the row writes a deployment wide record every seller would see (the default template or a saved template); its reading is the preview run's"
+    },
+    {
+      "id": "export.download.named-after-title",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pdf-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.pptx-direct",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.progress-per-slide",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.mode-sentence",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.fold-any-width",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.logo.replace-every-slide",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.footer.text",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.export.pdf-logo",
+      "feature": "brand",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.budget.no-load-before-ready",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.editable-names-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.export.pdf-face",
+      "feature": "fonts",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.text-rect",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.pptx-prst-avlst",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.export.raster-modes",
+      "feature": "shapes",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "diagrams.export.step-label",
+      "feature": "diagrams",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.inter.italic-release",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.picker.specimen-rows",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: the specimen rows of the Font dropdown (docs/FEATURES.md 3.5, P1, B1 with B2)"
+    },
+    {
+      "id": "fonts.picker.recent-group",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.preload.italic-on-edit-only",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.export.pdf-pptx-crisp",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.section-groups",
+      "feature": "shaders",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.export.pdf-frame",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.export.pptx-frame",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.export.html-frame",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: one report row names the shaders whose frame was pending or stale"
+    },
+    {
+      "id": "svg.export.pdf-vector",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.pptx-svgblip",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.pptx-fallback",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.export.web-page",
+      "feature": "svg",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.show.rules-only",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

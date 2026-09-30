@@ -31,6 +31,10 @@ export const IDS = [
   'fonts.catalog.six-families',
   'fonts.picker.search-category',
   'fonts.table.takes-family',
+  /* the field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md): the cover's
+     title and subtitle and a statement's big line take a face of their own; driven by
+     `fieldFace` below */
+  'fonts.field.own-face',
 ];
 
 /** The 26 families of SPEC-5-amendments A5 (`packages/schema/src/fonts.ts` on the branch). */
@@ -465,6 +469,7 @@ export async function run(t) {
     },
   );
   await featuresRound(t, { F, BOX, openDropdown, notLive, familyOfBox, storedFamily });
+  await fieldFace(t, { notLive });
 }
 
 /**
@@ -984,6 +989,356 @@ async function featuresRound(t, h) {
         ok: picked && stored === 'roboto' && everyCell && named === true,
         observed: `picked ${picked}: typography.family ${stored ?? 'absent'}; cells ${cells.map((c) => c.split(',')[0]).join(' | ') || 'none'} (all Roboto ${everyCell}); the Editable text export ${pptx.noBearer ? 'not driven: no bearer for this origin' : `${pptx.status}, a table cell naming Roboto ${named}`}`,
       };
+    },
+  );
+}
+
+/**
+ * The field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md; the row
+ * `fonts.field.own-face`): on a title slide the walk makes (`slide.new` with the Title layout,
+ * a fixed kind whose heading and lead are fields and not blocks; the walk's own cover may be a
+ * canvas) with a sentence typed into each field (an empty field exports no run, so the export
+ * halves would name nothing), the title takes Fraunces from the Font dropdown, Cmd+Z takes the
+ * kit's face back and Cmd+Shift+Z returns it, the subtitle takes Manrope from Format > Text >
+ * Font, a statement slide's big line takes Geist from the dropdown, a reload and the show draw
+ * the faces, and the PDF and the Editable text PowerPoint name the three, each read from the
+ * export route in one request. The field's record lives on the slide
+ * (`slide.typography.<field>.family`, read through slide.get), never on a block.
+ */
+async function fieldFace(t, h) {
+  const { page, BASE } = t;
+  const LANE = 'hotfix';
+  /** Types a sentence into a field's run (a double click opens the session, Escape ends it). */
+  const typeField = async (run, text) => {
+    const on = await t.openRun(run).catch(() => false);
+    if (!on) return false;
+    await t.press('Meta+a');
+    await t.typeHuman(text);
+    await t.sleep(200);
+    await t.press('Escape');
+    await t.settled();
+    return true;
+  };
+  /** The computed family of a field's element on the editor's stage. */
+  const familyOfField = (id) =>
+    page.evaluate((blockId) => {
+      const el = document.querySelector(
+        `.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block="${blockId}"]`,
+      );
+      return el ? getComputedStyle(el).fontFamily : null;
+    }, id);
+  /** The family a field carries on the slide record, or null. */
+  const storedField = async (slideId, field) => {
+    const got = await t.invoke('slide.get', { slideId }).catch(() => null);
+    const slide = got?.slide ?? got;
+    return slide?.typography?.[field]?.family ?? null;
+  };
+  /** Selects a field as an object: the walk's click on its box, then a plain click on the element when the handles did not come. */
+  const selectField = async (id) => {
+    await t.clearAll();
+    const picked = await t.selectObject(id);
+    if (picked) return true;
+    const b = await t.boxOf(id);
+    if (!b) return false;
+    await t.clickAt(b.inner.x + Math.min(24, b.inner.w / 2), b.inner.y + b.inner.h / 2);
+    await t.sleep(300);
+    return (await t.visible('toolbar.font')) || (await t.visible('toolbar.more'));
+  };
+  /** The Font control's state with the field selected: absent, disabled or live (the control may sit in More). */
+  const fontOnField = async () => {
+    let control = 'toolbar.font';
+    if (!(await t.visible(control))) {
+      if (await t.visible('toolbar.more')) {
+        await t.clickControl('toolbar.more');
+        await t.sleep(300);
+        control = 'toolbar.more.toolbar.font';
+      }
+    }
+    if (!(await t.visible(control))) return { state: 'absent', control };
+    const facts = await page.evaluate((c) => {
+      const el = document.querySelector(`[data-control="${c}"]`);
+      return {
+        disabled:
+          el?.getAttribute('aria-disabled') === 'true' || el?.hasAttribute('disabled') || false,
+        text: el?.textContent?.trim() ?? '',
+      };
+    }, control);
+    return { state: facts.disabled ? 'disabled' : 'live', control, ...facts };
+  };
+  /** Opens the dropdown on the selected field and picks a family; answers what stood in the way. */
+  const pickOnField = async (id) => {
+    const f = await fontOnField();
+    if (f.state !== 'live')
+      return { ok: false, why: `the Font control is ${f.state}${f.text ? ` ("${f.text}")` : ''}` };
+    await t.clickControl(f.control);
+    const open = await t
+      .pollUntil(
+        () => t.visible('toolbar.font.search'),
+        (x) => x,
+        6000,
+      )
+      .catch(() => false);
+    if (!open) return { ok: false, why: 'the dropdown did not open' };
+    await page
+      .locator('[data-control="toolbar.font.list"][data-rows]')
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => undefined);
+    if (!(await t.visible(`toolbar.font.row.${id}`))) {
+      await t.clickControl('toolbar.font.search').catch(() => undefined);
+      await t.typeHuman(id.split('-')[0]);
+      await t.sleep(400);
+    }
+    if (!(await t.visible(`toolbar.font.row.${id}`))) {
+      await t.press('Escape');
+      return { ok: false, why: `no toolbar.font.row.${id} in the open dropdown` };
+    }
+    await t.clickControl(`toolbar.font.row.${id}`);
+    await t.settled();
+    return { ok: true, label: f.text };
+  };
+
+  await t.step(
+    'fonts.field.own-face',
+    'select the cover title and pick Fraunces in the Font dropdown; Cmd+Z and Cmd+Shift+Z; the subtitle through Format > Text > Font, Manrope; a statement slide, its big line, Geist; a reload; the show; the PDF and the Editable text PowerPoint from the export route',
+    'each field stores its family on the slide and draws in it, Cmd+Z takes the kit face back, the faces survive the reload and draw in the show, and both exports name the three',
+    async () => {
+      const parts = [];
+      const fail = (why) => ({ ok: false, observed: [...parts, why].join('; ') });
+      /* a title slide of the walk's own, its two fields written */
+      const T = await t.setupSlide(t.deck.titleSlide, 'title').catch(() => null);
+      if (!T) return fail('no title slide could be made (slide.new with the Title layout)');
+      await t.clickCard(T);
+      const typedHeading = await typeField('heading/text', 'Renewal terms');
+      const typedLead = await typeField('lead/text', 'For the quarter ahead');
+      parts.push(`title slide ${T}: heading typed ${typedHeading}, lead typed ${typedLead}`);
+      /* the title: the dropdown */
+      if (!(await selectField('heading'))) return fail('the cover title could not be selected');
+      const before = await fontOnField();
+      if (before.state === 'disabled')
+        return t.notBuilt(
+          'toolbar.font',
+          LANE,
+          `the Font control on the cover's title is drawn disabled ("${before.text}"); the field fonts hotfix is not on this build`,
+        );
+      const revBefore = (await t.state()).revision;
+      const title = await pickOnField('fraunces');
+      if (!title.ok) return fail(`title: ${title.why}`);
+      const titleStored = await t
+        .pollUntil(
+          () => storedField(T, 'heading'),
+          (x) => x === 'fraunces',
+          8000,
+        )
+        .catch(() => storedField(T, 'heading'));
+      const titleDrawn = await t
+        .pollUntil(
+          () => familyOfField('heading'),
+          (x) => /fraunces/i.test(x ?? ''),
+          8000,
+        )
+        .catch(() => familyOfField('heading'));
+      const revAfter = await t
+        .pollUntil(
+          async () => (await t.state()).revision,
+          (r) => r !== revBefore,
+          8000,
+        )
+        .catch(async () => (await t.state()).revision);
+      parts.push(
+        `title: label "${title.label}" -> stored ${titleStored ?? 'none'}, drawn ${titleDrawn}, revision ${revBefore} -> ${revAfter}`,
+      );
+      /* Cmd+Z takes the kit's face back, Cmd+Shift+Z returns it */
+      await t.clearAll();
+      await t.press('Meta+z');
+      const undone = await t
+        .pollUntil(
+          () => storedField(T, 'heading'),
+          (x) => x === null,
+          8000,
+        )
+        .catch(() => storedField(T, 'heading'));
+      const undoneDrawn = await familyOfField('heading');
+      await t.press('Meta+Shift+z');
+      const redone = await t
+        .pollUntil(
+          () => storedField(T, 'heading'),
+          (x) => x === 'fraunces',
+          8000,
+        )
+        .catch(() => storedField(T, 'heading'));
+      await t.settled();
+      parts.push(
+        `Cmd+Z stored ${undone ?? 'none'} drawn ${undoneDrawn}; Cmd+Shift+Z stored ${redone ?? 'none'}`,
+      );
+      /* the subtitle: Format > Text > Font */
+      if (!(await selectField('lead'))) return fail('the subtitle could not be selected');
+      const r = await t.reachRow('format', 'format.text', 'format.text.font');
+      if (!r.present) {
+        await t.advancedBack('Format > Text > Font');
+        return fail('no Font row under Format > Text');
+      }
+      await t.menuPath('format', 'format.text', 'format.text.font');
+      const open = await t
+        .pollUntil(
+          () => t.visible('toolbar.font.search'),
+          (x) => x,
+          6000,
+        )
+        .catch(() => false);
+      let leadStored = null;
+      let leadDrawn = null;
+      if (open) {
+        await page
+          .locator('[data-control="toolbar.font.list"][data-rows]')
+          .first()
+          .waitFor({ timeout: 10_000 })
+          .catch(() => undefined);
+        if (!(await t.visible('toolbar.font.row.manrope'))) {
+          await t.clickControl('toolbar.font.search').catch(() => undefined);
+          await t.typeHuman('manrope');
+          await t.sleep(400);
+        }
+        if (await t.visible('toolbar.font.row.manrope')) {
+          await t.clickControl('toolbar.font.row.manrope');
+          await t.settled();
+          leadStored = await t
+            .pollUntil(
+              () => storedField(T, 'lead'),
+              (x) => x === 'manrope',
+              8000,
+            )
+            .catch(() => storedField(T, 'lead'));
+          leadDrawn = await t
+            .pollUntil(
+              () => familyOfField('lead'),
+              (x) => /manrope/i.test(x ?? ''),
+              8000,
+            )
+            .catch(() => familyOfField('lead'));
+        } else await t.press('Escape');
+      }
+      await t.advancedBack('Format > Text > Font');
+      parts.push(
+        `subtitle: Format > Text > Font opened ${open}${r.switched ? ' (with the switch on)' : ''} -> stored ${leadStored ?? 'none'}, drawn ${leadDrawn}`,
+      );
+      /* a statement slide's big line: the dropdown */
+      const S = await t.setupSlide(T, 'statement').catch(() => null);
+      let bigStored = null;
+      let bigDrawn = null;
+      if (S) {
+        await t.clickCard(S);
+        const typedBig = await typeField('big/text', 'Every product in every language');
+        parts.push(`statement ${S}: big line typed ${typedBig}`);
+        if (await selectField('big')) {
+          const big = await pickOnField('geist');
+          if (big.ok) {
+            bigStored = await t
+              .pollUntil(
+                () => storedField(S, 'big'),
+                (x) => x === 'geist',
+                8000,
+              )
+              .catch(() => storedField(S, 'big'));
+            bigDrawn = await t
+              .pollUntil(
+                () => familyOfField('big'),
+                (x) => /geist/i.test(x ?? ''),
+                8000,
+              )
+              .catch(() => familyOfField('big'));
+          } else parts.push(`statement: ${big.why}`);
+        } else parts.push('statement: the big line could not be selected');
+      }
+      parts.push(`statement ${S ?? 'not made'}: stored ${bigStored ?? 'none'}, drawn ${bigDrawn}`);
+      /* the reload and the show, read on the cover */
+      await t.reloadTo(`${BASE}/edit/${t.deck.id}#${T}`);
+      await t.settled();
+      await t.clickCard(T);
+      const afterReload = await t
+        .pollUntil(
+          () => familyOfField('heading'),
+          (x) => /fraunces/i.test(x ?? ''),
+          8000,
+        )
+        .catch(() => familyOfField('heading'));
+      const leadAfterReload = await familyOfField('lead');
+      await t.clickControl('present.open');
+      const inShow = await t
+        .pollUntil(
+          () => t.has('[data-control="present.show"]'),
+          (x) => x,
+          10_000,
+        )
+        .catch(() => false);
+      await t.sleep(500);
+      const showFamilies = await page.evaluate(() => {
+        const read = (id) => {
+          const el = document.querySelector(
+            `.ts-stagewrap.is-present .pt-slide:not(.is-leaving) [data-block="${id}"]`,
+          );
+          return el ? getComputedStyle(el).fontFamily : null;
+        };
+        return { heading: read('heading'), lead: read('lead') };
+      });
+      await t.press('Escape');
+      await t.waitGone('[data-control="present.show"]', 8000);
+      parts.push(
+        `reload: title ${afterReload}, subtitle ${leadAfterReload}; show entered ${inShow}: title ${showFamilies.heading}, subtitle ${showFamilies.lead}`,
+      );
+      /* the exports, one request each */
+      await t.clearAll();
+      const pptx = await t.exportPptx({ mode: 'native' });
+      let named = null;
+      if (pptx.bytes) {
+        let entries = t.zipEntries(pptx.bytes);
+        const inner =
+          [...entries.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
+          [...entries.keys()].find((n) => /\.pptx$/.test(n));
+        if (inner !== undefined) entries = t.zipEntries(entries.get(inner)(true));
+        const xml = [...entries.keys()]
+          .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+          .map((n) => entries.get(n)())
+          .join('\n');
+        named = ['Fraunces', 'Manrope', 'Geist'].filter((face) =>
+          new RegExp(`<a:latin typeface="${face}"`).test(xml),
+        );
+      }
+      const pdf = await t.exportPptx({ format: 'pdf', mode: undefined });
+      let embedded = null;
+      if (pdf.bytes) {
+        const names = [
+          ...pdf.bytes
+            .toString('latin1')
+            .matchAll(/\/(?:BaseFont|FontName)\s*\/([A-Za-z0-9+_-]+)/g),
+        ].map((m) => m[1]);
+        embedded = ['Fraunces', 'Manrope', 'Geist'].filter((face) =>
+          names.some((n) => n.includes(face)),
+        );
+      }
+      parts.push(
+        `Editable text PowerPoint ${pptx.noBearer ? 'not driven: no bearer for this origin' : `${pptx.status}, typefaces named ${named?.join(', ') || 'none'}`}; PDF ${pdf.noBearer ? 'not driven: no bearer' : `${pdf.status}, faces embedded ${embedded?.join(', ') || 'none'}`}`,
+      );
+      const exportsOk =
+        pptx.noBearer || pdf.noBearer ? null : named?.length === 3 && embedded?.length === 3;
+      const ok =
+        titleStored === 'fraunces' &&
+        /fraunces/i.test(titleDrawn ?? '') &&
+        revAfter === revBefore + 1 &&
+        undone === null &&
+        !/fraunces/i.test(undoneDrawn ?? '') &&
+        redone === 'fraunces' &&
+        leadStored === 'manrope' &&
+        /manrope/i.test(leadDrawn ?? '') &&
+        bigStored === 'geist' &&
+        /geist/i.test(bigDrawn ?? '') &&
+        /fraunces/i.test(afterReload ?? '') &&
+        /manrope/i.test(leadAfterReload ?? '') &&
+        inShow &&
+        /fraunces/i.test(showFamilies.heading ?? '') &&
+        /manrope/i.test(showFamilies.lead ?? '') &&
+        exportsOk === true;
+      return { ok, observed: parts.join('; ') };
     },
   );
 }

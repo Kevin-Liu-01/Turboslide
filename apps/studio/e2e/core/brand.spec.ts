@@ -820,12 +820,13 @@ function woff2Version(bytes: Buffer): string | null {
   return null;
 }
 /** The font preload links of a route's HTML, as hrefs. */
+/** The font links of a page's HTML: the preloads and, since the console hotfix, the editor's italic prefetch. */
 async function fontPreloads(path: string): Promise<string[]> {
   const res = await page.request.get(path, { headers: extraHTTPHeaders, maxRedirects: 5 });
   const html = await res.text();
   return [...html.matchAll(/<link\b[^>]*>/g)]
     .map((m) => m[0])
-    .filter((tag) => /rel=["']?preload/.test(tag) && /as=["']?font/.test(tag))
+    .filter((tag) => /rel=["']?pre(load|fetch)/.test(tag) && /as=["']?font/.test(tag))
     .map((tag) => /href=["']([^"']+)["']/.exec(tag)?.[1] ?? tag);
 }
 
@@ -1104,7 +1105,13 @@ test(title('fonts.preload.italic-on-edit-only'), async () => {
   });
   expect(decks.length, '/decks carries one font preload (the upright)').toBe(1);
   expect(decks[0] ?? '', 'the upright').not.toMatch(/Italic/i);
-  expect(edit.length, '/edit carries two').toBe(2);
+  /* the italic is a prefetch rather than a preload since the console hotfix of 2026-09-29: a
+     preload drew the browser's unused-preload warning on every editor load whose deck drew no
+     italic within seconds; the prefetch warms the cache without it */
+  expect(edit.length, '/edit carries two: the upright preload and the italic prefetch').toBe(2);
+  expect(edit.find((href) => /Italic/i.test(href)) ?? '', 'the italic is on /edit').toMatch(
+    /Italic/i,
+  );
 });
 
 // ---------------------------------------------------------------------------------------------

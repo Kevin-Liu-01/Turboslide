@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -9,7 +10,9 @@ import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { AccountProfile } from '@turboslide/identity/resolve';
 import type { RosterEntry } from '@turboslide/realtime/channel';
 import type { AccessRecord } from '@turboslide/schema/access';
+import { indexUpdates, principalFolder } from '@turboslide/store/access-store';
 
+import { indexStore } from './access';
 import { buildIdentityRuntime, setIdentityRuntime } from './auth/identity';
 import type { IdentityRuntime } from './auth/identity';
 import {
@@ -20,9 +23,13 @@ import {
   resolvePrincipalId,
   resolveRequestIdentity,
   roleMark,
+  rosterEntryFor,
   rosterEntryForReader,
+  withFreshIndexFacts,
 } from './room';
+import type { Room } from './room';
 import type { ViewerFacts } from './room';
+import { stateDir } from './root';
 
 // The room's identity seam of the people round (docs/PEOPLE.md 3.6, 3.7, 3.8, 3.27; 6.5): the
 // account session read on the room routes, the resolver's account and alias lookups, the roster
@@ -374,5 +381,80 @@ describe('identityViewsFor', () => {
       deleted: true,
     });
     expect(views['usr_people03']?.email).toBeUndefined();
+  });
+});
+
+describe("the caller's own index facts past the cache (docs/PEOPLE.md 6.4)", () => {
+  it('the boot reads the choice another instance wrote at once, the presence tick keeps the row, and the resolution follows the facts inside the 5 s', async () => {
+    /* people.own-chip-follows-avatar red on preview 7 (the verifier's pass 1 finding 3): the
+       choice `account.setAvatar` wrote on one instance reached the instance that served the
+       reload only when its index row expired, and the resolution cached over that row held the
+       old plate for another 5 s. The write below skips the writer's cache drop, the way another
+       instance's write reaches this one. */
+    const minted = await requestIdentity(
+      request('/api/decks/q4/presence', { cookie: 'ts.session_token=nonsense' }),
+    );
+    const id = minted.principalId ?? '';
+    expect(id).toMatch(/^anon_/);
+    const cookie = (minted.setCookie ?? '').split(';')[0] ?? '';
+    const again = () => requestIdentity(request('/api/decks/q4/presence', { cookie }));
+    const folder = join(stateDir(), 'users', principalFolder(id));
+    const glyph = { variant: 'glyph' as const, salt: 7 };
+    try {
+      // this instance read the row before the write: initials, cached for 5 s
+      expect((await again()).record?.avatar).toEqual({ variant: 'initials' });
+      const before = await resolveRequestIdentity(minted);
+      expect(before.avatar.variant).toBe('initials');
+      await (await indexStore()).update(id, indexUpdates.avatar(glyph));
+      // a presence tick keeps the row: the old choice, and the resolution cached over it
+      const tick = await again();
+      expect(tick.record?.avatar).toEqual({ variant: 'initials' });
+      expect((await resolveRequestIdentity(tick)).avatar.variant).toBe('initials');
+      // the boot reads the store, and its resolution misses the row cached seconds ago
+      const boot = await requestIdentity(request('/api/decks/q4/presence', { cookie }), {
+        freshIndex: true,
+      });
+      expect(boot.record?.avatar).toEqual(glyph);
+      expect((await resolveRequestIdentity(boot)).avatar).toEqual(glyph);
+      // the reads after the boot on this instance take the filled row
+      expect((await again()).record?.avatar).toEqual(glyph);
+      // a first presence post reads the store the same way on an instance that holds the old row
+      await (await indexStore()).update(id, indexUpdates.avatar({ variant: 'dither', salt: 2 }));
+      const stale = await again();
+      expect(stale.record?.avatar).toEqual(glyph);
+      const fresh = await withFreshIndexFacts(stale);
+      expect(fresh.record?.avatar).toEqual({ variant: 'dither', salt: 2 });
+      expect(await withFreshIndexFacts(fresh)).toBe(fresh);
+      const post = { clientId: 'b'.repeat(32), clock: 1, pointerOn: false, presenting: false };
+      const entry = await rosterEntryFor({} as Room, stale, 'editor', post, []);
+      expect(entry.mark).toMatchObject({ variant: 'dither' });
+      // the second post of the client keeps the row (one read per client, never per tick)
+      await (await indexStore()).update(id, indexUpdates.avatar(glyph));
+      const second = await rosterEntryFor({} as Room, await again(), 'editor', post, [entry]);
+      expect(second.mark).toMatchObject({ variant: 'dither' });
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('resolvePrincipalId', () => {
+  it('reads the name another instance wrote onto the deck index past this instance cache', async () => {
+    /* the blob tier's principal store is a file store per instance and the index cache of
+       access.ts is process local (5 s): the guest typed the name on one instance and A's reload
+       was served by another that had read the guest's index row before the write (the verifier's
+       pass 1 finding 2, people.comment-departed-guest). The write below skips the writer's cache
+       drop, the way another instance's write reaches this one. */
+    const anon = `anon_${randomUUID()}`;
+    const folder = join(stateDir(), 'users', principalFolder(anon));
+    try {
+      const before = await resolvePrincipalId(anon);
+      expect(before).toMatchObject({ displayName: labelFor(anon), trust: 'label' });
+      await (await indexStore()).update(anon, indexUpdates.name('Noor Haddad'));
+      const after = await resolvePrincipalId(anon);
+      expect(after).toMatchObject({ displayName: 'Noor Haddad', trust: 'guest' });
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
   });
 });

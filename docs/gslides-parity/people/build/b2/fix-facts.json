@@ -1,0 +1,270 @@
+{
+  "load.start": "3.03 3.82 5.93",
+  "deck.id": "untitled-20260930-kfd0",
+  "namePrompt.A.firstEdit": false,
+  "setName.A": {
+    "principal": {
+      "id": "anon_3bd0f17a-dcc0-420a-a33c-9615231510ce",
+      "kind": "anonymous",
+      "admin": false
+    },
+    "trust": "guest",
+    "label": "Ada Lovelace",
+    "name": "Ada Lovelace",
+    "mark": {
+      "density": 3,
+      "glyphSeed": 3462439340,
+      "presenter": false,
+      "self": true,
+      "trust": "guest",
+      "label": "Ada Lovelace, guest",
+      "variant": "initials",
+      "initials": "AL",
+      "hue": null
+    },
+    "avatar": {
+      "variant": "initials"
+    }
+  },
+  "link": "/s/GmdJDsNJoUtxJ3d5fohVnD",
+  "namePrompt.B.firstEdit": true,
+  "B.principal": {
+    "label": "Tin 201",
+    "markLabel": "Tin 201",
+    "asked": null
+  },
+  "B.first.open": {
+    "shown": true,
+    "ms": 803,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.42 3.85 5.89"
+  },
+  "B.first.dialog": {
+    "title": "Share People fix round, the first Share by link, B wrote",
+    "dialogsOnPage": ["dialog.share"],
+    "scrims": 1,
+    "ask": {
+      "words": "Your name, shown to collaborators",
+      "field": "Tin 201",
+      "skip": true,
+      "continueDisabled": false,
+      "signIn": true,
+      "error": "",
+      "firstInBody": true,
+      "box": {
+        "x": 485,
+        "y": 237.453125,
+        "w": 470,
+        "h": 94
+      },
+      "border": "rgba(7, 7, 7, 0.18)"
+    },
+    "focus": "dialog.namePrompt.name",
+    "general": true,
+    "address": "",
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "Ada Lovelace · guest",
+        "trust": " · guest",
+        "chip": "Ada Lovelace, guest"
+      }
+    ],
+    "box": {
+      "x": 460,
+      "y": 155.453125,
+      "w": 520,
+      "h": 589.078125
+    }
+  },
+  "shot.B.first.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/fix-share-ask-B-light.png",
+  "shot.B.first.dark": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/fix-share-ask-B-dark.png",
+  "B.first.dialog.dark.border": "rgba(242, 242, 240, 0.22)",
+  "B.first.skip": {
+    "gone": true,
+    "ms": 33
+  },
+  "B.first.afterSkip": {
+    "title": "Share People fix round, the first Share by link, B wrote",
+    "dialogsOnPage": ["dialog.share"],
+    "scrims": 1,
+    "ask": null,
+    "focus": "dialog.share.done",
+    "general": true,
+    "address": "",
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "Ada Lovelace · guest",
+        "trust": " · guest",
+        "chip": "Ada Lovelace, guest"
+      }
+    ],
+    "box": {
+      "x": 460,
+      "y": 207.453125,
+      "w": 520,
+      "h": 485.078125
+    }
+  },
+  "B.first.asked": "1",
+  "shot.B.afterSkip.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/fix-share-after-skip-B-light.png",
+  "B.first.escapeCloses": true,
+  "B.second.open": {
+    "shown": true,
+    "ms": 25,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.42 3.85 5.89"
+  },
+  "B.second.dialog": {
+    "ask": null,
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "Ada Lovelace · guest",
+        "trust": " · guest",
+        "chip": "Ada Lovelace, guest"
+      }
+    ],
+    "focus": "dialog.share.mode"
+  },
+  "A.owner.open": {
+    "shown": true,
+    "ms": 807,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.39 3.84 5.87"
+  },
+  "A.owner.dialog": {
+    "ask": null,
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "You",
+        "trust": null,
+        "chip": "Clay 305"
+      }
+    ],
+    "focus": "dialog.share.mode",
+    "dialogsOnPage": ["dialog.share"]
+  },
+  "C.first.open": {
+    "shown": true,
+    "ms": 811,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.39 3.84 5.87"
+  },
+  "C.first.dialog": {
+    "ask": {
+      "words": "Your name, shown to collaborators",
+      "field": "Helium 820",
+      "skip": true,
+      "continueDisabled": false,
+      "signIn": true,
+      "error": "",
+      "firstInBody": true,
+      "box": {
+        "x": 485,
+        "y": 237.453125,
+        "w": 470,
+        "h": 94
+      },
+      "border": "rgba(7, 7, 7, 0.18)"
+    },
+    "focus": "dialog.namePrompt.name",
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "Ada Lovelace · guest",
+        "trust": " · guest",
+        "chip": "Ada Lovelace, guest"
+      }
+    ]
+  },
+  "C.first.enter": {
+    "bandGone": true,
+    "ms": 27,
+    "dialogStill": true
+  },
+  "C.first.afterEnter": {
+    "ask": null,
+    "focus": "dialog.share.done",
+    "rows": [
+      {
+        "control": "dialog.share.owner",
+        "name": "Ada Lovelace · guest",
+        "trust": " · guest",
+        "chip": "Ada Lovelace, guest"
+      }
+    ],
+    "dialogsOnPage": ["dialog.share"]
+  },
+  "C.account": {
+    "label": "Helium 820",
+    "markLabel": "Copper Lane, guest"
+  },
+  "C.name.reachesA": {
+    "seen": true,
+    "ms": 2,
+    "bound": 5000,
+    "load": "3.39 3.84 5.87"
+  },
+  "shot.C.afterEnter.light": "/Users/kevinliu/repos/Turboslide-people/docs/gslides-parity/people/build/b2/fix-share-after-name-C-light.png",
+  "D.first.open": {
+    "shown": true,
+    "ms": 823,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.68 3.89 5.88"
+  },
+  "D.first.dialog": {
+    "ask": true,
+    "focus": "dialog.namePrompt.name"
+  },
+  "D.first.escape": {
+    "closed": true,
+    "asked": "1"
+  },
+  "D.second.open": {
+    "shown": true,
+    "ms": 37,
+    "bound": 5000,
+    "ok": true,
+    "load": "3.68 3.89 5.88"
+  },
+  "D.second.dialog": {
+    "ask": null,
+    "focus": "dialog.share.mode"
+  },
+  "console.errors": {
+    "A": {
+      "count": 10,
+      "first": [
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 338913",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unui3tt-d62df5 rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unui3tt-d62df5 rend"
+      ]
+    },
+    "B": {
+      "count": 5,
+      "first": [
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 338908",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unuicpp-9d559b rend",
+        "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4462/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker unuicpp-9d559b rend"
+      ]
+    },
+    "C": {
+      "count": 0,
+      "first": []
+    },
+    "D": {
+      "count": 0,
+      "first": []
+    }
+  },
+  "deck.removed": "untitled-20260930-kfd0",
+  "load.end": "3.68 3.89 5.88"
+}

@@ -713,6 +713,11 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
     kind: identity.kind === 'account' ? 'account' : agentish ? 'agent' : 'anonymous',
     ...(identity.account?.email !== undefined ? { email: identity.account.email } : {}),
     ...(admin ? { admin: true } : {}),
+    /* the anonymous ids the alias table linked to the account (docs/PEOPLE.md 3.6): a deck made
+       before the sign in stays the account's own at the share records too (b1.md R1) */
+    ...(identity.ctx.principal?.aliases !== undefined && identity.ctx.principal.aliases.length > 0
+      ? { aliases: identity.ctx.principal.aliases }
+      : {}),
   };
   const author: Author = identity.author ?? {
     kind: 'human',

@@ -74,8 +74,12 @@ import {
   avatarChoiceFromIndex,
   capabilitiesOf,
   displayNameFromIndex,
+  dropLinkGrantCache,
   effectiveAccess,
+  indexFactsFor,
   readAccess,
+  recordWithIndexFacts,
+  refreshIndexFacts,
 } from './access';
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
@@ -328,6 +332,15 @@ export type RequestIdentity = {
   account?: AccountProfile | null;
 };
 
+export type RequestIdentityOptions = {
+  /**
+   * read the principal's deck index past this instance's 5 s row (access.ts refreshIndexFacts):
+   * the editor boot, so a reload's payload carries the name and the choice written on another
+   * instance at once (docs/PEOPLE.md 6.4); the routes between keep the row
+   */
+  freshIndex?: boolean;
+};
+
 /**
  * The identity of a request on the room routes: the bearer as the bootstrap admin agent (SPEC-3
  * 0.23), else the account session when the deployment has an identity database (docs/PEOPLE.md
@@ -336,7 +349,10 @@ export type RequestIdentity = {
  * writes), else the sealed anonymous cookie (minted here when absent, so a stream opened before
  * the middleware ran still gets an id), else a stranger.
  */
-export async function requestIdentity(request: Request): Promise<RequestIdentity> {
+export async function requestIdentity(
+  request: Request,
+  options: RequestIdentityOptions = {},
+): Promise<RequestIdentity> {
   const secret = studioSessionSecret();
   if (request.headers.get('authorization') !== null) {
     const bearer = bearerAuthorize(request, process.env);
@@ -390,26 +406,25 @@ export async function requestIdentity(request: Request): Promise<RequestIdentity
   const touched = await principalStore()
     .touch(principal.id, new Date(), true)
     .catch(() => null);
-  /* the display name typed on another instance (b1.md R17): the principal store of the blob tier
-     is a file store per instance, so the name `account.setName` wrote elsewhere rides the
-     principal's deck index on the Blob store (access.ts displayNameFromIndex, the carrier the
-     link grants use), read past the same 5 s cache; a record that carries a name keeps it */
-  const named =
-    touched !== null && touched.name === undefined
-      ? await displayNameFromIndex(principal.id)
-          .then((name) => (name === undefined ? touched : { ...touched, name }))
-          .catch(() => touched)
-      : touched;
-  /* the avatar choice chosen on another instance rides the same index (docs/PEOPLE.md 3.13;
-     b4.md R4: `account.setAvatar` writes a non picture choice there and clears it on a picture):
-     the index's choice replaces the record's whenever the index carries one, unless the record's
-     choice is a picture, which the index never carries and a stale glyph must not outlive */
+  /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
+     (docs/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
+     instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
+     principal's deck index on the Blob store (the carrier the link grants use), read through
+     this instance's 5 s row (access.ts indexFactsFor) or past it when the caller asks
+     (`freshIndex`, the editor boot; docs/PEOPLE.md 6.4), and applied by access.ts
+     recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
+     replaces the record's unless the record's choice is a picture, which the index never carries
+     and a stale glyph must not outlive */
+  const facts =
+    touched === null
+      ? null
+      : await (
+          options.freshIndex === true
+            ? refreshIndexFacts(principal.id)
+            : indexFactsFor(principal.id)
+        ).catch(() => null);
   const record =
-    named !== null && named.avatar.variant !== 'picture'
-      ? await avatarChoiceFromIndex(principal.id)
-          .then((avatar) => (avatar === undefined ? named : { ...named, avatar }))
-          .catch(() => named)
-      : named;
+    touched !== null && facts !== null ? recordWithIndexFacts(touched, facts) : touched;
   return {
     /* the link grants are the union of the principal record's and the deck index's, so a grant
        exchanged on another instance admits the visitor on the ops, stream, presence and comments
@@ -567,15 +582,23 @@ export async function resolvePrincipalId(principalId: string): Promise<ResolvedI
   return resolveIdentity(principalId, carried);
 }
 
-/** The record with the name and the non picture choice the deck index carries, when it carries any. */
+/**
+ * The record with the name and the non picture choice the deck index carries, when it carries
+ * any, read past this instance's 5 s index cache (access.ts `indexFactsFor`): `account.setName`
+ * drops the cache on the instance that wrote the index and no bus reaches the others, so an
+ * instance that read the person's index row before the write (their join, a presence post)
+ * answered the old row for up to 5 s and A's reload drew the departed guest's label (the
+ * verifier's pass 1 finding 2, `people.comment-departed-guest` red twice on preview 7 about 2 s
+ * after the reload). The drop costs one store read per person per boot on the blob tier; the
+ * name's read fills the cache and the choice's read takes it.
+ */
 async function carriedFacts(
   principalId: string,
   record: PrincipalRecord | null,
 ): Promise<PrincipalRecord | null> {
-  const [name, avatar] = await Promise.all([
-    displayNameFromIndex(principalId).catch(() => undefined),
-    avatarChoiceFromIndex(principalId).catch(() => undefined),
-  ]);
+  dropLinkGrantCache(principalId);
+  const name = await displayNameFromIndex(principalId).catch(() => undefined);
+  const avatar = await avatarChoiceFromIndex(principalId).catch(() => undefined);
   if (name === undefined && avatar === undefined) return record;
   const base = record ?? newPrincipalRecord(principalId, new Date());
   return {
@@ -2296,7 +2319,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
 // ---------------------------------------------------------------------------------------------
 // Presence (SPEC-3 3.8) and the roster by role (4.8)
 
-type IdentityCacheRow = { at: number; identity: ResolvedIdentity };
+type IdentityCacheRow = { at: number; facts: string; identity: ResolvedIdentity };
 const identityCache = new Map<string, IdentityCacheRow>();
 const IDENTITY_CACHE_MS = 5000;
 
@@ -2307,6 +2330,37 @@ export function forgetIdentity(identity: string): void {
 }
 
 /**
+ * The facts of a request its resolution depends on, the cache row's validator (docs/PEOPLE.md
+ * 6.4): a request whose record or account carries another name or choice than the row was
+ * resolved from (the index read past its cache at a boot or a first presence post, a record
+ * another route wrote on this instance) is resolved again inside the 5 s, so the index row's
+ * window and this one never add up to ten.
+ */
+function identityFactsKey(identity: RequestIdentity): string {
+  return JSON.stringify([
+    identity.record?.name ?? null,
+    identity.record?.avatar ?? null,
+    identity.account?.name ?? null,
+    identity.account?.avatar ?? null,
+  ]);
+}
+
+/**
+ * The request identity with its record read against the deck index past this instance's 5 s row
+ * (access.ts refreshIndexFacts and recordWithIndexFacts; docs/PEOPLE.md 6.4): a client's first
+ * presence post after its boot. The same identity for a bearer, a request without a record, a
+ * store that did not answer, or an index that carries nothing new.
+ */
+export async function withFreshIndexFacts(identity: RequestIdentity): Promise<RequestIdentity> {
+  if (identity.ctx.agent !== undefined || identity.principalId === null || identity.record === null)
+    return identity;
+  const facts = await refreshIndexFacts(identity.principalId).catch(() => null);
+  if (facts === null) return identity;
+  const record = recordWithIndexFacts(identity.record, facts);
+  return record === identity.record ? identity : { ...identity, record };
+}
+
+/**
  * The resolved identity of a request, through the 5 s cache (docs/PEOPLE.md 3.6): a bearer as
  * its agent, a signed in request as the account the session resolved to, an anonymous request as
  * its record, or as the account the alias table links it to (a browser that signed in once and
@@ -2314,11 +2368,13 @@ export function forgetIdentity(identity: string): void {
  */
 export async function resolveRequestIdentity(identity: RequestIdentity): Promise<ResolvedIdentity> {
   const key = identity.identity;
+  const facts = identityFactsKey(identity);
   const hit = identityCache.get(key);
   const now = Date.now();
-  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS) return hit.identity;
+  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS && hit.facts === facts)
+    return hit.identity;
   const resolved = noteResolved(await resolveFresh(identity));
-  identityCache.set(key, { at: now, identity: resolved });
+  identityCache.set(key, { at: now, facts, identity: resolved });
   return resolved;
 }
 
@@ -2367,7 +2423,12 @@ export async function rosterEntryFor(
   post: PresencePost,
   existing: readonly RosterEntry[],
 ): Promise<RosterEntry> {
-  const resolved = await cachedIdentity(identity);
+  /* a client's first post after its boot reads the person's index past this instance's 5 s row
+     (docs/PEOPLE.md 6.4): the boot's payload read the store on its instance, and the instance
+     that serves the first post may hold the row from before the choice; the ticks after keep
+     the row, so the cost is one index read per client, never per tick */
+  const first = existing.every((row) => row.clientId !== post.clientId);
+  const resolved = await cachedIdentity(first ? await withFreshIndexFacts(identity) : identity);
   const principalId =
     identity.ctx.agent !== undefined ? `agent:${identity.ctx.agent.tokenId}` : identity.identity;
   const slot = grantHueSlot(principalId, existing);

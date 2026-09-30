@@ -411,7 +411,9 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     const room = await import('./room');
     const access = await import('./access');
     const auth = await import('./auth/identity');
-    const identity = await room.requestIdentity(getRequest());
+    /* the caller's index read past this instance's cache (docs/PEOPLE.md 6.4): a reload's payload
+       carries the name and the choice written on another instance at once */
+    const identity = await room.requestIdentity(getRequest(), { freshIndex: true });
     sendMintedCookie(identity.setCookie);
     const decision = await room.decideFor(identity, data.deckId, 'read', 'readEditorDeck');
     if (!decision.ok) return JSON.stringify(null);
@@ -566,7 +568,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
      Sign in row exists on /new where the deployment offers one */
   const room = await import('./room');
   const auth = await import('./auth/identity');
-  const identity = await room.requestIdentity(getRequest());
+  const identity = await room.requestIdentity(getRequest(), { freshIndex: true });
   sendMintedCookie(identity.setCookie);
   const resolved = await room.resolveRequestIdentity(identity);
   const runtime = auth.identityRuntime();

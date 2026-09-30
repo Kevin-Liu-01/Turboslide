@@ -48,7 +48,19 @@ export type Caller = {
   email?: string;
   admin?: boolean;
   kind: 'anonymous' | 'account' | 'agent' | 'local';
+  /**
+   * the anonymous ids the alias table links to a signed in caller (docs/PEOPLE.md 3.6;
+   * `Principal.aliases`); absent when none. A record owned by, granted to or requested by one of
+   * them is the caller's own (the people round's fix round, b1.md R1); every write still names
+   * `principalId`, so the account writes as itself.
+   */
+  aliases?: readonly string[];
 };
+
+/** The ids a caller answers to on a record: its own and the aliases the account carries. */
+function idsOf(caller: Caller): ReadonlySet<string> {
+  return new Set([caller.principalId, ...(caller.aliases ?? [])]);
+}
 
 export type AccessDeps = {
   deckDir: string;
@@ -121,13 +133,13 @@ export function standing(
   now: string,
 ): { role: Role; via: Via } | null {
   if (caller.admin === true) return { role: 'owner', via: 'admin' };
-  if (record.owner !== null && record.owner === caller.principalId)
-    return { role: 'owner', via: 'owner' };
+  const ids = idsOf(caller);
+  if (record.owner !== null && ids.has(record.owner)) return { role: 'owner', via: 'owner' };
   let best: { role: Role; via: Via } | null = null;
   for (const grant of record.grants) {
     if (!grantIsLive(grant, now)) continue;
     const mine =
-      (grant.principalId !== null && grant.principalId === caller.principalId) ||
+      (grant.principalId !== null && ids.has(grant.principalId)) ||
       (grant.email !== null &&
         caller.email !== undefined &&
         grant.email.toLowerCase() === caller.email.toLowerCase());
@@ -250,9 +262,10 @@ export async function shareGet(deps: AccessDeps): Promise<{
     throw new RangeError('This presentation is not available to you, or does not exist.');
   const capabilities = [...capabilitiesOf(record, mine)];
   if (!capabilities.includes('share')) {
+    const ids = idsOf(deps.caller);
     const own = record.grants.filter(
       (grant) =>
-        (grant.principalId !== null && grant.principalId === deps.caller.principalId) ||
+        (grant.principalId !== null && ids.has(grant.principalId)) ||
         (grant.email !== null &&
           deps.caller.email !== undefined &&
           grant.email === deps.caller.email),
@@ -608,12 +621,13 @@ export async function shareRequestAccess(
     await withDeckLock(deps.deckDir, async () => {
       const now = stamp(deps);
       const { record, stored } = await loadRecord(deps);
-      if (!stored && record.owner === deps.caller.principalId) return;
+      const ids = idsOf(deps.caller);
+      if (!stored && record.owner !== null && ids.has(record.owner)) return;
       if (standing(record, deps.caller, now) !== null) return;
       const mine = record.requests.filter(
         (row) =>
           row.respondedAt === null &&
-          (row.principalId === deps.caller.principalId ||
+          ((row.principalId !== null && ids.has(row.principalId)) ||
             (input.email !== undefined && row.email === input.email)),
       );
       if (mine.length >= 3) return;
@@ -748,7 +762,7 @@ export async function shareTransferOwnership(
 function isPendingOwner(record: AccessRecord, caller: Caller): boolean {
   const pending = record.pendingOwner;
   if (pending === null) return false;
-  if (pending.principalId !== null && pending.principalId === caller.principalId) return true;
+  if (pending.principalId !== null && idsOf(caller).has(pending.principalId)) return true;
   return (
     pending.email !== null &&
     caller.email !== undefined &&
@@ -825,7 +839,7 @@ export async function shareClaim(
     deps,
     input.baseRevision,
     (next, now) => {
-      if (next.owner !== null && next.owner !== deps.caller.principalId) {
+      if (next.owner !== null && !idsOf(deps.caller).has(next.owner)) {
         throw new ForbiddenError('this presentation has an owner already', 'transfer');
       }
       if (deps.caller.kind === 'anonymous' && deps.caller.admin !== true) {

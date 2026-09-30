@@ -2871,12 +2871,16 @@ test(title('decks.polish.pages-sweep'), async ({ browser }) => {
   /* the card's Make a copy lists Copy comments */
   await gotoDecks();
   await cardMenuRow(deck, /Make a copy/);
-  const copyDialog = await ctl(page, 'dialog.makeCopy')
+  /* the card's dialog is the home page's own (`home.copy`, decks.index.tsx; B5's item 98 note
+     names `home.copy.copy-comments`), not the editor's `dialog.makeCopy`: the first form of
+     this read waited for the editor's id on the home page and read red on every tier of the
+     round (the ship step's third attempt) */
+  const copyDialog = await ctl(page, 'home.copy')
     .waitFor({ timeout: 8000 })
     .then(() => true)
     .catch(() => false);
   const copyComments = copyDialog
-    ? (await ctl(page, 'dialog.makeCopy.copyComments').count()) > 0
+    ? (await ctl(page, 'home.copy.copy-comments').count()) > 0
     : false;
   await page.keyboard.press('Escape');
   notes.push(`Make a copy dialog ${copyDialog} with Copy comments ${copyComments}`);
@@ -2921,11 +2925,25 @@ test(title('decks.polish.pages-sweep'), async ({ browser }) => {
     await ctl(page, 'comment.card.new.field').click();
     await page.keyboard.type('Sweep comment', { delay: 40 });
     await ctl(page, 'comment.card.new.submit').click();
-    await page.waitForTimeout(1500);
-    const resolve = page.locator('[data-control$=".resolve"]').first();
+    /* posting closes the composer's card (CommentCard.tsx onSubmit runs onClose), and the
+       thread's card opens from its marker, the way a seller and `comments.resolve`
+       (present.spec.ts) open it; the first form of this read looked for the tick on the closed
+       card (count 0 on every tier of the round; the ship step's third attempt) */
+    const marker = await expect
+      .poll(() => ctl(page, 'comment.marker').count(), { timeout: 10_000 })
+      .toBeGreaterThan(0)
+      .then(() => true)
+      .catch(() => false);
+    if (marker) {
+      await ctl(page, 'comment.marker').click();
+      await ctl(page, 'comment.card')
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
+    }
+    const resolve = ctl(page, 'comment.card.resolve');
     let resolvedWords: string | null = null;
     let undo: string | null = null;
-    if ((await resolve.count()) > 0) {
+    if (marker && (await resolve.count()) > 0) {
       await resolve.click();
       resolvedWords = await expect
         .poll(() => snackbarText(page), { timeout: 5000 })

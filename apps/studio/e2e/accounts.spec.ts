@@ -1597,11 +1597,13 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
         : "the grant row's email line",
     ).toBe(emailB);
     expect(facts.below, 'the line under the name').not.toBe(false);
-    /* C, a viewer by link, sees no email */
-    await setLinkAccess(A, 'viewer');
+    /* C, a viewer by link, sees no email; the role change mints a new link and revokes the
+       editor link of beforeAll, so C follows the address the change answered (the six local
+       runs of the integrator read C's landing red on the revoked address) */
+    const viewerLink = await setLinkAccess(A, 'viewer');
     const { context: cCtx, page: C } = await otherContext(browser);
     try {
-      await C.goto(link);
+      await C.goto(viewerLink);
       await C.waitForURL(new RegExp(`/(edit|deck)/${deck}`), { timeout: 90_000 });
       await waitEditor(C);
       expect(

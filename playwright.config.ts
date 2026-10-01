@@ -49,6 +49,11 @@ export default defineConfig({
             // obviously fake secrets for the identity cookie and the export download URLs
             TURBOSLIDE_SESSION_SECRET: 'playwright-session-secret-0000000000000000000000',
             TURBOSLIDE_DOWNLOAD_SECRET: 'playwright-download-secret-000000000000000000',
+            // the realtime round (docs/REALTIME.md 4.1; build/r4.md R4-INTa): a fake Google client
+            // pair so the Sign in dialog offers Continue with Google to the accounts.* rows; a test
+            // value for a local server and never a client Google knows
+            GOOGLE_CLIENT_ID: 'fake-client-id.apps.googleusercontent.com',
+            GOOGLE_CLIENT_SECRET: 'fake-secret-for-local-tests',
           },
           url: baseURL,
           reuseExistingServer: true,

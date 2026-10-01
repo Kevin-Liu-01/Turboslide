@@ -178,6 +178,11 @@ const SERVER_ENV = {
   // agent surface stays open for the specs and the library's sign in limiter is off for the run
   TURBOSLIDE_LOCAL_OPEN: '1',
   TURBOSLIDE_AUTH_RATE_LIMIT: 'off',
+  // the realtime round (docs/REALTIME.md 4.1; build/r4.md request R4-INTa): a fake Google client
+  // pair, so step 32's accounts run offers Continue with Google and the four accounts.* rows read
+  // the button; a test value for a local server and never a client Google knows
+  GOOGLE_CLIENT_ID: 'fake-client-id.apps.googleusercontent.com',
+  GOOGLE_CLIENT_SECRET: 'fake-secret-for-local-tests',
 };
 // Step 6's source greps (SPEC-3 16.1, 8.4, 8.5): every `dangerouslySetInnerHTML` and `innerHTML`
 // call site outside this list is a failure, and so is `overwrite: true` on a pathname under the

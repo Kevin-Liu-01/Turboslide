@@ -106,6 +106,20 @@
   cursor: default;
 }
 
+/* the primary method when the email field is hidden (the realtime round, docs/REALTIME.md 4.1,
+   default 7.7; build/r4.md request R4-INTb): with TURBOSLIDE_MAIL=off the dialog has no field
+   and Continue with Google is the first action, drawn filled as .pt-ib.is-solid draws it; the
+   ring inverts the same way so it is not ink on ink */
+.ts-sign-in-method.is-primary {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  border-color: var(--pt-ink);
+}
+
+.ts-sign-in-method.is-primary:focus-visible {
+  outline-color: var(--pt-paper);
+}
+
 .ts-sign-in-note {
   font-size: 11px;
   color: var(--pt-titanium);

@@ -29,12 +29,16 @@ import type { ViewerFacts } from './presence-model';
  * Collaborators list of 4.9: the menu's accessible name says so.
  *
  * The focus round (docs/FOCUS.md 3.1, 3.2; b6's FR2): the row `title.presence.follow` and the
- * Later stub `title.presence.joinChat` are parked, so the Follow word and the Join chat footer
+ * Later stub `title.presence.joinChat` were parked, so the Follow word and the Join chat footer
  * are drawn only while `isPresent` says so for the menu context; the rows themselves, the chips,
  * the names and the slide numbers stay, and Enter or a click on a row still jumps (the chips stay
  * drawn, 3.2). The Go to slide word (`title.presence.goTo`) reads the same predicate and is in the
  * default view since the features round's ship one, when its row collab.roster.go-to-slide read
  * green in both preview runs of record (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`).
+ * Since the realtime round (docs/REALTIME.md 2 row realtime.follow.for-everyone) the Follow row is
+ * in the default view too and the `follow` capability reaches every editor and owner, by link
+ * included, so the row reads Follow for every editor and owner with a slide open and Go to slide
+ * for a commenter or a viewer.
  */
 export type RosterMenuProps = {
   anchor: HTMLElement;
@@ -114,8 +118,8 @@ export function RosterMenu({
         const trust = trustMarkOf(participant) === null ? trustWordFor(participant) : null;
         const following = presence.following === participant.clientId;
         /* Follow while its row is offered (docs/POLISH.md item 104: an anonymous editor can be
-           followed once the parked row returns); until then the row is a one time jump, in word
-           and in click, never a hidden control */
+           followed; the realtime round returned the row to the default view); where Follow is
+           refused the row is a one time jump, in word and in click, never a hidden control */
         const follow = !self && showFollowWord && canFollow(participant, capabilities);
         /* the tooltip's doc line opens with the trust sentence (3.7): "Signed in as <email>" for a
            reader who may see the address, else the state's sentence; the action sentence follows */
@@ -128,7 +132,7 @@ export function RosterMenu({
           : follow
             ? {
                 name: PRESENCE.follow,
-                doc: `${trustSentence} Jumps to that person’s slide and moves with them; your own edit or click stops it`,
+                doc: `${trustSentence} Jumps to that person’s slide and moves with them; your own click, edit or comment stops it, and so do Slideshow and Version history`,
               }
             : {
                 name: n === null ? name : PRESENCE.goToSlide(n),

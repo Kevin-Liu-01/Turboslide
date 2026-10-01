@@ -1,0 +1,146 @@
+{
+  "startedAt": "2026-10-01T19:02:23.717Z",
+  "base": "http://localhost:4473",
+  "appearance": "light",
+  "advancedTools": true,
+  "rows": {
+    "realtime.card.chip-painted": {
+      "domWithinMs": 184,
+      "pixelsDiffering": 157,
+      "marksBox": [
+        164,
+        257,
+        70,
+        16
+      ],
+      "zIndex": "1",
+      "thumbIsolation": "isolate",
+      "pass": true
+    },
+    "realtime.follow.for-everyone": {
+      "ownerOffersFollow": true,
+      "ownerRow": {
+        "item": "title.presence.follow",
+        "text": "MMica 802editor · slide 2Follow",
+        "act": "Follow"
+      },
+      "plate": "MFollowing Mica 802·Stop",
+      "stageWithinMs": 196,
+      "ends": {
+        "ownClick": true,
+        "ownClickStays": true,
+        "ownKey": true,
+        "ownKeySlide": "split-2-57ab",
+        "ownEdit": true,
+        "ownCommentAnswer": "ok",
+        "ownComment": true,
+        "slideshow": true,
+        "versionHistoryPanel": "versionHistory",
+        "versionHistory": true
+      },
+      "linkEditorOffersFollow": true,
+      "linkRow": {
+        "item": "title.presence.follow",
+        "text": "IInk 777owner · slide 2Follow",
+        "act": "Follow"
+      },
+      "linkPlate": "IFollowing Ink 777·Stop",
+      "linkStageWithinMs": 152,
+      "leaveEndsWithinMs": 58,
+      "chipGoneWithinMs": 60,
+      "pass": true
+    },
+    "realtime.agent.write-announced": {
+      "post": {
+        "status": 200,
+        "tookMs": 19,
+        "replaced": null
+      },
+      "bannerWithinMs": 157,
+      "banner": "Assistant changed slide 1",
+      "headBefore": "R3 follow drive",
+      "headAfter": "Agent wrote this",
+      "headAfterUndo": "Agent wrote this",
+      "leadAfterUndo": "Own words by A",
+      "cmdZLeftAgentText": true,
+      "cmdZTookOwnEdit": false,
+      "pass": true
+    }
+  },
+  "warm": {
+    "ready": true,
+    "ms": 3637
+  },
+  "load.start": [
+    17.63,
+    19.61,
+    19.53
+  ],
+  "deck.id": "untitled-20261001-s48s",
+  "slides": [
+    "title",
+    "split-1-57ab",
+    "split-2-57ab"
+  ],
+  "share.link": "http://localhost:4473/s/<token>",
+  "join.chipInAMs": 2570,
+  "B.access": {
+    "role": "editor",
+    "via": "link",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share"
+    ]
+  },
+  "A.access": {
+    "role": "owner",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share",
+      "settings",
+      "remove",
+      "transfer"
+    ]
+  },
+  "A.settings.advancedTools": true,
+  "load.end": [
+    23.12,
+    20.77,
+    19.95
+  ],
+  "teardown": {
+    "trash": "ok",
+    "remove": "ok"
+  },
+  "finishedAt": "2026-10-01T19:02:49.467Z"
+}

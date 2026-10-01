@@ -18,6 +18,9 @@ import { participantsOnSlide } from './presence-model';
  * zero as an empty box. The outline chip is a real 12 px size with an 8 px field (docs/PEOPLE.md
  * 3.4), not a 14 px chip scaled by a rule. Every mark is absolute inside the frame, so the card's
  * `contain-intrinsic-size` is unchanged. Without the editor shell (the view route) nothing draws.
+ * The marks paint above the thumbnail since the realtime round (Filmstrip.css `.ts-card-marks`
+ * z-index, Thumb.css isolation; audit-people.md defect 3 read the chip in the DOM and nothing in
+ * the pixels, the row realtime.card.chip-painted reads the pixels).
  */
 export function FilmstripMarks({
   slideId,

@@ -9,9 +9,10 @@ import { IdentityChip } from './IdentityChip';
  * The Following plate (gslides-parity SPEC-3 4.4; research 11 6.3, 8 P4): a 240 by 24 ink plate
  * absolutely over the stage at the top centre, "Following Maya · Stop" with a 14 px chip before
  * the name and a Stop text button; it appears and leaves by opacity and moves nothing. Following
- * ends on the follower's own edit, comment, click on another slide, Slideshow, Version history,
- * the chip again and when the followed person leaves: the route owns those stops and passes
- * `following`; the plate draws it and offers Stop.
+ * ends on the follower's own edit, comment, click or key on another slide, Slideshow, Version
+ * history, and when the followed person leaves (Google's six, audit-people.md section 2; the
+ * realtime round landed the four that were missing, apps/studio/src/editor/follow-rules.ts): the
+ * editor's controller owns those stops and passes `following`; the plate draws it and offers Stop.
  */
 export type FollowingPlateProps = {
   followed: PresenceParticipant;
@@ -39,7 +40,7 @@ export function FollowingPlate({ followed, name, onStop }: FollowingPlateProps) 
         onClick={onStop}
         {...tipProps({
           name: PRESENCE.stop,
-          doc: 'Stops following; your own click or edit stops it too',
+          doc: 'Stops following; your own click, edit or comment stops it too',
         })}
       >
         {PRESENCE.stop}

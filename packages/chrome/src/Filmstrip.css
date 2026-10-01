@@ -216,10 +216,17 @@
    a chip that arrives fills leftwards inside the box and neither the box nor an earlier chip moves.
    Sized to its content, the box grew leftwards with every arrival and the layout shift API counted
    each growth (presence.spec.ts:411, twenty arrivals). */
+/* Painted above the thumbnail (the realtime round, docs/REALTIME.md 2 row
+   realtime.card.chip-painted; audit-people.md defect 3): the thumbnail's live clone is
+   `position: absolute; z-index: 1` (viewer/LiveClone.tsx) and `.ts-thumb` made no stacking
+   context, so the clone painted over these marks although they come later in the frame; the chip
+   was in the DOM and nothing was at its place in the pixels (people-drive/probe-a-card-corner.png).
+   The z-index lifts the marks above the clone; Thumb.css isolates the thumbnail as the second guard. */
 .ts-card-marks {
   position: absolute;
   top: 4px;
   right: 4px;
+  z-index: 1;
   box-sizing: border-box;
   width: 70px;
   height: 16px;

@@ -8,11 +8,15 @@
 // capability gets 403 naming the capability; a request with no principal and no agent gets 401;
 // a revoked publish token gets 410. The owner may do everything; a grant its role; a link
 // visitor its link's stored role today, attributed to the anonymous label, and never the sharing,
-// trash, publish, transfer or follow cells; the legacy `open` mode behaves as a link at its role;
-// an agent its owner's role intersected with its scopes, and never transfer or follow; the
+// trash, publish or transfer cells; the legacy `open` mode behaves as a link at its role; an
+// agent its owner's role intersected with its scopes, and never transfer or follow; the
 // deployment admin everything with `via: 'admin'`. Notes are read by editors and owners only,
 // skipped slides by commenters and above; comments are read by viewers only under the owner's
-// switch (SPEC-3 0.11).
+// switch (SPEC-3 0.11). Since the realtime round (docs/REALTIME.md 2 row
+// realtime.follow.for-everyone, section 7 default 5) `follow` is a plain editor cell: every editor
+// and owner can be followed and can follow, by link and anonymous included, because a deployment
+// without sign in is anonymous throughout and Google's own refusal of anonymous people would
+// refuse everyone there (audit-people.md defect 6); an agent never follows.
 //
 // A deck without a record is today's deck: `owner: null, generalAccess: { mode: 'open', role:
 // 'editor' }` in memory until someone claims it (SPEC-3 6.1; research 09 1.4). After R8 a missing
@@ -158,7 +162,11 @@ export const SCOPES_FOR: Readonly<Record<Capability, readonly Scope[]>> = {
   follow: [],
 };
 
-/** The cells a link visitor (and the legacy open mode) never gets, whatever the link's role. */
+/**
+ * The cells a link visitor (and the legacy open mode) never gets, whatever the link's role.
+ * `follow` left the set in the realtime round: a person admitted by an editor link follows and is
+ * followed like a grant holder (docs/REALTIME.md 3.5, 5.1 lane R3).
+ */
 const NOT_BY_LINK: ReadonlySet<Capability> = new Set<Capability>([
   'share',
   'settings',
@@ -167,7 +175,6 @@ const NOT_BY_LINK: ReadonlySet<Capability> = new Set<Capability>([
   'remove',
   'publish',
   'transfer',
-  'follow',
 ]);
 
 /** The matrix of research 09 2.1 for a role holding a grant (or the owner). */
@@ -359,10 +366,9 @@ export function decide(
   if (via === 'admin') return { ok: true, role: 'owner', via: 'admin' };
 
   if ((via === 'link' || via === 'open') && NOT_BY_LINK.has(capability)) return forbidden;
-  if (capability === 'follow') {
-    if (ctx.agent !== undefined || principal.kind !== 'account') return forbidden;
-    if (via !== 'owner' && via !== 'grant') return forbidden;
-  }
+  /* an agent is never followed and never follows (SCOPES_FOR lists no scope for the cell); every
+     person with the editor role or above may, whatever brought them in (the realtime round) */
+  if (capability === 'follow' && ctx.agent !== undefined) return forbidden;
   if (!roleAllows(role, capability, rec.settings)) return forbidden;
   return { ok: true, role, via };
 }

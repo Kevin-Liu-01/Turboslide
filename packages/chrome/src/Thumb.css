@@ -4,11 +4,17 @@
    invisible until it has decoded, then replaces the clone in one cut, so no
    half-loaded image and no motion. Colors are the --pt- tokens only. */
 
+/* The thumbnail is its own stacking context (the realtime round, docs/REALTIME.md 2 row
+   realtime.card.chip-painted; audit-people.md defect 3): the live clone inside it carries
+   `z-index: 1` (viewer/LiveClone.tsx), and without the isolation that index competed with the
+   marks drawn after the thumbnail in a filmstrip card and painted over them. The clone's index
+   now orders the thumbnail's own children only. */
 .ts-thumb {
   position: absolute;
   inset: 0;
   display: block;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .ts-thumb-img {

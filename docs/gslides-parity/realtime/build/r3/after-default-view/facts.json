@@ -1,0 +1,129 @@
+{
+  "startedAt": "2026-10-01T19:03:09.026Z",
+  "base": "http://localhost:4473",
+  "appearance": "light",
+  "advancedTools": false,
+  "rows": {
+    "realtime.card.chip-painted": {
+      "domWithinMs": 181,
+      "pixelsDiffering": 151,
+      "marksBox": [
+        164,
+        257,
+        70,
+        16
+      ],
+      "zIndex": "1",
+      "thumbIsolation": "isolate",
+      "pass": true
+    },
+    "realtime.follow.for-everyone": {
+      "ownerOffersFollow": false,
+      "ownerRow": {
+        "item": "title.presence.goTo",
+        "text": "PPaper 250editor · slide 2Go to slide 2",
+        "act": "Go to slide 2"
+      },
+      "linkEditorOffersFollow": false,
+      "linkRow": {
+        "item": "title.presence.goTo",
+        "text": "MMagnesium 432owner · slide 1Go to slide 1",
+        "act": "Go to slide 1"
+      },
+      "leaveEndsWithinMs": "refollow refused",
+      "pass": false
+    },
+    "realtime.agent.write-announced": {
+      "post": {
+        "status": 200,
+        "tookMs": 17,
+        "replaced": null
+      },
+      "bannerWithinMs": 155,
+      "banner": "Assistant changed slide 1",
+      "headBefore": "R3 follow drive",
+      "headAfter": "Agent wrote this",
+      "headAfterUndo": "Agent wrote this",
+      "leadAfterUndo": "Own words by A",
+      "cmdZLeftAgentText": true,
+      "cmdZTookOwnEdit": false,
+      "pass": true
+    }
+  },
+  "warm": {
+    "ready": true,
+    "ms": 459
+  },
+  "load.start": [
+    19.97,
+    20.22,
+    19.77
+  ],
+  "deck.id": "untitled-20261001-hmky",
+  "slides": [
+    "title",
+    "split-1-449f",
+    "split-2-449f"
+  ],
+  "share.link": "http://localhost:4473/s/<token>",
+  "join.chipInAMs": 619,
+  "B.access": {
+    "role": "editor",
+    "via": "link",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share"
+    ]
+  },
+  "A.access": {
+    "role": "owner",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share",
+      "settings",
+      "remove",
+      "transfer"
+    ]
+  },
+  "A.settings.advancedTools": false,
+  "load.end": [
+    17.91,
+    19.77,
+    19.61
+  ],
+  "teardown": {
+    "trash": "ok",
+    "remove": "ok"
+  },
+  "finishedAt": "2026-10-01T19:03:18.772Z"
+}

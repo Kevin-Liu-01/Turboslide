@@ -1,0 +1,135 @@
+{
+  "startedAt": "2026-10-01T18:48:50.273Z",
+  "base": "http://localhost:4473",
+  "appearance": "light",
+  "rows": {
+    "realtime.card.chip-painted": {
+      "domWithinMs": 169,
+      "pixelsDiffering": 0,
+      "marksBox": [
+        164,
+        257,
+        70,
+        16
+      ],
+      "zIndex": "auto",
+      "thumbIsolation": "auto",
+      "pass": false
+    },
+    "realtime.follow.for-everyone": {
+      "ownerOffersFollow": false,
+      "ownerRow": {
+        "item": "title.presence.goTo",
+        "text": "AArgon 153editor · slide 2Go to slide 2",
+        "act": "Go to slide 2"
+      },
+      "linkEditorOffersFollow": false,
+      "linkRow": {
+        "item": "title.presence.goTo",
+        "text": "ZZinc 905owner · slide 1Go to slide 1",
+        "act": "Go to slide 1"
+      },
+      "leaveEndsWithinMs": "refollow refused",
+      "pass": false
+    },
+    "realtime.agent.write-announced": {
+      "post": {
+        "status": 400,
+        "tookMs": 18,
+        "replaced": {
+          "name": "TypeError",
+          "status": 400,
+          "message": "text.replaceAll: invalid input at /baseRevision: Invalid input: expected number, received undefined",
+          "action": "text.replaceAll",
+          "code": "invalid_input",
+          "pointer": "/baseRevision"
+        }
+      },
+      "bannerWithinMs": null,
+      "banner": null,
+      "headBefore": "R3 follow drive",
+      "headAfter": null,
+      "headAfterUndo": "R3 follow drive",
+      "leadAfterUndo": "Click to add subtitle",
+      "cmdZLeftAgentText": false,
+      "cmdZTookOwnEdit": true,
+      "pass": false
+    }
+  },
+  "warm": {
+    "ready": true,
+    "ms": 759
+  },
+  "load.start": [
+    18.74,
+    18.16,
+    18.89
+  ],
+  "deck.id": "untitled-20261001-wkdb",
+  "slides": [
+    "title",
+    "split-1-1390",
+    "split-2-1390"
+  ],
+  "share.link": "http://localhost:4473/s/<token>",
+  "join.chipInAMs": 832,
+  "B.access": {
+    "role": "editor",
+    "via": "link",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share"
+    ]
+  },
+  "A.access": {
+    "role": "owner",
+    "capabilities": [
+      "read",
+      "presence",
+      "readSkipped",
+      "comment",
+      "readComments",
+      "readNotes",
+      "write",
+      "history",
+      "export",
+      "exportNotes",
+      "rename",
+      "copy",
+      "trash",
+      "restore",
+      "publish",
+      "follow",
+      "share",
+      "settings",
+      "remove",
+      "transfer"
+    ]
+  },
+  "A.settings.advancedTools": false,
+  "load.end": [
+    18.6,
+    18.16,
+    18.88
+  ],
+  "teardown": {
+    "trash": "ok",
+    "remove": "ok"
+  },
+  "finishedAt": "2026-10-01T18:49:07.504Z"
+}

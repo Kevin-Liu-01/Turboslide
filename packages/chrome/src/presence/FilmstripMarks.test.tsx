@@ -83,4 +83,19 @@ describe('the filmstrip card marks', () => {
     expect(rule).toContain('justify-content: flex-start');
     expect(rule).toContain('right: 4px');
   });
+
+  it('paint above the thumbnail: the marks carry a z-index and the thumbnail is its own stacking context (audit-people.md defect 3)', () => {
+    const filmstrip = readFileSync(join(HERE, '..', 'Filmstrip.css'), 'utf8');
+    const marks = filmstrip.slice(
+      filmstrip.indexOf('.ts-card-marks {'),
+      filmstrip.indexOf('}', filmstrip.indexOf('.ts-card-marks {')),
+    );
+    expect(marks).toContain('z-index: 1');
+    const thumb = readFileSync(join(HERE, '..', 'Thumb.css'), 'utf8');
+    const rule = thumb.slice(
+      thumb.indexOf('.ts-thumb {'),
+      thumb.indexOf('}', thumb.indexOf('.ts-thumb {')),
+    );
+    expect(rule).toContain('isolation: isolate');
+  });
 });

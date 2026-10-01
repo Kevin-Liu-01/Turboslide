@@ -45,6 +45,13 @@ import {
  * chip's click no longer jumped (VERIFICATION.md "Polish round, pass 2" finding 5, the row red on
  * both tiers). Since the fix round 2 the chip's click is the jump and nothing else, and Follow
  * lives in the roster alone, where its word says what the click does.
+ *
+ * The realtime round (docs/REALTIME.md 2 row realtime.follow.for-everyone, 7 default 5): Follow is
+ * in the default view for every editor and owner, by link included. The row
+ * `title.presence.follow` lost `advanced: true` (the integrator, build/r3.md request 1) and the
+ * `follow` cell left the link visitor's refusals (packages/identity/src/access.ts), so
+ * `followOffered` below reads true without the Advanced tools switch; the follow ends on the six
+ * triggers Google names, run by the editor's controller (apps/studio/src/editor/follow-rules.ts).
  */
 
 /**
@@ -106,7 +113,8 @@ export function PresenceSlot() {
     else if (input.editor?.followClient) input.editor.followClient(participant.clientId);
     else goTo(participant);
   };
-  /* the Follow word is drawn in the roster while its parked row is present (docs/FOCUS.md 3.1) */
+  /* the Follow word is drawn in the roster while its row is present (docs/FOCUS.md 3.1); in the
+     default view since the realtime round, under the `follow` capability */
   const followOffered = isPresent(itemById('title.presence.follow'), shell.menuContext);
   const goTo = (participant: PresenceParticipant) => {
     if (presence.onGoTo) presence.onGoTo(participant.clientId);

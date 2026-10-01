@@ -12,6 +12,7 @@ import type {
 import {
   CAPABILITIES,
   DEFAULT_ACCESS_SETTINGS,
+  SCOPES,
   SCOPES_FOR,
   decide,
   roleAllows,
@@ -119,8 +120,9 @@ const GRANT_CELLS: Record<
   follow: [true, true, false, false],
 };
 
-// A link visitor at a link role: the role's cells minus the sharing, trash, publish, transfer and
-// follow cells (09 2.1 "Link visitor" column).
+// A link visitor at a link role: the role's cells minus the sharing, trash, publish and transfer
+// cells (09 2.1 "Link visitor" column). `follow` left the list in the realtime round
+// (docs/REALTIME.md 7 default 5): an editor by link follows and is followed.
 const NOT_BY_LINK = new Set<Capability>([
   'share',
   'settings',
@@ -129,7 +131,6 @@ const NOT_BY_LINK = new Set<Capability>([
   'remove',
   'publish',
   'transfer',
-  'follow',
 ]);
 
 describe('the matrix, one assertion per cell', () => {
@@ -434,21 +435,69 @@ describe('expiry, revocation and the highest standing', () => {
     });
   });
 
-  test('follow needs an account with a grant or the ownership', () => {
+  test('follow is every editor\u2019s and owner\u2019s, by link and anonymous included, and never an agent\u2019s (the realtime round)', () => {
     const rec = record({
-      grants: [grant('usr_ed', 'editor'), grant(anon.id, 'editor')],
+      grants: [grant('usr_ed', 'editor'), grant(anon.id, 'editor'), grant('usr_co', 'commenter')],
       generalAccess: { mode: 'open', role: 'editor' },
+      links: [link('lnk_e', 'editor'), link('lnk_v', 'viewer')],
     });
-    expect(decide(rec, ctx(principal('usr_ed')), 'follow', { now: NOW }).ok).toBe(true);
-    expect(decide(rec, ctx(anon), 'follow', { now: NOW }).ok).toBe(false);
-    expect(decide(rec, ctx(principal('usr_other')), 'follow', { now: NOW }).ok).toBe(false);
+    /* a grant holder and an anonymous grant holder */
+    expect(decide(rec, ctx(principal('usr_ed')), 'follow', { now: NOW })).toEqual({
+      ok: true,
+      role: 'editor',
+      via: 'grant',
+    });
+    expect(decide(rec, ctx(anon), 'follow', { now: NOW })).toEqual({
+      ok: true,
+      role: 'editor',
+      via: 'grant',
+    });
+    /* a stranger admitted by the open mode at the editor role */
+    expect(decide(rec, ctx(principal('usr_other')), 'follow', { now: NOW })).toEqual({
+      ok: true,
+      role: 'editor',
+      via: 'open',
+    });
+    /* an editor link admits; a viewer link does not (the role cell), nor does a commenter grant */
+    const stranger = principal('anon_1f2e3d4c-5b6a-4798-8a9b-0c1d2e3f4a5b', 'anonymous');
+    const restricted = record({ ...rec, generalAccess: { mode: 'link', role: 'viewer' } });
+    expect(
+      decide(
+        restricted,
+        ctx(stranger, { linkGrants: [{ linkId: 'lnk_e', deckId: 'q4-review', role: 'editor' }] }),
+        'follow',
+        { now: NOW },
+      ),
+    ).toEqual({ ok: true, role: 'editor', via: 'link' });
+    expect(
+      decide(
+        restricted,
+        ctx(stranger, { linkGrants: [{ linkId: 'lnk_v', deckId: 'q4-review', role: 'viewer' }] }),
+        'follow',
+        { now: NOW },
+      ).ok,
+    ).toBe(false);
+    expect(decide(restricted, ctx(principal('usr_co')), 'follow', { now: NOW }).ok).toBe(false);
+    /* the anonymous owner of a deck made before any sign in */
     const anonOwner = record({ owner: anon.id });
-    expect(decide(anonOwner, ctx(anon), 'write', { now: NOW })).toEqual({
+    expect(decide(anonOwner, ctx(anon), 'follow', { now: NOW })).toEqual({
       ok: true,
       role: 'owner',
       via: 'owner',
     });
-    expect(decide(anonOwner, ctx(anon), 'follow', { now: NOW }).ok).toBe(false);
+    /* an agent, the owner's own key with every scope included, is refused the cell */
+    const agent = {
+      tokenId: 'key_1',
+      ownerId: OWNER,
+      scopes: [...SCOPES] as Scope[],
+      name: 'cli',
+    };
+    expect(decide(rec, ctx(null, { agent }), 'follow', { now: NOW })).toEqual({
+      ok: false,
+      status: 403,
+      code: 'forbidden',
+      capability: 'follow',
+    });
   });
 });
 

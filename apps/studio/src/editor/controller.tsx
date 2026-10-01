@@ -12,6 +12,13 @@ import { awaitAcknowledged } from './ack-wait';
 import { foldListedThreads, withAnsweredThread } from './comments-fold';
 import { retargetFieldRuns, slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
+import {
+  agentEntriesOf,
+  endsFollowOnAction,
+  endsFollowOnPanel,
+  endsFollowOnSlide,
+  endsFollowOnView,
+} from './follow-rules';
 import { refusalSentence } from './refusal';
 import { refusedText, refusedWriteSentence, structuralRefusalSentence } from './refused-write';
 import { serialChain } from './serial-chain';
@@ -566,9 +573,15 @@ export type EditorSnapshot = {
   artifact: ArtifactState;
 };
 
-/** The shell's snackbar with one action, as EditorShellState.say offers it. */
+/**
+ * The shell's snackbar with one action, as EditorShellState.say offers it, and the right panel
+ * the shell shows (`EditorShellState.panel`): ShellBridge attaches the shell state on every
+ * render, so the controller reads the panel there and ends a follow when Version history opens
+ * (follow-rules.ts endsFollowOnPanel; docs/REALTIME.md 2 row realtime.follow.for-everyone).
+ */
 export type EditorShellSnack = {
   say: (text: string, action?: { label: string; run: () => void }) => void;
+  panel?: string | null;
 };
 
 export type EditorController = {
@@ -1051,6 +1064,8 @@ export function createEditorController(init: {
   let shell: ShellState | null = null;
   /* the editor shell's snackbar with an action (docs/PRODUCT.md 6.1), from ShellBridge */
   let editorShell: EditorShellSnack | null = null;
+  /* the editor shell's open panel at the last attach, for the Version history follow trigger */
+  let shellPanel: string | null = null;
   /* the document before the last remote op applied, for the inverse of an outside write (6.1) */
   let beforeRemote: DeckDocument | null = null;
   /** told once with the mutations of the next write the store shim applies locally (select-after-write.ts) */
@@ -1461,8 +1476,24 @@ export function createEditorController(init: {
     };
   };
 
+  /**
+   * The six ends of a follow (docs/REALTIME.md 2 row realtime.follow.for-everyone; Google's list
+   * in audit-people.md section 2; the rules in follow-rules.ts): the own commit (`commit`), the
+   * own click or key on another slide (`setActiveSlide`), the own comment (the room's comment
+   * writes), Slideshow (`setView`), Version history (the shell's panel at `attachEditorShell`) and
+   * the followed client's `leave`. Each calls this, which also tells the room the tab follows
+   * nobody, as `unfollow` does, so the roster's own row stops naming the person.
+   */
   const stopFollowing = (): void => {
-    if (latest().following !== null) publish({ following: null });
+    if (latest().following === null) return;
+    publish({ following: null });
+    room?.setPresence({ follow: undefined });
+  };
+  /** The slide the followed person has open, from the roster, or null without one. */
+  const followedSlideOf = (): string | null => {
+    const id = latest().following;
+    if (id === null) return null;
+    return latest().roster.find((row) => row.clientId === id)?.slideId ?? null;
   };
 
   /* the one sentence of a refused change that carried no typed text (item 102) is
@@ -1492,15 +1523,16 @@ export function createEditorController(init: {
   const announceAgentWrite = (entries: ReadonlyArray<Entry>): void => {
     if (room === null) return;
     const client = room;
-    const mine = entries.filter(
-      (entry) =>
-        !(entry.note !== undefined && ownAssistNotes.delete(entry.note)) &&
-        entry.author.kind === 'agent' &&
-        entry.clientId !== client.clientId() &&
-        !latest().ownClientIds.includes(entry.clientId) &&
-        entry.mutations !== undefined &&
-        entry.mutations.length > 0,
-    );
+    /* the gate (follow-rules.ts agentEntriesOf; docs/REALTIME.md 3.3, row
+       realtime.agent.write-announced): since the realtime round every bearer whose caller is an
+       agent writes with `author.kind: 'agent'`, the token's label and the run id, under the room's
+       `agent:<principalId>` client id (the blob tier's record keeps `store`), so a write through
+       POST /api/actions reaches this banner the way the assist's and the checkout agent's did */
+    const mine = agentEntriesOf(entries, {
+      clientId: client.clientId(),
+      earlierIds: latest().ownClientIds,
+      assistNotes: ownAssistNotes,
+    });
     if (mine.length === 0) return;
     const mutations: Mutation[] = mine.flatMap((entry) => entry.mutations ?? []);
     const before = beforeRemote;
@@ -1750,6 +1782,8 @@ export function createEditorController(init: {
   };
   /** A comment or notification action of this tab, then the sidecar and the inbox re-read. */
   const roomAction = async (action: ActionId, input: unknown): Promise<unknown> => {
+    // the own comment ends a follow (Google: "You add or edit a comment"; follow-rules.ts)
+    if (endsFollowOnAction(action)) stopFollowing();
     const out = await invoke(action, input);
     applyAnsweredThread(out);
     scheduleCommentsRefresh();
@@ -1954,7 +1988,9 @@ export function createEditorController(init: {
             // the row replaced where it stands (docs/PEOPLE.md 3.16): join order holds, so the
             // slots and the filmstrip never swap chips on a caret move
             publish({ roster: replaceRosterRow(latest().roster, event.state) });
-            // Follow (SPEC-3 4.4): the stage moves with the followed client's slide
+            // Follow (SPEC-3 4.4): the stage moves with the followed client's slide; the shell's
+            // report of that slide reads the roster row just replaced and keeps the follow
+            // (follow-rules.ts endsFollowOnSlide)
             const following = latest().following;
             if (
               following === event.clientId &&
@@ -1967,7 +2003,8 @@ export function createEditorController(init: {
           }
           case 'leave':
             publish({ roster: latest().roster.filter((row) => row.clientId !== event.clientId) });
-            if (latest().following === event.clientId) publish({ following: null });
+            // the sixth end of a follow: the followed person left (Google: "refreshes or leaves")
+            if (latest().following === event.clientId) stopFollowing();
             return;
           case 'checkpoint':
             noteCheckpointVersion(event);
@@ -3860,7 +3897,7 @@ export function createEditorController(init: {
   on<{ clientId: string }>('presence.follow', (input) => {
     if (!canFollow()) {
       throw new TypeError(
-        'Follow is for signed in editors and owners; use Go to slide to jump to where they are',
+        'Follow is for editors and owners; use Go to slide to jump to where they are',
       );
     }
     const target = latest().roster.find((row) => row.clientId === input.clientId);
@@ -3921,6 +3958,8 @@ export function createEditorController(init: {
             input === null ||
             (typeof input === 'object' && Object.keys(input as object).length === 0)));
       on<unknown>(id, async (input) => {
+        // a comment write through the window API is this tab's own and ends its follow too
+        if (!readsOnly(input) && endsFollowOnAction(id)) stopFollowing();
         const output = await runDeckAction({ deckId, action: id, input, author });
         if (!readsOnly(input)) {
           applyAnsweredThread(output);
@@ -4634,6 +4673,11 @@ export function createEditorController(init: {
     },
     attachEditorShell(api) {
       editorShell = api;
+      // Version history opening ends a follow (Google: "You open Version history"); the shell
+      // state is attached on every render of ShellBridge, so the panel's change is read here
+      const panel = api?.panel ?? null;
+      if (endsFollowOnPanel(shellPanel, panel)) stopFollowing();
+      shellPanel = panel;
     },
     acceptAssist,
     refreshPresence() {
@@ -4644,6 +4688,16 @@ export function createEditorController(init: {
     },
     setActiveSlide(slideId) {
       if (slideId === snapshot.activeSlide) return;
+      // the own click or key on another slide ends a follow; the follow's own move lands on the
+      // followed person's slide and keeps it (follow-rules.ts endsFollowOnSlide)
+      if (
+        endsFollowOnSlide({
+          following: snapshot.following,
+          followedSlide: followedSlideOf(),
+          slideId,
+        })
+      )
+        stopFollowing();
       const selection =
         snapshot.selection && snapshot.selection.slideId !== slideId ? null : snapshot.selection;
       publish({ activeSlide: slideId, selection });
@@ -4741,6 +4795,8 @@ export function createEditorController(init: {
     },
     setView(view) {
       if (view.mode === snapshot.view.mode && view.present === snapshot.view.present) return;
+      // the show starting ends a follow (Google: "You enter Slideshow mode")
+      if (endsFollowOnView(snapshot.view, view)) stopFollowing();
       publish({ view });
     },
     setShellSettings(settings) {

@@ -123,6 +123,17 @@ export const PRESENCE = {
   showMyPointer: 'Show my pointer',
   showingMyPointer: 'Showing my pointer',
   showCollaboratorPointers: 'Show collaborator pointers',
+  /* the two View > Live pointers rows' doc sentences (the realtime round, docs/REALTIME.md 2 row
+     realtime.pointer.second-browser; Google's rule, audit-people.md section 2: an editor shows
+     their pointer, every access level sees the pointers) */
+  showMyPointerDoc: 'Others see where your pointer is on the slide, with your name; editors only',
+  showCollaboratorPointersDoc:
+    'The pointers of the people in this presentation, with their names, up to twenty',
+  /* the word on a flag while that person moves or resizes a block (docs/REALTIME.md 3.5, row
+     realtime.block.drag-live): "Maya · moving" on the ghost box the drag draws */
+  moving: 'moving',
+  movingFlag: (first: string) => `${first} · moving`,
+  movingLabel: (name: string) => `${name}, moving`,
   announcements: 'Turn on collaborator announcements',
 } as const;
 

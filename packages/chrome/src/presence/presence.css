@@ -482,6 +482,20 @@
   border-color: var(--pt-ink);
 }
 
+/* The drag ghost (the realtime round, docs/REALTIME.md 3.5; row realtime.block.drag-live): the
+   box of a block another person is moving or resizing, drawn at the position their presence
+   frame carries in their hue, with their flag reading "moving" (menus/strings.ts PRESENCE.moving),
+   while the block's own element stays where the document has it until the op lands at the
+   release. A dashed hairline and nothing else, so it reads apart from the solid outline of a held
+   block (RemoteCursors.tsx draws it with both classes, realtime/build/r2.md R2-R6). */
+.ts-remote-outline.ts-remote-drag,
+.ts-remote-drag {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px dashed var(--ts-hue, var(--pt-ink));
+  pointer-events: none;
+}
+
 .ts-remote-caret {
   position: absolute;
   width: 2px;

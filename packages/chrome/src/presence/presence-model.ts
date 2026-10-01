@@ -225,7 +225,10 @@ export function rosterRoleWord(participant: PresenceParticipant): string {
  * commenters and agents (4.4); the caller needs the `follow` capability (6.2). An anonymous
  * editor can be followed (the polish round, docs/POLISH.md item 104): every seller on a
  * deployment without sign in is anonymous, and the rule that followed accounts alone offered
- * "Go to slide 3" and never Follow there.
+ * "Go to slide 3" and never Follow there. Since the realtime round (docs/REALTIME.md 2 row
+ * realtime.follow.for-everyone, 7 default 5) the server grants `follow` to every editor and owner,
+ * by link included (packages/identity/src/access.ts), and the row `title.presence.follow` is in
+ * the default view, so this predicate answers true for every editor and owner with a slide open.
  */
 export function canFollow(
   participant: PresenceParticipant,

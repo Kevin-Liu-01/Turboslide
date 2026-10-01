@@ -1,0 +1,173 @@
+{
+  "startedAt": "2026-10-01T17:56:36.897Z",
+  "base": "https://www.turboslide.com",
+  "deck.id": "untitled-20261001-4i57",
+  "cardMarks.A": {
+    "marks": {
+      "box": [
+        163,
+        132,
+        70,
+        16
+      ],
+      "display": "flex",
+      "opacity": "1",
+      "visibility": "visible",
+      "zIndex": "auto",
+      "count": "1",
+      "html": "<span class=\"ts-card-marks\" aria-label=\"Gravel 109\" data-count=\"1\"><span class=\"ts-chip is-live\" data-size=\"16\" data-variant=\"initials\" data-trust=\"label\" data-principal=\"anon_6fe1c3e3-cba5-4c7d-8e1b-66c5f855d511\" data-hue=\"1\" role=\"img\" aria-label=\"Gravel 109\" style=\"width: 16px; height: 16px; --ts-hue: #2f5ce0;\"><svg class=\"ts-chip-plate\" viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\" shape-rendering=\"crispEdges\"><rect x=\"0\" y=\"0\" width=\"2\" height=\"2\"></rect><rect x=\"4\" y=\"0\" width=\"2\" height=\"2\"></rect><rect x=\"8\" y=\"0\" width=\"2\" height=\"2\"></rect><rect x=\"0\" y=\"4\" width=\"2\" "
+    },
+    "chip": {
+      "box": [
+        217,
+        132,
+        16,
+        16
+      ],
+      "display": "flex",
+      "opacity": "1",
+      "visibility": "visible",
+      "width": "16px",
+      "height": "16px",
+      "border": "1px solid rgba(7, 7, 7, 0.62)",
+      "background": "rgb(255, 255, 255)",
+      "classes": "ts-chip is-live"
+    },
+    "frame": {
+      "box": [
+        36,
+        126,
+        203,
+        114
+      ],
+      "overflow": "hidden",
+      "children": [
+        "ts-thumb",
+        "ts-card-marks"
+      ]
+    },
+    "thumb": {
+      "box": [
+        38,
+        128,
+        199,
+        110
+      ],
+      "zIndex": "auto",
+      "position": "absolute"
+    },
+    "topAtChip": {
+      "tag": "SPAN",
+      "cls": "ts-thumb"
+    }
+  },
+  "shot.probe": "probe-a-card-corner.png",
+  "thumb.zIndexed": [
+    {
+      "tag": "DIV",
+      "cls": "ts-sheet sheet is-clone",
+      "position": "absolute",
+      "zIndex": "1",
+      "transform": "none",
+      "isolation": "auto"
+    },
+    {
+      "tag": "DIV",
+      "cls": "ts-stage stage",
+      "position": "absolute",
+      "zIndex": "auto",
+      "transform": "matrix(0.124375, 0, 0, 0.124375, 0, 0)",
+      "isolation": "auto"
+    },
+    {
+      "tag": "SECTION",
+      "cls": "slide is-on",
+      "position": "absolute",
+      "zIndex": "auto",
+      "transform": "none",
+      "isolation": "isolate"
+    },
+    {
+      "tag": "DIV",
+      "cls": "left-mid",
+      "position": "absolute",
+      "zIndex": "auto",
+      "transform": "matrix(1, 0, 0, 1, 0, -123.375)",
+      "isolation": "auto"
+    }
+  ],
+  "shot.probe.marksZ1": "probe-a-card-corner-marks-z1.png",
+  "shot.probe.thumbIsolated": "probe-a-card-corner-thumb-isolated.png",
+  "cardMarks.C": [
+    {
+      "count": "1",
+      "label": "Gravel 109",
+      "chips": 1
+    }
+  ],
+  "teardown.info": {
+    "status": 200,
+    "revision": 1
+  },
+  "teardown.trash": {
+    "status": 200,
+    "revision": 1,
+    "error": null
+  },
+  "teardown.remove": {
+    "status": 200,
+    "body": {
+      "id": "untitled-20261001-4i57",
+      "removed": true
+    }
+  },
+  "teardown.editStatus": 404,
+  "network": {
+    "A": {
+      "presencePosts": 3,
+      "opsPosts": 0,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 5405,
+          "status": 200,
+          "vercelId": "sfo1::iad1::z9w2b-1790877402565-92aada96ea2c"
+        },
+        {
+          "at": 13162,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xppch-1790877407093-f914fc8d6843"
+        },
+        {
+          "at": 14615,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9l9tx-1790877412094-8ca667cc771c"
+        }
+      ]
+    },
+    "B": {
+      "presencePosts": 2,
+      "opsPosts": 0,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 7732,
+          "status": 200,
+          "vercelId": "sfo1::iad1::55lhn-1790877404773-00b2a5cb6eb4"
+        },
+        {
+          "at": 12828,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fzv2r-1790877409678-6d1136203b4b"
+        }
+      ]
+    }
+  },
+  "finishedAt": "2026-10-01T17:57:00.176Z"
+}

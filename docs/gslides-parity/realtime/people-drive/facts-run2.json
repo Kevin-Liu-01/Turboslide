@@ -1,0 +1,1392 @@
+{
+  "startedAt": "2026-10-01T17:46:47.025Z",
+  "base": "https://www.turboslide.com",
+  "deck.id": "untitled-20261001-f1u1",
+  "build": null,
+  "slide1.runs": [
+    {
+      "run": "heading/text",
+      "text": "Click to add title"
+    },
+    {
+      "run": "lead/text",
+      "text": "Click to add subtitle"
+    }
+  ],
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text"
+  },
+  "share.link": "https://www.turboslide.com/s/<token>",
+  "A.self": {
+    "clientId": null,
+    "presence": {
+      "clientId": "0167830180bb13eec35e1ed31ce0bbc4",
+      "principalId": "anon_0eea81f7-7adf-4592-be9e-295eeffbd7eb",
+      "kind": "human",
+      "label": "Krypton 826",
+      "trust": "label",
+      "mark": {
+        "density": 3,
+        "glyphSeed": 1003335521,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Krypton 826",
+        "variant": "initials",
+        "initials": "K",
+        "hue": {
+          "slot": 3,
+          "hex": "#0f6a6a"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-10-01T17:46:51.909Z"
+    }
+  },
+  "join": {
+    "bEditorReadyMs": 1356,
+    "aSeesBChipMs": 1909,
+    "bSeesAChipMs": 1921
+  },
+  "B.self": {
+    "clientId": null,
+    "presence": null,
+    "access": "link"
+  },
+  "shot.join.A": "01-a-after-join.png",
+  "shot.step1.A.mid": "02-a-typing-title-while-b-subtitle.png",
+  "shot.step1.B.mid": "02-b-typing-subtitle-while-a-title.png",
+  "step1": {
+    "firstSeen": {
+      "A": {
+        "carets": 790,
+        "flags": 790
+      },
+      "B": {
+        "carets": 328,
+        "flags": 328
+      }
+    },
+    "samples": [
+      {
+        "at": 3,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 484,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 945,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1404,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1864,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2324,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "mergedAfterEscapeMs": 2070,
+    "aSeesSubtitle": "Prepared by the field team",
+    "bSeesHeading": "Quarterly review",
+    "elapsedMs": 4795
+  },
+  "shot.step1.A.after": "03-a-after-step1.png",
+  "shot.step2.r1.A.mid": "04-r1-a-both-in-title.png",
+  "shot.step2.r1.B.mid": "04-r1-b-both-in-title.png",
+  "step2.round1": {
+    "before": "Quarterly review",
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2,
+        "carets": 3447
+      },
+      "B": {
+        "flags": 2,
+        "outlines": 2,
+        "carets": 812
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 610,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1217,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1827,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2434,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 3042,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 8,
+    "aFinal": "alphabravo",
+    "bFinal": "alphabravo",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 3734
+  },
+  "shot.step2.r1.A.after": "05-r1-a-after.png",
+  "shot.step2.r1.B.after": "05-r1-b-after.png",
+  "shot.step2.r2.A.mid": "04-r2-a-both-in-title.png",
+  "shot.step2.r2.B.mid": "04-r2-b-both-in-title.png",
+  "step2.round2": {
+    "before": "alphabravo",
+    "firstSeen": {
+      "A": {
+        "carets": 2,
+        "flags": 2
+      },
+      "B": {
+        "carets": 2,
+        "flags": 2
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 609,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1217,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1826,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2434,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 3042,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "KKrypton"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 2746,
+    "aFinal": "alphabravo charlie delta",
+    "bFinal": "alphabravo charlie delta",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 6473
+  },
+  "shot.step2.r2.A.after": "05-r2-a-after.png",
+  "shot.step2.r2.B.after": "05-r2-b-after.png",
+  "selection.travel": {
+    "bClientId": "c58724dda54984cc1656d8f9d7bb6540",
+    "rounds": [
+      {
+        "round": 1,
+        "target": "lead",
+        "aStateSawSelectionMs": 16792,
+        "aOutlineBox": [
+          381,
+          548,
+          636,
+          27
+        ]
+      },
+      {
+        "round": 2,
+        "target": "heading",
+        "aStateSawSelectionMs": 12918,
+        "aOutlineBox": [
+          381,
+          466,
+          935,
+          63
+        ]
+      },
+      {
+        "round": 3,
+        "target": "lead",
+        "aStateSawSelectionMs": 12815,
+        "aOutlineBox": [
+          381,
+          548,
+          636,
+          27
+        ]
+      },
+      {
+        "round": 4,
+        "target": "heading",
+        "aStateSawSelectionMs": 13001,
+        "aOutlineBox": [
+          381,
+          466,
+          935,
+          63
+        ]
+      }
+    ]
+  },
+  "shot.selection.A": "06-a-after-b-selected-subtitle.png",
+  "shot.step3.B.mid": "07-b-dragging-while-a-selected.png",
+  "shot.step3.A.mid": "07-a-selected-while-b-drags.png",
+  "step3": {
+    "blockId": "lead",
+    "bInBMovedPx": 160,
+    "aSawMoveMs": 1468,
+    "aSawMoveDx": 160,
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2
+      },
+      "B": {}
+    },
+    "drawingsDuringDrag": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 104,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 206,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 308,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 412,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 513,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 616,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "FFoil"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "elapsedMs": 2336
+  },
+  "shot.step3.A.after": "08-a-after-b-moved.png",
+  "shot.step3.B.after": "08-b-after-move.png",
+  "step4.plateItems": [
+    {
+      "control": "layout.new",
+      "text": "Click to add titleClick to add subtitleT"
+    },
+    {
+      "control": "layout.new.title",
+      "text": "Click to add titleClick to add subtitleT"
+    },
+    {
+      "control": "layout.new.opener",
+      "text": "Click to add titleClick to add textMater"
+    },
+    {
+      "control": "layout.new.split",
+      "text": "Click to add titleClick to add textTitle"
+    },
+    {
+      "control": "layout.new.cols",
+      "text": "Click to add titleClick to add textClick"
+    },
+    {
+      "control": "layout.new.title-only",
+      "text": "Click to add titleTitle only"
+    },
+    {
+      "control": "layout.new.one-column",
+      "text": "Click to add titleClick to add textOne c"
+    },
+    {
+      "control": "layout.new.statement",
+      "text": "Click to add textMain point"
+    },
+    {
+      "control": "layout.new.section-description",
+      "text": "Click to add titleClick to add textClick"
+    },
+    {
+      "control": "layout.new.mood",
+      "text": "Click to add titleClick to add textImage"
+    },
+    {
+      "control": "layout.new.big-number",
+      "text": "Click to add a numberClick to add textBi"
+    },
+    {
+      "control": "layout.new.blank",
+      "text": "Blank"
+    },
+    {
+      "control": "layout.new.gt",
+      "text": "GT layouts (11)"
+    },
+    {
+      "control": "layout.new.caption",
+      "text": "Point at a layout to read what it holds"
+    }
+  ],
+  "step4": {
+    "cardsBefore": 1,
+    "aSawNewCardMs": 2293,
+    "aRevision": 9,
+    "bRevision": 9,
+    "aCardMarks": [
+      {
+        "count": "1",
+        "label": "Foil 457"
+      }
+    ],
+    "bCardMarks": [
+      {
+        "count": "1",
+        "label": "Krypton 826"
+      }
+    ]
+  },
+  "step4.cardMarkInA": {
+    "at": 2302,
+    "marks": [
+      {
+        "count": "1",
+        "label": "Foil 457"
+      }
+    ]
+  },
+  "shot.step4.A": "09-a-after-b-added-slide.png",
+  "shot.step4.B": "09-b-after-adding-slide.png",
+  "follow.chipDefaultView": {
+    "menuItem": "title.presence.goTo",
+    "label": "Go to slide 2"
+  },
+  "follow.rosterRows": [
+    {
+      "control": "presence.roster.0167830180bb13eec35e1ed31ce0bbc4",
+      "item": "title.presence.me",
+      "text": "KKrypton 826 (you)slide 1"
+    },
+    {
+      "control": "presence.roster.c58724dda54984cc1656d8f9d7bb6540",
+      "item": "title.presence.follow",
+      "text": "FFoil 457editor · slide 2Follow"
+    },
+    {
+      "control": null,
+      "item": "title.presence.joinChat",
+      "text": "Join chat"
+    }
+  ],
+  "shot.follow.roster": "10-a-roster-advanced.png",
+  "follow.afterClick": {
+    "offered": true,
+    "following": "c58724dda54984cc1656d8f9d7bb6540",
+    "plate": "FFollowing Foil 457·Stop"
+  },
+  "shot.follow.plate": "11-a-following-plate.png",
+  "follow.slidesB": [
+    "filmstrip.slide.title",
+    "filmstrip.slide.statement-1-6540"
+  ],
+  "follow.move": {
+    "bTo": null,
+    "aFollowedMs": null,
+    "aFollowing": "c58724dda54984cc1656d8f9d7bb6540"
+  },
+  "shot.follow.A.after": "12-a-after-follow-move.png",
+  "follow.afterOwnClick": {
+    "following": null,
+    "plate": null
+  },
+  "teardown.info": {
+    "status": 200,
+    "revision": 9
+  },
+  "teardown.trash": {
+    "status": 200,
+    "revision": 9,
+    "error": null
+  },
+  "teardown.remove": {
+    "status": 200,
+    "body": {
+      "id": "untitled-20261001-f1u1",
+      "removed": true
+    }
+  },
+  "teardown.editStatus": 404,
+  "network": {
+    "A": {
+      "presencePosts": 51,
+      "opsPosts": 3,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 4764,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fdf65-1790876811957-d1d5416345a3"
+        },
+        {
+          "at": 7624,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hzsr2-1790876815090-26b24ff298c9"
+        },
+        {
+          "at": 7624,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9blhl-1790876815180-924652e01c91"
+        },
+        {
+          "at": 7625,
+          "status": 200,
+          "vercelId": "sfo1::iad1::d6mb4-1790876814865-5e444efee4d1"
+        },
+        {
+          "at": 7699,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6fqct-1790876815333-13c53bc4a4a2"
+        },
+        {
+          "at": 7915,
+          "status": 200,
+          "vercelId": "sfo1::iad1::ncb9n-1790876815484-b7ec5aa2ea0b"
+        },
+        {
+          "at": 8019,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mxqkf-1790876815651-cfb32d0e22c9"
+        },
+        {
+          "at": 8185,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5ds8f-1790876815815-e7df8614f706"
+        },
+        {
+          "at": 8301,
+          "status": 200,
+          "vercelId": "sfo1::iad1::kj2g4-1790876815931-f52379201912"
+        },
+        {
+          "at": 8503,
+          "status": 200,
+          "vercelId": "sfo1::iad1::7zbjt-1790876816138-7ae5aef8e94d"
+        },
+        {
+          "at": 9078,
+          "status": 200,
+          "vercelId": "sfo1::iad1::s5cnc-1790876816709-3dcf1255a42c"
+        },
+        {
+          "at": 10086,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xbcvh-1790876817579-3369f3a91c73"
+        },
+        {
+          "at": 14048,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5n57k-1790876821578-f84c45c672d5"
+        },
+        {
+          "at": 14244,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jqxhv-1790876821680-907a78149eca"
+        },
+        {
+          "at": 14289,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jnztj-1790876821710-25730b2ed987"
+        },
+        {
+          "at": 15444,
+          "status": 200,
+          "vercelId": "sfo1::iad1::wp4q2-1790876821224-378778749cd2"
+        },
+        {
+          "at": 16641,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mw7s7-1790876824094-5e8d67aa7249"
+        },
+        {
+          "at": 18403,
+          "status": 200,
+          "vercelId": "sfo1::iad1::frdgg-1790876821393-1517955d3ba1"
+        },
+        {
+          "at": 19060,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8mrl4-1790876826678-5797dd6af280"
+        },
+        {
+          "at": 19112,
+          "status": 200,
+          "vercelId": "sfo1::iad1::t4tgw-1790876826711-db04cc19211f"
+        },
+        {
+          "at": 19219,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xbcvh-1790876826830-c99f05d63002"
+        },
+        {
+          "at": 19354,
+          "status": 200,
+          "vercelId": "sfo1::iad1::pr5h2-1790876826981-f908c7b44248"
+        },
+        {
+          "at": 19552,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8mrl4-1790876827148-ffa36ced1d27"
+        },
+        {
+          "at": 21272,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qb2jn-1790876824927-faed8c8e91bf"
+        },
+        {
+          "at": 22585,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xlj8r-1790876826518-7438bff7bd3e"
+        },
+        {
+          "at": 22665,
+          "status": 200,
+          "vercelId": "sfo1::iad1::frdgg-1790876830294-1745698267ea"
+        },
+        {
+          "at": 24085,
+          "status": 200,
+          "vercelId": "sfo1::iad1::7glrc-1790876831712-da99c1aecd4a"
+        },
+        {
+          "at": 25792,
+          "status": 200,
+          "vercelId": "sfo1::iad1::w75jm-1790876833113-bb4cff7ed742"
+        },
+        {
+          "at": 29184,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qthhw-1790876836782-cc71686e02bf"
+        },
+        {
+          "at": 34136,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lgbpr-1790876841716-c9864e73cc4f"
+        },
+        {
+          "at": 39194,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hqhsf-1790876846745-f3bd9caa01d2"
+        },
+        {
+          "at": 44096,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qmmn6-1790876851719-b74f740579a9"
+        },
+        {
+          "at": 49159,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fzv2r-1790876856723-8ad0fa3a41cf"
+        },
+        {
+          "at": 54156,
+          "status": 200,
+          "vercelId": "sfo1::iad1::m5ccn-1790876861752-5d3776721140"
+        },
+        {
+          "at": 59170,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8stdc-1790876866724-28e445a032f2"
+        },
+        {
+          "at": 69131,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fprg8-1790876876726-608bcd26e610"
+        },
+        {
+          "at": 79209,
+          "status": 200,
+          "vercelId": "sfo1::iad1::pkptq-1790876886727-91fc8086f517"
+        },
+        {
+          "at": 88122,
+          "status": 200,
+          "vercelId": "sfo1::iad1::snprk-1790876895219-56f3210da13b"
+        },
+        {
+          "at": 90330,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5n57k-1790876897934-896be01e64bb"
+        },
+        {
+          "at": 92524,
+          "status": 200,
+          "vercelId": "sfo1::iad1::85thj-1790876900138-5b283e1a3d03"
+        },
+        {
+          "at": 93536,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5ql89-1790876901082-3143a8bd01ad"
+        },
+        {
+          "at": 96843,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2dqk-1790876904424-8e1568053f29"
+        },
+        {
+          "at": 97564,
+          "status": 200,
+          "vercelId": "sfo1::iad1::ntkxc-1790876905139-76f1953a5e6e"
+        },
+        {
+          "at": 98931,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5ql89-1790876906560-f3455fff3302"
+        },
+        {
+          "at": 102600,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2v4gw-1790876910141-edd88709bc0c"
+        },
+        {
+          "at": 107702,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fprg8-1790876915142-4637520e86f8"
+        },
+        {
+          "at": 112769,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5xs57-1790876920143-985f85dde00a"
+        },
+        {
+          "at": 117591,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qwxhg-1790876925195-21e5ab786ee3"
+        },
+        {
+          "at": 122726,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6xwpf-1790876930147-2f3cded05287"
+        },
+        {
+          "at": 127828,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fl27s-1790876935152-c9e7640ed170"
+        },
+        {
+          "at": 130114,
+          "status": 200,
+          "vercelId": "sfo1::iad1::sj58d-1790876937667-efc2b0ea794e"
+        }
+      ]
+    },
+    "B": {
+      "presencePosts": 62,
+      "opsPosts": 5,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 7138,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zlvvh-1790876814468-5243cebace07"
+        },
+        {
+          "at": 7625,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qcr9s-1790876814980-e67b8379d766"
+        },
+        {
+          "at": 7625,
+          "status": 200,
+          "vercelId": "sfo1::iad1::t6vqs-1790876815184-96354f21bb93"
+        },
+        {
+          "at": 7707,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mqmgd-1790876815333-1ec63233a9b5"
+        },
+        {
+          "at": 7915,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xqr9w-1790876815484-03ccbc0e9b4b"
+        },
+        {
+          "at": 8019,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vqvjl-1790876815651-2738842513ee"
+        },
+        {
+          "at": 8189,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qjm6r-1790876815815-cce1844b8825"
+        },
+        {
+          "at": 8303,
+          "status": 200,
+          "vercelId": "sfo1::iad1::99d79-1790876815931-749ff4b1e931"
+        },
+        {
+          "at": 8515,
+          "status": 200,
+          "vercelId": "sfo1::iad1::k6skv-1790876816140-9ed99f3aa757"
+        },
+        {
+          "at": 8627,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zsgrv-1790876816231-5607574873c2"
+        },
+        {
+          "at": 8752,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2l8kz-1790876816381-df37c14e82eb"
+        },
+        {
+          "at": 8955,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xx64n-1790876816531-7f999f3305de"
+        },
+        {
+          "at": 9048,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zmjzm-1790876816680-1f7d13b4f752"
+        },
+        {
+          "at": 9478,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fzv2r-1790876816980-1df91b9751e2"
+        },
+        {
+          "at": 10054,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9grhb-1790876817585-e2cd250617c8"
+        },
+        {
+          "at": 13343,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zsgrv-1790876816863-e6bf6afecb43"
+        },
+        {
+          "at": 13984,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2v4gw-1790876821578-c5853c4b783b"
+        },
+        {
+          "at": 14197,
+          "status": 200,
+          "vercelId": "sfo1::iad1::ttmnz-1790876821680-9c90c93e24e1"
+        },
+        {
+          "at": 14218,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zlvvh-1790876821829-6763a89b429a"
+        },
+        {
+          "at": 15444,
+          "status": 200,
+          "vercelId": "sfo1::iad1::kv9bp-1790876819102-5ac743795268"
+        },
+        {
+          "at": 15850,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q7l5m-1790876823478-b1e87fffa8d6"
+        },
+        {
+          "at": 16669,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zlvvh-1790876824102-847df96f89c9"
+        },
+        {
+          "at": 17340,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hhlzn-1790876824928-e44e90ac4055"
+        },
+        {
+          "at": 18409,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lp6hd-1790876821381-15b17f3670c0"
+        },
+        {
+          "at": 19152,
+          "status": 200,
+          "vercelId": "sfo1::iad1::ttmnz-1790876826669-a6227a3b193b"
+        },
+        {
+          "at": 19203,
+          "status": 200,
+          "vercelId": "sfo1::iad1::89rvt-1790876826827-4d8fafeea3cd"
+        },
+        {
+          "at": 19361,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6xwpf-1790876826982-2f292d4149c4"
+        },
+        {
+          "at": 19526,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lcd57-1790876827148-6d89869bbf96"
+        },
+        {
+          "at": 21578,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2x5jq-1790876829104-6b755c825949"
+        },
+        {
+          "at": 22495,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xlj8r-1790876830058-22530e8b4eca"
+        },
+        {
+          "at": 22816,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q9xzx-1790876830302-4c1f860b334e"
+        },
+        {
+          "at": 25809,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fqb4z-1790876833113-78147608cbe8"
+        },
+        {
+          "at": 26623,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9wwfj-1790876834160-fb89fe19d65d"
+        },
+        {
+          "at": 27674,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q4n6s-1790876835212-0d0a678cd7e8"
+        },
+        {
+          "at": 31696,
+          "status": 200,
+          "vercelId": "sfo1::iad1::f2n5w-1790876839106-7828c289716d"
+        },
+        {
+          "at": 36744,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mw7s7-1790876844127-923615b5c051"
+        },
+        {
+          "at": 41912,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8rh86-1790876849171-c15b2ced6f5e"
+        },
+        {
+          "at": 45920,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2mrj8-1790876853440-27747901be59"
+        },
+        {
+          "at": 47129,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zr7t7-1790876854110-b17197905a2b"
+        },
+        {
+          "at": 51626,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lsdln-1790876859129-f3986cd25726"
+        },
+        {
+          "at": 56769,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q5msc-1790876864115-9cd9ff6c6a9d"
+        },
+        {
+          "at": 60332,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q5msc-1790876867863-fde461bea83f"
+        },
+        {
+          "at": 61491,
+          "status": 200,
+          "vercelId": "sfo1::iad1::twktk-1790876869119-75558f991bfa"
+        },
+        {
+          "at": 66732,
+          "status": 200,
+          "vercelId": "sfo1::iad1::wnw4q-1790876874118-bc66ea4ed7aa"
+        },
+        {
+          "at": 71868,
+          "status": 200,
+          "vercelId": "sfo1::iad1::bdt9b-1790876879120-cc1d34454133"
+        },
+        {
+          "at": 74733,
+          "status": 200,
+          "vercelId": "sfo1::iad1::cbcc5-1790876882203-055372a03316"
+        },
+        {
+          "at": 76504,
+          "status": 200,
+          "vercelId": "sfo1::iad1::q9xzx-1790876884122-f6b8f0c69f57"
+        },
+        {
+          "at": 81638,
+          "status": 200,
+          "vercelId": "sfo1::iad1::xlj8r-1790876889124-f79296c34520"
+        },
+        {
+          "at": 86881,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6s994-1790876894125-f8bcbc81c01e"
+        },
+        {
+          "at": 88123,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jc288-1790876895538-11b68d766d84"
+        },
+        {
+          "at": 90305,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vcdkw-1790876897934-dcf43d5faa79"
+        },
+        {
+          "at": 91165,
+          "status": 200,
+          "vercelId": "sfo1::iad1::7jdmc-1790876898458-75886a2f2bf0"
+        },
+        {
+          "at": 91546,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rmdc8-1790876899127-db9b61b732b4"
+        },
+        {
+          "at": 94253,
+          "status": 200,
+          "vercelId": "sfo1::iad1::4k87j-1790876901716-7adea4324af2"
+        },
+        {
+          "at": 95022,
+          "status": 200,
+          "vercelId": "sfo1::iad1::cbcc5-1790876902539-8acc2a0b0595"
+        },
+        {
+          "at": 96534,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jc2qn-1790876904129-7c24957a24bb"
+        },
+        {
+          "at": 101628,
+          "status": 200,
+          "vercelId": "sfo1::iad1::dcnh6-1790876909134-1b24e0ed742f"
+        },
+        {
+          "at": 106606,
+          "status": 200,
+          "vercelId": "sfo1::iad1::wklhp-1790876914181-340203dc8aa8"
+        },
+        {
+          "at": 111867,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9r4mr-1790876919133-79a288916d82"
+        },
+        {
+          "at": 116707,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9r4mr-1790876924146-46c4bc30676c"
+        },
+        {
+          "at": 121582,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vcwss-1790876929136-58b14f422e98"
+        },
+        {
+          "at": 126843,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zp8ms-1790876934141-865c5a4f5c99"
+        }
+      ]
+    }
+  },
+  "finishedAt": "2026-10-01T17:48:59.939Z"
+}

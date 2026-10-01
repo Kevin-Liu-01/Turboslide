@@ -1,0 +1,659 @@
+{
+  "startedAt": "2026-10-01T17:42:45.769Z",
+  "base": "https://www.turboslide.com",
+  "deck.id": "untitled-20261001-ogba",
+  "build": null,
+  "slide1.runs": [
+    {
+      "run": "heading/text",
+      "text": "Click to add title"
+    },
+    {
+      "run": "lead/text",
+      "text": "Click to add subtitle"
+    }
+  ],
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text"
+  },
+  "share.link": "https://www.turboslide.com/s/<token>",
+  "A.self": {
+    "clientId": null,
+    "presence": {
+      "clientId": "a4a04e41207fbc55495fd57730892cba",
+      "principalId": "anon_6994008c-4905-4dc3-909c-bf9dcc03b489",
+      "kind": "human",
+      "label": "Silicon 485",
+      "trust": "label",
+      "mark": {
+        "density": 1,
+        "glyphSeed": 1907092840,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Silicon 485",
+        "variant": "initials",
+        "initials": "S",
+        "hue": {
+          "slot": 2,
+          "hex": "#789000"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-10-01T17:42:58.283Z"
+    }
+  },
+  "join": {
+    "bEditorReadyMs": 1447,
+    "aSeesBChipMs": 1979,
+    "bSeesAChipMs": 1983
+  },
+  "B.self": {
+    "clientId": null,
+    "presence": {
+      "clientId": "71f053629e5a9c29208fb687af207312",
+      "principalId": "anon_197b8932-90f2-440a-8b27-1b2521ebf0ba",
+      "kind": "human",
+      "label": "Gallium 301",
+      "trust": "label",
+      "mark": {
+        "density": 3,
+        "glyphSeed": 3304382385,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Gallium 301",
+        "variant": "initials",
+        "initials": "G",
+        "hue": {
+          "slot": 5,
+          "hex": "#148d51"
+        }
+      },
+      "role": "editor",
+      "slideId": "title",
+      "selection": {
+        "blockIds": []
+      },
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-10-01T17:43:00.269Z"
+    },
+    "access": "link"
+  },
+  "shot.join.A": "01-a-after-join.png",
+  "shot.step1.A.mid": "02-a-typing-title-while-b-subtitle.png",
+  "shot.step1.B.mid": "02-b-typing-subtitle-while-a-title.png",
+  "step1": {
+    "firstSeen": {
+      "A": {
+        "carets": 473,
+        "flags": 473
+      },
+      "B": {
+        "carets": 321,
+        "flags": 321
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 473,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 930,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1389,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1845,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2303,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "mergedAfterEscapeMs": 1440,
+    "aSeesSubtitle": "Prepared by the field team",
+    "bSeesHeading": "Quarterly review",
+    "elapsedMs": 4105
+  },
+  "shot.step1.A.after": "03-a-after-step1.png",
+  "shot.step2.r1.A.mid": "04-r1-a-both-in-title.png",
+  "shot.step2.r1.B.mid": "04-r1-b-both-in-title.png",
+  "step2.round1": {
+    "before": "Quarterly review",
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2
+      },
+      "B": {
+        "flags": 2,
+        "outlines": 2
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 461,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 920,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1377,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 1536,
+    "aFinal": "alphabravo",
+    "bFinal": "alphabravo",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 3438
+  },
+  "shot.step2.r1.A.after": "05-r1-a-after.png",
+  "shot.step2.r1.B.after": "05-r1-b-after.png",
+  "shot.step2.r2.A.mid": "04-r2-a-both-in-title.png",
+  "shot.step2.r2.B.mid": "04-r2-b-both-in-title.png",
+  "step2.round2": {
+    "before": "alphabravo",
+    "firstSeen": {
+      "A": {
+        "flags": 2
+      },
+      "B": {
+        "flags": 2
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 458,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 915,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1372,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 3073,
+    "aFinal": "alphabravo charlie delta",
+    "bFinal": "alphabravo charlie delta",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 4965
+  },
+  "shot.step2.r2.A.after": "05-r2-a-after.png",
+  "shot.step2.r2.B.after": "05-r2-b-after.png",
+  "selection.travel": {
+    "bClientId": null,
+    "aStateSawBlockIdsMs": 22,
+    "blockIds": [
+      "heading"
+    ],
+    "aDrewOutlineMs": 23
+  },
+  "shot.selection.A": "06-a-after-b-selected-subtitle.png",
+  "shot.step3.B.mid": "07-b-dragging-while-a-selected.png",
+  "shot.step3.A.mid": "07-a-selected-while-b-drags.png",
+  "step3": {
+    "blockId": "lead",
+    "bInBMovedPx": 160,
+    "aSawMoveMs": 6757,
+    "aSawMoveDx": 160,
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2
+      },
+      "B": {
+        "flags": 2,
+        "outlines": 2
+      }
+    },
+    "drawingsDuringDrag": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 104,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 212,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 314,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 416,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 519,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 621,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "SSilicon"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "elapsedMs": 7651
+  },
+  "shot.step3.A.after": "08-a-after-b-moved.png",
+  "shot.step3.B.after": "08-b-after-move.png",
+  "step4": {
+    "cardsBefore": 1,
+    "aSawNewCardMs": null,
+    "aRevision": 8,
+    "bRevision": 8,
+    "aCardMarks": [
+      {
+        "count": "1",
+        "label": "Gallium 301"
+      }
+    ],
+    "bCardMarks": [
+      {
+        "count": "1",
+        "label": "Silicon 485"
+      }
+    ]
+  },
+  "step4.cardMarkInA": {
+    "at": 20130,
+    "marks": [
+      {
+        "count": "1",
+        "label": "Gallium 301"
+      }
+    ]
+  },
+  "shot.step4.A": "09-a-after-b-added-slide.png",
+  "shot.step4.B": "09-b-after-adding-slide.png",
+  "follow.chipDefaultView": {
+    "menuItem": "title.presence.goTo",
+    "label": "Go to slide 1"
+  },
+  "follow.rosterRows": [
+    {
+      "control": "presence.roster.a4a04e41207fbc55495fd57730892cba",
+      "item": "title.presence.me",
+      "text": "SSilicon 485 (you)slide 1"
+    },
+    {
+      "control": "presence.roster.71f053629e5a9c29208fb687af207312",
+      "item": "title.presence.follow",
+      "text": "GGallium 301editor · slide 1Follow"
+    },
+    {
+      "control": null,
+      "item": "title.presence.joinChat",
+      "text": "Join chat"
+    }
+  ],
+  "shot.follow.roster": "10-a-roster-advanced.png",
+  "follow.afterClick": {
+    "offered": true,
+    "following": "71f053629e5a9c29208fb687af207312",
+    "plate": "GFollowing Gallium 301·Stop"
+  },
+  "shot.follow.plate": "11-a-following-plate.png",
+  "follow.slidesB": [
+    "filmstrip.slide.title"
+  ],
+  "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"filmstrip.slide.title\"]').first()\n    - locator resolved to <div tabindex=\"0\" data-near=\"\" role=\"option\" data-id=\"title\" draggable=\"true\" aria-current=\"true\" aria-selected=\"true\" aria-label=\"Slide 1\" data-tip=\"alphabravo charlie delta\" data-control=\"filmstrip.slide.title\" class=\"ts-card is-current is-selected\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\nlocator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"filmstrip.slide.title\"]').first()\n    - locator resolved to <div tabindex=\"0\" data-near=\"\" role=\"option\" data-id=\"title\" draggable=\"true\" aria-current=\"true\" aria-selected=\"true\" aria-label=\"Slide 1\" data-tip=\"alphabravo charlie delta\" data-control=\"filmstrip.slide.title\" class=\"ts-card is-current is-selected\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <span aria-hidden=\"true\" class=\"ts-layout-frame\">…</span> from <div role=\"dialog\" class=\"ts-layout-plate\" data-control=\"layout.new.plate\" aria-label=\"New slide with layout\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n    at /Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/realtime/people-drive/drive.mjs:474:61",
+  "teardown.info": {
+    "status": 200,
+    "revision": 8
+  },
+  "teardown.trash": {
+    "status": 200,
+    "revision": 8,
+    "error": null
+  },
+  "teardown.remove": {
+    "status": 200,
+    "body": {
+      "id": "untitled-20261001-ogba",
+      "removed": true
+    }
+  },
+  "teardown.editStatus": 404,
+  "finishedAt": "2026-10-01T17:44:19.033Z"
+}

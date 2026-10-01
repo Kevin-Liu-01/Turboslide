@@ -1,0 +1,1393 @@
+{
+  "startedAt": "2026-10-01T17:50:36.675Z",
+  "base": "https://www.turboslide.com",
+  "deck.id": "untitled-20261001-7dyw",
+  "build": null,
+  "slide1.runs": [
+    {
+      "run": "heading/text",
+      "text": "Click to add title"
+    },
+    {
+      "run": "lead/text",
+      "text": "Click to add subtitle"
+    }
+  ],
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text"
+  },
+  "share.link": "https://www.turboslide.com/s/<token>",
+  "A.self": {
+    "clientId": null,
+    "presence": {
+      "clientId": "248d77767fdf2002b2b30ee9eacfd5db",
+      "principalId": "anon_4dd0c9e9-ef61-4667-bce2-65444251bb84",
+      "kind": "human",
+      "label": "Gallium 638",
+      "trust": "label",
+      "mark": {
+        "density": 3,
+        "glyphSeed": 2244500243,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Gallium 638",
+        "variant": "initials",
+        "initials": "G",
+        "hue": {
+          "slot": 4,
+          "hex": "#1d8fc8"
+        }
+      },
+      "role": "owner",
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-10-01T17:50:41.951Z"
+    }
+  },
+  "join": {
+    "bEditorReadyMs": 1372,
+    "aSeesBChipMs": 1793,
+    "bSeesAChipMs": 1796
+  },
+  "B.self": {
+    "clientId": null,
+    "presence": {
+      "clientId": "727e8c01afb5072a457d446491425b4f",
+      "principalId": "anon_3500a1aa-920e-4d68-88a5-1d41e6568bb3",
+      "kind": "human",
+      "label": "Mica 811",
+      "trust": "label",
+      "mark": {
+        "density": 1,
+        "glyphSeed": 310473864,
+        "presenter": false,
+        "self": false,
+        "trust": "label",
+        "label": "Mica 811",
+        "variant": "initials",
+        "initials": "M",
+        "hue": {
+          "slot": 2,
+          "hex": "#789000"
+        }
+      },
+      "role": "editor",
+      "slideId": "title",
+      "selection": {
+        "blockIds": []
+      },
+      "presenting": false,
+      "idle": false,
+      "lastSeenAt": "2026-10-01T17:50:43.750Z"
+    },
+    "access": "link"
+  },
+  "shot.join.A": "01-a-after-join.png",
+  "shot.step1.A.mid": "02-a-typing-title-while-b-subtitle.png",
+  "shot.step1.B.mid": "02-b-typing-subtitle-while-a-title.png",
+  "step1": {
+    "firstSeen": {
+      "A": {
+        "carets": 305,
+        "flags": 305
+      },
+      "B": {
+        "carets": 305,
+        "flags": 305
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 461,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 919,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1377,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1833,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2290,
+        "A": {
+          "carets": 1,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "mergedAfterEscapeMs": 619,
+    "aSeesSubtitle": "Prepared by the field team",
+    "bSeesHeading": "Quarterly review",
+    "elapsedMs": 3419
+  },
+  "shot.step1.A.after": "03-a-after-step1.png",
+  "shot.step2.r1.A.mid": "04-r1-a-both-in-title.png",
+  "shot.step2.r1.B.mid": "04-r1-b-both-in-title.png",
+  "step2.round1": {
+    "before": "Quarterly review",
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2
+      },
+      "B": {
+        "flags": 2,
+        "outlines": 2,
+        "carets": 406
+      }
+    },
+    "samples": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 615,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1223,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1831,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2440,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 3048,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 4421,
+    "aFinal": "alphabravo",
+    "bFinal": "alphabravo",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 8147
+  },
+  "shot.step2.r1.A.after": "05-r1-a-after.png",
+  "shot.step2.r1.B.after": "05-r1-b-after.png",
+  "shot.step2.r2.A.mid": "04-r2-a-both-in-title.png",
+  "shot.step2.r2.B.mid": "04-r2-b-both-in-title.png",
+  "step2.round2": {
+    "before": "alphabravo",
+    "firstSeen": {
+      "A": {
+        "flags": 3,
+        "outlines": 3
+      },
+      "B": {
+        "carets": 3,
+        "flags": 3
+      }
+    },
+    "samples": [
+      {
+        "at": 3,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 613,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1220,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 1831,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 2440,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 3048,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 1,
+          "flags": [
+            "GGallium"
+          ],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "convergedMs": 1336,
+    "aFinal": "alphabravo delta charlie",
+    "bFinal": "alphabravo delta charlie",
+    "bothWordsInA": true,
+    "bothWordsInB": true,
+    "elapsedMs": 5060
+  },
+  "shot.step2.r2.A.after": "05-r2-a-after.png",
+  "shot.step2.r2.B.after": "05-r2-b-after.png",
+  "selection.travel": {
+    "bClientId": "727e8c01afb5072a457d446491425b4f",
+    "rounds": [
+      {
+        "round": 1,
+        "target": "lead",
+        "aStateSawSelectionMs": 16753,
+        "aOutlineBox": [
+          381,
+          548,
+          636,
+          27
+        ]
+      },
+      {
+        "round": 2,
+        "target": "heading",
+        "aStateSawSelectionMs": 14891,
+        "aOutlineBox": [
+          381,
+          466,
+          935,
+          63
+        ]
+      },
+      {
+        "round": 3,
+        "target": "lead",
+        "aStateSawSelectionMs": 8808,
+        "aOutlineBox": [
+          381,
+          548,
+          636,
+          27
+        ]
+      },
+      {
+        "round": 4,
+        "target": "heading",
+        "aStateSawSelectionMs": 14917,
+        "aOutlineBox": [
+          381,
+          466,
+          935,
+          63
+        ]
+      }
+    ]
+  },
+  "shot.selection.A": "06-a-after-b-selected-subtitle.png",
+  "shot.step3.B.mid": "07-b-dragging-while-a-selected.png",
+  "shot.step3.A.mid": "07-a-selected-while-b-drags.png",
+  "step3": {
+    "blockId": "lead",
+    "bInBMovedPx": 160,
+    "aSawMoveMs": 703,
+    "aSawMoveDx": 160,
+    "firstSeen": {
+      "A": {
+        "flags": 2,
+        "outlines": 2
+      },
+      "B": {}
+    },
+    "drawingsDuringDrag": [
+      {
+        "at": 2,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 103,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 205,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 308,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 411,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 514,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      },
+      {
+        "at": 619,
+        "A": {
+          "carets": 0,
+          "flags": [
+            "MMica"
+          ],
+          "outlines": 1,
+          "pointers": 0
+        },
+        "B": {
+          "carets": 0,
+          "flags": [],
+          "outlines": 0,
+          "pointers": 0
+        }
+      }
+    ],
+    "elapsedMs": 1628
+  },
+  "shot.step3.A.after": "08-a-after-b-moved.png",
+  "shot.step3.B.after": "08-b-after-move.png",
+  "step4.plateItems": [
+    {
+      "control": "layout.new",
+      "text": "Click to add titleClick to add subtitleT"
+    },
+    {
+      "control": "layout.new.title",
+      "text": "Click to add titleClick to add subtitleT"
+    },
+    {
+      "control": "layout.new.opener",
+      "text": "Click to add titleClick to add textMater"
+    },
+    {
+      "control": "layout.new.split",
+      "text": "Click to add titleClick to add textTitle"
+    },
+    {
+      "control": "layout.new.cols",
+      "text": "Click to add titleClick to add textClick"
+    },
+    {
+      "control": "layout.new.title-only",
+      "text": "Click to add titleTitle only"
+    },
+    {
+      "control": "layout.new.one-column",
+      "text": "Click to add titleClick to add textOne c"
+    },
+    {
+      "control": "layout.new.statement",
+      "text": "Click to add textMain point"
+    },
+    {
+      "control": "layout.new.section-description",
+      "text": "Click to add titleClick to add textClick"
+    },
+    {
+      "control": "layout.new.mood",
+      "text": "Click to add titleClick to add textImage"
+    },
+    {
+      "control": "layout.new.big-number",
+      "text": "Click to add a numberClick to add textBi"
+    },
+    {
+      "control": "layout.new.blank",
+      "text": "Blank"
+    },
+    {
+      "control": "layout.new.gt",
+      "text": "GT layouts (11)"
+    },
+    {
+      "control": "layout.new.caption",
+      "text": "Point at a layout to read what it holds"
+    }
+  ],
+  "step4": {
+    "cardsBefore": 1,
+    "aSawNewCardMs": 2176,
+    "aActiveBefore": "title",
+    "aActiveAfter": "title",
+    "bActiveAfter": "split-1-5b4f",
+    "aRevision": 8,
+    "bRevision": 9,
+    "aCardMarks": [
+      {
+        "count": "1",
+        "label": "Mica 811",
+        "card": "filmstrip.slide.split-1-5b4f",
+        "box": [
+          164,
+          257,
+          70,
+          16
+        ]
+      }
+    ],
+    "bCardMarks": [
+      {
+        "count": "1",
+        "label": "Gallium 638",
+        "card": "filmstrip.slide.title",
+        "box": [
+          164,
+          131,
+          70,
+          16
+        ]
+      }
+    ]
+  },
+  "step4.cardMarkInA": {
+    "at": 2188,
+    "marks": [
+      {
+        "count": "1",
+        "label": "Mica 811",
+        "card": "filmstrip.slide.split-1-5b4f",
+        "box": [
+          164,
+          257,
+          70,
+          16
+        ]
+      }
+    ]
+  },
+  "shot.step4.A": "09-a-after-b-added-slide.png",
+  "shot.step4.A.filmstrip": "09-a-filmstrip-card-marks.png",
+  "shot.step4.B": "09-b-after-adding-slide.png",
+  "follow.chipDefaultView": {
+    "menuItem": "title.presence.goTo",
+    "label": "Go to slide 2"
+  },
+  "follow.rosterRows": [
+    {
+      "control": "presence.roster.248d77767fdf2002b2b30ee9eacfd5db",
+      "item": "title.presence.me",
+      "text": "GGallium 638 (you)slide 1"
+    },
+    {
+      "control": "presence.roster.727e8c01afb5072a457d446491425b4f",
+      "item": "title.presence.follow",
+      "text": "MMica 811editor · slide 2Follow"
+    },
+    {
+      "control": null,
+      "item": "title.presence.joinChat",
+      "text": "Join chat"
+    }
+  ],
+  "shot.follow.roster": "10-a-roster-advanced.png",
+  "follow.afterClick": {
+    "offered": true,
+    "following": "727e8c01afb5072a457d446491425b4f",
+    "plate": "MFollowing Mica 811·Stop"
+  },
+  "shot.follow.plate": "11-a-following-plate.png",
+  "follow.slidesB": [
+    "filmstrip.slide.title",
+    "filmstrip.slide.split-1-5b4f"
+  ],
+  "follow.bBackToSlide1": {
+    "bActive": "title",
+    "aFollowedBack": true,
+    "aActive": "title"
+  },
+  "follow.move": {
+    "bFrom": "title",
+    "bTo": "split-1-5b4f",
+    "aFollowedMs": 7224,
+    "aActive": "split-1-5b4f",
+    "aFollowing": "727e8c01afb5072a457d446491425b4f"
+  },
+  "shot.follow.A.after": "12-a-after-follow-move.png",
+  "follow.afterOwnClick": {
+    "following": null,
+    "plate": null
+  },
+  "teardown.info": {
+    "status": 200,
+    "revision": 9
+  },
+  "teardown.trash": {
+    "status": 200,
+    "revision": 9,
+    "error": null
+  },
+  "teardown.remove": {
+    "status": 200,
+    "body": {
+      "id": "untitled-20261001-7dyw",
+      "removed": true
+    }
+  },
+  "teardown.editStatus": 404,
+  "network": {
+    "A": {
+      "presencePosts": 45,
+      "opsPosts": 3,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 5497,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2dqk-1790877042410-1d422c0bef2f"
+        },
+        {
+          "at": 7560,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mxqkf-1790877044762-5ec37660cb5f"
+        },
+        {
+          "at": 7627,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6hfd9-1790877044917-81f575a93261"
+        },
+        {
+          "at": 7996,
+          "status": 200,
+          "vercelId": "sfo1::iad1::mxqkf-1790877045215-9148eb6c9aa3"
+        },
+        {
+          "at": 8369,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vhcpj-1790877045066-4198198264d1"
+        },
+        {
+          "at": 8370,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qqlqc-1790877045360-e2a89ae116b3"
+        },
+        {
+          "at": 8374,
+          "status": 200,
+          "vercelId": "sfo1::iad1::tc8z5-1790877045508-12dac951e14b"
+        },
+        {
+          "at": 8377,
+          "status": 200,
+          "vercelId": "sfo1::iad1::bl4dx-1790877045657-9e760b0ef430"
+        },
+        {
+          "at": 8532,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rdcfw-1790877045803-914484c1eb23"
+        },
+        {
+          "at": 8684,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hmmnn-1790877045950-4954ecdf6e1c"
+        },
+        {
+          "at": 9744,
+          "status": 200,
+          "vercelId": "sfo1::iad1::cbzcq-1790877046932-870ea5e825e1"
+        },
+        {
+          "at": 10425,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vhcpj-1790877047547-361f0c8d5831"
+        },
+        {
+          "at": 12601,
+          "status": 200,
+          "vercelId": "sfo1::iad1::wnw4q-1790877049714-2931a27f5988"
+        },
+        {
+          "at": 14059,
+          "status": 200,
+          "vercelId": "sfo1::iad1::gb9bh-1790877049868-45f4a5f7b2c7"
+        },
+        {
+          "at": 14060,
+          "status": 200,
+          "vercelId": "sfo1::iad1::df22f-1790877050079-eab172446ff5"
+        },
+        {
+          "at": 14064,
+          "status": 200,
+          "vercelId": "sfo1::iad1::855v6-1790877050169-e25027bee9bd"
+        },
+        {
+          "at": 14631,
+          "status": 200,
+          "vercelId": "sfo1::iad1::c9z8b-1790877051904-3b8b4e40f68a"
+        },
+        {
+          "at": 16796,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hnkm4-1790877053420-fa6ca09f0e61"
+        },
+        {
+          "at": 19733,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2mxjh-1790877056895-da6dab474797"
+        },
+        {
+          "at": 22151,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9lnkf-1790877059419-cddeca1e9e0a"
+        },
+        {
+          "at": 22315,
+          "status": 200,
+          "vercelId": "sfo1::iad1::79dv9-1790877059579-fce29e37b3e0"
+        },
+        {
+          "at": 22464,
+          "status": 200,
+          "vercelId": "sfo1::iad1::85njj-1790877059732-c5c760eec3d5"
+        },
+        {
+          "at": 22599,
+          "status": 200,
+          "vercelId": "sfo1::iad1::85njj-1790877059883-a85ae37b0d68"
+        },
+        {
+          "at": 22823,
+          "status": 200,
+          "vercelId": "sfo1::iad1::4z2r8-1790877060040-8dc09777378f"
+        },
+        {
+          "at": 24614,
+          "status": 200,
+          "vercelId": "sfo1::iad1::4z2r8-1790877061893-6ac7f72e9956"
+        },
+        {
+          "at": 24923,
+          "status": 200,
+          "vercelId": "sfo1::iad1::nt9hs-1790877062137-3df04652e208"
+        },
+        {
+          "at": 26245,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8mrl4-1790877063188-67b7bcd8215f"
+        },
+        {
+          "at": 27250,
+          "status": 200,
+          "vercelId": "sfo1::iad1::62llm-1790877064532-2197b190c8c3"
+        },
+        {
+          "at": 29619,
+          "status": 200,
+          "vercelId": "sfo1::iad1::pkm2r-1790877066894-6cd8eaa69efb"
+        },
+        {
+          "at": 34884,
+          "status": 200,
+          "vercelId": "sfo1::iad1::kxslp-1790877071895-d964e07ade81"
+        },
+        {
+          "at": 39643,
+          "status": 200,
+          "vercelId": "sfo1::iad1::gb2bl-1790877076897-cb675bbce187"
+        },
+        {
+          "at": 44942,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6fqct-1790877081963-8ca8ec784aea"
+        },
+        {
+          "at": 49633,
+          "status": 200,
+          "vercelId": "sfo1::iad1::5ngcd-1790877086900-d3743dd7ca49"
+        },
+        {
+          "at": 54722,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2lntf-1790877091925-ef5ea8f571a5"
+        },
+        {
+          "at": 60213,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lhh48-1790877096903-1c660a737eb7"
+        },
+        {
+          "at": 69865,
+          "status": 200,
+          "vercelId": "sfo1::iad1::sqsl4-1790877106907-f05ded10545d"
+        },
+        {
+          "at": 79729,
+          "status": 200,
+          "vercelId": "sfo1::iad1::gw9m5-1790877116909-3e0f9915cebb"
+        },
+        {
+          "at": 89280,
+          "status": 200,
+          "vercelId": "sfo1::iad1::kgqzq-1790877126531-3a423f37b461"
+        },
+        {
+          "at": 91577,
+          "status": 200,
+          "vercelId": "sfo1::iad1::zdcvb-1790877128525-98125843f9a6"
+        },
+        {
+          "at": 94184,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8v97j-1790877131413-b2bd890c838a"
+        },
+        {
+          "at": 94425,
+          "status": 200,
+          "vercelId": "sfo1::iad1::g8gfx-1790877131673-ffeba3c5ef43"
+        },
+        {
+          "at": 95459,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fcclc-1790877132620-09e5f92c284b"
+        },
+        {
+          "at": 99649,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8v97j-1790877136415-da99874ae585"
+        },
+        {
+          "at": 103908,
+          "status": 200,
+          "vercelId": "sfo1::iad1::cmwlj-1790877141090-8b0106bd5b1a"
+        },
+        {
+          "at": 104140,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rzhrf-1790877141417-83ac4f8e286a"
+        }
+      ]
+    },
+    "B": {
+      "presencePosts": 56,
+      "opsPosts": 5,
+      "streams": 1,
+      "regions": [
+        "sfo1"
+      ],
+      "presence": [
+        {
+          "at": 7560,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rgjmn-1790877044319-3a9a31bf2860"
+        },
+        {
+          "at": 7569,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fpmcn-1790877044856-bda93d4fe5c2"
+        },
+        {
+          "at": 7765,
+          "status": 200,
+          "vercelId": "sfo1::iad1::dcnh6-1790877045051-197f3c3dfb7e"
+        },
+        {
+          "at": 8069,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8j2d2-1790877045360-c6dcfe639733"
+        },
+        {
+          "at": 8218,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9qvlv-1790877045494-8a3f0fb9639c"
+        },
+        {
+          "at": 8370,
+          "status": 200,
+          "vercelId": "sfo1::iad1::9grhb-1790877045645-be62ecfa0775"
+        },
+        {
+          "at": 8370,
+          "status": 200,
+          "vercelId": "sfo1::iad1::dfb8r-1790877045211-c1e21cbc2db7"
+        },
+        {
+          "at": 8522,
+          "status": 200,
+          "vercelId": "sfo1::iad1::pflnk-1790877045792-2061525f1982"
+        },
+        {
+          "at": 8658,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2whd-1790877045942-55ab367aa452"
+        },
+        {
+          "at": 8806,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rhdkp-1790877046088-ef8f79d29134"
+        },
+        {
+          "at": 8951,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vcwss-1790877046236-7c4dcf376606"
+        },
+        {
+          "at": 9134,
+          "status": 200,
+          "vercelId": "sfo1::iad1::7dlkn-1790877046409-fb1cf1e5d20f"
+        },
+        {
+          "at": 9250,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2dqk-1790877046530-d24ec03f1c19"
+        },
+        {
+          "at": 9392,
+          "status": 200,
+          "vercelId": "sfo1::iad1::gjqft-1790877046678-fb660f60ec2a"
+        },
+        {
+          "at": 10355,
+          "status": 200,
+          "vercelId": "sfo1::iad1::nt9hs-1790877047543-93b6bafd200a"
+        },
+        {
+          "at": 12113,
+          "status": 200,
+          "vercelId": "sfo1::iad1::7dlkn-1790877049192-f6be0b7ca065"
+        },
+        {
+          "at": 13766,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2dqk-1790877050078-d26d5d0f3ee0"
+        },
+        {
+          "at": 13995,
+          "status": 200,
+          "vercelId": "sfo1::iad1::s6hh2-1790877046825-18a29b5ec8d4"
+        },
+        {
+          "at": 14016,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fsfc4-1790877050172-48fe5054ed5b"
+        },
+        {
+          "at": 14058,
+          "status": 200,
+          "vercelId": "sfo1::iad1::g77qd-1790877049859-b7f02885746d"
+        },
+        {
+          "at": 14060,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2s6vb-1790877050323-eb95d059cf84"
+        },
+        {
+          "at": 16075,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6f9pl-1790877053325-993aeea1a6ef"
+        },
+        {
+          "at": 16143,
+          "status": 200,
+          "vercelId": "sfo1::iad1::w9t7l-1790877053424-6bcf0febb043"
+        },
+        {
+          "at": 16988,
+          "status": 200,
+          "vercelId": "sfo1::iad1::pqzrq-1790877054193-3774548b3aeb"
+        },
+        {
+          "at": 22026,
+          "status": 200,
+          "vercelId": "sfo1::iad1::p8xcx-1790877059193-99129544af50"
+        },
+        {
+          "at": 22292,
+          "status": 200,
+          "vercelId": "sfo1::iad1::cq5p5-1790877059570-76d9015a445c"
+        },
+        {
+          "at": 22452,
+          "status": 200,
+          "vercelId": "sfo1::iad1::drnsh-1790877059731-d1fe4f456198"
+        },
+        {
+          "at": 22676,
+          "status": 200,
+          "vercelId": "sfo1::iad1::h8cng-1790877059884-eb67102f6759"
+        },
+        {
+          "at": 22808,
+          "status": 200,
+          "vercelId": "sfo1::iad1::6zpfm-1790877060040-b45ac7074be0"
+        },
+        {
+          "at": 26173,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qthhw-1790877063186-4986e6d99c80"
+        },
+        {
+          "at": 27017,
+          "status": 200,
+          "vercelId": "sfo1::iad1::d84pp-1790877064234-36ec99959488"
+        },
+        {
+          "at": 27394,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hldkc-1790877064535-d73256d40472"
+        },
+        {
+          "at": 29491,
+          "status": 200,
+          "vercelId": "sfo1::iad1::g77qd-1790877066558-a64e8f22fadf"
+        },
+        {
+          "at": 32038,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fqmg4-1790877069196-b4b35934cea9"
+        },
+        {
+          "at": 37001,
+          "status": 200,
+          "vercelId": "sfo1::iad1::r2whd-1790877074198-6c515470298c"
+        },
+        {
+          "at": 42193,
+          "status": 200,
+          "vercelId": "sfo1::iad1::8drx6-1790877079199-0be14070e7b5"
+        },
+        {
+          "at": 46922,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2z4t7-1790877084200-398ba80005a5"
+        },
+        {
+          "at": 47647,
+          "status": 200,
+          "vercelId": "sfo1::iad1::lg7nc-1790877084817-7f8cbd0780e6"
+        },
+        {
+          "at": 51964,
+          "status": 200,
+          "vercelId": "sfo1::iad1::vnhtk-1790877089202-0693eaa996e0"
+        },
+        {
+          "at": 56971,
+          "status": 200,
+          "vercelId": "sfo1::iad1::ln8jp-1790877094204-991aa87757e4"
+        },
+        {
+          "at": 62073,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fcgzd-1790877099266-2962516a9577"
+        },
+        {
+          "at": 64000,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2mrj8-1790877101211-b1f07cc1a626"
+        },
+        {
+          "at": 66971,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fcgzd-1790877104207-3dbca216a0e1"
+        },
+        {
+          "at": 72389,
+          "status": 200,
+          "vercelId": "sfo1::iad1::fqmg4-1790877109229-8493dcd03c57"
+        },
+        {
+          "at": 74266,
+          "status": 200,
+          "vercelId": "sfo1::iad1::dgtp4-1790877111543-b3b87c7054f0"
+        },
+        {
+          "at": 76999,
+          "status": 200,
+          "vercelId": "sfo1::iad1::k85tc-1790877114210-5e936e4f66d0"
+        },
+        {
+          "at": 81982,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2mxjh-1790877119211-eda86238eab9"
+        },
+        {
+          "at": 87371,
+          "status": 200,
+          "vercelId": "sfo1::iad1::rmqtp-1790877124213-a3d17fc74f91"
+        },
+        {
+          "at": 89566,
+          "status": 200,
+          "vercelId": "sfo1::iad1::l59vx-1790877126813-30300f8207e1"
+        },
+        {
+          "at": 91608,
+          "status": 200,
+          "vercelId": "sfo1::iad1::hm865-1790877128535-41979bd4967f"
+        },
+        {
+          "at": 91800,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jgzsz-1790877129037-1258c98f319c"
+        },
+        {
+          "at": 91932,
+          "status": 200,
+          "vercelId": "sfo1::iad1::sxz8q-1790877129212-dae97f810819"
+        },
+        {
+          "at": 95548,
+          "status": 200,
+          "vercelId": "sfo1::iad1::4vfhg-1790877132345-fabf356ab2d8"
+        },
+        {
+          "at": 96666,
+          "status": 200,
+          "vercelId": "sfo1::iad1::2ph9z-1790877133902-ea953ed92054"
+        },
+        {
+          "at": 96931,
+          "status": 200,
+          "vercelId": "sfo1::iad1::jfq27-1790877134214-26fd26d7f103"
+        },
+        {
+          "at": 102075,
+          "status": 200,
+          "vercelId": "sfo1::iad1::qx2pr-1790877139221-88dcb1841b88"
+        }
+      ]
+    }
+  },
+  "finishedAt": "2026-10-01T17:52:23.098Z"
+}

@@ -785,6 +785,9 @@ type StageTableCommand = Extract<
   }
 >;
 
+/** One frame of a move or resize session: the dragged block and its box in sheet units (`onDragFrame`). */
+export type DragFrame = { blockId: string; box: Box };
+
 export type EditorProps = {
   document: DeckDocument;
   slideId: string;
@@ -868,6 +871,13 @@ export type EditorProps = {
    * carries it to `describe().state.gesture` without polling the handle.
    */
   onGesture?: (report: GestureReport) => void;
+  /**
+   * The box of the block a move or resize session is dragging, told at every preview frame while
+   * the pointer is down, and null once at the session's end (docs/REALTIME.md 3.4, 3.5; the
+   * realtime round, R2): the page reports it as the presence `drag` field, so the other tabs draw
+   * the ghost while the drag runs. The `pos` write still lands at the release, as before.
+   */
+  onDragFrame?: (frame: DragFrame | null) => void;
   /* round three (gslides-parity SPEC-3 5.3, 6.3) */
   /**
    * View > Mode: Editing, Commenting or Viewing. Commenting and Viewing refuse every edit gesture
@@ -1178,6 +1188,7 @@ export function Editor({
   onCanvasConvert,
   onCaret,
   onGesture,
+  onDragFrame,
   mode: modeProp,
   parked,
 }: EditorProps) {
@@ -1185,6 +1196,11 @@ export function Editor({
   const [draft, setDraft] = useState<DeckDocument | null>(null);
   const draftRef = useRef(draft);
   draftRef.current = draft;
+  /* the drag sessions' presence hook (docs/REALTIME.md 3.5): the latest prop, and whether the
+     session that is down has told a frame, so its end tells null once */
+  const onDragFrameRef = useRef(onDragFrame);
+  onDragFrameRef.current = onDragFrame;
+  const dragFrameSent = useRef(false);
   const shown = draft ?? doc;
   const shownSlide = shown.slides[slideId];
   const freeform = isFreeformSlide(slide);
@@ -3332,6 +3348,12 @@ export function Editor({
   const endGestureState = (end: GestureEnd) => {
     gesture.current = null;
     finishFrames();
+    /* the drag's presence frames end with the session: the release commits the `pos` write and
+       the state that follows carries no drag (REALTIME.md 3.5) */
+    if (dragFrameSent.current) {
+      dragFrameSent.current = false;
+      onDragFrameRef.current?.(null);
+    }
     setActiveHandle(null);
     setDrop(null);
     setDropSlot(null);
@@ -3473,6 +3495,21 @@ export function Editor({
           return { document: draftRef.current, moved: [] };
         }
       });
+      /* the dragged block's box at this frame for the room's presence (REALTIME.md 3.4 `drag`):
+         the handle's own block of a move or a resize, in sheet units; the room client coalesces
+         the frames into its 80 ms batch */
+      if (
+        (g.handle.kind === 'free-move' || g.handle.kind === 'free-resize') &&
+        g.handle.blockId !== undefined &&
+        onDragFrameRef.current !== undefined
+      ) {
+        const blockId = g.handle.blockId;
+        const moved = movedPositions(mutations).find((row) => row.id === blockId);
+        if (moved !== undefined) {
+          dragFrameSent.current = true;
+          onDragFrameRef.current({ blockId, box: boundingBoxOf(moved.pos) });
+        }
+      }
     };
     const move = (ev: PointerEvent) => {
       const g = gesture.current;

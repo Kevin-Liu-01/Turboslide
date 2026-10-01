@@ -6,14 +6,18 @@ import type { PresenceParticipant } from '../editor-shell';
 import { PRESENCE } from '../menus/strings';
 import {
   Announcer,
+  CARET_KEEP_MS,
   canFollow,
   chipTipDocOf,
   chipTipOf,
   displayNameFor,
+  dragOf,
   flagText,
   isRoleWordView,
+  keptCaretBox,
   meOf,
   participantsOnSlide,
+  pointerPublished,
   pointersDrawn,
   rosterRoleWord,
   slideNumberOf,
@@ -146,6 +150,41 @@ describe('names, trust and follow (4.4, 4.8, 0.12)', () => {
     expect(pointersDrawn({ others: [], cap: 30 }, 21, false)).toBe(true);
     expect(pointersDrawn({ others: [] }, 3, true)).toBe(false);
     expect(pointersDrawn({ others: [], pointersVisible: false }, 3, false)).toBe(false);
+  });
+
+  it('publishes the own pointer for an owner or editor with Show my pointer on, and for nobody else (docs/REALTIME.md 3.5; R2)', () => {
+    expect(pointerPublished({ pointerMine: true }, 'editor')).toBe(true);
+    expect(pointerPublished({ pointerMine: true }, 'owner')).toBe(true);
+    expect(pointerPublished({ pointerMine: true }, 'viewer')).toBe(false);
+    expect(pointerPublished({ pointerMine: true }, 'commenter')).toBe(false);
+    expect(pointerPublished({ pointerMine: false }, 'editor')).toBe(false);
+    expect(pointerPublished({}, 'editor')).toBe(false);
+    expect(pointerPublished({ pointerMine: true }, null)).toBe(false);
+  });
+});
+
+describe('the drag ghost and the kept caret box (docs/REALTIME.md 3.4, 3.5; R2)', () => {
+  it('reads a drag box off a participant structurally and refuses a malformed one', () => {
+    const drag = { blockId: 'b1', x: 120, y: 40, w: 300, h: 80 };
+    expect(dragOf(person('c1', { drag } as Partial<PresenceParticipant>))).toEqual(drag);
+    expect(dragOf(person('c1'))).toBeNull();
+    expect(dragOf({ drag: { blockId: '', x: 0, y: 0, w: 1, h: 1 } })).toBeNull();
+    expect(dragOf({ drag: { blockId: 'b1', x: 0, y: 0, w: 1 } })).toBeNull();
+    expect(dragOf({ drag: { blockId: 'b1', x: Number.NaN, y: 0, w: 1, h: 1 } })).toBeNull();
+    expect(dragOf(null)).toBeNull();
+  });
+
+  it('keeps the last measured box for CARET_KEEP_MS when the range cannot be measured, then lets go', () => {
+    const measured: [number, number, number, number] = [10, 20, 2, 30];
+    const kept = { box: [50, 20, 2, 30] as [number, number, number, number], at: 1000 };
+    expect(keptCaretBox(measured, kept, 1200)).toEqual({ box: measured, kept: false });
+    expect(keptCaretBox(null, kept, 1000 + CARET_KEEP_MS - 1)).toEqual({
+      box: kept.box,
+      kept: true,
+    });
+    expect(keptCaretBox(null, kept, 1000 + CARET_KEEP_MS)).toBeNull();
+    expect(keptCaretBox(null, undefined, 1200)).toBeNull();
+    expect(CARET_KEEP_MS).toBe(300);
   });
 });
 

@@ -1,0 +1,323 @@
+{
+  "startedAt": "2026-10-01T19:18:56.129Z",
+  "baseA": "http://localhost:4472",
+  "baseB": "http://localhost:4472",
+  "label": "memory",
+  "deck.id": "untitled-20261001-koxw",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "subtitleBlock": "lead"
+  },
+  "share.link": "http://localhost:4472/s/<token>",
+  "A.instance": null,
+  "B.instance": null,
+  "join.ms": 607,
+  "join.chipInA": {
+    "present": true,
+    "ms": 711,
+    "aId": "7f213fa7adc5352db9ca9bbd11974274",
+    "bId": "8c9965a0587adf02777764d1e0fcb169"
+  },
+  "caret.round1": {
+    "round": 1,
+    "textA": "Realtime drive alpha bravo",
+    "textB": "Realtime drive alpha bravo",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 26,
+      "kept": false,
+      "box": [
+        1077,
+        460,
+        2,
+        75
+      ]
+    },
+    "aInB": {
+      "offset": 26,
+      "kept": false,
+      "box": [
+        1077,
+        460,
+        2,
+        75
+      ]
+    },
+    "ownA": 26,
+    "ownB": 26,
+    "wantBInA": 26,
+    "wantAInB": 20,
+    "okBInA": true,
+    "okAInB": false,
+    "firstBInAms": 318,
+    "firstAInBms": 149
+  },
+  "shot.caret.r1.A": "01-caret-r1-a.png",
+  "shot.caret.r1.B": "01-caret-r1-b.png",
+  "caret.round2": {
+    "round": 2,
+    "textA": "Realtime drive alpha bravo charlie delta",
+    "textB": "Realtime drive alpha bravo charlie delta",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 40,
+      "kept": false,
+      "box": [
+        863,
+        492,
+        2,
+        75
+      ]
+    },
+    "aInB": {
+      "offset": 40,
+      "kept": false,
+      "box": [
+        863,
+        492,
+        2,
+        75
+      ]
+    },
+    "ownA": 40,
+    "ownB": 40,
+    "wantBInA": 40,
+    "wantAInB": 34,
+    "okBInA": true,
+    "okAInB": false,
+    "firstBInAms": 285,
+    "firstAInBms": 133
+  },
+  "shot.caret.r2.A": "01-caret-r2-a.png",
+  "shot.caret.r2.B": "01-caret-r2-b.png",
+  "caret.round3": {
+    "round": 3,
+    "textA": "Realtime drive alpha bravo charlie delta echo foxtrot",
+    "textB": "Realtime drive alpha bravo charlie delta echo foxtrot",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 53,
+      "kept": false,
+      "box": [
+        1274,
+        462,
+        2,
+        49
+      ]
+    },
+    "aInB": {
+      "offset": 53,
+      "kept": false,
+      "box": [
+        1274,
+        462,
+        2,
+        49
+      ]
+    },
+    "ownA": 53,
+    "ownB": 53,
+    "wantBInA": 53,
+    "wantAInB": 45,
+    "okBInA": true,
+    "okAInB": false,
+    "firstBInAms": 278,
+    "firstAInBms": 127
+  },
+  "shot.caret.r3.A": "01-caret-r3-a.png",
+  "shot.caret.r3.B": "01-caret-r3-b.png",
+  "realtime.caret.offset-after-merge": {
+    "pass": false,
+    "rounds": [
+      {
+        "round": 1,
+        "okBInA": true,
+        "okAInB": false,
+        "bothWords": true,
+        "converged": true
+      },
+      {
+        "round": 2,
+        "okBInA": true,
+        "okAInB": false,
+        "bothWords": true,
+        "converged": true
+      },
+      {
+        "round": 3,
+        "okBInA": true,
+        "okAInB": false,
+        "bothWords": true,
+        "converged": true
+      }
+    ]
+  },
+  "inside.outline": {
+    "ms": 101,
+    "outline": {
+      "client": "8c9965a0587adf02777764d1e0fcb169",
+      "text": "",
+      "box": [
+        383,
+        582,
+        632,
+        23
+      ],
+      "classes": "ts-remote-outline ts-remote-outline is-inside",
+      "offset": null,
+      "kept": null,
+      "inside": "true",
+      "block": "lead",
+      "state": null,
+      "transform": null,
+      "style": {
+        "left": "98.585px",
+        "top": "424.922px",
+        "width": "631.515px",
+        "height": "22.79px"
+      }
+    },
+    "blockBox": [
+      381,
+      580,
+      636,
+      27
+    ],
+    "insetOk": true
+  },
+  "shot.inside.A": "02-inside-a.png",
+  "shot.inside.B": "02-inside-b.png",
+  "shot.drag.mid.A": "03-drag-mid-a.png",
+  "shot.drag.mid.B": "03-drag-mid-b.png",
+  "realtime.block.drag-live": {
+    "ghostFrames": 16,
+    "samples": 18,
+    "distinctGhostPositions": 13,
+    "movingWord": true,
+    "firstGhostMs": 165,
+    "blockMovedAfterReleaseMs": 83,
+    "ghostGoneAfterReleaseMs": 128,
+    "selectionKept": 1,
+    "pass": true
+  },
+  "shot.drag.after.A": "03-drag-after-a.png",
+  "shot.drag.after.B": "03-drag-after-b.png",
+  "pointer.on": {
+    "on": true
+  },
+  "pointer.readings": [
+    {
+      "want": {
+        "x": 400,
+        "y": 270
+      },
+      "drawn": {
+        "at": {
+          "x": 400,
+          "y": 270
+        },
+        "flag": "VVanadium"
+      },
+      "ms": 193
+    },
+    {
+      "want": {
+        "x": 800,
+        "y": 450
+      },
+      "drawn": {
+        "at": {
+          "x": 800,
+          "y": 450
+        },
+        "flag": "VVanadium"
+      },
+      "ms": 193
+    },
+    {
+      "want": {
+        "x": 1200,
+        "y": 630
+      },
+      "drawn": {
+        "at": {
+          "x": 1200,
+          "y": 630
+        },
+        "flag": "VVanadium"
+      },
+      "ms": 180
+    }
+  ],
+  "shot.pointer.A": "04-pointer-a.png",
+  "pointer.hiddenInA": {
+    "driven": true,
+    "gone": true
+  },
+  "realtime.pointer.second-browser": {
+    "drawn": true,
+    "within300": true,
+    "flagNamesB": true,
+    "hidden": {
+      "driven": true,
+      "gone": true
+    },
+    "sheetA": [
+      284,
+      157,
+      1128,
+      635
+    ],
+    "pass": true
+  },
+  "realtime.reload.loses-nothing": {
+    "msAfterLastKeystroke": 2152,
+    "converged": {
+      "ha": "one two threefour five",
+      "hb": "one two threefour five",
+      "sta": "uno dos tres cuatro cinco",
+      "stb": "uno dos tres cuatro cinco",
+      "revA": 13,
+      "revB": 13
+    },
+    "pass": true
+  },
+  "shot.reload.A": "06-reload-a.png",
+  "shot.reload.B": "06-reload-b.png",
+  "realtime.reconnect.loses-nothing": {
+    "offlineNoticed": true,
+    "msAfterReconnect": 2063,
+    "converged": {
+      "ha": "one two threefour five red green blue",
+      "hb": "one two threefour five red green blue",
+      "sta": "uno dos tres cuatro cinco rojo verde azul",
+      "stb": "uno dos tres cuatro cinco rojo verde azul",
+      "revA": 15,
+      "revB": 15
+    },
+    "recordsBefore": 13,
+    "recordsAfter": 15,
+    "pass": true
+  },
+  "shot.reconnect.A": "07-reconnect-a.png",
+  "shot.reconnect.B": "07-reconnect-b.png",
+  "dim.caretDrawnMs": 1,
+  "dim.caretDimMs": 30293,
+  "shot.dim.A": "05-dim-a.png",
+  "dim.leftMs": 57,
+  "realtime.caret.dims-and-leaves": {
+    "dimMs": 30293,
+    "leftMs": 57,
+    "pass": true
+  },
+  "shot.left.A": "05-left-a.png",
+  "teardown": {
+    "id": "untitled-20261001-koxw",
+    "editStatus": 404
+  },
+  "endedAt": "2026-10-01T19:20:14.351Z"
+}

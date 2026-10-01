@@ -74,7 +74,9 @@ import { authorDisplay, sameAuthor } from '@turboslide/store/store';
 import { SHEET } from '@turboslide/theme/tokens';
 import { BookView } from '@turboslide/viewer/BookView';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
+import { PRESENCE_BATCH_MS, SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/realtime/protocol';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
+import type { DragFrame } from '@turboslide/viewer/Editor';
 import type {
   EditorContextMenu,
   EditorHandle,
@@ -784,7 +786,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       window.removeEventListener('pageshow', onPageShow);
     };
   }, [controller]);
-  /* the tab's presence (SPEC-3 3.8): the slide, the selection and the caret, coalesced by the room client */
+  /* the tab's presence (SPEC-3 3.8; docs/REALTIME.md 3.4, 3.5): the slide, the selection and the
+     caret, coalesced by the room client. The caret carries `seq`, the room client's stream
+     position when this state was taken, read through a ref so a position that moves under a
+     standing caret posts nothing: the receiver moves the offset past the entries that landed
+     after `seq` (the caret transform; audit-people.md defect 4) */
+  const presenceSeqRef = useRef(0);
+  presenceSeqRef.current = snap.sync?.seq ?? 0;
   useEffect(() => {
     const blockIds =
       selection === null
@@ -824,6 +832,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
   /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
   const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
+                seq: presenceSeqRef.current,
   const ownRowRef = useRef<PresenceParticipant | null>(null);
   ownRowRef.current = ownRow;
   /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
@@ -831,6 +840,56 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      map's text replaces the row's own, the row's live facts stay */
   const suffixed = controller.identities();
   const withText = (row: PresenceParticipant): PresenceParticipant => {
+  /* the pointer (REALTIME.md 3.5; Google's rule, audit-people.md section 2): sampled from the
+     stage's pointer moves in sheet units once per presence batch while View > Live pointers >
+     Show my pointer is on and the tab may edit; outside the sheet, or when the switch goes off,
+     the field leaves the state. The room client coalesces the samples by replacement and the
+     server keeps the pointer for owners and editors among the first twenty clients */
+  const publishPointer = snap.pointerOn && canWrite;
+  useEffect(() => {
+    if (!publishPointer) {
+      controller.reportPresence({ pointer: undefined });
+      return;
+    }
+    let timer: number | undefined;
+    let latest: { x: number; y: number } | null | undefined;
+    const sheetOf = (): HTMLElement | null =>
+      document.querySelector<HTMLElement>('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    const flush = (): void => {
+      timer = undefined;
+      if (latest === undefined) return;
+      controller.reportPresence({ pointer: latest ?? undefined });
+      latest = undefined;
+    };
+    const schedule = (): void => {
+      if (timer === undefined) timer = window.setTimeout(flush, PRESENCE_BATCH_MS);
+    };
+    const sample = (event: PointerEvent): void => {
+      const sheet = sheetOf();
+      if (sheet === null) return;
+      const rect = sheet.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const x = ((event.clientX - rect.left) / rect.width) * SHEET_WIDTH;
+      const y = ((event.clientY - rect.top) / rect.height) * SHEET_HEIGHT;
+      const inside = x >= 0 && x <= SHEET_WIDTH && y >= 0 && y <= SHEET_HEIGHT;
+      latest = inside ? { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 } : null;
+      schedule();
+    };
+    const leave = (): void => {
+      latest = null;
+      schedule();
+    };
+    document.addEventListener('pointermove', sample, { passive: true });
+    document.documentElement.addEventListener('pointerleave', leave);
+    window.addEventListener('blur', leave);
+    return () => {
+      document.removeEventListener('pointermove', sample);
+      document.documentElement.removeEventListener('pointerleave', leave);
+      window.removeEventListener('blur', leave);
+      if (timer !== undefined) window.clearTimeout(timer);
+      controller.reportPresence({ pointer: undefined });
+    };
+  }, [controller, publishPointer]);
     const view = suffixed[row.principalId];
     if (view === undefined) return row;
     return { ...row, label: view.label, ...(view.name !== undefined ? { name: view.name } : {}) };
@@ -1947,6 +2006,24 @@ function EditorStage({
   const [canvasMenu, setCanvasMenu] = useState<EditorContextMenu | null>(null);
   const [gridMenu, setGridMenu] = useState<GridMenu | null>(null);
   const [tile, setTile] = useState<GridTileSize>(GRID_DEFAULT_TILE);
+/**
+ * The presence `drag` field of a viewer drag frame (docs/REALTIME.md 3.4; the realtime round,
+ * R2): the dragged block's box in whole sheet units, so the 2,048 byte cap holds; undefined at
+ * the session's end, which takes the field out of the state that follows the release.
+ */
+function dragFieldOf(
+  frame: DragFrame | null,
+): { blockId: string; x: number; y: number; w: number; h: number } | undefined {
+  if (frame === null) return undefined;
+  return {
+    blockId: frame.blockId,
+    x: Math.round(frame.box[0]),
+    y: Math.round(frame.box[1]),
+    w: Math.max(0, Math.round(frame.box[2])),
+    h: Math.max(0, Math.round(frame.box[3])),
+  };
+}
+
   const slide =
     viewerDeck.slides.find((entry) => entry.id === shell.active) ?? viewerDeck.slides[0];
   const record = snap.document.slides[shell.active];
@@ -2066,6 +2143,11 @@ function EditorStage({
             void controller
               .invoke('deck.guides', {
                 ...input,
+          /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
+             the viewer's move and resize sessions tell the dragged block's box at every preview
+             frame and null at the release, reported as the presence `drag` field; the state
+             that follows the release carries no drag, and the `pos` write lands as before */
+          onDragFrame={(frame) => controller.reportPresence({ drag: dragFieldOf(frame) })}
                 baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
               })
               .catch((error: unknown) => controller.say(errorMessage(error)));

@@ -71,6 +71,10 @@ export function CollabLayer({ view, shell }: CollabLayerProps) {
           presence={input.presence}
           viewer={viewer}
           present={present}
+          /* the stage's own sheet body (EditorOverlayView.body; the realtime round, R2): the
+             carets are measured in the sheet the overlay covers, never in another copy of the
+             slide the document holds (the filmstrip's live clone carries the same slide id) */
+          body={view.body}
           halo={halo}
         />
       ) : null}

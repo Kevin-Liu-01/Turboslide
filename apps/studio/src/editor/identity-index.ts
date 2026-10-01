@@ -7,6 +7,9 @@
 import type { IdentityView, PresenceParticipant } from '@turboslide/chrome/editor-shell';
 import { disambiguateLabels, labelFor } from '@turboslide/identity/labels';
 import type { RosterEntry } from '@turboslide/realtime/channel';
+import { receivedAtOf } from '@turboslide/realtime/client/room-client';
+import { dragOf } from '@turboslide/realtime/protocol';
+import type { PresenceDrag } from '@turboslide/realtime/protocol';
 import type { Thread } from '@turboslide/schema/comments';
 import type { Author, Version } from '@turboslide/schema/mutations';
 
@@ -31,13 +34,25 @@ export function identityView(identity: EditorIdentity | undefined, author: Autho
 }
 
 /**
+ * A participant with the round's drag box (docs/REALTIME.md 3.4, 3.5): the chrome's
+ * `PresenceParticipant` plus `drag`, the box of the block the person is moving or resizing while
+ * their pointer is down, read structurally off the roster entry. Assignable to the chrome's type
+ * wherever a participant is expected; `RemoteCursors` reads the box through `dragOf`.
+ */
+export type ParticipantView = PresenceParticipant & { drag?: PresenceDrag };
+
+/**
  * A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's
  * PresenceParticipant). The wire's hue slot is 0 to 5 and the chrome's `HueSlot` is 1 to 6
  * (docs/PEOPLE.md 3.15), so the slot moves up by one here and the caret, the outline, the flag
  * and the stripe draw the hue the room granted (`mark.hue.slot` on the same entry agrees).
+ * `lastSeenAt` is the room client's stamp of when the row's state last changed
+ * (`receivedAtOf`; docs/REALTIME.md 3.5, audit-people.md defect 8) and the mapping time only for
+ * a row the client did not stamp, so the caret dims after CARET_DIM_MS without a change.
  */
-export function participantOf(entry: RosterEntry, now: string): PresenceParticipant {
+export function participantOf(entry: RosterEntry, now: string): ParticipantView {
   const named = entry.trust === 'guest' || entry.trust === 'verified';
+  const drag = dragOf(entry);
   return {
     principalId: entry.principalId,
     label: entry.label,
@@ -72,10 +87,11 @@ export function participantOf(entry: RosterEntry, now: string): PresenceParticip
         }
       : {}),
     pointer: entry.pointer ?? null,
+    ...(drag === null ? {} : { drag }),
     following: entry.follow ?? null,
     presenting: entry.presenting,
     idle: false,
-    lastSeenAt: now,
+    lastSeenAt: receivedAtOf(entry) ?? now,
   };
 }
 

@@ -25,7 +25,8 @@ import { NotImplementedError } from '@turboslide/schema/errors';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { isSlideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
+import { isTextOp, sameText, shiftRange, transformMutation } from '@turboslide/schema/transform';
+import type { Splice } from '@turboslide/schema/transform';
 
 import type {
   CommentOp,
@@ -47,6 +48,7 @@ import {
   PRESENCE_HEARTBEAT_MS,
   PRESENCE_HEARTBEAT_QUIET_MS,
   REPLAY_MAX_ENTRIES,
+  caretSeqOf,
 } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
@@ -496,6 +498,173 @@ function clientOfOpId(opId: string): string {
   return colon < 0 ? opId : opId.slice(0, colon);
 }
 
+// ---------------------------------------------------------------------------------------------
+// The roster rows the client publishes (docs/REALTIME.md 3.5; the realtime round, R2)
+
+/**
+ * A roster row as this client hands it to the controller: the wire's entry plus `receivedAt`,
+ * the moment the row's client owned state last changed against the row it replaced (the slide,
+ * the selection without the caret's `seq`, the pointer, the drag, the follow and the two flags;
+ * never the clock alone, which every heartbeat moves). `participantOf` sets `lastSeenAt` from it,
+ * so the remote caret dims after CARET_DIM_MS without a change (`audit-people.md` defect 8: the
+ * mapping time stood in and the dim never fired). Carried structurally: the channel's
+ * `RosterEntry` type is R1's and the wire never carries the field (build/r2.md R2-R1).
+ */
+export type StampedRosterEntry = RosterEntry & { receivedAt?: string };
+
+/** The stamp of a row this client published, or undefined for a row from elsewhere. */
+export function receivedAtOf(entry: RosterEntry): string | undefined {
+  const raw = (entry as { receivedAt?: unknown }).receivedAt;
+  return typeof raw === 'string' && raw !== '' ? raw : undefined;
+}
+
+/** The fields of a row's client owned state the stamp compares; the clock is left out on purpose. */
+const PRESENCE_STATE_FIELDS = [
+  'slideId',
+  'selection',
+  'pointer',
+  'drag',
+  'follow',
+  'pointerOn',
+  'presenting',
+] as const;
+
+/**
+ * True when a presence state differs from the row it replaces in what the person did (not in
+ * the clock, and not in the caret's `seq`, which moves with the stream while the caret stands).
+ */
+export function presenceStateChanged(
+  previous: RosterEntry | undefined,
+  next: RosterEntry,
+): boolean {
+  if (previous === undefined) return true;
+  const pick = (row: RosterEntry): string => {
+    const record = row as unknown as Record<string, unknown>;
+    return PRESENCE_STATE_FIELDS.map((field) => {
+      const value = record[field];
+      if (field !== 'selection' || typeof value !== 'object' || value === null)
+        return JSON.stringify(value ?? null);
+      const selection = value as { blockIds?: unknown; caret?: Record<string, unknown> };
+      const caret =
+        selection.caret === undefined ? undefined : { ...selection.caret, seq: undefined };
+      return JSON.stringify({ blockIds: selection.blockIds, caret: caret ?? null });
+    }).join('|');
+  };
+  return pick(previous) !== pick(next);
+}
+
+/**
+ * A presence POST a server from before the round refused (docs/REALTIME.md 5.2; build/r2.md
+ * R2-R4): the route answers 400 with `error: 'unknown_field'`, the pointer of the object that
+ * carried the key and the keys it did not know, and the browser transport throws it in this
+ * shape. The client drops the field for the rest of the session and posts again
+ * (`legacyPresenceFields`), so the row stays alive on an older instance (an alias switch, an
+ * Instant Rollback) instead of every state being refused until the row expires.
+ */
+export type PresenceRefusal = {
+  status: number;
+  code?: string;
+  pointer?: string;
+  keys?: readonly string[];
+  message?: string;
+};
+
+/** Reads a transport's thrown value as a PresenceRefusal, or null for any other error. */
+export function presenceRefusalOf(error: unknown): PresenceRefusal | null {
+  if (typeof error !== 'object' || error === null || !('status' in error)) return null;
+  const row = error as { status?: unknown; code?: unknown; pointer?: unknown; keys?: unknown };
+  if (typeof row.status !== 'number') return null;
+  const out: PresenceRefusal = { status: row.status };
+  if (typeof row.code === 'string') out.code = row.code;
+  if (typeof row.pointer === 'string') out.pointer = row.pointer;
+  if (Array.isArray(row.keys))
+    out.keys = row.keys.filter((key): key is string => typeof key === 'string');
+  return out;
+}
+
+/** The two fields of the round an older server may refuse, by the pointer and keys of its answer. */
+export type LegacyPresenceField = 'drag' | 'caretSeq';
+
+export function legacyFieldOf(refusal: PresenceRefusal): LegacyPresenceField | null {
+  if (refusal.status !== 400 || refusal.code !== 'unknown_field') return null;
+  const pointer = refusal.pointer ?? '';
+  const keys = refusal.keys ?? [];
+  if (pointer === '/drag' || ((pointer === '/' || pointer === '') && keys.includes('drag')))
+    return 'drag';
+  if (
+    pointer === '/selection/caret/seq' ||
+    (pointer === '/selection/caret' && keys.includes('seq'))
+  )
+    return 'caretSeq';
+  return null;
+}
+
+/**
+ * The caret as the client reads and moves it (channel.ts `CaretState` plus the round's `seq`,
+ * read structurally until R1's type lands).
+ */
+export type CaretView = {
+  blockId: string;
+  path: string;
+  offset?: number;
+  range?: [number, number];
+  seq?: number;
+};
+
+/** The text splices of a mutation list that touch a caret's text, in order. */
+export function splicesOn(
+  mutations: readonly Mutation[],
+  slideId: string | undefined,
+  caret: Pick<CaretView, 'blockId' | 'path'>,
+): Splice[] {
+  return mutations.flatMap((mutation) =>
+    mutation.op === 'text.splice' &&
+    mutation.blockId === caret.blockId &&
+    mutation.path === caret.path &&
+    (slideId === undefined || mutation.slideId === slideId)
+      ? [{ at: mutation.at, remove: mutation.remove, insert: mutation.insert }]
+      : [],
+  );
+}
+
+/**
+ * A caret moved past splices that landed after it was taken (docs/REALTIME.md 3.5, row
+ * `realtime.caret.offset-after-merge`): the offset and the range's two ends through the
+ * schema's `shiftRange`, so a late frame never lands at offset 0 of a text that grew in front
+ * of it (`audit-people.md` defect 4, `run2/04-r1-a-both-in-title.png`).
+ */
+export function shiftCaret(caret: CaretView, splices: readonly Splice[]): CaretView {
+  if (splices.length === 0) return caret;
+  let offset = caret.offset;
+  let range = caret.range;
+  for (const splice of splices) {
+    if (offset !== undefined) offset = shiftPoint(offset, splice);
+    if (range !== undefined)
+      range =
+        range[0] === range[1]
+          ? [shiftPoint(range[0], splice), shiftPoint(range[1], splice)]
+          : shiftRange(range, splice);
+  }
+  return {
+    ...caret,
+    ...(offset === undefined ? {} : { offset }),
+    ...(range === undefined ? {} : { range }),
+  };
+}
+
+/**
+ * A collapsed caret moved by one splice: another author's insert at exactly the caret's offset
+ * lands to the right of it and leaves the caret where it is (the caret sits at the end of its
+ * owner's own text, and a later arrival at that point lands after it: room.ts admits the later
+ * arrival on the right), so a word another person appends at the caret never pushes the caret
+ * past itself (R2's memory tier run, caret round 2: B's caret after "delta" was pushed past A's
+ * " charlie" to the text's end). Every other case is `shiftRange`'s.
+ */
+export function shiftPoint(offset: number, splice: Splice): number {
+  if (splice.remove === 0 && splice.at === offset) return offset;
+  return shiftRange([offset, offset], splice)[0];
+}
+
 /** The slides a mutation list touches, for the change signal; deck level ops mark `all`. */
 export function changedSlides(mutations: readonly Mutation[]): readonly string[] | 'all' {
   const ids = new Set<string>();
@@ -620,6 +789,15 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    */
   let caughtUp = false;
   let tier: RealtimeTier = options.tier ?? 'memory';
+  /**
+   * The tier the last hello named (build/r1.md R1-R2a; docs/REALTIME.md 3.7, 3.8): a hello of
+   * another tier means the stream position is a number of the other tier (a stream seq against a
+   * store revision after the hand off from redis to blob, or the reverse on the hand back or a
+   * rollback), and a replay against it must not be applied; the tab reloads at the hello's
+   * revision instead. Null before the first hello, so the first hello sets the tier and nothing
+   * more.
+   */
+  let helloTier: RealtimeTier | null = null;
   let stream: StreamHandle | null = null;
   let flushTimer: unknown;
   let flushAt = Number.POSITIVE_INFINITY;
@@ -644,7 +822,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    */
   type PostedBatch = { base: number; opIds: string[]; folded: string; answered: boolean };
   let posted: PostedBatch[] = [];
-  let roster: RosterEntry[] = [];
+  let roster: StampedRosterEntry[] = [];
+  /** the round's fields an older server refused; stripped from every later presence body (R2-R4) */
+  const legacyPresenceFields = new Set<LegacyPresenceField>();
   let presence: Omit<PresencePost, 'clientId' | 'clock'> = { pointerOn: false, presenting: false };
   let presenceClock = 0;
   let presenceTimer: unknown;
@@ -955,6 +1135,122 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const isRecordEcho = (entry: Entry): boolean =>
     entry.clientId === 'store' || coversOf(entry).length > 0;
 
+  // -------------------------------------------------------------------------------------------
+  // The remote carets (docs/REALTIME.md 3.5; the realtime round, R2)
+
+  /** The client an entry was written by: its own id, or the id its `covers` were minted under on the blob tier. */
+  const authorOf = (entry: Entry): string => {
+    const covers = coversOf(entry);
+    return covers.length > 0 && covers[0] !== undefined ? clientOfOpId(covers[0]) : entry.clientId;
+  };
+
+  /** A row with its caret replaced; the caret is built as a variable so the extra `seq` rides past the channel's type. */
+  const withCaret = (row: StampedRosterEntry, caret: CaretView): StampedRosterEntry => {
+    if (row.selection === undefined) return row;
+    const placed: RosterEntry['selection'] = {
+      ...row.selection,
+      caret: caret as NonNullable<RosterEntry['selection']>['caret'],
+    };
+    return { ...row, selection: placed };
+  };
+
+  /**
+   * A row's stamp (`StampedRosterEntry`): the moment its client owned state last changed, kept
+   * from the row it replaces when nothing but the clock or the caret's `seq` moved.
+   */
+  const stampRow = (
+    state: RosterEntry,
+    previous: StampedRosterEntry | undefined,
+  ): StampedRosterEntry => {
+    const kept = previous === undefined ? undefined : receivedAtOf(previous);
+    const changed = presenceStateChanged(previous, state);
+    return {
+      ...state,
+      receivedAt: changed || kept === undefined ? new Date(now()).toISOString() : kept,
+    };
+  };
+
+  /**
+   * A received caret placed in this tab's frame: moved from its `seq` past every later entry of
+   * another author that touches its text (over the recent log), then past this tab's own pending
+   * splices on that text (applied to the document the caret is measured in and not yet in the
+   * stream), and stamped with the position it is now valid at. A caret without `seq` (an older
+   * client) is drawn where it says.
+   */
+  const placeCaret = (row: StampedRosterEntry): StampedRosterEntry => {
+    const caret = row.selection?.caret as CaretView | undefined;
+    if (caret === undefined) return row;
+    const from = caretSeqOf(caret);
+    if (from === null) return row;
+    const landed = recent
+      .filter(
+        (entry) => entry.seq > from && entry.kind === 'edit' && authorOf(entry) !== row.clientId,
+      )
+      .flatMap((entry) => splicesOn(entry.mutations ?? [], row.slideId, caret));
+    const own = pending.flatMap((op) =>
+      op.kind === 'edit' ? splicesOn(op.mutations ?? [], row.slideId, caret) : [],
+    );
+    const moved: CaretView = {
+      ...shiftCaret(caret, [...landed, ...own]),
+      seq: Math.max(from, seq),
+    };
+    return withCaret(row, moved);
+  };
+
+  /** Publishes a row the client moved on its own (a caret shifted), as a presence event with the row's clock. */
+  const announceRows = (rows: readonly StampedRosterEntry[]): void => {
+    for (const row of rows)
+      options.onEvent?.({ type: 'presence', clientId: row.clientId, clock: row.clock, state: row });
+  };
+
+  /**
+   * An entry of another author landed: every other row's caret on a text it spliced moves past
+   * it and the row goes out again, so the drawn caret follows the text as it grows (3.5). The
+   * author's own caret already reflects its own text; a caret taken at or above the entry's
+   * position reflects it too.
+   */
+  const shiftRosterCarets = (entry: Entry): void => {
+    if (entry.kind !== 'edit' || roster.length === 0) return;
+    const mutations = entry.mutations ?? [];
+    if (!mutations.some((mutation) => mutation.op === 'text.splice')) return;
+    const author = authorOf(entry);
+    const changed: StampedRosterEntry[] = [];
+    roster = roster.map((row) => {
+      if (row.clientId === author) return row;
+      const caret = row.selection?.caret as CaretView | undefined;
+      if (caret === undefined) return row;
+      const from = caretSeqOf(caret);
+      if (from === null || from >= entry.seq) return row;
+      const splices = splicesOn(mutations, row.slideId, caret);
+      const moved: CaretView = { ...shiftCaret(caret, splices), seq: entry.seq };
+      const next = withCaret(row, moved);
+      if (splices.length > 0) changed.push(next);
+      return next;
+    });
+    announceRows(changed);
+  };
+
+  /**
+   * This tab applied mutations of its own: the other rows' carets on the texts it spliced move
+   * past them now, since the document they are measured in holds the change; the echo of these
+   * mutations is this tab's own and skips the carets (`applyEntry`).
+   */
+  const shiftRosterCaretsPast = (mutations: readonly Mutation[]): void => {
+    if (roster.length === 0 || !mutations.some((mutation) => mutation.op === 'text.splice')) return;
+    const changed: StampedRosterEntry[] = [];
+    roster = roster.map((row) => {
+      if (myClientIds.has(row.clientId)) return row;
+      const caret = row.selection?.caret as CaretView | undefined;
+      if (caret === undefined || caretSeqOf(caret) === null) return row;
+      const splices = splicesOn(mutations, row.slideId, caret);
+      if (splices.length === 0) return row;
+      const next = withCaret(row, shiftCaret(caret, splices));
+      changed.push(next);
+      return next;
+    });
+    announceRows(changed);
+  };
+
   /** One admitted entry in stream order. */
   const applyEntry = (entry: Entry): void => {
     if (entry.seq !== seq) appliedAtSeq.clear();
@@ -1054,6 +1350,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // before the entry (VERIFICATION F-versions, "restore changed the deck false")
       scheduleResync(tier === 'blob' ? Math.max(entry.seq, revision) : revision);
     }
+    // the other people's carets on the texts this entry spliced follow it (docs/REALTIME.md 3.5)
+    shiftRosterCarets(entry);
     const folded = fold();
     const changed = changedSlides(mutations);
     emitChange(
@@ -1294,7 +1592,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         editing = event.editing;
         overCeiling = event.role === 'viewer' && event.editing >= 100;
         tier = event.tier;
-        roster = event.clients;
+        // every row stamped now (the hello says nothing older) and its caret placed in this
+        // tab's frame; a reconnect's hello keeps the stamps of the rows it already held
+        roster = event.clients.map((row) =>
+          placeCaret(
+            stampRow(
+              row,
+              roster.find((held) => held.clientId === row.clientId),
+            ),
+          ),
+        );
         helloSeq = event.seq;
         // the hold of the online event ends here: the hello names the head, and the flush below
         // waits for the replay when the position is behind it
@@ -1321,10 +1628,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           const covered = event.covered;
           retained = retained.filter((op) => op.seq > covered);
         }
-        if (event.seq < seq) {
-          // the stream was reset behind this client; reload at the server's revision
+        const foreign = helloTier !== null && helloTier !== event.tier;
+        helloTier = event.tier;
+        if (foreign || event.seq < seq) {
+          // the stream was reset behind this client, or this hello's tier is not the last one's
+          // (R1-R2a: the position is the other tier's number); reload at the server's revision
           seq = event.seq;
           appliedAtSeq.clear();
+          incoming.clear();
           void resync(event.revision);
         }
         // ops sent on a connection that died are re-sent under the new client id once the
@@ -1369,11 +1680,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // second person's chip moved 28 px whenever a third was present; presence.spec.ts's
         // second person row, build/t2.md T2-R1)
         const at = roster.findIndex((row) => row.clientId === event.clientId);
+        // the row stamped with when its state last changed (docs/REALTIME.md 3.5; audit-people.md
+        // defect 8) and its caret placed in this tab's frame (3.5, the caret transform); the
+        // controller receives the stamped and placed row, never the wire's
+        const state = placeCaret(stampRow(event.state, at === -1 ? undefined : roster[at]));
         roster =
-          at === -1
-            ? [...roster, event.state]
-            : roster.map((row, index) => (index === at ? event.state : row));
-        options.onEvent?.(event);
+          at === -1 ? [...roster, state] : roster.map((row, index) => (index === at ? state : row));
+        options.onEvent?.({ ...event, state });
         return;
       }
       case 'leave':
@@ -1738,6 +2051,21 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   // -------------------------------------------------------------------------------------------
   // Presence (SPEC-3 3.8): one batch per 80 ms, a heartbeat every 5 s
 
+  /**
+   * The state this tab posts (docs/REALTIME.md 3.4): the whole presence object, coalesced by
+   * replacement since every `setPresence` merged into it (the latest pointer or drag frame of
+   * a batch wins), minus the round's fields an older server refused (`legacyPresenceFields`).
+   */
+  const presenceBody = (id: string, clock: number): PresencePost => {
+    const state: Omit<PresencePost, 'clientId' | 'clock'> = { ...presence };
+    if (legacyPresenceFields.has('drag')) delete state.drag;
+    if (legacyPresenceFields.has('caretSeq') && state.selection?.caret !== undefined) {
+      const { seq: _seq, ...caret } = state.selection.caret;
+      state.selection = { ...state.selection, caret };
+    }
+    return { clientId: id, clock, ...state };
+  };
+
   const postPresence = async (): Promise<void> => {
     // the binding gates a presence post, not the stream: a tab whose stream is down or refused
     // is alive, its row stays in every roster (the chip, the server's reader liveness) and its
@@ -1746,9 +2074,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     presenceClock += 1;
     presenceDirty = false;
     try {
-      await transport.postPresence({ clientId, clock: presenceClock, ...presence });
-    } catch {
-      // a lost presence batch is replaced by the next one
+      await transport.postPresence(presenceBody(clientId, presenceClock));
+    } catch (error) {
+      // a server from before the round refused a field of it (R2-R4): the field leaves every
+      // later body and the state goes again at once; any other failure is a lost batch the next
+      // one replaces
+      const refused = presenceRefusalOf(error);
+      const field = refused === null ? null : legacyFieldOf(refused);
+      if (field !== null && !legacyPresenceFields.has(field)) {
+        legacyPresenceFields.add(field);
+        presenceDirty = true;
+        schedulePresence(0);
+      }
     }
   };
 
@@ -1911,7 +2248,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       const leaving =
         clientId !== null && bound
           ? transport
-              .postPresence({ clientId, clock: presenceClock + 1, ...presence }, { leave: true })
+              .postPresence(presenceBody(clientId, presenceClock + 1), { leave: true })
               .catch(() => undefined)
           : Promise.resolve();
       stream?.close();
@@ -1944,6 +2281,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         ...(note === undefined || note === '' ? {} : { note: note.slice(0, ENTRY_NOTE_MAX) }),
         ...(settle === undefined ? {} : { settle }),
       });
+      // the other people's carets on the texts this write spliced move past it now (3.5)
+      shiftRosterCaretsPast(mutations);
       emitChange(result.document, changedSlides(mutations), 'local');
       persist();
       emitStatus();
@@ -1984,10 +2323,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     flush,
     setPresence(state) {
       const before = presence;
+      // coalesced by replacement (docs/REALTIME.md 3.4): the partial state merges into the one
+      // pending body, the latest value of a field wins, and a pointer moved twenty times inside
+      // a batch posts once; a field set to undefined leaves the body (JSON drops it)
       presence = { ...presence, ...state };
-      // the pointer, the selection or the slide moved: the heartbeat's active window restarts
+      // the pointer, the drag, the selection or the slide moved: the heartbeat's active window restarts
       if (
         JSON.stringify(before.pointer) !== JSON.stringify(presence.pointer) ||
+        JSON.stringify(before.drag) !== JSON.stringify(presence.drag) ||
         JSON.stringify(before.selection) !== JSON.stringify(presence.selection) ||
         before.slideId !== presence.slideId
       )

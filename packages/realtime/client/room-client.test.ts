@@ -25,6 +25,12 @@ import {
   BACKOFF_MAX_MS,
   GAP_REOPEN_MS,
   createRoomClient,
+  legacyFieldOf,
+  presenceRefusalOf,
+  presenceStateChanged,
+  receivedAtOf,
+  shiftCaret,
+  shiftPoint,
   splitSseBlocks,
   streamFailureOf,
 } from './room-client.ts';
@@ -2416,6 +2422,319 @@ describe('the sync and costs round: acknowledgement by id, undo past remote entr
     expect(room.rejects()).toEqual([]);
     expect(changes.some((change) => change.reason === 'reject')).toBe(false);
     expect(textOf(room.document())).toBe(`ab${before}`);
+    await room.stop();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// The realtime round (docs/REALTIME.md 3.2, 3.4, 3.5; realtime/build/r2.md): the roster row's
+// stamp, the caret placed past later entries and the receiver's own pending splices, the carets
+// moved as entries land, the echo settled by op id on the stream tier before the answer, the
+// presence coalesced by replacement, and the round's fields dropped for a server that refuses them.
+
+describe('the realtime round: the stamp, the caret transform, the echo by id and the presence body (docs/REALTIME.md 3.2, 3.4, 3.5)', () => {
+  const eventually = async (read: () => boolean, timeoutMs = 3000): Promise<void> => {
+    const started = Date.now();
+    while (!read()) {
+      if (Date.now() - started > timeoutMs) throw new Error('not in time');
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+  };
+  const caretOf = (
+    room: ReturnType<typeof createRoomClient>,
+    clientId: string | null,
+  ): { offset?: number; range?: [number, number]; seq?: number } | undefined =>
+    room.roster().find((row) => row.clientId === clientId)?.selection?.caret as
+      { offset?: number; range?: [number, number]; seq?: number } | undefined;
+
+  it('stamps receivedAt when a row’s state changes and keeps it across heartbeats, so the caret can dim (3.5; audit-people.md defect 8)', async () => {
+    const h = harness();
+    let clock = 1_700_000_000_000;
+    const a = h.client(kevin, { now: () => clock });
+    const b = h.client(maya);
+    a.room.start();
+    await until(() => a.room.status().connected);
+    b.room.start();
+    await until(() => b.room.status().connected);
+    const bId = b.room.clientId();
+    const rowOf = () => a.room.roster().find((row) => row.clientId === bId);
+    await eventually(() => rowOf() !== undefined);
+    const first = receivedAtOf(rowOf()!);
+    expect(first).toBe(new Date(clock).toISOString());
+    // a heartbeat moves the clock alone: the stamp stands
+    clock += 5000;
+    const clockBefore = rowOf()!.clock;
+    b.room.refreshPresence();
+    await eventually(() => (rowOf()?.clock ?? 0) > clockBefore);
+    expect(receivedAtOf(rowOf()!)).toBe(first);
+    // a slide change is a change of state: the stamp moves to now
+    clock += 5000;
+    b.room.setPresence({ slideId: 'mood-compass' });
+    await eventually(() => rowOf()?.slideId === 'mood-compass');
+    expect(receivedAtOf(rowOf()!)).toBe(new Date(clock).toISOString());
+    expect(presenceStateChanged(rowOf(), { ...rowOf()!, clock: rowOf()!.clock + 1 })).toBe(false);
+    expect(presenceStateChanged(rowOf(), { ...rowOf()!, pointerOn: true })).toBe(true);
+    await b.room.stop();
+    await a.room.stop();
+  });
+
+  it('places a received caret past the entries that landed after its seq, past the receiver’s own pending splice, never past its owner’s own entry, and moves it as later entries land (3.5, the caret transform)', async () => {
+    const h = harness();
+    const events: RoomEvent[] = [];
+    const a = h.client(kevin, { onEvent: (event) => events.push(event) });
+    const b = h.client(maya);
+    a.room.start();
+    await until(() => a.room.status().connected);
+    b.room.start();
+    await until(() => b.room.status().connected);
+    const bId = b.room.clientId();
+    await eventually(() => a.room.roster().some((row) => row.clientId === bId));
+    // B's caret after its second character, taken at position 0 (nothing has landed)
+    b.room.setPresence({
+      slideId: SLIDE,
+      selection: {
+        blockIds: [BLOCK],
+        caret: { blockId: BLOCK, path: '/text', offset: 2, range: [2, 2], seq: 0 },
+      },
+    });
+    await eventually(() => caretOf(a.room, bId)?.offset === 2);
+    // A types five characters at the start, not yet landed: B's caret in A's frame moves past
+    // A's own pending splice at once, and the controller hears the moved row
+    events.length = 0;
+    a.room.apply([splice(0, 0, 'alpha')], 'type');
+    expect(caretOf(a.room, bId)).toMatchObject({ offset: 7, range: [7, 7] });
+    expect(events.some((event) => event.type === 'presence' && event.clientId === bId)).toBe(true);
+    await settled([a.room]);
+    // the echo of A's own write skips the carets: still 7
+    expect(caretOf(a.room, bId)?.offset).toBe(7);
+    // another writer inserts two characters at the start (seq 2): the caret follows, and the
+    // row's seq moves to the entry's
+    events.length = 0;
+    await h.server.appendExternal(kevin.author, [splice(0, 0, 'xx')]);
+    await eventually(() => caretOf(a.room, bId)?.offset === 9);
+    expect(caretOf(a.room, bId)?.seq).toBe(2);
+    expect(events.some((event) => event.type === 'presence' && event.clientId === bId)).toBe(true);
+    // a stale report from B (seq 0, offset 3) is placed past both entries: 3 plus 5 plus 2
+    b.room.setPresence({
+      slideId: SLIDE,
+      selection: {
+        blockIds: [BLOCK],
+        caret: { blockId: BLOCK, path: '/text', offset: 3, range: [3, 3], seq: 0 },
+      },
+    });
+    await eventually(() => caretOf(a.room, bId)?.offset === 10);
+    expect(caretOf(a.room, bId)?.seq).toBe(2);
+    // B's own write lands (seq 3): B's caret already reflects B's text, so it does not move
+    b.room.apply([splice(0, 0, 'bravo')], 'type');
+    await settled([a.room, b.room]);
+    expect(a.room.status().seq).toBe(3);
+    expect(caretOf(a.room, bId)?.offset).toBe(10);
+    // another person's word appended at exactly B's caret lands to the right of it: the caret
+    // stays (shiftPoint), while an insert before it still moves it
+    expect(
+      shiftCaret({ blockId: BLOCK, path: '/text', offset: 10, range: [10, 10] }, [
+        { at: 10, remove: 0, insert: ' charlie' },
+      ]),
+    ).toMatchObject({ offset: 10, range: [10, 10] });
+    expect(shiftPoint(10, { at: 9, remove: 0, insert: 'x' })).toBe(11);
+    expect(shiftPoint(10, { at: 10, remove: 2, insert: '' })).toBe(10);
+    expect(shiftPoint(10, { at: 4, remove: 3, insert: '' })).toBe(7);
+    // a caret without seq (an older client) is drawn where it says
+    b.room.setPresence({
+      slideId: SLIDE,
+      selection: {
+        blockIds: [BLOCK],
+        caret: { blockId: BLOCK, path: '/text', offset: 1, range: [1, 1] },
+      },
+    });
+    await eventually(() => caretOf(a.room, bId)?.offset === 1);
+    await b.room.stop();
+    await a.room.stop();
+  });
+
+  it('settles an own op by its id when the stream’s echo arrives before the POST’s answer, and the answer then repeats nothing (3.2, the stream tier)', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    const slow: RoomTransport = {
+      ...a.transport,
+      async postOps(body) {
+        const answer = await a.transport.postOps(body);
+        // the stream's echo has been delivered inside the append; the answer waits past it
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        return answer;
+      },
+    };
+    const changes: DocumentChange[] = [];
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport: slow,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+    });
+    room.start();
+    await until(() => room.status().connected);
+    const before = textOf(room.document());
+    const { settled: outcome } = room.apply([splice(0, 0, 'echo ')], 'type');
+    // the echo settles the op before the slow answer resolves
+    await eventually(() => room.status().pending === 0, 1000);
+    expect(textOf(room.document())).toBe(`echo ${before}`);
+    const acks = changes.filter((change) => change.reason === 'ack').length;
+    await outcome;
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(textOf(room.document())).toBe(`echo ${before}`);
+    expect(changes.filter((change) => change.reason === 'ack').length).toBe(acks);
+    expect(room.status().pending).toBe(0);
+    await room.stop();
+  });
+
+  it('coalesces the presence by replacement: twenty pointer frames and a drag inside one batch post once with the latest values (3.4)', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    const bodies: PresencePost[] = [];
+    const counting: RoomTransport = {
+      ...a.transport,
+      async postPresence(body, presenceOptions) {
+        bodies.push(body);
+        return a.transport.postPresence(body, presenceOptions);
+      },
+    };
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport: counting,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    await until(() => room.status().connected);
+    await eventually(() => bodies.length >= 1);
+    const posted = bodies.length;
+    for (let i = 1; i <= 20; i += 1) {
+      room.setPresence({ pointer: { x: 10 * i, y: 5 * i } });
+      room.setPresence({ drag: { blockId: BLOCK, x: i, y: i, w: 100, h: 50 } });
+    }
+    await new Promise((resolve) => setTimeout(resolve, PRESENCE_BATCH_MS * 3));
+    expect(bodies.length).toBe(posted + 1);
+    expect(bodies[bodies.length - 1]).toMatchObject({
+      pointer: { x: 200, y: 100 },
+      drag: { blockId: BLOCK, x: 20, y: 20, w: 100, h: 50 },
+    });
+    // the release clears the drag: the field leaves the body
+    room.setPresence({ drag: undefined });
+    await new Promise((resolve) => setTimeout(resolve, PRESENCE_BATCH_MS * 3));
+    expect(bodies.length).toBe(posted + 2);
+    expect(JSON.stringify(bodies[bodies.length - 1])).not.toContain('"drag"');
+    await room.stop();
+  });
+
+  it('drops a field a server from before the round refuses as unknown and posts the state again without it, keeping the row alive (R2-R4)', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    const bodies: PresencePost[] = [];
+    const legacy: RoomTransport = {
+      ...a.transport,
+      async postPresence(body, presenceOptions) {
+        bodies.push(body);
+        if (body.drag !== undefined)
+          throw { status: 400, code: 'unknown_field', pointer: '/', keys: ['drag'] };
+        if (body.selection?.caret?.seq !== undefined)
+          throw { status: 400, code: 'unknown_field', pointer: '/selection/caret', keys: ['seq'] };
+        return a.transport.postPresence(body, presenceOptions);
+      },
+    };
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport: legacy,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    await until(() => room.status().connected);
+    await eventually(() => bodies.length >= 1);
+    const posted = bodies.length;
+    room.setPresence({
+      slideId: SLIDE,
+      drag: { blockId: BLOCK, x: 1, y: 2, w: 3, h: 4 },
+      selection: {
+        blockIds: [BLOCK],
+        caret: { blockId: BLOCK, path: '/text', offset: 1, range: [1, 1], seq: 0 },
+      },
+    });
+    // the first body is refused for drag, the second for the caret's seq, the third lands
+    await eventually(() => bodies.length >= posted + 3);
+    const last = bodies[bodies.length - 1]!;
+    expect(last.drag).toBeUndefined();
+    expect(last.selection?.caret?.seq).toBeUndefined();
+    expect(last.selection?.caret?.offset).toBe(1);
+    expect(last.slideId).toBe(SLIDE);
+    expect(bodies.length).toBe(posted + 3);
+    expect(legacyFieldOf({ status: 400, code: 'unknown_field', pointer: '/drag' })).toBe('drag');
+    expect(
+      legacyFieldOf({ status: 400, code: 'unknown_field', pointer: '/selection/caret/seq' }),
+    ).toBe('caretSeq');
+    expect(legacyFieldOf({ status: 400, code: 'invalid', pointer: '/drag' })).toBeNull();
+    expect(presenceRefusalOf(new Error('offline'))).toBeNull();
+    await room.stop();
+  });
+});
+
+describe('a hello of another tier reads the position as foreign (build/r1.md R1-R2a; docs/REALTIME.md 3.7, 3.8)', () => {
+  it('resyncs at the hello’s revision when a reopened stream’s hello names a tier the last hello did not, and keeps the document whole', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    let opens = 0;
+    const resyncs: number[] = [];
+    const switching: RoomTransport = {
+      ...a.transport,
+      open(openOptions) {
+        opens += 1;
+        const second = opens > 1;
+        return a.transport.open({
+          ...openOptions,
+          onEvent: (event) =>
+            openOptions.onEvent(
+              // the memory tier to the redis tier: both are stream tiers, so the fake's memory
+              // channel serves the second hello without the blob tier's position rules
+              second && event.type === 'hello' ? { ...event, tier: 'redis' } : event,
+            ),
+        });
+      },
+    };
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport: switching,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: () => undefined,
+      onResync: async (revision) => {
+        resyncs.push(revision);
+        return h.server.document();
+      },
+    });
+    room.start();
+    await until(() => room.status().connected);
+    expect(resyncs).toEqual([]);
+    room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await until(() => room.status().pending === 0);
+    // the stream dies and comes back on the other tier: one reload at the hello's revision
+    h.server.kill();
+    await until(() => !room.status().connected);
+    await until(() => room.status().connected && resyncs.length > 0, 5000);
+    expect(resyncs).toEqual([h.server.document().deck.revision]);
+    expect(room.status().tier).toBe('redis');
+    expect(textOf(room.document())).toBe(textOf(h.server.document()));
+    // the same tier again: no reload
+    h.server.kill();
+    await until(() => !room.status().connected);
+    await until(() => room.status().connected, 5000);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(resyncs.length).toBe(1);
     await room.stop();
   });
 });

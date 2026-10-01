@@ -34,6 +34,60 @@ export const FLAG_FADE_MS = 3000;
 export const CARET_DIM_MS = 30_000;
 /** The announcements region says at most one sentence per person per this window (4.9). */
 export const ANNOUNCE_WINDOW_MS = 5000;
+/**
+ * A remote caret's bar keeps its last box this long when the range at its offset cannot be
+ * measured (docs/REALTIME.md 3.5; audit-people.md defect 4): the run is mid render or the text
+ * has not caught up, and the run's start would read as offset 0.
+ */
+export const CARET_KEEP_MS = 300;
+
+/**
+ * The box of a block another person is moving or resizing, in sheet units (docs/REALTIME.md
+ * 3.4 `drag`): present on a participant only while that person's pointer is down. The chrome
+ * has no dependency on `@turboslide/realtime`, so the shape is read here.
+ */
+export type PresenceDragView = { blockId: string; x: number; y: number; w: number; h: number };
+
+/** The drag box a participant carries, or null; read structurally off the participant. */
+export function dragOf(participant: unknown): PresenceDragView | null {
+  if (typeof participant !== 'object' || participant === null || !('drag' in participant))
+    return null;
+  const raw = (participant as { drag: unknown }).drag;
+  if (typeof raw !== 'object' || raw === null) return null;
+  const { blockId, x, y, w, h } = raw as Record<string, unknown>;
+  if (typeof blockId !== 'string' || blockId === '') return null;
+  const nums = [x, y, w, h];
+  if (!nums.every((n) => typeof n === 'number' && Number.isFinite(n))) return null;
+  return { blockId, x: x as number, y: y as number, w: w as number, h: h as number };
+}
+
+/**
+ * The box a remote caret draws at (3.5): the measured one when the range measured, else the box
+ * drawn last while it is younger than CARET_KEEP_MS (`kept` true), else nothing, so the caller
+ * falls to the block's box rather than to offset 0 of the run.
+ */
+export function keptCaretBox<B>(
+  measured: B | null,
+  kept: { box: B; at: number } | undefined,
+  now: number,
+): { box: B; kept: boolean } | null {
+  if (measured !== null) return { box: measured, kept: false };
+  if (kept !== undefined && now - kept.at < CARET_KEEP_MS) return { box: kept.box, kept: true };
+  return null;
+}
+
+/**
+ * Whether this tab publishes its own pointer (docs/REALTIME.md 3.5; Google's rule in
+ * audit-people.md section 2): View > Live pointers > Show my pointer on, and a role that may
+ * edit. Every access level draws the others' pointers (`pointersDrawn`); only an owner or an
+ * editor sends one, and the server strips a pointer from anyone else's row either way.
+ */
+export function pointerPublished(
+  presence: Pick<EditorPresence, 'pointerMine'>,
+  role: string | null | undefined,
+): boolean {
+  return presence.pointerMine === true && (role === 'owner' || role === 'editor');
+}
 
 /** The 1 based number of a slide in the deck's order, or null when the deck has no such slide. */
 export function slideNumberOf(document: DeckDocument, slideId: string | undefined): number | null {
@@ -246,7 +300,12 @@ export function participantsOnBlock(
   return others.filter((each) => each.selection?.blockIds.includes(blockId) === true);
 }
 
-/** True while pointers are drawn: under the cap and not in present mode (4.4). */
+/**
+ * True while the others' pointers are drawn (4.4; docs/REALTIME.md 3.5): View > Live pointers >
+ * Show collaborator pointers on (the default), not in present mode, and no more than the cap of
+ * participants in the room (Google stops pointers past 20 collaborators). Drawn for every access
+ * level; `pointerPublished` is the sending side's rule.
+ */
 export function pointersDrawn(
   presence: EditorPresence,
   participants: number,

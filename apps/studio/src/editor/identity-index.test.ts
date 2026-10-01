@@ -94,6 +94,35 @@ describe('participantOf', () => {
       name: 'Kevin Liu',
     });
   });
+
+  it('sets lastSeenAt from the room client’s stamp and carries the drag box; a row without the stamp reads the mapping time (docs/REALTIME.md 3.5; R2)', () => {
+    const now = '2026-10-01T10:00:00.000Z';
+    const stamped = {
+      ...entry(A, 'c1', 'Titanium 471', 0),
+      receivedAt: '2026-10-01T09:59:30.000Z',
+      drag: { blockId: 'b1', x: 120, y: 40, w: 300, h: 80 },
+    } as RosterEntry;
+    const row = participantOf(stamped, now);
+    expect(row.lastSeenAt).toBe('2026-10-01T09:59:30.000Z');
+    expect(row.drag).toEqual({ blockId: 'b1', x: 120, y: 40, w: 300, h: 80 });
+    const plain = participantOf(entry(B, 'c2', 'Cobalt 512', 1), now);
+    expect(plain.lastSeenAt).toBe(now);
+    expect(plain.drag).toBeUndefined();
+    /* a caret's seq rides the row and the offset falls back to the range's start as before */
+    const withCaret = participantOf(
+      {
+        ...entry(C, 'c3', 'Nickel 303', 2),
+        selection: {
+          blockIds: ['p1'],
+          caret: { blockId: 'p1', path: '/text', range: [7, 7], seq: 4 } as NonNullable<
+            RosterEntry['selection']
+          >['caret'],
+        },
+      },
+      now,
+    );
+    expect(withCaret.selection?.caret?.offset).toBe(7);
+  });
 });
 
 describe('identityView', () => {

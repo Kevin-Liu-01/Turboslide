@@ -124,6 +124,7 @@ describe('the runtime', () => {
       passkeys: false,
       passkeysNotice: 'Passkeys arrive once the address is final',
       github: false,
+      google: false,
     });
     expect(runtime.checkoutToken).toMatch(/^[0-9a-f]{64}$/);
   });

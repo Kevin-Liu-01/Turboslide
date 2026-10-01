@@ -33,7 +33,7 @@ import {
   typeInto,
   waitEditor,
 } from './core/lib';
-import { coreTitle } from './core/matrix';
+import { coreTitle, isCoreId } from './core/matrix';
 
 // MILESTONES-3 B3 acceptance, accounts.spec.ts (gslides-parity SPEC-3 16.3): the identity
 // surfaces of round three against the builder's dev server on 4332, started from apps/studio
@@ -1998,5 +1998,207 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
     expect(spread(reds), 'red holds along the first row').toBeLessThan(48);
     expect(spread(blues), 'blue spans the ramp along the first row').toBeGreaterThan(120);
     pictureUrl = src;
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// the realtime round's Google sign in rows (docs/REALTIME.md 4.4; design-google-login.md 6.2),
+// lane R4. Four local rows on a node server with an identity database, captured mail and the
+// fake Google pair (GOOGLE_CLIENT_ID=fake-client-id.apps.googleusercontent.com,
+// GOOGLE_CLIENT_SECRET=fake-secret-for-local-tests: test values for a local server, never a
+// client Google knows); the fourth row reads a second server with TURBOSLIDE_MAIL=off from
+// TURBOSLIDE_MAIL_OFF_BASE and is not driven without it. The round trip itself (the code
+// exchange at Google's token endpoint) cannot run here and is the hand row
+// `accounts.google-roundtrip` (docs/gslides-parity/realtime/build/google.md).
+
+/** The second server with `TURBOSLIDE_MAIL=off` (REALTIME.md 4.4 row 4), or null when none is named. */
+const MAIL_OFF_BASE = (process.env.TURBOSLIDE_MAIL_OFF_BASE ?? '').replace(/\/$/, '') || null;
+
+/**
+ * The test title of a local row: `coreTitle(id)` once R5's matrix carries the row, else the same
+ * shape (the id first, so `idOfTitle` and the gate map the result back) over the row's
+ * interaction as REALTIME.md section 2 states it (build/r4.md request R4-R5a).
+ */
+function localTitle(id: string, interaction: string): string {
+  return isCoreId(id) ? coreTitle(id) : `${id}: ${interaction}`;
+}
+
+const GOOGLE_ROWS = {
+  button: [
+    'accounts.google-button',
+    'Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and the passkey row; with the e2e mail mode capture the email field is present',
+  ],
+  leaves: [
+    'accounts.google-leaves',
+    "Local: accounts.google.com routes aborted; the button's navigation carries redirect_uri <origin>/api/auth/callback/google, the scopes openid email profile, prompt=select_account, a code_challenge and no access_type",
+  ],
+  error: [
+    'accounts.google-error-sentence',
+    "Local: /edit/<deck>?error=account_not_linked draws the dialog's failed sentence in the snackbar and the address loses the parameter",
+  ],
+  hidden: [
+    'accounts.email-hidden-without-mail',
+    'Local, a second server with TURBOSLIDE_MAIL=off: no email field; the Google button is the first method',
+  ],
+} as const;
+
+/** Opens the Sign in dialog through the own chip's menu; answers the route, or null when no chip drew. */
+async function openSignIn(p: Page): Promise<string | null> {
+  const done = await withOwnMenu(p, async (menu) => {
+    await menu.locator('[data-control="account.signIn"]').first().click();
+    await ctl(p, 'dialog.signIn').waitFor({ timeout: 8000 });
+    return true;
+  });
+  return done === null ? null : done.route;
+}
+
+/** The method buttons of the open dialog in document order, by their data-control ids. */
+async function methodOrder(p: Page): Promise<string[]> {
+  return ctl(p, 'dialog.signIn').evaluate((card) =>
+    [...card.querySelectorAll('.ts-sign-in-methods [data-control]')].map(
+      (el) => el.getAttribute('data-control') ?? '',
+    ),
+  );
+}
+
+/** The open dialog's box, rounded: the one 400 by 320 box of SPEC-3 7.3. */
+async function dialogBox(p: Page): Promise<{ width: number; height: number }> {
+  const box = await ctl(p, 'dialog.signIn').boundingBox();
+  return { width: Math.round(box?.width ?? 0), height: Math.round(box?.height ?? 0) };
+}
+
+test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4)', () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+  const scratch = new Scratch();
+  let aCtx: BrowserContext;
+  let A: Page;
+  let deck = '';
+
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(180_000);
+    ({ context: aCtx, page: A } = await ownerContext(browser));
+    const probe = await A.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+    expect(probe.status(), 'the server has an identity database').toBe(200);
+    deck = await newDeck(A, scratch, 'Google rows deck');
+  });
+  test.afterAll(async () => {
+    test.setTimeout(120_000);
+    try {
+      await teardownAll(A, scratch);
+    } finally {
+      await aCtx.close();
+    }
+  });
+
+  test(localTitle(...GOOGLE_ROWS.button), async () => {
+    test.setTimeout(120_000);
+    await openEditor(A, deck);
+    const route = await openSignIn(A);
+    expect(route, 'the own chip menu opens the Sign in dialog').not.toBeNull();
+    test.info().annotations.push({ type: 'opened through', description: route ?? '' });
+    const order = await methodOrder(A);
+    test.info().annotations.push({ type: 'methods', description: order.join(', ') });
+    const google = order.indexOf('dialog.signIn.google');
+    const github = order.indexOf('dialog.signIn.github');
+    const passkey = order.indexOf('dialog.signIn.passkey');
+    expect(google, 'the Google button is drawn').toBeGreaterThanOrEqual(0);
+    expect(passkey, 'the passkey row is drawn under Google').toBeGreaterThan(google);
+    if (github >= 0) expect(github, 'GitHub under Google').toBeGreaterThan(google);
+    else
+      test.info().annotations.push({
+        type: 'github',
+        description:
+          'not configured on this server (no fake GitHub pair); the order is read against the passkey row alone',
+      });
+    /* the e2e mail mode is capture: the email field and Continue are present */
+    await expect(ctl(A, 'dialog.signIn.email')).toHaveCount(1);
+    await expect(ctl(A, 'dialog.signIn.continue')).toHaveCount(1);
+    expect(await dialogBox(A)).toEqual({ width: 400, height: 320 });
+    await A.keyboard.press('Escape');
+    await expect(ctl(A, 'dialog.signIn')).toHaveCount(0);
+  });
+
+  test(localTitle(...GOOGLE_ROWS.error), async () => {
+    test.setTimeout(120_000);
+    await A.goto(`/edit/${deck}?error=account_not_linked`);
+    /* the sentence is said at the editor's mount and holds 5 s (SNACKBAR_HOLD_MS): read at once */
+    const snackbar = A.locator('[data-control="snackbar"]');
+    await expect(snackbar).toContainText('Sign in did not complete', { timeout: 30_000 });
+    await expect(snackbar).toContainText('account not linked');
+    await waitEditor(A);
+    await expect.poll(() => A.url(), { timeout: 10_000 }).not.toContain('error=');
+    expect(new URL(A.url()).pathname).toBe(`/edit/${deck}`);
+  });
+
+  test(localTitle(...GOOGLE_ROWS.leaves), async () => {
+    test.setTimeout(120_000);
+    await openEditor(A, deck);
+    const seen: { url: string | null } = { url: null };
+    const pattern = 'https://accounts.google.com/**';
+    await aCtx.route(pattern, async (route) => {
+      seen.url = seen.url ?? route.request().url();
+      await route.abort('aborted');
+    });
+    try {
+      const route = await openSignIn(A);
+      expect(route, 'the own chip menu opens the Sign in dialog').not.toBeNull();
+      await ctl(A, 'dialog.signIn.google').click();
+      await expect.poll(() => seen.url, { timeout: 20_000 }).not.toBeNull();
+    } finally {
+      await aCtx.unroute(pattern);
+    }
+    const url = new URL(seen.url ?? '');
+    test.info().annotations.push({
+      type: 'navigation',
+      description: `${url.origin}${url.pathname} with ${[...url.searchParams.keys()].join(', ')}`,
+    });
+    expect(url.origin).toBe('https://accounts.google.com');
+    expect(url.pathname).toBe('/o/oauth2/v2/auth');
+    expect(url.searchParams.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/callback/google`);
+    expect(url.searchParams.get('client_id')).toBe('fake-client-id.apps.googleusercontent.com');
+    const scope = (url.searchParams.get('scope') ?? '').split(/[\s+]+/);
+    expect(scope).toEqual(expect.arrayContaining(['openid', 'email', 'profile']));
+    expect(url.searchParams.get('prompt')).toBe('select_account');
+    expect(url.searchParams.get('code_challenge') ?? '').toMatch(/^[A-Za-z0-9_-]{20,}$/);
+    expect(url.searchParams.get('state') ?? '').not.toBe('');
+    expect(url.searchParams.has('access_type')).toBe(false);
+    /* the page left for an aborted navigation: back to the editor for the rows after */
+    await openEditor(A, deck);
+  });
+
+  test(localTitle(...GOOGLE_ROWS.hidden), async ({ browser }) => {
+    test.setTimeout(120_000);
+    test.skip(
+      MAIL_OFF_BASE === null,
+      'no second server with TURBOSLIDE_MAIL=off named by TURBOSLIDE_MAIL_OFF_BASE; the row is not driven',
+    );
+    const offBase = MAIL_OFF_BASE ?? '';
+    const { context, page } = await otherContext(browser);
+    try {
+      const probe = await page.request.get(`${offBase}/api/auth/get-session`, {
+        headers: { origin: offBase, 'sec-fetch-site': 'same-origin' },
+      });
+      expect(probe.status(), 'the second server has an identity database').toBe(200);
+      await page.goto(`${offBase}/new`);
+      await waitEditor(page);
+      const route = await openSignIn(page);
+      expect(route, 'the own chip menu opens the Sign in dialog').not.toBeNull();
+      const order = await methodOrder(page);
+      test.info().annotations.push({ type: 'methods', description: order.join(', ') });
+      await expect(ctl(page, 'dialog.signIn.email')).toHaveCount(0);
+      await expect(ctl(page, 'dialog.signIn.continue')).toHaveCount(0);
+      expect(order[0], 'Google is the first method').toBe('dialog.signIn.google');
+      await expect(ctl(page, 'dialog.signIn.google')).toHaveAttribute('data-primary', 'true');
+      /* the focus on open, so Enter runs Google */
+      const focused = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-control') ?? null,
+      );
+      expect(focused, 'the Google button holds the focus').toBe('dialog.signIn.google');
+      expect(await dialogBox(page)).toEqual({ width: 400, height: 320 });
+      await page.keyboard.press('Escape');
+    } finally {
+      await context.close();
+    }
   });
 });

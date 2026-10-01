@@ -244,6 +244,11 @@ export const ACCOUNT = {
     passkey: 'Use a passkey',
     passkeysLater: 'Passkeys arrive once the address is final',
     github: 'Continue with GitHub',
+    google: 'Continue with Google',
+    /* the library's own error redirect after a social sign in (`?error=<reason>`, docs/REALTIME.md
+       4.1); the reason in words, as Google or the library named it */
+    socialFailed: (reason: string) =>
+      `Sign in did not complete (${reason}). Try again or use another method`,
     back: 'Back',
     failed: 'That code did not match. Try again or request a new one',
   },

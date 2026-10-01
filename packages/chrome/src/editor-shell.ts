@@ -559,6 +559,8 @@ export type EditorAccount = {
   /** the passkey plugin is on: the production domain is fixed (7.3) */
   passkeysAvailable?: boolean;
   githubAvailable?: boolean;
+  /** the Google client is configured: Continue with Google, first in the dialog (docs/REALTIME.md 4.1) */
+  googleAvailable?: boolean;
   sessions?: readonly SessionView[];
   tokens?: readonly TokenView[];
   /** the avatar choice on the principal record (7.6): the builder starts from it (docs/PEOPLE.md 3.11) */
@@ -578,6 +580,7 @@ export type EditorAccount = {
   verifyCode?: (email: string, code: string) => Promise<unknown>;
   passkey?: () => Promise<unknown>;
   github?: () => void;
+  google?: () => void;
   /** the profile's agent key rows (7.7) */
   revokeToken?: (tokenId: string) => Promise<unknown>;
   /** Delete account (7.4); refused while other people hold grants on decks the caller owns */

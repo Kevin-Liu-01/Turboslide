@@ -202,6 +202,8 @@ export type EditorAuthFacts = {
   passkeys: boolean;
   passkeysNotice: string | null;
   github: boolean;
+  /** the Google client is configured: Continue with Google is offered first (docs/REALTIME.md 4.1) */
+  google: boolean;
   mail: MailMode;
 };
 
@@ -553,6 +555,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         passkeys: runtime.methods.passkeys,
         passkeysNotice: runtime.methods.passkeysNotice,
         github: runtime.methods.github,
+        google: runtime.methods.google,
         mail: runtime.mailMode,
       },
     };
@@ -746,6 +749,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
       passkeys: runtime.methods.passkeys,
       passkeysNotice: runtime.methods.passkeysNotice,
       github: runtime.methods.github,
+      google: runtime.methods.google,
       mail: runtime.mailMode,
     },
   };

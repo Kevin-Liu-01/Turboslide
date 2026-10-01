@@ -35,7 +35,7 @@ import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
 import type { MenuContext } from '@turboslide/chrome/menus/model';
-import { HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { ACCOUNT, HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
 import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
 import type { SnackbarAction } from '@turboslide/chrome/Snackbar';
@@ -265,7 +265,8 @@ function bodyOfInput(body: CommentBodyInput): CommentBody {
 
 /**
  * One call of better-auth's routes (SPEC-3 7.3; B3's `/api/auth/$`): the magic link mail with
- * its six digit code, the code exchange, sign out and the GitHub redirect. Same origin, JSON, the
+ * its six digit code, the code exchange, sign out and the social redirects (GitHub, Google). Same
+ * origin, JSON, the
  * library's own cookies; a refusal's sentence is the dialog's error row.
  */
 async function authPost(path: string, body: unknown): Promise<unknown> {
@@ -294,7 +295,7 @@ async function authPost(path: string, body: unknown): Promise<unknown> {
   return response.json().catch(() => null);
 }
 
-/** The address the sign in mail's link and the GitHub callback return to: this deck, no token. */
+/** The address the sign in mail's link and the social callbacks return to: this deck, no token. */
 function signInReturnAddress(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
 }
@@ -674,6 +675,29 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       releaseDraft();
     };
   });
+  /* the library's own error redirect after a social sign in (`?error=account_not_linked`,
+     `state_mismatch`; better-auth link-account.mjs): said once through the snackbar and dropped
+     from the address, so the next sign in's return address does not carry it (docs/REALTIME.md
+     4.1, 4.2; design-google-login.md 4.3). The route's search validator never reads the key, so
+     the location alone carries it */
+  useMountEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get('error');
+    if (reason === null) return;
+    const words =
+      reason
+        .replace(/[^a-z0-9_]/gi, '')
+        .replace(/_/g, ' ')
+        .slice(0, 64) || 'refused';
+    controller.say(ACCOUNT.signInDialog.socialFailed(words));
+    params.delete('error');
+    const search = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${window.location.pathname}${search === '' ? '' : `?${search}`}${window.location.hash}`,
+    );
+  });
 
   const viewerDeck = useMemo(
     () => toViewerDeck(snap, draft),
@@ -986,12 +1010,25 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      the dialog's exchanges run over better-auth's own routes and the page reloads with the
      account's identity once one lands (B2 R19; VERIFICATION-3 finding 9) */
   const auth = payload.auth;
+  /* one helper for the two social providers (docs/REALTIME.md 4.1; design-google-login.md 4.2):
+     the library answers the provider's URL and the browser leaves for it; the person returns to
+     this deck (signInReturnAddress) and the page reloads with the account's identity; a refusal
+     before the hand off is said through the snackbar, the dialog having already handed off */
+  const socialSignIn = (provider: 'github' | 'google') => {
+    void authPost('sign-in/social', { provider, callbackURL: signInReturnAddress() })
+      .then((answer) => {
+        const url = (answer as { url?: string } | null)?.url;
+        if (typeof url === 'string') window.location.assign(url);
+      })
+      .catch((error: unknown) => controller.say(errorMessage(error)));
+  };
   const account: EditorAccount = {
     principal,
     signedIn: payload.identity?.kind === 'account',
     signInAvailable: auth?.signIn ?? false,
     passkeysAvailable: auth?.passkeys ?? false,
     githubAvailable: auth?.github ?? false,
+    googleAvailable: auth?.google ?? false,
     ...(avatarChoice !== undefined ? { avatar: avatarChoice } : {}),
     ...(pictureUrl !== undefined ? { pictureUrl } : {}),
     namePrompt: {
@@ -1024,21 +1061,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           },
         }
       : {}),
-    ...(auth?.github === true
-      ? {
-          github: () => {
-            void authPost('sign-in/social', {
-              provider: 'github',
-              callbackURL: signInReturnAddress(),
-            })
-              .then((answer) => {
-                const url = (answer as { url?: string } | null)?.url;
-                if (typeof url === 'string') window.location.assign(url);
-              })
-              .catch((error: unknown) => controller.say(errorMessage(error)));
-          },
-        }
-      : {}),
+    ...(auth?.github === true ? { github: () => socialSignIn('github') } : {}),
+    ...(auth?.google === true ? { google: () => socialSignIn('google') } : {}),
     ...(payload.identity?.kind === 'account'
       ? {
           signOut: async (sessionId) => {

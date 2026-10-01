@@ -254,13 +254,16 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
   });
   const principals = tieredPrincipalStore(input);
   const hooks = emptyHooks();
+  /* the mail mode gates the email method (REALTIME.md 4.1, default 7.7): with TURBOSLIDE_MAIL=off
+     the dialog hides the field, so a database with no sender never offers a mail that is dropped */
+  const mailMode = selectMail(input.env).mode;
   const runtime: IdentityRuntime = {
     env: input.env,
     hosted: input.hosted,
     stateDir: input.stateDir,
     secret,
     dbSelection,
-    mailMode: selectMail(input.env).mode,
+    mailMode,
     db,
     auth: null,
     keys: db !== null ? dbApiKeyStore(db) : noApiKeyStore(),
@@ -270,7 +273,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     mailer,
     principals,
     checkoutToken: input.hosted ? null : checkoutToken(input.stateDir, input.announce ?? log),
-    methods: signInMethods(input.env, db !== null),
+    methods: signInMethods(input.env, db !== null, mailMode),
     hooks,
     ready: Promise.resolve(),
     close: async () => {

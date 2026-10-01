@@ -3,7 +3,12 @@
 // adapter runs over the identity database of db.ts, and the plugins are the magic link, the
 // email OTP (both in one mail through mail/), the device authorization flow for `turboslide
 // login`, and the TanStack Start cookie plugin last so cookies set inside server functions are
-// written. GitHub joins when its two variables are set. Passkeys wait: `@better-auth/passkey` is
+// written. GitHub and Google join when their two variables are set; Google asks for the account
+// chooser alone, with no offline access and no consent prompt, since nothing calls a Google API
+// after the sign in (docs/REALTIME.md 4.1). The base URL is dynamic: the request's Host when it
+// is on the deployment's own list (`TURBOSLIDE_AUTH_HOSTS`, else the five defaults), the hosted
+// fallback `TURBOSLIDE_PUBLIC_ORIGIN` otherwise, a refusal when neither. Passkeys wait:
+// `@better-auth/passkey` is
 // not in this checkout and the rpID cannot move once set (03 C1), so `signInMethods` reports them
 // off with the sentence the dialog shows.
 //
@@ -24,13 +29,33 @@ import { sha256Hex } from '@turboslide/identity/sha256';
 
 import type { AuthDb } from './db.ts';
 import { signInMail } from './mail/templates.ts';
-import type { Mailer } from './mail/mailer.ts';
+import type { MailMode, Mailer } from './mail/mailer.ts';
 import type { QuotaStore } from './quota.ts';
 import type { SecondaryStorage } from './secondary-storage.ts';
 
 export const BETTER_AUTH_SECRET_VARIABLE = 'BETTER_AUTH_SECRET';
 export const GITHUB_ID_VARIABLE = 'GITHUB_CLIENT_ID';
 export const GITHUB_SECRET_VARIABLE = 'GITHUB_CLIENT_SECRET';
+export const GOOGLE_ID_VARIABLE = 'GOOGLE_CLIENT_ID';
+export const GOOGLE_SECRET_VARIABLE = 'GOOGLE_CLIENT_SECRET';
+/**
+ * The hosts the library may name in a redirect URI or a magic link, comma separated
+ * (better-auth's `baseURL.allowedHosts`, docs/REALTIME.md 4.1; wildcards as `trustedOrigins`
+ * takes them). A Host header off the list is refused unless the hosted fallback
+ * `TURBOSLIDE_PUBLIC_ORIGIN` is set, so a deployment never mints a redirect URI on a host it does
+ * not own.
+ */
+export const AUTH_HOSTS_VARIABLE = 'TURBOSLIDE_AUTH_HOSTS';
+export const PUBLIC_ORIGIN_VARIABLE = 'TURBOSLIDE_PUBLIC_ORIGIN';
+export const DEFAULT_AUTH_HOSTS: readonly string[] = Object.freeze([
+  'www.turboslide.com',
+  'turboslide.com',
+  'turboslide.vercel.app',
+  'localhost:*',
+  '127.0.0.1:*',
+]);
+/** The social sign in start and Google's callback: 10 per minute per address (REALTIME.md 4.1). */
+export const SOCIAL_PER_MINUTE = 10;
 /** Set to the production host once it is final; the passkey plugin is enabled with it (0.20). */
 export const PASSKEY_RPID_VARIABLE = 'TURBOSLIDE_PASSKEY_RPID';
 
@@ -68,26 +93,65 @@ export type Env = Readonly<Record<string, string | undefined>>;
 export type SignInMethods = {
   /** Sign in exists at all: a database is configured (7.3). */
   available: boolean;
+  /** the magic link and the code: a database and a mail sender (REALTIME.md 4.1, default 7.7) */
   email: boolean;
   passkeys: boolean;
   passkeysNotice: string | null;
   github: boolean;
+  /** Continue with Google: the two Google variables and a database (REALTIME.md 4.1) */
+  google: boolean;
 };
 
-/** What the dialog offers on this deployment (7.3), from the environment alone. */
-export function signInMethods(env: Env, databaseConfigured: boolean): SignInMethods {
+/**
+ * What the dialog offers on this deployment (7.3), from the environment, the database and the
+ * mail mode alone. The email method needs a sender: with TURBOSLIDE_MAIL=off every mail is
+ * dropped (docs/PEOPLE.md 8.2 item 3), so the field is hidden rather than offered and Google may
+ * be the only method (REALTIME.md 7.7).
+ */
+export function signInMethods(
+  env: Env,
+  databaseConfigured: boolean,
+  mailMode: MailMode,
+): SignInMethods {
   const github = isSet(env[GITHUB_ID_VARIABLE]) && isSet(env[GITHUB_SECRET_VARIABLE]);
+  const google = isSet(env[GOOGLE_ID_VARIABLE]) && isSet(env[GOOGLE_SECRET_VARIABLE]);
   return {
     available: databaseConfigured,
-    email: databaseConfigured,
+    email: databaseConfigured && mailMode !== 'off',
     passkeys: false,
     passkeysNotice: databaseConfigured ? PASSKEYS_LATER : null,
     github: databaseConfigured && github,
+    google: databaseConfigured && google,
   };
 }
 
 function isSet(value: string | undefined): value is string {
   return value !== undefined && value !== '';
+}
+
+/** The hosts `baseURL.allowedHosts` accepts: `TURBOSLIDE_AUTH_HOSTS` split on commas, else the defaults. */
+export function authHosts(env: Env): string[] {
+  const listed = (env[AUTH_HOSTS_VARIABLE] ?? '')
+    .split(',')
+    .map((host) => host.trim())
+    .filter((host) => host !== '');
+  return listed.length > 0 ? listed : [...DEFAULT_AUTH_HOSTS];
+}
+
+/**
+ * The library's base URL per request (better-auth 1.7.4's dynamic config): the request's Host
+ * when it is on the list, the public origin as the hosted fallback, else a refusal. A checkout
+ * has no fallback, so a foreign Host is refused there too (better-auth.test.ts).
+ */
+export function authBaseURL(
+  env: Env,
+  hosted: boolean,
+): { allowedHosts: string[]; fallback?: string } {
+  const publicOrigin = env[PUBLIC_ORIGIN_VARIABLE];
+  return {
+    allowedHosts: authHosts(env),
+    ...(hosted && isSet(publicOrigin) ? { fallback: publicOrigin.replace(/\/+$/, '') } : {}),
+  };
 }
 
 /** `BETTER_AUTH_SECRET`, else a value derived from the identity cookie's secret. */
@@ -123,7 +187,7 @@ function buildAuth(deps: AuthDeps): Auth {
   const log = deps.log ?? ((line: string) => console.error(line));
   // the magic link handler asks the OTP plugin for a code through the api the instance exposes,
   // which does not exist until betterAuth() returned: a late binding
-  const api: { createOtp?: (email: string) => Promise<string> } = {};
+  const api: { createOtp?: (email: string, headers?: Headers) => Promise<string> } = {};
   const sendSignIn = async (
     email: string,
     url: string | undefined,
@@ -164,9 +228,25 @@ function buildAuth(deps: AuthDeps): Auth {
           },
         }
       : {};
+  const google =
+    isSet(deps.env[GOOGLE_ID_VARIABLE]) && isSet(deps.env[GOOGLE_SECRET_VARIABLE])
+      ? {
+          google: {
+            clientId: deps.env[GOOGLE_ID_VARIABLE] ?? '',
+            clientSecret: deps.env[GOOGLE_SECRET_VARIABLE] ?? '',
+            // the account chooser when the browser holds several Google accounts; no
+            // `accessType: 'offline'` and no `consent`, since nothing calls a Google API later
+            // (docs/REALTIME.md 4.1; design-google-login.md 2.4)
+            prompt: 'select_account' as const,
+          },
+        }
+      : {};
   const auth = betterAuth({
     appName: 'Turboslide',
     basePath: AUTH_BASE_PATH,
+    // the request's Host when the deployment owns it, else the hosted fallback, else a refusal
+    // (REALTIME.md 4.1): no boot warning and no redirect URI on a host Google would refuse
+    baseURL: authBaseURL(deps.env, deps.hosted),
     secret: betterAuthSecret(deps.env, deps.sessionSecret),
     database: { db: deps.db.db, type: deps.db.kind === 'sqlite' ? 'sqlite' : 'postgres' },
     ...(deps.secondaryStorage !== undefined ? { secondaryStorage: deps.secondaryStorage } : {}),
@@ -205,6 +285,8 @@ function buildAuth(deps: AuthDeps): Auth {
         '/device/token': { window: 60, max: 30 },
         '/device/approve': { window: 60, max: DEVICE_ATTEMPTS },
         '/device/deny': { window: 60, max: DEVICE_ATTEMPTS },
+        '/sign-in/social': { window: 60, max: SOCIAL_PER_MINUTE },
+        '/callback/google': { window: 60, max: SOCIAL_PER_MINUTE },
       },
     },
     user: {
@@ -230,16 +312,16 @@ function buildAuth(deps: AuthDeps): Auth {
         },
       },
     },
-    socialProviders: github,
+    socialProviders: { ...github, ...google },
     plugins: [
       magicLink({
         expiresIn: SIGN_IN_EXPIRES_S,
         storeToken: 'hashed',
         rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendMagicLink: async ({ email, url }) => {
+        sendMagicLink: async ({ email, url }, ctx) => {
           let code = '';
           try {
-            code = (await api.createOtp?.(email)) ?? '';
+            code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
           } catch (error) {
             log(
               `turboslide auth: code not created: ${error instanceof Error ? error.name : 'error'}`,
@@ -271,9 +353,19 @@ function buildAuth(deps: AuthDeps): Auth {
   // the OTP plugin's server only endpoint answers the code it stored (email-otp/routes.mjs);
   // the base `Auth` type does not carry plugin endpoints, so the one call is typed here
   const withOtp = auth.api as unknown as {
-    createVerificationOTP: (input: { body: { email: string; type: 'sign-in' } }) => Promise<string>;
+    createVerificationOTP: (input: {
+      body: { email: string; type: 'sign-in' };
+      headers?: Headers;
+    }) => Promise<string>;
   };
-  api.createOtp = (email) => withOtp.createVerificationOTP({ body: { email, type: 'sign-in' } });
+  // the request's headers ride along: under the dynamic base URL a direct api call with no source
+  // and no fallback is refused (better-auth to-auth-endpoints.mjs resolveDynamicContext), and a
+  // checkout has no fallback
+  api.createOtp = (email, headers) =>
+    withOtp.createVerificationOTP({
+      body: { email, type: 'sign-in' },
+      ...(headers !== undefined ? { headers } : {}),
+    });
   // the concrete options type is not assignable to the default one (the plugins narrow `api`);
   // callers use the handler and the base api
   return auth as unknown as Auth;

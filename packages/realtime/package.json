@@ -19,6 +19,7 @@
     "./lua": "./src/lua.ts",
     "./coalesce": "./src/coalesce.ts",
     "./admission": "./src/admission.ts",
+    "./room-core": "./src/room-core.ts",
     "./select": "./src/select.ts",
     "./client/room-client": "./client/room-client.ts",
     "./client/pending-store": "./client/pending-store.ts",
@@ -26,6 +27,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@turboslide/identity": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/store": "workspace:*",
     "zod": "catalog:"

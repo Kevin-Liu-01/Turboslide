@@ -7,6 +7,9 @@
   "include": ["src", "client", "vitest.config.ts"],
   "references": [
     {
+      "path": "../identity"
+    },
+    {
       "path": "../schema"
     },
     {

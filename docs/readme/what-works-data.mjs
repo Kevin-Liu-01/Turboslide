@@ -300,6 +300,14 @@ export const FEATURES = [
       '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
     shots: [],
   },
+  /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier; unparkable */
+  {
+    key: 'realtime',
+    heading: 'Realtime',
+    paragraph:
+      "**Realtime.** Two people on one deck see each other's keystrokes, caret, selection outline and pointer within a third of a second in one region, a dragged block moves in the other browser while the drag runs, a joiner's chip is in the title row within a second, and Follow is offered on every chip for every editor and owner, including by link. A reload or a reconnect loses nothing. An agent's write over HTTP is announced in the open tab and cannot be undone by the person typing. Two people typing one title keep both words.",
+    shots: [],
+  },
   {
     key: 'logos',
     heading: 'Logos',

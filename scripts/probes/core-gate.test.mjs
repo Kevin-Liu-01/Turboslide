@@ -328,7 +328,9 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(2);
-    expect(run.stderr).toContain('--only takes probe, specs, cost or accounts, not "text,slides"');
+    expect(run.stderr).toContain(
+      '--only takes probe, specs, cost, accounts or realtime, not "text,slides"',
+    );
     expect(run.stderr).toContain('--spec <areas>');
     expect(run.stderr).toContain('usage: node scripts/probes/core-gate.mjs');
     expect(run.stdout).toBe('');
@@ -342,7 +344,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(0);
-    expect(run.stderr).not.toContain('--only takes probe, specs, cost or accounts');
+    expect(run.stderr).not.toContain('--only takes probe, specs, cost, accounts or realtime');
   }, 30_000);
 });
 

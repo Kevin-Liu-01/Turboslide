@@ -47,6 +47,7 @@ import * as inbox from './areas/inbox.mjs';
 import * as lines from './areas/lines.mjs';
 import * as logos from './areas/logos.mjs';
 import * as people from './areas/people.mjs';
+import * as presence from './areas/presence.mjs';
 import * as shapes from './areas/shapes.mjs';
 import * as shaders from './areas/shaders.mjs';
 import * as share from './areas/share.mjs';
@@ -96,6 +97,9 @@ export const AREAS = [
      rows on the same deck: the chip geometry, the renderers' agreement, the own chip following
      the name and the avatar, the anonymous picture refusal */
   people,
+  /* the realtime round (docs/REALTIME.md section 2, 5.1 R5): the second person's chip read in the
+     pixels of the filmstrip card, with a second browser context opened and closed inside the area */
+  presence,
   exportArea,
   help,
   view,

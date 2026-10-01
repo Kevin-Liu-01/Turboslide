@@ -36,6 +36,7 @@ export type CoreFeature =
   | 'logos'
   | 'shaders'
   | 'svg'
+  | 'realtime'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -59,7 +60,9 @@ export type CoreSpecDriver =
   | 'core/sync.spec.ts'
   | 'core/logos.spec.ts'
   | 'core/shaders.spec.ts'
-  | 'core/svg.spec.ts';
+  | 'core/svg.spec.ts'
+  | 'core/realtime.spec.ts'
+  | 'e2e/agent-http.spec.ts';
 
 /** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
@@ -121,7 +124,7 @@ export type ParkedList = {
 
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
-/** The areas that are not feature names: `collab` is share's, `menus` chrome's, `gestures` (the objects round, docs/OBJECTS.md 6.1) arrange's. */
+/** The areas that are not feature names: `collab` is share's, `menus` chrome's, `gestures` (the objects round, docs/OBJECTS.md 6.1) arrange's, `people` and `accounts` share's. */
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
 /** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and URL intake rows of the logos area, the export rows and the View row of the shaders area. */
 export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;
@@ -130,6 +133,8 @@ export const RUN_RESULTS: readonly RunResult[];
 export const PROBE_DRIVER: 'probe --core';
 export const COST_PROBE_DRIVER: 'cost-probe';
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
+/** The file of a spec driver under apps/studio/e2e/ (`core/<area>.spec.ts` under core/, `e2e/<name>.spec.ts` at the root). */
+export function specPathOf(driver: string): string;
 /** The local spec drivers of docs/PEOPLE.md 6.2 (the accounts spec on a node server with an identity database). */
 export const LOCAL_SPEC_DRIVERS: readonly LocalSpecDriver[];
 /** The reason a local row absent from a run's results carries: "no identity database on this base". */

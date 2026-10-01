@@ -1,5 +1,5 @@
 {
-  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named. The polish round (docs/POLISH.md section 5) added 130 rows on 2026-09-28, the acceptance rows of 5.1: `today` is what the nine polish audits under docs/gslides-parity/polish/ measured on production on 2026-09-28 in the four words (the text, pages, collab and assist audits drove www.turboslide.com, the older build; the tables, objects, media and chrome audits read every code path against 877eb690 on turboslide.vercel.app), the severity of a broken row is its section 2 item's, `note` names the round, the POLISH.md item and the lane, `setup` names the window API writes a driver makes before its steps, and every row is written so a person's screenshot judges it (a pixel read of the frame or a box read of the DOM through the walk toolkit's `pixelAt` and `boxesOf`, or a spec assertion on the DOM's boxes or the file an export wrote). tables.cells.prompt-hovered-only is replaced by tables.cells.no-prompt (2.1 item 1); decks.home.seller-lead and decks.home.your-presentations are rewritten for the redesigned page (section 3); shaders.export.missing-frame-row, sync.viewer.live-updates, assist.viewer.disabled and images.insert.upload are read again with the day's reading. decks.home.load-budget carries `measure: true` (3.5). A row the table names with two drivers carries the spec that reads the file or the show. The field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md) added one row on 2026-09-28 under fonts (`fonts.field.own-face`): `today` is what Kevin reported and a Playwright probe measured on production at 877eb690 that day (the Font control disabled on the cover's title and subtitle), severity 3 by the product round's rule for an item of the highest value, and `note` names the hotfix and its document shape. The people round (docs/PEOPLE.md section 6) added 21 rows on 2026-09-29 under the area people (AREA_FEATURE people: share, unparkable, so a red people row blocks the ship unless it carries parks) and the existing versions, collab and share: the chip geometry, the two renderers' agreement, the own chip following the name and the avatar, the anonymous picture refusal, the version panel's mark column and Restore in the More menu, the chip tooltip's trust sentence, the departed guest's comment, the resolved owner row, the caret's hue, and ten local rows whose driver is e2e/accounts.spec.ts (LOCAL_SPEC_DRIVERS): the badge, the aliased author, the label suffix, the grant's email line and the six picture rows. today is what the audit under docs/gslides-parity/people/ measured on production on 2026-09-29 at bc01ccf4 in the four words (a row of a state production cannot hold, an account, a picture or a label collision, is not driven with the audit item that measured its absence as evidence; a broken row's severity follows the item's weight by the product round's rule); note names the round, the PEOPLE.md section and the lane; a local row is driven by the accounts spec on a node server with an identity database and never by a deployment run (6.2): absent from a run's results it is listed apart under local, never counted as passed and never a reason to park; the picture rows and the two own chip rows carry parks (6.1); people.comment-departed-guest is the comments feature's and people.versions-author-account the versions feature's (ROW_FEATURE).",
+  "$comment": "The core test matrix of the focus round (docs/FOCUS.md section 6). One row per core interaction. `feature` names the section 2 feature the row belongs to, so the rule \"a core feature with a not driven or failed row is parked for the ship\" is computed from this file by the run and never typed. `today` is what the focus audits saw on production at ec61c6b on 2026-09-15: works, broken, flaky or not driven; a not driven row carries no severity and a works row carries none either (a `note` records where the row's criterion differs from the audit's). `severity` sits on broken and flaky rows only, as the audits set it. `evidence` names the audit row or the file. `driver` names what drives the row: the editor walk probe in --core mode, or the spec file under apps/studio/e2e/core/. `setup` names a window API write made before the driven steps and never counted as one. Interaction texts carry the time bound the run checks. Rendered into docs/FOCUS.md by docs/gslides-parity/focus/render-focus.mjs; the probe's --core mode reads the ids. The rows the return round added (docs/RETURN.md section 5; the features tables, charts, diagrams, wordart, formatting, chrome, view and inbox, and the rows added under the existing areas) carry `today` as the return audits under docs/gslides-parity/return/ and the drive measured it on 2026-09-18 and cite them. `parks` on a row names the data-control ids (menu rows or toolbar controls of packages/chrome/src/menus/model.ts and toolbar-tails.ts) that row alone guards: a red row with `parks` keeps those ids behind the Advanced tools switch for that ship and neither parks its feature nor blocks the ship (RETURN.md section 1 rule 2); a red row without `parks` parks a parkable feature whole or blocks the ship when its feature is unparkable. The product round (docs/PRODUCT.md section 8) added 133 rows on 2026-09-19 under the areas of sections 2 to 6 and the four new features brand, fonts, templates and assist: `today` is what the product audits under docs/gslides-parity/product/ saw on production at 6e15d60 on 2026-09-19 (a row of a control that does not exist is not driven and cites the audit item that measured its absence; a control drawn disabled on purpose is not driven, never broken), the severity of a broken row follows the audit item's value (5 and 4 give 3, 3 gives 2, 2 and 1 give 1), and `measure` marks a measurement row (8.2) that records its seconds per slide in the run and never holds the ship. The sync and costs round (docs/SYNC.md section 6) added 16 rows on 2026-09-21 under the two unparkable features `sync` (the write path: the order, the latency, the two person title and block rows, the viewer, the reload, undo after a remote op, the idempotent resend, the pull without a listing) and `cost` (the function requests a minute a page makes and the store calls a minute the deck costs, per state): `today` is what the ordering and cost audits under docs/gslides-parity/sync/ saw on production at cbd4495 on 2026-09-20, the severity of a broken row follows the audit item's value by the product round's rule, a `sync.*` row of two browsers repeats its exchange three times inside its test, the driver `cost-probe` is scripts/probes/sync-cost-probe.mjs (run by the gate), and a cost row carries `measure: true` in the sense of SYNC.md 6.1: its counts are written beside its ceiling in the run and it holds the ship only when it is over its ceiling on the preview (the ceilings sit at about 1.5 times the model's expected count and under today's measured count, question 4's default). A row whose claim needs a lane's half names the lane in its note, so a red row on a tree where the half is not merged reads as a known mechanism (6.2). The features round, ship one (docs/FEATURES.md 7.1) added 71 rows on 2026-09-22 under the new parkable feature `logos` and the existing tables, charts, diagrams, shapes, wordart, arrange, brand, fonts, formatting, images and export: `today` is what the four production audits under docs/gslides-parity/features/ saw at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship one P0 or P1) with the lane whose item the row measures and the FEATURES.md section, `parks` names the control ids of FEATURES.md the row alone guards (a dialog, overlay or panel control named there is hidden through packages/chrome/src/parked-controls.ts, whose set core-matrix.mjs --emit-parked writes from the ship's parkedRows), and a row whose id area is `logos` while its measurement belongs to an unparkable feature carries that feature (`logos.export.pdf-pptx-crisp` is export, `logos.intake.*` are images; ROW_FEATURE in core-matrix.mjs), so a red one blocks the ship instead of parking the picker. The 29 rows of ship two (the shader library, FEATURES.md 5) join the file with that ship. The vector round (docs/VECTOR.md section 6) added 43 rows on 2026-09-24 and extended one (shapes.insert.named-rows reads the seven Insert > Shape rows): the shapes rows of the geometry interpreter, the glyph grids, Change shape and Mask image (parks naming the gallery row or the control each measures, so a red one re parks that category alone and never the three named rows; shapes.geometry.pinned-three, .text-rect and shapes.icons.named-rows carry no parks, being core rows of an earlier round's feature), the menus area whose rows are the chrome's (AREA_FEATURE menus: chrome, unparkable: the icons on the visual rows), the parkable feature svg (the intake by the chooser, a paste, a drop and a URL, the sheet at two zooms, the gestures, the copy, the sanitizer and the exports; every row parks one or more of the six ids of VECTOR.md 4.8 declared in core-matrix.mjs) and logos.export.svgblip; `today` is what the tree at 2be923e and the audits show on 2026-09-24 (a row of a control that does not exist is not driven with the document's reading as its evidence; a behaviour production shows red is broken with the audit's severity), and `note` names the round, the VECTOR.md section and the lane. The row logos.intake.svg-sentence left with its sentence (4.7); svg.import.upload measures the upload. features round, ship two (docs/FEATURES.md 5, 7.1) added the 29 rows of the shader library on 2026-09-24 under the new parkable feature `shaders` and the existing export and view: `today` is what audit-shaders under docs/gslides-parity/features/ saw on production at 9293df4 on 2026-09-20 in the four words (a row of a control that does not exist is not driven and cites the audit item that measured its absence; the severity of a broken row follows the audit item's value by the product round's rule), `note` carries the ship and the tier (Ship two P0 or P1) with the lane and the FEATURES.md section, `parks` names the FEATURES.md control ids the row alone guards (a dialog or Shader section control is hidden through packages/chrome/src/parked-controls.ts), the four export rows of the shaders area carry the feature export and the View row the feature view (ROW_FEATURE), so a red one blocks the ship or parks its own control and never the shader library, and `shaders.perf.editor-frame` carries `measure` (7.2): its number is recorded and never holds the ship. The objects round (docs/OBJECTS.md section 6) added 33 rows on 2026-09-25 and carried five (tables.seam.row-drag, tables.edge.add-row-column, tables.heads.select-row-column, tables.cells.prompt-hovered-only, wordart.tail.fill-outline; each keeps its id, its note gains the round and the section): nineteen under the new area `gestures`, whose rows are the arrange feature's (AREA_FEATURE gestures: arrange, unparkable, so a red gesture row fails the ship; the live gestures of section 2: the draw drawn as it grows, the click placement, the object and the ring equal at every frame of a resize, a seam drag, a move and a rotation, the connector during a move, the frame cadence and its budget read from describe().state.gesture, the readout, and one watch row), the tables rows of section 3 (the ring with a cell open, the cell ring, the editor guide grid, the show's rules, the box from the rows, the rows that grow, the seams with a cell open, the header toggle from the row head, the Table section's words), and one row each under charts, diagrams and lines (section 4). `today` is what docs/OBJECTS.md measured on production on 2026-09-26 (the return round plus ship one) and on the worktree at 5bf158a, in the four words; a row of a control that does not exist is not driven with the item that measured its absence as evidence; a broken row's severity follows the item's value by the product round's rule; `note` names the round, the OBJECTS.md section and the lane; `setup` names the block.insert and slide.new writes a driver makes before its steps. The frame rows read the gesture record of the window API (docs/OBJECTS.md 2.4), a field the integrator lands by B1's request; on a build without it they read not driven with the field named. The polish round (docs/POLISH.md section 5) added 130 rows on 2026-09-28, the acceptance rows of 5.1: `today` is what the nine polish audits under docs/gslides-parity/polish/ measured on production on 2026-09-28 in the four words (the text, pages, collab and assist audits drove www.turboslide.com, the older build; the tables, objects, media and chrome audits read every code path against 877eb690 on turboslide.vercel.app), the severity of a broken row is its section 2 item's, `note` names the round, the POLISH.md item and the lane, `setup` names the window API writes a driver makes before its steps, and every row is written so a person's screenshot judges it (a pixel read of the frame or a box read of the DOM through the walk toolkit's `pixelAt` and `boxesOf`, or a spec assertion on the DOM's boxes or the file an export wrote). tables.cells.prompt-hovered-only is replaced by tables.cells.no-prompt (2.1 item 1); decks.home.seller-lead and decks.home.your-presentations are rewritten for the redesigned page (section 3); shaders.export.missing-frame-row, sync.viewer.live-updates, assist.viewer.disabled and images.insert.upload are read again with the day's reading. decks.home.load-budget carries `measure: true` (3.5). A row the table names with two drivers carries the spec that reads the file or the show. The field fonts hotfix (docs/gslides-parity/features/build/field-fonts.md) added one row on 2026-09-28 under fonts (`fonts.field.own-face`): `today` is what Kevin reported and a Playwright probe measured on production at 877eb690 that day (the Font control disabled on the cover's title and subtitle), severity 3 by the product round's rule for an item of the highest value, and `note` names the hotfix and its document shape. The people round (docs/PEOPLE.md section 6) added 21 rows on 2026-09-29 under the area people (AREA_FEATURE people: share, unparkable, so a red people row blocks the ship unless it carries parks) and the existing versions, collab and share: the chip geometry, the two renderers' agreement, the own chip following the name and the avatar, the anonymous picture refusal, the version panel's mark column and Restore in the More menu, the chip tooltip's trust sentence, the departed guest's comment, the resolved owner row, the caret's hue, and ten local rows whose driver is e2e/accounts.spec.ts (LOCAL_SPEC_DRIVERS): the badge, the aliased author, the label suffix, the grant's email line and the six picture rows. today is what the audit under docs/gslides-parity/people/ measured on production on 2026-09-29 at bc01ccf4 in the four words (a row of a state production cannot hold, an account, a picture or a label collision, is not driven with the audit item that measured its absence as evidence; a broken row's severity follows the item's weight by the product round's rule); note names the round, the PEOPLE.md section and the lane; a local row is driven by the accounts spec on a node server with an identity database and never by a deployment run (6.2): absent from a run's results it is listed apart under local, never counted as passed and never a reason to park; the picture rows and the two own chip rows carry parks (6.1); people.comment-departed-guest is the comments feature's and people.versions-author-account the versions feature's (ROW_FEATURE). The realtime round (docs/REALTIME.md section 2) added 22 rows on 2026-10-01: sixteen under the new unparkable feature `realtime` (the area `realtime`: the keystroke, the caret, the selection outline, the drag ghost, the two typers, the joiner's chip, Follow for everyone, the agent write, the share link on every instance, the reload, the reconnect, the pointer, the caret's dim and leave, the card chip in the pixels and the departed guest's name, read on production by the two audits of 2026-09-28 to 2026-10-01 under docs/gslides-parity/realtime/), one cost row `cost.redis.commands` (measure: true, read from INFO commandstats through the cost probe's --redis-url) with the three cost rows of the sync round restated per tier, and five local `accounts.*` rows of the Google sign in (the area `accounts` belongs to `share`; e2e/accounts.spec.ts on a node server with an identity database, the round trip a manual row). `today` is what the audits measured on production; every bound is measured from the keystroke, the click or the mint in the other browser. The drivers: core/realtime.spec.ts (two browser contexts, two origins when REALTIME_BASES names them), the rows in core/share.spec.ts, e2e/agent-http.spec.ts and the walk's presence area.",
   "rows": [
     {
       "id": "decks.home.new-presentation",
@@ -6048,12 +6048,12 @@
     {
       "id": "cost.editor-idle.calls",
       "feature": "cost",
-      "interaction": "One editor tab alone, visible, 3 minutes idle: at most 12 function requests a minute from the browser (today 14; expected about 9 after the fix: 6 presence, 3 poll, 0.23 stream) and, from sync.status.storeCalls, at most 40 simple and 11 advanced store calls a minute for the deck (today about 70 and 12 by the code)",
+      "interaction": "One editor tab alone, visible, 3 minutes idle: at most 12 function requests a minute from the browser (today 14; expected about 9 after the fix: 6 presence, 3 poll, 0.23 stream) and, from sync.status.storeCalls, at most 40 simple and 11 advanced store calls a minute for the deck (today about 70 and 12 by the code); on the redis tier the store ceilings are restated at 10 simple and 2 advanced (no pulse, no record per POST)",
       "driver": "cost-probe",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-costs runs/idle.summary.md, section 5",
-      "note": "B2 (the heartbeat), B1 (the tick), B5 (the poll). A measurement row (docs/SYNC.md 6.1): its counts are written beside the ceiling in the run; over its ceiling on the preview it holds the ship.",
+      "note": "B2 (the heartbeat), B1 (the tick), B5 (the poll). A measurement row (docs/SYNC.md 6.1): its counts are written beside the ceiling in the run; over its ceiling on the preview it holds the ship. Realtime round; docs/REALTIME.md section 2: the store ceilings per tier (the cost probe reads the tier from the deck's sync.status and picks the ceilings; --tier names it); R5.",
       "measure": true
     },
     {
@@ -6070,22 +6070,22 @@
     {
       "id": "cost.editor-editing.calls",
       "feature": "cost",
-      "interaction": "One edit per 5 s for 3 minutes: at most 75 function requests a minute (today 79; expected about 68 after the fix, the presence batches of the selection unchanged) and at most 140 simple and 85 advanced store calls a minute (today about 166 and 99 by the code; expected about 122 and 72)",
+      "interaction": "One edit per 5 s for 3 minutes: at most 75 function requests a minute (today 79; expected about 68 after the fix, the presence batches of the selection unchanged) and at most 140 simple and 85 advanced store calls a minute (today about 166 and 99 by the code; expected about 122 and 72); the store ceilings restated for the redis tier at 30 simple and 12 advanced a minute (one record per 2 s idle run, one snapshot per record)",
       "driver": "cost-probe",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-costs runs/edit.summary.md, section 5; audit-ordering 3.2",
-      "note": "B2 (listVersions), B3 (the prune, the thumbnail). A measurement row (docs/SYNC.md 6.1).",
+      "note": "B2 (listVersions), B3 (the prune, the thumbnail). A measurement row (docs/SYNC.md 6.1). Realtime round; docs/REALTIME.md section 2: the store ceilings per tier; R5.",
       "measure": true
     },
     {
       "id": "cost.two-tabs-idle.calls",
       "feature": "cost",
-      "interaction": "A and B idle on two browsers for 3 minutes: no list call and at most 30 advanced store calls a minute for the deck (today 24 by the code, section 2.3)",
+      "interaction": "A and B idle on two browsers for 3 minutes: no list call and at most 30 advanced store calls a minute for the deck (today 24 by the code, section 2.3); restated for the redis tier at 2",
       "driver": "cost-probe",
       "today": "works",
       "evidence": "docs/SYNC.md section 2.3 (syncNow 1208 to 1226; pushNow)",
-      "note": "Pins invariant 7. A measurement row (docs/SYNC.md 6.1). The probe starts the window once the setup's card render (one put and one list at the deck's rest, docs/SYNC.md 3.10) has left the counters' 60 s window (the settle of the cost probe; the verifier's pass 1 F7).",
+      "note": "Pins invariant 7. A measurement row (docs/SYNC.md 6.1). The probe starts the window once the setup's card render (one put and one list at the deck's rest, docs/SYNC.md 3.10) has left the counters' 60 s window (the settle of the cost probe; the verifier's pass 1 F7). Realtime round; docs/REALTIME.md section 2: the advanced ceiling per tier; R5.",
       "measure": true
     },
     {
@@ -9463,6 +9463,227 @@
       "severity": 1,
       "evidence": "audit-collab item 20",
       "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "realtime.keystroke.within-300ms",
+      "feature": "realtime",
+      "interaction": "A types ten characters into a body block one per second; each is in B's DOM within 300 ms of the keystroke in one region and 800 ms across regions, ten of ten; no character lost or doubled",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-sync.md 1.3: 1,948 ms mean, 662 to 3,000 ms (2026-09-20); 1,960 ms mean, 4,121 ms max (2026-09-22)",
+      "setup": "block.insert of the body block A types into",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1, R2; the cross region reading is the verifier's hand row, recorded not driven by the spec"
+    },
+    {
+      "id": "realtime.caret.within-300ms",
+      "feature": "realtime",
+      "interaction": "B types in a block A has open; A draws B's caret and name flag in B's hue within 300 ms of the first keystroke and moves it within 300 ms of each later keystroke, ten of ten, whichever instance answers B's POST",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-people.md 3 step 2: 3,447 ms or never within 3.6 s; defect 1",
+      "setup": "block.insert of the body block both sessions open",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1, R2"
+    },
+    {
+      "id": "realtime.caret.offset-after-merge",
+      "feature": "realtime",
+      "interaction": "Both type in one block and both press Escape; each browser draws the other's caret after the other's own last character, never at offset 0, three rounds of three",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-people.md defect 4, run2/04-r1-a-both-in-title.png",
+      "setup": "block.insert of the body block both sessions type into",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2 (the caret transform, 3.5)"
+    },
+    {
+      "id": "realtime.selection.outline-within-300ms",
+      "feature": "realtime",
+      "interaction": "B clicks a block; A draws the outline in B's hue with B's flag within 300 ms, and moves it to the next block B clicks within 300 ms, eight of eight; a block both hold shows the own ring and the remote outline 2 px inside it",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-people.md 3 \"Selection alone\": 8.8 to 16.8 s, eight of eight",
+      "setup": "block.insert of the two blocks B clicks between",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1, R2, R3"
+    },
+    {
+      "id": "realtime.block.drag-live",
+      "feature": "realtime",
+      "interaction": "B drags a block 160 px; A sees the block's box follow at 80 ms steps while the drag runs with a \"moving\" word on B's flag; after the release A's own selection on that block reads the new position with no jump later than 300 ms",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-people.md 3 step 3: nothing during the drag, the jump 0.7 to 6.8 s after the release; defect 5",
+      "setup": "block.insert of the block B drags",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2 (the drag field, 3.4), R3 (the flag word)"
+    },
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "interaction": "A and B type a word each into one title within 200 ms, then append a word each, three rounds; both words in both browsers within 500 ms of the later Escape, no word lost, and each browser shows the other's word within 500 ms of its keystrokes",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-sync.md defect 1 (2.6 to 4.6 s); audit-people.md 3 step 2 (0.6 to 4.4 s); the standing red sync.title.concurrent-both-kept",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1, R2; supersedes Kevin's standing row sync.title.concurrent-both-kept when green on production (5.5)"
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "interaction": "B opens the link; B's chip is in A's title row within 1 s of B's editor being ready and A's chip in B's within 1 s, three of three, the two tabs on different instances (sync.status names the instance)",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-sync.md defect 3 (2.6 to 9.9 s); audit-people.md 3 \"Join\" (0.42 to 0.55 s after ready, 1.8 to 2.0 s after navigation)",
+      "note": "Realtime round; docs/REALTIME.md section 2; the two instance reading is asserted on the two process run (REALTIME_BASES names two origins) and recorded on one base; R1"
+    },
+    {
+      "id": "realtime.follow.for-everyone",
+      "feature": "realtime",
+      "interaction": "Two anonymous editors, one by link: each chip offers Follow in the default view with no switch; the follower's stage is on the followed person's new slide within 1 s of their click; the plate reads Following with Stop; the follower's own click, edit, comment, Slideshow and Version history end it, and the followed person's leave ends it",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-people.md 3 step 5 (Follow behind Advanced tools, 7.2 s on the push floor), defects 6 and 7",
+      "note": "Realtime round; docs/REALTIME.md section 2; R3; the integrator unparks title.presence.follow; the parked row collab.follow.anonymous-editor retires into this one"
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "interaction": "While A's tab is open, a bearer write through POST /api/actions/block.set?deck=<id> with the path /text (the HTTP write of the surface; REALTIME.md names text.set, which is not an action) changes a block; A's tab draws the agent banner within 1 s and Cmd+Z does not take the agent's write back; the version row names the agent",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-sync.md defect 9 (VERIFICATION.md PT.4 item 5: the text changed at 509 ms, no banner in 120 s)",
+      "setup": "block.insert of the block the agent writes into",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1 (callerFactsFor's author, 3.3); the blob tier reads the same fix"
+    },
+    {
+      "id": "realtime.share-link.every-instance",
+      "feature": "realtime",
+      "interaction": "A copies an editor link; a second browser opens it within 1 s of the mint and reads the editor, ten of ten, the two requests answered by different instances",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-sync.md defect 7 (docs/PEOPLE.md 250: 404 within a second of the mint, red twice on two previews)",
+      "note": "Realtime round; docs/REALTIME.md section 2; the first link is the dialog's Copy link, the nine after it share.createLink through the window API; R1 (the drop bus, 3.6)"
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "interaction": "A and B type five words each into two blocks at once; A reloads after its third word and keeps typing; every word is in both browsers and the two documents are byte equal at the live revision within 3 s of A's last keystroke",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "evidence": "audit-sync.md 1.5 (1.4 to 2.8 s reloads); sync.reload.same-document green on production",
+      "setup": "block.insert of the two body blocks",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2; the bound tightens from 5 s to 3 s on the redis tier"
+    },
+    {
+      "id": "realtime.reconnect.loses-nothing",
+      "feature": "realtime",
+      "interaction": "A offline 20 s while both type; A back: every word in both browsers within 3 s of the reconnect, A's resend at the shifted offset, no doubled word, deck.info shows one record per run",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "evidence": "audit-sync.md 1.5 (2.8 to 6.8 s on 2026-09-22, every word kept)",
+      "setup": "block.insert of the body block both type into",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2; the bound tightens from 10 s"
+    },
+    {
+      "id": "realtime.pointer.second-browser",
+      "feature": "realtime",
+      "interaction": "View > Live pointers > Show my pointer on in B; B's pointer moved over the slide is drawn in A within 300 ms with B's hue and flag; hidden with Show collaborator pointers off in A; hidden for the 21st person",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-people.md defect 2 (view.live-pointers.second-browser parked)",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2 (the pointer published), R3 (the two View rows); Google's rule: editors show, every access level views; the 21st person is recorded not driven by the spec (twenty contexts are not opened on the shared machine)"
+    },
+    {
+      "id": "realtime.caret.dims-and-leaves",
+      "feature": "realtime",
+      "interaction": "B stops moving for 30 s: its caret dims in A; B closes its tab: its caret, outline, flag and chips leave A within 2 s",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-people.md defect 8 (identity-index.ts 77 to 78)",
+      "setup": "block.insert of the block B holds its caret in",
+      "note": "Realtime round; docs/REALTIME.md section 2; R2 (lastSeenAt from the event), R1 (leave published at once, redis.ts 414 to 420)"
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "interaction": "B is on slide 2; A's filmstrip card 2 shows B's 16 px chip in the pixels at the card's top right within 2 s, read by a screenshot and not only by the DOM",
+      "driver": "probe --core",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-people.md defect 3 (probe-a-card-corner.png, nothing painted; probe-a-card-corner-marks-z1.png with the fix)",
+      "note": "Realtime round; docs/REALTIME.md section 2; R3 (.ts-card-marks { z-index: 1 } or .ts-thumb { isolation: isolate }); the walk's presence area opens a second browser context for B"
+    },
+    {
+      "id": "realtime.departed-guest.name-stable",
+      "feature": "realtime",
+      "interaction": "B types a name, comments and closes its context; A reloads three times with the instance named each time; every reload reads B's name and \"guest\" within 3 s",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "severity": 3,
+      "evidence": "audit-sync.md defect 8 (people.comment-departed-guest red 2 of 4 on preview 7)",
+      "note": "Realtime round; docs/REALTIME.md section 2; R1 (the principal store on Redis, docs/hosting.md 692 to 700); people.comment-departed-guest keeps its 10 s bound as the blob tier's"
+    },
+    {
+      "id": "cost.redis.commands",
+      "feature": "cost",
+      "interaction": "One editor hour as docs/SYNC.md 4.3 counts it, driven as 12 editing minutes and 48 idle minutes: at most 12,000 Redis commands, read from INFO commandstats before and after on the preview's database (or the Upstash console's graph for the hour); the presence write counted apart",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "evidence": "research-hosting.md 2.1 (about 10,000 by the code, 4,300 with a Lua presence write)",
+      "measure": true,
+      "note": "Realtime round; docs/REALTIME.md section 2; R1 (the PRESENCE_SET script), R5 (the probe's --redis-url through a wrapper); over the ceiling on the preview holds the ship. A measurement row (docs/SYNC.md 6.1): the probe drives an editing window and an idle window of --minutes each and counts the hour as 12 editing minutes plus 48 idle minutes from them (--minutes 12 --idle-minutes 48 drives the literal hour); without a Redis URL the row is not driven with the reason"
+    },
+    {
+      "id": "accounts.google-button",
+      "feature": "share",
+      "interaction": "Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and the passkey row; with the e2e mail mode capture the email field is present",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "design-google-login.md 6.2 row 1",
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4; the e2e server gains fake GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET"
+    },
+    {
+      "id": "accounts.google-leaves",
+      "feature": "share",
+      "interaction": "Local: accounts.google.com routes aborted; the button's navigation carries redirect_uri <origin>/api/auth/callback/google, the scopes openid email profile, prompt=select_account, a code_challenge and no access_type",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "design-google-login.md 6.2 row 2, 3.1",
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4"
+    },
+    {
+      "id": "accounts.google-error-sentence",
+      "feature": "share",
+      "interaction": "Local: /edit/<deck>?error=account_not_linked draws the dialog's failed sentence in the snackbar and the address loses the parameter",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "design-google-login.md 6.2 row 3, 4.3",
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4"
+    },
+    {
+      "id": "accounts.email-hidden-without-mail",
+      "feature": "share",
+      "interaction": "Local, a second server with TURBOSLIDE_MAIL=off: no email field; the Google button is the first method",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "design-google-login.md 6.2 row 4, 4.1",
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4; default 7.7"
+    },
+    {
+      "id": "accounts.google-roundtrip",
+      "feature": "share",
+      "interaction": "Hand: on http://localhost:4321 with the real client, a browser with a named anonymous deck signs in with Google; the alias row exists, the deck stays, the badge reads \"signed in\" with the Google address in a second browser; then the same on www.turboslide.com after section 4.5 lands, the scratch deck removed by id",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "design-google-login.md 6.2 last paragraph, 8 step 9",
+      "manual": "Google issues no authorization code to a test and the token endpoint is fixed in the provider, so the round trip is a hand sign in on localhost:4321 and on www.turboslide.com (docs/REALTIME.md 4.4); R4 writes the recipe, Kevin signs in, the verifier reads",
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4 writes the recipe; Kevin signs in; the verifier reads"
     }
   ]
 }

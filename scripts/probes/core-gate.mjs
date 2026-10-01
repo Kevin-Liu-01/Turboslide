@@ -72,6 +72,22 @@
 // AREAS, the names the walk's `--only` takes), and a module's rows are the ids it declares, so
 // `--areas polish-tables` runs and judges the polish round's table rows alone while `--areas
 // tables` keeps the tables module's own rows.
+// The realtime round (docs/REALTIME.md 5.1 R5, 5.4): `--tier redis|blob|memory` names the
+// realtime tier of the base and is recorded in the ledger (`tier` in core-gate.json and the table's
+// first line) and passed to the cost probe, whose three store ceilings of the sync round are
+// restated per tier; without it the probe reads the tier from the deck's `sync.status`.
+// `--only realtime` runs the drivers of the `realtime` feature's rows alone and judges those rows
+// alone: the core specs narrowed to the realtime spec rows (core/realtime.spec.ts, the two rows in
+// core/share.spec.ts and the agent write row in e2e/agent-http.spec.ts, each by its id at the head
+// of its title) and the walk probe over the module that declares the realtime probe row (the
+// presence area), so a lane reads its rows in minutes on the memory tier and the ship step reads
+// them narrowed on production; a run so narrowed is `narrowed.only: realtime` in the ledger and
+// stands beside the run of record, never in its place. `--redis-url <url>` is passed to the cost
+// probe for `cost.redis.commands` (INFO commandstats before and after; the value is never
+// printed, the gate's command line shows `--redis-url <set>`); without it the probe reads
+// TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL from the environment a wrapper set, else the row is not
+// driven with the reason. A spec driver's file is `specPathOf` (core-matrix.mjs): `core/<area>`
+// under apps/studio/e2e/core/, `e2e/<name>` at the folder's root.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
 // verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:
@@ -117,7 +133,9 @@ import {
   parkedFeaturesOf,
   readParkedList,
   rowsForDriver,
+  rowsForFeature,
   shipVerdict,
+  specPathOf,
 } from './core-matrix.mjs';
 import { declaredIds } from './core-walk/index.mjs';
 
@@ -130,7 +148,7 @@ const arg = (name, fallback) => {
 const flag = (name) => argv.includes(`--${name}`);
 const BASE = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$/, '');
 const USAGE =
-  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost|accounts] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>]';
+  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost|accounts|realtime] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>] [--tier redis|blob|memory] [--redis-url <url>]';
 if (!BASE) {
   console.error(USAGE);
   process.exit(2);
@@ -138,14 +156,27 @@ if (!BASE) {
 const OUT = resolve(ROOT, arg('out', '.turboslide/core-gate'));
 const PARKED = arg('parked', null);
 const ONLY = arg('only', null);
-/** The four drivers `--only` names (docs/PEOPLE.md 6.2 added the accounts spec). */
-const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts'];
+/**
+ * The drivers `--only` names (docs/PEOPLE.md 6.2 added the accounts spec) and the one feature
+ * narrowing (docs/REALTIME.md 5.1 R5: `realtime`, the realtime rows' drivers and rows alone).
+ */
+const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts', 'realtime'];
+/** The realtime tier of the base (`--tier`), recorded in the ledger and passed to the cost probe. */
+const TIER_VALUES = ['redis', 'blob', 'memory'];
+const TIER = arg('tier', null);
+if (TIER !== null && !TIER_VALUES.includes(TIER)) {
+  console.error(`core-gate: --tier takes redis, blob or memory, not ${JSON.stringify(TIER)}`);
+  console.error(USAGE);
+  process.exit(2);
+}
+/** The Redis URL for `cost.redis.commands`, passed through to the cost probe and never printed. */
+const REDIS_URL_ARG = arg('redis-url', null);
 if (ONLY !== null && !ONLY_VALUES.includes(ONLY)) {
   // `--only` names a driver, never an area: an unknown value used to run the whole matrix without
   // a word (s2.md S2-R4, `--only text,slides`); the areas go to `--spec` here and to the walk
   // probe's own `--only`
   console.error(
-    `core-gate: --only takes probe, specs, cost or accounts, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
+    `core-gate: --only takes probe, specs, cost, accounts or realtime, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
   );
   console.error(USAGE);
   process.exit(2);
@@ -170,6 +201,16 @@ const listArg = (name) => {
  */
 const ROWS_ONLY = listArg('rows');
 const AREAS_ONLY = listArg('areas');
+/**
+ * The realtime feature's rows (docs/REALTIME.md section 2) an `--only realtime` run drives and
+ * judges alone: its spec rows by id (the specs' `--grep`) and its probe rows through the walk
+ * modules that declare them.
+ */
+const REALTIME_ROWS = rowsForFeature('realtime');
+const REALTIME_SPEC_IDS = REALTIME_ROWS.filter((r) => CORE_SPEC_DRIVERS.includes(r.driver)).map(
+  (r) => r.id,
+);
+const REALTIME_PROBE_ROWS = REALTIME_ROWS.filter((r) => r.driver === PROBE_DRIVER);
 /** Every probe row's walk module (core-walk/index.mjs `declaredIds`: id to module name). */
 const WALK_MODULE_OF = declaredIds();
 /** The walk's module names, the names its `--only` takes. */
@@ -263,6 +304,15 @@ function walkModulesOf(areas) {
     }
   return [...modules];
 }
+/** The walk modules that declare the realtime probe rows (the presence area), for `--only realtime`. */
+function realtimeWalkModules() {
+  const modules = new Set();
+  for (const row of REALTIME_PROBE_ROWS) {
+    const module = WALK_MODULE_OF.get(row.id);
+    if (module !== undefined && module !== 'cleanup' && module !== 'walk') modules.add(module);
+  }
+  return [...modules];
+}
 /** The cost rows the cost probe drives (`--cost-rows`); every cost row when absent. */
 const COST_ROWS = arg('cost-rows', null);
 /** The minutes of each cost state's window (`--cost-minutes`; the probe's own default, 3, when absent). */
@@ -311,7 +361,9 @@ const judged =
         ? costRowsJudged
         : ONLY === 'accounts'
           ? accountsRowsJudged
-          : CORE_MATRIX;
+          : ONLY === 'realtime'
+            ? REALTIME_ROWS
+            : CORE_MATRIX;
 
 /**
  * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
@@ -400,6 +452,8 @@ function runProbe() {
      judges (the versions and comments rows live in the share module, the people round's two
      versions rows among them), so a narrowed run drives what it judges */
   if (AREAS_ONLY !== null) args.push('--only', walkModulesOf(AREAS_ONLY).join(','));
+  /* an `--only realtime` run names the modules that declare the realtime probe rows (the presence area) */
+  else if (ONLY === 'realtime') args.push('--only', realtimeWalkModules().join(','));
   console.log(`core-gate: node ${args.join(' ')}`);
   const t = Date.now();
   const result = spawnSync('node', args, { cwd: ROOT, stdio: 'inherit', env: process.env });
@@ -447,7 +501,11 @@ function runCost() {
   if (COST_ROWS) args.push('--rows', COST_ROWS);
   if (COST_MINUTES) args.push('--minutes', COST_MINUTES);
   if (flag('shots')) args.push('--shots', join(OUT, 'cost-shots'));
-  console.log(`core-gate: node ${args.join(' ')}`);
+  if (TIER !== null) args.push('--tier', TIER);
+  /* the Redis URL rides to the probe and is never printed (docs/REALTIME.md 1.1, 5.5) */
+  const shown = args.join(' ');
+  if (REDIS_URL_ARG !== null) args.push('--redis-url', REDIS_URL_ARG);
+  console.log(`core-gate: node ${shown}${REDIS_URL_ARG !== null ? ' --redis-url <set>' : ''}`);
   const t = Date.now();
   const result = spawnSync('node', args, { cwd: ROOT, stdio: 'inherit', env: process.env });
   return readCost(json, result.status, Date.now() - t);
@@ -510,13 +568,17 @@ const idOfTitle = (title) => {
  * The spec files a run covers: the `--spec` areas, else the drivers of the `--rows` named, else
  * every core spec. The dry run prints them, which is how the gate's own test reads them.
  */
-function specFiles(specOnly = SPEC_ONLY, rowsOnly = ROWS_ONLY) {
+function specFiles(specOnly = SPEC_ONLY, rowsOnly = ROWS_ONLY ?? realtimeRowsOnly()) {
   const drivers = specOnly
     ? specOnly.split(',').map((s) => `core/${s.trim()}.spec.ts`)
     : rowsOnly
       ? [...new Set(rowsOnly.map((id) => coreRow(id).driver))]
       : [...CORE_SPEC_DRIVERS];
-  return drivers.map((d) => `apps/studio/e2e/${d}`);
+  return drivers.map((d) => specPathOf(d));
+}
+/** The spec rows an `--only realtime` run greps for, in place of `--rows`; null otherwise. */
+function realtimeRowsOnly() {
+  return ONLY === 'realtime' ? REALTIME_SPEC_IDS : null;
 }
 /**
  * Playwright's `--grep` for a `--rows` run: each id at the head of its test title (`coreTitle`,
@@ -524,7 +586,7 @@ function specFiles(specOnly = SPEC_ONLY, rowsOnly = ROWS_ONLY) {
  * (the project, the file and the titles joined by spaces), so `svg.export.pdf-vector` never
  * matches a row whose id merely contains it. The dry run prints it for the gate's own test.
  */
-function rowsGrep(rowsOnly = ROWS_ONLY) {
+function rowsGrep(rowsOnly = ROWS_ONLY ?? realtimeRowsOnly()) {
   const escaped = rowsOnly.map((id) => id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   return `(^| )(${escaped.join('|')}): `;
 }
@@ -540,7 +602,7 @@ function runPlaywright(files, report, output) {
      machine clears the shared `.turboslide/playwright`, which deleted a failed row's trace mid
      run (b4.md fix round, b3 R22) */
   const args = ['test', ...files, '--reporter=list,json', '--output', join(OUT, output)];
-  if (ROWS_ONLY !== null) args.push('--grep', rowsGrep());
+  if (ROWS_ONLY !== null || ONLY === 'realtime') args.push('--grep', rowsGrep());
   console.log(
     `core-gate: node_modules/.bin/playwright ${args.join(' ')} (PLAYWRIGHT_BASE_URL=${BASE})`,
   );
@@ -642,7 +704,11 @@ let accounts = null;
  * has no identity database and its local rows are listed apart (6.2).
  */
 const runs = (driver) =>
-  driver === 'accounts' ? ONLY === 'accounts' : ONLY === null || ONLY === driver;
+  driver === 'accounts'
+    ? ONLY === 'accounts'
+    : ONLY === 'realtime'
+      ? driver === 'probe' || driver === 'specs'
+      : ONLY === null || ONLY === driver;
 if (REPORT !== null) {
   const dir = resolve(ROOT, REPORT);
   console.log(`core-gate: re-rendering the run under ${dir} (no driver runs)`);
@@ -694,7 +760,9 @@ if (REPORT !== null) {
             ? 'the cost probe'
             : ONLY === 'accounts'
               ? `the accounts spec ${ACCOUNTS_SPEC}${ROWS_ONLY === null ? '' : ` narrowed to the local rows ${ROWS_ONLY.join(', ')} (--grep ${JSON.stringify(rowsGrep())})`} (${accountsRowsJudged.length} local rows judged; the server needs an identity database)`
-              : 'the walk probe, the core specs and the cost probe';
+              : ONLY === 'realtime'
+                ? `the realtime rows alone (docs/REALTIME.md section 2): the walk probe over ${realtimeWalkModules().join(', ') || 'no module'} and the spec rows ${REALTIME_SPEC_IDS.join(', ')} (${specFiles().join(', ')} with --grep ${JSON.stringify(rowsGrep())}; ${REALTIME_ROWS.length} rows judged)`
+                : 'the walk probe, the core specs and the cost probe';
     console.log(
       `core-gate: dry run against ${BASE}: ${scratchLine}; the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}. Nothing ran and no lock was taken; exit 0.`,
     );
@@ -835,6 +903,8 @@ const exitCode =
 
 const summary = {
   base: BASE,
+  /* the realtime tier of the base as the caller named it (docs/REALTIME.md 5.4; --tier), or null */
+  tier: TIER,
   defaultTemplate,
   startedAt: new Date(startedAt).toISOString(),
   ms: Date.now() - startedAt,
@@ -922,7 +992,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step, ${local.length} local rows this run did not record (listed apart below, never counted as passed). Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}${TIER === null ? '' : ` (tier ${TIER})`}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step, ${local.length} local rows this run did not record (listed apart below, never counted as passed). Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',

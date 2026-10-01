@@ -2,8 +2,27 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { expect, test } from '@playwright/test';
+import { expect, request, test } from '@playwright/test';
 import type { APIRequestContext, Page } from '@playwright/test';
+
+import {
+  Scratch,
+  agentHeaders,
+  ctl,
+  headingRun,
+  invoke,
+  isLocalBase,
+  newDeck,
+  ownerContext,
+  placeBlock,
+  settled,
+  slideJson,
+  slideOrder,
+  state,
+  teardownAll,
+  typeInto,
+} from './core/lib';
+import { coreTitle } from './core/matrix';
 
 // MILESTONES M4 acceptance, agent-http.spec.ts: the hosted agent surface against a running studio.
 // It posts a slide.update with a stale baseRevision and receives 409 with the current document,
@@ -22,6 +41,12 @@ import type { APIRequestContext, Page } from '@playwright/test';
 // The rows that need B4's day three wiring (the author derived from the session on the window
 // transport, a key's scopes refusing `deck.remove` in enforce mode) are the round's `share.spec.ts`
 // and `security.spec.ts`; `authorize()` runs in shadow mode on every server this round.
+//
+// The realtime round (docs/REALTIME.md section 2, 5.1 R5): the matrix row
+// realtime.agent.write-announced lives at the end of this file in its own describe, made from /new
+// and run on every base the gate names; the seeded rows above skip off a checkout (a deployment's
+// store is not the checkout's decks/ folder) with that reason, so a gate run on a preview or on
+// production reads the one row and nothing else here fails for want of decks/e2e-agent.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-agent';
@@ -88,15 +113,21 @@ function setHeading(text: string) {
 
 test.describe.configure({ mode: 'serial' });
 
+/** The seeded rows run on a checkout alone: the deck under decks/e2e-agent is the file store's. */
+const SEEDED_BASE = (process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321').replace(/\/$/, '');
+const SEEDED = isLocalBase(SEEDED_BASE);
+const SEEDED_SKIP = `the seeded rows run on a checkout's file store (decks/e2e-agent), not against ${SEEDED_BASE}`;
+
 test.beforeAll(() => {
-  seedDeck();
+  if (SEEDED) seedDeck();
 });
 
 test.afterAll(() => {
-  removeDeck();
+  if (SEEDED) removeDeck();
 });
 
 test('the manifest and the action contract describe this instance', async ({ request }) => {
+  test.skip(!SEEDED, SEEDED_SKIP);
   const manifest = (await (await request.get(`/api/agent?deck=${DECK}`)).json()) as {
     actions: string[];
     implemented: string[];
@@ -140,6 +171,7 @@ test('the manifest and the action contract describe this instance', async ({ req
 });
 
 test('a stale baseRevision is 409 with the current document', async ({ request }) => {
+  test.skip(!SEEDED, SEEDED_SKIP);
   const current = revisionOnDisk();
   const response = await post(request, 'slide.update', {
     slideId: SLIDE,
@@ -156,6 +188,7 @@ test('a stale baseRevision is 409 with the current document', async ({ request }
 });
 
 test('a held lease is 409 with the holder, and force writes past it', async ({ request }) => {
+  test.skip(!SEEDED, SEEDED_SKIP);
   const lease = await post(
     request,
     'slide.lease',
@@ -201,6 +234,7 @@ test('a held lease is 409 with the holder, and force writes past it', async ({ r
 test('an unknown field is 400 with unknown_field and a pointer; off localhost without a token is 401', async ({
   request,
 }) => {
+  test.skip(!SEEDED, SEEDED_SKIP);
   const current = revisionOnDisk();
   const extra = await post(request, 'slide.update', {
     slideId: SLIDE,
@@ -250,6 +284,7 @@ test('the open editor shows the agent write with the agent as author within one 
   page,
   request,
 }) => {
+  test.skip(!SEEDED, SEEDED_SKIP);
   await openEditor(page);
   // the editor sits on the first slide and holds its lease as studio-e2e; the agent writes to
   // another slide, so the lease rule stays intact and the change arrives over the watch channel
@@ -324,6 +359,7 @@ test.describe('API keys as the bearer (gslides-parity SPEC-3 0.23, 7.7, 8.2)', (
   }
 
   test.beforeAll(async ({ request }) => {
+    test.skip(!SEEDED, SEEDED_SKIP);
     // the first request builds the identity runtime and migrates the database the seed writes
     const probe = await request.get('/api/auth/get-session', {
       headers: { 'sec-fetch-site': 'same-origin' },
@@ -399,5 +435,158 @@ test.describe('API keys as the bearer (gslides-parity SPEC-3 0.23, 7.7, 8.2)', (
     // the round one form on a checkout: no bearer, the header names the run id
     const open = await post(request, 'deck.info', {}, { author: 'agent:e2e-agent' });
     expect(open.status()).toBe(200);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// the realtime round (docs/REALTIME.md section 2, 3.3; the matrix row realtime.agent.write-announced,
+// driver e2e/agent-http.spec.ts): a bearer write through POST /api/actions/text.set?deck=<id> while
+// A's tab is open (REALTIME.md names text.set, which is not an action of the surface; the write is
+// block.set with the path /text, the HTTP write the surface has); A's tab draws the agent banner within 1 s, Cmd+Z does not take the agent's
+// write back, and the version row names the agent. A core row by its rules: the deck is made from
+// /new by the test and torn down through the product, the bearer is the deployment's
+// (~/.config/turboslide/hosts.json through lib's agentHeaders; none on localhost, whose surface is
+// open) and nothing is seeded from disk. The describe runs in the default mode, apart from the
+// serial seeded rows above, so a seeded row's failure off a checkout never skips it.
+
+/** The heading of the first slide through the window API (the cover's field, or its heading block once converted). */
+async function headingOf(p: Page): Promise<string> {
+  const first = (await slideOrder(p))[0]!;
+  const got = await slideJson(p, first);
+  if (got['kind'] === 'title') return String(got['heading'] ?? '').replace(/\u00a0/g, ' ');
+  const grammar = got['grammar'] as { slots?: { main?: string[] } } | undefined;
+  const id = grammar?.slots?.main?.[1] ?? 'heading';
+  const main = ((got['slots'] as { main?: { id: string; text?: unknown }[] } | undefined)?.main ??
+    []) as { id: string; text?: unknown }[];
+  return String(main.find((b) => b.id === id)?.text ?? '').replace(/\u00a0/g, ' ');
+}
+
+test.describe('the realtime round: the agent write announced in the open tab', () => {
+  test.describe.configure({ mode: 'default' });
+
+  test(coreTitle('realtime.agent.write-announced'), async ({ browser, baseURL }) => {
+    test.setTimeout(240_000);
+    const base = (baseURL ?? 'http://localhost:4321').replace(/\/$/, '');
+    const headers = agentHeaders(base, { 'x-turboslide-author': 'agent:realtime-row' });
+    test.skip(
+      headers === null,
+      `not driven: no bearer for ${base} (TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json), so the agent surface cannot write`,
+    );
+    if (headers === null) return;
+    const scratch = new Scratch();
+    const { context, page: A } = await ownerContext(browser);
+    try {
+      const deckId = await newDeck(A, scratch, 'Realtime agent write');
+      await expect
+        .poll(async () => (await state(A)).sync?.connected ?? false, { timeout: 45_000 })
+        .toBe(true);
+      const slideId = (await slideOrder(A))[0]!;
+      /* the block the agent writes into, placed as the row's setup write */
+      await placeBlock(A, slideId, {
+        id: 'agent-target',
+        type: 'text',
+        text: 'Before the agent',
+        pos: { x: 160, y: 520, w: 1280, h: 160 },
+      });
+      await settled(A);
+      /* the seller's own last edit, so Cmd+Z has something of the seller's to take back: a word
+         typed into the heading after the setup write (the first run's Cmd+Z undid the test's own
+         block.insert and the block left the slide with the agent's text in it, the right
+         behaviour read as the wrong one) */
+      const heading = await headingRun(A);
+      await typeInto(A, heading, 'Realtime agent write own');
+      await settled(A);
+      const api = await request.newContext();
+      let status = 0;
+      let answered = '';
+      const before = (await state(A)).revision;
+      const written = Date.now();
+      try {
+        const res = await api.post(
+          `${base}/api/actions/block.set?deck=${encodeURIComponent(deckId)}`,
+          {
+            headers,
+            data: {
+              slideId,
+              blockId: 'agent-target',
+              path: '/text',
+              value: 'Written by the agent',
+              baseRevision: before,
+            },
+            timeout: 30_000,
+            maxRedirects: 0,
+          },
+        );
+        status = res.status();
+        answered = (await res.text().catch(() => '')).slice(0, 200);
+      } finally {
+        await api.dispose().catch(() => undefined);
+      }
+      expect(status, `the agent's block.set /text is admitted (${answered})`).toBe(200);
+      /* the banner: the snackbar's sentence names the agent within 1 s of the write */
+      let bannerMs: number | null = null;
+      let bannerText = '';
+      await expect
+        .poll(
+          async () => {
+            const text =
+              (await ctl(A, 'snackbar')
+                .textContent()
+                .catch(() => '')) ?? '';
+            if (/changed/.test(text) && bannerMs === null) {
+              bannerMs = Date.now() - written;
+              bannerText = text.trim();
+            }
+            return /changed/.test(text);
+          },
+          { timeout: 10_000, intervals: [50] },
+        )
+        .toBe(true)
+        .catch(() => undefined);
+      const textMs = await expect
+        .poll(
+          async () => JSON.stringify(await slideJson(A, slideId)).includes('Written by the agent'),
+          { timeout: 5000 },
+        )
+        .toBe(true)
+        .then(() => Date.now() - written)
+        .catch(() => null);
+      /* Cmd+Z on A's stage takes the seller's own last edit back (the heading's word) and never
+         the agent's write: the block's text stays */
+      await A.keyboard.press('Escape');
+      await A.locator('.ts-stagewrap.ts-editor').click({ position: { x: 30, y: 30 } });
+      await A.keyboard.press('Meta+z');
+      await A.waitForTimeout(1500);
+      const afterUndo = JSON.stringify(await slideJson(A, slideId)).includes(
+        'Written by the agent',
+      );
+      const headingAfterUndo = await headingOf(A);
+      /* the version row names the agent */
+      await expect
+        .poll(async () => (await state(A)).sync?.pending ?? 0, { timeout: 10_000 })
+        .toBe(0);
+      await A.waitForTimeout(2500);
+      const versions = await invoke<{ author: { kind?: string; name?: string; runId?: string } }[]>(
+        A,
+        'version.list',
+        {},
+      );
+      const agentRows = versions.filter((v) => v.author?.kind === 'agent');
+      test.info().annotations.push({
+        type: 'measure',
+        description: `block.set /text answered ${status}; the text in A's document ${textMs ?? 'not within 5 s'} ms after the write; the banner ${bannerMs === null ? 'not drawn within 10 s' : `"${bannerText}" at ${bannerMs} ms`}; after Cmd+Z the agent's text ${afterUndo ? 'stays' : 'was taken back'} and the heading reads "${headingAfterUndo}" (the seller's own word ${/own/.test(headingAfterUndo) ? 'stays' : 'left'}); version rows by an agent ${agentRows.length} (${agentRows.map((v) => `${v.author.name ?? '?'}${v.author.runId ? ` run ${v.author.runId}` : ''}`).join(', ') || 'none'}) of ${versions.length}`,
+      });
+      expect(textMs, "the agent's text reaches A's document").not.toBeNull();
+      expect(bannerMs, "A's tab draws the agent banner").not.toBeNull();
+      expect(bannerMs!, 'within 1 s of the write').toBeLessThanOrEqual(1000);
+      expect(afterUndo, "Cmd+Z does not take the agent's write back").toBe(true);
+      expect(agentRows.length, 'the version row names the agent').toBeGreaterThan(0);
+    } finally {
+      try {
+        await teardownAll(A, scratch);
+      } finally {
+        await context.close().catch(() => undefined);
+      }
+    }
   });
 });

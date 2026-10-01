@@ -41,8 +41,7 @@
 // `core/shaders.spec.ts`, the shaders area's export rows under `export` and its View row under
 // `view` (ROW_FEATURE), the Background dialog among the control sources and the ids FEATURES.md
 // 5.3 to 5.6 declare for the gallery, the Shader section and the View row before the lanes' files
-// hold them.
-// packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`. The
+// hold them. The
 // vector round (docs/VECTOR.md section 6) added the parkable feature `svg` (the SVG pictures:
 // the intake, the sheet, the copy, the sanitizer), the area `menus` whose rows belong to the
 // unparkable `chrome` (the icons on the visual rows, 3.2 to 3.4), the spec driver
@@ -79,6 +78,22 @@
 // `decks.home.load-budget` (3.5). A row whose driver the table names twice carries the spec
 // (`core/export.spec.ts` for the two table and chart rows whose PDF half needs the file,
 // `core/logos.spec.ts` for the plate row, `core/decks.spec.ts` for the pages sweep).
+//
+// The realtime round (docs/REALTIME.md section 2, 5.1 R5) added on 2026-10-01 the unparkable
+// feature `realtime` (two people on one slide over the redis tier: the keystroke, the caret, the
+// selection outline, the drag ghost, the two typers, the joiner's chip, Follow for everyone, the
+// agent write, the share link on every instance, the reload, the reconnect, the pointer, the
+// caret's dim and leave, the card chip in the pixels, the departed guest's name; sixteen rows),
+// the two browser spec driver `core/realtime.spec.ts` (A and B on two origins when
+// `REALTIME_BASES` names them, one otherwise; the instance read from `sync.status`), the spec
+// driver `e2e/agent-http.spec.ts` for the agent write row (a core spec by its path under
+// apps/studio/e2e/, run on every base; `specPathOf` maps a driver to its file), the cost row
+// `cost.redis.commands` (the cost probe's `--redis-url`, read from a wrapper), the three cost rows
+// of the sync round restated per tier, and the area `accounts` whose five local rows of the
+// Google sign in are the share feature's (AREA_FEATURE; e2e/accounts.spec.ts). Two ids are
+// declared before the lanes' files hold them: `view.livePointers.others` (R3's request to the
+// integrator renames `view.livePointers.collaborators`; both are known here so the matrix
+// validates on either tree) and `dialog.signIn.google` (R4's button).
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
@@ -142,6 +157,9 @@ export const CORE_FEATURES = Object.freeze([
   /* the vector round (docs/VECTOR.md 6.1): the SVG pictures, parkable; its rows park the six
      control ids of 4.8 and never the feature whole */
   'svg',
+  /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier;
+     unparkable, since the title row, the stage and the filmstrip draw it with no flag to hide */
+  'realtime',
   'surface',
 ]);
 
@@ -161,6 +179,9 @@ export const AREA_FEATURE = Object.freeze({
   /* the people round (docs/PEOPLE.md 6.1): how a person is drawn is the share feature's, which
      is unparkable, so a red people row blocks the ship unless it carries `parks` */
   people: 'share',
+  /* the realtime round (docs/REALTIME.md section 2, 4.4): the Google sign in rows are the share
+     feature's local rows (e2e/accounts.spec.ts), as the people round's account rows are */
+  accounts: 'share',
 });
 
 /**
@@ -232,7 +253,24 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   /* the vector round (docs/VECTOR.md 6.1): the svg intake by the chooser, a paste, a drop and a
      URL, the sheet at two zooms, the picture gestures, the copy and the sanitizer rows */
   'core/svg.spec.ts',
+  /* the realtime round (docs/REALTIME.md section 2, 5.1 R5): the two browser spec of the
+     realtime rows (A and B on two origins when REALTIME_BASES names them), and the agent write
+     row in the hosted agent surface's spec, which runs on every base like a core spec */
+  'core/realtime.spec.ts',
+  'e2e/agent-http.spec.ts',
 ]);
+
+/**
+ * The file of a spec driver under apps/studio/e2e/: a `core/<area>.spec.ts` driver lives under
+ * `core/`, an `e2e/<name>.spec.ts` driver (the agent surface's spec, the accounts spec) at the
+ * folder's root. The gate and the specs' own tooling read the path from here, so a driver's
+ * spelling in the matrix is the one place it is named.
+ */
+export function specPathOf(driver) {
+  if (driver.startsWith('e2e/')) return `apps/studio/e2e/${driver.slice('e2e/'.length)}`;
+  if (driver.startsWith('core/')) return `apps/studio/e2e/${driver}`;
+  throw new RangeError(`${driver} is not a spec driver`);
+}
 
 /**
  * The local spec drivers (docs/PEOPLE.md 6.1, 6.2): a Playwright spec under apps/studio/e2e/ that
@@ -272,6 +310,9 @@ export const UNPARKABLE_FEATURES = Object.freeze([
      cost row marked measure records its counts and holds it only over its ceiling on the preview */
   'sync',
   'cost',
+  /* the realtime round (docs/REALTIME.md section 2, 5.3): a red realtime row blocks the ship; the
+     production table after the last lane's push is the one hosted whole matrix run of the round */
+  'realtime',
   'decks',
   'slides',
   'text',
@@ -466,6 +507,13 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'dialog.avatarBuilder.privacySentence',
   'dialog.avatarBuilder.cacheSentence',
   'dialog.share.row.email',
+  /* the realtime round (docs/REALTIME.md 5.2, build/r3.md request 2, build/r5.md): the second
+     View > Live pointers row's id once the integrator renames it (`view.livePointers.others`;
+     today's literal is `view.livePointers.collaborators`), so the two view rows' `parks` validate
+     on the tree before and after the rename; and R4's Google button in dialogs/SignIn.tsx */
+  'view.livePointers.others',
+  'view.livePointers.collaborators',
+  'dialog.signIn.google',
 ]);
 
 let controlSourceText = null;

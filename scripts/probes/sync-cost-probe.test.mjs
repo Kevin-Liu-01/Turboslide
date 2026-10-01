@@ -2,7 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CEILINGS,
+  PRESENCE_COMMANDS,
   SAMPLE_FRACTIONS,
+  TIER_CEILINGS,
+  ceilingsFor,
+  commandDelta,
+  editorHour,
+  parseCommandstats,
+  presenceApart,
+  redisTarget,
+  respCommand,
+  respParse,
   SETTLE_EVERY_MS,
   SETTLE_MAX_MS,
   STORE_WINDOW_MS,
@@ -32,6 +42,172 @@ describe('the ceilings', () => {
     );
     expect(SAMPLE_FRACTIONS).toHaveLength(5);
     expect(SAMPLE_FRACTIONS[SAMPLE_FRACTIONS.length - 1]).toBe(1);
+  });
+});
+
+describe('the realtime round (docs/REALTIME.md section 2): the Redis command row and the tiers', () => {
+  it('restates the three store ceilings on the redis tier and keeps them elsewhere', () => {
+    expect(ceilingsFor('cost.editor-idle.calls', 'redis')).toEqual({
+      functionPerMinute: 12,
+      simplePerMinute: 10,
+      advancedPerMinute: 2,
+    });
+    expect(ceilingsFor('cost.editor-editing.calls', 'redis')).toEqual({
+      functionPerMinute: 75,
+      simplePerMinute: 30,
+      advancedPerMinute: 12,
+    });
+    expect(ceilingsFor('cost.two-tabs-idle.calls', 'redis')).toEqual({
+      list: 0,
+      advancedPerMinute: 2,
+    });
+    expect(ceilingsFor('cost.editor-idle.calls', 'blob')).toEqual(
+      CEILINGS['cost.editor-idle.calls'],
+    );
+    expect(ceilingsFor('cost.editor-idle.calls', null)).toEqual(CEILINGS['cost.editor-idle.calls']);
+    expect(ceilingsFor('cost.show.calls', 'redis')).toEqual(CEILINGS['cost.show.calls']);
+    expect(ceilingsFor('nothing', 'redis')).toBeUndefined();
+    expect(Object.keys(TIER_CEILINGS)).toEqual(['redis']);
+    expect(CEILINGS['cost.redis.commands']).toEqual({ redisCommandsPerHour: 12_000 });
+  });
+
+  it('judges a store row by the tier the counts name', () => {
+    const counts = {
+      minutes: 3,
+      functionRequests: 24,
+      functionPerMinute: 8,
+      polls: 0,
+      failedRequests: 0,
+      connected: true,
+      store: { simple: 20, advanced: 5, head: 20, get: 0, put: 5, list: 0, del: 0 },
+      firstSampleStore: {
+        simple: 20,
+        advanced: 5,
+        head: 20,
+        get: 0,
+        put: 5,
+        list: 0,
+        del: 0,
+        own: 1,
+      },
+      ownMax: 1,
+      instances: 1,
+    };
+    /* under the blob tier's ceilings 20 simple and 5 advanced pass; under the redis tier's they fail */
+    expect(judgeRow('cost.editor-idle.calls', { ...counts, tier: 'blob' }, 'present').result).toBe(
+      'passed',
+    );
+    const redis = judgeRow('cost.editor-idle.calls', { ...counts, tier: 'redis' }, 'present');
+    expect(redis.result).toBe('failed');
+    expect(redis.reason).toContain('store simple 20 a minute over 10');
+    expect(redis.reason).toContain('store advanced 5 a minute over 2');
+    expect(redis.measures[0]).toBe('tier redis');
+  });
+
+  it('parses INFO commandstats, differences two readings, counts the hour and the presence family apart', () => {
+    const before = parseCommandstats(
+      '# Commandstats\r\ncmdstat_get:calls=10,usec=100,usec_per_call=10.00\r\ncmdstat_evalsha:calls=3,usec=30,usec_per_call=10.00\r\ncmdstat_hset:calls=1,usec=1,usec_per_call=1.00\r\n',
+    );
+    expect(before).toEqual({ get: 10, evalsha: 3, hset: 1 });
+    const after = { get: 16, evalsha: 9, hset: 8, publish: 7, zadd: 7, info: 2 };
+    const delta = commandDelta(before, after);
+    expect(delta.byName).toEqual({ get: 6, evalsha: 6, hset: 7, publish: 7, zadd: 7, info: 2 });
+    expect(delta.total).toBe(35);
+    expect(presenceApart(delta.byName)).toEqual({ presence: 21, evalsha: 6 });
+    expect(PRESENCE_COMMANDS).toContain('publish');
+    /* 600 commands over 3 editing minutes and 150 over 3 idle minutes: 200 and 50 a minute, the hour 200 × 12 + 50 × 48 */
+    expect(editorHour({ commands: 600, minutes: 3 }, { commands: 150, minutes: 3 })).toEqual({
+      editingPerMinute: 200,
+      idlePerMinute: 50,
+      hour: 4800,
+    });
+    expect(editorHour({ commands: 0, minutes: 0 }, { commands: 0, minutes: 0 }).hour).toBe(0);
+  });
+
+  it('names the Redis target without its password and speaks RESP', () => {
+    expect(redisTarget('redis://default:s3cret@db.example.net:6380/5')).toEqual({
+      host: 'db.example.net',
+      port: 6380,
+      db: 5,
+      tls: false,
+    });
+    expect(redisTarget('rediss://x.upstash.io')).toEqual({
+      host: 'x.upstash.io',
+      port: 6379,
+      db: 0,
+      tls: true,
+    });
+    expect(JSON.stringify(redisTarget('redis://default:s3cret@h/1'))).not.toContain('s3cret');
+    expect(respCommand(['INFO', 'commandstats'])).toBe(
+      '*2\r\n$4\r\nINFO\r\n$12\r\ncommandstats\r\n',
+    );
+    expect(respParse(Buffer.from('+OK\r\n'))).toEqual({ value: 'OK', end: 5 });
+    expect(respParse(Buffer.from(':42\r\n'))).toEqual({ value: 42, end: 5 });
+    expect(respParse(Buffer.from('$5\r\nhello\r\n'))).toEqual({ value: 'hello', end: 11 });
+    expect(respParse(Buffer.from('$-1\r\n'))).toEqual({ value: null, end: 5 });
+    expect(respParse(Buffer.from('-ERR no\r\n'))).toEqual({ value: { error: 'ERR no' }, end: 9 });
+    expect(respParse(Buffer.from('*2\r\n$1\r\na\r\n:1\r\n'))).toEqual({ value: ['a', 1], end: 15 });
+    /* an incomplete bulk string answers null until the rest arrives */
+    expect(respParse(Buffer.from('$5\r\nhel'))).toBeNull();
+  });
+
+  it('reads the Redis command row as not driven without a URL and judges it on the hour with one', () => {
+    const base = {
+      minutes: 3,
+      functionRequests: 30,
+      functionPerMinute: 10,
+      polls: 0,
+      failedRequests: 0,
+      connected: true,
+      tier: 'redis',
+    };
+    const none = judgeRow(
+      'cost.redis.commands',
+      { ...base, redis: { where: 'no-url', source: 'none' } },
+      'zero',
+    );
+    expect(none.result).toBe('not driven');
+    expect(none.reason).toContain('no Redis URL');
+    const down = judgeRow(
+      'cost.redis.commands',
+      {
+        ...base,
+        redis: {
+          where: 'unreachable',
+          reason: 'the Redis at h:1 did not answer INFO commandstats: ECONNREFUSED',
+          target: { host: 'h', port: 1, db: 0 },
+        },
+      },
+      'zero',
+    );
+    expect(down.result).toBe('not driven');
+    expect(down.reason).toContain('did not answer');
+    const redis = {
+      where: 'present',
+      source: 'REDIS_URL',
+      target: { host: 'h', port: 6379, db: 5, tls: false },
+      editing: { commands: 600, minutes: 3, presencePosts: 150, opsPosts: 36, byName: {} },
+      idle: { commands: 150, minutes: 3, presencePosts: 18, opsPosts: 0, byName: {} },
+      byName: { evalsha: 300, publish: 200, hset: 200, get: 50 },
+      editingPerMinute: 200,
+      idlePerMinute: 50,
+      hour: 4800,
+      presence: 400,
+      evalsha: 300,
+      otherDbClients: 2,
+    };
+    const ok = judgeRow('cost.redis.commands', { ...base, redis }, 'zero');
+    expect(ok.result).toBe('passed');
+    expect(ok.measures.join(' | ')).toContain('Redis commands an editor hour 4800 (ceiling 12000)');
+    expect(ok.measures.join(' | ')).toContain('400 calls of the presence family');
+    expect(ok.measures.join(' | ')).toContain('2 client(s) of other databases');
+    const over = judgeRow(
+      'cost.redis.commands',
+      { ...base, redis: { ...redis, hour: 15_000 } },
+      'zero',
+    );
+    expect(over.result).toBe('failed');
+    expect(over.reason).toBe('Redis commands an editor hour 15000 over 12000');
   });
 });
 

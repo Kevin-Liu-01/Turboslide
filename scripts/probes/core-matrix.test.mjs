@@ -14,6 +14,7 @@ import {
   CORE_ID_PATTERN,
   CORE_MATRIX,
   CORE_SPEC_DRIVERS,
+  specPathOf,
   CORE_STATES,
   PARKED_BEGIN,
   PARKED_END,
@@ -245,7 +246,11 @@ describe('the ship helpers of 6.2', () => {
     expect(parkedFeaturesOf(partial).blocking.length).toBe(
       CORE_MATRIX.filter((row) => !isParkable(row.feature) && row.parks === undefined).length -
         1 -
-        CORE_MATRIX.filter((row) => isManualRow(row) && !isParkable(row.feature)).length -
+        /* a manual row that is also a local row (the realtime round's accounts.google-roundtrip)
+           is counted once, under the local rows below */
+        CORE_MATRIX.filter(
+          (row) => isManualRow(row) && !isParkable(row.feature) && !isLocalRow(row),
+        ).length -
         CORE_MATRIX.filter((row) => isMeasureRow(row) && !isParkable(row.feature)).length -
         /* a local row the run did not record is listed apart, never blocking (PEOPLE.md 6.2) */
         localRows().filter((row) => !isParkable(row.feature) && row.parks === undefined).length,
@@ -330,6 +335,8 @@ describe('the ship helpers of 6.2', () => {
   it('treats a manual row (ruling (3)) as the checklist’s: not driven parks nothing and fails no ship, failed still does', () => {
     const manual = CORE_MATRIX.filter(isManualRow);
     expect(manual.map((row) => row.id).sort()).toEqual([
+      /* the realtime round (docs/REALTIME.md 4.4): the Google round trip is a hand sign in */
+      'accounts.google-roundtrip',
       'export.print.print-button',
       'text.clipboard.paste-without-formatting',
     ]);
@@ -432,8 +439,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's hotfix H6 (docs/NEXT.md 3.2): brand.template.blank-no-gt-mark */
     /* the second click hotfix (docs/gslides-parity/focus/AMENDMENTS.md A2, 2026-10-02):
        text.click.second-click-caret */
+    /* the realtime round (docs/REALTIME.md section 2) added 22 rows: sixteen realtime rows, the
+       Redis command row and five local accounts rows */
     expect(CORE_MATRIX.length).toBe(
-      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -486,7 +495,8 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
     /* ten spec rows and the pull row of the cost probe under sync; the five cost rows under cost */
     /* the polish round adds five sync rows (docs/POLISH.md 2.8) */
     expect(rowsForFeature('sync').length).toBe(11 + 5);
-    expect(rowsForFeature('cost').length).toBe(5);
+    /* the realtime round adds the Redis command row (docs/REALTIME.md section 2) */
+    expect(rowsForFeature('cost').length).toBe(5 + 1);
     expect(isParkable('sync')).toBe(false);
     expect(isParkable('cost')).toBe(false);
     expect(UNPARKABLE_FEATURES).toContain('sync');
@@ -503,6 +513,7 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
       'cost.editor-editing.calls',
       'cost.two-tabs-idle.calls',
       'cost.show.calls',
+      'cost.redis.commands',
     ]);
     expect(rowsForDriver(COST_PROBE_DRIVER)).toEqual(costRows());
     for (const row of costRows()) expect(isCostRow(row), row.id).toBe(true);
@@ -812,6 +823,8 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
     expect(isParkable('svg')).toBe(true);
     /* the people round (docs/PEOPLE.md 6.1) added the people area under share */
     expect(AREA_FEATURE).toEqual({
+      /* the realtime round (docs/REALTIME.md 4.4): the Google sign in rows are the share feature's */
+      accounts: 'share',
       collab: 'share',
       menus: 'chrome',
       gestures: 'arrange',
@@ -1102,7 +1115,12 @@ describe('the people round (docs/PEOPLE.md section 6)', () => {
     expect(people.filter((row) => row.driver === PROBE_DRIVER).length).toBe(7);
     expect(people.filter((row) => row.driver === 'core/share.spec.ts').length).toBe(4);
     expect(people.filter(isLocalRow).length).toBe(10);
-    expect(localRows().map((row) => row.id)).toEqual([
+    /* the realtime round adds the five accounts rows after these ten (its own block below) */
+    expect(
+      localRows()
+        .map((row) => row.id)
+        .filter((id) => !id.startsWith('accounts.')),
+    ).toEqual([
       'people.verified-badge',
       'people.versions-author-account',
       'people.labels-disambiguated',
@@ -1116,6 +1134,7 @@ describe('the people round (docs/PEOPLE.md section 6)', () => {
     ]);
     /* every local row is not driven today: production holds no account (6.1) */
     for (const row of localRows()) expect(row.today, row.id).toBe('not driven');
+    for (const row of localRows().slice(0, 10)) expect(row.id).not.toMatch(/^accounts\./);
     /* the picture rows and the two own chip rows carry parks (6.1); every other people row parks nothing */
     const picture = ['dialog.avatarBuilder.panel.picture', 'dialog.avatarBuilder.file'];
     for (const id of [
@@ -1207,5 +1226,128 @@ describe('the people round (docs/PEOPLE.md section 6)', () => {
       measured: [],
       local: [],
     });
+  });
+});
+
+describe('the realtime round (docs/REALTIME.md section 2)', () => {
+  const realtime = CORE_MATRIX.filter((row) => /^Realtime round;/.test(row.note ?? ''));
+  const REALTIME_IDS = [
+    'realtime.keystroke.within-300ms',
+    'realtime.caret.within-300ms',
+    'realtime.caret.offset-after-merge',
+    'realtime.selection.outline-within-300ms',
+    'realtime.block.drag-live',
+    'realtime.title.two-typers',
+    'realtime.join.chip-within-1s',
+    'realtime.follow.for-everyone',
+    'realtime.agent.write-announced',
+    'realtime.share-link.every-instance',
+    'realtime.reload.loses-nothing',
+    'realtime.reconnect.loses-nothing',
+    'realtime.pointer.second-browser',
+    'realtime.caret.dims-and-leaves',
+    'realtime.card.chip-painted',
+    'realtime.departed-guest.name-stable',
+  ];
+  const ACCOUNTS_IDS = [
+    'accounts.google-button',
+    'accounts.google-leaves',
+    'accounts.google-error-sentence',
+    'accounts.email-hidden-without-mail',
+    'accounts.google-roundtrip',
+  ];
+
+  it('holds the sixteen realtime rows under the unparkable feature, the cost row and the five local accounts rows', () => {
+    expect(CORE_FEATURES).toContain('realtime');
+    expect(UNPARKABLE_FEATURES).toContain('realtime');
+    expect(isParkable('realtime')).toBe(false);
+    expect(rowsForFeature('realtime').map((row) => row.id)).toEqual(REALTIME_IDS);
+    expect(AREA_FEATURE.accounts).toBe('share');
+    for (const id of ACCOUNTS_IDS) expect(coreRow(id).feature).toBe('share');
+    expect(
+      localRows()
+        .map((row) => row.id)
+        .slice(-5),
+    ).toEqual(ACCOUNTS_IDS);
+    /* the drivers: the two browser spec, the share spec's two rows, the agent surface's spec and
+       the walk's presence area; every row has a driver the gate runs (FOCUS.md 6.1) */
+    expect(CORE_SPEC_DRIVERS).toContain('core/realtime.spec.ts');
+    expect(CORE_SPEC_DRIVERS).toContain('e2e/agent-http.spec.ts');
+    expect(rowsForDriver('core/realtime.spec.ts').length).toBe(12);
+    expect(rowsForDriver('realtime.spec.ts')).toEqual(rowsForDriver('core/realtime.spec.ts'));
+    expect(rowsForDriver('e2e/agent-http.spec.ts').map((row) => row.id)).toEqual([
+      'realtime.agent.write-announced',
+    ]);
+    expect(
+      rowsForDriver('core/share.spec.ts')
+        .filter((row) => row.feature === 'realtime')
+        .map((row) => row.id),
+    ).toEqual(['realtime.share-link.every-instance', 'realtime.departed-guest.name-stable']);
+    expect(coreRow('realtime.card.chip-painted').driver).toBe(PROBE_DRIVER);
+    expect(specPathOf('core/realtime.spec.ts')).toBe('apps/studio/e2e/core/realtime.spec.ts');
+    expect(specPathOf('e2e/agent-http.spec.ts')).toBe('apps/studio/e2e/agent-http.spec.ts');
+    expect(() => specPathOf('probe --core')).toThrow(RangeError);
+    /* the agent row's spec is not a local driver: it runs on every base */
+    expect(isLocalRow(coreRow('realtime.agent.write-announced'))).toBe(false);
+    /* today as the audits measured production on 2026-09-28 to 2026-10-01 */
+    expect(coreRow('realtime.keystroke.within-300ms').today).toBe('broken');
+    expect(coreRow('realtime.keystroke.within-300ms').severity).toBe(3);
+    expect(coreRow('realtime.follow.for-everyone').today).toBe('not driven');
+    expect(coreRow('realtime.reload.loses-nothing').today).toBe('works');
+    expect(coreRow('realtime.share-link.every-instance').today).toBe('flaky');
+    /* no realtime row carries parks: the feature is unparkable and a red row blocks */
+    for (const row of rowsForFeature('realtime')) expect(row.parks, row.id).toBeUndefined();
+    /* the cost row is a measurement row of the cost probe with the Redis ceiling in its text */
+    const redis = coreRow('cost.redis.commands');
+    expect(isCostRow(redis)).toBe(true);
+    expect(isMeasureRow(redis)).toBe(true);
+    expect(redis.today).toBe('not driven');
+    expect(redis.interaction).toContain('12,000 Redis commands');
+    /* the three cost rows of the sync round restate their store ceilings for the redis tier */
+    expect(coreRow('cost.editor-idle.calls').interaction).toContain('10 simple and 2 advanced');
+    expect(coreRow('cost.editor-editing.calls').interaction).toContain('30 simple and 12 advanced');
+    expect(coreRow('cost.two-tabs-idle.calls').interaction).toContain(
+      'restated for the redis tier at 2',
+    );
+    /* the round's rows name it in their notes: the 22 added */
+    expect(realtime.length).toBe(22);
+    /* the round trip is the one manual row of the round */
+    expect(isManualRow(coreRow('accounts.google-roundtrip'))).toBe(true);
+    for (const id of ACCOUNTS_IDS)
+      if (id !== 'accounts.google-roundtrip') expect(isManualRow(coreRow(id)), id).toBe(false);
+    /* the declared ids of REALTIME.md 5.2 are known before the lanes' files hold them */
+    for (const id of [
+      'view.livePointers.others',
+      'view.livePointers.collaborators',
+      'dialog.signIn.google',
+    ])
+      expect(isKnownControl(id), id).toBe(true);
+  });
+
+  it('blocks the ship on a red realtime row and records a red Redis command row', () => {
+    const results = {};
+    for (const row of CORE_MATRIX) if (!isLocalRow(row)) results[row.id] = 'passed';
+    const run = parkedFeaturesOf({
+      ...results,
+      'realtime.keystroke.within-300ms': 'failed',
+      'realtime.follow.for-everyone': 'not driven',
+      'cost.redis.commands': 'failed',
+    });
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([
+      { id: 'realtime.keystroke.within-300ms', feature: 'realtime', result: 'failed' },
+      { id: 'realtime.follow.for-everyone', feature: 'realtime', result: 'not driven' },
+    ]);
+    expect(run.measured).toEqual([
+      { id: 'cost.redis.commands', feature: 'cost', result: 'failed' },
+    ]);
+    /* the five accounts rows are listed apart on a deployment run like the people round's ten */
+    expect(run.local.map((row) => row.id).slice(-5)).toEqual(ACCOUNTS_IDS);
+    expect(() => shipVerdict(results, ['realtime'])).toThrow(/realtime cannot be parked/);
+    const verdict = shipVerdict({ ...results, 'realtime.card.chip-painted': 'failed' });
+    expect(verdict.ok).toBe(false);
+    expect(verdict.failures).toEqual([
+      { id: 'realtime.card.chip-painted', feature: 'realtime', result: 'failed' },
+    ]);
   });
 });

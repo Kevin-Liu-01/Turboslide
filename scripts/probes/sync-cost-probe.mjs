@@ -55,6 +55,24 @@
 // is one put and one `list` (`pruneThumbs`, thumbs.ts; card-thumb.ts CARD_THUMB_SETTLE_MS); the
 // editor tab the show row leaves behind keeps its stream until the runtime reports the reader
 // gone (room.ts STREAM_READER_GONE_MS, 35 s), and that close flushes the card render and runs the
+// The realtime round (docs/REALTIME.md section 2, 5.1 R5): the row `cost.redis.commands` reads
+// `INFO commandstats` on the deployment's Redis before and after an editing window and an idle
+// window of `--minutes` each (`--idle-minutes` sets the idle window apart) and counts the editor
+// hour as docs/SYNC.md 4.3 does, 12 editing minutes and 48 idle minutes, from the two rates
+// (`--minutes 12 --idle-minutes 48` drives the literal hour). The Redis URL comes from `--redis-url`,
+// else TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL in the environment a wrapper set, and is never
+// printed (the JSON names its source, the host and the database number alone); without one, or
+// with a Redis that does not answer, the row is not driven with the reason. The read is a plain
+// RESP exchange over node:net or node:tls (AUTH, SELECT, INFO commandstats, CLIENT LIST, QUIT):
+// the probes carry no dependency and ioredis is not hoisted. `INFO commandstats` is server wide,
+// so on a local container shared by several databases the delta carries the other databases'
+// commands too; the JSON records how many clients of other databases were connected, and the
+// presence write is counted apart by command name (the presence family: hset, hget, zadd,
+// zscore, pexpire, publish, zrangebyscore, hmget) beside evalsha, the one command a scripted
+// presence write or an append costs. The three store ceilings of the sync round's cost rows are
+// restated per tier (REALTIME.md section 2): the tier is `--tier` when given, else the deck's
+// `sync.status` tier, and `ceilingsFor(id, tier)` picks the numbers.
+//
 // snapshot prune (blob.ts `pruneAtClose`, one `list`). Those calls landed inside the first 60 s
 // window of the pass 1 runs (`list` 1 on the two tabs row, 11 calls on the show row). So after
 // the state is ready the probe reads the counters every SETTLE_EVERY_MS until the row's quiet
@@ -67,6 +85,8 @@
 // alone, the way the walk probe does.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { connect as netConnect } from 'node:net';
+import { connect as tlsConnect } from 'node:tls';
 import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -91,6 +111,21 @@ const OUT = arg('out', null);
 const ROW = arg('row', null);
 const ALL = flag('all');
 const MINUTES = Number(arg('minutes', '3'));
+/** The idle window of `cost.redis.commands` in minutes (`--idle-minutes`; the editing window's minutes when absent). */
+const IDLE_MINUTES = Number(arg('idle-minutes', String(MINUTES)));
+/** The realtime tier named by the caller (`--tier`); the deck's sync.status tier when absent. */
+const TIER_ARG = arg('tier', null);
+/** The Redis URL of `cost.redis.commands` (never printed): --redis-url, else the wrapper's environment. */
+const REDIS_URL =
+  arg('redis-url', null) ?? process.env.TURBOSLIDE_PROBE_REDIS_URL ?? process.env.REDIS_URL ?? null;
+const REDIS_URL_SOURCE =
+  arg('redis-url', null) !== null
+    ? '--redis-url'
+    : process.env.TURBOSLIDE_PROBE_REDIS_URL
+      ? 'TURBOSLIDE_PROBE_REDIS_URL'
+      : process.env.REDIS_URL
+        ? 'REDIS_URL'
+        : 'none';
 const SHOTS = arg('shots', null);
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE);
 const OIDC = process.env.VERCEL_OIDC_TOKEN;
@@ -100,7 +135,7 @@ const VIEWPORT = { width: 1440, height: 900 };
 const SELF = fileURLToPath(import.meta.url);
 
 const USAGE =
-  'usage: node scripts/probes/sync-cost-probe.mjs --base <origin> (--row <id> | --all [--rows <ids>]) --out <json> [--minutes 3] [--shots <dir>]';
+  'usage: node scripts/probes/sync-cost-probe.mjs --base <origin> (--row <id> | --all [--rows <ids>]) --out <json> [--minutes 3] [--idle-minutes <n>] [--tier redis|blob|memory] [--redis-url <url>] [--shots <dir>]';
 
 /** The ceilings of docs/SYNC.md 6.1 by row, as the interaction texts give them. */
 export const CEILINGS = Object.freeze({
@@ -118,7 +153,103 @@ export const CEILINGS = Object.freeze({
      first open's `assets/`, the card render's `thumbs/`) are recorded beside it and never judged
      here (the sync and costs round's ship; VERIFICATION.md pass 2 F2 read `list` 1 from those) */
   'sync.pull.no-listing': { listVersions: 0, commits: 10 },
+  /* the realtime round (docs/REALTIME.md section 2): one editor hour of Redis commands, counted
+     as 12 editing minutes and 48 idle minutes from the two windows the probe drives */
+  'cost.redis.commands': { redisCommandsPerHour: 12_000 },
 });
+
+/**
+ * The store ceilings restated per realtime tier (docs/REALTIME.md section 2: on the redis tier no
+ * pulse and no record per POST, so the simple and advanced counts fall). A tier with no entry
+ * keeps CEILINGS as written (the blob tier's numbers, which the memory tier reads as zero).
+ */
+export const TIER_CEILINGS = Object.freeze({
+  redis: Object.freeze({
+    'cost.editor-idle.calls': { simplePerMinute: 10, advancedPerMinute: 2 },
+    'cost.editor-editing.calls': { simplePerMinute: 30, advancedPerMinute: 12 },
+    'cost.two-tabs-idle.calls': { advancedPerMinute: 2 },
+  }),
+});
+
+/** The ceilings of a row on a tier: CEILINGS with the tier's restated store numbers over it. */
+export function ceilingsFor(id, tier) {
+  const base = CEILINGS[id];
+  if (!base) return undefined;
+  const over = tier ? TIER_CEILINGS[tier]?.[id] : undefined;
+  return over ? { ...base, ...over } : base;
+}
+
+/** The command names of a presence write on the redis tier before the PRESENCE_SET script (research-hosting.md 2.1). */
+export const PRESENCE_COMMANDS = Object.freeze([
+  'hset',
+  'hget',
+  'zadd',
+  'zscore',
+  'pexpire',
+  'publish',
+  'zrangebyscore',
+  'hmget',
+]);
+
+/** The per command calls of an `INFO commandstats` text: `{ get: 12, evalsha: 3, ... }`. */
+export function parseCommandstats(text) {
+  const out = {};
+  for (const line of String(text ?? '').split(/\r?\n/)) {
+    const m = /^cmdstat_([A-Za-z0-9_|.-]+):(.*)$/.exec(line.trim());
+    if (!m) continue;
+    const calls = /(?:^|,)calls=(\d+)/.exec(m[2]);
+    if (calls) out[m[1].toLowerCase()] = Number(calls[1]);
+  }
+  return out;
+}
+
+/** The per command difference of two commandstats readings (names in either), and its sum. */
+export function commandDelta(before, after) {
+  const byName = {};
+  let total = 0;
+  for (const name of new Set([...Object.keys(before ?? {}), ...Object.keys(after ?? {})])) {
+    const d = Number(after?.[name] ?? 0) - Number(before?.[name] ?? 0);
+    if (d !== 0) byName[name] = d;
+    if (d > 0) total += d;
+  }
+  return { byName, total };
+}
+
+/**
+ * The editor hour from an editing window and an idle window (docs/SYNC.md 4.3: 12 editing
+ * minutes and 48 idle minutes), each a command count over its minutes; the rates and the hour.
+ */
+export function editorHour(editing, idle) {
+  const rate = (w) => (w.minutes > 0 ? w.commands / w.minutes : 0);
+  const editingPerMinute = rate(editing);
+  const idlePerMinute = rate(idle);
+  return {
+    editingPerMinute,
+    idlePerMinute,
+    hour: Math.round(editingPerMinute * 12 + idlePerMinute * 48),
+  };
+}
+
+/** The presence family's calls and the evalsha calls of a per command delta. */
+export function presenceApart(byName) {
+  let presence = 0;
+  for (const name of PRESENCE_COMMANDS) presence += Math.max(0, Number(byName?.[name] ?? 0));
+  const evalsha =
+    Math.max(0, Number(byName?.evalsha ?? 0)) + Math.max(0, Number(byName?.eval ?? 0));
+  return { presence, evalsha };
+}
+
+/** The URL's parts the JSON may name: the host, the port, the database number and whether TLS; never the password. */
+export function redisTarget(url) {
+  const u = new URL(url);
+  const db = Number((u.pathname || '/0').slice(1) || '0');
+  return {
+    host: u.hostname,
+    port: Number(u.port || '6379'),
+    db: Number.isFinite(db) ? db : 0,
+    tls: u.protocol === 'rediss:',
+  };
+}
 
 /** The fractions of the window at which the five storeCalls samples are read. */
 export const SAMPLE_FRACTIONS = Object.freeze([1 / 3, 1 / 2, 2 / 3, 5 / 6, 1]);
@@ -223,11 +354,50 @@ export function quietFor(id, storeCalls, own) {
  * Returns the result, the reason and the measure lines the gate records beside the row.
  */
 export function judgeRow(id, counts, where) {
-  const ceiling = CEILINGS[id];
+  /* the tier's restated store ceilings (docs/REALTIME.md section 2) when the run named one or the deck's sync.status did */
+  const ceiling = ceilingsFor(id, counts?.tier ?? null);
   if (!ceiling) throw new RangeError(`${id} is not a cost probe row`);
   const measures = [];
   const over = [];
   const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
+  if (counts?.tier) measures.push(`tier ${counts.tier}`);
+  /* the Redis command row (REALTIME.md section 2): the hour from the two windows, the presence
+     write apart, the ceiling judged on the hour; no URL or no answer is not driven */
+  if (ceiling.redisCommandsPerHour !== undefined) {
+    const r = counts.redis;
+    if (!r || r.where !== 'present')
+      return {
+        result: 'not driven',
+        reason:
+          r?.reason ??
+          'no Redis URL (--redis-url, TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL): INFO commandstats cannot be read',
+        measures: [
+          `function requests ${fmt(counts.functionPerMinute ?? 0)} a minute in the editing window were read from the page${r?.target ? `; redis ${r.target.host}:${r.target.port} db ${r.target.db}` : ''}`,
+        ],
+      };
+    const top = Object.entries(r.byName)
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, n]) => `${name} ${n}`)
+      .join(', ');
+    measures.push(
+      `Redis commands an editor hour ${r.hour} (ceiling ${ceiling.redisCommandsPerHour}): ${fmt(r.editingPerMinute)} a minute editing over ${fmt(r.editing.minutes)} min (${r.editing.commands} commands, ${r.editing.presencePosts} presence POSTs, ${r.editing.opsPosts} ops POSTs) and ${fmt(r.idlePerMinute)} a minute idle over ${fmt(r.idle.minutes)} min (${r.idle.commands} commands, ${r.idle.presencePosts} presence POSTs), counted as 12 editing and 48 idle minutes`,
+    );
+    measures.push(
+      `the presence write apart: ${r.presence} calls of the presence family (${PRESENCE_COMMANDS.join(', ')}) and ${r.evalsha} evalsha over both windows; by command ${top || 'none'}`,
+    );
+    measures.push(
+      `read from INFO commandstats on ${r.target.host}:${r.target.port} db ${r.target.db} (${r.source}); ${r.otherDbClients} client(s) of other databases were connected, whose commands the server wide counters carry too`,
+    );
+    if (r.hour > ceiling.redisCommandsPerHour)
+      over.push(`Redis commands an editor hour ${r.hour} over ${ceiling.redisCommandsPerHour}`);
+    if (counts.failedRequests > 0)
+      over.push(`${counts.failedRequests} request(s) of the page failed or answered 5xx`);
+    if (counts.connected === false) over.push('the tab lost its stream during the windows');
+    if (over.length > 0) return { result: 'failed', reason: over.join('; '), measures };
+    return { result: 'passed', reason: '', measures };
+  }
   /* a state the probe never reached (the hidden tab when the browser reads visible) is not driven
      with the reason, whatever the visible tab's counts read; the counts are still recorded */
   if (counts.notDriven)
@@ -652,6 +822,170 @@ export function summarize(records, t0, t1) {
 const strip = (records) => records.map(({ _req, ...r }) => r);
 
 // ---------------------------------------------------------------------------------------------
+// the Redis read of cost.redis.commands (docs/REALTIME.md section 2): a plain RESP exchange
+
+/** Encodes one command as a RESP array. */
+export function respCommand(parts) {
+  let out = `*${parts.length}\r\n`;
+  for (const part of parts) {
+    const s = String(part);
+    out += `$${Buffer.byteLength(s)}\r\n${s}\r\n`;
+  }
+  return out;
+}
+
+/**
+ * Parses one RESP reply at `offset` of a buffer: `{ value, end }` or null while the reply is
+ * incomplete. Simple strings, errors (as `{ error }`), integers, bulk strings and arrays.
+ */
+export function respParse(buf, offset = 0) {
+  if (offset >= buf.length) return null;
+  const type = String.fromCharCode(buf[offset]);
+  const lineEnd = buf.indexOf('\r\n', offset);
+  if (lineEnd < 0) return null;
+  const line = buf.toString('utf8', offset + 1, lineEnd);
+  const after = lineEnd + 2;
+  if (type === '+') return { value: line, end: after };
+  if (type === '-') return { value: { error: line }, end: after };
+  if (type === ':') return { value: Number(line), end: after };
+  if (type === '$') {
+    const n = Number(line);
+    if (n < 0) return { value: null, end: after };
+    if (buf.length < after + n + 2) return null;
+    return { value: buf.toString('utf8', after, after + n), end: after + n + 2 };
+  }
+  if (type === '*') {
+    const n = Number(line);
+    if (n < 0) return { value: null, end: after };
+    const items = [];
+    let at = after;
+    for (let i = 0; i < n; i += 1) {
+      const item = respParse(buf, at);
+      if (item === null) return null;
+      items.push(item.value);
+      at = item.end;
+    }
+    return { value: items, end: at };
+  }
+  throw new Error(`redis: an unknown reply type ${JSON.stringify(type)}`);
+}
+
+/**
+ * One connection to the Redis the URL names, running the commands in order and answering their
+ * replies; the password rides AUTH and is never read back. Rejects on a connection error or a
+ * reply error, after at most `timeoutMs`.
+ */
+export function redisExchange(url, commands, timeoutMs = 15_000) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const target = redisTarget(url);
+    const password = decodeURIComponent(u.password || '');
+    const username = decodeURIComponent(u.username || '');
+    const all = [
+      ...(password !== ''
+        ? [username && username !== 'default' ? ['AUTH', username, password] : ['AUTH', password]]
+        : []),
+      ['SELECT', String(target.db)],
+      ...commands,
+      ['QUIT'],
+    ];
+    const replies = [];
+    let buf = Buffer.alloc(0);
+    let done = false;
+    const finish = (error) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      socket.destroy();
+      if (error) reject(error);
+      else {
+        /* the AUTH and SELECT answers and QUIT's are dropped; the commands' replies answer */
+        const skip = password !== '' ? 2 : 1;
+        resolve(replies.slice(skip, skip + commands.length));
+      }
+    };
+    const timer = setTimeout(
+      () =>
+        finish(
+          new Error(`redis: no answer from ${target.host}:${target.port} within ${timeoutMs} ms`),
+        ),
+      timeoutMs,
+    );
+    const options = { host: target.host, port: target.port };
+    const socket = target.tls
+      ? tlsConnect({ ...options, servername: target.host })
+      : netConnect(options);
+    socket.on('error', (error) => finish(new Error(`redis: ${error.message}`)));
+    socket.on('close', () => {
+      if (replies.length >= all.length) finish(null);
+      else
+        finish(
+          new Error(
+            `redis: the connection closed after ${replies.length} of ${all.length} replies`,
+          ),
+        );
+    });
+    socket.on(target.tls ? 'secureConnect' : 'connect', () => {
+      socket.write(all.map(respCommand).join(''));
+    });
+    socket.on('data', (chunk) => {
+      buf = Buffer.concat([buf, chunk]);
+      for (;;) {
+        let parsed;
+        try {
+          parsed = respParse(buf, 0);
+        } catch (error) {
+          finish(error);
+          return;
+        }
+        if (parsed === null) break;
+        buf = buf.subarray(parsed.end);
+        if (
+          parsed.value &&
+          typeof parsed.value === 'object' &&
+          !Array.isArray(parsed.value) &&
+          'error' in parsed.value
+        ) {
+          finish(new Error(`redis: ${parsed.value.error}`));
+          return;
+        }
+        replies.push(parsed.value);
+        if (replies.length >= all.length) {
+          finish(null);
+          return;
+        }
+      }
+    });
+  });
+}
+
+/**
+ * One reading of the Redis: the per command calls of `INFO commandstats`, the connected clients
+ * and how many of them sit on another database than the URL's (a shared local container).
+ */
+export async function readRedisStats(url) {
+  const target = redisTarget(url);
+  const [info, clients] = await redisExchange(url, [
+    ['INFO', 'commandstats'],
+    ['CLIENT', 'LIST'],
+  ]);
+  const lines = String(clients ?? '')
+    .split(/\r?\n/)
+    .filter((l) => l.trim() !== '');
+  const otherDbClients = lines.filter((l) => {
+    const m = /(?:^|\s)db=(\d+)/.exec(l);
+    return m !== null && Number(m[1]) !== target.db;
+  }).length;
+  return {
+    at: now(),
+    calls: parseCommandstats(info),
+    clients: lines.length,
+    otherDbClients,
+    target,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // the bearer and the counters
 
 /** Where the bearer for sync.status comes from; the value stays in memory and is never printed. */
@@ -832,6 +1166,7 @@ async function runRow(id) {
   };
   const auth = bearer();
   out.bearer = auth.source;
+  out.tierArg = TIER_ARG;
   const browser = await chromium.launch({ headless: true });
   const ctxA = await browser.newContext({ viewport: VIEWPORT, extraHTTPHeaders });
   const A = await ctxA.newPage();
@@ -856,9 +1191,10 @@ async function runRow(id) {
     const tSetup0 = now();
     deck = await freshDeck(A);
     out.deck = deck;
-    out.tier = deck.tier;
+    /* the tier the ceilings follow: the caller's --tier, else the deck's sync.status tier (REALTIME.md section 2) */
+    out.tier = TIER_ARG ?? deck.tier;
     out.phases.setup = summarize(records, tSetup0, now());
-    log('deck', deck.id, 'tier', deck.tier, 'revision', deck.revision);
+    log('deck', deck.id, 'tier', deck.tier, 'revision', deck.revision, 'ceilings for', out.tier);
 
     /** One read of the counters, with the probe's own reads inside its window counted (R7 b). */
     const read = async () => {
@@ -1043,6 +1379,112 @@ async function runRow(id) {
       };
     }
 
+    if (id === 'cost.redis.commands') {
+      /* the Redis command row (docs/REALTIME.md section 2): INFO commandstats before and after
+         an editing window (one edit per 5 s) and an idle window, the hour counted as 12 editing
+         and 48 idle minutes from the two rates; without a URL or an answer the row is not driven */
+      const redis = { where: 'no-url', source: REDIS_URL_SOURCE, reason: null, target: null };
+      let stats0 = null;
+      if (REDIS_URL !== null) {
+        redis.target = redisTarget(REDIS_URL);
+        try {
+          stats0 = await readRedisStats(REDIS_URL);
+          redis.where = 'present';
+        } catch (error) {
+          redis.where = 'unreachable';
+          redis.reason = `the Redis at ${redis.target.host}:${redis.target.port} did not answer INFO commandstats: ${String(error.message ?? error).slice(0, 160)}`;
+        }
+      }
+      await sleep(5000);
+      const target = deck.body ?? deck.head;
+      const editMs = MINUTES * 60_000;
+      const idleMs = IDLE_MINUTES * 60_000;
+      const tE0 = now();
+      await shot(A, `${id}-editing-start`);
+      let n = 0;
+      const endE = tE0 + editMs;
+      while (now() < endE) {
+        const tick = now();
+        try {
+          await openRun(A, target);
+          await typeHuman(A, n % 2 === 0 ? 'ok ' : 'go ');
+          await A.keyboard.press('Escape');
+          n += 1;
+        } catch (error) {
+          (out.editErrors ??= []).push(String(error).split('\n')[0].slice(0, 200));
+        }
+        const wait = 5000 - (now() - tick);
+        if (wait > 0) await sleep(Math.min(wait, Math.max(0, endE - now())));
+      }
+      /* the last edit's run lands with the checkpointer's 2 s idle before the stats are read */
+      await sleep(2500);
+      const tE1 = now();
+      const stats1 =
+        redis.where === 'present' ? await readRedisStats(REDIS_URL).catch(() => null) : null;
+      out.edits = n;
+      const tI0 = now();
+      await sleep(idleMs);
+      const tI1 = now();
+      const stats2 =
+        redis.where === 'present' ? await readRedisStats(REDIS_URL).catch(() => null) : null;
+      await shot(A, `${id}-idle-end`);
+      const s = await state(A);
+      out.phases.editing = summarize(records, tE0, tE1);
+      out.phases.idle = summarize(records, tI0, tI1);
+      out.phases.window = out.phases.editing;
+      if (redis.where === 'present' && (stats1 === null || stats2 === null)) {
+        redis.where = 'unreachable';
+        redis.reason = `the Redis at ${redis.target.host}:${redis.target.port} answered the first INFO commandstats and not a later one`;
+      }
+      if (redis.where === 'present') {
+        const editing = commandDelta(stats0.calls, stats1.calls);
+        const idle = commandDelta(stats1.calls, stats2.calls);
+        const whole = commandDelta(stats0.calls, stats2.calls);
+        const hour = editorHour(
+          { commands: editing.total, minutes: out.phases.editing.minutes },
+          { commands: idle.total, minutes: out.phases.idle.minutes },
+        );
+        const apart = presenceApart(whole.byName);
+        Object.assign(redis, {
+          editing: {
+            commands: editing.total,
+            minutes: out.phases.editing.minutes,
+            byName: editing.byName,
+            presencePosts: out.phases.editing.presence,
+            opsPosts: out.phases.editing.ops,
+          },
+          idle: {
+            commands: idle.total,
+            minutes: out.phases.idle.minutes,
+            byName: idle.byName,
+            presencePosts: out.phases.idle.presence,
+            opsPosts: out.phases.idle.ops,
+          },
+          byName: whole.byName,
+          ...hour,
+          presence: apart.presence,
+          evalsha: apart.evalsha,
+          clients: stats2.clients,
+          otherDbClients: Math.max(
+            stats0.otherDbClients,
+            stats1.otherDbClients,
+            stats2.otherDbClients,
+          ),
+          readsAt: [stats0.at, stats1.at, stats2.at],
+        });
+        log(
+          'redis',
+          `editing ${editing.total} in ${out.phases.editing.minutes} min, idle ${idle.total} in ${out.phases.idle.minutes} min, hour ${hour.hour}`,
+        );
+      } else log('redis', redis.where, redis.reason ?? '');
+      out.redis = redis;
+      counts = {
+        ...windowCounts(out.phases.editing),
+        connected: s.sync?.connected ?? null,
+        redis,
+      };
+    }
+
     if (id === 'sync.pull.no-listing') {
       ctxB = await browser.newContext({
         viewport: VIEWPORT,
@@ -1135,6 +1577,7 @@ async function runRow(id) {
     out.storeCalls.ownReads = reads.length;
     counts.instances = folded.instances.length;
     counts.minutes = out.phases.window?.minutes ?? MINUTES;
+    counts.tier = out.tier ?? null;
     const verdict = judgeRow(id, counts, where);
     out.counts = counts;
     out.result = verdict.result;
@@ -1198,9 +1641,13 @@ function runAll() {
     const json = join(dir, `${id}.json`);
     const args = [SELF, '--base', BASE, '--row', id, '--out', json, '--minutes', String(MINUTES)];
     if (SHOTS) args.push('--shots', SHOTS);
+    if (arg('idle-minutes', null) !== null) args.push('--idle-minutes', String(IDLE_MINUTES));
+    if (TIER_ARG !== null) args.push('--tier', TIER_ARG);
     console.log(
-      `sync-cost-probe: node ${args.map((a) => (a === SELF ? 'scripts/probes/sync-cost-probe.mjs' : a)).join(' ')}`,
+      `sync-cost-probe: node ${args.map((a) => (a === SELF ? 'scripts/probes/sync-cost-probe.mjs' : a)).join(' ')}${arg('redis-url', null) !== null ? ' --redis-url <set>' : ''}`,
     );
+    /* the Redis URL rides to the child after the line above was printed; never printed itself */
+    if (arg('redis-url', null) !== null) args.push('--redis-url', arg('redis-url', null));
     const run = spawnSync(process.execPath, args, { stdio: 'inherit', env: process.env });
     if (existsSync(json)) {
       const parsed = JSON.parse(readFileSync(json, 'utf8'));
@@ -1244,7 +1691,8 @@ function runAll() {
     startedAt,
     endedAt: new Date().toISOString(),
     minutes: MINUTES,
-    tier: rows.find((r) => r.tier)?.tier ?? null,
+    idleMinutes: IDLE_MINUTES,
+    tier: TIER_ARG ?? rows.find((r) => r.tier)?.tier ?? null,
     instances,
     rows,
     exitCode,
@@ -1258,8 +1706,22 @@ function runAll() {
 }
 
 if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]) {
-  if (!BASE || !OUT || (!ROW && !ALL) || !Number.isFinite(MINUTES) || MINUTES <= 0) {
+  if (
+    !BASE ||
+    !OUT ||
+    (!ROW && !ALL) ||
+    !Number.isFinite(MINUTES) ||
+    MINUTES <= 0 ||
+    !Number.isFinite(IDLE_MINUTES) ||
+    IDLE_MINUTES <= 0
+  ) {
     console.error(USAGE);
+    process.exit(2);
+  }
+  if (TIER_ARG !== null && !['redis', 'blob', 'memory'].includes(TIER_ARG)) {
+    console.error(
+      `sync-cost-probe: --tier takes redis, blob or memory, not ${JSON.stringify(TIER_ARG)}`,
+    );
     process.exit(2);
   }
   if (ALL) {

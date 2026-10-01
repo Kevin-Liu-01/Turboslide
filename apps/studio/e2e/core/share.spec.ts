@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, request, test } from '@playwright/test';
 import type { BrowserContext, Locator, Page } from '@playwright/test';
 
 import { hueFor } from '@turboslide/identity/hues';
@@ -6,6 +6,7 @@ import { hueFor } from '@turboslide/identity/hues';
 import {
   Scratch,
   addSlide,
+  agentHeaders,
   clickCard,
   coverage,
   ctl,
@@ -44,7 +45,12 @@ import {
 // reaching the second browser, and a restore on a deck two browsers wrote into. The owner is one
 // context; every other person is a fresh context with no cookie of the owner's. The return round
 // (docs/RETURN.md section 5) adds the roster's Go to slide, the second browser's live pointer and
-// the notification that arrives from a second browser's mention.
+// the notification that arrives from a second browser's mention. The realtime round
+// (docs/REALTIME.md section 2) adds two rows of the realtime feature at the end: the share link
+// opened on every instance within a second of its mint, and the departed guest's name stable
+// over three reloads with the answering instance named; the second Live pointers row is read by
+// whichever id the build carries (`view.livePointers.others` since REALTIME.md 5.2, today's
+// `view.livePointers.collaborators` before the integrator's rename).
 //
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/share.spec.ts
 
@@ -1152,20 +1158,33 @@ test(title('collab.roster.go-to-slide'), async ({ browser }) => {
   }
 });
 
+/** The id of the second Live pointers row on this build: `others` (docs/REALTIME.md 5.2) or today's `collaborators`. */
+async function othersPointerRow(p: Page): Promise<string> {
+  await ctl(p, 'menubar.view').click();
+  await p.locator('#ts-menu-view').waitFor({ timeout: 8000 });
+  const parent = ctl(p, 'menu.view.livePointers');
+  let id = 'view.livePointers.collaborators';
+  if ((await parent.count()) > 0) {
+    await parent.hover();
+    await p.waitForTimeout(300);
+    if ((await p.locator('[data-control="menu.view.livePointers.others"]').count()) > 0)
+      id = 'view.livePointers.others';
+  }
+  await p.keyboard.press('Escape');
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(200);
+  return id;
+}
+
 test(title('view.live-pointers.second-browser'), async ({ browser }) => {
   test.setTimeout(180_000);
   await openEditor(page, deck);
   const first = (await slideOrder(page))[0]!;
   await clickCard(page, first);
-  const switched = await reachMenuRow(
-    page,
-    'view',
-    'view.livePointers',
-    'view.livePointers.collaborators',
-  );
+  const othersRow = await othersPointerRow(page);
+  const switched = await reachMenuRow(page, 'view', 'view.livePointers', othersRow);
   const pointersOn = async (p: Page) => (await state(p)).settings?.['pointerOthers'] === true;
-  if (!(await pointersOn(page)))
-    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+  if (!(await pointersOn(page))) await menuPath(page, 'view', 'view.livePointers', othersRow);
   await expect.poll(() => pointersOn(page), { timeout: 5000 }).toBe(true);
   const { context: other, page: second } = await secondEditor(browser);
   try {
@@ -1222,7 +1241,7 @@ test(title('view.live-pointers.second-browser'), async ({ browser }) => {
       `the second browser's pointer is drawn on the first within 2 s (drawn after ${drawnAfter} ms)`,
     ).toBeLessThanOrEqual(2000 + 900);
     /* with the row off it is not */
-    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+    await menuPath(page, 'view', 'view.livePointers', othersRow);
     await expect.poll(() => pointersOn(page), { timeout: 5000 }).toBe(false);
     await sweep();
     await page.waitForTimeout(1500);
@@ -1232,7 +1251,7 @@ test(title('view.live-pointers.second-browser'), async ({ browser }) => {
       description: `drawn ${drawnAfter} ms after the sweep began; with the row off ${off}`,
     });
     expect(off, 'no pointer with Show collaborator pointers off').toBe(0);
-    await menuPath(page, 'view', 'view.livePointers', 'view.livePointers.collaborators');
+    await menuPath(page, 'view', 'view.livePointers', othersRow);
     if (secondSwitched) await switchOff(second);
   } finally {
     await closeSecond(other, second);
@@ -2856,6 +2875,199 @@ test(title('collab.caret-hue-matches-chip'), async ({ browser }) => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the realtime round (docs/REALTIME.md section 2; the two rows of this file whose feature is
+// realtime): the share link on every instance and the departed guest's name after a reload. Each
+// records the instance that answered its origin's sync.status (storeCalls.instance, read through
+// the agent surface with the bearer where one exists; none on localhost, build/r1.md R1-R5c).
+
+/** The instance that answers the base's sync.status for the deck, or the reason it could not be read. */
+async function instanceOfBase(id: string): Promise<string> {
+  const base = (process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321').replace(/\/$/, '');
+  const headers = agentHeaders(base);
+  if (headers === null) return 'no bearer';
+  const api = await request.newContext();
+  try {
+    const res = await api.post(`${base}/api/actions/sync.status?deck=${encodeURIComponent(id)}`, {
+      headers,
+      data: {},
+      timeout: 20_000,
+      maxRedirects: 0,
+    });
+    if (res.status() !== 200) return `status ${res.status()}`;
+    const body = (await res.json().catch(() => null)) as {
+      storeCalls?: { instance?: string };
+    } | null;
+    return body?.storeCalls?.instance ?? 'no storeCalls.instance in the answer';
+  } catch (error) {
+    return `error ${String(error).slice(0, 80)}`;
+  } finally {
+    await api.dispose().catch(() => undefined);
+  }
+}
+
+test(title('realtime.share-link.every-instance'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  await openEditor(page, deck);
+  /* the first link is the dialog's Copy link (the product's path); the nine after it are minted
+     through share.createLink (several links with several roles may live at once), each a fresh
+     token, so ten mints are read on one deck */
+  links = await readLinks();
+  const rounds: string[] = [];
+  const failures: string[] = [];
+  const instances = { before: await instanceOfBase(deck), after: [] as string[] };
+  for (let i = 1; i <= 10; i += 1) {
+    let url = links.edit;
+    let mintedAt = Date.now();
+    if (i > 1) {
+      const got = await invoke<{ record: { revision: number } }>(page, 'share.get', { id: deck });
+      const made = await invoke<{ url?: string }>(page, 'share.createLink', {
+        id: deck,
+        role: 'editor',
+        label: `realtime ${i}`,
+        baseRevision: got.record.revision,
+      });
+      mintedAt = Date.now();
+      const path = shareLinkPathOf(made.url ?? '');
+      expect(path, `share.createLink ${i} answers a /s/ URL`).not.toBeNull();
+      url = `${(process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321').replace(/\/$/, '')}${path}`;
+    }
+    const { context: other, page: visitor } = await otherContext(browser);
+    try {
+      const openDelay = Date.now() - mintedAt;
+      const answer = await visitor.goto(url);
+      const status = answer?.status() ?? 0;
+      let landed = 'no editor';
+      if (status < 400) {
+        await visitor
+          .waitForURL((u) => !u.pathname.startsWith('/s/'), { timeout: 20_000 })
+          .catch(() => undefined);
+        if (new RegExp(`/edit/${deck}`).test(visitor.url())) {
+          const ready = await waitEditor(visitor)
+            .then(() => true)
+            .catch(() => false);
+          const mode = ready
+            ? await visitor
+                .locator('.pt-viewer:not(.ts-skeleton)')
+                .first()
+                .getAttribute('data-edit-mode')
+                .catch(() => null)
+            : null;
+          landed = ready
+            ? `the editor (data-edit-mode ${mode})`
+            : 'the editor page without the studio API';
+          if (mode !== 'editing') failures.push(`mint ${i}: landed on ${landed}`);
+        } else {
+          landed = new URL(visitor.url()).pathname.replace(deck, '<id>');
+          failures.push(`mint ${i}: the link landed on ${landed}`);
+        }
+      } else failures.push(`mint ${i}: the link answered ${status} ${openDelay} ms after the mint`);
+      instances.after.push(await instanceOfBase(deck));
+      rounds.push(`mint ${i}: opened ${openDelay} ms after the mint, status ${status}, ${landed}`);
+      if (openDelay > 1000)
+        failures.push(
+          `mint ${i}: the open started ${openDelay} ms after the mint (the driver's own lag past 1 s)`,
+        );
+    } finally {
+      await closeSecond(other, visitor);
+    }
+  }
+  const distinct = [...new Set([instances.before, ...instances.after])];
+  test.info().annotations.push({
+    type: 'measure',
+    description: `${rounds.join('; ')}; sync.status instances before ${instances.before} and after each open ${instances.after.join(', ')} (${distinct.length} distinct; the instance a browser navigation lands on is the deployment's choice and is recorded, not asserted)`,
+  });
+  expect(failures, 'ten of ten links open the editor within a second of the mint').toEqual([]);
+});
+
+test(title('realtime.departed-guest.name-stable'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  await openEditor(page, deck);
+  const first = (await slideOrder(page))[0]!;
+  const before = ((await state(page)).comments?.threads ?? []).length;
+  const { context: other, page: second } = await secondEditor(browser);
+  let guestPrincipal = '';
+  try {
+    await ownClientId(second);
+    const named = await nameSecond(second, 'Imani Okafor');
+    expect(named, 'the second browser typed a name').toBe(true);
+    guestPrincipal = (await peopleRows(second)).self?.principalId ?? '';
+    await clickCard(second, first);
+    await second.keyboard.press('Escape');
+    await second.keyboard.press('Meta+Alt+m');
+    await ctl(second, 'comment.card').waitFor({ timeout: 8000 });
+    await ctl(second, 'comment.card.new.field').click();
+    await second.keyboard.type('A departed guest wrote this.', { delay: 40 });
+    await ctl(second, 'comment.card.new.submit').click();
+    await expect
+      .poll(async () => ((await state(second)).comments?.threads ?? []).length, { timeout: 10_000 })
+      .toBe(before + 1);
+    await settled(second);
+  } finally {
+    await closeSecond(other, second);
+  }
+  expect(guestPrincipal, "the guest's principal id").toMatch(/^anon_/);
+  const readings: string[] = [];
+  const failures: string[] = [];
+  for (let n = 1; n <= 3; n += 1) {
+    const instance = await instanceOfBase(deck);
+    const t = Date.now();
+    await openEditor(page, deck);
+    const slot = page.locator('[data-control="title.comments.slot"] button').first();
+    if ((await slot.count()) > 0) await slot.click();
+    else await ctl(page, 'title.comments').click();
+    await ctl(page, 'panel.comments').waitFor({ timeout: 8000 });
+    const rowOf = page
+      .locator('[data-control^="panel.comments.thread."]')
+      .filter({ has: page.locator(`.ts-chip[data-principal="${guestPrincipal}"]`) })
+      .first();
+    let readMs: number | null = null;
+    const read = await expect
+      .poll(
+        async () => {
+          if ((await rowOf.count()) === 0) return null;
+          const row = await rowOf.evaluate((el) => ({
+            name: el.querySelector('.ts-comments-row-name')?.textContent?.trim() ?? null,
+            trust: el.querySelector('.ts-comments-row-trust')?.textContent?.trim() ?? null,
+          }));
+          if (row.name === 'Imani Okafor' && row.trust === 'guest') {
+            readMs ??= Date.now() - t;
+            return row;
+          }
+          return row;
+        },
+        { timeout: 10_000, intervals: [100] },
+      )
+      .toEqual({ name: 'Imani Okafor', trust: 'guest' })
+      .then(() => true)
+      .catch(() => false);
+    const row =
+      (await rowOf.count()) > 0
+        ? await rowOf.evaluate((el) => ({
+            name: el.querySelector('.ts-comments-row-name')?.textContent?.trim() ?? null,
+            trust: el.querySelector('.ts-comments-row-trust')?.textContent?.trim() ?? null,
+          }))
+        : null;
+    readings.push(
+      `reload ${n} (instance ${instance}): ${read ? `the name and "guest" ${readMs} ms after the reload` : `read ${JSON.stringify(row)} within 10 s`}`,
+    );
+    if (!read || (readMs ?? Infinity) > 3000)
+      failures.push(
+        `reload ${n} on instance ${instance}: ${read ? `${readMs} ms` : `read ${JSON.stringify(row)}`}`,
+      );
+    if (
+      await ctl(page, 'panel.comments.close')
+        .isVisible()
+        .catch(() => false)
+    )
+      await ctl(page, 'panel.comments.close').click();
+  }
+  test.info().annotations.push({ type: 'measure', description: readings.join('; ') });
+  expect(failures, 'every reload reads the name and "guest" within 3 s, three of three').toEqual(
+    [],
+  );
+});
+
 coverage(import.meta.filename, [
   'share.dialog.open',
   'share.copy-view-link',
@@ -2903,5 +3115,8 @@ coverage(import.meta.filename, [
   'people.comment-departed-guest',
   'share.dialog.owner-resolved',
   'collab.caret-hue-matches-chip',
+  /* the realtime round (docs/REALTIME.md section 2) */
+  'realtime.share-link.every-instance',
+  'realtime.departed-guest.name-stable',
 ]);
 void statusOf;

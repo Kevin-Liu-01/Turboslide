@@ -728,6 +728,180 @@ as off and the tabs fall to the `blob` tier's behaviour until the connection ret
 lost, because every admitted entry reaches the store within the checkpoint interval. Redis must
 never hold the only copy of anything: that is the test of whether a value belongs there.
 
+### 9.1 The realtime round (2026-10-01)
+
+The redis tier leaves the in process fake for the first time in the realtime round
+(`docs/REALTIME.md`; the research under `docs/gslides-parity/realtime/`). The round's lanes (R1
+the channel and the server, R2 the client, R3 the presence surfaces, R4 Google sign in, R5 the
+matrix, R6 these pages) change this section's design in six places; each lane's note under
+`docs/gslides-parity/realtime/build/` names its hunks.
+
+- The presence write is one `EVALSHA` of `PRESENCE_SET` (`packages/realtime/src/lua.ts`): the
+  clock check, the two `HSET`s (the body and its meta field `<clientId>:m` carrying
+  `<clock>:<durable>`), `ZADD`, the two `PEXPIRE`s and the `PUBLISH`, in place of the seven
+  commands of `redis.ts` `presence.set`. A frame whose durable projection (the entry without
+  `pointer`, `drag` and `clock`) equals the stored one is volatile: its body is not stored, its
+  meta clock and the expiry are refreshed, and it is published, so a pointer frame costs one
+  command and a joiner reads the pointer at the next frame; the editor hour falls from about
+  10,000 Redis commands to about 4,300 (REALTIME.md 3.4; `research-hosting.md` 2.1; R1's
+  `build/r1.md`). The state gains `caret.seq` (the tab's stream position, so a receiver transforms
+  a remote caret past later entries) and `drag` (the moving block's box while the pointer is
+  down); on the blob tier `drag` joins `PRESENCE_OMITTED_FIELDS` and nothing else changes there.
+- The drop bus (`packages/realtime/src/bus.ts`): `PUBLISH bus:<topic>` with the id as the
+  message, one subscription per topic per instance; the topics are `access` (the access record
+  cache, `cachedAccessStore`), `link` (the deck index row of `indexFactsFor`: the link grants, the
+  typed name, the avatar choice), `identity` (the room's resolved identity cache and its email
+  memory) and `principal` (declared; the kv principal store has no per instance cache to drop on
+  this tree). The memory tier runs the same bus in process; the blob tier has none and keeps its
+  5 s TTLs (REALTIME.md 3.6). The principal records live in Redis on this tier through the `kv`
+  of `auth/identity.ts` `selectPrincipalStore`.
+- A bearer's write over `POST /api/actions/<action>?deck=<id>` enters the deck's stream like a
+  tab's POST (every tier but `blob`; every mutation but `version.restore`) with `author.kind:
+'agent'`, the token's label as the name, the `x-turboslide-author` run id when present and the
+  client id `agent:<principalId>`, so the open tab's banner names the agent and Cmd+Z does not
+  take the write back (REALTIME.md 3.3).
+- The resync rule: a stream open whose `since` is above the head, more than 2,000 behind it, or
+  below the first retained entry of the stream (the trim) is answered `resync`, never a replay
+  with a gap and never a hang, on every tier (a blob tier revision above the new head at the flip
+  and the same case backwards at a rollback are the two hosted cases); the tab reloads once at the
+  head and its pending ops replay from the pending store (REALTIME.md 3.7).
+- The hand off between the tiers: on the redis tier every `roomFor` and every stream heartbeat
+  reads the `realtime` flag through the channel (cached 5 s). When it reads off (a hand
+  `SET flag:realtime off` on the database, or Redis unreachable, which the channel reads as off
+  and logs `redis.unavailable`) the instance closes its rooms, writes `resync` to every open
+  stream and closes them, and serves the next requests over the blob channel built on demand;
+  when the flag reads on again the instance hands back the same way. The tabs reload once each
+  way; nothing is lost because every admitted entry reached the store within the checkpoint
+  interval and the blob tier commits every append (9.3 item 1 is the command).
+- The per deck objects above gain the bus channels; the stream keeps 10,000 entries behind the
+  last checkpoint (`apps/studio/src/server/checkpoint.ts` `STREAM_RETAIN_ENTRIES`); the rule that
+  Redis never holds the only copy of anything stands.
+- Follow returns to the default view for every editor and owner, by link and anonymous included
+  and never for an agent: the `follow` cell of the capability matrix (`packages/identity/src/access.ts`)
+  leaves `NOT_BY_LINK` for editor links and `title.presence.follow` loses `advanced: true`
+  (REALTIME.md 7.5; R3's `build/r3.md`). Nothing here changes an authorization decision on the
+  server: a viewer's stream carries the ops with the notes stripped and the presence frames, and
+  the pointer is published by editors and owners alone (REALTIME.md 3.5).
+- Google sign in rides the same install: `DATABASE_URL` for the accounts, `REDIS_URL` for the
+  sessions' secondary storage and the principal store, the two Google variables and
+  `TURBOSLIDE_ADMIN_EMAILS` (REALTIME.md section 4; `docs/security.md` section 12).
+
+Measured against a real Redis for the first time in this round: the local two process run
+(two node servers over one tmp store with `REDIS_URL=redis://127.0.0.1:6379/<n>`) and the redis
+preview gate. [The ship step writes the numbers here from `build/r1.md` and the ledgers: the
+keystroke, the caret, the chip, the Redis commands per editor hour against the 12,000 ceiling.]
+
+### 9.2 The runbook: turning the tier on (REALTIME.md 3.7 and 4.5)
+
+The order never breaks a deployment, because `select.ts` reads `REDIS_URL` only when nothing is
+forced (79) and `redis` forced without it is a TypeError at the first request (67 to 71).
+Production forces `blob` today (`vercel env ls production --scope general-translation` on
+2026-10-01, names only: `TURBOSLIDE_REALTIME` present, `REDIS_URL` absent, on both projects).
+Every step that touches the project's environment runs through
+`node scripts/hosting/realtime-env.mjs <subcommand>` from a root linked to `turboslide-gt`
+(`scripts/hosting/README.md`): values from 600 files under `~/.config/turboslide/`, names only in
+the output, `--dry-run` to see the plan first. The Marketplace installs and the Google console are
+Kevin's (section 11's account boundary; REALTIME.md 4.5).
+
+1. Kevin installs Upstash Redis from the project's Storage tab (Fixed 250 MB, `us-east-1`,
+   connected to production and preview); `REDIS_URL` appears in both environments.
+   `realtime-env.mjs redis` confirms it and sets nothing. The next main deploy reads the URL and
+   stays on `blob`, because the forced row stands.
+2. Kevin installs Neon Postgres the same way (`DATABASE_URL`); `realtime-env.mjs database` mints
+   `BETTER_AUTH_SECRET` per environment with `openssl rand -hex 32` into
+   `~/.config/turboslide/better-auth.env` and sets it.
+3. Kevin creates the Google Cloud project `Turboslide` and the Web application client (REALTIME.md
+   4.5 step 3; `design-google-login.md` section 8) and writes the two values into
+   `~/.config/turboslide/google-oauth.env` (600); `realtime-env.mjs google` sets them with
+   `TURBOSLIDE_ADMIN_EMAILS`.
+4. `realtime-env.mjs mail` sets Resend's pair when Kevin provides `mail.env`; without it
+   `TURBOSLIDE_MAIL` stays `off`, the email field hides and Google is the one method (default 7.7).
+5. The redis preview gate (REALTIME.md 5.4 item 2): one deployment of the merged tree with
+   `-e TURBOSLIDE_REALTIME=redis`, `REDIS_URL` from the preview environment, the whole matrix once,
+   detached; `cost.redis.commands` over its ceiling holds the flip.
+6. `realtime-env.mjs flip`: requires `REDIS_URL` on both environments, removes the forced
+   `TURBOSLIDE_REALTIME` row on both (the removal and not a forced `redis`, default 7.9) and
+   writes `scripts/hosting/production.json` to `redis`; the ship step commits the file and pushes;
+   the guard (`scripts/hosting/README.md` "The guard patch") checks `REDIS_URL` before the
+   production deploy and runs the three realtime rows on the seller path; the next production
+   deployment selects `redis` (`select.ts` 79). Every open tab reloads once (REALTIME.md 3.7).
+7. The function log is read for the base URL warning, Kevin signs in once on
+   `www.turboslide.com`, the badge is read on a second browser, the scratch deck is removed by id
+   (`accounts.google-roundtrip`).
+
+Two deployments serve one deck during the alias switch (a blob instance writes records to the
+store while a redis instance appends to the stream): the redis room's follower reads the records
+above what it knows, announces an external checkpoint and the tabs reload at its revision; the
+window is the seconds of the switch (REALTIME.md 3.7; the ship note records what it saw).
+
+### 9.3 The rollback switch (REALTIME.md 3.8)
+
+`TURBOSLIDE_REALTIME` with the values `memory`, `redis` and `blob`. Production after the flip has
+no forced row and selects `redis` from `REDIS_URL`. Three ways back, from the fastest:
+
+1. No deploy: the `realtime` flag off. The command is
+   `redis-cli -u "$REDIS_URL" SET flag:realtime off` against the database (on Upstash, the
+   console's CLI; `REDIS_URL` read into the shell from the environment, never typed), or
+   `turboslide admin flag realtime off --to https://www.turboslide.com` against the deployment
+   through the agent bearer (`~/.config/turboslide/hosts.json`, never printed). The flag lives at
+   `flag:realtime` and is read with a 5 s cache on every instance (`apps/studio/src/server/flags.ts`
+   `FLAG_CACHE_MS`; `redis.ts` `flag`), so within 5 s every instance hands its rooms to the blob
+   channel the way `redis.unavailable` does (9.1); `SET flag:realtime on` or `DEL flag:realtime`
+   hands back. The tabs reload once each way. [R1 verifies on the preview that the hand set `off`
+   takes that path; the ship step writes the reading here.]
+2. A redeploy with the forced row: `node scripts/hosting/realtime-env.mjs rollback` sets
+   `TURBOSLIDE_REALTIME=blob` on production and preview (`--force`) and writes `production.json`
+   to `blob`; the guard's next pass, or `vercel deploy --prod` from the guard's worktree, builds
+   with it. The tabs reload once.
+3. Vercel's Instant Rollback (`vercel rollback --scope general-translation --yes`, or
+   `vercel promote <previous production url>`) to the guard's previous production deployment,
+   built with the forced `blob` row and running with it; `~/.config/turboslide/README.md` "Rolling
+   back by hand" has the steps and the hold that stops the loop redeploying the sha.
+
+A tab's stream position on the redis tier is not a store revision, so after any of the three the
+blob tier's replay answers `resync` and the tab reloads once (REALTIME.md 3.7); its pending ops
+survive in the pending store and replay against the current document.
+
+### 9.4 The failure modes (REALTIME.md 3.8)
+
+| Failure                                        | What happens                                                                                                                                                                                                                                                                       | Where                                                                                             |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Redis unreachable from an instance             | `redis.unavailable` is logged, the `realtime` flag reads off and the tabs fall to the blob tier's behaviour; nothing is lost, every admitted entry reaches the store within the checkpoint interval                                                                                | `redis.ts` `flag`; the paragraph above 9.1; 9.3 item 1 is the same path set by hand               |
+| A pub/sub message dropped                      | The subscriber's gap is filled from the stream by `XRANGE`; the client's 8 s gap watch reopens the stream if the fill is late                                                                                                                                                      | `redis.ts` `handle`, `redis.test.ts` (the dropped message test); `room-client.ts` the gap watch   |
+| The subscriber connection dropped              | ioredis reconnects; the instance's streams miss events until the client's gap watch reopens them; the hello's replay fills the gap                                                                                                                                                 | `room.ts` (`maxRetriesPerRequest: 3`)                                                             |
+| Upstash's connection limit                     | Every instance holds two connections; the limit is unpublished and the error exists (9.5). Kevin asks Upstash before the flip; the preview gate reads the connection count in the console                                                                                          | `research-options.md` 5a; `research-hosting.md` section 4 item 5 (1,024 descriptors per instance) |
+| The checkpointer's lock holder dies            | A waiter breaks a lock whose heartbeat is older than 3 s and writes the run                                                                                                                                                                                                        | `checkpoint.ts` (the lock, the heartbeat, the break)                                              |
+| A reload between the append and the checkpoint | The document at the store plus the stream's tail; the replay fills the rest                                                                                                                                                                                                        | `room.ts` `syncLive`; R1's two instance test on the blob store under the redis channel            |
+| Two instances checkpoint one run               | The checkpointer re-reads the records' `covered` under its lock on every run (a mirror syncs first), so two instances never commit one stream entry twice; the memory tier's single process hid a stale `covered` a second instance's checkpoint would have made before this round | `checkpoint.ts`; R1's finding on the two process run (`build/r1.md`)                              |
+| Blob's rate limit on the write path            | Fewer writes than today (one record per run); a 429 backs the checkpointer off and the stream keeps the entries up to 10,000                                                                                                                                                       | `research-hosting.md` section 4 item 7                                                            |
+| A presence flood                               | The per client budget drops frames past 15 a second; the `volatile` frames cost one command                                                                                                                                                                                        | `decks.$deckId.presence.ts` (`presenceBudget`); 9.1                                               |
+| The function's maximum duration                | The stream closes at 240 to 290 s with a `retry`, as today                                                                                                                                                                                                                         | `packages/realtime/src/protocol.ts`                                                               |
+
+### 9.5 Upstash's connection limit, read on 2026-10-01
+
+Every instance holds two connections (the command client and its pub/sub duplicate, `redis.ts`
+57 to 95, built with `lazyConnect: false` at module load, `room.ts` 156), nothing closes them
+when an instance is paused, and fluid compute runs many instances, so the number of connections
+a plan allows decides whether the tier holds under a gate's hundreds of tabs. The number is not
+published. Read as data on 2026-10-01: Upstash's troubleshooting page
+`https://upstash.com/docs/redis/troubleshooting/max_concurrent_connections` names the error
+`ERR max concurrent connections exceeded`, one cause ("You have reached the concurrent
+connection limit") and three answers (open and close the client inside a serverless function, at
+about 4 ms of latency per call; the REST client `@upstash/redis`, which "does not have any
+connection related problems" and which this tier cannot use because `SUBSCRIBE` needs the Redis
+protocol; or support@upstash.com); the pricing page `https://upstash.com/pricing/redis` and the
+pricing document `https://upstash.com/docs/redis/overall/pricing` carry rows for commands a
+second (10,000 on the fixed plans), request size, record size, data size and bandwidth and no row
+for connections, and the pricing document says nothing about how `redis.call` inside a script or
+a delivered pub/sub message is counted (operational commands such as `AUTH`, `HELLO`, `PING` and
+`QUIT` are not charged; replications to read regions are); the global database page
+`https://upstash.com/docs/redis/features/globaldatabase` states the latencies (read under 1 ms
+and write under 5 ms from the same region at the 99th percentile) and nothing about connections.
+The question Kevin sends to support@upstash.com before the flip: the concurrent connection limit
+of the Fixed 250 MB plan in `us-east-1`, for a client that holds one command connection and one
+subscriber per serverless instance. [The ship step writes the answer here, and the connection
+count the Upstash console showed during the preview gate.]
+
 ## 10. The private store and storage layout v2
 
 Layout v1 (sections 4 and 5) is one public store: every document has a predictable public URL, and
@@ -826,33 +1000,39 @@ A dev server needs `TURBOSLIDE_SESSION_SECRET` (32 characters or more; every `/a
 request derives its author from the sealed cookie, and the tmp store's export tokens need
 `TURBOSLIDE_DOWNLOAD_SECRET` beside it); an obviously fake value is fine on a checkout.
 
-Environment variables the round adds (every secret differs between preview and production):
+Environment variables the round adds (every secret differs between preview and production). The
+realtime round of 2026-10-01 (section 9.2) sets the rows it names through
+`scripts/hosting/realtime-env.mjs`, from 600 files under `~/.config/turboslide/`, names only in
+its output:
 
-| Variable                                             | Set by                | Effect                                                                                         |
-| ---------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
-| `REDIS_URL`                                          | the Upstash install   | the `redis` realtime tier, the caches and the inboxes of section 9                             |
-| `TURBOSLIDE_REALTIME`                                | you                   | forces `memory`, `redis` or `blob`                                                             |
-| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store     | layout v2: documents in the private store through `layoutBlobClient` (section 10)              |
-| `TURBOSLIDE_BLOB_PRIVATE_DIR`                        | you, a checkout       | a folder as the private store for a migration rehearsal                                        |
-| `DATABASE_URL`, `BETTER_AUTH_SECRET`                 | the Neon install, you | accounts (B3)                                                                                  |
-| `TURBOSLIDE_SESSION_SECRET`                          | you                   | seals the anonymous principal cookie; 32 characters or more, `openssl rand -hex 32`            |
-| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`             | you, after the domain | the mail sender (B3)                                                                           |
-| `TURBOSLIDE_MAIL`                                    | you                   | `capture` on previews                                                                          |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`           | you                   | the GitHub sign in (B3)                                                                        |
-| `TURBOSLIDE_ADMIN_EMAILS`                            | you                   | the deployment admins                                                                          |
-| `TURBOSLIDE_DOWNLOAD_SECRET`                         | you                   | required on every hosted environment, 16 bytes or more (section 5's table)                     |
-| `TURBOSLIDE_AUTH_DB`                                 | you, a checkout       | `node:sqlite` accounts on a checkout                                                           |
-| `TURBOSLIDE_AUTHORIZE`                               | you                   | `shadow` (default) logs denials and allows; `enforce` refuses                                  |
-| `TURBOSLIDE_MISSING_RECORD`                          | you                   | what a deck without `access.json` synthesizes as (B4's `authorize.ts`)                         |
-| `TURBOSLIDE_TRUST_PROXY`                             | you                   | trusts the platform's client address header (B4)                                               |
-| `TURBOSLIDE_LOCAL_OPEN`                              | a checkout's tests    | the localhost open rule for the test runs only                                                 |
-| `TURBOSLIDE_LOCAL_TOKEN`                             | you, a checkout       | `require` makes the localhost agent surface take the token of `.turboslide/token` (B3)         |
-| `TURBOSLIDE_AUTH_RATE_LIMIT`                         | a checkout's tests    | `off` turns the library's sign in limiter off for a spec run; ignored hosted                   |
-| `TURBOSLIDE_PASSKEY_RPID`                            | reserved              | the production host once final; the passkey plugin reads it when installed                     |
-| `TURBOSLIDE_CSP`                                     | you                   | `report` (default) sends the nonce CSP as report only; `enforce` after the report weeks; `off` |
-| `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY`       | you                   | the capture browser's egress denial and `strict` web security (B4, docs/security.md)           |
-| `TURBOSLIDE_PUBLIC_STORE_HOST`                       | you, hosted           | the public store's host for the CSP's `img-src` (B4)                                           |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | the Upstash install   | the Upstash rate limiter replaces the memory one when both are set (B4)                        |
+| Variable                                             | Set by                                                                                                                 | Effect                                                                                                                                                                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIS_URL`                                          | the Upstash install (Kevin, 4.5 step 1 of REALTIME.md)                                                                 | the `redis` realtime tier when nothing is forced (`select.ts` 79), the sessions' secondary storage, the principal store, the drop bus, the caches and the inboxes of section 9                                            |
+| `TURBOSLIDE_REALTIME`                                | you; `realtime-env.mjs flip` removes it, `rollback` sets `blob`                                                        | forces `memory`, `redis` or `blob`; production forced `blob` until the realtime round's flip removed the row (9.2); the rollback switch (9.3); `redis` without `REDIS_URL` is a TypeError at the first request            |
+| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store                                                                                                      | layout v2: documents in the private store through `layoutBlobClient` (section 10)                                                                                                                                         |
+| `TURBOSLIDE_BLOB_PRIVATE_DIR`                        | you, a checkout                                                                                                        | a folder as the private store for a migration rehearsal                                                                                                                                                                   |
+| `DATABASE_URL`, `BETTER_AUTH_SECRET`                 | the Neon install (Kevin, 4.5 step 2); `realtime-env.mjs database` mints and sets the secret, one value per environment | accounts (B3); without `DATABASE_URL` the Sign in row is absent (`auth/db.ts` `NO_DATABASE_NOTICE`)                                                                                                                       |
+| `TURBOSLIDE_SESSION_SECRET`                          | you                                                                                                                    | seals the anonymous principal cookie; 32 characters or more, `openssl rand -hex 32`                                                                                                                                       |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`             | you, after the domain; `realtime-env.mjs mail` from `mail.env`                                                         | the mail sender (B3)                                                                                                                                                                                                      |
+| `TURBOSLIDE_MAIL`                                    | you; `realtime-env.mjs mail`                                                                                           | `capture` on previews; `off` on production until the Resend pair exists, which hides the email field so Google may be the one method (REALTIME.md 4.1, default 7.7)                                                       |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`           | you                                                                                                                    | the GitHub sign in (B3)                                                                                                                                                                                                   |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`           | `realtime-env.mjs google` from `~/.config/turboslide/google-oauth.env` (Kevin writes it, 4.5 steps 3 and 4)            | the Google sign in (the realtime round, REALTIME.md 4.1; R4's `auth/better-auth.ts`): the redirect URI `<origin>/api/auth/callback/google`, the scopes `openid email profile`, `prompt=select_account`, no offline access |
+| `TURBOSLIDE_AUTH_HOSTS`                              | you, when a deployment owns a host off the default list                                                                | the Host names better-auth's `baseURL.allowedHosts` accepts; the default list is `www.turboslide.com`, `turboslide.com`, `turboslide.vercel.app`, `localhost:*`, `127.0.0.1:*` (REALTIME.md 4.1; R4)                      |
+| `TURBOSLIDE_ADMIN_EMAILS`                            | `realtime-env.mjs google` (`kevin@generaltranslation.com` by default)                                                  | the deployment admins; the first sign in with a listed address is the admin (`auth/profile.ts` `adminEmails`)                                                                                                             |
+| `TURBOSLIDE_BUILD_COMMIT`                            | the guard, per deployment (`-e` and `--build-env`)                                                                     | the commit a CLI deployment serves, read by `/api/agent` (`server/build-commit.ts`); a CLI deployment carries no `VERCEL_GIT_COMMIT_SHA`                                                                                  |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                         | you                                                                                                                    | required on every hosted environment, 16 bytes or more (section 5's table)                                                                                                                                                |
+| `TURBOSLIDE_AUTH_DB`                                 | you, a checkout                                                                                                        | `node:sqlite` accounts on a checkout                                                                                                                                                                                      |
+| `TURBOSLIDE_AUTHORIZE`                               | you                                                                                                                    | `shadow` (default) logs denials and allows; `enforce` refuses                                                                                                                                                             |
+| `TURBOSLIDE_MISSING_RECORD`                          | you                                                                                                                    | what a deck without `access.json` synthesizes as (B4's `authorize.ts`)                                                                                                                                                    |
+| `TURBOSLIDE_TRUST_PROXY`                             | you                                                                                                                    | trusts the platform's client address header (B4)                                                                                                                                                                          |
+| `TURBOSLIDE_LOCAL_OPEN`                              | a checkout's tests                                                                                                     | the localhost open rule for the test runs only                                                                                                                                                                            |
+| `TURBOSLIDE_LOCAL_TOKEN`                             | you, a checkout                                                                                                        | `require` makes the localhost agent surface take the token of `.turboslide/token` (B3)                                                                                                                                    |
+| `TURBOSLIDE_AUTH_RATE_LIMIT`                         | a checkout's tests                                                                                                     | `off` turns the library's sign in limiter off for a spec run; ignored hosted                                                                                                                                              |
+| `TURBOSLIDE_PASSKEY_RPID`                            | reserved                                                                                                               | the production host once final; the passkey plugin reads it when installed                                                                                                                                                |
+| `TURBOSLIDE_CSP`                                     | you                                                                                                                    | `report` (default) sends the nonce CSP as report only; `enforce` after the report weeks; `off`                                                                                                                            |
+| `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY`       | you                                                                                                                    | the capture browser's egress denial and `strict` web security (B4, docs/security.md)                                                                                                                                      |
+| `TURBOSLIDE_PUBLIC_STORE_HOST`                       | you, hosted                                                                                                            | the public store's host for the CSP's `img-src` (B4)                                                                                                                                                                      |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | the Upstash install                                                                                                    | the Upstash rate limiter replaces the memory one when both are set (B4)                                                                                                                                                   |
 
 ## 12. Round four: the CDN rules, the thumbnail cache, the seed twins and the native addon
 

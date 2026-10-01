@@ -1,0 +1,135 @@
+{
+  "base": "https://www.turboslide.com",
+  "tag": "hotfix-cb84fb0c-run4",
+  "deck": "untitled-20261001-bscu",
+  "startedAt": "2026-10-01T01:53:48.908Z",
+  "requests": [
+    {
+      "at": "2026-10-01T01:53:49.785Z",
+      "action": "comment.add",
+      "status": 200,
+      "ms": 192,
+      "inst": "z5vmh",
+      "sinceResolveClick": null
+    },
+    {
+      "at": "2026-10-01T01:53:53.191Z",
+      "action": "comment.list",
+      "status": 200,
+      "ms": 497,
+      "inst": "2jdw9",
+      "sinceResolveClick": null
+    },
+    {
+      "at": "2026-10-01T01:53:53.262Z",
+      "action": "comment.list",
+      "status": 200,
+      "ms": 151,
+      "inst": "25jbg",
+      "sinceResolveClick": null
+    },
+    {
+      "at": "2026-10-01T01:53:57.984Z",
+      "action": "comment.add",
+      "status": 200,
+      "ms": 686,
+      "inst": "tjjfw",
+      "sinceResolveClick": null
+    },
+    {
+      "at": "2026-10-01T01:53:58.426Z",
+      "action": "comment.list",
+      "status": 200,
+      "ms": 380,
+      "inst": "szdpv",
+      "sinceResolveClick": null
+    },
+    {
+      "at": "2026-10-01T01:54:01.790Z",
+      "action": "comment.resolve",
+      "status": 200,
+      "ms": 603,
+      "inst": "g84w6",
+      "sinceResolveClick": 628
+    },
+    {
+      "at": "2026-10-01T01:54:02.281Z",
+      "action": "comment.list",
+      "status": 200,
+      "ms": 426,
+      "inst": "v822c",
+      "sinceResolveClick": 1119
+    }
+  ],
+  "readings": {
+    "openAt": 1350,
+    "openCount": 0,
+    "openHasThread": false,
+    "resolvedAt": 1978,
+    "resolvedCount": 1,
+    "resolvedHasThread": true,
+    "open2At": 3910,
+    "open2Count": 0,
+    "open2HasThread": false,
+    "resolved2At": 4420,
+    "resolved2HasThread": true,
+    "stateResolvedAt": 664,
+    "within5s": true
+  },
+  "api": [
+    {
+      "inst": "4f988",
+      "ms": 262,
+      "status": 200,
+      "resolved": false,
+      "rev": 2,
+      "total": 1
+    },
+    {
+      "inst": "dljn9",
+      "ms": 225,
+      "status": 200,
+      "resolved": false,
+      "rev": 2,
+      "total": 1
+    }
+  ],
+  "threadId": "01m3tjp6zqneatxjt5jrxfg8j2",
+  "resolveClickAt": 1790819641162,
+  "removed": true,
+  "log": [
+    "/new drew after 540 ms; deck id untitled-20261001-bscu",
+    "tab   192 ms  200  z5vmh  comment.add",
+    "editor open after 4092 ms at https://www.turboslide.com/edit/untitled-20261001-bscu: slide title, revision 1, sync memory/poll connected false, access link/owner, filmstrip cards 1",
+    "tab   497 ms  200  2jdw9  comment.list",
+    "tab   151 ms  200  25jbg  comment.list",
+    "comments.loaded true after 210 ms",
+    "tab   686 ms  200  tjjfw  comment.add",
+    "thread placed: 1 thread(s) in the tab 842 ms after submit; markers 1",
+    "tab   380 ms  200  szdpv  comment.list",
+    "picture docs/gslides-parity/focus/verification/production-comments-hotfix-cb84fb0c-run4-01-comment-placed.png (31 ms)",
+    "panel open, filter All: 1 row(s)",
+    "picture docs/gslides-parity/focus/verification/production-comments-hotfix-cb84fb0c-run4-02-panel-all.png (49 ms)",
+    "tab   603 ms  200  g84w6  comment.resolve (+628 ms after the click)",
+    "pick open: selectOption took 4 ms (before it: {\"disabled\":false,\"drawn\":true,\"value\":\"all\",\"options\":3})",
+    "tab   426 ms  200  v822c  comment.list (+1119 ms after the click)",
+    "filter Open at +1350 ms: 0 row(s); the thread not under Open",
+    "pick resolved: selectOption took 15 ms (before it: {\"disabled\":false,\"drawn\":true,\"value\":\"open\",\"options\":3})",
+    "filter Resolved at +1978 ms: 1 row(s); the thread under Resolved (is-resolved)",
+    "pick open: selectOption took 4 ms (before it: {\"disabled\":false,\"drawn\":true,\"value\":\"resolved\",\"options\":3})",
+    "filter Open again at +3910 ms: 0 row(s); the thread not under Open",
+    "pick resolved: selectOption took 3 ms (before it: {\"disabled\":false,\"drawn\":true,\"value\":\"open\",\"options\":3})",
+    "filter Resolved again at +4420 ms: the thread under Resolved",
+    "tab state read the thread resolved at +664 ms",
+    "picture docs/gslides-parity/focus/verification/production-comments-hotfix-cb84fb0c-run4-03-filter-resolved-after-4420ms.png (30 ms)",
+    "pick open: selectOption took 3 ms (before it: {\"disabled\":false,\"drawn\":true,\"value\":\"resolved\",\"options\":3})",
+    "picture docs/gslides-parity/focus/verification/production-comments-hotfix-cb84fb0c-run4-04-filter-open-after-4959ms.png (25 ms)",
+    "verdict: resolved read under Resolved at +1978 ms and off Open at +1350 ms, state at +664 ms, no reload",
+    "api   262 ms  200  4f988  comment.list +5246 ms after the click: thread resolved rev 2 total 1",
+    "api   225 ms  200  dljn9  comment.list +5773 ms after the click: thread resolved rev 2 total 1",
+    "api instances read: 4f988, dljn9",
+    "tab deck.trash ok (revision 1 -> 1)",
+    "tab deck.remove ok",
+    "api   211 ms  404  jtlwh  deck.info after remove gone"
+  ]
+}

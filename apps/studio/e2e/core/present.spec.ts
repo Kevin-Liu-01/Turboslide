@@ -519,11 +519,19 @@ test(title('comments.on-title-placeholder'), async () => {
 async function threadsLoaded(
   slideId: string,
 ): Promise<{ id: string; resolved?: boolean; replies: unknown[] }[]> {
-  await expect.poll(async () => (await threads()).length, { timeout: 15_000 }).toBeGreaterThan(0);
+  /* the comments load beside the document: `describe().state.comments.loaded` reads true once
+     `comment.list` answered after the reload (b6's cycle 3 R3), and the count is read after it */
+  await expect
+    .poll(async () => (await state(page)).comments?.loaded ?? null, { timeout: 15_000 })
+    .not.toBe(false);
   /* the reply and resolve rows open a thread from its marker; when the object row's comment did
      not land (it read one thread where two were expected on the preview, run 2) the slide holds a
      slide level thread alone and draws no marker after the reload, so a thread on a setup block is
-     placed through the window API first (a setup write, never a driven step) */
+     placed through the window API first (a setup write, never a driven step). The same setup
+     write runs when the deck holds no thread at all: a row read narrowed on production
+     (`--only specs --rows comments.resolve`, the people round's rerun of 2026-09-30) ran without
+     the `comments.on-*` rows before it and failed here on an empty list, which read as a second
+     red of the row where it was the row's own dependency */
   await page.waitForTimeout(1500);
   if ((await ctl(page, 'comment.marker').count()) === 0) {
     await placeBlock(page, slideId, {
@@ -532,9 +540,12 @@ async function threadsLoaded(
       text: 'Reply box',
       pos: { x: 200, y: 600, w: 400, h: 100 },
     });
+    /* the body in the schema's shape (commentBodySchema: text and mentions); as a bare string the
+       window API refused it before any request left, the refusal was swallowed here and the row
+       failed on the marker (the preview reading of the hotfix of 2026-10-01, narrowed) */
     await invoke(page, 'comment.add', {
       anchor: { kind: 'block', slideId, blockId: 'reply-box' },
-      body: 'A thread to reply to.',
+      body: { text: 'A thread to reply to.', mentions: [] },
     }).catch(() => undefined);
     await settled(page);
   }

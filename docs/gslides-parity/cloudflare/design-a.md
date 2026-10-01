@@ -1,0 +1,454 @@
+# Design A: the channel on a Durable Object, everything else where it is
+
+Architect A of the Cloudflare design round, written 2026-10-01 in the worktree `/Users/kevinliu/repos/Turboslide-realtime` (branch `realtime/round`, `HEAD` `c978bb43`, equal to `origin/main`, plus the uncommitted edits of the realtime build round: six lanes editing at the time of writing). Line numbers are `HEAD`'s (`git show HEAD:<path>`) for every file `git status` lists as modified (`apps/studio/src/server/room.ts`, `checkpoint.ts`, `write.ts`, `access.ts`, `actions.ts`, `auth/identity.ts`, the three deck routes, `packages/realtime/client/room-client.ts`, `packages/realtime/src/channel.ts`, `protocol.ts`, `redis.ts`, `memory.ts`, `apps/studio/src/editor/controller.tsx`, `docs/hosting.md`, `docs/SYNC.md`, `docs/FOCUS.md`, `docs/security.md`); a working tree hunk is named by its function and marked "working tree". Every other file is read as the working copy, which `git status` lists as unmodified. This note fetched no product page itself: every product claim below cites the URL one of the five research notes of this folder fetched on 2026-10-01 and repeats what that note says the page said, by note and section. The one network read of this note is DNS: `dig NS turboslide.com +short` answered `dns1.registrar-servers.com` and `dns2.registrar-servers.com` and `dig CNAME www.turboslide.com +short` answered `5661780b11730745.vercel-dns-016.com` (2026-10-01), so the zone is at the registrar, `www` is Vercel's, and the Worker of this design is reached on its `workers.dev` hostname. Nothing was edited outside this folder, built, installed, started, deployed or configured.
+
+The brief: the least change. The realtime channel and presence move to one Cloudflare Worker with one Durable Object per deck over hibernating WebSockets. The app, the store, the version log, the exports and the agent HTTP routes stay on Vercel and Vercel Blob. The account database question is answered with what works from a Vercel function, which on Cloudflare's free tier is nothing this stage, with the reason and the two alternatives named (section 1.3).
+
+## 1. The shape
+
+### 1.1 One paragraph
+
+A Worker `turboslide-realtime` on `turboslide-realtime.<subdomain>.workers.dev` holds one Durable Object class `DeckRoom` with the SQLite backend, one object per deck, addressed by `idFromName(deckId)`. Every tab holds one WebSocket to its deck's object. The object is the order: it assigns the seq, transforms each entry past what landed since its base, runs the reducer and the validator, writes the entry to its SQLite before it acknowledges, fans the entry out to every socket the reader's role may see, and holds the roster in memory and in each socket's attachment. The object writes no version record itself: on its alarm (2 s after the last op, 10 s under typing, at once for an agent write) it posts the uncommitted entries to a Vercel route `POST /api/decks/:id/checkpoint` under a shared bearer, and that route runs the existing commit path (`coalesceEntries`, `store.write` with `ops` and `origin`, the comments applier) against Vercel Blob and answers the records; the object then publishes one `checkpoint` frame, moves `covered`, and trims. A tab proves its right to join with a ticket the Vercel editor loader mints: the deck id, the client id, the identity, the role, the reader facts and an expiry, signed with HMAC-SHA256 under a secret the Worker also holds; the Worker verifies the ticket before the socket reaches the object. The Vercel app keeps every page, loader, server function, export, the agent HTTP routes and the store; its stream, ops and presence routes answer "go to the Worker" on this tier; the reads that took the live document in process ask the Worker to checkpoint first and then read the store. The three existing tiers stay: `memory` for a checkout and the tests, `blob` hosted without a Worker and as the rollback, `redis` as built by the realtime round and unused by this design. The fourth tier's word is `do`.
+
+### 1.2 The paths, one text diagram each
+
+The notation: `A` and `B` are two browsers on one deck, `V` is a Vercel function, `W` is the Worker's stateless router, `DO` is the deck's Durable Object, `S` is Vercel Blob through the store. Times are the estimates of `research-options.md` 5b (10 to 30 ms a WebSocket frame in one region, under 5 ms admission) and the measured 650 ms four round Blob commit (`docs/SYNC.md` 2.2 as `audit-sync.md` 1.3 cites it); no number on a Durable Object path is measured yet (`research-durable-objects.md` section 5).
+
+A keystroke from A to B:
+
+```
+A tab: keystroke → room-client applies locally (optimistic) → 100 ms text flush (FLUSH_MS, room-client.ts 189)
+  → ws frame {t:'ops', req, ...OpsPost} ──10-30 ms──→ DO
+DO: ticket facts of the socket → budgets (CAPS, admission.ts 25-42) → base window (checkBaseWindow)
+  → since(base, head) from SQLite → transformEntry past landed → landCandidate (reducer, validator)
+  → INSERT entries (seq = head+1, rev = revision) [durable before the ack: SQLite output gate]
+  → setAlarm(now + 2 s) if none pending
+  → ws frame {t:'ack', req, ok, entries, rejected, head, revision, between?} ──→ A (A settles by op id)
+  → ws frame {type:'op', entry} filtered per reader ──10-30 ms──→ B (B applies, transforms its pending past it)
+Estimate keystroke to B's DOM: 100 + 10-30 + <5 + 10-30 = 125-165 ms in one region; the row's bound is 300 ms.
+```
+
+A join:
+
+```
+B: GET /edit/<deck> ──→ V loader (write.ts readEditorDeckFn 401-495): requestIdentity, decideFor('read'),
+   viewerFacts, mintClientId, store.read() → document, coveredSeq(records) → room: {tier:'do', seq: covered,
+   url: 'wss://<worker>/rooms/<deck>', ticket, ticketExpiresAt}
+B tab: new WebSocket(url + '?since=<covered>&tab=<token>&retire=<ids>', ['turboslide.v1', 'ticket.<token>'])
+  ──→ W: verify HMAC, exp, deck == path, org == Origin header → stub(idFromName(deck)).fetch(upgrade + claims)
+  ──→ DO: retire sockets tagged tab:<token>; count sockets per identity, per address; acceptWebSocket(ws, tags);
+      attachment = {claims, roster entry}; hello {seq: head, revision, clientId, role (editing ceiling), clients
+      (roster filtered for this reader), editing, tier:'do', covered}; replay since → head (replayPlan) or resync;
+      presence frame {clientId, clock, state} of B to every other socket
+A: B's chip within one frame of the accept (the row's bound is 1 s).
+```
+
+A presence frame (caret, selection, pointer, drag):
+
+```
+A tab: setPresence → 80 ms batch (PRESENCE_BATCH_MS) → ws frame {t:'presence', ...PresencePost}
+DO: per socket 15 a second cap → volatile or durable (a frame whose only change is pointer, drag or clock is
+    published and not stored; REALTIME.md 3.4's rule) → roster entry in memory and the socket attachment when
+    durable → {type:'presence', clientId, clock, state} to every other socket, state filtered per reader.
+A heartbeat with no change is the literal string "ping": the runtime answers "pong" without waking the object
+(setWebSocketAutoResponse; research-durable-objects.md section 4).
+```
+
+An agent HTTP write:
+
+```
+agent: POST /api/actions/block.set?deck=<id> (bearer) ──→ V actions route (actions.$action.ts 93-113)
+  → deckDispatcher → roomBackedStore.write (room.ts 1126-1180) → admitServerWrite (3281) on tier 'do':
+  → POST https://<worker>/rooms/<deck>/write {author (kind agent, serverClientId), mutations, baseRevision,
+    strict, note} with Authorization: Bearer <room bearer> ──→ W verifies the bearer ──→ DO:
+    base check (exact when strict, per touched slide otherwise) → landCandidate → INSERT entry
+    clientId agent:<principalId> → {type:'op'} to every socket (A's banner names the agent)
+    → checkpoint now: POST https://www.turboslide.com/api/decks/<deck>/checkpoint {fromSeq, toSeq, entries}
+      ──→ V checkpoint route: coalesceEntries → store.write(..., {ops, force}) with origin → records
+      ──→ DO: covered = toSeq, revision = record.revision, {type:'checkpoint'} to every socket
+  ← {ok, revision, record, seq} ──→ V answers the agent {revision, record, seq} as ServerWriteResult (3251-3261)
+Two hops in series (V → DO → V) plus the Blob commit: about 650 ms plus two hops.
+```
+
+A reload:
+
+```
+A reloads: pending store (IndexedDB) holds the unacknowledged ops → GET /edit/<deck> → V loader as the join
+  → A's socket opens at since = covered → hello.covered = DO.covered → replay (covered, head] → A's pending ops
+    are offered (offerPersisted) and replayed against the document; one whose first attempt committed is
+    recognised by (clientId, opId) in the DO's retained tail and answered with its seq, never appended twice.
+```
+
+A 20 s offline:
+
+```
+A offline: the browser's offline event closes the socket (the transport's listener, as sseTransport's at
+  controller.tsx 346-351) → room-client marks the stream down; A types; flush posts over HTTP
+  POST https://<worker>/rooms/<deck>/ops (Authorization: Ticket <token>) and fails; the ladder waits.
+A online: holdForHello → the socket reopens at since = A's position → replay fills the gap → A's resend goes at
+  the caught up base with the shifted offset; the DO transforms it past B's words; B reads A's words.
+Bound: 3 s after the reconnect (the row).
+```
+
+A version checkpoint:
+
+```
+DO alarm fires (2 s idle, or 10 s hard, or 2,000 entries, or 1 MB; checkpoint.ts 24-31 as constants)
+  → SELECT entries WHERE seq > covered → POST /api/decks/<deck>/checkpoint {fromSeq, toSeq, entries}
+    (the DO's outbound fetch: AbortSignal 25 s; one of the six outbound connections)
+  ──→ V: for each coalesced write: store.write({baseRevision: store.revision(), author, mutations, note,
+      origin: {clientId, opIds}}, {ops: {fromSeq, toSeq}, force: true}) (checkpoint.ts commit 190-210);
+      comment entries → commentsApplierFor(deck).apply; scheduleCardThumb(deck) (card-thumb.ts)
+      → {committed: VersionRecord[], revision, tier}
+  ──→ DO: revision = answer.revision; covered = toSeq; publish {type:'checkpoint', revision, fromSeq, toSeq,
+      snapshot, author, note, comments?}; DELETE entries WHERE seq <= covered - 10,000; if answer.tier !== 'do'
+      → {type:'resync'} to every socket and close (the rollback case, 5.3).
+```
+
+A sign in: none in this design (1.3). Google sign in's code (R4's working tree) ships inert; the Sign in row stays absent while `DATABASE_URL` is unset (`apps/studio/src/server/auth/db.ts` 62 to 65; `NO_DATABASE_NOTICE` as `read-auth.md` 1.3 reads it).
+
+### 1.3 The account database: nothing this stage, with the reason
+
+What a Vercel function can reach on Cloudflare's free plan, by the pages the researchers fetched on 2026-10-01:
+
+- D1 is reached through a Worker binding: "To interact with your D1 database from your Worker, you need to access it through the environment bindings provided to the Worker (env)" (https://developers.cloudflare.com/d1/worker-api/d1-database/, `research-d1-auth.md` answer 1). The HTTP endpoint `POST /accounts/{account_id}/d1/database/{database_id}/query` exists, Cloudflare describes it as the control plane ("REST API primarily interacts with the control plane", https://developers.cloudflare.com/d1/best-practices/query-d1/), and it sits under the global limit of "1,200 requests per five minute period per user" (https://developers.cloudflare.com/fundamentals/api/reference/limits/), which with the 4 to 7 statements per authenticated request of `read-auth.md` 4.1 is two concurrent signed in editors (`research-d1-auth.md` section 4).
+- Hyperdrive is a Worker binding and brings no database ("Hyperdrive is included in both the Free and Paid Workers plans", https://developers.cloudflare.com/hyperdrive/platform/pricing/; `env.HYPERDRIVE.connectionString`, https://developers.cloudflare.com/hyperdrive/configuration/connect-to-postgres/; `research-d1-auth.md` answer 5).
+- A session cookie set by a Worker on `workers.dev` never reaches `www.turboslide.com` (`workers.dev` is on the Public Suffix List, line 12707 of https://publicsuffix.org/list/public_suffix_list.dat on 2026-10-01; `read-auth.md` 3.5), so the auth routes cannot move to the Worker without the identity runtime moving with them (`research-d1-auth.md` section 3, layouts A'' and C), which is not the least change.
+
+So Design A ships no account database. Production stays what it is today: anonymous principals only, no `DATABASE_URL` on either project (`docs/hosting.md` working copy 1014; `research-hosting.md` 9 as `read-auth.md` 1.3 cites it). Two consequences are named and not hidden: the five `accounts.*` rows of `docs/REALTIME.md` section 2 stay `not driven` on production (the four local rows run on the e2e server, which has `TURBOSLIDE_AUTH_DB`, `playwright.config.ts` 43), and the principal store stays a file per instance without Redis (`identity.ts` 182 to 189 as `read-auth.md` 1.1 reads it), so `realtime.departed-guest.name-stable` keeps the blob tier's standing (section 8).
+
+The two alternatives, for the orchestrator's comparison and Kevin's choice, neither built by this design:
+
+- A1, D1 behind the Worker. The Worker gains `POST /db/batch` under the room bearer, running `env.ACCOUNTS.batch(statements)` (D1's `batch()` is one transaction, https://developers.cloudflare.com/d1/worker-api/d1-database/ as `research-d1-auth.md` 1.2 cites it). The function gains a Kysely dialect in the shape of `apps/studio/src/server/auth/sqlite-dialect.ts` (115 lines; its `bindable` at 29 to 39 already turns booleans into 0 and 1 and dates into ISO strings) that posts one compiled statement per `executeQuery`. The token store takes its cache path (`tokens.ts` 211 to 227 as `read-auth.md` 1.2 reads it: "Any engine with no synchronous read takes the cache path"). The cost: 4 to 7 Worker requests per authenticated request, so the Workers Free 100,000 a day is reached at 45 to 62 signed in editor hours a day (`research-d1-auth.md` section 4, the layout C row), unless the function caches account facts per session token for the cookie cache's 5 minutes (`better-auth.ts` 267 as `read-auth.md` 2.4 reads it), which takes it to about 12 Worker requests per signed in editor hour. Latency: one Worker hop and one D1 statement, both unmeasured (`research-d1-auth.md` open 1; the floor from this machine to the API edge was 50 to 116 ms). The principal `touch` must stay off D1: it writes on every request and would pass 100,000 rows a day at 45 to 60 editor hours (`read-auth.md` 4.1). This is a lane of its own and not the least change.
+- A2, Neon's free plan from Neon's own console (not the Vercel Marketplace): `DATABASE_URL` and `pg` unchanged (`db.ts` 48 to 49, 87 to 88). It is neither Vercel's nor Cloudflare's; Kevin's words were "cloudflare instead of vercel stuff", so it is named and not chosen.
+
+## 2. The authority and the auth of the channel
+
+### 2.1 Who admits, who transforms, who holds the roster
+
+The object admits and transforms. The admission is `admitOps` (`room.ts` 1693 to 1927) in shape: the budgets with the keys of `keys.ts` 106 to 128 as in memory counters per object (1712 to 1750), the base window (`checkBaseWindow`, `admission.ts` 73 to 77; 1764 to 1773), the landed entries since the base (1779 to 1784), the dedupe by `(clientId, opId)` (1789 to 1805, with the index of 2.3 in place of the tail scan), `transformEntry` with the tie rule (`landedOf`, 1462 to 1470, 1485 to 1509), the reducer and the validator in `landCandidate` (1596 to 1642), the undo of a refused sibling (`undoOfSplices`, 1584 to 1593), the working tree's `yieldConcurrentConversion` first in `transformEntry`, then the append, which in one object is an `INSERT` with no compare and no retry loop (`appendWithRetry`, `admission.ts` 167 to 233, exists for two writers and has one here). The pure half of these functions moves out of `room.ts` into `packages/realtime/src/room-core.ts` with no `node:` import, because `room.ts` imports `node:crypto` and `ioredis` (1, 3) and the schema's reducer, transform and validator import no `node:` (`read-channel.md` 1.3 item 8); `room.ts` re-exports them so its callers do not move (section 4).
+
+The object holds the roster: in memory while awake, in each socket's `serializeAttachment` (16,384 bytes at most, https://developers.cloudflare.com/durable-objects/best-practices/websockets/ as `research-durable-objects.md` 2 cites it) while hibernated, rebuilt from `getWebSockets()` on wake. A roster entry's identity fields (`label`, `trust`, `mark`, `principalId`, the verified `email` for owners and grant holders) come from the ticket (2.2), because the identity cache, the principal record and the deck index row are the function's (`rosterEntryFor` 2449 to 2484 reads them; `read-channel.md` 1.3 item 7). The hue slot (`assignHueSlot`, `preferredHueSlot` from `@turboslide/identity/hues`, imported at `room.ts` 7 with no `node:`), the pointer and drag rule for the first 20 editors and owners (2466 to 2475; `LIVE_POINTERS_MAX` `protocol.ts` 41) and the editing ceiling (`overEditingCeiling`, `EDITING_TABS_MAX` 43) run in the object as pure functions over the roster.
+
+The function decides who may join and mints the ticket; the function also writes the version log (section 3). The Worker verifies tickets and bearers before anything reaches the object, which is the rule the WebSocket page gives ("Validate requests in your Worker to avoid billing for invalid requests against a Durable Object", `research-durable-objects.md` 1.4 fact 2).
+
+### 2.2 The room ticket
+
+The ticket is minted by the editor loader (`write.ts` `readEditorDeckFn` 401 to 495), which already runs `requestIdentity` (429), `decideFor` (431) and reads the room facts it hands the page (493: `room: { seq, tier, notice }`), and by a new same origin route `GET /api/decks/:id/ticket?client=<cid>` for the refresh. A new module `apps/studio/src/server/room-ticket.ts` holds the shape:
+
+- Claims, canonical JSON (`canonicalJson` is imported at `room.ts` 51): `v` 1 (the protocol version), `deck`, `cid` (the client id, minted by `mintClientId` 2663 to 2668 so the MAC rule of 2647 to 2652 stays the function's; on a refresh the route takes the page's `cid` and checks `clientIdMatches(deck, cid, identity)` 2671 to 2677 before re-signing it), `id` (the identity string the budgets key on, `requestIdentity`'s `identity`), `kind` (`anonymous`, `signedIn`, `agent`; `admission.ts` 20), `pid` (the principal id, optional), `role`, `via`, `names` (`showNames`), `rc` (`readComments`) (the `ViewerFacts` of 2500 to 2508), `label`, `trust`, `mark`, `email` (the roster entry's identity fields, from `resolveRequestIdentity` 2399 to 2409 and `rosterEntryFor`; `email` only when `trust` is `verified`), `org` (the request's origin, which the function served and trusts), `tab` (the tab token, `tabTokenOf` 2325, optional), `iat`, `exp`.
+- The token: `base64url(claims) + '.' + base64url(hmacSha256(TURBOSLIDE_ROOM_SECRET, claims))`, `node:crypto` on the function as `clientIdMac` does, `crypto.subtle` HMAC verify in the Worker (`nodejs_compat` is on by default for compatibility dates of 2026-08-04 or later, https://developers.cloudflare.com/workers/configuration/compatibility-flags/ as `read-auth.md` section 6 cites it, but WebCrypto needs no flag).
+- Life: `ROOM_TICKET_TTL_MS` 600,000 (10 minutes); the client refreshes at `exp` minus 120 s and at once on an `access` frame, and sends `{ t: 'ticket', ticket }` up the socket; the object re-verifies and replaces the socket's facts. A lower role sends `{ type: 'access', revision: 0 }` (the frame of the stream route 174); a role without `read`, or no fresh ticket 30 s past `exp`, closes the socket with code 4403. This replaces the route's 60 s recheck (`AUTHORIZE_RECHECK_MS`, `decks.$deckId.stream.ts` 70) and its `access` drop (166 to 177, 195); the share and access routes, which today `channel.publish` an `access` event, publish it through the Worker (4.1), so a revoked link still reaches the tab within the publish and not within 10 minutes.
+- Carriage: the WebSocket upgrade carries the token as the second subprotocol, `['turboslide.v1', 'ticket.<token>']` (the constructor takes `url` and `protocols` and nothing else, https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket as `research-workers.md` 5.3 reads it; a token of base64url characters and `.` is a valid HTTP token); the Worker answers `Sec-WebSocket-Protocol: turboslide.v1`. An HTTP `POST /rooms/:id/ops` or `/presence` carries `Authorization: Ticket <token>`. Nothing rides a query string, so no ticket lands in a request log on either host (the Worker's 256 KB per request log, https://developers.cloudflare.com/workers/platform/limits/ as `research-workers.md` section 1 cites it; the app's one JSON line per request, `read-runtime.md` 2.13).
+- The Worker checks: the signature, `exp`, `deck` equals the path, `org` equals the request's `Origin` header (an upgrade always carries one; a cross origin `fetch` carries one), `v` is 1 or the one before it during a two version window. This is the cross site rule of `refuseCrossSite` (`room.ts` 3165 to 3184) and the CSRF filter (`apps/studio/src/start.ts` 19 to 22, 42 to 45) moved to the Worker with no host list to maintain: the pipeline's preview hosts pass because the loader that served the page put them in `org` (`research-workers.md` 5.2 asked for a pattern or a per deployment claim; this is the claim).
+- CORS for the HTTP POSTs: the Worker answers `OPTIONS` with the request's `Origin` echoed, `Access-Control-Allow-Methods: POST`, `Access-Control-Allow-Headers: authorization, content-type`, no credentials (the ticket is a header, not a cookie; MDN CORS as `research-workers.md` 5.2 reads it: without credentials no explicit origin rule binds). The actual POST is authorized by the ticket alone. The page's CSP `connect-src` gains `https://<worker host>` and `wss://<worker host>` from a new variable `TURBOSLIDE_ROOM_HOST` beside `TURBOSLIDE_PUBLIC_STORE_HOST` (`headers.ts` 167, 220 to 236; the policy is report only today, `cspMode` 195 to 200).
+
+The bearer between the two hosts: `TURBOSLIDE_ROOM_BEARER`, a second secret both hold, on `Authorization: Bearer` for the function's calls to the Worker (`/write`, `/flush`, `/external`, `/publish`, `/roster`, `/health`) and the object's calls to the function (`/checkpoint`, `/seed`). The agent surface's own bearer never reaches the Worker: an agent's write enters through the Vercel actions route and is forwarded under the room bearer (1.2).
+
+### 2.3 The ordering guarantees
+
+1. One object is one thread. Ops are admitted in arrival order per deck; the seq is `head + 1`; `rev` is the object's revision (the last committed record's). The soft limit is 1,000 requests a second per object (https://developers.cloudflare.com/durable-objects/platform/limits/ as `research-durable-objects.md` 3 cites it); Turboslide's worst room is 20 pointer publishers at 15 a second, 300 a second.
+2. An entry is durable before its acknowledgement: the `INSERT` runs in the same synchronous block as the `ack`, and the runtime's output gate holds the response until the write is confirmed ("the write path runs behind output gates", https://blog.cloudflare.com/sqlite-in-durable-objects/ as `research-durable-objects.md` 5 cites it).
+3. Every admitted entry is transformed past every entry between its base and the head before placement, and the answer carries the placed mutations (`admitOps` 1819 to 1846). There is no retry after a moved head, because nothing moves the head between the read and the insert in one thread.
+4. An op id is admitted at most once while its first attempt is in the retained window: the object's `entries` table carries a unique index on `(clientId, opId)`, and a POST's op ids are looked up by that index (0 to 64 rows read per POST) instead of the 2,000 entry tail scan of 1789 to 1794. The window is the retention, 10,000 entries behind `covered` (`STREAM_RETAIN_ENTRIES`, `checkpoint.ts` 37), which is wider than `REPLAY_MAX_ENTRIES` 2,000 (`protocol.ts` 30).
+5. The replay covers exactly the gap: a socket opens at `since`, the object answers `hello` with `seq: head` and `covered`, then the entries `(since, head]` by `replayPlan` (`admission.ts` 85 to 89) paged by 256 to 2,000 entries or 1 MB (`replayFor` 2764 to 2790), or `resync` when `since` is above the head, more than 2,000 behind it, or below the first retained seq (the working tree's `replayFor` rule, `build/r1.md` item 5; `docs/hosting.md` working copy 763 to 767). The `ack` carries `between` (`betweenEntries` 1351 to 1366, pure) as the ops route does (`decks.$deckId.ops.ts` 149).
+6. A reader receives every frame its role may see: `filterEventForReader` (2566 to 2599), `rosterEntryForReader` (2515 to 2539) and `stripNotes` (2542 to 2556) run per socket over the socket's ticket facts; `inbox` frames go to the sockets whose `pid` matches (2593 to 2595).
+7. A hibernated object wakes on the first frame or alarm with its constructor; it reads one `meta` row (`head`, `covered`, `revision`, the last snapshot's key) and the entries above `covered` (at most 2,000, since a checkpoint fires at 2,000), rebuilds the roster from `getWebSockets()`, and loads the live document from the Vercel seed route `GET /api/decks/:id/seed` (the store's document at the last checkpoint plus `coveredSeq`) before the first admission; the entries above `covered` are applied on top. A hello during the load is answered after it. The wake's cost is a risk named in section 10.
+
+### 2.4 The invariants of SYNC.md 3.11 and REALTIME.md 3.9, restated for the `do` tier
+
+`docs/SYNC.md` 3.11 (177 to 191 at `HEAD`); `docs/REALTIME.md` 3.9 (116 to 118).
+
+1. One ordered log per deck: the object's `entries` table is the order in front of the record log; the manifest put with `ifMatch` (`blob-store.ts` 1880 to 1884 as `read-store.md` 1.3 cites it) stays the store's one commit point, written by the checkpoint route alone; a record above the proven manifest is a claim and is never applied (unchanged, store side).
+2. Transform before place on every tier, the answer carries the placed mutations: in the object, 2.3 item 3; the tie rule rides the up frame as `insertTie` (`protocol.ts` `opsPostSchema`).
+3. Every record names its origin, an op id is admitted at most once within the window: the checkpoint route writes `origin: { clientId: write.clientId, opIds: write.opIds }` from `CoalescedWrite` (`coalesce.ts` 17 to 28) on every `store.write` it makes. This closes `read-channel.md` finding 9: `checkpoint.ts` `commit` (196 to 204) passes no `origin` today, so the stream tiers' records carry none and the resync read's `origins` (`write.ts` 468 to 471) answer nothing for them. The second half is 2.3 item 4.
+4. The client acknowledges by op id: the `ack` frame carries `OpsResponse` (`room-client.ts` 60 to 84) and the stream frame carries the own entry with its `opId`, so `applyEntry`'s own path settles (987 to 1027 as `read-channel.md` 3 item 4 cites it); transport independent.
+5. Every text a person can type into is a text run: schema, unchanged.
+6. A reader receives every op its role may see with the notes stripped for a commenter and a viewer: 2.3 item 6.
+7. The head is read, never listed; on this tier read on the hello and never polled: the object pushes; the function polls nothing (no pulse on `do`, as on `redis`).
+8. Every read of an overwritten path is proven: store side, unchanged; the checkpoint route and the seed route read through the store as every function does.
+9. The stream opens at the client's position, the replay covers exactly the gap, `hello.covered` is the last committed seq, the answer's `between` fills what sits under an admitted entry: 2.3 item 5.
+10. Unacknowledged ops survive a reload in the pending store and a replay whose first attempt committed is acknowledged, never committed again: the client's pending store (`pending-store.ts` 1 to 48) plus 2.3 item 4; the resync read's `origins` work on this tier because of item 3.
+11. Undo per author moves the inverse past every remote entry since it was recorded: client side (`transformSince` 1970 to 1983 as `read-channel.md` 3 item 11 cites it); the own echo carries the tab's client id on this tier, so the skip holds.
+12. The budget: zero timed store calls per tick per open deck per instance on this tier; the function makes no poll. The object's own store traffic is the checkpoint route's four round write per record and the seed read per wake; the `cost.*` rows of section 8 give this tier its column, which `read-channel.md` 3 item 12 asked for.
+13. Retention on a schedule: the prune every 20th commit rides the store's write path as today; the prune at the last stream's close (`blob.ts` 448 to 467) is the blob channel's; the object's own retention is the trim of 2.3 item 4 after each checkpoint.
+
+Two more, which `docs/hosting.md` section 9's Redis rule ("Redis must never hold the only copy of anything") does not cover as written and `read-channel.md` 3 asked the design to state: the object's SQLite holds the only copy of the entries between the last checkpoint and the head, for at most the checkpoint interval (2 s idle, 10 s under typing) and at most 2,000 entries or 1 MB, after which the alarm commits them; and a wake rebuilds the live document by `syncLive`'s cold path (`room.ts` 794 to 824 in shape: the store at the last checkpoint through the seed route, then the entries above `covered`) and answers no hello before it.
+
+## 3. The version log and the store
+
+Who writes records: the Vercel checkpoint route alone, through `store.write` on the Blob backed store, with `ops: { fromSeq, toSeq }`, `force: true` and `origin` (section 2.4 item 3), one `Write` per author per contiguous run (`coalesceEntries`, `coalesce.ts`), a noted entry its own record (`coalesce.ts` 8 to 11). The commit stays the four round write of `blob-store.ts` 1766 to 1981 (`read-store.md` 1.3): the snapshot, the record claimed on its number, the changed slide bodies, the manifest with `ifMatch`, the removed bodies, the pulse. `saveVersion`, `version.restore`, the trash and restore stamps and a new deck's upload write the manifest as today (`blob-store.ts` 1983 to 2031, 2636 to 2683, 2191 to 2250); none of them moves.
+
+Where: Vercel Blob, the one public store of layout v1 (`docs/HOSTING-MOVE.md` 20 as `read-store.md` 1.1 cites it). Nothing of the store moves in this design. R2 is not touched: its subscription is a checkout ("Complete the checkout flow to add an R2 subscription", https://developers.cloudflare.com/r2/get-started/ as `research-access.md` 3.4 cites it) and a checkout is a payment stop under the account boundary (`docs/hosting.md` working copy 976 to 978).
+
+How the room follows the external order. The object learns the store's revision from two places and never polls it:
+
+- Every checkpoint answer carries `revision`, the manifest's revision after the route's writes. The object expects `revision` to be its own plus the records it just committed; a larger jump means a write landed outside the object (a blob tier instance during an alias switch, 5.2; a CLI write on a checkout does not happen hosted). The object then reloads its live document from the seed route and publishes `{ type: 'checkpoint', external: true, revision }`, which is `announceExternal` (`room.ts` 992 to 1007) with the object as the publisher; every tab reloads once at the head (the controller's handling of an external checkpoint, unchanged).
+- Every Vercel code path that writes the manifest outside the checkpoint route tells the object: `POST /rooms/:id/external { revision, snapshot?, author, note }` under the room bearer. The callers: `admitServerWrite`'s restore path (3287 to 3344, today `room.follow()` at 3343), `deckDispatcher`'s `version.save` (through `saveVersion`), the trash and restore dispatchers (`actions.ts` as `docs/SYNC.md` 5.2 names them, 776 to 786), and `writeDeck` on a `version.restore`. The follower's `store.watch` (`room.ts` 1009 to 1016) is off on `do` as it is on `blob` (891, 1010), because the object has no `fs.watch` and no free poll; the explicit call is its trigger (`read-channel.md` 2 item 5).
+
+The card thumbnail's two triggers (`decks.$deckId.ops.ts` 137 `scheduleCardThumb`; the stream route's `flushCardThumb` at 147 to 149) lose their hooks when the ops stop passing through the function (`read-channel.md` finding 12). The checkpoint route calls `scheduleCardThumb(deckId)` after a commit that carried an edit; the object posts `{ closed: true }` on the same route when its last socket closes, and the route calls `flushCardThumb(deckId)` (`card-thumb.ts` 43 to 51). The 30 s settle and the 8 s floor (`CARD_THUMB_SETTLE_MS`, `CARD_THUMB_FLOOR_MS`, 39 to 41) stand.
+
+The comments sidecar: comment entries ride the same checkpoint body and the route hands them to `commentsApplierFor(deckId).apply` as the checkpointer does (`checkpoint.ts` 261 to 270), then `appendShifts`' sidecar half (`room.ts` 1217 to 1244) shifts the anchors of the committed edits; the `checkpoint` frame carries `comments: { revision, threadIds }` as today (293).
+
+## 4. The code changes by file
+
+### 4.1 The Vercel side
+
+| File | Change |
+| --- | --- |
+| `packages/realtime/src/channel.ts` 10 | `REALTIME_TIERS` gains `'do'`; `protocol.ts` 328 (`tier: z.enum(REALTIME_TIERS)`) follows; the client that knows the word deploys with the server that says it (5.1) |
+| `packages/realtime/src/select.ts` | `ROOM_HOST_VARIABLE = 'TURBOSLIDE_ROOM_HOST'`, `ROOM_SECRET_VARIABLE = 'TURBOSLIDE_ROOM_SECRET'`; `TURBOSLIDE_REALTIME=do` forced without both is a TypeError at the first request (the shape of 67 to 71); `TURBOSLIDE_ROOM_HOST` set and nothing forced selects `do` before the `REDIS_URL` check at 79; `RealtimeSelection` gains `room: boolean`; `notice` is null on `do` |
+| `packages/realtime/src/do.ts` (new) | `doChannel({ host, bearer, fetch, insecure })`: `tier: 'do'`; `publish` posts `/rooms/:id/publish` (the `access` and `inbox` events the share, access and notify routes publish today through `channel.publish`); `presence.roster` reads `/rooms/:id/roster`; `flag('realtime')` is a `GET /health` cached 60 s per instance (the hand off probe, 5.3); `head`, `since`, `append`, `trim`, `lock`, `heartbeat`, `unlock`, `budget`, `subscribe`, `presence.set/leave/bind/owner` throw `TypeError('not on the do tier')`, since the function neither admits nor subscribes here; `bus` undefined (the readers fall to their 5 s TTLs, `access.ts` 70 and 168, `room.ts` 2354); the module imports no `node:` and is tested with a fake `fetch`; it does not run `channel-contract.ts` because it is not a full channel |
+| `packages/realtime/src/room-core.ts` (new) | the pure admission moved out of `room.ts`: `transformEntry`, `landedOf`, `landedOwn`, `landCandidate`, `reanchorAll`, `undoOfSplices`, `betweenEntries`, `refusalIssue`, `yieldConcurrentConversion` (working tree), `touchedSlides`, `editingCount`, `overEditingCeiling`, `filterEventForReader`, `rosterEntryForReader`, `stripNotes`, `grantHueSlot`'s pure form; `room.ts` re-exports every name; no `node:` import (the only `node:` users in the moved set are none; `rememberedEmail` at 2523 stays in `room.ts` and the object reads the ticket's `email` instead) |
+| `apps/studio/src/server/room-ticket.ts` (new) | `mintRoomTicket(claims)`, `ROOM_TICKET_TTL_MS`, `ROOM_TICKET_REFRESH_MS`, `roomUrlFor(deckId)` (`wss://<host>/rooms/<id>`, `ws://` with `TURBOSLIDE_ROOM_INSECURE=1` on a checkout); `node:crypto` HMAC as `clientIdMac` (2647 to 2652) |
+| `apps/studio/src/server/room.ts` | `buildChannel` (146 to 244) gains `case 'do'` returning `doChannel` over `fetch`; `createRoom` (773 to 1035) treats `do` like `blob` where `blob` means "the store is the live document": `syncLive` 795 to 800, `follow` 891, `stopWatch` 1010, `covered` 1027, with no checkpointer and no subscription on `do` (the object schedules and the route commits); `liveIfOpen` (1061) and `liveAtLeast` (1965) on `do` call `flushRoom` then read the store; `flushRoom` (1088) on `do` posts `/rooms/:id/flush`; `roomBackedStore` (1126) on `do` keeps its shape over that `live()`; `admitServerWrite` (3281) on `do`: a restore goes through `store.write` and `/external`, every other write is forwarded to `/rooms/:id/write` and the answer is mapped onto `ServerWriteResult` (3251 to 3261), with `since` filled from `store.records()` on a conflict; the working tree's `ensureRealtimeTier` reads `doChannel.flag` on `do` and hands off to the blob channel the same way (5.3); `serverClientId` (working tree) is the client id the object writes for an agent author |
+| `apps/studio/src/routes/api/decks.$deckId.checkpoint.ts` (new) | `POST`, room bearer, body `{ fromSeq, toSeq, entries, closed? }` (the body cap is Vercel's 4.5 MB; a run is at most 1 MB or 2,000 entries); runs the commit of `checkpoint.ts` 190 to 210 per coalesced write with `origin`, the comments applier, `appendShifts`' sidecar half, `scheduleCardThumb` or `flushCardThumb`; answers `{ committed, revision, tier }`; on a preview it accepts `x-vercel-protection-bypass` as any route does (the platform's, not the route's) |
+| `apps/studio/src/routes/api/decks.$deckId.seed.ts` (new) | `GET`, room bearer: `{ document, revision, covered: coveredSeq(records) }` from the store after a forced sync |
+| `apps/studio/src/routes/api/decks.$deckId.ticket.ts` (new) | `GET ?client=<cid>`, same origin, cookie: `requestIdentity`, `decideFor('read', 'stream')`, `viewerFacts`, `clientIdMatches`, `mintRoomTicket`; answers `{ ticket, expiresAt }`; refused with `denialBody` as the stream route refuses |
+| `apps/studio/src/routes/api/decks.$deckId.stream.ts`, `.ops.ts`, `.presence.ts` | on `do` the stream route answers 503 `{ error: 'tier', tier: 'do' }` with `retry-after: 30` (the client's reopen honours it, `reopenWaitMs` 1666 to 1668) and the ops and presence routes answer 409 `{ error: 'resync' }`; everything else unchanged for the three other tiers |
+| `apps/studio/src/server/write.ts` 493 | `room` gains `url`, `ticket`, `ticketExpiresAt` on `do`; `seq` is `coveredSeq(records)` on `do` (the object's replay fills the rest) |
+| `apps/studio/src/server/headers.ts` 220 to 236 | `connect-src` gains `https://` and `wss://` of `TURBOSLIDE_ROOM_HOST` |
+| `apps/studio/src/server/access.ts`, the share, access and notify routes | every `channel.publish(deckId, { type: 'access' \| 'inbox' })` keeps its call; `doChannel.publish` carries it to the object |
+| `scripts/hosting/realtime-env.mjs` | subcommands `do` (sets `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_SECRET` and `TURBOSLIDE_ROOM_BEARER` on production and preview from `~/.config/turboslide/room.env`, 600, names only in the output), `flip --tier do` (removes the forced `TURBOSLIDE_REALTIME` row, writes `scripts/hosting/production.json` to `do`), `rollback` unchanged (`blob`); `EXPECTED_NAMES` gains the three |
+
+### 4.2 The client transport
+
+`apps/studio/src/editor/controller.tsx`: a `wsTransport(deckId, tab, room)` beside `sseTransport` (325 to 466), chosen at `attachRoom` (2013 to 2018: `transport: sseTransport(deckId, tabToken(idStorage()))`) when `init.payload.room?.tier === 'do'`; `EditorRoot.tsx` 847 already passes `payload.room.tier`. The `RoomTransport` contract (`room-client.ts` 177 to 181: `open`, `postOps`, `postPresence`) is unchanged, so `room-client.ts` needs no change beyond the tier word; every rule of `read-channel.md` section 4 survives as that note read them:
+
+- `open({ since, retire, onEvent, onError })`: one `WebSocket` per open at `room.url + '?since=&tab=&retire='` with the subprotocols of 2.2; `message` → `roomEventOf`'s parse (`protocol.ts` `roomEventSchema`) → `onEvent`; `close` → `onError({ status: code >= 4000 ? code - 4000 : undefined, retryAfterMs: the close reason's number when it carries one, message })` once per open (the client owns the reopen, 1674 to 1736); the browser's `offline` event closes the socket as `sseTransport`'s listener aborts the fetch (346 to 351); a refused upgrade (a 4xx status, which the browser reports as a `close` with code 1006) maps to `StreamFailure` with no status, and the ladder waits.
+- `postOps(body)`: while the socket is open, `{ t: 'ops', req, ...body }` with a 30 s deadline (`OPS_POST_TIMEOUT_MS` 500) and the matching `{ t: 'ack', req, ...OpsResponse }` resolves it; while it is down, `fetch(https://<host>/rooms/<id>/ops, { Authorization: Ticket })` with the same answer shape (the C3-F1 rule, `flush` 1449 to 1456, keeps its path; `read-channel.md` open 5 is answered: the rule stays).
+- `postPresence(body, { leave })`: on the socket when open; a body equal to the last one sent is the literal string `ping` (the heartbeat, auto answered without a wake); `leave` goes as `{ t: 'leave', clock }` on the socket and as `fetch(..., { keepalive: true })` to `/presence?leave=1` when the socket is down (the beacon the stream route's close replaces, `room-client.ts` `stop` 1908 to 1921 as `read-channel.md` 4 item 8 reads it); the object's `webSocketClose` runs the leave with the last clock whatever the tab managed to send.
+- The ticket refresh: a timer at `ticketExpiresAt - 120 s` and the `access` frame fetch `/api/decks/:id/ticket?client=<cid>` and send `{ t: 'ticket', ticket }`; the transport holds the current ticket for its HTTP fallbacks.
+- The fallback (5.3): after `WS_FALLBACK_AFTER_MS` 30 s of failed opens the transport opens the same origin SSE route instead; on an instance still serving `do` that answers 503 with `retry-after: 30` and the ladder waits; on an instance handed off to `blob` it answers a hello whose `tier` differs from the last one's, and the working tree's `helloTier` rule (`room-client.ts`, the hello handler) resyncs at `hello.revision` once and the tab continues on the blob tier over SSE.
+
+### 4.3 The Worker
+
+Location: `apps/realtime-worker/`, a workspace app (`pnpm-workspace.yaml` 4 covers `apps/*`), because it deploys; `packages/` are libraries. Files:
+
+- `package.json`: `@turboslide/realtime` and `@turboslide/schema` as `workspace:*`; `wrangler` 4.146.0 as a dev dependency (the registry's latest on 2026-10-01, `research-durable-objects.md` 6.2), `@cloudflare/workers-types`, `@cloudflare/vitest-pool-workers` (the version the lane reads from the registry on its day 0; this round installed nothing); scripts `dev` (`wrangler dev --port 8787`), `deploy`, `test`.
+- `wrangler.jsonc`, by https://developers.cloudflare.com/workers/wrangler/configuration/ and https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/ as `research-durable-objects.md` 6.1 reads them ("At a minimum, the name, main and compatibility_date keys are required"; `exports` with `storage: "sqlite"` in place of the legacy `migrations`, never both):
+
+```jsonc
+{
+  "name": "turboslide-realtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "durable_objects": { "bindings": [{ "name": "DECK_ROOM", "class_name": "DeckRoom" }] },
+  "exports": { "DeckRoom": { "type": "durable-object", "storage": "sqlite" } },
+  "vars": {
+    "TURBOSLIDE_APP_ORIGIN": "https://www.turboslide.com",
+    "TURBOSLIDE_PROTOCOL": "1"
+  },
+  "env": {
+    "preview": {
+      "name": "turboslide-realtime-preview",
+      "vars": { "TURBOSLIDE_APP_ORIGIN": "", "TURBOSLIDE_PROTOCOL": "1" }
+    }
+  }
+}
+```
+
+  The preview environment's `TURBOSLIDE_APP_ORIGIN` is set per preview deployment with `wrangler deploy --env preview --var TURBOSLIDE_APP_ORIGIN:<preview url>`. No `account_id`: `CLOUDFLARE_ACCOUNT_ID` carries it (https://developers.cloudflare.com/workers/wrangler/system-environment-variables/ as `research-access.md` 3.2 cites it).
+- Secrets, set with `wrangler secret bulk` from a 600 file (section 7): `TURBOSLIDE_ROOM_SECRET` (the ticket HMAC key), `TURBOSLIDE_ROOM_BEARER` (both directions' bearer), `VERCEL_AUTOMATION_BYPASS_SECRET` (the preview environment only, when Kevin enables the project setting; 9.3).
+- `src/index.ts`: the router. `GET /rooms/:id` with `Upgrade: websocket`: verify the ticket (2.2), `env.DECK_ROOM.get(env.DECK_ROOM.idFromName(id)).fetch(request with the claims as a header)`. `POST /rooms/:id/ops` and `/presence` with `Authorization: Ticket`: verify, forward. `POST /rooms/:id/write`, `/flush`, `/external`, `/publish`, `GET /rooms/:id/roster` with `Authorization: Bearer`: verify against `TURBOSLIDE_ROOM_BEARER`, forward. `GET /health`: `{ ok: true, protocol }`. `OPTIONS *`: the CORS answer of 2.2. Everything else 404. No request reaches an object unverified.
+- `src/deck-room.ts`: `class DeckRoom extends DurableObject`. SQLite: `meta(key, value)` (`head`, `covered`, `revision`, `lastCheckpointAt`, `firstUncommittedAt`), `entries(seq INTEGER PRIMARY KEY, rev, kind, clientId, opId, author, mutations, comment, at, note, covers)` with `UNIQUE(clientId, opId)`; rows are under 2 MB each (an ops POST is at most 256 kB, `OPS_POST_MAX_BYTES` `protocol.ts` 28) and statements under 100 KB with at most 100 bound parameters (the limits `research-durable-objects.md` 2 cites), so a batch insert is chunked. In memory: the live document, the roster (`Map<clientId, { state, facts }>`), the budgets (fixed windows keyed as `keys.ts` 106 to 128), the presence per socket counters, the known op ids of the current window. Handlers: `fetch` (the upgrade and the HTTP routes), `webSocketMessage` (`ops`, `presence`, `leave`, `ticket`), `webSocketClose` and `webSocketError` (leave, roster, the last socket's `{ closed: true }` checkpoint post), `alarm` (the checkpoint and the hard cap). The heartbeat: `this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'))` in the constructor (https://developers.cloudflare.com/durable-objects/examples/websocket-hibernation-server/ as `research-durable-objects.md` 4 cites it). No `setTimeout` or `setInterval` anywhere in the class: a standing timer keeps the object awake and is the single most expensive line one can write (`research-durable-objects.md` finding 4). The one alarm: set when the first uncommitted entry lands at `now + CHECKPOINT_IDLE_MS` (2,000, `checkpoint.ts` 25), never later than `firstUncommittedAt + CHECKPOINT_MAX_MS` (10,000, line 27); when it fires with the newest entry younger than 2 s and the hard cap unmet it re-arms at `newest + 2 s`, else it checkpoints; at 2,000 entries or 1 MB (29 to 31) the checkpoint runs in the handler. Every outbound `fetch` carries `AbortSignal.timeout(25_000)`: a hanging fetch bills duration for up to 15 minutes (https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/ as `research-durable-objects.md` 4 cites it). Liveness without a timer: on every message and wake, a socket whose `getWebSocketAutoResponseTimestamp` and last message are both older than `PRESENCE_EXPIRY_MS` 120,000 (`protocol.ts` 68) is closed with a leave. Placement: `idFromName` with no location hint this round; the object is created near the first request and never moves (https://developers.cloudflare.com/durable-objects/reference/data-location/ as `research-durable-objects.md` 5 cites it); a `locationHint` is section 10's lever.
+- `src/ticket.ts`: `verifyTicket(token, secret, { deck, origin, now })` with `crypto.subtle`, a constant time compare, the two version window.
+- `src/sql.ts`: the schema, the statements, `rowsRead` and `rowsWritten` read off each cursor for the cost row (https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/ as `research-durable-objects.md` 2 cites it).
+- `test/`: vitest under `@cloudflare/vitest-pool-workers` for the object (the admission against the channel contract's cases of `channel-contract.ts` 112 to 330 adapted to one writer: the seq from 1, the stale base, the dedupe, the replay paging, the roster's clocks and leaves, the reader filter per socket, the ticket's refusals, the alarm's cadence with a fake clock); a pure unit test of `ticket.ts` runs in node too.
+
+### 4.4 Lines that `read-channel.md` 2.10 lists as branches on `blob`, re-read for `do`
+
+`admitOps` 1751 (never reached on `do`: the ops route answers 409), `syncLive` 795 (store on `do`), `follow` 891 (off on `do`), `stopWatch` 1010 (off), `covered` 1027 (`coveredSeq` on `do`), `flushRoom` 1098 (the Worker on `do`), `roomBackedStore` 1136 (the live read through `flushRoom` then the store on `do`), `liveAtLeast` 1972 (the same), `admitServerWrite` 3287 (the forward on `do`). The client's seven branches (`room-client.ts` 874, 900, 1003, 1055, 1228, 1262, 1491 at `HEAD`) read `tier === 'blob'` and are false on `do`, which is right: on this tier the seq is the stream's position and not a revision, as on memory and redis.
+
+## 5. The migration and the flip
+
+### 5.1 A deck on the blob tier, opened by the new tier
+
+The deck has records and a manifest and no object. The first socket's upgrade creates the object; its constructor finds an empty `meta`, reads the seed route (`document`, `revision`, `covered`), and starts the order at `head = covered`. On a blob tier deck `covered` is 0, because `admitOnBlob` writes records through `store.write` without `ops` (`room.ts` 3287 to 3298; `coveredSeq` reads `record.ops.toSeq`, `checkpoint.ts` 106 to 112), so the object's first seq is 1 while the revision is the store's (say 376); the seq and the revision are two numbers (`Entry.seq` and `Entry.rev`, `channel.ts` 56 to 60), as on the redis tier at its flip (`docs/REALTIME.md` 3.7). A tab from before the flip holds a position that is a revision; its reopen lands on the function's stream route, which answers 503 with `retry-after: 30` on `do` (4.1); its page is the old deployment's JavaScript, which does not know the word `do` (the parser is strict, `protocol.ts` 328 and `roomEventOf` 440 to 441 as `read-channel.md` 2 item 7 reads them), so it must reload: the ops route's 409 `resync` (which the old client reads as `resync(head)`, `room-client.ts` 1571 to 1574 as `read-channel.md` 4 item 7 cites it) reloads the page on its next flush, and a tab with nothing to flush reloads on its next stream open's refusal ladder when the Vercel route's body says `tier`, a field the old client ignores, so that tab waits out its 503s until the person acts or the page is reloaded by hand. The honest statement: a tab idle across the flip with nothing pending reads Reconnecting until it is reloaded; a tab that types reloads once. The two deployments window (5.2) is the same class.
+
+### 5.2 Two deployments during the alias switch
+
+A blob instance writes records straight to the store while the object orders and the checkpoint route commits. The object's next checkpoint answer carries a revision above its expectation; it reloads from the seed route and announces an external checkpoint; the tabs reload at the head (section 3). A tab on the blob instance learns of the object's records through the pulse poll as `store` entries, as it does of any other instance's commit today. The window is the seconds of the alias switch, the class `docs/SYNC.md` 3.2 records for every two deployment window and `docs/REALTIME.md` 3.7 records for the redis flip. The ship note records what it saw.
+
+### 5.3 The rollback switch and the fallback
+
+`TURBOSLIDE_REALTIME` keeps its meaning: `memory`, `redis`, `blob`, `do`. Production after the flip has no forced row and selects `do` from `TURBOSLIDE_ROOM_HOST`. Three ways back, from the fastest:
+
+1. The forced row: `node scripts/hosting/realtime-env.mjs rollback` sets `TURBOSLIDE_REALTIME=blob` on production and preview and writes `production.json` to `blob`; the guard's next pass deploys it (`docs/hosting.md` working copy 852 to 855 is the same step for the redis tier). The Worker stays deployed. A tab on the `do` JavaScript keeps its socket; the object keeps admitting and, on its next alarm, posts its checkpoint to a route whose instance now serves `blob`; the route commits the records whatever its tier (the route is bearer authenticated and tier agnostic) and answers `tier: 'blob'`; the object publishes `resync` to every socket and closes them; the tabs reload onto the blob deployment and the SSE transport. Nothing acknowledged is lost: the entries reach the store within the checkpoint interval, as `docs/REALTIME.md` 3.8 says of the redis tier. The window: a tab that reloads before that checkpoint lands reads a document missing at most 10 s of acknowledged typing until the record lands and the blob tier's poll delivers it as `store` entries.
+2. Vercel's Instant Rollback to the guard's previous production deployment (`docs/hosting.md` working copy 856 to 859), which was built with the forced `blob` row; the same object behaviour as item 1.
+3. The Worker unreachable (a Cloudflare incident): the function's `ensureRealtimeTier` (working tree) reads `doChannel.flag('realtime')`, a `GET /health` cached 60 s per instance; off hands the instance's rooms to the blob channel built on demand, as the redis tier's hand off does (`docs/hosting.md` working copy 768 to 775). The tab's transport falls to the SSE route after 30 s of failed opens (4.2) and the `helloTier` rule resyncs once. The hand back when the probe reads on: the same in reverse; the tabs reload once. The cost of the probe is bounded by request rate, at most 60 Worker requests an hour per active instance.
+
+There is no runtime kill switch without a deploy on this tier this round: the redis tier's `SET flag:realtime off` reads a Redis key (`docs/hosting.md` working copy 842 to 851); a Worker equivalent needs a flags object or a KV namespace and is named in section 10.
+
+### 5.4 A deployment without the Worker
+
+`TURBOSLIDE_ROOM_HOST` absent selects `blob` on Vercel and `memory` on a checkout (`select.ts` 80 to 88); `do` forced without the host or the secret throws at the first request (4.1). A deployment with the host set and the Worker never deployed behaves as 5.3 item 3 from the first request: the probe reads off within 60 s and the instance serves `blob`; until then the loader hands out tickets to a socket that cannot open and the tab waits on its ladder. The order of section 7 deploys the Worker and reads its `/health` before any Vercel variable names it.
+
+## 6. The free tier math
+
+The load model is `docs/SYNC.md` 4.3 (240 to 243 at `HEAD`) as `research-durable-objects.md` 1.2 counts it: one editor hour is 12 minutes of editing at one edit per 5 s and 48 idle minutes, 144 ops, about 1,440 caret and selection frames, 576 heartbeats, 1 to 3 connects, a room of two on average, 300 bytes a message, 30 day months; 1,500 editor hours a month at 50 a day and 15,000 at 500. The caps are the pricing page's as `research-durable-objects.md` 1.1 printed them from https://developers.cloudflare.com/durable-objects/platform/pricing/ (dateModified 2026-09-30, read 2026-10-01) and https://developers.cloudflare.com/workers/platform/pricing/ (2026-08-28): Free "100,000 / day" requests, "13,000 GB-s / day", "5 million / day" rows read, "100,000 / day" rows written, "5 GB (total)"; Workers Free "100,000 per day"; "If you exceed any one of the free tier limits, further operations of that type will fail with an error"; "Daily free limits reset at 00:00 UTC"; incoming WebSocket messages at "20:1"; auto response messages "will not incur additional wall-clock time, and so they will not be charged"; "Each setAlarm() is billed as a single row written"; "Deletes are counted as rows written"; duration "for the 128 MB of memory your Durable Object is allocated, regardless of actual usage".
+
+Per editor hour under this design:
+
+- Incoming messages: 144 ops plus 1,440 presence frames, 1,584, at 20:1 is 79 request units; the 576 heartbeats are the auto response pair and cost nothing.
+- Connects: 1 to 3, each one Worker request and one object request.
+- Checkpoints: under the load model every edit is followed by 2 s of idle, so one checkpoint per edit, 144 an hour, each one alarm invocation (a request) and one `setAlarm` (a row written). Real typing is bursts of keystrokes 100 ms apart and makes fewer; 144 is the ceiling the cost rows use.
+- Rows written: 144 entries, 144 `setAlarm`, 144 `meta` updates (`covered`, `revision`), and the trim's deletes once a deck holds more than 10,000 retained entries (about 70 editing hours of one deck), 144 an hour then: 432 to 576.
+- Rows read: a wake reads one `meta` row, the entries above `covered` (0 to 10 under the model) and nothing else, because the dedupe is an indexed lookup (2.3 item 4) and the roster is the attachments; an op reads its landed set (0 to a few) and its dedupe matches (0 to 64); a replay reads the gap. Under 2,000 an hour.
+- Wakes: the 12 editing minutes are two to four bursts; each burst after a hibernation pays one seed read (a Vercel invocation, not an object request). Say 4.
+- Object requests from the function: `flush` before an agent read, `external`, `publish`: under 5 an hour for sellers.
+- Duration: handlers 1,584 at about 2 ms is 3.2 s; checkpoint waits 144 at about 700 ms (the 650 ms four round commit plus a hop) is 101 s; wakes 4 at about 300 ms; alarms 144 at about 5 ms. About 106 s awake, times 0.125 GB, is 13.2 GB-s. The object is eligible for hibernation between frames and bills nothing then ("idle and eligible for hibernation are not billed for duration, even before the runtime has hibernated them").
+- Storage: 300 bytes times 144 is 43 KB an hour, trimmed to 10,000 entries behind `covered`, so at most about 3 MB per deck.
+- Worker requests: 1 to 3 connects, HTTP fallbacks while a socket is down (rare, say 5), the function's calls to the Worker (under 5), plus the health probe at most 60 an hour per active instance.
+
+Against the caps:
+
+| Cap, per day | At 50 editor hours a day | At 500 editor hours a day |
+| --- | --- | --- |
+| Durable Object requests, 100,000 Free | 79 + 2 + 144 + 5 = 230 an hour, 11,500: 11.5 % | 115,000: 115 %, over by about 20:50 UTC each day with a flat load |
+| Duration, 13,000 GB-s Free | 660: 5.1 % | 6,600: 51 % |
+| Rows written, 100,000 Free | 21,600 to 28,800: 22 to 29 % | 216,000 to 288,000: 216 to 288 %, over by about 11:00 UTC each day |
+| Rows read, 5 million Free | under 100,000: 2 % | under 1 million: 20 % |
+| SQL stored data, 5 GB Free (1 GB per object by the limits page's FAQ, `research-durable-objects.md` 2) | under 100 MB across decks | under 1 GB across decks; 3 MB per deck |
+| Worker requests, 100,000 Free | 400 plus the probes of a few active instances, about 3,000: 3 % | 4,000 plus about 5,000: 9 % |
+| D1 rows read and written, R2 operations | none in this design | none |
+
+So the Free plan holds at 50 editor hours a day on every line with the object written as 4.3 says (the heartbeat as the auto response pair, no standing timer, presence out of SQLite, the dedupe indexed). At 500 editor hours a day it breaks every day, first on rows written at about 11:00 UTC and then on object requests at about 20:50 UTC, and every realtime row reads red for the rest of the day (`research-durable-objects.md` 1.4 fact 1), which under `docs/FOCUS.md` 6.2 is a stop. The fact that forces the Workers Paid plan before any number does is the same note's fact 2: the Worker's own daily cap is spendable by anyone who can reach `turboslide-realtime.<subdomain>.workers.dev` with an upgrade request, since the request counts before the ticket is verified; the Paid plan has no daily cap ("No limit" on requests, https://developers.cloudflare.com/workers/platform/limits/ as `research-durable-objects.md` 1.4 cites it) and bills overage.
+
+On Paid, prices from the same pricing page: $5.00 a month minimum; 1 million requests a month included then $0.15 a million; 400,000 GB-s included then $12.50 a million GB-s; 50 million rows written and 25 billion read included; 5 GB-month included then $0.20 a GB-month; overage rounded up to the next billable unit.
+
+- At 50 editor hours a day: 345,000 requests, 19,800 GB-s, 0.65 to 0.86 million rows written a month, all inside the included amounts: $5.00 a month.
+- At 500 editor hours a day: 3.45 million requests, 2.45 million over, rounded to 3 million, $0.45; 198,000 GB-s inside; 6.5 to 8.6 million rows written inside; storage inside: $5.45 a month.
+
+The Vercel line is not Cloudflare's but it is Kevin's bill, so it is named: the stream's 2 GB function hold and the pulse poll leave (they are the lines `research-costs-actual.md` cut 5 names), and what stays per editor hour is about 153 invocations (144 checkpoint route calls at about 700 ms of a 2 GB function, 6 ticket refreshes, a loader, a few others) and 144 records at 5 advanced and 2 to 3 simple Blob operations each (`docs/SYNC.md` 4.2 as `read-store.md` 2 cites it). At 50 editor hours a day: about 84 GB-hours ($0.89 at $0.0106), 230,000 invocations ($0.14 at $0.60 a million), 1.08 million advanced ($5.40 at $5.00 a million) and 0.65 million simple ($0.26 at $0.40 a million) Blob operations: about $7 a month on the Pro seat the General Translation team pays anyway (prices as `research-costs-actual.md` 3 recorded them on 2026-09-20). At 500: about $70, of which Blob advanced operations are $54. The one cost lever on both bills is the checkpoint cadence: `CHECKPOINT_IDLE_MS` 2,000 is `docs/SYNC.md`'s model (one record per typing run) and this design keeps it; a 10 s idle trigger on the `do` tier would divide the checkpoint, alarm and record lines by about five under the load model at the price of version history granularity, and the pulse put the store makes on every commit (`blob-store.ts` 1940) is one advanced operation per record that no poller reads on this tier.
+
+Two things the table leaves out on purpose: the pipeline's gates, which `docs/REALTIME.md` 1.1 rule 1 keeps on the local memory tier (a hosted gate that opened hundreds of tabs against the object would count every connect, message and alarm against the same daily caps, `research-durable-objects.md` 1.3), and D1 and R2, which this design does not use.
+
+## 7. The setup steps the orchestrator performs
+
+Conventions, as `research-access.md` section 5 sets them: the operator is the orchestrator in a tab of Kevin's Chrome with a session that already exists; it types no password, card or code; values go into 600 files under `~/.config/turboslide/` and never into a chat, a log or the repository. Marks: `STOP account` an account creation, `STOP payment` a plan purchase, a checkout or a card, `STOP terms` a terms, policy or consent checkbox, `STOP DNS` a zone or a record, `GRANT` an OAuth permission grant performed only under Kevin's chat instruction of 2026-10-01 with the scope list reported first, `KEVIN` a step only Kevin can do, `none` an act with no account, payment, terms or DNS character.
+
+| # | Step | Mark |
+| --- | --- | --- |
+| 1 | Kevin names the Cloudflare account: the General Translation account that `gt-edge` deploys to (`/Users/kevinliu/gt/gt-cloud/.github/workflows/deploy-edge.yml` 64 to 67 as `research-access.md` 1 cites it) or one of his own | KEVIN |
+| 2 | Open `https://dash.cloudflare.com/login` in the Chrome profile Kevin names. Signed in: go to 4. A user exists for the address and the session is gone: Kevin types the password and the second factor | KEVIN |
+| 3 | No user exists for `kevin@generaltranslation.com`: Sign in with Google "will create a new account" (https://developers.cloudflare.com/fundamentals/account/login/ as `research-access.md` 3.1 quotes it). Stop before the click | STOP account |
+| 4 | Read the account id (Workers & Pages, Account Details; https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/ as `research-access.md` 3.3 cites it) into `~/.config/turboslide/cloudflare.env` as `CLOUDFLARE_ACCOUNT_ID=`, mode 600 | none |
+| 5 | Confirm the plan reads Workers Free ("By default, users have access to the Workers Free plan", https://developers.cloudflare.com/workers/platform/pricing/). Click no Upgrade. If Kevin wants no daily cutoff (section 6), the Workers Paid purchase is his click | STOP payment if offered as the only way forward |
+| 6 | Install wrangler: `pnpm add -D wrangler@4.146.0` in `apps/realtime-worker` and `pnpm install` (the build lane's day 0; this round installs nothing) | none |
+| 7 | `npx wrangler login --browser=false --use-keyring` in a terminal; open the printed `https://dash.cloudflare.com/oauth2/auth?...` link in Kevin's tab; the consent dialog has an Edit Permissions button and "Required scopes remain selected" (https://developers.cloudflare.com/changelog/post/2026-08-22-wrangler-mcp-optional-oauth-scopes/ as `research-access.md` 3.2 cites it); report the scope list, then Allow; the callback lands on `http://localhost:8976/oauth/callback` and the credential goes to the keychain, not a plaintext TOML | GRANT |
+| 8 | The guard's credential: My Profile > API Tokens > Create Token, template Edit Cloudflare Workers ("Workers Scripts Write" and four more, https://developers.cloudflare.com/fundamentals/api/reference/template/ as `research-access.md` 3.3 cites it), Account Resources the one account, Continue to summary, Create Token; the secret "is only shown once" (https://developers.cloudflare.com/fundamentals/api/get-started/create-token/); into `cloudflare.env` as `CLOUDFLARE_API_TOKEN=`; verify with `GET /user/tokens/verify`. A social login account must set a password first (https://developers.cloudflare.com/fundamentals/account/login/: "Some operations, such as ... creating API tokens, require setting a password"); that is Kevin's | KEVIN for the password; none for the token |
+| 9 | The `workers.dev` subdomain: Workers & Pages, Change next to Your subdomain, `turboslide` (or whatever the account has); or answer the first `wrangler deploy`'s prompt (https://developers.cloudflare.com/workers/get-started/guide/ as `research-durable-objects.md` 6.2 cites it). It is Cloudflare's hostname, not a zone | none |
+| 10 | Mint the two secrets locally: `openssl rand -hex 32` twice into `~/.config/turboslide/room.env` as `TURBOSLIDE_ROOM_SECRET=` and `TURBOSLIDE_ROOM_BEARER=`, mode 600 | none |
+| 11 | `npx wrangler deploy` from `apps/realtime-worker` (the first deploy provisions the `DeckRoom` namespace, https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/: "Cloudflare provisions a namespace for the class the first time you deploy"); then `npx wrangler secret bulk <600 json written from room.env>` and delete the temporary file (`secret put` from stdin is unconfirmed, `research-workers.md` open 8; `secret bulk` takes a JSON or `.env` file by the secrets page). `GET https://turboslide-realtime.<subdomain>.workers.dev/health` must answer `{ ok: true }` | none |
+| 12 | `npx wrangler deploy --env preview` the same way for the gate's Worker | none |
+| 13 | Vercel: `node scripts/hosting/realtime-env.mjs do --dry-run`, then without, from a root linked to `turboslide-gt`: `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` on production and preview by `vercel env add <NAME> <env> --sensitive` with the value on stdin (the pipeline's rule, `docs/REALTIME.md` 4.5; `research-hosting.md` section 5). The forced `TURBOSLIDE_REALTIME=blob` row stands, so the next main deploy stays on `blob` | none |
+| 14 | The preview protection bypass for the object's callbacks to a protected preview: Vercel project settings, Deployment Protection, Protection Bypass for Automation (https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection as `research-workers.md` 5.4 cites it); a project setting change, so Kevin's; the generated secret goes to the preview Worker as `VERCEL_AUTOMATION_BYPASS_SECRET`. Without it the hosted realtime rows are read on production alone (9.3) | KEVIN |
+| 15 | The gates of 9.3; then `realtime-env.mjs flip --tier do` (removes the forced row, writes `production.json` to `do`), the commit and the push through the guard; the production table read once after the alias moves | none |
+| 16 | DNS: nothing. If any page offers Add a site, Add domain or a nameserver change for `turboslide.com`, stop | STOP DNS |
+| 17 | R2: not in this design; `Storage & databases > R2 > Overview`'s checkout is never opened | STOP payment if reached |
+| 18 | D1 and the Google client: only with alternative A1 of 1.3. D1: `npx wrangler d1 create turboslide-accounts --location=enam` (D1 is on the Free plan; `research-d1-auth.md` 5), the `d1_databases` binding, the token's D1 Edit permission added by hand (the Workers template lacks it, `research-access.md` 3.3). Google: Part B of `research-access.md` section 5 as written, with its two stops: the checkbox "I agree to the Google API Services: User Data Policy" at Branding (STOP terms) and any policy in the Publish app dialog (STOP terms); the client secret shown once into `~/.config/turboslide/google-oauth.env` (600), which `realtime-env.mjs google` already reads (69 to 70) | none for D1; STOP terms twice for Google; otherwise none |
+| 19 | Record in the ship note: the account's name and the id's first four characters, the token's name and TTL, the subdomain, the plan as shown, the Worker's version ids, the date | none |
+
+What this list does not contain, on purpose: no Marketplace install (no Upstash, no Neon), no R2 checkout, no payment method, no zone, no Google console step unless A1 is chosen.
+
+## 8. The rows of REALTIME.md section 2 and the cost rows restated
+
+Rows this design meets, with the mechanism that meets each (the bounds are the rows' own):
+
+| Row | Met by |
+| --- | --- |
+| `realtime.keystroke.within-300ms` | one frame to the object, admission in memory, one frame to B (1.2); the estimate 125 to 165 ms in one region is unmeasured until the preview row, which is the first number anyone will have (`research-durable-objects.md` finding 11) |
+| `realtime.caret.within-300ms` | presence frames fanned out per frame (1.2) with R2's client half |
+| `realtime.caret.offset-after-merge` | R2's caret transform (`build/r2.md`), transport independent |
+| `realtime.selection.outline-within-300ms` | the same fan out with R2's and R3's halves |
+| `realtime.block.drag-live` | the volatile `drag` frame published and not stored; R2's ghost and R3's word |
+| `realtime.title.two-typers` | the object transforms every entry past what landed (2.3 item 3), invariant 2 |
+| `realtime.join.chip-within-1s` | the hello carries the roster and the join's presence frame reaches A within one frame (1.2); the row's "two tabs on different instances" is read from `sync.status.storeCalls.instance` of the loaders, which differ, while the object is one |
+| `realtime.follow.for-everyone` | R3's surfaces and the `follow` cell, transport independent |
+| `realtime.agent.write-announced` | the agent's write enters the object with `clientId: agent:<principalId>` (`serverClientId`, working tree) and fans out as an `op` (1.2) |
+| `realtime.reload.loses-nothing` | the pending store, the replay from `covered`, the dedupe by `(clientId, opId)` (1.2, 2.3) |
+| `realtime.reconnect.loses-nothing` | the reopen at the position, the replay, the resend at the caught up base, the HTTP fallback while the socket is down (1.2, 4.2) |
+| `realtime.pointer.second-browser` | the volatile pointer frame for the first 20 editors and owners; R3's View rows |
+| `realtime.caret.dims-and-leaves` | the dim: no frame from B for 30 s (B's heartbeats are pings and are not fanned out, which is the row's reading of "stops moving"); the leave: B's close frame runs `webSocketClose` and the leave fans out at once |
+| `realtime.card.chip-painted` | R3's stacking rule, transport independent |
+
+Rows this design does not meet, with the reason:
+
+| Row | Why not, and what would |
+| --- | --- |
+| `realtime.share-link.every-instance` | the drop bus is among Vercel functions (`bus.ts`, working tree; `access.ts` `channelDropBus`) and an object holds no subscription from a function (`read-channel.md` finding 10); on `do` the readers fall to their 5 s TTLs (`access.ts` 70 and 168), so a link opened within a second of its mint on another instance can answer 404 for up to 5 s, the blob tier's standing (`audit-sync.md` defect 7). What would: a carrier among the functions (Redis, which this design has none of; or the function reading the Worker on each request, which is a hop per request and the identity runtime's move of `research-d1-auth.md` layout C) |
+| `realtime.departed-guest.name-stable` | the principal store is a file per instance without Redis (`identity.ts` 182 to 189 as `read-auth.md` 1.1 reads it; `audit-sync.md` defect 8); the row keeps the 10 s bound of `people.comment-departed-guest` as the blob tier's. What would: the account database of 1.3 A1 with the principal records on it and the `touch` debounced, or Redis |
+| `accounts.google-button`, `accounts.google-leaves`, `accounts.google-error-sentence`, `accounts.email-hidden-without-mail` | the four local rows pass on the e2e server as R4 built them; production has no database in this design, so they stay `not driven` there |
+| `accounts.google-roundtrip` | no database, no sign in |
+| `cost.redis.commands` | no Redis; replaced below |
+
+The cost rows restated for the `do` tier, in the shape `docs/REALTIME.md` section 2 restates them for `redis` (R5's to land; `measure: true`; over the ceiling on the preview holds the ship):
+
+| Row | The `do` tier's ceiling |
+| --- | --- |
+| `cost.editor-idle.calls` | one tab alone, 3 minutes idle: at most 1 function request a minute from the browser (the ticket refresh is one per 10 minutes; no presence POST, no stream, no session poll) and 0 simple and 0 advanced store calls a minute for the deck (no pulse, no record) |
+| `cost.editor-editing.calls` | one edit per 5 s for 3 minutes: at most 15 function requests a minute (12 checkpoint route calls at one record per 2 s idle run, the ticket refresh, a loader) and at most 40 simple and 65 advanced store calls a minute for the deck (12 records at 5 advanced and 2 to 3 simple each, the code's count of `docs/SYNC.md` 4.2; `docs/REALTIME.md` section 2 wrote 12 advanced for the redis tier's 12 records, which is one per record and disagrees with 4.2's five; R5 measures and restates both tiers from the counters) |
+| `cost.two-tabs-idle.calls` | no `list` and at most 2 advanced store calls a minute for the deck (none from presence; the prune's every 20th commit) |
+| `cost.do.requests` (new, in place of `cost.redis.commands`) | one editor hour driven as 12 editing minutes and 48 idle minutes: at most 300 Durable Object request units, 600 rows written, 20 GB-s of duration and 10 Worker requests for the deck, read from the Worker's analytics (the dashboard's Durable Objects metrics, which "reflect actual usage" and not the 20:1 ratio, `research-durable-objects.md` 3) and from `rowsRead` and `rowsWritten` on the object's cursors through a bearer route `GET /rooms/:id/counters`; the presence frames counted apart |
+| `cost.show.calls` | unchanged: no function request and no store call after the load (`docs/SYNC.md` 6.1) |
+
+## 9. The lanes
+
+### 9.1 What stays, changes or is replaced of REALTIME.md 5.1 R1 to R6
+
+| Lane | Under this design |
+| --- | --- |
+| R1 the channel and the server | replaced in part. Gone with Redis: the `PRESENCE_SET` script and the volatile frames in `lua.ts` and `redis.ts` (the two frame classes survive as the object's rule), the bus on Redis, the principal store on Redis, the hand off through the Redis flag. Kept from the working tree: the agent author (`callerFactsFor`, `serverClientId`), `replayFor`'s non contiguous `resync`, `yieldConcurrentConversion`, the checkpointer's `covered` moves from events, the two presence fields' server half. The redis tier itself stays in the tree as built and unused by this design |
+| R2 the client and the viewer's carets | stays as it is; every change sits above `RoomTransport` (`build/r2.md` "What landed") |
+| R3 presence and the people surfaces | stays as it is |
+| R4 Google sign in | stays on the branch and ships inert (1.3); its local rows run |
+| R5 the matrix and the drivers | stays, with `--tier do`, the row `cost.do.requests`, the `do` column of the three cost rows (8), and the two browser spec's second origin (`PLAYWRIGHT_SECOND_BASE_URL` of `build/r1.md` R1-R5a: A on one node port, B on another, one Worker between them) |
+| R6 hosting scripts and docs | changes: `realtime-env.mjs do`, `flip --tier do`, `production.json` `do`; the guard patch's check becomes the presence of `TURBOSLIDE_ROOM_HOST` in the environment names when the tree expects `do` (today `REDIS_URL`, `build/guard-readme-section.md`); `docs/hosting.md` gains a section 13 for the `do` tier beside section 9; `docs/CLOUDFLARE.md`; `docs/security.md` 12's table gains the three variables; `docs/SYNC.md` 5.2's annotations |
+
+The new lanes, with disjoint files:
+
+| Lane | Owns | Builds |
+| --- | --- | --- |
+| D1 the Worker | `apps/realtime-worker/**` (new), `packages/realtime/src/room-core.ts` (new; the move out of `room.ts` is a seam commit by the integrator with re-exports, so `room.ts` stays R1's and D2's) | 4.3; the object's tests; `wrangler dev` beside the node server (9.3) |
+| D2 the Vercel side | `packages/realtime/src/select.ts`, `channel.ts` 10, `do.ts` (new), `apps/studio/src/server/room-ticket.ts` (new), `room.ts`'s `do` branches (4.1, 4.4; after R1's working tree lands, since both edit `room.ts`: merge order R1 then D2), the three new routes, the three deck routes' `do` answers, `write.ts` 493, `headers.ts` 220 to 236 | 4.1 |
+| D3 the client transport | `apps/studio/src/editor/controller.tsx` 325 to 466 and 2013 to 2018 (after R3, which also edits `controller.tsx`: merge order R3 then D3) | 4.2 |
+
+Files two lanes need: `apps/studio/src/server/room.ts` (R1 then D2; D1 names the functions it moves in `build/d1.md` on day 0 and the integrator moves them); `packages/realtime/src/channel.ts` (R1's `bus` then D2's tier word); `apps/studio/src/editor/controller.tsx` (R3 then D3); `scripts/probes/core-matrix.mjs` and the matrix (R5 alone; D1 to D3 name their rows and `data-control` ids in their request files on day 0); `docs/hosting.md`, `docs/security.md`, `scripts/hosting/realtime-env.mjs` (R6 alone; D2 names its variables).
+
+### 9.2 The merge order
+
+R5 (the rows exist on day 0), then R1 (its working tree as it stands, so the seam is one), then the integrator's seam commit (the move into `room-core.ts`), then D1 (the Worker, which compiles against `room-core.ts` and deploys to the preview Worker), then D2 (the Vercel side), then D3 (the transport), then R2, then R3, then R4, then R6. After each merge the integrator typechecks (`node_modules/.bin/tsc -b`), runs vitest per touched package (the Worker's under its pool), runs the `/new` boot probe, and rebases onto `origin/main` after any hand fix there (`docs/REALTIME.md` 5.3's rule). The ship follows `docs/FOCUS.md` 6.2 and `docs/REALTIME.md` 5.3's one lane per push through the guard, with one addition the guard needs: a Worker step before the Vercel preview deploy when `apps/realtime-worker/**` or `packages/realtime/src/room-core.ts` changed (`wrangler deploy` under `CLOUDFLARE_API_TOKEN` from `cloudflare.env`; `wrangler versions upload` does not apply a Durable Object lifecycle change and version URLs are "Not generated for Durable Objects", `research-workers.md` 5.4 and `research-durable-objects.md` 6.1), and the Worker deployed first stays compatible with the previous Vercel deployment through the ticket's `v` window (2.2), so the order Worker then Vercel never strands a tab.
+
+### 9.3 The gates, under the cost rules of REALTIME.md 1.1
+
+1. The local run. Every lane drives its rows on the node server with the memory tier as every round does. D1 to D3 and R2 also drive the `do` tier locally: `wrangler dev --port 8787` in `apps/realtime-worker` (workerd, no Cloudflare cost; alarms "may fail after a hot reload" under `wrangler dev`, https://developers.cloudflare.com/durable-objects/platform/known-issues/ as `research-durable-objects.md` 4 cites it, so the lane restarts it rather than editing it live), `.dev.vars` (600, ignored by git) with test values of the two secrets and `TURBOSLIDE_APP_ORIGIN=http://127.0.0.1:4471`, and two node servers on 4471 and 4481 over one `TURBOSLIDE_STORE=tmp` folder with `TURBOSLIDE_REALTIME=do`, `TURBOSLIDE_ROOM_HOST=127.0.0.1:8787`, `TURBOSLIDE_ROOM_INSECURE=1` and the same two test secrets; A's context on the first port and B's on the second, so every function request of A and B is answered by a different process and one object orders both (the shape of `docs/REALTIME.md` 5.4 item 1, with the Worker in place of the Redis container). The object's seed and checkpoint callbacks go to 4471, which serves them over the shared folder. The Worker's own vitest runs under `@cloudflare/vitest-pool-workers`.
+2. The enforce preview. One preview per round from the merged tree (`docs/REALTIME.md` 1.1 rule 2): the preview Worker deployed with `--env preview --var TURBOSLIDE_APP_ORIGIN:<the Vercel preview url>`, then `vercel deploy --yes --archive=tgz -e TURBOSLIDE_AUTHORIZE=enforce -e TURBOSLIDE_ASSIST=fixture -e TURBOSLIDE_LOGO_UPSTREAM=fixture -e TURBOSLIDE_MAIL=off -e TURBOSLIDE_REALTIME=do -e TURBOSLIDE_ROOM_HOST=turboslide-realtime-preview.<subdomain>.workers.dev` with the secrets from the project's preview environment (step 13). The whole matrix does not run there (rule 1); the hosted run is narrowed to the rows only a deployment can read: the `realtime.*` rows, `cost.editor-idle.calls`, `cost.editor-editing.calls`, `cost.two-tabs-idle.calls`, `cost.do.requests`, the blob tier's classes and the access rules on a second deployment with `-e TURBOSLIDE_REALTIME=blob` (the rollback tier's check, as `docs/REALTIME.md` 5.4 item 2 runs it). The object's callbacks to the protected preview need the bypass secret (step 14); without it the realtime rows are read on the local two process run and on production after the flip, and the ledger says so. A hosted gate's tabs count against the Free day's caps (section 6); a narrowed run is a few hundred object requests.
+3. The production guard. The ship's pushes ride `~/.config/turboslide/gt-follow.sh` as every main sha does (the preview deployment, the hosted smoke, the seller path's walk areas and spec rows, the promote on green, the production smoke, the promote back on red; `read-runtime.md` 5.1), with R6's patch adapted: the three two browser rows join the seller path when the tree's matrix carries them and `TURBOSLIDE_ROOM_HOST` is in the deployment's environment names; a tree whose `production.json` expects `do` is held while the variable is absent from production's names; the Worker step of 9.2 runs first. The production table is read once after the alias moves (`--base https://www.turboslide.com --tier do`), narrowed reruns beside it and never in its place. A core row red twice on production is a stop (`docs/FOCUS.md` 6.2 as the working copy states it at 262 to 268).
+
+## 10. The risks and what this design does not know
+
+1. Latency is unmeasured. No first party page publishes a browser to object WebSocket round trip in milliseconds (`research-durable-objects.md` section 5); the 125 to 165 ms of 1.2 is `research-options.md` 5b's estimate; the first number is the preview row, and the measurement must be an application message, since protocol pings are answered at the edge.
+2. The wake after a pause. An object hibernates after about 10 s without a message or alarm (https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/ as `research-durable-objects.md` 4 cites it); heartbeats are pings and do not keep it awake; a person who reads for 15 s and then types pays the constructor, one seed read from a Vercel route (a function invocation, the store's mirror sync, the document's JSON) and the apply of the tail before the admission: an estimated 150 to 400 ms on that keystroke. The row `realtime.keystroke.within-300ms` types ten characters one per second and stays awake inside the burst; the first keystroke after a pause is the case to measure. The levers if it reads red: the live document read from the last snapshot's public URL (`snapshots/<md5>.json` is immutable and digest named, `read-store.md` 1.2) instead of the seed route under layout v1, or the document chunked into SQLite rows at each checkpoint (one to three rows written per checkpoint against the rows budget of section 6).
+3. The preview gate's callbacks. A protected Vercel preview refuses the object's `checkpoint` and `seed` calls without the automation bypass secret, which is a project setting of Kevin's (step 14); until then the hosted realtime rows are read on production alone after the flip, which weakens the gate `docs/REALTIME.md` 5.4 item 2 wanted.
+4. The Free plan fails closed for the day on any passed cap, and the Worker's cap is spendable by strangers who can reach the public `workers.dev` hostname (`research-durable-objects.md` 1.4). At today's seller traffic (18 production requests in three quiet hours, `research-costs-actual.md` 32) nothing approaches a cap; a flood would redden every realtime row until 00:00 UTC. The Workers Paid plan at $5.00 a month removes the cutoff; whether it asks for a payment method on file was not read (`research-durable-objects.md` open 7) and the purchase is Kevin's.
+5. Two deploy surfaces. The ticket secret, the bearer, the protocol version and the tier word must agree between the Vercel deployment and the Worker version in service; the guard has no Worker step today (`research-options.md` 5b; `read-runtime.md` 5.2) and gains one (9.2). A Cloudflare incident takes the rooms down while the pages stay up; the hand off of 5.3 item 3 is the answer and is untested.
+6. The account database and sign in. Kevin's ask included Google sign in; this design ships none (1.3), because no free Cloudflare database is reachable from a Vercel function by a supported path. The two alternatives are named and costed; neither is the least change.
+7. The two cross instance rows stay flaky (`realtime.share-link.every-instance`, `realtime.departed-guest.name-stable`; section 8), because their mechanism is among the Vercel functions and not the channel's.
+8. The Vercel bill does not go to zero. The stream hold and the pulse poll leave; the checkpoint route and the Blob records stay, about $7 a month at 50 editor hours a day and about $70 at 500 (section 6), with the checkpoint cadence as the lever.
+9. `origin` on records. The checkpoint route must write `origin` per coalesced write (2.4 item 3) or invariants 3 and 10's resync path fails on this tier as it does on the stream tiers today (`read-channel.md` finding 9).
+10. The alarm's precision. Alarms are at least once with retries on a throw (https://developers.cloudflare.com/durable-objects/api/alarms/ as `research-durable-objects.md` 4 cites it); how late an alarm may fire past its time is not on the pages read, and a late alarm widens the window of 2.4's last paragraph.
+11. `DROP TABLE` or `deleteAll()` against row deletes (`research-durable-objects.md` open 1) decides the trim's cost at 500 editor hours; this design trims by `DELETE` and counts it.
+12. The rows written cap at 500 editor hours a day breaks the Free plan daily (section 6); the design's answer is the Paid plan at $5.45 a month, not a code change.
+13. The account. Which Cloudflare account hosts the Worker, whether `kevin@generaltranslation.com` already has a user there, and whether a social login account must first set a password for the API token (`research-access.md` 7.1; `research-durable-objects.md` 6.3) are Kevin's answers before step 2.
+14. No runtime kill switch without a deploy on this tier (5.3); a flags object or a KV namespace read on wake would give one and is a later item.
+15. Placement. The object is created near the first tab that opens the deck and never moves; a deck opened first from Europe keeps its object there and a US seller pays the ocean on every frame (`research-durable-objects.md` finding 10). `idFromName` with a `locationHint` from the deck owner's region is the lever and is not in this round.
+16. `@cloudflare/vitest-pool-workers`'s version and whether `wrangler secret put` reads stdin were not read today; the lane reads the registry on its day 0 and uses `secret bulk` from a 600 file.
+17. The ticket on the subprotocol header. The design assumes every path between the browser and the Worker carries `Sec-WebSocket-Protocol` unchanged; a proxy that strips it would refuse every upgrade. The first frame carrying the ticket is the fallback shape if a measurement shows it.
+18. The seed route's body. A deck document is handed to the object as JSON through one Vercel response; the function's response cap is 4.5 MB (`read-runtime.md` 2.8) and `CAPS.deckMaxBytes` is 25 MB (`admission.ts` 37); a document above 4.5 MB needs the public snapshot read of item 2 instead.
+
+## Sources
+
+The tree at `c978bb43` unless marked working tree: `packages/realtime/src/{channel,select,protocol,admission,memory,redis,blob,coalesce,keys,channel-contract}.ts`, `packages/realtime/src/bus.ts` (untracked), `packages/realtime/client/room-client.ts`, `apps/studio/src/server/{room,checkpoint,write,headers,card-thumb,start,flags,root}.ts`, `apps/studio/src/server/auth/{db,sqlite-dialect}.ts`, `apps/studio/src/routes/api/{decks.$deckId.stream,decks.$deckId.ops,decks.$deckId.presence,actions.$action}.ts`, `apps/studio/src/editor/{controller,EditorRoot}.tsx`, `packages/store/src/{store,blob-store}.ts`, `scripts/hosting/realtime-env.mjs`, `playwright.config.ts`, `scripts/check.mjs`, `pnpm-workspace.yaml`, `turbo.json`, `package.json`; `docs/REALTIME.md`, `docs/SYNC.md` section 3 and 4.3 and 5.2 and 6.1, `docs/hosting.md` sections 9 and 11 (working copy), `docs/FOCUS.md` 6.2 (working copy), `docs/security.md` 9 and 12 (working copy); `docs/gslides-parity/realtime/{research-options,research-hosting,research-costs-actual}.md`, `docs/gslides-parity/realtime/build/{r1,r2,r3,r4,r5,r6,google,guard-readme-section}.md`; `~/.config/turboslide/gt-follow.sh` (its structure, no value read). The nine notes of this folder: `read-channel.md`, `read-auth.md`, `read-store.md`, `read-runtime.md`, `research-durable-objects.md`, `research-d1-auth.md`, `research-r2.md`, `research-workers.md`, `research-access.md`, every product URL above cited through them with the section that fetched it on 2026-10-01. DNS: `dig NS turboslide.com +short`, `dig CNAME www.turboslide.com +short`, 2026-10-01.

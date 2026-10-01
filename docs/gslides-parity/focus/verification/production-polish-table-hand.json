@@ -1,0 +1,294 @@
+{
+  "base": "https://www.turboslide.com",
+  "startedAt": "2026-10-01T05:33:31.417Z",
+  "steps": [
+    {
+      "at": "2026-10-01T05:33:31.541Z",
+      "step": "goto /new"
+    },
+    {
+      "at": "2026-10-01T05:33:32.639Z",
+      "step": "fresh draft",
+      "id": "untitled-20261001-tdd0"
+    },
+    {
+      "at": "2026-10-01T05:33:35.463Z",
+      "step": "deck created",
+      "url": "https://www.turboslide.com/edit/untitled-20261001-tdd0"
+    },
+    {
+      "at": "2026-10-01T05:33:42.074Z",
+      "step": "new slide",
+      "slideId": "split-1",
+      "current": "split-1"
+    },
+    {
+      "at": "2026-10-01T05:33:44.542Z",
+      "step": "table inserted",
+      "words": "10 x 10",
+      "tableId": "table",
+      "ms": 821
+    },
+    {
+      "at": "2026-10-01T05:33:45.145Z",
+      "step": "inserted facts",
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 381.4
+      },
+      "rows": 10,
+      "ringToRows": 0,
+      "prompts": 0,
+      "chip": "Table",
+      "headerHasText": false
+    },
+    {
+      "at": "2026-10-01T05:33:45.207Z",
+      "step": "picture docs/gslides-parity/focus/verification/production-polish-table-light-inserted.png"
+    },
+    {
+      "at": "2026-10-01T05:33:47.557Z",
+      "step": "light facts",
+      "openCell": "1,9",
+      "editing": true,
+      "cellRing": {
+        "x": 1118.7,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 38.1
+      },
+      "cellBox": {
+        "x": 1118.7,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 37.4
+      },
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 381.4
+      },
+      "rows": 10,
+      "rowHeights": [
+        38.1
+      ],
+      "ringToRows": 0,
+      "prompts": 0,
+      "chromeTheme": "light",
+      "sheetGround": "rgba(0, 0, 0, 0)",
+      "pixel": {
+        "x": 746,
+        "ringBottom": 692.1,
+        "lastThinRunY": 691,
+        "under": -1.1,
+        "thinRuns": [
+          "615:1px #c9c9c9",
+          "652:1px #e8e8e8",
+          "653:1px #c9c9c9",
+          "690:1px #e8e8e8",
+          "691:1px #1768d3"
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T05:33:47.622Z",
+      "step": "picture docs/gslides-parity/focus/verification/production-polish-table-light.png"
+    },
+    {
+      "at": "2026-10-01T05:33:47.650Z",
+      "step": "picture docs/gslides-parity/focus/verification/production-polish-table-light-close.png"
+    },
+    {
+      "at": "2026-10-01T05:33:54.869Z",
+      "step": "dark facts",
+      "openCell": "1,9",
+      "editing": true,
+      "cellRing": {
+        "x": 1118.7,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 38.1
+      },
+      "cellBox": {
+        "x": 1118.7,
+        "y": 349.5,
+        "w": 67.7,
+        "h": 37.4
+      },
+      "ring": {
+        "x": 509.6,
+        "y": 310.7,
+        "w": 676.8,
+        "h": 381.4
+      },
+      "rows": 10,
+      "rowHeights": [
+        38.1
+      ],
+      "ringToRows": 0,
+      "prompts": 0,
+      "chromeTheme": "dark",
+      "sheetGround": "rgba(0, 0, 0, 0)",
+      "pixel": {
+        "x": 746,
+        "ringBottom": 692.1,
+        "lastThinRunY": 691,
+        "under": -1.1,
+        "thinRuns": [
+          "615:1px #424242",
+          "652:1px #202020",
+          "653:1px #424242",
+          "690:1px #202020",
+          "691:1px #5091ef"
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T05:33:54.931Z",
+      "step": "picture docs/gslides-parity/focus/verification/production-polish-table-dark.png"
+    },
+    {
+      "at": "2026-10-01T05:33:54.957Z",
+      "step": "picture docs/gslides-parity/focus/verification/production-polish-table-dark-close.png"
+    },
+    {
+      "at": "2026-10-01T05:33:56.454Z",
+      "step": "teardown",
+      "id": "untitled-20261001-tdd0",
+      "trashed": "ok",
+      "removed": "ok"
+    }
+  ],
+  "light": {
+    "k": 0.7,
+    "sheet": {
+      "x": 284,
+      "y": 157,
+      "w": 1128,
+      "h": 634.5
+    },
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 381.4
+    },
+    "rows": 10,
+    "rowHeights": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "lastRowBottom": 692.1,
+    "ringToRows": 0,
+    "prompts": 0,
+    "openCell": "1,9",
+    "cellRing": {
+      "x": 1118.7,
+      "y": 349.5,
+      "w": 67.7,
+      "h": 38.1
+    },
+    "cellBox": {
+      "x": 1118.7,
+      "y": 349.5,
+      "w": 67.7,
+      "h": 37.4
+    },
+    "chromeTheme": "light",
+    "sheetGround": "rgba(0, 0, 0, 0)",
+    "sheetBottom": 791.5,
+    "editing": true,
+    "chip": "Table",
+    "headerHasText": false,
+    "pixel": {
+      "x": 746,
+      "ringBottom": 692.1,
+      "lastThinRunY": 691,
+      "under": -1.1,
+      "thinRuns": [
+        "615:1px #c9c9c9",
+        "652:1px #e8e8e8",
+        "653:1px #c9c9c9",
+        "690:1px #e8e8e8",
+        "691:1px #1768d3"
+      ]
+    }
+  },
+  "dark": {
+    "k": 0.7,
+    "sheet": {
+      "x": 284,
+      "y": 157,
+      "w": 1128,
+      "h": 634.5
+    },
+    "ring": {
+      "x": 509.6,
+      "y": 310.7,
+      "w": 676.8,
+      "h": 381.4
+    },
+    "rows": 10,
+    "rowHeights": [
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1,
+      38.1
+    ],
+    "lastRowBottom": 692.1,
+    "ringToRows": 0,
+    "prompts": 0,
+    "openCell": "1,9",
+    "cellRing": {
+      "x": 1118.7,
+      "y": 349.5,
+      "w": 67.7,
+      "h": 38.1
+    },
+    "cellBox": {
+      "x": 1118.7,
+      "y": 349.5,
+      "w": 67.7,
+      "h": 37.4
+    },
+    "chromeTheme": "dark",
+    "sheetGround": "rgba(0, 0, 0, 0)",
+    "sheetBottom": 791.5,
+    "editing": true,
+    "chip": "Table",
+    "headerHasText": false,
+    "pixel": {
+      "x": 746,
+      "ringBottom": 692.1,
+      "lastThinRunY": 691,
+      "under": -1.1,
+      "thinRuns": [
+        "615:1px #424242",
+        "652:1px #202020",
+        "653:1px #424242",
+        "690:1px #202020",
+        "691:1px #5091ef"
+      ]
+    }
+  },
+  "deckId": "untitled-20261001-tdd0",
+  "consoleErrors": [],
+  "endedAt": "2026-10-01T05:33:56.454Z"
+}

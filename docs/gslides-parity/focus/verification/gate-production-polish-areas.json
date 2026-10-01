@@ -1,0 +1,2272 @@
+{
+  "base": "https://www.turboslide.com",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-01T05:38:20.975Z",
+  "ms": 2116229,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 2115555,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish-close/gate-prod-areas/core-walk.json",
+    "deckId": "untitled-20261001-n03a",
+    "steps": 279
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "tables",
+      "polish-tables",
+      "polish-text",
+      "polish-objects",
+      "polish-chrome",
+      "text",
+      "shapes"
+    ],
+    "costRows": null
+  },
+  "rows": 234,
+  "passed": 232,
+  "failed": 0,
+  "notDriven": 2,
+  "manual": [
+    "text.clipboard.paste-without-formatting"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "241c1df1",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-01",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "text.title.single-click": "passed",
+    "text.title.double-click": "passed",
+    "text.title.type-escape": "passed",
+    "text.selected.typing-replaces": "passed",
+    "text.selected.enter-appends": "passed",
+    "text.title.double-click-enters": "passed",
+    "text.caret.click-mid-word": "passed",
+    "text.caret.home-end": "passed",
+    "text.caret.shift-arrow-replace": "passed",
+    "text.caret.shift-home-end": "passed",
+    "text.caret.backspace-word": "passed",
+    "text.caret.option-backspace": "passed",
+    "text.caret.delete": "passed",
+    "text.caret.cmd-a": "passed",
+    "text.title.enter-commits": "passed",
+    "text.session.escape-twice": "passed",
+    "text.subtitle.double-click-type": "passed",
+    "text.subtitle.enter-new-line": "passed",
+    "text.subtitle.shift-enter": "passed",
+    "text.subtitle.arrows-backspace-join": "passed",
+    "text.subtitle.escape-commits": "passed",
+    "text.textbox.insert-click-type": "passed",
+    "text.textbox.insert-drag": "passed",
+    "text.textbox.drag-inside-moves": "passed",
+    "text.textbox.burst-reliability": "passed",
+    "text.toolbar.swaps-on-select": "passed",
+    "text.fontsize.type-enter": "passed",
+    "text.fontsize.plus-minus": "passed",
+    "text.bold.toolbar": "passed",
+    "text.bold.cmd-b-word": "passed",
+    "text.italic.toolbar-word": "passed",
+    "text.italic.cmd-i-word": "passed",
+    "text.underline.cmd-u-word": "passed",
+    "text.underline.toolbar": "passed",
+    "text.strikethrough.cmd-shift-x": "passed",
+    "text.strikethrough.menu": "passed",
+    "text.color.swatch-on-word": "passed",
+    "text.align.toolbar-and-key": "passed",
+    "text.spacing.toolbar": "passed",
+    "text.list.bulleted-toolbar": "passed",
+    "text.list.numbered-toolbar": "passed",
+    "text.list.bulleted-menu-preset": "passed",
+    "text.indent.toolbar": "passed",
+    "text.indent.keys": "passed",
+    "text.link.cmd-k-enter": "passed",
+    "text.clear-formatting": "passed",
+    "text.format-menu.rows-enabled": "passed",
+    "text.format-menu.size-increase": "passed",
+    "text.format-menu.align-left": "passed",
+    "text.format-menu.spacing-double": "passed",
+    "text.format-menu.text-fitting": "passed",
+    "text.autofit.title-wraps": "passed",
+    "text.autofit.textbox-grow": "passed",
+    "text.clipboard.within-box": "passed",
+    "text.clipboard.between-boxes": "passed",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "passed",
+    "text.find-replace.shortcut": "passed",
+    "text.persistence.reload": "passed",
+    "text.list.numbered-menu-preset": "passed",
+    "text.list.chords": "passed",
+    "text.link.toolbar-button": "passed",
+    "text.format-options.panel": "passed",
+    "text.layout-runs.type": "passed",
+    "text.context.text-block": "passed",
+    "text.context.text-selection": "passed",
+    "text.context.inside-session": "passed",
+    "text.format-menu.size-decrease": "passed",
+    "text.format-menu.spacing-single-1-15": "passed",
+    "text.format-menu.align-indent-rows": "passed",
+    "text.textbox.toolbar-button": "passed",
+    "shapes.insert.rectangle-click": "passed",
+    "shapes.insert.rounded-click": "passed",
+    "shapes.insert.ellipse-click": "passed",
+    "shapes.insert.rectangle-drag": "passed",
+    "shapes.insert.ellipse-drag": "passed",
+    "shapes.insert.named-rows": "passed",
+    "shapes.default-look": "passed",
+    "shapes.select": "passed",
+    "shapes.move": "passed",
+    "shapes.resize.eight-handles": "passed",
+    "shapes.rotate": "passed",
+    "shapes.fill.colour": "passed",
+    "shapes.border.colour-weight-dash": "passed",
+    "shapes.text.type-align-bold": "passed",
+    "shapes.duplicate-delete-undo-redo": "passed",
+    "shapes.format-options.size-position": "passed",
+    "shapes.reload-and-viewer": "passed",
+    "shapes.context.shape": "passed",
+    "shapes.text.colour-toolbar": "passed",
+    "shapes.text.enter-opens-label": "passed",
+    "shapes.borders-lines.menu": "passed",
+    "tables.insert.grid": "passed",
+    "tables.cell.double-click-type": "passed",
+    "tables.cell.tab-from-written": "passed",
+    "tables.cell.tab-from-empty": "passed",
+    "tables.cell.shift-tab": "passed",
+    "tables.cell.tab-last-appends-row": "passed",
+    "tables.menu.format-table-with-session": "passed",
+    "tables.menu.format-table-selected": "passed",
+    "tables.menu.format-table-rows": "passed",
+    "tables.context.rows": "passed",
+    "tables.context.insert-delete": "passed",
+    "tables.column.insert-keeps-widths": "passed",
+    "tables.column.resize-seam": "passed",
+    "tables.cell.align-menu": "passed",
+    "tables.cell.align-toolbar": "passed",
+    "tables.select.resize": "passed",
+    "tables.cell.fill-border-tail": "passed",
+    "tables.cells.merge-unmerge": "passed",
+    "tables.tail.merge-unmerge-buttons": "passed",
+    "tables.distribute.rows-columns": "passed",
+    "tables.light-appearance": "passed",
+    "tables.present": "passed",
+    "tables.reload": "passed",
+    "text.title.one-click-tail": "passed",
+    "text.title.bold-menu": "passed",
+    "text.title.bold-cmd-b": "passed",
+    "text.title.align-menu": "passed",
+    "text.title.size-menu": "passed",
+    "text.title.format-options-marks": "passed",
+    "text.title.apply-layout-after-format": "passed",
+    "text.fontsize.type-one-undo": "passed",
+    "text.format-options.field-one-undo": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "text.link.detect-url": "passed",
+    "text.link.detect-email": "passed",
+    "text.select.double-click-address": "passed",
+    "text.select.shift-home-line": "passed",
+    "text.link.popover-apply-remove": "passed",
+    "text.format-options.padding-grid": "passed",
+    "text.format-options.remembers-section": "passed",
+    "text.autofit.shrink-on-overflow": "passed",
+    "text.find-replace.count-while-typing": "passed",
+    "tables.cell.click-places-caret": "passed",
+    "tables.cell.click-then-type": "passed",
+    "tables.range.drag-from-selected": "passed",
+    "shapes.label.centred-default": "passed",
+    "shapes.geometry.shapes.hexagon-sheet": "passed",
+    "shapes.geometry.shapes.star5-adjust": "passed",
+    "shapes.geometry.shapes.pie-arc": "passed",
+    "shapes.geometry.shapes.multipath-can": "passed",
+    "shapes.geometry.shapes.flowchart-own-space": "passed",
+    "shapes.geometry.arrows.right-arrow": "passed",
+    "shapes.geometry.arrows.curved-right": "passed",
+    "shapes.geometry.callouts.wedge-rect": "passed",
+    "shapes.geometry.callouts.cloud": "passed",
+    "shapes.geometry.equation.plus-divide": "passed",
+    "shapes.geometry.pinned-three": "passed",
+    "shapes.geometry.sites": "passed",
+    "shapes.geometry.resize-keeps-adjust": "passed",
+    "shapes.insert.grid-shapes": "passed",
+    "shapes.insert.grid-arrows": "passed",
+    "shapes.insert.grid-callouts": "passed",
+    "shapes.insert.grid-equation": "passed",
+    "shapes.icons.named-rows": "passed",
+    "shapes.change-shape.plate": "passed",
+    "shapes.mask-image.plate": "passed",
+    "tables.selected.typing-appends": "passed",
+    "tables.cell.arrows-cross-cells": "passed",
+    "tables.range.shift-arrows": "passed",
+    "tables.range.bold-italic": "passed",
+    "tables.range.size-color": "passed",
+    "tables.panel.table-first": "passed",
+    "tables.seam.row-drag": "passed",
+    "tables.edge.add-row-column": "passed",
+    "tables.heads.select-row-column": "passed",
+    "tables.bar.row-column-buttons": "not driven",
+    "tables.command.keeps-caret": "passed",
+    "tables.cells.tabular-figures": "passed",
+    "tables.select.ring-with-cell-open": "passed",
+    "tables.cell.ring-on-cell": "passed",
+    "tables.cells.empty-grid-guides": "passed",
+    "tables.light-appearance-guides": "passed",
+    "tables.insert.box-fits-rows": "passed",
+    "tables.rows.grow-with-text": "passed",
+    "tables.resize.rows-share-extra": "passed",
+    "tables.seam.visible-with-cell-open": "passed",
+    "tables.heads.header-toggle": "passed",
+    "tables.panel.section-words": "passed",
+    "tables.cells.no-prompt": "passed",
+    "tables.rows.ring-follows-typing": "passed",
+    "tables.cell.click-moves-caret": "passed",
+    "tables.tail.size-step-ladder": "passed",
+    "tables.insert.box-never-shorter-than-rows": "passed",
+    "tables.heads.keys-act-on-range": "passed",
+    "tables.insert.one-placement-rule": "passed",
+    "tables.edge.stays-inside-sheet": "passed",
+    "tables.range.align-cells-only": "passed",
+    "tables.context.object-menu-on-frame": "passed",
+    "tables.polish.seams-snap-grid": "passed",
+    "text.bold.toolbar-marks-run": "passed",
+    "slides.layout.blank-empty": "passed",
+    "text.paragraph.toolbar-live": "passed",
+    "text.list.enter-tab-no-error": "passed",
+    "text.size.run-and-typed-value": "passed",
+    "text.marks.whole-block-from-menu": "passed",
+    "text.tail.heading-takes-list-indent": "passed",
+    "text.heading.enter-keeps-session": "passed",
+    "text.link.chip-on-click": "passed",
+    "text.title.shrink-on-overflow": "passed",
+    "text.title.second-session-survives-reload": "passed",
+    "text.link.popover-anchored": "passed",
+    "text.link.detection-setting": "passed",
+    "text.tail.size-reads-heading": "passed",
+    "text.polish.highlight-console": "passed",
+    "lines.hit.stroke-only": "passed",
+    "shapes.geometry.cloud-callout-closed": "passed",
+    "charts.grid.every-series-in-view": "passed",
+    "chrome.format-options.fields-by-kind": "passed",
+    "lines.move.detaches": "passed",
+    "lines.select.handles-no-ring": "passed",
+    "arrange.select.no-browser-highlight": "passed",
+    "diagrams.label.double-click-selects-word": "passed",
+    "lines.connector.perpendicular-at-sites": "passed",
+    "wordart.bar.closes": "passed",
+    "wordart.polish.chip-weight-arming": "passed",
+    "chrome.plate.fits-viewport": "passed",
+    "formatting.spacing.table-cells": "passed",
+    "help.check-slides.plain-sentence": "passed",
+    "slides.background.picture-grid": "passed",
+    "menus.rows.icon-on-every-row": "passed",
+    "chrome.snackbar.refusal-sentence": "passed",
+    "chrome.handles.tooltip-words": "passed",
+    "chrome.tooltips.only-on-hover": "passed",
+    "chrome.chip.above-ring": "passed",
+    "chrome.dialog.no-loading-jump": "passed",
+    "chrome.dialog.focus-return-and-trap": "passed",
+    "comments.insert.needs-selection": "passed",
+    "chrome.context.escape-closes-submenu": "passed",
+    "formatting.border-weight.menu-opens": "passed",
+    "chrome.toolbar.select-glyph": "passed",
+    "chrome.words.one-spelling": "passed",
+    "chrome.menus.structure-sweep": "passed",
+    "slides.filmstrip.follows-every-move": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": [
+        "bar.table"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.selected.typing-replaces",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.session.escape-twice",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.context.inside-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.default-look",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.select",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.move",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.rotate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.fill.colour",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.context.shape",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.text.colour-toolbar",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.text.enter-opens-label",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.borders-lines.menu",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.grid",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.double-click-type",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-from-written",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-from-empty",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.shift-tab",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-last-appends-row",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-with-session",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-selected",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.insert-delete",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.column.insert-keeps-widths",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.column.resize-seam",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.align-menu",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.align-toolbar",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.select.resize",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.fill-border-tail",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.merge-unmerge",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.tail.merge-unmerge-buttons",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.distribute.rows-columns",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.light-appearance",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.present",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.reload",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.one-click-tail",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.bold-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.bold-cmd-b",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.align-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.size-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.format-options-marks",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.apply-layout-after-format",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.fontsize.type-one-undo",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-options.field-one-undo",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detect-url",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detect-email",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.select.double-click-address",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.select.shift-home-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.popover-apply-remove",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-options.padding-grid",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.format-options.remembers-section",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.autofit.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.find-replace.count-while-typing",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-places-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-then-type",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.drag-from-selected",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.label.centred-default",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.hexagon-sheet",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.star5-adjust",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.pie-arc",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.multipath-can",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.flowchart-own-space",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.arrows.right-arrow",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.arrows.curved-right",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.callouts.wedge-rect",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.callouts.cloud",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.equation.plus-divide",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.pinned-three",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.sites",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.resize-keeps-adjust",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-shapes",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-arrows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-callouts",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-equation",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.icons.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.change-shape.plate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.mask-image.plate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.selected.typing-appends",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.arrows-cross-cells",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.shift-arrows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.bold-italic",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.size-color",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.panel.table-first",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: bar.table (docs/PRODUCT.md 7.1, B3); no bar under the selected table (P1, FEATURES.md 2.3 item 3)"
+    },
+    {
+      "id": "tables.command.keeps-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.tabular-figures",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.select.ring-with-cell-open",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.ring-on-cell",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.empty-grid-guides",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.light-appearance-guides",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.box-fits-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.rows.grow-with-text",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.resize.rows-share-extra",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.seam.visible-with-cell-open",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.heads.header-toggle",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.panel.section-words",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.no-prompt",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.rows.ring-follows-typing",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-moves-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.tail.size-step-ladder",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.box-never-shorter-than-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.heads.keys-act-on-range",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.one-placement-rule",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.edge.stays-inside-sheet",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.align-cells-only",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.object-menu-on-frame",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.polish.seams-snap-grid",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.blank-empty",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.hit.stroke-only",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.cloud-callout-closed",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.grid.every-series-in-view",
+      "feature": "charts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.format-options.fields-by-kind",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.move.detaches",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.select.handles-no-ring",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.no-browser-highlight",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "diagrams.label.double-click-selects-word",
+      "feature": "diagrams",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.connector.perpendicular-at-sites",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.bar.closes",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "wordart.polish.chip-weight-arming",
+      "feature": "wordart",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.plate.fits-viewport",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.spacing.table-cells",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.check-slides.plain-sentence",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.background.picture-grid",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.rows.icon-on-every-row",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.snackbar.refusal-sentence",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.handles.tooltip-words",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tooltips.only-on-hover",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.chip.above-ring",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.dialog.no-loading-jump",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.dialog.focus-return-and-trap",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.insert.needs-selection",
+      "feature": "comments",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.context.escape-closes-submenu",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.border-weight.menu-opens",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.select-glyph",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.one-spelling",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.structure-sweep",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.filmstrip.follows-every-move",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

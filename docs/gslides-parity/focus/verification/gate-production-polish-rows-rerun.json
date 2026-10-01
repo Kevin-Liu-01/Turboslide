@@ -1,0 +1,278 @@
+{
+  "base": "https://www.turboslide.com",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-01T06:54:55.005Z",
+  "ms": 964531,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 963652,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish-close/gate-prod-rows-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "images.insert.no-external-banner",
+      "shaders.frame.large-png-lands",
+      "images.replace.keeps-aspect",
+      "logos.dialog.results-in-view",
+      "shaders.insert.free-rectangle",
+      "export.refusal.sentence-and-retry",
+      "export.picture.progress-and-capture",
+      "sync.slide.concurrent-add-both-kept",
+      "assist.snackbar.names-change"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 9,
+  "passed": 2,
+  "failed": 7,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "241c1df1",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-01",
+  "results": {
+    "assist.snackbar.names-change": "failed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.picture.progress-and-capture": "failed",
+    "images.insert.no-external-banner": "failed",
+    "images.replace.keeps-aspect": "passed",
+    "logos.dialog.results-in-view": "failed",
+    "shaders.frame.large-png-lands": "failed",
+    "shaders.insert.free-rectangle": "failed",
+    "sync.slide.concurrent-add-both-kept": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "images.insert.no-external-banner",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.frame.large-png-lands",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "logos.dialog.results-in-view",
+        "feature": "logos",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.insert.free-rectangle",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.picture.progress-and-capture",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "assist.snackbar.names-change",
+        "feature": "assist",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "assist",
+    "logos",
+    "shaders"
+  ],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "shaders.frame.large-png-lands",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: page.screenshot: Clipped area is either empty or outside the resulting image"
+    },
+    {
+      "id": "images.replace.keeps-aspect",
+      "feature": "images",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.dialog.results-in-view",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the dialog's height does not change"
+    },
+    {
+      "id": "shaders.insert.free-rectangle",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the file within 4 s on an unchanged slide"
+    },
+    {
+      "id": "sync.slide.concurrent-add-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.snackbar.names-change",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: renewal became contract"
+    }
+  ]
+}

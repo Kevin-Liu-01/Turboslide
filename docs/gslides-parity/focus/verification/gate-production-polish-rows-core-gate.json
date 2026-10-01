@@ -1,0 +1,945 @@
+{
+  "base": "https://www.turboslide.com",
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-01T06:13:37.488Z",
+  "ms": 2342281,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 2341361,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish-close/gate-prod-rows/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "surface.domain.build-commit",
+      "tables.header.rule-with-text",
+      "charts.labels.fit-slot",
+      "svg.paste.keeps-text",
+      "images.insert.no-external-banner",
+      "shaders.frame.large-png-lands",
+      "images.replace.keeps-aspect",
+      "images.picture.no-plate",
+      "logos.dialog.results-in-view",
+      "logos.dialog.sentence-case-whole-names",
+      "shaders.gallery.words-and-head",
+      "shaders.insert.free-rectangle",
+      "brand.panel.words-match-sheet",
+      "images.byurl.preview-contained",
+      "svg.intake.long-comment",
+      "images.drop.clamped",
+      "images.polish.natural-size",
+      "chrome.tail.reads-mode",
+      "share.name-prompt.empty-field",
+      "decks.recent.keeps-new-deck",
+      "decks.card.rename-everywhere",
+      "decks.list.one-card-per-deck",
+      "export.print.deck-appearance",
+      "share.dialog.new-deck-restricted-viewer",
+      "share.role-change.keeps-link",
+      "export.details.seller-card",
+      "decks.trash.leaves-at-once",
+      "export.refusal.sentence-and-retry",
+      "export.print.opens",
+      "decks.card.title-ellipsis",
+      "decks.card.download-powerpoint",
+      "export.download.one-name-rule",
+      "export.picture.progress-and-capture",
+      "decks.import.upload-drop-zone",
+      "decks.back.list-restored",
+      "decks.card.thumbnail-or-plate",
+      "versions.panel.rows-read-clean",
+      "versions.title-row.last-edit-inline",
+      "present.bar.no-dead-control",
+      "present.laser.visible",
+      "comments.marker.one-per-anchor",
+      "share.dialog.restricted-and-more",
+      "decks.trash.enter-confirms",
+      "decks.card.rename-field-fits",
+      "decks.trash.empty-not-primary",
+      "decks.polish.pages-sweep",
+      "sync.slide.concurrent-add-both-kept",
+      "sync.title-row.save-words-truthful",
+      "sync.reject.sentence-below-toolbar",
+      "share.name-prompt.never-mid-drag",
+      "collab.follow.anonymous-editor",
+      "present.link.first-paint-show",
+      "surface.skeleton.matches-editor",
+      "sync.write.5xx-keeps-document",
+      "sync.recovered.no-plate-for-held-writes",
+      "collab.presence.join-within-2s",
+      "decks.thumbnail.never-502",
+      "collab.polish.session-sweep",
+      "assist.panel.mode-aware",
+      "assist.tailor.one-pass",
+      "assist.snackbar.names-change",
+      "assist.panel.words-and-layout",
+      "assist.polish.agent-sweep",
+      "decks.home.pictures-three-widths",
+      "decks.home.copy-rules",
+      "decks.home.product-pictures",
+      "decks.home.links-and-card",
+      "decks.home.load-budget",
+      "decks.home.layout-shift"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 69,
+  "passed": 58,
+  "failed": 11,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "first byte 38 ms (budget 150)",
+        "LCP 172 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 201 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 15729 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1238762 B (reported against 600000)",
+        "first byte 38 ms (budget 150)",
+        "LCP 172 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 201 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 15729 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1238762 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "241c1df1",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-01",
+  "results": {
+    "assist.panel.mode-aware": "passed",
+    "assist.tailor.one-pass": "passed",
+    "assist.snackbar.names-change": "failed",
+    "assist.panel.words-and-layout": "passed",
+    "assist.polish.agent-sweep": "passed",
+    "brand.panel.words-match-sheet": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.copy-rules": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.links-and-card": "failed",
+    "decks.home.load-budget": "passed",
+    "decks.home.layout-shift": "passed",
+    "decks.recent.keeps-new-deck": "passed",
+    "decks.card.rename-everywhere": "passed",
+    "decks.list.one-card-per-deck": "passed",
+    "decks.trash.leaves-at-once": "passed",
+    "decks.card.title-ellipsis": "passed",
+    "decks.card.download-powerpoint": "passed",
+    "decks.import.upload-drop-zone": "passed",
+    "decks.back.list-restored": "passed",
+    "decks.card.thumbnail-or-plate": "passed",
+    "decks.trash.enter-confirms": "passed",
+    "decks.card.rename-field-fits": "passed",
+    "decks.trash.empty-not-primary": "passed",
+    "decks.thumbnail.never-502": "passed",
+    "decks.polish.pages-sweep": "passed",
+    "versions.panel.rows-read-clean": "passed",
+    "versions.title-row.last-edit-inline": "passed",
+    "comments.marker.one-per-anchor": "passed",
+    "tables.header.rule-with-text": "passed",
+    "charts.labels.fit-slot": "passed",
+    "export.print.deck-appearance": "passed",
+    "export.details.seller-card": "passed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.print.opens": "passed",
+    "export.download.one-name-rule": "passed",
+    "export.picture.progress-and-capture": "failed",
+    "images.insert.no-external-banner": "failed",
+    "images.byurl.preview-contained": "passed",
+    "images.drop.clamped": "passed",
+    "images.polish.natural-size": "passed",
+    "images.replace.keeps-aspect": "failed",
+    "images.picture.no-plate": "passed",
+    "logos.dialog.results-in-view": "failed",
+    "logos.dialog.sentence-case-whole-names": "passed",
+    "present.bar.no-dead-control": "passed",
+    "present.laser.visible": "passed",
+    "present.link.first-paint-show": "passed",
+    "shaders.frame.large-png-lands": "failed",
+    "shaders.gallery.words-and-head": "passed",
+    "shaders.insert.free-rectangle": "failed",
+    "chrome.tail.reads-mode": "passed",
+    "share.name-prompt.empty-field": "passed",
+    "share.dialog.new-deck-restricted-viewer": "passed",
+    "share.role-change.keeps-link": "passed",
+    "share.dialog.restricted-and-more": "passed",
+    "share.name-prompt.never-mid-drag": "passed",
+    "collab.follow.anonymous-editor": "failed",
+    "collab.presence.join-within-2s": "passed",
+    "collab.polish.session-sweep": "passed",
+    "surface.domain.build-commit": "passed",
+    "surface.skeleton.matches-editor": "passed",
+    "svg.paste.keeps-text": "passed",
+    "svg.intake.long-comment": "passed",
+    "sync.slide.concurrent-add-both-kept": "failed",
+    "sync.title-row.save-words-truthful": "passed",
+    "sync.reject.sentence-below-toolbar": "passed",
+    "sync.write.5xx-keeps-document": "passed",
+    "sync.recovered.no-plate-for-held-writes": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "images.insert.no-external-banner",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.frame.large-png-lands",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "images.replace.keeps-aspect",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "logos.dialog.results-in-view",
+        "feature": "logos",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.insert.free-rectangle",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.picture.progress-and-capture",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "sync.slide.concurrent-add-both-kept",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "collab.follow.anonymous-editor",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "assist.snackbar.names-change",
+        "feature": "assist",
+        "result": "failed"
+      },
+      {
+        "id": "decks.home.links-and-card",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "assist",
+    "logos",
+    "shaders"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "collab.follow.anonymous-editor",
+      "parks": [
+        "title.presence.follow"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "images.replace.keeps-aspect",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "sync.slide.concurrent-add-both-kept",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "surface.domain.build-commit",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.header.rule-with-text",
+      "feature": "tables",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "charts.labels.fit-slot",
+      "feature": "charts",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.paste.keeps-text",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "shaders.frame.large-png-lands",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: page.screenshot: Clipped area is either empty or outside the resulting image"
+    },
+    {
+      "id": "images.replace.keeps-aspect",
+      "feature": "images",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the picture's natural size is known"
+    },
+    {
+      "id": "images.picture.no-plate",
+      "feature": "images",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.dialog.results-in-view",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the dialog's height does not change"
+    },
+    {
+      "id": "logos.dialog.sentence-case-whole-names",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.gallery.words-and-head",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.free-rectangle",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "brand.panel.words-match-sheet",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.byurl.preview-contained",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "svg.intake.long-comment",
+      "feature": "svg",
+      "driver": "core/svg.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.drop.clamped",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.polish.natural-size",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tail.reads-mode",
+      "feature": "chrome",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.empty-field",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-everywhere",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.one-card-per-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.print.deck-appearance",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.new-deck-restricted-viewer",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.role-change.keeps-link",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.details.seller-card",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.leaves-at-once",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.print.opens",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.title-ellipsis",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.download-powerpoint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.one-name-rule",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the file within 4 s on an unchanged slide"
+    },
+    {
+      "id": "decks.import.upload-drop-zone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.back.list-restored",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.thumbnail-or-plate",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.panel.rows-read-clean",
+      "feature": "versions",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.title-row.last-edit-inline",
+      "feature": "versions",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.bar.no-dead-control",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.laser.visible",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.marker.one-per-anchor",
+      "feature": "comments",
+      "driver": "core/documents.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.restricted-and-more",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.enter-confirms",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-field-fits",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.empty-not-primary",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.polish.pages-sweep",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.slide.concurrent-add-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: both browsers hold both slides within 5 s, no reject card, no retry word, three rounds"
+    },
+    {
+      "id": "sync.title-row.save-words-truthful",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.never-mid-drag",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.follow.anonymous-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the roster lists Follow for an anonymous editor"
+    },
+    {
+      "id": "present.link.first-paint-show",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "surface.skeleton.matches-editor",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.write.5xx-keeps-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.recovered.no-plate-for-held-writes",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.thumbnail.never-502",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.polish.session-sweep",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.panel.mode-aware",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.one-pass",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.snackbar.names-change",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: renewal became contract"
+    },
+    {
+      "id": "assist.panel.words-and-layout",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.polish.agent-sweep",
+      "feature": "assist",
+      "driver": "core/assist.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy-rules",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: og:url names www.turboslide.com"
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

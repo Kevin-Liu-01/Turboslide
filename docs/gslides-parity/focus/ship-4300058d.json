@@ -46,7 +46,7 @@
     },
     {
       "id": "view.live-pointers.second-browser",
-      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+      "parks": ["view.livePointers.mine", "view.livePointers.others"]
     }
   ],
   "notParked": [

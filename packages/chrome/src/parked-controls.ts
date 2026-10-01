@@ -38,8 +38,8 @@ export const PARKED_CONTROLS: ReadonlySet<string> = new Set<string>([
   'panel.brand.logo.find',
   'picture.svg.copy',
   'toolbar.group.text',
-  'view.livePointers.collaborators',
   'view.livePointers.mine',
+  'view.livePointers.others',
 ]);
 /* parked-controls:end */
 

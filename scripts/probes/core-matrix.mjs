@@ -572,9 +572,10 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'dialog.avatarBuilder.cacheSentence',
   'dialog.share.row.email',
   /* the realtime round (docs/REALTIME.md 5.2, build/r3.md request 2, build/r5.md): the second
-     View > Live pointers row's id once the integrator renames it (`view.livePointers.others`;
-     today's literal is `view.livePointers.collaborators`), so the two view rows' `parks` validate
-     on the tree before and after the rename; and R4's Google button in dialogs/SignIn.tsx */
+     View > Live pointers row's id, `view.livePointers.others` since the integrator's day 0 commit
+     (model.ts; the matrix's two view rows and the ship list of record renamed with it), and the
+     old literal `view.livePointers.collaborators`, kept so a parked list or a ledger from before
+     the rename still validates; and R4's Google button in dialogs/SignIn.tsx */
   'view.livePointers.others',
   'view.livePointers.collaborators',
   'dialog.signIn.google',

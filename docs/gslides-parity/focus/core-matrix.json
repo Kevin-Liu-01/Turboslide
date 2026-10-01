@@ -4488,7 +4488,7 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 54",
-      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+      "parks": ["view.livePointers.mine", "view.livePointers.others"]
     },
     {
       "id": "view.live-pointers.second-browser",
@@ -4497,7 +4497,7 @@
       "driver": "core/share.spec.ts",
       "today": "not driven",
       "evidence": "audit-surface row 54 verdict: the pointer drawing across browsers was not driven",
-      "parks": ["view.livePointers.mine", "view.livePointers.collaborators"]
+      "parks": ["view.livePointers.mine", "view.livePointers.others"]
     },
     {
       "id": "view.comments.radios",

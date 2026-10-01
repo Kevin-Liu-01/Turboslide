@@ -791,11 +791,16 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     'title.presence',
     'Collaborators',
     [
+      /* in the default view since the realtime round (docs/REALTIME.md 2 row
+         realtime.follow.for-everyone, section 7 default 5; build/r3.md request 1): the server
+         grants `follow` to every editor and owner, by link and anonymous included
+         (packages/identity/src/access.ts), so the row needs no switch; `when: 'follow'` keeps it
+         from viewers, commenters and agents. The parked row collab.follow.anonymous-editor retires
+         into the realtime row */
       now('title.presence.follow', 'Follow', action('presence.follow'), {
         turboslide: true,
-        advanced: true,
         when: 'follow',
-        doc: 'Jumps to that person’s slide and moves with them; your own edit or click stops it',
+        doc: 'Jumps to that person’s slide and moves with them; your own click, edit or comment stops it, and so do Slideshow and Version history',
       }),
       now('title.presence.goTo', 'Go to slide', client('goToClient'), {
         turboslide: true,
@@ -818,7 +823,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     ],
     {
       google: 'Avatar row',
-      doc: 'Who has this presentation open; click a chip to follow that person',
+      doc: 'Who has this presentation open; a chip jumps to that person’s slide and the list offers Follow',
     },
   ),
   /* the product round (docs/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini */
@@ -1305,27 +1310,25 @@ const VIEW: Menu = {
       { icon: 'chat', dividerBefore: true, when: 'readComments' },
     ),
     /* SPEC-3 4.4, 4.6, 13.1: Google's two rows; the own pointer is off by default and needs the
-       editor role, the collaborators' pointers are on by default for everyone. Parked again by
-       the return round's integration (docs/RETURN.md section 1 rule 2): the matrix row
-       view.live-pointers.second-browser, which carries `parks` naming these two rows, was red on
-       the memory tier and on the enforce preview on 2026-09-19 (the editor reports the slide,
-       the selection and the caret to the room and never the pointer, so the second browser's
-       pointer is not drawn on the first; build/integrator.md). The rows flip and hold
-       (view.live-pointers.toggles) and return when the second browser row passes. */
-    parked(
-      sub('view.livePointers', 'Live pointers', [
-        now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
-          when: 'write',
-          doc: 'Others see where your pointer is on the slide, with your name',
-        }),
-        now(
-          'view.livePointers.collaborators',
-          'Show collaborator pointers',
-          toggle('pointerOthers'),
-          { doc: 'The pointers of the people in this presentation, up to twenty' },
-        ),
-      ]),
-    ),
+       editor role, the collaborators' pointers are on by default for everyone. Parked by the
+       return round's integration (docs/RETURN.md section 1 rule 2) while the editor reported no
+       pointer to the room; back in the default view since the realtime round (docs/REALTIME.md 2
+       row realtime.pointer.second-browser, 5.2; build/r3.md request 2): the stage publishes the
+       pointer and the overlay draws the others' from real frames. The second row's id is
+       `view.livePointers.others` since the same round (the data-control id REALTIME.md 5.2
+       names); the words are PRESENCE's in strings.ts (`showMyPointer`, `showMyPointerDoc`,
+       `showCollaboratorPointers`, `showCollaboratorPointersDoc`), written here as the menu
+       model's literals like every other row's. Google's rule (audit-people.md section 2): an
+       editor shows a pointer, every access level sees the pointers. */
+    sub('view.livePointers', 'Live pointers', [
+      now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
+        when: 'write',
+        doc: 'Others see where your pointer is on the slide, with your name; editors only',
+      }),
+      now('view.livePointers.others', 'Show collaborator pointers', toggle('pointerOthers'), {
+        doc: 'The pointers of the people in this presentation, with their names, up to twenty',
+      }),
+    ]),
     now('view.showSpeakerNotes', 'Show speaker notes', toggle('speakerNotes'), {
       dividerBefore: true,
       when: 'readNotes',

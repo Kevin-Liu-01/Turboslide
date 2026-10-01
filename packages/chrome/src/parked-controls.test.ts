@@ -82,8 +82,13 @@ describe('isParkedIn', () => {
       'panel.brand.logo.find',
       'picture.svg.copy',
       'toolbar.group.text',
-      'view.livePointers.collaborators',
+      /* the realtime round's day 0 commit renamed the second Live pointers row to
+         view.livePointers.others in model.ts, the matrix and the ship list of record
+         (docs/REALTIME.md 5.2; build/r3.md request 2, build/r5.md request 2); the set follows the
+         list until the next ship's emit, and the menu rows themselves are in the default view
+         through model.ts, which no menu row reads this set for */
       'view.livePointers.mine',
+      'view.livePointers.others',
     ]);
     /* ship two: the Background dialog's Shader row and its field are parked, the gallery's Insert >
        Shader and the Shader section are not, and View > Play shaders stays in the default view */

@@ -179,11 +179,12 @@ describe('the title row slots', () => {
     const onFollow = vi.fn();
     const onGoTo = vi.fn();
     /* the default view first: the rows and chips stay, the own row and the stub are absent
-       (docs/FOCUS.md 3.1, 3.2; b6's FR2) and the Go to slide word is drawn: the matrix row
-       collab.roster.go-to-slide, whose `parks` name title.presence.goTo, read green in both preview
-       runs of record of the features round's ship one and left the parked list
-       (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`; re-parked at the return round's ship
-       when it read red, docs/RETURN.md section 1 rule 2, VERIFICATION.md R2-F1) */
+       (docs/FOCUS.md 3.1, 3.2; b6's FR2). The row of a person with a slide open offers Follow in
+       the default view since the realtime round (docs/REALTIME.md 2 row
+       realtime.follow.for-everyone, section 7 default 5; build/r3.md request 1: title.presence.follow
+       lost `advanced: true`, the capability granted to every editor and owner); before that round
+       the row read the Go to slide word, in the default view since the features round's ship one
+       (collab.roster.go-to-slide, docs/gslides-parity/focus/ship-f1afe1e.json `leaves`) */
     const plain = render(
       <Harness
         input={input({ presence: { self, others, onFollow, onGoTo } })}
@@ -198,12 +199,12 @@ describe('the title row slots', () => {
     expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(21);
     expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).not.toBeNull();
     expect(plainRoster.querySelector('[data-menu-item="title.presence.joinChat"]')).toBeNull();
-    expect(plainRoster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
-      'Go to slide',
-    );
+    const plainRow = plainRoster.querySelector('[data-control="presence.roster.c1"]')!;
+    expect(plainRow.textContent).toContain(PRESENCE.follow);
+    expect(plainRow.getAttribute('data-menu-item')).toBe('title.presence.follow');
     fireEvent.keyDown(plainRoster, { key: 'Escape' });
     plain.unmount();
-    /* the switch on, remembered per browser: the own row and the stub return, the word stays */
+    /* the switch on, remembered per browser: the own row and the stub return, Follow stays */
     localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container } = render(
       <Harness
@@ -246,7 +247,7 @@ describe('the title row slots', () => {
     expect(roster.querySelector('[data-control="presence.roster.me"]')?.textContent).toContain(
       PRESENCE.you,
     );
-    /* with the Follow row present (Advanced tools on) the row offers Follow (item 104) */
+    /* the row offers Follow with the switch on as in the default view (item 104; the realtime round) */
     expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
       PRESENCE.follow,
     );
@@ -439,8 +440,8 @@ describe('the title row slots', () => {
     );
     const more = container.querySelector('[data-control="presence.more"]')!;
     /* one collaborator: the chip fits, no +N, yet the opener is drawn (a people glyph) and opens
-       the roster with that person's row and the Go to slide word (title.presence.goTo, in the
-       default view since the features round's ship one) */
+       the roster with that person's row, which offers Follow in the default view since the realtime
+       round (title.presence.follow; before it the Go to slide word, title.presence.goTo) */
     expect(more.classList.contains('is-empty')).toBe(false);
     expect(more.textContent).toBe('');
     expect(more.querySelector('svg')).not.toBeNull();
@@ -451,7 +452,7 @@ describe('the title row slots', () => {
       person(1).label,
     );
     expect(roster.querySelector('[data-control="presence.roster.c1"]')?.textContent).toContain(
-      'Go to slide',
+      PRESENCE.follow,
     );
     fireEvent.keyDown(roster, { key: 'Escape' });
   });

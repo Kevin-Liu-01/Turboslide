@@ -247,13 +247,11 @@ const SPEC_ROWS: Row[] = [
     ],
     { was3: 'later' },
   ),
-  /* SPEC-3 4.6, 13.1: Google's two Live pointers rows */
-  row(
-    'view',
-    'now',
-    ['view.livePointers', 'view.livePointers.mine', 'view.livePointers.collaborators'],
-    { was3: 'omit' },
-  ),
+  /* SPEC-3 4.6, 13.1: Google's two Live pointers rows (the second's id is view.livePointers.others
+     since the realtime round, docs/REALTIME.md 5.2) */
+  row('view', 'now', ['view.livePointers', 'view.livePointers.mine', 'view.livePointers.others'], {
+    was3: 'omit',
+  }),
   row('view', 'now', ['view.showSpeakerNotes']),
   row('view', 'now', ['view.showFilmstrip']),
   row('view', 'now', ['view.mode', 'view.mode.editing', 'view.mode.viewing']),
@@ -855,11 +853,11 @@ describe('the SPEC rows', () => {
       setting: 'pointerMine',
     });
     expect(itemById('view.livePointers.mine').when).toBe('write');
-    expect(itemById('view.livePointers.collaborators').effect).toEqual({
+    expect(itemById('view.livePointers.others').effect).toEqual({
       kind: 'toggle',
       setting: 'pointerOthers',
     });
-    expect(itemById('view.livePointers.collaborators').when).toBeUndefined();
+    expect(itemById('view.livePointers.others').when).toBeUndefined();
     expect(itemById('view.mode.commenting').effect).toEqual({
       kind: 'toggle',
       setting: 'mode',
@@ -1184,15 +1182,19 @@ describe('the role predicates of SPEC-3 13.4', () => {
     ])
       expect(isPresent(itemById(id), viewer), id).toBe(true);
     /* the parked rows a viewer may use are drawn for them behind Tools > Advanced tools alone
-       (docs/FOCUS.md 3.1, 3.2); Open, Details and the collaborator pointers returned to the
-       default view in the return round (docs/RETURN.md 2.16, 2.17) */
+       (docs/FOCUS.md 3.1, 3.2); Open and Details returned to the default view in the return round
+       (docs/RETURN.md 2.16, 2.17), and Show collaborator pointers in the realtime round
+       (docs/REALTIME.md 2 row realtime.pointer.second-browser: every access level sees the
+       pointers), so a viewer reads it with the switch off too */
     const viewerOn = asRole('viewer', {
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
     });
-    for (const id of ['title.inbox', 'view.livePointers.collaborators']) {
+    for (const id of ['title.inbox']) {
       expect(isPresent(itemById(id), viewer), id).toBe(false);
       expect(isPresent(itemById(id), viewerOn), id).toBe(true);
     }
+    expect(isPresent(itemById('view.livePointers.others'), viewer)).toBe(true);
+    expect(isPresent(itemById('view.livePointers.others'), viewerOn)).toBe(true);
     /* the own chip's menu returned to the default view in the people round (docs/PEOPLE.md 3.14,
        default 2), for a viewer too */
     for (const id of ['file.open', 'file.details', 'title.account']) {
@@ -1321,7 +1323,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(isEnabled(itemById('insert.comment'), commenting)).toBe(true);
     expect(isChecked(itemById('view.comments.showAll'), DEFAULT_MENU_CONTEXT)).toBe(true);
     expect(isChecked(itemById('view.comments.hide'), DEFAULT_MENU_CONTEXT)).toBe(false);
-    expect(isChecked(itemById('view.livePointers.collaborators'), DEFAULT_MENU_CONTEXT)).toBe(true);
+    expect(isChecked(itemById('view.livePointers.others'), DEFAULT_MENU_CONTEXT)).toBe(true);
     expect(isChecked(itemById('view.livePointers.mine'), DEFAULT_MENU_CONTEXT)).toBe(false);
     /* the own chip's rows read the identity facts; the account menu was parked in the focus
        round (docs/FOCUS.md 3.2) and is in the default view since the people round (docs/PEOPLE.md
@@ -2790,6 +2792,8 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'tools.checkSlides',
       'help.improve',
       'insert.textBox',
+      /* Follow is in the default view since the realtime round (docs/REALTIME.md 7 default 5) */
+      'title.presence.follow',
     ]) {
       expect(off.has(id), `${id} off`).toBe(true);
       expect(on.has(id), `${id} on`).toBe(true);
@@ -2801,7 +2805,6 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'file.download.txt',
       'file.share.publish',
       'title.inbox',
-      'title.presence.follow',
       'tools.notificationSettings',
       'view.gridView',
       'view.showSections',
@@ -2934,18 +2937,34 @@ describe('the return round: the flags of the returned and the parked rows (docs/
     expect(isPresent(item, OFF)).toBe(true);
   });
 
+  it('draws Follow and the Live pointers rows in the default view since the realtime round', () => {
+    /* docs/REALTIME.md 2 rows realtime.follow.for-everyone and realtime.pointer.second-browser,
+       section 7 default 5; build/r3.md requests 1 and 2: Follow for every editor and owner (the
+       `follow` capability is granted by link and anonymous included, so `when: 'follow'` is the
+       one gate), and the two Live pointers rows now that the stage publishes the pointer; the
+       second row's id is view.livePointers.others */
+    for (const id of [
+      'title.presence.follow',
+      'view.livePointers',
+      'view.livePointers.mine',
+      'view.livePointers.others',
+    ]) {
+      const item = itemById(id);
+      expect(item.advanced, `${id} carries the flag`).toBeUndefined();
+      expect(item.status, id).toBe('now');
+    }
+    expect(isPresent(itemById('view.livePointers'), OFF)).toBe(true);
+    expect(isPresent(itemById('view.livePointers.others'), OFF)).toBe(true);
+    expect(isPresent(itemById('view.livePointers.mine'), OFF)).toBe(true);
+    expect(itemById('title.presence.follow').when).toBe('follow');
+  });
+
   it('keeps the flag on every row RETURN.md leaves parked', () => {
     for (const id of [
       'file.versionHistory.showChanges',
-      /* the return round's integration parked the Live pointers rows again: the matrix row
-         view.live-pointers.second-browser carries `parks` naming them and was red on both tiers
-         (docs/RETURN.md section 1 rule 2; build/integrator.md) */
-      'view.livePointers',
-      'view.livePointers.mine',
-      'view.livePointers.collaborators',
-      'title.presence.follow',
-      /* title.presence.me and title.account left the list in the people round (docs/PEOPLE.md
-         3.14, default 2: the own chip and the roster's own row in the default view) */
+      /* the Live pointers rows and Follow left this list in the realtime round (the test above);
+         title.presence.me and title.account left it in the people round (docs/PEOPLE.md 3.14,
+         default 2: the own chip and the roster's own row in the default view) */
       'title.inbox',
       'file.makeCopy.selected',
       'file.share.publish',

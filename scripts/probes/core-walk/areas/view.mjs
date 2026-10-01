@@ -217,7 +217,7 @@ export async function run(t) {
       let ok = true;
       for (const [row, key] of [
         ['mine', 'pointerMine'],
-        ['collaborators', 'pointerOthers'],
+        ['others', 'pointerOthers'],
       ]) {
         const a = await setting(key);
         await t.menuPath('view', 'view.livePointers', `view.livePointers.${row}`);

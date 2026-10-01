@@ -1247,6 +1247,9 @@ export type CommentCallerResult =
   | { ok: true; caller: CommentCaller; identity: RequestIdentity }
   | { ok: false; status: number; body: unknown; identity: RequestIdentity };
 
+/** A comment action's caller that took this long or longer writes one line to the server log. */
+export const COMMENT_CALLER_SLOW_MS = 1000;
+
 /**
  * The caller of a comment action on a request: the identity, `authorize()` for the capability the
  * action needs (a denial is the body of 6.2), the capabilities of the role on the record, the
@@ -1257,13 +1260,40 @@ export async function commentCallerFor(
   deckId: string,
   action: CommentActionId,
 ): Promise<CommentCallerResult> {
-  const identity = await requestIdentity(request);
+  const started = Date.now();
   const capability = commentCapabilityOf(action);
+  /* the identity read, the room's open and the access record leave together: on the blob tier
+     each is a round of store calls, and on an instance that has not opened the deck the room's
+     open pulls the mirror (the snapshot, the records, the sidecar). The production gate of the
+     people round read one `comment.resolve` at 5.2 s with the op's stamp 4.6 s after the request
+     arrived, so the time was spent here, before the op (the comments hotfix of 2026-10-01). The
+     room's failure is kept aside until the decision is in: a denied request answers its denial
+     and never the room's words, as before */
+  const settle = <T>(run: Promise<T>) =>
+    run.then(
+      (value) => ({ ok: true as const, value }),
+      (error: unknown) => ({ ok: false as const, error }),
+    );
+  const [identity, opened, read] = await Promise.all([
+    requestIdentity(request),
+    settle(roomFor(deckId)),
+    settle(effectiveAccess(deckId)),
+  ]);
+  const decided = Date.now();
   const decision = await decideFor(identity, deckId, capability, action);
   if (!decision.ok)
     return { ok: false, status: decision.status, body: denialBody(decision, capability), identity };
-  const room = await roomFor(deckId);
-  const record = await effectiveAccess(deckId);
+  if (!opened.ok) throw opened.error;
+  if (!read.ok) throw read.error;
+  const room = opened.value;
+  const record = read.value;
+  const total = Date.now() - started;
+  if (total >= COMMENT_CALLER_SLOW_MS) {
+    // one line per slow caller, so a production reading names where a comment action's time went
+    log(
+      `${deckId}: ${action} caller took ${total} ms (identity, room and record ${decided - started} ms, the decision ${Date.now() - decided} ms)`,
+    );
+  }
   const caller: CommentCaller = {
     room,
     author: authorOf(identity),

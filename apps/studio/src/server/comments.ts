@@ -170,12 +170,18 @@ export type LiveThreads = { threads: Map<string, Thread>; revision: number };
 /**
  * The threads as every tab sees them now: the sidecar plus the comment entries the checkpointer
  * has not written yet, folded in stream order through the same reducer. An entry the reducer
- * refuses (a duplicate add from a redelivery) is skipped, as the applier skips it.
+ * refuses (a duplicate add from a redelivery) is skipped, as the applier skips it. On the blob
+ * tier the append wrote the sidecar itself (room.ts `applyComments`), so nothing is pending and
+ * the stored sidecar is the answer: folding the entries over it a second time moved this
+ * instance's `commentsRevision` one above every other instance's for the same sidecar (the
+ * comments hotfix of 2026-10-01, read on production: `rev 7` on the writing instance, `rev 6` on
+ * the others, for one resolve).
  */
 export async function liveThreads(room: Room): Promise<LiveThreads> {
   const stored = await storedThreads(room.deckId);
   const threads = new Map(stored.threads);
   let revision = stored.revision;
+  if (room.tier === 'blob') return { threads, revision };
   // `?.` for a room built by an earlier module version of the dev server (the rooms live on globalThis across reloads)
   for (const entry of room.checkpointer.pendingComments?.() ?? []) {
     const op = entry.comment;
@@ -371,7 +377,9 @@ export function mapCommentError(error: unknown): unknown {
  */
 async function landOp(caller: CommentCaller, op: CommentOp): Promise<ThreadResult> {
   const { room } = caller;
-  const live = await liveThreads(room);
+  // the sidecar and the live document leave together: on the blob tier each is a round of store
+  // calls, and the row's 5 s holds the whole action (the comments hotfix of 2026-10-01)
+  const [live, current] = await Promise.all([liveThreads(room), room.live()]);
   const threadId = op.op === 'add' ? op.thread.id : op.threadId;
   const before = live.threads.get(threadId);
   const at = stampOf(caller);
@@ -384,7 +392,6 @@ async function landOp(caller: CommentCaller, op: CommentOp): Promise<ThreadResul
   } catch (error) {
     throw mapCommentError(error);
   }
-  const current = await room.live();
   const entry: NewEntry = {
     rev: current.document.deck.revision,
     kind: 'comment',
@@ -405,10 +412,16 @@ async function landOp(caller: CommentCaller, op: CommentOp): Promise<ThreadResul
     throw new ConflictError('The room is busy; retry', {
       currentRevision: current.document.deck.revision,
     });
-  room.checkpointer.noteComments(result.entries);
-  room.checkpointer.noteAppended(result.entries, 0);
-  if (caller.author.kind === 'agent') await room.checkpointer.run({ force: true });
-  else room.checkpointer.schedule();
+  if (room.tier !== 'blob') {
+    // the memory and redis tiers: the checkpointer writes the sidecar from the stream, so the
+    // entries are its pending comments until then. On the blob tier the append wrote the sidecar
+    // inside the append (room.ts `applyComments`; the version log carries no comment entry for a
+    // checkpoint to fold), so a run here would read nothing and the fold would count the op twice
+    room.checkpointer.noteComments(result.entries);
+    room.checkpointer.noteAppended(result.entries, 0);
+    if (caller.author.kind === 'agent') await room.checkpointer.run({ force: true });
+    else room.checkpointer.schedule();
+  }
   return { thread, commentsRevision: live.revision + 1 };
 }
 

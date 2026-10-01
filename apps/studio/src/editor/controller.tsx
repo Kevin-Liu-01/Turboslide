@@ -7,6 +7,7 @@ import { planAcceptedCard, withAssistClear } from './assist-accept';
 import { autoTitleMutations } from './auto-title';
 import type { AutoTitleMemory } from './auto-title';
 import { awaitAcknowledged } from './ack-wait';
+import { foldListedThreads, withAnsweredThread } from './comments-fold';
 import { slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import { refusalSentence } from './refusal';
@@ -1626,6 +1627,10 @@ export function createEditorController(init: {
     init.payload.draft === true || latest().access.capabilities.includes(capability);
   let commentsTimer: ReturnType<typeof setTimeout> | undefined;
   let inboxTimer: ReturnType<typeof setTimeout> | undefined;
+  /* how many times in a row a list answer behind this tab is read again, and the pause before each */
+  let commentsBehindReads = 0;
+  const COMMENTS_BEHIND_READS = 4;
+  const COMMENTS_BEHIND_WAIT_MS = 700;
   const refreshComments = async (): Promise<void> => {
     if (!hasCapability('readComments')) {
       if (latest().comments.threads.length > 0 || latest().comments.loaded) {
@@ -1639,24 +1644,51 @@ export function createEditorController(init: {
         includeDeleted: true,
         limit: 200,
       })) as { threads: Thread[]; commentsRevision: number };
+      /* the answer folded over what this tab holds (comments-fold.ts): on the blob tier the
+         instance that served the list may not have pulled the sidecar this tab's last write
+         moved, and its copy must not move a thread this tab resolved back to open (the
+         production gate of the people round, comments.resolve); an answer behind the tab is
+         read again a moment later, a few times, until the store catches up */
+      const fold = foldListedThreads(latest().comments.threads, answer);
       publish({
         comments: {
           ...latest().comments,
-          threads: answer.threads,
-          revision: answer.commentsRevision,
+          threads: fold.threads,
+          revision: fold.revision,
           loaded: true,
         },
       });
+      if (fold.behind && commentsBehindReads < COMMENTS_BEHIND_READS) {
+        commentsBehindReads += 1;
+        scheduleCommentsRefresh(COMMENTS_BEHIND_WAIT_MS);
+      } else if (!fold.behind) {
+        commentsBehindReads = 0;
+      }
     } catch {
       // a draft before its first write, or a role the record does not let read comments
     }
   };
-  const scheduleCommentsRefresh = (): void => {
+  const scheduleCommentsRefresh = (waitMs = 60): void => {
     if (commentsTimer !== undefined) return;
     commentsTimer = setTimeout(() => {
       commentsTimer = undefined;
       void refreshComments();
-    }, 60);
+    }, waitMs);
+  };
+  /** A comment write's answered thread into this tab's list at once, before the sidecar's refresh. */
+  const applyAnsweredThread = (out: unknown): void => {
+    if (typeof out !== 'object' || out === null || !('thread' in out)) return;
+    const { thread } = out as { thread: unknown; commentsRevision?: unknown };
+    if (typeof thread !== 'object' || thread === null || !('revision' in thread)) return;
+    const answered = thread as Thread;
+    const current = latest().comments;
+    publish({
+      comments: {
+        ...current,
+        threads: withAnsweredThread(current.threads, answered),
+        revision: Math.max(current.revision, answered.revision),
+      },
+    });
   };
   const refreshInbox = async (): Promise<void> => {
     if (init.payload.draft === true && room === null) return;
@@ -1696,6 +1728,7 @@ export function createEditorController(init: {
   /** A comment or notification action of this tab, then the sidecar and the inbox re-read. */
   const roomAction = async (action: ActionId, input: unknown): Promise<unknown> => {
     const out = await invoke(action, input);
+    applyAnsweredThread(out);
     scheduleCommentsRefresh();
     scheduleInboxRefresh();
     return out;
@@ -3702,6 +3735,7 @@ export function createEditorController(init: {
       on<unknown>(id, async (input) => {
         const output = await runDeckAction({ deckId, action: id, input, author });
         if (!readsOnly(input)) {
+          applyAnsweredThread(output);
           scheduleCommentsRefresh();
           scheduleInboxRefresh();
         }

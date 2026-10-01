@@ -7,6 +7,7 @@ import { describeBackends } from '@turboslide/effects/select';
 
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
 import { agentAuth, requireAgentAuth } from '../../server/auth';
+import { buildCommit } from '../../server/build-commit';
 import { refuseForeignOrigin } from '../../server/headers';
 import { studioSessions } from '../../server/sessions';
 
@@ -34,20 +35,12 @@ type InstanceFacts = {
   platform: string;
   /**
    * The commit this build was made from (docs/POLISH.md section 0 item 1): the platform's
-   * VERCEL_GIT_COMMIT_SHA when it sets one, else the stamp scripts/check.mjs writes into the
-   * build as TURBOSLIDE_BUILD_COMMIT, else null; a probe and a person read which commit a
-   * domain serves
+   * VERCEL_GIT_COMMIT_SHA when it names a sha, else the stamp scripts/check.mjs and the
+   * production guard pass as TURBOSLIDE_BUILD_COMMIT, else null (server/build-commit.ts); a
+   * probe and a person read which commit a domain serves
    */
   commit: string | null;
 };
-
-/** The build's commit from the environment, or null on a build that carries none. */
-export function buildCommit(
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): string | null {
-  const sha = env.VERCEL_GIT_COMMIT_SHA ?? env.TURBOSLIDE_BUILD_COMMIT ?? '';
-  return /^[0-9a-f]{7,40}$/i.test(sha) ? sha.toLowerCase() : null;
-}
 
 function instanceFacts(): InstanceFacts {
   let effectsBackend: InstanceFacts['effectsBackend'] = 'typescript';

@@ -1,0 +1,199 @@
+{
+  "startedAt": "2026-10-01T19:07:36.196Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    31.34375,
+    21.00634765625,
+    19.70263671875
+  ],
+  "steps": [
+    {
+      "label": "redis-1",
+      "aToBMs": 839,
+      "A": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 2,
+        "revision": 1,
+        "pending": 0
+      },
+      "B": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 2,
+        "revision": 1,
+        "pending": 0
+      }
+    },
+    {
+      "label": "blob-1",
+      "aToBMs": null,
+      "A": {
+        "tier": "blob",
+        "connected": true,
+        "seq": 3,
+        "revision": 3,
+        "pending": 0
+      },
+      "B": {
+        "tier": "blob",
+        "connected": true,
+        "seq": 2,
+        "revision": 2,
+        "pending": 0
+      }
+    },
+    {
+      "label": "blob-2",
+      "aToBMs": 12107,
+      "A": {
+        "tier": "blob",
+        "connected": true,
+        "seq": 4,
+        "revision": 4,
+        "pending": 0
+      },
+      "B": {
+        "tier": "blob",
+        "connected": true,
+        "seq": 4,
+        "revision": 4,
+        "pending": 0
+      }
+    },
+    {
+      "label": "redis-2",
+      "aToBMs": 795,
+      "A": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 3,
+        "revision": 4,
+        "pending": 0
+      },
+      "B": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 3,
+        "revision": 4,
+        "pending": 0
+      }
+    },
+    {
+      "label": "redis-3",
+      "aToBMs": 789,
+      "A": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 4,
+        "revision": 4,
+        "pending": 0
+      },
+      "B": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 4,
+        "revision": 4,
+        "pending": 0
+      }
+    }
+  ],
+  "flag.before": "",
+  "deck.id": "untitled-20261001-8s4x",
+  "tiers.start": {
+    "A": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 1,
+      "revision": 1,
+      "pending": 0
+    },
+    "B": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 1,
+      "revision": 1,
+      "pending": 0
+    }
+  },
+  "flag.set": "off",
+  "handoff": {
+    "at": 6049,
+    "A": {
+      "tier": "blob",
+      "connected": true,
+      "seq": 2,
+      "revision": 2,
+      "pending": 0
+    },
+    "B": {
+      "tier": "blob",
+      "connected": true,
+      "seq": 2,
+      "revision": 2,
+      "pending": 0
+    }
+  },
+  "handoff.logs": {
+    "4471": [
+      "turboslide room: realtime handed off to the blob tier: the realtime flag reads off"
+    ],
+    "4481": [
+      "turboslide room: realtime handed off to the blob tier: the realtime flag reads off"
+    ]
+  },
+  "handback": {
+    "at": 17243,
+    "A": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 2,
+      "revision": 4,
+      "pending": 0
+    },
+    "B": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 2,
+      "revision": 4,
+      "pending": 0
+    }
+  },
+  "handback.logs": {
+    "4471": [
+      "turboslide room: realtime handed off to the blob tier: the realtime flag reads off",
+      "turboslide room: realtime handed back to the redis tier: the realtime flag reads on"
+    ],
+    "4481": [
+      "turboslide room: realtime handed off to the blob tier: the realtime flag reads off",
+      "turboslide room: realtime handed back to the redis tier: the realtime flag reads on"
+    ]
+  },
+  "final.texts": {
+    "A": "Hand off drive redis-1 blob-1 blob-2 redis-2 redis-3",
+    "B": "Hand off drive redis-1 blob-1 blob-2 redis-2 redis-3"
+  },
+  "final.revisions": {
+    "A": 5,
+    "B": 5,
+    "records": 5
+  },
+  "pass": {
+    "handedOffMs": 6049,
+    "handedBackMs": 17243,
+    "everyWordReachedB": false,
+    "documentsAgree": true
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "loadAtEnd": [
+    35.0107421875,
+    23.63720703125,
+    20.75341796875
+  ],
+  "finishedAt": "2026-10-01T19:08:35.135Z"
+}

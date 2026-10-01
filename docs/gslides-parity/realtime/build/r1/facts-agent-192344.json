@@ -1,0 +1,210 @@
+{
+  "startedAt": "2026-10-01T19:23:28.491Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    22.2744140625,
+    17.79931640625,
+    16.982421875
+  ],
+  "deck.id": "untitled-20261001-08ed",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 234,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 236,
+        "aSeesBChipAfterReadyMs": 86,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 235,
+        "aSeesBChipAfterReadyMs": 90,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      22.412109375,
+      17.90185546875,
+      17.0234375
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "agent.write": {
+    "status": 404,
+    "ms": 3,
+    "base": 1,
+    "body": {
+      "error": {
+        "name": "RangeError",
+        "status": 404,
+        "message": "Unknown action \"slide.set\"; GET /api/agent lists them",
+        "code": "unknown_action"
+      }
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 404,
+    "writeMs": 11283,
+    "textInAMs": null,
+    "bannerInAMs": null,
+    "snackbar": "",
+    "headingAfterUndo": "Click to add title",
+    "agentWriteKeptAfterUndo": false,
+    "versions": [
+      {
+        "n": 1,
+        "author": {
+          "kind": "human",
+          "name": "Osmium 887",
+          "principalId": "anon_9c1588b1-687c-4549-9489-cbc49d81db53"
+        },
+        "revision": 1
+      }
+    ],
+    "pass": false,
+    "load": [
+      21.07666015625,
+      17.7578125,
+      16.98193359375
+    ]
+  },
+  "redis": {
+    "before": 18801,
+    "after": 19221,
+    "commandsDuringDrive": 420,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 2,
+      "hset": 9,
+      "pttl": 13,
+      "zadd": 9,
+      "select": 1,
+      "set": 88,
+      "get": 145,
+      "info": 1,
+      "evalsha": 26,
+      "hget": 9,
+      "del": 1,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 31,
+      "hmget": 11,
+      "publish": 20,
+      "incrby": 13,
+      "zscore": 5,
+      "xtrim": 2,
+      "xadd": 2,
+      "zrangebyscore": 26
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 234,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 236,
+          "aSeesBChipAfterReadyMs": 86,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 235,
+          "aSeesBChipAfterReadyMs": 90,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        22.412109375,
+        17.90185546875,
+        17.0234375
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 404,
+      "writeMs": 11283,
+      "textInAMs": null,
+      "bannerInAMs": null,
+      "snackbar": "",
+      "headingAfterUndo": "Click to add title",
+      "agentWriteKeptAfterUndo": false,
+      "versions": [
+        {
+          "n": 1,
+          "author": {
+            "kind": "human",
+            "name": "Osmium 887",
+            "principalId": "anon_9c1588b1-687c-4549-9489-cbc49d81db53"
+          },
+          "revision": 1
+        }
+      ],
+      "pass": false,
+      "load": [
+        21.07666015625,
+        17.7578125,
+        16.98193359375
+      ]
+    }
+  },
+  "loadAtEnd": [
+    21.07666015625,
+    17.7578125,
+    16.98193359375
+  ],
+  "finishedAt": "2026-10-01T19:23:44.208Z"
+}

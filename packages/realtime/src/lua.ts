@@ -107,12 +107,66 @@ end
 return {count, ttl}
 `.trim();
 
+/**
+ * A presence write (the realtime round, docs/REALTIME.md 3.4): the seven commands of the old
+ * `presence.set` as one step. KEYS[1] the roster hash, KEYS[2] the presence expiry set; ARGV[1]
+ * the client id, ARGV[2] the state's clock, ARGV[3] the expiry time in ms, ARGV[4] the TTL in
+ * ms, ARGV[5] the pub/sub channel, ARGV[6] the body (the roster entry as JSON), ARGV[7] the
+ * durable projection (the entry without `pointer`, `drag` and `clock`, canonical JSON), ARGV[8]
+ * the clock now in ms, ARGV[9] the wire message to publish. The hash holds two fields per
+ * client: `<id>` the body and `<id>:m` the meta `<clock>:<durable>`. A live row whose meta clock
+ * is above the state's is a late batch and answers 0 with nothing written. A live row whose
+ * durable projection equals the state's is a volatile frame (a pointer or a drag moved, or a
+ * heartbeat): the body is not rewritten, the meta clock and the expiry are refreshed and the
+ * message is published, answering 2. Otherwise the body and the meta are written, the expiry
+ * refreshed and the message published, answering 1. The roster read (`HMGET` of the live ids)
+ * never meets a meta field, since the expiry set holds client ids alone.
+ */
+export const PRESENCE_SET_SCRIPT = `
+local id = ARGV[1]
+local clock = tonumber(ARGV[2])
+local now = tonumber(ARGV[8])
+local meta = redis.call('HGET', KEYS[1], id .. ':m')
+local live = false
+if meta then
+  local score = redis.call('ZSCORE', KEYS[2], id)
+  if score and tonumber(score) > now then
+    live = true
+  end
+end
+local volatile = false
+if live then
+  local sep = string.find(meta, ':', 1, true)
+  local previous = tonumber(string.sub(meta, 1, sep - 1))
+  if previous and previous > clock then
+    return 0
+  end
+  if string.sub(meta, sep + 1) == ARGV[7] then
+    volatile = true
+  end
+end
+if volatile then
+  redis.call('HSET', KEYS[1], id .. ':m', clock .. ':' .. ARGV[7])
+else
+  redis.call('HSET', KEYS[1], id, ARGV[6], id .. ':m', clock .. ':' .. ARGV[7])
+end
+redis.call('ZADD', KEYS[2], ARGV[3], id)
+redis.call('PEXPIRE', KEYS[1], ARGV[4])
+redis.call('PEXPIRE', KEYS[2], ARGV[4])
+redis.call('PUBLISH', ARGV[5], ARGV[9])
+if volatile then
+  return 2
+end
+return 1
+`.trim();
+
 export const SCRIPTS = {
   append: APPEND_SCRIPT,
   lock: LOCK_SCRIPT,
   heartbeat: HEARTBEAT_SCRIPT,
   unlock: UNLOCK_SCRIPT,
   budget: BUDGET_SCRIPT,
+  presenceSet: PRESENCE_SET_SCRIPT,
 } as const;
 
 export type ScriptName = keyof typeof SCRIPTS;

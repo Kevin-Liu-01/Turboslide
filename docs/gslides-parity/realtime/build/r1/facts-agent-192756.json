@@ -1,0 +1,229 @@
+{
+  "startedAt": "2026-10-01T19:27:50.711Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    9.15869140625,
+    15.00244140625,
+    16.154296875
+  ],
+  "deck.id": "untitled-20261001-7pet",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 205,
+        "aSeesBChipAfterReadyMs": 3,
+        "bSeesAChipAfterReadyMs": 6,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 179,
+        "aSeesBChipAfterReadyMs": 4,
+        "bSeesAChipAfterReadyMs": 7,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 184,
+        "aSeesBChipAfterReadyMs": 2,
+        "bSeesAChipAfterReadyMs": 5,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      9.15869140625,
+      15.00244140625,
+      16.154296875
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "agent.write": {
+    "status": 200,
+    "ms": 6,
+    "base": 1,
+    "body": {
+      "revision": 2
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 200,
+    "writeMs": 1346,
+    "textInAMs": 104,
+    "bannerInAMs": 1,
+    "snackbar": "Assistant changed slide 1Undo",
+    "headingAfterUndo": "Written by the agent",
+    "agentWriteKeptAfterUndo": true,
+    "versions": [
+      {
+        "n": 1,
+        "author": {
+          "kind": "human",
+          "name": "Nylon 112",
+          "principalId": "anon_6f73bbaa-da5f-4aeb-b407-fe681d6bcf68"
+        },
+        "revision": 1
+      },
+      {
+        "n": 2,
+        "author": {
+          "kind": "agent",
+          "name": "agent",
+          "runId": "http"
+        },
+        "revision": 2
+      }
+    ],
+    "pass": true,
+    "load": [
+      9.7060546875,
+      15.0185546875,
+      16.1533203125
+    ]
+  },
+  "redis": {
+    "before": 22907,
+    "after": 23323,
+    "commandsDuringDrive": 416,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 6,
+      "hset": 5,
+      "pttl": 17,
+      "zadd": 5,
+      "select": 1,
+      "set": 88,
+      "get": 153,
+      "info": 1,
+      "evalsha": 34,
+      "hget": 5,
+      "del": 3,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 22,
+      "hmget": 7,
+      "publish": 20,
+      "incrby": 17,
+      "zscore": 1,
+      "xtrim": 2,
+      "xadd": 5,
+      "zrangebyscore": 18
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 205,
+          "aSeesBChipAfterReadyMs": 3,
+          "bSeesAChipAfterReadyMs": 6,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 179,
+          "aSeesBChipAfterReadyMs": 4,
+          "bSeesAChipAfterReadyMs": 7,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 184,
+          "aSeesBChipAfterReadyMs": 2,
+          "bSeesAChipAfterReadyMs": 5,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        9.15869140625,
+        15.00244140625,
+        16.154296875
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 200,
+      "writeMs": 1346,
+      "textInAMs": 104,
+      "bannerInAMs": 1,
+      "snackbar": "Assistant changed slide 1Undo",
+      "headingAfterUndo": "Written by the agent",
+      "agentWriteKeptAfterUndo": true,
+      "versions": [
+        {
+          "n": 1,
+          "author": {
+            "kind": "human",
+            "name": "Nylon 112",
+            "principalId": "anon_6f73bbaa-da5f-4aeb-b407-fe681d6bcf68"
+          },
+          "revision": 1
+        },
+        {
+          "n": 2,
+          "author": {
+            "kind": "agent",
+            "name": "agent",
+            "runId": "http"
+          },
+          "revision": 2
+        }
+      ],
+      "pass": true,
+      "load": [
+        9.7060546875,
+        15.0185546875,
+        16.1533203125
+      ]
+    }
+  },
+  "loadAtEnd": [
+    9.7060546875,
+    15.0185546875,
+    16.1533203125
+  ],
+  "finishedAt": "2026-10-01T19:27:56.234Z"
+}

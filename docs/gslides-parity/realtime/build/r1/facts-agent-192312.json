@@ -1,0 +1,210 @@
+{
+  "startedAt": "2026-10-01T19:22:56.673Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    25.6650390625,
+    17.93896484375,
+    17.00537109375
+  ],
+  "deck.id": "untitled-20261001-fxp2",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 184,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 2,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 188,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 208,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      25.6650390625,
+      17.93896484375,
+      17.00537109375
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "agent.write": {
+    "status": 404,
+    "ms": 3,
+    "base": 1,
+    "body": {
+      "error": {
+        "name": "RangeError",
+        "status": 404,
+        "message": "Unknown action \"slide.set\"; GET /api/agent lists them",
+        "code": "unknown_action"
+      }
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 404,
+    "writeMs": 11262,
+    "textInAMs": null,
+    "bannerInAMs": null,
+    "snackbar": "",
+    "headingAfterUndo": "Click to add title",
+    "agentWriteKeptAfterUndo": false,
+    "versions": [
+      {
+        "n": 1,
+        "author": {
+          "kind": "human",
+          "name": "Cobalt 119",
+          "principalId": "anon_8aadb3e7-3372-41b4-bbeb-832a94bf4e54"
+        },
+        "revision": 1
+      }
+    ],
+    "pass": false,
+    "load": [
+      21.67138671875,
+      17.43505859375,
+      16.84130859375
+    ]
+  },
+  "redis": {
+    "before": 17904,
+    "after": 18331,
+    "commandsDuringDrive": 427,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 2,
+      "hset": 9,
+      "pttl": 13,
+      "zadd": 9,
+      "select": 1,
+      "set": 89,
+      "get": 148,
+      "info": 1,
+      "evalsha": 28,
+      "hget": 9,
+      "del": 2,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 31,
+      "hmget": 11,
+      "publish": 20,
+      "incrby": 13,
+      "zscore": 5,
+      "xtrim": 2,
+      "xadd": 2,
+      "zrangebyscore": 26
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 184,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 2,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 188,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 208,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        25.6650390625,
+        17.93896484375,
+        17.00537109375
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 404,
+      "writeMs": 11262,
+      "textInAMs": null,
+      "bannerInAMs": null,
+      "snackbar": "",
+      "headingAfterUndo": "Click to add title",
+      "agentWriteKeptAfterUndo": false,
+      "versions": [
+        {
+          "n": 1,
+          "author": {
+            "kind": "human",
+            "name": "Cobalt 119",
+            "principalId": "anon_8aadb3e7-3372-41b4-bbeb-832a94bf4e54"
+          },
+          "revision": 1
+        }
+      ],
+      "pass": false,
+      "load": [
+        21.67138671875,
+        17.43505859375,
+        16.84130859375
+      ]
+    }
+  },
+  "loadAtEnd": [
+    21.67138671875,
+    17.43505859375,
+    16.84130859375
+  ],
+  "finishedAt": "2026-10-01T19:23:12.111Z"
+}

@@ -7,6 +7,8 @@
 import type { CommentOp as SchemaCommentOp } from '@turboslide/schema/comments';
 import type { Author, MarkMutation, Mutation, SpliceMutation } from '@turboslide/schema/mutations';
 
+import type { DropBus } from './bus.ts';
+
 export const REALTIME_TIERS = ['memory', 'redis', 'blob'] as const;
 export type RealtimeTier = (typeof REALTIME_TIERS)[number];
 
@@ -121,6 +123,12 @@ export type CaretState = {
   path: string;
   offset?: number;
   range?: [number, number];
+  /**
+   * the tab's stream position when the state was taken (the realtime round, docs/REALTIME.md
+   * 3.4, 3.5; R2's field in protocol.ts), so a receiver transforms the offset past the entries
+   * that landed after it instead of drawing it at a stale place
+   */
+  seq?: number;
 };
 
 export type SelectionState = {
@@ -132,6 +140,14 @@ export type SelectionState = {
 /** Sheet units inside the 1600 by 900 sheet. */
 export type PointerState = { x: number; y: number };
 
+/**
+ * The box of a block the tab is moving or resizing, in sheet units, present only while the
+ * pointer is down (docs/REALTIME.md 3.4; row `realtime.block.drag-live`): a volatile presence
+ * frame on the redis tier (published, not stored; redis.ts `PRESENCE_VOLATILE_KEYS`), never
+ * pushed to the blob tier's shared record (store/presence-store.ts `PRESENCE_OMITTED_FIELDS`).
+ */
+export type DragState = { blockId: string; x: number; y: number; w: number; h: number };
+
 /** What a client posts about itself (SPEC-3 3.8); the identity fields are the server's. */
 export type PresenceState = {
   clientId: string;
@@ -140,6 +156,7 @@ export type PresenceState = {
   slideId?: string;
   selection?: SelectionState;
   pointer?: PointerState;
+  drag?: DragState;
   /** the client this one follows */
   follow?: string;
   pointerOn: boolean;
@@ -333,6 +350,13 @@ export type RealtimeChannel = {
   budget: (key: string, cost: number, limit: number, windowMs: number) => Promise<BudgetResult>;
   /** a kill switch (SPEC-3 0.33); on by default, `realtime` reads as off when Redis is unreachable */
   flag: (name: string) => Promise<boolean>;
+  /**
+   * The drop bus of the deployment (the realtime round, docs/REALTIME.md 3.6; bus.ts): the
+   * message that makes every instance forget one cached row (an access record, a deck index row,
+   * a resolved identity). In process on the memory tier, Redis pub/sub on the redis tier; absent
+   * on the blob tier, which keeps its 5 s TTLs instead.
+   */
+  bus?: DropBus;
   /** closes subscriptions and connections */
   close: () => Promise<void>;
 };

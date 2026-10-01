@@ -88,8 +88,12 @@ export const PRESENCE_SHARED_TTL_MS = 30_000;
 export const PRESENCE_REFRESH_TIMER_MS = 5000;
 /** How long an instance's earlier copies of the record stay before it deletes them. */
 export const PRESENCE_COPY_GRACE_MS = 60_000;
-/** The row fields that never travel: the live pointer stays per instance. */
-export const PRESENCE_OMITTED_FIELDS: readonly string[] = ['pointer'];
+/**
+ * The row fields that never travel on this tier: the live pointer and the box of a block being
+ * dragged (the realtime round, docs/REALTIME.md 3.4: `drag` is a presence frame of the redis
+ * tier at the 80 ms batch; a record polled at 2 s could only draw it jumping).
+ */
+export const PRESENCE_OMITTED_FIELDS: readonly string[] = ['pointer', 'drag'];
 /**
  * The row fields that travel with the next push and start none: a selection or a follow change
  * every few hundred milliseconds would push the record at the floor for good, while a join, a

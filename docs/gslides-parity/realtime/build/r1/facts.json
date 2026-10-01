@@ -1,0 +1,977 @@
+{
+  "startedAt": "2026-10-01T19:08:35.536Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    35.490234375,
+    23.92529296875,
+    20.87158203125
+  ],
+  "deck.id": "untitled-20261001-89cx",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 327,
+        "aSeesBChipAfterReadyMs": 85,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 329,
+        "aSeesBChipAfterReadyMs": 87,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 291,
+        "aSeesBChipAfterReadyMs": 1,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      35.490234375,
+      23.92529296875,
+      20.87158203125
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "shot.caret.A.closed": "r1-03-a-sees-b-caret-closed.png",
+  "shot.caret.A.open": "r1-03-a-sees-b-caret-open.png",
+  "row.realtime.caret.within-300ms": {
+    "variants": [
+      {
+        "aHoldsBlockOpen": false,
+        "moves": [
+          {
+            "keystroke": 1,
+            "caretMovedInAMs": 2,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 2,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 3,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 4,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 5,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 6,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 7,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 8,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 9,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 10,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          }
+        ],
+        "caretOffsetsInAState": [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            7
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            9,
+            9
+          ],
+          [
+            10,
+            10
+          ]
+        ],
+        "flagsInA": [
+          "LLithium"
+        ],
+        "overBound": 9,
+        "pass": false
+      },
+      {
+        "aHoldsBlockOpen": true,
+        "moves": [
+          {
+            "keystroke": 1,
+            "caretMovedInAMs": 2,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 2,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 3,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 4,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 5,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 6,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 7,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 8,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 9,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          },
+          {
+            "keystroke": 10,
+            "caretMovedInAMs": null,
+            "box": [
+              381,
+              548,
+              2,
+              27
+            ]
+          }
+        ],
+        "caretOffsetsInAState": [
+          [
+            10,
+            10
+          ],
+          [
+            12,
+            12
+          ],
+          [
+            13,
+            13
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            15,
+            15
+          ],
+          [
+            16,
+            16
+          ],
+          [
+            17,
+            17
+          ],
+          [
+            18,
+            18
+          ],
+          [
+            19,
+            19
+          ],
+          [
+            20,
+            20
+          ]
+        ],
+        "flagsInA": [
+          "LLithium"
+        ],
+        "overBound": 9,
+        "pass": false
+      }
+    ],
+    "pass": false,
+    "load": [
+      34.06298828125,
+      25.11376953125,
+      21.4521484375
+    ]
+  },
+  "shot.title.A": "r1-05-a-two-typers.png",
+  "shot.title.B": "r1-05-b-two-typers.png",
+  "row.realtime.title.two-typers": {
+    "rounds": [
+      {
+        "round": 1,
+        "wordA": " alpha",
+        "wordB": " bravo",
+        "convergedAfterEscapeMs": 137,
+        "text": "Realtime round drive alpha bravo",
+        "aSawBWordAfterBLastKeyMs": 117,
+        "bSawAWordAfterALastKeyMs": 178,
+        "typingDoneMs": {
+          "a": 629,
+          "b": 779
+        }
+      },
+      {
+        "round": 2,
+        "wordA": " charlie",
+        "wordB": " delta",
+        "convergedAfterEscapeMs": null,
+        "text": {
+          "a": "Realtime round drive alpha bravo charlie",
+          "b": "Realtime round drive alpha bravo charlie"
+        },
+        "aSawBWordAfterBLastKeyMs": null,
+        "bSawAWordAfterALastKeyMs": 50,
+        "typingDoneMs": {
+          "a": 778,
+          "b": 775
+        }
+      },
+      {
+        "round": 3,
+        "wordA": " echo",
+        "wordB": " foxtrot",
+        "convergedAfterEscapeMs": 132,
+        "text": "Realtime round drive alpha bravo charlie echo foxtrot",
+        "aSawBWordAfterBLastKeyMs": 132,
+        "bSawAWordAfterALastKeyMs": 47,
+        "typingDoneMs": {
+          "a": 541,
+          "b": 918
+        }
+      }
+    ],
+    "pass": false,
+    "load": [
+      30.7529296875,
+      24.8017578125,
+      21.4033203125
+    ]
+  },
+  "agent.write": {
+    "status": 200,
+    "ms": 13,
+    "base": 22,
+    "body": {
+      "revision": 23
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 200,
+    "writeMs": 1380,
+    "textInAMs": 127,
+    "bannerInAMs": 1,
+    "snackbar": "Assistant changed slide 1: Realtime round drive alpha bravo charli… became Written by the agentUndo",
+    "headingAfterUndo": "Written by the agent",
+    "agentWriteKeptAfterUndo": true,
+    "versions": [
+      {
+        "n": 21,
+        "author": {
+          "kind": "human",
+          "name": "Iridium 607",
+          "principalId": "anon_59bdf4ab-38bf-4e37-886d-d074e498690c"
+        },
+        "revision": 21
+      },
+      {
+        "n": 22,
+        "author": {
+          "kind": "human",
+          "name": "Lithium 347",
+          "principalId": "anon_99fc68ca-45d6-4bfb-8724-11d45ff05e6c"
+        },
+        "revision": 22
+      },
+      {
+        "n": 23,
+        "author": {
+          "kind": "agent",
+          "name": "agent",
+          "runId": "http"
+        },
+        "revision": 23
+      }
+    ],
+    "pass": true,
+    "load": [
+      28.9306640625,
+      24.5224609375,
+      21.32470703125
+    ]
+  },
+  "redis": {
+    "before": 5505,
+    "after": 8778,
+    "commandsDuringDrive": 3273,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 57,
+      "hset": 109,
+      "pttl": 233,
+      "zadd": 109,
+      "select": 1,
+      "set": 377,
+      "get": 587,
+      "info": 1,
+      "evalsha": 421,
+      "hget": 109,
+      "del": 22,
+      "zrem": 1,
+      "hdel": 1,
+      "pexpire": 327,
+      "hmget": 111,
+      "publish": 169,
+      "incrby": 233,
+      "zscore": 105,
+      "xtrim": 40,
+      "xadd": 32,
+      "zrangebyscore": 226
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 327,
+          "aSeesBChipAfterReadyMs": 85,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 329,
+          "aSeesBChipAfterReadyMs": 87,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 291,
+          "aSeesBChipAfterReadyMs": 1,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        35.490234375,
+        23.92529296875,
+        20.87158203125
+      ]
+    },
+    "realtime.caret.within-300ms": {
+      "variants": [
+        {
+          "aHoldsBlockOpen": false,
+          "moves": [
+            {
+              "keystroke": 1,
+              "caretMovedInAMs": 2,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 2,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 3,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 4,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 5,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 6,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 7,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 8,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 9,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 10,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            }
+          ],
+          "caretOffsetsInAState": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              7,
+              7
+            ],
+            [
+              8,
+              8
+            ],
+            [
+              9,
+              9
+            ],
+            [
+              10,
+              10
+            ]
+          ],
+          "flagsInA": [
+            "LLithium"
+          ],
+          "overBound": 9,
+          "pass": false
+        },
+        {
+          "aHoldsBlockOpen": true,
+          "moves": [
+            {
+              "keystroke": 1,
+              "caretMovedInAMs": 2,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 2,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 3,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 4,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 5,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 6,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 7,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 8,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 9,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            },
+            {
+              "keystroke": 10,
+              "caretMovedInAMs": null,
+              "box": [
+                381,
+                548,
+                2,
+                27
+              ]
+            }
+          ],
+          "caretOffsetsInAState": [
+            [
+              10,
+              10
+            ],
+            [
+              12,
+              12
+            ],
+            [
+              13,
+              13
+            ],
+            [
+              14,
+              14
+            ],
+            [
+              15,
+              15
+            ],
+            [
+              16,
+              16
+            ],
+            [
+              17,
+              17
+            ],
+            [
+              18,
+              18
+            ],
+            [
+              19,
+              19
+            ],
+            [
+              20,
+              20
+            ]
+          ],
+          "flagsInA": [
+            "LLithium"
+          ],
+          "overBound": 9,
+          "pass": false
+        }
+      ],
+      "pass": false,
+      "load": [
+        34.06298828125,
+        25.11376953125,
+        21.4521484375
+      ]
+    },
+    "realtime.title.two-typers": {
+      "rounds": [
+        {
+          "round": 1,
+          "wordA": " alpha",
+          "wordB": " bravo",
+          "convergedAfterEscapeMs": 137,
+          "text": "Realtime round drive alpha bravo",
+          "aSawBWordAfterBLastKeyMs": 117,
+          "bSawAWordAfterALastKeyMs": 178,
+          "typingDoneMs": {
+            "a": 629,
+            "b": 779
+          }
+        },
+        {
+          "round": 2,
+          "wordA": " charlie",
+          "wordB": " delta",
+          "convergedAfterEscapeMs": null,
+          "text": {
+            "a": "Realtime round drive alpha bravo charlie",
+            "b": "Realtime round drive alpha bravo charlie"
+          },
+          "aSawBWordAfterBLastKeyMs": null,
+          "bSawAWordAfterALastKeyMs": 50,
+          "typingDoneMs": {
+            "a": 778,
+            "b": 775
+          }
+        },
+        {
+          "round": 3,
+          "wordA": " echo",
+          "wordB": " foxtrot",
+          "convergedAfterEscapeMs": 132,
+          "text": "Realtime round drive alpha bravo charlie echo foxtrot",
+          "aSawBWordAfterBLastKeyMs": 132,
+          "bSawAWordAfterALastKeyMs": 47,
+          "typingDoneMs": {
+            "a": 541,
+            "b": 918
+          }
+        }
+      ],
+      "pass": false,
+      "load": [
+        30.7529296875,
+        24.8017578125,
+        21.4033203125
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 200,
+      "writeMs": 1380,
+      "textInAMs": 127,
+      "bannerInAMs": 1,
+      "snackbar": "Assistant changed slide 1: Realtime round drive alpha bravo charli… became Written by the agentUndo",
+      "headingAfterUndo": "Written by the agent",
+      "agentWriteKeptAfterUndo": true,
+      "versions": [
+        {
+          "n": 21,
+          "author": {
+            "kind": "human",
+            "name": "Iridium 607",
+            "principalId": "anon_59bdf4ab-38bf-4e37-886d-d074e498690c"
+          },
+          "revision": 21
+        },
+        {
+          "n": 22,
+          "author": {
+            "kind": "human",
+            "name": "Lithium 347",
+            "principalId": "anon_99fc68ca-45d6-4bfb-8724-11d45ff05e6c"
+          },
+          "revision": 22
+        },
+        {
+          "n": 23,
+          "author": {
+            "kind": "agent",
+            "name": "agent",
+            "runId": "http"
+          },
+          "revision": 23
+        }
+      ],
+      "pass": true,
+      "load": [
+        28.9306640625,
+        24.5224609375,
+        21.32470703125
+      ]
+    }
+  },
+  "loadAtEnd": [
+    28.9306640625,
+    24.5224609375,
+    21.32470703125
+  ],
+  "finishedAt": "2026-10-01T19:09:37.615Z"
+}

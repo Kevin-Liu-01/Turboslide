@@ -1,0 +1,690 @@
+{
+  "startedAt": "2026-10-01T19:22:35.801Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    30.51513671875,
+    18.22119140625,
+    17.07861328125
+  ],
+  "deck.id": "untitled-20261001-vmaa",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 257,
+        "aSeesBChipAfterReadyMs": 87,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 267,
+        "aSeesBChipAfterReadyMs": 85,
+        "bSeesAChipAfterReadyMs": 2,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 263,
+        "aSeesBChipAfterReadyMs": 87,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      30.51513671875,
+      18.22119140625,
+      17.07861328125
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "shot.title.A": "r1-05-a-two-typers.png",
+  "shot.title.B": "r1-05-b-two-typers.png",
+  "row.realtime.title.two-typers": {
+    "rounds": [
+      {
+        "round": 1,
+        "wordA": " alpha",
+        "wordB": " bravo",
+        "convergedAfterEscapeMs": 146,
+        "text": "Realtime round drive alpha bravo",
+        "aSawBWordAfterBLastKeyMs": 159,
+        "bSawAWordAfterALastKeyMs": 190,
+        "typingDoneMs": {
+          "a": 633,
+          "b": 835
+        },
+        "wire": {
+          "A": [
+            {
+              "at": 6061,
+              "sent": {
+                "base": 1,
+                "entries": [
+                  {
+                    "opId": "0b08:1",
+                    "mutations": [
+                      {
+                        "op": "text.splice",
+                        "path": "/heading",
+                        "at": 20,
+                        "remove": 0,
+                        "insert": " alpha"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  2
+                ],
+                "rejected": [],
+                "between": 0
+              }
+            }
+          ],
+          "B": [
+            {
+              "at": 6225,
+              "sent": {
+                "base": 2,
+                "entries": [
+                  {
+                    "opId": "1437:1",
+                    "mutations": [
+                      {
+                        "op": "text.splice",
+                        "path": "/heading",
+                        "at": 26,
+                        "remove": 0,
+                        "insert": " bravo"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  3
+                ],
+                "rejected": [],
+                "between": 0
+              }
+            }
+          ]
+        }
+      },
+      {
+        "round": 2,
+        "wordA": " charlie",
+        "wordB": " delta",
+        "convergedAfterEscapeMs": 68,
+        "text": "Realtime round drive alpha bravo charlie delta",
+        "aSawBWordAfterBLastKeyMs": 77,
+        "bSawAWordAfterALastKeyMs": 68,
+        "typingDoneMs": {
+          "a": 788,
+          "b": 779
+        },
+        "wire": {
+          "A": [
+            {
+              "at": 8393,
+              "sent": {
+                "base": 3,
+                "entries": [
+                  {
+                    "opId": "0b08:2",
+                    "mutations": [
+                      {
+                        "op": "slide.replace"
+                      },
+                      {
+                        "op": "text.splice",
+                        "path": "/text",
+                        "at": 32,
+                        "remove": 0,
+                        "insert": " charlie"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/typography",
+                        "value": "[object Object]"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/pos/h",
+                        "value": "90"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  4
+                ],
+                "rejected": [],
+                "between": 0
+              }
+            }
+          ],
+          "B": [
+            {
+              "at": 8412,
+              "sent": {
+                "base": 3,
+                "entries": [
+                  {
+                    "opId": "1437:2",
+                    "mutations": [
+                      {
+                        "op": "slide.replace"
+                      },
+                      {
+                        "op": "text.splice",
+                        "path": "/text",
+                        "at": 32,
+                        "remove": 0,
+                        "insert": " delta"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/typography",
+                        "value": "[object Object]"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/pos/h",
+                        "value": "90"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  5
+                ],
+                "rejected": [],
+                "between": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "round": 3,
+        "wordA": " echo",
+        "wordB": " foxtrot",
+        "convergedAfterEscapeMs": 5,
+        "text": "Realtime round drive alpha bravo charlie delta echo foxtrot",
+        "aSawBWordAfterBLastKeyMs": 17,
+        "bSawAWordAfterALastKeyMs": 49,
+        "typingDoneMs": {
+          "a": 550,
+          "b": 919
+        },
+        "wire": {
+          "A": [
+            {
+              "at": 10266,
+              "sent": {
+                "base": 5,
+                "entries": [
+                  {
+                    "opId": "0b08:3",
+                    "mutations": [
+                      {
+                        "op": "text.splice",
+                        "path": "/text",
+                        "at": 46,
+                        "remove": 0,
+                        "insert": " echo"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/typography",
+                        "value": "[object Object]"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  6
+                ],
+                "rejected": [],
+                "between": 0
+              }
+            }
+          ],
+          "B": [
+            {
+              "at": 10576,
+              "sent": {
+                "base": 6,
+                "entries": [
+                  {
+                    "opId": "1437:3",
+                    "mutations": [
+                      {
+                        "op": "text.splice",
+                        "path": "/text",
+                        "at": 51,
+                        "remove": 0,
+                        "insert": " foxtrot"
+                      },
+                      {
+                        "op": "block.set",
+                        "path": "/typography",
+                        "value": "[object Object]"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "answer": {
+                "status": 200,
+                "seqs": [
+                  7
+                ],
+                "rejected": [],
+                "between": 0
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "pass": true,
+    "load": [
+      28.69287109375,
+      18.244140625,
+      17.1005859375
+    ]
+  },
+  "redis": {
+    "before": 15449,
+    "after": 16658,
+    "commandsDuringDrive": 1209,
+    "byCommand": {
+      "subscribe": 8,
+      "xrange": 11,
+      "hset": 42,
+      "pttl": 66,
+      "zadd": 42,
+      "select": 5,
+      "set": 170,
+      "get": 246,
+      "info": 5,
+      "evalsha": 125,
+      "hget": 42,
+      "del": 5,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 113,
+      "hmget": 44,
+      "publish": 60,
+      "incrby": 66,
+      "zscore": 38,
+      "hello": 4,
+      "client|setinfo": 8,
+      "xtrim": 6,
+      "xadd": 7,
+      "zrangebyscore": 92
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 257,
+          "aSeesBChipAfterReadyMs": 87,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 267,
+          "aSeesBChipAfterReadyMs": 85,
+          "bSeesAChipAfterReadyMs": 2,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 263,
+          "aSeesBChipAfterReadyMs": 87,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        30.51513671875,
+        18.22119140625,
+        17.07861328125
+      ]
+    },
+    "realtime.title.two-typers": {
+      "rounds": [
+        {
+          "round": 1,
+          "wordA": " alpha",
+          "wordB": " bravo",
+          "convergedAfterEscapeMs": 146,
+          "text": "Realtime round drive alpha bravo",
+          "aSawBWordAfterBLastKeyMs": 159,
+          "bSawAWordAfterALastKeyMs": 190,
+          "typingDoneMs": {
+            "a": 633,
+            "b": 835
+          },
+          "wire": {
+            "A": [
+              {
+                "at": 6061,
+                "sent": {
+                  "base": 1,
+                  "entries": [
+                    {
+                      "opId": "0b08:1",
+                      "mutations": [
+                        {
+                          "op": "text.splice",
+                          "path": "/heading",
+                          "at": 20,
+                          "remove": 0,
+                          "insert": " alpha"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    2
+                  ],
+                  "rejected": [],
+                  "between": 0
+                }
+              }
+            ],
+            "B": [
+              {
+                "at": 6225,
+                "sent": {
+                  "base": 2,
+                  "entries": [
+                    {
+                      "opId": "1437:1",
+                      "mutations": [
+                        {
+                          "op": "text.splice",
+                          "path": "/heading",
+                          "at": 26,
+                          "remove": 0,
+                          "insert": " bravo"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    3
+                  ],
+                  "rejected": [],
+                  "between": 0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "round": 2,
+          "wordA": " charlie",
+          "wordB": " delta",
+          "convergedAfterEscapeMs": 68,
+          "text": "Realtime round drive alpha bravo charlie delta",
+          "aSawBWordAfterBLastKeyMs": 77,
+          "bSawAWordAfterALastKeyMs": 68,
+          "typingDoneMs": {
+            "a": 788,
+            "b": 779
+          },
+          "wire": {
+            "A": [
+              {
+                "at": 8393,
+                "sent": {
+                  "base": 3,
+                  "entries": [
+                    {
+                      "opId": "0b08:2",
+                      "mutations": [
+                        {
+                          "op": "slide.replace"
+                        },
+                        {
+                          "op": "text.splice",
+                          "path": "/text",
+                          "at": 32,
+                          "remove": 0,
+                          "insert": " charlie"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/typography",
+                          "value": "[object Object]"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/pos/h",
+                          "value": "90"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    4
+                  ],
+                  "rejected": [],
+                  "between": 0
+                }
+              }
+            ],
+            "B": [
+              {
+                "at": 8412,
+                "sent": {
+                  "base": 3,
+                  "entries": [
+                    {
+                      "opId": "1437:2",
+                      "mutations": [
+                        {
+                          "op": "slide.replace"
+                        },
+                        {
+                          "op": "text.splice",
+                          "path": "/text",
+                          "at": 32,
+                          "remove": 0,
+                          "insert": " delta"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/typography",
+                          "value": "[object Object]"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/pos/h",
+                          "value": "90"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    5
+                  ],
+                  "rejected": [],
+                  "between": 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          "round": 3,
+          "wordA": " echo",
+          "wordB": " foxtrot",
+          "convergedAfterEscapeMs": 5,
+          "text": "Realtime round drive alpha bravo charlie delta echo foxtrot",
+          "aSawBWordAfterBLastKeyMs": 17,
+          "bSawAWordAfterALastKeyMs": 49,
+          "typingDoneMs": {
+            "a": 550,
+            "b": 919
+          },
+          "wire": {
+            "A": [
+              {
+                "at": 10266,
+                "sent": {
+                  "base": 5,
+                  "entries": [
+                    {
+                      "opId": "0b08:3",
+                      "mutations": [
+                        {
+                          "op": "text.splice",
+                          "path": "/text",
+                          "at": 46,
+                          "remove": 0,
+                          "insert": " echo"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/typography",
+                          "value": "[object Object]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    6
+                  ],
+                  "rejected": [],
+                  "between": 0
+                }
+              }
+            ],
+            "B": [
+              {
+                "at": 10576,
+                "sent": {
+                  "base": 6,
+                  "entries": [
+                    {
+                      "opId": "1437:3",
+                      "mutations": [
+                        {
+                          "op": "text.splice",
+                          "path": "/text",
+                          "at": 51,
+                          "remove": 0,
+                          "insert": " foxtrot"
+                        },
+                        {
+                          "op": "block.set",
+                          "path": "/typography",
+                          "value": "[object Object]"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "answer": {
+                  "status": 200,
+                  "seqs": [
+                    7
+                  ],
+                  "rejected": [],
+                  "between": 0
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "pass": true,
+      "load": [
+        28.69287109375,
+        18.244140625,
+        17.1005859375
+      ]
+    }
+  },
+  "loadAtEnd": [
+    28.69287109375,
+    18.244140625,
+    17.1005859375
+  ],
+  "finishedAt": "2026-10-01T19:22:46.379Z"
+}

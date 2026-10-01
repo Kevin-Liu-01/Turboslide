@@ -15,6 +15,7 @@ import {
   editEntry,
   kevin,
   maya,
+  rosterEntry,
   until,
 } from './channel-contract.ts';
 import { fakeRedis } from './redis-fake.ts';
@@ -254,5 +255,97 @@ describe('redisChannel', () => {
     expect(errors.some((context) => /did not parse/.test(context))).toBe(true);
     stop();
     await channel.close();
+  });
+
+  it('writes a presence state in one EVALSHA, publishes a volatile frame without storing it, refreshes the expiry on a heartbeat and removes the meta on leave (docs/REALTIME.md 3.4)', async () => {
+    let clock = 1_700_000_000_000;
+    const now = (): number => clock;
+    const fake = fakeRedis({ now });
+    const { a, b } = pair(fake, now);
+    const seen: RoomEvent[] = [];
+    const stop = b.subscribe('gt-brand', (event) => seen.push(event));
+    await until(() => fake.subscribers('deck:gt-brand:events') === 1);
+    await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 1, 'Titanium 471'), 120_000);
+    // the first set loads the script; every later set is one command
+    const mark = fake.calls.length;
+    const moved = { ...rosterEntry(CLIENT_A, 2, 'Titanium 471'), pointer: { x: 100, y: 200 } };
+    await a.presence.set('gt-brand', CLIENT_A, moved, 120_000);
+    const sent = fake.calls.slice(mark);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]?.[0]).toBe('EVALSHA');
+    // a joiner's roster read answers the stored body: the pointer frame was not stored
+    const roster = await b.presence.roster('gt-brand');
+    expect(roster).toHaveLength(1);
+    expect(roster[0]).not.toHaveProperty('pointer');
+    expect(roster[0]?.clock).toBe(1);
+    // the subscriber received the pointer frame as published
+    await until(() => seen.filter((event) => event.type === 'presence').length >= 2);
+    const frames = seen.filter((event) => event.type === 'presence');
+    expect(frames[frames.length - 1]).toMatchObject({
+      type: 'presence',
+      clientId: CLIENT_A,
+      clock: 2,
+      state: { pointer: { x: 100, y: 200 } },
+    });
+    // a late batch with an older clock changes nothing, after the volatile frame too
+    await a.presence.set(
+      'gt-brand',
+      CLIENT_A,
+      { ...rosterEntry(CLIENT_A, 1, 'Late'), pointer: { x: 1, y: 1 } },
+      120_000,
+    );
+    expect((await b.presence.roster('gt-brand'))[0]?.label).toBe('Titanium 471');
+    // a durable change (the name) is stored
+    await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 3, 'Maya'), 120_000);
+    expect((await b.presence.roster('gt-brand'))[0]).toMatchObject({ label: 'Maya', clock: 3 });
+    // a heartbeat with nothing changed is volatile too and still refreshes the expiry
+    clock += 100_000;
+    await a.presence.set('gt-brand', CLIENT_A, rosterEntry(CLIENT_A, 4, 'Maya'), 120_000);
+    clock += 100_000;
+    expect((await b.presence.roster('gt-brand')).map((row) => row.clientId)).toEqual([CLIENT_A]);
+    clock += 25_000;
+    expect(await b.presence.roster('gt-brand')).toEqual([]);
+    // the expired row's body and meta leave the hash together
+    const swept = fake.calls.filter((call) => call[0] === 'HDEL').at(-1);
+    expect(swept).toEqual(['HDEL', 'deck:gt-brand:roster', CLIENT_A, `${CLIENT_A}:m`]);
+    // leave removes both fields and announces once
+    await a.presence.set('gt-brand', CLIENT_B, rosterEntry(CLIENT_B, 1, 'Cobalt 12'), 120_000);
+    await a.presence.leave('gt-brand', CLIENT_B);
+    expect(await b.presence.roster('gt-brand')).toEqual([]);
+    expect(fake.calls.filter((call) => call[0] === 'HDEL').at(-1)).toEqual([
+      'HDEL',
+      'deck:gt-brand:roster',
+      CLIENT_B,
+      `${CLIENT_B}:m`,
+    ]);
+    await until(() => seen.some((event) => event.type === 'leave'));
+    expect(seen.filter((event) => event.type === 'leave')).toEqual([
+      { type: 'leave', clientId: CLIENT_B },
+    ]);
+    stop();
+  });
+
+  it('reports a flag read that failed through onUnavailable, once per read past the cache', async () => {
+    let clock = 1_700_000_000_000;
+    const reported: string[] = [];
+    const broken: RedisCommands = {
+      call: async () => {
+        throw new Error('ECONNREFUSED');
+      },
+      subscribe: async () => async () => {},
+      quit: async () => {},
+    };
+    const down = redisChannel(broken, {
+      now: () => clock,
+      flagCacheMs: 5000,
+      onUnavailable: (name, error) =>
+        reported.push(`${name}:${error instanceof Error ? error.message : String(error)}`),
+    });
+    expect(await down.flag('realtime')).toBe(false);
+    expect(await down.flag('realtime')).toBe(false);
+    expect(reported).toEqual(['realtime:ECONNREFUSED']);
+    clock += 5001;
+    expect(await down.flag('realtime')).toBe(false);
+    expect(reported).toHaveLength(2);
   });
 });

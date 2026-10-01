@@ -1,0 +1,210 @@
+{
+  "startedAt": "2026-10-01T19:15:52.865Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    9.21484375,
+    13.07275390625,
+    16.65625
+  ],
+  "deck.id": "untitled-20261001-px75",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 172,
+        "aSeesBChipAfterReadyMs": 83,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 167,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 188,
+        "aSeesBChipAfterReadyMs": 83,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      9.1171875,
+      12.98828125,
+      16.60546875
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "agent.write": {
+    "status": 400,
+    "ms": 6,
+    "base": 1,
+    "body": {
+      "error": {
+        "name": "TypeError",
+        "status": 400,
+        "message": "mutation 0 (block.set): No block \"heading\" on slide \"title\"",
+        "action": "block.set"
+      }
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 400,
+    "writeMs": 11287,
+    "textInAMs": null,
+    "bannerInAMs": null,
+    "snackbar": "",
+    "headingAfterUndo": "Click to add title",
+    "agentWriteKeptAfterUndo": false,
+    "versions": [
+      {
+        "n": 1,
+        "author": {
+          "kind": "human",
+          "name": "Foil 872",
+          "principalId": "anon_d260961d-dbf6-43c0-ade7-c9951b399ab7"
+        },
+        "revision": 1
+      }
+    ],
+    "pass": false,
+    "load": [
+      9.005859375,
+      12.83935546875,
+      16.51025390625
+    ]
+  },
+  "redis": {
+    "before": 12850,
+    "after": 13276,
+    "commandsDuringDrive": 426,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 2,
+      "hset": 9,
+      "pttl": 13,
+      "zadd": 9,
+      "select": 1,
+      "set": 90,
+      "get": 146,
+      "info": 1,
+      "evalsha": 28,
+      "hget": 9,
+      "del": 2,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 31,
+      "hmget": 11,
+      "publish": 20,
+      "incrby": 13,
+      "zscore": 5,
+      "xtrim": 2,
+      "xadd": 2,
+      "zrangebyscore": 26
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 172,
+          "aSeesBChipAfterReadyMs": 83,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 167,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 188,
+          "aSeesBChipAfterReadyMs": 83,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        9.1171875,
+        12.98828125,
+        16.60546875
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 400,
+      "writeMs": 11287,
+      "textInAMs": null,
+      "bannerInAMs": null,
+      "snackbar": "",
+      "headingAfterUndo": "Click to add title",
+      "agentWriteKeptAfterUndo": false,
+      "versions": [
+        {
+          "n": 1,
+          "author": {
+            "kind": "human",
+            "name": "Foil 872",
+            "principalId": "anon_d260961d-dbf6-43c0-ade7-c9951b399ab7"
+          },
+          "revision": 1
+        }
+      ],
+      "pass": false,
+      "load": [
+        9.005859375,
+        12.83935546875,
+        16.51025390625
+      ]
+    }
+  },
+  "loadAtEnd": [
+    9.005859375,
+    12.83935546875,
+    16.51025390625
+  ],
+  "finishedAt": "2026-10-01T19:16:08.178Z"
+}

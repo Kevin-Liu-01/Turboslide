@@ -265,6 +265,27 @@ export function channelContract(name: string, setup: ContractSetup): void {
       stop();
     });
 
+    it('carries a drop message to the other instance and refuses an id outside the grammar (docs/REALTIME.md 3.6)', async () => {
+      const { channel, peer } = await setup();
+      if (channel.tier === 'blob') return; // the blob tier has no bus and keeps its TTLs
+      expect(channel.bus).toBeDefined();
+      expect(peer.bus).toBeDefined();
+      const seen: string[] = [];
+      const stop = peer.bus!.subscribe('access', (id) => seen.push(id));
+      await until(() => true);
+      await channel.bus!.publish('access', 'q4-review');
+      await until(() => seen.includes('q4-review'));
+      // another topic's message never reaches an `access` listener
+      await channel.bus!.publish('link', 'anon_0f1e2d3c-4b5a-4978-8a9b-0c1d2e3f4a5b');
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(seen).toEqual(['q4-review']);
+      stop();
+      await channel.bus!.publish('access', 'after-stop');
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(seen).toEqual(['q4-review']);
+      await expect(channel.bus!.publish('access', 'not an id!')).rejects.toThrow(/not an id/);
+    });
+
     it('binds a client id to its session for a while (report 10 F26)', async () => {
       const { channel, peer, advance } = await setup();
       expect(await peer.presence.owner('gt-brand', CLIENT_A)).toBeNull();

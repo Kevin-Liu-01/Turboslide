@@ -22,6 +22,7 @@ import type {
   RosterEntry,
   TrimOptions,
 } from './channel.ts';
+import { redisDropBus } from './bus.ts';
 import type { FlagName } from './keys.ts';
 import { checkClientId, deckKeys, flagKey, isFlagName } from './keys.ts';
 import { SCRIPTS } from './lua.ts';
@@ -104,7 +105,45 @@ export type RedisChannelOptions = {
   flagCacheMs?: number;
   /** where a subscriber's failure is reported (a message that does not parse, a gap fill that fails) */
   onError?: (error: unknown, context: string) => void;
+  /**
+   * Called when a flag's `GET` failed and the flag took its failure value (SPEC-3 0.33: `realtime`
+   * off, every other flag on): the room's hand off (docs/REALTIME.md 3.8) logs `redis.unavailable`
+   * from here, since `flag()` answers the value and never throws.
+   */
+  onUnavailable?: (name: FlagName, error: unknown) => void;
 };
+
+/**
+ * The presence fields that never make a stored frame (docs/REALTIME.md 3.4): a state whose only
+ * change against the stored one is in these is a volatile frame, published and not stored, so a
+ * pointer or a drag moving at the 80 ms batch is one `PUBLISH` and a joiner reads it at the next
+ * frame. `clock` is left out of the comparison too, since every frame carries a new one. The
+ * fields are stripped by name so the script needs nothing of their shape (R2 lands `drag`).
+ */
+export const PRESENCE_VOLATILE_KEYS: readonly string[] = ['pointer', 'drag', 'clock'];
+
+/** Canonical JSON of a value: keys sorted at every level, so two equal states read as one string. */
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record)
+      .filter((key) => record[key] !== undefined)
+      .sort();
+    return `{${keys.map((key) => `${JSON.stringify(key)}:${canonical(record[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
+
+/** The durable projection of a roster entry: the state without its volatile fields, as one string. */
+export function durableOf(state: RosterEntry): string {
+  const durable: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(state)) {
+    if (PRESENCE_VOLATILE_KEYS.includes(key)) continue;
+    durable[key] = value;
+  }
+  return canonical(durable);
+}
 
 /** The wire shape of a pub/sub message; `entries` are bodies without `seq`, numbered from `from`. */
 type WireMessage =
@@ -143,9 +182,13 @@ export function redisChannel(
   const now = options.now ?? (() => Date.now());
   const flagCacheMs = options.flagCacheMs ?? 5000;
   const onError = options.onError ?? (() => {});
+  const onUnavailable = options.onUnavailable ?? (() => {});
   const shas = new Map<ScriptName, string>();
   const subscriptions = new Map<string, Subscription>();
   const flagCache = new Map<FlagName, { value: boolean; at: number }>();
+  const bus = redisDropBus(commands, { onError });
+  /** The meta field of a roster row: `<clientId>:m` holds `<clock>:<durable>` (lua.ts PRESENCE_SET). */
+  const metaField = (id: string): string => `${id}:m`;
 
   const load = async (name: ScriptName): Promise<string> => {
     const sha = String(await commands.call('SCRIPT', 'LOAD', SCRIPTS[name]));
@@ -364,24 +407,26 @@ export function redisChannel(
       async set(deckId, clientId, state, ttlMs): Promise<void> {
         const keys = deckKeys(deckId);
         const id = checkClientId(clientId);
-        const expiresAt = now() + ttlMs;
-        // an older clock is a late batch; the roster keeps the newer state (SPEC-3 3.8)
-        const stored = await commands.call('HGET', keys.roster, id);
-        if (typeof stored === 'string') {
-          try {
-            const previous = JSON.parse(stored) as { clock?: unknown };
-            const score = await commands.call('ZSCORE', keys.presence, id);
-            const live = asNumber(score) > now();
-            if (live && typeof previous.clock === 'number' && previous.clock > state.clock) return;
-          } catch {
-            // an unreadable body is replaced
-          }
-        }
-        await commands.call('HSET', keys.roster, id, JSON.stringify(state));
-        await commands.call('ZADD', keys.presence, expiresAt, id);
-        await commands.call('PEXPIRE', keys.roster, ttlMs);
-        await commands.call('PEXPIRE', keys.presence, ttlMs);
-        await publishWire(deckId, { t: 'presence', clientId: id, clock: state.clock, state });
+        const t = now();
+        // one script (docs/REALTIME.md 3.4, lua.ts PRESENCE_SET): the clock check (an older clock
+        // is a late batch, SPEC-3 3.8), the body and its meta, the expiry, the publish; a frame
+        // whose durable projection equals the stored one is published and not stored
+        const wire: WireMessage = { t: 'presence', clientId: id, clock: state.clock, state };
+        await run(
+          'presenceSet',
+          [keys.roster, keys.presence],
+          [
+            id,
+            state.clock,
+            t + ttlMs,
+            ttlMs,
+            keys.events,
+            JSON.stringify(state),
+            durableOf(state),
+            t,
+            JSON.stringify(wire),
+          ],
+        );
       },
       async roster(deckId): Promise<RosterEntry[]> {
         const keys = deckKeys(deckId);
@@ -390,7 +435,7 @@ export function redisChannel(
         if (Array.isArray(expired) && expired.length > 0) {
           const ids = expired.filter((row): row is string => typeof row === 'string');
           if (ids.length > 0) {
-            await commands.call('HDEL', keys.roster, ...ids);
+            await commands.call('HDEL', keys.roster, ...ids, ...ids.map(metaField));
             await commands.call('ZREM', keys.presence, ...ids);
           }
         }
@@ -414,7 +459,7 @@ export function redisChannel(
       async leave(deckId, clientId): Promise<void> {
         const keys = deckKeys(deckId);
         const id = checkClientId(clientId);
-        const removed = asNumber(await commands.call('HDEL', keys.roster, id));
+        const removed = asNumber(await commands.call('HDEL', keys.roster, id, metaField(id)));
         await commands.call('ZREM', keys.presence, id);
         if (removed > 0) await publishWire(deckId, { t: 'leave', clientId: id });
       },
@@ -458,13 +503,16 @@ export function redisChannel(
       try {
         const reply = await commands.call('GET', flagKey(name));
         value = !(typeof reply === 'string' && /^(off|0|false)$/i.test(reply.trim()));
-      } catch {
+      } catch (error) {
         // Redis unreachable: realtime reads as off (the blob tier), every other flag as on (SPEC-3 0.33)
         value = name !== 'realtime';
+        onUnavailable(name, error);
       }
       flagCache.set(name, { value, at: t });
       return value;
     },
+
+    bus,
 
     async close(): Promise<void> {
       for (const [deckId, sub] of subscriptions) {
@@ -477,6 +525,7 @@ export function redisChannel(
           // closing anyway
         }
       }
+      await bus.close();
       await commands.quit();
     },
   };

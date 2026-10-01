@@ -47,7 +47,7 @@ import {
 } from '@turboslide/realtime/protocol';
 import { STREAM_HEARTBEAT_MS } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
-import { selectRealtime } from '@turboslide/realtime/select';
+import { BLOB_TIER_NOTICE, selectRealtime } from '@turboslide/realtime/select';
 import type { RealtimeSelection } from '@turboslide/realtime/select';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { canonicalJson } from '@turboslide/schema/json';
@@ -87,12 +87,15 @@ import type { Capability, ShadowedDecision } from './authorize';
 import { sessionOf } from './auth/better-auth';
 import {
   accountFacts,
+  bindIdentityRedis,
   identityRuntime,
   linkAnonymous,
+  principalKvOf,
   resolveIdentity as resolveThroughRuntime,
 } from './auth/identity';
 import { studioSessionSecret } from './auth/middleware';
 import { selectPrincipalStore } from './auth/principal';
+import type { RedisKvLike } from './auth/secondary-storage';
 import { boundPrincipal, ensurePrincipal, readPrincipal } from './auth/session';
 import { applyStreamEntries, createCheckpointer, coveredSeq } from './checkpoint';
 import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comments';
@@ -125,6 +128,7 @@ import {
 
 type Shared = typeof globalThis & {
   __turboslideRoom?: {
+    /** the tier the instance serves now: the selection's, or the blob tier after the hand off of docs/REALTIME.md 3.8 */
     selection: RealtimeSelection;
     channel: RealtimeChannel;
     rooms: Map<string, Promise<Room>>;
@@ -134,6 +138,12 @@ type Shared = typeof globalThis & {
     redis: RedisCommands | null;
     /** the blob tier's shared roster (store/presence-store.ts), for the leave that carries the beacon's clock (`leavePresence`); absent elsewhere */
     presence?: SharedPresence<RosterEntry>;
+    /** the selection the environment made, kept for the hand back */
+    selected: RealtimeSelection;
+    /** the redis channel on the redis tier, null elsewhere; the hand off reads its `realtime` flag */
+    redisChannel: RealtimeChannel | null;
+    /** the blob channel the redis tier falls to, built on the first hand off */
+    fallback?: { channel: RealtimeChannel; presence?: SharedPresence<RosterEntry> };
   };
 };
 
@@ -143,10 +153,25 @@ function log(line: string): void {
   console.error(`turboslide room: ${line}`);
 }
 
+/** `redis.unavailable` once a minute while the flag read keeps failing (docs/REALTIME.md 3.8). */
+let unavailableLoggedAt = 0;
+function noteRedisUnavailable(name: string, error: unknown): void {
+  const now = Date.now();
+  if (now - unavailableLoggedAt < 60_000) return;
+  unavailableLoggedAt = now;
+  logSecurityEvent({
+    event: 'redis.unavailable',
+    killSwitch: name,
+    reason: error instanceof Error ? error.message : String(error),
+  });
+}
+
 function buildChannel(selection: RealtimeSelection): {
   channel: RealtimeChannel;
   redis: RedisCommands | null;
   presence?: SharedPresence<RosterEntry>;
+  /** the ioredis client of the redis tier, for the principal records and the identity runtime */
+  kv?: RedisKvLike;
 } {
   switch (selection.tier) {
     case 'memory':
@@ -162,8 +187,10 @@ function buildChannel(selection: RealtimeSelection): {
         channel: redisChannel(redis, {
           onError: (error, context) =>
             log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
+          onUnavailable: noteRedisUnavailable,
         }),
         redis,
+        kv: client as unknown as RedisKvLike,
       };
     }
     case 'blob': {
@@ -246,8 +273,15 @@ function buildChannel(selection: RealtimeSelection): {
 function state(): NonNullable<Shared['__turboslideRoom']> {
   if (shared.__turboslideRoom === undefined) {
     const selection = selectRealtime(process.env);
-    const { channel, redis, presence } = buildChannel(selection);
-    const principals = selectPrincipalStore({ stateDir: stateDir() }).store;
+    const { channel, redis, presence, kv } = buildChannel(selection);
+    /* the principal records live in Redis on the redis tier (docs/REALTIME.md 3.6; docs/hosting.md
+       section 9), here and in the identity runtime, which reads the binding at every call
+       (auth/identity.ts bindIdentityRedis): a name typed on one instance is the name on the next */
+    bindIdentityRedis(kv);
+    const principals = selectPrincipalStore({
+      ...(kv === undefined ? {} : { kv: principalKvOf(kv) }),
+      stateDir: stateDir(),
+    }).store;
     log(`realtime tier ${selection.tier} (${selection.reason})`);
     shared.__turboslideRoom = {
       selection,
@@ -257,9 +291,87 @@ function state(): NonNullable<Shared['__turboslideRoom']> {
       streams: createStreamCounters(),
       redis,
       ...(presence === undefined ? {} : { presence }),
+      selected: selection,
+      redisChannel: selection.tier === 'redis' ? channel : null,
     };
+    // the resolved identity cache leaves on the other instances' word (3.6): a rename or an
+    // avatar change on one instance drops the row everywhere at once instead of after 5 s
+    channel.bus?.subscribe('identity', (identity) => {
+      identityCache.delete(identity);
+      emailMemory.delete(identity);
+    });
   }
   return shared.__turboslideRoom;
+}
+
+/** One hand off or hand back at a time. */
+let switchingTier: Promise<void> | null = null;
+
+/**
+ * The redis tier's hand off and hand back (docs/REALTIME.md 3.8). The `realtime` flag is read
+ * through the redis channel (cached 5 s; it reads off when Redis is unreachable, which
+ * `noteRedisUnavailable` logs, or when a hand set it off: `SET flag:realtime off`). Off while the
+ * instance serves the redis tier: the blob channel is built once over the deck store, the
+ * instance's selection, channel and shared roster move to it, every open room is superseded (its
+ * streams write `resync` and close, so each tab reloads once and reopens on the blob tier) and
+ * closed, and the next `roomFor` opens a blob room. On again: the same in reverse. Nothing is
+ * lost: every admitted entry of the redis tier reached the store within the checkpoint interval
+ * and the blob tier commits every append. Called by `roomFor` on every request and by the stream
+ * route's heartbeat, so an idle instance notices within 15 s. Nothing on the other tiers.
+ */
+export async function ensureRealtimeTier(): Promise<void> {
+  const s = state();
+  const redis = s.redisChannel;
+  if (redis === null) return;
+  if (switchingTier !== null) return switchingTier;
+  const on = await redis.flag('realtime');
+  const servingBlob = s.selection.tier === 'blob';
+  if (on === !servingBlob) return;
+  switchingTier = (async () => {
+    if (!on) {
+      s.fallback ??= buildChannel({
+        tier: 'blob',
+        reason: 'handed off from redis: the realtime flag reads off',
+        redis: true,
+        notice: BLOB_TIER_NOTICE,
+      });
+      s.channel = s.fallback.channel;
+      s.selection = {
+        tier: 'blob',
+        reason: 'handed off from redis: the realtime flag reads off',
+        redis: true,
+        notice: BLOB_TIER_NOTICE,
+      };
+      if (s.fallback.presence === undefined) delete s.presence;
+      else s.presence = s.fallback.presence;
+      log('realtime handed off to the blob tier: the realtime flag reads off');
+    } else {
+      s.channel = redis;
+      s.selection = s.selected;
+      delete s.presence;
+      log('realtime handed back to the redis tier: the realtime flag reads on');
+    }
+    await supersedeRooms();
+  })().finally(() => {
+    switchingTier = null;
+  });
+  return switchingTier;
+}
+
+/** Supersedes and closes every room of this instance: the open streams resync and close, the next request opens a room on the tier served now. */
+async function supersedeRooms(): Promise<void> {
+  const s = shared.__turboslideRoom;
+  if (s === undefined) return;
+  for (const [deckId, pending] of s.rooms) {
+    s.rooms.delete(deckId);
+    try {
+      const room = await pending;
+      room.supersede();
+      await room.close();
+    } catch {
+      // a room that never opened has nothing to supersede
+    }
+  }
 }
 
 /** The blob tier's shared roster, undefined on the memory and redis tiers. */
@@ -760,6 +872,14 @@ export type Room = {
   covered: () => number;
   /** turns the records written outside the room since the live revision into stream entries now */
   follow: () => Promise<void>;
+  /**
+   * Registers a listener for the room's supersession (the hand off of docs/REALTIME.md 3.8: the
+   * instance moved to another tier and this room is closed in favour of one on it): the stream
+   * route writes `resync` and closes, so the tab reloads once. The return value unregisters.
+   */
+  onSupersede: (fn: () => void) => () => void;
+  /** fires the supersede listeners, before `close()` */
+  supersede: () => void;
   /** stops the subscription, the follower and the checkpointer (tests) */
   close: () => Promise<void>;
 };
@@ -873,11 +993,16 @@ async function createRoom(deckId: string): Promise<Room> {
             return;
           }
           setRevision(event.revision, new Date().toISOString());
+          // another instance's run covered the stream up to here (checkpoint.ts `covered`; the
+          // realtime round's two process run): this instance's next run starts above it instead
+          // of committing the same entries again
+          checkpointer.covered(event.toSeq);
         });
       }
     },
     { passive: true },
   );
+  const supersedeListeners = new Set<() => void>();
 
   /**
    * The follower (SPEC-3 0.48, 3.7 c): a record written outside the room (a CLI write beside the
@@ -903,8 +1028,12 @@ async function createRoom(deckId: string): Promise<Room> {
       try {
         for (const record of fresh) {
           if (record.ops !== undefined) {
-            // another instance's checkpoint: its entries are in the stream already
-            await queued(async () => setRevision(record.revision, record.createdAt));
+            // another instance's checkpoint: its entries are in the stream already and covered
+            const toSeq = record.ops.toSeq;
+            await queued(async () => {
+              setRevision(record.revision, record.createdAt);
+              checkpointer.covered(toSeq);
+            });
             continue;
           }
           await queued(async () => {
@@ -1026,6 +1155,22 @@ async function createRoom(deckId: string): Promise<Room> {
     covered: () =>
       selection.tier === 'blob' ? live.seq : Math.max(coveredAtOpen, checkpointer.state().covered),
     follow,
+    onSupersede(fn) {
+      supersedeListeners.add(fn);
+      return () => {
+        supersedeListeners.delete(fn);
+      };
+    },
+    supersede() {
+      for (const fn of [...supersedeListeners]) {
+        try {
+          fn();
+        } catch {
+          // a listener that throws has its own error path
+        }
+      }
+      supersedeListeners.clear();
+    },
     async close() {
       stopSubscription();
       stopWatch();
@@ -1036,6 +1181,10 @@ async function createRoom(deckId: string): Promise<Room> {
 
 /** The room of a deck on this instance; a RangeError when the deck is missing. */
 export async function roomFor(deckId: string): Promise<Room> {
+  // the redis tier's hand off and hand back run here, on every request (docs/REALTIME.md 3.8)
+  await ensureRealtimeTier().catch((error: unknown) =>
+    log(`the tier check failed: ${error instanceof Error ? error.message : String(error)}`),
+  );
   const { rooms } = state();
   let room = rooms.get(deckId);
   if (room === undefined) {
@@ -1486,7 +1635,8 @@ export function transformEntry(
   mutations: readonly Mutation[],
   landed: ReadonlyArray<Landed>,
 ): Mutation[] | null {
-  let out: Mutation[] = [...mutations];
+  let out: Mutation[] = yieldConcurrentConversion(mutations, landed);
+  if (out.length === 0) return null;
   for (const { mutation: against, insertTie } of landed) {
     const next: Mutation[] = [];
     for (const mutation of out) {
@@ -1506,6 +1656,41 @@ export function transformEntry(
     if (out.length === 0) return null;
   }
   return out;
+}
+
+/**
+ * Two tabs converting one slide at once (the realtime round, R1's two process run; the row
+ * `realtime.title.two-typers`, and the mechanism behind the standing red
+ * `sync.title.concurrent-both-kept`): a title that wraps while two people type into it converts
+ * the cover to a canvas in both tabs within the same batch (viewer Editor.tsx 1786, 1812), so
+ * each tab posts `slide.replace` with its own copy of the slide beside its `text.splice`. The
+ * first lands; the second's `slide.replace` would put back a slide without the first's word and
+ * its splice, moved past the first's by the transform, then falls outside its own copy's text
+ * ("text.splice: 40 plus 0 is outside a text of 32 characters", the whole entry refused, the
+ * second word lost). The rule: an entry that carries a `slide.replace` of a slide another
+ * `slide.replace` of the same slide replaced since its base, together with a text op on that
+ * slide, yields its own replacement and keeps the rest, so the first conversion stands and the
+ * second typist's word rides onto it through the ordinary transform. A bare `slide.replace`
+ * (the source drawer, `slide.toCanvas`) keeps the last writer wins rule as before. Pure.
+ */
+export function yieldConcurrentConversion(
+  mutations: readonly Mutation[],
+  landed: ReadonlyArray<Landed>,
+): Mutation[] {
+  const replaced = new Set<string>();
+  for (const { mutation } of landed)
+    if (mutation.op === 'slide.replace') replaced.add(mutation.slideId);
+  if (replaced.size === 0) return [...mutations];
+  const typedOn = new Set<string>();
+  for (const mutation of mutations) if (isTextOp(mutation)) typedOn.add(mutation.slideId);
+  return mutations.filter(
+    (mutation) =>
+      !(
+        mutation.op === 'slide.replace' &&
+        replaced.has(mutation.slideId) &&
+        typedOn.has(mutation.slideId)
+      ),
+  );
 }
 
 /** `after` anchors of inserts and moves re-resolve to the end of the slot or section when the anchor left (SPEC-3 3.5). */
@@ -2353,10 +2538,22 @@ type IdentityCacheRow = { at: number; facts: string; identity: ResolvedIdentity 
 const identityCache = new Map<string, IdentityCacheRow>();
 const IDENTITY_CACHE_MS = 5000;
 
-/** Drops the cached resolution of one identity (a rename or an avatar change on this instance, b1.md R18), so the next presence post reads the new record. */
+/**
+ * Drops the cached resolution of one identity (a rename or an avatar change on this instance,
+ * b1.md R18), so the next presence post reads the new record, and tells the other instances to
+ * drop theirs through the channel's bus (docs/REALTIME.md 3.6; the row
+ * `realtime.departed-guest.name-stable`). A publish that fails is logged; the 5 s cache bounds it.
+ */
 export function forgetIdentity(identity: string): void {
   identityCache.delete(identity);
   emailMemory.delete(identity);
+  void realtimeChannel()
+    .bus?.publish('identity', identity)
+    .catch((error: unknown) =>
+      log(
+        `the identity drop of ${identity} was not published: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    );
 }
 
 /**
@@ -2465,14 +2662,21 @@ export async function rosterEntryFor(
   const mark = markSpec(resolved, { hueSlot: slot });
   const canEdit = role === 'owner' || role === 'editor';
   const joinOrder = existing.findIndex((row) => row.clientId === post.clientId);
-  const pointerAllowed =
-    canEdit &&
-    (joinOrder < 0 ? existing.length < LIVE_POINTERS_MAX : joinOrder < LIVE_POINTERS_MAX);
-  const { pointer, ...rest } = post;
+  const amongFirst =
+    joinOrder < 0 ? existing.length < LIVE_POINTERS_MAX : joinOrder < LIVE_POINTERS_MAX;
+  const pointerAllowed = canEdit && amongFirst;
+  /* `drag`, the box of a block the tab is moving or resizing (docs/REALTIME.md 3.4, R2's field
+     in protocol.ts), follows the pointer's role and count rule and not `pointerOn`: a dragged
+     block's ghost is drawn whatever the live pointers switch says; the field is read by name
+     here so this file compiles before and after R2's commit */
+  const { pointer, drag, ...rest } = post as PresencePost & { drag?: unknown };
+  const dragPart: Record<string, unknown> =
+    drag !== undefined && canEdit && amongFirst ? { drag } : {};
   void room;
   return {
     ...rest,
     ...(pointer !== undefined && pointerAllowed && post.pointerOn ? { pointer } : {}),
+    ...dragPart,
     principalId,
     label: resolved.displayName,
     trust: resolved.trust as Trust,
@@ -2480,7 +2684,7 @@ export async function rosterEntryFor(
     hueSlot: slot - 1,
     kind: resolved.kind === 'agent' ? 'agent' : 'human',
     role,
-  };
+  } as RosterEntry;
 }
 
 /** The word a link visitor sees instead of a named person (SPEC-3 0.12, 4.8). */
@@ -2779,6 +2983,14 @@ export async function replayFor(
       Math.min(256, REPLAY_MAX_ENTRIES - entries.length),
     );
     if (page.length === 0) break;
+    /* a since the stream does not hold (docs/REALTIME.md 3.7): the first entry after the
+       position is not the next seq, so the entries below it are gone (the stream trimmed behind
+       a checkpoint, a Redis reset, a position from the other tier after a hand off or a
+       rollback, a hole in the blob tier's log) and a replay from here would apply entries over a
+       base the tab never saw; the tab reloads at the head instead, once, never a hang */
+    const first = page[0];
+    if (first !== undefined && first.seq !== from + 1)
+      return { type: 'resync', revision: room.revision() };
     for (const entry of page) {
       bytes += JSON.stringify(entry).length;
       entries.push(entry);
@@ -3278,6 +3490,18 @@ export function isLostRace(error: unknown): boolean {
   return error instanceof Error && error.name === 'StaleMirrorError';
 }
 
+/**
+ * The client id a server write's stream entry carries (docs/REALTIME.md 3.3): `agent:<principal
+ * id>` for an agent's author, so the open tab's banner gate (controller.tsx announceAgentWrite:
+ * an agent author whose client id is not the tab's own) passes on every tier that runs the
+ * room, `server` for every other writer as before; cut to the 64 characters of
+ * `entrySchema.clientId`. Exported for its test.
+ */
+export function serverClientId(author: Author): string {
+  if (author.kind !== 'agent') return 'server';
+  return `agent:${author.principalId ?? author.name}`.slice(0, 64);
+}
+
 export async function admitServerWrite(
   room: Room,
   input: ServerWriteInput,
@@ -3392,7 +3616,7 @@ export async function admitServerWrite(
     rev: current,
     kind: 'edit',
     author: input.author,
-    clientId: 'server',
+    clientId: serverClientId(input.author),
     opId,
     mutations: placed.mutations,
     at: new Date().toISOString(),

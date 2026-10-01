@@ -13,6 +13,7 @@ import {
   createStreamCloser,
   decideFor,
   editingCount,
+  ensureRealtimeTier,
   filterEventForReader,
   mintClientId,
   overEditingCeiling,
@@ -273,12 +274,22 @@ async function serve(request: Request, deckId: string): Promise<Response> {
             return;
           }
           write(sseComment());
+          // the redis tier's hand off and hand back (room.ts ensureRealtimeTier; docs/REALTIME.md
+          // 3.8) are read here too, so an instance whose tabs are idle notices within a heartbeat
+          void ensureRealtimeTier().catch(() => undefined);
         }, STREAM_HEARTBEAT_MS);
         const authorizeTimer = setInterval(() => void recheck(), AUTHORIZE_RECHECK_MS);
         const life = setTimeout(close, lifetime);
+        // the room superseded by a hand off (3.8): the tab reloads at the revision and reopens
+        // its stream on the tier the instance serves now, once
+        const stopSupersede = room.onSupersede(() => {
+          write(sseFrame({ type: 'resync', revision: room.revision() }));
+          close();
+        });
         const end = unsubscribe;
         closer.onClose(() => {
           end();
+          stopSupersede();
           clearInterval(heartbeat);
           clearInterval(authorizeTimer);
           clearTimeout(life);

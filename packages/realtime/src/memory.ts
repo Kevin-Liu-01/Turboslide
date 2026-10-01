@@ -15,6 +15,7 @@ import type {
   RosterEntry,
   TrimOptions,
 } from './channel.ts';
+import { memoryDropBus } from './bus.ts';
 import type { FlagName } from './keys.ts';
 import { checkClientId, checkDeckId, deckKeys, isFlagName } from './keys.ts';
 
@@ -54,6 +55,9 @@ export function memoryChannel(options: MemoryChannelOptions = {}): MemoryChannel
   const rooms = new Map<string, Room>();
   const locks = new Map<string, Lock>();
   const budgets = new Map<string, Budget>();
+  // the drop bus of one process (docs/REALTIME.md 3.6): the same shape the redis tier carries
+  // over pub/sub, so the readers of access.ts and room.ts run one code path on both tiers
+  const bus = memoryDropBus();
 
   const roomOf = (deckId: string): Room => {
     const id = checkDeckId(deckId);
@@ -221,8 +225,11 @@ export function memoryChannel(options: MemoryChannelOptions = {}): MemoryChannel
       return flags.get(name) ?? true;
     },
 
+    bus,
+
     async close(): Promise<void> {
       for (const room of rooms.values()) room.listeners.clear();
+      await bus.close();
     },
 
     setFlag(name, value) {

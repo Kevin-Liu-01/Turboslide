@@ -1,0 +1,145 @@
+{
+  "startedAt": "2026-10-01T19:07:28.261Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    31.103515625,
+    20.6005859375,
+    19.54638671875
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "typed": "a1xyz",
+      "expected": "a1xyz",
+      "typedMs": 505,
+      "ackedSeq": 1,
+      "storeRevisionAtReload": 1,
+      "storeRecordsAtReload": 1,
+      "bReadAfterReloadMs": 252,
+      "bText": "a1xyz",
+      "bSyncAfter": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 2,
+        "revision": 1,
+        "pending": 0,
+        "retained": 0
+      },
+      "load": [
+        31.89599609375,
+        20.93896484375,
+        19.671875
+      ]
+    },
+    {
+      "round": 2,
+      "typed": "b2xyz",
+      "expected": "a1xyzb2xyz",
+      "typedMs": 462,
+      "ackedSeq": 2,
+      "storeRevisionAtReload": 2,
+      "storeRecordsAtReload": 2,
+      "bReadAfterReloadMs": 195,
+      "bText": "a1xyzb2xyz",
+      "bSyncAfter": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 3,
+        "revision": 2,
+        "pending": 0,
+        "retained": 0
+      },
+      "load": [
+        31.89599609375,
+        20.93896484375,
+        19.671875
+      ]
+    },
+    {
+      "round": 3,
+      "typed": "c3xyz",
+      "expected": "a1xyzb2xyzc3xyz",
+      "typedMs": 430,
+      "ackedSeq": 3,
+      "storeRevisionAtReload": 3,
+      "storeRecordsAtReload": 3,
+      "bReadAfterReloadMs": 189,
+      "bText": "a1xyzb2xyzc3xyz",
+      "bSyncAfter": {
+        "tier": "redis",
+        "connected": true,
+        "seq": 4,
+        "revision": 3,
+        "pending": 0,
+        "retained": 0
+      },
+      "load": [
+        31.89599609375,
+        20.93896484375,
+        19.671875
+      ]
+    }
+  ],
+  "deck.id": "untitled-20261001-qkc3",
+  "tiers": {
+    "A": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 1,
+      "revision": 1,
+      "pending": 0,
+      "retained": 0
+    },
+    "B": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 1,
+      "revision": 1,
+      "pending": 0,
+      "retained": 0
+    },
+    "slideId": "title"
+  },
+  "after": {
+    "documentsEqual": true,
+    "aText": "a1xyzb2xyzc3xyz",
+    "bText": "a1xyzb2xyzc3xyz",
+    "A": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 4,
+      "revision": 4,
+      "pending": 0,
+      "retained": 0
+    },
+    "B": {
+      "tier": "redis",
+      "connected": true,
+      "seq": 4,
+      "revision": 4,
+      "pending": 0,
+      "retained": 0
+    },
+    "revisions": {
+      "A": 4,
+      "B": 4
+    },
+    "records": 4
+  },
+  "pass": {
+    "everyReloadRead": true,
+    "documentsEqual": true
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "loadAtEnd": [
+    31.34375,
+    21.00634765625,
+    19.70263671875
+  ],
+  "finishedAt": "2026-10-01T19:07:35.930Z"
+}

@@ -72,6 +72,8 @@ import { placeInsert } from '../editor/place-insert';
 import { hostedAccessHooks } from './access';
 import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
+import { requestRunId } from '@turboslide/agent/http/auth';
+
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, identityLabel } from './authorize';
 import type { AuthContext } from './authorize';
@@ -719,11 +721,38 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
       ? { aliases: identity.ctx.principal.aliases }
       : {}),
   };
-  const author: Author = identity.author ?? {
-    kind: 'human',
-    name: labelFor(principalId),
-    ...(identity.principalId !== null ? { principalId } : {}),
-  };
+  /* an agent's write is an agent's author on every tier (docs/REALTIME.md 3.3; audit-sync.md
+     defect 9): the identity's own author when it carries one (the key's registered name,
+     `bootstrap` or `checkout`, with the run id of `x-turboslide-author`), else an agent author
+     under the agent's name, never the human label fallback for a bearer; the author names its
+     principal id so the version row and the banner of an open tab read one id
+     (controller.tsx announceAgentWrite admits an agent author whose client id is not the tab's,
+     room.ts admitServerWrite writes `agent:<principalId>`). A browser without an author keeps
+     the label fallback as before */
+  const runId = requestRunId(request);
+  const fallback: Author = agentish
+    ? {
+        kind: 'agent',
+        name: identity.ctx.agent?.name ?? labelFor(principalId),
+        ...(runId !== undefined ? { runId } : {}),
+        principalId,
+      }
+    : {
+        kind: 'human',
+        name: labelFor(principalId),
+        ...(identity.principalId !== null ? { principalId } : {}),
+      };
+  const own = identity.author;
+  const author: Author =
+    own === null
+      ? fallback
+      : own.kind === 'agent'
+        ? {
+            ...own,
+            ...(own.runId === undefined && runId !== undefined ? { runId } : {}),
+            ...(own.principalId === undefined ? { principalId } : {}),
+          }
+        : own;
   return { identity, caller, author, origin };
 }
 

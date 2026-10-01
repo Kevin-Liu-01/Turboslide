@@ -316,6 +316,48 @@ export function fakeRedis(options: FakeRedisOptions = {}): FakeRedis {
         }
         return [count, ttl];
       }
+      case SCRIPTS.presenceSet: {
+        // the same steps as lua.ts PRESENCE_SET (docs/REALTIME.md 3.4)
+        const [rosterKey, presenceKey] = keys;
+        const [id, clockArg, expiresAt, ttlMs, channel, body, durable, nowArg, wire] = args;
+        if (
+          rosterKey === undefined ||
+          presenceKey === undefined ||
+          id === undefined ||
+          clockArg === undefined ||
+          expiresAt === undefined ||
+          ttlMs === undefined ||
+          channel === undefined ||
+          body === undefined ||
+          durable === undefined ||
+          nowArg === undefined ||
+          wire === undefined
+        )
+          throw new FakeRedisError('fake: presenceSet wants 2 keys and 9 args');
+        const clock = Number(clockArg);
+        const metaKey = `${id}:m`;
+        const meta = hashes.get(rosterKey)?.get(metaKey);
+        let live = false;
+        if (meta !== undefined) {
+          const score = zsets.get(presenceKey)?.get(id);
+          if (score !== undefined && score > Number(nowArg)) live = true;
+        }
+        let volatile = false;
+        if (live && meta !== undefined) {
+          const sep = meta.indexOf(':');
+          const previous = Number(meta.slice(0, sep));
+          if (Number.isFinite(previous) && previous > clock) return 0;
+          if (meta.slice(sep + 1) === durable) volatile = true;
+        }
+        const hash = hashOf(rosterKey);
+        if (!volatile) hash.set(id, body);
+        hash.set(metaKey, `${clock}:${durable}`);
+        zsetOf(presenceKey).set(id, Number(expiresAt));
+        pexpire(rosterKey, Number(ttlMs));
+        pexpire(presenceKey, Number(ttlMs));
+        publish(channel, wire);
+        return volatile ? 2 : 1;
+      }
       default:
         throw new FakeRedisError(
           'fake: unknown script; redis-fake.ts runs the scripts of lua.ts only',

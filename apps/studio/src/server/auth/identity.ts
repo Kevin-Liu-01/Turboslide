@@ -29,7 +29,7 @@ import { labelFor } from '@turboslide/identity/labels';
 import type { HueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
-import type { PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
+import type { KvClient, PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
 import { newPrincipalRecord } from '@turboslide/identity/principal';
 import { resolvePrincipal, sanitizeRunId, toIdentityView } from '@turboslide/identity/resolve';
 import type {
@@ -169,6 +169,72 @@ function emptyHooks(): IdentityHooks {
   };
 }
 
+// ------------------------------------------------------------------------------------------
+// The principal store's tier (the realtime round, docs/REALTIME.md 3.6, the row
+// `realtime.departed-guest.name-stable`; audit-sync.md defect 8)
+
+const REDIS_BINDING = Symbol.for('turboslide.studio.identity.redis');
+
+function redisHolder(): Record<symbol, RedisKvLike | undefined> {
+  return globalThis as unknown as Record<symbol, RedisKvLike | undefined>;
+}
+
+/**
+ * Binds the deployment's Redis client for the principal records. The room module constructs the
+ * one ioredis client of the redis tier (room.ts `state()`) and the identity runtime is built
+ * earlier at boot (start.ts `bindServerSeams` binds the identity hooks before it reads the room's
+ * Redis), so the runtime cannot take the client as an input; the principal store reads this
+ * binding at every call instead and falls to the file store under the state folder while none
+ * is bound (a checkout, the blob tier, the tests). Before this round the hosted principal store
+ * was a file per instance on every tier, so a name typed on one instance was a label on the next.
+ */
+export function bindIdentityRedis(client: RedisKvLike | undefined): void {
+  redisHolder()[REDIS_BINDING] = client;
+}
+
+function boundIdentityRedis(): RedisKvLike | undefined {
+  return redisHolder()[REDIS_BINDING];
+}
+
+/** The key value shape the principal store takes (`@turboslide/identity/principal` KvClient) over an ioredis shaped client; the TTL arrives in ms and leaves as `EX` seconds. */
+export function principalKvOf(client: RedisKvLike): KvClient {
+  return {
+    get: (key) => client.get(key),
+    set: async (key, value, ttlMs) => {
+      await client.set(key, value, 'EX', Math.max(1, Math.ceil(ttlMs / 1000)));
+    },
+    del: async (key) => {
+      await client.del(key);
+    },
+  };
+}
+
+/**
+ * The principal store that follows the deployment's tier at the call: Redis when the runtime was
+ * built with a client or one is bound (`bindIdentityRedis`), the file store otherwise. One store
+ * object for the runtime's life, so `runtime.principals` keeps its identity.
+ */
+function tieredPrincipalStore(input: Pick<BuildRuntimeInput, 'redis' | 'stateDir'>): PrincipalStore {
+  const file = selectPrincipalStore({ stateDir: input.stateDir }).store;
+  let kvStore: PrincipalStore | undefined;
+  let kvClient: RedisKvLike | undefined;
+  const pick = (): PrincipalStore => {
+    const client = input.redis ?? boundIdentityRedis();
+    if (client === undefined) return file;
+    if (kvStore === undefined || kvClient !== client) {
+      kvClient = client;
+      kvStore = selectPrincipalStore({ kv: principalKvOf(client), stateDir: input.stateDir }).store;
+    }
+    return kvStore;
+  };
+  return {
+    get: (principalId, now) => pick().get(principalId, now),
+    put: (record) => pick().put(record),
+    touch: (principalId, now, create) => pick().touch(principalId, now, create),
+    delete: (principalId) => pick().delete(principalId),
+  };
+}
+
 /** Builds a runtime from its inputs; `identityRuntime()` keeps one per process. */
 export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime {
   const log = input.log ?? ((line: string) => console.error(line));
@@ -186,22 +252,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     resend: input.resend ?? ((apiKey) => new Resend(apiKey)),
     warn: log,
   });
-  const redisKv =
-    input.redis !== undefined
-      ? {
-          get: (key: string) => input.redis!.get(key),
-          set: async (key: string, value: string, ttlMs: number) => {
-            await input.redis!.set(key, value, 'EX', Math.max(1, Math.ceil(ttlMs / 1000)));
-          },
-          del: async (key: string) => {
-            await input.redis!.del(key);
-          },
-        }
-      : undefined;
-  const principals = selectPrincipalStore({
-    ...(redisKv !== undefined ? { kv: redisKv } : {}),
-    stateDir: input.stateDir,
-  }).store;
+  const principals = tieredPrincipalStore(input);
   const hooks = emptyHooks();
   const runtime: IdentityRuntime = {
     env: input.env,

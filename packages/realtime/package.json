@@ -9,6 +9,7 @@
   },
   "exports": {
     "./channel": "./src/channel.ts",
+    "./bus": "./src/bus.ts",
     "./protocol": "./src/protocol.ts",
     "./keys": "./src/keys.ts",
     "./memory": "./src/memory.ts",

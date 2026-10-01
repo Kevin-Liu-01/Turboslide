@@ -338,6 +338,53 @@ describe('the checkpointer', () => {
     expect(plainOf(String(findText(replayed.slides[SLIDE])))).not.toMatch(/^CLI CLI/);
   });
 
+  it('two instances over one channel and one store never commit an entry twice (the realtime round, docs/REALTIME.md 5.4 item 1)', async () => {
+    // two function instances each hold a checkpointer of the deck: the same channel (one Redis),
+    // the same store (one Blob store, here one folder), their own timers. Before this round the
+    // covered seq was read from the records once per instance and moved by its own runs alone,
+    // so the instance that took the lock second re-committed the first's run
+    const a = checkpointer();
+    const timersB = fakeTimers();
+    const b = createCheckpointer({
+      deckId: 'gt-brand',
+      channel,
+      store,
+      timers: timersB,
+      now: timersB.now,
+    });
+    await channel.append('gt-brand', 0, [
+      entryOf(CLIENT_A, kevin, 1, [splice(0, 0, 'a')]),
+      entryOf(CLIENT_A, kevin, 2, [splice(1, 0, 'b')]),
+      entryOf(CLIENT_A, kevin, 3, [splice(2, 0, 'c')]),
+    ]);
+    const first = await a.run({ force: true });
+    expect(first.ok && first.toSeq).toBe(3);
+    // B admits 4 and runs: its first read of the records says 3 is covered, so it commits 4 alone
+    await channel.append('gt-brand', 3, [entryOf(CLIENT_B, maya, 1, [splice(3, 0, 'd')])]);
+    const second = await b.run({ force: true });
+    expect(second.ok && second.fromSeq).toBe(4);
+    expect(second.ok && second.toSeq).toBe(4);
+    // A admits 5 and 6 and runs: its own last run ended at 3, the records say 4
+    await channel.append('gt-brand', 4, [
+      entryOf(CLIENT_A, kevin, 4, [splice(4, 0, 'e')]),
+      entryOf(CLIENT_A, kevin, 5, [splice(5, 0, 'f')]),
+    ]);
+    const third = await a.run({ force: true });
+    expect(third.ok && third.fromSeq).toBe(5);
+    expect(third.ok && third.toSeq).toBe(6);
+    const records = await store.records();
+    expect(records.map((record) => record.ops)).toEqual([
+      { fromSeq: 1, toSeq: 3 },
+      { fromSeq: 4, toSeq: 4 },
+      { fromSeq: 5, toSeq: 6 },
+    ]);
+    const after = await store.read();
+    expect(plainOf(String(findText(after.document.slides[SLIDE]))).startsWith('abcdef')).toBe(true);
+    // the event of another instance's run moves the covered seq too (room.ts hands it over)
+    b.covered(6);
+    expect(b.state().covered).toBe(6);
+  });
+
   it('commits the client entries admitted before a follower’s store entry instead of skipping them (the stream fix round two, T1-R4)', async () => {
     // a tab typed two keystrokes (seq 1 and 2, uncommitted), then an agent's strict write landed
     // at the store and the follower appended it as a store entry (seq 3): the run commits the two

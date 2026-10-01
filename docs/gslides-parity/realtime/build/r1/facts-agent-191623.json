@@ -1,0 +1,210 @@
+{
+  "startedAt": "2026-10-01T19:16:08.347Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    9.005859375,
+    12.83935546875,
+    16.51025390625
+  ],
+  "deck.id": "untitled-20261001-wn6o",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 189,
+        "aSeesBChipAfterReadyMs": 85,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 189,
+        "aSeesBChipAfterReadyMs": 83,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 190,
+        "aSeesBChipAfterReadyMs": 84,
+        "bSeesAChipAfterReadyMs": 1,
+        "note": "the chip waits are timed from B editor ready; A polled first then B"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      9.32568359375,
+      12.841796875,
+      16.4892578125
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "agent.write": {
+    "status": 400,
+    "ms": 8,
+    "base": 1,
+    "body": {
+      "error": {
+        "name": "TypeError",
+        "status": 400,
+        "message": "mutation 0 (block.set): No block \"heading\" on slide \"title\"",
+        "action": "block.set"
+      }
+    }
+  },
+  "shot.agent.A": "r1-06-a-agent-banner.png",
+  "row.realtime.agent.write-announced": {
+    "writeStatus": 400,
+    "writeMs": 11297,
+    "textInAMs": null,
+    "bannerInAMs": null,
+    "snackbar": "",
+    "headingAfterUndo": "Click to add title",
+    "agentWriteKeptAfterUndo": false,
+    "versions": [
+      {
+        "n": 1,
+        "author": {
+          "kind": "human",
+          "name": "Granite 141",
+          "principalId": "anon_6f518bda-5b06-45a8-8afd-4b2525a56d6b"
+        },
+        "revision": 1
+      }
+    ],
+    "pass": false,
+    "load": [
+      8.8876953125,
+      12.63232421875,
+      16.3720703125
+    ]
+  },
+  "redis": {
+    "before": 13301,
+    "after": 13722,
+    "commandsDuringDrive": 421,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 2,
+      "hset": 9,
+      "pttl": 13,
+      "zadd": 9,
+      "select": 1,
+      "set": 89,
+      "get": 145,
+      "info": 1,
+      "evalsha": 26,
+      "hget": 9,
+      "del": 1,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 31,
+      "hmget": 11,
+      "publish": 20,
+      "incrby": 13,
+      "zscore": 5,
+      "xtrim": 2,
+      "xadd": 2,
+      "zrangebyscore": 26
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 189,
+          "aSeesBChipAfterReadyMs": 85,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 189,
+          "aSeesBChipAfterReadyMs": 83,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 190,
+          "aSeesBChipAfterReadyMs": 84,
+          "bSeesAChipAfterReadyMs": 1,
+          "note": "the chip waits are timed from B editor ready; A polled first then B"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        9.32568359375,
+        12.841796875,
+        16.4892578125
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "writeStatus": 400,
+      "writeMs": 11297,
+      "textInAMs": null,
+      "bannerInAMs": null,
+      "snackbar": "",
+      "headingAfterUndo": "Click to add title",
+      "agentWriteKeptAfterUndo": false,
+      "versions": [
+        {
+          "n": 1,
+          "author": {
+            "kind": "human",
+            "name": "Granite 141",
+            "principalId": "anon_6f518bda-5b06-45a8-8afd-4b2525a56d6b"
+          },
+          "revision": 1
+        }
+      ],
+      "pass": false,
+      "load": [
+        8.8876953125,
+        12.63232421875,
+        16.3720703125
+      ]
+    }
+  },
+  "loadAtEnd": [
+    8.8876953125,
+    12.63232421875,
+    16.3720703125
+  ],
+  "finishedAt": "2026-10-01T19:16:23.759Z"
+}

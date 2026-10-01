@@ -26,6 +26,7 @@ import {
   newLinkHashes,
 } from '@turboslide/store/hosted';
 import type {
+  AccessBus,
   AccessStore,
   CachedAccessStore,
   HeadCache,
@@ -34,6 +35,8 @@ import type {
   LinkIndex,
   StoredAccess,
 } from '@turboslide/store/hosted';
+
+import type { DropBus, DropTopic } from '@turboslide/realtime/bus';
 
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
@@ -53,17 +56,21 @@ import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
  * binds (`loadAccessRecord`). The share actions of section 12 run over `hostedAccessHooks`, and
  * the link exchange finds a link through `findShareLink`.
  *
- * The cache and the instances (VERIFICATION-3 finding 34). The drop bus is process local on every
- * hosted tier this round (the redis tier's shared `PUBLISH access:<deckId>` is Kevin's install),
- * so another instance's write never drops this instance's entry. Three rules bound the stale
- * window: the blob tier trusts an entry for `BLOB_ACCESS_TTL_MS` (5 s) instead of 60 s; every
- * share write and every link exchange reads past the cache (`readStoredAccessFresh`, the F1
- * "drop before the fresh read"), so a write's `ifMatch` etag is the store's and a mint or a
- * revocation seconds old counts on every instance; and the link hash index (`links/<hex>`,
- * written beside the record before the record itself, F2) makes the exchange one record read
- * instead of one per deck. A conflict the store still reports is never the store's own sentence:
- * `hostedAccessHooks.save` retries once when the store holds the very record the write based on
- * under another etag, and otherwise answers the SPEC-3 sentence with the current record attached.
+ * The cache and the instances (VERIFICATION-3 finding 34; the realtime round, docs/REALTIME.md
+ * 3.6). The drop bus is the realtime channel's (`RealtimeChannel.bus`, packages/realtime bus.ts):
+ * in process on the memory tier, Redis pub/sub on the redis tier, so a share write or a link
+ * exchange on one instance drops the record's row (`access`) and the person's deck index row
+ * (`link`: the link grants, the typed name, the avatar choice) on every instance at once; the blob
+ * tier has no bus and another instance's write never drops this instance's entry there. Three
+ * rules bound the stale window where the bus is absent or a message is lost: the blob tier trusts
+ * an entry for `BLOB_ACCESS_TTL_MS` (5 s) instead of 60 s; every share write and every link
+ * exchange reads past the cache (`readStoredAccessFresh`, the F1 "drop before the fresh read"),
+ * so a write's `ifMatch` etag is the store's and a mint or a revocation seconds old counts on
+ * every instance; and the link hash index (`links/<hex>`, written beside the record before the
+ * record itself, F2) makes the exchange one record read instead of one per deck. A conflict the
+ * store still reports is never the store's own sentence: `hostedAccessHooks.save` retries once
+ * when the store holds the very record the write based on under another etag, and otherwise
+ * answers the SPEC-3 sentence with the current record attached.
  */
 
 /** How long a blob tier instance trusts a record it read (finding 34); the file tier keeps 60 s. */
@@ -80,6 +87,8 @@ type Shared = typeof globalThis & {
     heads: HeadCache;
     links: LinkIndex;
     kind: AccessStore['kind'];
+    /** the realtime channel's drop bus (docs/REALTIME.md 3.6); undefined on the blob tier */
+    drops: DropBus | undefined;
   };
 };
 
@@ -90,22 +99,73 @@ function warn(line: string): void {
   console.error(`turboslide access: ${line}`);
 }
 
+/**
+ * The realtime channel's drop bus (docs/REALTIME.md 3.6), loaded late because room.ts imports
+ * this module: the memory tier's in process bus, the redis tier's pub/sub, nothing on the blob
+ * tier. A channel that cannot be built answers nothing and the caches keep their TTLs.
+ */
+async function channelDropBus(): Promise<DropBus | undefined> {
+  try {
+    const { realtimeChannel } = await import('./room');
+    return realtimeChannel().bus;
+  } catch (error) {
+    warn(
+      `the drop bus is not available: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * The access record cache's bus over the drop bus's `access` topic, so a write on any instance
+ * drops the record on every instance (SPEC-3 6.1's `PUBLISH` drop, landed with the bus). A publish
+ * that fails (Redis unreachable) is logged and never fails the write that made it; the TTL then
+ * bounds the stale read as before.
+ */
+function accessBusOver(drops: DropBus): AccessBus {
+  return {
+    publish: (deckId) =>
+      drops.publish('access', deckId).catch((error: unknown) => {
+        warn(
+          `the access drop of ${deckId} was not published: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }),
+    subscribe: (onDrop) => drops.subscribe('access', onDrop),
+  };
+}
+
+/** Publishes one drop message; nothing on a tier without a bus, a warning on a failed publish. */
+async function publishDrop(topic: DropTopic, id: string): Promise<void> {
+  const drops = (await stores()).drops;
+  if (drops === undefined) return;
+  await drops.publish(topic, id).catch((error: unknown) => {
+    warn(
+      `the ${topic} drop of ${id} was not published: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  });
+}
+
 async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
   const selection = storeSelection();
-  const bus = memoryAccessBus();
+  const drops = await channelDropBus();
+  const bus = drops === undefined ? memoryAccessBus() : accessBusOver(drops);
+  // the deck index row (the link grants, the typed name, the avatar choice) leaves this instance
+  // on the other instances' word (docs/REALTIME.md 3.6; audit-sync.md defects 7 and 8)
+  drops?.subscribe('link', (principalId) => grantCache.delete(principalId));
   if (selection.kind === 'blob') {
     const client = await exportBlobClient();
     if (client !== null) {
       return {
-        // the bus is process local, so on the blob tier another instance's write never drops
-        // this instance's entry: a short trust window bounds the stale read (VERIFICATION-3
-        // finding 34: a link minted or revoked on one instance took up to a minute to land on
-        // another); the redis tier's shared drop message is Kevin's install
+        // without a bus (the blob tier) another instance's write never drops this instance's
+        // entry: a short trust window bounds the stale read (VERIFICATION-3 finding 34: a link
+        // minted or revoked on one instance took up to a minute to land on another); with one
+        // (the redis tier) the drop lands at once and the window is the safety net
         access: cachedAccessStore(blobAccessStore(client), { bus, ttlMs: BLOB_ACCESS_TTL_MS }),
         index: blobIndexStore(client),
         heads: memoryHeadCache(),
         links: blobLinkIndex(client),
         kind: 'blob',
+        drops,
       };
     }
   }
@@ -115,6 +175,7 @@ async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
     heads: memoryHeadCache(),
     links: fileLinkIndex(stateDir()),
     kind: 'file',
+    drops,
   };
 }
 
@@ -192,6 +253,10 @@ export async function noteLinkGrant(
   await (
     await indexStore()
   ).update(principalId, indexUpdates.shared(grant.deckId, grant.role, now, 'link', grant.linkId));
+  // the other instances forget their row of this person at once (docs/REALTIME.md 3.6; the row
+  // `realtime.share-link.every-instance`: a copied link answered 404 on the next instance for up
+  // to 5 s before the round)
+  await publishDrop('link', principalId);
 }
 
 /** The link grants the principal's deck index records (`via: 'link'` rows with a link id), read past a 5 s cache. */
@@ -250,6 +315,7 @@ export async function displayNameFromIndex(
 export async function noteDisplayName(principalId: string, name: string): Promise<void> {
   grantCache.delete(principalId);
   await (await indexStore()).update(principalId, indexUpdates.name(name));
+  await publishDrop('link', principalId);
 }
 
 /**
@@ -272,6 +338,7 @@ export async function noteAvatarChoice(
 ): Promise<void> {
   grantCache.delete(principalId);
   await (await indexStore()).update(principalId, indexUpdates.avatar(choice));
+  await publishDrop('link', principalId);
 }
 
 /**

@@ -180,9 +180,21 @@ export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
     if (hardTimer === undefined) hardTimer = timers.setTimeout(fire, CHECKPOINT_MAX_MS);
   };
 
+  /**
+   * The last seq the store's records cover, read under the lock on every run (the realtime
+   * round, R1's two process run of docs/REALTIME.md 5.4 item 1). Two instances each hold a
+   * checkpointer of one deck; before this the value was read from the records once and then
+   * moved by this instance's own runs alone, so the instance that took the lock second started
+   * from where its own last run ended and committed the other instance's run again (the same
+   * mutations applied twice in the store, a doubled word). The records are the truth: a mirror
+   * syncs first when the store has one (the redis tier over the Blob store), then the newest
+   * `ops.toSeq` is taken, never below what this instance already knows (`covered()` moves it on
+   * another instance's checkpoint event too). One records read per run, under the lock.
+   */
   const knownCovered = async (): Promise<number> => {
-    if (covered >= 0) return covered;
-    covered = coveredSeq(await store.records());
+    const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+    if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);
+    covered = Math.max(covered, coveredSeq(await store.records()));
     return covered;
   };
 

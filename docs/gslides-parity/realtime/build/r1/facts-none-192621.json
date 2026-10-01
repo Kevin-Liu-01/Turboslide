@@ -1,0 +1,149 @@
+{
+  "startedAt": "2026-10-01T19:26:17.684Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "load": [
+    18.50830078125,
+    18.1640625,
+    17.2939453125
+  ],
+  "deck.id": "untitled-20261001-0clp",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "all": [
+      "heading/text",
+      "lead/text"
+    ]
+  },
+  "A.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "share.link": "http://localhost:4481/s/<token>",
+  "B.sync": {
+    "tier": "redis",
+    "transport": "sse",
+    "connected": true
+  },
+  "row.realtime.join.chip-within-1s": {
+    "rounds": [
+      {
+        "round": 1,
+        "bEditorReadyMs": 181,
+        "aSeesBChipAfterReadyMs": 3,
+        "bSeesAChipAfterReadyMs": 6,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      },
+      {
+        "round": 2,
+        "bEditorReadyMs": 174,
+        "aSeesBChipAfterReadyMs": 3,
+        "bSeesAChipAfterReadyMs": 6,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      },
+      {
+        "round": 3,
+        "bEditorReadyMs": 178,
+        "aSeesBChipAfterReadyMs": 3,
+        "bSeesAChipAfterReadyMs": 6,
+        "chipsInABefore": 0,
+        "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+      }
+    ],
+    "pass": true,
+    "origins": {
+      "A": "4471",
+      "B": "4481"
+    },
+    "load": [
+      17.50634765625,
+      17.9619140625,
+      17.2275390625
+    ]
+  },
+  "shot.join.A": "r1-01-a-after-join.png",
+  "shot.join.B": "r1-01-b-after-join.png",
+  "redis": {
+    "before": 22166,
+    "after": 22458,
+    "commandsDuringDrive": 292,
+    "byCommand": {
+      "subscribe": 2,
+      "xrange": 1,
+      "hset": 4,
+      "pttl": 4,
+      "zadd": 4,
+      "select": 1,
+      "set": 76,
+      "get": 124,
+      "info": 1,
+      "evalsha": 11,
+      "hget": 4,
+      "del": 1,
+      "zrem": 2,
+      "hdel": 2,
+      "pexpire": 12,
+      "hmget": 6,
+      "publish": 14,
+      "incrby": 4,
+      "xtrim": 2,
+      "xadd": 1,
+      "zrangebyscore": 16
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "editStatusAfter": 404
+  },
+  "rows": {
+    "realtime.join.chip-within-1s": {
+      "rounds": [
+        {
+          "round": 1,
+          "bEditorReadyMs": 181,
+          "aSeesBChipAfterReadyMs": 3,
+          "bSeesAChipAfterReadyMs": 6,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        },
+        {
+          "round": 2,
+          "bEditorReadyMs": 174,
+          "aSeesBChipAfterReadyMs": 3,
+          "bSeesAChipAfterReadyMs": 6,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        },
+        {
+          "round": 3,
+          "bEditorReadyMs": 178,
+          "aSeesBChipAfterReadyMs": 3,
+          "bSeesAChipAfterReadyMs": 6,
+          "chipsInABefore": 0,
+          "note": "A polled first for B chip by client id, then B for A chip (its time includes A wait)"
+        }
+      ],
+      "pass": true,
+      "origins": {
+        "A": "4471",
+        "B": "4481"
+      },
+      "load": [
+        17.50634765625,
+        17.9619140625,
+        17.2275390625
+      ]
+    }
+  },
+  "loadAtEnd": [
+    17.50634765625,
+    17.9619140625,
+    17.2275390625
+  ],
+  "finishedAt": "2026-10-01T19:26:21.022Z"
+}

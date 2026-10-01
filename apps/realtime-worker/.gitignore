@@ -1,0 +1,4 @@
+# the local secrets wrangler dev reads (TURBOSLIDE_ROOM_SECRET, TURBOSLIDE_ROOM_BEARER, TURBOSLIDE_APP_ORIGIN; mode 600)
+.dev.vars
+# wrangler's local state: the simulated object and D1, the dev server's cache
+.wrangler/

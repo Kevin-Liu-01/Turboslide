@@ -10,6 +10,11 @@ packages:
 # Packages reference these with "catalog:". Never pin "latest"; a version bump goes
 # through a PR that runs the full acceptance suite.
 catalog:
+  # The Cloudflare move (docs/CLOUDFLARE.md 3.6.2; the integrator's seam commit, 2026-10-01): the
+  # realtime Worker's tooling, each the registry's latest on 2026-10-01; the vitest plugin requires
+  # vitest 4.1 or later and pins its own wrangler, so the two move together
+  '@cloudflare/vitest-plugin': 1.3.5
+  '@cloudflare/workers-types': 5.20261001.1
   '@codemirror/autocomplete': 6.20.3
   '@codemirror/commands': 6.11.0
   '@codemirror/lang-json': 6.0.2
@@ -73,6 +78,7 @@ catalog:
   ulid: 3.0.2
   vite: 8.2.2
   vitest: 4.1.11
+  wrangler: 4.146.0
   zod: 4.6.1
 
 # Round three (gslides-parity SPEC-3 8.10, 11.5 R0; build-3/b4.md request 1): pptxgenjs 4.0.1
@@ -91,8 +97,21 @@ allowBuilds:
   lightningcss: true
   unrs-resolver: true
   sharp: true
+  # the realtime Worker's runtime (the Cloudflare move, 2026-10-01): workerd's postinstall checks the
+  # platform binary of its optional dependency and downloads it when absent, esbuild's shape
+  workerd: true
 
 # pnpm 11 holds back releases younger than its default minimumReleaseAge; pnpm appended this
 # exclusion for the pinned zod on the first install. Keep entries here only for pinned catalog versions.
 minimumReleaseAgeExclude:
   - zod@4.6.1
+  - '@cloudflare/vitest-plugin@1.3.5'
+  - '@cloudflare/workerd-darwin-64@1.20261001.1'
+  - '@cloudflare/workerd-darwin-arm64@1.20261001.1'
+  - '@cloudflare/workerd-linux-64@1.20261001.1'
+  - '@cloudflare/workerd-linux-arm64@1.20261001.1'
+  - '@cloudflare/workerd-windows-64@1.20261001.1'
+  - '@cloudflare/workers-types@5.20261001.1'
+  - miniflare@5.20261001.0-alpha
+  - workerd@1.20261001.1
+  - wrangler@4.146.0

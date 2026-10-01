@@ -1,0 +1,9 @@
+{
+  // The realtime Worker's configuration (docs/CLOUDFLARE.md 3.6.2). This is the integrator's
+  // placeholder with the three required keys alone; R6 owns the file and lands the Durable Object
+  // binding and its sqlite export, the D1 bindings, the vars and the preview environment on day 0
+  // from R1's request.
+  "name": "turboslide-realtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+}

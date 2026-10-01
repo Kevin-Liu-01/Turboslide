@@ -60,6 +60,9 @@
       "path": "apps/render-worker"
     },
     {
+      "path": "apps/realtime-worker"
+    },
+    {
       "path": "apps/studio"
     }
   ]

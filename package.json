@@ -10,6 +10,9 @@
   "prettier": "@turboslide/prettier-config",
   "scripts": {
     "dev": "pnpm --filter @turboslide/studio dev",
+    "worker:dev": "pnpm --filter @turboslide/realtime-worker dev",
+    "worker:test": "pnpm --filter @turboslide/realtime-worker test",
+    "worker:types": "pnpm --filter @turboslide/realtime-worker types",
     "build": "turbo run build",
     "test": "vitest run",
     "check": "node scripts/check.mjs",

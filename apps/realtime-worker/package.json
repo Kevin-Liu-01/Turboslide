@@ -1,0 +1,25 @@
+{
+  "name": "@turboslide/realtime-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The realtime Worker (docs/CLOUDFLARE.md 3.1, 3.6.2): one Cloudflare Worker, turboslide-realtime, holding one SQLite backed Durable Object per deck over hibernating WebSockets as the channel and the presence of the `do` tier, with the accounts database D1 bound to it and reached by the Vercel function through its bearer routes. The pure admission comes from @turboslide/realtime/room-core; the Vercel app keeps every page, the store and the version log. This is the integrator's skeleton: src/index.ts answers GET /health alone and R1 replaces it.",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@turboslide/identity": "workspace:*",
+    "@turboslide/realtime": "workspace:*",
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

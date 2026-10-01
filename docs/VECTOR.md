@@ -725,6 +725,8 @@ path), `lines.connector.*` (a rectangle's eight sites stand).
 
 ### 6.2 The runs, the parks and the verdict
 
+The ship rule of docs/FOCUS.md 6.2, in force since the comments hotfix of 2026-10-01, holds over this section: a core row red twice on production after a ship is a stop, fixed forward or reverted within the hour, never named for an owner and left in the production table; a ship is one lane's work and not a round's merge; the build that goes live is walked by hand on the seller path before it is promoted.
+
 - One gate on the enforce preview built from the round's merged tree and one on production after the
   ship (Kevin's speed ask, in place of the two and one of `docs/FEATURES.md` 7.2). The preview is
   deployed by the integrator with `vercel deploy --yes --archive=tgz` from the worktree and the

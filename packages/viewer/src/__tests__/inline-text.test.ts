@@ -574,6 +574,23 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
     expect(out.selection).toEqual([6, 6]);
   });
 
+  it("keeps a collapsed caret before another person's word that landed at its point (build/r2.md R2-R10)", () => {
+    // A's caret rests at the end of its own last word; B's word lands exactly there. The room
+    // placed B's word to the right of A's text, so A reads it appear after the caret and the
+    // caret stays (docs/REALTIME.md 2, realtime.caret.offset-after-merge). Before this the caret
+    // was carried past the insert like an offset of the base (11 read 19).
+    const base = 'Alpha bravo';
+    expect(absorbedText(base, base, 'Alpha bravo charlie', [11, 11])).toEqual({
+      text: 'Alpha bravo charlie',
+      selection: [11, 11],
+    });
+    // an insert before the caret still moves it, a range ending at the point still follows the
+    // insert, and a removal at the point still clamps to its start
+    expect(absorbedText(base, base, 'XX Alpha bravo', [11, 11]).selection).toEqual([14, 14]);
+    expect(absorbedText(base, base, 'Alpha bravo charlie', [6, 11]).selection).toEqual([6, 19]);
+    expect(absorbedText(base, base, 'Alpha', [11, 11]).selection).toEqual([5, 5]);
+  });
+
   it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
     // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
     const base = 'Every line of copy';

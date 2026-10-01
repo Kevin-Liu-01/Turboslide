@@ -779,7 +779,17 @@ export function absorbedText(
      the remote delta whenever the collaborator's change began between the two (four characters
      typed at 6 of the base, two landing at 8: the caret restored at 12 for 10) */
   const inserted = applied ? local.text.length : 0;
+  /* a collapsed caret exactly where another person's insertion landed stays before it (the
+     realtime round, build/r2.md R2-R10; the row realtime.caret.offset-after-merge): the later
+     arrival is placed to the right of this person's text by the room, and the room client keeps
+     a remote caret still for the same case (`shiftPoint`), so the owner reads the other's word
+     appear after the caret, as Google draws it. Before this the caret was shifted like an offset
+     past the change (A's caret at 20 read 26 once B's " bravo" landed at 20) */
+  const collapsed = selection !== null && selection[0] === selection[1];
+  const staysBefore = (offset: number): boolean =>
+    collapsed && untouched && offset === change.start && change.end === change.start;
   const carry = (offset: number): number => {
+    if (staysBefore(offset)) return offset;
     if (offset <= local.start) return shift(offset);
     if (offset < local.start + local.text.length) {
       return at + Math.min(offset - local.start, inserted);

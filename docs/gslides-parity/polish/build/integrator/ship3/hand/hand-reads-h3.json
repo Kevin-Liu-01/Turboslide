@@ -1,0 +1,26 @@
+{
+  "base": "http://localhost:4448",
+  "startedAt": "2026-09-30T23:55:50.112Z",
+  "endedAt": "2026-09-30T23:57:25.194Z",
+  "rows": [
+    {
+      "n": 1,
+      "name": "h3 share.name-prompt.empty-field by hand (the plate)",
+      "expected": "Share on a fresh browser: the prompt is the title row plate, its field empty with the placeholder \"Your name\" and the question as the group's label",
+      "observed": "plate false in the title row false (72 px); value \"\", placeholder \"Your name\", label \"null\"",
+      "ok": false,
+      "shot": "01-h3-name-plate-2x.png",
+      "ms": 4429
+    }
+  ],
+  "decks": [
+    {
+      "id": "untitled-20260930-6c36",
+      "trashed": true,
+      "removed": true,
+      "status": 404
+    }
+  ],
+  "passed": 0,
+  "failed": 1
+}

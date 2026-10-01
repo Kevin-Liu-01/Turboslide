@@ -1,0 +1,281 @@
+{
+  "base": "http://localhost:4448",
+  "defaultTemplate": null,
+  "startedAt": "2026-09-30T23:38:55.607Z",
+  "ms": 594999,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.collaborators"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 594973,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/polish/ship3/gate-local-rerun-specs/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.polish.pages-sweep",
+      "decks.home.load-budget",
+      "shaders.export.missing-frame-row",
+      "export.refusal.sentence-and-retry",
+      "export.picture.progress-and-capture",
+      "images.insert.no-external-banner",
+      "present.link.first-paint-show",
+      "share.name-prompt.empty-field"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 8,
+  "passed": 3,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: ready 1002 ms (budget 500)",
+      "measures": [
+        "first byte 112 ms (budget 150)",
+        "LCP 184 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 1002 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 67500 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 12800310 B (reported against 600000)",
+        "first byte 112 ms (budget 150)",
+        "LCP 184 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 1002 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 67500 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 12800310 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "37ab81a4",
+  "origin": "http://localhost:4448",
+  "date": "2026-09-30",
+  "results": {
+    "decks.home.load-budget": "failed",
+    "decks.polish.pages-sweep": "failed",
+    "shaders.export.missing-frame-row": "failed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.picture.progress-and-capture": "passed",
+    "images.insert.no-external-banner": "failed",
+    "present.link.first-paint-show": "passed",
+    "share.name-prompt.empty-field": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "shaders.export.missing-frame-row",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "images.insert.no-external-banner",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "decks.polish.pages-sweep",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "decks.polish.pages-sweep",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the export started within 800 ms of the change"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "share.name-prompt.empty-field",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.polish.pages-sweep",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "present.link.first-paint-show",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: ready 1002 ms (budget 500)"
+    }
+  ]
+}

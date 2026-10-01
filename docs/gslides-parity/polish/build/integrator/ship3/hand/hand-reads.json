@@ -1,0 +1,77 @@
+{
+  "base": "http://localhost:4448",
+  "startedAt": "2026-09-30T23:36:10.636Z",
+  "endedAt": "2026-09-30T23:38:55.499Z",
+  "rows": [
+    {
+      "n": 1,
+      "name": "h1 slides.delete.two-selected-key-undo",
+      "expected": "two cards selected, Delete: both leave; the snackbar Undo: both return in the old order; the same order after a reload",
+      "observed": "selected blank-1-dfb5, blank-2-dfb5; 4 -> 2 (0 ms; snackbar \"Deleted 2 slidesUndo\", Undo true) -> 4 1973 ms after Undo, the old order; after reload the same order",
+      "ok": true,
+      "shot": "03-h1-after-undo.png",
+      "ms": 5669
+    },
+    {
+      "n": 2,
+      "name": "h2 versions.window-mark-column by hand (the driver fix)",
+      "expected": "the newest window row is open on its own (aria-expanded true) and its list is drawn with one rule 25 px inside the panel (B5's hairline: margin 24 px plus the 1 px border)",
+      "observed": "panel 320 px; 1 window row(s), the first versionHistory.window.w6 aria-expanded true; list drawn true, its edge at x 24 (1px rgba(7, 7, 7, 0.09), margin-left 23px); marks at x 41, 41, 41",
+      "ok": true,
+      "shot": "04-h2-version-history-window.png",
+      "ms": 3304
+    },
+    {
+      "n": 3,
+      "name": "h3 share.name-prompt.empty-field by hand",
+      "expected": "the placeholder Your name",
+      "observed": "error: TimeoutError: page.waitForURL: Timeout 60000ms exceeded.",
+      "ok": false,
+      "shot": null,
+      "ms": 60108
+    },
+    {
+      "n": 4,
+      "name": "h4 assist.tailor.dialog-one-undo",
+      "expected": "the count reads every Acme; Apply renames every Acme to Globex and skips the pricing slide in one revision; the snackbar carries Undo; one Cmd+Z restores both",
+      "observed": "count \"2 places on 2 slides\" (Acme 2 on 2 slides); skip box true; Acme 2 -> 0 -> 2; Globex 0 -> 2 -> 0; pricing skipped false -> true -> false; revision 5 -> 5 at the facts' read, 6 1841 ms after Apply -> 7 after Cmd+Z (restored in 3 ms); snackbar \"Tailored for Globex: 2 places on 2 slides, 1 slide skippedUndo\" with Undo true",
+      "ok": true,
+      "shot": "07-h4-after-undo.png",
+      "ms": 20687
+    },
+    {
+      "n": 5,
+      "name": "h5 logos.tailor.find-customer-logo",
+      "expected": "Find the Figma logo draws the mark; Apply swaps the Acme picture and renames the text in one revision; one Cmd+Z restores both; the kit's mark is unchanged",
+      "observed": "asset acme-logo-asset; button \"Find the Figma logo\", mark drawn true, stored \"The Figma logo is ready; Apply puts it where the old logo was\" 1 ms after the click; Apply: picture asset acme-logo-asset -> figma (swapped true), text \"Prepared for Figma\", revision 12 -> 12 at the objects' read, 13 1842 ms after Apply; Cmd+Z: restored true in 1 ms, revision 13; the kit's mark null -> null -> null",
+      "ok": true,
+      "shot": "10-h5-after-undo.png",
+      "ms": 17087
+    },
+    {
+      "n": 6,
+      "name": "h6 shaders.panel.kit-colours",
+      "expected": "six kit swatches in the Shader section; the shader is on the kit's Primary; the kit's primary colour written: the frame is re captured within 5 s with a new frameKey",
+      "observed": "Liquid metal inserted in 131 ms (first frame asset none at 12263 ms); selected with handles true; swatches text, background, caption, hint, primary, accent, custom (6 of six roles); the sheet renders light; the Primary swatch clicked (revision 15 -> 16); brand.set /colors/light/primary ok; frame none -> none (no backend) 22110 ms after the write; the new picture decoded on the sheet false at 22110 ms",
+      "ok": false,
+      "shot": "13-h6-after-kit-write.png",
+      "ms": 44696
+    }
+  ],
+  "decks": [
+    {
+      "id": "untitled-20260930-d06s",
+      "trashed": true,
+      "removed": true,
+      "status": 404
+    },
+    {
+      "id": "untitled-20260930-v6ys",
+      "trashed": true,
+      "removed": true,
+      "status": 404
+    }
+  ],
+  "passed": 4,
+  "failed": 2
+}

@@ -822,8 +822,12 @@ async function openHistory(p: Page): Promise<Locator | null> {
       .catch(() => false);
     if (!opened) return null;
   }
+  /* open every closed window and leave an open one open: the newest window is open by default
+     (VersionsPanel.tsx, f0e3d449), and a click on it closed it and hid its rows (the realtime
+     round's fix round 2, build/r1.md R1-R4f) */
   for (const w of await p.locator('[data-control^="versionHistory.window."]').all())
-    await w.click().catch(() => undefined);
+    if ((await w.getAttribute('aria-expanded').catch(() => null)) === 'false')
+      await w.click().catch(() => undefined);
   await p.waitForTimeout(300);
   return p.locator('.ts-versions.is-history').first();
 }

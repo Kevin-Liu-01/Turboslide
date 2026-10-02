@@ -44,6 +44,13 @@ import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../
 //   POST /api/logo/refresh { dryRun? }         the index rebuild: the agent bearer or
 //                                              `Authorization: Bearer <CRON_SECRET>` (what a Vercel
 //                                              cron sends), else 401 (4.2)
+//   GET  /api/logo/refresh                     the daily cron of apps/studio/vercel.json: Vercel's
+//                                              cron sends a GET with `Authorization: Bearer
+//                                              <CRON_SECRET>`, so a GET runs the full rebuild with
+//                                              that secret alone and answers 401 without it, the
+//                                              agent bearer included; a project without
+//                                              CRON_SECRET refuses its own cron (docs/NEXT.md 3.2
+//                                              H10; audit-cost 18, 130)
 //   POST /api/logo/insert?deck=<id> { slug, variant?, slideId?, box?, everySlide?, kit?, blockId?, baseRevision }
 //                                              `logo.insert` for the seller's page (its session
 //                                              cookie, same origin) and for an agent (the bearer);
@@ -132,6 +139,7 @@ async function serve(request: Request, splat: string): Promise<Response> {
     return serveSearch(request);
   }
   if (splat === 'refresh') {
+    if (method === 'GET') return serveCronRefresh(request);
     if (method !== 'POST') return refuse(405, 'method_not_allowed', 'POST the refresh');
     return serveRefresh(request);
   }
@@ -218,6 +226,28 @@ async function serveSearch(request: Request): Promise<Response> {
     return jsonResponse(answer);
   } catch (error) {
     return storeBusy(error, 'logo.search') ?? errorResponse(error, 'logo.search');
+  }
+}
+
+/**
+ * The cron's refresh (docs/NEXT.md 3.2 H10): a Vercel cron sends GET with the project's
+ * CRON_SECRET as the bearer, and the refresh it asks for is the full one. The cron secret is the
+ * one credential a GET takes: a GET without it is 401, so neither a link nor a crawler, nor the
+ * open localhost surface, starts the rebuild by a GET, and the project without CRON_SECRET (the
+ * personal one) refuses the cron its vercel.json shares.
+ */
+async function serveCronRefresh(request: Request): Promise<Response> {
+  if (refreshCredential(request) !== 'cron')
+    return refuse(
+      401,
+      'unauthorized',
+      'the daily logo refresh by GET takes the cron secret; POST the refresh with the agent bearer',
+    );
+  try {
+    const counts = await (await logoService()).refresh({ dryRun: false });
+    return jsonResponse({ ...counts, credential: 'cron' });
+  } catch (error) {
+    return storeBusy(error, 'logo.refresh') ?? errorResponse(error, 'logo.refresh');
   }
 }
 

@@ -148,3 +148,82 @@ timing below carries the one minute load average it was read at.
     after the headers, so its reads are not in them).
   - `GET /_serverFn/<readEditorDeckFn>`: 200 with the same fifteen entries; `POST /_serverFn/<heldOpIdsFn>`: 200 with `cold` and `total`.
   - Load 70 to 79 during these reads.
+
+## H10: the cron's GET of the logo refresh
+
+- `apps/studio/src/routes/api/logo.$.ts`: `GET /api/logo/refresh` runs the full refresh when the
+  request carries `Authorization: Bearer <CRON_SECRET>` (`refreshCredential` answers `cron`) and
+  answers 401 otherwise, the agent bearer and the open localhost surface included; POST is as it
+  was. `apps/studio/vercel.json` needs no change: both projects share the cron, and the one
+  without CRON_SECRET (the personal project) now refuses its cron with 401 where it answered 405.
+- Check: on 4502 (no CRON_SECRET) `GET /api/logo/refresh` 401, with a wrong bearer 401, HEAD 405.
+  On 4512 (a local CRON_SECRET): without a credential 401, with a wrong bearer 401, with the
+  secret 200 in 241 s at load about 78 (`credential: "cron"`, `upstream: "network"`, 2,224 of
+  4,948 brands fetched in the run's budget).
+
+## Commits
+
+| Hotfix | Commit |
+| --- | --- |
+| H5 | `56431c76` |
+| H6 | `41332b42` |
+| H7 | `68a60bd3` |
+| H8 | `63fb0ec0` |
+| H9 | `17869dda` |
+| H10 | the commit that carries this table |
+
+Every commit names its push key first and carries its own files by an explicit path list. The
+three files several lanes change (`core-matrix.json`, `core-matrix.test.mjs`, `README.md`) and
+`export.spec.ts` were staged from `HEAD` plus my hunk alone (`git hash-object` and
+`git update-index`), so the H2 to H4 lane's uncommitted rows, count terms and README lines stayed in
+the working tree unstaged. The working tree carries both lanes' edits of those files.
+
+## Where the build left NEXT.md's file lists
+
+- H7: `apps/studio/src/routes/api/export.$deckId.ts` (eight lines in `jobFile`); without it the
+  local reading of `export.remove.copies-gone` stays 200, because a file or tmp tier serves the
+  copy from its job folder. No lane of 4.1.6 owns the file.
+- H8: `--routes` in `scripts/perf-budget.mjs`, so the check reads `/decks` alone on production.
+- H9: `apps/studio/src/server/server-timing.ts` (new) and `auth/identity.ts` (the `facts` entry,
+  eleven lines in `accountSession`). No lane of 4.1.6 owns either file.
+- H6: `title.json` is unchanged; the schema requires the mark box on a title slide.
+- H10: `apps/studio/vercel.json` is unchanged; the missing secret on the personal project is what
+  refuses its cron.
+
+## Round 1
+
+The requests to other lanes and to the integrator, and the findings outside H5 to H10.
+
+1. To B4 (`decks/templates/**`, `packages/render/src/stage.ts`): H6's record sits at the head of
+   `decks/templates/blank/deck.json`. B4a's plain slide can extend the same record (`frame`
+   `{ rails: false, crosses: false }` and `counter` `{ show: false }`, the kit fields of
+   `schema/brand.ts` `KitFrame` and `KitCounter`) rather than add a mechanism. `stage.ts` carries
+   only H6's comment on `GT_BAND`.
+2. To the integrator, the whole matrix on the merged tree: the core walk's scratch deck comes from
+   `/new`, so after H6 it starts with no logo. `brand.logo.remove` then writes the record it
+   already holds and ends with Use the default logo; `brand.background.enter-keeps-open` reads the
+   wordmark's contrast after that step and finds no wordmark if it runs alone. I did not drive the
+   walk.
+3. To the integrator, `export.remove.copies-gone` on a deployment: Vercel's Blob page says a
+   delete "may take up to 60 seconds to propagate through our cache", so a public copy can answer
+   200 from the CDN past the row's 5 s on the preview and on production. If the hosted reading is
+   red at 5 s and green by 60 s, the bound is the Blob cache's and the row's text is the
+   integrator's to change.
+4. To B3b and B4, a finding outside H6: the Brand kit's Reset to the default kit (`brand.reset`,
+   `panel.brand.reset`) removes the record, so a Blank deck's Reset draws the GT mark again, and
+   Use the default logo draws the GT mark as "General Translation's logo". The deployment's
+   default kit is `decks/templates/blank/template.json` `brand.name` "General Translation".
+5. A finding for the store package's owner: `packages/store/src/templates.ts` `blankDeckDocument`
+   (a decks folder without the blank template, the CLI's fallback) still writes a title slide
+   that draws the GT mark.
+6. A finding: a one-time download token (`apps/studio/src/server/tokens.ts`, 15 minutes) minted
+   for a deck's job before the deck's removal still resolves while unspent. Not changed.
+7. A finding, read and not driven: `builds/` is not in `isPublicPath`
+   (`packages/store/src/migrate.ts` 83), so under the split client a built web page is put on the
+   private store while `download.ts` `builtFileLink` hands its `entry.url` to the browser.
+8. To the integrator and the owner of `apps/studio/e2e/core/lib.ts`: the core specs mock the dev
+   server's HMR socket (`quietDevServer`), so a dev server whose dependency optimizer rebuilds
+   React on a spec's first visit draws two React copies and the setup times out (H6 run 1). A
+   warm-up visit without the mock before a spec run avoids it.
+9. README: my commits rendered the brand and Download and print lines of What works today; the
+   decks, share and local rows lines of H2 to H4's rows are that lane's to render.

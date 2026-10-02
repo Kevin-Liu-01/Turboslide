@@ -185,11 +185,11 @@ test(title('decks.list.read'), async () => {
   await expect(ctl(page, 'home.template.gt-brand')).toContainText('GT brand deck');
   /* the polish round (docs/POLISH.md 2.7 item 75, B5): the Recent row is gone; this browser's
      decks are the first cards with the line "Opened just now" */
-  await expect(ctl(page, 'home.cards')).toBeVisible();
+  /* Round 1 (docs/NEXT.md 4.1.3 item 10): the ruled rows are the default view */
+  const listed = page.locator('[data-control="home.rows"], [data-control="home.cards"]').first();
+  await expect(listed).toBeVisible();
   await expect(ctl(page, `home.card.${deck}`)).toBeVisible();
-  await expect(
-    ctl(page, 'home.cards').locator('[data-control^="home.card."]').first(),
-  ).toContainText(/Opened/);
+  await expect(listed.locator('[data-control^="home.card."]').first()).toContainText(/Opened/);
 });
 
 test(title('decks.list.search'), async () => {
@@ -293,7 +293,7 @@ test(title('decks.row.rename-enter'), async () => {
     page.locator(`[data-control="home.rows"] [data-control="home.title.${deck}"]`),
     'the store has the name',
   ).toHaveText(deckName, { timeout: 5000 });
-  await ctl(page, 'home.view.grid').click();
+  /* the list stays the view, the default since Round 1 */
 });
 
 test(title('decks.card.make-a-copy'), async () => {
@@ -1401,12 +1401,12 @@ test(title('decks.card.edited-relative-time'), async () => {
     const row = document.querySelector(`[data-control="home.card.${id}"]`);
     return row ? Math.round(row.getBoundingClientRect().height) : null;
   }, deck);
-  await ctl(page, 'home.view.grid').click();
   test.info().annotations.push({
     type: 'card',
     description: `when "${facts.when}"; list row ${rowHeight} px`,
   });
-  expect(rowHeight, "the list view's rows are 32 px").toBe(32);
+  /* Round 1 (docs/NEXT.md 4.1.3 item 10): the ruled rows carry the 64 by 36 thumbnail */
+  expect(rowHeight, "the list view's rows are 56 px").toBe(56);
 });
 
 test(title('decks.card.more-glyph'), async () => {
@@ -2707,6 +2707,91 @@ test(title('decks.home.phone'), async ({ browser }) => {
   expect(failures).toEqual([]);
 });
 
+// ---- the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.3 item 10, 4.1.5): /decks as ruled rows
+
+test(title('decks.list.ruled-rows'), async () => {
+  test.setTimeout(120_000);
+  await gotoDecks();
+  const facts = await page.evaluate((id) => {
+    const rows = document.querySelector('[data-control="home.rows"]');
+    const row = document.querySelector<HTMLElement>(`tr[data-control="home.card.${id}"]`);
+    const thumb = row?.querySelector<HTMLElement>('.ts-row-thumb') ?? null;
+    const edge = (() => {
+      const probe = document.createElement('div');
+      probe.style.color = 'var(--pt-edge)';
+      document.body.append(probe);
+      const value = getComputedStyle(probe).color;
+      probe.remove();
+      return value;
+    })();
+    const box = thumb?.getBoundingClientRect();
+    const tcs = thumb ? getComputedStyle(thumb) : null;
+    const cells = row ? [...row.querySelectorAll('td')] : [];
+    const framed = cells.some((td) => {
+      const cs = getComputedStyle(td);
+      return (
+        parseFloat(cs.borderTopWidth) > 0 ||
+        parseFloat(cs.borderLeftWidth) > 0 ||
+        parseFloat(cs.borderRightWidth) > 0 ||
+        cs.boxShadow !== 'none'
+      );
+    });
+    const rule = cells[0] ? getComputedStyle(cells[0]) : null;
+    const strip = document.querySelector('#templates');
+    const hatch = strip?.nextElementSibling ?? null;
+    const hatchFill = hatch?.querySelector<HTMLElement>('.ts-hatch');
+    const signIn = document.querySelector<HTMLElement>('.ts-appbar [data-control="home.signIn"]');
+    const scs = signIn ? getComputedStyle(signIn) : null;
+    return {
+      list: rows !== null,
+      cards: document.querySelector('[data-control="home.cards"]') !== null,
+      row: row?.tagName.toLowerCase() ?? null,
+      thumb: box ? { width: Math.round(box.width), height: Math.round(box.height) } : null,
+      thumbBorder: tcs ? `${tcs.borderTopWidth} ${tcs.borderTopStyle} ${tcs.borderTopColor}` : null,
+      edge,
+      thumbImg: thumb?.querySelector('img')?.getAttribute('src') ?? null,
+      framed,
+      rule: rule ? `${rule.borderBottomWidth} ${rule.borderBottomStyle}` : null,
+      hatchAfterStrip: hatch?.classList.contains('ts-decks-hatch') ?? false,
+      hatchImage: hatchFill ? getComputedStyle(hatchFill).backgroundImage : '',
+      offered: signIn !== null,
+      signIn: signIn
+        ? {
+            text: (signIn.textContent ?? '').trim(),
+            border: scs?.borderTopColor ?? '',
+            background: scs?.backgroundColor ?? '',
+            tag: signIn.tagName.toLowerCase(),
+          }
+        : null,
+    };
+  }, deck);
+  /* whether this deployment offers this visitor a sign in method: the bar's end says what the
+     loader read (components/home/sign-in.tsx readSignInFacts) */
+  const offered =
+    (await ctl(page, 'home.signIn').count()) > 0 ||
+    (await page.locator('.ts-appbar-end').getAttribute('data-sign-in')) === 'offered';
+  test.info().annotations.push({
+    type: 'rows',
+    description: `rows ${facts.list}, cards ${facts.cards}; the deck's entry a ${facts.row}; thumbnail ${JSON.stringify(facts.thumb)} ${facts.thumbBorder} (edge ${facts.edge}), src ${facts.thumbImg}; a box around the row ${facts.framed}; the row's rule ${facts.rule}; the hatch after the strip ${facts.hatchAfterStrip} (${facts.hatchImage.slice(0, 40)}); sign in offered by the deployment ${offered}, drawn ${JSON.stringify(facts.signIn)}`,
+  });
+  expect(facts.list, 'the list draws as rows by default').toBe(true);
+  expect(facts.cards, 'no card grid by default').toBe(false);
+  expect(facts.row, "the deck's entry is a row").toBe('tr');
+  expect(facts.thumb, 'a 64 by 36 thumbnail').toEqual({ width: 64, height: 36 });
+  expect(facts.thumbBorder, 'framed in the edge role').toBe(`1px solid ${facts.edge}`);
+  expect(facts.framed, 'the row is ruled, not boxed').toBe(false);
+  expect(facts.rule, 'the row owns its line').toBe('1px solid');
+  expect(facts.hatchAfterStrip, 'the hatch strip follows Start a new presentation').toBe(true);
+  expect(facts.hatchImage, 'the hatch is drawn').toContain('repeating-linear-gradient');
+  if (offered) {
+    expect(facts.signIn?.text, 'Sign In as text in the bar').toBe('Sign In');
+    expect(facts.signIn?.border, 'no frame around Sign In').toBe('rgba(0, 0, 0, 0)');
+  } else {
+    /* a deployment without a method draws no Sign In (docs/NEXT.md 3.2 H4's rule) */
+    expect(facts.signIn, 'no Sign In without a method').toBeNull();
+  }
+});
+
 // ---- the list and the trash (docs/POLISH.md 2.7)
 
 /** The cards of a deck on /decks, with the line under each title. */
@@ -3108,7 +3193,8 @@ test(title('decks.card.rename-field-fits'), async () => {
     const input = document.querySelector(
       `[data-control="home.rename.${id}"]`,
     ) as HTMLInputElement | null;
-    const body = input?.closest('.ts-hm-card-body, .ts-hm-card') ?? null;
+    /* the card's body, or the ruled row's label cell, the default view since Round 1 */
+    const body = input?.closest('.ts-hm-card-body, .ts-hm-card, .ts-row-label') ?? null;
     if (!input || !body) return null;
     const ir = input.getBoundingClientRect();
     const br = body.getBoundingClientRect();
@@ -3398,12 +3484,19 @@ const BASE = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321';
 /** The data-control ids of the cards /decks draws in its grid, once the listing has landed. */
 async function listedCards(p: Page): Promise<string[]> {
   await expect(
-    p.locator('[data-control="home.cards"], [data-control="home.empty"]').first(),
+    p
+      .locator(
+        '[data-control="home.rows"], [data-control="home.cards"], [data-control="home.empty"]',
+      )
+      .first(),
   ).toBeVisible({ timeout: 30_000 });
   /* the listing streams behind the shell: the frames leave when it lands */
   await expect(p.locator('[data-control="home.pending"]')).toHaveCount(0, { timeout: 30_000 });
+  /* the ruled rows are the default view since Round 1 (docs/NEXT.md 4.1.3 item 10) */
   return p
-    .locator('[data-control="home.cards"] > [data-control^="home.card."]')
+    .locator(
+      '[data-control="home.rows"] tbody > [data-control^="home.card."], [data-control="home.cards"] > [data-control^="home.card."]',
+    )
     .evaluateAll((els) => els.map((el) => el.getAttribute('data-control') ?? ''));
 }
 
@@ -3596,4 +3689,6 @@ coverage(import.meta.filename, [
   'decks.home.capture-plain',
   'decks.home.copy',
   'decks.home.phone',
+  /* the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.3 item 10, 4.1.5) */
+  'decks.list.ruled-rows',
 ]);

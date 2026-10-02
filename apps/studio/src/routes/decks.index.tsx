@@ -26,6 +26,7 @@ import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 
+import { SignInButton, offersSignIn, readSignInFacts } from '../components/home/sign-in';
 import { useMountEffect } from '../components/useMountEffect';
 import {
   RESTORING_STEP_MS,
@@ -67,6 +68,7 @@ import {
 } from './-recent';
 import type { DeckOpenFacts, RecentEntry, TrashRefusedDetail } from './-recent';
 
+import '../components/home/grammar.css';
 import './decks.css';
 
 /**
@@ -125,7 +127,11 @@ export const Route = createFileRoute('/decks/')({
       throw redirect({ to: '/decks/templates' });
   },
   loader: async ({ deps }) => {
-    const [health, cookies] = await Promise.all([getServerHealth(), readHomeCookies()]);
+    const [health, cookies, signIn] = await Promise.all([
+      getServerHealth(),
+      readHomeCookies(),
+      readSignInFacts(),
+    ]);
     // the store listing is not awaited: the router streams it behind the shell (SPEC-4 0.29)
     const listing = listHomeDecks({ data: deps.show === 'all' ? { show: 'all' } : {} });
     return {
@@ -135,6 +141,7 @@ export const Route = createFileRoute('/decks/')({
       prefs: cookies.prefs,
       recent: cookies.recent,
       now: cookies.now,
+      signIn,
     };
   },
   /* Back from the editor paints the cards it left (docs/POLISH.md item 89): a match younger than
@@ -162,7 +169,9 @@ export type HomeView = 'grid' | 'list';
 
 type HomeSettings = { sort: HomeSort; view: HomeView };
 
-const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'grid' };
+/* the ruled rows are the default view since Round 1 (docs/NEXT.md 4.1.3 item 10; DECK-GRAMMAR 39:
+   lists are ruled rows); the cards stay one click away under Grid view */
+const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'list' };
 
 /** the cards that preload the editor's loader on viewport entry (SPEC-4 0.39) */
 export const VIEWPORT_PRELOAD_CARDS = 12;
@@ -229,7 +238,7 @@ function readSettings(): HomeSettings {
         parsed.sort === 'modified' || parsed.sort === 'title' || parsed.sort === 'opened'
           ? parsed.sort
           : DEFAULT_SETTINGS.sort,
-      view: parsed.view === 'list' ? 'list' : 'grid',
+      view: parsed.view === 'grid' ? 'grid' : 'list',
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -324,13 +333,26 @@ export function timeAgo(iso: string, now: Date = new Date()): string {
 // ---------------------------------------------------------------------------------------------
 // Helpers
 
-/** The thumbnail of a card: the render route's downsampled capture (server/thumbs.ts thumbUrl). */
+/**
+ * The thumbnail of a card: the render route's downsampled capture (server/thumbs.ts thumbUrl), at
+ * 320 px for a card and 160 px for a row's 64 by 36 frame (the route's widths are 160, 320 and
+ * 640; 160 covers the frame at twice its size).
+ */
 export function cardThumbUrl(
   card: Pick<DeckCard, 'id' | 'firstSlide' | 'appearance' | 'revision'>,
+  width: 160 | 320 = 320,
 ) {
   if (card.firstSlide === null) return null;
-  return `/api/render/${encodeURIComponent(card.firstSlide)}?deck=${encodeURIComponent(card.id)}&theme=${card.appearance}&w=320&r=${card.revision}`;
+  return `/api/render/${encodeURIComponent(card.firstSlide)}?deck=${encodeURIComponent(card.id)}&theme=${card.appearance}&w=${width}&r=${card.revision}`;
 }
+
+/**
+ * The GT brand deck card's cover (docs/NEXT.md 4.1.3 item 10; brand-a 105): the first slide of the
+ * example deck the store seeds, through the render route's unstamped thumbnail, which answers the
+ * newest stored capture with `s-maxage=60` and renders the current one after the response, so the
+ * page reads no deck for it. The GT template and the seeded deck open on the same slide.
+ */
+export const GT_BRAND_COVER = '/api/render/opener-brand?deck=gt-brand&theme=dark&w=320';
 
 /** The facts the Recent record keeps of a card (./-recent.ts). */
 export function openFactsOf(card: DeckCard): DeckOpenFacts {
@@ -475,6 +497,14 @@ function gtBrandDeckId(now: Date = new Date()): string {
   return `gt-brand-${now.getTime().toString(36)}`;
 }
 
+/** The words of the page Round 1 added (docs/NEXT.md 4.1.3 item 10), in the page's own module. */
+export const DECKS_PAGE = {
+  name: 'Name',
+  lastOpened: 'Last opened',
+  slides: 'Slides',
+  actions: 'Actions',
+} as const;
+
 /** The empty states of the band (SPEC-4 1.10): the figure, a title, one sentence, one action at most. */
 export const HOME_EMPTY = {
   title: 'No presentations yet',
@@ -485,7 +515,15 @@ export const HOME_EMPTY = {
 } as const;
 
 function HomePage() {
-  const { decks, admin, node, prefs: cookiePrefs, recent, now: serverNow } = Route.useLoaderData();
+  const {
+    decks,
+    admin,
+    node,
+    prefs: cookiePrefs,
+    recent,
+    now: serverNow,
+    signIn,
+  } = Route.useLoaderData();
   const search = Route.useSearch();
   const router = useRouter();
   const navigate = useNavigate();
@@ -809,78 +847,98 @@ function HomePage() {
   };
 
   return (
-    <main ref={page} className="ts-home ts-home-page" data-node={node}>
-      <header className="ts-appbar">
-        <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
-        <label className="ts-appbar-search">
-          <Icon name="search" />
-          <input
-            type="search"
-            value={query}
-            placeholder={HOME.search}
-            aria-label={HOME.search}
-            data-control="home.search"
-            autoComplete="off"
-            spellCheck={false}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
-            {...tipProps({ name: HOME.search, doc: 'Filters the list by title.' })}
-          />
-        </label>
+    <main ref={page} className="ts-home ts-home-page ts-decks-page" data-node={node}>
+      {/* the column's two rails, drawn once for the page (grammar.css .ts-rails) */}
+      <div className="ts-rails" aria-hidden="true" />
+      <header className="ts-appbar ts-seam">
+        <div className="ts-col ts-appbar-row">
+          <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
+          <label className="ts-appbar-search">
+            <Icon name="search" />
+            <input
+              type="search"
+              value={query}
+              placeholder={HOME.search}
+              aria-label={HOME.search}
+              data-control="home.search"
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
+              {...tipProps({ name: HOME.search, doc: 'Filters the list by title.' })}
+            />
+          </label>
+          {/* Sign In as text for an anonymous visitor (docs/NEXT.md 4.1.2, B's graft), drawn only
+            where the deployment offers a method; the loader read the facts, so it is in the
+            server's HTML */}
+          <span
+            className="ts-appbar-end"
+            data-sign-in={offersSignIn(signIn) && !signIn.signedIn ? 'offered' : 'none'}
+          >
+            <SignInButton facts={signIn} control="home.signIn" className="pt-ib ts-appbar-signin" />
+          </span>
+        </div>
       </header>
 
-      <section className="ts-strip" id="templates" aria-labelledby="ts-strip-heading">
-        <div className="ts-strip-head">
-          <h2 id="ts-strip-heading">{HOME.startNew}</h2>
-          {/* the gallery page (docs/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
-          <Link
-            to="/decks/templates"
-            className="ts-strip-gallery"
-            data-control="home.gallery"
-            {...tipProps({
-              name: HOME.gallery,
-              doc: 'Every template a presentation can start from, the ones saved here included.',
-            })}
-          >
-            {HOME.gallery}
-          </Link>
-        </div>
-        <ul className="ts-strip-cards">
-          <li>
+      <section className="ts-strip ts-seam" id="templates" aria-labelledby="ts-strip-heading">
+        <div className="ts-col">
+          <div className="ts-strip-head">
+            <h2 id="ts-strip-heading">{HOME.startNew}</h2>
+            {/* the gallery page (docs/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
             <Link
-              to="/new"
-              className="ts-template ts-template-blank"
-              data-control="home.blank"
-              {...tipProps({ name: HOME.blank, doc: 'Starts an untitled presentation.' })}
-            >
-              <span className="ts-template-plate">
-                <Icon name="plus" size={40} />
-              </span>
-              <span className="ts-template-label">{HOME.blank}</span>
-            </Link>
-          </li>
-          <li>
-            <button
-              type="button"
-              className="ts-template"
-              data-control="home.template.gt-brand"
-              disabled={creating}
-              onClick={() => void createGtBrandDeck()}
+              to="/decks/templates"
+              className="ts-strip-gallery"
+              data-control="home.gallery"
               {...tipProps({
-                name: HOME.gtBrand,
-                doc: 'Makes a copy of the GT brand template, 85 slides, and opens it.',
+                name: HOME.gallery,
+                doc: 'Every template a presentation can start from, the ones saved here included.',
               })}
             >
-              <span className="ts-template-plate ts-template-gt">
-                <GtMark width={56} height={36} />
-              </span>
-              <span className="ts-template-label">{creating ? 'Opening' : HOME.gtBrand}</span>
-            </button>
-          </li>
-        </ul>
+              {HOME.gallery}
+            </Link>
+          </div>
+          <ul className="ts-strip-cards">
+            <li>
+              <Link
+                to="/new"
+                className="ts-template ts-template-blank"
+                data-control="home.blank"
+                {...tipProps({ name: HOME.blank, doc: 'Starts an untitled presentation.' })}
+              >
+                <span className="ts-template-plate">
+                  <Icon name="plus" size={40} />
+                </span>
+                <span className="ts-template-label">{HOME.blank}</span>
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                className="ts-template"
+                data-control="home.template.gt-brand"
+                disabled={creating}
+                onClick={() => void createGtBrandDeck()}
+                {...tipProps({
+                  name: HOME.gtBrand,
+                  doc: 'Makes a copy of the GT brand template and opens it.',
+                })}
+              >
+                <span className="ts-template-plate ts-template-gt">
+                  <GtBrandCover />
+                </span>
+                <span className="ts-template-label">{creating ? 'Opening' : HOME.gtBrand}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </section>
 
+      {/* the hatch strip where the topic changes (slide 49; A's graft) */}
+      <div className="ts-decks-hatch ts-seam" aria-hidden="true">
+        <div className="ts-col-bare ts-hatch" />
+      </div>
+
       <section
-        className="ts-recent"
+        className="ts-recent ts-seam"
         aria-labelledby="ts-recent-heading"
         // the opened order is this browser's alone: without the Recent cookie the band is hidden
         // until mounted, then shown in its final order (L1); with the cookie the server rendered
@@ -889,89 +947,93 @@ function HomePage() {
           !mounted && settings.sort === 'opened' && recent.length === 0 ? '' : undefined
         }
       >
-        <div className="ts-recent-head">
-          <div>
-            <h2 id="ts-recent-heading">{HOME.recent}</h2>
-          </div>
-          <div className="ts-recent-tools">
-            {/* the deployment admin's filter (docs/NEXT.md 3.2 H2): drawn once the listing says
+        <div className="ts-col">
+          <div className="ts-recent-head">
+            <div>
+              <h2 id="ts-recent-heading">{HOME.recent}</h2>
+            </div>
+            <div className="ts-recent-tools">
+              {/* the deployment admin's filter (docs/NEXT.md 3.2 H2): drawn once the listing says
                 the viewer may show every deck */}
-            <Suspense fallback={null}>
-              <AdminShowFilter
-                admin={admin}
-                show={search.show === 'all' ? 'all' : 'own'}
-                onShow={(show) =>
-                  void navigate({ to: '/decks', search: show === 'all' ? { show: 'all' } : {} })
-                }
-              />
-            </Suspense>
-            <span className="ts-seg" role="group" aria-label="View">
-              <button
-                type="button"
-                className={settings.view === 'grid' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
-                aria-pressed={settings.view === 'grid'}
-                data-control="home.view.grid"
-                onClick={() => choose({ view: 'grid' })}
-                {...tipProps({
-                  name: 'Grid view',
-                  doc: 'Cards with a thumbnail of the first slide.',
-                })}
-              >
-                <Icon name="grid" />
-              </button>
-              <button
-                type="button"
-                className={settings.view === 'list' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
-                aria-pressed={settings.view === 'list'}
-                data-control="home.view.list"
-                onClick={() => choose({ view: 'list' })}
-                {...tipProps({
-                  name: 'List view',
-                  doc: 'Rows with the title, the last edit and the slide count.',
-                })}
-              >
-                <Icon name="queue-list" />
-              </button>
-            </span>
-            <label className="ts-sort">
-              <span className="ts-visually-hidden">Sort by</span>
-              <select
-                className="pt-select"
-                value={settings.sort}
-                data-control="home.sort"
-                onChange={(event) => choose({ sort: event.target.value as HomeSort })}
-                {...tipProps({ name: 'Sort by', doc: 'The order of the list.' })}
-              >
-                <option value="opened">{HOME.sortOpened}</option>
-                <option value="modified">{HOME.sortModified}</option>
-                <option value="title">{HOME.sortTitle}</option>
-              </select>
-            </label>
+              <Suspense fallback={null}>
+                <AdminShowFilter
+                  admin={admin}
+                  show={search.show === 'all' ? 'all' : 'own'}
+                  onShow={(show) =>
+                    void navigate({ to: '/decks', search: show === 'all' ? { show: 'all' } : {} })
+                  }
+                />
+              </Suspense>
+              <span className="ts-seg" role="group" aria-label="View">
+                <button
+                  type="button"
+                  className={settings.view === 'grid' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
+                  aria-pressed={settings.view === 'grid'}
+                  data-control="home.view.grid"
+                  onClick={() => choose({ view: 'grid' })}
+                  {...tipProps({
+                    name: 'Grid view',
+                    doc: 'Cards with a thumbnail of the first slide.',
+                  })}
+                >
+                  <Icon name="grid" />
+                </button>
+                <button
+                  type="button"
+                  className={settings.view === 'list' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
+                  aria-pressed={settings.view === 'list'}
+                  data-control="home.view.list"
+                  onClick={() => choose({ view: 'list' })}
+                  {...tipProps({
+                    name: 'List view',
+                    doc: 'Rows with the title, the last edit and the slide count.',
+                  })}
+                >
+                  <Icon name="queue-list" />
+                </button>
+              </span>
+              <label className="ts-sort">
+                <span className="ts-visually-hidden">Sort by</span>
+                <select
+                  className="pt-select"
+                  value={settings.sort}
+                  data-control="home.sort"
+                  onChange={(event) => choose({ sort: event.target.value as HomeSort })}
+                  {...tipProps({ name: 'Sort by', doc: 'The order of the list.' })}
+                >
+                  <option value="opened">{HOME.sortOpened}</option>
+                  <option value="modified">{HOME.sortModified}</option>
+                  <option value="title">{HOME.sortTitle}</option>
+                </select>
+              </label>
+            </div>
           </div>
-        </div>
 
-        {/* the store's cards stream behind the shell (SPEC-4 0.29): this browser's own decks
+          {/* the store's cards stream behind the shell (SPEC-4 0.29): this browser's own decks
             are drawn as the first cards at first byte and the grid's frames stand in for the rest
             until the listing arrives; a refetch keeps the cards on the page; Back from the editor
             paints the listing it left (item 89) */}
-        <Suspense fallback={<GridFrame view={settings.view} {...listProps} />}>
-          <StoreList promise={decks} {...listProps} />
-        </Suspense>
+          <Suspense fallback={<GridFrame view={settings.view} {...listProps} />}>
+            <StoreList promise={decks} {...listProps} />
+          </Suspense>
+        </div>
       </section>
 
       <footer className="ts-home-tail">
-        <Link
-          to="/decks/trash"
-          className="pt-ib is-text"
-          data-control="home.trash"
-          {...tipProps({
-            name: HOME.trash,
-            doc: 'Presentations moved to the trash; restore or delete them forever.',
-          })}
-        >
-          <Icon name="archive" />
-          <span className="pt-lb">{HOME.trash}</span>
-        </Link>
+        <div className="ts-col">
+          <Link
+            to="/decks/trash"
+            className="pt-ib is-text"
+            data-control="home.trash"
+            {...tipProps({
+              name: HOME.trash,
+              doc: 'Presentations moved to the trash; restore or delete them forever.',
+            })}
+          >
+            <Icon name="archive" />
+            <span className="pt-lb">{HOME.trash}</span>
+          </Link>
+        </div>
       </footer>
 
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
@@ -1047,16 +1109,7 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
         aria-busy="true"
         aria-label={`${HOME.recent}, loading`}
       >
-        <thead>
-          <tr>
-            <th scope="col">{HOME.sortTitle}</th>
-            <th scope="col">Last edit</th>
-            <th scope="col">Slides</th>
-            <th scope="col">
-              <span className="ts-visually-hidden">Actions</span>
-            </th>
-          </tr>
-        </thead>
+        <RowsHead />
         <tbody>
           {recentCards.map((card, index) => (
             <DeckRowView
@@ -1068,6 +1121,7 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
               openedAt={props.opened[card.id]}
               renaming={false}
               menuOpen={false}
+              plate={!(card.id in props.heads)}
               onOpen={() => props.onOpen(card)}
               onMenu={() => undefined}
               onRename={() => undefined}
@@ -1077,7 +1131,10 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
           {blanks.map((i) => (
             <tr key={`frame-${i}`} className="ts-row ts-row-frame" aria-hidden="true">
               <td className="ts-row-title">
-                <span className="ts-frame-line" />
+                <span className="ts-row-name">
+                  <span className="ts-hm-card-thumb ts-row-thumb" />
+                  <span className="ts-frame-line" />
+                </span>
               </td>
               <td className="ts-row-when" />
               <td className="ts-row-count" />
@@ -1269,8 +1326,12 @@ function DeckList({
   onError,
   onUnlisted,
 }: ListProps & { list: ReadonlyArray<DeckCard> }) {
+  /* the answered renames over every card, the folded ones included: an anonymous visitor's
+     cards are this browser's Recent record and the store's own heads (docs/NEXT.md 3.2 H2 lists
+     no store deck to them), so a rename applied to the listing alone left the card on the head's
+     old title (decks.card.rename-enter, red since H2) */
   const list = useMemo(
-    () => foldRecent(applyRenames(listed, renamed), recent, heads),
+    () => applyRenames(foldRecent(listed, recent, heads), renamed),
     [listed, renamed, recent, heads],
   );
   /* the decks of this browser the listing does not hold, once the listing has landed */
@@ -1394,16 +1455,7 @@ function DeckList({
         </ul>
       ) : (
         <table className="ts-rows" data-control="home.rows">
-          <thead>
-            <tr>
-              <th scope="col">{HOME.sortTitle}</th>
-              <th scope="col">Last edit</th>
-              <th scope="col">Slides</th>
-              <th scope="col">
-                <span className="ts-visually-hidden">Actions</span>
-              </th>
-            </tr>
-          </thead>
+          <RowsHead />
           <tbody>
             {visible.map((card, index) => (
               <DeckRowView
@@ -1416,6 +1468,7 @@ function DeckList({
                 renaming={renaming === card.id}
                 menuOpen={menu?.deckId === card.id}
                 busy={busyDownload === card.id}
+                plate={!listedIds.has(card.id) && !(card.id in heads)}
                 onOpen={() => onOpen(card)}
                 onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
                 onRename={(name) => rename(card, name)}
@@ -1595,9 +1648,12 @@ export function Thumb({
   card,
   eager = false,
   plate = false,
+  size = 'card',
 }: {
   card: Pick<DeckCard, 'id' | 'title' | 'firstSlide' | 'appearance' | 'revision'>;
   eager?: boolean;
+  /** the card's 16:9 plate, or a ruled row's 64 by 36 frame (the 160 px capture) */
+  size?: 'card' | 'row';
   /** true draws the plate alone: a card this browser remembers before the listing or the store's own head confirms the deck still exists (main's cdbd0dd5; the round folds those cards into the grid) */
   plate?: boolean;
 }) {
@@ -1607,7 +1663,7 @@ export function Thumb({
   /* the card left the viewport after its failed ask: the next entry is a new view */
   const wasOut = useRef(false);
   const box = useRef<HTMLSpanElement>(null);
-  const base = plate ? null : cardThumbUrl(card);
+  const base = plate ? null : cardThumbUrl(card, size === 'row' ? 160 : 320);
   const url = base === null ? null : attempt === 0 ? base : `${base}&retry=${attempt}`;
   useEffect(() => {
     const el = box.current;
@@ -1637,7 +1693,7 @@ export function Thumb({
   return (
     <span
       ref={box}
-      className="ts-hm-card-thumb"
+      className={size === 'row' ? 'ts-hm-card-thumb ts-row-thumb' : 'ts-hm-card-thumb'}
       data-theme={card.appearance}
       data-thumb={capture ? 'capture' : 'plate'}
       data-loaded={capture && loaded ? '' : undefined}
@@ -1650,8 +1706,8 @@ export function Thumb({
         <img
           key={url}
           src={url}
-          width={320}
-          height={180}
+          width={size === 'row' ? 64 : 320}
+          height={size === 'row' ? 36 : 180}
           alt=""
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"
@@ -1662,6 +1718,32 @@ export function Thumb({
           }}
         />
       ) : null}
+    </span>
+  );
+}
+
+/**
+ * The GT brand deck card's cover (`GT_BRAND_COVER`): the example deck's first slide, with the GT
+ * mark on the template's ink plate under it from the first paint, so a deployment whose store
+ * holds no example deck or no capture yet still draws the template's own mark. The GT mark is the
+ * template's content here (docs/brand.md 134 to 139), never the product's.
+ */
+function GtBrandCover() {
+  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>('loading');
+  return (
+    <span className="ts-template-cover" data-cover={state}>
+      <GtMark width={56} height={36} />
+      {state === 'failed' ? null : (
+        <img
+          src={GT_BRAND_COVER}
+          width={320}
+          height={180}
+          alt=""
+          decoding="async"
+          onLoad={() => setState('loaded')}
+          onError={() => setState('failed')}
+        />
+      )}
     </span>
   );
 }
@@ -1730,6 +1812,32 @@ function DeckCardView({
   );
 }
 
+/**
+ * The head of the ruled rows (docs/NEXT.md 4.1.3 item 10): the name with its thumbnail, when this
+ * browser last opened the deck or when it was last edited, the slide count and the actions.
+ */
+function RowsHead() {
+  return (
+    <thead>
+      <tr>
+        <th scope="col">{DECKS_PAGE.name}</th>
+        <th scope="col">{DECKS_PAGE.lastOpened}</th>
+        <th scope="col">{DECKS_PAGE.slides}</th>
+        <th scope="col">
+          <span className="ts-visually-hidden">{DECKS_PAGE.actions}</span>
+        </th>
+      </tr>
+    </thead>
+  );
+}
+
+/**
+ * One ruled row (docs/NEXT.md 4.1.3 item 10; brand-c rule 5): the first slide's capture in a 64 by
+ * 36 `--pt-edge` frame as the open link, the title, the when line, the slide count and the More
+ * button, the row owning its `--pt-hair-soft` line. The inner classes are the card's
+ * (`.ts-hm-card-thumb`, `-title`, `-when`, `-more`), so a reader of a deck's entry finds the same
+ * parts in either view. Under 720 px the when line moves under the title.
+ */
 function DeckRowView({
   card,
   index,
@@ -1739,11 +1847,19 @@ function DeckRowView({
   renaming,
   menuOpen,
   busy = false,
+  plate = false,
   onOpen,
   onMenu,
   onRename,
   onCancelRename,
 }: CardViewProps) {
+  const when = busy
+    ? DOWNLOAD_WORDS.preparing('pptx')
+    : openedAt !== undefined
+      ? HOME.opened(timeAgo(openedAt, now))
+      : mounted
+        ? shortDate(card.updatedAt, now)
+        : card.updatedAt.slice(0, 10);
   return (
     <tr
       className="ts-row"
@@ -1752,35 +1868,56 @@ function DeckRowView({
       data-busy={busy ? '' : undefined}
     >
       <td className="ts-row-title">
-        {renaming ? (
-          <RenameField card={card} onRename={onRename} onCancel={onCancelRename} />
-        ) : (
+        <span className="ts-row-name">
           <Link
             to="/edit/$deckId"
             params={{ deckId: card.id }}
             preload={preloadOf(index)}
-            className="ts-hm-card-title"
-            data-control={`home.title.${card.id}`}
+            className="ts-hm-card-open ts-row-open"
+            data-control={`home.open.${card.id}`}
+            tabIndex={-1}
+            aria-hidden="true"
             onClick={(event) => {
               event.preventDefault();
               onOpen();
             }}
           >
-            <Icon name="deck" />
-            <span className="ts-hm-card-title-text">{card.title}</span>
+            <Thumb card={card} plate={plate} size="row" />
           </Link>
-        )}
+          {renaming ? (
+            <span className="ts-row-label">
+              <RenameField card={card} onRename={onRename} onCancel={onCancelRename} />
+            </span>
+          ) : (
+            <span className="ts-row-label">
+              <Link
+                to="/edit/$deckId"
+                params={{ deckId: card.id }}
+                preload={preloadOf(index)}
+                className="ts-hm-card-title"
+                data-control={`home.title.${card.id}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onOpen();
+                }}
+              >
+                <span className="ts-hm-card-title-text">{card.title}</span>
+              </Link>
+              <span className="ts-row-when-under" suppressHydrationWarning aria-hidden="true">
+                {when}
+              </span>
+            </span>
+          )}
+        </span>
       </td>
-      <td className="ts-row-when" suppressHydrationWarning>
-        {openedAt !== undefined
-          ? HOME.opened(timeAgo(openedAt, now))
-          : mounted
-            ? shortDate(card.updatedAt, now)
-            : card.updatedAt.slice(0, 10)}
+      <td className="ts-row-when ts-hm-card-when" suppressHydrationWarning>
+        {when}
       </td>
       <td className="ts-row-count">{card.slides}</td>
+      {/* the More button leaves while the field is open, as on the card: the menu that opened
+          Rename gives the focus back to its button, which would close the field at once */}
       <td className="ts-row-more">
-        <MoreButton card={card} open={menuOpen} onMenu={onMenu} />
+        {renaming ? null : <MoreButton card={card} open={menuOpen} onMenu={onMenu} />}
       </td>
     </tr>
   );

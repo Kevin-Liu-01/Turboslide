@@ -4899,7 +4899,7 @@
     {
       "id": "decks.card.edited-relative-time",
       "feature": "decks",
-      "interaction": "A card reads \"Edited <relative day> at <locale time>\" and \"Edited by <name>\" when the author is known, or \"Opened <ago>\" for a presentation this browser opened (3.6); the list view's rows are 32 px",
+      "interaction": "A card reads \"Edited <relative day> at <locale time>\" and \"Edited by <name>\" when the author is known, or \"Opened <ago>\" for a presentation this browser opened (3.6); the list view's ruled rows are 56 px with their 64 by 36 thumbnail",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-interface 27",
@@ -9573,6 +9573,16 @@
       "severity": 1,
       "evidence": "audit-brand-surfaces 39",
       "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the 1023 px layout block keeps the column's gutter on the navigation (the bug was home.css 398)"
+    },
+    {
+      "id": "decks.list.ruled-rows",
+      "feature": "decks",
+      "interaction": "The listed presentations draw as ruled rows with a 64 by 36 framed thumbnail, the hatch strip after \"Start a new presentation\", and Sign In as text in the bar for an anonymous visitor",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 26 (cards as boxes)",
+      "note": "docs/NEXT.md 4.1.3 item 10 and 4.1.5 (B2b): the list view is the default and draws the rows; the cards stay under Grid view. A deployment that offers no sign in method draws no Sign In, and the driver reads the bar's `data-sign-in` for it"
     },
     {
       "id": "realtime.keystroke.within-300ms",

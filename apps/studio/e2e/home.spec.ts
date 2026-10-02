@@ -140,6 +140,10 @@ test('the three bands: the strip, the recent cards with thumbnails, search, sort
   await expect(caption).toHaveCount(0);
   const alpha = page.locator(`[data-control="home.card.${ALPHA}"]`);
   const beta = page.locator(`[data-control="home.card.${BETA}"]`);
+  /* the ruled rows are the default view since Round 1 (docs/NEXT.md 4.1.3 item 10); the cards'
+     reads below are Grid view's */
+  await expect(page.locator('[data-control="home.rows"]')).toBeVisible();
+  await page.locator('[data-control="home.view.grid"]').click();
   await expect(alpha).toBeVisible();
   await expect(beta).toBeVisible();
   await expect(alpha.locator('img')).toHaveAttribute(

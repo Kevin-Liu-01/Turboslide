@@ -7,7 +7,14 @@
    row --pt-hair-soft under itself. Fields are ruled in --pt-field, the focus ring is the one inset
    ring of tokens.css, a card's plate is the deck's paper with the title in its ink (3.1, 3.6).
    Buttons are the shell's .pt-ib; the one solid button of a page is its own act: New presentation
-   on the empty list, Empty trash on the trash. Colors are tokens only, radius 0, Inter at 13px. */
+   on the empty list, Empty trash on the trash. Colors are tokens only, radius 0, Inter at 13px.
+   Round 1 (docs/NEXT.md 4.1.2 and 4.1.3 item 10) puts /decks (`.ts-decks-page`) on the deck's page
+   grammar: the 1104 px column with one rail on each side drawn once (grammar.css .ts-rails), the
+   58 px bar with Sign In as text at its end, a full bleed seam under each band with a 9 px cross
+   at each rail (.ts-seam), the hatch strip after Start a new presentation, and the recent list as
+   ruled rows with a 64 by 36 framed thumbnail by default; the cards stay under Grid view. Corners
+   are square except --pt-radius on the search field, the view control and the sort field. The
+   trash keeps its layout. */
 .ts-home-page {
   max-width: 1120px;
   padding-top: 24px;
@@ -19,9 +26,111 @@ html:has(.ts-home-page) {
 }
 
 /* the opened order is this browser's alone: the band paints once, in its final order (SPEC-3 9.2 L1) */
-.ts-recent[data-pending] > .ts-cards,
-.ts-recent[data-pending] > .ts-rows {
+.ts-recent[data-pending] .ts-cards,
+.ts-recent[data-pending] .ts-rows {
   visibility: hidden;
+}
+
+/* ---- /decks on the page grammar (Round 1): the page root is full bleed, the column inside ---- */
+.ts-home-page.ts-decks-page {
+  position: relative;
+  box-sizing: border-box;
+  /* the rails run the viewport's height on a short list */
+  min-height: 100vh;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 96px;
+}
+
+.ts-decks-page .ts-appbar {
+  display: block;
+  padding: 0;
+}
+
+.ts-decks-page .ts-appbar-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  min-height: var(--ts-nav-h, 58px);
+}
+
+.ts-decks-page .ts-appbar-search {
+  max-width: 480px;
+}
+
+.ts-decks-page .ts-appbar-search input {
+  height: 36px;
+  background: var(--pt-paper);
+}
+
+/* Sign In as text: its ink ends on the column's content edge, as the gallery link's and the row
+   lines' do (sheet-judge fix 4: the button's 8 px padding is given back) */
+.ts-appbar-end {
+  display: inline-flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.ts-decks-page .ts-appbar-signin {
+  margin-right: -8px;
+  color: var(--pt-ink);
+  border-color: transparent;
+  text-decoration: none;
+}
+
+.ts-decks-page .ts-appbar-signin:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-decks-page .ts-strip {
+  padding: 32px 0;
+}
+
+.ts-decks-page .ts-strip h2,
+.ts-decks-page .ts-recent h2 {
+  font-size: var(--ts-title, 1.125rem);
+  line-height: 1.35;
+}
+
+.ts-decks-page .ts-strip-gallery {
+  font-size: var(--ts-small);
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-decks-page .ts-template {
+  width: 208px;
+  font-size: var(--ts-small);
+}
+
+.ts-decks-page .ts-template-plate {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-color: var(--pt-edge);
+}
+
+.ts-decks-page .ts-template-label {
+  font-size: var(--ts-small);
+}
+
+.ts-decks-page .ts-recent {
+  padding: 32px 0 40px;
+}
+
+.ts-decks-page .ts-seg {
+  border-radius: var(--pt-radius);
+  overflow: hidden;
+}
+
+.ts-decks-page .ts-home-tail {
+  margin-top: 0;
+  padding-top: 24px;
+  border-top: 0;
 }
 
 .ts-visually-hidden {
@@ -93,6 +202,12 @@ html:has(.ts-home-page) {
 
 .ts-home-empty-figure .ts-empty-title {
   font-size: 20px;
+}
+
+/* the empty list's mood picture (MoodFigure.tsx) above the title, the action at the hero's 40 px */
+.ts-home-empty-mood .ts-empty-action .pt-ib {
+  height: 40px;
+  text-decoration: none;
 }
 
 .ts-appbar-search {
@@ -227,6 +342,30 @@ html:has(.ts-home-page) {
   border-color: transparent;
 }
 
+/* the GT template's cover (decks.index.tsx GtBrandCover): the example deck's first slide over the
+   template's mark, which shows while the capture loads and when it fails */
+.ts-template-cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ts-template-cover img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-template-cover[data-cover='loading'] img {
+  opacity: 0;
+}
+
 .ts-template:hover .ts-template-plate,
 .ts-template:focus-visible .ts-template-plate {
   border-color: var(--pt-ink);
@@ -246,12 +385,6 @@ html:has(.ts-home-page) {
 /* ---- Recent presentations ---- */
 .ts-recent {
   padding: 24px 0 0;
-}
-
-.ts-recent-lead {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
 }
 
 .ts-recent-tools {
@@ -445,6 +578,95 @@ html:has(.ts-home-page) {
   font-size: 13px;
 }
 
+/* ---- the ruled rows of /decks (Round 1; brand-c rule 5; DECK-GRAMMAR 39): the head under one
+   --pt-hair rule, each row 56 px owning its --pt-hair-soft line, the first slide in a 64 by 36
+   --pt-edge frame before the title ---- */
+.ts-decks-page .ts-rows {
+  margin: 16px 0 0;
+  border-top: 1px solid var(--pt-hair);
+  font-size: var(--ts-small);
+}
+
+.ts-decks-page .ts-rows th {
+  padding: 0 16px 0 0;
+  height: 36px;
+  font-size: var(--ts-label, 13px);
+}
+
+.ts-decks-page .ts-rows th:first-child {
+  padding-left: 80px;
+}
+
+.ts-decks-page .ts-rows td {
+  height: 56px;
+  padding: 0 16px 0 0;
+}
+
+.ts-decks-page .ts-rows tr:last-child td {
+  border-bottom-color: var(--pt-hair);
+}
+
+.ts-row-name {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ts-row-open {
+  flex: 0 0 auto;
+  display: block;
+  line-height: 0;
+}
+
+.ts-hm-card-thumb.ts-row-thumb {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 64px;
+  height: 36px;
+  aspect-ratio: auto;
+  border: 1px solid var(--pt-edge);
+}
+
+.ts-row-thumb .ts-hm-card-plate {
+  padding: 2px;
+  font-size: 6px;
+  line-height: 1.1;
+  overflow: hidden;
+}
+
+.ts-row-label {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ts-row-when-under {
+  display: none;
+  font-size: var(--ts-label, 13px);
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-decks-page .ts-row-title {
+  max-width: 0;
+}
+
+.ts-decks-page .ts-row-title .ts-hm-card-title {
+  font-size: var(--ts-small);
+}
+
+.ts-decks-page .ts-row-when {
+  width: 200px;
+}
+
+.ts-decks-page .ts-rows .ts-hm-card-when {
+  margin: 0;
+  font-size: var(--ts-small);
+}
+
 .ts-rows th {
   text-align: left;
   padding: 8px 12px;
@@ -574,10 +796,61 @@ html:has(.ts-home-page) {
   color: var(--pt-ink);
 }
 
+/* the layout's one breakpoint (slide 49): the bar's search moves under the lockup and Sign In */
+@media (max-width: 1023px) {
+  .ts-decks-page .ts-appbar-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0;
+    padding-bottom: 12px;
+  }
+
+  .ts-decks-page .ts-appbar-row > .ts-brand-lockup {
+    grid-column: 1;
+    min-height: var(--ts-nav-h, 58px);
+  }
+
+  .ts-decks-page .ts-appbar-end {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ts-decks-page .ts-appbar-search {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+}
+
 @media (max-width: 720px) {
   .ts-appbar {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .ts-decks-page .ts-strip-cards > li {
+    width: calc((100% - 20px) / 2);
+  }
+
+  .ts-decks-page .ts-template {
+    width: 100%;
+  }
+
+  /* the name takes the row: the when line sits under it, the count and the column head leave */
+  .ts-decks-page .ts-row-title {
+    width: 100%;
+  }
+
+  .ts-decks-page .ts-rows thead,
+  .ts-decks-page .ts-rows td:nth-child(2),
+  .ts-decks-page .ts-rows td:nth-child(3) {
+    display: none;
+  }
+
+  .ts-decks-page .ts-row-when-under {
+    display: block;
+  }
+
+  .ts-decks-page .ts-rows td:last-child {
+    padding-right: 0;
   }
 
   .ts-recent-head,

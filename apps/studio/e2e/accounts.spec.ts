@@ -2236,11 +2236,19 @@ async function homeCards(p: Page): Promise<string[]> {
   await p.goto('/decks');
   await p.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
   await expect(
-    p.locator('[data-control="home.cards"], [data-control="home.empty"]').first(),
+    p
+      .locator(
+        '[data-control="home.rows"], [data-control="home.cards"], [data-control="home.empty"]',
+      )
+      .first(),
   ).toBeVisible({ timeout: 30_000 });
   await expect(p.locator('[data-control="home.pending"]')).toHaveCount(0, { timeout: 30_000 });
+  /* the ruled rows are the default view since Round 1 (docs/NEXT.md 4.1.3 item 10), the cards
+     Grid view's */
   return p
-    .locator('[data-control="home.cards"] > [data-control^="home.card."]')
+    .locator(
+      '[data-control="home.rows"] tbody > [data-control^="home.card."], [data-control="home.cards"] > [data-control^="home.card."]',
+    )
     .evaluateAll((els) =>
       els.map((el) => (el.getAttribute('data-control') ?? '').slice('home.card.'.length)),
     );

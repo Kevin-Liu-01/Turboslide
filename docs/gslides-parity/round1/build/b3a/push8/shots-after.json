@@ -1,0 +1,151 @@
+{
+ "base": "http://localhost:4515",
+ "tag": "after",
+ "layout": "new",
+ "startedAt": "2026-10-02T14:43:53.831Z",
+ "loadAtStart": 21.71,
+ "shots": [
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "light",
+   "file": "insert-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "light",
+   "file": "tools-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "light",
+   "file": "download-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "file",
+   "width": 1440,
+   "mode": "light",
+   "file": "file-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "theme",
+   "width": 1440,
+   "mode": "light",
+   "file": "theme-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "dark",
+   "file": "insert-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "dark",
+   "file": "tools-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "dark",
+   "file": "download-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "file",
+   "width": 1440,
+   "mode": "dark",
+   "file": "file-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "theme",
+   "width": 1440,
+   "mode": "dark",
+   "file": "theme-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "width": 390,
+   "mode": "light",
+   "error": "appearance: TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.tools\"]').first()\n    - locator resolved to <bu"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "light",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.insert\"]').first()\n    - locator resolved to <button type=\"button\" tabindex=\"-1\" role=\""
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "light",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.tools\"]').first()\n    - locator resolved to <button type=\"button\" tabindex=\"-1\" role=\"m"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "light",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.file\"]').first()\n    - locator resolved to <button tabindex=\"0\" type=\"button\" role=\"men"
+  },
+  {
+   "name": "file",
+   "width": 390,
+   "mode": "light",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.file\"]').first()\n    - locator resolved to <button tabindex=\"0\" type=\"button\" role=\"men"
+  },
+  {
+   "name": "theme",
+   "width": 390,
+   "mode": "light",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"toolbar.theme\"]').first()\n    - locator resolved to <button type=\"button\" data-tip=\"Theme\" data"
+  },
+  {
+   "width": 390,
+   "mode": "dark",
+   "error": "appearance: TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.tools\"]').first()\n    - locator resolved to <bu"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "dark",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.insert\"]').first()\n    - locator resolved to <button type=\"button\" tabindex=\"-1\" role=\""
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "dark",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.tools\"]').first()\n    - locator resolved to <button type=\"button\" tabindex=\"-1\" role=\"m"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "dark",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.file\"]').first()\n    - locator resolved to <button tabindex=\"0\" type=\"button\" role=\"men"
+  },
+  {
+   "name": "file",
+   "width": 390,
+   "mode": "dark",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.file\"]').first()\n    - locator resolved to <button tabindex=\"0\" type=\"button\" role=\"men"
+  },
+  {
+   "name": "theme",
+   "width": 390,
+   "mode": "dark",
+   "error": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"toolbar.theme\"]').first()\n    - locator resolved to <button type=\"button\" data-tip=\"Theme\" data"
+  }
+ ],
+ "endedAt": "2026-10-02T14:50:33.637Z",
+ "loadAtEnd": 41.99
+}

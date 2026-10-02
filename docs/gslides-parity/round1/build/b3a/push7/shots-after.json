@@ -1,0 +1,123 @@
+{
+ "base": "http://localhost:4505",
+ "tag": "after",
+ "layout": "new",
+ "startedAt": "2026-10-02T14:22:27.117Z",
+ "loadAtStart": 4.88,
+ "shots": [
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "light",
+   "file": "insert-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "light",
+   "file": "tools-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "light",
+   "file": "download-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "view",
+   "width": 1440,
+   "mode": "light",
+   "file": "view-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "dark",
+   "file": "insert-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "dark",
+   "file": "tools-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "dark",
+   "file": "download-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "view",
+   "width": 1440,
+   "mode": "dark",
+   "file": "view-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "light",
+   "file": "insert-390-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "light",
+   "file": "tools-390-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "light",
+   "file": "download-390-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "view",
+   "width": 390,
+   "mode": "light",
+   "file": "view-390-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "dark",
+   "file": "insert-390-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "dark",
+   "file": "tools-390-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "dark",
+   "file": "download-390-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "view",
+   "width": 390,
+   "mode": "dark",
+   "file": "view-390-dark-after.jpg",
+   "theme": "dark"
+  }
+ ],
+ "endedAt": "2026-10-02T14:22:51.900Z",
+ "loadAtEnd": 4.42
+}

@@ -1,0 +1,39 @@
+{
+ "base": "http://localhost:4505",
+ "tag": "after",
+ "layout": "new",
+ "startedAt": "2026-10-02T14:42:24.071Z",
+ "loadAtStart": 16.56,
+ "shots": [
+  {
+   "name": "view",
+   "width": 1440,
+   "mode": "light",
+   "file": "view-1440-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "view",
+   "width": 1440,
+   "mode": "dark",
+   "file": "view-1440-dark-after.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "view",
+   "width": 390,
+   "mode": "light",
+   "file": "view-390-light-after.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "view",
+   "width": 390,
+   "mode": "dark",
+   "file": "view-390-dark-after.jpg",
+   "theme": "dark"
+  }
+ ],
+ "endedAt": "2026-10-02T14:42:44.408Z",
+ "loadAtEnd": 19.1
+}

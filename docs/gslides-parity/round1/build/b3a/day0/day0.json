@@ -1,0 +1,2548 @@
+{
+ "base": "http://localhost:4505",
+ "startedAt": "2026-10-02T09:03:26.499Z",
+ "loadAtStart": 12.56,
+ "themes": {
+  "light": {
+   "panels": {
+    "formatOptions": {
+     "heading": "Format options",
+     "controls": 127,
+     "interactive": 115,
+     "words": 159,
+     "tipWords": 212,
+     "ids": [
+      "panel.formatOptions",
+      "panel.formatOptions.close",
+      "formatOptions.section.size",
+      "formatOptions.size.width",
+      "formatOptions.size.height",
+      "formatOptions.size.lock",
+      "formatOptions.size.lock.lock",
+      "formatOptions.size.flip",
+      "formatOptions.size.flip.h",
+      "formatOptions.size.flip.v",
+      "formatOptions.size.rotate",
+      "formatOptions.size.rotate.dial",
+      "formatOptions.section.position",
+      "formatOptions.position.from",
+      "formatOptions.position.from.topLeft",
+      "formatOptions.position.from.center",
+      "formatOptions.position.x",
+      "formatOptions.position.y",
+      "formatOptions.section.textFitting",
+      "formatOptions.textFitting.autofit",
+      "formatOptions.textFitting.autofit.none",
+      "formatOptions.textFitting.autofit.shrink",
+      "formatOptions.textFitting.autofit.grow",
+      "formatOptions.textFitting.indent",
+      "formatOptions.padding",
+      "formatOptions.padding.top",
+      "formatOptions.padding.bottom",
+      "formatOptions.padding.left",
+      "formatOptions.padding.right",
+      "formatOptions.textFitting.valign",
+      "formatOptions.textFitting.valign.top",
+      "formatOptions.textFitting.valign.middle",
+      "formatOptions.textFitting.valign.bottom",
+      "formatOptions.section.text",
+      "block.b3a-text.text",
+      "block.b3a-text.typography",
+      "block.b3a-text.typography.size.down",
+      "block.b3a-text.typography.size",
+      "block.b3a-text.typography.size.up",
+      "block.b3a-text.typography.weight.down",
+      "block.b3a-text.typography.weight",
+      "block.b3a-text.typography.weight.up",
+      "block.b3a-text.typography.align",
+      "block.b3a-text.typography.align.option.left",
+      "block.b3a-text.typography.align.option.center",
+      "block.b3a-text.typography.align.option.right",
+      "block.b3a-text.typography.align.option.justify",
+      "block.b3a-text.typography.tracking.down",
+      "block.b3a-text.typography.tracking",
+      "block.b3a-text.typography.tracking.up",
+      "block.b3a-text.typography.leading.down",
+      "block.b3a-text.typography.leading",
+      "block.b3a-text.typography.leading.up",
+      "block.b3a-text.typography.spaceBefore.down",
+      "block.b3a-text.typography.spaceBefore",
+      "block.b3a-text.typography.spaceBefore.up",
+      "block.b3a-text.typography.spaceAfter.down",
+      "block.b3a-text.typography.spaceAfter",
+      "block.b3a-text.typography.spaceAfter.up",
+      "block.b3a-text.typography.columns",
+      "block.b3a-text.typography.columns.option.1",
+      "block.b3a-text.typography.columns.option.2",
+      "block.b3a-text.typography.columns.option.3",
+      "block.b3a-text.typography.indent.down",
+      "block.b3a-text.typography.indent",
+      "block.b3a-text.typography.indent.up",
+      "block.b3a-text.typography.family.down",
+      "block.b3a-text.typography.family",
+      "block.b3a-text.typography.family.up",
+      "formatOptions.typography.numerals.sentence",
+      "formatOptions.typography.numerals",
+      "formatOptions.text.lineSpacing",
+      "formatOptions.text.columns",
+      "formatOptions.text.spaceBefore",
+      "formatOptions.text.spaceAfter",
+      "formatOptions.text.marks",
+      "formatOptions.text.marks.b",
+      "formatOptions.text.marks.i",
+      "formatOptions.text.marks.u",
+      "formatOptions.text.marks.s",
+      "formatOptions.text.marks.sup",
+      "formatOptions.text.marks.sub",
+      "formatOptions.section.colour",
+      "block.b3a-text.color",
+      "block.b3a-text.color.none",
+      "block.b3a-text.color.ink",
+      "block.b3a-text.color.paper",
+      "block.b3a-text.color.ink-2",
+      "block.b3a-text.color.titanium",
+      "block.b3a-text.color.hair",
+      "block.b3a-text.color.hair-soft",
+      "block.b3a-text.color.plate",
+      "block.b3a-text.color.edge",
+      "block.b3a-text.color.green",
+      "block.b3a-text.color.amber",
+      "block.b3a-text.color.red",
+      "block.b3a-text.color.blue",
+      "block.b3a-text.color.accent",
+      "block.b3a-text.color.hex",
+      "formatOptions.section.shadow",
+      "formatOptions.shadow",
+      "formatOptions.shadow.enable",
+      "formatOptions.shadow.color",
+      "formatOptions.shadow.color.ink",
+      "formatOptions.shadow.color.paper",
+      "formatOptions.shadow.color.ink-2",
+      "formatOptions.shadow.color.titanium",
+      "formatOptions.shadow.color.hair",
+      "formatOptions.shadow.color.hair-soft",
+      "formatOptions.shadow.color.plate",
+      "formatOptions.shadow.color.edge",
+      "formatOptions.shadow.color.green",
+      "formatOptions.shadow.color.amber",
+      "formatOptions.shadow.color.red",
+      "formatOptions.shadow.color.blue",
+      "formatOptions.shadow.color.accent",
+      "formatOptions.shadow.color.hex",
+      "formatOptions.shadow.transparency.slider",
+      "formatOptions.shadow.transparency",
+      "formatOptions.shadow.angle.slider",
+      "formatOptions.shadow.angle",
+      "formatOptions.shadow.distance.slider",
+      "formatOptions.shadow.distance",
+      "formatOptions.shadow.blur.slider",
+      "formatOptions.shadow.blur",
+      "formatOptions.section.altText",
+      "formatOptions.altText.description"
+     ],
+     "texts": [
+      "Format options",
+      "Size & rotation",
+      "Width",
+      "px",
+      "Height",
+      "px",
+      "Rotate",
+      "°",
+      "Position",
+      "Top-left",
+      "Center",
+      "X",
+      "px",
+      "Y",
+      "px",
+      "Text fitting",
+      "Do not autofit",
+      "Shrink text on overflow",
+      "Resize shape to fit text",
+      "Indentation: Left",
+      "px",
+      "Padding",
+      "Top",
+      "px",
+      "Bottom",
+      "px",
+      "Left",
+      "px",
+      "Right",
+      "px",
+      "Vertical alignment",
+      "Top",
+      "Middle",
+      "Bottom",
+      "Text",
+      "Text",
+      "A text box for the day 0 read",
+      "Typography",
+      "Size",
+      "−",
+      "+",
+      "of 13",
+      "px",
+      "Weight",
+      "−",
+      "+",
+      "of 5",
+      "Align",
+      "left",
+      "center",
+      "right",
+      "justify",
+      "Tracking (em)",
+      "−",
+      "+",
+      "of 7",
+      "em",
+      "Line spacing",
+      "−",
+      "+",
+      "of 14",
+      "Space before",
+      "−",
+      "+",
+      "of 4",
+      "Space after",
+      "−",
+      "+",
+      "of 4",
+      "Columns",
+      "1",
+      "2",
+      "3",
+      "Indent",
+      "−",
+      "+",
+      "of 4",
+      "Font",
+      "−",
+      "+",
+      "Tabular figures",
+      "Every digit takes the same width, so numbers line up in a column",
+      "off",
+      "Line spacing",
+      "Columns",
+      "Space before",
+      "px",
+      "Space after",
+      "px",
+      "Superscript",
+      "Subscript",
+      "Color",
+      "Color",
+      "Drop shadow",
+      "Drop shadow",
+      "Color",
+      "Transparency",
+      "%",
+      "Angle",
+      "°",
+      "Distance",
+      "px",
+      "Blur radius",
+      "px",
+      "Alt text",
+      "Description"
+     ]
+    },
+    "brandKit": {
+     "heading": "Brand kit",
+     "controls": 39,
+     "interactive": 34,
+     "words": 100,
+     "tipWords": 65,
+     "ids": [
+      "panel.brand",
+      "panel.brand.close",
+      "panel.themes",
+      "panel.brand.appearance.light",
+      "themes.gt.light",
+      "panel.brand.appearance.dark",
+      "themes.gt.dark",
+      "panel.brand.logo.preview",
+      "panel.brand.logo.replace",
+      "panel.brand.logo.remove",
+      "panel.brand.logo.default",
+      "panel.brand.logo.position",
+      "panel.brand.footer.position",
+      "panel.brand.color.appearance.light",
+      "panel.brand.color.appearance.dark",
+      "panel.brand.color.text.swatch",
+      "panel.brand.color.text.hex",
+      "panel.brand.color.background.swatch",
+      "panel.brand.color.background.hex",
+      "panel.brand.color.caption.swatch",
+      "panel.brand.color.caption.hex",
+      "panel.brand.color.hint.swatch",
+      "panel.brand.color.hint.hex",
+      "panel.brand.color.primary.swatch",
+      "panel.brand.color.primary.hex",
+      "panel.brand.color.accent.swatch",
+      "panel.brand.color.accent.hex",
+      "panel.brand.font.display",
+      "panel.brand.font.text",
+      "panel.brand.footer.logo",
+      "panel.brand.footer.text",
+      "panel.brand.counter.show",
+      "panel.brand.counter.format",
+      "panel.brand.counter.skipTitle",
+      "panel.brand.frame.rails",
+      "panel.brand.frame.rules",
+      "panel.brand.frame.crosses",
+      "panel.brand.lexicon",
+      "panel.brand.reset"
+     ],
+     "texts": [
+      "Brand kit",
+      "Appearance",
+      "Light",
+      "Dark",
+      "Logo",
+      "Replace",
+      "Remove",
+      "Use the default logo",
+      "On the title slide",
+      "In the footer",
+      "Shown on the title slide and in the corner of every slide",
+      "Colors",
+      "Light",
+      "Dark",
+      "Text",
+      "Background",
+      "Captions",
+      "Hints",
+      "Primary",
+      "Accent",
+      "Fonts",
+      "Display",
+      "Inter",
+      "Text",
+      "Inter",
+      "Footer",
+      "Logo",
+      "Text",
+      "Slide numbers",
+      "Show",
+      "Format",
+      "Skip title slides",
+      "Frame",
+      "Rails",
+      "Rails: the margins at the sides of every slide",
+      "Rules",
+      "Rules: the thin lines that frame the slide",
+      "Crosses",
+      "Crosses: the small marks at the frame’s corners",
+      "Words that never translate",
+      "Kept as written when this presentation is translated",
+      "Reset to General Translation"
+     ]
+    },
+    "comments": {
+     "heading": "Comments0",
+     "controls": 5,
+     "interactive": 2,
+     "words": 17,
+     "tipWords": 3,
+     "ids": [
+      "panel.comments",
+      "panel.comments.close",
+      "panel.comments.empty",
+      "panel.comments.gesture",
+      "panel.comments.notificationSettings"
+     ],
+     "texts": [
+      "Comments",
+      "0",
+      "No comments yet",
+      "Select something on a slide, then Insert > Comment (Cmd+Option+M)",
+      "Notification settings"
+     ]
+    },
+    "versionHistory": {
+     "heading": "Version history",
+     "controls": 19,
+     "interactive": 18,
+     "words": 63,
+     "tipWords": 101,
+     "ids": [
+      "panel.versionHistory",
+      "panel.versionHistory.close",
+      "versionHistory.namedOnly",
+      "versionHistory.nameCurrent",
+      "versionHistory.window.w7",
+      "versionHistory.7.pick",
+      "versionHistory.7.more",
+      "versionHistory.6.pick",
+      "versionHistory.6.more",
+      "versionHistory.5.pick",
+      "versionHistory.5.more",
+      "versionHistory.4.pick",
+      "versionHistory.4.more",
+      "versionHistory.3.pick",
+      "versionHistory.3.more",
+      "versionHistory.2.pick",
+      "versionHistory.2.more",
+      "versionHistory.1.pick",
+      "versionHistory.1.more"
+     ],
+     "texts": [
+      "Version history",
+      "Only show named versions",
+      "Name this version",
+      "Today",
+      "I",
+      "02:03 AM",
+      "You",
+      "·",
+      "1 change",
+      "▾",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "· current",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· 1 change"
+     ]
+    },
+    "assist": {
+     "heading": "Assist",
+     "controls": 10,
+     "interactive": 6,
+     "words": 84,
+     "tipWords": 15,
+     "ids": [
+      "panel.assist",
+      "panel.assist.close",
+      "panel.assist.slide",
+      "panel.assist.starters",
+      "panel.assist.starter.tailor",
+      "panel.assist.starter.shorter",
+      "panel.assist.starter.notes",
+      "panel.assist.prompt",
+      "panel.assist.send",
+      "panel.assist.firstLine"
+     ],
+     "texts": [
+      "Assist",
+      "Slide 2: Slide 2",
+      "Tailor for a customer",
+      "Replace the customer name, swap the logo and skip slides, as one change you can undo",
+      "Make it shorter",
+      "Asks for a shorter reading of this slide’s text; you read the change before it lands",
+      "Write speaker notes",
+      "Asks for a talk track for this slide, under 120 words",
+      "Send",
+      "Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept"
+     ]
+    },
+    "checkSlides": {
+     "heading": "Suggestions for this slide2",
+     "controls": 4,
+     "interactive": 3,
+     "words": 25,
+     "tipWords": 5,
+     "ids": [
+      "panel.checkSlides",
+      "panel.checkSlides.close",
+      "suggestion.export/non-native|blank-1-9ce7|||",
+      "suggestion.layout/freeform|blank-1-9ce7||/layout|"
+     ],
+     "texts": [
+      "Suggestions for this slide",
+      "2",
+      "In native mode an image exports as a 2x raster.",
+      "This slide is arranged by hand. Apply layout re-flows it."
+     ]
+    },
+    "diagram": {
+     "heading": "Diagram",
+     "controls": 18,
+     "interactive": 14,
+     "words": 15,
+     "tipWords": 16,
+     "ids": [
+      "panel.diagram",
+      "panel.diagram.close",
+      "insert.diagram.type",
+      "insert.diagram.type.grid",
+      "insert.diagram.type.hierarchy",
+      "insert.diagram.type.timeline",
+      "insert.diagram.type.process",
+      "insert.diagram.type.relationship",
+      "insert.diagram.type.cycle",
+      "insert.diagram.count.less",
+      "insert.diagram.count",
+      "insert.diagram.count.more",
+      "insert.diagram.style",
+      "insert.diagram.style.outline",
+      "insert.diagram.style.plate",
+      "insert.diagram.style.ink",
+      "insert.diagram.preview",
+      "insert.diagram.insert"
+     ],
+     "texts": [
+      "Diagram",
+      "Grid",
+      "Hierarchy",
+      "Timeline",
+      "Process",
+      "Relationship",
+      "Cycle",
+      "Steps",
+      "Outline",
+      "Plate",
+      "Ink",
+      "Insert",
+      "960 × 540"
+     ]
+    }
+   },
+   "context": {
+    "card": {
+     "rows": 12,
+     "disabled": 0,
+     "words": 26,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "slide.newSlide",
+       "label": "New slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.duplicateSlide",
+       "label": "Duplicate slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.deleteSlide",
+       "label": "Delete slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.skipSlide",
+       "label": "Skip slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeBackground",
+       "label": "Change background",
+       "disabled": false
+      },
+      {
+       "id": "slide.applyLayout",
+       "label": "Apply layout",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeTheme",
+       "label": "Change theme",
+       "disabled": false
+      },
+      {
+       "id": "slide.moveSlide",
+       "label": "Move slide",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "emptySlide": {
+     "rows": 10,
+     "disabled": 0,
+     "words": 21,
+     "list": [
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "slide.newSlide",
+       "label": "New slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.duplicateSlide",
+       "label": "Duplicate slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.deleteSlide",
+       "label": "Delete slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.skipSlide",
+       "label": "Skip slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeBackground",
+       "label": "Change background",
+       "disabled": false
+      },
+      {
+       "id": "slide.applyLayout",
+       "label": "Apply layout",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeTheme",
+       "label": "Change theme",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      },
+      {
+       "id": "view.guides",
+       "label": "Guides",
+       "disabled": false
+      }
+     ]
+    },
+    "text": {
+     "rows": 17,
+     "disabled": 3,
+     "words": 32,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.textFitting",
+       "label": "Text fitting",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "picture": {
+     "rows": 17,
+     "disabled": 1,
+     "words": 33,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "format.image.replaceImage",
+       "label": "Replace image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.cropImage",
+       "label": "Crop image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.maskImage",
+       "label": "Mask image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.resetImage",
+       "label": "Reset image",
+       "disabled": true
+      },
+      {
+       "id": "format.image.imageOptions",
+       "label": "Image options",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "shape": {
+     "rows": 18,
+     "disabled": 3,
+     "words": 34,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.textFitting",
+       "label": "Text fitting",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.changeShape",
+       "label": "Change shape",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "line": {
+     "rows": 18,
+     "disabled": 3,
+     "words": 34,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.bordersLines.lineStart",
+       "label": "Line start",
+       "disabled": false
+      },
+      {
+       "id": "format.bordersLines.lineEnd",
+       "label": "Line end",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "table": {
+     "rows": 16,
+     "disabled": 3,
+     "words": 29,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "format.table",
+       "label": "Table",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "cell": {
+     "rows": 17,
+     "disabled": 2,
+     "words": 38,
+     "list": [
+      {
+       "id": "format.table.insertRowAbove",
+       "label": "Insert row above",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertRowBelow",
+       "label": "Insert row below",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertColumnLeft",
+       "label": "Insert column left",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertColumnRight",
+       "label": "Insert column right",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteRow",
+       "label": "Delete row",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteColumn",
+       "label": "Delete column",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteTable",
+       "label": "Delete table",
+       "disabled": false
+      },
+      {
+       "id": "format.table.headerRow",
+       "label": "Header row",
+       "disabled": false
+      },
+      {
+       "id": "format.table.distributeRows",
+       "label": "Distribute rows",
+       "disabled": false
+      },
+      {
+       "id": "format.table.distributeColumns",
+       "label": "Distribute columns",
+       "disabled": false
+      },
+      {
+       "id": "format.table.mergeCells",
+       "label": "Merge cells",
+       "disabled": true
+      },
+      {
+       "id": "format.table.unmergeCells",
+       "label": "Unmerge cells",
+       "disabled": true
+      },
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      }
+     ]
+    }
+   },
+   "tails": {
+    "shape": {
+     "drawn": [
+      "toolbar.changeShape",
+      "toolbar.fillColor",
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.font",
+      "toolbar.fontSize",
+      "toolbar.bold",
+      "toolbar.italic",
+      "toolbar.underline",
+      "toolbar.textColor",
+      "toolbar.highlightColor",
+      "toolbar.insertLink",
+      "toolbar.insertComment",
+      "toolbar.align",
+      "toolbar.spacing",
+      "toolbar.formatOptions"
+     ],
+     "folded": [
+      "toolbar.bulletedList",
+      "toolbar.numberedList",
+      "toolbar.decreaseIndent",
+      "toolbar.increaseIndent",
+      "toolbar.clearFormatting"
+     ],
+     "more": "5"
+    },
+    "cell": {
+     "drawn": [
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.fillColor",
+      "toolbar.font",
+      "toolbar.fontSize",
+      "toolbar.bold",
+      "toolbar.italic",
+      "toolbar.underline",
+      "toolbar.textColor",
+      "toolbar.highlightColor",
+      "toolbar.insertLink",
+      "toolbar.insertComment",
+      "toolbar.align",
+      "toolbar.spacing",
+      "toolbar.formatOptions"
+     ],
+     "folded": [
+      "toolbar.bulletedList",
+      "toolbar.numberedList",
+      "toolbar.decreaseIndent",
+      "toolbar.increaseIndent",
+      "toolbar.clearFormatting"
+     ],
+     "more": "5"
+    }
+   },
+   "theme": "light"
+  },
+  "dark": {
+   "panels": {
+    "formatOptions": {
+     "heading": "Format options",
+     "controls": 127,
+     "interactive": 115,
+     "words": 159,
+     "tipWords": 212,
+     "ids": [
+      "panel.formatOptions",
+      "panel.formatOptions.close",
+      "formatOptions.section.size",
+      "formatOptions.size.width",
+      "formatOptions.size.height",
+      "formatOptions.size.lock",
+      "formatOptions.size.lock.lock",
+      "formatOptions.size.flip",
+      "formatOptions.size.flip.h",
+      "formatOptions.size.flip.v",
+      "formatOptions.size.rotate",
+      "formatOptions.size.rotate.dial",
+      "formatOptions.section.position",
+      "formatOptions.position.from",
+      "formatOptions.position.from.topLeft",
+      "formatOptions.position.from.center",
+      "formatOptions.position.x",
+      "formatOptions.position.y",
+      "formatOptions.section.textFitting",
+      "formatOptions.textFitting.autofit",
+      "formatOptions.textFitting.autofit.none",
+      "formatOptions.textFitting.autofit.shrink",
+      "formatOptions.textFitting.autofit.grow",
+      "formatOptions.textFitting.indent",
+      "formatOptions.padding",
+      "formatOptions.padding.top",
+      "formatOptions.padding.bottom",
+      "formatOptions.padding.left",
+      "formatOptions.padding.right",
+      "formatOptions.textFitting.valign",
+      "formatOptions.textFitting.valign.top",
+      "formatOptions.textFitting.valign.middle",
+      "formatOptions.textFitting.valign.bottom",
+      "formatOptions.section.text",
+      "block.b3a-text.text",
+      "block.b3a-text.typography",
+      "block.b3a-text.typography.size.down",
+      "block.b3a-text.typography.size",
+      "block.b3a-text.typography.size.up",
+      "block.b3a-text.typography.weight.down",
+      "block.b3a-text.typography.weight",
+      "block.b3a-text.typography.weight.up",
+      "block.b3a-text.typography.align",
+      "block.b3a-text.typography.align.option.left",
+      "block.b3a-text.typography.align.option.center",
+      "block.b3a-text.typography.align.option.right",
+      "block.b3a-text.typography.align.option.justify",
+      "block.b3a-text.typography.tracking.down",
+      "block.b3a-text.typography.tracking",
+      "block.b3a-text.typography.tracking.up",
+      "block.b3a-text.typography.leading.down",
+      "block.b3a-text.typography.leading",
+      "block.b3a-text.typography.leading.up",
+      "block.b3a-text.typography.spaceBefore.down",
+      "block.b3a-text.typography.spaceBefore",
+      "block.b3a-text.typography.spaceBefore.up",
+      "block.b3a-text.typography.spaceAfter.down",
+      "block.b3a-text.typography.spaceAfter",
+      "block.b3a-text.typography.spaceAfter.up",
+      "block.b3a-text.typography.columns",
+      "block.b3a-text.typography.columns.option.1",
+      "block.b3a-text.typography.columns.option.2",
+      "block.b3a-text.typography.columns.option.3",
+      "block.b3a-text.typography.indent.down",
+      "block.b3a-text.typography.indent",
+      "block.b3a-text.typography.indent.up",
+      "block.b3a-text.typography.family.down",
+      "block.b3a-text.typography.family",
+      "block.b3a-text.typography.family.up",
+      "formatOptions.typography.numerals.sentence",
+      "formatOptions.typography.numerals",
+      "formatOptions.text.lineSpacing",
+      "formatOptions.text.columns",
+      "formatOptions.text.spaceBefore",
+      "formatOptions.text.spaceAfter",
+      "formatOptions.text.marks",
+      "formatOptions.text.marks.b",
+      "formatOptions.text.marks.i",
+      "formatOptions.text.marks.u",
+      "formatOptions.text.marks.s",
+      "formatOptions.text.marks.sup",
+      "formatOptions.text.marks.sub",
+      "formatOptions.section.colour",
+      "block.b3a-text.color",
+      "block.b3a-text.color.none",
+      "block.b3a-text.color.ink",
+      "block.b3a-text.color.paper",
+      "block.b3a-text.color.ink-2",
+      "block.b3a-text.color.titanium",
+      "block.b3a-text.color.hair",
+      "block.b3a-text.color.hair-soft",
+      "block.b3a-text.color.plate",
+      "block.b3a-text.color.edge",
+      "block.b3a-text.color.green",
+      "block.b3a-text.color.amber",
+      "block.b3a-text.color.red",
+      "block.b3a-text.color.blue",
+      "block.b3a-text.color.accent",
+      "block.b3a-text.color.hex",
+      "formatOptions.section.shadow",
+      "formatOptions.shadow",
+      "formatOptions.shadow.enable",
+      "formatOptions.shadow.color",
+      "formatOptions.shadow.color.ink",
+      "formatOptions.shadow.color.paper",
+      "formatOptions.shadow.color.ink-2",
+      "formatOptions.shadow.color.titanium",
+      "formatOptions.shadow.color.hair",
+      "formatOptions.shadow.color.hair-soft",
+      "formatOptions.shadow.color.plate",
+      "formatOptions.shadow.color.edge",
+      "formatOptions.shadow.color.green",
+      "formatOptions.shadow.color.amber",
+      "formatOptions.shadow.color.red",
+      "formatOptions.shadow.color.blue",
+      "formatOptions.shadow.color.accent",
+      "formatOptions.shadow.color.hex",
+      "formatOptions.shadow.transparency.slider",
+      "formatOptions.shadow.transparency",
+      "formatOptions.shadow.angle.slider",
+      "formatOptions.shadow.angle",
+      "formatOptions.shadow.distance.slider",
+      "formatOptions.shadow.distance",
+      "formatOptions.shadow.blur.slider",
+      "formatOptions.shadow.blur",
+      "formatOptions.section.altText",
+      "formatOptions.altText.description"
+     ],
+     "texts": [
+      "Format options",
+      "Size & rotation",
+      "Width",
+      "px",
+      "Height",
+      "px",
+      "Rotate",
+      "°",
+      "Position",
+      "Top-left",
+      "Center",
+      "X",
+      "px",
+      "Y",
+      "px",
+      "Text fitting",
+      "Do not autofit",
+      "Shrink text on overflow",
+      "Resize shape to fit text",
+      "Indentation: Left",
+      "px",
+      "Padding",
+      "Top",
+      "px",
+      "Bottom",
+      "px",
+      "Left",
+      "px",
+      "Right",
+      "px",
+      "Vertical alignment",
+      "Top",
+      "Middle",
+      "Bottom",
+      "Text",
+      "Text",
+      "A text box for the day 0 read",
+      "Typography",
+      "Size",
+      "−",
+      "+",
+      "of 13",
+      "px",
+      "Weight",
+      "−",
+      "+",
+      "of 5",
+      "Align",
+      "left",
+      "center",
+      "right",
+      "justify",
+      "Tracking (em)",
+      "−",
+      "+",
+      "of 7",
+      "em",
+      "Line spacing",
+      "−",
+      "+",
+      "of 14",
+      "Space before",
+      "−",
+      "+",
+      "of 4",
+      "Space after",
+      "−",
+      "+",
+      "of 4",
+      "Columns",
+      "1",
+      "2",
+      "3",
+      "Indent",
+      "−",
+      "+",
+      "of 4",
+      "Font",
+      "−",
+      "+",
+      "Tabular figures",
+      "Every digit takes the same width, so numbers line up in a column",
+      "off",
+      "Line spacing",
+      "Columns",
+      "Space before",
+      "px",
+      "Space after",
+      "px",
+      "Superscript",
+      "Subscript",
+      "Color",
+      "Color",
+      "Drop shadow",
+      "Drop shadow",
+      "Color",
+      "Transparency",
+      "%",
+      "Angle",
+      "°",
+      "Distance",
+      "px",
+      "Blur radius",
+      "px",
+      "Alt text",
+      "Description"
+     ]
+    },
+    "brandKit": {
+     "heading": "Brand kit",
+     "controls": 39,
+     "interactive": 34,
+     "words": 100,
+     "tipWords": 65,
+     "ids": [
+      "panel.brand",
+      "panel.brand.close",
+      "panel.themes",
+      "panel.brand.appearance.light",
+      "themes.gt.light",
+      "panel.brand.appearance.dark",
+      "themes.gt.dark",
+      "panel.brand.logo.preview",
+      "panel.brand.logo.replace",
+      "panel.brand.logo.remove",
+      "panel.brand.logo.default",
+      "panel.brand.logo.position",
+      "panel.brand.footer.position",
+      "panel.brand.color.appearance.light",
+      "panel.brand.color.appearance.dark",
+      "panel.brand.color.text.swatch",
+      "panel.brand.color.text.hex",
+      "panel.brand.color.background.swatch",
+      "panel.brand.color.background.hex",
+      "panel.brand.color.caption.swatch",
+      "panel.brand.color.caption.hex",
+      "panel.brand.color.hint.swatch",
+      "panel.brand.color.hint.hex",
+      "panel.brand.color.primary.swatch",
+      "panel.brand.color.primary.hex",
+      "panel.brand.color.accent.swatch",
+      "panel.brand.color.accent.hex",
+      "panel.brand.font.display",
+      "panel.brand.font.text",
+      "panel.brand.footer.logo",
+      "panel.brand.footer.text",
+      "panel.brand.counter.show",
+      "panel.brand.counter.format",
+      "panel.brand.counter.skipTitle",
+      "panel.brand.frame.rails",
+      "panel.brand.frame.rules",
+      "panel.brand.frame.crosses",
+      "panel.brand.lexicon",
+      "panel.brand.reset"
+     ],
+     "texts": [
+      "Brand kit",
+      "Appearance",
+      "Light",
+      "Dark",
+      "Logo",
+      "Replace",
+      "Remove",
+      "Use the default logo",
+      "On the title slide",
+      "In the footer",
+      "Shown on the title slide and in the corner of every slide",
+      "Colors",
+      "Light",
+      "Dark",
+      "Text",
+      "Background",
+      "Captions",
+      "Hints",
+      "Primary",
+      "Accent",
+      "Fonts",
+      "Display",
+      "Inter",
+      "Text",
+      "Inter",
+      "Footer",
+      "Logo",
+      "Text",
+      "Slide numbers",
+      "Show",
+      "Format",
+      "Skip title slides",
+      "Frame",
+      "Rails",
+      "Rails: the margins at the sides of every slide",
+      "Rules",
+      "Rules: the thin lines that frame the slide",
+      "Crosses",
+      "Crosses: the small marks at the frame’s corners",
+      "Words that never translate",
+      "Kept as written when this presentation is translated",
+      "Reset to General Translation"
+     ]
+    },
+    "comments": {
+     "heading": "Comments0",
+     "controls": 5,
+     "interactive": 2,
+     "words": 17,
+     "tipWords": 3,
+     "ids": [
+      "panel.comments",
+      "panel.comments.close",
+      "panel.comments.empty",
+      "panel.comments.gesture",
+      "panel.comments.notificationSettings"
+     ],
+     "texts": [
+      "Comments",
+      "0",
+      "No comments yet",
+      "Select something on a slide, then Insert > Comment (Cmd+Option+M)",
+      "Notification settings"
+     ]
+    },
+    "versionHistory": {
+     "heading": "Version history",
+     "controls": 19,
+     "interactive": 18,
+     "words": 63,
+     "tipWords": 101,
+     "ids": [
+      "panel.versionHistory",
+      "panel.versionHistory.close",
+      "versionHistory.namedOnly",
+      "versionHistory.nameCurrent",
+      "versionHistory.window.w7",
+      "versionHistory.7.pick",
+      "versionHistory.7.more",
+      "versionHistory.6.pick",
+      "versionHistory.6.more",
+      "versionHistory.5.pick",
+      "versionHistory.5.more",
+      "versionHistory.4.pick",
+      "versionHistory.4.more",
+      "versionHistory.3.pick",
+      "versionHistory.3.more",
+      "versionHistory.2.pick",
+      "versionHistory.2.more",
+      "versionHistory.1.pick",
+      "versionHistory.1.more"
+     ],
+     "texts": [
+      "Version history",
+      "Only show named versions",
+      "Name this version",
+      "Today",
+      "I",
+      "02:03 AM",
+      "You",
+      "·",
+      "1 change",
+      "▾",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "· current",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· named",
+      "I",
+      "02:03 AM",
+      "You",
+      "· 1 change"
+     ]
+    },
+    "assist": {
+     "heading": "Assist",
+     "controls": 10,
+     "interactive": 6,
+     "words": 84,
+     "tipWords": 15,
+     "ids": [
+      "panel.assist",
+      "panel.assist.close",
+      "panel.assist.slide",
+      "panel.assist.starters",
+      "panel.assist.starter.tailor",
+      "panel.assist.starter.shorter",
+      "panel.assist.starter.notes",
+      "panel.assist.prompt",
+      "panel.assist.send",
+      "panel.assist.firstLine"
+     ],
+     "texts": [
+      "Assist",
+      "Slide 2: Slide 2",
+      "Tailor for a customer",
+      "Replace the customer name, swap the logo and skip slides, as one change you can undo",
+      "Make it shorter",
+      "Asks for a shorter reading of this slide’s text; you read the change before it lands",
+      "Write speaker notes",
+      "Asks for a talk track for this slide, under 120 words",
+      "Send",
+      "Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept"
+     ]
+    },
+    "checkSlides": {
+     "heading": "Suggestions for this slide2",
+     "controls": 4,
+     "interactive": 3,
+     "words": 25,
+     "tipWords": 5,
+     "ids": [
+      "panel.checkSlides",
+      "panel.checkSlides.close",
+      "suggestion.export/non-native|blank-1-9ce7|||",
+      "suggestion.layout/freeform|blank-1-9ce7||/layout|"
+     ],
+     "texts": [
+      "Suggestions for this slide",
+      "2",
+      "In native mode an image exports as a 2x raster.",
+      "This slide is arranged by hand. Apply layout re-flows it."
+     ]
+    },
+    "diagram": {
+     "heading": "Diagram",
+     "controls": 18,
+     "interactive": 14,
+     "words": 15,
+     "tipWords": 16,
+     "ids": [
+      "panel.diagram",
+      "panel.diagram.close",
+      "insert.diagram.type",
+      "insert.diagram.type.grid",
+      "insert.diagram.type.hierarchy",
+      "insert.diagram.type.timeline",
+      "insert.diagram.type.process",
+      "insert.diagram.type.relationship",
+      "insert.diagram.type.cycle",
+      "insert.diagram.count.less",
+      "insert.diagram.count",
+      "insert.diagram.count.more",
+      "insert.diagram.style",
+      "insert.diagram.style.outline",
+      "insert.diagram.style.plate",
+      "insert.diagram.style.ink",
+      "insert.diagram.preview",
+      "insert.diagram.insert"
+     ],
+     "texts": [
+      "Diagram",
+      "Grid",
+      "Hierarchy",
+      "Timeline",
+      "Process",
+      "Relationship",
+      "Cycle",
+      "Steps",
+      "Outline",
+      "Plate",
+      "Ink",
+      "Insert",
+      "960 × 540"
+     ]
+    }
+   },
+   "context": {
+    "card": {
+     "rows": 12,
+     "disabled": 0,
+     "words": 26,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "slide.newSlide",
+       "label": "New slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.duplicateSlide",
+       "label": "Duplicate slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.deleteSlide",
+       "label": "Delete slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.skipSlide",
+       "label": "Skip slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeBackground",
+       "label": "Change background",
+       "disabled": false
+      },
+      {
+       "id": "slide.applyLayout",
+       "label": "Apply layout",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeTheme",
+       "label": "Change theme",
+       "disabled": false
+      },
+      {
+       "id": "slide.moveSlide",
+       "label": "Move slide",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "emptySlide": {
+     "rows": 10,
+     "disabled": 0,
+     "words": 21,
+     "list": [
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "slide.newSlide",
+       "label": "New slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.duplicateSlide",
+       "label": "Duplicate slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.deleteSlide",
+       "label": "Delete slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.skipSlide",
+       "label": "Skip slide",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeBackground",
+       "label": "Change background",
+       "disabled": false
+      },
+      {
+       "id": "slide.applyLayout",
+       "label": "Apply layout",
+       "disabled": false
+      },
+      {
+       "id": "slide.changeTheme",
+       "label": "Change theme",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      },
+      {
+       "id": "view.guides",
+       "label": "Guides",
+       "disabled": false
+      }
+     ]
+    },
+    "text": {
+     "rows": 17,
+     "disabled": 3,
+     "words": 32,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.textFitting",
+       "label": "Text fitting",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "picture": {
+     "rows": 17,
+     "disabled": 1,
+     "words": 33,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "format.image.replaceImage",
+       "label": "Replace image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.cropImage",
+       "label": "Crop image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.maskImage",
+       "label": "Mask image",
+       "disabled": false
+      },
+      {
+       "id": "format.image.resetImage",
+       "label": "Reset image",
+       "disabled": true
+      },
+      {
+       "id": "format.image.imageOptions",
+       "label": "Image options",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "shape": {
+     "rows": 18,
+     "disabled": 3,
+     "words": 34,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.textFitting",
+       "label": "Text fitting",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.changeShape",
+       "label": "Change shape",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "line": {
+     "rows": 18,
+     "disabled": 3,
+     "words": 34,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.bordersLines.lineStart",
+       "label": "Line start",
+       "disabled": false
+      },
+      {
+       "id": "format.bordersLines.lineEnd",
+       "label": "Line end",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "table": {
+     "rows": 16,
+     "disabled": 3,
+     "words": 29,
+     "list": [
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "edit.delete",
+       "label": "Delete",
+       "disabled": false
+      },
+      {
+       "id": "edit.duplicate",
+       "label": "Duplicate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.order",
+       "label": "Order",
+       "disabled": false
+      },
+      {
+       "id": "arrange.rotate",
+       "label": "Rotate",
+       "disabled": false
+      },
+      {
+       "id": "arrange.centerOnPage",
+       "label": "Center on page",
+       "disabled": false
+      },
+      {
+       "id": "arrange.align",
+       "label": "Align",
+       "disabled": false
+      },
+      {
+       "id": "arrange.distribute",
+       "label": "Distribute",
+       "disabled": true
+      },
+      {
+       "id": "arrange.group",
+       "label": "Group",
+       "disabled": true
+      },
+      {
+       "id": "arrange.ungroup",
+       "label": "Ungroup",
+       "disabled": true
+      },
+      {
+       "id": "format.table",
+       "label": "Table",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      },
+      {
+       "id": "format.altText",
+       "label": "Alt text",
+       "disabled": false
+      },
+      {
+       "id": "insert.comment",
+       "label": "Comment",
+       "disabled": false
+      }
+     ]
+    },
+    "cell": {
+     "rows": 17,
+     "disabled": 2,
+     "words": 38,
+     "list": [
+      {
+       "id": "format.table.insertRowAbove",
+       "label": "Insert row above",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertRowBelow",
+       "label": "Insert row below",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertColumnLeft",
+       "label": "Insert column left",
+       "disabled": false
+      },
+      {
+       "id": "format.table.insertColumnRight",
+       "label": "Insert column right",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteRow",
+       "label": "Delete row",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteColumn",
+       "label": "Delete column",
+       "disabled": false
+      },
+      {
+       "id": "format.table.deleteTable",
+       "label": "Delete table",
+       "disabled": false
+      },
+      {
+       "id": "format.table.headerRow",
+       "label": "Header row",
+       "disabled": false
+      },
+      {
+       "id": "format.table.distributeRows",
+       "label": "Distribute rows",
+       "disabled": false
+      },
+      {
+       "id": "format.table.distributeColumns",
+       "label": "Distribute columns",
+       "disabled": false
+      },
+      {
+       "id": "format.table.mergeCells",
+       "label": "Merge cells",
+       "disabled": true
+      },
+      {
+       "id": "format.table.unmergeCells",
+       "label": "Unmerge cells",
+       "disabled": true
+      },
+      {
+       "id": "edit.cut",
+       "label": "Cut",
+       "disabled": false
+      },
+      {
+       "id": "edit.copy",
+       "label": "Copy",
+       "disabled": false
+      },
+      {
+       "id": "edit.paste",
+       "label": "Paste",
+       "disabled": false
+      },
+      {
+       "id": "insert.link",
+       "label": "Link",
+       "disabled": false
+      },
+      {
+       "id": "format.formatOptions",
+       "label": "Format options",
+       "disabled": false
+      }
+     ]
+    }
+   },
+   "tails": {
+    "shape": {
+     "drawn": [
+      "toolbar.changeShape",
+      "toolbar.fillColor",
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.font",
+      "toolbar.fontSize",
+      "toolbar.bold",
+      "toolbar.italic",
+      "toolbar.underline",
+      "toolbar.textColor",
+      "toolbar.highlightColor",
+      "toolbar.insertLink",
+      "toolbar.insertComment",
+      "toolbar.align",
+      "toolbar.spacing",
+      "toolbar.formatOptions"
+     ],
+     "folded": [
+      "toolbar.bulletedList",
+      "toolbar.numberedList",
+      "toolbar.decreaseIndent",
+      "toolbar.increaseIndent",
+      "toolbar.clearFormatting"
+     ],
+     "more": "5"
+    },
+    "cell": {
+     "drawn": [
+      "toolbar.borderColor",
+      "toolbar.borderWeight",
+      "toolbar.borderDash",
+      "toolbar.fillColor",
+      "toolbar.font",
+      "toolbar.fontSize",
+      "toolbar.bold",
+      "toolbar.italic",
+      "toolbar.underline",
+      "toolbar.textColor",
+      "toolbar.highlightColor",
+      "toolbar.insertLink",
+      "toolbar.insertComment",
+      "toolbar.align",
+      "toolbar.spacing",
+      "toolbar.formatOptions"
+     ],
+     "folded": [
+      "toolbar.bulletedList",
+      "toolbar.numberedList",
+      "toolbar.decreaseIndent",
+      "toolbar.increaseIndent",
+      "toolbar.clearFormatting"
+     ],
+     "more": "5"
+    }
+   },
+   "theme": "dark"
+  }
+ },
+ "deck": {
+  "id": "b3a-day0-muqqk2km",
+  "create": 200
+ },
+ "cleanup": {
+  "trash": 200,
+  "remove": 200,
+  "infoAfter": 404
+ },
+ "endedAt": "2026-10-02T09:04:48.209Z",
+ "loadAtEnd": 27.78
+}

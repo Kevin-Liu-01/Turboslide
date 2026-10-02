@@ -1,0 +1,151 @@
+{
+ "base": "http://localhost:4505",
+ "tag": "before",
+ "layout": "new",
+ "startedAt": "2026-10-02T15:11:57.678Z",
+ "loadAtStart": 21.44,
+ "shots": [
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "light",
+   "file": "insert-1440-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "light",
+   "file": "tools-1440-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "light",
+   "file": "download-1440-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "file",
+   "width": 1440,
+   "mode": "light",
+   "file": "file-1440-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "theme",
+   "width": 1440,
+   "mode": "light",
+   "file": "theme-1440-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "insert",
+   "width": 1440,
+   "mode": "dark",
+   "file": "insert-1440-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "tools",
+   "width": 1440,
+   "mode": "dark",
+   "file": "tools-1440-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "download",
+   "width": 1440,
+   "mode": "dark",
+   "file": "download-1440-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "file",
+   "width": 1440,
+   "mode": "dark",
+   "file": "file-1440-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "theme",
+   "width": 1440,
+   "mode": "dark",
+   "file": "theme-1440-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "light",
+   "file": "insert-390-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "light",
+   "file": "tools-390-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "light",
+   "file": "download-390-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "file",
+   "width": 390,
+   "mode": "light",
+   "file": "file-390-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "theme",
+   "width": 390,
+   "mode": "light",
+   "file": "theme-390-light-before.jpg",
+   "theme": "light"
+  },
+  {
+   "name": "insert",
+   "width": 390,
+   "mode": "dark",
+   "file": "insert-390-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "tools",
+   "width": 390,
+   "mode": "dark",
+   "file": "tools-390-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "download",
+   "width": 390,
+   "mode": "dark",
+   "file": "download-390-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "file",
+   "width": 390,
+   "mode": "dark",
+   "file": "file-390-dark-before.jpg",
+   "theme": "dark"
+  },
+  {
+   "name": "theme",
+   "width": 390,
+   "mode": "dark",
+   "file": "theme-390-dark-before.jpg",
+   "theme": "dark"
+  }
+ ],
+ "endedAt": "2026-10-02T15:12:38.313Z",
+ "loadAtEnd": 30.6
+}

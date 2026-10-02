@@ -55,6 +55,8 @@ const FEATURES = [
   ['cost', 'SYNC 6.1 The calls per state'],
   /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier; unparkable */
   ['realtime', 'REALTIME 2 Realtime'],
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the setup rows of the do tier; unparkable, read on that tier alone */
+  ['setup', 'CLOUDFLARE 2.3 The setup rows'],
   /* the features round, ship one (docs/FEATURES.md section 4, 7.1): the logo picker over thesvg.org */
   ['logos', 'FEATURES 4 The logo picker'],
   /* the features round, ship two (docs/FEATURES.md section 5, 7.1): the shader library */
@@ -120,6 +122,8 @@ const README = {
   cost: '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
   realtime:
     "**Realtime.** Two people on one deck see each other's keystrokes, caret, selection outline and pointer within a third of a second in one region, a dragged block moves in the other browser while the drag runs, a joiner's chip is in the title row within a second, and Follow is offered on every chip for every editor and owner, including by link. A reload or a reconnect loses nothing. An agent's write over HTTP is announced in the open tab and cannot be undone by the person typing. Two people typing one title keep both words.",
+  setup:
+    "**Setup.** The realtime Worker answers its health check with the commit it was built from and the app it calls back; two people on one deck through two app instances read one Durable Object and byte equal documents; the account's daily Durable Object and Worker figures, read before and after a release run, stay under the Free plan's caps; and a deck of about 20 MB opened beside three other open decks costs no isolate restart.",
   logos:
     "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
   shaders:

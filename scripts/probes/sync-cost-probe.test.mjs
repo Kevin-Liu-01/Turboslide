@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CEILINGS,
+  DO_ROWS,
+  TIER_WORDS,
+  counterBucket,
+  counterDelta,
+  counterHour,
+  isDoRow,
+  roomRequestsOf,
+  roomTarget,
   PRESENCE_COMMANDS,
   SAMPLE_FRACTIONS,
   TIER_CEILINGS,
@@ -52,10 +60,11 @@ describe('the realtime round (docs/REALTIME.md section 2): the Redis command row
       simplePerMinute: 10,
       advancedPerMinute: 2,
     });
+    /* the Cloudflare phase restated the redis editing column from the counters (docs/CLOUDFLARE.md 2.2) */
     expect(ceilingsFor('cost.editor-editing.calls', 'redis')).toEqual({
       functionPerMinute: 75,
-      simplePerMinute: 30,
-      advancedPerMinute: 12,
+      simplePerMinute: 40,
+      advancedPerMinute: 65,
     });
     expect(ceilingsFor('cost.two-tabs-idle.calls', 'redis')).toEqual({
       list: 0,
@@ -67,7 +76,7 @@ describe('the realtime round (docs/REALTIME.md section 2): the Redis command row
     expect(ceilingsFor('cost.editor-idle.calls', null)).toEqual(CEILINGS['cost.editor-idle.calls']);
     expect(ceilingsFor('cost.show.calls', 'redis')).toEqual(CEILINGS['cost.show.calls']);
     expect(ceilingsFor('nothing', 'redis')).toBeUndefined();
-    expect(Object.keys(TIER_CEILINGS)).toEqual(['redis']);
+    expect(Object.keys(TIER_CEILINGS)).toEqual(['redis', 'do']);
     expect(CEILINGS['cost.redis.commands']).toEqual({ redisCommandsPerHour: 12_000 });
   });
 
@@ -671,5 +680,334 @@ describe('the request log', () => {
     expect(s.polls).toBe(1);
     expect(s.failedRequests).toBe(1);
     expect(s.rows[0].route).toBeDefined();
+  });
+});
+
+describe('the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the do tier and the six rows per product', () => {
+  it('names the four tier words, the six do rows and the do tier ceilings of the store rows', () => {
+    expect(TIER_WORDS).toEqual(['redis', 'blob', 'memory', 'do']);
+    expect(DO_ROWS).toEqual([
+      'cost.do.requests',
+      'cost.do.duration',
+      'cost.do.rows-written',
+      'cost.d1.reads',
+      'cost.d1.writes',
+      'cost.worker.requests',
+    ]);
+    for (const id of DO_ROWS) expect(isDoRow(id), id).toBe(true);
+    expect(isDoRow('cost.redis.commands')).toBe(false);
+    expect(ceilingsFor('cost.editor-idle.calls', 'do')).toEqual({
+      functionPerMinute: 1,
+      simplePerMinute: 0,
+      advancedPerMinute: 0,
+      objectRequestsPerMinute: 0,
+      rowsWrittenPerMinute: 0,
+    });
+    expect(ceilingsFor('cost.editor-editing.calls', 'do')).toEqual({
+      functionPerMinute: 15,
+      simplePerMinute: 40,
+      advancedPerMinute: 65,
+      objectRequestsPerMinute: 20,
+      rowsWrittenPerMinute: 60,
+    });
+    expect(ceilingsFor('cost.two-tabs-idle.calls', 'do')).toEqual({
+      list: 0,
+      advancedPerMinute: 2,
+      objectRequestsPerMinute: 0,
+    });
+    expect(CEILINGS['cost.do.requests']).toEqual({ objectRequestsPerHour: 300 });
+    expect(CEILINGS['cost.do.duration']).toEqual({ objectGbsPerHour: 20 });
+    expect(CEILINGS['cost.do.rows-written']).toEqual({ rowsWrittenPerHour: 800 });
+    expect(CEILINGS['cost.d1.reads']).toEqual({ d1RowsReadPerHour: 300 });
+    expect(CEILINGS['cost.d1.writes']).toEqual({ d1RowsWrittenPerHour: 20 });
+    expect(CEILINGS['cost.worker.requests']).toEqual({ workerRequestsPerHour: 90 });
+  });
+
+  it('reads the Worker counters: the request units by kind or as a number, the deltas with the own reads off, the hour', () => {
+    expect(roomRequestsOf({ requests: 12 })).toBe(12);
+    expect(roomRequestsOf({ requests: { total: 30, upgrades: 2, messages: 20, alarms: 8 } })).toBe(
+      30,
+    );
+    expect(roomRequestsOf({ requests: { upgrades: 2, messages: 20, alarms: 8 } })).toBe(30);
+    expect(roomRequestsOf({})).toBe(0);
+    expect(roomRequestsOf(null)).toBe(0);
+    /* R1's shape (build/r1.md R1-R5d): the persisted `total` bucket first, then `sinceWake` */
+    expect(
+      roomRequestsOf({ total: { requests: 50, rowsWritten: 9 }, sinceWake: { requests: 5 } }),
+    ).toBe(50);
+    expect(roomRequestsOf({ sinceWake: { requests: 5 } })).toBe(5);
+    expect(counterBucket({ total: { requests: 1 } }).name).toBe('total');
+    expect(counterBucket({ sinceWake: { requests: 1 } }).name).toBe('sinceWake');
+    expect(counterBucket({ requests: 1 }).name).toBe('flat');
+    expect(
+      counterDelta(
+        { total: { requests: 10, rowsWritten: 4 } },
+        { total: { requests: 14, rowsWritten: 7 } },
+        1,
+      ),
+    ).toEqual({ requests: 3, requestsRaw: 4, rowsRead: 0, rowsWritten: 3, queries: 0, batches: 0 });
+    /* an answer that says its own read is not counted keeps every unit */
+    expect(
+      counterDelta({ requests: 10, countsSelf: false }, { requests: 14, countsSelf: false }, 1)
+        .requests,
+    ).toBe(4);
+    const before = {
+      requests: { total: 100 },
+      rowsRead: 10,
+      rowsWritten: 40,
+      queries: 3,
+      batches: 1,
+    };
+    const after = {
+      requests: { total: 131 },
+      rowsRead: 25,
+      rowsWritten: 76,
+      queries: 9,
+      batches: 1,
+    };
+    expect(counterDelta(before, after, 1)).toEqual({
+      requests: 30,
+      requestsRaw: 31,
+      rowsRead: 15,
+      rowsWritten: 36,
+      queries: 6,
+      batches: 0,
+    });
+    /* a missing field reads 0 on either side; the own reads never push the units below 0 */
+    expect(counterDelta({}, { rowsWritten: 2 }, 1)).toEqual({
+      requests: 0,
+      requestsRaw: 0,
+      rowsRead: 0,
+      rowsWritten: 2,
+      queries: 0,
+      batches: 0,
+    });
+    const editing = { minutes: 3, delta: counterDelta(before, after, 1) };
+    const idle = {
+      minutes: 3,
+      delta: counterDelta(after, { ...after, requests: { total: 134 } }, 1),
+    };
+    /* 10 a minute editing and 2/3 a minute idle: 12 * 10 + 48 * 2/3 = 152 */
+    expect(counterHour(editing, idle, 'requests')).toEqual({
+      editingPerMinute: 10,
+      idlePerMinute: 2 / 3,
+      hour: 152,
+    });
+    expect(roomTarget('rt.example.workers.dev', false, true)).toEqual({
+      host: 'rt.example.workers.dev',
+      scheme: 'https',
+      bearer: 'TURBOSLIDE_ROOM_BEARER',
+    });
+    expect(roomTarget('127.0.0.1:8795', true, false)).toEqual({
+      host: '127.0.0.1:8795',
+      scheme: 'http',
+      bearer: 'none',
+    });
+  });
+
+  it('judges the six do rows from one drive: not driven without a source, passed under the ceilings, failed over them', () => {
+    const base = {
+      minutes: 3,
+      functionRequests: 30,
+      functionPerMinute: 10,
+      polls: 0,
+      failedRequests: 0,
+      connected: true,
+      tier: 'do',
+      edits: 36,
+      roomRequests: 4,
+      roomSockets: 1,
+      roomRequestsHour: 32,
+      signedIn: false,
+    };
+    const target = {
+      host: 'rt.example.workers.dev',
+      scheme: 'https',
+      bearer: 'TURBOSLIDE_ROOM_BEARER',
+    };
+    const window = (requests, rowsRead, rowsWritten, queries, batches) => ({
+      requests,
+      requestsRaw: requests + 1,
+      rowsRead,
+      rowsWritten,
+      queries,
+      batches,
+    });
+    const room = {
+      where: 'present',
+      target,
+      colo: 'IAD',
+      ownReads: 2,
+      editing: { minutes: 3, delta: window(45, 20, 120, 0, 0) },
+      idle: { minutes: 3, delta: window(0, 0, 0, 0, 0) },
+      hour: {},
+    };
+    const db = {
+      where: 'present',
+      target,
+      ownReads: 2,
+      editing: { minutes: 3, delta: window(0, 12, 1, 4, 0) },
+      idle: { minutes: 3, delta: window(0, 3, 0, 1, 0) },
+      hour: {},
+    };
+    for (const field of ['requests', 'rowsRead', 'rowsWritten', 'queries', 'batches']) {
+      room.hour[field] = counterHour(room.editing, room.idle, field);
+      db.hour[field] = counterHour(db.editing, db.idle, field);
+    }
+    /* another tier: every do row is not driven with the tier named */
+    const blob = judgeRow('cost.do.requests', { ...base, tier: 'blob', room, db }, 'zero');
+    expect(blob.result).toBe('not driven');
+    expect(blob.reason).toBe("a do tier row; this run's tier is blob");
+    /* no counters: not driven with the reason the reader gave */
+    const none = judgeRow(
+      'cost.do.requests',
+      {
+        ...base,
+        room: {
+          where: 'no-host',
+          reason:
+            'no room host (--room-host or TURBOSLIDE_ROOM_HOST): the Worker counters cannot be read',
+        },
+      },
+      'zero',
+    );
+    expect(none.result).toBe('not driven');
+    expect(none.reason).toContain('no room host');
+    expect(none.measures.join(' | ')).toContain('the page made 10 function requests a minute');
+    /* the counters: 45 units in 3 editing minutes and 0 idle is 180 an hour, under 300 */
+    const requests = judgeRow('cost.do.requests', { ...base, room, db }, 'zero');
+    expect(requests.result).toBe('passed');
+    expect(requests.measures.join(' | ')).toContain(
+      'object request units an editor hour 180 (ceiling 300)',
+    );
+    expect(requests.measures.join(' | ')).toContain("the object's colo IAD");
+    /* 120 rows written in 3 editing minutes is 480 an hour, under 800; 300 would be 1200, over */
+    expect(judgeRow('cost.do.rows-written', { ...base, room, db }, 'zero').result).toBe('passed');
+    const heavy = {
+      ...room,
+      editing: { minutes: 3, delta: window(45, 20, 300, 0, 0) },
+    };
+    heavy.hour = {
+      ...room.hour,
+      rowsWritten: counterHour(heavy.editing, heavy.idle, 'rowsWritten'),
+    };
+    const over = judgeRow('cost.do.rows-written', { ...base, room: heavy, db }, 'zero');
+    expect(over.result).toBe('failed');
+    expect(over.reason).toBe('rows written by the object an editor hour 1200 over 800');
+    /* the D1 rows: 12 read editing and 3 idle is 48 + 48 = 96 an hour; 1 written editing is 4 an hour */
+    const reads = judgeRow('cost.d1.reads', { ...base, room, db }, 'zero');
+    expect(reads.result).toBe('passed');
+    expect(reads.measures.join(' | ')).toContain(
+      'D1 rows read an editor hour 96 (ceiling 300; an anonymous tab',
+    );
+    expect(judgeRow('cost.d1.writes', { ...base, room, db }, 'zero').result).toBe('passed');
+    const noDb = judgeRow(
+      'cost.d1.reads',
+      { ...base, room, db: { where: 'refused', reason: 'GET /db/counters on rt answered 404' } },
+      'zero',
+    );
+    expect(noDb.result).toBe('not driven');
+    expect(noDb.reason).toContain('answered 404');
+    /* the dashboard rows: not driven without the file, judged on its figures with it */
+    const noDash = judgeRow('cost.do.duration', { ...base, room, db }, 'zero');
+    expect(noDash.result).toBe('not driven');
+    expect(noDash.reason).toContain('--dashboard <json> with doDurationGbs');
+    const dashboard = { readAt: '2026-10-01T20:00:00Z', doDurationGbs: 12.5, workerRequests: 70 };
+    const duration = judgeRow('cost.do.duration', { ...base, room, db, dashboard }, 'zero');
+    expect(duration.result).toBe('passed');
+    expect(duration.measures.join(' | ')).toContain(
+      'Durable Object duration for the hour 12.5 GB-s (ceiling 20)',
+    );
+    expect(
+      judgeRow(
+        'cost.do.duration',
+        { ...base, room, db, dashboard: { ...dashboard, doDurationGbs: 25 } },
+        'zero',
+      ).result,
+    ).toBe('failed');
+    /* the Worker requests: an anonymous tab's ceiling is 30, a signed in tab's 90 */
+    const worker = judgeRow('cost.worker.requests', { ...base, room, db, dashboard }, 'zero');
+    expect(worker.result).toBe('failed');
+    expect(worker.reason).toBe('Worker requests for the hour 70 over 30');
+    expect(
+      judgeRow('cost.worker.requests', { ...base, room, db, dashboard, signedIn: true }, 'zero')
+        .result,
+    ).toBe('passed');
+    expect(judgeRow('cost.worker.requests', { ...base, room, db }, 'zero').result).toBe(
+      'not driven',
+    );
+  });
+
+  it('judges a store row on the do tier by the object half too, and reads it not driven without the counters', () => {
+    const counts = {
+      minutes: 3,
+      functionRequests: 3,
+      functionPerMinute: 1,
+      polls: 0,
+      failedRequests: 0,
+      connected: true,
+      store: { simple: 0, advanced: 0, head: 0, get: 0, put: 0, list: 0, del: 0 },
+      firstSampleStore: {
+        simple: 0,
+        advanced: 0,
+        head: 0,
+        get: 0,
+        put: 0,
+        list: 0,
+        del: 0,
+        own: 0,
+      },
+      ownMax: 0,
+      instances: 1,
+      tier: 'do',
+    };
+    const target = { host: '127.0.0.1:8795', scheme: 'http', bearer: 'TURBOSLIDE_ROOM_BEARER' };
+    const quiet = {
+      where: 'present',
+      target,
+      colo: 'local',
+      window: {
+        minutes: 3,
+        delta: { requests: 0, requestsRaw: 1, rowsRead: 0, rowsWritten: 0, queries: 0, batches: 0 },
+        ownReads: 1,
+        requestsPerMinute: 0,
+        rowsWrittenPerMinute: 0,
+      },
+    };
+    const ok = judgeRow('cost.editor-idle.calls', { ...counts, room: quiet }, 'zero');
+    expect(ok.result).toBe('passed');
+    expect(ok.measures.join(' | ')).toContain('object request units 0 a minute (ceiling 0');
+    expect(ok.measures.join(' | ')).toContain("the object's colo local");
+    const busy = {
+      ...quiet,
+      window: {
+        ...quiet.window,
+        delta: { ...quiet.window.delta, requests: 6, rowsWritten: 3 },
+        requestsPerMinute: 2,
+        rowsWrittenPerMinute: 1,
+      },
+    };
+    const over = judgeRow('cost.editor-idle.calls', { ...counts, room: busy }, 'zero');
+    expect(over.result).toBe('failed');
+    expect(over.reason).toContain('object request units 2 a minute over 0');
+    expect(over.reason).toContain('rows written by the object 1 a minute over 0');
+    const unread = judgeRow(
+      'cost.editor-idle.calls',
+      {
+        ...counts,
+        room: {
+          where: 'no-bearer',
+          reason:
+            'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment): the object half is not driven',
+        },
+      },
+      'zero',
+    );
+    expect(unread.result).toBe('not driven');
+    expect(unread.reason).toContain('no room bearer');
+    /* on the blob tier the row carries no object half and the counters are not asked for */
+    expect(judgeRow('cost.editor-idle.calls', { ...counts, tier: 'blob' }, 'zero').result).toBe(
+      'passed',
+    );
   });
 });

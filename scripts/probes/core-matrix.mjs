@@ -95,6 +95,19 @@
 // integrator renames `view.livePointers.collaborators`; both are known here so the matrix
 // validates on either tree) and `dialog.signIn.google` (R4's button).
 //
+// The Cloudflare phase of the realtime round (docs/CLOUDFLARE.md section 2, 5.2 R5) added on
+// 2026-10-01 the unparkable feature `setup` (the four setup rows of 2.3: the Worker's health, two
+// people on one deck through two app instances and one Durable Object, the Free plan's daily caps
+// read before and after the one hosted gate, a large deck's memory on the preview), the driver
+// `core-gate` (GATE_DRIVER: a row the gate itself drives or records, such as the health check
+// and the two hand rows), the six cost rows per Cloudflare product of 2.2 (`cost.do.*`,
+// `cost.d1.*`, `cost.worker.requests`; the cost probe's `--tier do` with the Worker's counters
+// read under the room bearer from a wrapper), and the tier rows rule (TIER_FEATURES): a feature
+// whose rows read one realtime tier alone is judged by a gate run on that tier and listed apart
+// by a run on any other, with the reason, never counted as passed and never a reason to park, in
+// the shape of the local rows. The ids of 2.1 are unchanged; the rows whose bound or mechanism
+// changes on the `do` tier say so in their notes.
+//
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
@@ -160,6 +173,10 @@ export const CORE_FEATURES = Object.freeze([
   /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier;
      unparkable, since the title row, the stage and the filmstrip draw it with no flag to hide */
   'realtime',
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the setup rows of the `do` tier (the Worker's
+     health, the two instance case through one object, the Free plan's caps, the memory case);
+     unparkable while the tree expects `do`, read by a gate run on that tier alone (TIER_FEATURES) */
+  'setup',
   'surface',
 ]);
 
@@ -225,6 +242,16 @@ export const PROBE_DRIVER = 'probe --core';
  */
 export const COST_PROBE_DRIVER = 'cost-probe';
 
+/**
+ * The gate itself (docs/CLOUDFLARE.md 2.3; scripts/probes/core-gate.mjs `--only setup`): a row
+ * the gate drives in its own process (the Worker's `/health` read, `setup.worker.health`) or
+ * records from a hand reading given to it (`setup.free-plan.caps` from the dashboard's figures
+ * before and after the one hosted run, `setup.do.memory` the verifier's hand row). A gate row
+ * no run recorded is "no step" on the `do` tier like any row; on another tier the setup rows
+ * are listed apart (TIER_FEATURES).
+ */
+export const GATE_DRIVER = 'core-gate';
+
 /** The Playwright specs under apps/studio/e2e/core/, as the `driver` field spells them. */
 export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/decks.spec.ts',
@@ -286,8 +313,42 @@ export const CORE_DRIVERS = Object.freeze([
   PROBE_DRIVER,
   ...CORE_SPEC_DRIVERS,
   COST_PROBE_DRIVER,
+  GATE_DRIVER,
   ...LOCAL_SPEC_DRIVERS,
 ]);
+
+/**
+ * The features whose rows read one realtime tier alone (docs/CLOUDFLARE.md 2.3: the `setup` rows
+ * are the `do` tier's, "unparkable while the tree expects `do`"). A gate run names its tier with
+ * `--tier`; a run on that tier judges the feature's rows like any rows of an unparkable feature,
+ * and a run on any other tier (or one that names none) lists them apart under `tierRows` with
+ * `tierAbsentReason`, never counted as passed, never "no step" and never a reason to park, the
+ * shape of the local rows (docs/PEOPLE.md 6.2). The matrix's own reading (`today`) keeps them
+ * as the audits left them.
+ */
+export const TIER_FEATURES = Object.freeze({ setup: 'do' });
+
+/** The realtime tier a feature's rows read, or null for a feature every tier reads. */
+export function tierOfFeature(feature) {
+  return TIER_FEATURES[feature] ?? null;
+}
+
+/** True for a row of a tier feature (TIER_FEATURES): judged on its tier alone. */
+export function isTierRow(row) {
+  return row !== undefined && row !== null && tierOfFeature(row.feature) !== null;
+}
+
+/** The tier rows, in the file's order; `tier` narrows them to the rows of that tier. */
+export function tierRows(tier = null) {
+  return CORE_MATRIX.filter(
+    (row) => isTierRow(row) && (tier === null || tierOfFeature(row.feature) === tier),
+  );
+}
+
+/** The reason a tier row carries in a run whose tier is not the row's. */
+export function tierAbsentReason(row, tier) {
+  return `a ${tierOfFeature(row.feature)} tier row; this run's tier is ${tier ?? 'not named (no --tier)'}`;
+}
 
 /** The reason a local row absent from a run's results carries in the table (6.2). */
 export const LOCAL_ABSENT_REASON = 'no identity database on this base';
@@ -313,6 +374,9 @@ export const UNPARKABLE_FEATURES = Object.freeze([
   /* the realtime round (docs/REALTIME.md section 2, 5.3): a red realtime row blocks the ship; the
      production table after the last lane's push is the one hosted whole matrix run of the round */
   'realtime',
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3, 5.5): `realtime` and `setup` unparkable; a setup
+     row is judged by a run on the `do` tier alone (TIER_FEATURES), so the rule binds there */
+  'setup',
   'decks',
   'slides',
   'text',
@@ -688,18 +752,29 @@ export function rowsForFeature(feature) {
 }
 
 /**
- * The rows a driver carries: `probe --core`, `cost-probe`, a `core/<area>.spec.ts` file name
- * (`core/` optional) or a local spec (`e2e/accounts.spec.ts`).
+ * The rows a driver carries: `probe --core`, `cost-probe`, `core-gate`, a `core/<area>.spec.ts`
+ * file name (`core/` optional) or a local spec (`e2e/accounts.spec.ts`).
  */
 export function rowsForDriver(driver) {
   const name =
     driver === PROBE_DRIVER ||
     driver === COST_PROBE_DRIVER ||
+    driver === GATE_DRIVER ||
     driver.startsWith('core/') ||
     driver.startsWith('e2e/')
       ? driver
       : `core/${driver}`;
   return CORE_MATRIX.filter((row) => row.driver === name);
+}
+
+/** True for a row the gate itself drives or records (docs/CLOUDFLARE.md 2.3): its driver is `core-gate`. */
+export function isGateRow(row) {
+  return row?.driver === GATE_DRIVER;
+}
+
+/** The gate's own rows, in the file's order. */
+export function gateRows() {
+  return rowsForDriver(GATE_DRIVER);
 }
 
 /** True for a local row (docs/PEOPLE.md 6.2): its driver is one of `LOCAL_SPEC_DRIVERS`. */
@@ -988,8 +1063,13 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
     const cost = CORE_MATRIX.filter(isCostRow);
     const manual = CORE_MATRIX.filter(isManualRow);
     const local = localRows();
+    const tiered = tierRows();
     console.log(
-      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${cost.length} cost probe rows (${cost.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; ${local.length} local rows (${LOCAL_SPEC_DRIVERS.join(', ')}); unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
+      `  ${withParks.length} rows carry parks; ${measure.length} measurement rows (${measure.map((r) => r.id).join(', ') || 'none'}); ${cost.length} cost probe rows (${cost.map((r) => r.id).join(', ') || 'none'}); ${manual.length} manual rows; ${local.length} local rows (${LOCAL_SPEC_DRIVERS.join(', ')}); ${tiered.length} tier rows (${Object.entries(
+        TIER_FEATURES,
+      )
+        .map(([feature, tier]) => `${feature} on ${tier}`)
+        .join(', ')}); unparkable features: ${UNPARKABLE_FEATURES.join(', ')}`,
     );
   }
 }

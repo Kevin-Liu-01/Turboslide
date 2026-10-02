@@ -88,6 +88,26 @@
 // TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL from the environment a wrapper set, else the row is not
 // driven with the reason. A spec driver's file is `specPathOf` (core-matrix.mjs): `core/<area>`
 // under apps/studio/e2e/core/, `e2e/<name>` at the folder's root.
+// The Cloudflare phase (docs/CLOUDFLARE.md section 2, 5.2 R5): `--tier do` is the fourth tier
+// word, recorded in the ledger and passed to the cost probe with `--room-host` (the Worker host,
+// else TURBOSLIDE_ROOM_HOST from a wrapper's environment; the room bearer is TURBOSLIDE_ROOM_BEARER
+// in that environment alone and is never a flag) and `--cost-dashboard <json>` (the hand read
+// figures of the hour for the two rows only the dashboard answers). The `setup` feature's rows
+// are the `do` tier's (core-matrix.mjs TIER_FEATURES): a `--tier do` run judges them like any
+// unparkable rows and any other run lists them apart under `tierRows` with the reason, never
+// counted as passed, never "no step" and never a reason to park. `--only setup` runs their
+// drivers alone and implies the `do` tier: the gate itself reads `GET /health` on the Worker
+// (`setup.worker.health`: 200, `ok`, `protocol` 1, `realtime` on, within 2 s, `appOrigin` the
+// base's origin, `commit` the base's build commit from `GET /api/agent` or the sha `--known-skew`
+// names), the two browser spec narrowed to `setup.do.two-instances` (A on the base, B on
+// `--second-base`, which rides to the spec as PLAYWRIGHT_SECOND_BASE_URL and REALTIME_BASES), and
+// the two hand rows from the files given to it: `--caps-before <json>` and `--caps-after <json>`
+// (the dashboard's daily Durable Object requests, rows written and Worker requests around the one
+// hosted run; `setup.free-plan.caps` passes when the differences are under 10,000 requests and
+// 20,000 rows written) and `--memory-reading <json>` (the verifier's reading of `setup.do.memory`
+// with its `result` and `reason`); a hand row without its file stays not driven with the flag
+// named. The ledger records `secondBase`, `roomHost`, `health`, `freePlanCaps` and
+// `memoryReading` beside `tier`.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
 // verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:
@@ -136,6 +156,8 @@ import {
   rowsForFeature,
   shipVerdict,
   specPathOf,
+  tierAbsentReason,
+  tierRows,
 } from './core-matrix.mjs';
 import { declaredIds } from './core-walk/index.mjs';
 
@@ -148,7 +170,7 @@ const arg = (name, fallback) => {
 const flag = (name) => argv.includes(`--${name}`);
 const BASE = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$/, '');
 const USAGE =
-  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost|accounts|realtime] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>] [--tier redis|blob|memory] [--redis-url <url>]';
+  'usage: node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--matrix <path>] [--parked <ship json>] [--only probe|specs|cost|accounts|realtime|setup] [--spec <areas>] [--rows <ids>] [--areas <areas>] [--cost-rows <ids>] [--cost-minutes <n>] [--tier redis|blob|memory|do] [--redis-url <url>] [--second-base <origin>] [--room-host <host>] [--known-skew <sha>] [--caps-before <json>] [--caps-after <json>] [--memory-reading <json>] [--cost-dashboard <json>]';
 if (!BASE) {
   console.error(USAGE);
   process.exit(2);
@@ -160,15 +182,42 @@ const ONLY = arg('only', null);
  * The drivers `--only` names (docs/PEOPLE.md 6.2 added the accounts spec) and the one feature
  * narrowing (docs/REALTIME.md 5.1 R5: `realtime`, the realtime rows' drivers and rows alone).
  */
-const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts', 'realtime'];
-/** The realtime tier of the base (`--tier`), recorded in the ledger and passed to the cost probe. */
-const TIER_VALUES = ['redis', 'blob', 'memory'];
-const TIER = arg('tier', null);
-if (TIER !== null && !TIER_VALUES.includes(TIER)) {
-  console.error(`core-gate: --tier takes redis, blob or memory, not ${JSON.stringify(TIER)}`);
+const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts', 'realtime', 'setup'];
+/** The realtime tier of the base (`--tier`), recorded in the ledger and passed to the cost probe; `do` since the Cloudflare phase. */
+const TIER_VALUES = ['redis', 'blob', 'memory', 'do'];
+const TIER_ARG = arg('tier', null);
+if (TIER_ARG !== null && !TIER_VALUES.includes(TIER_ARG)) {
+  console.error(
+    `core-gate: --tier takes redis, blob, memory or do, not ${JSON.stringify(TIER_ARG)}`,
+  );
   console.error(USAGE);
   process.exit(2);
 }
+/* `--only setup` reads the do tier's rows and implies it (docs/CLOUDFLARE.md 2.3); another tier named with it is a contradiction */
+if (ONLY === 'setup' && TIER_ARG !== null && TIER_ARG !== 'do') {
+  console.error(
+    `core-gate: --only setup reads the do tier's rows and implies --tier do; --tier ${TIER_ARG} contradicts it`,
+  );
+  console.error(USAGE);
+  process.exit(2);
+}
+const TIER = ONLY === 'setup' ? 'do' : TIER_ARG;
+/** B's origin for the two browser specs (`--second-base`): PLAYWRIGHT_SECOND_BASE_URL and REALTIME_BASES ride to Playwright; null for one origin. */
+const SECOND_BASE = (arg('second-base', null) ?? '').replace(/\/$/, '') || null;
+/** The Worker host of the do tier (`--room-host`, else TURBOSLIDE_ROOM_HOST); the bearer stays in the environment and is never a flag. */
+const ROOM_HOST = arg('room-host', null) ?? process.env.TURBOSLIDE_ROOM_HOST ?? null;
+/** `http` to the Worker on a checkout (TURBOSLIDE_ROOM_INSECURE=1 or a loopback host). */
+const ROOM_INSECURE =
+  process.env.TURBOSLIDE_ROOM_INSECURE === '1' ||
+  /^(127\.0\.0\.1|localhost|\[::1\])(:|$)/.test(ROOM_HOST ?? '');
+/** A Worker commit named as a known skew against the base's build commit (`--known-skew <sha>`). */
+const KNOWN_SKEW = arg('known-skew', null);
+/** The two hand rows' files (docs/CLOUDFLARE.md 2.3): the dashboard's caps before and after, the verifier's memory reading. */
+const CAPS_BEFORE = arg('caps-before', null);
+const CAPS_AFTER = arg('caps-after', null);
+const MEMORY_READING = arg('memory-reading', null);
+/** The hand read dashboard figures of the cost probe's hour (`--cost-dashboard <json>`), passed through. */
+const COST_DASHBOARD = arg('cost-dashboard', null);
 /** The Redis URL for `cost.redis.commands`, passed through to the cost probe and never printed. */
 const REDIS_URL_ARG = arg('redis-url', null);
 if (ONLY !== null && !ONLY_VALUES.includes(ONLY)) {
@@ -176,7 +225,7 @@ if (ONLY !== null && !ONLY_VALUES.includes(ONLY)) {
   // a word (s2.md S2-R4, `--only text,slides`); the areas go to `--spec` here and to the walk
   // probe's own `--only`
   console.error(
-    `core-gate: --only takes probe, specs, cost, accounts or realtime, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
+    `core-gate: --only takes probe, specs, cost, accounts, realtime or setup, not ${JSON.stringify(ONLY)}; name the areas with --spec <areas> (the specs), the walk probe's --only (the walk) or --cost-rows <ids> (the cost probe)`,
   );
   console.error(USAGE);
   process.exit(2);
@@ -211,6 +260,18 @@ const REALTIME_SPEC_IDS = REALTIME_ROWS.filter((r) => CORE_SPEC_DRIVERS.includes
   (r) => r.id,
 );
 const REALTIME_PROBE_ROWS = REALTIME_ROWS.filter((r) => r.driver === PROBE_DRIVER);
+/**
+ * The setup rows of the do tier (docs/CLOUDFLARE.md 2.3; core-matrix.mjs TIER_FEATURES): judged
+ * by a `--tier do` run or an `--only setup` run, listed apart by every other run. Their spec rows
+ * ride Playwright's `--grep` like the realtime rows'; the gate's own rows (`core-gate`) are the
+ * health read and the two hand rows.
+ */
+const SETUP_ROWS = rowsForFeature('setup');
+const SETUP_SPEC_IDS = SETUP_ROWS.filter((r) => CORE_SPEC_DRIVERS.includes(r.driver)).map(
+  (r) => r.id,
+);
+/** True when this run judges the tier rows (the setup rows): the run is on their tier. */
+const TIER_ROWS_JUDGED = TIER === 'do';
 /** Every probe row's walk module (core-walk/index.mjs `declaredIds`: id to module name). */
 const WALK_MODULE_OF = declaredIds();
 /** The walk's module names, the names its `--only` takes. */
@@ -352,7 +413,10 @@ const costRowsJudged = costRows().filter(
 const accountsRowsJudged = localRows().filter(
   (r) => ROWS_ONLY === null || ROWS_ONLY.includes(r.id),
 );
-const judged =
+/* the tier rows this run lists apart (core-matrix.mjs TIER_FEATURES): a run not on their tier
+   never judges them and never reads them as no step */
+const tierRowsApart = TIER_ROWS_JUDGED ? [] : tierRows();
+const judgedBefore =
   ONLY === 'probe'
     ? probeRowsJudged
     : ONLY === 'specs'
@@ -363,7 +427,10 @@ const judged =
           ? accountsRowsJudged
           : ONLY === 'realtime'
             ? REALTIME_ROWS
-            : CORE_MATRIX;
+            : ONLY === 'setup'
+              ? SETUP_ROWS
+              : CORE_MATRIX;
+const judged = judgedBefore.filter((row) => !tierRowsApart.includes(row));
 
 /**
  * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
@@ -502,6 +569,10 @@ function runCost() {
   if (COST_MINUTES) args.push('--minutes', COST_MINUTES);
   if (flag('shots')) args.push('--shots', join(OUT, 'cost-shots'));
   if (TIER !== null) args.push('--tier', TIER);
+  /* the Cloudflare phase: the Worker host and the dashboard figures ride to the probe; the room
+     bearer stays in the environment the probe inherits */
+  if (arg('room-host', null) !== null) args.push('--room-host', arg('room-host', null));
+  if (COST_DASHBOARD !== null) args.push('--dashboard', resolve(ROOT, COST_DASHBOARD));
   /* the Redis URL rides to the probe and is never printed (docs/REALTIME.md 1.1, 5.5) */
   const shown = args.join(' ');
   if (REDIS_URL_ARG !== null) args.push('--redis-url', REDIS_URL_ARG);
@@ -576,9 +647,9 @@ function specFiles(specOnly = SPEC_ONLY, rowsOnly = ROWS_ONLY ?? realtimeRowsOnl
       : [...CORE_SPEC_DRIVERS];
   return drivers.map((d) => specPathOf(d));
 }
-/** The spec rows an `--only realtime` run greps for, in place of `--rows`; null otherwise. */
+/** The spec rows an `--only realtime` or `--only setup` run greps for, in place of `--rows`; null otherwise. */
 function realtimeRowsOnly() {
-  return ONLY === 'realtime' ? REALTIME_SPEC_IDS : null;
+  return ONLY === 'realtime' ? REALTIME_SPEC_IDS : ONLY === 'setup' ? SETUP_SPEC_IDS : null;
 }
 /**
  * Playwright's `--grep` for a `--rows` run: each id at the head of its test title (`coreTitle`,
@@ -602,15 +673,26 @@ function runPlaywright(files, report, output) {
      machine clears the shared `.turboslide/playwright`, which deleted a failed row's trace mid
      run (b4.md fix round, b3 R22) */
   const args = ['test', ...files, '--reporter=list,json', '--output', join(OUT, output)];
-  if (ROWS_ONLY !== null || ONLY === 'realtime') args.push('--grep', rowsGrep());
+  if (ROWS_ONLY !== null || ONLY === 'realtime' || ONLY === 'setup')
+    args.push('--grep', rowsGrep());
+  /* the Cloudflare phase: B's origin rides to the two browser spec under both names it reads */
+  const second =
+    SECOND_BASE === null
+      ? {}
+      : { PLAYWRIGHT_SECOND_BASE_URL: SECOND_BASE, REALTIME_BASES: `${BASE},${SECOND_BASE}` };
   console.log(
-    `core-gate: node_modules/.bin/playwright ${args.join(' ')} (PLAYWRIGHT_BASE_URL=${BASE})`,
+    `core-gate: node_modules/.bin/playwright ${args.join(' ')} (PLAYWRIGHT_BASE_URL=${BASE}${SECOND_BASE === null ? '' : ` PLAYWRIGHT_SECOND_BASE_URL=${SECOND_BASE}`})`,
   );
   const t = Date.now();
   const result = spawnSync(join(ROOT, 'node_modules', '.bin', 'playwright'), args, {
     cwd: ROOT,
     stdio: 'inherit',
-    env: { ...process.env, PLAYWRIGHT_BASE_URL: BASE, PLAYWRIGHT_JSON_OUTPUT_NAME: report },
+    env: {
+      ...process.env,
+      PLAYWRIGHT_BASE_URL: BASE,
+      PLAYWRIGHT_JSON_OUTPUT_NAME: report,
+      ...second,
+    },
   });
   return readSpecs(report, result.status, Date.now() - t);
 }
@@ -689,9 +771,261 @@ function readSpecs(report, exit, ms) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// the gate's own rows (the Cloudflare phase, docs/CLOUDFLARE.md 2.3): the Worker's health and the
+// two hand rows read from files
+
+/** True when two origins name one host: localhost and 127.0.0.1 read as one, the scheme and port must agree. */
+export function sameOrigin(a, b) {
+  try {
+    const x = new URL(a);
+    const y = new URL(b);
+    const host = (u) =>
+      u.hostname === 'localhost' || u.hostname === '[::1]' ? '127.0.0.1' : u.hostname;
+    const port = (u) => u.port || (u.protocol === 'https:' ? '443' : '80');
+    return x.protocol === y.protocol && host(x) === host(y) && port(x) === port(y);
+  } catch {
+    return false;
+  }
+}
+
+/** The bearer of a deployment base: TURBOSLIDE_TOKEN, else the origin's row of ~/.config/turboslide/hosts.json; empty on localhost and without one. Never printed. */
+function bearerForBase() {
+  if (LOCAL) return '';
+  let token = process.env.TURBOSLIDE_TOKEN ?? '';
+  if (token === '') {
+    try {
+      const file = join(homedir(), '.config', 'turboslide', 'hosts.json');
+      const hosts = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')).hosts ?? {}) : {};
+      const row = hosts[BASE] ?? hosts[BASE.replace(/\/$/, '')] ?? null;
+      if (row && typeof row.token === 'string') token = row.token;
+    } catch {
+      token = '';
+    }
+  }
+  return token;
+}
+
+/** The base's build commit from GET /api/agent (`instance.commit`), or the reason it could not be read. */
+async function baseCommit() {
+  const headers = {
+    accept: 'application/json',
+    ...(process.env.VERCEL_OIDC_TOKEN
+      ? { 'x-vercel-trusted-oidc-idp-token': process.env.VERCEL_OIDC_TOKEN }
+      : {}),
+  };
+  const token = bearerForBase();
+  if (token !== '') headers.authorization = `Bearer ${token}`;
+  try {
+    const res = await fetch(new URL('/api/agent', BASE), {
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    });
+    const body = await res.json().catch(() => null);
+    if (res.status !== 200)
+      return { commit: null, reason: `GET /api/agent answered ${res.status}` };
+    const commit = body?.instance?.commit ?? null;
+    return { commit, reason: commit === null ? 'GET /api/agent names no instance.commit' : null };
+  } catch (error) {
+    return {
+      commit: null,
+      reason: `GET /api/agent did not answer: ${String(error).slice(0, 120)}`,
+    };
+  }
+}
+
+/**
+ * The row `setup.worker.health` (docs/CLOUDFLARE.md 2.3): GET /health on the Worker within 2 s,
+ * `ok`, `protocol` 1, `realtime` on, `appOrigin` the base's origin, `commit` the base's build
+ * commit or the sha named as a known skew. Answers the probe's shape: results and reasons by
+ * row id, the measures and the health facts for the ledger.
+ */
+async function runHealth() {
+  const id = 'setup.worker.health';
+  const json = join(OUT, 'health.json');
+  const t = Date.now();
+  const facts = {
+    host: ROOM_HOST,
+    scheme: ROOM_INSECURE ? 'http' : 'https',
+    knownSkew: KNOWN_SKEW,
+  };
+  const finish = (result, reason, measure) => {
+    const health = { ...facts, result, reason, ms: Date.now() - t };
+    writeFileSync(json, JSON.stringify(health, null, 2));
+    return {
+      exit: result === 'passed' ? 0 : 1,
+      ms: health.ms,
+      results: { [id]: result },
+      reasons: reason ? { [id]: reason } : {},
+      measures: measure ? { [id]: [measure] } : {},
+      json,
+      health,
+    };
+  };
+  if (ROOM_HOST === null)
+    return finish(
+      'not driven',
+      'no room host (--room-host or TURBOSLIDE_ROOM_HOST): GET /health was not read',
+    );
+  const url = `${facts.scheme}://${ROOM_HOST}/health`;
+  console.log(`core-gate: GET ${url}`);
+  let status = 0;
+  let body = null;
+  let ms = 0;
+  try {
+    const t0 = Date.now();
+    const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+    body = await res.json().catch(() => null);
+    ms = Date.now() - t0;
+    status = res.status;
+  } catch (error) {
+    return finish(
+      'failed',
+      `GET /health on ${ROOM_HOST} did not answer within 2 s: ${String(error).slice(0, 120)}`,
+    );
+  }
+  Object.assign(facts, { status, ms, body });
+  const problems = [];
+  if (status !== 200) problems.push(`status ${status}`);
+  if (body?.ok !== true) problems.push('ok is not true');
+  if (body?.protocol !== 1) problems.push(`protocol ${JSON.stringify(body?.protocol)} (1 asked)`);
+  if (body?.realtime !== 'on')
+    problems.push(`realtime ${JSON.stringify(body?.realtime)} (on asked)`);
+  if (ms > 2000) problems.push(`${ms} ms (2 s asked)`);
+  const appOrigin = typeof body?.appOrigin === 'string' ? body.appOrigin.replace(/\/$/, '') : '';
+  if (!sameOrigin(appOrigin, BASE))
+    problems.push(`appOrigin ${JSON.stringify(appOrigin)} is not this run's base ${BASE}`);
+  const base = await baseCommit();
+  facts.baseCommit = base.commit;
+  const commit = typeof body?.commit === 'string' ? body.commit : '';
+  let commitWord;
+  let unread = false;
+  if (
+    base.commit === null &&
+    KNOWN_SKEW !== null &&
+    commit !== '' &&
+    (commit === KNOWN_SKEW || commit.startsWith(KNOWN_SKEW) || KNOWN_SKEW.startsWith(commit))
+  )
+    commitWord = `commit ${commit.slice(0, 12)}, the sha --known-skew names (the base's commit unread: ${base.reason})`;
+  else if (base.commit === null) {
+    /* a base that names no build commit (a vite dev server without TURBOSLIDE_BUILD_COMMIT) cannot be compared: the row is not driven on that half, the health facts recorded */
+    commitWord = `the base's commit unread (${base.reason}) and no --known-skew names the Worker's ${commit || 'empty commit'}, so the commit half cannot be read`;
+    unread = true;
+  } else if (
+    commit !== '' &&
+    (commit === base.commit || commit.startsWith(base.commit) || base.commit.startsWith(commit))
+  )
+    commitWord = `commit ${commit.slice(0, 12)} equal to the base's`;
+  else if (
+    KNOWN_SKEW !== null &&
+    commit !== '' &&
+    (commit === KNOWN_SKEW || commit.startsWith(KNOWN_SKEW) || KNOWN_SKEW.startsWith(commit))
+  )
+    commitWord = `commit ${commit.slice(0, 12)} against the base's ${base.commit.slice(0, 12)}, the known skew --known-skew names`;
+  else {
+    commitWord = `commit ${commit || 'empty'} against the base's ${base.commit.slice(0, 12)}, not named as a known skew`;
+    problems.push(commitWord);
+  }
+  facts.commitWord = commitWord;
+  const measure = `GET /health on ${ROOM_HOST} answered ${status} in ${ms} ms: realtime ${JSON.stringify(body?.realtime)}, protocol ${JSON.stringify(body?.protocol)}, appOrigin ${JSON.stringify(appOrigin)}; ${commitWord}`;
+  if (problems.length > 0) return finish('failed', problems.join('; '), measure);
+  if (unread) return finish('not driven', commitWord, measure);
+  return finish('passed', '', measure);
+}
+
+/** A JSON file of a hand reading, or null; a missing or malformed file is the reason. */
+function readHandFile(path) {
+  if (path === null) return { body: null, reason: null };
+  try {
+    const body = JSON.parse(readFileSync(resolve(ROOT, path), 'utf8'));
+    if (body === null || typeof body !== 'object' || Array.isArray(body))
+      return { body: null, reason: `${path} is not an object` };
+    return { body, reason: null };
+  } catch (error) {
+    return { body: null, reason: `${path} could not be read: ${String(error).slice(0, 120)}` };
+  }
+}
+
+/**
+ * The two hand rows (docs/CLOUDFLARE.md 2.3): `setup.free-plan.caps` from the dashboard's daily
+ * figures before and after the run (`--caps-before`, `--caps-after`; passed when the differences
+ * are under 10,000 Durable Object requests and 20,000 rows written, the Worker requests recorded),
+ * and `setup.do.memory` from the verifier's reading (`--memory-reading`: its `result` and
+ * `reason`). A row without its file stays not driven with the flag named.
+ */
+function runHandRows() {
+  const results = {};
+  const reasons = {};
+  const measures = {};
+  const before = readHandFile(CAPS_BEFORE);
+  const after = readHandFile(CAPS_AFTER);
+  let freePlanCaps = null;
+  if (CAPS_BEFORE === null || CAPS_AFTER === null) {
+    results['setup.free-plan.caps'] = 'not driven';
+    reasons['setup.free-plan.caps'] =
+      "the dashboard's figures before and after the run were not given (--caps-before <json> and --caps-after <json>, each { readAt, doRequests, doRowsWritten, workerRequests })";
+  } else if (before.body === null || after.body === null) {
+    results['setup.free-plan.caps'] = 'not driven';
+    reasons['setup.free-plan.caps'] = before.reason ?? after.reason;
+  } else {
+    const n = (o, k) => (typeof o?.[k] === 'number' ? o[k] : null);
+    const fields = ['doRequests', 'doRowsWritten', 'workerRequests'];
+    const delta = {};
+    const missing = [];
+    for (const f of fields) {
+      const a = n(before.body, f);
+      const b = n(after.body, f);
+      if (a === null || b === null) missing.push(f);
+      else delta[f] = b - a;
+    }
+    freePlanCaps = { before: before.body, after: after.body, delta, missing };
+    const over = [];
+    if (delta.doRequests !== undefined && delta.doRequests >= 10_000)
+      over.push(`Durable Object requests grew by ${delta.doRequests} (under 10,000 asked)`);
+    if (delta.doRowsWritten !== undefined && delta.doRowsWritten >= 20_000)
+      over.push(`rows written grew by ${delta.doRowsWritten} (under 20,000 asked)`);
+    const measure = `the dashboard's daily figures: before (${before.body.readAt ?? 'unnamed time'}) requests ${n(before.body, 'doRequests') ?? 'unread'}, rows written ${n(before.body, 'doRowsWritten') ?? 'unread'}, Worker requests ${n(before.body, 'workerRequests') ?? 'unread'}; after (${after.body.readAt ?? 'unnamed time'}) requests ${n(after.body, 'doRequests') ?? 'unread'}, rows written ${n(after.body, 'doRowsWritten') ?? 'unread'}, Worker requests ${n(after.body, 'workerRequests') ?? 'unread'}; the run cost ${delta.doRequests ?? 'unread'} requests, ${delta.doRowsWritten ?? 'unread'} rows written and ${delta.workerRequests ?? 'unread'} Worker requests`;
+    measures['setup.free-plan.caps'] = [measure];
+    if (missing.length > 0) {
+      results['setup.free-plan.caps'] = 'not driven';
+      reasons['setup.free-plan.caps'] =
+        `the figures ${missing.join(', ')} are missing from the files`;
+    } else if (over.length > 0) {
+      results['setup.free-plan.caps'] = 'failed';
+      reasons['setup.free-plan.caps'] = over.join('; ');
+    } else results['setup.free-plan.caps'] = 'passed';
+  }
+  const memory = readHandFile(MEMORY_READING);
+  let memoryReading = null;
+  if (MEMORY_READING === null) {
+    results['setup.do.memory'] = 'not driven';
+    reasons['setup.do.memory'] =
+      "the verifier's hand reading was not given (--memory-reading <json> with result, reason and the dashboard's memory percentiles)";
+  } else if (memory.body === null) {
+    results['setup.do.memory'] = 'not driven';
+    reasons['setup.do.memory'] = memory.reason;
+  } else {
+    memoryReading = memory.body;
+    const result = ['passed', 'failed', 'not driven'].includes(memory.body.result)
+      ? memory.body.result
+      : 'not driven';
+    results['setup.do.memory'] = result;
+    reasons['setup.do.memory'] =
+      result === 'passed'
+        ? ''
+        : (memory.body.reason ?? `the reading's result is ${JSON.stringify(memory.body.result)}`);
+    if (typeof memory.body.measure === 'string')
+      measures['setup.do.memory'] = [memory.body.measure];
+  }
+  return { results, reasons, measures, freePlanCaps, memoryReading };
+}
+
+// ---------------------------------------------------------------------------------------------
 // the merge and the verdict
 
 let probe = null;
+/** The gate's own rows (the Cloudflare phase): the Worker's health and the two hand rows. */
+let health = null;
+let hand = null;
 /** The deployment's default template after the drivers, and whether this run put Blank back (the templates rows' side effect on a shared store). */
 let defaultTemplate = null;
 let specs = null;
@@ -706,9 +1040,14 @@ let accounts = null;
 const runs = (driver) =>
   driver === 'accounts'
     ? ONLY === 'accounts'
-    : ONLY === 'realtime'
-      ? driver === 'probe' || driver === 'specs'
-      : ONLY === null || ONLY === driver;
+    : driver === 'gate'
+      ? /* the gate's own rows: a do tier run or an --only setup run (docs/CLOUDFLARE.md 2.3) */
+        TIER_ROWS_JUDGED && (ONLY === null || ONLY === 'setup')
+      : ONLY === 'realtime'
+        ? driver === 'probe' || driver === 'specs'
+        : ONLY === 'setup'
+          ? driver === 'specs'
+          : ONLY === null || ONLY === driver;
 if (REPORT !== null) {
   const dir = resolve(ROOT, REPORT);
   console.log(`core-gate: re-rendering the run under ${dir} (no driver runs)`);
@@ -718,6 +1057,23 @@ if (REPORT !== null) {
   if (runs('cost') && existsSync(join(dir, 'cost-probe.json')))
     cost = readCost(join(dir, 'cost-probe.json'), null, 0);
   if (runs('accounts')) accounts = readSpecs(join(dir, 'accounts.json'), null, 0);
+  if (runs('gate')) {
+    /* a re-render reads the health row from its JSON and the hand rows from the files named again */
+    const file = join(dir, 'health.json');
+    if (existsSync(file)) {
+      const h = JSON.parse(readFileSync(file, 'utf8'));
+      health = {
+        exit: h.result === 'passed' ? 0 : 1,
+        ms: 0,
+        results: { 'setup.worker.health': h.result },
+        reasons: h.reason ? { 'setup.worker.health': h.reason } : {},
+        measures: {},
+        json: file,
+        health: h,
+      };
+    }
+    hand = runHandRows();
+  }
 } else {
   if (UNDER_VITEST && LOCAL && !DRY_RUN && !LOCK_NAMED) {
     console.error(
@@ -762,11 +1118,18 @@ if (REPORT !== null) {
               ? `the accounts spec ${ACCOUNTS_SPEC}${ROWS_ONLY === null ? '' : ` narrowed to the local rows ${ROWS_ONLY.join(', ')} (--grep ${JSON.stringify(rowsGrep())})`} (${accountsRowsJudged.length} local rows judged; the server needs an identity database)`
               : ONLY === 'realtime'
                 ? `the realtime rows alone (docs/REALTIME.md section 2): the walk probe over ${realtimeWalkModules().join(', ') || 'no module'} and the spec rows ${REALTIME_SPEC_IDS.join(', ')} (${specFiles().join(', ')} with --grep ${JSON.stringify(rowsGrep())}; ${REALTIME_ROWS.length} rows judged)`
-                : 'the walk probe, the core specs and the cost probe';
+                : ONLY === 'setup'
+                  ? `the setup rows alone (docs/CLOUDFLARE.md 2.3, the do tier): GET /health on ${ROOM_HOST ?? 'no room host (--room-host or TURBOSLIDE_ROOM_HOST)'}, the spec rows ${SETUP_SPEC_IDS.join(', ')} (${specFiles().join(', ')} with --grep ${JSON.stringify(rowsGrep())}; B on ${SECOND_BASE ?? 'the base (one origin, so the two instance row is not driven)'}) and the two hand rows from ${CAPS_BEFORE === null || CAPS_AFTER === null ? 'no caps files' : 'the caps files'} and ${MEMORY_READING === null ? 'no memory reading' : 'the memory reading'} (${SETUP_ROWS.length} rows judged)`
+                  : `the walk probe, the core specs and the cost probe${TIER_ROWS_JUDGED ? ', and the setup rows of the do tier (GET /health, the two hand rows)' : ''}`;
     console.log(
-      `core-gate: dry run against ${BASE}: ${scratchLine}; the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}. Nothing ran and no lock was taken; exit 0.`,
+      `core-gate: dry run against ${BASE}${TIER === null ? '' : ` (tier ${TIER})`}${SECOND_BASE === null ? '' : ` with B on ${SECOND_BASE}`}: ${scratchLine}; the run would take ${LOCAL ? `the lock ${LOCK}` : 'no lock (a deployment)'} and run ${drivers}${tierRowsApart.length > 0 ? `; the ${tierRowsApart.length} tier rows (${tierRowsApart.map((r) => r.id).join(', ')}) would be listed apart (${tierAbsentReason(tierRowsApart[0], TIER)})` : ''}. Nothing ran and no lock was taken; exit 0.`,
     );
     process.exit(0);
+  }
+  /* the health read first (no lock, no browser): a Worker that does not answer is read before any row runs (5.5 item 2) */
+  if (runs('gate')) {
+    health = await runHealth();
+    hand = runHandRows();
   }
   const held = await takeLock();
   try {
@@ -839,12 +1202,16 @@ const results = {
   ...(specs?.results ?? {}),
   ...(cost?.results ?? {}),
   ...(accounts?.results ?? {}),
+  ...(health?.results ?? {}),
+  ...(hand?.results ?? {}),
 };
 const reasons = {
   ...(probe?.reasons ?? {}),
   ...(specs?.reasons ?? {}),
   ...(cost?.reasons ?? {}),
   ...(accounts?.reasons ?? {}),
+  ...(health?.reasons ?? {}),
+  ...(hand?.reasons ?? {}),
 };
 /**
  * A local row this run did not record (docs/PEOPLE.md 6.2): the accounts run's, listed apart
@@ -873,7 +1240,12 @@ const manual = table
   .map((r) => r.id);
 /* the measurement rows (PRODUCT.md 8.2) and the cost rows (SYNC.md 6.1): their result, reason and
    recorded numbers, listed apart; a cost row's numbers are its counts beside its ceilings */
-const measures = { ...(specs?.measures ?? {}), ...(cost?.measures ?? {}) };
+const measures = {
+  ...(specs?.measures ?? {}),
+  ...(cost?.measures ?? {}),
+  ...(health?.measures ?? {}),
+  ...(hand?.measures ?? {}),
+};
 const measured = table
   .filter((r) => isMeasureRow(coreRow(r.id)))
   .map((r) => ({
@@ -903,8 +1275,24 @@ const exitCode =
 
 const summary = {
   base: BASE,
-  /* the realtime tier of the base as the caller named it (docs/REALTIME.md 5.4; --tier), or null */
+  /* the realtime tier of the base as the caller named it (docs/REALTIME.md 5.4; --tier), or null;
+     `do` since the Cloudflare phase, implied by --only setup */
   tier: TIER,
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3, 5.4): B's origin for the two browser specs, the
+     Worker host the run read, the health row's facts, the two hand rows' readings and the tier
+     rows this run listed apart (never judged, never passed) */
+  secondBase: SECOND_BASE,
+  roomHost: ROOM_HOST,
+  health: health?.health ?? null,
+  freePlanCaps: hand?.freePlanCaps ?? null,
+  memoryReading: hand?.memoryReading ?? null,
+  tierRows:
+    tierRowsApart.length === 0
+      ? null
+      : {
+          reason: tierAbsentReason(tierRowsApart[0], TIER),
+          ids: tierRowsApart.map((r) => r.id),
+        },
   defaultTemplate,
   startedAt: new Date(startedAt).toISOString(),
   ms: Date.now() - startedAt,
@@ -992,7 +1380,7 @@ const esc = (s) =>
 const lines = [
   '# Core gate matrix',
   '',
-  `Base ${BASE}${TIER === null ? '' : ` (tier ${TIER})`}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step, ${local.length} local rows this run did not record (listed apart below, never counted as passed). Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
+  `Base ${BASE}${TIER === null ? '' : ` (tier ${TIER})`}${SECOND_BASE === null ? '' : ` with B on ${SECOND_BASE}`}${ROOM_HOST === null ? '' : `, the Worker ${ROOM_HOST}`}, started ${summary.startedAt}, ${Math.round(summary.ms / 1000)} s. ${table.length} rows judged: ${summary.passed} passed, ${summary.failed} failed, ${summary.notDriven} not driven (${manual.length} of them manual, the checklist's: ${manual.join(', ') || 'none'}), ${noStep.length} no step, ${local.length} local rows this run did not record (listed apart below, never counted as passed). Measurement rows (PRODUCT.md 8.2, recorded and never holding the ship; the cost rows of SYNC.md 6.1 among them, which hold it over their ceiling on the preview): ${measured.map((m) => `${m.id} ${m.result}${m.measures.length > 0 ? ` (${m.measures.join('; ')})` : ''}`).join('; ') || 'none judged'}. Cost rows over their ceiling in this run: ${costOverCeiling.join(', ') || 'none'}. Verdict ${verdict.ok ? 'ok' : 'failed'}${parked.parkedFeatures.length > 0 ? ` with the committed parked list ${parked.parkedFeatures.join(', ')}` : ''}${(parked.parkedRows ?? []).length > 0 ? ` and the parked rows ${parked.parkedRows.map((r) => r.id).join(', ')}` : ''}; retries ${specs === null ? 'no specs run' : `${specs.retries} configured, ${specs.retried} test(s) retried`}; exit ${exitCode}. A not driven row is never counted as passed. Features a ship on this run would park (rule 4 of section 1; RETURN.md rule 2): ${parking.parked.join(', ') || 'none'}; rows whose own controls a ship would keep parked: ${parking.parkedRows.map((r) => `${r.id} (${r.parks.join(', ')})`).join('; ') || 'none'}; rows of an unparkable feature blocking the ship: ${parking.blocking.map((b) => b.id).join(', ') || 'none'}.`,
   '',
   '| Row | Feature | Driver | Today | Result | Reason |',
   '| --- | --- | --- | --- | --- | --- |',
@@ -1011,6 +1399,15 @@ const lines = [
   '',
 ];
 if (noStep.length > 0) lines.push('## No step', '', ...noStep.map((id) => `- \`${id}\``), '');
+if (tierRowsApart.length > 0)
+  lines.push(
+    '## Tier rows this run did not judge (docs/CLOUDFLARE.md 2.3)',
+    '',
+    `Listed apart with the reason "${tierAbsentReason(tierRowsApart[0], TIER)}": judged by a run on their tier alone, never counted as passed and never a reason to park.`,
+    '',
+    ...tierRowsApart.map((r) => `- \`${r.id}\``),
+    '',
+  );
 if (local.length > 0)
   lines.push(
     '## Local rows this run did not record (docs/PEOPLE.md 6.2)',
@@ -1030,6 +1427,22 @@ if (measured.length > 0)
     ),
     '',
   );
+/* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the gate's own rows in the table, so a ledger
+   reader sees the health read and the hand readings beside the rows */
+if (health !== null || hand !== null) {
+  const own = { ...(health?.measures ?? {}), ...(hand?.measures ?? {}) };
+  lines.push(
+    '## The setup rows of the do tier (docs/CLOUDFLARE.md 2.3)',
+    '',
+    ...table
+      .filter((r) => r.driver === 'core-gate')
+      .map(
+        (r) =>
+          `- \`${r.id}\`: ${r.result}${r.reason ? ` (${esc(r.reason)})` : ''}${(own[r.id] ?? []).length > 0 ? `; recorded ${esc(own[r.id].join('; '))}` : ''}`,
+      ),
+    '',
+  );
+}
 writeFileSync(join(OUT, 'core-matrix.md'), `${lines.join('\n')}\n`);
 
 console.log(

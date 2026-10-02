@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { CORE_MATRIX, CORE_SPEC_DRIVERS, localRows } from './core-matrix.mjs';
+import { CORE_MATRIX, CORE_SPEC_DRIVERS, isTierRow, localRows, tierRows } from './core-matrix.mjs';
 import { AREAS } from './core-walk/index.mjs';
 
 // The core gate's tail (docs/FOCUS.md 6.2; VERIFICATION.md F3): after the drivers the gate merges
@@ -19,8 +19,12 @@ import { AREAS } from './core-walk/index.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GATE = join(ROOT, 'scripts', 'probes', 'core-gate.mjs');
 /* the spec rows alone: `--only specs` judges them, never the walk probe's or the cost probe's rows
-   (the sync and costs round added the `cost-probe` driver) */
-const specRows = CORE_MATRIX.filter((row) => CORE_SPEC_DRIVERS.includes(row.driver));
+   (the sync and costs round added the `cost-probe` driver); a run with no `--tier` lists the tier
+   rows apart (the Cloudflare phase, docs/CLOUDFLARE.md 2.3: the setup row of the realtime spec),
+   so they are not among the rows such a run judges */
+const specRows = CORE_MATRIX.filter(
+  (row) => CORE_SPEC_DRIVERS.includes(row.driver) && !isTierRow(row),
+);
 
 /** A Playwright JSON report with one passed test per spec row, `failing` rows failed. */
 function stubReport(failing = []) {
@@ -329,7 +333,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
     );
     expect(run.status).toBe(2);
     expect(run.stderr).toContain(
-      '--only takes probe, specs, cost, accounts or realtime, not "text,slides"',
+      '--only takes probe, specs, cost, accounts, realtime or setup, not "text,slides"',
     );
     expect(run.stderr).toContain('--spec <areas>');
     expect(run.stderr).toContain('usage: node scripts/probes/core-gate.mjs');
@@ -344,7 +348,9 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
       { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
     );
     expect(run.status).toBe(0);
-    expect(run.stderr).not.toContain('--only takes probe, specs, cost, accounts or realtime');
+    expect(run.stderr).not.toContain(
+      '--only takes probe, specs, cost, accounts, realtime or setup',
+    );
   }, 30_000);
 });
 
@@ -685,8 +691,239 @@ describe('the gate judges the local rows through --only accounts and lists them 
     /* the walk probe's rows are no step in this stub, so the run exits 1 for them and not for the local rows */
     expect(run.status).toBe(1);
     expect(summary.noStep.length).toBe(
-      CORE_MATRIX.filter((r) => !CORE_SPEC_DRIVERS.includes(r.driver) && !localRows().includes(r))
-        .length,
+      CORE_MATRIX.filter(
+        (r) => !CORE_SPEC_DRIVERS.includes(r.driver) && !localRows().includes(r) && !isTierRow(r),
+      ).length,
     );
+    /* the tier rows (the Cloudflare phase): listed apart on a run with no tier, never no step */
+    expect(summary.tierRows.ids).toEqual(tierRows().map((r) => r.id));
+    expect(summary.tierRows.reason).toBe("a do tier row; this run's tier is not named (no --tier)");
+    for (const id of summary.tierRows.ids) expect(summary.noStep).not.toContain(id);
+    expect(table).toContain('## Tier rows this run did not judge (docs/CLOUDFLARE.md 2.3)');
   }, 40_000);
+});
+
+// The Cloudflare phase (docs/CLOUDFLARE.md 2.3, 5.4; R5): `--tier do`, `--only setup` (the do tier
+// implied), the second origin, the room host, the health row read from a finished run's
+// health.json and the two hand rows from the files given to the gate.
+describe('the gate reads the setup rows of the do tier (the Cloudflare phase)', () => {
+  const setupIds = tierRows().map((r) => r.id);
+  const dryRun = (extra) =>
+    spawnSync(
+      'node',
+      [GATE, '--base', 'https://stub.invalid', '--dry-run', '--out', join(tmpdir(), 'x'), ...extra],
+      { cwd: ROOT, encoding: 'utf8', timeout: 20_000 },
+    );
+
+  it('takes do as a tier word, implies it for --only setup and refuses a contradiction', () => {
+    const plain = dryRun([
+      '--tier',
+      'do',
+      '--second-base',
+      'https://stub2.invalid',
+      '--room-host',
+      'rt.example.workers.dev',
+    ]);
+    expect(plain.stderr, plain.stderr).toBe('');
+    expect(plain.status).toBe(0);
+    expect(plain.stdout).toContain('(tier do) with B on https://stub2.invalid');
+    expect(plain.stdout).toContain(
+      'and the setup rows of the do tier (GET /health, the two hand rows)',
+    );
+    const setup = dryRun(['--only', 'setup', '--second-base', 'https://stub2.invalid']);
+    expect(setup.stderr, setup.stderr).toBe('');
+    expect(setup.status).toBe(0);
+    expect(setup.stdout).toContain('(tier do)');
+    expect(setup.stdout).toContain('the setup rows alone (docs/CLOUDFLARE.md 2.3, the do tier)');
+    expect(setup.stdout).toContain('GET /health on no room host');
+    expect(setup.stdout).toContain(
+      `--grep ${JSON.stringify('(^| )(setup\\.do\\.two-instances): ')}`,
+    );
+
+    expect(setup.stdout).toContain('B on https://stub2.invalid');
+    expect(setup.stdout).toContain(`${setupIds.length} rows judged`);
+    const contradiction = dryRun(['--only', 'setup', '--tier', 'blob']);
+    expect(contradiction.status).toBe(2);
+    expect(contradiction.stderr).toContain(
+      "--only setup reads the do tier's rows and implies --tier do; --tier blob contradicts it",
+    );
+    const unknown = dryRun(['--tier', 'purple']);
+    expect(unknown.status).toBe(2);
+    expect(unknown.stderr).toContain('--tier takes redis, blob, memory or do, not "purple"');
+    /* another tier lists the setup rows apart and says so */
+    const memory = dryRun(['--only', 'realtime', '--tier', 'memory']);
+    expect(memory.status).toBe(0);
+    expect(memory.stdout).toContain(
+      `the ${setupIds.length} tier rows (${setupIds.join(', ')}) would be listed apart (a do tier row; this run's tier is memory)`,
+    );
+  }, 60_000);
+
+  it('judges the setup rows from a finished do tier run: the health JSON, the caps files and the memory reading', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'core-gate-setup-'));
+    /* the specs: the setup spec row passed, like a run with B on a second origin */
+    const specRow = CORE_MATRIX.find((r) => r.id === 'setup.do.two-instances');
+    writeFileSync(
+      join(dir, 'specs.json'),
+      JSON.stringify({
+        config: { projects: [{ retries: 0 }] },
+        suites: [
+          {
+            title: specRow.driver,
+            specs: [
+              {
+                title: `${specRow.id}: ${specRow.interaction}`,
+                file: `apps/studio/e2e/${specRow.driver}`,
+                tests: [
+                  {
+                    status: 'expected',
+                    results: [{ status: 'passed', retry: 0 }],
+                    annotations: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(dir, 'health.json'),
+      JSON.stringify({
+        host: 'rt.example.workers.dev',
+        result: 'passed',
+        reason: '',
+        status: 200,
+        ms: 120,
+        body: {
+          ok: true,
+          protocol: 1,
+          commit: 'abc',
+          realtime: 'on',
+          appOrigin: 'https://stub.invalid',
+        },
+      }),
+    );
+    const before = join(dir, 'before.json');
+    const after = join(dir, 'after.json');
+    writeFileSync(
+      before,
+      JSON.stringify({
+        readAt: '2026-10-01T18:00:00Z',
+        doRequests: 1000,
+        doRowsWritten: 4000,
+        workerRequests: 500,
+      }),
+    );
+    writeFileSync(
+      after,
+      JSON.stringify({
+        readAt: '2026-10-01T19:00:00Z',
+        doRequests: 3200,
+        doRowsWritten: 9000,
+        workerRequests: 900,
+      }),
+    );
+    const memory = join(dir, 'memory.json');
+    writeFileSync(
+      memory,
+      JSON.stringify({
+        result: 'passed',
+        reason: '',
+        measure:
+          'every hello within 3 s; P50 memory 41 MB, P999 88 MB; no isolate restart in the hour',
+      }),
+    );
+    const out = join(dir, 'out');
+    const run = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'https://stub.invalid',
+        '--only',
+        'setup',
+        '--report',
+        dir,
+        '--out',
+        out,
+        '--caps-before',
+        before,
+        '--caps-after',
+        after,
+        '--memory-reading',
+        memory,
+        '--room-host',
+        'rt.example.workers.dev',
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    expect(run.stderr, run.stderr).toBe('');
+    expect(run.status).toBe(0);
+    const summary = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
+    expect(summary.tier).toBe('do');
+    expect(summary.roomHost).toBe('rt.example.workers.dev');
+    expect(summary.rows).toBe(setupIds.length);
+    expect(summary.passed).toBe(setupIds.length);
+    expect(summary.tierRows).toBeNull();
+    expect(summary.health.result).toBe('passed');
+    expect(summary.freePlanCaps.delta).toEqual({
+      doRequests: 2200,
+      doRowsWritten: 5000,
+      workerRequests: 400,
+    });
+    expect(summary.memoryReading.result).toBe('passed');
+    expect(summary.results['setup.worker.health']).toBe('passed');
+    expect(summary.results['setup.free-plan.caps']).toBe('passed');
+    expect(summary.results['setup.do.memory']).toBe('passed');
+    expect(summary.results['setup.do.two-instances']).toBe('passed');
+    expect(summary.manual).toEqual([]);
+    const table = readFileSync(join(out, 'core-matrix.md'), 'utf8');
+    expect(table).toContain(
+      'Base https://stub.invalid (tier do), the Worker rt.example.workers.dev',
+    );
+    expect(table).toContain(
+      'the run cost 2200 requests, 5000 rows written and 400 Worker requests',
+    );
+    /* the caps over their bound fail the row; the hand rows without their files stay not driven, the checklist\'s */
+    writeFileSync(
+      after,
+      JSON.stringify({
+        readAt: '2026-10-01T19:00:00Z',
+        doRequests: 12_000,
+        doRowsWritten: 9000,
+        workerRequests: 900,
+      }),
+    );
+    const over = spawnSync(
+      'node',
+      [
+        GATE,
+        '--base',
+        'https://stub.invalid',
+        '--only',
+        'setup',
+        '--report',
+        dir,
+        '--out',
+        out,
+        '--caps-before',
+        before,
+        '--caps-after',
+        after,
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    expect(over.status).toBe(1);
+    const second = JSON.parse(readFileSync(join(out, 'core-gate.json'), 'utf8'));
+    expect(second.results['setup.free-plan.caps']).toBe('failed');
+    expect(second.table.find((r) => r.id === 'setup.free-plan.caps').reason).toBe(
+      'Durable Object requests grew by 11000 (under 10,000 asked)',
+    );
+    expect(second.results['setup.do.memory']).toBe('not driven');
+    expect(second.table.find((r) => r.id === 'setup.do.memory').reason).toContain(
+      '--memory-reading <json>',
+    );
+    expect(second.manual).toEqual(['setup.do.memory']);
+    expect(second.verdict.failures.map((f) => f.id)).toEqual(['setup.free-plan.caps']);
+  }, 60_000);
 });

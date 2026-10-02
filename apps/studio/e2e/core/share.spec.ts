@@ -4,7 +4,6 @@ import type { BrowserContext, Locator, Page } from '@playwright/test';
 import { hueFor } from '@turboslide/identity/hues';
 
 import {
-  Scratch,
   addSlide,
   agentHeaders,
   clickCard,
@@ -12,6 +11,8 @@ import {
   ctl,
   extraHTTPHeaders,
   headingRun,
+  invoke,
+  isLocalBase,
   menuPath,
   newDeck,
   openEditor,
@@ -19,6 +20,9 @@ import {
   ownerContext,
   placeBlock,
   runsOfBlock,
+  sameCookiesContext,
+  Scratch,
+  selectBlock,
   settled,
   skipCurrent,
   slideJson,
@@ -30,9 +34,6 @@ import {
   typeInto,
   typeNote,
   waitEditor,
-  invoke,
-  sameCookiesContext,
-  selectBlock,
 } from './lib';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
@@ -566,15 +567,20 @@ test(title('share.stranger-cannot-edit'), async ({ browser }) => {
  */
 async function secondEditor(
   browser: import('@playwright/test').Browser,
+  base?: string,
 ): Promise<{ context: BrowserContext; page: Page }> {
   links = await readLinks();
-  const pair = await otherContext(browser);
+  /* the Cloudflare phase: a base named puts the second editor on another app instance (R4-R5b) */
+  const pair =
+    base === undefined ? await otherContext(browser) : await otherContextAt(browser, base);
   const started = Date.now();
   let status: number | null = null;
   let loads = 0;
   for (;;) {
     loads += 1;
-    const res = await pair.page.goto(loads === 1 ? links.edit : `/edit/${deck}`);
+    const res = await pair.page.goto(
+      loads === 1 ? (base === undefined ? links.edit : onBase(links.edit, base)) : `/edit/${deck}`,
+    );
     status = res?.status() ?? null;
     if (status !== 404 || Date.now() - started > 30_000) break;
     await pair.page.waitForTimeout(2000);
@@ -2881,9 +2887,50 @@ test(title('collab.caret-hue-matches-chip'), async ({ browser }) => {
 // records the instance that answered its origin's sync.status (storeCalls.instance, read through
 // the agent surface with the bearer where one exists; none on localhost, build/r1.md R1-R5c).
 
-/** The instance that answers the base's sync.status for the deck, or the reason it could not be read. */
-async function instanceOfBase(id: string): Promise<string> {
-  const base = (process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321').replace(/\/$/, '');
+/* The Cloudflare phase (docs/CLOUDFLARE.md 5.4; build/r4.md R4-R5b): B's origin for the two realtime
+   rows, `REALTIME_BASES=<originA>,<originB>` or `PLAYWRIGHT_SECOND_BASE_URL` as core/realtime.spec.ts
+   reads them (the gate's --second-base sets both), so the departed guest joins and the share links
+   open through the second app instance of a two process run; unset, both read the one base. */
+const SHARE_A_BASE = (process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321').replace(
+  /\/$/,
+  '',
+);
+const SHARE_B_BASE = (
+  (process.env['REALTIME_BASES'] ?? '')
+    .split(',')
+    .map((x) => x.trim().replace(/\/$/, ''))
+    .filter((x) => x !== '')[1] ??
+  process.env['PLAYWRIGHT_SECOND_BASE_URL'] ??
+  SHARE_A_BASE
+).replace(/\/$/, '');
+/** An absolute URL's path and search moved onto `base` (a link minted on A's origin, opened on B's). */
+function onBase(url: string, base: string): string {
+  try {
+    const u = new URL(url, SHARE_A_BASE);
+    return `${base}${u.pathname}${u.search}`;
+  } catch {
+    return url;
+  }
+}
+/** A second person's context on `baseURL` (the preview header, no cookie of the first, the HMR socket mocked on a local base). */
+async function otherContextAt(
+  browser: import('@playwright/test').Browser,
+  baseURL: string,
+): Promise<{ context: BrowserContext; page: Page }> {
+  const context = await browser.newContext({
+    baseURL,
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+    acceptDownloads: true,
+    permissions: ['clipboard-read', 'clipboard-write'],
+  });
+  if (isLocalBase(baseURL)) await context.routeWebSocket('**', () => undefined);
+  const page = await context.newPage();
+  return { context, page };
+}
+
+/** The instance that answers a base's sync.status for the deck (A's base unless named), or the reason it could not be read. */
+async function instanceOfBase(id: string, base: string = SHARE_A_BASE): Promise<string> {
   const headers = agentHeaders(base);
   if (headers === null) return 'no bearer';
   const api = await request.newContext();
@@ -2930,12 +2977,15 @@ test(title('realtime.share-link.every-instance'), async ({ browser }) => {
       mintedAt = Date.now();
       const path = shareLinkPathOf(made.url ?? '');
       expect(path, `share.createLink ${i} answers a /s/ URL`).not.toBeNull();
-      url = `${(process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321').replace(/\/$/, '')}${path}`;
+      url = `${SHARE_A_BASE}${path}`;
     }
-    const { context: other, page: visitor } = await otherContext(browser);
+    /* the Cloudflare phase: the link minted on A's origin opens on B's (the second app instance on
+       a two process run; the one base otherwise), so "the two requests answered by different
+       instances" is the run's shape and not the deployment's chance */
+    const { context: other, page: visitor } = await otherContextAt(browser, SHARE_B_BASE);
     try {
       const openDelay = Date.now() - mintedAt;
-      const answer = await visitor.goto(url);
+      const answer = await visitor.goto(onBase(url, SHARE_B_BASE));
       const status = answer?.status() ?? 0;
       let landed = 'no editor';
       if (status < 400) {
@@ -2962,7 +3012,7 @@ test(title('realtime.share-link.every-instance'), async ({ browser }) => {
           failures.push(`mint ${i}: the link landed on ${landed}`);
         }
       } else failures.push(`mint ${i}: the link answered ${status} ${openDelay} ms after the mint`);
-      instances.after.push(await instanceOfBase(deck));
+      instances.after.push(await instanceOfBase(deck, SHARE_B_BASE));
       rounds.push(`mint ${i}: opened ${openDelay} ms after the mint, status ${status}, ${landed}`);
       if (openDelay > 1000)
         failures.push(
@@ -2975,7 +3025,7 @@ test(title('realtime.share-link.every-instance'), async ({ browser }) => {
   const distinct = [...new Set([instances.before, ...instances.after])];
   test.info().annotations.push({
     type: 'measure',
-    description: `${rounds.join('; ')}; sync.status instances before ${instances.before} and after each open ${instances.after.join(', ')} (${distinct.length} distinct; the instance a browser navigation lands on is the deployment's choice and is recorded, not asserted)`,
+    description: `${rounds.join('; ')}; the links minted on ${SHARE_A_BASE} and opened on ${SHARE_B_BASE}${SHARE_A_BASE === SHARE_B_BASE ? ' (one base)' : ' (two bases)'}; sync.status instances before ${instances.before} (A's base) and after each open ${instances.after.join(', ')} (B's base; ${distinct.length} distinct; the instance a browser navigation lands on is the deployment's choice and is recorded, not asserted)`,
   });
   expect(failures, 'ten of ten links open the editor within a second of the mint').toEqual([]);
 });
@@ -2985,7 +3035,8 @@ test(title('realtime.departed-guest.name-stable'), async ({ browser }) => {
   await openEditor(page, deck);
   const first = (await slideOrder(page))[0]!;
   const before = ((await state(page)).comments?.threads ?? []).length;
-  const { context: other, page: second } = await secondEditor(browser);
+  /* the Cloudflare phase (R4-R5b): B joins through the second app instance when a run names one */
+  const { context: other, page: second } = await secondEditor(browser, SHARE_B_BASE);
   let guestPrincipal = '';
   try {
     await ownClientId(second);
@@ -3062,7 +3113,10 @@ test(title('realtime.departed-guest.name-stable'), async ({ browser }) => {
     )
       await ctl(page, 'panel.comments.close').click();
   }
-  test.info().annotations.push({ type: 'measure', description: readings.join('; ') });
+  test.info().annotations.push({
+    type: 'measure',
+    description: `${readings.join('; ')}; B joined through ${SHARE_B_BASE}${SHARE_A_BASE === SHARE_B_BASE ? ' (one base)' : ' (two bases)'}`,
+  });
   expect(failures, 'every reload reads the name and "guest" within 3 s, three of three').toEqual(
     [],
   );

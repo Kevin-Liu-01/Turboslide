@@ -58,6 +58,17 @@ import {
 // never passed (docs/PRODUCT.md 8.1); a bound missed is a failed row with its measured
 // milliseconds in the reason. Retries stay 0, one worker, 1440 by 900.
 //
+// The Cloudflare phase (docs/CLOUDFLARE.md 2.1, 2.3, 5.4): on the `do` tier the two origins are
+// two app instances in front of one Durable Object, so `statusOf` also reads the object's colo
+// from `sync.status` (`colo`, R1's field; "unnamed" until it lands) and the join row records one
+// colo across both reads. The setup row `setup.do.two-instances` (the `setup` feature, the do
+// tier's) runs here: A and B type five words each into two blocks through the two instances, the
+// documents are byte equal at the live revision within 3 s, `sync.covered` and `sync.seq` agree
+// across both tabs (R2's two fields on `describe().state.sync`; a field absent fails the row with
+// its name, never passes it) and one colo answers both; on one origin or on another tier the row
+// is not driven with the reason. The gate passes B's origin as PLAYWRIGHT_SECOND_BASE_URL and
+// REALTIME_BASES from `--second-base`.
+//
 // PLAYWRIGHT_BASE_URL=<origin> [REALTIME_BASES=<originA>,<originB>] node_modules/.bin/playwright test apps/studio/e2e/core/realtime.spec.ts
 
 const END_OF_TEXT = process.platform === 'darwin' ? 'Meta+ArrowDown' : 'Control+End';
@@ -189,7 +200,19 @@ type Facts = {
   revision: number;
   serverRevision: number;
   slideId: string;
-  sync: { seq: number; pending: number; retained: number; connected: boolean; tier: string };
+  sync: {
+    seq: number;
+    pending: number;
+    retained: number;
+    connected: boolean;
+    tier: string;
+    /** the last hello's covered seq (R2's field on the do tier, docs/CLOUDFLARE.md 2.3); absent until it lands */
+    covered?: number | null;
+    /** the object's colo from the hello (R2's field on the do tier); absent until it lands */
+    colo?: string | null;
+    /** the object's facts from the `room` frame (build/r2.md R2-C10): the colo and the object id's head */
+    room?: { colo?: string | null; object?: string | null } | null;
+  };
   presence: {
     clientId: string | null;
     following?: string | null;
@@ -488,9 +511,14 @@ async function drawingsOf(p: Page, clientId: string): Promise<Drawings> {
  * build/r1.md R1-R5c), or the reason it could not be read. Through the spec's own request
  * context with the bearer where one exists (none on localhost).
  */
-async function instanceOf(base: string): Promise<string> {
+/**
+ * The instance, the tier and the object's colo an origin's `sync.status` names (the Cloudflare
+ * phase, docs/CLOUDFLARE.md 2.1: `colo` is R1's field on the do tier, "unnamed" until it lands),
+ * or the reason they could not be read.
+ */
+async function statusOf(base: string): Promise<{ instance: string; tier: string; colo: string }> {
   const headers = agentHeaders(base);
-  if (headers === null) return 'no bearer';
+  if (headers === null) return { instance: 'no bearer', tier: 'unread', colo: 'unread' };
   const api = await request.newContext();
   try {
     const res = await api.post(`${base}/api/actions/sync.status?deck=${encodeURIComponent(deck)}`, {
@@ -499,13 +527,23 @@ async function instanceOf(base: string): Promise<string> {
       timeout: 20_000,
       maxRedirects: 0,
     });
-    if (res.status() !== 200) return `status ${res.status()}`;
+    if (res.status() !== 200)
+      return { instance: `status ${res.status()}`, tier: 'unread', colo: 'unread' };
     const body = (await res.json().catch(() => null)) as {
+      tier?: string;
+      colo?: string | null;
+      room?: { colo?: string | null } | null;
       storeCalls?: { instance?: string };
     } | null;
-    return body?.storeCalls?.instance ?? 'no storeCalls.instance in the answer';
+    /* the colo: `room.colo` (R2-C10's object facts, build/r2.md) or `colo` (this lane's CF-R1b); "unnamed" until either lands */
+    const colo = body?.room?.colo ?? body?.colo ?? null;
+    return {
+      instance: body?.storeCalls?.instance ?? 'no storeCalls.instance in the answer',
+      tier: body?.tier ?? 'unnamed',
+      colo: typeof colo === 'string' && colo !== '' ? colo : 'unnamed',
+    };
   } catch (error) {
-    return `error ${String(error).slice(0, 80)}`;
+    return { instance: `error ${String(error).slice(0, 80)}`, tier: 'unread', colo: 'unread' };
   } finally {
     await api.dispose().catch(() => undefined);
   }
@@ -516,27 +554,48 @@ async function instanceOf(base: string): Promise<string> {
 
 type WireRow = {
   at: number;
+  /** where the ops rode: the Vercel ops route, the Worker's HTTP belt, or the socket (the do tier) */
+  via: 'http' | 'belt' | 'socket';
   opIds: string[];
   splices: { at?: number; insertLength?: number }[];
   status: number | string | null;
 };
+/** The splices and op ids of an ops body (the POST's JSON or the socket frame's). */
+function opsOf(body: unknown): Pick<WireRow, 'opIds' | 'splices'> {
+  const parsed = (body ?? {}) as {
+    entries?: { opId: string; mutations?: Record<string, unknown>[] }[];
+  };
+  return {
+    opIds: (parsed.entries ?? []).map((e) => e.opId),
+    splices: (parsed.entries ?? []).flatMap((e) =>
+      (e.mutations ?? [])
+        .filter((m) => m['op'] === 'text.splice')
+        .map((m) => ({
+          ...(typeof m['at'] === 'number' ? { at: m['at'] } : {}),
+          ...(typeof m['insert'] === 'string' ? { insertLength: m['insert'].length } : {}),
+        })),
+    ),
+  };
+}
+/**
+ * Every ops post of a page with its splice offsets and its answer: the Vercel ops route's POST
+ * (the memory, redis and blob tiers), and on the do tier (docs/CLOUDFLARE.md 3.6.3; build/r2.md
+ * R2-C8) the Worker's HTTP belt POST (`/rooms/<id>/ops` on the room host, while the socket is
+ * down) and the socket frames `{ t: 'ops', req, ... }` answered by `{ t: 'ack', req, ok }`.
+ */
 function wireOf(p: Page, sink: WireRow[]): void {
   p.on('request', (req: PwRequest) => {
-    if (!/\/api\/decks\/[^/?]+\/ops(\?|$)/.test(req.url()) || req.method() !== 'POST') return;
-    const row: WireRow = { at: Date.now(), opIds: [], splices: [], status: null };
+    if (req.method() !== 'POST') return;
+    const url = req.url();
+    const via = /\/api\/decks\/[^/?]+\/ops(\?|$)/.test(url)
+      ? 'http'
+      : /\/rooms\/[^/?]+\/ops(\?|$)/.test(url)
+        ? 'belt'
+        : null;
+    if (via === null) return;
+    const row: WireRow = { at: Date.now(), via, opIds: [], splices: [], status: null };
     try {
-      const parsed = JSON.parse(req.postData() ?? '{}') as {
-        entries?: { opId: string; mutations?: Record<string, unknown>[] }[];
-      };
-      row.opIds = (parsed.entries ?? []).map((e) => e.opId);
-      row.splices = (parsed.entries ?? []).flatMap((e) =>
-        (e.mutations ?? [])
-          .filter((m) => m['op'] === 'text.splice')
-          .map((m) => ({
-            ...(typeof m['at'] === 'number' ? { at: m['at'] } : {}),
-            ...(typeof m['insert'] === 'string' ? { insertLength: m['insert'].length } : {}),
-          })),
-      );
+      Object.assign(row, opsOf(JSON.parse(req.postData() ?? '{}')));
     } catch {
       // not json
     }
@@ -549,6 +608,55 @@ function wireOf(p: Page, sink: WireRow[]): void {
       .catch((error: unknown) => {
         row.status = `failed: ${String(error).slice(0, 60)}`;
       });
+  });
+  p.on('websocket', (ws) => {
+    if (!/\/rooms\/[^/?]+/.test(ws.url())) return;
+    const open = new Map<string, WireRow>();
+    ws.on('framesent', (frame) => {
+      try {
+        const payload =
+          typeof frame.payload === 'string' ? frame.payload : frame.payload.toString('utf8');
+        if (payload === 'ping') return;
+        const parsed = JSON.parse(payload) as { t?: string; req?: string | number };
+        if (parsed.t !== 'ops') return;
+        const row: WireRow = {
+          at: Date.now(),
+          via: 'socket',
+          opIds: [],
+          splices: [],
+          status: null,
+        };
+        Object.assign(row, opsOf(parsed));
+        sink.push(row);
+        if (parsed.req !== undefined) open.set(String(parsed.req), row);
+      } catch {
+        // not json
+      }
+    });
+    ws.on('framereceived', (frame) => {
+      try {
+        const payload =
+          typeof frame.payload === 'string' ? frame.payload : frame.payload.toString('utf8');
+        if (payload === 'pong') return;
+        const parsed = JSON.parse(payload) as {
+          t?: string;
+          req?: string | number;
+          ok?: boolean;
+          status?: number;
+        };
+        if (parsed.t !== 'ack' || parsed.req === undefined) return;
+        const row = open.get(String(parsed.req));
+        if (!row) return;
+        row.status = parsed.ok === false ? (parsed.status ?? 'refused') : 200;
+        open.delete(String(parsed.req));
+      } catch {
+        // not json
+      }
+    });
+    ws.on('close', () => {
+      for (const row of open.values()) if (row.status === null) row.status = 'socket closed';
+      open.clear();
+    });
   });
 }
 
@@ -976,7 +1084,8 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
     const aId = await clientIdOf(A);
     const rounds: string[] = [];
     const failures: string[] = [];
-    const instances = { a: await instanceOf(A_BASE), b: await instanceOf(B_BASE) };
+    const statuses = { a: await statusOf(A_BASE), b: await statusOf(B_BASE) };
+    const instances = { a: statuses.a.instance, b: statuses.b.instance };
     for (let round = 1; round <= 3; round += 1) {
       const { page: B, ready, person } = await joinB(browser);
       const bId = await clientIdOf(B);
@@ -1024,8 +1133,15 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
     }
     test.info().annotations.push({
       type: 'measure',
-      description: `${rounds.join('; ')}; instances: ${A_BASE} answered ${instances.a}, ${B_BASE} answered ${instances.b}${TWO_ORIGINS ? ' (two origins)' : " (one origin: the instance of each request is the deployment's choice and is recorded, not asserted)"}`,
+      description: `${rounds.join('; ')}; instances: ${A_BASE} answered ${instances.a}, ${B_BASE} answered ${instances.b}${TWO_ORIGINS ? ' (two origins)' : " (one origin: the instance of each request is the deployment's choice and is recorded, not asserted)"}; tier ${statuses.a.tier}; the object's colo ${statuses.a.colo} and ${statuses.b.colo}${statuses.a.tier === 'do' ? ' (one object on the do tier)' : ' (no object on this tier)'}`,
     });
+    /* the Cloudflare phase: on the do tier one object orders the deck, named by its colo on both origins */
+    if (statuses.a.tier === 'do' && statuses.b.tier === 'do') {
+      expect(statuses.a.colo, "sync.status names the object's colo on the do tier").not.toBe(
+        'unnamed',
+      );
+      expect(statuses.b.colo, 'one object across both origins').toBe(statuses.a.colo);
+    }
     expect(
       failures,
       "B's chip in A and A's in B within 1 s of B's editor being ready, three of three",
@@ -1173,18 +1289,43 @@ test(title('realtime.follow.for-everyone'), async ({ browser }) => {
       }),
     );
     await refollow();
+    /* the comment: the shortcut first; when the card does not open (the shortcut needs the editor's
+       focus, which a refollow through the window API does not give, and Insert > Comment is
+       disabled while nothing is selected, since a comment anchors on a selection; a click to select
+       would end the follow as the own click; the Cloudflare phase's runs 1, 2 and 4 on 4475), the
+       comment goes through the window API as a slide comment on the slide the follow put A on,
+       the same action (comment.add) the UI path takes and the same follow end rule
+       (follow-rules.ts endsFollowOnAction); the measure says which path and whether the follow still
+       stood when the comment was made */
+    let followingBeforeComment: string | null = null;
+    let commentPath = 'the shortcut';
     ends.push(
       await ended("A's comment", async () => {
         await A.keyboard.press('Escape');
         await A.keyboard.press('Meta+Alt+m');
-        await ctl(A, 'comment.card').waitFor({ timeout: 8000 });
-        await ctl(A, 'comment.card.new.field').click();
-        await A.keyboard.type('A comment while following', { delay: 30 });
-        await ctl(A, 'comment.card.new.submit').click();
-        await A.waitForTimeout(400);
-        await A.keyboard.press('Escape');
+        const opened = await ctl(A, 'comment.card')
+          .waitFor({ timeout: 3000 })
+          .then(() => true)
+          .catch(() => false);
+        followingBeforeComment = await followingOf(A);
+        if (opened) {
+          await ctl(A, 'comment.card.new.field').click({ timeout: 5000 });
+          await A.keyboard.type('A comment while following', { delay: 30 });
+          await ctl(A, 'comment.card.new.submit').click({ timeout: 5000 });
+          await A.waitForTimeout(400);
+          await A.keyboard.press('Escape');
+        } else {
+          commentPath = 'the window API (comment.add on the slide; the shortcut opened no card)';
+          const slideId = (await facts(A)).slideId;
+          await invoke(A, 'comment.add', {
+            anchor: { kind: 'slide', slideId },
+            body: { text: 'A comment while following', mentions: [] },
+          });
+        }
       }),
     );
+    ends[ends.length - 1] +=
+      ` (through ${commentPath}; still following before the comment: ${followingBeforeComment !== null})`;
     await refollow();
     ends.push(
       await ended('Slideshow', async () => {
@@ -1196,7 +1337,22 @@ test(title('realtime.follow.for-everyone'), async ({ browser }) => {
     await refollow();
     ends.push(
       await ended('Version history', async () => {
-        await ctl(A, 'title.lastEdit').click();
+        /* the title row's last edit word is a menu item (`data-menu-item="title.lastEdit"`, TitleRow.tsx
+           290), not a data-control, so the row reads it by that hook; when it takes no click within
+           5 s the panel opens through File > Version history > See version history, every step
+           bounded (the Cloudflare phase's run 5 waited on `[data-control="title.lastEdit"]`, which no
+           element carries, to the test's own timeout) */
+        const lastEdit = A.locator('[data-menu-item="title.lastEdit"]').first();
+        const clicked = await lastEdit
+          .click({ timeout: 5000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!clicked) {
+          await ctl(A, 'menubar.file').click({ timeout: 5000 });
+          await A.locator('#ts-menu-file').waitFor({ timeout: 8000 });
+          await ctl(A, 'menu.file.versionHistory').hover({ timeout: 5000 });
+          await ctl(A, 'menu.file.versionHistory.see').click({ timeout: 8000 });
+        }
         await A.waitForTimeout(600);
         await A.keyboard.press('Escape');
       }),
@@ -1376,12 +1532,13 @@ test(title('realtime.reconnect.loses-nothing'), async ({ browser }) => {
     const admitted = wire.filter((w) => w.status === 200 && w.splices.length > 0);
     const firstAt = firstAttempt?.splices[0]?.at ?? null;
     const resentAt = admitted[admitted.length - 1]?.splices[0]?.at ?? null;
+    const carriage = `the first attempt over ${firstAttempt?.via ?? 'nothing'}, the admitted one over ${admitted[admitted.length - 1]?.via ?? 'nothing'}`;
     /* the records: one per author per contiguous run (the checkpointer), read from version.list */
     await A.waitForTimeout(2500);
     const records = (await invoke<unknown[]>(A, 'version.list', {})).length - recordsBefore;
     test.info().annotations.push({
       type: 'measure',
-      description: `converged ${converged} ${convergedMs} ms after the reconnect; A's splice offset ${firstAt} on the first attempt, ${resentAt} on the admitted POST; ${records} version record(s) for the four words (one per author per contiguous run); A "${a}"`,
+      description: `converged ${converged} ${convergedMs} ms after the reconnect; A's splice offset ${firstAt} on the first attempt, ${resentAt} on the admitted post (${carriage}); ${records} version record(s) for the four words (one per author per contiguous run); A "${a}"`,
     });
     expect(
       converged,
@@ -1551,7 +1708,103 @@ test(title('realtime.caret.dims-and-leaves'), async ({ browser }) => {
   }
 });
 
+// ---------------------------------------------------------------------------------------------
+// the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the two instance case through one object
+
+test(title('setup.do.two-instances'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  test.skip(
+    !TWO_ORIGINS,
+    'one origin: the row needs A and B on two app instances (REALTIME_BASES or PLAYWRIGHT_SECOND_BASE_URL names the second)',
+  );
+  try {
+    const A = await openA(browser, 'Realtime two instances');
+    const { page: B } = await joinB(browser);
+    const statuses = { a: await statusOf(A_BASE), b: await statusOf(B_BASE) };
+    const tier = (await facts(A)).sync?.tier ?? statuses.a.tier;
+    test.skip(
+      tier !== 'do',
+      `the tier is ${tier}, not do: the row reads one Durable Object behind two app instances`,
+    );
+    const one = await bodyBlock(A, B, 'rt-two-a', 'A writes', { x: 160, y: 420, w: 600, h: 140 });
+    const two = await bodyBlock(A, B, 'rt-two-b', 'B writes', { x: 840, y: 420, w: 600, h: 140 });
+    const wordsA = [' a1', ' a2', ' a3', ' a4', ' a5'];
+    const wordsB = [' b1', ' b2', ' b3', ' b4', ' b5'];
+    let lastKey = 0;
+    const typing = (p: Page, run: string, words: string[], gap: number) => async () => {
+      await openRun(p, run);
+      for (const w of words) {
+        await typeHuman(p, w);
+        lastKey = Math.max(lastKey, Date.now());
+        await p.waitForTimeout(gap);
+      }
+      await closeRun(p);
+    };
+    await Promise.all([typing(A, one.run, wordsA, 500)(), typing(B, two.run, wordsB, 600)()]);
+    const since = lastKey;
+    const converged = await expect
+      .poll(
+        async () => {
+          const [a1, a2, b1, b2] = await Promise.all([
+            blockText(A, one.slideId, 'rt-two-a'),
+            blockText(A, two.slideId, 'rt-two-b'),
+            blockText(B, one.slideId, 'rt-two-a'),
+            blockText(B, two.slideId, 'rt-two-b'),
+          ]);
+          return (
+            wordsA.every((w) => countIn(a1, w) === 1 && countIn(b1, w) === 1) &&
+            wordsB.every((w) => countIn(a2, w) === 1 && countIn(b2, w) === 1)
+          );
+        },
+        { timeout: 3000 },
+      )
+      .toBe(true)
+      .then(() => true)
+      .catch(() => false);
+    const convergedMs = Date.now() - since;
+    await Promise.all([quiet(A), quiet(B)]);
+    const [fa, fb] = await Promise.all([facts(A), facts(B)]);
+    const live = Math.max(fa.serverRevision, fb.serverRevision);
+    const [da, db] = await Promise.all([documentOf(A), documentOf(B)]);
+    const hello = {
+      a: {
+        seq: fa.sync?.seq ?? null,
+        covered: fa.sync?.covered,
+        colo: fa.sync?.room?.colo ?? fa.sync?.colo,
+      },
+      b: {
+        seq: fb.sync?.seq ?? null,
+        covered: fb.sync?.covered,
+        colo: fb.sync?.room?.colo ?? fb.sync?.colo,
+      },
+    };
+    test.info().annotations.push({
+      type: 'measure',
+      description: `instances ${statuses.a.instance} and ${statuses.b.instance} (${statuses.a.instance === statuses.b.instance ? 'one instance' : 'two instances'}); the object's colo ${statuses.a.colo} and ${statuses.b.colo}; every word in both ${converged ? 'within' : 'not within'} 3 s of the later last keystroke (${convergedMs} ms); revisions ${da.revision}, ${db.revision} against the live ${live}; sync.seq ${hello.a.seq} and ${hello.b.seq}, sync.covered ${hello.a.covered ?? 'absent'} and ${hello.b.covered ?? 'absent'}, sync.colo ${hello.a.colo ?? 'absent'} and ${hello.b.colo ?? 'absent'}`,
+    });
+    expect(statuses.a.instance, 'the two origins are two app instances').not.toBe(
+      statuses.b.instance,
+    );
+    expect(converged, 'every word in both browsers within 3 s of the later last keystroke').toBe(
+      true,
+    );
+    expect(da.canon, 'A and B read byte equal documents').toBe(db.canon);
+    expect(da.revision, 'at the live revision').toBeGreaterThanOrEqual(live);
+    expect(hello.a.seq, 'sync.seq agrees across both tabs').toBe(hello.b.seq);
+    expect(
+      hello.a.covered,
+      'sync.covered is on describe().state.sync (R2, docs/CLOUDFLARE.md 2.3)',
+    ).not.toBeUndefined();
+    expect(hello.a.covered, 'sync.covered agrees across both tabs').toBe(hello.b.covered);
+    expect(statuses.a.colo, "sync.status names the object's colo").not.toBe('unnamed');
+    expect(statuses.b.colo, 'one object answers both origins').toBe(statuses.a.colo);
+  } finally {
+    await cleanUp();
+  }
+});
+
 coverage(import.meta.filename, [
+  'setup.do.two-instances',
   'realtime.keystroke.within-300ms',
   'realtime.caret.within-300ms',
   'realtime.caret.offset-after-merge',

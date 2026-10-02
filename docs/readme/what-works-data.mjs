@@ -309,6 +309,15 @@ export const FEATURES = [
     shots: [],
   },
   {
+  /* the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md 2.3): the setup rows of the do
+     tier, judged by a gate run on that tier alone; unparkable */
+  {
+    key: 'setup',
+    heading: 'Setup',
+    paragraph:
+      "**Setup.** The realtime Worker answers its health check with the commit it was built from and the app it calls back; two people on one deck through two app instances read one Durable Object and byte equal documents; the account's daily Durable Object and Worker figures, read before and after a release run, stay under the Free plan's caps; and a deck of about 20 MB opened beside three other open decks costs no isolate restart.",
+    shots: [],
+  },
     key: 'logos',
     heading: 'Logos',
     paragraph:

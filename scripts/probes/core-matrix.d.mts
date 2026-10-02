@@ -37,6 +37,7 @@ export type CoreFeature =
   | 'shaders'
   | 'svg'
   | 'realtime'
+  | 'setup'
   | 'surface';
 
 /** The four words of the audits for what production did on the day the matrix was written. */
@@ -68,12 +69,20 @@ export type CoreSpecDriver =
 export type CostProbeDriver = 'cost-probe';
 
 /**
+ * The gate itself (docs/CLOUDFLARE.md 2.3): a row scripts/probes/core-gate.mjs drives in its own
+ * process (the Worker's `/health`) or records from a hand reading given to it (the Free plan's
+ * caps, the memory case).
+ */
+export type GateDriver = 'core-gate';
+
+/**
  * The local spec of docs/PEOPLE.md 6.2: apps/studio/e2e/accounts.spec.ts on a node server with an
  * identity database, run by the gate's `--only accounts` and never by a deployment run.
  */
 export type LocalSpecDriver = 'e2e/accounts.spec.ts';
 
-export type CoreDriver = 'probe --core' | CoreSpecDriver | CostProbeDriver | LocalSpecDriver;
+export type CoreDriver =
+  'probe --core' | CoreSpecDriver | CostProbeDriver | GateDriver | LocalSpecDriver;
 
 /** One row of docs/gslides-parity/focus/core-matrix.json. */
 export type CoreRow = {
@@ -132,6 +141,21 @@ export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];
 export const PROBE_DRIVER: 'probe --core';
 export const COST_PROBE_DRIVER: 'cost-probe';
+export const GATE_DRIVER: 'core-gate';
+/** The features whose rows read one realtime tier alone (docs/CLOUDFLARE.md 2.3): `setup` on `do`. */
+export const TIER_FEATURES: Readonly<Record<string, 'memory' | 'redis' | 'blob' | 'do'>>;
+/** The realtime tier a feature's rows read, or null for a feature every tier reads. */
+export function tierOfFeature(feature: string): 'memory' | 'redis' | 'blob' | 'do' | null;
+/** True for a row of a tier feature: judged by a gate run on its tier alone, listed apart elsewhere. */
+export function isTierRow(row: CoreRow | undefined): boolean;
+/** The tier rows, in the file's order; `tier` narrows them to the rows of that tier. */
+export function tierRows(tier?: string | null): CoreRow[];
+/** The reason a tier row carries in a run whose tier is not the row's. */
+export function tierAbsentReason(row: CoreRow, tier: string | null): string;
+/** True for a row the gate itself drives or records (its driver is `core-gate`). */
+export function isGateRow(row: CoreRow | undefined): boolean;
+/** The gate's own rows, in the file's order. */
+export function gateRows(): CoreRow[];
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
 /** The file of a spec driver under apps/studio/e2e/ (`core/<area>.spec.ts` under core/, `e2e/<name>.spec.ts` at the root). */
 export function specPathOf(driver: string): string;
@@ -171,7 +195,7 @@ export function isKnownControl(id: string): boolean;
 export function coreRow(id: string): CoreRow;
 export function featureOf(id: string): CoreFeature;
 export function rowsForFeature(feature: CoreFeature): CoreRow[];
-/** The rows of a driver: `probe --core` or a `core/<area>.spec.ts` file name, `core/` optional. */
+/** The rows of a driver: `probe --core`, `cost-probe`, `core-gate` or a `core/<area>.spec.ts` file name, `core/` optional. */
 export function rowsForDriver(driver: string): CoreRow[];
 export function probeRows(): CoreRow[];
 /** The rows the cost probe drives (docs/SYNC.md 6.3). */

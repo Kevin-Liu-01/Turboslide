@@ -73,6 +73,30 @@
 // restated per tier (REALTIME.md section 2): the tier is `--tier` when given, else the deck's
 // `sync.status` tier, and `ceilingsFor(id, tier)` picks the numbers.
 //
+// The Cloudflare phase (docs/CLOUDFLARE.md 2.2, 5.2 R5): `--tier do` and the six cost rows per
+// Cloudflare product, `cost.do.requests`, `cost.do.duration`, `cost.do.rows-written`,
+// `cost.d1.reads`, `cost.d1.writes` and `cost.worker.requests`, driven as one editor hour in the
+// Redis row's shape (an editing window at one edit per 5 s and an idle window, the hour counted
+// as 12 editing and 48 idle minutes from the two rates) over one drive: `--all` runs the do rows
+// as one child (`--group <ids>`) and the child writes one JSON per row from the same drive. The
+// Worker's counters are read before, between and after the windows: `GET /rooms/:id/counters`
+// (the object's request units, rows read and rows written off its cursors, its colo) and
+// `GET /db/counters` (the D1 routes' rows read and written), both under `Authorization: Bearer`
+// with TURBOSLIDE_ROOM_BEARER from the environment a wrapper set (never a flag, never printed;
+// the JSON names the host and that a bearer was set), against the host of `--room-host` or
+// TURBOSLIDE_ROOM_HOST (`http` with TURBOSLIDE_ROOM_INSECURE=1 or a loopback host). Each read is
+// itself one request against the object, so the probe takes its own reads off the request
+// count. Two rows read the dashboard alone, since no counter inside the object measures wall
+// time and the function's calls to the Worker are not visible from the browser: `--dashboard
+// <json>` carries the hand read figures of the hour (`doDurationGbs`, `workerRequests`, and
+// `doRequests`, `doRowsWritten`, `d1RowsRead`, `d1RowsWritten` recorded beside the counters);
+// without the file those two rows are not driven with the reason. On the `do` tier the three
+// store rows of the sync round gain two ceilings, the object request units and the rows written
+// a minute, read from the same counters around their window; without the host, the bearer or an
+// answering route a row whose claim needs the counters is not driven with the reason, its
+// function requests still recorded. The page's own requests to the room host (the socket opens,
+// the HTTP belt posts) are counted apart from the function requests (`room`, `roomSockets`).
+//
 // snapshot prune (blob.ts `pruneAtClose`, one `list`). Those calls landed inside the first 60 s
 // window of the pass 1 runs (`list` 1 on the two tabs row, 11 calls on the show row). So after
 // the state is ready the probe reads the counters every SETTLE_EVERY_MS until the row's quiet
@@ -115,6 +139,29 @@ const MINUTES = Number(arg('minutes', '3'));
 const IDLE_MINUTES = Number(arg('idle-minutes', String(MINUTES)));
 /** The realtime tier named by the caller (`--tier`); the deck's sync.status tier when absent. */
 const TIER_ARG = arg('tier', null);
+/** The tiers `--tier` takes (docs/CLOUDFLARE.md 3.6.1: the fourth word is `do`). */
+export const TIER_WORDS = Object.freeze(['redis', 'blob', 'memory', 'do']);
+/** The do rows a child judges from one drive (`--group <ids>`, set by `--all`); the `--row` alone otherwise. */
+const GROUP = (arg('group', null) ?? '')
+  .split(',')
+  .map((x) => x.trim())
+  .filter((x) => x !== '');
+/** The hand read dashboard figures of the hour (`--dashboard <json>`), read once; null without the flag. */
+const DASHBOARD_PATH = arg('dashboard', null);
+/** The Worker host of the `do` tier: `--room-host`, else TURBOSLIDE_ROOM_HOST; null without either. */
+const ROOM_HOST = arg('room-host', null) ?? process.env.TURBOSLIDE_ROOM_HOST ?? null;
+const ROOM_HOST_SOURCE =
+  arg('room-host', null) !== null
+    ? '--room-host'
+    : process.env.TURBOSLIDE_ROOM_HOST
+      ? 'TURBOSLIDE_ROOM_HOST'
+      : 'none';
+/** `http` to the Worker on a checkout (TURBOSLIDE_ROOM_INSECURE=1 or a loopback host); `https` otherwise. */
+const ROOM_INSECURE =
+  process.env.TURBOSLIDE_ROOM_INSECURE === '1' ||
+  /^(127\.0\.0\.1|localhost|\[::1\])(:|$)/.test(ROOM_HOST ?? '');
+/** The room bearer, from the environment alone and never printed; empty when unset. */
+const ROOM_BEARER = process.env.TURBOSLIDE_ROOM_BEARER ?? '';
 /** The Redis URL of `cost.redis.commands` (never printed): --redis-url, else the wrapper's environment. */
 const REDIS_URL =
   arg('redis-url', null) ?? process.env.TURBOSLIDE_PROBE_REDIS_URL ?? process.env.REDIS_URL ?? null;
@@ -135,7 +182,7 @@ const VIEWPORT = { width: 1440, height: 900 };
 const SELF = fileURLToPath(import.meta.url);
 
 const USAGE =
-  'usage: node scripts/probes/sync-cost-probe.mjs --base <origin> (--row <id> | --all [--rows <ids>]) --out <json> [--minutes 3] [--idle-minutes <n>] [--tier redis|blob|memory] [--redis-url <url>] [--shots <dir>]';
+  'usage: node scripts/probes/sync-cost-probe.mjs --base <origin> (--row <id> [--group <ids>] | --all [--rows <ids>]) --out <json> [--minutes 3] [--idle-minutes <n>] [--tier redis|blob|memory|do] [--redis-url <url>] [--room-host <host>] [--dashboard <json>] [--shots <dir>]';
 
 /** The ceilings of docs/SYNC.md 6.1 by row, as the interaction texts give them. */
 export const CEILINGS = Object.freeze({
@@ -156,7 +203,29 @@ export const CEILINGS = Object.freeze({
   /* the realtime round (docs/REALTIME.md section 2): one editor hour of Redis commands, counted
      as 12 editing minutes and 48 idle minutes from the two windows the probe drives */
   'cost.redis.commands': { redisCommandsPerHour: 12_000 },
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the six cost rows per Cloudflare product, one
+     editor hour each counted as the Redis row counts it; the object's request units, rows written
+     and the D1 rows from the Worker's counters, the duration and the Worker's requests from the
+     dashboard's figures given as --dashboard */
+  'cost.do.requests': { objectRequestsPerHour: 300 },
+  'cost.do.duration': { objectGbsPerHour: 20 },
+  'cost.do.rows-written': { rowsWrittenPerHour: 800 },
+  'cost.d1.reads': { d1RowsReadPerHour: 300 },
+  'cost.d1.writes': { d1RowsWrittenPerHour: 20 },
+  'cost.worker.requests': { workerRequestsPerHour: 90 },
 });
+
+/** The six cost rows of the Cloudflare phase (docs/CLOUDFLARE.md 2.2), driven from one editor hour. */
+export const DO_ROWS = Object.freeze([
+  'cost.do.requests',
+  'cost.do.duration',
+  'cost.do.rows-written',
+  'cost.d1.reads',
+  'cost.d1.writes',
+  'cost.worker.requests',
+]);
+/** True for a row of DO_ROWS. */
+export const isDoRow = (id) => DO_ROWS.includes(id);
 
 /**
  * The store ceilings restated per realtime tier (docs/REALTIME.md section 2: on the redis tier no
@@ -166,8 +235,30 @@ export const CEILINGS = Object.freeze({
 export const TIER_CEILINGS = Object.freeze({
   redis: Object.freeze({
     'cost.editor-idle.calls': { simplePerMinute: 10, advancedPerMinute: 2 },
-    'cost.editor-editing.calls': { simplePerMinute: 30, advancedPerMinute: 12 },
+    /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the redis editing column restated from the
+       counters, 12 records at 5 advanced and 2 to 3 simple each (docs/SYNC.md 4.2's count;
+       docs/REALTIME.md section 2 wrote 12 advanced for 12 records) */
+    'cost.editor-editing.calls': { simplePerMinute: 40, advancedPerMinute: 65 },
     'cost.two-tabs-idle.calls': { advancedPerMinute: 2 },
+  }),
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the do tier's column, with the object's request
+     units and rows written a minute read from GET /rooms/:id/counters around the window */
+  do: Object.freeze({
+    'cost.editor-idle.calls': {
+      functionPerMinute: 1,
+      simplePerMinute: 0,
+      advancedPerMinute: 0,
+      objectRequestsPerMinute: 0,
+      rowsWrittenPerMinute: 0,
+    },
+    'cost.editor-editing.calls': {
+      functionPerMinute: 15,
+      simplePerMinute: 40,
+      advancedPerMinute: 65,
+      objectRequestsPerMinute: 20,
+      rowsWrittenPerMinute: 60,
+    },
+    'cost.two-tabs-idle.calls': { advancedPerMinute: 2, objectRequestsPerMinute: 0 },
   }),
 });
 
@@ -249,6 +340,76 @@ export function redisTarget(url) {
     db: Number.isFinite(db) ? db : 0,
     tls: u.protocol === 'rediss:',
   };
+}
+
+/**
+ * The Worker host's facts the JSON may name (docs/CLOUDFLARE.md 2.2): the host, the scheme and
+ * whether a bearer was set; never the bearer.
+ */
+export function roomTarget(host, insecure, bearerSet) {
+  return {
+    host,
+    scheme: insecure ? 'http' : 'https',
+    bearer: bearerSet ? 'TURBOSLIDE_ROOM_BEARER' : 'none',
+  };
+}
+
+/**
+ * The bucket of a counters answer the rows read (build/r1.md R1-R5d): `total` (the object's
+ * counts persisted at every checkpoint, which survive a wake) when the route answers one, else
+ * `sinceWake`, else the answer itself (a flat body). The bucket's name rides in the measures.
+ */
+export function counterBucket(counters) {
+  if (counters?.total && typeof counters.total === 'object')
+    return { name: 'total', bucket: counters.total };
+  if (counters?.sinceWake && typeof counters.sinceWake === 'object')
+    return { name: 'sinceWake', bucket: counters.sinceWake };
+  return { name: 'flat', bucket: counters ?? {} };
+}
+
+/**
+ * The request units of a counters answer: `requests` of its bucket (`counterBucket`), read as
+ * `requests.total` when the route answers an object by kind, the kinds summed when it has no
+ * total, a bare number otherwise, 0 when absent.
+ */
+export function roomRequestsOf(counters) {
+  const r = counterBucket(counters).bucket.requests;
+  if (typeof r === 'number') return r;
+  if (r && typeof r === 'object') {
+    if (typeof r.total === 'number') return r.total;
+    return Object.values(r).reduce((n, v) => n + (typeof v === 'number' ? v : 0), 0);
+  }
+  return 0;
+}
+
+/**
+ * The difference of two counters answers on the fields the cost rows read: the request units
+ * (`roomRequestsOf`), `rowsRead`, `rowsWritten` and, for the D1 route, `queries` and `batches`,
+ * each off the answer's bucket (`counterBucket`); a field absent on either side reads 0.
+ * `ownReads` reads are taken off the request units, since the probe's own counter reads are
+ * requests against the object too, unless the answer says `countsSelf: false`.
+ */
+export function counterDelta(before, after, ownReads = 0) {
+  const b = counterBucket(before).bucket;
+  const a = counterBucket(after).bucket;
+  const n = (c, k) => (typeof c?.[k] === 'number' ? c[k] : 0);
+  const own = after?.countsSelf === false || before?.countsSelf === false ? 0 : ownReads;
+  return {
+    requests: Math.max(0, roomRequestsOf(after) - roomRequestsOf(before) - own),
+    requestsRaw: roomRequestsOf(after) - roomRequestsOf(before),
+    rowsRead: n(a, 'rowsRead') - n(b, 'rowsRead'),
+    rowsWritten: n(a, 'rowsWritten') - n(b, 'rowsWritten'),
+    queries: n(a, 'queries') - n(b, 'queries'),
+    batches: n(a, 'batches') - n(b, 'batches'),
+  };
+}
+
+/** The hour of one counter from its editing and idle windows (the shape of `editorHour`). */
+export function counterHour(editing, idle, field) {
+  return editorHour(
+    { commands: editing.delta[field] ?? 0, minutes: editing.minutes },
+    { commands: idle.delta[field] ?? 0, minutes: idle.minutes },
+  );
 }
 
 /** The fractions of the window at which the five storeCalls samples are read. */
@@ -398,6 +559,119 @@ export function judgeRow(id, counts, where) {
     if (over.length > 0) return { result: 'failed', reason: over.join('; '), measures };
     return { result: 'passed', reason: '', measures };
   }
+  /* the Cloudflare phase's rows (docs/CLOUDFLARE.md 2.2): one editor hour of the object's request
+     units, its rows written, the D1 rows read and written (the Worker's counters around the two
+     windows), the object's duration and the Worker's requests (the dashboard's figures); a row
+     whose source is absent is not driven with the reason, the page's own reading recorded */
+  if (isDoRow(id)) {
+    const room = counts.room ?? null;
+    const db = counts.db ?? null;
+    const dash = counts.dashboard ?? null;
+    const pageSide = `the page made ${fmt(counts.functionPerMinute ?? 0)} function requests a minute and ${counts.roomRequests ?? 0} request(s) to the room host (${counts.roomSockets ?? 0} socket open(s)) in the editing window`;
+    const windows = (w) =>
+      `${fmt(w.editing.minutes)} min editing (${counts.edits ?? 0} edits) and ${fmt(w.idle.minutes)} min idle, counted as 12 editing and 48 idle minutes`;
+    const notDriven = (reason, extra = []) => ({
+      result: 'not driven',
+      reason,
+      measures: [...measures, pageSide, ...extra],
+    });
+    const roomAbsent = () =>
+      room === null || room.where !== 'present'
+        ? (room?.reason ??
+          (ROOM_HOST === null
+            ? 'no room host (--room-host or TURBOSLIDE_ROOM_HOST): the Worker counters cannot be read'
+            : ROOM_BEARER === ''
+              ? 'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment): the Worker counters cannot be read'
+              : 'the Worker counters were not read'))
+        : null;
+    if (counts.tier && counts.tier !== 'do')
+      return notDriven(`a do tier row; this run's tier is ${counts.tier}`);
+    const dashLine =
+      dash === null
+        ? 'no --dashboard <json>: the dashboard figures of the hour were not given'
+        : `the dashboard's figures given for the hour (read ${dash.readAt ?? 'at an unnamed time'}): ${
+            Object.entries(dash)
+              .filter(([k, v]) => k !== 'readAt' && typeof v === 'number')
+              .map(([k, v]) => `${k} ${v}`)
+              .join(', ') || 'none'
+          }`;
+    if (ceiling.objectRequestsPerHour !== undefined || ceiling.rowsWrittenPerHour !== undefined) {
+      const why = roomAbsent();
+      if (why !== null) return notDriven(why, [dashLine]);
+      const field = ceiling.objectRequestsPerHour !== undefined ? 'requests' : 'rowsWritten';
+      const limit = ceiling.objectRequestsPerHour ?? ceiling.rowsWrittenPerHour;
+      const hour = room.hour[field];
+      const word = field === 'requests' ? 'object request units' : 'rows written by the object';
+      measures.push(
+        `${word} an editor hour ${hour.hour} (ceiling ${limit}): ${fmt(hour.editingPerMinute)} a minute over ${windows(room)} (${room.editing.delta[field]} editing, ${room.idle.delta[field]} idle${field === 'requests' ? `; ${room.ownReads} of the probe's own counter reads taken off` : ''})`,
+      );
+      measures.push(
+        `read from GET /rooms/:id/counters on ${room.target.scheme}://${room.target.host} (bearer ${room.target.bearer}; the ${room.bucket ?? 'flat'} counts); the object's colo ${room.colo ?? 'unnamed'}; rows read ${room.editing.delta.rowsRead + room.idle.delta.rowsRead} over both windows`,
+      );
+      measures.push(dashLine, pageSide);
+      if (hour.hour > limit) over.push(`${word} an editor hour ${hour.hour} over ${limit}`);
+    } else if (
+      ceiling.d1RowsReadPerHour !== undefined ||
+      ceiling.d1RowsWrittenPerHour !== undefined
+    ) {
+      if (db === null || db.where !== 'present')
+        return notDriven(db?.reason ?? roomAbsent() ?? 'GET /db/counters was not read', [dashLine]);
+      const field = ceiling.d1RowsReadPerHour !== undefined ? 'rowsRead' : 'rowsWritten';
+      const limit = ceiling.d1RowsReadPerHour ?? ceiling.d1RowsWrittenPerHour;
+      const hour = db.hour[field];
+      const word = field === 'rowsRead' ? 'D1 rows read' : 'D1 rows written';
+      measures.push(
+        `${word} an editor hour ${hour.hour} (ceiling ${limit}; ${counts.signedIn ? 'a signed in tab' : 'an anonymous tab, so the signed in hour of the row is not this reading'}): ${db.editing.delta[field]} editing and ${db.idle.delta[field]} idle over ${windows(db)}; ${db.editing.delta.queries + db.idle.delta.queries} /db/query and ${db.editing.delta.batches + db.idle.delta.batches} /db/batch call(s)`,
+      );
+      measures.push(
+        `read from GET /db/counters on ${db.target.scheme}://${db.target.host} (bearer ${db.target.bearer})`,
+      );
+      measures.push(dashLine, pageSide);
+      if (hour.hour > limit) over.push(`${word} an editor hour ${hour.hour} over ${limit}`);
+    } else if (ceiling.objectGbsPerHour !== undefined) {
+      if (dash === null || typeof dash.doDurationGbs !== 'number')
+        return notDriven(
+          "the dashboard's duration metric for the hour was not given (--dashboard <json> with doDurationGbs); no counter inside the object reads wall time",
+          [dashLine],
+        );
+      measures.push(
+        `Durable Object duration for the hour ${dash.doDurationGbs} GB-s (ceiling ${ceiling.objectGbsPerHour}), the dashboard's figure`,
+        dashLine,
+        pageSide,
+      );
+      if (dash.doDurationGbs > ceiling.objectGbsPerHour)
+        over.push(
+          `Durable Object duration ${dash.doDurationGbs} GB-s over ${ceiling.objectGbsPerHour}`,
+        );
+    } else if (ceiling.workerRequestsPerHour !== undefined) {
+      if (dash === null || typeof dash.workerRequests !== 'number')
+        return notDriven(
+          "the dashboard's Workers analytics for the hour were not given (--dashboard <json> with workerRequests); the function's calls to the Worker are not visible from the browser",
+          [dashLine],
+        );
+      const limit = counts.signedIn ? ceiling.workerRequestsPerHour : 30;
+      const control = counts.control ?? null;
+      const classes = (body) =>
+        body && typeof body === 'object'
+          ? Object.entries(body)
+              .filter(([, v]) => typeof v === 'number')
+              .map(([k, v]) => `${k} ${v}`)
+              .join(', ') || 'none'
+          : 'none';
+      measures.push(
+        `Worker requests for the hour ${dash.workerRequests} (ceiling ${limit} for ${counts.signedIn ? 'a signed in tab' : 'an anonymous tab'}), the dashboard's figure; from the browser ${counts.roomRequestsHour ?? 'unread'} an hour (${counts.roomRequests ?? 0} request(s) and ${counts.roomSockets ?? 0} socket open(s) in the editing window)${control ? `; the isolate's own counts by class (GET /control/counters, ${control.after?.where ?? 'unread'}): before ${classes(control.before?.body)}; after ${classes(control.after?.body)}` : ''}`,
+        dashLine,
+        pageSide,
+      );
+      if (dash.workerRequests > limit)
+        over.push(`Worker requests for the hour ${dash.workerRequests} over ${limit}`);
+    }
+    if (counts.failedRequests > 0)
+      over.push(`${counts.failedRequests} request(s) of the page failed or answered 5xx`);
+    if (counts.connected === false) over.push('the tab lost its channel during the windows');
+    if (over.length > 0) return { result: 'failed', reason: over.join('; '), measures };
+    return { result: 'passed', reason: '', measures };
+  }
   /* a state the probe never reached (the hidden tab when the browser reads visible) is not driven
      with the reason, whatever the visible tab's counts read; the counts are still recorded */
   if (counts.notDriven)
@@ -537,9 +811,50 @@ export function judgeRow(id, counts, where) {
       storeNote = `no bearer for sync.status on ${BASE} (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven`;
     }
   }
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): on the do tier the store rows carry the object's
+     request units and rows written a minute, read from GET /rooms/:id/counters around the window;
+     a row whose claim needs them and whose counters could not be read is not driven with the reason */
+  let roomNote = '';
+  if (ceiling.objectRequestsPerMinute !== undefined || ceiling.rowsWrittenPerMinute !== undefined) {
+    const room = counts.room ?? null;
+    if (room !== null && room.where === 'present' && room.window) {
+      const w = room.window;
+      if (ceiling.objectRequestsPerMinute !== undefined) {
+        measures.push(
+          `object request units ${fmt(w.requestsPerMinute)} a minute (ceiling ${ceiling.objectRequestsPerMinute}; ${w.delta.requests} in ${fmt(w.minutes)} min after ${w.ownReads} of the probe's own counter reads were taken off)`,
+        );
+        if (w.requestsPerMinute > ceiling.objectRequestsPerMinute)
+          over.push(
+            `object request units ${fmt(w.requestsPerMinute)} a minute over ${ceiling.objectRequestsPerMinute}`,
+          );
+      }
+      if (ceiling.rowsWrittenPerMinute !== undefined) {
+        measures.push(
+          `rows written by the object ${fmt(w.rowsWrittenPerMinute)} a minute (ceiling ${ceiling.rowsWrittenPerMinute}; ${w.delta.rowsWritten} in ${fmt(w.minutes)} min)`,
+        );
+        if (w.rowsWrittenPerMinute > ceiling.rowsWrittenPerMinute)
+          over.push(
+            `rows written by the object ${fmt(w.rowsWrittenPerMinute)} a minute over ${ceiling.rowsWrittenPerMinute}`,
+          );
+      }
+      measures.push(
+        `read from GET /rooms/:id/counters on ${room.target.scheme}://${room.target.host} (bearer ${room.target.bearer}); the object's colo ${room.colo ?? 'unnamed'}`,
+      );
+    } else {
+      roomNote =
+        room?.reason ??
+        (ROOM_HOST === null
+          ? 'no room host (--room-host or TURBOSLIDE_ROOM_HOST): the object half is not driven'
+          : ROOM_BEARER === ''
+            ? 'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment): the object half is not driven'
+            : 'the Worker counters were not read: the object half is not driven');
+      measures.push(roomNote);
+    }
+  }
   if (over.length > 0) return { result: 'failed', reason: over.join('; '), measures };
   if (storeNote !== '' && where !== 'zero')
     return { result: 'not driven', reason: storeNote, measures };
+  if (roomNote !== '') return { result: 'not driven', reason: roomNote, measures };
   return { result: 'passed', reason: '', measures };
 }
 
@@ -692,7 +1007,7 @@ const ORIGIN_HOST = (() => {
   }
 })();
 
-export function routeOf(url, originHost = ORIGIN_HOST) {
+export function routeOf(url, originHost = ORIGIN_HOST, roomHost = ROOM_HOST) {
   let u;
   try {
     u = new URL(url);
@@ -701,6 +1016,16 @@ export function routeOf(url, originHost = ORIGIN_HOST) {
   }
   if (u.hostname.endsWith('.blob.vercel-storage.com'))
     return { route: 'blob public host', kind: 'store' };
+  /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the page's own requests to the Worker (the
+     socket opens, the HTTP belt posts, the presence leave) are counted apart from the function
+     requests; a loopback host is matched on its port as well */
+  if (roomHost !== null && u.host === roomHost) {
+    const m = /^\/rooms\/[^/]+(\/[a-z-]+)?/.exec(u.pathname);
+    return {
+      route: `room ${m ? `/rooms/<id>${m[1] ?? ''}` : u.pathname}`,
+      kind: u.protocol === 'ws:' || u.protocol === 'wss:' ? 'socket' : 'room',
+    };
+  }
   if (u.host !== originHost) return { route: `third party ${u.hostname}`, kind: 'other' };
   const p = u.pathname;
   let m;
@@ -779,6 +1104,25 @@ function attachLog(page, who, records) {
     row.ms = now() - row.t;
     row.failed = request.failure()?.errorText ?? 'failed';
   });
+  /* the Cloudflare phase: a WebSocket open to the room host is one request of the page to the
+     Worker (the upgrade counts as a request before the ticket is verified, docs/CLOUDFLARE.md 1.3) */
+  page.on('websocket', (ws) => {
+    const { route, kind } = routeOf(ws.url());
+    if (kind !== 'socket' && kind !== 'room') return;
+    records.push({
+      who,
+      t: now(),
+      route,
+      kind: 'socket',
+      method: 'WS',
+      type: 'websocket',
+      status: null,
+      ms: null,
+      failed: null,
+      fn: null,
+      _req: null,
+    });
+  });
 }
 
 /** The requests inside [t0, t1) by route, with the function request count and the polls. */
@@ -809,6 +1153,9 @@ export function summarize(records, t0, t1) {
     presence: fn.filter((r) => r.route === '/api/decks/<id>/presence').length,
     ops: fn.filter((r) => r.route === '/api/decks/<id>/ops').length,
     streams: fn.filter((r) => r.route === '/api/decks/<id>/stream').length,
+    /* the Cloudflare phase: the page's requests to the room host and its socket opens, apart */
+    room: inWindow.filter((r) => r.kind === 'room' || r.kind === 'socket').length,
+    roomSockets: inWindow.filter((r) => r.kind === 'socket').length,
     /* a request that failed or answered 5xx; an aborted stream at the window's end is not a failure */
     failedRequests: fn.filter(
       (r) =>
@@ -1051,6 +1398,143 @@ async function sampleStoreCalls(api, deckId, auth) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// the Worker's counters (the Cloudflare phase, docs/CLOUDFLARE.md 2.2, 3.6.2)
+
+/** The room host's facts for the JSON, or null without a host. */
+function roomFacts() {
+  return ROOM_HOST === null ? null : roomTarget(ROOM_HOST, ROOM_INSECURE, ROOM_BEARER !== '');
+}
+
+/**
+ * One GET under the room bearer against the Worker (`/rooms/<id>/counters` or `/db/counters`),
+ * answering `{ where, body, status, reason }`: `present` with the JSON body, `no-host`,
+ * `no-bearer`, `refused` (a status other than 200) or `unreachable`. The bearer rides in memory
+ * and is never printed; a 10 s deadline bounds the call.
+ */
+async function readWorker(path) {
+  if (ROOM_HOST === null)
+    return {
+      where: 'no-host',
+      body: null,
+      status: 0,
+      reason:
+        'no room host (--room-host or TURBOSLIDE_ROOM_HOST): the Worker counters cannot be read',
+    };
+  if (ROOM_BEARER === '')
+    return {
+      where: 'no-bearer',
+      body: null,
+      status: 0,
+      reason:
+        'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment): the Worker counters cannot be read',
+    };
+  const url = `${ROOM_INSECURE ? 'http' : 'https'}://${ROOM_HOST}${path}`;
+  const at = now();
+  try {
+    const res = await fetch(url, {
+      headers: { authorization: `Bearer ${ROOM_BEARER}`, accept: 'application/json' },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const text = await res.text();
+    let body = null;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = null;
+    }
+    if (res.status !== 200 || body === null)
+      return {
+        where: 'refused',
+        body,
+        status: res.status,
+        at,
+        reason: `GET ${path} on ${ROOM_HOST} answered ${res.status}${body === null ? ' with no JSON' : ''}`,
+      };
+    return { where: 'present', body, status: 200, at };
+  } catch (error) {
+    return {
+      where: 'unreachable',
+      body: null,
+      status: 0,
+      at,
+      reason: `GET ${path} on ${ROOM_HOST} did not answer: ${String(error?.message ?? error).slice(0, 160)}`,
+    };
+  }
+}
+const readRoomCounters = (deckId) => readWorker(`/rooms/${encodeURIComponent(deckId)}/counters`);
+const readDbCounters = () => readWorker('/db/counters');
+/** The Worker's per isolate request counts by class (build/r1.md R1-R5d): recorded beside the dashboard's figure, never the figure of record. */
+const readControlCounters = () => readWorker('/control/counters');
+
+/** The hand read dashboard figures of the hour (`--dashboard <json>`), or null; a bad file is an error named in the JSON. */
+function readDashboard() {
+  if (DASHBOARD_PATH === null) return null;
+  const parsed = JSON.parse(readFileSync(resolve(DASHBOARD_PATH), 'utf8'));
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))
+    throw new Error(`${DASHBOARD_PATH}: expected an object of the hour's figures`);
+  return parsed;
+}
+
+/**
+ * The counters around two windows: `before`, `mid` and `after` are `readWorker` answers; the
+ * deltas of each window with the probe's own reads taken off the request units (one read closes
+ * each window), the hour per field and the object's colo. `where` is `present` when every read
+ * answered, else the first failing read's word and reason.
+ */
+function counterWindows(before, mid, after, editingMinutes, idleMinutes) {
+  const failing = [before, mid, after].find((r) => r.where !== 'present');
+  if (failing)
+    return { where: failing.where, reason: failing.reason, readsAt: [before.at, mid.at, after.at] };
+  const editing = { minutes: editingMinutes, delta: counterDelta(before.body, mid.body, 1) };
+  const idle = { minutes: idleMinutes, delta: counterDelta(mid.body, after.body, 1) };
+  const hour = {};
+  for (const field of ['requests', 'rowsRead', 'rowsWritten', 'queries', 'batches'])
+    hour[field] = counterHour(editing, idle, field);
+  return {
+    where: 'present',
+    editing,
+    idle,
+    hour,
+    ownReads: after.body?.countsSelf === false ? 0 : 2,
+    bucket: counterBucket(after.body).name,
+    colo: after.body?.colo ?? after.body?.room?.colo ?? mid.body?.colo ?? before.body?.colo ?? null,
+    readsAt: [before.at, mid.at, after.at],
+    last: after.body,
+  };
+}
+
+/**
+ * The counters around one window (the store rows on the do tier): the delta with the probe's one
+ * closing read taken off, per minute; `where` as `counterWindows`.
+ */
+function roomWindow(before, after, minutes) {
+  const target = roomFacts();
+  const failing = [before, after].find((r) => r.where !== 'present');
+  if (failing) return { where: failing.where, reason: failing.reason, target };
+  const delta = counterDelta(before.body, after.body, 1);
+  const m = Math.max(minutes, 1 / 60);
+  return {
+    where: 'present',
+    target,
+    bucket: counterBucket(after.body).name,
+    colo: after.body?.colo ?? after.body?.room?.colo ?? before.body?.colo ?? null,
+    window: {
+      minutes,
+      delta,
+      ownReads: after.body?.countsSelf === false ? 0 : 1,
+      requestsPerMinute: Number((delta.requests / m).toFixed(2)),
+      rowsWrittenPerMinute: Number((delta.rowsWritten / m).toFixed(2)),
+    },
+    reads: [before, after].map((r) => ({
+      where: r.where,
+      status: r.status,
+      at: r.at ?? null,
+      body: r.body,
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // the scratch deck and its teardown
 
 async function freshDeck(page) {
@@ -1278,6 +1762,8 @@ async function runRow(id) {
         log('visibility after bringToFront', visibility);
       }
       const settledAs = await settle();
+      /* the Cloudflare phase: on the do tier the object's counters are read around the window */
+      const roomBefore = out.tier === 'do' ? await readRoomCounters(deck.id) : null;
       const t0 = now();
       await shot(A, `${id}-start`);
       const sampling = sampler(t0, windowMs);
@@ -1302,6 +1788,7 @@ async function runRow(id) {
       }
       await sampling;
       const t1 = now();
+      const roomAfter = out.tier === 'do' ? await readRoomCounters(deck.id) : null;
       await shot(A, `${id}-end`);
       const s = await state(A);
       out.phases.window = summarize(records, t0, t1);
@@ -1315,7 +1802,11 @@ async function runRow(id) {
         connected: s.sync?.connected ?? null,
         notDriven,
         settle: settledAs,
+        ...(roomBefore
+          ? { room: roomWindow(roomBefore, roomAfter, out.phases.window.minutes) }
+          : {}),
       };
+      if (roomBefore) out.room = counts.room;
     }
 
     if (id === 'cost.two-tabs-idle.calls') {
@@ -1332,13 +1823,16 @@ async function runRow(id) {
       await dismissPrompt(B);
       await sleep(5000);
       const settledAs = await settle();
+      const roomBefore = out.tier === 'do' ? await readRoomCounters(deck.id) : null;
       const t0 = now();
       await shot(A, `${id}-a-start`);
       await shot(B, `${id}-b-start`);
       await sampler(t0, windowMs);
       const t1 = now();
+      const roomAfter = out.tier === 'do' ? await readRoomCounters(deck.id) : null;
       const [sa, sb] = await Promise.all([state(A), state(B)]);
       out.phases.window = summarize(records, t0, t1);
+      if (roomBefore) out.room = roomWindow(roomBefore, roomAfter, out.phases.window.minutes);
       out.roster = {
         a: { clientId: sa.presence?.clientId ?? null, others: (sa.presence?.others ?? []).length },
         b: { clientId: sb.presence?.clientId ?? null, others: (sb.presence?.others ?? []).length },
@@ -1348,6 +1842,7 @@ async function runRow(id) {
         connected: sa.sync?.connected === true && sb.sync?.connected === true,
         mutual: (sa.presence?.others ?? []).length >= 1 && (sb.presence?.others ?? []).length >= 1,
         settle: settledAs,
+        ...(out.room ? { room: out.room } : {}),
       };
     }
 
@@ -1485,6 +1980,127 @@ async function runRow(id) {
       };
     }
 
+    if (isDoRow(id)) {
+      /* the Cloudflare phase's rows (docs/CLOUDFLARE.md 2.2): one editor hour in the Redis row's
+         shape, the Worker's counters read before, between and after the two windows under the
+         room bearer, the dashboard's figures read from --dashboard; every row of GROUP is judged
+         from this one drive (runAll's grouping) */
+      out.room = { target: roomFacts(), source: ROOM_HOST_SOURCE };
+      let dashboard = null;
+      try {
+        dashboard = readDashboard();
+      } catch (error) {
+        out.dashboardError = String(error).slice(0, 200);
+      }
+      out.dashboard = dashboard;
+      await sleep(5000);
+      const r0 = await readRoomCounters(deck.id);
+      const d0 = await readDbCounters();
+      const c0 = await readControlCounters();
+      log(
+        'counters',
+        r0.where,
+        r0.reason ?? `requests ${roomRequestsOf(r0.body)}`,
+        '| db',
+        d0.where,
+      );
+      const target = deck.body ?? deck.head;
+      const editMs = MINUTES * 60_000;
+      const idleMs = IDLE_MINUTES * 60_000;
+      const tE0 = now();
+      await shot(A, `${id}-editing-start`);
+      let n = 0;
+      const endE = tE0 + editMs;
+      while (now() < endE) {
+        const tick = now();
+        try {
+          await openRun(A, target);
+          await typeHuman(A, n % 2 === 0 ? 'ok ' : 'go ');
+          await A.keyboard.press('Escape');
+          n += 1;
+        } catch (error) {
+          (out.editErrors ??= []).push(String(error).split('\n')[0].slice(0, 200));
+        }
+        const wait = 5000 - (now() - tick);
+        if (wait > 0) await sleep(Math.min(wait, Math.max(0, endE - now())));
+      }
+      /* the last edit's run lands with the checkpoint's idle cadence before the counters are read */
+      await sleep(2500);
+      const tE1 = now();
+      const r1 = await readRoomCounters(deck.id);
+      const d1 = await readDbCounters();
+      out.edits = n;
+      const tI0 = now();
+      await sleep(idleMs);
+      const tI1 = now();
+      const r2 = await readRoomCounters(deck.id);
+      const d2 = await readDbCounters();
+      const c2 = await readControlCounters();
+      await shot(A, `${id}-idle-end`);
+      const s = await state(A);
+      out.phases.editing = summarize(records, tE0, tE1);
+      out.phases.idle = summarize(records, tI0, tI1);
+      out.phases.window = out.phases.editing;
+      const room = counterWindows(r0, r1, r2, out.phases.editing.minutes, out.phases.idle.minutes);
+      const db = counterWindows(d0, d1, d2, out.phases.editing.minutes, out.phases.idle.minutes);
+      out.room = {
+        ...out.room,
+        ...room,
+        reads: [r0, r1, r2].map((r) => ({
+          where: r.where,
+          status: r.status,
+          at: r.at ?? null,
+          body: r.body,
+        })),
+      };
+      out.db = {
+        target: roomFacts(),
+        ...db,
+        reads: [d0, d1, d2].map((r) => ({
+          where: r.where,
+          status: r.status,
+          at: r.at ?? null,
+          body: r.body,
+        })),
+      };
+      /* the Worker's own per isolate counts by class around the whole drive (R1-R5d), recorded beside the dashboard's figure */
+      out.control = {
+        target: roomFacts(),
+        before: { where: c0.where, status: c0.status, body: c0.body, reason: c0.reason ?? null },
+        after: { where: c2.where, status: c2.status, body: c2.body, reason: c2.reason ?? null },
+      };
+      if (room.where === 'present')
+        log(
+          'room',
+          `requests ${room.editing.delta.requests} editing and ${room.idle.delta.requests} idle (hour ${room.hour.requests.hour}), rows written ${room.editing.delta.rowsWritten} and ${room.idle.delta.rowsWritten} (hour ${room.hour.rowsWritten.hour}), colo ${room.colo ?? 'unnamed'}`,
+        );
+      else log('room', room.where, room.reason ?? '');
+      if (db.where === 'present')
+        log(
+          'db',
+          `rows read ${db.hour.rowsRead.hour} an hour, rows written ${db.hour.rowsWritten.hour} an hour`,
+        );
+      else log('db', db.where, db.reason ?? '');
+      const roomHour = editorHour(
+        { commands: out.phases.editing.room, minutes: out.phases.editing.minutes },
+        { commands: out.phases.idle.room, minutes: out.phases.idle.minutes },
+      );
+      counts = {
+        ...windowCounts(out.phases.editing),
+        connected: s.sync?.connected ?? null,
+        edits: n,
+        room: { ...room, target: roomFacts() },
+        db: { ...db, target: roomFacts() },
+        dashboard,
+        roomRequests: out.phases.editing.room,
+        roomSockets: out.phases.editing.roomSockets,
+        roomRequestsHour: roomHour.hour,
+        control: out.control,
+        /* the probe's tab is anonymous: a signed in hour is a hosted run's with a session, named by the measure */
+        signedIn: false,
+      };
+    }
+
     if (id === 'sync.pull.no-listing') {
       ctxB = await browser.newContext({
         viewport: VIEWPORT,
@@ -1584,6 +2200,21 @@ async function runRow(id) {
     out.reason = verdict.reason;
     out.measures = verdict.measures;
     log(id, verdict.result, verdict.reason || '', '|', verdict.measures.join(' | '));
+    /* the Cloudflare phase: the siblings of a grouped drive (the do rows), judged from the same counts */
+    if (GROUP.length > 0) {
+      out.group = {};
+      for (const sibling of GROUP) {
+        if (sibling === id) continue;
+        const v = judgeRow(sibling, counts, where);
+        out.group[sibling] = {
+          result: v.result,
+          reason: v.reason,
+          measures: v.measures,
+          ceilings: CEILINGS[sibling],
+        };
+        log(sibling, v.result, v.reason || '', '|', v.measures.join(' | '));
+      }
+    }
   } catch (error) {
     out.error = String(error && error.stack ? error.stack : error)
       .split('\n')
@@ -1637,51 +2268,70 @@ function runAll() {
   mkdirSync(dir, { recursive: true });
   const rows = [];
   const startedAt = new Date().toISOString();
-  for (const id of ids) {
+  /* the Cloudflare phase: the do rows run as one child from one drive (`--group`), the child
+     writing one JSON per row; the first of them is the child's `--row` */
+  const doGroup = ids.filter(isDoRow);
+  const plan = ids.filter((id) => !isDoRow(id) || id === doGroup[0]);
+  for (const id of plan) {
     const json = join(dir, `${id}.json`);
     const args = [SELF, '--base', BASE, '--row', id, '--out', json, '--minutes', String(MINUTES)];
     if (SHOTS) args.push('--shots', SHOTS);
     if (arg('idle-minutes', null) !== null) args.push('--idle-minutes', String(IDLE_MINUTES));
     if (TIER_ARG !== null) args.push('--tier', TIER_ARG);
+    if (isDoRow(id) && doGroup.length > 1) args.push('--group', doGroup.join(','));
+    if (arg('room-host', null) !== null) args.push('--room-host', arg('room-host', null));
+    if (DASHBOARD_PATH !== null) args.push('--dashboard', DASHBOARD_PATH);
     console.log(
       `sync-cost-probe: node ${args.map((a) => (a === SELF ? 'scripts/probes/sync-cost-probe.mjs' : a)).join(' ')}${arg('redis-url', null) !== null ? ' --redis-url <set>' : ''}`,
     );
     /* the Redis URL rides to the child after the line above was printed; never printed itself */
     if (arg('redis-url', null) !== null) args.push('--redis-url', arg('redis-url', null));
     const run = spawnSync(process.execPath, args, { stdio: 'inherit', env: process.env });
-    if (existsSync(json)) {
-      const parsed = JSON.parse(readFileSync(json, 'utf8'));
-      rows.push({
-        id,
-        result: parsed.result,
-        reason: parsed.reason ?? '',
-        measures: parsed.measures ?? [],
-        counts: parsed.counts ?? null,
-        ceilings: parsed.ceilings ?? null,
-        where: parsed.where ?? null,
-        instances: parsed.storeCalls?.instances ?? [],
-        settle: parsed.phases?.settle
-          ? {
-              settled: parsed.phases.settle.settled,
-              ms: parsed.phases.settle.ms,
-              samples: parsed.phases.settle.samples?.length ?? 0,
-            }
-          : null,
-        tier: parsed.tier ?? null,
-        deck: parsed.deck?.id ?? null,
-        teardown: parsed.teardown ?? null,
-        json,
-        exit: run.status,
-      });
-    } else {
-      rows.push({
-        id,
-        result: 'failed',
-        reason: `the cost probe wrote no JSON for ${id} (exit ${run.status})`,
-        measures: [],
-        json: null,
-        exit: run.status,
-      });
+    const members = isDoRow(id) ? doGroup : [id];
+    for (const member of members) {
+      const file = member === id ? json : join(dir, `${member}.json`);
+      if (existsSync(file)) {
+        const parsed = JSON.parse(readFileSync(file, 'utf8'));
+        rows.push({
+          id: member,
+          result: parsed.result,
+          reason: parsed.reason ?? '',
+          measures: parsed.measures ?? [],
+          counts: parsed.counts ?? null,
+          ceilings: parsed.ceilings ?? null,
+          where: parsed.where ?? null,
+          instances: parsed.storeCalls?.instances ?? [],
+          settle: parsed.phases?.settle
+            ? {
+                settled: parsed.phases.settle.settled,
+                ms: parsed.phases.settle.ms,
+                samples: parsed.phases.settle.samples?.length ?? 0,
+              }
+            : null,
+          tier: parsed.tier ?? null,
+          /* the Cloudflare phase: the Worker host and the object's colo the row read, never the bearer */
+          room: parsed.room
+            ? {
+                where: parsed.room.where ?? null,
+                target: parsed.room.target ?? null,
+                colo: parsed.room.colo ?? null,
+              }
+            : null,
+          deck: parsed.deck?.id ?? null,
+          teardown: parsed.teardown ?? null,
+          json: file,
+          exit: run.status,
+        });
+      } else {
+        rows.push({
+          id: member,
+          result: 'failed',
+          reason: `the cost probe wrote no JSON for ${member} (exit ${run.status})`,
+          measures: [],
+          json: null,
+          exit: run.status,
+        });
+      }
     }
   }
   const instances = [...new Set(rows.flatMap((r) => r.instances ?? []))];
@@ -1693,6 +2343,9 @@ function runAll() {
     minutes: MINUTES,
     idleMinutes: IDLE_MINUTES,
     tier: TIER_ARG ?? rows.find((r) => r.tier)?.tier ?? null,
+    /* the Cloudflare phase: the Worker host the run read, its source and whether a bearer was set */
+    room: roomFacts() === null ? null : { ...roomFacts(), source: ROOM_HOST_SOURCE },
+    dashboard: DASHBOARD_PATH,
     instances,
     rows,
     exitCode,
@@ -1718,9 +2371,15 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
     console.error(USAGE);
     process.exit(2);
   }
-  if (TIER_ARG !== null && !['redis', 'blob', 'memory'].includes(TIER_ARG)) {
+  if (TIER_ARG !== null && !TIER_WORDS.includes(TIER_ARG)) {
     console.error(
-      `sync-cost-probe: --tier takes redis, blob or memory, not ${JSON.stringify(TIER_ARG)}`,
+      `sync-cost-probe: --tier takes redis, blob, memory or do, not ${JSON.stringify(TIER_ARG)}`,
+    );
+    process.exit(2);
+  }
+  if (GROUP.some((id) => !isDoRow(id)) || (GROUP.length > 0 && !isDoRow(ROW ?? ''))) {
+    console.error(
+      `sync-cost-probe: --group takes the do rows alone (${DO_ROWS.join(', ')}) with one of them as --row`,
     );
     process.exit(2);
   }
@@ -1735,10 +2394,34 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.
     }
     const out = await runRow(ROW);
     mkdirSync(dirname(resolve(OUT)), { recursive: true });
-    writeFileSync(resolve(OUT), JSON.stringify(out, null, 2));
+    const { group, ...primary } = out;
+    writeFileSync(resolve(OUT), JSON.stringify(primary, null, 2));
     console.log(
       `sync-cost-probe: ${ROW} ${out.result}${out.reason ? ` (${out.reason})` : ''}; ${resolve(OUT)}`,
     );
-    process.exit(out.result === 'failed' ? 1 : 0);
+    /* the Cloudflare phase: one JSON per sibling of a grouped drive, beside the primary's */
+    let failed = out.result === 'failed';
+    for (const [sibling, verdict] of Object.entries(group ?? {})) {
+      const file = join(dirname(resolve(OUT)), `${sibling}.json`);
+      writeFileSync(
+        file,
+        JSON.stringify(
+          {
+            ...primary,
+            id: sibling,
+            interaction: coreRow(sibling).interaction,
+            ...verdict,
+            groupedWith: ROW,
+          },
+          null,
+          2,
+        ),
+      );
+      console.log(
+        `sync-cost-probe: ${sibling} ${verdict.result}${verdict.reason ? ` (${verdict.reason})` : ''}; ${file} (from the drive of ${ROW})`,
+      );
+      if (verdict.result === 'failed') failed = true;
+    }
+    process.exit(failed ? 1 : 0);
   }
 }

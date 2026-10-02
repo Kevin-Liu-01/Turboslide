@@ -1,14 +1,30 @@
-// The realtime round's verifier drive (docs/REALTIME.md 5.1 R5, 5.4; the verifier's hand rows),
-// generalised from docs/gslides-parity/realtime/people-drive/drive.mjs: two anonymous browsers on
-// one scratch deck, A on one origin and B on another when two are given (the two process run of
-// REALTIME.md 5.4 item 1 over one tmp overlay, or two instances of a deployment), both on slide 1,
-// reading what each sees of the other at every step of REALTIME.md section 2 with a timestamp per
-// step, a picture per step and the facts in one JSON, then the deck removed by its id. The drive
-// judges nothing: it records what happened and the verifier reads the pictures and the numbers
-// against the rows' bounds; a step that could not be driven is recorded with its reason.
+// The verifier drive of the realtime round and its Cloudflare phase (docs/REALTIME.md 5.1 R5, 5.4;
+// docs/CLOUDFLARE.md 5.1, the verifier's hand rows on the `do` tier), moved here from
+// docs/gslides-parity/realtime/verify/verify.mjs and generalised from
+// docs/gslides-parity/realtime/people-drive/drive.mjs: two anonymous browsers on one scratch deck,
+// A on one origin and B on another when two are given (the two process run of CLOUDFLARE.md 5.4
+// over one tmp overlay with one Worker between them, or two instances of a deployment), both on
+// slide 1, reading what each sees of the other at every step of REALTIME.md section 2 with a
+// timestamp per step, a picture per step and the facts in one JSON, then the deck removed by its
+// id. The drive judges nothing: it records what happened and the verifier reads the pictures and
+// the numbers against the rows' bounds; a step that could not be driven is recorded with its reason.
 //
-//   node docs/gslides-parity/realtime/verify/verify.mjs --base <originA> [--base-b <originB>]
-//     [--out <dir>] [--headed] [--type-delay 70]
+//   node docs/gslides-parity/cloudflare/verify/verify.mjs --base <originA> [--base-b <originB>]
+//     [--room-host <host>] [--out <dir>] [--headed] [--type-delay 70]
+//
+// The do run (CLOUDFLARE.md section 2): `sync.status` is read on both origins for the instance, the
+// tier and the object's colo (`colo`, R1's field, "unnamed" until it lands); the Worker named by
+// `--room-host` or TURBOSLIDE_ROOM_HOST answers `GET /health` once before the drive (the setup row
+// `setup.worker.health`'s facts: the status, the time, `realtime`, `commit`, `appOrigin`) and, when
+// TURBOSLIDE_ROOM_BEARER is in the environment (a wrapper sets it; nothing here prints it),
+// `GET /rooms/<id>/counters` and `GET /db/counters` before and after the drive, so the object's
+// request units, rows written and the D1 rows the whole drive cost are in the facts (the cost rows
+// of 2.2 read the same counters over an editor hour); a step `two instances` types five words from
+// each browser into two blocks through the two origins and records the two slide documents, the
+// revisions, `sync.seq`, `sync.covered` and `sync.colo` of both tabs (the setup row
+// `setup.do.two-instances`'s facts; `covered` and `colo` are R2's fields, recorded as absent until
+// they land). The page's own requests to the room host (the socket opens, the HTTP belt) are
+// counted per page beside the presence, ops and stream requests.
 //
 // The bearer for a deployment's teardown reaches this process as TURBOSLIDE_BEARER or
 // TURBOSLIDE_TOKEN, set by a wrapper that reads ~/.config/turboslide/hosts.json (nothing here
@@ -33,7 +49,7 @@ const BASE_A = (arg('base', process.env.PLAYWRIGHT_BASE_URL) ?? '').replace(/\/$
 const BASE_B = (arg('base-b', BASE_A) ?? BASE_A).replace(/\/$/, '');
 if (!BASE_A) {
   console.error(
-    'usage: node docs/gslides-parity/realtime/verify/verify.mjs --base <originA> [--base-b <originB>] [--out <dir>] [--headed] [--type-delay 70]',
+    'usage: node docs/gslides-parity/cloudflare/verify/verify.mjs --base <originA> [--base-b <originB>] [--room-host <host>] [--out <dir>] [--headed] [--type-delay 70]',
   );
   process.exit(2);
 }
@@ -48,12 +64,21 @@ const LOCAL = (b) => /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(b);
 const TOKEN = process.env.TURBOSLIDE_BEARER ?? process.env.TURBOSLIDE_TOKEN ?? '';
 const OIDC = process.env.VERCEL_OIDC_TOKEN ?? '';
 const extraHTTPHeaders = OIDC ? { 'x-vercel-trusted-oidc-idp-token': OIDC } : {};
+/* the do tier's Worker (docs/CLOUDFLARE.md 2.3): the host from the flag or the environment, http on a
+   checkout, the room bearer from the environment alone and never printed */
+const ROOM_HOST = arg('room-host', process.env.TURBOSLIDE_ROOM_HOST ?? null) ?? null;
+const ROOM_INSECURE =
+  process.env.TURBOSLIDE_ROOM_INSECURE === '1' ||
+  /^(127\.0\.0\.1|localhost|\[::1\])(:|$)/.test(ROOM_HOST ?? '');
+const ROOM_BEARER = process.env.TURBOSLIDE_ROOM_BEARER ?? '';
 
 const facts = {
   startedAt: new Date().toISOString(),
   baseA: BASE_A,
   baseB: BASE_B,
   twoOrigins: BASE_A !== BASE_B,
+  roomHost: ROOM_HOST,
+  roomBearer: ROOM_BEARER === '' ? 'none' : 'TURBOSLIDE_ROOM_BEARER',
   out: OUT,
   steps: [],
 };
@@ -92,6 +117,50 @@ async function post(base, action, deckId, body) {
   }
   return { status: response.status, json };
 }
+
+/** One GET on the Worker (`/health` without a bearer, the counters under the room bearer); the body, the status and the time, or the reason. */
+async function readWorker(path, { bearer = false } = {}) {
+  if (ROOM_HOST === null)
+    return { where: 'no-host', reason: 'no room host (--room-host or TURBOSLIDE_ROOM_HOST)' };
+  if (bearer && ROOM_BEARER === '')
+    return {
+      where: 'no-bearer',
+      reason: 'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment)',
+    };
+  const url = `${ROOM_INSECURE ? 'http' : 'https'}://${ROOM_HOST}${path}`;
+  const started = performance.now();
+  try {
+    const response = await fetch(url, {
+      headers: bearer ? { authorization: `Bearer ${ROOM_BEARER}` } : {},
+      signal: AbortSignal.timeout(10_000),
+    });
+    const text = await response.text();
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = { text: text.slice(0, 200) };
+    }
+    return {
+      where: response.status === 200 ? 'present' : 'refused',
+      status: response.status,
+      ms: ms(started),
+      body: json,
+    };
+  } catch (error) {
+    return {
+      where: 'unreachable',
+      ms: ms(started),
+      reason: String(error?.message ?? error).slice(0, 160),
+    };
+  }
+}
+/** The counters of the deck's object and of the D1 routes, in one read. */
+const readCounters = async (deckId) => ({
+  at: sinceStart(),
+  room: await readWorker(`/rooms/${encodeURIComponent(deckId)}/counters`, { bearer: true }),
+  db: await readWorker('/db/counters', { bearer: true }),
+});
 
 const ctl = (page, id) => page.locator(`[data-control="${id}"]`).first();
 const state = (page) => page.evaluate(() => window.turboslide.studio.describe().state);
@@ -270,14 +339,23 @@ async function openRun(page, run) {
   await page.keyboard.press('End');
 }
 const typeHuman = (page, text) => page.keyboard.type(text, { delay: TYPE_DELAY });
-async function instanceOf(base, deckId) {
-  if (!LOCAL(base) && TOKEN === '') return 'no bearer';
+/** The instance, the tier and the object's colo an origin's `sync.status` names (the colo is R1's field on the do tier). */
+async function statusOf(base, deckId) {
+  if (!LOCAL(base) && TOKEN === '')
+    return { instance: 'no bearer', tier: 'unread', colo: 'unread' };
   const r = await post(base, 'sync.status', deckId, {}).catch((e) => ({
     status: 0,
     json: { error: String(e) },
   }));
-  return r.json?.storeCalls?.instance ?? `status ${r.status}`;
+  const colo = r.json?.room?.colo ?? r.json?.colo ?? null;
+  return {
+    instance: r.json?.storeCalls?.instance ?? `status ${r.status}`,
+    tier: r.json?.tier ?? 'unnamed',
+    transport: r.json?.transport ?? 'unnamed',
+    colo: typeof colo === 'string' && colo !== '' ? colo : 'unnamed',
+  };
 }
+const instanceOf = async (base, deckId) => (await statusOf(base, deckId)).instance;
 
 const browser = await chromium.launch({ headless: !HEADED });
 const mk = (baseURL) =>
@@ -298,18 +376,32 @@ let bId = null;
 
 /* the presence POSTs, the ops POSTs and the stream opens of each page with the x-vercel-id region */
 const net = {
-  A: { presence: 0, ops: 0, streams: 0, regions: new Set() },
-  B: { presence: 0, ops: 0, streams: 0, regions: new Set() },
+  A: { presence: 0, ops: 0, streams: 0, room: 0, sockets: 0, regions: new Set() },
+  B: { presence: 0, ops: 0, streams: 0, room: 0, sockets: 0, regions: new Set() },
 };
-const watch = (who, page) =>
+const isRoomHost = (url) => {
+  if (ROOM_HOST === null) return false;
+  try {
+    return new URL(url).host === ROOM_HOST;
+  } catch {
+    return false;
+  }
+};
+const watch = (who, page) => {
   page.on('response', (response) => {
     const url = response.url();
     const id = response.headers()['x-vercel-id'];
     if (id) net[who].regions.add(id.split('::')[0]);
-    if (/\/api\/decks\/[^/]+\/presence/.test(url)) net[who].presence += 1;
+    if (isRoomHost(url)) net[who].room += 1;
+    else if (/\/api\/decks\/[^/]+\/presence/.test(url)) net[who].presence += 1;
     else if (/\/api\/decks\/[^/]+\/ops/.test(url)) net[who].ops += 1;
     else if (/\/api\/decks\/[^/]+\/stream/.test(url)) net[who].streams += 1;
   });
+  /* the do tier (docs/CLOUDFLARE.md 3.6.3): one WebSocket per open to the room host */
+  page.on('websocket', (ws) => {
+    if (isRoomHost(ws.url())) net[who].sockets += 1;
+  });
+};
 watch('A', A);
 
 /** B joins through the editor link on B's origin; returns when B's editor is ready and connected. */
@@ -382,9 +474,12 @@ try {
   say('share.link', linkPath === null ? null : '/s/<token>');
   say('tier', (await state(A)).sync?.tier ?? null);
   say('instances.before', {
-    a: await instanceOf(BASE_A, deckId),
-    b: await instanceOf(BASE_B, deckId),
+    a: await statusOf(BASE_A, deckId),
+    b: await statusOf(BASE_B, deckId),
   });
+  /* the do tier's Worker (docs/CLOUDFLARE.md 2.3): the health once, the counters before the drive */
+  say('worker.health', await readWorker('/health'));
+  say('counters.before', await readCounters(deckId));
   /* the body block the typing rows share and two blocks for the selection row, as setup writes */
   const slideId = (await state(A)).slideId;
   const place = async (id, text, pos) => {
@@ -435,7 +530,7 @@ try {
       bSeesAChipMs: chipInB,
       aId,
       bId,
-      instances: { a: await instanceOf(BASE_A, deckId), b: await instanceOf(BASE_B, deckId) },
+      instances: { a: await statusOf(BASE_A, deckId), b: await statusOf(BASE_B, deckId) },
       shot: await shot(A, '01-a-after-join'),
     });
     await B.keyboard.press('Escape');
@@ -477,6 +572,121 @@ try {
       bText: await runText(B, bodyRun),
       shot: await shot(B, '02-b-after-keystrokes', await stageClip(B)),
     });
+  }
+
+  // ---- step 2b: the two instance case (setup.do.two-instances, docs/CLOUDFLARE.md 2.3): five
+  // words from each browser into two blocks through the two origins; the two slide documents, the
+  // revisions and the tabs' sync facts after
+  {
+    const xRun = (
+      await A.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '.ts-stagewrap.ts-editor .pt-slide [data-block="vf-x"] [data-run], .ts-stagewrap.ts-editor .pt-slide [data-block="vf-x"][data-run]',
+          ),
+        ].map((el) => el.getAttribute('data-run')),
+      )
+    )[0];
+    const yRun = (
+      await B.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '.ts-stagewrap.ts-editor .pt-slide [data-block="vf-y"] [data-run], .ts-stagewrap.ts-editor .pt-slide [data-block="vf-y"][data-run]',
+          ),
+        ].map((el) => el.getAttribute('data-run')),
+      )
+    )[0];
+    if (!xRun || !yRun) {
+      step('two instances', {
+        notDriven: `the two blocks' runs were not found (x ${xRun}, y ${yRun})`,
+      });
+    } else {
+      const wordsA = [' a1', ' a2', ' a3', ' a4', ' a5'];
+      const wordsB = [' b1', ' b2', ' b3', ' b4', ' b5'];
+      let lastKey = 0;
+      const typing = async (page, run, words, gap) => {
+        await openRun(page, run);
+        for (const w of words) {
+          await typeHuman(page, w);
+          lastKey = Math.max(lastKey, performance.now());
+          await sleep(gap);
+        }
+        await page.keyboard.press('Escape');
+      };
+      await Promise.all([typing(A, xRun, wordsA, 500), typing(B, yRun, wordsB, 600)]);
+      const convergedMs = await poll(
+        async () => {
+          const [ax, ay, bx, by] = await Promise.all([
+            runText(A, xRun),
+            runText(A, yRun),
+            runText(B, xRun),
+            runText(B, yRun),
+          ]);
+          const has = (t, words) => words.every((w) => (t ?? '').split(w).length === 2);
+          return has(ax, wordsA) && has(bx, wordsA) && has(ay, wordsB) && has(by, wordsB)
+            ? ms(lastKey)
+            : null;
+        },
+        10_000,
+        40,
+      );
+      await poll(
+        async () => {
+          const [sa, sb] = await Promise.all([state(A), state(B)]);
+          return (sa.sync?.pending ?? 0) + (sa.sync?.retained ?? 0) === 0 &&
+            (sb.sync?.pending ?? 0) + (sb.sync?.retained ?? 0) === 0
+            ? true
+            : null;
+        },
+        20_000,
+        100,
+      );
+      const [sa, sb] = await Promise.all([state(A), state(B)]);
+      const [docA, docB] = await Promise.all([
+        invoke(A, 'slide.get', { slideId }).catch((e) => ({ error: String(e).slice(0, 120) })),
+        invoke(B, 'slide.get', { slideId }).catch((e) => ({ error: String(e).slice(0, 120) })),
+      ]);
+      const canon = (v) => JSON.stringify(v);
+      step('two instances', {
+        instances: { a: await statusOf(BASE_A, deckId), b: await statusOf(BASE_B, deckId) },
+        convergedMsAfterLastKey: convergedMs,
+        revisions: {
+          a: sa.revision,
+          b: sb.revision,
+          serverA: sa.serverRevision,
+          serverB: sb.serverRevision,
+        },
+        sync: {
+          a: {
+            seq: sa.sync?.seq ?? null,
+            covered: sa.sync?.covered ?? 'absent',
+            colo: sa.sync?.room?.colo ?? sa.sync?.colo ?? 'absent',
+            object: sa.sync?.room?.object ?? 'absent',
+            tier: sa.sync?.tier ?? null,
+            transport: sa.sync?.transport ?? null,
+          },
+          b: {
+            seq: sb.sync?.seq ?? null,
+            covered: sb.sync?.covered ?? 'absent',
+            colo: sb.sync?.room?.colo ?? sb.sync?.colo ?? 'absent',
+            object: sb.sync?.room?.object ?? 'absent',
+            tier: sb.sync?.tier ?? null,
+            transport: sb.sync?.transport ?? null,
+          },
+        },
+        slideByteEqual: canon(docA) === canon(docB),
+        texts: {
+          ax: await runText(A, xRun),
+          ay: await runText(A, yRun),
+          bx: await runText(B, xRun),
+          by: await runText(B, yRun),
+        },
+        shots: [
+          await shot(A, '02b-a-two-instances', await stageClip(A)),
+          await shot(B, '02b-b-two-instances', await stageClip(B)),
+        ],
+      });
+    }
   }
 
   // ---- step 3: the caret while B types in a block A has open (realtime.caret.within-300ms)
@@ -1006,6 +1216,7 @@ try {
   if (B) await B.screenshot({ path: join(OUT, 'B-error.png') }).catch(() => undefined);
 } finally {
   await leaveB().catch(() => undefined);
+  if (deckId) say('counters.after', await readCounters(deckId));
   if (deckId) {
     /* the teardown by id: the bearer on a deployment, A's window API on a checkout without one */
     if (TOKEN !== '' || !LOCAL(BASE_A)) {

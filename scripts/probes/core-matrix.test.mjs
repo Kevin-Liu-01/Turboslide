@@ -46,6 +46,14 @@ import {
   LOCAL_SPEC_DRIVERS,
   isLocalRow,
   localRows,
+  GATE_DRIVER,
+  TIER_FEATURES,
+  gateRows,
+  isGateRow,
+  isTierRow,
+  tierAbsentReason,
+  tierOfFeature,
+  tierRows,
 } from './core-matrix.mjs';
 
 // The core matrix module (docs/FOCUS.md section 6; the integrator's day 0; docs/RETURN.md section 5
@@ -86,7 +94,9 @@ describe('the committed matrix', () => {
         costRows().length +
         CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0) +
         /* the people round (docs/PEOPLE.md 6.2): the local rows of the accounts spec */
-        localRows().length,
+        localRows().length +
+        /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the gate's own rows */
+        gateRows().length,
     ).toBe(CORE_MATRIX.length);
     expect(localRows()).toEqual(rowsForDriver('e2e/accounts.spec.ts'));
     for (const row of localRows()) expect(isLocalRow(row), row.id).toBe(true);
@@ -338,6 +348,10 @@ describe('the ship helpers of 6.2', () => {
       /* the realtime round (docs/REALTIME.md 4.4): the Google round trip is a hand sign in */
       'accounts.google-roundtrip',
       'export.print.print-button',
+      /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the dashboard's figures and the verifier's
+         memory reading are hand rows the gate records from the files given to it */
+      'setup.do.memory',
+      'setup.free-plan.caps',
       'text.clipboard.paste-without-formatting',
     ]);
     for (const row of manual) expect(row.manual.length).toBeGreaterThan(20);
@@ -440,9 +454,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the second click hotfix (docs/gslides-parity/focus/AMENDMENTS.md A2, 2026-10-02):
        text.click.second-click-caret */
     /* the realtime round (docs/REALTIME.md section 2) added 22 rows: sixteen realtime rows, the
-       Redis command row and five local accounts rows */
+       Redis command row and five local accounts rows; its Cloudflare phase (docs/CLOUDFLARE.md
+       section 2) added 10: six cost rows per Cloudflare product and four setup rows */
     expect(CORE_MATRIX.length).toBe(
-      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22 + 10,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -495,8 +510,9 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
     /* ten spec rows and the pull row of the cost probe under sync; the five cost rows under cost */
     /* the polish round adds five sync rows (docs/POLISH.md 2.8) */
     expect(rowsForFeature('sync').length).toBe(11 + 5);
-    /* the realtime round adds the Redis command row (docs/REALTIME.md section 2) */
-    expect(rowsForFeature('cost').length).toBe(5 + 1);
+    /* the realtime round adds the Redis command row (docs/REALTIME.md section 2); its Cloudflare
+       phase the six rows per Cloudflare product (docs/CLOUDFLARE.md 2.2) */
+    expect(rowsForFeature('cost').length).toBe(5 + 1 + 6);
     expect(isParkable('sync')).toBe(false);
     expect(isParkable('cost')).toBe(false);
     expect(UNPARKABLE_FEATURES).toContain('sync');
@@ -514,6 +530,12 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
       'cost.two-tabs-idle.calls',
       'cost.show.calls',
       'cost.redis.commands',
+      'cost.do.requests',
+      'cost.do.duration',
+      'cost.do.rows-written',
+      'cost.d1.reads',
+      'cost.d1.writes',
+      'cost.worker.requests',
     ]);
     expect(rowsForDriver(COST_PROBE_DRIVER)).toEqual(costRows());
     for (const row of costRows()) expect(isCostRow(row), row.id).toBe(true);
@@ -1273,7 +1295,11 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
        the walk's presence area; every row has a driver the gate runs (FOCUS.md 6.1) */
     expect(CORE_SPEC_DRIVERS).toContain('core/realtime.spec.ts');
     expect(CORE_SPEC_DRIVERS).toContain('e2e/agent-http.spec.ts');
-    expect(rowsForDriver('core/realtime.spec.ts').length).toBe(12);
+    /* twelve realtime rows and, since the Cloudflare phase, the setup row setup.do.two-instances */
+    expect(rowsForDriver('core/realtime.spec.ts').length).toBe(12 + 1);
+    expect(
+      rowsForDriver('core/realtime.spec.ts').filter((r) => r.feature === 'realtime').length,
+    ).toBe(12);
     expect(rowsForDriver('realtime.spec.ts')).toEqual(rowsForDriver('core/realtime.spec.ts'));
     expect(rowsForDriver('e2e/agent-http.spec.ts').map((row) => row.id)).toEqual([
       'realtime.agent.write-announced',
@@ -1305,7 +1331,8 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
     expect(redis.interaction).toContain('12,000 Redis commands');
     /* the three cost rows of the sync round restate their store ceilings for the redis tier */
     expect(coreRow('cost.editor-idle.calls').interaction).toContain('10 simple and 2 advanced');
-    expect(coreRow('cost.editor-editing.calls').interaction).toContain('30 simple and 12 advanced');
+    /* the Cloudflare phase restated the redis editing column from the counters (docs/CLOUDFLARE.md 2.2) */
+    expect(coreRow('cost.editor-editing.calls').interaction).toContain('40 simple and 65 advanced');
     expect(coreRow('cost.two-tabs-idle.calls').interaction).toContain(
       'restated for the redis tier at 2',
     );
@@ -1348,6 +1375,129 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
     expect(verdict.ok).toBe(false);
     expect(verdict.failures).toEqual([
       { id: 'realtime.card.chip-painted', feature: 'realtime', result: 'failed' },
+    ]);
+  });
+});
+
+describe('the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md section 2)', () => {
+  const DO_COST_IDS = [
+    'cost.do.requests',
+    'cost.do.duration',
+    'cost.do.rows-written',
+    'cost.d1.reads',
+    'cost.d1.writes',
+    'cost.worker.requests',
+  ];
+  const SETUP_IDS = [
+    'setup.worker.health',
+    'setup.do.two-instances',
+    'setup.free-plan.caps',
+    'setup.do.memory',
+  ];
+
+  it('holds the six cost rows per product as measurement rows of the cost probe with their ceilings in their texts', () => {
+    for (const id of DO_COST_IDS) {
+      const row = coreRow(id);
+      expect(row.feature, id).toBe('cost');
+      expect(isCostRow(row), id).toBe(true);
+      expect(isMeasureRow(row), id).toBe(true);
+      expect(row.today, id).toBe('not driven');
+      expect(row.note, id).toMatch(/^Cloudflare phase; docs\/CLOUDFLARE\.md 2\.2/);
+    }
+    expect(coreRow('cost.do.requests').interaction).toContain(
+      'at most 300 Durable Object request units',
+    );
+    expect(coreRow('cost.do.duration').interaction).toContain('at most 20 GB-s');
+    expect(coreRow('cost.do.rows-written').interaction).toContain('at most 800 rows written');
+    expect(coreRow('cost.d1.reads').interaction).toContain('at most 300 D1 rows read');
+    expect(coreRow('cost.d1.writes').interaction).toContain('at most 20 D1 rows written');
+    expect(coreRow('cost.worker.requests').interaction).toContain(
+      'at most 90 requests to the Worker',
+    );
+    /* the three store rows of the sync round carry their do tier column */
+    expect(coreRow('cost.editor-idle.calls').interaction).toContain(
+      'on the do tier at most 1 function request a minute',
+    );
+    expect(coreRow('cost.editor-editing.calls').interaction).toContain(
+      'at most 20 object request units a minute and at most 60 rows written a minute',
+    );
+    expect(coreRow('cost.two-tabs-idle.calls').interaction).toContain(
+      'on the do tier no list, at most 2 advanced and 0 object requests',
+    );
+    /* the Redis row stays for the redis tier */
+    expect(coreRow('cost.redis.commands').note).toContain('not driven on do');
+  });
+
+  it("holds the four setup rows under the unparkable feature setup, the do tier's, with the gate as the driver of three", () => {
+    expect(CORE_FEATURES).toContain('setup');
+    expect(UNPARKABLE_FEATURES).toContain('setup');
+    expect(isParkable('setup')).toBe(false);
+    expect(rowsForFeature('setup').map((row) => row.id)).toEqual(SETUP_IDS);
+    expect(CORE_DRIVERS).toContain(GATE_DRIVER);
+    expect(GATE_DRIVER).toBe('core-gate');
+    expect(gateRows().map((row) => row.id)).toEqual([
+      'setup.worker.health',
+      'setup.free-plan.caps',
+      'setup.do.memory',
+    ]);
+    expect(rowsForDriver('core-gate')).toEqual(gateRows());
+    for (const row of gateRows()) expect(isGateRow(row), row.id).toBe(true);
+    expect(isGateRow(coreRow('setup.do.two-instances'))).toBe(false);
+    expect(coreRow('setup.do.two-instances').driver).toBe('core/realtime.spec.ts');
+    expect(coreRow('setup.do.two-instances').setup).toBe('block.insert of the two body blocks');
+    /* the two hand rows: the dashboard's figures and the verifier's reading, recorded by the gate */
+    expect(isManualRow(coreRow('setup.free-plan.caps'))).toBe(true);
+    expect(isManualRow(coreRow('setup.do.memory'))).toBe(true);
+    expect(isManualRow(coreRow('setup.worker.health'))).toBe(false);
+    expect(isManualRow(coreRow('setup.do.two-instances'))).toBe(false);
+    for (const id of SETUP_IDS) {
+      expect(coreRow(id).today, id).toBe('not driven');
+      expect(coreRow(id).parks, id).toBeUndefined();
+      expect(coreRow(id).note, id).toMatch(/^Cloudflare phase; docs\/CLOUDFLARE\.md 2\.3/);
+    }
+    expect(coreRow('setup.worker.health').interaction).toContain('within 2 s');
+    expect(coreRow('setup.free-plan.caps').interaction).toContain(
+      'under 10,000 requests and under 20,000 rows written',
+    );
+  });
+
+  it("reads the setup rows as the do tier's (TIER_FEATURES), judged there and listed apart elsewhere", () => {
+    expect(TIER_FEATURES).toEqual({ setup: 'do' });
+    expect(tierOfFeature('setup')).toBe('do');
+    expect(tierOfFeature('realtime')).toBeNull();
+    expect(tierOfFeature('nothing')).toBeNull();
+    expect(tierRows().map((row) => row.id)).toEqual(SETUP_IDS);
+    expect(tierRows('do')).toEqual(tierRows());
+    expect(tierRows('blob')).toEqual([]);
+    for (const row of tierRows()) expect(isTierRow(row), row.id).toBe(true);
+    expect(isTierRow(coreRow('realtime.join.chip-within-1s'))).toBe(false);
+    expect(isTierRow(undefined)).toBe(false);
+    expect(tierAbsentReason(coreRow('setup.worker.health'), 'blob')).toBe(
+      "a do tier row; this run's tier is blob",
+    );
+    expect(tierAbsentReason(coreRow('setup.worker.health'), null)).toBe(
+      "a do tier row; this run's tier is not named (no --tier)",
+    );
+    /* the two ship helpers know nothing of tiers: on the do tier a red setup row blocks like any
+       unparkable row, and the gate narrows its judged rows on another tier (core-gate.mjs) */
+    const results = {};
+    for (const row of CORE_MATRIX) if (!isLocalRow(row)) results[row.id] = 'passed';
+    const run = parkedFeaturesOf({ ...results, 'setup.worker.health': 'failed' });
+    expect(run.parked).toEqual([]);
+    expect(run.blocking).toEqual([
+      { id: 'setup.worker.health', feature: 'setup', result: 'failed' },
+    ]);
+    expect(() => shipVerdict(results, ['setup'])).toThrow(/setup cannot be parked/);
+    /* a not driven hand row of setup is the checklist's, never blocking (ruling (3)) */
+    const hand = shipVerdict({ ...results, 'setup.do.memory': 'not driven' });
+    expect(hand.ok).toBe(true);
+    /* the judged rows of a run on another tier leave the setup rows out and the verdict holds */
+    const judged = CORE_MATRIX.filter((row) => !isTierRow(row));
+    const { 'setup.worker.health': _h, 'setup.do.two-instances': _t, ...without } = results;
+    expect(shipVerdict(without, [], judged).ok).toBe(true);
+    expect(shipVerdict(without, []).failures.map((f) => f.id)).toEqual([
+      'setup.worker.health',
+      'setup.do.two-instances',
     ]);
   });
 });

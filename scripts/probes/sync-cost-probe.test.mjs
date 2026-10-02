@@ -10,6 +10,8 @@ import {
   isDoRow,
   roomRequestsOf,
   roomTarget,
+  roomWindow,
+  wentBack,
   PRESENCE_COMMANDS,
   SAMPLE_FRACTIONS,
   TIER_CEILINGS,
@@ -803,6 +805,49 @@ describe('the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the do tier and the six
       scheme: 'http',
       bearer: 'none',
     });
+  });
+
+  it('reads the request units, takes the own reads and their own rows off, refuses a field that went back and takes the samples off a window (build/r1.md R1-R5f; VERIFICATION.md "Realtime round, pass 2" P2-6, P2-7)', () => {
+    /* the object's units: the fetches, the alarms and the messages at 20:1 */
+    expect(
+      roomRequestsOf({ total: { requests: 3, alarms: 2, messages: 40, requestUnits: 7 } }),
+    ).toBe(7);
+    const at = (requestUnits, rowsWritten) => ({
+      countsSelf: true,
+      selfRowsWritten: 1,
+      durable: true,
+      total: { requests: 0, rowsWritten, requestUnits },
+    });
+    /* 36 edits as messages read 1.8 units and the counters read its own unit and its own row */
+    expect(counterDelta(at(10, 5), at(12.8, 9), 1)).toEqual({
+      requests: 1.8,
+      requestsRaw: 2.8,
+      rowsRead: 0,
+      rowsWritten: 3,
+      queries: 0,
+      batches: 0,
+    });
+    /* a field that went back is named with its amount, never clamped to a reading */
+    const back = counterDelta(at(10, 9), at(11, 7), 1);
+    expect(back.back).toEqual([{ field: 'rowsWritten', amount: -2 }]);
+    expect(wentBack(back)).toContain('rowsWritten -2');
+    expect(wentBack(counterDelta(at(10, 5), at(12, 6), 1))).toBeNull();
+    /* an idle window of two tabs: five samples cost 9 units and 3 rows between their brackets;
+       the window's own reads are the closing read and the ten bracket reads */
+    const target = { host: '127.0.0.1:8798', scheme: 'http', bearer: 'TURBOSLIDE_ROOM_BEARER' };
+    const before = { where: 'present', status: 200, at: 0, body: at(100, 50) };
+    const after = { where: 'present', status: 200, at: 1, body: at(120, 64) };
+    const probe = { samples: 5, requests: 9, rowsWritten: 3, reads: 10 };
+    const w = roomWindow(before, after, 3, probe, target);
+    expect(w.where).toBe('present');
+    expect(w.window.delta.requests).toBe(0);
+    expect(w.window.delta.rowsWritten).toBe(0);
+    expect(w.window.ownReads).toBe(11);
+    expect(w.window.probe).toEqual(probe);
+    /* without the samples taken off the same window reads the probe's own cost */
+    const raw = roomWindow(before, after, 3, null, target);
+    expect(raw.window.delta.requests).toBe(19);
+    expect(raw.window.delta.rowsWritten).toBe(13);
   });
 
   it('judges the six do rows from one drive: not driven without a source, passed under the ceilings, failed over them', () => {

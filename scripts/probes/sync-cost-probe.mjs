@@ -368,12 +368,18 @@ export function counterBucket(counters) {
 }
 
 /**
- * The request units of a counters answer: `requests` of its bucket (`counterBucket`), read as
- * `requests.total` when the route answers an object by kind, the kinds summed when it has no
- * total, a bare number otherwise, 0 when absent.
+ * The request units of a counters answer: the bucket's `requestUnits` when the object answers it
+ * (the fetches, the alarms and the incoming WebSocket messages at 20:1, the pricing page's units;
+ * build/r1.md R1-R5f), else `requests` of its bucket (`counterBucket`), read as `requests.total`
+ * when the route answers an object by kind, the kinds summed when it has no total, a bare number
+ * otherwise, 0 when absent. The edits of a do tab are WebSocket messages, which `requests` never
+ * counted, so `cost.do.requests` read 0 units for 36 edits before the units were read
+ * (VERIFICATION.md "Realtime round, pass 2" P2-7).
  */
 export function roomRequestsOf(counters) {
-  const r = counterBucket(counters).bucket.requests;
+  const bucket = counterBucket(counters).bucket;
+  if (typeof bucket.requestUnits === 'number') return bucket.requestUnits;
+  const r = bucket.requests;
   if (typeof r === 'number') return r;
   if (r && typeof r === 'object') {
     if (typeof r.total === 'number') return r.total;
@@ -387,21 +393,44 @@ export function roomRequestsOf(counters) {
  * (`roomRequestsOf`), `rowsRead`, `rowsWritten` and, for the D1 route, `queries` and `batches`,
  * each off the answer's bucket (`counterBucket`); a field absent on either side reads 0.
  * `ownReads` reads are taken off the request units, since the probe's own counter reads are
- * requests against the object too, unless the answer says `countsSelf: false`.
+ * requests against the object too, unless the answer says `countsSelf: false`; and each own read
+ * takes the answer's `selfRowsWritten` off `rowsWritten`, since the object writes its counters
+ * before it answers them (build/r1.md R1-R5f). A field that went back between the two answers is
+ * refused, never clamped: `back` names each with the amount, and the row reads not driven.
  */
 export function counterDelta(before, after, ownReads = 0) {
   const b = counterBucket(before).bucket;
   const a = counterBucket(after).bucket;
   const n = (c, k) => (typeof c?.[k] === 'number' ? c[k] : 0);
   const own = after?.countsSelf === false || before?.countsSelf === false ? 0 : ownReads;
-  return {
-    requests: Math.max(0, roomRequestsOf(after) - roomRequestsOf(before) - own),
-    requestsRaw: roomRequestsOf(after) - roomRequestsOf(before),
+  const selfRows = typeof after?.selfRowsWritten === 'number' ? after.selfRowsWritten : 0;
+  const units = (v) => Math.round(v * 100) / 100;
+  const raw = {
+    requests: units(roomRequestsOf(after) - roomRequestsOf(before)),
     rowsRead: n(a, 'rowsRead') - n(b, 'rowsRead'),
     rowsWritten: n(a, 'rowsWritten') - n(b, 'rowsWritten'),
     queries: n(a, 'queries') - n(b, 'queries'),
     batches: n(a, 'batches') - n(b, 'batches'),
   };
+  const back = Object.entries(raw)
+    .filter(([, v]) => v < 0)
+    .map(([field, amount]) => ({ field, amount }));
+  return {
+    requests: Math.max(0, units(raw.requests - own)),
+    requestsRaw: raw.requests,
+    rowsRead: raw.rowsRead,
+    rowsWritten: Math.max(0, raw.rowsWritten - own * selfRows),
+    queries: raw.queries,
+    batches: raw.batches,
+    ...(back.length > 0 ? { back } : {}),
+  };
+}
+
+/** The words of a counters delta whose fields went back (`counterDelta`'s `back`), or null. */
+export function wentBack(delta) {
+  const back = delta?.back ?? [];
+  if (back.length === 0) return null;
+  return `the object's counters went back between two reads (${back.map((b) => `${b.field} ${b.amount}`).join(', ')}), so the window cannot be counted`;
 }
 
 /** The hour of one counter from its editing and idle windows (the shape of `editorHour`). */
@@ -583,7 +612,7 @@ export function judgeRow(id, counts, where) {
             : ROOM_BEARER === ''
               ? 'no room bearer (TURBOSLIDE_ROOM_BEARER in the environment): the Worker counters cannot be read'
               : 'the Worker counters were not read'))
-        : null;
+        : (wentBack(room.editing?.delta) ?? wentBack(room.idle?.delta));
     if (counts.tier && counts.tier !== 'do')
       return notDriven(`a do tier row; this run's tier is ${counts.tier}`);
     const dashLine =
@@ -817,8 +846,13 @@ export function judgeRow(id, counts, where) {
   let roomNote = '';
   if (ceiling.objectRequestsPerMinute !== undefined || ceiling.rowsWrittenPerMinute !== undefined) {
     const room = counts.room ?? null;
-    if (room !== null && room.where === 'present' && room.window) {
+    const back = room?.window ? wentBack(room.window.delta) : null;
+    if (room !== null && room.where === 'present' && room.window && back === null) {
       const w = room.window;
+      if (w.probe)
+        measures.push(
+          `the probe's own ${w.probe.samples} sync.status sample(s) cost the object ${w.probe.requests} request unit(s) and ${w.probe.rowsWritten} row(s) written, read between two counter reads each and taken off the window`,
+        );
       if (ceiling.objectRequestsPerMinute !== undefined) {
         measures.push(
           `object request units ${fmt(w.requestsPerMinute)} a minute (ceiling ${ceiling.objectRequestsPerMinute}; ${w.delta.requests} in ${fmt(w.minutes)} min after ${w.ownReads} of the probe's own counter reads were taken off)`,
@@ -842,6 +876,7 @@ export function judgeRow(id, counts, where) {
       );
     } else {
       roomNote =
+        back ??
         room?.reason ??
         (ROOM_HOST === null
           ? 'no room host (--room-host or TURBOSLIDE_ROOM_HOST): the object half is not driven'
@@ -1504,14 +1539,22 @@ function counterWindows(before, mid, after, editingMinutes, idleMinutes) {
 }
 
 /**
- * The counters around one window (the store rows on the do tier): the delta with the probe's one
- * closing read taken off, per minute; `where` as `counterWindows`.
+ * The counters around one window (the store rows on the do tier): the delta with the probe's own
+ * reads taken off, per minute; `where` as `counterWindows`. `probe` is what the probe's own
+ * sync.status samples cost the object inside the window (`bracketSample`): each sample reads the
+ * object's counters for its colo and the live document through the room, so the samples' units
+ * and rows and the two bracketing counter reads of each are taken off too (VERIFICATION.md
+ * "Realtime round, pass 2" P2-6: 2.67 units a minute of an idle window were the samples').
  */
-function roomWindow(before, after, minutes) {
-  const target = roomFacts();
+export function roomWindow(before, after, minutes, probe = null, target = roomFacts()) {
   const failing = [before, after].find((r) => r.where !== 'present');
   if (failing) return { where: failing.where, reason: failing.reason, target };
-  const delta = counterDelta(before.body, after.body, 1);
+  const own = 1 + (probe?.reads ?? 0);
+  const delta = counterDelta(before.body, after.body, own);
+  if (probe !== null) {
+    delta.requests = Math.max(0, Math.round((delta.requests - probe.requests) * 100) / 100);
+    delta.rowsWritten = Math.max(0, delta.rowsWritten - probe.rowsWritten);
+  }
   const m = Math.max(minutes, 1 / 60);
   return {
     where: 'present',
@@ -1521,7 +1564,8 @@ function roomWindow(before, after, minutes) {
     window: {
       minutes,
       delta,
-      ownReads: after.body?.countsSelf === false ? 0 : 1,
+      ownReads: after.body?.countsSelf === false ? 0 : own,
+      ...(probe === null ? {} : { probe }),
       requestsPerMinute: Number((delta.requests / m).toFixed(2)),
       rowsWrittenPerMinute: Number((delta.rowsWritten / m).toFixed(2)),
     },
@@ -1690,15 +1734,49 @@ async function runRow(id) {
       sample.storeCalls
         ? `head ${sample.storeCalls.head} get ${sample.storeCalls.get} put ${sample.storeCalls.put} list ${sample.storeCalls.list} del ${sample.storeCalls.del} own ${sample.own} instance ${String(sample.storeCalls.instance ?? '').slice(0, 8)}`
         : `status ${sample.status}`;
+    /**
+     * What the probe's own sync.status samples inside a window cost the deck's object on the do
+     * tier (VERIFICATION.md "Realtime round, pass 2" P2-6; build/r1.md R1-R5f): every sample reads
+     * the object's counters for its colo and the live document through the room, so each is read
+     * between two counter reads and its units and rows go to `roomWindow`, which takes them off.
+     */
+    const probeCost = { samples: 0, requests: 0, rowsWritten: 0, reads: 0 };
+    const bracketing = () => out.tier === 'do' && ROOM_HOST !== null && ROOM_BEARER !== '';
     /** Samples the counters at the five fractions of a window of `ms` from `t0` while `during` runs. */
     const sampler = async (t0, ms) => {
       for (const f of SAMPLE_FRACTIONS) {
         const at = t0 + Math.round(ms * f);
         const wait = at - now();
         if (wait > 0) await sleep(wait);
+        const bracket = bracketing() ? await readRoomCounters(deck.id) : null;
         const sample = await read();
-        samples.push({ fraction: f, sinceWindowMs: now() - t0, ...sample });
-        log('sample', f.toFixed(2), sample.counters, brief(sample));
+        let objectCost = null;
+        if (bracket !== null) {
+          const closing = await readRoomCounters(deck.id);
+          probeCost.reads += 2;
+          if (bracket.where === 'present' && closing.where === 'present') {
+            const d = counterDelta(bracket.body, closing.body, 1);
+            objectCost = { requests: d.requests, rowsWritten: d.rowsWritten };
+            probeCost.samples += 1;
+            probeCost.requests = Math.round((probeCost.requests + d.requests) * 100) / 100;
+            probeCost.rowsWritten += d.rowsWritten;
+          } else probeCost.failed = bracket.reason ?? closing.reason;
+        }
+        samples.push({
+          fraction: f,
+          sinceWindowMs: now() - t0,
+          ...sample,
+          ...(objectCost === null ? {} : { objectCost }),
+        });
+        log(
+          'sample',
+          f.toFixed(2),
+          sample.counters,
+          brief(sample),
+          objectCost === null
+            ? ''
+            : `object ${objectCost.requests} units ${objectCost.rowsWritten} rows`,
+        );
       }
     };
     /**
@@ -1803,7 +1881,14 @@ async function runRow(id) {
         notDriven,
         settle: settledAs,
         ...(roomBefore
-          ? { room: roomWindow(roomBefore, roomAfter, out.phases.window.minutes) }
+          ? {
+              room: roomWindow(
+                roomBefore,
+                roomAfter,
+                out.phases.window.minutes,
+                bracketing() ? probeCost : null,
+              ),
+            }
           : {}),
       };
       if (roomBefore) out.room = counts.room;
@@ -1832,7 +1917,13 @@ async function runRow(id) {
       const roomAfter = out.tier === 'do' ? await readRoomCounters(deck.id) : null;
       const [sa, sb] = await Promise.all([state(A), state(B)]);
       out.phases.window = summarize(records, t0, t1);
-      if (roomBefore) out.room = roomWindow(roomBefore, roomAfter, out.phases.window.minutes);
+      if (roomBefore)
+        out.room = roomWindow(
+          roomBefore,
+          roomAfter,
+          out.phases.window.minutes,
+          bracketing() ? probeCost : null,
+        );
       out.roster = {
         a: { clientId: sa.presence?.clientId ?? null, others: (sa.presence?.others ?? []).length },
         b: { clientId: sb.presence?.clientId ?? null, others: (sb.presence?.others ?? []).length },

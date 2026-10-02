@@ -695,6 +695,13 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
   await decks.templates.pull();
   const from = readDefaultTemplateId(decks.decksDir);
   const dir = await templateDir(from);
+  /* the realtime tier the draft's room will run on (docs/CLOUDFLARE.md 3.6.3; build/r2.md R2-C3):
+     the deck does not exist yet, so no ticket and no url ride here, but the tier word does, so a
+     deck made from /new on the do tier opens its socket on its first write (the ticket route mints
+     the client id) instead of starting on the stream route, meeting its 503 and waiting out the
+     30 s retry before the switch (the integrator's two process run of 2026-10-01: `connected`
+     false for 45 s on every realtime row made from /new) */
+  const selection = room.realtimeSelection();
   const { document } = loadDeckDir(dir);
   const now = new Date();
   let deckId = newDraftDeckId(now);
@@ -731,6 +738,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
     hosting: hostingFacts(),
     defaultKit,
     draft: true,
+    room: { seq: 0, tier: selection.tier, notice: selection.notice },
     identity: ownIdentityOf(resolved),
     auth: {
       signIn: runtime.methods.available,

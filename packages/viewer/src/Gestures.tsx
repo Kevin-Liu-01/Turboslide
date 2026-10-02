@@ -249,6 +249,12 @@ export type HandleOptions = {
   ids?: readonly string[];
   /** crop mode on the anchor: the eight crop handles over the frame replace the object's handles */
   crop?: { frame: Box };
+  /**
+   * The anchor's type when the slide's blocks do not name it: a grammar field such as the cover
+   * title or subtitle is no block of the slide, so the editor reads the type the renderer wrote
+   * (`data-type`), the same reading its ring uses, and the squares stand off the text with it
+   */
+  ringType?: string;
 };
 
 /** The eight resize squares around a box, for an object or a selection's union. */
@@ -336,8 +342,13 @@ function canvasHandles(
   /* a text object's ring stands off its text (text-ring.ts, the caret fix of 2026-09-20), so the
      chip, the eight squares and the rotation ring sit on that ring and not on the text's own box
      (Kevin, 2026-09-25: the squares of a text box sat inside the lines); every other object and a
-     multi-selection keep the measured box */
-  const box = ids.length === 1 && block !== undefined ? ringBoxFor(block.type, measured) : measured;
+     multi-selection keep the measured box. A grammar field (the cover title, a subtitle) is no
+     block of the slide, so its type comes from the editor's reading of the rendered element, the
+     one its ring reads (Kevin, 2026-10-02: on a new deck's title the squares sat 10 sheet pixels
+     inside the ring, over the letters) */
+  const ringType = block?.type ?? options.ringType;
+  const box =
+    ids.length === 1 && ringType !== undefined ? ringBoxFor(ringType, measured) : measured;
   handles.push({
     id: `free-move:${anchor}`,
     kind: 'free-move',

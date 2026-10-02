@@ -7542,6 +7542,7 @@ export function Editor({
       ? handlesFor(shownSlide, boxes, selection, {
           ids,
           ...(crop ? { crop: { frame: crop.frame } } : {}),
+          ...(selectedId !== null ? { ringType: ringTypeOf(selectedId) } : {}),
         })
       : tableFrame && shownSlide && anchorId !== null
         ? handlesFor(shownSlide, boxes, { kind: 'block', blockId: anchorId }, { ids }).filter(

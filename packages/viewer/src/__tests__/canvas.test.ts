@@ -32,6 +32,7 @@ import {
 import type { Handle, MeasuredBoxes } from '../Gestures';
 import { flipMutations, rotateMutations } from '../rotate';
 import { boxSnapLines, sheetEdgeLines } from '../snap';
+import { TEXT_RING_OUTSET } from '../text-ring';
 
 // The canvas (gslides-parity SPEC-2 sections 1 and 6; Kevin's directive of 2026-09-12): the
 // conversion of every slide kind from the stage's boxes, the first gesture's write carrying the
@@ -633,5 +634,37 @@ describe('the resize handles share the schema model (SPEC-5-amendments A4)', () 
     if (iconOut === undefined || textOut === undefined) throw new Error('both members write');
     expect(iconOut.x).toBeCloseTo(400, 0);
     expect(textOut.x + textOut.w).toBeCloseTo(1060, 0);
+  });
+});
+
+describe('the squares of a grammar field stand off its text with the ring (Kevin, 2026-10-02)', () => {
+  /* the cover title is no block of the slide: the editor hands the type its renderer wrote, the
+     reading its ring uses, and the squares sit on the ring and not inside it over the letters */
+  const centre = (h: Handle | undefined): [number, number] => {
+    if (!h) throw new Error('expected a handle');
+    return [h.box[0] + h.box[2] / 2, h.box[1] + h.box[3] / 2];
+  };
+  it('puts the corner squares and the chip on the outset ring when the type is handed in', () => {
+    const d = TEXT_RING_OUTSET;
+    const list = handlesFor(
+      title,
+      titleBoxes,
+      { kind: 'block', blockId: 'heading' },
+      { ringType: 'heading' },
+    );
+    const [x, y, w, h] = titleBoxes.blocks.heading!;
+    expect(centre(handle('free-resize', list, 'nw'))).toEqual([x - d, y - d]);
+    expect(centre(handle('free-resize', list, 'se'))).toEqual([x + w + d, y + h + d]);
+    expect(handle('free-move', list)?.box).toEqual([x - d, y - d, w + 2 * d, h + 2 * d]);
+  });
+  it('keeps the measured box for a type outside the text ring set', () => {
+    const list = handlesFor(
+      title,
+      titleBoxes,
+      { kind: 'block', blockId: 'mark' },
+      { ringType: 'mark' },
+    );
+    const [x, y] = titleBoxes.blocks.mark!;
+    expect(centre(handle('free-resize', list, 'nw'))).toEqual([x, y]);
   });
 });

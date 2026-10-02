@@ -35,7 +35,7 @@
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-hair);
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.2 var(--pt-text);

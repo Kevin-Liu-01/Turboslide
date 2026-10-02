@@ -28,8 +28,10 @@
   transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
+/* the multiline field holds slide text, set in the chrome's Inter; monospace is the code panel's
+   alone (DECK-GRAMMAR 31; B5's css/mono-outside-code finding) */
 .ts-ctl-text.is-multiline .ts-ctl-textarea {
-  font-family: var(--pt-mono);
+  font-family: var(--pt-text);
   font-size: 12px;
   max-height: calc(12 * 1.4 * 12px + 10px);
   overflow: auto;

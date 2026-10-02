@@ -22,18 +22,20 @@
   padding: 0 12px;
 }
 
-/* the solid call to action, Present, keeps the old nav's look (Kevin's
-   directive; DESIGN.md, chrome exceptions): an 8px corner, 14px sides, the
-   word first and the 12px play glyph after it (the row is reversed here so
-   ToolButton keeps its one icon-then-label markup), and a hover that drops
-   the ink ground for ink text inside the ink frame. The toolbar's tier four
-   still collapses it to a 32px square. The corner is unchanged this round
-   (docs/PRODUCT.md 3.1.1: the kit's `corner` field decides it next round). */
+/* the solid call to action (Done, Continue, the viewer's Present): 14px
+   sides, the word first and the 12px play glyph after it (the row is reversed
+   here so ToolButton keeps its one icon-then-label markup), and a hover that
+   drops the ink ground for ink text inside the ink frame. The toolbar's tier
+   four still collapses it to a 32px square. Square since Round 1 of the next
+   program (docs/NEXT.md 4.1.2 and 4.1.3 item 14, question 9's default): the
+   chrome's one 8 px corner is the editor's Slideshow (TitleRow.css
+   `.ts-title-slideshow`); every other solid button is square, as the deck's
+   chrome is (DECK-GRAMMAR 39). */
 .pt-ib.is-solid {
   flex-direction: row-reverse;
   gap: 7px;
   padding: 0 14px;
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .pt-ib.is-solid svg {

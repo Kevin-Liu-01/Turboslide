@@ -1350,7 +1350,7 @@ export async function run(t) {
   await t.step(
     'arrange.selection-colour.dark',
     'select an object on the dark appearance (the /new default)',
-    'the ring and chip are #3d86f0',
+    'the ring and chip are #2f5ce0',
     async () => {
       const theme = (await t.state()).theme;
       if (theme !== 'dark') await appearance('dark');
@@ -1358,7 +1358,7 @@ export async function run(t) {
       await t.selectObject('a1');
       const colour = await chipColour();
       return {
-        ok: colour === 'rgb(61, 134, 240)',
+        ok: colour === 'rgb(47, 92, 224)',
         observed: `theme ${(await t.state()).theme}; chip ${colour}`,
       };
     },
@@ -1366,7 +1366,7 @@ export async function run(t) {
   await t.step(
     'arrange.selection-colour.light',
     'a setup write of the light appearance, then select an object',
-    'the ring and chip are #1a73e8',
+    'the ring and chip are #2f5ce0',
     async () => {
       await appearance('light');
       await rehome();
@@ -1375,7 +1375,7 @@ export async function run(t) {
       await t.clearAll();
       await appearance('dark');
       return {
-        ok: colour === 'rgb(26, 115, 232)',
+        ok: colour === 'rgb(47, 92, 224)',
         observed: `chip ${colour} on the light appearance; dark restored`,
       };
     },

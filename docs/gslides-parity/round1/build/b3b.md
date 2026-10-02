@@ -86,3 +86,36 @@ Pictures (`build/b3b/`, looked at; taken at 02:53 to 02:54 PDT at a load of 21.4
 - `after9-draft-1440-light.png` against `before-draft-1440-light.png`: the fresh draft shows the clock glyph and no words.
 - `after9-firstwrite-1440-light.png`: the name plate under the row's right end in the menu bar band, the name beside it whole. `before-firstwrite-1440-light.png` caught no plate (the before shot wrote once, on `/new`).
 - The Assist sparkle, Share's 8 px corner and the glyph first Slideshow are pushes 10 and 12, so they still show here. The title row's mark is B1's working geometry, which my server read from the shared tree.
+
+## Push 10: B3b#10, the chrome's values (item 14)
+
+Files: `packages/chrome/src/TitleRow.css`, `ToolButton.css`, `Palette.css`, `DiagramPanel.css`, `inspector/table.css`, `inspector/chart.css`, `inspector/text.css`, `inspector/lint-mark.css`, `pickers/DiagramPicker.css`, `tokens.css`, `Overlay.css`, `Filmstrip.tsx` (one hunk), `packages/viewer/src/BookView.css`; with consent, B1's `packages/theme/src/brand.test.ts` (the dark remap's names, b1.md request 6) and B3a's hunk of `scripts/probes/core-walk/areas/chrome.mjs` with the words of `chrome.cluster.gaps-heights` (b3a.md 12); and `scripts/probes/core-walk/areas/arrange.mjs` (no lane's file).
+
+What changed:
+
+- Corners. Share, the solid button, the name plate, its Continue and its error plate are square. Slideshow keeps 8 px on `.ts-title-slideshow` (the one exception B5's lint holds) and draws its word before the play glyph. The off token radii of `Palette.css` (the key chip), `DiagramPanel.css`, `inspector/table.css` (the height field and the swatch), `pickers/DiagramPicker.css` and `inspector/chart.css` (the text field, the swatch, the remove key) are 0. Sign In lost its negative margin, so its box keeps the row's 12 px inset (b3a.md 12 read it 4 px).
+- Selection. `--pt-select` is `#2f5ce0` in both appearances and `--pt-select-text` `#ffffff` (declared in `:root`, read in both), and the chip's text reads it (`Overlay.css`). B1's `SELECTION_COLORS` landed in B1#2. The walk's two selection steps and their rows read `rgb(47, 92, 224)`.
+- No smooth scroll. `BookView.css` 16 and its reduced motion override left. The filmstrip's follow jumps (`scrollBehavior()` answers `auto`), since a smooth scroll in script is the same motion the deck refuses.
+- Status hues. `--pt-status-done`, `--pt-status-open` and `--pt-status-refused` per theme (light `#12a37a` 3.21:1, `#c47d00` 3.34:1, `#e5484d` 3.91:1 on `#ffffff`; dark `#1fbf92` 8.56:1, `#f0a020` 9.36:1, `#e5484d` 5.15:1 on `#070707`). The chrome's one status glyph today is the inspector's lint mark: the open hue at severity 1 and 2 and the refused hue at 3, where it read titanium and ink.
+- B5's report findings in my files that no item named (b5.md 120 and 121): the table section's heading leaves its tracked capitals, and the multiline text field sets slide text in Inter, not monospace.
+
+Not done: B5's `gt-ui/cta-title-case` findings in my files (b5.md 122: `Toolbar.tsx` "Exit fullscreen" and "Copy link", `inspector/table.tsx` four labels, `inspector/asset.tsx` "Add asset") change words that tests and the agent's generated docs pin (`describe.json`, `materials-sections.test.tsx`, `tooltip.test.tsx`); no item of mine names them, so they wait for B5b's enforce push or the integrator.
+
+Rows (entered in this push): `chrome.selection.gt-blue` (broken, 1) and `chrome.scroll.no-smooth` (broken, 1), driver `core/chrome.spec.ts`; the words of `arrange.selection-colour.light` and `.dark` and of `chrome.cluster.gaps-heights` (B3a's hunk) changed with their drivers; the matrix total gains 2.
+
+Readings. The rows of pushes 10 to 14 were read on one server holding all five pushes (restarted at 10:43 PDT on the config without the watcher), because the load stayed over 24 for most of the hours they were written in:
+
+| Run | UTC and load | Rows | Result |
+| --- | --- | --- | --- |
+| b3b-all-chrome | 17:22:03Z to 17:38:38Z, load 21.76 to 26.00 | the ten rows of `chrome-round1.ts` | 5 passed (the three title row rows, `chrome.scroll.no-smooth`, `chrome.selection.gt-blue`); 5 failed, read below under their pushes |
+| b3b-all-chrome2 | 18:43:07Z to 18:49:51Z, load 16.68 to 54.98 | the five that failed | 3 passed; 2 failed, read below |
+| b3b-chrome3 | 20:06:27Z to 20:07:09Z, load 10.80 to 17.87 | `chrome.mark.one-product-mark`, `chrome.phone.menus-key` | 2 passed |
+| b3b-share | 20:07:09Z to 20:09:23Z, load 17.87 to 31.93 | `share.dialog.ruled-rows`, `share.name-prompt.empty-field`, `share.dialog.one-link`, `share.dialog.open` | 4 passed |
+| b3b-present | 20:34:23Z to 20:34:59Z, load 12.65 to 16.50 | `present.presenter.phone-head`, `present.presenter.sentence-case`, `present.presenter-view.arrow` | 3 passed |
+| b3b-chrome-neighbours | 20:35:00Z to 20:35:33Z, load 16.50 to 17.23 | `share.dialog.more-row`, `chrome.toolbar.fold-any-width`, `slides.layout.plate-four-columns` | 3 passed |
+| walk chrome, arrange | 20:35:33Z to 20:50:41Z, load 17.23 to 43.35 | the walk's `chrome` and `arrange` areas (`editor-walk-probe.mjs --core --only chrome,arrange`) | 122 passed, 9 failed, 1 not driven; read below |
+
+This push's readings: `chrome.selection.gt-blue` read the ring, the chip and the chip's text `rgb(47, 92, 224)`, `rgb(47, 92, 224)` and `rgb(255, 255, 255)` on a light deck and on a dark deck (the overlay's `data-theme` light, then dark; the overlay takes the deck's appearance, so these are the two appearances the ring is drawn in). The chrome read light both times: the test's stored `ts-chrome-appearance` did not turn it, and the dark chrome's token is the same `#2f5ce0` (`tokens.css`), which `chrome.stage.deck-appearance` reads in dark chrome. `chrome.scroll.no-smooth` read 581 elements on the editor, 468 on the book view (`/deck/<id>?mode=book`), 279 on `/home` and 232 on `/decks`, none computing `smooth`. In the walk, `arrange.selection-colour.light` and `.dark` passed on the one blue, and `chrome.cluster.gaps-heights` passed for the first time ("gaps 8, 8, 8, 8, 8, 8; inset 12 from Sign In; corners share 0px, split 8px"), with every other `chrome.*` row the walk reads passing.
+
+Unit tests: the chrome suite 921 passed (98 files), the viewer suite 515, the studio's components and editor 234; `brand.test.ts` 36 of 37, the one red being "counts the check steps" (b1.md request 8, red at HEAD since B5a#19).
+

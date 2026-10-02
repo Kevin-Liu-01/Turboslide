@@ -42,7 +42,7 @@
   border: 0;
   border-radius: 0;
   background: var(--pt-select);
-  color: var(--pt-paper);
+  color: var(--pt-select-text);
   font: 500 13px/1 var(--pt-text);
   white-space: nowrap;
   pointer-events: auto;

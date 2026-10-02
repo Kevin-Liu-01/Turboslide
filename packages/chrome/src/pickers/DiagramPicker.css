@@ -54,7 +54,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   border: 1px solid var(--pt-hair);
-  border-radius: 3px;
+  border-radius: 0;
   background: var(--pt-paper);
 }
 

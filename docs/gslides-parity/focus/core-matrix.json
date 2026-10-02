@@ -2394,7 +2394,7 @@
     {
       "id": "arrange.selection-colour.light",
       "feature": "arrange",
-      "interaction": "The ring and chip are #1a73e8 on the light theme",
+      "interaction": "The ring and chip are #2f5ce0 on the light theme, the chip's text #ffffff",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-arrange row 76",
@@ -2403,7 +2403,7 @@
     {
       "id": "arrange.selection-colour.dark",
       "feature": "arrange",
-      "interaction": "The ring and chip are #3d86f0 on the dark theme",
+      "interaction": "The ring and chip are #2f5ce0 on the dark theme, the chip's text #ffffff",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-arrange row 77",
@@ -4416,7 +4416,7 @@
     {
       "id": "chrome.cluster.gaps-heights",
       "feature": "chrome",
-      "interaction": "Gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, Share and the split button share the 8 px corner, no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; note: if question 1 picks 6 px the corner read is --pt-radius on both; the side panel toggle (title.sidePanel) sits in the cluster at 32 px once the bottom bar leaves (PRODUCT.md section 2 rank 25), and is not required while the bottom bar is still drawn",
+      "interaction": "Gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, the split button has the 8 px corner and Share is square (the inset read from Sign In when it is drawn after Share), no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; note: if question 1 picks 6 px the corner read is --pt-radius on both; the side panel toggle (title.sidePanel) sits in the cluster at 32 px once the bottom bar leaves (PRODUCT.md section 2 rank 25), and is not required while the bottom bar is still drawn",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome rows 22, 25, 30",
@@ -8938,6 +8938,26 @@
       "severity": 2,
       "evidence": "audit-clutter 80 to 81",
       "note": "docs/NEXT.md 4.1.3 item 13, push B3b#9. NEXT.md 4.1.5 names the driver probe --core; the walk area chrome.mjs is B3a's file, so the row is driven in core/chrome.spec.ts (round1/build/b3b.md)"
+    },
+    {
+      "id": "chrome.selection.gt-blue",
+      "feature": "chrome",
+      "interaction": "The selection ring computes to `#2f5ce0` in both appearances and the chip's text to `#ffffff`",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 41",
+      "note": "docs/NEXT.md 4.1.3 item 14, question 3's default, push B3b#10: --pt-select and the new --pt-select-text in tokens.css with B1's SELECTION_COLORS (round1/build/b3b.md request 1); the test sets the chrome and the deck to one appearance and reads the ring, the chip and the chip's text"
+    },
+    {
+      "id": "chrome.scroll.no-smooth",
+      "feature": "chrome",
+      "interaction": "No element on the editor, the book view, `/home` or `/decks` computes `scroll-behavior: smooth`",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-source 305",
+      "note": "docs/NEXT.md 4.1.3 item 14, push B3b#10: packages/viewer/src/BookView.css 16 and its reduced motion override left; the book view is read at /deck/<id>?mode=book"
     },
     {
       "id": "formatting.border-weight.menu-opens",

@@ -472,6 +472,10 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       'pt-hair-on-ink',
       'pt-plate-on-ink',
       'pt-plate-on-ink-open',
+      /* the status hues per theme (docs/NEXT.md 4.1.3 item 14; Round 1 push B3b#10) */
+      'pt-status-done',
+      'pt-status-open',
+      'pt-status-refused',
       'pt-select',
       'pt-guide',
     ]);

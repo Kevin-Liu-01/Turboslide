@@ -36,13 +36,12 @@ import './Filmstrip.css';
 
 /** the distance a followed row keeps from the list's edges */
 export const FOLLOW_MARGIN = 8;
-/** Smooth unless the reader asked for less motion. */
+/**
+ * The follow's scroll: an instant jump, never a smooth scroll (docs/NEXT.md 4.1.3 item 14; the
+ * deck's slide 38 line 46 and slide 39 line 11), whatever the reader's motion setting.
+ */
 export function scrollBehavior(): ScrollBehavior {
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  } catch {
-    return 'auto';
-  }
+  return 'auto';
 }
 /**
  * After a follow's scroll, when the row is read again and placed once more if it sits outside

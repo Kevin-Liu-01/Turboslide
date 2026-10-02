@@ -100,6 +100,8 @@ export async function run(t) {
         arrow: read('[data-control="present.arrow"]'),
         label: read('[data-control="present.open"] .pt-lb'),
         share: read('[data-control="share.open"]'),
+        /* Sign In as text after Share for a visitor who can sign in (Round 1 push B3b#9) */
+        signIn: read('[data-control="title.signIn"]'),
         theme: document.documentElement.getAttribute('data-theme'),
       };
     });
@@ -683,7 +685,7 @@ export async function run(t) {
   await t.step(
     'chrome.cluster.gaps-heights',
     "read the right cluster's controls",
-    'gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, both with the 8 px corner, no empty +N box, no inbox slot while the plate is parked',
+    'gaps 8 px, inset 12 px from the last control (Sign In when drawn, else Share), Share, the split button and the comments glyph 32 px tall, the split button with the 8 px corner and Share square, no empty +N box, no inbox slot while the plate is parked',
     async () => {
       await t.clearAll();
       if (await t.visible('panel.comments.close')) await t.clickControl('panel.comments.close');
@@ -696,11 +698,14 @@ export async function run(t) {
         c.inboxSlot,
         c.split,
         c.share,
+        c.signIn,
       ].filter((x) => x && x.w > 0);
       const gaps = [];
       for (let i = 1; i < controls.length; i += 1)
         gaps.push(Math.round((controls[i].x - controls[i - 1].right) * 10) / 10);
-      const inset = Math.round((c.viewport - c.share.right) * 10) / 10;
+      /* the row's last control: Sign In when the title row draws it (Round 1 push B3b#9) */
+      const last = c.signIn && c.signIn.w > 0 ? c.signIn : c.share;
+      const inset = Math.round((c.viewport - last.right) * 10) / 10;
       const heights = {
         share: Math.round(c.share.h),
         split: Math.round(c.split.h),
@@ -716,13 +721,14 @@ export async function run(t) {
         heights.share === 32 &&
         heights.split === 32 &&
         heights.comments === 32 &&
-        /^8px/.test(c.share.radius) &&
+        /* Share square and the split button at 8 px (question 9's default, Round 1 push B3b#10) */
+        /^0px/.test(c.share.radius) &&
         /^8px/.test(c.split.radius) &&
         moreHidden &&
         (!inboxParked || inboxCollapsed);
       return {
         ok,
-        observed: `gaps ${gaps.join(', ')}; inset ${inset}; heights ${JSON.stringify(heights)}; corners share ${c.share.radius}, split ${c.split.radius}; +N box ${c.more ? `${Math.round(c.more.w)}x${Math.round(c.more.h)} opacity ${c.more.opacity}` : 'absent'} hidden ${moreHidden}; inbox plate ${c.inbox ? 'drawn' : 'parked'}, slot ${c.inboxSlot ? `${Math.round(c.inboxSlot.w)} px` : 'absent'}${c.share.radius.startsWith('6px') && c.split.radius.startsWith('6px') ? '; note: both corners read 6 px (--pt-radius), the alternative of question 1' : ''}`,
+        observed: `gaps ${gaps.join(', ')}; inset ${inset} from ${last === c.share ? 'Share' : 'Sign In'}; heights ${JSON.stringify(heights)}; corners share ${c.share.radius}, split ${c.split.radius}; +N box ${c.more ? `${Math.round(c.more.w)}x${Math.round(c.more.h)} opacity ${c.more.opacity}` : 'absent'} hidden ${moreHidden}; inbox plate ${c.inbox ? 'drawn' : 'parked'}, slot ${c.inboxSlot ? `${Math.round(c.inboxSlot.w)} px` : 'absent'}${c.share.radius.startsWith('6px') && c.split.radius.startsWith('6px') ? '; note: both corners read 6 px (--pt-radius), the alternative of question 1' : ''}`,
       };
     },
   );

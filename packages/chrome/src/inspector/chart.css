@@ -32,7 +32,7 @@
   height: 26px;
   padding: 0 8px;
   border: 1px solid var(--pt-hair);
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.2 var(--pt-text);
@@ -178,7 +178,7 @@
   height: 16px;
   padding: 0;
   border: 1px solid var(--pt-hair);
-  border-radius: 3px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -201,7 +201,7 @@
   height: 18px;
   padding: 0;
   border: 0;
-  border-radius: 3px;
+  border-radius: 0;
   background: var(--pt-plate);
   color: var(--pt-ink-2);
   cursor: pointer;

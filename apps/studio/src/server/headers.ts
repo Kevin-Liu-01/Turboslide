@@ -401,10 +401,16 @@ const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence)$/;
 /** The assist route (docs/PRODUCT.md 6.3): a bearer is its proof as on the room routes. */
 const ASSIST_ROUTE_PATTERN = /^\/api\/assist(?:\/|$)/;
 
-/** The GET pages a person reaches by a typed or mailed address (b3.md R11). */
+/**
+ * The GET pages a person reaches by a typed or mailed address (b3.md R11), and the OAuth provider
+ * callbacks: Google and GitHub send the browser back with a top level GET whose Sec-Fetch-Site is
+ * cross-site, so filtering it refused every social sign in with a 403. better-auth checks the
+ * state and the PKCE verifier on that route itself.
+ */
 const NAVIGATION_GET_PATTERNS: ReadonlyArray<RegExp> = [
   /^\/device(?:\/|$)/,
   /^\/api\/auth\/magic-link\/verify(?:\/|$)/,
+  /^\/api\/auth\/callback\/[a-z0-9-]+$/,
 ];
 
 /** The 403 a refused cross site request gets: no detail, logged as `csrf.refused`. */

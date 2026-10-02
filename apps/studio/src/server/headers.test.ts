@@ -474,6 +474,13 @@ describe('the widened CSRF filter and the JSON rule (SPEC-3 8.7; report 04 F13)'
     expect(csrfFilter(ctx('/device', 'POST'))).toBe(true);
     expect(csrfFilter(ctx('/api/auth/magic-link/verify', 'GET'))).toBe(false);
     expect(csrfFilter(ctx('/api/auth/magic-link/verify', 'POST'))).toBe(true);
+    // the OAuth provider callbacks arrive as a cross site top level GET; better-auth checks the
+    // state and the PKCE verifier there, so only their unsafe methods are filtered
+    for (const provider of ['google', 'github']) {
+      expect(csrfFilter(ctx(`/api/auth/callback/${provider}`, 'GET')), provider).toBe(false);
+      expect(csrfFilter(ctx(`/api/auth/callback/${provider}`, 'POST')), provider).toBe(true);
+    }
+    expect(csrfFilter(ctx('/api/auth/callback/google/extra', 'GET'))).toBe(true);
     // a bearer agent on the room routes sends no Sec-Fetch-Site; the bearer is its proof (b2.md R14)
     for (const path of ['/api/decks/q4/stream', '/api/decks/q4/ops', '/api/decks/q4/presence']) {
       const bearer = {

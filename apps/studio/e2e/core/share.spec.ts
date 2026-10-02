@@ -2924,7 +2924,14 @@ async function otherContextAt(
     acceptDownloads: true,
     permissions: ['clipboard-read', 'clipboard-write'],
   });
-  if (isLocalBase(baseURL)) await context.routeWebSocket('**', () => undefined);
+  /* the HMR socket of a dev server alone: the room's socket to the Worker (docs/CLOUDFLARE.md 3.6.3,
+     `/rooms/<id>` on the room host) must reach it, or no tab connects on the do tier (the
+     integrator's two process run of 2026-10-01) */
+  if (isLocalBase(baseURL))
+    await context.routeWebSocket(
+      (url) => !url.pathname.startsWith('/rooms/'),
+      () => undefined,
+    );
   const page = await context.newPage();
   return { context, page };
 }

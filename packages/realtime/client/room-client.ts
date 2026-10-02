@@ -304,6 +304,12 @@ export type SyncStatus = {
   transport: TransportKind;
   /** the object this tab's socket reached, on the `do` tier after its `room` frame; absent elsewhere */
   room?: RoomObjectFacts;
+  /**
+   * The committed seq as this tab knows it: the last hello's `covered`, moved up by every
+   * `checkpoint` frame's `toSeq` (docs/CLOUDFLARE.md 2.3 `setup.do.two-instances`, 3.4 item 5;
+   * build/r5.md CF-R2a); null before a hello that names one.
+   */
+  covered: number | null;
   connected: boolean;
   /** the browser is offline (`navigator.onLine` false, the `offline` event), or the last POST failed while it could not say */
   offline: boolean;
@@ -821,6 +827,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let tier: RealtimeTier = options.tier ?? 'memory';
   /** the object the last `room` frame named (the `do` tier), for `SyncStatus.room` */
   let roomObject: RoomObjectFacts | null = null;
+  /** the committed seq (SyncStatus.covered): the hello's, then each checkpoint's toSeq */
+  let covered: number | null = null;
   /**
    * The tier the last hello named (build/r1.md R1-R2a; docs/REALTIME.md 3.7, 3.8): a hello of
    * another tier means the stream position is a number of the other tier (a stream seq against a
@@ -877,6 +885,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     tier,
     transport: transport.kind?.() ?? 'sse',
     ...(roomObject === null ? {} : { room: roomObject }),
+    covered,
     connected,
     offline,
     resending,
@@ -1658,8 +1667,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // and a reopen replays entries, not checkpoints (SEAM-F8: the title row read Saving on
         // a quiet deck after a reconnect, for good)
         if (event.covered !== undefined) {
-          const covered = event.covered;
-          retained = retained.filter((op) => op.seq > covered);
+          const helloCovered = event.covered;
+          retained = retained.filter((op) => op.seq > helloCovered);
+          covered = helloCovered;
         }
         const foreign = helloTier !== null && helloTier !== event.tier;
         helloTier = event.tier;
@@ -1691,6 +1701,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         return;
       case 'checkpoint': {
         retained = retained.filter((op) => op.seq > event.toSeq);
+        if (event.external !== true) covered = Math.max(covered ?? 0, event.toSeq);
         if (event.external === true) {
           void resync(event.revision).catch(() => undefined);
         } else {

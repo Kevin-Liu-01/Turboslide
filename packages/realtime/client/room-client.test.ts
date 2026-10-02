@@ -1614,6 +1614,22 @@ describe('the stream fix round, fix round (VERIFICATION C3S-F1, C3S-F2, C3S-F3, 
     await until(() => a.room.status().connected, 3000);
     await until(() => a.room.status().retained === 0, 1000);
     expect(a.room.status().pending).toBe(0);
+    // the status names the committed seq the hello carried (CF-R2a, setup.do.two-instances)
+    expect(a.room.status().covered).toBe(1);
+    await a.room.stop();
+  });
+
+  it('names the committed seq on the status: null before a hello, then each checkpoint moves it up', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    expect(a.room.status().covered).toBeNull();
+    a.room.start();
+    await until(() => a.room.status().connected);
+    a.room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await until(() => a.room.status().pending === 0, 3000);
+    await h.server.checkpoint();
+    await until(() => a.room.status().covered === a.room.status().seq, 1000);
+    expect(a.room.status().covered).toBeGreaterThan(0);
     await a.room.stop();
   });
 

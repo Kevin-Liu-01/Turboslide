@@ -4352,6 +4352,8 @@ export function createEditorController(init: {
         // the wire's kind as the transport names it and the object the socket reached (R2-C10)
         transport: snapshot.sync?.transport ?? 'poll',
         room: snapshot.sync?.room ?? null,
+        // the committed seq the hello and the checkpoints named (CF-R2a; setup.do.two-instances)
+        covered: snapshot.sync?.covered ?? null,
         connected: snapshot.sync?.connected ?? false,
         // the stream's state beside the connection (the cycle 3 stream fix round, s1.md S1-R2):
         // a driver reads whether the client is offline, reopening its stream or waiting on the

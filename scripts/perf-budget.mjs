@@ -67,7 +67,9 @@
 // production build of apps/studio served on this machine with TURBOSLIDE_STORE=tmp, deployment is
 // a Vercel preview or production reached from the check machine); --deck <id> (gt-brand);
 // --runs <n> (3; cold and warm samples per route, medians compared); --only <checks> (routes,
-// transitions, filmstrip, idle, twins, cdn, vitals, write); --idle-seconds <n> (60); --write (the write path
+// transitions, filmstrip, idle, twins, cdn, vitals, write); --routes <paths> (the routes check's
+// paths, comma separated, `/decks` alone for a read of the listing on a deployment one does not
+// write to; all eight by default); --idle-seconds <n> (60); --write (the write path
 // on /new: a scratch deck is created and left in place, so pass it only against a tmp store or a
 // preview you own; the deck id is printed); --json <file> (the raw numbers); --report (print the
 // table and exit 0 whatever the result, for a baseline run); --chrome <path> (else
@@ -317,6 +319,7 @@ function parseArgs(argv) {
     deck: 'gt-brand',
     runs: 3,
     only: null,
+    routes: null,
     idleSeconds: 60,
     write: false,
     json: null,
@@ -331,6 +334,7 @@ function parseArgs(argv) {
     else if (arg === '--deck') out.deck = next();
     else if (arg === '--runs') out.runs = Number(next());
     else if (arg === '--only') out.only = new Set(next().split(','));
+    else if (arg === '--routes') out.routes = new Set(next().split(','));
     else if (arg === '--idle-seconds') out.idleSeconds = Number(next());
     else if (arg === '--write') out.write = true;
     else if (arg === '--json') out.json = next();
@@ -616,9 +620,34 @@ const browser = await chromium.launch({
   args: CHROME_FLAGS,
 });
 
+/**
+ * The agent string of a person's Chrome (docs/NEXT.md 3.2 H8; audit-performance 10 and item 11):
+ * the headless browser's own string with `HeadlessChrome` read as `Chrome`, the person rerun's
+ * rule. `isbot` 5 classes `HeadlessChrome` as a bot, and TanStack's stream renderer then holds the
+ * whole answer for every suspense boundary, so the gate's `/decks` rows read the bot path (the
+ * whole listing as the first byte, 2.6 to 13.7 s) where a seller gets the shell and the first card.
+ */
+const PERSON_USER_AGENT = await (async () => {
+  const probe = await browser.newContext();
+  try {
+    const page = await probe.newPage();
+    const agent = await page.evaluate(() => navigator.userAgent);
+    return agent.replace(/HeadlessChrome/g, 'Chrome');
+  } finally {
+    await probe.close();
+  }
+})();
+if (/headless/i.test(PERSON_USER_AGENT))
+  throw new Error(
+    `perf-budget: the person's agent string still reads headless: ${PERSON_USER_AGENT}`,
+  );
+results.userAgent = PERSON_USER_AGENT;
+console.log(`perf-budget: contexts open as ${PERSON_USER_AGENT}`);
+
 async function newContext() {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
+    userAgent: PERSON_USER_AGENT,
     ...(Object.keys(TRUSTED_HEADERS).length > 0 ? { extraHTTPHeaders: TRUSTED_HEADERS } : {}),
   });
   await context.addInitScript(INIT);
@@ -747,7 +776,7 @@ async function routeLoads() {
     `/deck/${args.deck}`,
     `/edit/${args.deck}`,
     `/present/${args.deck}`,
-  ];
+  ].filter((route) => args.routes === null || args.routes.has(route));
   for (const route of routes) {
     const samples = { cold: [], warm: [] };
     let absent = false;

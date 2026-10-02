@@ -86,3 +86,39 @@ timing below carries the one minute load average it was read at.
   2026-08-26) says a delete "may take up to 60 seconds to propagate through our cache". A public
   copy can therefore answer from the CDN for up to a minute after the removal, past the row's
   5 s, on the preview and on production. The local tiers read the route and are not cached.
+
+## H8: the performance gate opens its contexts as a person
+
+- `scripts/perf-budget.mjs`: `PERSON_USER_AGENT` is the launched browser's own agent string with
+  `HeadlessChrome` read as `Chrome` (the audit's person rerun rule); `newContext` passes it, the
+  run throws if the string still reads headless, and the JSON records it as `userAgent`.
+- `--routes <paths>`: the routes check's paths, comma separated, so the check below reads
+  `/decks` alone on a deployment and opens no editor or show there. All eight paths by default.
+- The classification, read with the tree's `isbot` 5.2.2: the headless string is a bot (true),
+  the person string is not (false). TanStack's stream renderer reads the same `isbot`
+  (`renderRouterToStream.js` 13).
+- Smoke on 4502 (`--profile local --only routes --routes /decks --runs 1 --report`), load 23.90
+  to 24.14: exit 0, "contexts open as Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+  AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36". The dev server's
+  numbers are no budget reading (step 31 reads the node-server build).
+- The check (the gate's `/decks` against the person rerun of audit-performance 2.1, production,
+  within 20 percent at a load under 20): read on production (`node scripts/perf-budget.mjs --base https://www.turboslide.com
+  --profile deployment --only routes --routes /decks --runs 3 --report`, page loads only, nothing
+  written), compared with the person rerun's cold median final headers 144 ms and FCP 296 ms and
+  warm 105 ms and 180 ms:
+
+  | Run | Load at start and end | Cold first byte | Cold FCP | Warm first byte | Warm FCP |
+  | --- | --- | --- | --- | --- | --- |
+  | 1, 08:24:57Z | 19.66, 20.24 | 115 ms (-20.1%) | 280 ms (-5.4%) | 97 ms (-7.6%) | 172 ms (-4.4%) |
+  | 2, 08:25:32Z | 18.23, 18.26 | 129 ms (-10.4%) | 232 ms (-21.6%) | 99 ms (-5.7%) | 208 ms (+15.6%) |
+
+  Run 2 is the clean reading (its whole run under 20); run 1 ended at 20.24 and is recorded beside
+  it. The gate's first byte is `responseStart` where the audit read the final headers, and its
+  `ready` (cold 297 ms, warm 270 ms in run 2) is the route's own mark where the audit read
+  hydration (434 ms and 309 ms), so those two pairs are not the same measurement. On the person
+  path the 20 percent bound holds for the first byte both ways and for the warm FCP; the cold FCP
+  of run 2 reads 21.6 percent under the audit's. Each run held one slow sample (run 1 cold
+  1,956 ms first byte, run 2 warm 1,518 ms), which the medians leave out. The bot path the gate
+  read before (2.6 to 13.7 s to the first byte) is gone from both runs: every other sample's first
+  byte is 87 to 156 ms. The raw runs are under `.turboslide/round1/hb/perf-decks-run1.json` and
+  `-run2.json` (untracked).

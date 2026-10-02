@@ -1,7 +1,8 @@
 import { SITE } from '@turboslide/theme/brand/site';
 
 /**
- * The head of /home (docs/POLISH.md 3.6): the title carries the value, the description is the
+ * The head of /home (docs/POLISH.md 3.6): the title carries the value as a plain statement
+ * (docs/NEXT.md 4.1.3 item 9; DECK-GRAMMAR 66 names the comma tail it replaced), the description is the
  * hero's lead (`SITE.description`, the one sentence the head, the manifest, the card and the
  * README share), and the path `og:url` names. A module of its own since the round four fixer
  * round (SPEC-4 3.12, VERIFICATION-4 finding 2): the route file's `head()` runs at module level
@@ -10,7 +11,7 @@ import { SITE } from '@turboslide/theme/brand/site';
  * re-exports it so the copy lints read it.
  */
 export const HOME_META = {
-  title: 'Turboslide, a slides editor in the browser',
+  title: 'Turboslide is a slides editor in the browser',
   description: SITE.description,
   path: '/home',
 } as const;

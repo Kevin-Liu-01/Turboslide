@@ -12,17 +12,23 @@ import { HomeHero } from '../components/home/HomeHero';
 import { HomeLicence } from '../components/home/HomeLicence';
 import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
+import { HomeNumbers } from '../components/home/HomeNumbers';
 import { HomePresent } from '../components/home/HomePresent';
 import { HOME_FACTS } from '../components/home/facts';
 import { HOME_META } from '../components/home/home-meta';
 import { useMountEffect } from '../components/useMountEffect';
 
+import '../components/home/grammar.css';
 import './home.css';
 
 /**
  * The product page, /home (docs/POLISH.md section 3; the round four notes of gslides-parity
- * SPEC-4 section 2, 0.42, 0.43 stand under it): the navigation, the hero and six sections with
- * one purpose each on the 1120 px rail over the chrome's tokens, prerendered at build (the
+ * SPEC-4 section 2, 0.42, 0.43 stand under it), on the deck's page grammar since Round 1
+ * (docs/NEXT.md 4.1.2 and 4.1.3 item 9): the 1104 px column with one rail on each side drawn
+ * once (`.ts-rails`), the 58 px navigation, the hero with its facts rows and the product's own
+ * picture, the numbers row and the hatch strip, then six sections with one purpose each, every
+ * band closed by a full bleed seam with a 9 px cross where it meets a rail, over the chrome's
+ * tokens, prerendered at build (the
  * `prerender` option of the deploy config; the route has no loader and reads no storage except
  * `gt-theme`), indexable and outside `NOINDEX_ROUTES`. The page renders a `main` element (the
  * perf check's landmark) with the root class `.ts-product` (never `.ts-home-page`, the /decks
@@ -66,12 +72,15 @@ function HomePage() {
       <script type="speculationrules" nonce={nonce} suppressHydrationWarning>
         {SPECULATION_RULES_JSON}
       </script>
+      {/* the column's two rails, drawn once for the whole page (grammar.css .ts-rails) */}
+      <div className="ts-rails" aria-hidden="true" />
       <HomeNav nonce={nonce} />
       <HomeHero />
+      <HomeNumbers facts={HOME_FACTS} />
       <HomeCanvas />
       <HomeMenus />
       <HomePresent />
-      <HomeExport facts={HOME_FACTS} />
+      <HomeExport />
       <HomeAgents facts={HOME_FACTS} />
       <HomeLicence />
       <HomeFooter />

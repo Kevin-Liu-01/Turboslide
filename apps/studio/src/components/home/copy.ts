@@ -2,10 +2,12 @@ import { SITE } from '@turboslide/theme/brand/site';
 
 import type { HomeFacts } from './facts';
 import { formatCount } from './facts';
+import { HOME_META } from './home-meta';
 
 /**
- * Every string of the /home page (docs/POLISH.md section 3; the round four notes of
- * gslides-parity SPEC-4 section 2 stand under it), in one module so `copy.test.ts` can lint them
+ * Every string of the /home page (docs/POLISH.md section 3, on the page grammar of docs/NEXT.md
+ * 4.1.2 and 4.1.3 item 9 since Round 1; the round four notes of gslides-parity SPEC-4 section 2
+ * stand under it), in one module so `copy.test.ts` can lint them
  * all: sentence case headings with no comma and no trailing period, one thought per sentence
  * under 20 words, Title Case on buttons alone, no em dash, no exclamation mark, no semicolon, no
  * colon list, no metaphor word, no "X, not Y" pair, none of the five words of SPEC-4 0.26, none
@@ -59,15 +61,18 @@ export const HOME_PROPER_NOUNS: ReadonlyArray<string> = [
 
 /**
  * The copy paths the default view words rule of the menu model does not read: the head (a
- * sentence about the product, not a band), the agents section (it names the transports) and the
- * licence section ("Run it from a checkout" is plain English, and "run" is a menu model word).
+ * sentence about the product, not a band), the agents section (it names the transports), the
+ * license section ("Run it from a checkout" is plain English, and "run" is a menu model word) and
+ * the numbers row (its actions figure names the transports). The path `licence` keeps the British
+ * spelling of the ids (`home.licence.*`), which Round 1 keeps while the words read "license".
  */
-export const DEFAULT_VIEW_EXEMPT: ReadonlyArray<string> = ['meta', 'agents', 'licence'];
+export const DEFAULT_VIEW_EXEMPT: ReadonlyArray<string> = ['meta', 'agents', 'licence', 'numbers'];
 
 export { HOME_META } from './home-meta';
 
 // ---------------------------------------------------------------------------------------------
-// The navigation (3.2 item 0)
+// The navigation (3.2 item 0; docs/NEXT.md 4.1.3 item 9: GitHub moves to the footer and Sign In
+// joins the bar)
 
 export type NavLink = {
   id: string;
@@ -85,13 +90,14 @@ export const NAV = {
       href: `${GITHUB_FILE}/docs/README.md`,
       external: true,
     },
-    { id: 'home.nav.github', label: 'GitHub', href: REPOSITORY, external: true },
   ] as ReadonlyArray<NavLink>,
   appearance: {
     label: 'Appearance',
     light: { label: 'Light' },
     dark: { label: 'Dark' },
   },
+  /** drawn for an anonymous visitor once the deployment answers that it offers a method (sign-in.tsx) */
+  signIn: { label: 'Sign In' },
   newPresentation: { label: 'New Presentation', href: '/new' },
 } as const;
 
@@ -113,29 +119,84 @@ export const HERO = {
     shot: 'hero' as ShotKind,
     alt: 'The Turboslide editor with the example deck open on its Blue Marble slide.',
   },
+  /** the facts rows beside the hero's text (brand-c rule 5): a key with its Heroicon, one sentence */
+  facts: [
+    {
+      id: 'menus',
+      icon: 'bars-3' as SectionIconName,
+      key: 'Menus',
+      value: "The menus go from File to Help in Google's order, with Google's shortcuts.",
+    },
+    {
+      id: 'present',
+      icon: 'play' as SectionIconName,
+      key: 'Present',
+      value: 'Presenter view opens in a second window with the timer and the notes.',
+    },
+    {
+      id: 'export',
+      icon: 'arrow-down-tray' as SectionIconName,
+      key: 'Export',
+      value: 'Downloads are PDF and PowerPoint files that match the screen.',
+    },
+  ],
+} as const;
+
+// ---------------------------------------------------------------------------------------------
+// The numbers row (docs/NEXT.md 4.1.2, A's graft: three figures of packages/theme/brand/facts.json)
+
+export const NUMBERS = {
+  label: 'Turboslide in three numbers',
+  cells: [
+    {
+      id: 'layouts',
+      figure: (facts: HomeFacts): string => `${formatCount(facts.layouts)} layouts`,
+      sentence: 'A new slide starts from one of these layouts.',
+    },
+    {
+      id: 'actions',
+      figure: (facts: HomeFacts): string => `${formatCount(facts.actions)} actions`,
+      sentence: 'Agents run the same actions as the editor over the CLI, MCP and HTTP.',
+    },
+    {
+      id: 'mismatch',
+      figure: (facts: HomeFacts): string => formatPercentFigure(facts.mismatchPercent),
+      sentence:
+        'The worst page of the example PowerPoint export differs from the screen by this share.',
+      /** the figure links to the export record */
+      href: `${GITHUB_FILE}/docs/pptx.md`,
+    },
+  ],
 } as const;
 
 // ---------------------------------------------------------------------------------------------
 // The sections (3.2 items 2 to 7)
 
-/** The six Heroicons before the section headings (3.3 item 3), by the sprite's names. */
+/**
+ * The Heroicons of the page's key cells, by the sprite's names. Since Round 1 an icon sits only in
+ * a key cell of the facts rows (DECK-GRAMMAR 40), never before a heading.
+ */
 export type SectionIconName =
   'cursor-arrow-rays' | 'bars-3' | 'play' | 'arrow-down-tray' | 'command-line' | 'document-text';
 
 export const CANVAS = {
   id: 'canvas',
-  icon: 'cursor-arrow-rays' as SectionIconName,
   heading: 'Everything on a slide moves',
   lead: 'Drag, resize and rotate any object. The first drag turns the slide into a canvas. Undo puts the layout back.',
-  picture: {
-    shot: 'canvas' as ShotKind,
-    alt: 'A picture selected on a slide with its ring, its eight handles and the rotation readout.',
+  /** a diagram in the deck's grammar in place of the capture, which drew the blue selection ring */
+  diagram: {
+    label:
+      'A slide with one picture moved, resized and rotated, its first place drawn as a hairline.',
+    slide: 'Slide',
+    before: 'First place',
+    move: 'Drag',
+    resize: 'Resize',
+    rotate: 'Rotate',
   },
 } as const;
 
 export const MENUS = {
   id: 'menus',
-  icon: 'bars-3' as SectionIconName,
   heading: "The menus are Google's",
   lead: "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's order. The shortcuts are Google's too. So are the right click menus.",
   picture: { shot: 'menus' as ShotKind, alt: 'The menu bar with the Insert menu open.' },
@@ -143,7 +204,6 @@ export const MENUS = {
 
 export const PRESENT = {
   id: 'present',
-  icon: 'play' as SectionIconName,
   heading: 'Present from the browser',
   lead: 'Slideshow starts on the current slide. Presenter view opens in a second window with the timer, the notes and the next slide. A present link opens the show for anyone.',
   diagram: {
@@ -162,28 +222,19 @@ export const PRESENT = {
 
 export const EXPORT = {
   id: 'export',
-  icon: 'arrow-down-tray' as SectionIconName,
   heading: 'Export to PDF and PowerPoint',
   lead: 'File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches the screen pixel for pixel.',
   diagram: {
-    label: 'A slide with an arrow to two files, pitch.pdf and pitch.pptx.',
+    label: 'A slide with a line to two files, pitch.pdf and pitch.pptx.',
     slide: 'Slide',
     pdf: 'pitch.pdf',
     pptx: 'pitch.pptx',
-  },
-  /** the one measured sentence of the page, with its figure linked to the export record */
-  measured: {
-    before: 'The worst page mismatch on the 170 page example export is',
-    figure: (facts: HomeFacts): string => `${formatPercentWord(facts.mismatchPercent)}`,
-    after: '.',
-    href: `${GITHUB_FILE}/docs/pptx.md`,
   },
 } as const;
 
 export const AGENTS = {
   id: 'agents',
   anchor: 'agents',
-  icon: 'command-line' as SectionIconName,
   heading: 'Agents run the same actions',
   lead: (facts: HomeFacts): string =>
     `Every editor action is a command. Agents run the same ${formatCount(facts.actions)} actions over the CLI, MCP and HTTP.`,
@@ -205,8 +256,7 @@ export const AGENTS = {
 
 export const LICENCE = {
   id: 'licence',
-  icon: 'document-text' as SectionIconName,
-  heading: 'Free under the MIT licence',
+  heading: 'Free under the MIT license',
   lead: 'Run it from a checkout or deploy it to Vercel. The code is on GitHub.',
   button: { id: 'home.licence.github', label: 'GitHub', href: REPOSITORY },
 } as const;
@@ -228,7 +278,7 @@ export const FOOTER = {
       external: true,
     },
     { id: 'home.foot.github', label: 'GitHub', href: REPOSITORY, external: true },
-    { id: 'home.foot.licence', label: 'Licence', href: `${GITHUB_FILE}/LICENSE`, external: true },
+    { id: 'home.foot.licence', label: 'License', href: `${GITHUB_FILE}/LICENSE`, external: true },
     {
       id: 'home.foot.notices',
       label: 'Third party notices',
@@ -236,15 +286,17 @@ export const FOOTER = {
       external: true,
     },
   ] as ReadonlyArray<FooterLink>,
-  closing:
-    "Turboslide is General Translation's slides editor. Google Slides is a product of Google LLC.",
+  /** the sentence that names the company, the GT mark set inline before its name (brand-judge-3 graft 2) */
+  maker: { before: 'Turboslide is made by', company: 'General Translation', after: '.' },
+  closing: 'Google Slides is a product of Google LLC.',
 } as const;
 
 /** Every string of the page, keyed, for the lints. */
 export const HOME_COPY = {
-  meta: { title: 'Turboslide, a slides editor in the browser', description: SITE.description },
+  meta: { title: HOME_META.title, description: SITE.description },
   nav: NAV,
   hero: HERO,
+  numbers: NUMBERS,
   canvas: CANVAS,
   menus: MENUS,
   present: PRESENT,
@@ -257,6 +309,11 @@ export const HOME_COPY = {
 /** A percent as the measured sentence prints it: the number and the word. */
 export function formatPercentWord(n: number): string {
   return `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })} percent`;
+}
+
+/** A percent as the numbers row prints it: the number and the sign. */
+export function formatPercentFigure(n: number): string {
+  return `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })}%`;
 }
 
 /** A string, or a text function applied to the facts; null when a function has no facts to read. */

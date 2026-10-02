@@ -3,13 +3,14 @@ import { SPRITE } from '@turboslide/theme/sprite';
 import type { SectionIconName } from './copy';
 
 /**
- * The 20 px Heroicon before every section heading of /home (docs/POLISH.md 3.2, 3.3 item 3):
- * the icon names the section at the text's size and colour, so no card box has to. All six come
+ * The Heroicon of a key cell of /home's facts rows (DECK-GRAMMAR 40: an icon sits only in a key
+ * cell; docs/NEXT.md 4.1.3 item 9 took it out of the section headings): the icon names the row at
+ * the text's colour, 16 px in the key cell (home.css `.ts-product-h2-icon`). All six names come
  * from the theme sprite (`packages/theme/assets/sprite-ids.json`; `cursor-arrow-rays` and
- * `arrow-down-tray` joined it in the polish round, build/b7.md request 5). The sprite's bodies
- * are markup for the renderer's `<use>`; the
- * `<path>` elements are read out once at module load and rendered as React elements, which keeps
- * the page off `dangerouslySetInnerHTML`. `currentColor`, 20 unit grid, decorative.
+ * `arrow-down-tray` joined it in the polish round, build/b7.md request 5). The sprite's bodies are
+ * markup for the renderer's `<use>`; the `<path>` elements are read out once at module load and
+ * rendered as React elements, which keeps the page off `dangerouslySetInnerHTML`.
+ * `currentColor`, 20 unit grid, decorative.
  */
 type PathAttributes = { d: string; evenodd: boolean };
 

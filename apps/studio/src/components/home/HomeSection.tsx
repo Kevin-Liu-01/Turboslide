@@ -1,18 +1,17 @@
 import type { ReactNode } from 'react';
 
-import type { SectionIconName } from './copy';
-import { SectionIcon } from './SectionIcon';
-
 /**
- * One section of /home (docs/POLISH.md 3.2): one purpose, one heading with its 20 px Heroicon
- * before it, one lead at the 560 px measure, at most one action or note under the lead
- * (`after`), and one picture or one diagram beside the text (`children`) in the two column block
- * of 3.4 (text 5 of 12, picture 7 of 12, a 72 px gap, `align-items: start`; one column with the
- * text first under 760). A section without a picture (`single`) takes no picture box.
+ * One section of /home (docs/POLISH.md 3.2; the page grammar of docs/NEXT.md 4.1.2): one
+ * purpose, one heading with no icon before it (DECK-GRAMMAR 40: an icon sits only in a key cell),
+ * one lead at the 560 px measure, at most one action or note under the lead (`after`), and one
+ * picture or one diagram beside the text (`children`) in the two column block of 3.4 (text 5 of
+ * 12, picture 7 of 12, a 72 px gap, `align-items: start`; one column with the text first under
+ * the layout's one breakpoint, 1023 px). The section is a band of the 1104 px column with its
+ * seam under it and a cross where the seam meets each rail (`.ts-seam`). A section without a
+ * picture (`single`) takes no picture box.
  */
 export type HomeSectionProps = {
   id: string;
-  icon: SectionIconName;
   heading: string;
   lead: string;
   after?: ReactNode;
@@ -22,7 +21,6 @@ export type HomeSectionProps = {
 
 export function HomeSection({
   id,
-  icon,
   heading,
   lead,
   after,
@@ -31,12 +29,11 @@ export function HomeSection({
 }: HomeSectionProps) {
   const headingId = `ts-product-h-${id}`;
   return (
-    <section className="ts-product-band" id={id} aria-labelledby={headingId} data-band={id}>
-      <div className={single ? 'ts-product-rail' : 'ts-product-rail ts-product-two'}>
+    <section className="ts-product-band ts-seam" id={id} aria-labelledby={headingId} data-band={id}>
+      <div className={single ? 'ts-col' : 'ts-col ts-product-two'}>
         <div className="ts-product-text">
           <h2 id={headingId} className="ts-product-h2">
-            <SectionIcon name={icon} />
-            <span>{heading}</span>
+            {heading}
           </h2>
           <p className="ts-product-lead">{lead}</p>
           {after}

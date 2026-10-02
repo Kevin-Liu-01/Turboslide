@@ -26,8 +26,10 @@ import {
   LICENCE,
   MENUS,
   NAV,
+  NUMBERS,
   PRESENT,
   REPORT_WORDS,
+  formatPercentFigure,
   formatPercentWord,
 } from './copy';
 import type { Text } from './copy';
@@ -131,13 +133,17 @@ function visibleStrings(): string[] {
     ...NAV.links.map((link) => link.label),
     NAV.appearance.light.label,
     NAV.appearance.dark.label,
+    NAV.signIn.label,
     NAV.newPresentation.label,
     HERO.heading,
     HERO.lead,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,
+    ...HERO.facts.flatMap((fact) => [fact.key, fact.value]),
+    ...NUMBERS.cells.flatMap((cell) => [cell.figure(PROBE), cell.sentence]),
     CANVAS.heading,
     CANVAS.lead,
+    ...Object.values(CANVAS.diagram).filter((v) => v !== CANVAS.diagram.label),
     MENUS.heading,
     MENUS.lead,
     PRESENT.heading,
@@ -145,7 +151,6 @@ function visibleStrings(): string[] {
     ...Object.values(PRESENT.diagram).filter((v) => v !== PRESENT.diagram.label),
     EXPORT.heading,
     EXPORT.lead,
-    `${EXPORT.measured.before} ${EXPORT.measured.figure(PROBE)}${EXPORT.measured.after}`,
     EXPORT.diagram.slide,
     EXPORT.diagram.pdf,
     EXPORT.diagram.pptx,
@@ -161,6 +166,7 @@ function visibleStrings(): string[] {
     LICENCE.button.label,
     NAV.lockup.word,
     ...FOOTER.links.map((link) => link.label),
+    `${FOOTER.maker.before} ${FOOTER.maker.company}${FOOTER.maker.after}`,
     FOOTER.closing,
   ];
 }
@@ -229,7 +235,7 @@ describe('every string of the page', () => {
       expect(forbiddenWordsIn(text), `${path}: "${text}"`).toEqual([]);
     }
     expect(checked).toBeGreaterThan(40);
-    expect(DEFAULT_VIEW_EXEMPT).toEqual(['meta', 'agents', 'licence']);
+    expect(DEFAULT_VIEW_EXEMPT).toEqual(['meta', 'agents', 'licence', 'numbers']);
     /* and the exemptions earn it: the agents section names the transport, the licence section says run */
     expect(forbiddenWordsIn(AGENTS.lead(PROBE))).toContain('MCP');
     expect(forbiddenWordsIn(LICENCE.lead)).toEqual(['run']);
@@ -268,6 +274,7 @@ describe('headings and buttons', () => {
   });
 
   const buttons: string[] = [
+    NAV.signIn.label,
     NAV.newPresentation.label,
     NAV.appearance.light.label,
     NAV.appearance.dark.label,
@@ -289,17 +296,12 @@ describe('headings and buttons', () => {
     }
   });
 
-  it('puts one icon of the sprite family before every section heading, each different', () => {
-    const icons = [CANVAS.icon, MENUS.icon, PRESENT.icon, EXPORT.icon, AGENTS.icon, LICENCE.icon];
-    expect(new Set(icons).size).toBe(6);
-    expect(icons).toEqual([
-      'cursor-arrow-rays',
-      'bars-3',
-      'play',
-      'arrow-down-tray',
-      'command-line',
-      'document-text',
-    ]);
+  it('puts no icon before a heading and one in each key cell of the facts rows (DECK-GRAMMAR 40)', () => {
+    for (const section of [CANVAS, MENUS, PRESENT, EXPORT, AGENTS, LICENCE])
+      expect('icon' in section, section.id).toBe(false);
+    const icons = HERO.facts.map((fact) => fact.icon);
+    expect(new Set(icons).size).toBe(icons.length);
+    expect(icons).toEqual(['bars-3', 'play', 'arrow-down-tray']);
   });
 });
 
@@ -308,7 +310,7 @@ describe('the counts of the tree (SPEC-4 0.25)', () => {
     AGENTS.lead,
     AGENTS.diagram.label,
     AGENTS.diagram.table,
-    EXPORT.measured.figure,
+    ...NUMBERS.cells.map((cell) => cell.figure),
   ];
 
   it('flow through functions of the facts, never through digits in a string', () => {
@@ -320,13 +322,19 @@ describe('the counts of the tree (SPEC-4 0.25)', () => {
       const a = fn(PROBE);
       const b = fn(PROBE_2);
       expect(a).not.toBe(b);
-      const markers = [formatCount(PROBE.actions), formatPercentWord(PROBE.mismatchPercent)];
+      const markers = [
+        formatCount(PROBE.actions),
+        formatCount(PROBE.layouts),
+        formatPercentWord(PROBE.mismatchPercent),
+        formatPercentFigure(PROBE.mismatchPercent),
+      ];
       expect(
         markers.some((marker) => a.includes(marker)),
         a,
       ).toBe(true);
     }
     expect(formatPercentWord(0.003)).toBe('0.003 percent');
+    expect(formatPercentFigure(0.003)).toBe('0.003%');
   });
 
   it('keeps the plain strings free of a count of the tree', () => {
@@ -344,20 +352,27 @@ describe('the shape of the page (POLISH.md 3.2)', () => {
     expect(HERO.lead).toBe(SITE.description);
     expect(HOME_META.description).toBe(SITE.description);
     expect(SITE.manifest.description).toBe(SITE.description);
-    expect(HOME_META.title).toBe('Turboslide, a slides editor in the browser');
+    /* a plain statement, no comma tail (docs/NEXT.md 4.1.3 item 9; DECK-GRAMMAR 66) */
+    expect(HOME_META.title).toBe('Turboslide is a slides editor in the browser');
+    expect(HOME_META.title).not.toContain(',');
     expect(sentencesOf(HERO.lead).length).toBe(3);
     expect(sentencesOf(HERO.lead)[0]).toBe('Turboslide is a slides editor in the browser.');
   });
 
-  it('routes the hero, the navigation and the licence as 3.2 says', () => {
+  it('routes the hero, the navigation and the license as 3.2 says', () => {
     expect(HERO.buttons.newPresentation.href).toBe('/new');
     expect(NAV.newPresentation.href).toBe('/new');
     expect(HERO.buttons.openDeck.deckId).toBe('gt-brand');
     expect(HERO.buttons.openDeck.label).toBe('Open the Example Deck');
-    expect(NAV.links.map((link) => link.label)).toEqual(['Documentation', 'GitHub']);
+    /* GitHub moved to the footer and Sign In joined the bar (docs/NEXT.md 4.1.3 item 9) */
+    expect(NAV.links.map((link) => link.label)).toEqual(['Documentation']);
+    expect(NAV.signIn.label).toBe('Sign In');
     expect(LICENCE.button.href).toBe('https://github.com/Kevin-Liu-01/Turboslide');
     expect(AGENTS.link.href.startsWith('https://github.com/Kevin-Liu-01/Turboslide')).toBe(true);
-    expect(EXPORT.measured.href).toMatch(/\/docs\/pptx\.md$/);
+    const record = NUMBERS.cells.find((cell) => cell.id === 'mismatch');
+    expect(record !== undefined && 'href' in record ? record.href : '').toMatch(
+      /\/docs\/pptx\.md$/,
+    );
     expect(SITE.productionOrigin).toBe('https://www.turboslide.com');
   });
 
@@ -368,16 +383,24 @@ describe('the shape of the page (POLISH.md 3.2)', () => {
       'Your presentations',
       'Documentation',
       'GitHub',
-      'Licence',
+      'License',
       'Third party notices',
     ]);
+    /* American English in the words, the ids kept (docs/NEXT.md 4.1.3 item 9) */
+    expect(FOOTER.links.find((link) => link.label === 'License')?.id).toBe('home.foot.licence');
+    expect(LICENCE.heading).toBe('Free under the MIT license');
+    expect(LICENCE.button.id).toBe('home.licence.github');
+    for (const { text, path } of every)
+      expect(/\blicence\b/i.test(text), `${path}: "${text}"`).toBe(false);
     expect(FOOTER.links.find((link) => link.label === 'Your presentations')?.href).toBe('/decks');
     expect(FOOTER.links.every((link) => !link.href.startsWith('/api/'))).toBe(true);
     expect(FOOTER.closing).toContain('Google Slides is a product of Google LLC');
+    expect(FOOTER.maker.company).toBe('General Translation');
   });
 
   it('gives every diagram one sentence as its name', () => {
     for (const label of [
+      CANVAS.diagram.label,
       PRESENT.diagram.label,
       EXPORT.diagram.label,
       AGENTS.diagram.label(PROBE),

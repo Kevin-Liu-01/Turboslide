@@ -9441,7 +9441,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 1, 2, 11, 13, 22",
-      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
     },
     {
       "id": "decks.home.copy-rules",
@@ -9456,12 +9456,12 @@
     {
       "id": "decks.home.product-pictures",
       "feature": "decks",
-      "interaction": "The hero and the two crops carry the Turboslide mark in the title row and no Extensions menu (`shots.test.ts`); each drawn at 1:1 or larger of its CSS size except the hero at 0.78; the same picture in both appearances",
+      "interaction": "The hero and the menus crop carry the Turboslide mark in the title row and no Extensions menu (`shots.test.ts`); the hero drawn at the column's 1024 px (0.71) and the crop at its slot (0.9 or more); the same picture in both appearances",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 3, 20, 24",
-      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
     },
     {
       "id": "decks.home.links-and-card",
@@ -9493,6 +9493,46 @@
       "severity": 1,
       "evidence": "audit-collab item 20",
       "note": "Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "interaction": "`/home` at 1440 draws one rail on each side at the 1104 px column, 9 px crosses where seams meet them, a 58 px navigation bar, no icon before a heading, no arrowhead, diagram labels of 18 px or more, the command on `#101010`",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 34 to 38",
+      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the rails drawn once by `.ts-rails`, a `.ts-seam` under every band with its two crosses, the diagrams end their flows in 11 unit square markers"
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "interaction": "The `/home` capture shows no selection ring, chip or handle",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 38 (rank 13)",
+      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the canvas section draws a diagram in place of the selected picture's capture; the driver reads every shown capture's pixels for the selection blues"
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "interaction": "`/home`'s title reads \"Turboslide is a slides editor in the browser\" and no word on the page reads \"licence\"",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 40 (rank 15)",
+      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the ids `home.licence.*` keep their spelling"
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "interaction": "`/home` at 390 keeps a 16 px gutter at the navigation; nothing crosses the viewport",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 39",
+      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the 1023 px layout block keeps the column's gutter on the navigation (the bug was home.css 398)"
     },
     {
       "id": "realtime.keystroke.within-300ms",

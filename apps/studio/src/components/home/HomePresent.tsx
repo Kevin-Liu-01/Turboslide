@@ -8,7 +8,7 @@ import { HomeSection } from './HomeSection';
  */
 export function HomePresent() {
   return (
-    <HomeSection id={PRESENT.id} icon={PRESENT.icon} heading={PRESENT.heading} lead={PRESENT.lead}>
+    <HomeSection id={PRESENT.id} heading={PRESENT.heading} lead={PRESENT.lead}>
       <PresentDiagram />
     </HomeSection>
   );

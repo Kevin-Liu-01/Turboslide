@@ -1,12 +1,18 @@
 /* The product page, /home (docs/POLISH.md section 3; the round four notes of gslides-parity
-   SPEC-4 section 2 stand under it). One sheet for the navigation, the hero, the six sections and
-   the footer. Colours are the --pt- tokens of tokens.css alone (paper and ink); sizes are the --ts-
-   identity tokens brand.css puts on :root plus the spacing system of POLISH.md 3.4 (base unit
-   8 px: section padding 112, hero padding top 96, h1 to lead 24, h2 to lead 16, lead to buttons
-   32, text block to picture 56, the two column gap 72, the lead measure 560, the body measure 480;
-   72, 56, 16, 12, 24, 32 and the rail under 760). The line law of brand.md section 8: one --pt-hair
-   rule under the navigation and between sections, --pt-edge around a picture, nothing else drawn.
-   Nothing animates apart from the .pt-ib colour transitions tokens.css defines. */
+   SPEC-4 section 2 stand under it), on the deck's page grammar since Round 1 (docs/NEXT.md 4.1.2
+   and 4.1.3 item 9; Prototemplate deck/slides/29-ladder.html and 49-shell-numbers.html; brand-c
+   rules 3 to 6 and 13). One sheet for the navigation, the hero, the numbers row, the six sections
+   and the footer. Colours are the --pt- tokens of tokens.css alone (paper and ink); sizes are the
+   --ts- identity tokens brand.css puts on :root (the ladder, the 1104 px column, the 58 px
+   navigation bar, the 9 px cross) plus the spacing system of POLISH.md 3.4 (base unit 8 px:
+   section padding 112, h1 to lead 24, h2 to lead 16, lead to buttons 32, text block to picture
+   56, the two column gap 72, the lead measure 560). The line law (DESIGN.md 59, 177 to 188): one
+   rail on each side of the column, drawn once for the page (grammar.css .ts-rails); every band
+   ends in a full bleed seam with a cross where it meets each rail (grammar.css .ts-seam); the hatch strip
+   after the numbers row marks the change of topic; --pt-edge around a picture; nothing else is
+   drawn. The layout has one breakpoint, 1023 px; the hero type has its own at 720 px (brand.css).
+   Monospace sits only on the #101010 panel (DECK-GRAMMAR 31). Nothing animates apart from the
+   .pt-ib colour transitions tokens.css defines. */
 
 /* the document scrolls with no smoothing, said explicitly (SPEC-4 0.23) */
 html:has(.ts-product) {
@@ -14,11 +20,12 @@ html:has(.ts-product) {
 }
 
 .ts-product {
+  position: relative;
   display: block;
   min-width: 0;
   color: var(--pt-ink);
   background: var(--pt-paper);
-  font: var(--ts-body) / 1.55 var(--pt-text);
+  font: var(--ts-body) / 1.6 var(--pt-text);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -31,16 +38,7 @@ html:has(.ts-product) {
   color: inherit;
 }
 
-/* the rail: 1120 px of content between 24 px gutters (the box is border-box, so the gutters are added) */
-.ts-product-rail {
-  box-sizing: border-box;
-  max-width: calc(var(--ts-rail) + 48px);
-  margin: 0 auto;
-  padding: 0 24px;
-  min-width: 0;
-}
-
-/* ---- the ladder (brand.md section 7): weight 500 on every heading, the h1 included ---- */
+/* ---- the ladder (slide 29): weight 500 on every heading, the h1 included ---- */
 .ts-product-h1,
 .ts-product-h2 {
   margin: 0;
@@ -52,32 +50,23 @@ html:has(.ts-product) {
 }
 
 .ts-product-h1 {
-  max-width: 960px;
+  max-width: 640px;
   font-size: var(--ts-h1);
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  line-height: 1.04;
+  letter-spacing: -0.038em;
 }
 
-/* the section heading with its 20 px icon before it, at the text's colour */
+/* the section heading: the words alone, no icon before them (DECK-GRAMMAR 40) */
 .ts-product-h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   font-size: var(--ts-h2);
-  line-height: 1.12;
+  line-height: 1.18;
   letter-spacing: -0.025em;
-}
-
-.ts-product-h2-icon {
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
 }
 
 .ts-product-lead {
   max-width: 560px;
   font-size: var(--ts-lead);
-  line-height: 1.45;
+  line-height: 1.55;
   color: var(--pt-ink-2);
 }
 
@@ -87,15 +76,6 @@ html:has(.ts-product) {
 
 .ts-product-h2 + .ts-product-lead {
   margin-top: 16px;
-}
-
-/* the body measure: the one measured sentence, the command box */
-.ts-product-note {
-  max-width: 480px;
-  margin-top: 16px;
-  font-size: var(--ts-body);
-  line-height: 1.55;
-  color: var(--pt-ink-2);
 }
 
 .ts-product-inline-link {
@@ -113,19 +93,20 @@ html:has(.ts-product) {
   outline-offset: 2px;
 }
 
-/* the one monospace on the page (SPEC-4 0.20): the agents' command box */
+/* the one monospace on the page (SPEC-4 0.20; DECK-GRAMMAR 31): the agents' command in white
+   monospace on the #101010 panel, the same panel in both appearances */
 .ts-product-cmd {
   display: block;
   box-sizing: border-box;
   max-width: 480px;
   margin: 24px 0 0;
-  padding: 10px 12px;
+  padding: 14px 16px;
   font-family: var(--pt-mono);
   font-size: var(--ts-small);
   line-height: 1.55;
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-plate);
+  color: var(--pt-panel-text);
+  border: 0;
+  background: var(--pt-panel-ink);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -144,31 +125,24 @@ html:has(.ts-product) {
   text-underline-offset: 3px;
 }
 
-/* ---- the navigation: 44 px (--pt-title-h), one rule under it ---- */
-.ts-product-nav {
-  border-bottom: 1px solid var(--pt-hair);
-}
-
+/* ---- the navigation: 58 px (--ts-nav-h) in the column, the seam under it ---- */
 .ts-product-nav-row {
   display: flex;
   align-items: center;
   gap: 24px;
-  min-height: var(--pt-title-h);
+  min-height: var(--ts-nav-h, 58px);
 }
 
-/* the horizontal lockup at 22 px type: the 16 px solid mark, a 10 px gap (SPEC-4 1.2) */
+/* the lockup: the 24 px mark beside the 22 px word, half the cap between them less the T's
+   bearing (brand.css .ts-brand-lockup, B1's rule; docs/gslides-parity/round1/sheet.md) */
 .ts-product-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex: 0 0 auto;
+  height: var(--ts-nav-h, 58px);
   color: var(--pt-ink);
   text-decoration: none;
-}
-
-.ts-product-lockup .ts-mark {
-  width: 16px;
-  height: 16px;
 }
 
 .ts-product-lockup-word {
@@ -179,10 +153,6 @@ html:has(.ts-product) {
   line-height: 1;
   letter-spacing: -0.01em;
   white-space: nowrap;
-}
-
-.ts-product-lockup-small .ts-product-lockup-word {
-  font-size: 15px;
 }
 
 .ts-product-lockup:hover .ts-product-lockup-word {
@@ -204,6 +174,20 @@ html:has(.ts-product) {
   text-decoration: none;
 }
 
+/* Sign In (sign-in.tsx): the page is prerendered, so the button arrives after hydration once the
+   deployment answers; its slot is drawn at the button's width from the first paint, so the
+   arrival moves nothing (the layout shift row) and a deployment with no method leaves the slot
+   empty at the start of the right hand group; its words in ink, as Documentation's */
+.ts-product-nav-signin {
+  display: inline-flex;
+  flex: 0 0 64px;
+  justify-content: flex-end;
+}
+
+.ts-product-nav-signin .pt-ib {
+  color: var(--pt-ink);
+}
+
 /* the appearance group: two aria-pressed buttons; the pressed look comes from the data-theme
    attribute the boot script stamps before first paint, so a prerendered page never shows a frame
    with both buttons outlined or both pressed (HomeNav.tsx) */
@@ -220,10 +204,20 @@ html:has(.ts-product) {
   border-color: var(--pt-ink);
 }
 
-/* ---- the hero: text over paper, then the product (3.2 item 1) ---- */
+/* ---- the hero: the text and the facts rows, then the product (3.2 item 1) ---- */
 .ts-product-hero {
-  padding: 96px 0 112px;
-  border-bottom: 1px solid var(--pt-hair);
+  padding: 72px 0 112px;
+}
+
+.ts-product-hero-head {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: 72px;
+  align-items: end;
+}
+
+.ts-product-hero-text {
+  min-width: 0;
 }
 
 .ts-product-cta {
@@ -246,6 +240,50 @@ html:has(.ts-product) {
 .ts-product-cta .pt-ib.is-solid {
   color: var(--pt-paper);
   border-color: var(--pt-ink);
+}
+
+/* the facts rows (brand-c rule 5; DECK-GRAMMAR 36, 39 and 40): ruled key and value rows, each
+   row owning its line, a Heroicon in the key cell and nowhere else */
+.ts-product-facts {
+  margin: 0;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-product-fact {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 24px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: var(--ts-small);
+  line-height: 1.55;
+}
+
+.ts-product-fact:last-child {
+  border-bottom-color: var(--pt-hair);
+}
+
+.ts-product-fact dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: start;
+  min-height: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-product-fact dd {
+  margin: 0;
+  color: var(--pt-ink-2);
+}
+
+/* the key cell's icon: 16 px, the text's colour, decorative */
+.ts-product-h2-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
 }
 
 /* a picture in its frame (the edge role) */
@@ -285,10 +323,48 @@ html:has(.ts-product) {
   display: block;
 }
 
-/* ---- the sections: one rule between them, the two column block of 3.4 ---- */
+/* ---- the numbers row (A's graft): three cells parted by hairlines, then the hatch strip ---- */
+.ts-product-numbers-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ts-product-number {
+  min-width: 0;
+  padding: 32px var(--ts-gutter, 40px);
+}
+
+.ts-product-number + .ts-product-number {
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-product-figure {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: var(--ts-figure);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--pt-ink);
+}
+
+.ts-product-figure .ts-product-inline-link {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+.ts-product-number-sentence {
+  max-width: 300px;
+  margin-top: 8px;
+  font-size: var(--ts-small);
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+}
+
+/* ---- the sections: the two column block of 3.4, a seam under each ---- */
 .ts-product-band {
   padding: 112px 0;
-  border-bottom: 1px solid var(--pt-hair);
 }
 
 .ts-product-two {
@@ -302,7 +378,7 @@ html:has(.ts-product) {
   min-width: 0;
 }
 
-/* ---- the diagrams (3.3 item 2): the grammar's strokes and labels from the tokens ---- */
+/* ---- the diagrams (3.3 item 2; slide 33): 1 px strokes, 20 unit labels, square markers ---- */
 .ts-product-diagram {
   display: block;
   width: 100%;
@@ -313,7 +389,9 @@ html:has(.ts-product) {
 
 .ts-product-diagram .dg-hair,
 .ts-product-diagram .dg-edge,
-.ts-product-diagram .dg-plate {
+.ts-product-diagram .dg-plate,
+.ts-product-diagram .dg-ink,
+.ts-product-diagram .dg-handle {
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
   shape-rendering: crispEdges;
@@ -334,13 +412,31 @@ html:has(.ts-product) {
   stroke: var(--pt-hair);
 }
 
-.ts-product-diagram .dg-label {
-  fill: var(--pt-ink-2);
-  font-size: 13px;
+/* the moved picture's outline and its rotation handle, ink on the plate */
+.ts-product-diagram .dg-ink {
+  stroke: var(--pt-ink);
 }
 
-.ts-product-diagram .dg-mark {
-  fill: currentColor;
+.ts-product-diagram line.dg-ink {
+  fill: none;
+}
+
+.ts-product-diagram .dg-handle {
+  fill: var(--pt-paper);
+  stroke: var(--pt-ink);
+}
+
+/* the end of a flow: an 11 unit filled square in ink (Marker.tsx), never an arrowhead */
+.ts-product-diagram .dg-marker {
+  fill: var(--pt-ink);
+  shape-rendering: crispEdges;
+}
+
+/* the labels at 20 units in ink-2 (DECK-GRAMMAR "Diagrams"): 18 px or more on screen where the
+   diagram takes the seven column slot of the column (555 px of its 612 units) */
+.ts-product-diagram .dg-label {
+  fill: var(--pt-ink-2);
+  font-size: 20px;
 }
 
 /* ---- the footer (3.2 item 8): the lockup, six links in one row, the closing line ---- */
@@ -353,6 +449,10 @@ html:has(.ts-product) {
   flex-wrap: wrap;
   align-items: center;
   gap: 16px 40px;
+}
+
+.ts-product-foot .ts-product-lockup {
+  height: auto;
 }
 
 .ts-product-foot-links {
@@ -385,17 +485,22 @@ html:has(.ts-product) {
   color: var(--pt-ink-2);
 }
 
-/* ---- under 760: one column, the text first, the numbers of 3.4's narrow column ---- */
-@media (max-width: 760px) {
-  .ts-product-rail {
-    padding: 0 20px;
-  }
+/* the GT mark before the company's name at the text's cap, in the text's ink */
+.ts-product-foot-company {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--pt-ink);
+}
 
-  /* the navigation wraps to two rows: the lockup and the button, then the links and the group */
+/* ---- the layout's one breakpoint (slide 49): under 1024 every row is one column ---- */
+@media (max-width: 1023px) {
+  /* the navigation wraps to two rows: the lockup and the button, then the links, Sign In and the
+     group; Sign In comes after Documentation so its arrival moves nothing (the group is pushed to
+     the right by its own margin) */
   .ts-product-nav-row {
     flex-wrap: wrap;
     gap: 0 12px;
-    padding: 6px 0;
   }
 
   .ts-product-nav-new {
@@ -407,15 +512,30 @@ html:has(.ts-product) {
     order: 3;
     flex-basis: 100%;
     margin-left: 0;
-    padding-top: 4px;
+    padding-bottom: 12px;
+  }
+
+  .ts-product-nav-link {
+    order: 1;
+  }
+
+  .ts-product-nav-signin {
+    order: 2;
+    justify-content: flex-start;
   }
 
   .ts-product-appearance {
+    order: 3;
     margin: 0 0 0 auto;
   }
 
   .ts-product-hero {
-    padding: 56px 0 72px;
+    padding: 48px 0 72px;
+  }
+
+  .ts-product-hero-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
   }
 
   .ts-product-h1 + .ts-product-lead {
@@ -427,23 +547,29 @@ html:has(.ts-product) {
   }
 
   .ts-product-lead,
-  .ts-product-note,
   .ts-product-cmd {
     max-width: none;
   }
 
   .ts-product-cta {
-    flex-direction: column;
     margin-top: 24px;
-  }
-
-  .ts-product-cta .pt-ib {
-    width: 100%;
-    justify-content: center;
   }
 
   .ts-product-hero-shot {
     margin-top: 32px;
+  }
+
+  .ts-product-numbers-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-product-number {
+    padding: 24px var(--ts-gutter, 40px);
+  }
+
+  .ts-product-number + .ts-product-number {
+    border-left: 0;
+    border-top: 1px solid var(--pt-hair);
   }
 
   .ts-product-band {
@@ -455,13 +581,29 @@ html:has(.ts-product) {
     gap: 32px;
   }
 
-  /* the diagram scales with the rail, its labels never under 13 px on screen: the label's size
-     in SVG units grows as the drawn width falls (13 px at 760, 22.7 at 390, a line between) */
-  .ts-product-diagram .dg-label {
-    font-size: calc(32.9px - 2.62vw);
-  }
-
   .ts-product-footer {
     padding: 48px 0 56px;
+  }
+}
+
+/* the narrow phone: the buttons full width, the diagram labels kept readable as the drawing
+   shrinks (24.4 units at 390 px is 13 px on screen) */
+@media (max-width: 720px) {
+  .ts-product-cta {
+    flex-direction: column;
+  }
+
+  .ts-product-cta .pt-ib {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ts-product-fact {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .ts-product-diagram .dg-label {
+    font-size: clamp(20px, calc(37.4px - 3.33vw), 24.4px);
   }
 }

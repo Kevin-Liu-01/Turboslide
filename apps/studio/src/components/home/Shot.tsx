@@ -11,8 +11,8 @@ import type { ShotRecord } from './shots';
  * The stored appearance shows one of the two through `home.css` (`.ts-product-only-dark` and
  * `-light`); both are `loading="lazy"`, so the hidden one, which has no box, is never requested,
  * and the shown one loads with the first layout (the hero carries `fetchpriority="high"`). The
- * hero is drawn at the rail's 1120 px (0.78 of its 1440 px capture); the crops at 1:1 of their
- * capture on the wide layouts.
+ * hero is drawn at the column's 1024 px content width (0.71 of its 1440 px capture) and the crop
+ * at the seven column slot's 555 px (0.91 of its 612 px capture) on the wide layouts.
  */
 export type ShotProps = {
   kind: ShotKind;
@@ -23,13 +23,18 @@ export type ShotProps = {
   priority?: boolean;
 };
 
-/** The `sizes` of a crop in the seven column slot of a two column band (3.4). */
+/**
+ * The `sizes` of a crop in the seven column slot of a two column band (3.4) inside the 1104 px
+ * column and its 40 px gutters (docs/NEXT.md 4.1.2): 555 px from 1136 px, the slot's share of
+ * the column below that, and the column's content width under the 1023 px breakpoint (16 px
+ * gutters inside 16 px margins under 720).
+ */
 export const CROP_SIZES =
-  '(min-width: 1168px) 611px, (min-width: 761px) calc((100vw - 120px) * 7 / 12), calc(100vw - 40px)';
+  '(min-width: 1136px) 556px, (min-width: 1024px) calc((100vw - 184px) * 7 / 12), (min-width: 721px) calc(100vw - 112px), calc(100vw - 64px)';
 
-/** The `sizes` of the hero picture at the rail's width. */
+/** The `sizes` of the hero picture at the column's content width. */
 export const HERO_SIZES =
-  '(min-width: 1168px) 1120px, (min-width: 761px) calc(100vw - 48px), calc(100vw - 40px)';
+  '(min-width: 1136px) 1024px, (min-width: 721px) calc(100vw - 112px), calc(100vw - 64px)';
 
 const SHOTS: ReadonlyMap<string, ShotRecord> = new Map(
   SHOTS_MANIFEST.shots.map((shot) => [shot.name, shot]),

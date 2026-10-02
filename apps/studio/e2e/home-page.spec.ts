@@ -12,12 +12,15 @@ import type { Page } from '@playwright/test';
 // scrolls to the top; the rendered copy follows the rules of 3.1; the Speculation Rules script
 // names /new; no script the page loads carries the shader library's mount; CLS is 0 over the load
 // and a full scroll. Runs against a builder's server with PLAYWRIGHT_BASE_URL (AGENTS.md dev
-// server rules; B7's port is 4447) or the runner's 4321.
+// server rules; B7's port is 4447) or the runner's 4321. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a)
+// moved the page onto the deck's grammar: the 1104 px column and its 40 px gutters, the ladder of
+// slide 29, no icon before a heading, the canvas section's diagram in place of its capture, the
+// hero at 72 px under the seam (48 under 1024), the diagram labels at 20 units.
 
 const HERO_HEADING = 'Build the pitch, present it and send the link';
 const HERO_LEAD =
   "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.";
-const TITLE = 'Turboslide, a slides editor in the browser';
+const TITLE = 'Turboslide is a slides editor in the browser';
 
 const BANDS = ['hero', 'canvas', 'menus', 'present', 'export', 'agents', 'licence'] as const;
 const HEADINGS: Record<(typeof BANDS)[number], string> = {
@@ -27,7 +30,7 @@ const HEADINGS: Record<(typeof BANDS)[number], string> = {
   present: 'Present from the browser',
   export: 'Export to PDF and PowerPoint',
   agents: 'Agents run the same actions',
-  licence: 'Free under the MIT licence',
+  licence: 'Free under the MIT license',
 };
 
 /** The report words of 3.1 that never appear on the page. */
@@ -146,12 +149,13 @@ test('the sections stand in order with one heading, one lead and one picture or 
     await expect(heading, band).toHaveCount(1);
     await expect(heading, band).toHaveText(HEADINGS[band]);
     await expect(section.locator('.ts-product-lead'), band).toHaveCount(1);
-    if (band !== 'hero') await expect(section.locator('h2 svg[data-icon]'), band).toHaveCount(1);
+    /* no icon before a heading (DECK-GRAMMAR 40) */
+    await expect(section.locator('h1 svg, h2 svg'), band).toHaveCount(0);
     const pictures = await section.locator('figure img').count();
     const diagrams = await section.locator('svg[role="img"][data-diagram]').count();
     if (band === 'licence') {
       expect(pictures + diagrams, band).toBe(0);
-    } else if (['hero', 'canvas', 'menus'].includes(band)) {
+    } else if (['hero', 'menus'].includes(band)) {
       /* one picture: the dark and the light file of one capture */
       expect(pictures, band).toBe(2);
       expect(diagrams, band).toBe(0);
@@ -163,7 +167,7 @@ test('the sections stand in order with one heading, one lead and one picture or 
   /* the h1 is the seller's sentence at weight 500 */
   expect(await styleOf(page, 'main h1', ['font-weight', 'font-size'])).toEqual({
     'font-weight': '500',
-    'font-size': '56px',
+    'font-size': '59.2px',
   });
   await expect(page.locator('main h1')).toHaveCount(1);
   /* one command box, the one monospace on the page */
@@ -177,7 +181,7 @@ test('the pictures carry width, height, srcset and sizes; the hidden appearance 
   page,
 }) => {
   await openHome(page, 'dark');
-  for (const name of ['hero', 'canvas', 'menus']) {
+  for (const name of ['hero', 'menus']) {
     for (const theme of ['dark', 'light']) {
       const img = page.locator(`img[data-shot="${name}-${theme}"]`);
       await expect(img, name).toHaveCount(1);
@@ -228,9 +232,9 @@ for (const width of [1440, 1280] as const) {
   test(`the spacing system of 3.4 reads from the boxes at ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: width === 1440 ? 900 : 800 });
     await openHome(page);
-    /* the hero: 96 under the navigation, 112 under the picture; the bands 112 and 112 */
+    /* the hero: 72 under the navigation, 112 under the picture; the bands 112 and 112 */
     expect(await styleOf(page, '[data-band="hero"]', ['padding-top', 'padding-bottom'])).toEqual({
-      'padding-top': '96px',
+      'padding-top': '72px',
       'padding-bottom': '112px',
     });
     for (const band of BANDS.slice(1))
@@ -246,10 +250,10 @@ for (const width of [1440, 1280] as const) {
     expect(lead!.top - h1!.bottom).toBe(24);
     expect(cta!.top - lead!.bottom).toBe(32);
     expect(shot!.top - cta!.bottom).toBe(56);
-    /* the picture at the rail's 1120 in a 1 px edge frame (the frame is the rail's width, the
-       picture 1118 inside it, 0.78 of its 1440 px capture), its top in the first screen */
-    expect(shot!.width).toBe(1120);
-    expect((await page.locator('img[data-shot="hero-dark"]').boundingBox())!.width).toBe(1118);
+    /* the picture at the column's 1024 px content width in a 1 px edge frame (the picture 1022
+       inside it, 0.71 of its 1440 px capture), its top in the first screen */
+    expect(shot!.width).toBe(1024);
+    expect((await page.locator('img[data-shot="hero-dark"]').boundingBox())!.width).toBe(1022);
     expect(shot!.top).toBeLessThan(width === 1440 ? 560 : 560);
     const frame = await styleOf(page, '[data-band="hero"] figure', [
       'border-top-width',
@@ -288,14 +292,12 @@ for (const width of [1440, 1280] as const) {
       );
       expect(pic!.top, band).toBe(text!.top);
     }
-    /* the crops are drawn at 1:1 of their capture: the seven column slot is 611.3 px and the
-       frame takes 2, so the picture draws at 609, within the frame's two pixels of its 612 */
-    for (const name of ['canvas', 'menus']) {
+    /* the crop is drawn at its slot: seven twelfths of the column's 1024 px less the 72 px gap
+       is 555.3 px, and the frame takes 2 */
+    for (const name of ['menus']) {
       const img = page.locator(`img[data-shot="${name}-dark"]`);
       const drawn = (await img.boundingBox())!.width;
-      expect(Math.abs(drawn - Number(await img.getAttribute('width'))), name).toBeLessThanOrEqual(
-        3,
-      );
+      expect(Math.abs(drawn - 553), name).toBeLessThanOrEqual(2);
     }
     /* the footer 56 and 64 */
     expect(await styleOf(page, 'footer', ['padding-top', 'padding-bottom'])).toEqual({
@@ -317,7 +319,7 @@ test('the narrow layout at 390: one column, the text first, the numbers of 3.4',
   await page.setViewportSize({ width: 390, height: 844 });
   await openHome(page);
   expect(await styleOf(page, '[data-band="hero"]', ['padding-top', 'padding-bottom'])).toEqual({
-    'padding-top': '56px',
+    'padding-top': '48px',
     'padding-bottom': '72px',
   });
   for (const band of BANDS.slice(1))
@@ -329,15 +331,19 @@ test('the narrow layout at 390: one column, the text first, the numbers of 3.4',
     'font-size': '40px',
     'font-weight': '500',
   });
-  expect((await styleOf(page, 'main h2', ['font-size']))!['font-size']).toBe('26px');
-  expect((await styleOf(page, '.ts-product-lead', ['font-size']))!['font-size']).toBe('18px');
+  /* the ladder of slide 29: the hero alone has its own size under 720 px */
+  expect((await styleOf(page, 'main h2', ['font-size']))!['font-size']).toBe('36px');
+  expect((await styleOf(page, '.ts-product-lead', ['font-size']))!['font-size']).toBe('17px');
   const h1 = await boxOf(page, 'main h1');
   const lead = await boxOf(page, '[data-band="hero"] .ts-product-lead');
   const cta = await boxOf(page, '[data-band="hero"] .ts-product-cta');
   const shot = await boxOf(page, '[data-band="hero"] figure');
+  const facts = await boxOf(page, '[data-band="hero"] .ts-product-facts');
   expect(lead!.top - h1!.bottom).toBe(16);
   expect(cta!.top - lead!.bottom).toBe(24);
-  expect(shot!.top - cta!.bottom).toBe(32);
+  /* one column: the text, the facts rows 32 under it, the picture 32 under them */
+  expect(facts!.top - cta!.bottom).toBe(32);
+  expect(shot!.top - facts!.bottom).toBe(32);
   /* the buttons stacked full width, 8 apart */
   const buttons = await page.evaluate(() =>
     [...document.querySelectorAll('[data-band="hero"] .ts-product-cta a')].map((a) => {
@@ -350,7 +356,8 @@ test('the narrow layout at 390: one column, the text first, the numbers of 3.4',
     }),
   );
   expect(buttons.length).toBe(2);
-  expect(buttons[0]!.width).toBe(350);
+  /* the column's content: 390 less 16 px margins and 16 px gutters on each side */
+  expect(buttons[0]!.width).toBe(326);
   expect(buttons[1]!.top - (buttons[0]!.top + buttons[0]!.height)).toBe(8);
   /* one column, the text above the picture or the diagram */
   for (const band of ['canvas', 'menus', 'present', 'export', 'agents'] as const) {
@@ -363,12 +370,12 @@ test('the narrow layout at 390: one column, the text first, the numbers of 3.4',
       `[data-band="${band}"] figure, [data-band="${band}"] svg[role="img"]`,
     );
     expect(pic!.top - text!.bottom, band).toBe(32);
-    expect(pic!.width, band).toBeLessThanOrEqual(350);
+    expect(pic!.width, band).toBeLessThanOrEqual(326);
   }
-  /* the navigation keeps the word and the two links */
+  /* the navigation keeps the word and Documentation; GitHub is the footer's since Round 1 */
   await expect(page.locator('.ts-product-nav .ts-product-lockup-word')).toBeVisible();
   await expect(page.locator('[data-control="home.nav.docs"]')).toBeVisible();
-  await expect(page.locator('[data-control="home.nav.github"]')).toBeVisible();
+  await expect(page.locator('[data-control="home.nav.github"]')).toHaveCount(0);
   await expect(page.locator('[data-control="home.nav.new"]')).toBeVisible();
   await expect(page.locator('[data-control="home.theme.light"]')).toBeVisible();
   /* the diagram labels stay 13 px or larger on screen */
@@ -602,12 +609,13 @@ test('the diagrams are inline, named, small and drawn from the tokens', async ({
       };
     }),
   );
-  expect(diagrams.map((d) => d.name)).toEqual(['present', 'export', 'agents']);
+  expect(diagrams.map((d) => d.name)).toEqual(['canvas', 'present', 'export', 'agents']);
   for (const diagram of diagrams) {
     expect(diagram.role, diagram.name ?? '').toBe('img');
     expect(diagram.label, diagram.name ?? '').toMatch(/^[A-Z].*\.$/);
     expect(diagram.bytes, diagram.name ?? '').toBeLessThan(10_000);
-    expect(diagram.fontSize, diagram.name ?? '').toBe('13px');
+    /* 20 units (DECK-GRAMMAR "Diagrams"), 18 px or more on screen at the wide layouts */
+    expect(diagram.fontSize, diagram.name ?? '').toBe('20px');
     expect(diagram.strokeWidth, diagram.name ?? '').toBe('1px');
     expect(diagram.animated, diagram.name ?? '').toBe(0);
   }

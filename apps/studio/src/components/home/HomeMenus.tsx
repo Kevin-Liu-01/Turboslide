@@ -9,7 +9,7 @@ import { CROP_SIZES, Shot } from './Shot';
  */
 export function HomeMenus() {
   return (
-    <HomeSection id={MENUS.id} icon={MENUS.icon} heading={MENUS.heading} lead={MENUS.lead}>
+    <HomeSection id={MENUS.id} heading={MENUS.heading} lead={MENUS.lead}>
       <figure className="ts-product-shot">
         <Shot kind={MENUS.picture.shot} alt={MENUS.picture.alt} sizes={CROP_SIZES} />
       </figure>

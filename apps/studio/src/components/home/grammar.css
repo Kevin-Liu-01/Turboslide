@@ -1,0 +1,71 @@
+/* The page grammar of the pages outside the editor (docs/NEXT.md 4.1.2 and 4.1.3 items 9 to 11;
+   Prototemplate deck/slides/49-shell-numbers.html; DESIGN.md 177 to 188; brand-c rule 3): the
+   1104 px column with one hairline rail on each side, drawn once for the page by `.ts-rails` (the
+   column's `border-inline`, so the brand lint's one rail check finds one line on each side); the
+   column `.ts-col` with its gutter, which text never crosses (DECK-GRAMMAR 15), and `.ts-col-bare`
+   without it; `.ts-seam`, a full bleed hairline under a band with a 9 px cross with 1 px arms
+   where it meets each rail; and `.ts-hatch`, the strip of 45 degree hairlines every 8 px where
+   the topic changes. /home, /decks and Not found import it. Colours are tokens only; no radius,
+   no motion. The column is `min(--ts-rail, 100% - 32px)`, so under 1136 px the rails stand 16 px
+   inside the viewport and the layout needs no media block here. The page root is the rails'
+   containing block (`position: relative`).
+
+   Docs/NEXT.md 4.1.6 names brand.css for these classes; they sit in this file of B2's while B1
+   rewrites brand.css in the same round, and move there with the integrator's merge if it chooses
+   (docs/gslides-parity/round1/build/b2.md). */
+
+.ts-rails {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - min(var(--ts-rail), 100% - 32px) / 2);
+  width: min(var(--ts-rail), 100% - 32px);
+  box-sizing: border-box;
+  border-inline: 1px solid var(--pt-hair);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ts-col,
+.ts-col-bare {
+  box-sizing: border-box;
+  width: min(var(--ts-rail), 100% - 32px);
+  margin-inline: auto;
+  min-width: 0;
+}
+
+.ts-col {
+  padding-inline: var(--ts-gutter, 40px);
+}
+
+.ts-seam {
+  position: relative;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-seam::before,
+.ts-seam::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  width: var(--ts-cross, 9px);
+  height: var(--ts-cross, 9px);
+  background:
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 4px 0 / 1px 100% no-repeat,
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 0 4px / 100% 1px no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ts-seam::before {
+  left: calc(50% - min(var(--ts-rail), 100% - 32px) / 2 - 4px);
+}
+
+.ts-seam::after {
+  left: calc(50% + min(var(--ts-rail), 100% - 32px) / 2 - 5px);
+}
+
+.ts-hatch {
+  height: 24px;
+  background-image: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 8px);
+}

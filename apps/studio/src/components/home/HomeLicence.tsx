@@ -3,14 +3,16 @@ import { HomeLink } from './HomeLink';
 import { HomeSection } from './HomeSection';
 
 /**
- * Licence and hosting (docs/POLISH.md 3.2 item 7): the buyer's questions about cost and control,
- * one heading, one lead and the GitHub button. No picture, so no picture box.
+ * License and hosting (docs/POLISH.md 3.2 item 7): the buyer's questions about cost and control,
+ * one heading, one lead and the GitHub button. No picture, so no picture box. The words read
+ * "license" (American English, as the deck writes "color"; docs/NEXT.md 4.1.3 item 9) while the
+ * file, the component and the ids keep `licence` (`home.licence.*`), which the rows and the
+ * earlier rounds' links name.
  */
 export function HomeLicence() {
   return (
     <HomeSection
       id={LICENCE.id}
-      icon={LICENCE.icon}
       heading={LICENCE.heading}
       lead={LICENCE.lead}
       single

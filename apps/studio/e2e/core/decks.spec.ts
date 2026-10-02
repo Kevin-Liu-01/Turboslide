@@ -1986,7 +1986,8 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
           `${label}: hero ${JSON.stringify(facts.hero)}, bands ${facts.bands.map((b) => `${b.band} ${b.pad.top}/${b.pad.bottom}`).join(', ')}, h1 ${facts.h1Weight} at ${facts.h1Size}px, two column ${facts.twos.map((t) => `${t.align} ${t.gap}`).join('; ')}, frames ${facts.frames.join(', ')}, height ${facts.height}, overflow ${facts.overflow}, wide ${facts.wide}`,
         );
         const sectionPad = narrow ? 72 : 112;
-        const heroTop = narrow ? 56 : 96;
+        /* Round 1 (docs/NEXT.md 4.1.3 item 9): the hero opens 72 px under the seam, 48 under 1024 */
+        const heroTop = narrow ? 48 : 72;
         if (!facts.hero || facts.hero.top !== heroTop)
           failures.push(`${label}: hero padding top ${facts.hero?.top} (3.4 says ${heroTop})`);
         for (const b of facts.bands)
@@ -1999,7 +2000,7 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
               `${label}: ${b.band} padding ${b.pad.top}/${b.pad.bottom} (3.4 says ${sectionPad})`,
             );
         if (facts.h1Weight !== '500') failures.push(`${label}: h1 weight ${facts.h1Weight}`);
-        if (facts.h1Size !== (narrow ? 40 : 56)) failures.push(`${label}: h1 size ${facts.h1Size}`);
+        if (facts.h1Size !== (narrow ? 40 : 59)) failures.push(`${label}: h1 size ${facts.h1Size}`);
         if (!narrow)
           for (const [i, two] of facts.twos.entries())
             if (two.align !== 'start')
@@ -2130,20 +2131,21 @@ test(title('decks.home.product-pictures'), async ({ browser }) => {
         `${theme}: ${shots.map((s) => `${s.shot} ${s.drawn}/${s.width}${s.shown ? '' : ' hidden'}`).join(', ')}`,
       );
       const shown = shots.filter((s) => s.shown);
-      for (const kind of ['hero', 'canvas', 'menus']) {
+      /* Round 1 (docs/NEXT.md 4.1.3 item 9): the canvas crop left the page for a diagram */
+      for (const kind of ['hero', 'menus']) {
         const own = shown.find((s) => s.shot.startsWith(`${kind}-`)) ?? null;
         if (!own) {
           failures.push(`${theme}: no ${kind} picture shown`);
           continue;
         }
         const scale = own.width > 0 ? own.drawn / own.width : 0;
-        if (kind === 'hero' ? Math.abs(scale - 0.78) > 0.03 : scale < 0.99)
+        if (kind === 'hero' ? Math.abs(scale - 0.71) > 0.03 : scale < 0.9)
           failures.push(`${theme}: ${own.shot} drawn at ${scale.toFixed(2)} of its size`);
         if (!/-(dark|light)$/.test(own.shot) || !own.shot.endsWith(theme))
           failures.push(`${theme}: the shown ${kind} picture is ${own.shot}`);
       }
       /* the same picture in both appearances: a dark and a light file of every capture, the same size */
-      for (const kind of ['hero', 'canvas', 'menus']) {
+      for (const kind of ['hero', 'menus']) {
         const pair = shots.filter((s) => s.shot === `${kind}-dark` || s.shot === `${kind}-light`);
         if (
           pair.length !== 2 ||
@@ -2337,6 +2339,365 @@ test(title('decks.home.layout-shift'), async ({ browser }) => {
       }
     }
   test.info().annotations.push({ type: 'layout shift', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+// ---- the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.3 item 9, 4.1.5): /home on the deck's
+// page grammar (Prototemplate deck/slides/29, 33 and 49; DECK-GRAMMAR 14, 29, 31, 40)
+
+/** The colours the old canvas capture drew its ring, chip and handle in, and the GT accent. */
+const SELECTION_BLUES: ReadonlyArray<readonly [number, number, number]> = [
+  [0x1a, 0x73, 0xe8],
+  [0x3d, 0x86, 0xf0],
+  [0x2f, 0x5c, 0xe0],
+  [0x86, 0xa8, 0xff],
+];
+
+test(title('decks.home.grammar'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of ['light', 'dark'] as const) {
+    const { context: fresh, page: p } = await homeContext(
+      browser,
+      { width: 1440, height: 900 },
+      theme,
+    );
+    try {
+      await homeOpen(p);
+      const facts = await p.evaluate(() => {
+        const num = (v: string) => Math.round(parseFloat(v) * 100) / 100;
+        const rails = [...document.querySelectorAll<HTMLElement>('main.ts-product .ts-rails')].map(
+          (el) => {
+            const r = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return {
+              left: Math.round(r.left),
+              width: Math.round(r.width),
+              height: Math.round(r.height),
+              borders: `${cs.borderLeftWidth} ${cs.borderLeftStyle} ${cs.borderRightWidth} ${cs.borderRightStyle}`,
+            };
+          },
+        );
+        const page = document.documentElement.scrollHeight;
+        /* a long vertical line drawn by another element on either side would be a second rail */
+        const others = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
+          .filter((el) => !el.classList.contains('ts-rails'))
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return (
+              r.height > page * 0.5 &&
+              (parseFloat(cs.borderLeftWidth) > 0 || parseFloat(cs.borderRightWidth) > 0)
+            );
+          }).length;
+        const crosses = [...document.querySelectorAll<HTMLElement>('main.ts-product .ts-seam')].map(
+          (el) => {
+            const r = el.getBoundingClientRect();
+            const own = getComputedStyle(el);
+            /* the pseudo element's box is placed against the band's padding box (position:
+               relative); its arms sit 4 px into its 9 px square */
+            const padBottom = r.bottom - parseFloat(own.borderBottomWidth);
+            const one = (pseudo: '::before' | '::after') => {
+              const cs = getComputedStyle(el, pseudo);
+              const top = padBottom - parseFloat(cs.bottom) - parseFloat(cs.height);
+              return {
+                w: num(cs.width),
+                h: num(cs.height),
+                x: Math.round(r.left + parseFloat(cs.left) + 4),
+                y: Math.round(top + 4),
+                content: cs.content,
+              };
+            };
+            return {
+              band:
+                el.getAttribute('data-band') ??
+                el.getAttribute('data-strip') ??
+                el.className.split(' ')[0] ??
+                '',
+              seam: Math.round(r.bottom) - 1,
+              before: one('::before'),
+              after: one('::after'),
+            };
+          },
+        );
+        const nav = document.querySelector<HTMLElement>('.ts-product-nav-row');
+        const headings = [...document.querySelectorAll<HTMLElement>('main h1, main h2')].map(
+          (h) => ({
+            text: (h.textContent ?? '').trim(),
+            svg: h.querySelectorAll('svg').length,
+            before: h.previousElementSibling?.tagName.toLowerCase() === 'svg',
+          }),
+        );
+        const diagrams = [...document.querySelectorAll<SVGSVGElement>('svg[data-diagram]')].map(
+          (svg) => {
+            const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+            const chevrons = [...svg.querySelectorAll('polyline, polygon')].filter((el) => {
+              const pts = (el.getAttribute('points') ?? '')
+                .trim()
+                .split(/\s+/)
+                .map((pair) => pair.split(',').map(Number));
+              let length = 0;
+              for (let i = 1; i < pts.length; i += 1)
+                length += Math.hypot(
+                  (pts[i]?.[0] ?? 0) - (pts[i - 1]?.[0] ?? 0),
+                  (pts[i]?.[1] ?? 0) - (pts[i - 1]?.[1] ?? 0),
+                );
+              return el.tagName.toLowerCase() === 'polygon' || length < 30;
+            }).length;
+            const markers = [...svg.querySelectorAll<SVGRectElement>('rect.dg-marker')].filter(
+              (rect) => rect.width.baseVal.value === 11 && rect.height.baseVal.value === 11,
+            ).length;
+            const labels = [...svg.querySelectorAll<SVGTextElement>('text')].map((t) => ({
+              text: t.textContent ?? '',
+              px: Math.round(parseFloat(getComputedStyle(t).fontSize) * scale * 100) / 100,
+            }));
+            return {
+              name: svg.getAttribute('data-diagram') ?? '',
+              chevrons,
+              markers,
+              smallest: Math.min(...labels.map((l) => l.px)),
+              small: labels.filter((l) => l.px < 18).map((l) => `${l.text} ${l.px}`),
+            };
+          },
+        );
+        const pre = document.querySelector<HTMLElement>('main pre');
+        const cmd = pre
+          ? {
+              background: getComputedStyle(pre).backgroundColor,
+              color: getComputedStyle(pre).color,
+              font: getComputedStyle(pre).fontFamily,
+            }
+          : null;
+        const mono = [...document.querySelectorAll<HTMLElement>('main.ts-product *')].filter(
+          (el) =>
+            el.closest('pre') === null &&
+            /monospace|Menlo|Consolas|SF Mono/.test(getComputedStyle(el).fontFamily) &&
+            (el.textContent ?? '').trim() !== '',
+        ).length;
+        return {
+          rails,
+          others,
+          crosses,
+          navHeight: nav ? Math.round(nav.getBoundingClientRect().height) : null,
+          headings,
+          diagrams,
+          cmd,
+          mono,
+        };
+      });
+      const label = `1440 ${theme}`;
+      notes.push(
+        `${label}: rails ${JSON.stringify(facts.rails)}, other long side lines ${facts.others}, seams ${facts.crosses.map((c) => `${c.band} y${c.seam} crosses ${c.before.w}x${c.before.h} at ${c.before.x},${c.before.y} and ${c.after.x},${c.after.y}`).join('; ')}, nav ${facts.navHeight} px, diagrams ${facts.diagrams.map((d) => `${d.name} chevrons ${d.chevrons} markers ${d.markers} smallest label ${d.smallest} px`).join('; ')}, command ${facts.cmd?.background} ${facts.cmd?.color}, monospace outside the panel ${facts.mono}`,
+      );
+      /* one rail on each side at the 1104 px column, drawn once */
+      if (facts.rails.length !== 1) failures.push(`${label}: ${facts.rails.length} rail elements`);
+      const rail = facts.rails[0];
+      if (rail !== undefined) {
+        if (rail.left !== 168 || rail.width !== 1104)
+          failures.push(`${label}: the rails stand at ${rail.left} and ${rail.left + rail.width}`);
+        if (rail.borders !== '1px solid 1px solid')
+          failures.push(`${label}: the rails are ${rail.borders}`);
+      }
+      if (facts.others > 0) failures.push(`${label}: ${facts.others} more long vertical lines`);
+      /* a 9 px cross where each seam meets each rail */
+      if (facts.crosses.length < 8) failures.push(`${label}: ${facts.crosses.length} seams`);
+      for (const c of facts.crosses)
+        for (const [side, cross, x] of [
+          ['left', c.before, 168],
+          ['right', c.after, 1271],
+        ] as const) {
+          if (cross.w !== 9 || cross.h !== 9)
+            failures.push(`${label}: ${c.band} ${side} cross ${cross.w} by ${cross.h}`);
+          if (Math.abs(cross.x - x) > 1 || Math.abs(cross.y - c.seam) > 1)
+            failures.push(
+              `${label}: ${c.band} ${side} cross centred at ${cross.x},${cross.y}, the seam at ${x},${c.seam}`,
+            );
+        }
+      /* the 58 px navigation bar */
+      if (facts.navHeight !== 58)
+        failures.push(`${label}: the navigation is ${facts.navHeight} px`);
+      /* no icon before a heading */
+      for (const h of facts.headings)
+        if (h.svg > 0 || h.before) failures.push(`${label}: an icon at the heading "${h.text}"`);
+      /* no arrowhead, square markers, labels of 18 px or more */
+      if (facts.diagrams.length !== 4) failures.push(`${label}: ${facts.diagrams.length} diagrams`);
+      for (const d of facts.diagrams) {
+        if (d.chevrons > 0) failures.push(`${label}: ${d.name} draws ${d.chevrons} arrowheads`);
+        if (d.markers === 0) failures.push(`${label}: ${d.name} draws no square marker`);
+        if (d.small.length > 0)
+          failures.push(`${label}: ${d.name} labels under 18 px: ${d.small.join(', ')}`);
+      }
+      /* the command on #101010 in white monospace, and no monospace elsewhere */
+      if (facts.cmd?.background !== 'rgb(16, 16, 16)')
+        failures.push(`${label}: the command sits on ${facts.cmd?.background}`);
+      if (!/^rgba?\(255, 255, 255/.test(facts.cmd?.color ?? ''))
+        failures.push(`${label}: the command's text is ${facts.cmd?.color}`);
+      if (!/monospace|Menlo|Consolas/.test(facts.cmd?.font ?? ''))
+        failures.push(`${label}: the command is set in ${facts.cmd?.font}`);
+      if (facts.mono > 0) failures.push(`${label}: ${facts.mono} monospace runs outside the panel`);
+    } finally {
+      await fresh.close();
+    }
+  }
+  test.info().annotations.push({ type: 'grammar', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+test(title('decks.home.capture-plain'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of ['light', 'dark'] as const) {
+    const { context: fresh, page: p } = await homeContext(
+      browser,
+      { width: 1440, height: 900 },
+      theme,
+    );
+    try {
+      await homeOpen(p);
+      await homeScroll(p);
+      await p.waitForTimeout(600);
+      const shots = await p.evaluate(async (blues) => {
+        const out: { shot: string; pixels: number; blue: number; error?: string }[] = [];
+        for (const img of document.querySelectorAll<HTMLImageElement>('main img[data-shot]')) {
+          if (img.getBoundingClientRect().width === 0) continue;
+          const shot = img.getAttribute('data-shot') ?? '';
+          try {
+            if (!img.complete) await img.decode();
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx === null) throw new Error('no 2d context');
+            ctx.drawImage(img, 0, 0);
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let blue = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i] ?? 0;
+              const g = data[i + 1] ?? 0;
+              const b = data[i + 2] ?? 0;
+              for (const [br, bg, bb] of blues)
+                if (Math.abs(r - br) + Math.abs(g - bg) + Math.abs(b - bb) < 60) {
+                  blue += 1;
+                  break;
+                }
+            }
+            out.push({ shot, pixels: data.length / 4, blue });
+          } catch (error) {
+            out.push({ shot, pixels: 0, blue: -1, error: String(error) });
+          }
+        }
+        return out;
+      }, SELECTION_BLUES);
+      const label = `1440 ${theme}`;
+      notes.push(
+        `${label}: ${shots.map((s) => `${s.shot} ${s.blue} selection blue pixels of ${s.pixels}${s.error ? ` (${s.error})` : ''}`).join(', ')}`,
+      );
+      if (shots.length === 0) failures.push(`${label}: no capture shown`);
+      for (const s of shots) {
+        if (s.shot.startsWith('canvas-'))
+          failures.push(`${label}: the selected picture's capture ${s.shot} is on the page`);
+        if (s.blue < 0) failures.push(`${label}: ${s.shot} could not be read (${s.error})`);
+        else if (s.blue > 40)
+          failures.push(`${label}: ${s.shot} carries ${s.blue} pixels of selection blue`);
+      }
+    } finally {
+      await fresh.close();
+    }
+  }
+  test.info().annotations.push({ type: 'captures', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+});
+
+test(title('decks.home.copy'), async ({ browser }) => {
+  test.setTimeout(120_000);
+  const { context: fresh, page: p } = await homeContext(
+    browser,
+    { width: 1440, height: 900 },
+    'light',
+  );
+  try {
+    await homeOpen(p);
+    const copy = await p.evaluate(() => ({
+      title: document.title,
+      og: document.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? null,
+      text: (document.querySelector('main') as HTMLElement).innerText,
+      attributes: [...document.querySelectorAll('main [aria-label], main [alt]')]
+        .map((el) => `${el.getAttribute('aria-label') ?? ''} ${el.getAttribute('alt') ?? ''}`)
+        .join(' '),
+    }));
+    const licence = `${copy.text} ${copy.attributes}`.match(/\blicence\b/gi) ?? [];
+    test.info().annotations.push({
+      type: 'copy',
+      description: `title "${copy.title}"; og:title "${copy.og}"; "licence" ${licence.length} times; "license" ${(copy.text.match(/\blicense\b/gi) ?? []).length} times`,
+    });
+    expect(copy.title).toBe('Turboslide is a slides editor in the browser');
+    expect(copy.og).toBe('Turboslide is a slides editor in the browser');
+    expect(licence, 'no word on the page reads "licence"').toEqual([]);
+  } finally {
+    await fresh.close();
+  }
+});
+
+test(title('decks.home.phone'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of ['light', 'dark'] as const) {
+    const { context: fresh, page: p } = await homeContext(
+      browser,
+      { width: 390, height: 844 },
+      theme,
+    );
+    try {
+      await homeOpen(p);
+      await p.waitForTimeout(800);
+      const facts = await p.evaluate(() => {
+        const width = document.documentElement.clientWidth;
+        const nav = [
+          ...document.querySelectorAll<HTMLElement>(
+            '.ts-product-nav-row > *, .ts-product-nav-links > *, .ts-product-nav-signin > *',
+          ),
+        ]
+          .filter((el) => el.getBoundingClientRect().width > 0)
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return {
+              control: el.getAttribute('data-control') ?? el.className.split(' ')[0] ?? '',
+              left: Math.round(r.left),
+              right: Math.round(r.right),
+            };
+          });
+        const crossing = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && (r.right > width + 1 || r.left < -1);
+          })
+          .map((el) => `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}`);
+        return {
+          width,
+          scroll: document.documentElement.scrollWidth,
+          nav,
+          crossing,
+        };
+      });
+      const label = `390 ${theme}`;
+      notes.push(
+        `${label}: nav ${facts.nav.map((n) => `${n.control} ${n.left}..${n.right}`).join(', ')}; scroll width ${facts.scroll}; crossing ${facts.crossing.length}`,
+      );
+      for (const n of facts.nav)
+        if (n.left < 16 || n.right > facts.width - 16)
+          failures.push(`${label}: ${n.control} at ${n.left}..${n.right} leaves the 16 px gutter`);
+      if (facts.scroll > facts.width)
+        failures.push(`${label}: the page scrolls to ${facts.scroll}`);
+      if (facts.crossing.length > 0)
+        failures.push(`${label}: ${facts.crossing.slice(0, 6).join(', ')} cross the viewport`);
+    } finally {
+      await fresh.close();
+    }
+  }
+  test.info().annotations.push({ type: 'phone', description: notes.join(' | ') });
   expect(failures).toEqual([]);
 });
 
@@ -3204,4 +3565,9 @@ coverage(import.meta.filename, [
   /* the next program's hotfix H2 (docs/NEXT.md 3.2, 4.1.5) */
   'decks.list.own-and-shared',
   'decks.list.action-scoped',
+  /* the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.3 item 9, 4.1.5) */
+  'decks.home.grammar',
+  'decks.home.capture-plain',
+  'decks.home.copy',
+  'decks.home.phone',
 ]);

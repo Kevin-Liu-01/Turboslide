@@ -8,11 +8,18 @@ import type { ExportJobResult, VerifyOutcome } from '@turboslide/render-worker/j
 import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import type { BlobClient } from '@turboslide/store/blob-store';
+import { deckCopyPrefix } from '@turboslide/store/blob-store';
 import { isStoreBusy } from '@turboslide/store/pulse';
 
 import { displayNameOf, exportFileName } from '@turboslide/export/batch/plan';
 
-import { ensureDeckAssets, exportBlobClient, openDeckStore, workerClientOptions } from './root';
+import {
+  ensureDeckAssets,
+  ensureDecks,
+  exportBlobClient,
+  openDeckStore,
+  workerClientOptions,
+} from './root';
 
 /**
  * The synchronous export (docs/hosting-chromium.md): one call runs the export job to completion
@@ -113,9 +120,24 @@ function defaultClient(): WorkerClient {
   return shared;
 }
 
-/** The pathname a produced file is stored under on the blob backend. */
+/**
+ * The pathname a produced file is stored under on the blob backend: under the deck's `exports`
+ * copy folder, which the store's `remove` deletes with the deck (blob-store.ts `deckCopyPrefix`;
+ * docs/NEXT.md 3.2 H7).
+ */
 export function storedExportPath(deckId: string, jobId: string, name: string): string {
-  return `exports/${deckId}/${jobId}/${name}`;
+  return `${deckCopyPrefix('exports', deckId)}${jobId}/${name}`;
+}
+
+/**
+ * Whether the export route may still serve a copy of the deck (docs/NEXT.md 3.2 H7): true while
+ * the collection holds the deck, trashed or not, and false once it was deleted forever. On the
+ * blob backend the store deletes the stored copies with the deck; on the file and tmp backends a
+ * copy is a file in this instance's job folder that the route streams, so the route answers 404
+ * for it once the deck is gone.
+ */
+export async function deckHoldsCopies(deckId: string): Promise<boolean> {
+  return (await ensureDecks()).has(deckId);
 }
 
 /**

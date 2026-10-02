@@ -43,6 +43,7 @@ import {
   rgbDistance,
   samplePicture,
   shaderBlocks,
+  teardown,
   waitFrame,
   agentHeaders,
   fetchBytes,
@@ -3470,7 +3471,75 @@ test(title('export.picture.progress-and-capture'), async () => {
   expect(file.ms, 'the file within 4 s on an unchanged slide').toBeLessThanOrEqual(4000);
 });
 
+/**
+ * docs/NEXT.md 3.2 H7 (audit-performance item 14): the copies an export leaves (a PDF and a
+ * PowerPoint through the sync export route, the hosted editor's path, whose answer names each
+ * file's address) answer while the deck lives and answer 404 within 5 s of its removal through the
+ * product (Move to trash, then Delete forever on the trash page). On the blob tier a copy is the
+ * stored file the store deletes with the deck; on the file and tmp tiers it is the export route's
+ * `?job=&file=` address, which stops serving a deck that is gone. A fresh identity of its own, so
+ * the downloads of the file's other rows keep their quota. Off localhost the route needs a bearer
+ * for the origin; without one the row is not driven.
+ */
+test(title('export.remove.copies-gone'), async () => {
+  test.setTimeout(300_000);
+  const headers = agentHeaders(process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321');
+  test.skip(
+    headers === null,
+    'not driven: the sync export route needs a bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)',
+  );
+  const { context, page } = await ownerContext(browserRef);
+  const scratch = new Scratch();
+  const owner: Owner = {
+    context,
+    page,
+    scratch,
+    deck: '',
+    unskipped: 1,
+    downloads: 2,
+    n: owners.length + 1,
+  };
+  owners.push(owner);
+  const deck = await newDeck(page, scratch, 'Export copies deck');
+  owner.deck = deck;
+  const urls: string[] = [];
+  for (const input of [
+    { format: 'pdf' },
+    { format: 'pptx', mode: 'native', theme: ['light'] },
+  ] as const) {
+    const res = await page.request.post(`/api/export/${deck}?sync=1&format=json`, {
+      headers: headers!,
+      data: input,
+      timeout: 240_000,
+      maxRedirects: 0,
+    });
+    expect(res.status(), `the ${input.format} export answers`).toBe(200);
+    const body = (await res.json()) as { files?: { url: string | null }[] };
+    for (const file of body.files ?? []) if (file.url !== null) urls.push(file.url);
+  }
+  const before = await Promise.all(urls.map(async (url) => (await fetchBytes(page, url)).status));
+  expect(urls.length, 'the two exports name their copies').toBeGreaterThanOrEqual(2);
+  expect(before, 'every copy answers while the deck lives').toEqual(urls.map(() => 200));
+  await teardown(page, deck);
+  scratch.ids.delete(deck);
+  const removedAt = Date.now();
+  const statuses = async () =>
+    Promise.all(urls.map(async (url) => (await fetchBytes(page, url)).status));
+  const after = await expect
+    .poll(statuses, { timeout: 5000, intervals: [250, 500, 1000] })
+    .toEqual(urls.map(() => 404))
+    .then(() => statuses())
+    .catch(() => statuses());
+  const ms = Date.now() - removedAt;
+  test.info().annotations.push({
+    type: 'copies',
+    description: `${urls.length} copies (${urls.map((url) => new URL(url, page.url()).pathname.split('/').slice(0, 4).join('/')).join(', ')}): ${before.join(', ')} before the removal; ${after.join(', ')} ${ms} ms after it`,
+  });
+  expect(after, 'every copy answers 404 within 5 s of the removal').toEqual(urls.map(() => 404));
+});
+
 coverage(import.meta.filename, [
+  'export.remove.copies-gone',
   'export.zip.bundle',
   'export.html.web-page',
   'export.jpg.current-slide',

@@ -252,6 +252,21 @@ export function deckPrefix(deckId: string): string {
   return `decks/${deckId}/`;
 }
 
+/**
+ * The folders that hold a deck's copies beside `decks/` (docs/NEXT.md 3.2 H7): the exported files
+ * (`exports/<id>/<job>/`, the studio's export-sync.ts and export-batch.ts), the built web pages
+ * (`builds/<id>/`, download.ts) and the bundles (`bundles/<id>/`, bundle-core.ts). `remove`
+ * deletes each of them with the deck, so storage stops growing with every export. The job records
+ * under `exports/.jobs/` are no deck's folder: a deck id is a slug and never starts with a dot.
+ */
+export const DECK_COPY_FOLDERS = ['exports', 'builds', 'bundles'] as const;
+export type DeckCopyFolder = (typeof DECK_COPY_FOLDERS)[number];
+
+/** `<folder>/<id>/`: where one kind of a deck's copies lives in the store. */
+export function deckCopyPrefix(folder: DeckCopyFolder, deckId: string): string {
+  return `${folder}/${deckId}/`;
+}
+
 export const LEASES_FILE = 'leases.json';
 
 /**
@@ -2877,6 +2892,14 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         await store.sync(true);
         checkRevision(decksDir, deckId, baseRevision);
       }
+      // the deck's copies go before the deck (docs/NEXT.md 3.2 H7; audit-performance item 14: the
+      // exports outlived their deck and the store grew with every export): a store that refuses
+      // the delete fails the remove while the deck is still there to remove again
+      const copies: string[] = [];
+      for (const folder of DECK_COPY_FOLDERS)
+        for (const entry of await c.list(deckCopyPrefix(folder, deckId)))
+          copies.push(entry.pathname);
+      if (copies.length > 0) await c.del(copies);
       // the current presence record's copy is named by the record's version (presence-store.ts
       // `presenceCopyPath`: the md5 hex the etag quotes), read before the record goes
       const record = await c.head(`${prefix}${STATE_DIR}/presence.json`).catch(() => null);

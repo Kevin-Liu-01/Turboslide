@@ -14,6 +14,7 @@ import {
   attachmentOf,
   contentDisposition,
   contentTypeOf,
+  deckHoldsCopies,
   exportSummary,
   headerJson,
   jsonBody,
@@ -129,6 +130,13 @@ async function jobFile(
   if (!isProducedFileName(name)) return badRequest('file must be a name');
   if (saveAs !== null && !isProducedFileName(saveAs)) return badRequest('as must be a name');
   try {
+    // a deck deleted forever takes its copies along (docs/NEXT.md 3.2 H7): the file this
+    // instance still holds for it is not served
+    if (!(await deckHoldsCopies(deckId)))
+      return Response.json(
+        { error: { message: `No deck ${deckId}; its exports left with it`, status: 404 } },
+        { status: 404 },
+      );
     const batched = await batchedJobFile(deckId, jobId, name);
     const data = batched?.data ?? (await worker().readJobFile(jobId, `export/${name}`));
     return new Response(data, {

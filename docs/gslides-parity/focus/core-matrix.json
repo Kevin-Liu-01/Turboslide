@@ -9089,6 +9089,16 @@
       "note": "Polish round; docs/POLISH.md 2.7 item 87; B5"
     },
     {
+      "id": "export.remove.copies-gone",
+      "feature": "export",
+      "interaction": "After deck.remove, every export copy of the deck answers 404 within 5 s",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-performance 164",
+      "note": "docs/NEXT.md 3.2 H7 and 4.2.6: the store deletes the deck's exports/, builds/ and bundles/ folders with the deck; the export route stops serving a removed deck's job file"
+    },
+    {
       "id": "decks.import.upload-drop-zone",
       "feature": "decks",
       "interaction": "Import slides > Upload: a button and a drop target, no native file control visible",

@@ -25,10 +25,12 @@ import {
   BLOB_WRITE_TIMEOUT_MS,
   BlobExistsError,
   BlobTimeoutError,
+  DECK_COPY_FOLDERS,
   DOCUMENT_PUT_MAX_BYTES,
   FRESH_DECKS_PATH,
   HOSTED_POLL_MS,
   boundedBlobClient,
+  deckCopyPrefix,
   isMirroredDocument,
   manifestSlideIds,
   openBlobStore,
@@ -1223,6 +1225,63 @@ describe('hosted stores', () => {
   });
 
   describe('blob collection across instances', () => {
+    it('removes the deck’s export, build and bundle copies with the deck (docs/NEXT.md 3.2 H7)', async () => {
+      const fake = memoryBlobClient();
+      const decks = collection('blob', join(root, 'overlay-1'), fake);
+      await decks.ready();
+      clock = '2026-09-11T11:00:00.000Z';
+      await decks.create({ name: 'Exported deck', from: 'gt-brand' });
+      await decks.create({ name: 'Kept deck', from: 'gt-brand' });
+      const put = (pathname: string) =>
+        fake.put(pathname, PNG, { overwrite: true, contentType: 'application/octet-stream' });
+      const copies = [
+        'exports/exported-deck/job-1/exported-deck.pdf',
+        'exports/exported-deck/job-2/exported-deck-light.pptx',
+        'exports/exported-deck/job-2/plan.json',
+        'builds/exported-deck/folder-1/exported-deck.html',
+        'bundles/exported-deck/folder-1/exported-deck.zip',
+      ];
+      const kept = [
+        'exports/kept-deck/job-3/kept-deck.pdf',
+        'exports/exported-deck-2/job-4/x.pdf',
+        'exports/.jobs/job-1.json',
+        'builds/kept-deck/folder-2/kept-deck.html',
+      ];
+      for (const pathname of [...copies, ...kept]) await put(pathname);
+      expect(DECK_COPY_FOLDERS).toEqual(['exports', 'builds', 'bundles']);
+      expect(deckCopyPrefix('exports', 'exported-deck')).toBe('exports/exported-deck/');
+
+      expect(await decks.remove('exported-deck')).toEqual({ id: 'exported-deck', removed: true });
+      for (const pathname of copies) expect(await fake.head(pathname)).toBeNull();
+      for (const pathname of kept) expect(await fake.head(pathname)).not.toBeNull();
+      expect(blobsOf(fake, 'decks/exported-deck/')).toEqual([]);
+      expect(blobsOf(fake, 'decks/kept-deck/')).toContain('decks/kept-deck/deck.json');
+    });
+
+    it('keeps the deck when the store refuses to delete its copies, so the remove can run again', async () => {
+      const fake = memoryBlobClient();
+      const decks = collection('blob', join(root, 'overlay-1'), fake);
+      await decks.ready();
+      clock = '2026-09-11T11:00:00.000Z';
+      await decks.create({ name: 'Busy deck', from: 'gt-brand' });
+      await fake.put('exports/busy-deck/job-1/busy-deck.pdf', PNG, {
+        overwrite: true,
+        contentType: 'application/pdf',
+      });
+      const del = fake.del.bind(fake);
+      let refuse = true;
+      fake.del = async (pathnames, options) => {
+        if (refuse && pathnames.some((pathname) => pathname.startsWith('exports/')))
+          throw new Error('Vercel Blob: Too many requests');
+        return del(pathnames, options);
+      };
+      await expect(decks.remove('busy-deck')).rejects.toThrow(/Too many requests/);
+      expect(await fake.head('decks/busy-deck/deck.json')).not.toBeNull();
+      refuse = false;
+      expect(await decks.remove('busy-deck')).toEqual({ id: 'busy-deck', removed: true });
+      expect(await fake.head('exports/busy-deck/job-1/busy-deck.pdf')).toBeNull();
+    });
+
     it('uploads the seed once, shares created decks and serves twins by URL', async () => {
       const fake = memoryBlobClient();
       const first = collection('blob', join(root, 'overlay-1'), fake);

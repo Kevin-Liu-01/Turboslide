@@ -1,0 +1,506 @@
+{
+  "base": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "tier": "do",
+  "secondBase": null,
+  "roomHost": "turboslide-realtime-preview.kk23907751.workers.dev",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-02T01:12:24.394Z",
+  "ms": 3130602,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": {
+    "exit": 1,
+    "ms": 3129000,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/realtime/integrator2/gate-preview-do/cost/cost-probe.json",
+    "minutes": 3,
+    "instances": [
+      "1a1bb21c",
+      "f2196b47",
+      "b5a5833c",
+      "d443b309",
+      "f80c934c",
+      "4006eff9",
+      "1eb43859",
+      "31087011",
+      "108bba50",
+      "5b78a858",
+      "73742195"
+    ]
+  },
+  "accounts": null,
+  "costOverCeiling": [
+    "sync.pull.no-listing",
+    "cost.editor-idle.calls",
+    "cost.editor-editing.calls",
+    "cost.two-tabs-idle.calls",
+    "cost.show.calls",
+    "cost.do.requests",
+    "cost.do.rows-written",
+    "cost.d1.reads",
+    "cost.d1.writes"
+  ],
+  "narrowed": {
+    "only": "cost",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 13,
+  "passed": 0,
+  "failed": 9,
+  "notDriven": 4,
+  "manual": [],
+  "measured": [
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "failed",
+      "reason": "function requests 2.66 a minute over 1; a tab lost its stream during the window; store simple 6 a minute over 0",
+      "measures": [
+        "tier do",
+        "function requests 2.66 a minute (ceiling 1; 8 in 3.01 min)",
+        "the store settled 2.58 s after the state was ready (1 sync.status read(s) before the window)",
+        "store simple 6 a minute (ceiling 0; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 0 a minute (ceiling 0)",
+        "instances answering sync.status 1",
+        "object request units 0 a minute (ceiling 0; 0 in 3.01 min after 1 of the probe's own counter reads were taken off)",
+        "rows written by the object 0 a minute (ceiling 0; 0 in 3.01 min)",
+        "read from GET /rooms/:id/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER); the object's colo SJC"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 2.99 a minute and 9 session poll(s) were read from the tab that stayed visible"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "failed",
+      "reason": "a tab lost its stream during the window",
+      "measures": [
+        "tier do",
+        "function requests 14.64 a minute (ceiling 15; 44 in 3.01 min)",
+        "the store settled 2.75 s after the state was ready (1 sync.status read(s) before the window)",
+        "store simple 16 a minute (ceiling 40; 3 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 0 a minute (ceiling 65)",
+        "instances answering sync.status 2",
+        "object request units 16.28 a minute (ceiling 20; 49 in 3.01 min after 1 of the probe's own counter reads were taken off)",
+        "rows written by the object 0 a minute (ceiling 60; 0 in 3.01 min)",
+        "read from GET /rooms/:id/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER); the object's colo SJC"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "failed",
+      "reason": "a tab lost its stream during the window; the two tabs never listed each other in the roster; object request units 10.96 a minute over 0",
+      "measures": [
+        "tier do",
+        "the store settled 2.61 s after the state was ready (1 sync.status read(s) before the window)",
+        "store advanced 0 a minute (ceiling 2)",
+        "store list 0 (ceiling 0)",
+        "instances answering sync.status 3",
+        "object request units 10.96 a minute (ceiling 0; 33 in 3.01 min after 1 of the probe's own counter reads were taken off)",
+        "read from GET /rooms/:id/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER); the object's colo SJC"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "failed",
+      "reason": "12 store call(s) in the window beyond the probe's own reads, ceiling none",
+      "measures": [
+        "tier do",
+        "function requests 0 in the window (ceiling 0)",
+        "the store did not settle within 159.29 s and the window started anyway (the last read before it: head 18, get 0, put 0, list 0, del 0, 6 of the heads the probe's own)",
+        "store calls at the first sample 13 (head 9, get 4, put 0, list 0, del 0), of which 1 the probe's own sync.status read(s) (one deck.json head each, b3.md R7 b); the page's 12 (ceiling 0)",
+        "function requests between the load and the window 0 (the settle, 159.29 s)",
+        "instances answering sync.status 1"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.redis.commands",
+      "result": "not driven",
+      "reason": "no Redis URL (--redis-url, TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL): INFO commandstats cannot be read",
+      "measures": [
+        "function requests 14.79 a minute in the editing window were read from the page"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.requests",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows",
+      "measures": [
+        "tier do",
+        "object request units an editor hour 142 (ceiling 300): 11.84 a minute over 3.04 min editing (36 edits) and 3 min idle, counted as 12 editing and 48 idle minutes (36 editing, 0 idle; 2 of the probe's own counter reads taken off)",
+        "read from GET /rooms/:id/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER; the total counts); the object's colo SJC; rows read 0 over both windows",
+        "no --dashboard <json>: the dashboard figures of the hour were not given",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.duration",
+      "result": "not driven",
+      "reason": "the dashboard's duration metric for the hour was not given (--dashboard <json> with doDurationGbs); no counter inside the object reads wall time",
+      "measures": [
+        "tier do",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window",
+        "no --dashboard <json>: the dashboard figures of the hour were not given"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.rows-written",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows",
+      "measures": [
+        "tier do",
+        "rows written by the object an editor hour 0 (ceiling 800): 0 a minute over 3.04 min editing (36 edits) and 3 min idle, counted as 12 editing and 48 idle minutes (0 editing, 0 idle)",
+        "read from GET /rooms/:id/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER; the total counts); the object's colo SJC; rows read 0 over both windows",
+        "no --dashboard <json>: the dashboard figures of the hour were not given",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.d1.reads",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows",
+      "measures": [
+        "tier do",
+        "D1 rows read an editor hour 0 (ceiling 300; an anonymous tab, so the signed in hour of the row is not this reading): 0 editing and 0 idle over 3.04 min editing (36 edits) and 3 min idle, counted as 12 editing and 48 idle minutes; 0 /db/query and 0 /db/batch call(s)",
+        "read from GET /db/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER)",
+        "no --dashboard <json>: the dashboard figures of the hour were not given",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.d1.writes",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows",
+      "measures": [
+        "tier do",
+        "D1 rows written an editor hour 0 (ceiling 20; an anonymous tab, so the signed in hour of the row is not this reading): 0 editing and 0 idle over 3.04 min editing (36 edits) and 3 min idle, counted as 12 editing and 48 idle minutes; 0 /db/query and 0 /db/batch call(s)",
+        "read from GET /db/counters on https://turboslide-realtime-preview.kk23907751.workers.dev (bearer TURBOSLIDE_ROOM_BEARER)",
+        "no --dashboard <json>: the dashboard figures of the hour were not given",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.worker.requests",
+      "result": "not driven",
+      "reason": "the dashboard's Workers analytics for the hour were not given (--dashboard <json> with workerRequests); the function's calls to the Worker are not visible from the browser",
+      "measures": [
+        "tier do",
+        "the page made 14.79 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window",
+        "no --dashboard <json>: the dashboard figures of the hour were not given"
+      ],
+      "cost": true
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "8fdb0c4f",
+  "origin": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "date": "2026-10-02",
+  "results": {
+    "sync.pull.no-listing": "failed",
+    "cost.editor-idle.calls": "failed",
+    "cost.editor-hidden.calls": "not driven",
+    "cost.editor-editing.calls": "failed",
+    "cost.two-tabs-idle.calls": "failed",
+    "cost.show.calls": "failed",
+    "cost.redis.commands": "not driven",
+    "cost.do.requests": "failed",
+    "cost.do.duration": "not driven",
+    "cost.do.rows-written": "failed",
+    "cost.d1.reads": "failed",
+    "cost.d1.writes": "failed",
+    "cost.worker.requests": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "sync.pull.no-listing",
+        "feature": "sync",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "cost.editor-idle.calls",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.editor-hidden.calls",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.editor-editing.calls",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.two-tabs-idle.calls",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.show.calls",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.redis.commands",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.do.requests",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.do.duration",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.do.rows-written",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.d1.reads",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.d1.writes",
+        "feature": "cost",
+        "result": "failed"
+      },
+      {
+        "id": "cost.worker.requests",
+        "feature": "cost",
+        "result": "not driven"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "sync.pull.no-listing",
+      "feature": "sync",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "sync.pull.no-listing",
+      "feature": "sync",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "failed",
+      "reason": "0 commit(s) landed, 10 asked; A never read every word of B's ten commits"
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "failed",
+      "reason": "function requests 2.66 a minute over 1; a tab lost its stream during the window; store simple 6 a minute over 0"
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached"
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "failed",
+      "reason": "a tab lost its stream during the window"
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "works",
+      "result": "failed",
+      "reason": "a tab lost its stream during the window; the two tabs never listed each other in the roster; object request units 10.96 a minute over 0"
+    },
+    {
+      "id": "cost.show.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "failed",
+      "reason": "12 store call(s) in the window beyond the probe's own reads, ceiling none"
+    },
+    {
+      "id": "cost.redis.commands",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no Redis URL (--redis-url, TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL): INFO commandstats cannot be read"
+    },
+    {
+      "id": "cost.do.requests",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows"
+    },
+    {
+      "id": "cost.do.duration",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the dashboard's duration metric for the hour was not given (--dashboard <json> with doDurationGbs); no counter inside the object reads wall time"
+    },
+    {
+      "id": "cost.do.rows-written",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows"
+    },
+    {
+      "id": "cost.d1.reads",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows"
+    },
+    {
+      "id": "cost.d1.writes",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the tab lost its channel during the windows"
+    },
+    {
+      "id": "cost.worker.requests",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the dashboard's Workers analytics for the hour were not given (--dashboard <json> with workerRequests); the function's calls to the Worker are not visible from the browser"
+    }
+  ]
+}

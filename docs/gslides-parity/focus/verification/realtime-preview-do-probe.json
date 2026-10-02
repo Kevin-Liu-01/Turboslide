@@ -1,0 +1,2228 @@
+{
+  "base": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "tier": "do",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-02T01:06:27.091Z",
+  "ms": 357150,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 355652,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/realtime/integrator2/gate-preview-do/probe/core-walk.json",
+    "deckId": "untitled-20261002-0p4j",
+    "steps": 123
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "decks",
+      "text",
+      "versions",
+      "presence"
+    ],
+    "costRows": null
+  },
+  "rows": 116,
+  "passed": 12,
+  "failed": 4,
+  "notDriven": 100,
+  "manual": [
+    "text.clipboard.paste-without-formatting"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "8fdb0c4f",
+  "origin": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "date": "2026-10-02",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "failed",
+    "decks.title.save-words": "failed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "failed",
+    "decks.save.acknowledged": "failed",
+    "decks.editor.move-to-trash": "passed",
+    "text.title.single-click": "not driven",
+    "text.title.double-click": "not driven",
+    "text.title.type-escape": "not driven",
+    "text.selected.typing-replaces": "not driven",
+    "text.selected.enter-appends": "not driven",
+    "text.title.double-click-enters": "not driven",
+    "text.caret.click-mid-word": "not driven",
+    "text.caret.home-end": "not driven",
+    "text.caret.shift-arrow-replace": "not driven",
+    "text.caret.shift-home-end": "not driven",
+    "text.caret.backspace-word": "not driven",
+    "text.caret.option-backspace": "not driven",
+    "text.caret.delete": "not driven",
+    "text.caret.cmd-a": "not driven",
+    "text.title.enter-commits": "not driven",
+    "text.session.escape-twice": "not driven",
+    "text.subtitle.double-click-type": "not driven",
+    "text.subtitle.enter-new-line": "not driven",
+    "text.subtitle.shift-enter": "not driven",
+    "text.subtitle.arrows-backspace-join": "not driven",
+    "text.subtitle.escape-commits": "not driven",
+    "text.textbox.insert-click-type": "not driven",
+    "text.textbox.insert-drag": "not driven",
+    "text.textbox.drag-inside-moves": "not driven",
+    "text.textbox.burst-reliability": "not driven",
+    "text.toolbar.swaps-on-select": "not driven",
+    "text.fontsize.type-enter": "not driven",
+    "text.fontsize.plus-minus": "not driven",
+    "text.bold.toolbar": "not driven",
+    "text.bold.cmd-b-word": "not driven",
+    "text.italic.toolbar-word": "not driven",
+    "text.italic.cmd-i-word": "not driven",
+    "text.underline.cmd-u-word": "not driven",
+    "text.underline.toolbar": "not driven",
+    "text.strikethrough.cmd-shift-x": "not driven",
+    "text.strikethrough.menu": "not driven",
+    "text.color.swatch-on-word": "not driven",
+    "text.align.toolbar-and-key": "not driven",
+    "text.spacing.toolbar": "not driven",
+    "text.list.bulleted-toolbar": "not driven",
+    "text.list.numbered-toolbar": "not driven",
+    "text.list.bulleted-menu-preset": "not driven",
+    "text.indent.toolbar": "not driven",
+    "text.indent.keys": "not driven",
+    "text.link.cmd-k-enter": "not driven",
+    "text.clear-formatting": "not driven",
+    "text.format-menu.rows-enabled": "not driven",
+    "text.format-menu.size-increase": "not driven",
+    "text.format-menu.align-left": "not driven",
+    "text.format-menu.spacing-double": "not driven",
+    "text.format-menu.text-fitting": "not driven",
+    "text.autofit.title-wraps": "not driven",
+    "text.autofit.textbox-grow": "not driven",
+    "text.clipboard.within-box": "not driven",
+    "text.clipboard.between-boxes": "not driven",
+    "text.clipboard.paste-without-formatting": "not driven",
+    "text.find-replace.replace-all": "not driven",
+    "text.find-replace.shortcut": "not driven",
+    "text.persistence.reload": "not driven",
+    "text.list.numbered-menu-preset": "not driven",
+    "text.list.chords": "not driven",
+    "text.link.toolbar-button": "not driven",
+    "text.format-options.panel": "not driven",
+    "text.layout-runs.type": "not driven",
+    "text.context.text-block": "not driven",
+    "text.context.text-selection": "not driven",
+    "text.context.inside-session": "not driven",
+    "text.format-menu.size-decrease": "not driven",
+    "text.format-menu.spacing-single-1-15": "not driven",
+    "text.format-menu.align-indent-rows": "not driven",
+    "text.textbox.toolbar-button": "not driven",
+    "share.file-menu-share-with-others": "not driven",
+    "versions.open-from-last-edit": "not driven",
+    "versions.pick": "not driven",
+    "versions.name-current": "not driven",
+    "versions.undo-restore": "not driven",
+    "surface.cleanup": "passed",
+    "text.title.one-click-tail": "not driven",
+    "text.title.bold-menu": "not driven",
+    "text.title.bold-cmd-b": "not driven",
+    "text.title.align-menu": "not driven",
+    "text.title.size-menu": "not driven",
+    "text.title.format-options-marks": "not driven",
+    "text.title.apply-layout-after-format": "not driven",
+    "text.fontsize.type-one-undo": "not driven",
+    "text.format-options.field-one-undo": "not driven",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "failed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "not driven",
+    "versions.show-changes-marks": "not driven",
+    "text.link.detect-url": "not driven",
+    "text.link.detect-email": "not driven",
+    "text.select.double-click-address": "not driven",
+    "text.select.shift-home-line": "not driven",
+    "text.link.popover-apply-remove": "not driven",
+    "text.format-options.padding-grid": "not driven",
+    "text.format-options.remembers-section": "not driven",
+    "text.autofit.shrink-on-overflow": "not driven",
+    "text.find-replace.count-while-typing": "not driven",
+    "comments.panel.empty-gesture": "not driven",
+    "versions.panel.author-you": "not driven",
+    "versions.field.square": "not driven",
+    "versions.window-mark-column": "not driven",
+    "versions.restore-in-more": "not driven",
+    "realtime.card.chip-painted": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.new.first-write",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.title.save-words",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.edit.reload-keeps-slide",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "text.title.single-click",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.double-click",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.type-escape",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.selected.typing-replaces",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.selected.enter-appends",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.double-click-enters",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.click-mid-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.home-end",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.shift-arrow-replace",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.shift-home-end",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.backspace-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.option-backspace",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.delete",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.caret.cmd-a",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.enter-commits",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.session.escape-twice",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.subtitle.double-click-type",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.subtitle.enter-new-line",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.subtitle.shift-enter",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.subtitle.arrows-backspace-join",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.subtitle.escape-commits",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.insert-click-type",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.insert-drag",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.drag-inside-moves",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.burst-reliability",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.toolbar.swaps-on-select",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.fontsize.type-enter",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.fontsize.plus-minus",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.bold.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.bold.cmd-b-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.italic.toolbar-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.italic.cmd-i-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.underline.cmd-u-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.underline.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.strikethrough.cmd-shift-x",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.strikethrough.menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.color.swatch-on-word",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.align.toolbar-and-key",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.spacing.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.bulleted-toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.numbered-toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.bulleted-menu-preset",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.indent.toolbar",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.indent.keys",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.cmd-k-enter",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.clear-formatting",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.rows-enabled",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.size-increase",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.align-left",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.spacing-double",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.text-fitting",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.autofit.title-wraps",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.autofit.textbox-grow",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.clipboard.within-box",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.clipboard.between-boxes",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.find-replace.replace-all",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.find-replace.shortcut",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.persistence.reload",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.numbered-menu-preset",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.chords",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.toolbar-button",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-options.panel",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.layout-runs.type",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.text-block",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.text-selection",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.context.inside-session",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.size-decrease",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.spacing-single-1-15",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-menu.align-indent-rows",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.textbox.toolbar-button",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.open-from-last-edit",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.pick",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.name-current",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.undo-restore",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.one-click-tail",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.bold-menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.bold-cmd-b",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.align-menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.size-menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.format-options-marks",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.apply-layout-after-format",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.fontsize.type-one-undo",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-options.field-one-undo",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "decks.file.import-slides-deck",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "versions.show-changes-toggle",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.detect-url",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.detect-email",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.select.double-click-address",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.select.shift-home-line",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.popover-apply-remove",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-options.padding-grid",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.format-options.remembers-section",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.autofit.shrink-on-overflow",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.find-replace.count-while-typing",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.panel.author-you",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.field.square",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.window-mark-column",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "versions.restore-in-more",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "realtime.card.chip-painted",
+        "feature": "realtime",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "decks.file.import-slides-deck",
+      "parks": [
+        "file.importSlides"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "decks.new.first-write",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.title.save-words",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.selected.typing-replaces",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.session.escape-twice",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.context.inside-session",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.one-click-tail",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.bold-menu",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.bold-cmd-b",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.align-menu",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.size-menu",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.format-options-marks",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.apply-layout-after-format",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.fontsize.type-one-undo",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-options.field-one-undo",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.detect-url",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.detect-email",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.select.double-click-address",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.select.shift-home-line",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.popover-apply-remove",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-options.padding-grid",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.format-options.remembers-section",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.autofit.shrink-on-overflow",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.find-replace.count-while-typing",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.new.draft",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.ground-paint",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.first-write",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "double click the title, type, Escape: editing true; /new; revision 2; words seen Saving…; final \"\"; stored true"
+    },
+    {
+      "id": "decks.title.save-words",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "a second edit: words Saving…; final \"\""
+    },
+    {
+      "id": "decks.title.rename-enter",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-escape",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-blur",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.rename-empty",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.file-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.tab-title-after-rename",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.title.mark-to-list",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.edit.reload-keeps-slide",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "reload /edit/<id>#s/<slide>: error: window API slide.new did not answer within 60 s"
+    },
+    {
+      "id": "text.title.single-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.double-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.type-escape",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.selected.typing-replaces",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.selected.enter-appends",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.double-click-enters",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.click-mid-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.shift-arrow-replace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.shift-home-end",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.backspace-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.option-backspace",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.delete",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.caret.cmd-a",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.enter-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.session.escape-twice",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.subtitle.double-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.subtitle.enter-new-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.subtitle.shift-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.subtitle.arrows-backspace-join",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.subtitle.escape-commits",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.textbox.insert-click-type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.textbox.insert-drag",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.textbox.drag-inside-moves",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.textbox.burst-reliability",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.toolbar.swaps-on-select",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.fontsize.type-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.fontsize.plus-minus",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.bold.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.bold.cmd-b-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.italic.toolbar-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.italic.cmd-i-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.underline.cmd-u-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.underline.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.strikethrough.cmd-shift-x",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.strikethrough.menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.color.swatch-on-word",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.align.toolbar-and-key",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.spacing.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.list.bulleted-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.list.numbered-toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.list.bulleted-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.indent.toolbar",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.indent.keys",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.link.cmd-k-enter",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.clear-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.rows-enabled",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.size-increase",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.align-left",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.spacing-double",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.text-fitting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.autofit.title-wraps",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.autofit.textbox-grow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.clipboard.within-box",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.clipboard.between-boxes",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.clipboard.paste-without-formatting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.find-replace.replace-all",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.find-replace.shortcut",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.persistence.reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.list.numbered-menu-preset",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.list.chords",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.link.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-options.panel",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.layout-runs.type",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.context.text-block",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.context.text-selection",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.context.inside-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.size-decrease",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.spacing-single-1-15",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-menu.align-indent-rows",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.textbox.toolbar-button",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.one-click-tail",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.bold-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.bold-cmd-b",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.align-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.size-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.format-options-marks",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.title.apply-layout-after-format",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.fontsize.type-one-undo",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-options.field-one-undo",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "decks.name.follows-heading",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.open-list-search",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.import-slides-deck",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "a copy of this deck (a setup write); File > Import slides, pick the copy, All, Import slides: copy import-source-20261002-m6tp offered 1 slides after 16386 ms; slides 2 -> 2, landed after the current false; the imports removed again; the copy answers 404"
+    },
+    {
+      "id": "decks.file.details",
+      "feature": "decks",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.link.detect-url",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.link.detect-email",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.select.double-click-address",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.select.shift-home-line",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.link.popover-apply-remove",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-options.padding-grid",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.format-options.remembers-section",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.autofit.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "text.find-replace.count-while-typing",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "no fresh deck could be made after the stall (slide.new did not answer within 60 s)"
+    }
+  ]
+}

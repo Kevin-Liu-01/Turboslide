@@ -1,0 +1,139 @@
+{
+  "startedAt": "2026-10-02T08:55:57.509Z",
+  "baseA": "http://localhost:4478",
+  "baseB": "http://localhost:4488",
+  "appearance": "light",
+  "pictures": [
+    "01-title-row-chips-a.png",
+    "02-roster-a.png",
+    "03-caret-outline-a.png",
+    "04-pointer-a.png",
+    "05-card-chip-a.png",
+    "06-following-plate-a.png",
+    "07-sign-in-dialog-a.png"
+  ],
+  "deck.id": "untitled-20261002-ogo8",
+  "sync.A": {
+    "seq": 0,
+    "revision": 1,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "poll",
+    "room": null,
+    "covered": null,
+    "connected": false,
+    "offline": false,
+    "storeDegraded": false,
+    "streamDown": false
+  },
+  "clients": {
+    "a": "2ffe0edbe7e6f0eb9c937692b7532be9",
+    "b": "6d13f944cb3135dac81ae6e6654d626f"
+  },
+  "sync.B": {
+    "seq": 1,
+    "revision": 1,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "ws",
+    "room": {
+      "colo": "SJC",
+      "object": "4c05a3ff",
+      "idleMs": 2000,
+      "maxMs": 10000
+    },
+    "covered": 1,
+    "connected": true,
+    "offline": false,
+    "storeDegraded": false,
+    "streamDown": false
+  },
+  "drawnTheme": {
+    "a": "light",
+    "b": "light"
+  },
+  "chip.inA": {
+    "id": "presence.chip.6d13f944cb3135dac81ae6e6654d626f",
+    "box": [
+      847,
+      10,
+      24,
+      24
+    ]
+  },
+  "roster.forB": {
+    "shown": true,
+    "item": "title.presence.follow",
+    "text": "NNickel 885editor · slide 1Follow"
+  },
+  "caret.inA": {
+    "client": "6d13f944cb3135dac81ae6e6654d626f",
+    "box": [
+      478,
+      550,
+      2,
+      22
+    ],
+    "offset": "12",
+    "inside": null
+  },
+  "outline.inA": null,
+  "pointer.on": {
+    "on": true
+  },
+  "pointer.inA": {
+    "client": "6d13f944cb3135dac81ae6e6654d626f",
+    "box": [
+      961,
+      506,
+      0,
+      0
+    ],
+    "offset": null,
+    "inside": null
+  },
+  "slides": 2,
+  "card.chip": {
+    "slide": "split-1-2be9",
+    "drawn": true
+  },
+  "follow": {
+    "offered": true,
+    "took": true,
+    "stageSlide": "split-1-2be9"
+  },
+  "follow.endedByClick": true,
+  "signIn.dialog": {
+    "methods": [
+      "dialog.signIn.google",
+      "dialog.signIn.passkey"
+    ],
+    "emailField": true
+  },
+  "transport.A": {
+    "seq": 3,
+    "revision": 3,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "ws",
+    "room": {
+      "colo": "SJC",
+      "object": "4c05a3ff",
+      "idleMs": 2000,
+      "maxMs": 10000
+    },
+    "covered": 3,
+    "connected": true,
+    "offline": false,
+    "storeDegraded": false,
+    "streamDown": false
+  },
+  "teardown": {
+    "id": "untitled-20261002-ogo8",
+    "editStatus": 404
+  },
+  "endedAt": "2026-10-02T08:56:06.357Z"
+}

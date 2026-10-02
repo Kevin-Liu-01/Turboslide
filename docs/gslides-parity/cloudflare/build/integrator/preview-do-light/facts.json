@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-10-02T01:12:46.280Z",
+  "baseA": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "baseB": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+  "appearance": "light",
+  "pictures": [],
+  "error": {
+    "message": "page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================\n    at /Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/build/integrator/pictures.mjs:195:11"
+  },
+  "endedAt": "2026-10-02T01:13:19.618Z"
+}

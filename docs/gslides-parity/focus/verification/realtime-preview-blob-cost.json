@@ -1,0 +1,444 @@
+{
+  "base": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "tier": "blob",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is blob",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "startedAt": "2026-10-02T01:28:09.229Z",
+  "ms": 2138582,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": {
+    "exit": 0,
+    "ms": 2137371,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/realtime/integrator2/gate-preview-blob/cost/cost-probe.json",
+    "minutes": 3,
+    "instances": [
+      "e25ecf09",
+      "381a8974",
+      "8030c8c6",
+      "b4742716",
+      "ca8f5eed"
+    ]
+  },
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "cost",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 13,
+  "passed": 5,
+  "failed": 0,
+  "notDriven": 8,
+  "manual": [],
+  "measured": [
+    {
+      "id": "cost.editor-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "tier blob",
+        "function requests 9.65 a minute (ceiling 12; 29 in 3 min)",
+        "the store settled 2.26 s after the state was ready (1 sync.status read(s) before the window)",
+        "store simple 32 a minute (ceiling 40; 2 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 10 a minute (ceiling 11)",
+        "instances answering sync.status 1"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached",
+      "measures": [
+        "function requests 9.66 a minute and 9 session poll(s) were read from the tab that stayed visible"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "tier blob",
+        "function requests 71.27 a minute (ceiling 75; 214 in 3 min)",
+        "the store settled 2.27 s after the state was ready (1 sync.status read(s) before the window)",
+        "store simple 124 a minute (ceiling 140; 2 of the heads the probe's own sync.status reads, which the ceiling carries, b3.md R7 b)",
+        "store advanced 74 a minute (ceiling 85)",
+        "instances answering sync.status 1"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "tier blob",
+        "the store settled 2.19 s after the state was ready (1 sync.status read(s) before the window)",
+        "store advanced 12 a minute (ceiling 30)",
+        "store list 0 (ceiling 0)",
+        "instances answering sync.status 3"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.show.calls",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "tier blob",
+        "function requests 0 in the window (ceiling 0)",
+        "the store settled 114.95 s after the state was ready (12 sync.status read(s) before the window; the first read: head 23, put 22, list 0, del 0)",
+        "store calls at the first sample 1 (head 1, get 0, put 0, list 0, del 0), of which 1 the probe's own sync.status read(s) (one deck.json head each, b3.md R7 b); the page's 0 (ceiling 0)",
+        "function requests between the load and the window 0 (the settle, 114.95 s)",
+        "instances answering sync.status 1"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.redis.commands",
+      "result": "not driven",
+      "reason": "no Redis URL (--redis-url, TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL): INFO commandstats cannot be read",
+      "measures": [
+        "function requests 68.05 a minute in the editing window were read from the page"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.requests",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.duration",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.do.rows-written",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.d1.reads",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.d1.writes",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    },
+    {
+      "id": "cost.worker.requests",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob",
+      "measures": [
+        "tier blob",
+        "the page made 74.96 function requests a minute and 0 request(s) to the room host (0 socket open(s)) in the editing window"
+      ],
+      "cost": true
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "8fdb0c4f",
+  "origin": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "date": "2026-10-02",
+  "results": {
+    "sync.pull.no-listing": "passed",
+    "cost.editor-idle.calls": "passed",
+    "cost.editor-hidden.calls": "not driven",
+    "cost.editor-editing.calls": "passed",
+    "cost.two-tabs-idle.calls": "passed",
+    "cost.show.calls": "passed",
+    "cost.redis.commands": "not driven",
+    "cost.do.requests": "not driven",
+    "cost.do.duration": "not driven",
+    "cost.do.rows-written": "not driven",
+    "cost.d1.reads": "not driven",
+    "cost.d1.writes": "not driven",
+    "cost.worker.requests": "not driven"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [
+      {
+        "id": "cost.editor-hidden.calls",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.redis.commands",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.do.requests",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.do.duration",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.do.rows-written",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.d1.reads",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.d1.writes",
+        "feature": "cost",
+        "result": "not driven"
+      },
+      {
+        "id": "cost.worker.requests",
+        "feature": "cost",
+        "result": "not driven"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "sync.pull.no-listing",
+      "feature": "sync",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "cost.editor-idle.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "cost.editor-hidden.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "document.visibilityState read \"visible\" after a second page was brought to the front (headless Chromium reports no hidden page), so the hidden state was not reached"
+    },
+    {
+      "id": "cost.editor-editing.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "cost.two-tabs-idle.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "cost.show.calls",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "cost.redis.commands",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no Redis URL (--redis-url, TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL): INFO commandstats cannot be read"
+    },
+    {
+      "id": "cost.do.requests",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    },
+    {
+      "id": "cost.do.duration",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    },
+    {
+      "id": "cost.do.rows-written",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    },
+    {
+      "id": "cost.d1.reads",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    },
+    {
+      "id": "cost.d1.writes",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    },
+    {
+      "id": "cost.worker.requests",
+      "feature": "cost",
+      "driver": "cost-probe",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "a do tier row; this run's tier is blob"
+    }
+  ]
+}

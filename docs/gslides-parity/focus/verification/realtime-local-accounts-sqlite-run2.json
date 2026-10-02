@@ -1,0 +1,395 @@
+{
+  "base": "http://localhost:4478",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-02T02:14:40.653Z",
+  "ms": 89080,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 1,
+    "ms": 89015,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/realtime/integrator2/gate-accounts-sqlite-run2/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 15,
+  "passed": 5,
+  "failed": 2,
+  "notDriven": 8,
+  "manual": [
+    "accounts.google-roundtrip"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [
+    "accounts.google-roundtrip"
+  ],
+  "commit": "8fdb0c4f",
+  "origin": "http://localhost:4478",
+  "date": "2026-10-02",
+  "results": {
+    "people.verified-badge": "passed",
+    "people.versions-author-account": "failed",
+    "people.labels-disambiguated": "failed",
+    "share.dialog.grant-email-line": "not driven",
+    "people.avatar-upload": "not driven",
+    "people.avatar-cap-refusal": "not driven",
+    "people.avatar-rotation": "not driven",
+    "people.avatar-fallback-plate": "not driven",
+    "people.avatar-link-visitor": "not driven",
+    "people.avatar-metadata-stripped": "not driven",
+    "accounts.google-button": "passed",
+    "accounts.google-error-sentence": "passed",
+    "accounts.google-leaves": "passed",
+    "accounts.email-hidden-without-mail": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.versions-author-account",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "people.labels-disambiguated",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.grant-email-line",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-upload",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-cap-refusal",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-rotation",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-fallback-plate",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-link-visitor",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-metadata-stripped",
+        "feature": "share",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": [
+      {
+        "id": "accounts.google-roundtrip",
+        "feature": "share",
+        "reason": "no identity database on this base"
+      }
+    ]
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "people.avatar-upload",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-rotation",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "result": "failed"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: a record by the anonymous id"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "accounts.google-button",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-leaves",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-error-sentence",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.email-hidden-without-mail",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-roundtrip",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no identity database on this base"
+    }
+  ]
+}

@@ -1223,8 +1223,13 @@ export async function deckDispatcher(
   // object's order (admitServerWrite's do branch, the op fan out, the checkpoint at once) and an
   // agent's read answers the object's live document instead of the store at the last checkpoint;
   // on the memory, redis and blob tiers the plain store keeps today's path (the follower turns a
-  // write into stream entries there). The asset and snapshot handlers stay on the plain store:
-  // a picture put is no document mutation and the Blob backend's snapshots count is its own.
+  // write into stream entries there). The asset handlers take the same store (the realtime round's
+  // fix round 2, build/r1.md R1-INTh): `asset.add` records the asset with a document write at the
+  // head, and on the plain store that write moved the store's revision outside the object, so the
+  // `block.insert` naming the asset was refused at a revision the object does not hold ("Your new
+  // object was not added. Try again"); through the room the record enters the object's order and
+  // reaches every tab as an op. `putAsset`, `snapshots` and the other members ride the spread of
+  // `roomBackedStore` unchanged, so a picture's bytes still go to the store.
   const liveStore = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
@@ -1302,7 +1307,7 @@ export async function deckDispatcher(
   // /api/actions/logo.search, deck_logo_search and the window transport answer them
   registerLogoActionsLazily(dispatcher, deckId, liveStore);
   registerSlideImport(dispatcher, deckId, storeDeps, store.dir, liveStore, decks);
-  const assets = assetDispatcherLoader(dispatcher, deckId, store, deckStore);
+  const assets = assetDispatcherLoader(dispatcher, deckId, store, liveStore);
   registerRecordActionsFor(dispatcher, deckId, store, liveStore, storeDeps, facts, assets);
   // the store's view of the deck for the HTTP and MCP transports (docs/SYNC.md 6.3, 3.6; the sync
   // round, build/b3.md R2): `sync.status` with `storeCalls` replaces the CLI's placeholder the

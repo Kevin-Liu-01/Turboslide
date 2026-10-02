@@ -190,15 +190,31 @@ export function checkType(ctx: LintContext): Finding[] {
   return out;
 }
 
+/**
+ * The markup without its glyph art: a `<text>` element that keeps its spaces
+ * (`xml:space="preserve"`) in a monospace face draws a mark out of characters, row by row (the
+ * ASCII speed mark, P:public/marks/bar-monogram-ascii.svg, DECK-GRAMMAR.md:52), so its font size
+ * is a cell of the mark, never a label (round1/build/b4.md request 7).
+ */
+export function withoutGlyphArt(source: string): string {
+  return source.replace(/<text\b([^>]*)>[\s\S]*?<\/text\s*>/gi, (whole, attributes: string) =>
+    /\bxml:space\s*=\s*["']preserve["']/i.test(attributes) &&
+    /\bfont-family\s*=\s*(?:"[^"]*mono|'[^']*mono)/i.test(attributes)
+      ? ''
+      : whole,
+  );
+}
+
 function checkSvgLabels(
   ctx: LintContext,
   out: Finding[],
   slideId: string,
   blockId: string,
   path: string,
-  source: string,
+  markup: string,
 ): void {
   const small = new Set<number>();
+  const source = withoutGlyphArt(markup);
   for (const m of source.matchAll(/font-size\s*[:=]\s*["']?(\d+(?:\.\d+)?)(?:px)?["']?/gi)) {
     const n = Number(m[1]);
     if (n < SVG_LABEL_MIN && /<svg|<text|\.dia|svg/i.test(source)) small.add(n);

@@ -88,6 +88,16 @@ function literals(source: string): string[] {
   return [...new Set([...source.matchAll(LITERAL)].map((m) => m[0].toLowerCase()))];
 }
 
+/**
+ * The markup without its SVG masks. A mask's fills are luminance, never colours: white keeps the
+ * masked shape and black cuts it (the GT plate, double cut and livery marks cut their letters out
+ * with `fill="#000"`, P:public/marks, DECK-GRAMMAR.md:52), and a token there would invert the cut
+ * in the dark appearance (round1/build/b4.md request 7).
+ */
+export function withoutMasks(source: string): string {
+  return source.replace(/<mask\b[\s\S]*?<\/mask\s*>/gi, '');
+}
+
 export function checkColor(ctx: LintContext): Finding[] {
   const out: Finding[] = [];
   const hues = Object.values(SEMANTIC_HUES);
@@ -156,7 +166,7 @@ export function checkColor(ctx: LintContext): Finding[] {
       if (block.type === 'dia' && block.svg)
         sources.push({ path: `${ref.path}/svg`, text: block.svg });
       for (const source of sources) {
-        const found = literals(source.text);
+        const found = literals(withoutMasks(source.text));
         const semantic = found.filter((c) => hues.includes(c));
         const others = found.filter(
           (c) =>

@@ -173,6 +173,7 @@ import {
 } from './identity-index';
 import type { MeAnswerFacts } from './own-identity';
 import { rowReflects } from './own-identity';
+import { roomTransport } from './transport';
 import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
 import {
   clearPendingMirror,
@@ -180,20 +181,16 @@ import {
   memoryPendingStore,
 } from '@turboslide/realtime/client/pending-store';
 import type { PendingStore } from '@turboslide/realtime/client/pending-store';
-import { createRoomClient, splitSseBlocks } from '@turboslide/realtime/client/room-client';
+import { createRoomClient } from '@turboslide/realtime/client/room-client';
 import type {
-  OpsResponse,
   PersistedOffer,
   Rejected,
   ResyncAnswer,
   ResyncOrigin,
   RoomClient,
-  RoomTransport,
-  StreamFailure,
   SyncStatus,
 } from '@turboslide/realtime/client/room-client';
-import { parseSseBlock, roomEventOf } from '@turboslide/realtime/protocol';
-import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
+import type { PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
@@ -307,164 +304,6 @@ import { partitionRoster, readClientIds, rememberClientId, tabToken } from './cl
    them beside the index, so the unit test reads them without this module's graph */
 export { identityView, participantOf };
 
-/**
- * The browser's transport of the room (SPEC-3 3.3): a streamed fetch down, fetch up, same origin.
- *
- * The stream was an EventSource until the focus round's cycle 3 stream fix round (VERIFICATION.md
- * C3-F1): the browser reconnected it on its own, exposed neither the status nor the `retry-after`
- * of a refused open (the route's 503 `too_many_streams`), and the room client learnt only that
- * "the stream closed", so nobody read the wait and the reopen was left to the browser. The room
- * client owns the reopen now (room-client.ts `reopenStream`), so the transport opens one stream
- * per `open`, reports once how it ended, and reconnects nothing. A fetch with
- * `accept: text/event-stream` gives the status and the headers of a refusal directly and the same
- * bytes as the EventSource otherwise (the route's frames, parsed by protocol.ts `parseSseBlock`
- * over `splitSseBlocks`); its abort is the close the server sees. This was the smaller change
- * against an EventSource plus a second fetch to probe the status: one connection per open, no
- * probe that itself takes a slot, and no EventSource reconnect to suppress.
- */
-function sseTransport(deckId: string, tab: string): RoomTransport {
-  const base = `/api/decks/${encodeURIComponent(deckId)}`;
-  return {
-    open({ since, retire, onEvent, onError }) {
-      // the tab's earlier ids ride every open (a reconnect too), so the instance the stream lands
-      // on drops their roster rows and releases their stream slots before hello (hotfix 2 cause
-      // B1; C3-F1); the tab's token rides too, so the instance releases the tab's earlier slots
-      // it holds under no id the tab knows (an open aborted before its hello, another deck's
-      // stream of this tab; C3S-F2)
-      const retiring =
-        retire === undefined || retire.length === 0
-          ? ''
-          : `&retire=${retire.map((id) => encodeURIComponent(id)).join(',')}`;
-      const tabbed = `&tab=${encodeURIComponent(tab)}`;
-      const aborter = new AbortController();
-      let done = false;
-      // the browser's offline event ends the stream (the seam step of the cycle 3 stream fix
-      // round): an established socket can stay open and silent long after the network went (a
-      // laptop that changed networks; Playwright's offline emulation keeps an open stream's bytes
-      // flowing while every new request fails), so the tab takes the browser's word as the
-      // stream's end and the room client reopens it on its ladder once the network is back
-      const onOffline = (): void => {
-        aborter.abort();
-        end({ message: 'the browser went offline' });
-      };
-      const listening = typeof window !== 'undefined';
-      if (listening) window.addEventListener('offline', onOffline);
-      const end = (failure: StreamFailure): void => {
-        if (listening) window.removeEventListener('offline', onOffline);
-        if (done) return;
-        done = true;
-        onError(failure);
-      };
-      void (async () => {
-        let response: Response;
-        try {
-          response = await fetch(`${base}/stream?since=${since}${retiring}${tabbed}`, {
-            headers: { accept: 'text/event-stream' },
-            cache: 'no-store',
-            signal: aborter.signal,
-          });
-        } catch {
-          // the network refused the connection (offline, a dropped socket): no status to read
-          if (!aborter.signal.aborted) end({ message: 'the stream did not open' });
-          return;
-        }
-        if (!response.ok || response.body === null) {
-          // a refused open: the status, the body's code, the wait the route named and the
-          // client id it minted (the room client posts under it while it waits for a slot)
-          const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-          const retry = response.headers.get('retry-after');
-          const retryAfterMs = retry === null ? NaN : Number(retry) * 1000;
-          end({
-            status: response.status,
-            code: typeof json.error === 'string' ? json.error : 'error',
-            ...(Number.isFinite(retryAfterMs) ? { retryAfterMs } : {}),
-            ...(typeof json.clientId === 'string' ? { clientId: json.clientId } : {}),
-            message: `The stream answered ${response.status}`,
-          });
-          return;
-        }
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let rest = '';
-        let retryMs: number | undefined;
-        try {
-          for (;;) {
-            const chunk = await reader.read();
-            if (chunk.done) break;
-            const split = splitSseBlocks(rest + decoder.decode(chunk.value, { stream: true }));
-            rest = split.rest;
-            for (const block of split.blocks) {
-              const parsed = parseSseBlock(block);
-              if (parsed === null) continue;
-              if (parsed.retry !== undefined) retryMs = parsed.retry;
-              const event = roomEventOf(parsed);
-              if (event !== null && !done) onEvent(event);
-            }
-          }
-        } catch {
-          // the connection dropped mid stream, or this tab aborted it
-        }
-        if (aborter.signal.aborted) return;
-        // the stream ended (its lifetime, the server, the network): the server's `retry` is the
-        // wait before the next open when it sent one
-        end({
-          ...(retryMs === undefined ? {} : { retryAfterMs: retryMs }),
-          message: 'the stream closed',
-        });
-      })();
-      return {
-        close: () => {
-          done = true;
-          if (listening) window.removeEventListener('offline', onOffline);
-          aborter.abort();
-        },
-      };
-    },
-    async postOps(body: OpsPost): Promise<OpsResponse> {
-      // a deadline on the write (the focus round, cycle 2): a POST that never answers (an
-      // instance whose deck queue is held, VERIFICATION F-stall; a dev server that reloaded its
-      // program under the request) left the room client's `posting` unsettled, so `flush()`
-      // and every `idle()` caller after it (a version.restore, a named version, an asset
-      // action) waited for good with no sentence anywhere (VERIFICATION F-versions, "restore
-      // changed the deck false"). A timed out POST throws, the client marks itself offline and
-      // resends with its op ids, which the room deduplicates against the stream's tail
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), OPS_POST_TIMEOUT_MS);
-      let response: Response;
-      try {
-        response = await fetch(`${base}/ops`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', accept: 'application/json' },
-          body: JSON.stringify(body),
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timer);
-      }
-      const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-      if (response.ok && json.ok === true) return json as unknown as OpsResponse;
-      const retry = response.headers.get('retry-after');
-      return {
-        ok: false,
-        status: response.status,
-        code: typeof json.error === 'string' ? json.error : 'error',
-        message:
-          typeof json.message === 'string' ? json.message : `The room answered ${response.status}`,
-        ...(typeof json.head === 'number' ? { head: json.head } : {}),
-        ...(retry !== null ? { retryAfterMs: Number(retry) * 1000 } : {}),
-      };
-    },
-    async postPresence(body: PresencePost, options = {}) {
-      await fetch(`${base}/presence${options.leave === true ? '?leave=1' : ''}`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
-        keepalive: options.leave === true,
-      });
-    },
-  };
-}
-
 /** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
 function pendingStoreFor(): PendingStore {
   return typeof indexedDB === 'undefined' ? memoryPendingStore() : indexedDbPendingStore();
@@ -491,13 +330,6 @@ class StaleBaseError extends ConflictError {
 const EXTERNAL_BANNER_MS = 8000;
 /** The floor between two snackbars of one refusal sentence (C3-F3; `sayRefusal`). */
 const REFUSAL_SNACKBAR_SPACING_MS = 60_000;
-/**
- * How long one ops POST may take before the room client treats it as failed and resends (the
- * focus round, cycle 2; the transport's `postOps` says what a POST that never answered did).
- * Above the room's own admission time under load (the memory tier's checkpoint at its 10 s hard
- * limit, the blob tier's one second write spacing per deck) and under the browser's own limits.
- */
-const OPS_POST_TIMEOUT_MS = 30_000;
 
 export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
 
@@ -2009,13 +1841,23 @@ export function createEditorController(init: {
     scheduleCommentsRefresh();
   };
 
-  /** The room client over the stream (SPEC-3 3.6); started once the deck exists in the store. */
-  const attachRoom = (document: DeckDocument, seq: number, tier: SyncStatus['tier']): void => {
+  /**
+   * The room client over the stream or the socket (SPEC-3 3.6; docs/CLOUDFLARE.md 3.6.3); started
+   * once the deck exists in the store. `roomFacts` is the editor payload's `room` (the tier, the
+   * seq, and on the do tier the socket url and the ticket): the transport picks the wire by its
+   * tier word and fetches a ticket itself when the payload carries none (build/r2.md R2-C1, R2-C3).
+   */
+  const attachRoom = (
+    document: DeckDocument,
+    seq: number,
+    tier: SyncStatus['tier'],
+    roomFacts: unknown = init.payload.room,
+  ): void => {
     if (room !== null) return;
     const now = (): string => new Date().toISOString();
     const client = createRoomClient({
       deckId,
-      transport: sseTransport(deckId, tabToken(idStorage())),
+      transport: roomTransport(deckId, tabToken(idStorage()), roomFacts),
       document,
       seq,
       tier,
@@ -3338,6 +3180,7 @@ export function createEditorController(init: {
         payload.document,
         payload.room?.seq ?? payload.document.deck.revision,
         payload.room?.tier ?? init.payload.room?.tier ?? 'memory',
+        payload.room ?? init.payload.room,
       );
       // the record the server side create wrote, read once (b6.md R1, as after draftCommit); a
       // null answer is the lag, the deck was just made (access-refresh.ts)
@@ -4015,8 +3858,11 @@ export function createEditorController(init: {
       pending: status?.pending ?? latest().pending,
       retained: status?.retained ?? 0,
       tier: status?.tier ?? init.payload.room?.tier ?? 'memory',
-      transport: status === undefined ? 'poll' : 'sse',
+      // the wire's kind as the transport names it (`ws` on the do tier's socket) and the object
+      // the socket reached, from its room frame (docs/CLOUDFLARE.md 3.6.3; build/r2.md R2-C10)
+      transport: status?.transport ?? 'poll',
       connected: status?.connected ?? false,
+      ...(status?.room === undefined ? {} : { room: status.room }),
     };
   });
   on<{ threadId: string }>('comment.link', (input) => {
@@ -4503,7 +4349,9 @@ export function createEditorController(init: {
         pending: snapshot.sync?.pending ?? snapshot.pending,
         retained: snapshot.sync?.retained ?? 0,
         tier: snapshot.sync?.tier ?? init.payload.room?.tier ?? 'memory',
-        transport: snapshot.sync === null ? 'poll' : 'sse',
+        // the wire's kind as the transport names it and the object the socket reached (R2-C10)
+        transport: snapshot.sync?.transport ?? 'poll',
+        room: snapshot.sync?.room ?? null,
         connected: snapshot.sync?.connected ?? false,
         // the stream's state beside the connection (the cycle 3 stream fix round, s1.md S1-R2):
         // a driver reads whether the client is offline, reopening its stream or waiting on the

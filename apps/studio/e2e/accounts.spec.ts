@@ -21,6 +21,7 @@ import {
   clickCard,
   ctl,
   headingRun,
+  invoke,
   newDeck,
   openEditor,
   otherContext,
@@ -2222,6 +2223,91 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
       await page.keyboard.press('Escape');
     } finally {
       await context.close();
+    }
+  });
+});
+
+/* ---------------------------------------------------------------------------------------------
+   The next program's hotfixes (docs/NEXT.md 3.2, 4.3.3): the local rows of H2 and H3, each
+   titled by `coreTitle(id)` so the gate's `--only accounts` run maps it back to its row. */
+
+/** The data-control ids of the cards /decks draws in its grid, once the listing has landed. */
+async function homeCards(p: Page): Promise<string[]> {
+  await p.goto('/decks');
+  await p.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  await expect(
+    p.locator('[data-control="home.cards"], [data-control="home.empty"]').first(),
+  ).toBeVisible({ timeout: 30_000 });
+  await expect(p.locator('[data-control="home.pending"]')).toHaveCount(0, { timeout: 30_000 });
+  return p
+    .locator('[data-control="home.cards"] > [data-control^="home.card."]')
+    .evaluateAll((els) =>
+      els.map((el) => (el.getAttribute('data-control') ?? '').slice('home.card.'.length)),
+    );
+}
+
+/** The ids of a deck.list answer, whatever shape the transport gives them. */
+function listedIds(list: unknown): string[] {
+  const rows = Array.isArray(list)
+    ? (list as { id: string }[])
+    : ((list as { decks?: { id: string }[] } | null)?.decks ?? []);
+  return rows.map((row) => row.id);
+}
+
+test.describe("the next program's hotfixes: the local rows (docs/NEXT.md 3.2, 4.3.3)", () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+
+  test(coreTitle('accounts.decks-list-scoped'), async ({ browser }) => {
+    test.setTimeout(300_000);
+    const scratchA = new Scratch();
+    const scratchB = new Scratch();
+    const scratchC = new Scratch();
+    const { context: aCtx, page: A } = await ownerContext(browser);
+    const { context: bCtx, page: B } = await otherContext(browser);
+    const { context: cCtx, page: C } = await otherContext(browser);
+    try {
+      const probe = await A.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+      expect(probe.status(), 'the server has an identity database').toBe(200);
+      const stamp = Date.now();
+      const emailA = `h2-a-${stamp}@example.test`;
+      const emailB = `h2-b-${stamp}@example.test`;
+      expect((await signInWithCode(A.request, ORIGIN, emailA)).status).toBe(200);
+      expect((await signInWithCode(B.request, ORIGIN, emailB)).status).toBe(200);
+      /* A's deck, shared with B by address; B's own deck; C's deck, a stranger's */
+      const deckA = await newDeck(A, scratchA, 'H2 owner deck');
+      await inviteByEmail(A, emailB, 'viewer');
+      const deckB = await newDeck(B, scratchB, 'H2 own deck');
+      const deckC = await newDeck(C, scratchC, 'H2 stranger deck');
+      expect((await peopleState(B)).account?.signedIn, 'B is signed in').toBe(true);
+      /* B's /decks and B's deck.list from B's own editor */
+      const bCards = await homeCards(B);
+      await openEditor(B, deckB);
+      const bList = listedIds(await invoke(B, 'deck.list', {}));
+      /* A's /decks: its own deck, and neither B's nor C's */
+      const aCards = await homeCards(A);
+      await openEditor(A, deckA);
+      const aList = listedIds(await invoke(A, 'deck.list', {}));
+      test.info().annotations.push({
+        type: 'listings',
+        description: JSON.stringify({ deckA, deckB, deckC, bCards, bList, aCards, aList }),
+      });
+      expect([...bCards].sort(), "B's /decks: B's own deck and the one shared with B").toEqual(
+        [deckA, deckB].sort(),
+      );
+      expect([...bList].sort(), "B's deck.list: the same set").toEqual([deckA, deckB].sort());
+      expect(aCards, "A's /decks: A's own deck alone").toEqual([deckA]);
+      expect(aList, "A's deck.list: A's own deck alone").toEqual([deckA]);
+    } finally {
+      try {
+        await teardownAll(C, scratchC);
+        await teardownAll(B, scratchB);
+        await teardownAll(A, scratchA);
+      } finally {
+        await cCtx.close();
+        await bCtx.close();
+        await aCtx.close();
+      }
     }
   });
 });

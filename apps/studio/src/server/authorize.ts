@@ -570,6 +570,8 @@ export function capabilityForAction(id: string): Capability | null {
   if (id === 'presence.follow') return 'follow';
   if (id.startsWith('presence.')) return 'presence';
   if (id.startsWith('export.') || id === 'build.run') return 'export';
+  // deck.list has no deck to check: its handler answers the caller's own and shared decks
+  // (docs/NEXT.md 3.2 H2; server/deck-scope.ts); deck.create makes one
   if (id === 'deck.list' || id === 'deck.create') return null;
   if (!isActionId(id)) return 'read';
   return ACTIONS[id as ActionId].mutates ? 'write' : 'read';

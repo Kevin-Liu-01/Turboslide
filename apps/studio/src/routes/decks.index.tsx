@@ -37,7 +37,7 @@ import {
 import {
   copyStoredDeck,
   createNewDeck,
-  listDecks,
+  listHomeDecks,
   readDeckCard,
   renameStoredDeck,
   restoreStoredDeck,
@@ -76,10 +76,13 @@ import './decks.css';
  * cards (a 320 by 180 thumbnail of slide 1 in the deck's appearance, the title, "Opened 2 hours
  * ago" from this browser's history or "Edited <date>") with a list view toggle, a sort control
  * and a per card menu (Open, Open in new tab, Present, Rename, Make a copy, Download, Move to
- * trash). Trash at the bottom links to /decks/trash. Every read is `deck.list` through the store
- * (server/decks.ts listDecks), the one call the Open dialog, the Import slides dialog, the CLI
- * and MCP share, so decks in the trash and unsaved drafts never appear. Recent is this browser's
- * own history first, then the store's updatedAt, so a rep sees their decks before other people's.
+ * trash). Trash at the bottom links to /decks/trash. The list is the viewer's (docs/NEXT.md 3.2
+ * H2; server/deck-scope.ts): an anonymous visitor's cards are this browser's Recent record alone
+ * and the store is not asked, a signed in person's are the decks they own and the ones shared
+ * with them, and the deployment's admin may show every deck with the filter `?show=all`
+ * (server/decks.ts listHomeDecks, scoped as the Open dialog's `listDecks` and the `deck.list`
+ * action are), so decks in the trash, unsaved drafts and other people's decks never appear.
+ * Recent is this browser's own history first, then the store's updatedAt.
  *
  * The shell streams before the list (gslides-parity SPEC-4 0.29, 3.1; PP 3.1 item 3): the loader
  * awaits the server facts and the two cookies and returns the store listing as an unawaited
@@ -109,16 +112,23 @@ import './decks.css';
  * within the first seconds; the Make a copy dialog is the chrome's one Dialog.
  */
 export const Route = createFileRoute('/decks/')({
+  /* the admin's filter (docs/NEXT.md 3.2 H2, question 8): `?show=all` lists every deck the store
+     holds for the deployment's admin; the server answers anyone else their own listing */
+  validateSearch: (search: Record<string, unknown>): HomeSearch =>
+    search.show === 'all' ? { show: 'all' } : {},
+  loaderDeps: ({ search }) => ({ show: search.show }),
   /* the old Template gallery anchor (/decks#templates) lands on the gallery page (docs/PRODUCT.md 4.3) */
   beforeLoad: ({ location }) => {
     if (location.hash === 'templates' || location.hash === '#templates')
       throw redirect({ to: '/decks/templates' });
   },
-  loader: async () => {
+  loader: async ({ deps }) => {
     const [health, cookies] = await Promise.all([getServerHealth(), readHomeCookies()]);
     // the store listing is not awaited: the router streams it behind the shell (SPEC-4 0.29)
+    const listing = listHomeDecks({ data: deps.show === 'all' ? { show: 'all' } : {} });
     return {
-      decks: listDecks(),
+      decks: listing.then((answer) => answer.cards),
+      admin: listing.then((answer) => answer.admin),
       node: health.node,
       prefs: cookies.prefs,
       recent: cookies.recent,
@@ -141,6 +151,9 @@ export { RECENT_KEY, readOpened, recordDeckOpened } from './-recent';
 
 /** the view and sort the rep last chose */
 const HOME_SETTINGS_KEY = 'turboslide:home';
+
+/** The page's search: the admin's filter (docs/NEXT.md 3.2 H2). */
+type HomeSearch = { show?: 'all' };
 
 export type HomeSort = 'opened' | 'modified' | 'title';
 export type HomeView = 'grid' | 'list';
@@ -470,7 +483,8 @@ export const HOME_EMPTY = {
 } as const;
 
 function HomePage() {
-  const { decks, node, prefs: cookiePrefs, recent, now: serverNow } = Route.useLoaderData();
+  const { decks, admin, node, prefs: cookiePrefs, recent, now: serverNow } = Route.useLoaderData();
+  const search = Route.useSearch();
   const router = useRouter();
   const navigate = useNavigate();
   /* the old Template gallery anchor on a full load (docs/PRODUCT.md 4.3): the hash never reaches
@@ -866,9 +880,19 @@ function HomePage() {
         <div className="ts-recent-head">
           <div>
             <h2 id="ts-recent-heading">{HOME.recent}</h2>
-            <p className="ts-recent-lead">{HOME.listed}</p>
           </div>
           <div className="ts-recent-tools">
+            {/* the deployment admin's filter (docs/NEXT.md 3.2 H2): drawn once the listing says
+                the viewer may show every deck */}
+            <Suspense fallback={null}>
+              <AdminShowFilter
+                admin={admin}
+                show={search.show === 'all' ? 'all' : 'own'}
+                onShow={(show) =>
+                  void navigate({ to: '/decks', search: show === 'all' ? { show: 'all' } : {} })
+                }
+              />
+            </Suspense>
             <span className="ts-seg" role="group" aria-label="View">
               <button
                 type="button"
@@ -940,6 +964,45 @@ function HomePage() {
 
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </main>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The admin's filter (docs/NEXT.md 3.2 H2, question 8)
+
+/**
+ * The deployment admin's choice between their own and shared decks and every deck the store
+ * holds; nothing for anyone else. It waits on the listing's own answer, so the page asks the
+ * server nothing more for it.
+ */
+function AdminShowFilter({
+  admin,
+  show,
+  onShow,
+}: {
+  admin: Promise<boolean>;
+  show: 'own' | 'all';
+  onShow: (show: 'own' | 'all') => void;
+}) {
+  const allowed = useAwaited({ promise: admin });
+  if (!allowed) return null;
+  return (
+    <label className="ts-sort">
+      <span className="ts-visually-hidden">Show</span>
+      <select
+        className="pt-select"
+        value={show}
+        data-control="home.show"
+        onChange={(event) => onShow(event.target.value === 'all' ? 'all' : 'own')}
+        {...tipProps({
+          name: 'Show',
+          doc: 'Your presentations and the ones shared with you, or every presentation here.',
+        })}
+      >
+        <option value="own">{HOME.showOwn}</option>
+        <option value="all">{HOME.showAll}</option>
+      </select>
+    </label>
   );
 }
 

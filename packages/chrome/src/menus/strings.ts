@@ -977,7 +977,10 @@ export const HOME = {
   sortOpened: 'Last opened by me',
   sortModified: 'Last modified',
   sortTitle: 'Title',
-  listed: 'Every presentation on this Turboslide is listed here',
+  /* the admin's filter on /decks (docs/NEXT.md 3.2 H2, question 8): the viewer's own and shared
+     presentations by default, every presentation on the deployment on request */
+  showOwn: 'Yours and shared with you',
+  showAll: 'Every presentation',
   trash: 'Trash',
   empty: 'No presentations yet. Start one above',
   trashEmpty: 'Trash is empty',

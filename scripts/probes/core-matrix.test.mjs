@@ -459,8 +459,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's hotfix H3 (docs/NEXT.md 3.2), carried in the realtime round's R4 push:
        one local accounts row, accounts.sign-out-clean */
     /* the next program's hotfix H7 (docs/NEXT.md 3.2): export.remove.copies-gone */
+    /* the next program's hotfix H2 (docs/NEXT.md 3.2): two decks rows and one local accounts row */
     expect(CORE_MATRIX.length).toBe(
-      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22 + 10 + 1 + 1,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22 + 10 + 1 + 1 + 3,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',

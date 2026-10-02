@@ -24,6 +24,7 @@ import { slideCounter } from '@turboslide/render/deck';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 
 import type { AuthContext } from './authorize';
+import type { ListingScope } from './deck-scope';
 import { renderSlide } from './render';
 import type { LiveDocument } from './room';
 import {
@@ -32,7 +33,7 @@ import {
   ensureDecks,
   hostingFacts,
   openDeckStore,
-  listStoredDecks,
+  storeSelection,
 } from './root';
 
 /**
@@ -261,16 +262,66 @@ function cardOf(head: DeckHead): DeckCard {
 }
 
 /**
- * Every deck the store holds outside the trash, for the home page's Recent presentations, the
- * Open dialog and the Import slides dialog (gslides-parity SPEC 6.2), newest first by the
- * updatedAt the store rewrites on every write. Hosted, the first call materializes the bundled
- * seed, so an empty function instance still lists the GT deck. The same `deck.list` the CLI and
- * MCP answer, through the collection (`HostedDecks.list`), which on Blob syncs every deck so a
- * title or a trash stamp written on another instance shows here at once.
+ * The listing scope of the request being served (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the
+ * whole store for a checkout's file store and the deployment's admin bearer, the caller's own and
+ * shared decks for a signed in person, and nothing from the store for an anonymous visitor, whose
+ * page draws this browser's Recent record (routes/-recent.ts).
  */
-export const listDecks = createServerFn({ method: 'GET' }).handler(async (): Promise<DeckCard[]> =>
-  (await listStoredDecks()).map(cardOf),
+async function pageScope(): Promise<ListingScope> {
+  const fileStore = storeSelection().kind === 'file';
+  if (fileStore) return { kind: 'every' };
+  const [{ listingScope }, { requestIdentity, sessionCacheKey }] = await Promise.all([
+    import('./deck-scope'),
+    import('./auth/identity'),
+  ]);
+  try {
+    const request = getRequest();
+    /* no account session and no bearer: an anonymous visitor, whose page reads this browser's
+       Recent record; nothing is resolved or read for it */
+    if (sessionCacheKey(request) === null && !request.headers.has('authorization'))
+      return { kind: 'browser' };
+    const identity = await requestIdentity(request);
+    return listingScope({ kind: identity.kind, ctx: identity.ctx }, { fileStore, page: true });
+  } catch {
+    return { kind: 'none' };
+  }
+}
+
+/**
+ * The viewer's decks outside the trash, for the home page's Recent presentations, the Open dialog
+ * and the Import slides dialog (gslides-parity SPEC 6.2), newest first by the updatedAt the store
+ * rewrites on every write, scoped to the viewer (docs/NEXT.md 3.2 H2): a signed in person's own
+ * and shared decks, an anonymous visitor's none (the page draws this browser's Recent record), a
+ * checkout's every deck. The heads come through the collection (`HostedDecks.list`), which on
+ * Blob syncs every deck so a title or a trash stamp written on another instance shows here at
+ * once; an anonymous visitor's listing reads no store at all.
+ */
+export const listDecks = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<DeckCard[]> => {
+    const { listScoped } = await import('./deck-scope');
+    return (await listScoped(await pageScope())).map(cardOf);
+  },
 );
+
+/** What `/decks` lists and whether the viewer may ask for every deck (docs/NEXT.md 3.2 H2). */
+export type HomeListing = { cards: DeckCard[]; admin: boolean };
+
+/**
+ * `/decks`' listing (docs/NEXT.md 3.2 H2, question 8): the viewer's own and shared decks, and for
+ * the deployment's admin every deck the store holds behind the page's filter (`show: 'all'`). A
+ * caller who is not the admin is answered their own listing whatever `show` says.
+ */
+export const listHomeDecks = createServerFn({ method: 'GET' })
+  .validator((input: { show?: 'all' }): { show?: 'all' } =>
+    input.show === 'all' ? { show: 'all' } : {},
+  )
+  .handler(async ({ data }): Promise<HomeListing> => {
+    const { listScoped } = await import('./deck-scope');
+    const scope = await pageScope();
+    const admin = scope.kind === 'own' && scope.admin;
+    const listed = await listScoped(admin && data.show === 'all' ? { kind: 'every' } : scope);
+    return { cards: listed.map(cardOf), admin };
+  });
 
 /** The decks in the trash, newest stamp first, for /decks/trash (gslides-parity SPEC 6.4). */
 export const listTrashedDecks = createServerFn({ method: 'GET' }).handler(

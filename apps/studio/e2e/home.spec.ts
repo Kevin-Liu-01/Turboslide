@@ -134,9 +134,10 @@ test('the three bands: the strip, the recent cards with thumbnails, search, sort
   await expect(page.locator('[data-control="home.gallery"]')).toHaveText('Template gallery');
   /* the recent list */
   await expect(page.getByRole('heading', { name: 'Recent presentations' })).toBeVisible();
-  await expect(
-    page.getByText('Every presentation on this Turboslide is listed here'),
-  ).toBeVisible();
+  /* no caption claims every presentation: the list is the viewer's (docs/NEXT.md 3.2 H2; on this
+     spec's file store every deck is the checkout holder's, so the seeded decks list) */
+  const caption = page.getByText('Every presentation on this Turboslide is listed here');
+  await expect(caption).toHaveCount(0);
   const alpha = page.locator(`[data-control="home.card.${ALPHA}"]`);
   const beta = page.locator(`[data-control="home.card.${BETA}"]`);
   await expect(alpha).toBeVisible();

@@ -70,6 +70,8 @@ import {
 
 import { placeInsert } from '../editor/place-insert';
 import { hostedAccessHooks } from './access';
+import { listingScope } from './deck-scope';
+import type { ListingScope } from './deck-scope';
 import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
 import { requestRunId } from '@turboslide/agent/http/auth';
@@ -668,6 +670,22 @@ function creatorContextOf(request: Request | undefined, facts: CallerFacts): Aut
   return null;
 }
 
+/**
+ * Who `deck.list` answers for (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the whole store for a
+ * dispatcher built outside a request (a unit test, the CLI's rule), a cookieless localhost caller
+ * (the checkout holder) and the admin bearer, and on a checkout's file store for every caller; a
+ * request with no identity lists nothing; anyone else lists their own and shared decks.
+ */
+function listingScopeOf(request: Request | undefined, facts: CallerFacts): ListingScope {
+  const fileStore = storeSelection().kind === 'file';
+  if (request === undefined || isCheckoutAgent(request)) return { kind: 'every' };
+  if (facts.identity === null) return fileStore ? { kind: 'every' } : { kind: 'none' };
+  return listingScope(
+    { kind: facts.identity.kind, ctx: facts.identity.ctx },
+    { fileStore, page: false },
+  );
+}
+
 async function callerFactsFor(request: Request | undefined): Promise<CallerFacts> {
   const origin =
     request === undefined
@@ -938,6 +956,7 @@ function registerHostedDeckActions(
   dispatcher: Dispatcher,
   decks: HostedDecks,
   creator: AuthContext | null,
+  listing: ListingScope,
 ): void {
   // a deck this caller creates or copies gets its record at once (SPEC-3 6.1; VERIFICATION-3
   // finding 4): restricted, the caller its owner; a caller with no identity leaves none
@@ -953,9 +972,15 @@ function registerHostedDeckActions(
   dispatcher.register('deck.create', async (input) =>
     record(await decks.create(input as CreateDeckInput)),
   );
-  dispatcher.register('deck.list', (input) => {
+  // the listing scoped to the caller (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the admin
+  // bearer and a checkout list the store, anyone else their own and shared decks; the collection
+  // the store selection built is the one `listScoped` lists
+  dispatcher.register('deck.list', async (input) => {
     const { includeTrashed } = input as DeckListInput;
-    return decks.list(includeTrashed === true ? { includeTrashed: true } : {});
+    if (listing.kind === 'every')
+      return decks.list(includeTrashed === true ? { includeTrashed: true } : {});
+    const { listScoped } = await import('./deck-scope');
+    return listScoped(listing, includeTrashed === true ? { includeTrashed: true } : {});
   });
   dispatcher.register('deck.copy', async (input) => {
     const { baseRevision, ...rest } = input as DeckCopyInput;
@@ -1305,7 +1330,12 @@ export async function deckDispatcher(
   // admin.flag as before
   const request = currentRequest(options.request);
   const facts = await callerFactsFor(request);
-  registerHostedDeckActions(dispatcher, decks, creatorContextOf(request, facts));
+  registerHostedDeckActions(
+    dispatcher,
+    decks,
+    creatorContextOf(request, facts),
+    listingScopeOf(request, facts),
+  );
   // the templates of the product round over the collection's folder (docs/PRODUCT.md 4.3)
   registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));
   // the assistant's two actions on this deck (docs/PRODUCT.md 6.2; build/b6.md R3): the route

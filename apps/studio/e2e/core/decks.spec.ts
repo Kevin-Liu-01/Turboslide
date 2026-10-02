@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import {
   OIDC,
   Scratch,
+  agentHeaders,
   clickCard,
   coverage,
   ctl,
@@ -19,6 +20,7 @@ import {
   newDeck,
   openEditor,
   openGtBrandCopy,
+  otherContext,
   ownerContext,
   placeBlock,
   pngSize,
@@ -3015,6 +3017,112 @@ test(title('decks.polish.pages-sweep'), async ({ browser }) => {
   expect(failures).toEqual([]);
 });
 
+/* ---------------------------------------------------------------------------------------------
+   The listing scoped to the viewer (docs/NEXT.md 3.2 H2, 4.1.5): a fresh anonymous browser lists
+   no deck it did not open, the deck.list action answers a principal its own decks alone, and the
+   checkout holder or the deployment's bearer still lists the whole store. */
+
+const BASE = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321';
+
+/** The data-control ids of the cards /decks draws in its grid, once the listing has landed. */
+async function listedCards(p: Page): Promise<string[]> {
+  await expect(
+    p.locator('[data-control="home.cards"], [data-control="home.empty"]').first(),
+  ).toBeVisible({ timeout: 30_000 });
+  /* the listing streams behind the shell: the frames leave when it lands */
+  await expect(p.locator('[data-control="home.pending"]')).toHaveCount(0, { timeout: 30_000 });
+  return p
+    .locator('[data-control="home.cards"] > [data-control^="home.card."]')
+    .evaluateAll((els) => els.map((el) => el.getAttribute('data-control') ?? ''));
+}
+
+test(title('decks.list.own-and-shared'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  const { context: freshCtx, page: fresh } = await otherContext(browser);
+  const freshScratch = new Scratch();
+  try {
+    await gotoDecks(fresh);
+    const first = await listedCards(fresh);
+    const caption = await fresh
+      .getByText('Every presentation on this Turboslide is listed here')
+      .count();
+    /* the deck this browser makes and opens: its Recent record lists it, and nothing else */
+    const own = await newDeck(fresh, freshScratch, 'Own and shared row');
+    await gotoDecks(fresh);
+    await expect(ctl(fresh, `home.card.${own}`)).toBeVisible({ timeout: 20_000 });
+    const after = await listedCards(fresh);
+    test.info().annotations.push({
+      type: 'listing',
+      description: `fresh browser: ${first.length} cards (${first.slice(0, 5).join(', ') || 'none'}); after its own deck ${own}: ${after.join(', ')}; caption count ${caption}; the file's deck ${deck} listed: ${after.includes(`home.card.${deck}`)}`,
+    });
+    expect(first, 'a fresh anonymous browser lists no presentation').toEqual([]);
+    expect(caption, 'no caption claims every presentation').toBe(0);
+    expect(after, "the deck it opened, and no other person's").toEqual([`home.card.${own}`]);
+  } finally {
+    try {
+      await teardownAll(fresh, freshScratch);
+    } finally {
+      await freshCtx.close();
+    }
+  }
+});
+
+test(title('decks.list.action-scoped'), async ({ browser }) => {
+  test.setTimeout(180_000);
+  const { context: freshCtx, page: fresh } = await otherContext(browser);
+  const freshScratch = new Scratch();
+  try {
+    const own = await newDeck(fresh, freshScratch, 'Action scoped row');
+    /* the window transport, as the principal's own editor runs it */
+    const windowIds = rowsOf(await invoke(fresh, 'deck.list', {})).map((row) => row.id);
+    const windowTrashed = rowsOf(await invoke(fresh, 'deck.list', { includeTrashed: true })).map(
+      (row) => row.id,
+    );
+    /* POST /api/actions/deck.list with the fresh principal's cookie (a deployment answers 401
+       without the bearer, which lists nothing) */
+    const posted = await fresh.request.post(
+      `/api/actions/deck.list?deck=${encodeURIComponent(own)}`,
+      { headers: { ...extraHTTPHeaders, 'content-type': 'application/json' }, data: {} },
+    );
+    const postedIds =
+      posted.status() === 200 ? rowsOf(await posted.json()).map((row) => row.id) : null;
+    /* the checkout holder (a cookieless localhost call) or the deployment's bearer */
+    const headers = agentHeaders(BASE);
+    let ownerIds: string[] | null = null;
+    let ownerStatus = 0;
+    if (headers !== null) {
+      const res = await fetch(`${BASE}/api/actions/deck.list?deck=${encodeURIComponent(own)}`, {
+        method: 'POST',
+        headers,
+        body: '{}',
+      });
+      ownerStatus = res.status;
+      if (res.ok) ownerIds = rowsOf(await res.json()).map((row) => row.id);
+    }
+    test.info().annotations.push({
+      type: 'listing',
+      description: `window: ${windowIds.join(', ')}; window with trash: ${windowTrashed.length}; POST with the cookie: ${posted.status()} ${postedIds === null ? '' : postedIds.join(', ')}; the holder or the bearer: ${headers === null ? 'not read (no bearer for this deployment)' : `${ownerStatus}, ${ownerIds?.length ?? 0} decks, the file's deck ${ownerIds?.includes(deck) ?? false}, the fresh deck ${ownerIds?.includes(own) ?? false}`}`,
+    });
+    expect(windowIds, 'the principal lists its own deck alone').toEqual([own]);
+    expect(windowTrashed, "with the trash: still no other person's deck").toEqual([own]);
+    if (postedIds !== null)
+      expect(postedIds, 'POST with the cookie lists its own deck alone').toEqual([own]);
+    else expect(posted.status(), 'POST without the bearer is refused').toBe(401);
+    if (headers !== null) {
+      expect(ownerStatus).toBe(200);
+      expect(ownerIds, 'the holder or the bearer lists the whole store').toEqual(
+        expect.arrayContaining([own, deck]),
+      );
+    }
+  } finally {
+    try {
+      await teardownAll(fresh, freshScratch);
+    } finally {
+      await freshCtx.close();
+    }
+  }
+});
+
 coverage(import.meta.filename, [
   'decks.home.new-presentation',
   'decks.home.your-presentations',
@@ -3089,4 +3197,7 @@ coverage(import.meta.filename, [
   'decks.trash.empty-not-primary',
   'decks.thumbnail.never-502',
   'decks.polish.pages-sweep',
+  /* the next program's hotfix H2 (docs/NEXT.md 3.2, 4.1.5) */
+  'decks.list.own-and-shared',
+  'decks.list.action-scoped',
 ]);

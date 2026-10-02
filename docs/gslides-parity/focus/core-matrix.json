@@ -8979,6 +8979,26 @@
       "note": "Polish round; docs/POLISH.md 2.7 item 76; B5"
     },
     {
+      "id": "decks.list.own-and-shared",
+      "feature": "decks",
+      "interaction": "A fresh anonymous browser on `/decks` sees no presentation it did not open, and a deck it opened lists in its Recent record; no caption claims every presentation",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-brand-surfaces 26; audit-clutter 87; audit-auth 56",
+      "note": "docs/NEXT.md 3.2 H2 and 4.1.5: an anonymous visitor's listing is this browser's Recent record and the store is not asked (server/deck-scope.ts); the caption left strings.ts"
+    },
+    {
+      "id": "decks.list.action-scoped",
+      "feature": "decks",
+      "interaction": "`POST /api/actions/deck.list` from a fresh anonymous principal answers no deck it cannot read; the owner's bearer still lists the whole store",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-clutter 38, 87 (143 presentations at 01:46:35Z)",
+      "note": "docs/NEXT.md 3.2 H2 and 4.1.5: the dispatcher's deck.list answers a principal the decks it owns or holds a grant or a link on (server/deck-scope.ts); the bootstrap bearer and a checkout's localhost holder list the store; a deployment refuses the POST without the bearer, which lists nothing, and the row reads the window transport there"
+    },
+    {
       "id": "export.print.deck-appearance",
       "feature": "export",
       "interaction": "Print settings and preview on a light deck: the page's sheet background reads paper; the PDF it downloads is light",
@@ -9657,6 +9677,15 @@
       "today": "not driven",
       "evidence": "audit-auth 40 to 41, 67",
       "note": "docs/NEXT.md 3.2 H3 and 4.3.3: local row; not driven today by the matrix rule for local rows (production holds no account; NEXT.md 4.3.3 reads it broken from audit-auth 40 to 41); the menu row runs EditorAccount.signOut(), whose account.signOut ends this browser session and mints a fresh anonymous cookie in the same answer; the revocation bound is A1b accounts.revoke-within-5s"
+      },
+      {
+      "id": "accounts.decks-list-scoped",
+      "feature": "share",
+      "interaction": "A signed in person's `/decks` and `deck.list` list the presentations they own and the ones shared with them, and no other",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-auth 56",
+      "note": "docs/NEXT.md 3.2 H2 and 4.3.3: local row; not driven today by the matrix's rule for local rows (production holds no account; NEXT.md 4.3.3 reads it broken from audit-auth 56); the record names the account or an anonymous id linked to it as the owner, a live grant names it or its verified address, or it holds a live link (server/deck-scope.ts)"
     },
     {
       "id": "accounts.google-button",

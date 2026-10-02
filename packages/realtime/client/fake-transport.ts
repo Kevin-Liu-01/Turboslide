@@ -423,3 +423,129 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
 export function tabTransport(server: FakeRoomServer, identity: FakeIdentity): FakeTabTransport {
   return server.transportFor(identity);
 }
+
+// ---------------------------------------------------------------------------------------------
+// The socket shaped fake (docs/CLOUDFLARE.md 3.6.3; the Cloudflare phase, R2)
+
+/**
+ * What the studio's socket transport (apps/studio/src/editor/transport.ts `wsTransport`) needs
+ * of a `WebSocket`: the four handler slots, `send`, `close`, the ready state and the subprotocol
+ * the server selected. The browser's `WebSocket` satisfies it; this fake satisfies it for the
+ * tests, with the server's side exposed (`accept`, `push`, `closeFromServer`) so a test plays the
+ * Worker: accept the upgrade with `turboslide.v1`, send a hello, close with 4401. Frames the
+ * client sent are in `sent`, in order, as the strings it wrote.
+ */
+export type FakeSocketCloseEvent = { code: number; reason: string; wasClean: boolean };
+
+export type FakeSocket = {
+  readonly url: string;
+  readonly protocols: readonly string[];
+  readyState: number;
+  protocol: string;
+  onopen: ((event: unknown) => void) | null;
+  onmessage: ((event: { data: unknown }) => void) | null;
+  onclose: ((event: FakeSocketCloseEvent) => void) | null;
+  onerror: ((event: unknown) => void) | null;
+  send: (data: string) => void;
+  close: (code?: number, reason?: string) => void;
+  /** every frame the client sent, as written */
+  sent: string[];
+  /** the frames the client sent, JSON parsed; a non JSON frame (the `ping`) is the string */
+  frames: () => unknown[];
+  /** the server accepted the upgrade with this subprotocol (the default is the first the client asked for) */
+  accept: (protocol?: string) => void;
+  /** a frame down: a string as is, anything else as JSON */
+  push: (frame: unknown) => void;
+  /** the server closed the socket with a code and a reason (a refused upgrade is 1006 before `accept`) */
+  closeFromServer: (code: number, reason?: string) => void;
+  /** how the client closed the socket, or null while it has not */
+  closedByClient: { code: number | undefined; reason: string | undefined } | null;
+};
+
+export type FakeSocketHub = {
+  /** the constructor the transport is given in place of the browser's `WebSocket` */
+  WebSocket: new (url: string, protocols?: string | string[]) => FakeSocket;
+  /** every socket made, in order */
+  sockets: FakeSocket[];
+  /** the newest socket; throws when none was made */
+  last: () => FakeSocket;
+  /** how many sockets were made */
+  opens: () => number;
+};
+
+const SOCKET_CONNECTING = 0;
+const SOCKET_OPEN = 1;
+const SOCKET_CLOSING = 2;
+const SOCKET_CLOSED = 3;
+
+export function fakeSocketHub(): FakeSocketHub {
+  const sockets: FakeSocket[] = [];
+  class Socket implements FakeSocket {
+    readonly url: string;
+    readonly protocols: readonly string[];
+    readyState = SOCKET_CONNECTING;
+    protocol = '';
+    onopen: FakeSocket['onopen'] = null;
+    onmessage: FakeSocket['onmessage'] = null;
+    onclose: FakeSocket['onclose'] = null;
+    onerror: FakeSocket['onerror'] = null;
+    sent: string[] = [];
+    closedByClient: FakeSocket['closedByClient'] = null;
+    constructor(url: string, protocols?: string | string[]) {
+      this.url = url;
+      this.protocols =
+        protocols === undefined ? [] : typeof protocols === 'string' ? [protocols] : [...protocols];
+      sockets.push(this);
+    }
+    send(data: string): void {
+      if (this.readyState !== SOCKET_OPEN) throw new Error('the socket is not open');
+      this.sent.push(data);
+    }
+    close(code?: number, reason?: string): void {
+      if (this.readyState === SOCKET_CLOSED || this.readyState === SOCKET_CLOSING) return;
+      this.closedByClient = { code, reason };
+      this.readyState = SOCKET_CLOSING;
+      // the browser fires close asynchronously once the handshake ends
+      queueMicrotask(() => {
+        this.readyState = SOCKET_CLOSED;
+        this.onclose?.({ code: code ?? 1005, reason: reason ?? '', wasClean: true });
+      });
+    }
+    frames(): unknown[] {
+      return this.sent.map((text) => {
+        try {
+          return JSON.parse(text) as unknown;
+        } catch {
+          return text;
+        }
+      });
+    }
+    accept(protocol?: string): void {
+      if (this.readyState !== SOCKET_CONNECTING) return;
+      this.protocol = protocol ?? this.protocols[0] ?? '';
+      this.readyState = SOCKET_OPEN;
+      this.onopen?.({});
+    }
+    push(frame: unknown): void {
+      if (this.readyState !== SOCKET_OPEN) throw new Error('the socket is not open');
+      this.onmessage?.({ data: typeof frame === 'string' ? frame : JSON.stringify(frame) });
+    }
+    closeFromServer(code: number, reason = ''): void {
+      if (this.readyState === SOCKET_CLOSED) return;
+      const opened = this.readyState === SOCKET_OPEN;
+      this.readyState = SOCKET_CLOSED;
+      if (!opened) this.onerror?.({});
+      this.onclose?.({ code, reason, wasClean: opened && code !== 1006 });
+    }
+  }
+  return {
+    WebSocket: Socket,
+    sockets,
+    last: () => {
+      const socket = sockets[sockets.length - 1];
+      if (socket === undefined) throw new Error('no socket was made');
+      return socket;
+    },
+    opens: () => sockets.length,
+  };
+}

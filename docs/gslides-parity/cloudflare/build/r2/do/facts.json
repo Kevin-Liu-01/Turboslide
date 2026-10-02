@@ -1,0 +1,603 @@
+{
+  "startedAt": "2026-10-01T23:32:08.262Z",
+  "baseA": "http://127.0.0.1:4472",
+  "baseB": "http://127.0.0.1:4482",
+  "label": "do",
+  "deck.id": "untitled-20261001-h3no",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "subtitleBlock": "lead"
+  },
+  "A.reloadedForTicket": true,
+  "share.link": "http://127.0.0.1:4482/s/<token>",
+  "A.instance": null,
+  "B.instance": null,
+  "join.ms": 4986,
+  "join.chipInA": {
+    "present": true,
+    "ms": 4988,
+    "aId": "e83f0cbf2bc40e25d4b9846a079651de",
+    "bId": "3189423ea3ae9b8f268fbf4547f276dd"
+  },
+  "caret.round1": {
+    "round": 1,
+    "textA": "Realtime drive alpha bravo",
+    "textB": "Realtime drive alpha bravo",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 26,
+      "kept": false,
+      "box": [
+        1077,
+        460,
+        2,
+        75
+      ]
+    },
+    "aInB": {
+      "offset": 20,
+      "kept": false,
+      "box": [
+        913,
+        460,
+        2,
+        75
+      ]
+    },
+    "ownA": 20,
+    "ownB": 26,
+    "wantBInA": 26,
+    "wantAInB": 20,
+    "okBInA": true,
+    "okAInB": true,
+    "firstBInAms": 348,
+    "firstAInBms": 277
+  },
+  "shot.caret.r1.A": "01-caret-r1-a.png",
+  "shot.caret.r1.B": "01-caret-r1-b.png",
+  "caret.round2": {
+    "round": 2,
+    "textA": "Realtime drive alpha bravo charlie delta",
+    "textB": "Realtime drive alpha bravo charlie delta",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 40,
+      "kept": false,
+      "box": [
+        863,
+        492,
+        2,
+        75
+      ]
+    },
+    "aInB": {
+      "offset": 34,
+      "kept": false,
+      "box": [
+        719,
+        492,
+        2,
+        75
+      ]
+    },
+    "ownA": 34,
+    "ownB": 40,
+    "wantBInA": 40,
+    "wantAInB": 34,
+    "okBInA": true,
+    "okAInB": true,
+    "firstBInAms": 312,
+    "firstAInBms": 153
+  },
+  "shot.caret.r2.A": "01-caret-r2-a.png",
+  "shot.caret.r2.B": "01-caret-r2-b.png",
+  "caret.round3": {
+    "round": 3,
+    "textA": "Realtime drive alpha bravo charlie delta echo foxtrot",
+    "textB": "Realtime drive alpha bravo charlie delta echo foxtrot",
+    "converged": true,
+    "bothWords": true,
+    "bInA": {
+      "offset": 53,
+      "kept": false,
+      "box": [
+        1274,
+        462,
+        2,
+        49
+      ]
+    },
+    "aInB": {
+      "offset": 45,
+      "kept": false,
+      "box": [
+        1153,
+        462,
+        2,
+        49
+      ]
+    },
+    "ownA": 45,
+    "ownB": 53,
+    "wantBInA": 53,
+    "wantAInB": 45,
+    "okBInA": true,
+    "okAInB": true,
+    "firstBInAms": 298,
+    "firstAInBms": 141
+  },
+  "shot.caret.r3.A": "01-caret-r3-a.png",
+  "shot.caret.r3.B": "01-caret-r3-b.png",
+  "realtime.caret.offset-after-merge": {
+    "pass": true,
+    "rounds": [
+      {
+        "round": 1,
+        "okBInA": true,
+        "okAInB": true,
+        "bothWords": true,
+        "converged": true
+      },
+      {
+        "round": 2,
+        "okBInA": true,
+        "okAInB": true,
+        "bothWords": true,
+        "converged": true
+      },
+      {
+        "round": 3,
+        "okBInA": true,
+        "okAInB": true,
+        "bothWords": true,
+        "converged": true
+      }
+    ]
+  },
+  "inside.outline": {
+    "ms": 99,
+    "outline": {
+      "client": "3189423ea3ae9b8f268fbf4547f276dd",
+      "text": "",
+      "box": [
+        383,
+        582,
+        632,
+        23
+      ],
+      "classes": "ts-remote-outline ts-remote-outline is-inside",
+      "offset": null,
+      "kept": null,
+      "inside": "true",
+      "block": "lead",
+      "state": null,
+      "transform": null,
+      "style": {
+        "left": "98.585px",
+        "top": "424.922px",
+        "width": "631.515px",
+        "height": "22.79px"
+      }
+    },
+    "blockBox": [
+      381,
+      580,
+      636,
+      27
+    ],
+    "insetOk": true
+  },
+  "shot.inside.A": "02-inside-a.png",
+  "shot.inside.B": "02-inside-b.png",
+  "shot.drag.mid.A": "03-drag-mid-a.png",
+  "shot.drag.mid.B": "03-drag-mid-b.png",
+  "realtime.block.drag-live": {
+    "ghostFrames": 18,
+    "samples": 20,
+    "distinctGhostPositions": 14,
+    "movingWord": true,
+    "firstGhostMs": 166,
+    "blockMovedAfterReleaseMs": 107,
+    "ghostGoneAfterReleaseMs": 108,
+    "selectionKept": 1,
+    "pass": true
+  },
+  "shot.drag.after.A": "03-drag-after-a.png",
+  "shot.drag.after.B": "03-drag-after-b.png",
+  "pointer.on": {
+    "on": true
+  },
+  "pointer.readings": [
+    {
+      "want": {
+        "x": 400,
+        "y": 270
+      },
+      "drawn": {
+        "at": {
+          "x": 400,
+          "y": 270
+        },
+        "flag": "QQuartz"
+      },
+      "ms": 193
+    },
+    {
+      "want": {
+        "x": 800,
+        "y": 450
+      },
+      "drawn": {
+        "at": {
+          "x": 800,
+          "y": 450
+        },
+        "flag": "QQuartz"
+      },
+      "ms": 196
+    },
+    {
+      "want": {
+        "x": 1200,
+        "y": 630
+      },
+      "drawn": {
+        "at": {
+          "x": 1200,
+          "y": 630
+        },
+        "flag": "QQuartz"
+      },
+      "ms": 191
+    }
+  ],
+  "shot.pointer.A": "04-pointer-a.png",
+  "pointer.hiddenInA": {
+    "driven": false,
+    "reason": "TimeoutError: locator.waitFor: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.view.livePointers.collaborators\"]').first() to be visible\n"
+  },
+  "realtime.pointer.second-browser": {
+    "drawn": true,
+    "within300": true,
+    "flagNamesB": true,
+    "hidden": {
+      "driven": false,
+      "reason": "TimeoutError: locator.waitFor: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menu.view.livePointers.collaborators\"]').first() to be visible\n"
+    },
+    "sheetA": [
+      284,
+      157,
+      1128,
+      635
+    ],
+    "pass": false
+  },
+  "realtime.reload.loses-nothing": {
+    "msAfterLastKeystroke": 2144,
+    "converged": {
+      "ha": "one two threefour five",
+      "hb": "one two threefour five",
+      "sta": "uno dos tres cuatro cinco",
+      "stb": "uno dos tres cuatro cinco",
+      "revA": 13,
+      "revB": 13
+    },
+    "pass": true
+  },
+  "shot.reload.A": "06-reload-a.png",
+  "shot.reload.B": "06-reload-b.png",
+  "realtime.reconnect.loses-nothing": {
+    "offlineNoticed": true,
+    "msAfterReconnect": 2131,
+    "converged": {
+      "ha": "one two threefour five red green blue",
+      "hb": "one two threefour five red green blue",
+      "sta": "uno dos tres cuatro cinco rojo verde azul",
+      "stb": "uno dos tres cuatro cinco rojo verde azul",
+      "revA": 15,
+      "revB": 15
+    },
+    "recordsBefore": 13,
+    "recordsAfter": 15,
+    "pass": true
+  },
+  "shot.reconnect.A": "07-reconnect-a.png",
+  "shot.reconnect.B": "07-reconnect-b.png",
+  "dim.caretDrawnMs": 1,
+  "dim.caretDimMs": 30896,
+  "shot.dim.A": "05-dim-a.png",
+  "dim.leftMs": 57,
+  "realtime.caret.dims-and-leaves": {
+    "dimMs": 30896,
+    "leftMs": 57,
+    "pass": true
+  },
+  "shot.left.A": "05-left-a.png",
+  "teardown": {
+    "id": "untitled-20261001-h3no",
+    "editStatus": 404
+  },
+  "transport.sockets": {
+    "A": [
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=1&tab=<token>",
+        "openedAt": "2026-10-01T23:32:13.600Z",
+        "sent": 1,
+        "received": 1,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 1,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": {
+          "tier": "do",
+          "seq": 1,
+          "covered": 1,
+          "at": "2026-10-01T23:32:13.611Z"
+        },
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": false
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=1&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:14.154Z",
+        "sent": 44,
+        "received": 121,
+        "pings": 5,
+        "pongs": 5,
+        "ops": 5,
+        "presence": 33,
+        "leave": 0,
+        "ticket": 1,
+        "join": 0,
+        "acks": 5,
+        "opEvents": 12,
+        "presenceEvents": 89,
+        "hello": {
+          "tier": "do",
+          "seq": 1,
+          "covered": 1,
+          "at": "2026-10-01T23:32:14.189Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "0c21ac8e",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 1,
+        "closed": false
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=13&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:42.019Z",
+        "sent": 27,
+        "received": 41,
+        "pings": 9,
+        "pongs": 9,
+        "ops": 2,
+        "presence": 16,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 2,
+        "opEvents": 3,
+        "presenceEvents": 19,
+        "hello": {
+          "tier": "do",
+          "seq": 13,
+          "covered": 13,
+          "at": "2026-10-01T23:32:42.064Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "0c21ac8e",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 0,
+        "closed": false
+      }
+    ],
+    "B": [
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=1&tab=<token>",
+        "openedAt": "2026-10-01T23:32:19.235Z",
+        "sent": 68,
+        "received": 130,
+        "pings": 5,
+        "pongs": 5,
+        "ops": 7,
+        "presence": 56,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 7,
+        "opEvents": 13,
+        "presenceEvents": 95,
+        "hello": {
+          "tier": "do",
+          "seq": 1,
+          "covered": 1,
+          "at": "2026-10-01T23:32:19.283Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "0c21ac8e",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:32:45.438Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:45.926Z",
+        "sent": 0,
+        "received": 0,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 0,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": null,
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:32:45.931Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:46.927Z",
+        "sent": 0,
+        "received": 0,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 0,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": null,
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:32:46.933Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:48.931Z",
+        "sent": 0,
+        "received": 0,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 0,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": null,
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:32:48.947Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:32:52.933Z",
+        "sent": 0,
+        "received": 0,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 0,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": null,
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:32:52.949Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:33:00.936Z",
+        "sent": 0,
+        "received": 0,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 0,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 0,
+        "hello": null,
+        "room": null,
+        "resend": 0,
+        "reauth": 0,
+        "closed": true,
+        "closedAt": "2026-10-01T23:33:00.951Z"
+      },
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-h3no?since=14&tab=<token>&retire=<ids>",
+        "openedAt": "2026-10-01T23:33:05.427Z",
+        "sent": 12,
+        "received": 17,
+        "pings": 8,
+        "pongs": 8,
+        "ops": 1,
+        "presence": 3,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 1,
+        "opEvents": 1,
+        "presenceEvents": 3,
+        "hello": {
+          "tier": "do",
+          "seq": 15,
+          "covered": 15,
+          "at": "2026-10-01T23:33:05.446Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "0c21ac8e",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 0,
+        "closed": false
+      }
+    ]
+  },
+  "transport.status.A": {
+    "seq": 16,
+    "revision": 15,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "sse",
+    "connected": true,
+    "offline": false,
+    "storeDegraded": false,
+    "streamDown": false
+  },
+  "endedAt": "2026-10-01T23:33:39.195Z"
+}

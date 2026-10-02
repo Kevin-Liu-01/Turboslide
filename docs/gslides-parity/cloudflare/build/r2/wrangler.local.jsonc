@@ -1,0 +1,29 @@
+{
+  // R2's local copy of apps/realtime-worker/wrangler.jsonc for `wrangler dev --port 8792` (docs/CLOUDFLARE.md
+  // 5.4 item 1): the same bindings, the vars pointed at R2's first node server (the object's seed and
+  // checkpoint callbacks go to 4472). Paths are relative to this file. Nothing here is deployed;
+  // .turboslide is gitignored. The D1 id is a placeholder: the local D1 is simulated.
+  "name": "turboslide-realtime",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "durable_objects": { "bindings": [{ "name": "DECK_ROOM", "class_name": "DeckRoom" }] },
+  "exports": { "DeckRoom": { "type": "durable-object", "storage": "sqlite" } },
+  "d1_databases": [
+    {
+      "binding": "ACCOUNTS",
+      "database_name": "turboslide-accounts",
+      "database_id": "00000000-0000-4000-8000-000000000002",
+      "migrations_dir": "../../../apps/realtime-worker/migrations"
+    }
+  ],
+  "vars": {
+    "TURBOSLIDE_APP_ORIGIN": "http://127.0.0.1:4472",
+    "TURBOSLIDE_PROTOCOL": "1",
+    "TURBOSLIDE_ROOM_HINT": "",
+    "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
+    "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+    "TURBOSLIDE_BUILD_COMMIT": ""
+  }
+}

@@ -171,6 +171,92 @@ const ctxA = await mk(BASE_A);
 let ctxB = await mk(BASE_B);
 const A = await ctxA.newPage();
 let B = await ctxB.newPage();
+
+/**
+ * The sockets each page opens (the Cloudflare phase, docs/CLOUDFLARE.md 3.6.3): on the `do` tier
+ * the room client's transport is one WebSocket per open to the deck's Durable Object, and
+ * Playwright reports its URL and its frames (not the subprotocols or the close code). The drive
+ * counts the frames by kind, keeps the hello's tier and the object's `room` frame, and writes the
+ * rows under `transport.sockets`; on the SSE tiers the lists stay empty. The tab token and the
+ * retire list are cut from the URL before it is written.
+ */
+const sockets = { A: [], B: [] };
+const watchSockets = (page, who) => {
+  page.on('websocket', (ws) => {
+    // the room's sockets alone: vite's HMR socket on a dev server is not the transport's
+    if (!/\/rooms\//.test(ws.url())) return;
+    const row = {
+      url: ws
+        .url()
+        .replace(/tab=[0-9a-f]+/, 'tab=<token>')
+        .replace(/retire=[^&]*/, 'retire=<ids>'),
+      openedAt: new Date().toISOString(),
+      sent: 0,
+      received: 0,
+      pings: 0,
+      pongs: 0,
+      ops: 0,
+      presence: 0,
+      leave: 0,
+      ticket: 0,
+      join: 0,
+      acks: 0,
+      opEvents: 0,
+      presenceEvents: 0,
+      hello: null,
+      room: null,
+      resend: 0,
+      reauth: 0,
+      closed: false,
+    };
+    sockets[who].push(row);
+    const parse = (payload) => {
+      try {
+        return JSON.parse(payload);
+      } catch {
+        return null;
+      }
+    };
+    ws.on('framesent', (frame) => {
+      row.sent += 1;
+      if (frame.payload === 'ping') {
+        row.pings += 1;
+        return;
+      }
+      const j = parse(frame.payload);
+      if (j === null) return;
+      if (j.t === 'ops') row.ops += 1;
+      else if (j.t === 'presence') row.presence += 1;
+      else if (j.t === 'leave') row.leave += 1;
+      else if (j.t === 'ticket') row.ticket += 1;
+      else if (j.t === 'join') row.join += 1;
+    });
+    ws.on('framereceived', (frame) => {
+      row.received += 1;
+      if (frame.payload === 'pong') {
+        row.pongs += 1;
+        return;
+      }
+      const j = parse(frame.payload);
+      if (j === null) return;
+      if (j.t === 'ack') row.acks += 1;
+      else if (j.t === 'room')
+        row.room = { colo: j.colo, object: j.object, idleMs: j.idleMs, maxMs: j.maxMs };
+      else if (j.t === 'reauth') row.reauth += 1;
+      else if (j.type === 'hello')
+        row.hello = { tier: j.tier, seq: j.seq, covered: j.covered, at: new Date().toISOString() };
+      else if (j.type === 'op') row.opEvents += 1;
+      else if (j.type === 'presence') row.presenceEvents += 1;
+      else if (j.type === 'resend') row.resend += 1;
+    });
+    ws.on('close', () => {
+      row.closed = true;
+      row.closedAt = new Date().toISOString();
+    });
+  });
+};
+watchSockets(A, 'A');
+watchSockets(B, 'B');
 let deckId = null;
 let linkB = null;
 let heading = null;
@@ -249,6 +335,16 @@ try {
     if ((await ctl(A, 'dialog.namePrompt.close').count()) > 0)
       await ctl(A, 'dialog.namePrompt.close').click();
     else await ctl(A, 'dialog.namePrompt.skip').click();
+  }
+  /* the do tier (the Cloudflare phase): the /new page's payload carries no room ticket, since the
+     deck did not exist when it was served, and the ticket route refuses a first mint without a
+     client id (build/r2.md R2-C3), so A reloads once now that the deck exists and the editor
+     loader mints the ticket into the page; B's join below is a full navigation and gets its own */
+  if (LABEL === 'do') {
+    await A.reload();
+    await waitEditor(A);
+    await A.mouse.click(20, 500);
+    say('A.reloadedForTicket', true);
   }
   const share = await invoke(A, 'share.get', { id: deckId });
   const opened = await invoke(A, 'share.setGeneralAccess', {
@@ -541,8 +637,15 @@ try {
       await ctl(A, 'menubar.view').click();
       await A.locator('#ts-menu-view').waitFor({ timeout: 4000 });
       await ctl(A, 'menu.view.livePointers').hover();
-      await ctl(A, 'menu.view.livePointers.collaborators').waitFor({ timeout: 4000 });
-      await ctl(A, 'menu.view.livePointers.collaborators').click();
+      /* the second row's id is `others` since the integrator's seam of 2026-10-01 (REALTIME.md
+         5.2; build/r3.md request 2); `collaborators` is the id of a build from before it */
+      await sleep(300);
+      const othersId =
+        (await ctl(A, 'menu.view.livePointers.others').count()) > 0
+          ? 'menu.view.livePointers.others'
+          : 'menu.view.livePointers.collaborators';
+      await ctl(A, othersId).waitFor({ timeout: 4000 });
+      await ctl(A, othersId).click();
       await sleep(250);
       await B.mouse.move(sheetB.x + sheetB.width * 0.4, sheetB.y + sheetB.height * 0.4, {
         steps: 3,
@@ -755,6 +858,13 @@ try {
     } catch (error) {
       say('teardown.error', String(error).slice(0, 300));
     }
+  }
+  // the wire each page used (the do tier's sockets; empty lists on the SSE tiers) and the client's own word
+  say('transport.sockets', sockets);
+  try {
+    say('transport.status.A', (await state(A)).sync ?? null);
+  } catch {
+    say('transport.status.A', null);
   }
   facts.endedAt = new Date().toISOString();
   writeFileSync(join(OUT, 'facts.json'), JSON.stringify(facts, null, 2));

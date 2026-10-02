@@ -1,0 +1,176 @@
+{
+  "startedAt": "2026-10-01T23:34:49.999Z",
+  "baseA": "http://127.0.0.1:4472",
+  "baseB": "http://127.0.0.1:4482",
+  "label": "do",
+  "deck.id": "untitled-20261001-47iz",
+  "runs.chosen": {
+    "heading": "heading/text",
+    "subtitle": "lead/text",
+    "subtitleBlock": "lead"
+  },
+  "A.reloadedForTicket": true,
+  "share.link": "http://127.0.0.1:4482/s/<token>",
+  "A.instance": null,
+  "B.instance": null,
+  "join.ms": 997,
+  "join.chipInA": {
+    "present": true,
+    "ms": 999,
+    "aId": "29a57145e26d872c77a0e4219b0ee47b",
+    "bId": "2e88914a8f3bc95025ceb23cc61c7168"
+  },
+  "pointer.on": {
+    "on": true
+  },
+  "pointer.readings": [
+    {
+      "want": {
+        "x": 400,
+        "y": 270
+      },
+      "drawn": {
+        "at": {
+          "x": 400,
+          "y": 270
+        },
+        "flag": "AArgon"
+      },
+      "ms": 199
+    },
+    {
+      "want": {
+        "x": 800,
+        "y": 450
+      },
+      "drawn": {
+        "at": {
+          "x": 800,
+          "y": 450
+        },
+        "flag": "AArgon"
+      },
+      "ms": 200
+    },
+    {
+      "want": {
+        "x": 1200,
+        "y": 630
+      },
+      "drawn": {
+        "at": {
+          "x": 1200,
+          "y": 630
+        },
+        "flag": "AArgon"
+      },
+      "ms": 180
+    }
+  ],
+  "shot.pointer.A": "04-pointer-a.png",
+  "pointer.hiddenInA": {
+    "driven": true,
+    "gone": true
+  },
+  "realtime.pointer.second-browser": {
+    "drawn": true,
+    "within300": true,
+    "flagNamesB": true,
+    "hidden": {
+      "driven": true,
+      "gone": true
+    },
+    "sheetA": [
+      284,
+      157,
+      1128,
+      635
+    ],
+    "pass": true
+  },
+  "teardown": {
+    "id": "untitled-20261001-47iz",
+    "editStatus": 404
+  },
+  "transport.sockets": {
+    "A": [
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-47iz?since=1&tab=<token>",
+        "openedAt": "2026-10-01T23:34:53.197Z",
+        "sent": 2,
+        "received": 11,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 1,
+        "leave": 0,
+        "ticket": 1,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 6,
+        "hello": {
+          "tier": "do",
+          "seq": 1,
+          "covered": 1,
+          "at": "2026-10-01T23:34:53.240Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "e43af93f",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 1,
+        "closed": false
+      }
+    ],
+    "B": [
+      {
+        "url": "ws://127.0.0.1:8792/rooms/untitled-20261001-47iz?since=1&tab=<token>",
+        "openedAt": "2026-10-01T23:34:54.248Z",
+        "sent": 5,
+        "received": 8,
+        "pings": 0,
+        "pongs": 0,
+        "ops": 0,
+        "presence": 5,
+        "leave": 0,
+        "ticket": 0,
+        "join": 0,
+        "acks": 0,
+        "opEvents": 0,
+        "presenceEvents": 5,
+        "hello": {
+          "tier": "do",
+          "seq": 1,
+          "covered": 1,
+          "at": "2026-10-01T23:34:54.290Z"
+        },
+        "room": {
+          "colo": "SJC",
+          "object": "e43af93f",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "resend": 0,
+        "reauth": 0,
+        "closed": false
+      }
+    ]
+  },
+  "transport.status.A": {
+    "seq": 1,
+    "revision": 1,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "sse",
+    "connected": true,
+    "offline": false,
+    "storeDegraded": false,
+    "streamDown": false
+  },
+  "endedAt": "2026-10-01T23:34:55.938Z"
+}

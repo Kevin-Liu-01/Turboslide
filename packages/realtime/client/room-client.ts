@@ -105,7 +105,25 @@ export type OpenOptions = {
    * transport knows the status and the wait, any error otherwise (`streamFailureOf` reads both).
    */
   onError: (error: unknown) => void;
+  /**
+   * The room asked every tab for its presence again (docs/CLOUDFLARE.md 3.3, 3.6.3: a woken
+   * Durable Object holds the roster's identity fields and slides in the socket attachments and
+   * asks the selection and the caret back with one `resend` frame). The client answers as it does
+   * after a hello: its state goes at once. A transport without the frame (the SSE one) never
+   * calls it.
+   */
+  onResend?: () => void;
+  /**
+   * The object named itself (docs/CLOUDFLARE.md 3.6.1; frames.ts `roomFrame`, sent once after
+   * the hello): the colo that answered the upgrade, the first characters of the object id and
+   * the checkpoint cadence it runs. The client carries it on `SyncStatus.room`, so `sync.status`
+   * names the one object two tabs on two instances share (2.3 `setup.do.two-instances`).
+   */
+  onRoom?: (room: RoomObjectFacts) => void;
 };
+
+/** What a `do` tier object says about itself after the hello (frames.ts `roomFrame`). */
+export type RoomObjectFacts = { colo: string; object: string; idleMs: number; maxMs: number };
 
 /**
  * How a stream ended, as the transport reports it: a refused open carries the HTTP status, the
@@ -175,11 +193,20 @@ export function splitSseBlocks(buffer: string): { blocks: string[]; rest: string
   return { blocks, rest: text.slice(from) };
 }
 
+/** The word `SyncStatus.transport` carries: the stream's kind, or none before the room is attached. */
+export type TransportKind = 'sse' | 'ws' | 'poll' | 'none';
+
 /** What the client needs of the wire: the stream, the ops POST and the presence POST. */
 export type RoomTransport = {
   open: (options: OpenOptions) => StreamHandle;
   postOps: (body: OpsPost) => Promise<OpsResponse>;
   postPresence: (body: PresencePost, options?: { leave?: boolean }) => Promise<void>;
+  /**
+   * The kind of wire this transport runs on now (docs/CLOUDFLARE.md 3.6.3: `ws` on the `do`
+   * tier's socket, `sse` on the stream route), for `SyncStatus.transport`; a transport that says
+   * nothing is read as `sse`, the word every transport before the round was.
+   */
+  kind?: () => Exclude<TransportKind, 'none'>;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -273,7 +300,10 @@ export type SyncStatus = {
   pending: number;
   retained: number;
   tier: RealtimeTier;
-  transport: 'sse' | 'poll' | 'none';
+  /** the wire's kind as the transport names it (`ws` on the `do` tier's socket, `sse` on the stream route) */
+  transport: TransportKind;
+  /** the object this tab's socket reached, on the `do` tier after its `room` frame; absent elsewhere */
+  room?: RoomObjectFacts;
   connected: boolean;
   /** the browser is offline (`navigator.onLine` false, the `offline` event), or the last POST failed while it could not say */
   offline: boolean;
@@ -789,6 +819,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    */
   let caughtUp = false;
   let tier: RealtimeTier = options.tier ?? 'memory';
+  /** the object the last `room` frame named (the `do` tier), for `SyncStatus.room` */
+  let roomObject: RoomObjectFacts | null = null;
   /**
    * The tier the last hello named (build/r1.md R1-R2a; docs/REALTIME.md 3.7, 3.8): a hello of
    * another tier means the stream position is a number of the other tier (a stream seq against a
@@ -843,7 +875,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     pending: pending.length,
     retained: retained.length,
     tier,
-    transport: 'sse',
+    transport: transport.kind?.() ?? 'sse',
+    ...(roomObject === null ? {} : { room: roomObject }),
     connected,
     offline,
     resending,
@@ -1999,6 +2032,18 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         reported = true;
         if (self !== null && stream !== self) return;
         reopenStream(streamFailureOf(error));
+      },
+      // a woken room asks for the presence again (docs/CLOUDFLARE.md 3.3): the hello's own path
+      onResend: () => {
+        if (stopped || self === null || stream !== self) return;
+        presenceDirty = true;
+        schedulePresence(0);
+      },
+      // the object named itself: sync.status carries it (docs/CLOUDFLARE.md 2.3)
+      onRoom: (facts) => {
+        if (stopped || self === null || stream !== self) return;
+        roomObject = facts;
+        emitStatus();
       },
     });
     self = handle;

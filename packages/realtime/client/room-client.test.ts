@@ -2738,3 +2738,68 @@ describe('a hello of another tier reads the position as foreign (build/r1.md R1-
     await room.stop();
   });
 });
+
+describe('the Cloudflare phase: the socket transport’s frames the client reads (docs/CLOUDFLARE.md 3.6.3; realtime/build/r2.md)', () => {
+  it('reports the transport’s kind and the object’s room frame in its status, and posts its presence at once on a resend', async () => {
+    const h = harness();
+    const a = h.client(kevin);
+    let resend: (() => void) | undefined;
+    let room:
+      | ((facts: { colo: string; object: string; idleMs: number; maxMs: number }) => void)
+      | undefined;
+    const presencePosts: PresencePost[] = [];
+    const socketLike: RoomTransport = {
+      ...a.transport,
+      kind: () => 'ws',
+      open(openOptions) {
+        resend = openOptions.onResend;
+        room = openOptions.onRoom;
+        return a.transport.open(openOptions);
+      },
+      async postPresence(body, presenceOptions) {
+        presencePosts.push(body);
+        await a.transport.postPresence(body, presenceOptions);
+      },
+    };
+    const client = createRoomClient({
+      deckId: 'gt-brand',
+      transport: socketLike,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    client.start();
+    await until(() => client.status().connected);
+    expect(client.status().transport).toBe('ws');
+    expect(client.status().room).toBeUndefined();
+    // the hello's own presence post, then nothing until the heartbeat
+    await until(() => presencePosts.length === 1);
+    const before = presencePosts.length;
+    // a woken object asks for the presence again: the state goes at once, not on the heartbeat
+    expect(resend).toBeDefined();
+    resend?.();
+    await until(() => presencePosts.length > before, 1000);
+    expect(presencePosts.length).toBe(before + 1);
+    // the object named itself once after the hello: sync.status carries it
+    room?.({ colo: 'IAD', object: 'abcdef01', idleMs: 2000, maxMs: 10_000 });
+    expect(client.status().room).toEqual({
+      colo: 'IAD',
+      object: 'abcdef01',
+      idleMs: 2000,
+      maxMs: 10_000,
+    });
+    // a transport that says nothing of its kind reads as the stream route, the word every one before the round was
+    const plain = createRoomClient({
+      deckId: 'gt-brand',
+      transport: h.client(maya).transport,
+      document: h.server.document(),
+      seq: h.server.seq(),
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    expect(plain.status().transport).toBe('sse');
+    await client.stop();
+    await plain.stop();
+  });
+});

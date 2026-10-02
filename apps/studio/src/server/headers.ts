@@ -13,6 +13,12 @@ import {
 } from '@turboslide/agent/http/dispatch';
 
 import { logSecurityEvent } from './log';
+import {
+  instanceFacts,
+  newRequestTiming,
+  serverTimingValue,
+  withRequestTiming,
+} from './server-timing';
 
 /**
  * The request and response header rules of the third Google Slides parity round (gslides-parity
@@ -349,18 +355,26 @@ export function withHeaders(response: Response, headers: Record<string, string>)
  * The global request middleware (SPEC-3 8.8): mints the request's CSP nonce into the request
  * context (`context.nonce`, the field the framework's `RequestOptions` names, so `getRouter()` can
  * hand it to `ssr.nonce` and the root document to its boot script), lets the handler answer, and
- * sets the headers of `securityHeadersFor` on the answer without overriding one a route set.
+ * sets the headers of `securityHeadersFor` on the answer without overriding one a route set. The
+ * handler runs under the request's timing collector, and the answer carries `server-timing` with
+ * the store reads it recorded, the instance's age and the time to the headers (server-timing.ts;
+ * docs/NEXT.md 3.2 H9).
  */
 export function securityHeadersMiddleware() {
   return createMiddleware({ type: 'request' }).server(async ({ request, next, pathname }) => {
     const nonce = mintNonce();
     const requestId = requestIdOf(request);
-    const result = await next({ context: { nonce, requestId } });
-    const headers = securityHeadersFor(pathname, {
-      nonce,
-      requestId,
-      secure: isSecureRequest(request),
-    });
+    const timing = newRequestTiming();
+    const facts = instanceFacts();
+    const result = await withRequestTiming(timing, () => next({ context: { nonce, requestId } }));
+    const headers = {
+      ...securityHeadersFor(pathname, {
+        nonce,
+        requestId,
+        secure: isSecureRequest(request),
+      }),
+      'server-timing': serverTimingValue(timing, facts),
+    };
     return { ...result, response: withHeaders(result.response, headers) };
   });
 }

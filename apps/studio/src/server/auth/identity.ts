@@ -75,6 +75,7 @@ import { flagOf, markSchemaCurrent, schemaIsCurrent, stampOf } from './schema.ts
 import { sessionSecret } from './secret.ts';
 import { redisSecondaryStorage } from './secondary-storage.ts';
 import type { RedisKvLike } from './secondary-storage.ts';
+import { noteTiming } from '../server-timing.ts';
 import { boundPrincipal, ensurePrincipal, parseCookies, readPrincipal } from './session.ts';
 import type { EnsuredPrincipal } from './session.ts';
 import {
@@ -640,17 +641,26 @@ export async function accountSession(
   if (options.fresh !== true && cache.ttlMs > 0) {
     const hit = cache.rows.get(key);
     if (hit !== undefined) {
-      if (now - hit.at < cache.ttlMs && hit.value.session.expiresAt.getTime() > now)
+      if (now - hit.at < cache.ttlMs && hit.value.session.expiresAt.getTime() > now) {
+        // the `facts` entry of the answer's server-timing (docs/NEXT.md 3.2 H9)
+        noteTiming({ name: 'facts', desc: 'hit' });
         return hit.value;
+      }
       cache.rows.delete(key);
       cache.byPrincipal.get(hit.value.account.principalId)?.delete(key);
     }
   }
   await runtime.ready;
   let value: AccountSession | null = null;
+  const readStarted = performance.now();
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
       value = await readAccountSession(runtime, request);
+      noteTiming({
+        name: 'facts',
+        dur: performance.now() - readStarted,
+        desc: cache.ttlMs > 0 ? 'miss' : 'off',
+      });
       break;
     } catch (error) {
       const proxy = isD1ProxyError(error);

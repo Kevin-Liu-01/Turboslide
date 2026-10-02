@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { labelFor } from '@turboslide/identity/labels';
 
+import { newRequestTiming, withRequestTiming } from '../server-timing.ts';
 import { fakeD1 } from './d1-fake.ts';
 import type { FakeD1 } from './d1-fake.ts';
 import {
@@ -248,6 +249,24 @@ describe('the session facts cache (CLOUDFLARE.md 4.1; cost.d1.reads)', () => {
     const none = await accountSession(runtime, request('/edit/q4'));
     expect(none).toBeNull();
     expect(fake.statements).toEqual([]);
+  });
+
+  test('each read of the session facts names a miss or a hit in the request’s server-timing (docs/NEXT.md 3.2 H9)', async () => {
+    const runtime = runtimeOn(fake);
+    await runtime.ready;
+    const { cookie } = await signIn(runtime, 'ana@example.test');
+    const first = newRequestTiming();
+    await withRequestTiming(first, () => accountSession(runtime, request('/edit/q4', { cookie })));
+    const second = newRequestTiming();
+    await withRequestTiming(second, () => accountSession(runtime, request('/edit/q4', { cookie })));
+    const facts = (timing: ReturnType<typeof newRequestTiming>) =>
+      timing.entries.filter((entry) => entry.name === 'facts');
+    expect(facts(first).map((entry) => entry.desc)).toEqual(['miss']);
+    expect(facts(first)[0]?.dur).toBeGreaterThanOrEqual(0);
+    expect(facts(second).map((entry) => entry.desc)).toEqual(['hit']);
+    const anonymous = newRequestTiming();
+    await withRequestTiming(anonymous, () => accountSession(runtime, request('/edit/q4')));
+    expect(facts(anonymous), 'no session cookie, no read of the cache').toEqual([]);
   });
 
   test('the cache is off on the sqlite engine unless asked, and the anonymous link is written once per cached session', async () => {

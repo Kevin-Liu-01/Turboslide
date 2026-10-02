@@ -122,3 +122,29 @@ timing below carries the one minute load average it was read at.
   read before (2.6 to 13.7 s to the first byte) is gone from both runs: every other sample's first
   byte is 87 to 156 ms. The raw runs are under `.turboslide/round1/hb/perf-decks-run1.json` and
   `-run2.json` (untracked).
+
+## H9: server-timing on documents and server functions
+
+- `apps/studio/src/server/server-timing.ts` (new): one collector per request on an
+  AsyncLocalStorage kept on globalThis, `timed(name, work)` for a store read (a read that throws
+  is recorded with `desc="failed"`), `noteTiming`, a cap of 40 entries, and the header's value:
+  the reads in the order they ended, then `cold;dur=<instance age ms>;desc="request <n>"` (n is
+  the request's ordinal on the instance, 1 is the cold start), then `total;dur=<ms to the headers>`.
+- `apps/studio/src/server/headers.ts`: the global headers middleware runs the handler under the
+  collector and sets `server-timing` on every answer that has none.
+- `apps/studio/src/server/write.ts` (`readEditorDeckFn`): each read of the chain is one entry:
+  `deck-head`, `identity`, `access`, `grants` (signed in), `room`, `live`, `document`,
+  `versions`, `leases`, `records` (a resync), `access-record`, `resolve`, `templates`,
+  `comments`, `views`.
+- `apps/studio/src/server/auth/identity.ts` (outside NEXT.md's list, no lane owns it):
+  `accountSession` notes `facts;desc="hit"` on a cache hit and `facts;dur=..;desc="miss"` on a read
+  (`desc="off"` where the cache is off, the sqlite engine).
+- Tests: `server-timing.test.ts` (7), the `facts` test in `auth/identity-d1.test.ts` (miss, then
+  hit, none without a session cookie); the studio suite 761 passed.
+- Check on 4502 (a dev server, tmp store):
+  - `curl -sI /edit/gt-brand`: `deck-head;dur=170.6, identity;dur=1.5, access;dur=0.5, room;dur=784.5, live;dur=0.2, document;dur=129.9, versions;dur=2.4, leases;dur=0.1, access-record;dur=0.1, resolve;dur=0.6, templates;dur=26.3, comments;dur=0.3, views;dur=0.1, cold;dur=406411;desc="request 3", total;dur=2158`
+    (the first editor load of the server), then `total;dur=218` on the second.
+  - `curl -sI /decks`: `cold;dur=408676;desc="request 4", total;dur=54.3` (the listing streams
+    after the headers, so its reads are not in them).
+  - `GET /_serverFn/<readEditorDeckFn>`: 200 with the same fifteen entries; `POST /_serverFn/<heldOpIdsFn>`: 200 with `cold` and `total`.
+  - Load 70 to 79 during these reads.

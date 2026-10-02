@@ -433,7 +433,11 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    if (!(await hasStoredDeck(data.deckId))) return JSON.stringify(null);
+    /* each store read of the chain is one `server-timing` entry of the answer (docs/NEXT.md 3.2
+       H9; audit-performance item 2 names the chain): loaded here with the room, since the module
+       imports node:async_hooks and the client stub of this file must not */
+    const { timed } = await import('./server-timing');
+    if (!(await timed('deck-head', () => hasStoredDeck(data.deckId)))) return JSON.stringify(null);
     // the room and the identity (round three): loaded here, not at the top, so the client stub of
     // this module never pulls the channel's Node graph (agent-actions.ts explains the rule)
     const room = await import('./room');
@@ -441,18 +445,24 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     const auth = await import('./auth/identity');
     /* the caller's index read past this instance's cache (docs/PEOPLE.md 6.4): a reload's payload
        carries the name and the choice written on another instance at once */
-    const identity = await room.requestIdentity(getRequest(), { freshIndex: true });
+    const identity = await timed('identity', () =>
+      room.requestIdentity(getRequest(), { freshIndex: true }),
+    );
     sendMintedCookie(identity.setCookie);
-    const decision = await room.decideFor(identity, data.deckId, 'read', 'readEditorDeck');
+    const decision = await timed('access', () =>
+      room.decideFor(identity, data.deckId, 'read', 'readEditorDeck'),
+    );
     if (!decision.ok) return JSON.stringify(null);
     /* an invitation by email binds to the account whose verified address it names at that
        account's first read of the deck (docs/PEOPLE.md 3.10; SPEC-3 6.5; access.ts
        bindEmailGrants says why here and not at sign in): the decision above admitted the invitee
        through the address, and the record the payload carries below names them from now on */
-    if (identity.kind === 'signedIn' && identity.ctx.principal !== null)
-      await access.bindEmailGrants(data.deckId, identity.ctx.principal).catch(() => null);
+    if (identity.kind === 'signedIn' && identity.ctx.principal !== null) {
+      const principal = identity.ctx.principal;
+      await timed('grants', () => access.bindEmailGrants(data.deckId, principal)).catch(() => null);
+    }
     const runtime = auth.identityRuntime();
-    const deckRoom = await room.roomFor(data.deckId);
+    const deckRoom = await timed('room', () => room.roomFor(data.deckId));
     // the head on the blob tier (the focus round, cycle 2): a page load and a tab's reload read
     // the store's current document, not this instance's mirror as it stood within the sync
     // window (750 ms), and a caller that names the revision it learned from a write's answer
@@ -464,11 +474,11 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     let versions: Awaited<ReturnType<typeof deckRoom.store.listVersions>>;
     let leases: Awaited<ReturnType<typeof deckRoom.store.leases>>;
     try {
-      live = await room.liveAtLeast(deckRoom, data.atLeast);
+      live = await timed('live', () => room.liveAtLeast(deckRoom, data.atLeast));
       [read, versions, leases] = await Promise.all([
-        deckRoom.store.read(),
-        deckRoom.store.listVersions(),
-        deckRoom.store.leases(),
+        timed('document', () => deckRoom.store.read()),
+        timed('versions', () => deckRoom.store.listVersions()),
+        timed('leases', () => deckRoom.store.leases()),
       ]);
     } catch (error) {
       /* a deck deleted forever a moment ago (docs/POLISH.md item 98; audit-tables item 20): the
@@ -483,12 +493,12 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     const origins =
       data.since === undefined
         ? undefined
-        : originsSince(await deckRoom.store.records(), data.since);
-    const record = await access.effectiveAccess(data.deckId);
+        : originsSince(await timed('records', () => deckRoom.store.records()), data.since);
+    const record = await timed('access-record', () => access.effectiveAccess(data.deckId));
     const standing = access.standingOf(decision, record);
     // the caller as the room resolves it (docs/PEOPLE.md 3.6): the account behind a session or
     // an aliased cookie, else the record's name or label
-    const resolved = await room.resolveRequestIdentity(identity);
+    const resolved = await timed('resolve', () => room.resolveRequestIdentity(identity));
     const selection = room.realtimeSelection();
     // the do tier (docs/CLOUDFLARE.md 3.3, 3.6.1): the socket URL and the ticket of the reader's
     // decision ride the payload; a mint that fails leaves the room without one and the transport
@@ -542,7 +552,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       assistMode: (await import('./assist')).assistMode(),
       /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
          the store's template index is pulled first so a default set on another instance holds */
-      defaultKit: await defaultKitOfCollection(),
+      defaultKit: await timed('templates', () => defaultKitOfCollection()),
       room: { seq: live.seq, tier: selection.tier, notice: selection.notice, ...roomExtra },
       identity: ownIdentityOf(resolved),
       ...(standing.role !== null ? { role: standing.role } : {}),
@@ -565,10 +575,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
        record's people; the address for the owner and a grant holder (SPEC-3 4.8), a role word for
        a verified person read by a link visitor without the owner's switch (0.12; 4.5) */
     const commentAuthors = standing.capabilities.includes('readComments')
-      ? await (
-          await import('./comments')
-        )
-          .liveThreads(deckRoom)
+      ? await timed('comments', async () => (await import('./comments')).liveThreads(deckRoom))
           .then(({ threads }) =>
             [...threads.values()].flatMap((thread) =>
               [thread.comment, ...thread.replies].map((comment) => comment.author.principalId),
@@ -577,13 +584,15 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
           .catch(() => [] as string[])
       : [];
     const byLink = standing.via === 'link' || standing.via === 'open';
-    const identities = await room.identityViewsFor(
-      peopleOf({ versions: shaped.versions, commentAuthors, access: record }),
-      {
-        showEmail: standing.via === 'owner' || standing.via === 'grant',
-        roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
-        access: record,
-      },
+    const identities = await timed('views', () =>
+      room.identityViewsFor(
+        peopleOf({ versions: shaped.versions, commentAuthors, access: record }),
+        {
+          showEmail: standing.via === 'owner' || standing.via === 'grant',
+          roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
+          access: record,
+        },
+      ),
     );
     // the trim after the shaping: a role without history carries an empty log and no count
     return JSON.stringify({

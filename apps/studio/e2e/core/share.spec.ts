@@ -36,6 +36,7 @@ import {
   waitEditor,
 } from './lib';
 import { shareRound1 } from './share-round1';
+import { shareChromeRows } from './b3b-dialogs';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
 // `collab.*`, `comments.reaches-second-browser` and `versions.restore` with the driver
@@ -2055,7 +2056,10 @@ test(title('share.name-prompt.empty-field'), async ({ browser }) => {
   const freshScratch = new Scratch();
   try {
     await newDeck(fp, freshScratch, 'Name prompt empty');
-    await ctl(fp, 'share.open').click();
+    /* Share asks no name since Round 1 (docs/NEXT.md 4.1.3 item 17): the title row plate is the
+       one prompt, opened by the deck's first write in its editor (SPEC-3 0.18) */
+    await fp.keyboard.press('Escape');
+    await fp.keyboard.press('Control+m');
     const prompt = ctl(fp, 'dialog.namePrompt');
     const shown = await prompt
       .waitFor({ timeout: 4000 })
@@ -2075,7 +2079,7 @@ test(title('share.name-prompt.empty-field'), async ({ browser }) => {
       type: 'prompt',
       description: `value "${value}", placeholder "${placeholder}"`,
     });
-    await ctl(fp, 'dialog.namePrompt.skip')
+    await ctl(fp, 'dialog.namePrompt.close')
       .click({ timeout: 3000 })
       .catch(() => undefined);
     expect(value, 'the name field is empty').toBe('');
@@ -3196,7 +3200,11 @@ test(title('accounts.no-dead-method'), async () => {
 /* lane B2 of Round 1 (docs/NEXT.md 4.1.3 item 11): its row lives in share-round1.ts */
 const ACCESS_ROWS = shareRound1();
 
+/* lane B3b of Round 1 (docs/NEXT.md 4.1.3 item 17): its row lives in b3b-dialogs.ts */
+const B3B_ROWS = shareChromeRows();
+
 coverage(import.meta.filename, [
+  ...B3B_ROWS,
   ...ACCESS_ROWS,
   'share.dialog.open',
   'share.copy-view-link',

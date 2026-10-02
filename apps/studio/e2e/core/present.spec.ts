@@ -29,6 +29,7 @@ import {
   typeInto,
   typeNote,
 } from './lib';
+import { presentChromeRows } from './b3b-dialogs';
 
 // Present and comments, the spec rows (docs/FOCUS.md 2.7, 6.4 `present.*`, `comments.*` and
 // `text.link.present-click` with the driver core/present.spec.ts): the show from the title row
@@ -1254,7 +1255,11 @@ test(title('present.link.first-paint-show'), async ({ browser }) => {
   }
 });
 
+/* lane B3b of Round 1 (docs/NEXT.md 4.1.3 item 17): its row lives in b3b-dialogs.ts */
+const B3B_ROWS = presentChromeRows();
+
 coverage(import.meta.filename, [
+  ...B3B_ROWS,
   'present.slideshow.button',
   'present.slideshow.cmd-enter',
   'present.keys.arrow-right',

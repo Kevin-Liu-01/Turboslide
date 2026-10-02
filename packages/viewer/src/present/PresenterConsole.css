@@ -370,3 +370,24 @@
     display: none;
   }
 }
+
+/* A phone (docs/NEXT.md 4.1.3 item 17; audit-brand-surfaces rank 19): the head is two rows, the
+   timer group on the first and the connection status with the clock on the second, so "No
+   slideshow window is open" never draws over Pause and Reset; the head row grows to hold both */
+@media (max-width: 600px) {
+  .ts-presenter {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .ts-presenter-head {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+    padding: 8px 16px;
+  }
+
+  .ts-presenter-facts {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+}

@@ -26,7 +26,6 @@ import {
   rowAddress,
   shareLinks,
   accessSentence,
-  SHARE_NAME_ASKED_KEY,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
@@ -1095,9 +1094,9 @@ describe('the two stages of the Share dialog (product round)', () => {
     vi.unstubAllGlobals();
   });
 
-  /* the first Share's name ask (docs/PRODUCT.md section 2 rank 4; the people round's fix round,
-     VERIFICATION.md People round pass 1 finding 4): a band at the head of the body carrying the
-     prompt's control ids, so the dialog itself opens at once for a person by link too */
+  /* the display name is the title row plate's question (docs/NEXT.md 4.1.3 item 17; the row
+     share.dialog.ruled-rows): the first Share on a browser with no name opens the dialog with no
+     prompt, where the people round's band asked at the head of its body */
   const anonymous = (
     setName: (name: string) => Promise<unknown>,
     extra: Partial<NonNullable<EditorShellInput['account']>> = {},
@@ -1122,8 +1121,7 @@ describe('the two stages of the Share dialog (product round)', () => {
   const notFound = () =>
     vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 })));
 
-  it('asks a browser with no display name for one on the first Share, in a band inside the dialog, once, and never a signed in account', async () => {
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
+  it('opens without a name prompt for a browser with no display name, on the record and while it loads', async () => {
     const setName = vi.fn(() => Promise.resolve(undefined));
     vi.stubGlobal('fetch', notFound());
     const { state } = host(anonymous(setName));
@@ -1133,196 +1131,23 @@ describe('the two stages of the Share dialog (product round)', () => {
       </Host>,
     );
     await flush();
-    /* the dialog opens at once, the ask at the head of its body; the ask is no dialog of its own */
-    const dialog = document.querySelector('[data-control="dialog.share"]');
-    expect(dialog).not.toBeNull();
-    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(document.querySelector('.ts-dialog-title')?.textContent).toBe(`Share ${doc.deck.title}`);
-    const ask = dialog!.querySelector('[data-control="dialog.namePrompt"]');
-    expect(ask).not.toBeNull();
-    expect(ask!.textContent).toContain('Your name, shown to collaborators');
-    expect(dialog!.firstElementChild?.nextElementSibling?.contains(ask)).toBe(true);
-    expect(
-      dialog!.querySelector<HTMLInputElement>('[data-control="dialog.namePrompt.name"]')?.value,
-    ).toBe('Ink 100');
-    /* the field's placeholder is the prompt's (docs/POLISH.md 2.6 item 63) */
-    expect(
-      dialog!
-        .querySelector<HTMLInputElement>('[data-control="dialog.namePrompt.name"]')
-        ?.getAttribute('placeholder'),
-    ).toBe('Your name');
-    /* the record's rows stand under the band from the first paint */
-    expect(dialog!.querySelector('[data-control="dialog.share.general"]')).not.toBeNull();
-    expect(dialog!.querySelector('[data-control="dialog.share.owner"]')).not.toBeNull();
-    /* the field takes the focus, so the person can type at once */
-    expect(document.activeElement?.getAttribute('data-control')).toBe('dialog.namePrompt.name');
-    fireEvent.click(document.querySelector('[data-control="dialog.namePrompt.skip"]')!);
-    await flush();
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
     expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
     expect(setName).not.toHaveBeenCalled();
-    expect(state.closeDialog).not.toHaveBeenCalled();
-    expect(localStorage.getItem(SHARE_NAME_ASKED_KEY)).toBe('1');
-    /* the focus the band held goes to Done, so Enter and Escape keep working */
-    expect(document.activeElement?.getAttribute('data-control')).toBe('dialog.share.done');
     first.unmount();
-    /* the second open asks nothing */
-    const second = render(
-      <Host state={state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
-    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
-    second.unmount();
-    /* a signed in account has its name: no band, even on a browser never asked */
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    const signedIn = host(
-      anonymous(setName, {
-        principal: {
-          principalId: 'acct_22222222-2222-4222-8222-222222222222',
-          label: 'Ada Lovelace',
-          name: 'Ada Lovelace',
-          trust: 'verified',
-          kind: 'account',
-        },
-        signedIn: true,
-      }),
-    );
-    render(
-      <Host state={signedIn.state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
-    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.unstubAllGlobals();
-  });
-
-  it('keeps the name typed into the band on Enter or Continue and never runs Done', async () => {
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.stubGlobal('fetch', notFound());
-    const setName = vi.fn(() => Promise.resolve(undefined));
-    const { state } = host(anonymous(setName));
-    const first = render(
-      <Host state={state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    const field = document.querySelector<HTMLInputElement>(
-      '[data-control="dialog.namePrompt.name"]',
-    )!;
-    fireEvent.change(field, { target: { value: '  Copper Lane ' } });
-    fireEvent.keyDown(field, { key: 'Enter' });
-    await flush();
-    expect(setName).toHaveBeenCalledWith('Copper Lane');
-    expect(state.closeDialog).not.toHaveBeenCalled();
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
-    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
-    expect(localStorage.getItem(SHARE_NAME_ASKED_KEY)).toBe('1');
-    first.unmount();
-    /* Continue, the button */
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    setName.mockClear();
-    render(
-      <Host state={state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    const again = document.querySelector<HTMLInputElement>(
-      '[data-control="dialog.namePrompt.name"]',
-    )!;
-    fireEvent.change(again, { target: { value: 'Iron Gate' } });
-    fireEvent.click(document.querySelector('[data-control="dialog.namePrompt.continue"]')!);
-    await flush();
-    expect(setName).toHaveBeenCalledWith('Iron Gate');
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
-    expect(state.closeDialog).not.toHaveBeenCalled();
-    /* an empty field keeps Continue disabled and Enter does nothing */
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.unstubAllGlobals();
-  });
-
-  it("shows the server's refusal sentence in the band and keeps the band", async () => {
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.stubGlobal('fetch', notFound());
-    const setName = vi.fn(() => Promise.reject(new Error('That name is reserved')));
-    const { state } = host(anonymous(setName));
-    render(
-      <Host state={state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    const field = document.querySelector<HTMLInputElement>(
-      '[data-control="dialog.namePrompt.name"]',
-    )!;
-    fireEvent.change(field, { target: { value: 'studio' } });
-    fireEvent.click(document.querySelector('[data-control="dialog.namePrompt.continue"]')!);
-    await flush();
-    expect(document.querySelector('[data-control="dialog.namePrompt.error"]')?.textContent).toBe(
-      'That name is reserved',
-    );
-    expect(document.querySelector('[data-control="dialog.namePrompt"]')).not.toBeNull();
-    expect(localStorage.getItem(SHARE_NAME_ASKED_KEY)).toBeNull();
-    /* an empty field disables Continue and Enter keeps nothing */
-    fireEvent.change(field, { target: { value: '   ' } });
-    expect(
-      document.querySelector<HTMLButtonElement>('[data-control="dialog.namePrompt.continue"]')
-        ?.disabled,
-    ).toBe(true);
-    fireEvent.keyDown(field, { key: 'Enter' });
-    await flush();
-    expect(setName).toHaveBeenCalledTimes(1);
-    expect(state.closeDialog).not.toHaveBeenCalled();
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.unstubAllGlobals();
-  });
-
-  it("counts a close with the band still up as asked, the way the prompt's close did", async () => {
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.stubGlobal('fetch', notFound());
-    const setName = vi.fn(() => Promise.resolve(undefined));
-    const { state } = host(anonymous(setName));
-    render(
-      <Host state={state}>
-        <ShareDialog />
-      </Host>,
-    );
-    await flush();
-    fireEvent.keyDown(document.querySelector('[data-control="dialog.share"]')!, { key: 'Escape' });
-    expect(state.closeDialog).toHaveBeenCalledTimes(1);
-    expect(setName).not.toHaveBeenCalled();
-    expect(localStorage.getItem(SHARE_NAME_ASKED_KEY)).toBe('1');
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    vi.unstubAllGlobals();
-  });
-
-  it('draws the band over the loading state while the record is on its way', async () => {
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
-    /* the route never answers in this test: the loading state stands */
     vi.stubGlobal(
       'fetch',
       vi.fn(() => new Promise<Response>(() => undefined)),
     );
-    const setName = vi.fn(() => Promise.resolve(undefined));
-    const { state } = host({ ...anonymous(setName), access: undefined, role: undefined });
+    const loading = host({ ...anonymous(setName), access: undefined, role: undefined });
     render(
-      <Host state={state}>
+      <Host state={loading.state}>
         <ShareDialog />
       </Host>,
     );
     await flush();
-    const dialog = document.querySelector('[data-control="dialog.share"]');
-    expect(dialog).not.toBeNull();
-    expect(dialog!.querySelector('[data-control="dialog.share.loading"]')).not.toBeNull();
-    expect(dialog!.querySelector('[data-control="dialog.namePrompt"]')).not.toBeNull();
-    localStorage.removeItem(SHARE_NAME_ASKED_KEY);
+    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
+    expect(document.querySelector('[data-control="dialog.namePrompt"]')).toBeNull();
     vi.unstubAllGlobals();
   });
 

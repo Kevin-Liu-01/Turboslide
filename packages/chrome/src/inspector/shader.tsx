@@ -95,30 +95,34 @@ export type ShaderSectionProps = {
   onChange?: (anchor: HTMLElement) => void;
 };
 
-/** The words of the section (docs/FEATURES.md 5.3; the group names are Glyphfield's). */
+/**
+ * The words of the section (docs/FEATURES.md 5.3; the group names are Glyphfield's). The seller's
+ * noun is "Animated pattern" (docs/NEXT.md question 10's default; round1/build/b3a.md request 4):
+ * the section title and the tooltips name it, never "shader".
+ */
 export const SHADER_WORDS = {
-  section: 'Shader',
+  section: 'Animated pattern',
   change: 'Change',
-  changeDoc: 'Opens the gallery; the shader takes your brand kit’s colors on the slide',
+  changeDoc: 'Opens the gallery; the pattern takes your brand kit’s colors on the slide',
   preset: 'Preset',
-  presetDoc: 'The shader’s recorded looks; a pick keeps its geometry and drops the slider changes',
+  presetDoc: 'The pattern’s recorded looks; a pick keeps its geometry and drops the slider changes',
   colors: 'Colors',
-  colorsDoc: 'The ground the shader takes from your brand kit; the figures follow it',
+  colorsDoc: 'The ground the pattern takes from your brand kit; the figures follow it',
   custom: 'Custom',
-  customDoc: 'Six hex digits for the ground; Enter applies and the shader leaves the kit',
+  customDoc: 'Six hex digits for the ground; Enter applies and the pattern leaves the kit',
   form: 'Form',
   light: 'Light and texture',
   orientation: 'Orientation',
   motion: 'Motion',
   dither: 'Dither',
   advanced: 'Advanced',
-  advancedDoc: 'Every value of the shader by its own name, for a fine adjustment',
+  advancedDoc: 'Every value of the pattern by its own name, for a fine adjustment',
   anchor: 'Frame time',
   anchorDoc: 'The moment of the loop the still freezes, in milliseconds',
   reset: 'Reset',
   stillFresh: 'Still: up to date',
   stillPending: 'Still: updating after the last change',
-  notUsed: 'Not used by this shader',
+  notUsed: 'Not used by this pattern',
   twoTone: 'Two-tone',
   twoToneDoc: 'Screens the still into a light and a dark twin through the deck’s pattern',
   plate: 'Plate',

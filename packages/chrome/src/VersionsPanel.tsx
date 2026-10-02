@@ -79,10 +79,12 @@ export type VersionsPanelProps = {
 export function formatWhen(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
+  /* the hour without a leading zero, "Oct 1, 6:45 PM" (docs/NEXT.md 4.1.3 item 17;
+     audit-brand-surfaces rank 22 read "06:45 PM") */
   return date.toLocaleString([], {
     month: 'short',
     day: 'numeric',
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
   });
 }
@@ -90,7 +92,7 @@ export function formatWhen(iso: string): string {
 function formatTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
 /** A window's time: one time when its start and end read the same minute, else "12:37 PM to 12:38 PM" (item 91). */

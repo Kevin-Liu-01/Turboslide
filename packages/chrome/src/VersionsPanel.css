@@ -225,6 +225,13 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 36px;
+  /* the row owns its rule across the panel's width (DESIGN.md 59; docs/NEXT.md 4.1.3 item 17;
+     audit-brand-surfaces rank 22: the label drew it and it stopped at Name this version) */
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-versions-tools > .ts-versions-named {
+  border-bottom: 0;
 }
 
 /* the row's columns: the 16 px mark, the body, the More button; Restore leaves the grid and

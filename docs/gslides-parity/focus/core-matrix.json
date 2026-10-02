@@ -8861,7 +8861,7 @@
     {
       "id": "share.name-prompt.empty-field",
       "feature": "share",
-      "interaction": "Share on a fresh browser: the name field is empty with the placeholder \"Your name\"",
+      "interaction": "A fresh browser's name prompt, the title row plate on its deck's first write in the editor (Share asks no name since Round 1): the name field is empty with the placeholder \"Your name\"",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 2,
@@ -8908,6 +8908,36 @@
       "severity": 2,
       "evidence": "audit-chrome item 18",
       "note": "Polish round; docs/POLISH.md 2.6 item 68; B1"
+    },
+    {
+      "id": "share.dialog.ruled-rows",
+      "feature": "share",
+      "interaction": "The Share dialog draws its rows with row lines and no framed boxes, and opens without a name prompt",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 46",
+      "note": "docs/NEXT.md 4.1.3 item 17, push B3b#13: the people list, the links, the requests, the review band and More draw row lines (dialogs/share.css) and the first Share's name ask left the dialog (dialogs/Share.tsx), so the title row's plate is the one name prompt; the test is in apps/studio/e2e/core/b3b-dialogs.ts and reads the first stage and the stage behind More"
+    },
+    {
+      "id": "versions.panel.seam-and-time",
+      "feature": "versions",
+      "interaction": "The tools row's rule runs the panel's width; times read \"6:45 PM\"",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 47",
+      "note": "docs/NEXT.md 4.1.3 item 17, push B3b#13: .ts-versions-tools draws the rule (VersionsPanel.css) and the times format the hour as numeric (VersionsPanel.tsx, no lane's file)"
+    },
+    {
+      "id": "present.presenter.phone-head",
+      "feature": "present",
+      "interaction": "At 390 the presenter head's status line does not overlap Pause or Reset",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 44",
+      "note": "docs/NEXT.md 4.1.3 item 17, push B3b#13: under 600 px the head is two rows, the timer group over the status and the clock (PresenterConsole.css); the test is in apps/studio/e2e/core/b3b-dialogs.ts"
     },
     {
       "id": "chrome.title-row.phone",

@@ -218,7 +218,7 @@ describe('the Shader section', () => {
     expect(screen.getByText(SHADER_WORDS.advanced)).toBeTruthy();
   });
 
-  it('keeps the sentence plus "not used by this shader" as the tooltip of a control the shader does not use', () => {
+  it('keeps the sentence plus "not used by this pattern" as the tooltip of a control the pattern does not use', () => {
     // liquid metal maps no uniform to Strength (build/integrator.md finding 3): the range is
     // aria-disabled and out of the tab order, never `disabled`, so a hover still shows the plate
     // (the fix round of ship two, verification F.5 item 3)
@@ -245,7 +245,7 @@ describe('the Shader section', () => {
       vi.advanceTimersByTime(400);
       const plate = document.querySelector('.pt-tip');
       expect(plate?.textContent).toContain('how strong the effect is');
-      expect(plate?.textContent?.toLowerCase()).toContain('not used by this shader');
+      expect(plate?.textContent?.toLowerCase()).toContain('not used by this pattern');
       // the gesture is refused: a change writes nothing and previews nothing
       fireEvent.change(strength, { target: { value: '1.8' } });
       fireEvent.pointerUp(strength);

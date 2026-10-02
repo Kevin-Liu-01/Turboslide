@@ -78,7 +78,7 @@ describe('the primitives in the Insert group', () => {
       'Text box',
       'Icon',
       'Image',
-      'Shader',
+      'Animated pattern',
     ]);
     expect(insertLabel('shot')).toBe('Image');
   });
@@ -101,7 +101,7 @@ describe('the primitives in the Insert group', () => {
       'Arrow shape',
       'Text box',
       'Image',
-      'Shader',
+      'Animated pattern',
     ]);
     for (const id of [
       'insert:block:shape:rectangle',

@@ -474,6 +474,7 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's Round 1 push B3b#10 (docs/NEXT.md 4.1.5): the selection and the scroll rows */
     /* the next program's Round 1 push B3b#11 (docs/NEXT.md 4.1.5): the stage's appearance row */
     /* the next program's Round 1 push B3b#12 (docs/NEXT.md 4.1.5): the one mark and the no sparkle rows */
+    /* the next program's Round 1 push B3b#13 (docs/NEXT.md 4.1.5): the Share, Version history and presenter rows */
     expect(CORE_MATRIX.length).toBe(
       565 +
         133 +
@@ -499,7 +500,8 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
         3 +
         2 +
         1 +
-        2,
+        2 +
+        3,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',

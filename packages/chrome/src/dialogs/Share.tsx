@@ -4,27 +4,24 @@ import {
   rememberLinkUrl,
   rememberedGeneralUrl,
 } from './share-links';
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { labelFor } from '@turboslide/identity/labels';
 
 import { Dialog, DialogCheck } from '../Dialog';
-import { SHARE_NAME_PROMPT_TITLE } from './NamePrompt';
 import { useEditorShell } from '../editor-shell-context';
 import type {
   AccessGrantView,
   AccessLinkView,
   AccessRequestView,
   EditorAccess,
-  EditorAccount,
   EditorCapability,
   EditorRole,
   IdentityView,
 } from '../editor-shell';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
-import { ACCOUNT, DIALOGS, SNACKBARS } from '../menus/strings';
+import { DIALOGS, SNACKBARS } from '../menus/strings';
 import {
   IdentityChip,
   TrustMark,
@@ -230,27 +227,6 @@ export function shareDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-/** The browser's memory that the first Share already asked for a name (rank 4). */
-export const SHARE_NAME_ASKED_KEY = 'ts-share-name-asked';
-
-function nameAskedBefore(): boolean {
-  try {
-    return (
-      typeof localStorage !== 'undefined' && localStorage.getItem(SHARE_NAME_ASKED_KEY) === '1'
-    );
-  } catch {
-    return true;
-  }
-}
-
-function rememberNameAsked(): void {
-  try {
-    localStorage.setItem(SHARE_NAME_ASKED_KEY, '1');
-  } catch {
-    // private mode: the prompt returns on the next open
-  }
 }
 
 /** What `GET /api/access/<deckId>` answers (routes/api/access.$.ts): the record shaped for the caller, the standing, the mode. */
@@ -496,136 +472,6 @@ export async function loadAccess(
   }
 }
 
-/**
- * The display name ask of the first Share (docs/PRODUCT.md section 2 rank 4): a band at the head
- * of the dialog's body with the prompt's words, one field prefilled with the label, Continue,
- * Skip and the Sign in link when sign in exists. It carries the prompt's control ids
- * (`dialog.namePrompt`, `.name`, `.continue`, `.skip`, `.signIn`, `.error`; docs/PRODUCT.md
- * 7.1), so a driver that passes the prompt with Skip after `share.open` passes the band. Enter in
- * the field keeps the name and never runs the dialog's Done: the field handles the key itself
- * (Dialog's `defaultPrevented` rule). The server's refusal sentence shows in the error row and the
- * band stays; Skip keeps the label. The field's placeholder is "Your name" (docs/POLISH.md 2.6
- * item 63), the one prompt grammar whichever surface asks: the plate hides while a dialog is open
- * (TitleRow.tsx), so on the first Share this band is the one prompt a driver or a seller reads (the
- * ship step's third attempt, share.name-prompt.empty-field on the memory tier).
- */
-function ShareNameAsk({
-  account,
-  setName,
-  onDone,
-  onSignIn,
-}: {
-  account: EditorAccount;
-  setName: (name: string) => Promise<unknown>;
-  onDone: () => void;
-  onSignIn: () => void;
-}) {
-  const titleId = useId();
-  const prefilled =
-    account.namePrompt?.prefilled ?? account.principal.name ?? account.principal.label ?? '';
-  const [name, setNameField] = useState(prefilled);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const submit = () => {
-    const trimmed = name.trim();
-    if (trimmed === '' || busy) return;
-    setBusy(true);
-    setName(trimmed).then(
-      () => onDone(),
-      (err: unknown) => {
-        setError(err instanceof Error ? err.message : String(err));
-        setBusy(false);
-      },
-    );
-  };
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Enter') return;
-    event.preventDefault();
-    submit();
-  };
-  const tip = tipProps({
-    name: ACCOUNT.namePrompt.name,
-    doc: 'Up to 40 letters or digits; Enter keeps it',
-    key: 'Enter',
-  });
-  return (
-    <section
-      className="ts-share-name-ask"
-      data-control="dialog.namePrompt"
-      aria-labelledby={titleId}
-    >
-      <h3 id={titleId} className="ts-share-name-ask-title">
-        {SHARE_NAME_PROMPT_TITLE}
-      </h3>
-      <div className="ts-share-name-ask-row">
-        <input
-          type="text"
-          className="ts-share-name-ask-field"
-          value={name}
-          maxLength={80}
-          placeholder="Your name"
-          aria-label={ACCOUNT.namePrompt.name}
-          data-control="dialog.namePrompt.name"
-          autoComplete="nickname"
-          spellCheck={false}
-          {...tip}
-          onFocus={(event) => {
-            tip.onFocus(event);
-            event.currentTarget.select();
-          }}
-          onChange={(event) => {
-            setNameField(event.target.value);
-            setError(null);
-          }}
-          onKeyDown={onKeyDown}
-        />
-        <button
-          type="button"
-          className="pt-ib is-text"
-          data-control="dialog.namePrompt.skip"
-          onClick={onDone}
-          {...tipProps({ name: 'Skip', doc: 'Keeps the generated label for now' })}
-        >
-          <span className="pt-lb">Skip</span>
-        </button>
-        <button
-          type="button"
-          className="pt-ib is-solid"
-          disabled={busy || name.trim() === ''}
-          data-control="dialog.namePrompt.continue"
-          onClick={submit}
-          {...tipProps({
-            name: ACCOUNT.namePrompt.continue,
-            doc: 'Keeps this name on your edits and comments in this presentation',
-            key: 'Enter',
-          })}
-        >
-          <span className="pt-lb">{ACCOUNT.namePrompt.continue}</span>
-        </button>
-      </div>
-      <div className="ts-share-name-ask-foot">
-        {account.signInAvailable ? (
-          <button
-            type="button"
-            className="ts-share-name-ask-signin"
-            data-control="dialog.namePrompt.signIn"
-            onClick={onSignIn}
-            {...tipProps({
-              name: ACCOUNT.namePrompt.signIn,
-              doc: 'Keep your name across browsers',
-            })}
-          >
-            {ACCOUNT.namePrompt.signIn}
-          </button>
-        ) : null}
-        <p className="ts-share-name-ask-error" role="alert" data-control="dialog.namePrompt.error">
-          {error ?? ''}
-        </p>
-      </div>
-    </section>
-  );
-}
-
 /** The word of a grant's chip: Pending, Expired or nothing. */
 export function grantStatus(
   grant: AccessGrantView,
@@ -721,21 +567,11 @@ export function ShareDialog() {
   const [more, setMore] = useState(false);
   /* Open as a slideshow: the address field reads the present link */
   const [asShow, setAsShow] = useState(false);
-  /* the first Share on a browser with no display name asks for one (rank 4), once per browser;
-     a signed in account already has its name */
+  /* the display name is asked by the title row's plate on the first write (TitleRow.css, the
+     name prompt the route opens), never by Share (docs/NEXT.md 4.1.3 item 17, the row
+     share.dialog.ruled-rows; audit-brand-surfaces rank 21: the dialog opened with a prompt the
+     reader did not ask for) */
   const account = input.account;
-  const [naming, setNaming] = useState<boolean>(
-    () =>
-      account !== undefined &&
-      account.setName !== undefined &&
-      !account.signedIn &&
-      account.principal.kind === 'anonymous' &&
-      account.principal.name === undefined &&
-      !nameAskedBefore(),
-  );
-  /* true while the band was drawn in this open: once it leaves, the focus that was in its field
-     goes to Done, so Enter and Escape keep working (Dialog's rule for a control that left) */
-  const askedHere = useRef(naming);
   /* the one own identity every surface reads (docs/PEOPLE.md 3.11) */
   const me = meOf({ account, presence: input.presence }) ?? undefined;
   /** The name a row shows (rank 4): You for this browser's own principal. */
@@ -760,14 +596,7 @@ export function ShareDialog() {
     const done = card.querySelector<HTMLElement>('[data-control="dialog.share.done"]');
     (done ?? card).focus();
   };
-  useEffect(() => {
-    if (!naming && askedHere.current) focusDone();
-  }, [naming]);
-  /* a close with the band still up counts as asked, as the prompt's close did (once per browser) */
-  const close = () => {
-    if (naming) rememberNameAsked();
-    shell.closeDialog();
-  };
+  const close = () => shell.closeDialog();
 
   const baseRevision = (): number =>
     Math.max(access?.revision ?? 0, known, answeredAccess(input.deckId)?.revision ?? 0);
@@ -851,25 +680,6 @@ export function ShareDialog() {
     doc: 'Closes the dialog',
   };
 
-  /* the first Share asks for a display name (rank 4) in a band at the head of the body; the
-     dialog under it is the one every open draws, so it opens at once */
-  const nameAsk =
-    naming && account !== undefined && account.setName !== undefined ? (
-      <ShareNameAsk
-        account={account}
-        setName={account.setName}
-        onDone={() => {
-          account.onNamePrompt?.(false);
-          rememberNameAsked();
-          setNaming(false);
-        }}
-        onSignIn={() => {
-          account.onNamePrompt?.(false);
-          shell.openDialog('signIn');
-        }}
-      />
-    ) : null;
-
   /* the draft of /new before its first write: nothing exists in the store to share yet */
   if (draft && access === undefined) {
     return (
@@ -881,7 +691,6 @@ export function ShareDialog() {
         className="ts-share"
         actions={[doneAction]}
       >
-        {nameAsk}
         <p className="ts-share-draft" data-control="dialog.share.draft">
           {DRAFT_SENTENCE}
         </p>
@@ -902,7 +711,6 @@ export function ShareDialog() {
         className="ts-share"
         actions={[doneAction]}
       >
-        {nameAsk}
         {failed ? (
           <section aria-labelledby="ts-share-links">
             <h3 id="ts-share-links" className="ts-dialog-field-label">
@@ -1204,7 +1012,6 @@ export function ShareDialog() {
       className="ts-share"
       actions={[doneAction]}
     >
-      {nameAsk}
       {access.claimable === true ? (
         <div className="ts-share-claim" data-control="dialog.share.claim">
           <span>{DIALOGS.share.claim}</span>

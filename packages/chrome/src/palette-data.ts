@@ -169,8 +169,9 @@ export const PRIMITIVE_ORDER: ReadonlyArray<BlockType> = [
 export function insertLabel(type: BlockType, variant?: ShapeKind): string {
   if (type === 'shape' && variant !== undefined) return `${SHAPE_WORD[variant]} shape`;
   if (type === 'shot') return 'Image';
-  /* the features round, ship two (docs/FEATURES.md 5.1): a shader reads Shader wherever a seller reads it */
-  if (type === 'material') return 'Shader';
+  /* a shader reads "Animated pattern" wherever a seller reads it (docs/NEXT.md question 10's
+     default; round1/build/b3a.md request 15), where the features round's ship two wrote Shader */
+  if (type === 'material') return 'Animated pattern';
   return CATALOG[type].label;
 }
 

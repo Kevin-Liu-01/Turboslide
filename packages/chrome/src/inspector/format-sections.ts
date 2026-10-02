@@ -107,9 +107,9 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
      the default view; a parked control inside it is hidden through parked-controls.ts */
   {
     id: 'shader',
-    title: 'Shader',
+    title: 'Animated pattern',
     icon: 'cube',
-    doc: 'The shader’s preset, your brand kit’s colors and Glyphfield’s controls',
+    doc: 'The pattern’s preset, your brand kit’s colors and Glyphfield’s controls',
   },
   /* Drop shadow draws in the default view since the polish round (docs/POLISH.md 2.5 item 41;
      polish/build/b4.md R5): the parked list of record parks no `format.dropShadow` */

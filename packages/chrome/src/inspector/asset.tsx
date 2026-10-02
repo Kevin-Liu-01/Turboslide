@@ -549,7 +549,6 @@ export function AssetIntake({
           title="Add the picture to the deck"
           doc="Runs asset.add: writes the twins, the record and the credit into the deck."
           label={adding ? 'Adding' : 'Add asset'}
-          icon="sparkles"
           control={`${control}.add`}
           onClick={add}
           solid

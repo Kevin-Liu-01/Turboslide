@@ -181,7 +181,7 @@ export function controlIcon(spec: ControlSpec): IconName {
     case 'asset':
       return 'photo';
     case 'icon':
-      return 'sparkles';
+      return 'squares-2x2';
     case 'json':
       return 'code';
     case 'readonly':
@@ -241,7 +241,7 @@ export const BLOCK_ICONS: Readonly<Record<BlockType, IconName>> = {
   shape: 'cube',
   rule: 'minus',
   text: 'pencil',
-  icon: 'sparkles',
+  icon: 'squares-2x2',
   html: 'code',
 };
 
@@ -251,7 +251,7 @@ export const KIND_ICONS: Readonly<Record<SlideKind, IconName>> = {
   opener: 'deck',
   mood: 'photo',
   closing: 'check-badge',
-  title: 'sparkles',
+  title: 'star',
   statement: 'chat',
 };
 

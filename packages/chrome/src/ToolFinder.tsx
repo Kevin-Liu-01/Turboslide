@@ -142,7 +142,8 @@ export function askEntry(
     group: 'menus',
     title: ASK_ROW.title(trimmed),
     hint: ASK_ROW.doc,
-    icon: 'sparkles',
+    /* the Ask row reads the conversation glyph, never a sparkle (NEXT.md 4.1.3 item 16) */
+    icon: 'chat',
     terms: trimmed.toLowerCase(),
     run: { kind: 'call', call: () => ask(trimmed) },
   };

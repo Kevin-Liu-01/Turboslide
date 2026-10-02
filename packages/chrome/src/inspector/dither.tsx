@@ -409,7 +409,6 @@ export function DitherSection({
           title="Recapture"
           doc="Runs asset.dither: the two-tone pipeline from the source again, writing both twins."
           label="Recapture"
-          icon="sparkles"
           control={`asset.${asset.id}.recapture`}
           onClick={recapture}
           solid

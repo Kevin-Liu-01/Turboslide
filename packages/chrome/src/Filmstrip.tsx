@@ -12,7 +12,6 @@ import { useNearWindow } from '@turboslide/viewer/GridView';
 import { useTheme } from '@turboslide/viewer/theme';
 import { ContextMenu } from './ContextMenu';
 import type { EditorDispatch } from './dispatch';
-import { GtMark } from './GtMark';
 import { cn } from './lib/cn';
 import { detectPlatform } from './menus/keys.ts';
 import type { MenuContext, MenuItem } from './menus/model.ts';
@@ -24,6 +23,7 @@ import type { ShellItem, ShellSection } from './shell-data';
 import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
+import { TurboslideMark } from './TurboslideMark';
 import type { FilmstripHandle, SidebarEdit, SidebarProps } from './Sidebar';
 
 import './Filmstrip.css';
@@ -1106,11 +1106,11 @@ export function Filmstrip({
               aria-label="Every presentation"
               {...tipProps({ name: 'Turboslide', doc: 'Every presentation on this Turboslide.' })}
             >
-              <GtMark />
+              <TurboslideMark size={16} aria-hidden="true" />
             </a>
           ) : (
             <span className="pt-sb-mark">
-              <GtMark />
+              <TurboslideMark size={16} aria-hidden="true" />
             </span>
           )}
           {aside}

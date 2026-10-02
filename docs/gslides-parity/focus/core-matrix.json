@@ -8950,6 +8950,26 @@
       "note": "docs/NEXT.md 4.1.3 item 15, push B3b#11: .ts-stagewrap left the sheet appearance selectors of tokens.css (the overlay keeps them); the filmstrip and the tree sidebar draw the edited deck's appearance; the presenter page draws deckAppearance; the /deck view's stage, show, grid, book and cards draw the payload's appearance (the route's ?theme=, else the deck's own); the stage band and the thumbnail warm up read the deck's appearance. The test sets the light deck and the dark chrome as setup and reads the four surfaces in one browser"
     },
     {
+      "id": "chrome.mark.one-product-mark",
+      "feature": "chrome",
+      "interaction": "The tab icon, the touch icon, the title row's home link, the `/decks` bar and the CLI banner draw one mark from one geometry; no surface outside the GT template draws the GT monogram",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-brand-surfaces 42 (the `/deck` view draws the GT monogram)",
+      "note": "docs/NEXT.md 4.1.3 item 16, push B3b#12: GtMark gave way to TurboslideMark in the /deck view's sidebar head, the viewer toolbar's brand and the filmstrip's overlay head. The test reads the served icon.svg, apple-touch-icon.png and favicon.ico against the build's files (scripts/build-brand.ts --check compares those with the geometry of packages/theme/src/brand.ts), the svg.ts-mark in the title row, the /decks bar and the /deck view, no GT monogram path outside a slide, and the CLI banner's glyph against markBlocks()"
+    },
+    {
+      "id": "chrome.ai.no-sparkle",
+      "feature": "chrome",
+      "interaction": "No sparkle glyph in the title row, the palette, the tool finder or the dither inspector; Assist reads as the word",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 31",
+      "note": "docs/NEXT.md 4.1.3 item 16, push B3b#12: Assist is the word alone in the title row and in More; the palette's prompt fields draw no glyph, its action rows the pencil or the document, its theme row the sun or the moon; the finder's Ask row the chat glyph; the dither section's Recapture the word alone. The browser reads the title row, Search the menus and Run an action; the dither section sits in the Inspector's Dither group of a two tone picture, which a /new deck does not hold, so packages/chrome/src/__tests__/marks-round1.test.tsx renders it and reads no sparkle"
+    },
+    {
       "id": "chrome.selection.gt-blue",
       "feature": "chrome",
       "interaction": "The selection ring computes to `#2f5ce0` in both appearances and the chip's text to `#ffffff`",

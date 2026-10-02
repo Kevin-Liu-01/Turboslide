@@ -728,7 +728,8 @@ function actionEntries(ctx: PaletteContext): PaletteEntry[] {
       meta: spec.id,
       hint: spec.doc,
       keys: key === undefined ? undefined : key.startsWith('Cmd ') ? cmd(ctx, key.slice(4)) : key,
-      icon: spec.mutates ? 'sparkles' : 'document',
+      /* a write reads the pencil and a read the document; no sparkle (NEXT.md 4.1.3 item 16) */
+      icon: spec.mutates ? 'pencil' : 'document',
       terms: `${spec.id} ${spec.group} ${spec.mcp ?? ''} ${spec.cli?.usage ?? ''}`,
       run,
     };
@@ -757,7 +758,7 @@ function viewEntries(ctx: PaletteContext): PaletteEntry[] {
     group: 'view',
     title: view.theme === 'dark' ? 'Light theme' : 'Dark theme',
     keys: 'D',
-    icon: 'sparkles',
+    icon: view.theme === 'dark' ? 'sun' : 'moon',
     terms: 'theme dark light',
     run: {
       kind: 'dispatch',

@@ -257,7 +257,6 @@ export function Palette({
         {iconPick ? (
           <div className="pt-search-tools is-prompt">
             <span className="pt-search-field is-static">
-              <Icon name="sparkles" />
               <span>{iconPick.run.label}</span>
             </span>
             <span className="pt-search-count">{iconPick.entry.title}</span>
@@ -265,7 +264,6 @@ export function Palette({
         ) : prompt ? (
           <div className="pt-search-tools is-prompt">
             <label className="pt-search-field">
-              <Icon name="sparkles" />
               <input
                 type="text"
                 value={prompt.value}

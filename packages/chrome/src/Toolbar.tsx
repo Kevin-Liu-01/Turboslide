@@ -1,7 +1,6 @@
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { GtMark } from './GtMark';
 import { Icon } from './icons';
 import { InsertMenu } from './InsertMenu';
 import type { InsertMenuProps } from './InsertMenu';
@@ -16,6 +15,7 @@ import { PRODUCT_NAME } from './Sidebar';
 import { ThemeButton } from './ThemeButton';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
+import { TurboslideMark } from './TurboslideMark';
 import { toggleFullscreen } from './useShellKeys';
 
 import './Toolbar.css';
@@ -527,7 +527,7 @@ export function Toolbar({
         />
         {/* always rendered; Toolbar.css shows it while the shell root says the column is closed */}
         <span className="pt-bar-brand">
-          <GtMark />
+          <TurboslideMark size={16} aria-hidden="true" />
           <b>{PRODUCT_NAME}</b>
         </span>
         {paging ? (

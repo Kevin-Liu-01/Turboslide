@@ -7,7 +7,6 @@ import { useNearWindow } from '@turboslide/viewer/GridView';
 import { useTheme } from '@turboslide/viewer/theme';
 import type { EditorDispatch } from './dispatch';
 import { EditorShellContext } from './editor-shell-context';
-import { GtMark } from './GtMark';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
@@ -23,6 +22,7 @@ import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
 import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
 import { mergeTipProps, tipProps } from './Tooltip';
+import { TurboslideMark } from './TurboslideMark';
 import { Filmstrip, makeFollow } from './Filmstrip';
 
 import './Sidebar.css';
@@ -1046,11 +1046,11 @@ function TreeSidebar({
             aria-label="Every deck"
             {...tipProps({ name: PRODUCT_NAME, doc: 'Back to the deck list.' })}
           >
-            <GtMark />
+            <TurboslideMark size={16} aria-hidden="true" />
           </a>
         ) : (
           <span className="pt-sb-mark">
-            <GtMark />
+            <TurboslideMark size={16} aria-hidden="true" />
           </span>
         )}
         <b>{PRODUCT_NAME}</b>

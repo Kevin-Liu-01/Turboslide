@@ -526,8 +526,11 @@ const ROSTER_ROW_ID = 'title.presence';
  */
 export function titleMoreItems(panel: string | null): MenuItem[] {
   const side = itemById('title.sidePanel');
+  /* Assist reads as the word in More too: the model row's sparkle glyph stays off (NEXT.md 4.1.3
+     item 16) */
+  const { icon: _sparkle, ...assist } = itemById('title.assist');
   const rows: MenuItem[] = [
-    itemById('title.assist'),
+    assist,
     itemById('title.comments'),
     panel === null ? side : { ...side, label: 'Hide side panel', doc: 'Closes the panel' },
     { ...itemById(ROSTER_ROW_ID), items: undefined, dividerBefore: true },
@@ -744,12 +747,12 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         ) : null}
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
         <PresenceSlot />
-        {/* the Assist button (docs/PRODUCT.md 6.1): the sparkle glyph with the word, a toggle of the
-            Assist panel like the comments glyph; absent for a reader */}
+        {/* the Assist button (docs/PRODUCT.md 6.1): the word alone, a toggle of the Assist panel
+            like the comments glyph; absent for a reader. No sparkle (NEXT.md 4.1.3 item 16;
+            P:deck/slides/39-avoid.html 12: robot and sparkle iconography is not used for AI) */}
         <span className="ts-title-slot ts-title-assist-slot" data-control="title.assist.slot">
           {assistPresent ? (
             <ToolButton
-              icon="sparkles"
               title={assistKey === undefined ? assist.label : `${assist.label} (${assistKey})`}
               label={assist.label}
               doc={assist.doc ?? ''}

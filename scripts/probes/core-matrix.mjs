@@ -480,8 +480,8 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'dialog.saveAsTemplate',
   'home.gallery',
   /* the assist (B6) */
+  /* Tools > Assist (tools.assist) left the model in Round 1 (docs/NEXT.md 4.1.3 item 20) */
   'title.assist',
-  'tools.assist',
   'tools.tailor',
   'panel.assist',
   'panel.assist.prompt',
@@ -494,7 +494,7 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'format.image.replaceImage.byUrl',
   /* the features round, ship one (docs/FEATURES.md 2.2, 2.3, 3.1, 4.3 to 4.11, 4.12): the ids the
      rows' `parks` name before the lanes' files hold them. The menu rows land in model.ts by request
-     (B1 `insert.logo`, `insert.image.logo`; B6 `format.image.replaceImage.logo`, templated as
+     (B1 `insert.image.logo`; B6 `format.image.replaceImage.logo`, templated as
      `${prefix}.logo` by `replaceImageItems`); the dialog controls in dialogs/Logo.tsx (B1), the
      Tailor button in dialogs/Tailor.tsx (B1), the kit button in ThemesPanel.tsx (B6, P1), the Edit
      data button and the P1 table handles and bar in Overlay.tsx (B3), the two P1 tails in
@@ -502,7 +502,7 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
      families their source templates: `handle.table.row` (`handle.table.row.<n>`),
      `handle.table.head.column` and `.row` (`handle.table.head.<axis>.<n>`) and `bar.table`
      (`bar.table.<command>`). */
-  'insert.logo',
+  /* Insert > Logo (insert.logo) left the model in Round 1 (docs/NEXT.md 4.1.3 item 20) */
   'insert.image.logo',
   'format.image.replaceImage.logo',
   'dialog.logo.group.brand',
@@ -533,8 +533,9 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
      families `formatOptions.shader.preset` (`.preset.<id>`) and `formatOptions.shader.color`
      (`.color.<role>`) name their tiles and swatches; the P1 engine chip and the P1 hover surface in
      dialogs/ShaderGallery.tsx (B1). */
+  /* View > Play shaders (view.playShaders) moved to Tools > Preferences in Round 1 (docs/NEXT.md
+     4.1.3 item 20); its id is tools.preferences.playShaders, a literal of model.ts */
   'insert.shader',
-  'view.playShaders',
   'dialog.background.shader',
   'dialog.background.shader.addToTheme',
   'dialog.shader.engine.glyph',

@@ -793,21 +793,29 @@ test(title('shaders.library.glyph-engines-render'), async () => {
   expect(pdfImages(pdf.bytes), 'the PDF carries the frames').toBeGreaterThanOrEqual(3);
 });
 
-/** The View > Play shaders rows, or null when the row is not on the build. */
+/** The Tools > Preferences > Play shaders rows (View > Play shaders before Round 1, docs/NEXT.md 4.1.3 item 20), or null when the row is not on the build. */
 async function playShaderRows(
   p: Page,
 ): Promise<{ id: string; label: string; checked: string | null }[] | null> {
-  await ctl(p, 'menubar.view').click();
-  await p.locator('#ts-menu-view').waitFor({ timeout: 8000 });
-  const row = ctl(p, 'menu.view.playShaders');
+  await ctl(p, 'menubar.tools').click();
+  await p.locator('#ts-menu-tools').waitFor({ timeout: 8000 });
+  const group = ctl(p, 'menu.tools.preferences');
+  if ((await group.count()) === 0) {
+    await p.keyboard.press('Escape');
+    return null;
+  }
+  await group.hover();
+  await p.waitForTimeout(400);
+  const row = ctl(p, 'menu.tools.preferences.playShaders');
   if ((await row.count()) === 0) {
+    await p.keyboard.press('Escape');
     await p.keyboard.press('Escape');
     return null;
   }
   await row.hover();
   await p.waitForTimeout(400);
   const rows = await p.evaluate(() =>
-    [...document.querySelectorAll('[data-control^="menu.view.playShaders."]')]
+    [...document.querySelectorAll('[data-control^="menu.tools.preferences.playShaders."]')]
       .filter((e) => e.getClientRects().length > 0)
       .map((e) => ({
         id: (e.getAttribute('data-control') ?? '').replace(/^menu\./, ''),
@@ -815,7 +823,7 @@ async function playShaderRows(
         checked: e.getAttribute('aria-checked'),
       })),
   );
-  await p.keyboard.press('Escape');
+  for (let i = 0; i < 3; i += 1) await p.keyboard.press('Escape');
   await p.waitForTimeout(150);
   return rows;
 }
@@ -823,7 +831,7 @@ async function setPlayShaders(p: Page, want: RegExp): Promise<boolean> {
   const rows = await playShaderRows(p);
   const row = rows?.find((r) => want.test(r.label)) ?? null;
   if (!row) return false;
-  await menuPath(p, 'view', 'view.playShaders', row.id);
+  await menuPath(p, 'tools', 'tools.preferences', 'tools.preferences.playShaders', row.id);
   return true;
 }
 /**
@@ -881,10 +889,7 @@ test(title('shaders.show.plays-when-on'), async () => {
   const id = shader!.id;
   const rows = await playShaderRows(page);
   if (rows === null)
-    test.skip(
-      true,
-      'not on this build: view.playShaders (docs/FEATURES.md 5.6, B1 by request in model.ts, P1)',
-    );
+    test.skip(true, 'not on this build: tools.preferences.playShaders (docs/FEATURES.md 5.6, P1)');
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await setPlayShaders(page, /^on$/i);
   /* the block's Play in the show through the section's control */
@@ -944,10 +949,7 @@ test(title('shaders.show.frame-when-off'), async () => {
   const id = shader!.id;
   const rows = await playShaderRows(page);
   if (rows === null)
-    test.skip(
-      true,
-      'not on this build: view.playShaders (docs/FEATURES.md 5.6, B1 by request in model.ts, P1)',
-    );
+    test.skip(true, 'not on this build: tools.preferences.playShaders (docs/FEATURES.md 5.6, P1)');
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await setPlayShaders(page, /^off$/i);

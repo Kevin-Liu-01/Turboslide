@@ -186,20 +186,25 @@ async function insertLogo(
     body: (await res.json().catch(() => null)) as Record<string, unknown> | null,
   };
 }
-/** Reaches Insert > Logo (the switch on when the row is parked); answers whether the dialog is drawn. */
+/** Reaches Insert > Image > Logo, the one Logo row since Round 1 (docs/NEXT.md 4.1.3 item 20; the switch on when the row is parked); answers whether the dialog is drawn. */
 async function openLogo(p: Page): Promise<{ open: boolean; switched: boolean }> {
   const present = async (): Promise<boolean> => {
     await ctl(p, 'menubar.insert').click();
     await p.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
-    const there = await ctl(p, 'menu.insert.logo')
-      .isVisible()
+    await ctl(p, 'menu.insert.image').hover();
+    const there = await p
+      .locator('[data-control="menu.insert.image.logo"]')
+      .first()
+      .waitFor({ timeout: 6000 })
+      .then(() => true)
       .catch(() => false);
     if (!there) {
+      await p.keyboard.press('Escape');
       await p.keyboard.press('Escape');
       await p.waitForTimeout(150);
       return false;
     }
-    await ctl(p, 'menu.insert.logo').click();
+    await ctl(p, 'menu.insert.image.logo').click();
     return ctl(p, 'dialog.logo')
       .waitFor({ timeout: 8000 })
       .then(() => true)
@@ -260,11 +265,7 @@ test(title('logos.picker.recents'), async () => {
   await openEditor(page, deck);
   const slideId = (await state(page)).slideId;
   const opened = await openLogo(page);
-  if (!opened.open)
-    test.skip(
-      true,
-      'not on this build: insert.logo (docs/FEATURES.md 4.3, B1 by request in model.ts)',
-    );
+  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
   const inserted: string[] = [];
   for (const slug of ['figma', 'vercel']) {
     if (inserted.length > 0) {
@@ -844,9 +845,9 @@ test(title('logos.export.svgblip'), async () => {
   const countsAfter = ((await invoke(page, 'deck.info')) as { counts: { assets: number } }).counts
     .assets;
   const logoAssets = countsAfter - countsBefore;
-  /** The download dialog with PowerPoint picked; File > Download > Download options, the type by default. */
+  /** The download dialog with PowerPoint picked; File > Download > More formats > Download options, the type by default. */
   const openPptxDialog = async () => {
-    await menuPath(page, 'file', 'file.download', 'file.download.options');
+    await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
     await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
   };
   const closeDialog = async () => {
@@ -936,7 +937,7 @@ test(title('logos.export.svgblip'), async () => {
     /#(title-logo|footer-logo):/.test(p.name),
   );
   /* the PDF: no image XObject for the logo */
-  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   await ctl(page, 'dialog.download.type.pdf').waitFor({ timeout: 8000 });
   await ctl(page, 'dialog.download.type.pdf').click();
   await ctl(page, 'dialog.download.pdf').waitFor({ timeout: 8000 });
@@ -1269,7 +1270,7 @@ test(title('logos.dialog.results-in-view'), async () => {
   await openEditor(page, deck);
   const slideId = await addSlide(page);
   const opened = await openLogo(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
   /* tiles under Your brand and Recent: one insert first */
   const results0 = await searchInDialog(page, 'figma');
   if (results0.length > 0) {
@@ -1339,7 +1340,7 @@ test(title('logos.dialog.sentence-case-whole-names'), async () => {
   await openEditor(page, deck);
   const slideId = await addSlide(page);
   const opened = await openLogo(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
   /* a customer logo inserted, so Recent has a tile */
   const results = await searchInDialog(page, 'vercel');
   if (results.length > 0) {

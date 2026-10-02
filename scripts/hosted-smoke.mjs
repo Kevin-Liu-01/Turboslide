@@ -64,10 +64,11 @@
 // other row passing). `build commit` reads `/api/agent`'s `instance.commit` (B5's stamp, section 0
 // item 1) and fails when the field is missing or, with `--sha <commit>`, when it differs from the
 // commit named (a prefix of either matches the other); off localhost the field needs the bearer,
-// so without `--token-env` the row is listed as skipped. `View > Play shaders` reads the client
-// the shell loads: on a built deployment it walks the module graph from the shell's scripts
-// (`assets/*.js`, the static imports and the `import()` chunks, bounded) until one module carries
-// the row id `view.playShaders` and the label "Play shaders"; on a Vite dev server (the shell's
+// so without `--token-env` the row is listed as skipped. `Tools > Preferences > Play shaders` reads
+// the client the shell loads: on a built deployment it walks the module graph from the shell's
+// scripts (`assets/*.js`, the static imports and the `import()` chunks, bounded) until one module
+// carries the row id `tools.preferences.playShaders` and the label "Play shaders" (the row left the
+// View menu for Tools > Preferences in Round 1, docs/NEXT.md 4.1.3 item 20); on a Vite dev server (the shell's
 // entry under `/@id/`) it reads the menu model through `/@fs/<checkout>/packages/chrome/src/menus/model.ts`.
 // The `/home` row's marks are the remade page's (section 3): the root `class="ts-product"` (the
 // element carries `id="top"` first), the hero lead's second sentence as React escapes it, and the
@@ -887,8 +888,8 @@ async function commitRow(base, headers, timeoutMs, sha) {
   };
 }
 
-/** The marks of the one row only the current build draws: View > Play shaders (docs/FEATURES.md 5.6). */
-const PLAY_SHADERS_MARKS = ['view.playShaders', 'Play shaders'];
+/** The marks of the one row only the current build draws: Tools > Preferences > Play shaders (docs/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20). */
+const PLAY_SHADERS_MARKS = ['tools.preferences.playShaders', 'Play shaders'];
 /** The module graph walk's bounds: modules fetched and bytes read before the row gives up. */
 const GRAPH_MODULES = 400;
 const GRAPH_BYTES = 40 * 1024 * 1024;
@@ -979,8 +980,9 @@ async function playShadersRow(base, timeoutMs) {
   }
   return {
     row: {
-      name: 'View > Play shaders',
-      expect: 'the served client carries view.playShaders and "Play shaders" (the current build)',
+      name: 'Tools > Preferences > Play shaders',
+      expect:
+        'the served client carries tools.preferences.playShaders and "Play shaders" (the current build)',
       detail: () => (found === null ? `not found; ${note}` : `in ${found}; ${note}`),
     },
     r: { status: shell.status, ms: shell.ms },

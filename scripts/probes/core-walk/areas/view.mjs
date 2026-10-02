@@ -1,5 +1,5 @@
 // The View menu rows (docs/RETURN.md 2.16, section 5 `view.*` with the driver `probe --core`):
-// Appearance, Show filmstrip, the three modes and the toolbar in Viewing, Full screen, the Hide
+// Appearance (under Tools > Preferences since Round 1, docs/NEXT.md 4.1.3 item 20), Show filmstrip, the three modes and the toolbar in Viewing, Full screen, the Hide
 // the menus chevron, the Live pointers toggles, the Comments radios, Show all comments and the
 // four display modes on a deck with two comments. The second browser's pointer is
 // core/share.spec.ts. A row still parked on this build is reached with the switch on and the
@@ -37,11 +37,17 @@ export async function run(t) {
 
   await t.step(
     'view.appearance.rows',
-    'View > Appearance > Light, Dark, Match the presentation',
+    'Tools > Preferences > Appearance > Light, Dark, Match the presentation',
     'each sets data-theme and the choice is stored',
     async () => {
-      const r = await t.reachRow('view', 'view.appearance', 'view.appearance.light');
-      if (!r.present) return { ok: false, observed: 'View > Appearance is not reachable' };
+      const r = await t.reachRow(
+        'tools',
+        'tools.preferences',
+        'tools.preferences.appearance',
+        'tools.preferences.appearance.light',
+      );
+      if (!r.present)
+        return { ok: false, observed: 'Tools > Preferences > Appearance is not reachable' };
       /* the presentation's own appearance is the stage's data-theme since the polish round
          (docs/POLISH.md 2.5 item 49: the sheet keeps it whatever the chrome's theme); the
          describe state's theme is the chrome's */
@@ -56,7 +62,12 @@ export async function run(t) {
         ['dark', 'dark'],
         ['match', deck],
       ]) {
-        await t.menuPath('view', 'view.appearance', `view.appearance.${row}`);
+        await t.menuPath(
+          'tools',
+          'tools.preferences',
+          'tools.preferences.appearance',
+          `tools.preferences.appearance.${row}`,
+        );
         const got = await t.pollUntil(theme, (x) => x === want, 5000).catch(theme);
         const kept = await stored('ts-chrome-appearance');
         ok =

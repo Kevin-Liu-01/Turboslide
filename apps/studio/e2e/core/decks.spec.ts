@@ -516,7 +516,7 @@ async function switchOff(p: Page): Promise<void> {
 
 /**
  * The deck's bundle (the product's own transfer file), downloaded from the deck's editor through
- * File > Download > Turboslide bundle, the way `export.zip.bundle` reads it. Since docs/POLISH.md
+ * File > Download > More formats > Turboslide bundle, the way `export.zip.bundle` reads it. Since docs/POLISH.md
  * item 85 the card's Download is the PowerPoint, a PK file with no `manifest.json`, which the
  * upload rows read as "Not a deck bundle" twice in the polish round's run of record (B5's R21 to
  * B6, landed by the ship step's third attempt). The bundle row sits behind Advanced tools on
@@ -524,10 +524,16 @@ async function switchOff(p: Page): Promise<void> {
  */
 async function bundleBytes(p: Page, id: string): Promise<Buffer> {
   await openEditor(p, id);
-  const switched = await reachMenuRow(p, 'file', 'file.download', 'file.download.zip');
+  const switched = await reachMenuRow(
+    p,
+    'file',
+    'file.download',
+    'file.download.more',
+    'file.download.zip',
+  );
   const zip = await download(
     p,
-    () => menuPath(p, 'file', 'file.download', 'file.download.zip'),
+    () => menuPath(p, 'file', 'file.download', 'file.download.more', 'file.download.zip'),
     60_000,
   );
   expect(zip.bytes.subarray(0, 2).toString('latin1'), 'a zip').toBe('PK');

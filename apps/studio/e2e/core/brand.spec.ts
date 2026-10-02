@@ -383,9 +383,9 @@ function pptxGtObjects(bytes: Buffer): string[] {
   }
   return out;
 }
-/** One file through File > Download > Download options with PDF or PowerPoint (native) picked. */
+/** One file through File > Download > More formats > Download options with PDF or PowerPoint (native) picked. */
 async function downloadAs(p: Page, kind: 'pdf' | 'pptx'): Promise<Buffer> {
-  await menuPath(p, 'file', 'file.download', 'file.download.options');
+  await menuPath(p, 'file', 'file.download', 'file.download.more', 'file.download.options');
   if (kind === 'pdf') {
     await ctl(p, 'dialog.download.type.pdf').click({ timeout: 8000 });
     await ctl(p, 'dialog.download.pdf').waitFor({ timeout: 8000 });

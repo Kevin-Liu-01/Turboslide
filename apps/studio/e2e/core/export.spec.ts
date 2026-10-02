@@ -291,11 +291,11 @@ test.afterAll(async () => {
 
 /**
  * The download dialog with the PDF type picked (docs/PRODUCT.md section 2 rank 8): the PDF row
- * starts its download at once, so the dialog's way in is File > Download > Download options and its
+ * starts its download at once, so the dialog's way in is File > Download > More formats > Download options and its
  * File type choice; the dialog's control then reads `dialog.download.pdf`.
  */
 async function openPdf(page: Page): Promise<void> {
-  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   const type = ctl(page, 'dialog.download.type.pdf');
   await type.waitFor({ timeout: 8000 });
   await type.click();
@@ -303,7 +303,7 @@ async function openPdf(page: Page): Promise<void> {
 }
 /** The download dialog with PowerPoint picked (the default of Download options). */
 async function openPptx(page: Page): Promise<void> {
-  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
 }
 async function check(page: Page, control: string): Promise<void> {
@@ -613,7 +613,7 @@ test(title('export.zip.bundle'), async () => {
   await openEditor(page, deck);
   const switched = await reachDownloadRow(page, 'file.download.zip');
   const zip = await download(page, () =>
-    menuPath(page, 'file', 'file.download', 'file.download.zip'),
+    menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.zip'),
   );
   expect(zip.ms, 'arrives within 30 s').toBeLessThan(30_000);
   expect(zip.bytes.subarray(0, 2).toString('latin1')).toBe('PK');
@@ -654,7 +654,7 @@ test(title('export.html.web-page'), async () => {
   /* the first attempt is the row: a cancelled download fails it (return-drive rows 13 to 16) */
   const html = await download(
     page,
-    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    () => menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.html'),
     30_000,
   );
   expect(html.ms, 'arrives within 30 s').toBeLessThan(30_000);
@@ -725,13 +725,31 @@ test(title('export.png.current-slide'), async () => {
   await pictureRow('png', '\x89PNG', /\.png$/i);
 });
 
+/** The rows File > Download keeps under More formats since Round 1 (docs/NEXT.md 4.1.3 item 20). */
+const MORE_FORMATS = new Set(['file.download.html', 'file.download.zip', 'file.download.options']);
+/** The menu path of a File > Download row under the File menu: its parents, then the row. */
+function downloadPath(rowId: string): string[] {
+  return MORE_FORMATS.has(rowId)
+    ? ['file.download', 'file.download.more', rowId]
+    : ['file.download', rowId];
+}
+
 /** Turns Tools > Advanced tools on when a File > Download row is still parked on this build. */
 async function reachDownloadRow(page: Page, rowId: string): Promise<boolean> {
   await ctl(page, 'menubar.file').click();
   await page.locator('#ts-menu-file').waitFor({ timeout: 8000 });
   await ctl(page, 'menu.file.download').hover();
   await page.locator('[data-control="menu.file.download.pdf"]').waitFor({ timeout: 6000 });
+  if (MORE_FORMATS.has(rowId)) {
+    await ctl(page, 'menu.file.download.more').hover();
+    await page
+      .locator(`[data-control="menu.${rowId}"]`)
+      .first()
+      .waitFor({ timeout: 6000 })
+      .catch(() => undefined);
+  }
   const present = (await ctl(page, `menu.${rowId}`).count()) > 0;
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
@@ -1062,15 +1080,20 @@ async function downloadWithWords(p: Page, start: () => Promise<void>, timeout = 
     throw error;
   }
 }
-/** Whether the Download submenu has the Download options row on this build (B1, by request in model.ts). */
+/** Whether File > Download > More formats has the Download options row on this build (Round 1, docs/NEXT.md 4.1.3 item 20). */
 async function hasOptionsRow(p: Page): Promise<boolean> {
   await ctl(p, 'menubar.file').click();
   await p.locator('#ts-menu-file').waitFor({ timeout: 8000 });
   await ctl(p, 'menu.file.download').hover();
   await p.waitForTimeout(400);
+  await ctl(p, 'menu.file.download.more')
+    .hover()
+    .catch(() => undefined);
+  await p.waitForTimeout(400);
   const there = await ctl(p, 'menu.file.download.options')
     .isVisible()
     .catch(() => false);
+  await p.keyboard.press('Escape');
   await p.keyboard.press('Escape');
   await p.keyboard.press('Escape');
   await p.waitForTimeout(150);
@@ -1254,7 +1277,7 @@ test(title('export.download.options-dialog'), async () => {
       true,
       'not on this build: file.download.options (docs/PRODUCT.md 7.1, B1 by request in model.ts)',
     );
-  await menuPath(page, 'file', 'file.download', 'file.download.options');
+  await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   const dialog = page
     .locator(
       '[data-control="dialog.download.pptx"], [data-control="dialog.download.pdf"], [data-control="dialog.download"]',
@@ -1320,7 +1343,7 @@ test(title('export.download.mode-sentence'), async () => {
   const { page, deck } = await withBudget(0);
   await openEditor(page, deck);
   if (await hasOptionsRow(page))
-    await menuPath(page, 'file', 'file.download', 'file.download.options');
+    await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   else await menuPath(page, 'file', 'file.download', 'file.download.pptx');
   await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
   const facts = await page.evaluate(() => ({
@@ -1423,7 +1446,13 @@ test(title('export.download.large-deck-pptx'), async () => {
       page,
       async () => {
         if (await hasOptionsRow(page))
-          await menuPath(page, 'file', 'file.download', 'file.download.options');
+          await menuPath(
+            page,
+            'file',
+            'file.download',
+            'file.download.more',
+            'file.download.options',
+          );
         else await menuPath(page, 'file', 'file.download', 'file.download.pptx');
         await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
         await ctl(page, 'dialog.download.mode.native').click({ force: true });
@@ -2481,7 +2510,7 @@ test(title('svg.export.web-page'), async () => {
   const switched = await reachDownloadRow(page, 'file.download.html');
   const html = await download(
     page,
-    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    () => menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.html'),
     30_000,
   );
   const text = html.bytes.toString('utf8');
@@ -2708,7 +2737,7 @@ test(title('shaders.export.html-frame'), async () => {
   const switched = await reachDownloadRow(page, 'file.download.html');
   const html = await download(
     page,
-    () => menuPath(page, 'file', 'file.download', 'file.download.html'),
+    () => menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.html'),
     60_000,
   );
   if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
@@ -3403,7 +3432,7 @@ test(title('export.download.one-name-rule'), async () => {
     const file = await download(
       page,
       async () => {
-        await menuPath(page, 'file', 'file.download', `file.download.${row}`);
+        await menuPath(page, 'file', ...downloadPath(`file.download.${row}`));
         const ok = ctl(page, 'dialog.download.ok');
         if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
       },

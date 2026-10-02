@@ -104,12 +104,22 @@ export async function run(t) {
       };
     });
   const themeNow = () => page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-  /** View > Appearance > light or dark through the product (the row itself is the view area's). */
+  /** Tools > Preferences > Appearance > light or dark through the product (the row itself is the view area's; under Tools > Preferences since Round 1, docs/NEXT.md 4.1.3 item 20). */
   const setChrome = async (appearance) => {
     if ((await themeNow()) === appearance) return true;
-    const r = await t.reachRow('view', 'view.appearance', `view.appearance.${appearance}`);
+    const r = await t.reachRow(
+      'tools',
+      'tools.preferences',
+      'tools.preferences.appearance',
+      `tools.preferences.appearance.${appearance}`,
+    );
     if (!r.present) return false;
-    await t.menuPath('view', 'view.appearance', `view.appearance.${appearance}`);
+    await t.menuPath(
+      'tools',
+      'tools.preferences',
+      'tools.preferences.appearance',
+      `tools.preferences.appearance.${appearance}`,
+    );
     return (
       (await t.pollUntil(themeNow, (x) => x === appearance, 5000).catch(themeNow)) === appearance
     );
@@ -773,9 +783,19 @@ async function productRound(t) {
   const themeNow = () => page.evaluate(() => document.documentElement.getAttribute('data-theme'));
   const setChrome = async (appearance) => {
     if ((await themeNow()) === appearance) return true;
-    const r = await t.reachRow('view', 'view.appearance', `view.appearance.${appearance}`);
+    const r = await t.reachRow(
+      'tools',
+      'tools.preferences',
+      'tools.preferences.appearance',
+      `tools.preferences.appearance.${appearance}`,
+    );
     if (!r.present) return false;
-    await t.menuPath('view', 'view.appearance', `view.appearance.${appearance}`);
+    await t.menuPath(
+      'tools',
+      'tools.preferences',
+      'tools.preferences.appearance',
+      `tools.preferences.appearance.${appearance}`,
+    );
     return (
       (await t.pollUntil(themeNow, (x) => x === appearance, 5000).catch(themeNow)) === appearance
     );
@@ -1691,7 +1711,6 @@ async function productRound(t) {
     'insert.line.scribble',
     'insert.specialCharacters',
     'insert.slideNumbers',
-    'insert.logo',
     'insert.icon',
     /* the Material row of VECTOR.md 3.2 is the Shader row since the features round's ship two
        (build/b1.md R1: insert.material renamed to insert.shader and unflagged), with the cube */
@@ -1726,13 +1745,13 @@ async function productRound(t) {
     'format.bordersLines.borderDash',
     'format.bordersLines.lineStart',
     'format.bordersLines.lineEnd',
-    'format.textFitting',
     'format.formatOptions',
   ];
-  /* the context only rows (model.ts contextOnly): Drop shadow and Change shape on a shape's right
-     click menu (the image list carries no Drop shadow row; the picture's shadow is the Format
-     options section), Edit data and Chart type on a chart's */
-  const SHAPE_CONTEXT_ROWS = ['format.changeShape', 'format.dropShadow'];
+  /* the context only rows (model.ts contextOnly): Text fitting (off the Format menu since Round 1,
+     docs/NEXT.md 4.1.3 item 20), Drop shadow and Change shape on a shape's right click menu (the
+     image list carries no Drop shadow row; the picture's shadow is the Format options section),
+     Edit data and Chart type on a chart's */
+  const SHAPE_CONTEXT_ROWS = ['format.textFitting', 'format.changeShape', 'format.dropShadow'];
   const CHART_CONTEXT_ROWS = ['format.editData', 'format.chartType'];
 
   const iconsOn = await t.setAdvanced(true);
@@ -1788,7 +1807,7 @@ async function productRound(t) {
     .then((r) => r.ok === true);
   await t.step(
     'menus.icons.format-rows',
-    "open the Format menu with the picture selected and read every row of 3.3, the submenus hovered; the shape's right click menu for Change shape; the chart's for Edit data and Chart type",
+    "open the Format menu with the picture selected and read every row of 3.3, the submenus hovered; the shape's right click menu for Text fitting and Change shape; the chart's for Edit data and Chart type",
     'each row draws an icon',
     async () => {
       await t.clearAll();

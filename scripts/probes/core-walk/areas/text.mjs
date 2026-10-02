@@ -102,6 +102,18 @@ export const IDS = [
 
 const MARK_SEL = 'b, strong, i, em, u, s, [data-mark], a, span[style]';
 
+/**
+ * Text fitting from the box's right click menu: the menus' one way to the section since Round 1
+ * (docs/NEXT.md 4.1.3 item 20; audit-clutter 100: the Format menu's row left). The caller selects
+ * the box first, as the menu bar path had it.
+ */
+async function textFittingFromMenu(t, id) {
+  const b = await t.boxOf(id);
+  const c = t.center(b.free);
+  await t.rightClickAt(c.x, c.y);
+  await t.clickContextRow('format.textFitting');
+}
+
 export async function run(t) {
   const { page, BASE } = t;
   const T = t.deck.titleSlide;
@@ -1635,12 +1647,12 @@ export async function run(t) {
   );
   await t.step(
     'text.format-menu.text-fitting',
-    'Format > Text fitting with the text box selected',
+    "Text fitting from the text box's right click menu",
     'Format options opens for the box',
     async () => {
       await t.clearAll();
       await t.selectObject(F.id);
-      await t.menuPath('format', 'format.textFitting');
+      await textFittingFromMenu(t, F.id);
       await t.waitControl('panel.formatOptions', 6000);
       const open = await t.has('[data-control="panel.formatOptions"]');
       /* the section is waited for and judged (b1 R14): the row opens the panel at Text fitting,
@@ -2804,12 +2816,12 @@ async function productRound(t) {
     );
   await t.step(
     'text.format-options.padding-grid',
-    'select the box, Format > Text fitting; read the Padding fields',
+    'select the box, Text fitting from its right click menu; read the Padding fields',
     'one Padding head, Top, Bottom, Left, Right in two by two, the unit inside the field, labels at 12.5 px in ink-2',
     async () => {
       await t.clearAll();
       await t.selectObject(FIT);
-      await t.menuPath('format', 'format.textFitting');
+      await textFittingFromMenu(t, FIT);
       await t.waitControl('panel.formatOptions', 6000);
       await page
         .locator('[data-control="panel.formatOptions"] [data-section="textFitting"]')
@@ -2884,12 +2896,12 @@ async function productRound(t) {
   );
   await t.step(
     'text.format-options.remembers-section',
-    'collapse Text fitting, close the panel, reopen from the toolbar; then Format > Text fitting',
-    'Size & rotation is open and Text fitting stays collapsed; Format > Text fitting opens the panel with Text fitting alone',
+    'collapse Text fitting, close the panel, reopen from the toolbar; then Text fitting from the right click menu',
+    'Size & rotation is open and Text fitting stays collapsed; Text fitting from the right click menu opens the panel with Text fitting alone',
     async () => {
       await t.clearAll();
       await t.selectObject(FIT);
-      await t.menuPath('format', 'format.textFitting');
+      await textFittingFromMenu(t, FIT);
       await t.waitControl('panel.formatOptions', 6000);
       const head = page
         .locator(
@@ -2913,7 +2925,7 @@ async function productRound(t) {
       const reopened = await sectionsState();
       await closePanel();
       await t.selectObject(FIT);
-      await t.menuPath('format', 'format.textFitting');
+      await textFittingFromMenu(t, FIT);
       await t.waitControl('panel.formatOptions', 6000);
       await t.sleep(400);
       const fromMenu = await sectionsState();
@@ -2933,7 +2945,7 @@ async function productRound(t) {
           byId(reopened, 'size') === true &&
           byId(reopened, 'textFitting') === false &&
           fromMenuAlone,
-        observed: `reopened from the toolbar: ${reopened.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}; Format > Text fitting: ${fromMenu.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}`,
+        observed: `reopened from the toolbar: ${reopened.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}; Text fitting from the right click menu: ${fromMenu.map((s) => `${s.id} ${s.open ? 'open' : 'closed'}`).join(', ')}`,
       };
     },
   );
@@ -2944,7 +2956,7 @@ async function productRound(t) {
     async () => {
       await t.clearAll();
       await t.selectObject(FIT);
-      await t.menuPath('format', 'format.textFitting');
+      await textFittingFromMenu(t, FIT);
       await t.waitControl('panel.formatOptions', 6000);
       const shrink = page
         .locator(

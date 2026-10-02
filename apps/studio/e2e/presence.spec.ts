@@ -352,10 +352,9 @@ test('a second person appears as a chip without moving the row; the roster lists
 
   /* the announcements region speaks on the next join once it is on */
   await pageA.locator('[data-control="menubar.tools"]').click();
-  await pageA.locator('[data-menu-item="tools.accessibilitySettings"]').hover();
-  await pageA
-    .locator('[data-menu-item="tools.accessibilitySettings.collaboratorAnnouncements"]')
-    .click();
+  /* under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
+  await pageA.locator('[data-menu-item="tools.preferences"]').hover();
+  await pageA.locator('[data-menu-item="tools.preferences.collaboratorAnnouncements"]').click();
   await expect(pageA.locator('[data-control="presence.announcements"]')).toHaveAttribute(
     'aria-live',
     'polite',

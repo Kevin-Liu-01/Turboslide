@@ -487,9 +487,9 @@ export async function run(t) {
       const returned = /\[menubar\.file\]/.test(active);
       let trapped = null;
       let leaks = 0;
-      const reach = await t.reachRow('insert', 'insert.logo');
+      const reach = await t.reachRow('insert', 'insert.image', 'insert.image.logo');
       if (reach.present) {
-        await t.menuPath('insert', 'insert.logo');
+        await t.menuPath('insert', 'insert.image', 'insert.image.logo');
         const logo = await t
           .waitControl('dialog.logo', 8000)
           .then(() => true)
@@ -596,7 +596,7 @@ export async function run(t) {
   await t.step(
     'chrome.words.one-spelling',
     "every menu label and tooltip read; File > Open; the Download submenu; Details; the Download dialog's modes; the shortcuts dialog",
-    'no British spelling; "Open" without an ellipsis; the formats first, a divider, then Download options; no "(change"; Pictures and Editable text; Paint format once',
+    'no British spelling; "Open" without an ellipsis; the formats first, a divider, then More formats with Download options last after a divider; no "(change"; Pictures and Editable text; Paint format once',
     async () => {
       await t.clearAll();
       const facts = [];
@@ -604,6 +604,7 @@ export async function run(t) {
       const british = [];
       let fileOpen = null;
       let downloadOrder = null;
+      let moreOrder = null;
       for (const menuId of MENUS) {
         await t.openMenu(menuId);
         const rows = await page.evaluate(
@@ -632,26 +633,31 @@ export async function run(t) {
           await t
             .hoverRow('file.download', '[data-control="menu.file.download.pdf"]')
             .catch(() => undefined);
-          downloadOrder = await page.evaluate(() => {
-            const root = document.querySelector('#ts-menu-file');
-            const items = [
-              ...(root?.querySelectorAll(
-                '[data-control^="menu.file.download."], .ts-menu-divider',
-              ) ?? []),
-            ].filter((el) => el.getClientRects().length > 0);
-            const sub = items.filter((el) =>
-              el.matches('.ts-menu-divider')
-                ? el
-                    .closest('.ts-menu-group')
-                    ?.querySelector('[data-control^="menu.file.download."]') !== null
-                : true,
-            );
-            return sub.map((el) =>
-              el.matches('.ts-menu-divider')
-                ? '|'
-                : (el.getAttribute('data-control') ?? '').replace('menu.file.download.', ''),
-            );
-          });
+          /* one submenu's own rows and dividers, in order (Menu.tsx draws a submenu inside the
+             parent row's group with the id <parent id>-<row id>) */
+          const orderOf = (menuElementId) =>
+            page.evaluate((id) => {
+              const root = document.getElementById(id);
+              if (!root) return null;
+              const out = [];
+              for (const group of root.querySelectorAll(':scope > .ts-menu-group')) {
+                if (group.querySelector(':scope > .ts-menu-divider')) out.push('|');
+                const row = group.querySelector(':scope > [data-menu-item]');
+                if (row && row.getClientRects().length > 0)
+                  out.push(
+                    (row.getAttribute('data-menu-item') ?? '').replace('file.download.', ''),
+                  );
+              }
+              return out;
+            }, menuElementId);
+          downloadOrder = await orderOf('ts-menu-file-file.download');
+          /* Round 1 (docs/NEXT.md 4.1.3 item 20): the web page, the bundle and Download options
+             are under More formats */
+          await t
+            .hoverRow('file.download.more', '[data-control="menu.file.download.options"]')
+            .catch(() => undefined);
+          moreOrder = await orderOf('ts-menu-file-file.download-file.download.more');
+          await t.press('Escape');
         }
         await t.press('Escape', 2);
         await t.sleep(120);
@@ -673,11 +679,18 @@ export async function run(t) {
       const openOk = fileOpen === 'Open';
       ok = ok && openOk;
       facts.push(`File's row reads "${fileOpen}"`);
-      const optionsIndex = downloadOrder?.indexOf('options') ?? -1;
-      const dividerBeforeOptions = optionsIndex > 0 && downloadOrder[optionsIndex - 1] === '|';
-      const optionsLast = optionsIndex >= 0 && optionsIndex === downloadOrder.length - 1;
-      ok = ok && dividerBeforeOptions && optionsLast;
-      facts.push(`Download rows ${downloadOrder?.join(' ') ?? 'unread'}`);
+      const moreLast =
+        downloadOrder !== null &&
+        downloadOrder.length >= 2 &&
+        downloadOrder[downloadOrder.length - 1] === 'more' &&
+        downloadOrder[downloadOrder.length - 2] === '|';
+      const optionsIndex = moreOrder?.indexOf('options') ?? -1;
+      const dividerBeforeOptions = optionsIndex > 0 && moreOrder[optionsIndex - 1] === '|';
+      const optionsLast = optionsIndex >= 0 && optionsIndex === moreOrder.length - 1;
+      ok = ok && moreLast && dividerBeforeOptions && optionsLast;
+      facts.push(
+        `Download rows ${downloadOrder?.join(' ') ?? 'unread'}; More formats ${moreOrder?.join(' ') ?? 'unread'}`,
+      );
       /* Details' Last edit */
       await t.menuPath('file', 'file.details');
       await t.waitControl('dialog.details', 6000).catch(() => undefined);
@@ -688,7 +701,7 @@ export async function run(t) {
       ok = ok && lastEditOk;
       facts.push(`Last edit "${lastEdit}"`);
       /* the Download dialog's modes */
-      await t.menuPath('file', 'file.download', 'file.download.options');
+      await t.menuPath('file', 'file.download', 'file.download.more', 'file.download.options');
       await t.waitControl('dialog.download.type', 8000).catch(() => undefined);
       const modes = await page.evaluate(() =>
         ['flatten', 'native'].map((m) =>

@@ -1557,23 +1557,32 @@ export async function run(t) {
 
   await t.step(
     'shaders.view.play-setting',
-    'View > Play shaders; read the three rows; pick Off; reload; the show Options menu; the default back',
+    'Tools > Preferences > Play shaders; read the three rows; pick Off; reload; the show Options menu; the default back',
     'On, In the show only and Off with In the show only checked by default; the pick is stored and describe reads it; the Options menu mirrors it',
     async () => {
-      const r = await t.reachRow('view', 'view.playShaders');
+      /* under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
+      const r = await t.reachRow('tools', 'tools.preferences', 'tools.preferences.playShaders');
       if (!r.present)
         return t.notBuilt(
-          'view.playShaders',
+          'tools.preferences.playShaders',
           MENU_LANE,
-          'no Play shaders row in the View menu (P1, FEATURES.md 5.6)',
+          'no Play shaders row under Tools > Preferences (P1, FEATURES.md 5.6)',
         );
       await t.clearAll();
-      await t.openMenu('view');
+      await t.openMenu('tools');
       await t
-        .hoverRow('view.playShaders', '[data-control^="menu.view.playShaders."]')
+        .hoverRow('tools.preferences', '[data-control="menu.tools.preferences.playShaders"]')
+        .catch(() => undefined);
+      await t
+        .hoverRow(
+          'tools.preferences.playShaders',
+          '[data-control^="menu.tools.preferences.playShaders."]',
+        )
         .catch(() => undefined);
       await t.sleep(300);
-      const rows = (await t.menuRows('view')).filter((x) => x.id.startsWith('view.playShaders.'));
+      const rows = (await t.menuRows('tools')).filter((x) =>
+        x.id.startsWith('tools.preferences.playShaders.'),
+      );
       await t.closeMenus();
       const labels = rows.map((x) => x.label.replace(/\s+/g, ' ').trim());
       const checked = rows.filter((x) => x.checked === 'true').map((x) => x.label.trim());
@@ -1583,7 +1592,7 @@ export async function run(t) {
       let afterOff = null;
       let afterReload = null;
       if (offRow) {
-        await t.menuPath('view', 'view.playShaders', offRow.id);
+        await t.menuPath('tools', 'tools.preferences', 'tools.preferences.playShaders', offRow.id);
         afterOff = await t.pollUntil(setting, (v) => v !== default1, 5000).catch(setting);
         await t.reloadTo(page.url());
         await t.settled();
@@ -1624,7 +1633,10 @@ export async function run(t) {
       await t.waitGone('[data-control="present.show"]', 8000);
       /* the default back */
       const showRow = rows.find((x) => /in the show only/i.test(x.label)) ?? null;
-      if (showRow) await t.menuPath('view', 'view.playShaders', showRow.id).catch(() => undefined);
+      if (showRow)
+        await t
+          .menuPath('tools', 'tools.preferences', 'tools.preferences.playShaders', showRow.id)
+          .catch(() => undefined);
       const restored = await setting();
       return {
         ok:

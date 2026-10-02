@@ -261,6 +261,10 @@ test('File > Download > Turboslide bundle (.zip) downloads the deck from the edi
   const downloadRow = page.locator('[data-menu-item="file.download"]');
   await expect(downloadRow).toBeVisible();
   await downloadRow.click();
+  /* under More formats since Round 1 (docs/NEXT.md 4.1.3 item 20) */
+  const moreRow = page.locator('[data-menu-item="file.download.more"]');
+  await expect(moreRow).toBeVisible();
+  await moreRow.click();
   const entry = page.locator('[data-menu-item="file.download.zip"]');
   await expect(entry).toBeVisible();
   const download = page.waitForEvent('download', { timeout: 30_000 });

@@ -233,7 +233,7 @@ describe('the fixed fields', () => {
     expect(fixedFieldDoc('display')).toContain('Display face');
     expect(fixedFieldDoc('text')).toContain('Text face');
     for (const role of ['display', 'text'] as const) {
-      expect(fixedFieldDoc(role)).toContain('Slide > Edit theme');
+      expect(fixedFieldDoc(role)).toContain('Slide > Change theme');
       expect(fixedFieldDoc(role)).not.toMatch(/[.—]$/);
     }
   });

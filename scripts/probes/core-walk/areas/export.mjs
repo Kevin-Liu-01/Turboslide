@@ -47,7 +47,7 @@ export async function run(t) {
   /* the PDF row starts its download at once (docs/PRODUCT.md section 2 rank 8), so the dialog's way
      in is Download options with the PDF type picked; its control then reads dialog.download.pdf */
   const openPdf = async () => {
-    await t.menuPath('file', 'file.download', 'file.download.options');
+    await t.menuPath('file', 'file.download', 'file.download.more', 'file.download.options');
     await t.waitControl('dialog.download.type.pdf', 8000);
     await t.clickControl('dialog.download.type.pdf');
     await t.waitControl('dialog.download.pdf', 8000);
@@ -145,7 +145,7 @@ export async function run(t) {
           break;
         }
       }
-      await t.menuPath('file', 'file.download', 'file.download.options');
+      await t.menuPath('file', 'file.download', 'file.download.more', 'file.download.options');
       await t.waitControl('dialog.download.pptx', 8000);
       const flatten = await checked('dialog.download.mode.flatten');
       const native = await checked('dialog.download.mode.native');

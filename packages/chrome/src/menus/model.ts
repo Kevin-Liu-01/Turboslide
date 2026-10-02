@@ -284,8 +284,8 @@ export type MenuSetting =
   /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection,
      the one preference row; on by default, kept per browser; the Editor reads it as `linkDetection` */
   | 'linkDetection'
-  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, On, In the show only
-     or Off, per browser */
+  /* the features round, ship two (docs/FEATURES.md 5.6): Play shaders, On, In the show only or
+     Off, per browser; under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
   | 'playShaders';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
@@ -826,13 +826,16 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
       doc: 'Who has this presentation open; a chip jumps to that person’s slide and the list offers Follow',
     },
   ),
-  /* the product round (docs/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini */
+  /* the product round (docs/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini.
+     Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 49, 98): the one way into the panel, Tools >
+     Assist having left, and tailoring is Tools > Tailor for a customer alone (the panel's tailoring
+     starter opens that dialog), so the doc no longer names it */
   now('title.assist', 'Assist', panel('Assist'), {
     turboslide: true,
     icon: 'sparkles',
     key: shortcut('Cmd+J'),
     when: 'write',
-    doc: 'Tailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept',
+    doc: 'Ask for a shorter slide or for speaker notes; nothing changes until you accept',
   }),
   now('title.comments', 'Show all comments', panel('Comments'), {
     icon: 'chat',
@@ -1046,22 +1049,39 @@ const FILE: Menu = {
           'Scalable Vector Graphics (.svg, current slide)',
           DOWNLOAD_FORMATS,
         ),
-        now('file.download.html', 'Web page (.html)', action('build.run'), {
-          turboslide: true,
-          doc: 'One file that opens in any browser',
-        }),
-        now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
-          turboslide: true,
-          doc: 'The file Open and Import slides read',
-        }),
-        /* the product round (docs/PRODUCT.md section 2 rank 8): the format rows start their
-           download at once; this row opens the whole dialog. The polish round (docs/POLISH.md
-           2.6 item 73; audit-chrome item 33) lists it last, after a divider */
-        now('file.download.options', 'Download options', dialog('Download options'), {
-          turboslide: true,
-          dividerBefore: true,
-          doc: 'The file type and the modes, Include skipped slides and Include speaker notes',
-        }),
+        /* Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 103): the four Google formats first,
+           then More formats with the two Turboslide formats and the whole dialog, so Download
+           draws five rows. The three rows keep their ids (editor-shell.ts runs the web page and
+           the file by id; the matrix rows name them); a driver hovers `file.download.more` first.
+           The clutter audit put the two formats inside the dialog, which knows PowerPoint and PDF
+           alone (dialogs/Download.tsx), so they stay rows of the submenu (round1/build/b3a.md 10) */
+        sub(
+          'file.download.more',
+          'More formats',
+          [
+            now('file.download.html', 'Web page (.html)', action('build.run'), {
+              turboslide: true,
+              doc: 'One file that opens in any browser',
+            }),
+            now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
+              turboslide: true,
+              doc: 'The file Open and Import slides read',
+            }),
+            /* the product round (docs/PRODUCT.md section 2 rank 8): the format rows start their
+               download at once; this row opens the whole dialog. The polish round (docs/POLISH.md
+               2.6 item 73; audit-chrome item 33) lists it last, after a divider */
+            now('file.download.options', 'Download options', dialog('Download options'), {
+              turboslide: true,
+              dividerBefore: true,
+              doc: 'The file type and the modes, Include skipped slides and Include speaker notes',
+            }),
+          ],
+          {
+            turboslide: true,
+            dividerBefore: true,
+            doc: 'A web page, a Turboslide bundle, or PowerPoint and PDF with their options',
+          },
+        ),
       ],
       /* SPEC-3 6.2: the Download rows follow the export capability (the owner's download switch) */
       { when: 'export' },
@@ -1356,32 +1376,12 @@ const VIEW: Menu = {
       ],
       { dividerBefore: true, when: 'comment' },
     ),
-    /* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md R1): three radios over one
-       per browser setting; the editor mount and the show read it, reduced motion forces Off */
-    sub(
-      'view.playShaders',
-      'Play shaders',
-      [
-        now('view.playShaders.on', 'On', toggle('playShaders', 'on'), {
-          doc: 'Shaders move on the slide while you edit and in the show',
-        }),
-        now('view.playShaders.show', 'In the show only', toggle('playShaders', 'show'), {
-          doc: 'Shaders hold their frame while you edit and move in the show',
-        }),
-        now('view.playShaders.off', 'Off', toggle('playShaders', 'off'), {
-          doc: 'Shaders show their frame everywhere',
-        }),
-      ],
-      {
-        turboslide: true,
-        icon: 'cube',
-        dividerBefore: true,
-        terms: ['shader', 'animation', 'motion', 'reduced motion'],
-      },
-    ),
+    /* Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 101): Play shaders and Appearance moved
+       to Tools > Preferences (`tools.preferences.playShaders`, `tools.preferences.appearance`) */
     now('view.fullScreen', 'Full screen', toggle('compact'), {
       key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
       icon: 'fullscreen',
+      dividerBefore: true,
       doc: 'Hides the menus and the toolbar; Esc restores them',
     }),
     now('view.showSections', 'Show sections', toggle('sections'), {
@@ -1390,21 +1390,6 @@ const VIEW: Menu = {
       dividerBefore: true,
       doc: 'Section names between the slides in the filmstrip',
     }),
-    sub(
-      'view.appearance',
-      'Appearance',
-      [
-        now('view.appearance.light', 'Light', toggle('appearance', 'light')),
-        now('view.appearance.dark', 'Dark', toggle('appearance', 'dark')),
-        now('view.appearance.match', 'Match the presentation', toggle('appearance', 'match')),
-      ],
-      {
-        turboslide: true,
-        icon: 'swatch',
-        /* docs/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
-        doc: 'Light or dark chrome. Match follows the presentation’s own appearance',
-      },
-    ),
   ],
 };
 
@@ -1449,14 +1434,9 @@ const INSERT: Menu = {
       ],
       { icon: 'photo' },
     ),
-    /* the features round (docs/FEATURES.md 4.3; build/b1.md R1): Insert > Logo in the default view,
-       with the finder terms so Search the menus "logo" answers Logo first (audit-logos 12) */
-    now('insert.logo', 'Logo', dialog('Logo'), {
-      turboslide: true,
-      icon: 'tag',
-      doc: 'A company logo from thesvg.org, or your own',
-      terms: ['logo', 'brand', 'company', 'mark'],
-    }),
+    /* the features round (docs/FEATURES.md 4.3) drew Insert > Logo at the top level as well; Round 1
+       (docs/NEXT.md 4.1.3 item 20; audit-clutter 47, 96) keeps the one row, Insert > Image > Logo,
+       which carries the finder terms, so Search the menus "logo" still answers Logo */
     now('insert.textBox', 'Text box', action('block.insert'), {
       icon: 'text',
       doc: 'Click to place a box, or drag to draw one',
@@ -2095,14 +2075,15 @@ const FORMAT: Menu = {
       enabled: 'blockSelected',
       doc: 'The description a screen reader reads',
     }),
-    /* docs/FOCUS.md 2.3 lists Text fitting among the Format menu's rows and the matrix row
-       `text.format-menu.text-fitting` drives it from the menu bar (VERIFICATION F18), so the row
-       is drawn in the Format menu as well as on the text block's right-click menu; Google keeps
-       the section inside Format options alone, hence `turboslide` */
+    /* Text fitting opens Format options at its section. docs/FOCUS.md 2.3 drew it in the Format
+       menu too; Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 51, 100) keeps it where Google
+       keeps it, inside Format options, and on the right click menus of a text box and a shape,
+       with Search the menus: `contextOnly` takes it off the menu bar alone */
     now('format.textFitting', 'Text fitting', panel('Format options'), {
       icon: 'arrows-pointing-in',
       enabled: 'textBlockSelected',
       turboslide: true,
+      contextOnly: true,
       doc: 'Do not autofit, Shrink text on overflow, or Resize shape to fit text',
     }),
     now('format.dropShadow', 'Drop shadow', panel('Format options'), {
@@ -2229,15 +2210,22 @@ const SLIDE: Menu = {
       },
     ),
     later('slide.transition', 'Transition', STILL_SLIDES),
-    /* the product round (docs/PRODUCT.md 4.1): Edit theme opens the Brand kit panel, the deck's
-       colours, faces, logo, footer, slide numbers and frame */
-    now('slide.editTheme', 'Edit theme', panel('Brand kit'), {
+    /* the product round (docs/PRODUCT.md 4.1) drew Edit theme and Change theme as two rows that open
+       one panel. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 50, 99) keeps Change theme;
+       Google's Edit theme stays in its position as an omitted row, so the parity record holds it */
+    omit(
+      'slide.editTheme',
+      'Edit theme',
+      'Slide > Change theme and the toolbar Theme button open the one panel that edits the theme',
+    ),
+    /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
+       light and dark appearances (docs/RETURN.md 2.13), the Appearance section of the Brand kit
+       panel, which holds the deck's colours, faces, logo, footer, slide numbers and frame */
+    now('slide.changeTheme', 'Change theme', panel('Brand kit'), {
+      icon: 'swatch',
       dividerBefore: true,
       doc: 'The colors, faces, logo, footer, slide numbers and frame of this presentation',
     }),
-    /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
-       light and dark appearances (docs/RETURN.md 2.13), the Appearance section of the Brand kit panel */
-    now('slide.changeTheme', 'Change theme', panel('Brand kit'), { icon: 'swatch' }),
   ],
 };
 
@@ -2457,34 +2445,99 @@ const TOOLS: Menu = {
       advanced: true,
       doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
     }),
-    /* the product round (docs/PRODUCT.md section 2 rank 9): the one preference Turboslide keeps,
-       link detection as you type; text fitting is set per text box in Format options */
+    /* the product round (docs/PRODUCT.md section 2 rank 9): link detection as you type; text fitting
+       is set per text box in Format options. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 83,
+       101, 102): the browser's preferences in one submenu, so Tools opens on a named group and the
+       collapse rule of `visibleItems` no longer draws a lone toggle without its group's name. View >
+       Play shaders, View > Appearance and the collaborator announcements of Accessibility settings
+       moved here with new ids under `tools.preferences.`; their settings are the same */
     sub('tools.preferences', 'Preferences', [
       now('tools.preferences.linkDetection', 'Link detection', toggle('linkDetection'), {
         turboslide: true,
         doc: 'A web or mail address becomes a link when you type a space or Enter after it',
       }),
-    ]),
-    /* SPEC-3 0.42, 4.9, 13.1: a submenu with the one row Turboslide can honour; the screen reader
-       and braille rows stay out with their reason */
-    sub('tools.accessibilitySettings', 'Accessibility settings', [
+      /* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md R1): three radios over one
+         per browser setting; the editor mount and the show read it, reduced motion forces Off */
+      sub(
+        'tools.preferences.playShaders',
+        'Play shaders',
+        [
+          now('tools.preferences.playShaders.on', 'On', toggle('playShaders', 'on'), {
+            doc: 'Shaders move on the slide while you edit and in the show',
+          }),
+          now(
+            'tools.preferences.playShaders.show',
+            'In the show only',
+            toggle('playShaders', 'show'),
+            { doc: 'Shaders hold their frame while you edit and move in the show' },
+          ),
+          now('tools.preferences.playShaders.off', 'Off', toggle('playShaders', 'off'), {
+            doc: 'Shaders show their frame everywhere',
+          }),
+        ],
+        {
+          turboslide: true,
+          icon: 'cube',
+          terms: ['shader', 'animation', 'motion', 'reduced motion'],
+        },
+      ),
+      sub(
+        'tools.preferences.appearance',
+        'Appearance',
+        [
+          now('tools.preferences.appearance.light', 'Light', toggle('appearance', 'light')),
+          now('tools.preferences.appearance.dark', 'Dark', toggle('appearance', 'dark')),
+          now(
+            'tools.preferences.appearance.match',
+            'Match the presentation',
+            toggle('appearance', 'match'),
+          ),
+        ],
+        {
+          turboslide: true,
+          icon: 'swatch',
+          /* docs/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
+          doc: 'Light or dark chrome. Match follows the presentation’s own appearance',
+        },
+      ),
+      /* SPEC-3 0.42, 4.9, 13.1: the one row of Google's Accessibility settings Turboslide can
+         honour; Google draws it under Accessibility settings, hence `turboslide` here */
       now(
-        'tools.accessibilitySettings.collaboratorAnnouncements',
+        'tools.preferences.collaboratorAnnouncements',
         'Turn on collaborator announcements',
         toggle('announce'),
-        { doc: 'Your screen reader says who joined, who left and who is on which slide' },
-      ),
-      omit(
-        'tools.accessibilitySettings.screenReader',
-        'Turn on screen reader support',
-        'The browser’s screen reader works on the DOM',
-      ),
-      omit(
-        'tools.accessibilitySettings.braille',
-        'Turn on braille support',
-        'The browser’s screen reader works on the DOM',
+        {
+          turboslide: true,
+          dividerBefore: true,
+          doc: 'Your screen reader says who joined, who left and who is on which slide',
+        },
       ),
     ]),
+    /* SPEC-3 0.42, 13.1: Google's Accessibility settings, kept in its position for the parity
+       record; its one live row is Tools > Preferences > Turn on collaborator announcements, so
+       every row here is omitted and the submenu is not drawn */
+    sub(
+      'tools.accessibilitySettings',
+      'Accessibility settings',
+      [
+        omit(
+          'tools.accessibilitySettings.collaboratorAnnouncements',
+          'Turn on collaborator announcements',
+          'Tools > Preferences holds it',
+        ),
+        omit(
+          'tools.accessibilitySettings.screenReader',
+          'Turn on screen reader support',
+          'The browser’s screen reader works on the DOM',
+        ),
+        omit(
+          'tools.accessibilitySettings.braille',
+          'Turn on braille support',
+          'The browser’s screen reader works on the DOM',
+        ),
+      ],
+      { omitReason: 'Tools > Preferences holds the one row Turboslide honours' },
+    ),
     /* SPEC-3 5.7, 13.1, 13.3: the Activity panel for editors, and for commenters when the owner
        allows; the row opens the panel itself (a split, like the Slideshow button) and its one
        child is the panel's Later tab, Viewers, with its clause */
@@ -2499,19 +2552,15 @@ const TOOLS: Menu = {
         }),
       ],
     }),
-    /* the product round (docs/PRODUCT.md sections 5 and 6): the deterministic tailoring pass and
-       the assistant's panel, both under Tools beside Check slides */
+    /* the product round (docs/PRODUCT.md sections 5 and 6): the deterministic tailoring pass beside
+       Check slides. Tools > Assist left in Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 48,
+       97): the title row's Assist and Cmd+J open the panel */
     now('tools.tailor', 'Tailor for a customer', dialog('Tailor for a customer'), {
       turboslide: true,
       icon: 'sparkles',
       dividerBefore: true,
       when: 'write',
       doc: 'Replaces the customer name everywhere, swaps the pictures named after the old one and skips slides, as one change',
-    }),
-    now('tools.assist', 'Assist', panel('Assist'), {
-      turboslide: true,
-      when: 'write',
-      doc: 'Tailor the deck for a customer, ask for a shorter slide or for speaker notes; nothing changes until you accept',
     }),
     now('tools.checkSlides', 'Check slides', panel('Suggestions for this slide'), {
       turboslide: true,
@@ -2758,10 +2807,6 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'view.mode.editing': 'pencil',
   'view.mode.commenting': 'chat',
   'view.mode.viewing': 'eye',
-  'view.playShaders': 'play',
-  'view.appearance.light': 'sun',
-  'view.appearance.dark': 'moon',
-  'view.appearance.match': 'computer-desktop',
   'view.motion': 'film',
   'view.themeBuilder': 'swatch',
   'insert.image.stockWeb': 'photo',
@@ -2815,7 +2860,6 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'slide.moveSlide.toBeginning': 'bars-arrow-up',
   'slide.moveSlide.down': 'bars-arrow-down',
   'slide.moveSlide.toEnd': 'bars-arrow-down',
-  'slide.editTheme': 'swatch',
   'arrange.order.bringToFront': 'chevron-up',
   'arrange.order.bringForward': 'chevron-up',
   'arrange.order.sendBackward': 'chevron-down',
@@ -2840,11 +2884,17 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'arrange.regroup': 'rectangle-group',
   'tools.preferences': 'cog-6-tooth',
   'tools.preferences.linkDetection': 'cog-6-tooth',
+  /* Round 1 (docs/NEXT.md 4.1.3 item 20): the rows that moved from View and Accessibility settings
+     keep their glyphs */
+  'tools.preferences.playShaders': 'play',
+  'tools.preferences.appearance.light': 'sun',
+  'tools.preferences.appearance.dark': 'moon',
+  'tools.preferences.appearance.match': 'computer-desktop',
+  'tools.preferences.collaboratorAnnouncements': 'eye',
   'tools.accessibilitySettings': 'eye',
   'tools.accessibilitySettings.collaboratorAnnouncements': 'eye',
   'tools.accessibilitySettings.screenReader': 'eye',
   'tools.accessibilitySettings.braille': 'eye',
-  'tools.assist': 'sparkles',
   'tools.advancedTools': 'wrench-screwdriver',
   'tools.explore': 'search',
   'tools.linkedObjects': 'link',

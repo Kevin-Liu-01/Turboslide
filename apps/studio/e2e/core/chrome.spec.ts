@@ -19,6 +19,7 @@ import {
   teardownAll,
   title,
 } from './lib';
+import { chromeMenus } from './chrome-menus';
 
 // The chrome at two viewports, the spec rows (docs/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
 // plate-four-columns`, `share.dialog.more-row` and `chrome.toolbar.fold-any-width` with the driver
@@ -328,22 +329,28 @@ test(title('chrome.toolbar.fold-any-width'), async () => {
 });
 
 /**
- * Insert > Logo on a page (the switch on when the row is parked); answers whether the dialog is
- * drawn (the features round, docs/FEATURES.md 4.3; the menu row is the integrator's by request).
+ * Insert > Image > Logo on a page (the switch on when the row is parked); answers whether the
+ * dialog is drawn (the features round, docs/FEATURES.md 4.3; the one Logo row since Round 1,
+ * docs/NEXT.md 4.1.3 item 20).
  */
 async function openLogoDialog(page: Page): Promise<{ open: boolean; switched: boolean }> {
   const present = async (): Promise<boolean> => {
     await ctl(page, 'menubar.insert').click();
     await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
-    const there = await ctl(page, 'menu.insert.logo')
-      .isVisible()
+    await ctl(page, 'menu.insert.image').hover();
+    const there = await page
+      .locator('[data-control="menu.insert.image.logo"]')
+      .first()
+      .waitFor({ timeout: 6000 })
+      .then(() => true)
       .catch(() => false);
     if (!there) {
+      await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
       await page.waitForTimeout(150);
       return false;
     }
-    await ctl(page, 'menu.insert.logo').click();
+    await ctl(page, 'menu.insert.image.logo').click();
     return ctl(page, 'dialog.logo')
       .waitFor({ timeout: 8000 })
       .then(() => true)
@@ -423,11 +430,7 @@ test(title('logos.picker.chrome-1280'), async () => {
   const { page, deck } = laptop;
   await openEditor(page, deck);
   const opened = await openLogoDialog(page);
-  if (!opened.open)
-    test.skip(
-      true,
-      'not on this build: insert.logo (docs/FEATURES.md 4.3, B1 by request in model.ts)',
-    );
+  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
   await ctl(page, 'dialog.logo.search').click();
   await page.keyboard.type('figma', { delay: 60 });
   await expect
@@ -449,8 +452,15 @@ test(title('logos.picker.chrome-1280'), async () => {
   test.info().annotations.push({ type: 'light', description: JSON.stringify(light) });
   expect(light!.perRow, `five tiles wide at ${light!.viewport}`).toBe(5);
   expect(light!.scrollsX, 'no horizontal scroll').toBe(0);
-  /* the dark appearance: View > Appearance > Dark, the dialog on ink with both halves in every tile */
-  await menuPath(page, 'view', 'view.appearance', 'view.appearance.dark').catch(() => undefined);
+  /* the dark appearance: Tools > Preferences > Appearance > Dark, the dialog on ink with both
+     halves in every tile */
+  await menuPath(
+    page,
+    'tools',
+    'tools.preferences',
+    'tools.preferences.appearance',
+    'tools.preferences.appearance.dark',
+  ).catch(() => undefined);
   await page.waitForTimeout(400);
   const again = await openLogoDialog(page);
   expect(again.open, 'the dialog opens in the dark appearance').toBe(true);
@@ -462,7 +472,13 @@ test(title('logos.picker.chrome-1280'), async () => {
   const dark = await logoGridFacts(page);
   await page.keyboard.press('Escape');
   await expect(ctl(page, 'dialog.logo')).toHaveCount(0, { timeout: 5000 });
-  await menuPath(page, 'view', 'view.appearance', 'view.appearance.light').catch(() => undefined);
+  await menuPath(
+    page,
+    'tools',
+    'tools.preferences',
+    'tools.preferences.appearance',
+    'tools.preferences.appearance.light',
+  ).catch(() => undefined);
   if (opened.switched) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
   test.info().annotations.push({ type: 'dark', description: JSON.stringify(dark) });
   expect(dark!.dark, `the dialog is on ink (${dark!.ground})`).toBe(true);
@@ -545,7 +561,11 @@ test(title('shaders.panel.section-groups'), async () => {
   if (skipped !== null) test.skip(true, skipped);
 });
 
+/* lane B3a of Round 1 (docs/NEXT.md 4.1.3 items 20 to 22): its rows live in chrome-menus.ts */
+const MENU_ROWS = chromeMenus(() => wide);
+
 coverage(import.meta.filename, [
+  ...MENU_ROWS,
   'slides.layout.plate-four-columns',
   'share.dialog.more-row',
   'chrome.toolbar.fold-any-width',

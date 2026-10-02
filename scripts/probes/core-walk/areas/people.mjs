@@ -284,12 +284,17 @@ export async function run(t) {
       (sel) => document.querySelector(sel)?.getAttribute('data-variant') ?? null,
       OWN_CHIP,
     );
-  /** The chrome's appearance (`data-theme` on the root) through View > Appearance. */
+  /** The chrome's appearance (`data-theme` on the root) through Tools > Preferences > Appearance (Round 1, docs/NEXT.md 4.1.3 item 20). */
   const chromeTheme = () =>
     page.evaluate(() => document.documentElement.getAttribute('data-theme'));
   const setChrome = async (mode) => {
     await t.surfaceClear({ dialogs: true });
-    await t.menuPath('view', 'view.appearance', `view.appearance.${mode}`);
+    await t.menuPath(
+      'tools',
+      'tools.preferences',
+      'tools.preferences.appearance',
+      `tools.preferences.appearance.${mode}`,
+    );
     return t
       .pollUntil(chromeTheme, (v) => (mode === 'match' ? true : v === mode), 5000)
       .catch(chromeTheme);

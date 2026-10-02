@@ -259,12 +259,8 @@ const SPEC_ROWS: Row[] = [
   row('view', 'now', ['view.mode.commenting'], { was3: 'omit' }),
   row('view', 'now', ['view.fullScreen']),
   row('view', 'now', ['view.showSections']),
-  row('view', 'now', [
-    'view.appearance',
-    'view.appearance.light',
-    'view.appearance.dark',
-    'view.appearance.match',
-  ]),
+  /* View > Appearance moved to Tools > Preferences in Round 1 (docs/NEXT.md 4.1.3 item 20); its row
+     is under 2.8 Tools below */
   /* 2.4 Insert */
   row('insert', 'now', ['insert.image.upload']),
   row('insert', 'omit', [
@@ -274,8 +270,9 @@ const SPEC_ROWS: Row[] = [
   ]),
   row('insert', 'now', ['insert.image.byUrl']),
   row('insert', 'now', ['insert.image.fromThisPresentation']),
-  /* the features round (docs/FEATURES.md 4.3): the Logo picker, in the menu and in the Image submenu */
-  row('insert', 'now', ['insert.logo', 'insert.image.logo']),
+  /* the features round (docs/FEATURES.md 4.3): the Logo picker in the Image submenu; the top level
+     Insert > Logo left in Round 1 (docs/NEXT.md 4.1.3 item 20) */
+  row('insert', 'now', ['insert.image.logo']),
   row('insert', 'now', ['insert.textBox']),
   /* SPEC-2 12: Audio and Video are present with the recording clause */
   row('insert', 'later', ['insert.audio', 'insert.video'], { was: 'omit' }),
@@ -470,8 +467,9 @@ const SPEC_ROWS: Row[] = [
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
   row('slide', 'later', ['slide.transition']),
-  /* the product round (docs/PRODUCT.md 4.1): Edit theme opens the Brand kit panel */
-  row('slide', 'now', ['slide.editTheme']),
+  /* the product round (docs/PRODUCT.md 4.1) drew Edit theme as a second way into the Brand kit
+     panel; Round 1 (docs/NEXT.md 4.1.3 item 20) omits it in Google's position */
+  row('slide', 'omit', ['slide.editTheme']),
   row('slide', 'now', ['slide.changeTheme']),
   /* 2.7 Arrange */
   row('arrange', 'now', [
@@ -528,13 +526,20 @@ const SPEC_ROWS: Row[] = [
   row('tools', 'now', ['tools.notificationSettings']),
   /* the product round (docs/PRODUCT.md section 2 rank 9): the one preference, Link detection */
   row('tools', 'now', ['tools.preferences', 'tools.preferences.linkDetection']),
-  /* SPEC-3 0.42, 13.1: the submenu with the one row Turboslide can honour */
-  row(
-    'tools',
-    'now',
-    ['tools.accessibilitySettings', 'tools.accessibilitySettings.collaboratorAnnouncements'],
-    { was3: 'omit' },
-  ),
+  /* the appearance (SPEC 2.12, a Turboslide row), under Tools > Preferences since Round 1 */
+  row('tools', 'now', [
+    'tools.preferences.appearance',
+    'tools.preferences.appearance.light',
+    'tools.preferences.appearance.dark',
+    'tools.preferences.appearance.match',
+  ]),
+  /* SPEC-3 0.42, 13.1: the one row of Accessibility settings Turboslide can honour, under Tools >
+     Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20); Google's submenu and its row stay in
+     Google's position as omitted rows */
+  row('tools', 'now', ['tools.preferences.collaboratorAnnouncements'], {
+    was3: 'omit',
+    omits: ['tools.accessibilitySettings', 'tools.accessibilitySettings.collaboratorAnnouncements'],
+  }),
   row('tools', 'omit', [
     'tools.accessibilitySettings.screenReader',
     'tools.accessibilitySettings.braille',
@@ -542,9 +547,9 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-3 5.7, 13.1, 13.3: the Activity panel and its one Later tab */
   row('tools', 'now', ['tools.activityDashboard'], { was3: 'omit' }),
   row('tools', 'later', ['tools.activityDashboard.viewers']),
-  /* the product round (docs/PRODUCT.md sections 5 and 6): Tailor for a customer and Assist */
+  /* the product round (docs/PRODUCT.md sections 5 and 6): Tailor for a customer; Tools > Assist left
+     in Round 1 (docs/NEXT.md 4.1.3 item 20) */
   row('tools', 'now', ['tools.tailor']),
-  row('tools', 'now', ['tools.assist']),
   row('tools', 'now', ['tools.checkSlides']),
   row('tools', 'now', ['tools.advanced.showSource']),
   row('tools', 'now', ['tools.advanced.sideBySide']),
@@ -604,7 +609,8 @@ const OTHER_ROWS: Row[] = [
   row('slideshow', 'later', ['title.slideshow.presentOnAnotherScreen']),
   row('slideshow', 'omit', ['title.slideshow.displayOptions']),
   row('context', 'now', ['format.altText']),
-  row('format', 'now', ['format.textFitting'], { was: 'later' }),
+  /* on the right click menus alone since Round 1 (docs/NEXT.md 4.1.3 item 20) */
+  row('context', 'now', ['format.textFitting'], { was: 'later' }),
   row('context', 'now', ['format.dropShadow']),
   row('context', 'now', ['format.changeShape']),
   row('context', 'now', ['format.editData']),
@@ -621,12 +627,13 @@ const OTHER_ROWS: Row[] = [
   row('arrange', 'now', ['arrange.regroup'], { was: 'omit' }),
   /* the focus round (docs/FOCUS.md 3.1): the one switch that shows the parked set, ours */
   row('tools', 'now', ['tools.advancedTools']),
-  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, ours */
-  row('view', 'now', [
-    'view.playShaders',
-    'view.playShaders.on',
-    'view.playShaders.show',
-    'view.playShaders.off',
+  /* the features round, ship two (docs/FEATURES.md 5.6): Play shaders, ours, under Tools >
+     Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
+  row('tools', 'now', [
+    'tools.preferences.playShaders',
+    'tools.preferences.playShaders.on',
+    'tools.preferences.playShaders.show',
+    'tools.preferences.playShaders.off',
   ]),
 ];
 
@@ -649,17 +656,20 @@ const COUNTS: Record<string, Counts> = {
   /* the product round adds Save as template and Download options (docs/PRODUCT.md 4.3, section 2 rank 8) */
   file: [26, 5, 5],
   edit: [11, 0, 0],
-  view: [16, 1, 2],
+  /* 15 since Round 1: Appearance moved to Tools > Preferences (docs/NEXT.md 4.1.3 item 20) */
+  view: [15, 1, 2],
   /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2); 23
      with the features round's Logo row (docs/FEATURES.md 4.3) */
   insert: [23, 3, 5],
   /* the product round adds Font, Add a caption and Use on every slide (docs/PRODUCT.md 4.2, section 2 rank 10, 4.4);
      the features round adds Tabular figures (docs/FEATURES.md 3.1 item 4) */
   format: [32, 2, 0],
-  /* Edit theme opens the Brand kit panel since the product round (docs/PRODUCT.md 4.1) */
-  slide: [9, 1, 0],
+  /* Edit theme opened the Brand kit panel from the product round (docs/PRODUCT.md 4.1) until Round 1
+     omitted it (docs/NEXT.md 4.1.3 item 20) */
+  slide: [8, 1, 1],
   arrange: [7, 0, 0],
-  /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/PRODUCT.md section 2 rank 9, 5, 6) */
+  /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/PRODUCT.md section 2 rank 9, 5, 6);
+     Round 1 (docs/NEXT.md 4.1.3 item 20): Assist left and Appearance joined Preferences */
   tools: [18, 2, 4],
   extensions: [2, 0, 2],
   help: [4, 0, 2],
@@ -805,10 +815,13 @@ describe('the SPEC rows', () => {
     const total = Object.values(derived).reduce(add, zero);
     /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2); 160 with the
        features round's Logo and Tabular figures rows (docs/FEATURES.md 4.3, 3.1 item 4) */
-    expect(total).toEqual([160, 15, 24]);
+    /* Round 1 (docs/NEXT.md 4.1.3 item 20): Tools > Assist left (one Now row fewer) and Edit
+       theme is omitted (one Now row to Omit) */
+    expect(total).toEqual([158, 15, 25]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
-       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two */
-    expect(total[0] + total[1] + total[2]).toBe(199);
+       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
+       198 after Round 1's cuts */
+    expect(total[0] + total[1] + total[2]).toBe(198);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -826,7 +839,7 @@ describe('the SPEC rows', () => {
       'view.livePointers',
       'view.mode.commenting',
       'insert.comment',
-      'tools.accessibilitySettings',
+      'tools.preferences.collaboratorAnnouncements',
       'tools.activityDashboard',
     ]);
     /* 13.1: the effects and the role predicates of the flipped rows */
@@ -866,8 +879,10 @@ describe('the SPEC rows', () => {
     expect(itemById('view.mode.commenting').when).toBe('comment');
     expect(itemById('view.mode').when).toBe('comment');
     expect(itemById('view.mode.editing').when).toBe('write');
-    expect(itemById('tools.accessibilitySettings').effect).toEqual({ kind: 'submenu' });
-    expect(itemById('tools.accessibilitySettings.collaboratorAnnouncements').effect).toEqual({
+    /* Round 1 (docs/NEXT.md 4.1.3 item 20): the row is under Tools > Preferences and Google's
+       Accessibility settings submenu is omitted in its position */
+    expect(itemById('tools.accessibilitySettings').status).toBe('omit');
+    expect(itemById('tools.preferences.collaboratorAnnouncements').effect).toEqual({
       kind: 'toggle',
       setting: 'announce',
     });
@@ -1034,7 +1049,7 @@ describe('the SPEC rows', () => {
   it('marks the twenty Turboslide additions of SPEC 2.12 as ours', () => {
     const twenty = [
       'view.showSections',
-      'view.appearance',
+      'tools.preferences.appearance',
       'insert.image.fromThisPresentation',
       'insert.icon',
       'insert.shader',
@@ -2233,18 +2248,23 @@ describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3
     expect(isPresent(item, ON)).toBe(true);
   });
 
-  it('draws Text fitting in the Format menu with the switch off, and keeps it on the text block menu (docs/FOCUS.md 2.3; VERIFICATION F18)', () => {
+  it('keeps Text fitting off the Format menu and on the text box and shape menus, with Search the menus (docs/NEXT.md 4.1.3 item 20; audit-clutter 100)', () => {
     const item = itemById('format.textFitting');
     expect(item.status).toBe('now');
-    expect(item.contextOnly).toBeUndefined();
+    expect(item.contextOnly).toBe(true);
     expect(item.advanced).toBeUndefined();
-    /* Google keeps the section inside Format options alone, so the menu row is ours */
+    /* Google keeps the section inside Format options alone, so the row is ours */
     expect(item.turboslide).toBe(true);
     const format = MENUS.find((menu) => menu.id === 'format');
     const bar = visibleItems(format?.items ?? [], { context: OFF }).map((each) => each.id);
-    expect(bar).toContain('format.textFitting');
+    expect(bar).not.toContain('format.textFitting');
     expect(contextMenuIds('textBlock')).toContain('format.textFitting');
+    expect(contextMenuIds('shape')).toContain('format.textFitting');
     expect(finderRows(OFF).some((row) => row.item.id === 'format.textFitting')).toBe(true);
+    /* the Format menu's top rows: ten, from eleven (audit-clutter 100) */
+    expect(visibleItems(format?.items ?? [], { context: OFF, collapseSingles: true })).toHaveLength(
+      10,
+    );
   });
 
   it('hides a flagged row and a Later row while off, draws both while on, and keeps the action registered', () => {
@@ -2519,18 +2539,19 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(() => itemById('insert.material')).toThrow();
   });
 
-  it('View > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/FEATURES.md 5.6; build/b1.md R1)', () => {
-    const sub = itemById('view.playShaders');
+  it('Tools > Preferences > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20)', () => {
+    const sub = itemById('tools.preferences.playShaders');
     expect(sub.label).toBe('Play shaders');
     expect(sub.turboslide).toBe(true);
     expect(sub.advanced).toBeUndefined();
+    expect(itemPath(sub.id)).toEqual(['Tools', 'Preferences', 'Play shaders']);
     expect((sub.items ?? []).map((item) => item.id)).toEqual([
-      'view.playShaders.on',
-      'view.playShaders.show',
-      'view.playShaders.off',
+      'tools.preferences.playShaders.on',
+      'tools.preferences.playShaders.show',
+      'tools.preferences.playShaders.off',
     ]);
     for (const value of ['on', 'show', 'off'] as const)
-      expect(itemById(`view.playShaders.${value}`).effect).toEqual({
+      expect(itemById(`tools.preferences.playShaders.${value}`).effect).toEqual({
         kind: 'toggle',
         setting: 'playShaders',
         value,
@@ -2539,9 +2560,9 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       ...OFF,
       settings: { ...OFF.settings, playShaders: 'show' },
     };
-    expect(isChecked(itemById('view.playShaders.show'), withDefault)).toBe(true);
-    expect(isChecked(itemById('view.playShaders.on'), withDefault)).toBe(false);
-    expect(isChecked(itemById('view.playShaders.off'), withDefault)).toBe(false);
+    expect(isChecked(itemById('tools.preferences.playShaders.show'), withDefault)).toBe(true);
+    expect(isChecked(itemById('tools.preferences.playShaders.on'), withDefault)).toBe(false);
+    expect(isChecked(itemById('tools.preferences.playShaders.off'), withDefault)).toBe(false);
     expect(isPresent(sub, OFF)).toBe(true);
   });
 
@@ -2780,7 +2801,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'arrange.group',
       'arrange.distribute.horizontally',
       'slide.changeTheme',
-      'view.appearance.dark',
+      'tools.preferences.appearance.dark',
       'view.showRuler',
       'view.fullScreen',
       'file.open',
@@ -2881,9 +2902,9 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'view.mode.editing',
       'view.mode.viewing',
       'view.fullScreen',
-      'view.appearance',
-      'view.appearance.light',
-      'view.appearance.match',
+      'tools.preferences.appearance',
+      'tools.preferences.appearance.light',
+      'tools.preferences.appearance.match',
       'insert.shape',
       /* the vector round (docs/VECTOR.md 2.6, item S7): the four glyph grids, Change shape and
          Mask image in the default view */
@@ -3028,12 +3049,19 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
       ...(item.items === undefined ? [] : ids(item.items, ctx)),
     ]);
 
-  it('lists Insert > Logo under the Image row in the default view, and Logo inside the Image submenu after Upload from computer', () => {
+  it('lists one Logo row, inside the Image submenu after Upload from computer, and none at the top of Insert (docs/NEXT.md 4.1.3 item 20; audit-clutter 96)', () => {
     const insert = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
-    expect(insert.indexOf('insert.logo')).toBeGreaterThan(insert.indexOf('insert.image'));
-    expect(insert.indexOf('insert.logo')).toBeLessThan(insert.indexOf('insert.textBox'));
+    expect(insert).not.toContain('insert.logo');
+    expect(findItem('insert.logo')).toBeUndefined();
     expect(insert.indexOf('insert.image.logo')).toBe(insert.indexOf('insert.image.upload') + 1);
-    for (const id of ['insert.logo', 'insert.image.logo', 'format.image.replaceImage.logo']) {
+    /* the Insert menu's top rows: thirteen, from fourteen */
+    expect(
+      visibleItems(MENUS.find((m) => m.id === 'insert')!.items, {
+        context: OFF,
+        collapseSingles: true,
+      }).map((item) => item.label),
+    ).not.toContain('Logo');
+    for (const id of ['insert.image.logo', 'format.image.replaceImage.logo']) {
       const item = itemById(id);
       expect(item.status, id).toBe('now');
       expect(item.advanced, `${id} in the default view`).not.toBe(true);
@@ -3041,7 +3069,7 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
       expect(item.effect).toEqual({ kind: 'dialog', title: 'Logo' });
       expect(resolveLabel(item, OFF)).toBe('Logo');
     }
-    expect(itemById('insert.logo').icon).toBe('tag');
+    expect(itemById('insert.image.logo').icon).toBe('tag');
   });
 
   it('answers Search the menus "logo" with Logo first, and "line up numbers" with Tabular figures', () => {
@@ -3059,8 +3087,7 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
       filterPalette(entries, query)
         .find((group) => group.group.id === 'menus')
         ?.rows.map((entry) => entry.id.replace(/^menu:/, '')) ?? [];
-    expect(listed('logo')[0]).toBe('insert.logo');
-    expect(listed('logo')).toContain('insert.image.logo');
+    expect(listed('logo')[0]).toBe('insert.image.logo');
     expect(listed('logo')).toContain('format.image.replaceImage.logo');
     expect(listed('line up numbers')).toContain('format.text.tabularFigures');
     const row = itemById('format.text.tabularFigures');
@@ -3146,7 +3173,6 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'format.image.replaceImage.byUrl': 'link',
       'format.image.replaceImage.logo': 'tag',
       'format.image.replaceImage.fromThisPresentation': 'document-duplicate',
-      'insert.logo': 'tag',
       'insert.textBox': 'text',
       'insert.shape': 'box',
       'insert.table': 'table',

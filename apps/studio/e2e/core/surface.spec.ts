@@ -549,29 +549,36 @@ test(title('surface.domain.build-commit'), async () => {
     ? ((await res.json().catch(() => null)) as { instance?: { commit?: string } } | null)
     : null;
   const commit = body?.instance?.commit ?? null;
-  /* View lists Play shaders on the build the round ships (the row only the current build draws) */
+  /* Tools > Preferences lists Play shaders on the build the round ships (the row only the current
+     build draws; it left the View menu for Tools > Preferences in Round 1, docs/NEXT.md 4.1.3
+     item 20) */
   await openEditor(page, deck);
-  await ctl(page, 'menubar.view').click();
-  await page.locator('#ts-menu-view').waitFor({ timeout: 8000 });
-  let playShaders = await ctl(page, 'menu.view.playShaders')
-    .isVisible()
-    .catch(() => false);
-  await page.keyboard.press('Escape');
+  const drawsPlayShaders = async (): Promise<boolean> => {
+    await ctl(page, 'menubar.tools').click();
+    await page.locator('#ts-menu-tools').waitFor({ timeout: 8000 });
+    await ctl(page, 'menu.tools.preferences')
+      .hover()
+      .catch(() => undefined);
+    const drawn = await page
+      .locator('[data-control="menu.tools.preferences.playShaders"]')
+      .first()
+      .waitFor({ timeout: 6000 })
+      .then(() => true)
+      .catch(() => false);
+    for (let i = 0; i < 3; i += 1) await page.keyboard.press('Escape');
+    return drawn;
+  };
+  let playShaders = await drawsPlayShaders();
   let switched = false;
   if (!playShaders) {
     await setAdvanced(page, true);
     switched = true;
-    await ctl(page, 'menubar.view').click();
-    await page.locator('#ts-menu-view').waitFor({ timeout: 8000 });
-    playShaders = await ctl(page, 'menu.view.playShaders')
-      .isVisible()
-      .catch(() => false);
-    await page.keyboard.press('Escape');
+    playShaders = await drawsPlayShaders();
     await setAdvanced(page, false);
   }
   test.info().annotations.push({
     type: 'build',
-    description: `HEAD ${head.slice(0, 12)}; /api/agent ${res ? res.status() : 'no bearer for this origin'} instance.commit ${commit ?? 'none'}; View > Play shaders drawn ${playShaders}${switched ? ' with the switch on' : ''}`,
+    description: `HEAD ${head.slice(0, 12)}; /api/agent ${res ? res.status() : 'no bearer for this origin'} instance.commit ${commit ?? 'none'}; Tools > Preferences > Play shaders drawn ${playShaders}${switched ? ' with the switch on' : ''}`,
   });
   expect(
     res,
@@ -583,7 +590,7 @@ test(title('surface.domain.build-commit'), async () => {
     head.startsWith(commit!) || commit!.startsWith(head.slice(0, 7)),
     `instance.commit ${commit} equals the checkout's HEAD ${head.slice(0, 12)}`,
   ).toBe(true);
-  expect(playShaders, 'the View menu lists Play shaders').toBe(true);
+  expect(playShaders, 'Tools > Preferences lists Play shaders').toBe(true);
   void isLocalBase;
 });
 

@@ -195,7 +195,7 @@ export async function run(t) {
 
   await t.step(
     'brand.panel.opens',
-    'Slide > Change theme, the toolbar Theme button and Slide > Edit theme',
+    'Slide > Change theme and the toolbar Theme button; the Slide menu read for its theme rows',
     'the Brand kit panel opens each time with its nine sections and the frame rows carry their sentences',
     async () => {
       await t.clearAll();
@@ -245,29 +245,21 @@ export async function run(t) {
         )
         .catch(() => false);
       await closePanel();
-      /* Slide > Edit theme, the Later stub flipped to the panel (model.ts 2007) */
-      const edit = await t.reachRow('slide', 'slide.editTheme');
-      let fromEdit = false;
-      if (edit.present) {
-        await t.menuPath('slide', 'slide.editTheme');
-        fromEdit = await t
-          .pollUntil(
-            () => t.visible('panel.brand'),
-            (x) => x,
-            6000,
-          )
-          .catch(() => false);
-        await closePanel();
-      }
-      await t.advancedBack('Slide > Edit theme');
+      /* Slide > Edit theme left in Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 99): the
+         Slide menu draws one theme row, Change theme, which opened the panel above */
+      await t.openMenu('slide');
+      const themeRows = (await t.menuRows('slide')).filter((r) => /\btheme\b/i.test(r.label));
+      await t.closeMenus();
+      const oneThemeRow = themeRows.length === 1 && themeRows[0].id === 'slide.changeTheme';
+      await t.advancedBack('Slide > Change theme');
       return {
         ok:
           missingSections.length === 0 &&
           frameSentences.length === 0 &&
           resetOk &&
           fromToolbar &&
-          fromEdit,
-        observed: `sections missing ${missingSections.join(', ') || 'none'} (heads ${first.heads.slice(0, 12).join(' | ')}); frame sentences missing ${frameSentences.length}; reset "${first.reset ?? 'none'}"; from the toolbar ${fromToolbar}; from Slide > Edit theme ${edit.present ? fromEdit : 'no row'}`,
+          oneThemeRow,
+        observed: `sections missing ${missingSections.join(', ') || 'none'} (heads ${first.heads.slice(0, 12).join(' | ')}); frame sentences missing ${frameSentences.length}; reset "${first.reset ?? 'none'}"; from the toolbar ${fromToolbar}; the Slide menu's theme rows ${themeRows.map((r) => r.id).join(', ') || 'none'}`,
       };
     },
   );

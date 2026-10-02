@@ -372,7 +372,7 @@
     {
       "id": "decks.card.download",
       "feature": "decks",
-      "interaction": "Card menu > Download starts the PowerPoint download within 30 s: a PK file named .pptx (docs/POLISH.md 2.7 item 85; the bundle is File > Download > Turboslide bundle, export.zip.bundle)",
+      "interaction": "Card menu > Download starts the PowerPoint download within 30 s: a PK file named .pptx (docs/POLISH.md 2.7 item 85; the bundle is File > Download > More formats > Turboslide bundle, export.zip.bundle)",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 41",
@@ -1440,7 +1440,7 @@
     {
       "id": "text.format-menu.text-fitting",
       "feature": "text",
-      "interaction": "Format options opens at Text fitting for a text box",
+      "interaction": "Text fitting on a text box's right click menu opens Format options at Text fitting; the Format menu draws no Text fitting row",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-text row 52: the row could not be located to click"
@@ -3043,7 +3043,7 @@
     {
       "id": "export.pdf.dialog",
       "feature": "export",
-      "interaction": "File > Download > Download options with PDF Document as the file type opens the dialog with its sentence, the skipped slides checkbox off, Cancel and Download (the PDF row itself starts the download at once, docs/PRODUCT.md section 2 rank 8)",
+      "interaction": "File > Download > More formats > Download options with PDF Document as the file type opens the dialog with its sentence, the skipped slides checkbox off, Cancel and Download (the PDF row itself starts the download at once, docs/PRODUCT.md section 2 rank 8)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-export row 8"
@@ -3092,7 +3092,7 @@
     {
       "id": "export.pptx.dialog",
       "feature": "export",
-      "interaction": "File > Download > Download options opens the dialog with both modes as radios: Perfect selected on a deck without a table or a chart, Editable text preselected when the deck holds either (the PowerPoint row itself starts the Perfect download at once on a deck without a table or a chart, docs/PRODUCT.md section 2 rank 8)",
+      "interaction": "File > Download > More formats > Download options opens the dialog with both modes as radios: Perfect selected on a deck without a table or a chart, Editable text preselected when the deck holds either (the PowerPoint row itself starts the Perfect download at once on a deck without a table or a chart, docs/PRODUCT.md section 2 rank 8)",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-export row 16"
@@ -4434,7 +4434,7 @@
     {
       "id": "view.appearance.rows",
       "feature": "view",
-      "interaction": "View > Appearance > Light, Dark, Match the presentation each set data-theme and the choice is stored",
+      "interaction": "Tools > Preferences > Appearance > Light, Dark, Match the presentation each set data-theme and the choice is stored",
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-chrome row 29; audit-surface row 59"
@@ -4637,7 +4637,7 @@
     {
       "id": "export.zip.bundle",
       "feature": "export",
-      "interaction": "File > Download > Turboslide bundle arrives within 30 s with deck.json and the snackbar reads \"Saved <name>\" with the file's name (docs/POLISH.md 2.7 item 86)",
+      "interaction": "File > Download > More formats > Turboslide bundle arrives within 30 s with deck.json and the snackbar reads \"Saved <name>\" with the file's name (docs/POLISH.md 2.7 item 86)",
       "driver": "core/export.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 30",
@@ -4647,7 +4647,7 @@
     {
       "id": "export.html.web-page",
       "feature": "export",
-      "interaction": "File > Download > Web page; the download event's file arrives within 30 s with the deck title and the heading text, on the first attempt, in both runs of one deployment",
+      "interaction": "File > Download > More formats > Web page; the download event's file arrives within 30 s with the deck title and the heading text, on the first attempt, in both runs of one deployment",
       "driver": "core/export.spec.ts",
       "today": "flaky",
       "evidence": "audit-surface row 29; return-drive rows 13 to 16 (three cancelled of six attempts)",
@@ -5056,7 +5056,7 @@
     {
       "id": "export.download.options-dialog",
       "feature": "export",
-      "interaction": "File > Download > Download options opens the dialog with the modes, Include skipped slides and Include speaker notes; the dialog closes when the file is saved",
+      "interaction": "File > Download > More formats > Download options opens the dialog with the modes, Include skipped slides and Include speaker notes; the dialog closes when the file is saved",
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "audit-seller 8"
@@ -5167,7 +5167,7 @@
     {
       "id": "text.format-options.remembers-section",
       "feature": "text",
-      "interaction": "Collapse Text fitting, close the panel, reopen it from the toolbar; Size & rotation is open and Text fitting stays collapsed; Format > Text fitting opens the panel with Text fitting alone",
+      "interaction": "Collapse Text fitting, close the panel, reopen it from the toolbar; Size & rotation is open and Text fitting stays collapsed; Text fitting on the box's right click menu opens the panel with Text fitting alone",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-interface 15"
@@ -5535,7 +5535,7 @@
     {
       "id": "menus.icons.format-rows",
       "feature": "chrome",
-      "interaction": "Every Format row of 3.3 draws an icon: Bold, the four alignments, the Image rows, Borders & lines and its rows, Text fitting, Drop shadow (with the switch on), Change shape (on a shape's right click menu), Edit data and Chart type (on a chart's)",
+      "interaction": "Every Format row of 3.3 draws an icon: Bold, the four alignments, the Image rows, Borders & lines and its rows, Drop shadow (with the switch on), Text fitting and Change shape (on a shape's right click menu), Edit data and Chart type (on a chart's)",
       "driver": "probe --core",
       "today": "broken",
       "severity": 1,
@@ -5555,11 +5555,11 @@
     {
       "id": "brand.panel.opens",
       "feature": "brand",
-      "interaction": "Slide > Change theme, the toolbar Theme button and Slide > Edit theme open the Brand kit panel with Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to General Translation",
+      "interaction": "Slide > Change theme and the toolbar Theme button open the Brand kit panel with Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to General Translation",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-brand 4, 8; audit-seller 6",
-      "parks": ["slide.editTheme"]
+      "parks": ["slide.changeTheme"]
     },
     {
       "id": "brand.logo.replace-every-slide",
@@ -5816,11 +5816,11 @@
     {
       "id": "assist.entry.title-row",
       "feature": "assist",
-      "interaction": "The Assist button sits between the presence chips and the comments glyph; Cmd+J opens the panel; Tools > Assist opens it",
+      "interaction": "The Assist button sits between the presence chips and the comments glyph; Cmd+J opens the panel; Tools has no Assist row",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist 2; audit-interface 6",
-      "parks": ["title.assist", "tools.assist"]
+      "parks": ["title.assist"]
     },
     {
       "id": "assist.panel.first-line-and-cards",
@@ -5829,7 +5829,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist 2",
-      "parks": ["title.assist", "tools.assist"]
+      "parks": ["title.assist"]
     },
     {
       "id": "assist.tailor.dialog-one-undo",
@@ -6820,11 +6820,11 @@
     {
       "id": "logos.insert.row",
       "feature": "logos",
-      "interaction": "Insert > Logo is in the default view under the Image row and Insert > Image > Logo is in the submenu; Search the menus \"logo\" lists Logo first",
+      "interaction": "Insert > Image > Logo is in the default view and Insert has no top level Logo row; Search the menus \"logo\" lists Logo first",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 1, 17 (02-insert-menu.png, 03-insert-image-submenu.png, 10-search-menus-logo.png)",
-      "parks": ["insert.logo", "insert.image.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 by request in model.ts: the two rows and the terms of insert.logo)"
     },
     {
@@ -6834,7 +6834,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 1",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the dialog, B6 logo-model.ts ranking and logo.search)"
     },
     {
@@ -6844,7 +6844,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 6 (12-thesvg-default-marks-on-paper-and-ink.png, raster-check.json)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.3 (B1 the two grounds per tile, B6 the appearance rule and the readsOnPaper flag)"
     },
     {
@@ -6894,7 +6894,7 @@
       "driver": "core/chrome.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 21 (09-insert-icon-dialog.png as the grid's precedent)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.3 (B1: Dialog.tsx and the Icon dialog's grid; docs/brand.md section 9)"
     },
     {
@@ -6904,7 +6904,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 2 (04-upload-thesvg-svg.png: the svg refused; logo-walk.json)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 logo.insert with B7's registration; the logo source kind in assets.ts)"
     },
     {
@@ -6914,7 +6914,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 9 (05-upload-png-logo.png, 06-upload-png-wordmark.png: the largest fit)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.4 (B6 the size rule over the product round's free rectangle helper; the chip word in Selection.tsx by request to B3)"
     },
     {
@@ -6924,7 +6924,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 5, 6 (raster-check.json)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.4 (B6: the tint rewrites every fill and stroke; off for CC BY-ND, Proprietary, Trademark and Unknown, question 2 of section 9); the integrator at the merge: Stripe (a mono and no pair) in place of GitHub, whose own light and dark files the appearance rule prefers to a tint (build/b6.md section 5); the tint half through logo.insert { variant: 'mono' } because the ten mark fixture holds no mark whose default fails on ink with a tintable mono and no pair"
     },
     {
@@ -6966,7 +6966,7 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 2 (svg/ the sampled files; corpus-sample.json)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.7 (B6: logo-sanitize.ts and routes/api/logo.$.ts); the unit tests are apps/studio/src/server/logos.test.ts"
     },
     {
@@ -6976,7 +6976,7 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 10",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.2 (B6 with B7: the agent bearer and CRON_SECRET; the crons entry of vercel.json); driven on both origins (7.2)"
     },
     {
@@ -6986,7 +6986,7 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 13 (thesvg-registry.headers; the camel case keys against the kebab case files)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.9 and 7.2 (B6: logo-fixtures/**; the spec reads the deployment's facts for the upstream and records the row not driven with apps/studio/src/server/logos.test.ts named where the upstream is thesvg.org, the pattern of assist.quota.429)"
     },
     {
@@ -6996,7 +6996,7 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 10",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.9 and 7.2 (B6, B7's flag); not driven by design where the upstream is not down, with apps/studio/src/server/logos.test.ts named"
     },
     {
@@ -7006,7 +7006,7 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 12, section 1 (thesvg-facts.json: 4,236 of the 4,940 marks under an open licence)",
-      "parks": ["insert.logo"],
+      "parks": ["insert.image.logo"],
       "note": "Ship one P0; docs/FEATURES.md 4.2 and 4.10 (B6: the week cache for CC0, MIT, Apache, BSD, ISC and Unlicense alone; judge-design rejection 17)"
     },
     {
@@ -7330,11 +7330,11 @@
     {
       "id": "shaders.view.play-setting",
       "feature": "view",
-      "interaction": "View > Play shaders lists On, In the show only and Off with In the show only checked by default; the pick is stored per browser and describe().state.settings.playShaders reads it; the Slideshow's Options menu mirrors it",
+      "interaction": "Tools > Preferences > Play shaders lists On, In the show only and Off with In the show only checked by default; the pick is stored per browser and describe().state.settings.playShaders reads it; the Slideshow's Options menu mirrors it",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 17 (walk-run2.json row 25)",
-      "parks": ["view.playShaders"],
+      "parks": ["tools.preferences.playShaders"],
       "note": "Ship two P1; docs/FEATURES.md 5.6 (B1: view.playShaders and its MenuSetting in model.ts by request to the integrator, the Slideshow Options row; B5 reads it); the feature is view (7.1), so the row parks its control alone through parks and never the shaders feature; the walk reads the submenu's rows by their labels and puts the default back"
     },
     {
@@ -7345,7 +7345,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 10 (s12-slideshow.png, walk-run2.json row 22)",
-      "parks": ["view.playShaders", "formatOptions.shader.play"],
+      "parks": ["tools.preferences.playShaders", "formatOptions.shader.play"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P1; docs/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
@@ -7356,7 +7356,7 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 17, section 7 (walk-run2.json row 25)",
-      "parks": ["view.playShaders"],
+      "parks": ["tools.preferences.playShaders"],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P1; docs/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
@@ -8094,7 +8094,7 @@
     {
       "id": "surface.domain.build-commit",
       "feature": "surface",
-      "interaction": "`GET /api/agent` on the gate's origin answers `instance.commit` equal to the ship's sha and the View menu lists Play shaders; `scripts/hosted-smoke.mjs` exits 1 when either differs",
+      "interaction": "`GET /api/agent` on the gate's origin answers `instance.commit` equal to the ship's sha and Tools > Preferences lists Play shaders; `scripts/hosted-smoke.mjs` exits 1 when either differs",
       "driver": "core/surface.spec.ts",
       "today": "broken",
       "severity": 3,
@@ -8931,12 +8931,42 @@
     {
       "id": "chrome.words.one-spelling",
       "feature": "chrome",
-      "interaction": "No \"colour\", \"centre\", \"licence\" or \"posterised\" in any label or tooltip of the chrome; File lists \"Open\"; Download lists the formats, a divider, then Download options; Details' Last edit has no \"(change\"; the Download dialog's modes read Pictures and Editable text; the shortcuts dialog lists Paint format once",
+      "interaction": "No \"colour\", \"centre\", \"licence\" or \"posterised\" in any label or tooltip of the chrome; File lists \"Open\"; Download lists the four formats, a divider, then More formats, whose last row after a divider is Download options; Details' Last edit has no \"(change\"; the Download dialog's modes read Pictures and Editable text; the shortcuts dialog lists Paint format once",
       "driver": "probe --core",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-chrome items 29 to 52",
       "note": "Polish round; docs/POLISH.md 2.6 item 73; B1 with B5's files by request"
+    },
+    {
+      "id": "chrome.menus.one-logo-row",
+      "feature": "chrome",
+      "interaction": "Insert shows one Logo row (under Image); Tools has no Assist row; Format has no Text fitting row; Slide has one Theme row",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-clutter 47 to 51",
+      "note": "docs/NEXT.md 4.1.3 item 20 and 4.1.5, push B3a#7 (the cuts); the rows are read with Tools > Advanced tools off"
+    },
+    {
+      "id": "chrome.menus.preferences-named",
+      "feature": "chrome",
+      "interaction": "Tools opens on Preferences, Tailor for a customer, Check slides and Advanced tools; no collapsed toggle shows without its group name",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-clutter 83, 101 to 102",
+      "note": "docs/NEXT.md 4.1.3 item 20 and 4.1.5, push B3a#7: Preferences holds Link detection, Play shaders, Appearance and Turn on collaborator announcements"
+    },
+    {
+      "id": "chrome.menus.download-four-first",
+      "feature": "chrome",
+      "interaction": "File > Download lists PowerPoint, PDF, JPG, PNG and More formats, five rows",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-clutter 103",
+      "note": "docs/NEXT.md 4.1.3 item 20 and 4.1.5, push B3a#7: More formats holds Web page, the Turboslide bundle and Download options (round1/build/b3a.md request 10)"
     },
     {
       "id": "chrome.menus.structure-sweep",

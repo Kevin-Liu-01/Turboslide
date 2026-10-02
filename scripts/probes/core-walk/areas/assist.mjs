@@ -127,19 +127,20 @@ export async function run(t) {
 
   await t.step(
     'assist.entry.title-row',
-    'read the title row; Cmd+J; Tools > Assist',
-    'the Assist button sits between the presence chips and the comments glyph; Cmd+J and Tools > Assist open the panel',
+    'read the title row; Cmd+J; the Tools menu',
+    'the Assist button sits between the presence chips and the comments glyph; Cmd+J opens the panel; Tools draws no Assist row',
     async () => {
       await t.clearAll();
       if (!(await t.visible('title.assist'))) {
-        /* the row may be parked on this build: with the switch on the button draws */
-        const r = await t.reachRow('tools', 'tools.assist');
-        if (!r.present || !(await t.visible('title.assist'))) {
+        /* the button may be parked on this build: with the switch on it draws */
+        const on = await t.setAdvanced(true);
+        if (on) t.deck.advanced = true;
+        if (!(await t.visible('title.assist'))) {
           await t.advancedBack('the Assist entry');
           return t.notBuilt(
             'title.assist',
             LANE,
-            `Tools > Assist ${r.present ? 'present' : 'absent'}`,
+            'no Assist button in the title row with the switch on',
           );
         }
       }
@@ -166,23 +167,13 @@ export async function run(t) {
         )
         .catch(() => false);
       await closePanel();
-      const r = await t.reachRow('tools', 'tools.assist');
-      let byMenu = false;
-      if (r.present) {
-        await t.menuPath('tools', 'tools.assist');
-        byMenu = await t
-          .pollUntil(
-            () => t.visible('panel.assist'),
-            (x) => x,
-            6000,
-          )
-          .catch(() => false);
-        await closePanel();
-      }
+      /* Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 97): Tools > Assist left; the title
+         row's button and Cmd+J are the ways in */
+      const menuRow = await t.menuRowPresent('tools', 'tools.assist');
       await t.advancedBack('the Assist entry');
       return {
-        ok: between && byKey && byMenu,
-        observed: `x: presence ${order.presence}, assist ${order.assist}, comments ${order.comments} (between ${between}); Cmd+J opened the panel ${byKey}; Tools > Assist ${r.present ? `opened it ${byMenu}` : 'absent'}`,
+        ok: between && byKey && !menuRow,
+        observed: `x: presence ${order.presence}, assist ${order.assist}, comments ${order.comments} (between ${between}); Cmd+J opened the panel ${byKey}; Tools draws an Assist row ${menuRow}`,
       };
     },
   );

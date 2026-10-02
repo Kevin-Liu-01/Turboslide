@@ -10,11 +10,11 @@
 // agent transports and the 1280 chrome) are core/logos.spec.ts and core/chrome.spec.ts.
 //
 // The controls are B1's (`dialogs/Logo.tsx`, `dialogs/Tailor.tsx`'s button) over B6's model and
-// routes, with the menu rows `insert.logo`, `insert.image.logo` and `format.image.replaceImage.logo`
-// in `model.ts` by request to the integrator (FEATURES.md section 6). A row whose control is not on
-// the build reads not driven with the control's id and its lane (docs/PRODUCT.md 8.1); the dialog
-// is reached through the Insert menu alone, so while the menu row is absent every dialog row reads
-// not built on `insert.logo`. The search reaches thesvg.org's index on the deployment (the cache
+// routes, with the menu rows `insert.image.logo` and `format.image.replaceImage.logo` in
+// `model.ts` (FEATURES.md section 6; the top level `insert.logo` left in Round 1, docs/NEXT.md 4.1.3
+// item 20). A row whose control is not on the build reads not driven with the control's id and its
+// lane (docs/PRODUCT.md 8.1); the dialog is reached through Insert > Image alone, so while the menu
+// row is absent every dialog row reads not built on `insert.image.logo`. The search reaches thesvg.org's index on the deployment (the cache
 // of 4.2); a search that answers nothing is recorded with the foot's failure sentence.
 
 export const NAME = 'logos';
@@ -107,20 +107,20 @@ export async function run(t) {
         title: (e.textContent ?? '').trim().slice(0, 40),
       }));
     });
-  /** Opens Insert > Logo; answers whether the dialog is drawn, or a not built reading. */
+  /** Opens Insert > Image > Logo; answers whether the dialog is drawn, or a not built reading. */
   const openLogo = async () => {
     await t.clearAll();
-    const r = await t.reachRow('insert', 'insert.logo');
+    const r = await t.reachRow('insert', 'insert.image', 'insert.image.logo');
     if (!r.present)
       return {
         open: false,
         why: t.notBuilt(
-          'insert.logo',
+          'insert.image.logo',
           MENU_LANE,
-          'no Logo row in the Insert menu (FEATURES.md 4.3)',
+          'no Logo row in Insert > Image (FEATURES.md 4.3)',
         ),
       };
-    await t.menuPath('insert', 'insert.logo');
+    await t.menuPath('insert', 'insert.image', 'insert.image.logo');
     const shown = await t
       .pollUntil(
         () => t.visible('dialog.logo'),
@@ -411,36 +411,38 @@ export async function run(t) {
   await t.step(
     'logos.insert.row',
     'Insert with the switch off; the Image submenu; Search the menus "logo"',
-    'Logo is in the default view under Image and in the submenu; the finder lists Logo first',
+    'Insert > Image > Logo is in the default view and Insert has no top level Logo row; the finder lists Logo first',
     async () => {
       await t.clearAll();
       const advanced = await t.advancedOn();
       if (advanced) await t.setAdvanced(false);
-      const inDefault = await t.menuRowPresent('insert', 'insert.logo');
       const inSubmenu = await t.menuRowPresent('insert', 'insert.image', 'insert.image.logo');
-      if (!inDefault && !inSubmenu) {
+      if (!inSubmenu) {
         const parked = await t.setAdvanced(true);
-        const withSwitch = parked ? await t.menuRowPresent('insert', 'insert.logo') : false;
+        const withSwitch = parked
+          ? await t.menuRowPresent('insert', 'insert.image', 'insert.image.logo')
+          : false;
         await t.setAdvanced(false);
         if (!withSwitch)
           return t.notBuilt(
-            'insert.logo',
+            'insert.image.logo',
             MENU_LANE,
-            'no Logo row in the Insert menu with the switch off or on (FEATURES.md 4.3)',
+            'no Logo row in Insert > Image with the switch off or on (FEATURES.md 4.3)',
           );
         return {
           ok: false,
           observed:
-            'Insert > Logo is drawn with Tools > Advanced tools on alone: the row is parked on this build',
+            'Insert > Image > Logo is drawn with Tools > Advanced tools on alone: the row is parked on this build',
         };
       }
-      /* the order: Logo directly under the Image row */
+      /* Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 96): one Logo row, so the Insert menu's
+         own rows carry none */
       await t.openMenu('insert');
-      const rows = (await t.menuRows('insert')).map((r) => r.id);
+      const rows = await t.menuRows('insert');
       await t.closeMenus();
-      const imageAt = rows.indexOf('insert.image');
-      const logoAt = rows.indexOf('insert.logo');
-      const underImage = imageAt >= 0 && logoAt === imageAt + 1;
+      const topLogo = rows
+        .filter((r) => r.id === 'insert.logo' || r.label.replace(/\s+/g, ' ').trim() === 'Logo')
+        .map((r) => r.id);
       await t.menuPath('help', 'help.searchMenus');
       await t.waitControl('palette.query', 8000);
       await t.typeHuman('logo');
@@ -454,8 +456,8 @@ export async function run(t) {
       await t.press('Escape');
       await t.waitGone('[data-control="palette.query"]', 4000);
       return {
-        ok: inDefault && inSubmenu && underImage && first[0] === 'insert.logo',
-        observed: `Insert > Logo in the default view ${inDefault} (${underImage ? 'directly under Image' : `Image at ${imageAt}, Logo at ${logoAt}`}); Insert > Image > Logo ${inSubmenu}; the finder's first rows for "logo": ${first.join(', ') || 'none'}`,
+        ok: inSubmenu && topLogo.length === 0 && first[0] === 'insert.image.logo',
+        observed: `Insert > Image > Logo in the default view ${inSubmenu}; top level Logo rows ${topLogo.join(', ') || 'none'}; the finder's first rows for "logo": ${first.join(', ') || 'none'}`,
       };
     },
   );

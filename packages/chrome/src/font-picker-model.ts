@@ -42,8 +42,9 @@ export const FONT_PICKER = {
   doc: 'The face of the selected text; More fonts lists every face with its license',
   tableDoc: 'A table takes one size; its face is the theme’s',
   /* a fixed kind's field (the cover's heading and lead): the kit's face for its role draws it */
-  fixedDisplayDoc: 'This heading takes the brand kit’s Display face; Slide > Edit theme changes it',
-  fixedTextDoc: 'This text takes the brand kit’s Text face; Slide > Edit theme changes it',
+  fixedDisplayDoc:
+    'This heading takes the brand kit’s Display face; Slide > Change theme changes it',
+  fixedTextDoc: 'This text takes the brand kit’s Text face; Slide > Change theme changes it',
   search: 'Search fonts',
   searchDoc: 'Type part of a family name',
   brand: 'Brand',

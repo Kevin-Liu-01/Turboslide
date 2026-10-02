@@ -462,29 +462,11 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's hotfix H2 (docs/NEXT.md 3.2): two decks rows and one local accounts row */
     /* the next program's hotfix H4 (docs/NEXT.md 3.2): one accounts row on every origin */
     /* the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.5): four /home rows */
+    /* the next program's Round 1 push B3a#7 (docs/NEXT.md 4.1.5): three menu rows of the cuts */
+    /* the next program's rows (docs/NEXT.md), one term per push in the order of the comments above */
+    const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3;
     expect(CORE_MATRIX.length).toBe(
-      565 +
-        133 +
-        16 +
-        71 +
-        29 +
-        43 -
-        1 +
-        33 +
-        1 -
-        1 +
-        130 +
-        1 +
-        21 +
-        1 +
-        1 +
-        22 +
-        10 +
-        1 +
-        1 +
-        3 +
-        1 +
-        4,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 22 + 10 + NEXT_ROWS,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -645,7 +627,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       expect(coreRow(id).feature).toBe(feature);
       /* every exception but the View row lands on an unparkable feature; the View row parks its own control */
       if (id !== 'shaders.view.play-setting') expect(isParkable(feature), id).toBe(false);
-      else expect(coreRow(id).parks, id).toEqual(['view.playShaders']);
+      else expect(coreRow(id).parks, id).toEqual(['tools.preferences.playShaders']);
     }
     expect(() =>
       validateCoreMatrix([
@@ -671,7 +653,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
     const picker = parkedFeaturesOf({ ...results, 'logos.picker.search': 'failed' });
     expect(picker.parked).toEqual([]);
     expect(picker.parkedRows).toEqual([
-      { id: 'logos.picker.search', parks: ['insert.logo'], result: 'failed' },
+      { id: 'logos.picker.search', parks: ['insert.image.logo'], result: 'failed' },
     ]);
     const agent = parkedFeaturesOf({ ...results, 'logos.agent.search-insert': 'not driven' });
     expect(agent.parked).toEqual(['logos']);
@@ -705,7 +687,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
         parkedFeatures: [],
         parkedRows: [
           { id: 'logos.insert.every-slide', parks: ['dialog.logo.everySlide'] },
-          { id: 'logos.insert.row', parks: ['insert.logo', 'insert.image.logo'] },
+          { id: 'logos.insert.row', parks: ['insert.image.logo'] },
           { id: 'charts.double-click.opens-data', parks: ['bar.chart.editData'] },
         ],
       }),
@@ -714,7 +696,6 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       'bar.chart.editData',
       'dialog.logo.everySlide',
       'insert.image.logo',
-      'insert.logo',
     ]);
     const check = emitParked(list, { out: module, check: true });
     expect(check.changed).toBe(true);
@@ -723,9 +704,9 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
     expect(written.changed).toBe(true);
     const text = readFileSync(module, 'utf8');
     expect(text).toContain(
-      "  'bar.chart.editData',\n  'dialog.logo.everySlide',\n  'insert.image.logo',\n  'insert.logo',\n]);",
+      "  'bar.chart.editData',\n  'dialog.logo.everySlide',\n  'insert.image.logo',\n]);",
     );
-    expect(text).toContain('from ship-abc1234.json; 4 controls');
+    expect(text).toContain('from ship-abc1234.json; 3 controls');
     expect(text.split(PARKED_BEGIN).length).toBe(2);
     expect(emitParked(list, { out: module, check: true }).changed).toBe(false);
     expect(() => spliceParkedSet('no markers here', renderParkedSet([], null))).toThrow(
@@ -805,7 +786,11 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(view.parked).toEqual([]);
     expect(view.blocking).toEqual([]);
     expect(view.parkedRows).toEqual([
-      { id: 'shaders.view.play-setting', parks: ['view.playShaders'], result: 'not driven' },
+      {
+        id: 'shaders.view.play-setting',
+        parks: ['tools.preferences.playShaders'],
+        result: 'not driven',
+      },
     ]);
     /* the measurement row is recorded and holds nothing */
     const frame = parkedFeaturesOf({ ...results, 'shaders.perf.editor-frame': 'failed' });
@@ -819,7 +804,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
   it('knows the declared ids of FEATURES.md 5.3 to 5.6 and writes them into the parked set', () => {
     for (const id of [
       'insert.shader',
-      'view.playShaders',
+      'tools.preferences.playShaders',
       'dialog.background.shader',
       'formatOptions.shader',
       'formatOptions.shader.strength',
@@ -842,7 +827,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
         parkedFeatures: [],
         parkedRows: [
           { id: 'shaders.panel.preset-tiles', parks: ['formatOptions.shader.preset'] },
-          { id: 'shaders.view.play-setting', parks: ['view.playShaders'] },
+          { id: 'shaders.view.play-setting', parks: ['tools.preferences.playShaders'] },
           { id: 'shaders.background.place-answers', parks: ['dialog.background.shader'] },
         ],
       }),
@@ -850,7 +835,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(emitParked(list, { out: module }).controls).toEqual([
       'dialog.background.shader',
       'formatOptions.shader.preset',
-      'view.playShaders',
+      'tools.preferences.playShaders',
     ]);
     expect(readFileSync(module, 'utf8')).toContain('from ship-def5678.json; 3 controls');
   });

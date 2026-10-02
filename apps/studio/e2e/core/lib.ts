@@ -700,12 +700,18 @@ export async function ownerContext(
  * 6e): a worktree shared by several lanes changes under a running spec, and Vite's client would
  * reload the page or swap a module mid row; with the socket answered by nobody the client boots
  * and styles the page and nothing reaches it. A deployment carries no such socket and the mock
- * is not installed there. The product's own realtime is a streamed fetch, never a WebSocket.
+ * is not installed there. On the memory, blob and redis tiers the product's realtime is a
+ * streamed fetch; on the do tier it is a WebSocket to `/rooms/<id>` on the Worker's host
+ * (docs/CLOUDFLARE.md 3.6.3), which the mock leaves alone, or no tab of a local two process run
+ * connects (the integrator's merge pass of 2026-10-01).
  */
 async function quietDevServer(context: BrowserContext): Promise<void> {
   const base = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:4321';
   if (!isLocalBase(base)) return;
-  await context.routeWebSocket('**', () => undefined);
+  await context.routeWebSocket(
+    (url) => !url.pathname.startsWith('/rooms/'),
+    () => undefined,
+  );
 }
 
 /** A second person: another context with the same header and no cookie of the first. */

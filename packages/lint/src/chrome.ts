@@ -17,9 +17,14 @@
 //      rings in the three roles, ink or paper; since round four (gslides-parity round four, the orchestrator's ruling 1)
 //      the canvas selection surfaces named by `select` may draw --pt-select and the snap guides
 //      named by `guides` may draw --pt-guide, and nothing else may;
-//   4. missing seams (page mode only), self-stacks and invisible seams.
+//   4. missing seams (page mode only), self-stacks and invisible seams;
+//   5. the one rail check (docs/NEXT.md 4.1.3 item 25) on the page roots named by `rails`: two
+//      long vertical lines on one side of the page are the retired outer pair. It fails the audit
+//      once the brand lint enforces (brand/config.ts BRAND_LINT_MODE) and is reported before.
 // The function is self-contained: Playwright serializes it, so it reads only its argument.
 // A state that did not apply is an infrastructure failure, never a pass (lint-lines.mjs line 113).
+import { BRAND_LINT_MODE } from './brand/config.ts';
+import type { BrandLintMode } from './brand/config.ts';
 
 export type ChromeRoles =
   | 'hair'
@@ -68,6 +73,11 @@ export type ChromeScope = {
   select?: string;
   /** The snap guides (Guides.css): the one surface that may draw `--pt-guide`. */
   guides?: string;
+  /**
+   * The page roots the one rail check runs on (docs/NEXT.md 4.1.3 item 25; audit-brand-source
+   * 16.8): /home, /decks and Not found. Absent means the check runs nowhere.
+   */
+  rails?: string;
 };
 
 export type AuditConfig = { ALLOW: string[]; chrome: ChromeScope | null };
@@ -109,6 +119,28 @@ export type AuditResult = {
   selfStacks: SelfStack[];
   invisibles: InvisibleSeam[];
   roles: Record<string, number[] | null> | null;
+  /** the one rail check, on a document whose root matches the scope's `rails`; absent elsewhere */
+  rails?: RailReport;
+};
+
+/**
+ * The one rail check (docs/NEXT.md 4.1.3 item 25; the retired outer pair of P:.oxlintrc.json
+ * gt-ui/single-rail): the long vertical lines of the page on each side of its middle. A rail is a
+ * vertical line whose contiguous run (segments at one x joined across gaps of 2 px or less) covers
+ * at least half the page root's height; a side with two rails draws the retired outer pair.
+ */
+export type RailReport = {
+  /** the page root's class */
+  page: string;
+  /** the shortest run counted as a rail, px */
+  min: number;
+  /** the x of each rail left of the root's middle, and right of it */
+  left: number[];
+  right: number[];
+  /** the owners of the rails, one per rail, left then right */
+  owners: string[];
+  /** true when a side draws more than one rail */
+  double: boolean;
 };
 
 /**
@@ -192,6 +224,8 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
   select:
     '.ts-select, .ts-select-chip, .ts-hover, .ts-handle, .ts-marquee, .ts-group, .ts-crop-frame, .ts-turn',
   guides: '.ts-guide',
+  /* the one rail check (NEXT.md 4.1.3 item 25): /home, /decks and its sub pages, Not found */
+  rails: '.ts-product, .ts-home-page, .ts-notfound',
   collab:
     '.ts-flag, .ts-remote-outline, .ts-remote-caret, .ts-remote-pointer, .ts-following-plate, .ts-chip-stripe, .is-following, .has-halo',
   collabColors: COLLAB_COLORS,
@@ -997,6 +1031,57 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     }
   }
 
+  let rails: RailReport | undefined;
+  const railRoot = chrome?.rails ? document.querySelector(chrome.rails) : null;
+  if (railRoot) {
+    const box = railRoot.getBoundingClientRect();
+    const pageH = Math.min(
+      box.height,
+      Math.max(document.documentElement.scrollHeight, window.innerHeight),
+    );
+    const min = Math.max(240, pageH * 0.5);
+    const mid = box.left + box.width / 2;
+    const byX = new Map<number, LineSegment[]>();
+    for (const s of segs) {
+      if (s.orient !== 'v' || !chromeOf[s.el]) continue;
+      const key = [...byX.keys()].find((x) => Math.abs(x - s.pos) <= 1) ?? s.pos;
+      const list = byX.get(key) ?? [];
+      list.push(s);
+      byX.set(key, list);
+    }
+    const found: { x: number; owner: string }[] = [];
+    for (const [x, list] of byX) {
+      list.sort((a, b) => a.from - b.from);
+      let start = list[0]?.from ?? 0;
+      let end = list[0]?.to ?? 0;
+      let best = end - start;
+      let owner = list[0]?.owner ?? '';
+      for (const s of list.slice(1)) {
+        if (s.from <= end + 2) end = Math.max(end, s.to);
+        else {
+          start = s.from;
+          end = s.to;
+        }
+        if (end - start > best) {
+          best = end - start;
+          owner = s.owner;
+        }
+      }
+      if (best >= min) found.push({ x, owner });
+    }
+    found.sort((a, b) => a.x - b.x);
+    const left = found.filter((f) => f.x < mid).map((f) => f.x);
+    const right = found.filter((f) => f.x >= mid).map((f) => f.x);
+    rails = {
+      page: label(railRoot),
+      min: Math.round(min),
+      left,
+      right,
+      owners: found.map((f) => f.owner),
+      double: left.length > 1 || right.length > 1,
+    };
+  }
+
   const colorKeys = new Set<string>();
   const colorHits = colors.filter((c) => {
     const key = `${c.kind}:${c.owner}:${c.side}:${c.color}`;
@@ -1014,11 +1099,12 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     selfStacks: selfStacks.slice(0, 24),
     invisibles: invisibles.slice(0, 12),
     roles: ROLES,
+    ...(rails ? { rails } : {}),
   };
 };
 
 /** True when an audit carries anything that fails the run (lint-lines.mjs `failing`). */
-export function failingAudit(audit: AuditResult): boolean {
+export function failingAudit(audit: AuditResult, mode: BrandLintMode = BRAND_LINT_MODE): boolean {
   const structuralStacks = audit.selfStacks.filter((s) => s.len >= 120);
   return Boolean(
     audit.doubles.length ||
@@ -1026,7 +1112,9 @@ export function failingAudit(audit: AuditResult): boolean {
     audit.colors.length ||
     audit.missing.length ||
     structuralStacks.length ||
-    audit.invisibles.length,
+    audit.invisibles.length ||
+    // the one rail check fails the audit once the brand lint enforces (NEXT.md 4.1.3 item 25)
+    (mode === 'enforce' && audit.rails?.double === true),
   );
 }
 
@@ -1043,5 +1131,9 @@ export function formatAudit(audit: AuditResult): string[] {
     lines.push(`  self-stack ${s.side} of ${s.owner} @${s.at} (${s.len}px)`);
   for (const s of audit.invisibles) lines.push(`  invisible seam ${s.owner} @${s.at} on ${s.fill}`);
   for (const m of audit.missing) lines.push(`  missing ${m.kind} seam ${m.between} @${m.at}`);
+  if (audit.rails?.double === true)
+    lines.push(
+      `  rails on ${audit.rails.page}: left [${audit.rails.left.join(', ')}] right [${audit.rails.right.join(', ')}], two rails on one side (${audit.rails.owners.join(' | ')})`,
+    );
   return lines;
 }

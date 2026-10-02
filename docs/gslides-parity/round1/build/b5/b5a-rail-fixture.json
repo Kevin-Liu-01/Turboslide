@@ -1,0 +1,176 @@
+[
+  {
+    "width": 1440,
+    "name": "one rail",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        168
+      ],
+      "right": [
+        1272
+      ],
+      "owners": [
+        "ts-rail.drawn",
+        "ts-rail.drawn"
+      ],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  },
+  {
+    "width": 1440,
+    "name": "outer pair",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        159,
+        168
+      ],
+      "right": [
+        1272,
+        1281
+      ],
+      "owners": [
+        "outer",
+        "ts-rail.drawn",
+        "ts-rail.drawn",
+        "outer"
+      ],
+      "double": true
+    },
+    "report": false,
+    "enforce": true,
+    "lines": [
+      "  rails on ts-product: left [159, 168] right [1272, 1281], two rails on one side (outer | ts-rail.drawn | ts-rail.drawn | outer)"
+    ]
+  },
+  {
+    "width": 1440,
+    "name": "rails per section",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        168
+      ],
+      "right": [
+        1272
+      ],
+      "owners": [
+        "SECTION",
+        "SECTION"
+      ],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  },
+  {
+    "width": 1440,
+    "name": "thumbnail frames, no rail",
+    "rails": {
+      "page": "ts-home-page",
+      "min": 1140,
+      "left": [],
+      "right": [],
+      "owners": [],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  },
+  {
+    "width": 390,
+    "name": "one rail",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        0
+      ],
+      "right": [
+        390
+      ],
+      "owners": [
+        "ts-rail.drawn",
+        "ts-rail.drawn"
+      ],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  },
+  {
+    "width": 390,
+    "name": "outer pair",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        -9,
+        0
+      ],
+      "right": [
+        390,
+        399
+      ],
+      "owners": [
+        "outer",
+        "ts-rail.drawn",
+        "ts-rail.drawn",
+        "outer"
+      ],
+      "double": true
+    },
+    "report": false,
+    "enforce": true,
+    "lines": [
+      "  rails on ts-product: left [-9, 0] right [390, 399], two rails on one side (outer | ts-rail.drawn | ts-rail.drawn | outer)"
+    ]
+  },
+  {
+    "width": 390,
+    "name": "rails per section",
+    "rails": {
+      "page": "ts-product",
+      "min": 1352,
+      "left": [
+        0
+      ],
+      "right": [
+        390
+      ],
+      "owners": [
+        "SECTION",
+        "SECTION"
+      ],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  },
+  {
+    "width": 390,
+    "name": "thumbnail frames, no rail",
+    "rails": {
+      "page": "ts-home-page",
+      "min": 1140,
+      "left": [],
+      "right": [],
+      "owners": [],
+      "double": false
+    },
+    "report": false,
+    "enforce": false,
+    "lines": []
+  }
+]

@@ -38,6 +38,16 @@
 // seven core specs under apps/studio/e2e/core/, every matrix row judged by its id, exit 1 on any
 // failed or not driven driven row. The runs that count are on the preview and on production
 // (6.2); this step proves the drivers run. `--list` prints 32.
+//
+// Round 1 of the next program (docs/NEXT.md 4.1.3 item 25, 4.1.6 pushes 19 and 20): step 33 is
+// the brand lint, `node packages/lint/src/brand/main.ts`: the thirteen gt-ui rules of
+// Prototemplate's .oxlintrc.json ported onto the TypeScript syntax tree, the CSS checks (smooth
+// scrolling, radii outside --pt-radius and the named exceptions, monospace outside the code
+// surfaces, eyebrows, faces outside Inter, the retired outer rail) and the credits check for mood
+// pictures, over packages/chrome, packages/viewer and apps/studio/src. No server; about a second.
+// Its mode is BRAND_LINT_MODE in packages/lint/src/brand/config.ts: report prints and passes,
+// enforce fails on a finding config.ts does not accept. The same constant decides whether step
+// 18's one rail check (packages/lint/src/chrome.ts) fails the chrome lint. `--list` prints 33.
 // Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
 // Chrome for Testing once for the card compare when chromium-1217 is present and the fonts venv's
@@ -407,6 +417,9 @@ const steps = [
     cmd: `node scripts/probes/core-gate.mjs --base ${STUDIO_URL} --out .turboslide/core-gate`,
     needs: 'server',
   },
+  // Round 1 of the next program (docs/NEXT.md 4.1.3 item 25): the brand lint over the chrome
+  // sources, the stylesheets and the mood pictures' credits, in the mode config.ts names
+  { cmd: 'node packages/lint/src/brand/main.ts --json .turboslide/brand-lint.json' },
 ];
 
 const argv = process.argv.slice(2);

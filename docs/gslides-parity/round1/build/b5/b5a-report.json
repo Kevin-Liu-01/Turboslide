@@ -1,0 +1,944 @@
+{
+  "mode": "report",
+  "read": {
+    "scripts": 438,
+    "stylesheets": 109,
+    "pictures": 20
+  },
+  "findings": [
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "apps/studio/src/editor/EditorRoot.tsx",
+      "line": 2566,
+      "column": 15,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy text"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "apps/studio/src/styles.css",
+      "line": 116,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-deck-id { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/DiagramPanel.css",
+      "line": 38,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-diagram-count-field { border-radius: 4px }"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/ExportMenu.css",
+      "line": 179,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-export-progress .ts-export-line { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/ExportMenu.tsx",
+      "line": 349,
+      "column": 13,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Build and download"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/ExportMenu.tsx",
+      "line": 372,
+      "column": 17,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Download deck bundle"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/ExportReportCard.css",
+      "line": 106,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-report-residual { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/HistoryPanel.tsx",
+      "line": 72,
+      "column": 19,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Undo to here"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Inspector.tsx",
+      "line": 526,
+      "column": 13,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Add item"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/Palette.css",
+      "line": 186,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".pt-search kbd { border-radius: 4px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/SourceDrawer.tsx",
+      "line": 289,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy as command"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 277,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-share { border-radius: 8px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 500,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate { border-radius: 8px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 530,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate-continue { border-radius: 6px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 556,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate-error { border-radius: 6px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/ToolButton.css",
+      "line": 36,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".pt-ib.is-solid { border-radius: 8px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Toolbar.tsx",
+      "line": 599,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Exit fullscreen"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Toolbar.tsx",
+      "line": 615,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy link"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/ImportSlides.tsx",
+      "line": 284,
+      "column": 15,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Select a file from your device"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/Open.tsx",
+      "line": 217,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Select a file from your device"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/Publish.tsx",
+      "line": 148,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy link"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/asset.tsx",
+      "line": 548,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Add asset"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 35,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chart-field input[type='text'] { border-radius: 4px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 181,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chartgrid-swatch, .ts-chart-swatch { border-radius: 3px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 204,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chartgrid-remove { border-radius: 3px }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 25,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-table-heading { text-transform: uppercase }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 75,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-table-height { border-radius: 4px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 106,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-table-swatch { border-radius: 3px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 402,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Distribute rows"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 430,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Distribute columns"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 540,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Merge cells"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 549,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Unmerge cells"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/inspector/text.css",
+      "line": 32,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-ctl-text.is-multiline .ts-ctl-textarea { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/pickers/DiagramPicker.css",
+      "line": 57,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-diagram-preview { border-radius: 3px }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/chrome/src/pickers/Pickers.css",
+      "line": 21,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-picker-title { text-transform: uppercase }"
+    },
+    {
+      "rule": "css/no-smooth-scroll",
+      "file": "packages/viewer/src/BookView.css",
+      "line": 16,
+      "column": 3,
+      "message": "The product does not smooth-scroll (P:deck/slides/39-avoid.html; audit-brand-source 14.4). Remove scroll-behavior: smooth.",
+      "text": ".pt-book { scroll-behavior: smooth }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/viewer/src/present/PresentShortcuts.css",
+      "line": 49,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-present-card h3 { text-transform: uppercase }"
+    },
+    {
+      "rule": "gt-ui/no-smooth-scroll",
+      "file": "packages/viewer/standalone/runtime.ts",
+      "line": 487,
+      "column": 75,
+      "message": "The product does not smooth-scroll (P:deck/slides/39-avoid.html). Use behavior \"auto\" or drop the option.",
+      "text": "'smooth'"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-cable-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-cable` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-cable"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-cable-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-cable` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-cable"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-calligraphy-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-calligraphy` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-calligraphy"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-calligraphy-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-calligraphy` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-calligraphy"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-compass-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-compass` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-compass"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-compass-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-compass` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-compass"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-devanagari-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-devanagari` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-devanagari"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-devanagari-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-devanagari` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-devanagari"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-dictionary-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-dictionary` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-dictionary"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-dictionary-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-dictionary` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-dictionary"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-earth-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-earth-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-lighthouse-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-lighthouse` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-lighthouse"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-lighthouse-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-lighthouse` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-lighthouse"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-rosetta-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-rosetta` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-rosetta"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-rosetta-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-rosetta` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-rosetta"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-wave-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-wave` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-wave"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-wave-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-wave` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-wave"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/templates/blank/assets/mood-earth-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/templates/blank/assets/mood-earth-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    }
+  ],
+  "accepted": [],
+  "open": [
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "apps/studio/src/editor/EditorRoot.tsx",
+      "line": 2566,
+      "column": 15,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy text"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "apps/studio/src/styles.css",
+      "line": 116,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-deck-id { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/DiagramPanel.css",
+      "line": 38,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-diagram-count-field { border-radius: 4px }"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/ExportMenu.css",
+      "line": 179,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-export-progress .ts-export-line { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/ExportMenu.tsx",
+      "line": 349,
+      "column": 13,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Build and download"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/ExportMenu.tsx",
+      "line": 372,
+      "column": 17,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Download deck bundle"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/ExportReportCard.css",
+      "line": 106,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-report-residual { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/HistoryPanel.tsx",
+      "line": 72,
+      "column": 19,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Undo to here"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Inspector.tsx",
+      "line": 526,
+      "column": 13,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Add item"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/Palette.css",
+      "line": 186,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".pt-search kbd { border-radius: 4px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/SourceDrawer.tsx",
+      "line": 289,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy as command"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 277,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-share { border-radius: 8px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 500,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate { border-radius: 8px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 530,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate-continue { border-radius: 6px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/TitleRow.css",
+      "line": 556,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-title-name-plate-error { border-radius: 6px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/ToolButton.css",
+      "line": 36,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".pt-ib.is-solid { border-radius: 8px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Toolbar.tsx",
+      "line": 599,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Exit fullscreen"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/Toolbar.tsx",
+      "line": 615,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy link"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/ImportSlides.tsx",
+      "line": 284,
+      "column": 15,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Select a file from your device"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/Open.tsx",
+      "line": 217,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Select a file from your device"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/dialogs/Publish.tsx",
+      "line": 148,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Copy link"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/asset.tsx",
+      "line": 548,
+      "column": 9,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Add asset"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 35,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chart-field input[type='text'] { border-radius: 4px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 181,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chartgrid-swatch, .ts-chart-swatch { border-radius: 3px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/chart.css",
+      "line": 204,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-chartgrid-remove { border-radius: 3px }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 25,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-table-heading { text-transform: uppercase }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 75,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-table-height { border-radius: 4px }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/inspector/table.css",
+      "line": 106,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-table-swatch { border-radius: 3px }"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 402,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Distribute rows"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 430,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Distribute columns"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 540,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Merge cells"
+    },
+    {
+      "rule": "gt-ui/cta-title-case",
+      "file": "packages/chrome/src/inspector/table.tsx",
+      "line": 549,
+      "column": 11,
+      "message": "Button labels are Title Case (DECK-GRAMMAR.md:22): capitalise every word except a short function word after the first.",
+      "text": "Unmerge cells"
+    },
+    {
+      "rule": "css/mono-outside-code",
+      "file": "packages/chrome/src/inspector/text.css",
+      "line": 32,
+      "column": 3,
+      "message": "Monospace outside a code surface (DECK-GRAMMAR.md:31 \"Nothing else uses monospace\"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.",
+      "text": ".ts-ctl-text.is-multiline .ts-ctl-textarea { font-family: var(--pt-mono) }"
+    },
+    {
+      "rule": "css/radius",
+      "file": "packages/chrome/src/pickers/DiagramPicker.css",
+      "line": 57,
+      "column": 3,
+      "message": "A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 \"Corners\"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.",
+      "text": ".ts-diagram-preview { border-radius: 3px }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/chrome/src/pickers/Pickers.css",
+      "line": 21,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-picker-title { text-transform: uppercase }"
+    },
+    {
+      "rule": "css/no-smooth-scroll",
+      "file": "packages/viewer/src/BookView.css",
+      "line": 16,
+      "column": 3,
+      "message": "The product does not smooth-scroll (P:deck/slides/39-avoid.html; audit-brand-source 14.4). Remove scroll-behavior: smooth.",
+      "text": ".pt-book { scroll-behavior: smooth }"
+    },
+    {
+      "rule": "css/no-eyebrow",
+      "file": "packages/viewer/src/present/PresentShortcuts.css",
+      "line": 49,
+      "column": 3,
+      "message": "No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.",
+      "text": ".ts-present-card h3 { text-transform: uppercase }"
+    },
+    {
+      "rule": "gt-ui/no-smooth-scroll",
+      "file": "packages/viewer/standalone/runtime.ts",
+      "line": 487,
+      "column": 75,
+      "message": "The product does not smooth-scroll (P:deck/slides/39-avoid.html). Use behavior \"auto\" or drop the option.",
+      "text": "'smooth'"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-cable-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-cable` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-cable"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-cable-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-cable` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-cable"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-calligraphy-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-calligraphy` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-calligraphy"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-calligraphy-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-calligraphy` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-calligraphy"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-compass-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-compass` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-compass"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-compass-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-compass` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-compass"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-devanagari-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-devanagari` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-devanagari"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-devanagari-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-devanagari` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-devanagari"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-dictionary-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-dictionary` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-dictionary"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-dictionary-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-dictionary` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-dictionary"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-earth-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-earth-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-lighthouse-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-lighthouse` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-lighthouse"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-lighthouse-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-lighthouse` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-lighthouse"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-rosetta-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-rosetta` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-rosetta"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-rosetta-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-rosetta` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-rosetta"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-wave-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-wave` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-wave"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/gt-brand/assets/mood-wave-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-wave` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-wave"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/templates/blank/assets/mood-earth-dark.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    },
+    {
+      "rule": "brand/credits",
+      "file": "decks/templates/blank/assets/mood-earth-light.jpg",
+      "line": 1,
+      "column": 1,
+      "message": "No credit row in docs/brand.md names `mood-earth` with its licence (NEXT.md 4.1.2: a picture with no licence read stays out of the product).",
+      "text": "mood-earth"
+    }
+  ],
+  "stale": [],
+  "broken": [],
+  "failed": false
+}

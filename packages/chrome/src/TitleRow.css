@@ -93,7 +93,9 @@
   appearance: none;
   cursor: text;
   flex: 0 1 auto;
-  min-width: 0;
+  /* the name keeps 96 px at every width (NEXT.md 4.1.3 item 13; audit-brand-surfaces rank 3: at
+     390 px it read "U" in 18 px); the row folds its right group under 480 px so it fits */
+  min-width: 96px;
 }
 
 .ts-title-name:hover {
@@ -484,18 +486,26 @@
   color: var(--pt-ink);
 }
 
-/* ---- the name prompt as a plate in the row (docs/POLISH.md 2.8 item 103) ----
-   The route's prompt on the first write or at the join sits in the right cluster before the
-   collaborators, 32 px inside the 44 px row: never over the sheet, never over the toolbar. The
-   question is the field's placeholder; the field narrows when the row does. */
+/* ---- the name prompt as a plate under the row (docs/POLISH.md 2.8 item 103; NEXT.md 4.1.3
+   item 13) ----
+   The route's prompt on the first write or at the join floats under the title row's right end,
+   in the menu bar's 28 px band (the menu titles sit at the left), never over the sheet and never
+   over the toolbar. It left the row's right cluster, where its 300 px squeezed the deck name to
+   one letter at 1440 px (audit-brand-surfaces rank 4). Fixed, so the row's own `overflow: hidden`
+   does not clip it. The question is the field's placeholder. */
 .ts-title-name-plate {
+  position: fixed;
+  top: var(--pt-title-h, 44px);
+  right: 12px;
+  z-index: 20;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   box-sizing: border-box;
-  height: var(--pt-ctl-h, 32px);
+  height: var(--pt-menu-h, 28px);
+  max-width: calc(100vw - 24px);
   margin: 0;
-  padding: 0 4px 0 12px;
+  padding: 0 2px 0 10px;
   border: 1px solid var(--pt-hair);
   border-radius: 8px;
   background: var(--pt-paper);
@@ -505,7 +515,8 @@
 .ts-title-name-plate-field {
   box-sizing: border-box;
   width: 200px;
-  height: 24px;
+  min-width: 0;
+  height: 22px;
   padding: 0 4px;
   border: 0;
   border-bottom: 1px solid var(--pt-hair);
@@ -525,14 +536,14 @@
 }
 
 .ts-title-name-plate-continue {
-  height: 24px;
+  height: 22px;
   padding: 0 10px;
   border-radius: 6px;
 }
 
 .ts-title-name-plate-close {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   font: 16px/1 var(--pt-text);
   color: var(--pt-ink-2);
@@ -540,11 +551,7 @@
 
 /* the server's refusal sentence (reserved, already in use, the shape rule) hangs under the plate
    in its own small plate, so the row keeps its height and the sentence is read where the field
-   is; empty it takes no room */
-.ts-title-name-plate {
-  position: relative;
-}
-
+   is; empty it takes no room (the plate is fixed, so it is the sentence's containing block) */
 .ts-title-name-plate-error {
   position: absolute;
   top: calc(100% + 4px);
@@ -567,5 +574,86 @@
 @media (max-width: 1180px) {
   .ts-title-name-plate-field {
     width: 150px;
+  }
+}
+
+/* ---- Round 1 of the next program (docs/NEXT.md 4.1.3 item 13) ---- */
+
+/* One status phrase (audit-clutter 81; brand C rule 7): from 1280 px up, where the Last edit words
+   are drawn, the save words leave the screen while the cell reads All changes saved, so the row
+   shows "Last edit just now" alone; Saving, the retry word, Offline and Reconnecting show as they
+   did, since `data-state` is then not `saved`. The words stay in the cell, clipped, for the live
+   region and the walk's readers. Under 1280 px the Last edit words are hidden and the save words
+   are the one phrase. */
+@media (min-width: 1280px) {
+  .ts-title-row:has(.ts-title-clock-words:not(:empty))
+    .ts-title-save[data-state='saved']
+    .ts-title-save-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ts-title-row:has(.ts-title-clock-words:not(:empty))
+    .ts-title-save[data-state='saved']
+    .ts-title-save-words::after {
+    display: none;
+  }
+}
+
+.ts-title-save {
+  position: relative;
+}
+
+/* Sign In as text after Share (NEXT.md 4.1.2, B's graft): a quiet text button in ink, the
+   share's height, no frame until hover */
+.pt-ib.is-text.ts-title-signin {
+  height: var(--pt-ctl-h, 32px);
+  padding: 0 8px;
+  margin-right: -8px;
+  border-color: transparent;
+  color: var(--pt-ink);
+  white-space: nowrap;
+}
+
+/* the More key, drawn under 480 px alone */
+.pt-ib.ts-title-more {
+  display: none;
+  color: var(--pt-ink-2);
+}
+
+/* Under 480 px (NEXT.md 4.1.3 item 13; audit-brand-surfaces proposal 3): the row keeps the mark,
+   the deck name at 96 px or more, the clock and the save glyph on the left, and Slideshow as a
+   32 px key, Share as a 32 px key and More on the right. The presence slot, Assist, the comments
+   and side panel glyphs, the inbox, Sign In and the Slideshow arrow fold into More, whose rows run
+   what each did (TitleRow.tsx `titleMoreItems`). The name takes what the row leaves, up to the
+   900 px block's 160 px. */
+@media (max-width: 479px) {
+  .ts-title-row {
+    padding: 0 8px 0 6px;
+  }
+
+  .ts-title-r > .ts-presence,
+  .ts-title-r > .ts-title-slot,
+  .ts-title-r > .pt-ib.ts-title-signin,
+  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow {
+    display: none;
+  }
+
+  .pt-ib.ts-title-more {
+    display: inline-flex;
+  }
+
+  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present {
+    width: 30px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .ts-title-name-plate-field {
+    width: 120px;
   }
 }

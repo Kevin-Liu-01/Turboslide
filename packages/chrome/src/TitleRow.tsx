@@ -2,17 +2,25 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useEditorShell } from './editor-shell-context';
-import type { IdentityView, LinkComponent } from './editor-shell';
+import type {
+  EditorPresence,
+  IdentityView,
+  LinkComponent,
+  PresenceParticipant,
+} from './editor-shell';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { Menu } from './Menu';
 import { tooltipKey } from './menus/keys';
-import { isPresent, itemById } from './menus/model';
+import { findItem, isPresent, itemById } from './menus/model';
 import type { MenuItem } from './menus/model';
 import { TITLE_ROW } from './menus/strings';
 import { NamePromptPlate } from './dialogs/NamePrompt';
+import { AccountMenu } from './presence/AccountMenu';
 import { nameOf } from './presence/IdentityChip';
+import { meOf, viewerFactsOf } from './presence/presence-model';
 import { PresenceSlot } from './presence/PresenceSlot';
+import { RosterMenu } from './presence/RosterMenu';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
 import { TurboslideMark } from './TurboslideMark';
@@ -42,6 +50,16 @@ import './TitleRow.css';
  * left and the stage gained its 32 px); the save words stay hidden on a fresh draft until the
  * first edit, so a seller never reads Not saved yet before typing; the presence slot carries a
  * tooltip (PresenceSlot.tsx).
+ *
+ * Round 1 of the next program (docs/NEXT.md 4.1.3 item 13; audit-brand-surfaces ranks 3 and 4;
+ * audit-clutter 80 to 82): one status phrase. A draft nobody edited shows no Last edit words; after
+ * a write the words read "Last edit 2 minutes ago" with the author in their tooltip, and the save
+ * words show only while they differ from All changes saved (they stay in the cell for screen
+ * readers and the walk's readers). The name prompt floats under the row (TitleRow.css), so the
+ * deck name keeps its width while it shows. Sign In is a text button after Share for a visitor
+ * the deployment can sign in. Under 480 px the deck name keeps 96 px and the presence slot,
+ * Assist, the comments and side panel glyphs, the inbox, Sign In and the Slideshow arrow fold into
+ * one More key, whose Collaborators row opens the roster at the key.
  */
 
 /** "2 minutes ago" from an ISO time and now. */
@@ -286,9 +304,16 @@ function SaveState() {
 function LastEdit() {
   const shell = useEditorShell();
   const save = shell.input.save;
-  const ago = timeAgo(save?.lastEditAt ?? shell.input.document.deck.updatedAt);
+  /* a draft is a deck nobody edited yet (/new before its first write; the route passes the
+     draft's `updatedAt`, the time /new built it, as `lastEditAt`, which read "Last edit just now"
+     on a fresh /new: audit-clutter 80): no words until the first write */
+  const ago =
+    save?.draft === true ? null : timeAgo(save?.lastEditAt ?? shell.input.document.deck.updatedAt);
   const item = itemById('title.lastEdit');
-  const words = lastEditWords(ago, save?.lastEditor, save?.lastEditBy);
+  /* the tooltip and the accessible name name the author; the words beside the clock do not, so
+     the row reads one short phrase (NEXT.md 4.1.3 item 13) */
+  const full = lastEditWords(ago, save?.lastEditor, save?.lastEditBy);
+  const words = ago === null ? '' : TITLE_ROW.lastEdit(ago);
   const changed = save?.changedSinceOpen === true;
   return (
     <span
@@ -297,11 +322,11 @@ function LastEdit() {
     >
       <ToolButton
         icon="clock"
-        title={words}
+        title={full}
         doc={
           changed ? `${item.doc ?? ''}. Changed since you opened it`.replace(/^\. /, '') : item.doc
         }
-        ariaLabel={words}
+        ariaLabel={full}
         pressed={shell.panel === 'versionHistory'}
         quiet
         className="ts-title-clock"
@@ -318,8 +343,9 @@ function LastEdit() {
         data-control="deck.lastEdit.words"
         aria-hidden="true"
         onClick={() => shell.runItem(item)}
+        {...(words === '' ? {} : tipProps({ name: full, doc: item.doc }))}
       >
-        {ago === null ? '' : words}
+        {words}
       </span>
       <i className="ts-title-dot" aria-hidden="true" />
     </span>
@@ -451,6 +477,187 @@ function InboxPlate() {
   );
 }
 
+/**
+ * Sign In as text (NEXT.md 4.1.2, B's graft; 4.1.3 item 13): a quiet text button after Share for
+ * a visitor the deployment can sign in (`title.account.signIn`'s `canSignIn`), Title Case as every
+ * button is (DECK-GRAMMAR 22). It opens the dialog the account menu's Sign in row opens. Absent
+ * on a deployment that offers no method and for a signed in person. Under 480 px it leaves the
+ * row and its row is in More.
+ */
+/**
+ * The title row's Sign In item: B3a's `title.signIn` (round1/build/b3a.md request 5, landed with
+ * B3a#8) once the model holds it, else the account menu's own Sign in row, which opens the same
+ * dialog under the same `canSignIn` predicate.
+ */
+export function titleSignInItem(): MenuItem {
+  return findItem('title.signIn') ?? itemById('title.account.signIn');
+}
+
+function TitleSignIn() {
+  const shell = useEditorShell();
+  const item = titleSignInItem();
+  if (!isPresent(item, shell.menuContext)) return null;
+  return (
+    <button
+      type="button"
+      className="pt-ib is-text ts-title-signin"
+      data-control="title.signIn"
+      data-menu-item={item.id}
+      onClick={() => shell.runItem(item)}
+      {...tipProps({ name: 'Sign In', doc: item.doc ?? '' })}
+    >
+      <span className="pt-lb">Sign In</span>
+    </button>
+  );
+}
+
+/** The id of the More key's menu; the key names it in `aria-controls` while it is mounted. */
+export const TITLE_MORE_MENU_ID = 'ts-menu-title-more';
+
+/** The roster's row in More: the presence slot's label, opening the roster at the key. */
+const ROSTER_ROW_ID = 'title.presence';
+
+/**
+ * The rows the More key holds under 480 px, in the order they read: the controls the row folds
+ * (Assist, Show all comments, the side panel toggle, Collaborators, Notifications), the two rows of
+ * the Slideshow arrow, then Sign in. Each is the model's own item, so the labels, the keys, the
+ * tooltips and the `when` predicates are the ones the row's controls read; a row the context does
+ * not offer is absent (`Menu` filters with `isPresent`).
+ */
+export function titleMoreItems(panel: string | null): MenuItem[] {
+  const side = itemById('title.sidePanel');
+  const rows: MenuItem[] = [
+    itemById('title.assist'),
+    itemById('title.comments'),
+    panel === null ? side : { ...side, label: 'Hide side panel', doc: 'Closes the panel' },
+    { ...itemById(ROSTER_ROW_ID), items: undefined, dividerBefore: true },
+    itemById('title.inbox'),
+    { ...itemById('title.slideshow.presenterView'), dividerBefore: true },
+    itemById('title.slideshow.startFromBeginning'),
+    { ...titleSignInItem(), label: 'Sign in', dividerBefore: true },
+  ];
+  return rows;
+}
+
+const NO_PRESENCE: EditorPresence = { others: [] };
+
+/**
+ * The More key (NEXT.md 4.1.3 item 13; audit-brand-surfaces proposal 3): drawn under 480 px only
+ * (TitleRow.css), a 32 px quiet key with the horizontal ellipsis. Its menu runs each row as the
+ * folded control does; Collaborators opens the roster plate at the key, and the roster's own row
+ * opens the account menu there, so Change name, Sign in and Forget this browser stay one tap away
+ * while the presence slot is folded.
+ */
+function TitleMore() {
+  const shell = useEditorShell();
+  const { input } = shell;
+  const key = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState<'menu' | 'roster' | 'account' | null>(null);
+  const presence = input.presence ?? NO_PRESENCE;
+  const viewer = viewerFactsOf(input.access, presence);
+  const self = meOf({ account: input.account, presence });
+  const goTo = (participant: PresenceParticipant) => {
+    if (presence.onGoTo) presence.onGoTo(participant.clientId);
+    else if (input.editor?.goToClient) input.editor.goToClient(participant.clientId);
+    else if (participant.slideId !== undefined) input.navigate?.(`#${participant.slideId}`);
+  };
+  const follow = (participant: PresenceParticipant) => {
+    if (presence.following === participant.clientId) presence.onUnfollow?.();
+    else if (presence.onFollow) presence.onFollow(participant.clientId);
+    else if (input.editor?.followClient) input.editor.followClient(participant.clientId);
+    else goTo(participant);
+  };
+  const run = (chosen: MenuItem) => {
+    if (chosen.id === ROSTER_ROW_ID) {
+      setOpen('roster');
+      return;
+    }
+    setOpen(null);
+    if (chosen.id === 'title.sidePanel') {
+      if (shell.panel === null) shell.reopenPanel();
+      else shell.closePanel();
+      return;
+    }
+    if (chosen.id === 'title.assist' && shell.panel === 'assist') {
+      shell.closePanel();
+      return;
+    }
+    if (chosen.id === 'title.comments' && shell.panel === 'comments') {
+      shell.closePanel();
+      return;
+    }
+    shell.runItem(chosen);
+  };
+  const anchor = key.current;
+  return (
+    <>
+      <button
+        ref={key}
+        type="button"
+        className="pt-ib pt-icon ts-title-more"
+        data-control="title.more"
+        aria-label="More"
+        aria-haspopup="menu"
+        aria-expanded={open !== null}
+        aria-controls={open === 'menu' ? TITLE_MORE_MENU_ID : undefined}
+        onClick={() => setOpen((on) => (on === null ? 'menu' : null))}
+        {...tipProps({
+          name: 'More',
+          doc: 'Assist, comments, the side panel, collaborators and the slideshow options',
+        })}
+      >
+        <Icon name="ellipsis-horizontal" />
+      </button>
+      {open === 'menu' && anchor ? (
+        <Menu
+          items={titleMoreItems(shell.panel)}
+          context={shell.menuContext}
+          label="More"
+          anchor={{ kind: 'element', element: anchor }}
+          placement="below"
+          align="end"
+          returnFocusTo={anchor}
+          onSelect={run}
+          onClose={() => setOpen((on) => (on === 'menu' ? null : on))}
+          id={TITLE_MORE_MENU_ID}
+        />
+      ) : null}
+      {open === 'roster' && anchor ? (
+        <RosterMenu
+          anchor={anchor}
+          presence={presence}
+          document={input.document}
+          viewer={viewer}
+          capabilities={input.capabilities}
+          context={shell.menuContext}
+          onFollow={(participant) => {
+            setOpen(null);
+            follow(participant);
+          }}
+          onGoTo={(participant) => {
+            setOpen(null);
+            goTo(participant);
+          }}
+          onAccount={() => setOpen('account')}
+          onClose={() => setOpen((on) => (on === 'roster' ? null : on))}
+          returnFocusTo={anchor}
+        />
+      ) : null}
+      {open === 'account' && anchor && self !== null ? (
+        <AccountMenu
+          anchor={anchor}
+          identity={self}
+          account={input.account}
+          context={shell.menuContext}
+          runItem={shell.runItem}
+          onClose={() => setOpen((on) => (on === 'account' ? null : on))}
+          returnFocusTo={anchor}
+        />
+      ) : null}
+    </>
+  );
+}
+
 export type TitleRowProps = {
   /** compact mode: the Show the menus chevron at the far right */
   compact: boolean;
@@ -528,9 +735,10 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         <SaveState />
       </div>
       <div className="ts-title-r">
-        {/* the name prompt the route opens on the first write or at the join sits here as a plate
-            (docs/POLISH.md 2.8 item 103): inside the row, never over the sheet; a dialog a person
-            opened covers it while open, the way the floating card was covered */}
+        {/* the name prompt the route opens on the first write or at the join (docs/POLISH.md 2.8
+            item 103): a plate that floats under the row's right end (TitleRow.css, NEXT.md 4.1.3
+            item 13), never over the sheet and never inside the row, so the deck name keeps its
+            width while it shows; a dialog a person opened covers it while open */}
         {shell.input.account?.namePrompt?.open === true && shell.dialog === null ? (
           <NamePromptPlate />
         ) : null}
@@ -631,6 +839,8 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
           </button>
           <i className="ts-title-dot" aria-hidden="true" />
         </span>
+        <TitleSignIn />
+        <TitleMore />
         {compact ? (
           <ToolButton
             icon="chevron-down"

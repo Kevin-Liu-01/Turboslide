@@ -132,7 +132,9 @@ describe('the title row slots', () => {
     const right = container.querySelector('.ts-title-r')!;
     const controls = Array.from(right.children).map((el) => el.getAttribute('data-control'));
     /* the side panel toggle joined the cluster in the product round (docs/PRODUCT.md section 2
-       rank 25): the bottom bar that held it left */
+       rank 25): the bottom bar that held it left. The More key (NEXT.md 4.1.3 item 13) is in the
+       markup at every width and drawn under 480 px alone (TitleRow.css); Sign In is absent here,
+       since the harness offers no sign in method */
     expect(controls).toEqual([
       'title.presence',
       'title.assist.slot',
@@ -141,6 +143,7 @@ describe('the title row slots', () => {
       'title.inbox.slot',
       'present.split',
       'share.slot',
+      'title.more',
     ]);
     expect(right.querySelector('[data-control="title.sidePanel"]')).not.toBeNull();
     const presence = right.querySelector('[data-control="title.presence"]')!;

@@ -21,6 +21,7 @@ import {
 } from './lib';
 import { chromeMenus } from './chrome-menus';
 import { chromePages } from './chrome-pages';
+import { chromeRound1 } from './chrome-round1';
 
 // The chrome at two viewports, the spec rows (docs/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
 // plate-four-columns`, `share.dialog.more-row` and `chrome.toolbar.fold-any-width` with the driver
@@ -568,7 +569,11 @@ const MENU_ROWS = chromeMenus(() => wide);
 /* lane B2 of Round 1 (docs/NEXT.md 4.1.3 item 11): its row lives in chrome-pages.ts */
 const PAGE_ROWS = chromePages();
 
+/* lane B3b of Round 1 (docs/NEXT.md 4.1.3 items 13 to 18): its rows live in chrome-round1.ts */
+const ROUND1_ROWS = chromeRound1();
+
 coverage(import.meta.filename, [
+  ...ROUND1_ROWS,
   ...PAGE_ROWS,
   ...MENU_ROWS,
   'slides.layout.plate-four-columns',

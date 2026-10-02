@@ -8910,6 +8910,36 @@
       "note": "Polish round; docs/POLISH.md 2.6 item 68; B1"
     },
     {
+      "id": "chrome.title-row.phone",
+      "feature": "chrome",
+      "interaction": "At 390 by 844 the title row fits the viewport, the deck name is at least 96 px wide and Slideshow and Share are inside it",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-brand-surfaces 28 (row 491 px wide, name 18 px, \"U\")",
+      "note": "docs/NEXT.md 4.1.3 item 13 and 4.1.5, push B3b#9: under 480 px the presence slot, Assist, the comments and side panel glyphs, the inbox, Sign In and the Slideshow arrow fold into one More key (TitleRow.tsx titleMoreItems); the test is in apps/studio/e2e/core/chrome-round1.ts, called from the spec"
+    },
+    {
+      "id": "chrome.title-row.name-after-first-write",
+      "feature": "chrome",
+      "interaction": "At 1440 px, within 5 s after the first write, the deck name keeps its full width while the name plate shows",
+      "driver": "core/chrome.spec.ts",
+      "today": "flaky",
+      "severity": 2,
+      "evidence": "audit-brand-surfaces 29; audit-clutter 82 (one of two runs)",
+      "note": "docs/NEXT.md 4.1.3 item 13, push B3b#9: the plate floats under the row in the menu bar band (TitleRow.css); the first write on /new makes the deck and the next write is the first its editor counts, the one the route opens the prompt on (SPEC-3 0.18), so the test writes once more and reads the name within 5 s of that write"
+    },
+    {
+      "id": "chrome.title-row.one-status",
+      "feature": "chrome",
+      "interaction": "A draft nobody edited shows no Last edit words; after a write the row shows one status phrase, the author in its tooltip",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-clutter 80 to 81",
+      "note": "docs/NEXT.md 4.1.3 item 13, push B3b#9. NEXT.md 4.1.5 names the driver probe --core; the walk area chrome.mjs is B3a's file, so the row is driven in core/chrome.spec.ts (round1/build/b3b.md)"
+    },
+    {
       "id": "formatting.border-weight.menu-opens",
       "feature": "formatting",
       "interaction": "A picture selected: Format > Borders and lines > Border weight opens the weights and 2 px writes",

@@ -13,6 +13,9 @@
 // payload's tier word and holds the switch between them (3.8): the ticket route names the tier
 // when the socket is refused for it, the stream route's 503 `tier` names the socket. The room
 // client's state machine above the `RoomTransport` contract is unchanged; it owns every reopen.
+// The wrapper also raises the studio session's two page events (the realtime round fix round,
+// build/r2.md R2-F2): whether a socket is open, and the room's `session` nudge, which the room
+// client never sees.
 import type { Entry, RoomEvent } from '@turboslide/realtime/channel';
 import {
   REOPEN_WAIT_MAX_MS,
@@ -44,6 +47,15 @@ import {
   roomEventOf,
 } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
+
+import {
+  SESSION_NUDGE_EVENT,
+  SESSION_SOCKET_EVENT,
+  noteSocketWord,
+  sessionNudgeOf,
+  sessionNudgeOfText,
+} from './session-word';
+import type { SessionNudgeDetail, SessionSocketDetail } from './session-word';
 
 // ---------------------------------------------------------------------------------------------
 // The numbers
@@ -367,7 +379,24 @@ export type TransportDeps = {
   window?: Pick<Window, 'addEventListener' | 'removeEventListener'> | null;
   /** the browser's word on the network, `navigator.onLine` by default */
   online?: () => boolean;
+  /**
+   * Raises a page event (the studio session's word, R2-F2): a `CustomEvent` dispatched on
+   * `window` by default, nothing where there is no window (the tests record the calls).
+   */
+  announce?: (name: string, detail: unknown) => void;
 };
+
+function announceOf(deps: TransportDeps): (name: string, detail: unknown) => void {
+  if (deps.announce !== undefined) return deps.announce;
+  return (name, detail) => {
+    if (typeof window === 'undefined' || typeof CustomEvent === 'undefined') return;
+    try {
+      window.dispatchEvent(new CustomEvent(name, { detail }));
+    } catch {
+      // the page event is advice to the session loop; the wire never depends on it
+    }
+  };
+}
 
 function fetchOf(deps: TransportDeps): typeof globalThis.fetch {
   return deps.fetch ?? ((input, init) => globalThis.fetch(input, init));
@@ -601,7 +630,15 @@ export type TicketAnswer = {
 type TicketRead =
   { ok: true; answer: TicketAnswer } | { ok: false; status: number; code: string; message: string };
 
-export type SocketTransport = RoomTransport & {
+/**
+ * What the socket transport's `open` takes beyond the room client's options: `onSession`, told
+ * the session id of every `session` frame (R2-F2), which the room client never reads; the
+ * wrapper (`roomTransport`) passes it and raises SESSION_NUDGE_EVENT.
+ */
+export type SocketOpenOptions = OpenOptions & { onSession?: (sessionId: string) => void };
+
+export type SocketTransport = Omit<RoomTransport, 'open'> & {
+  open: (options: SocketOpenOptions) => StreamHandle;
   kind: () => 'ws';
   /** the socket URL the transport opens (the payload's, or the ticket route's), or null while none is known */
   url: () => string | null;
@@ -827,7 +864,15 @@ export function wsTransport(
         socket.close(1000, 'disposed');
       }
     },
-    open({ since, retire, onEvent, onError, onResend, onRoom }: OpenOptions): StreamHandle {
+    open({
+      since,
+      retire,
+      onEvent,
+      onError,
+      onResend,
+      onRoom,
+      onSession,
+    }: SocketOpenOptions): StreamHandle {
       let done = false;
       let opened = false;
       let socket: SocketLike | null = null;
@@ -927,12 +972,25 @@ export function wsTransport(
           // the auto response pair's answer is not JSON and never reaches the parser
           if (event.data === HEARTBEAT_RESPONSE) return;
           const frame = parseDownFrame(event.data);
-          if (frame === null) return;
+          if (frame === null) {
+            // the studio session's nudge before the event joins the room event schema (R2-F2a):
+            // read from the raw frame; every other frame the parser does not know is dropped
+            const nudged = sessionNudgeOfText(event.data);
+            if (nudged !== null) onSession?.(nudged);
+            return;
+          }
           switch (frame.kind) {
-            case 'event':
+            case 'event': {
+              // the nudge is the session loop's and never the room client's (R2-F2)
+              const nudged = sessionNudgeOf(frame.event);
+              if (nudged !== null) {
+                onSession?.(nudged);
+                return;
+              }
               if (frame.event.type === 'hello') clientId = frame.event.clientId;
               onEvent(frame.event);
               return;
+            }
             case 'ack': {
               const ack = acks.get(frame.frame.req);
               if (ack === undefined) return;
@@ -1125,18 +1183,39 @@ export function roomTransport(
     mode = next;
     failedSince = null;
   };
+  /* the studio session's word (R2-F2): the page is told when a socket says hello and when it
+     ends, once per change, and every nudge the socket carries */
+  const announce = announceOf(deps);
+  let socketSaid = false;
+  const saySocket = (open: boolean): void => {
+    if (open === socketSaid) return;
+    socketSaid = open;
+    noteSocketWord(deckId, open);
+    const detail: SessionSocketDetail = { deckId, open };
+    announce(SESSION_SOCKET_EVENT, detail);
+  };
+  const sayNudge = (sessionId: string): void => {
+    const detail: SessionNudgeDetail = { deckId, sessionId };
+    announce(SESSION_NUDGE_EVENT, detail);
+  };
   return {
     kind: () => mode,
     open(options) {
+      const wire = mode;
       const onEvent = (event: RoomEvent): void => {
-        if (event.type === 'hello') failedSince = null;
+        if (event.type === 'hello') {
+          failedSince = null;
+          saySocket(wire === 'ws');
+        }
         options.onEvent(event);
       };
       if (mode === 'ws') {
-        return ws.open({
+        const handle = ws.open({
           ...options,
           onEvent,
+          onSession: sayNudge,
           onError: (error) => {
+            saySocket(false);
             const failure = error as TransportFailure;
             if (failedSince === null) failedSince = now();
             if (typeof failure.tier === 'string' && failure.tier !== 'do') {
@@ -1164,6 +1243,12 @@ export function roomTransport(
             });
           },
         });
+        return {
+          close() {
+            saySocket(false);
+            handle.close();
+          },
+        };
       }
       return sse.open({
         ...options,

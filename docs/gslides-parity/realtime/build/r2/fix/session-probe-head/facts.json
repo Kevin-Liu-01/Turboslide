@@ -1,0 +1,142 @@
+{
+  "base": "http://localhost:4472",
+  "idleSeconds": 90,
+  "startedAt": "2026-10-02T15:40:55.783Z",
+  "calls": [
+    {
+      "ms": 615,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 640,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 1679,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvd3JpdGUudHM_dHNzLXNlc"
+    },
+    {
+      "ms": 1720,
+      "method": "GET",
+      "path": "/api/decks/untitled-20261002-j1kt/ticket"
+    },
+    {
+      "ms": 1721,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvd2FybS50cz90c3Mtc2Vyd"
+    },
+    {
+      "ms": 1786,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 1786,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 1786,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 1848,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 20657,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 40664,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 60672,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 80677,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 100684,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 100728,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 100734,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 100739,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 100754,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    }
+  ],
+  "deckId": "untitled-20261002-j1kt",
+  "slides": [
+    "title",
+    "title-1-928d"
+  ],
+  "target": "title-1-928d",
+  "statusBefore": {
+    "seq": 2,
+    "revision": 2,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "ws",
+    "connected": true,
+    "room": {
+      "colo": "SJC",
+      "object": "21bb6f1d",
+      "idleMs": 2000,
+      "maxMs": 10000
+    }
+  },
+  "idle": {
+    "fromMs": 3837,
+    "toMs": 93840,
+    "serverFunctionPosts": 4,
+    "otherRequests": []
+  },
+  "mcp": {
+    "tools": true,
+    "activeBefore": "title",
+    "ms": 5713,
+    "result": {
+      "slideId": "title",
+      "n": 1,
+      "mode": "slide",
+      "theme": "light",
+      "present": false,
+      "edit": true,
+      "zoom": "fit"
+    },
+    "isError": false,
+    "activeAfter": "title-1-928d"
+  },
+  "teardown": 404,
+  "endedAt": "2026-10-02T15:42:36.698Z"
+}

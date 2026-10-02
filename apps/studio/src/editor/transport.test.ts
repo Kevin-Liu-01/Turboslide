@@ -30,6 +30,13 @@ import {
   wsTransport,
 } from './transport';
 import type { TransportDeps, TransportFailure } from './transport';
+import {
+  SESSION_NUDGE_EVENT,
+  SESSION_SOCKET_EVENT,
+  sessionNudgeOf,
+  sessionNudgeOfText,
+  sessionSocketOpen,
+} from './session-word';
 
 const CLIENT = 'c'.repeat(32);
 const DECK = 'deck-one';
@@ -699,5 +706,98 @@ describe('roomTransport: the choice and the switch (3.8)', () => {
     expect(failure.status).toBeUndefined();
     const response: OpsResponse = { ok: false, status: 401, code: 'ticket', message: 'x' };
     expect(response.ok).toBe(false);
+  });
+});
+
+describe('the studio session’s word on the socket (the realtime round fix round, R2-F2)', () => {
+  type Said = { name: string; detail: unknown };
+  const withAnnounce = (h: Harness): Said[] => {
+    const said: Said[] = [];
+    h.deps.announce = (name, detail) => said.push({ name, detail });
+    return said;
+  };
+
+  test('sessionNudgeOf reads the event and nothing else', () => {
+    expect(sessionNudgeOf({ type: 'session', sessionId: 's-1' })).toBe('s-1');
+    expect(sessionNudgeOf({ type: 'session', sessionId: '' })).toBeNull();
+    expect(sessionNudgeOf({ type: 'session' })).toBeNull();
+    expect(sessionNudgeOf({ type: 'access', revision: 1 })).toBeNull();
+    expect(sessionNudgeOf(null)).toBeNull();
+    expect(sessionNudgeOfText('{"type":"session","sessionId":"s-2"}')).toBe('s-2');
+    expect(sessionNudgeOfText('{"type":"store","ok":true}')).toBeNull();
+    expect(sessionNudgeOfText('not json "session"')).toBeNull();
+  });
+
+  test('the socket says hello once, a nudge reaches the page and never the room client, the end says closed', async () => {
+    const h = harness();
+    const said = withAnnounce(h);
+    const transport = roomTransport(DECK, TAB, facts(), h.deps);
+    const handle = h.open(transport);
+    const socket = await accept(h);
+    expect(said).toEqual([{ name: SESSION_SOCKET_EVENT, detail: { deckId: DECK, open: true } }]);
+    expect(sessionSocketOpen(DECK)).toBe(true);
+    // a frame the frame parser does not know yet (the event before it joins the schema)
+    socket.push({ type: 'session', sessionId: 'sess-1' });
+    await h.clock.flush();
+    expect(said[1]).toEqual({
+      name: SESSION_NUDGE_EVENT,
+      detail: { deckId: DECK, sessionId: 'sess-1' },
+    });
+    expect(h.events.map((event) => event.type)).toEqual(['hello']);
+    // a second hello on the same socket (a resync) says nothing new
+    socket.push(hello());
+    await h.clock.flush();
+    expect(said.filter((row) => row.name === SESSION_SOCKET_EVENT)).toHaveLength(1);
+    handle.close();
+    expect(sessionSocketOpen(DECK)).toBe(false);
+    expect(said[said.length - 1]).toEqual({
+      name: SESSION_SOCKET_EVENT,
+      detail: { deckId: DECK, open: false },
+    });
+  });
+
+  test('a socket that drops says closed, and its reopen says open again', async () => {
+    const h = harness();
+    const said = withAnnounce(h);
+    const transport = roomTransport(DECK, TAB, facts(), h.deps);
+    h.open(transport);
+    (await accept(h)).closeFromServer(1006, '');
+    await h.clock.flush();
+    expect(said.map((row) => row.detail)).toEqual([
+      { deckId: DECK, open: true },
+      { deckId: DECK, open: false },
+    ]);
+    h.open(transport, 1);
+    await accept(h, hello({ seq: 1 }));
+    expect(said.map((row) => (row.detail as { open: boolean }).open)).toEqual([true, false, true]);
+  });
+
+  test('the stream route never says a socket is open', async () => {
+    const encoder = new TextEncoder();
+    const h = harness((url) => {
+      if (url.includes('/stream?')) {
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(
+                `event: hello\ndata: ${JSON.stringify(hello({ tier: 'memory' }))}\n\n`,
+              ),
+            );
+          },
+        });
+        return new Response(body, {
+          status: 200,
+          headers: { 'content-type': 'text/event-stream' },
+        });
+      }
+      return json({}, 500);
+    });
+    const said = withAnnounce(h);
+    const transport = roomTransport(DECK, TAB, { tier: 'memory', seq: 0 }, h.deps);
+    const handle = h.open(transport);
+    await h.clock.flush();
+    expect(h.events.map((event) => event.type)).toEqual(['hello']);
+    expect(said).toEqual([]);
+    handle.close();
   });
 });

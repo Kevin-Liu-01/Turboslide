@@ -1,0 +1,377 @@
+--- a/packages/realtime/src/channel.ts
++++ b/packages/realtime/src/channel.ts
+@@ -257,7 +257,9 @@
+    * C3-F2): a tab's title row reads Reconnecting while `ok` is false. `retryAfterMs` is the wait
+    * before the next poll. The blob tier alone sends it; the other tiers have no store poll.
+    */
+-  | { type: 'store'; ok: boolean; retryAfterMs?: number };
++  | { type: 'store'; ok: boolean; retryAfterMs?: number }
++  /** the hosted agent surface queued a command for this studio session (build/r2.md R2-F2a) */
++  | { type: 'session'; sessionId: string };
+ 
+ export type RoomEventType = RoomEvent['type'];
+ 
+--- a/packages/realtime/src/protocol.ts
++++ b/packages/realtime/src/protocol.ts
+@@ -414,6 +414,7 @@
+     ok: z.boolean(),
+     retryAfterMs: nonNegativeInt.optional(),
+   }),
++  z.strictObject({ type: z.literal('session'), sessionId: z.string().min(1).max(128) }),
+ ]) satisfies z.ZodType<RoomEvent>;
+ 
+ // ---------------------------------------------------------------------------------------------
+--- a/packages/agent/src/http/sessions.ts
++++ b/packages/agent/src/http/sessions.ts
+@@ -27,6 +27,8 @@
+    */
+   principalId?: string;
+   url?: string;
++  /** the page hears its commands on the room's socket and polls at the slow pace (R2-F2c) */
++  socket?: boolean;
+   attachedAt: string;
+   lastSeenAt: string;
+   /** describe().state of the page's owner, as last reported. */
+@@ -47,6 +49,7 @@
+   principalId?: string;
+   url?: string;
+   state?: Record<string, unknown>;
++  socket?: boolean;
+ };
+ 
+ export type SessionRegistry = {
+@@ -92,6 +95,8 @@
+ };
+ 
+ export const DEFAULT_STALE_MS = 45_000;
++/** How long a session that polls at the socket's slow pace stays attached (R2-F2c). */
++export const SOCKET_STALE_MS = 6 * 60_000;
+ /**
+  * How long a command waits for the page's answer. The page polls every 20 s when idle
+  * (useStudioSession.ts `EMPTY_ANSWER_PAUSE_MS`) and the poll is not held, so a command issued just
+@@ -158,7 +163,9 @@
+ 
+   const stamp = (): string => new Date(now()).toISOString();
+ 
+-  const fresh = (entry: Entry): boolean => now() - Date.parse(entry.session.lastSeenAt) <= staleMs;
++  const fresh = (entry: Entry): boolean =>
++    now() - Date.parse(entry.session.lastSeenAt) <=
++    (entry.session.socket === true ? Math.max(staleMs, SOCKET_STALE_MS) : staleMs);
+ 
+   const drop = (entry: Entry): void => {
+     entries.delete(entry.session.id);
+@@ -184,6 +191,7 @@
+         ...(input.author !== undefined ? { author: input.author } : {}),
+         ...(input.principalId !== undefined ? { principalId: input.principalId } : {}),
+         ...(input.url !== undefined ? { url: input.url } : {}),
++        ...(input.socket === true ? { socket: true } : {}),
+         attachedAt: existing?.session.attachedAt ?? at,
+         lastSeenAt: at,
+         state: { ...(input.state ?? {}) },
+--- a/apps/studio/src/server/sessions.ts
++++ b/apps/studio/src/server/sessions.ts
+@@ -47,6 +47,8 @@
+ export const SESSIONS_PER_DECK_MAX = 200;
+ /** A binding not touched by a poll for this long is gone (the poll cycle is 20 s, the sweep 45 s). */
+ export const SESSION_BINDING_TTL_MS = 90_000;
++/** A binding of a page on the room's socket, which polls every five minutes (R2-F2c). */
++export const SOCKET_BINDING_TTL_MS = 6 * 60_000;
+ 
+ export type SessionBinding = {
+   id: string;
+@@ -58,6 +60,8 @@
+   attachedAt: string;
+   lastSeenAt: string;
+   userAgent?: string;
++  /** the page polls at the socket's slow pace (R2-F2c) */
++  socket?: boolean;
+ };
+ 
+ export type BindRefusal = { ok: false; reason: 'identity' | 'deck'; cap: number };
+@@ -74,7 +78,8 @@
+ type Kv = { call: (command: string, ...args: (string | number)[]) => Promise<unknown> };
+ 
+ const fresh = (row: SessionBinding, now: string): boolean =>
+-  Date.parse(now) - Date.parse(row.lastSeenAt) <= SESSION_BINDING_TTL_MS;
++  Date.parse(now) - Date.parse(row.lastSeenAt) <=
++  (row.socket === true ? SOCKET_BINDING_TTL_MS : SESSION_BINDING_TTL_MS);
+ 
+ /** One directory over a load and save of the whole table; the two backends differ only there. */
+ function directoryOver(
+@@ -200,6 +205,8 @@
+   state?: Record<string, unknown>;
+   /** A session id the page already holds: re-attaches it after an owner change or a server restart. */
+   id?: string;
++  /** the page hears its commands on the room's socket (R2-F2c) */
++  socket?: boolean;
+ };
+ 
+ const attachFn = createServerFn({ method: 'POST' })
+@@ -214,6 +221,7 @@
+       ...(typeof input.url === 'string' ? { url: input.url.slice(0, 2000) } : {}),
+       ...(state !== undefined ? { state } : {}),
+       ...(typeof input.id === 'string' && /^[0-9a-f-]{36}$/.test(input.id) ? { id: input.id } : {}),
++      ...(input.socket === true ? { socket: true } : {}),
+     };
+   })
+   .handler(async ({ data }): Promise<string> => {
+@@ -230,6 +238,7 @@
+       kind: who.kind,
+       attachedAt: session.attachedAt,
+       lastSeenAt: now,
++      ...(rest.socket === true ? { socket: true } : {}),
+     });
+     if (!bound.ok) {
+       studioSessions().detach(session.id);
+--- a/apps/studio/src/server/actions.ts
++++ b/apps/studio/src/server/actions.ts
+@@ -904,7 +904,15 @@
+         `No studio page is attached to deck ${deckId}; open /deck/${deckId} or /edit/${deckId}`,
+       );
+     }
+-    return studioSessions().request(session.id, 'view.goto', input);
++    const answer = studioSessions().request(session.id, 'view.goto', input);
++    // on the do tier the page hears the command on the room's socket (build/r2.md R2-F2b): the
++    // object sends the nudge on every socket of the deck and the page polls at once; a failed
++    // publish leaves the command to the page's slow poll
++    if (realtimeTier() === 'do')
++      void realtimeChannel()
++        .publish(deckId, { type: 'session', sessionId: session.id })
++        .catch(() => undefined);
++    return answer;
+   });
+ }
+ 
+--- a/apps/studio/src/components/useStudioSession.ts
++++ b/apps/studio/src/components/useStudioSession.ts
+@@ -6,6 +6,12 @@
+ import { errorStatus } from '@turboslide/schema/errors';
+ 
+ import {
++  SESSION_NUDGE_EVENT,
++  SESSION_SOCKET_EVENT,
++  sessionSocketOpen,
++} from '../editor/session-word';
++import type { SessionNudgeDetail, SessionSocketDetail } from '../editor/session-word';
++import {
+   answerStudioSession,
+   attachStudioSession,
+   detachStudioSession,
+@@ -55,6 +61,12 @@
+ export const HOT_PAUSE_MS = 1_000;
+ /** How long after a command the hook keeps the quick pace. */
+ export const HOT_WINDOW_MS = 30_000;
++/**
++ * The pause after an empty poll while the room's socket is open (build/r2.md R2-F2d): the socket
++ * carries a nudge for every command, so this poll is the fallback and the session's heartbeat
++ * (the registry keeps a socket session attached for six minutes).
++ */
++export const SOCKET_IDLE_PAUSE_MS = 5 * 60_000;
+ /** How long a tab stays hidden before the page detaches; a quick tab switch never detaches. */
+ export const HIDDEN_DETACH_MS = 10_000;
+ /** The pause after a poll or an attach that threw (a deploy's 5xx, a refused rate). */
+@@ -110,6 +122,12 @@
+   /** the page's address, for the manifest's session list */
+   href: () => string;
+   now: () => number;
++  /** whether the room's socket is open now (session-word.ts), read at the start */
++  socketOpen?: () => boolean;
++  /** subscribes to the room transport's socket word; returns the unsubscribe */
++  onSocket?: (listener: (open: boolean) => void) => () => void;
++  /** subscribes to the room's nudges, each with the session id it names; returns the unsubscribe */
++  onNudge?: (listener: (sessionId: string) => void) => () => void;
+ };
+ 
+ function ownerOf(studio: StudioAutomation): SessionOwner {
+@@ -128,6 +146,8 @@
+   let sessionId: string | undefined;
+   let attached = false;
+   let lastCommandAt = Number.NEGATIVE_INFINITY;
++  /* the room's socket is open: the page hears its commands there and polls at the slow pace */
++  let socket = deps.socketOpen?.() ?? false;
+   /* the interruptible wait: a visibility change or the stop ends a pause early, and a change that
+      lands while no wait is pending is kept so the next wait returns at once */
+   let changed = false;
+@@ -170,6 +190,7 @@
+       url: deps.href(),
+       state: described.state,
+       ...(sessionId !== undefined ? { id: sessionId } : {}),
++      ...(socket ? { socket: true } : {}),
+     });
+     sessionId = session.id;
+     attached = true;
+@@ -255,7 +276,7 @@
+       if (!alive) break;
+       if (commands.length === 0) {
+         const hot = deps.now() - lastCommandAt < HOT_WINDOW_MS;
+-        await wait(hot ? HOT_PAUSE_MS : EMPTY_ANSWER_PAUSE_MS);
++        await wait(hot ? HOT_PAUSE_MS : socket ? SOCKET_IDLE_PAUSE_MS : EMPTY_ANSWER_PAUSE_MS);
+         continue;
+       }
+       lastCommandAt = deps.now();
+@@ -265,11 +286,29 @@
+ 
+   const offVisibility = deps.onVisibilityChange(wakeUp);
+   const offReady = deps.onReady(onReady);
++  /* the socket's word (R2-F2d): a change re-attaches with the flag, so the registry keeps the
++     session at the pace it polls at, and a socket that ended returns the loop to 20 s at once */
++  const offSocket =
++    deps.onSocket?.((open) => {
++      if (open === socket) return;
++      socket = open;
++      if (attached && alive && deps.visible()) void attach().catch(() => undefined);
++      wakeUp();
++    }) ?? (() => {});
++  /* a nudge for this page's session: poll now and keep the quick pace until the command lands */
++  const offNudge =
++    deps.onNudge?.((id) => {
++      if (id !== sessionId) return;
++      lastCommandAt = deps.now();
++      wakeUp();
++    }) ?? (() => {});
+   void run();
+   return () => {
+     alive = false;
+     offVisibility();
+     offReady();
++    offSocket();
++    offNudge();
+     wakeUp();
+     if (attached) void detach();
+   };
+@@ -311,6 +350,23 @@
+       },
+       href: () => window.location.href,
+       now: () => Date.now(),
++      socketOpen: () => sessionSocketOpen(deckId),
++      onSocket: (listener) => {
++        const on = (event: Event): void => {
++          const detail = (event as CustomEvent<SessionSocketDetail>).detail;
++          if (detail?.deckId === deckId) listener(detail.open);
++        };
++        window.addEventListener(SESSION_SOCKET_EVENT, on);
++        return () => window.removeEventListener(SESSION_SOCKET_EVENT, on);
++      },
++      onNudge: (listener) => {
++        const on = (event: Event): void => {
++          const detail = (event as CustomEvent<SessionNudgeDetail>).detail;
++          if (detail?.deckId === deckId) listener(detail.sessionId);
++        };
++        window.addEventListener(SESSION_NUDGE_EVENT, on);
++        return () => window.removeEventListener(SESSION_NUDGE_EVENT, on);
++      },
+     });
+   }, [deckId, author, enabled]);
+ }
+--- a/apps/studio/src/components/useStudioSession.test.ts
++++ b/apps/studio/src/components/useStudioSession.test.ts
+@@ -4,6 +4,7 @@
+   createSessionRegistry,
+   DEFAULT_COMMAND_TIMEOUT_MS,
+   DEFAULT_STALE_MS,
++  SOCKET_STALE_MS,
+ } from '@turboslide/agent/http/sessions';
+ import type { SessionCommand } from '@turboslide/agent/http/sessions';
+ import type { StudioAutomation } from '@turboslide/agent/window/adapter';
+@@ -15,6 +16,7 @@
+   HOT_PAUSE_MS,
+   HOT_WINDOW_MS,
+   POLL_MS,
++  SOCKET_IDLE_PAUSE_MS,
+   startStudioSession,
+ } from './useStudioSession';
+ import type { SessionLoopDeps } from './useStudioSession';
+@@ -195,6 +197,56 @@
+     stop();
+   });
+ 
++  it('on the room socket: attaches with the flag, pauses five minutes, polls at once on its nudge (R2-F2d)', async () => {
++    const h = harness();
++    let socketListener: ((open: boolean) => void) | undefined;
++    let nudgeListener: ((sessionId: string) => void) | undefined;
++    const attaches: Array<{ socket?: boolean }> = [];
++    const attach = h.deps.api.attach;
++    h.deps.api.attach = async (input) => {
++      attaches.push({ ...(input.socket === true ? { socket: true } : {}) });
++      return attach(input);
++    };
++    h.deps.socketOpen = () => true;
++    h.deps.onSocket = (listener) => {
++      socketListener = listener;
++      return () => undefined;
++    };
++    h.deps.onNudge = (listener) => {
++      nudgeListener = listener;
++      return () => undefined;
++    };
++    const stop = startStudioSession(h.deps);
++    await tick(0);
++    expect(attaches).toEqual([{ socket: true }]);
++    expect(h.of('poll')).toHaveLength(1);
++    /* three idle minutes: no poll (docs/CLOUDFLARE.md 2.2 cost.editor-idle.calls) */
++    await tick(3 * 60_000);
++    expect(h.of('poll')).toHaveLength(1);
++    /* another page's nudge is not this one's */
++    nudgeListener?.('session-9');
++    await tick(0);
++    expect(h.of('poll')).toHaveLength(1);
++    nudgeListener?.('session-1');
++    await tick(0);
++    expect(h.of('poll')).toHaveLength(2);
++    /* the quick pace follows the nudge until the command lands on the instance polled */
++    await tick(HOT_PAUSE_MS);
++    expect(h.of('poll')).toHaveLength(3);
++    await tick(HOT_WINDOW_MS);
++    const settled = h.of('poll').length;
++    await tick(SOCKET_IDLE_PAUSE_MS - 1);
++    expect(h.of('poll').length).toBeLessThanOrEqual(settled + 1);
++    /* the socket ends: re-attached without the flag and back to 20 s at once */
++    socketListener?.(false);
++    await tick(0);
++    expect(attaches[attaches.length - 1]).toEqual({});
++    const before = h.of('poll').length;
++    await tick(EMPTY_ANSWER_PAUSE_MS * 2);
++    expect(h.of('poll').length - before).toBeGreaterThanOrEqual(2);
++    stop();
++  });
++
+   it('issues no poll while the document is hidden', async () => {
+     const h = harness({ visible: false });
+     const stop = startStudioSession(h.deps);
+@@ -280,6 +332,23 @@
+     }
+   });
+ 
++  it('keeps a session on the room socket attached past the 45 s sweep, up to six minutes (R2-F2c)', () => {
++    let now = Date.parse('2026-10-02T15:00:00.000Z');
++    const registry = createSessionRegistry({ now: () => now });
++    const plain = registry.attach({ deckId: 'fixture', owner: 'editor', actions: ['view.goto'] });
++    const socket = registry.attach({
++      deckId: 'fixture',
++      owner: 'editor',
++      actions: ['view.goto'],
++      socket: true,
++    });
++    now += DEFAULT_STALE_MS + 1;
++    expect(registry.list('fixture').map((session) => session.id)).toEqual([socket.id]);
++    expect(plain.id).not.toBe(socket.id);
++    now += SOCKET_STALE_MS - DEFAULT_STALE_MS;
++    expect(registry.list('fixture')).toEqual([]);
++  });
++
+   it('answers a known id with no queue after the hold it was asked for, zero included', async () => {
+     const registry = createSessionRegistry();
+     const session = registry.attach({ deckId: 'fixture', owner: 'viewer', actions: ['view.goto'] });
+@@ -298,6 +367,12 @@
+     expect(HOT_PAUSE_MS).toBeLessThan(EMPTY_ANSWER_PAUSE_MS);
+   });
+ 
++  it('keeps the socket pace inside the socket session freshness (R2-F2c, R2-F2d)', () => {
++    expect(SOCKET_IDLE_PAUSE_MS + HIDDEN_DETACH_MS).toBeLessThan(SOCKET_STALE_MS);
++    /* the do tier's idle row: no poll in its three minute window */
++    expect(SOCKET_IDLE_PAUSE_MS).toBeGreaterThan(3 * 60_000);
++  });
++
+   it('fits the idle cost row: at most 4 polls in any 60 s window (SYNC.md 6.1 cost.editor-idle.calls)', () => {
+     const pollsInWindow = Math.floor(60_000 / EMPTY_ANSWER_PAUSE_MS) + 1;
+     expect(pollsInWindow).toBeLessThanOrEqual(4);

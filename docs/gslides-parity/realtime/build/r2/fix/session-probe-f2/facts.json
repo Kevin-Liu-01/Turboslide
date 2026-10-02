@@ -1,0 +1,132 @@
+{
+  "base": "http://localhost:4472",
+  "idleSeconds": 90,
+  "startedAt": "2026-10-02T15:43:07.101Z",
+  "calls": [
+    {
+      "ms": 3989,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 4183,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 5026,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvd3JpdGUudHM_dHNzLXNlc"
+    },
+    {
+      "ms": 5113,
+      "method": "GET",
+      "path": "/api/decks/untitled-20261002-p6gc/ticket"
+    },
+    {
+      "ms": 5113,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvd2FybS50cz90c3Mtc2Vyd"
+    },
+    {
+      "ms": 5139,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 5139,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 5199,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 5199,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 5199,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 5293,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 98903,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 98960,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 98964,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzL"
+    },
+    {
+      "ms": 98976,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    },
+    {
+      "ms": 98991,
+      "method": "POST",
+      "path": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50c"
+    }
+  ],
+  "deckId": "untitled-20261002-p6gc",
+  "slides": [
+    "title",
+    "title-1-ac4c"
+  ],
+  "target": "title-1-ac4c",
+  "statusBefore": {
+    "seq": 2,
+    "revision": 2,
+    "pending": 0,
+    "retained": 0,
+    "tier": "do",
+    "transport": "ws",
+    "connected": true,
+    "room": {
+      "colo": "SJC",
+      "object": "c45f357b",
+      "idleMs": 2000,
+      "maxMs": 10000
+    }
+  },
+  "idle": {
+    "fromMs": 7290,
+    "toMs": 97293,
+    "serverFunctionPosts": 0,
+    "otherRequests": []
+  },
+  "mcp": {
+    "tools": true,
+    "activeBefore": "title",
+    "ms": 76,
+    "result": {
+      "slideId": "title",
+      "n": 1,
+      "mode": "slide",
+      "theme": "light",
+      "present": false,
+      "edit": true,
+      "zoom": "fit"
+    },
+    "isError": false,
+    "activeAfter": "title-1-ac4c"
+  },
+  "teardown": 404,
+  "endedAt": "2026-10-02T15:44:46.286Z"
+}

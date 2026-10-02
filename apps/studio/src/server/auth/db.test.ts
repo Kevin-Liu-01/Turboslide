@@ -48,6 +48,75 @@ describe('selectAuthDb', () => {
     });
   });
 
+  test('d1 behind TURBOSLIDE_ACCOUNTS=d1 with the Worker pair, winning over the other two; refused without the pair or with another value', () => {
+    const pair = {
+      TURBOSLIDE_ROOM_HOST: 'turboslide-realtime-preview.kk23907751.workers.dev',
+      TURBOSLIDE_ROOM_BEARER: 'a-test-bearer-value',
+    };
+    const d1 = selectAuthDb({ TURBOSLIDE_ACCOUNTS: 'd1', ...pair }, '/repo');
+    expect(d1).toEqual({
+      kind: 'd1',
+      host: 'turboslide-realtime-preview.kk23907751.workers.dev',
+      insecure: false,
+      reason:
+        'TURBOSLIDE_ACCOUNTS=d1 over TURBOSLIDE_ROOM_HOST=turboslide-realtime-preview.kk23907751.workers.dev',
+    });
+    expect(JSON.stringify(d1)).not.toContain('a-test-bearer-value');
+    expect(
+      selectAuthDb(
+        {
+          TURBOSLIDE_ACCOUNTS: 'd1',
+          ...pair,
+          TURBOSLIDE_ROOM_INSECURE: '1',
+          TURBOSLIDE_ROOM_HOST: '127.0.0.1:8794',
+        },
+        '/repo',
+      ),
+    ).toMatchObject({ kind: 'd1', host: '127.0.0.1:8794', insecure: true });
+    /* the explicit engine wins over a checkout's SQLite row and a DATABASE_URL */
+    expect(
+      selectAuthDb(
+        {
+          TURBOSLIDE_ACCOUNTS: 'd1',
+          ...pair,
+          [AUTH_DB_VARIABLE]: '.turboslide/auth.sqlite',
+          DATABASE_URL: 'postgres://fake:fake@localhost/fake',
+        },
+        '/repo',
+      ).kind,
+    ).toBe('d1');
+    /* a hosted process may run it: no file is named */
+    expect(selectAuthDb({ TURBOSLIDE_ACCOUNTS: 'd1', ...pair, VERCEL: '1' }, '/repo').kind).toBe(
+      'd1',
+    );
+    expect(() => selectAuthDb({ TURBOSLIDE_ACCOUNTS: 'd1' }, '/repo')).toThrow(TypeError);
+    expect(() =>
+      selectAuthDb(
+        { TURBOSLIDE_ACCOUNTS: 'd1', TURBOSLIDE_ROOM_HOST: pair.TURBOSLIDE_ROOM_HOST },
+        '/repo',
+      ),
+    ).toThrow(/TURBOSLIDE_ROOM_BEARER/);
+    expect(() => selectAuthDb({ TURBOSLIDE_ACCOUNTS: 'neon', ...pair }, '/repo')).toThrow(
+      TypeError,
+    );
+    /* an empty value is no engine named */
+    expect(selectAuthDb({ TURBOSLIDE_ACCOUNTS: '' }, '/repo').kind).toBe('none');
+  });
+
+  test('openAuthDb on the d1 kind builds the proxy dialect with the bearer from the environment, never from the selection', async () => {
+    const selection = selectAuthDb(
+      { TURBOSLIDE_ACCOUNTS: 'd1', TURBOSLIDE_ROOM_HOST: 'h.test', TURBOSLIDE_ROOM_BEARER: 'b' },
+      '/repo',
+    );
+    if (selection.kind !== 'd1') throw new Error('d1 expected');
+    const auth = openAuthDb(selection, { TURBOSLIDE_ROOM_BEARER: 'b' });
+    open.push(auth);
+    expect(auth.kind).toBe('d1');
+    expect(auth.sqlite).toBeUndefined();
+    expect(auth.counters?.()).toMatchObject({ calls: 0, statements: 0 });
+    expect(() => openAuthDb(selection, {})).toThrow(TypeError);
+  });
+
   test('a hosted process may not name a sqlite file, and the reason never carries a URL', () => {
     expect(() => selectAuthDb({ VERCEL: '1', [AUTH_DB_VARIABLE]: 'x.sqlite' }, '/repo')).toThrow(
       TypeError,
@@ -69,7 +138,7 @@ describe('the node:sqlite dialect', () => {
     expect(bindable({ a: 1 })).toBe('{"a":1}');
   });
 
-  test('migrates the five Turboslide tables idempotently and runs reads, writes and returning', async () => {
+  test('migrates the seven Turboslide tables idempotently and runs reads, writes and returning', async () => {
     const auth = await db();
     await migrateAuthDb(auth);
     const tables = await auth.db.introspection.getTables();

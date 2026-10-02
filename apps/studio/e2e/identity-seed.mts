@@ -1,10 +1,21 @@
 // The identity seed of the e2e specs (accounts.spec.ts, agent-http.spec.ts): a Node script the
-// specs run with `node`, over the same SQLite file and state folder the dev server on 4332 uses
-// (`TURBOSLIDE_AUTH_DB=.turboslide/auth-b3.sqlite`), so a spec can mint an API key, revoke it,
-// read a captured sign in code or an alias, and write a picture avatar file the way the server
-// would. Node strips the types of the studio's modules (erasable syntax only, explicit
-// extensions); nothing here imports the framework. Every value it prints is a test fixture and
-// never a deployment's secret.
+// specs run with `node`, over the same identity database and state folder the server under test
+// uses, so a spec can mint an API key, revoke it, read a captured sign in code or an alias, and
+// write a picture avatar file the way the server would. The engine follows the spec's
+// environment the way the server's does (auth/db.ts `selectAuthDb`): the SQLite file of
+// `TURBOSLIDE_AUTH_DB` (the `<dbPath>` argument wins when given), or, under
+// `TURBOSLIDE_ACCOUNTS=d1`, the realtime Worker's D1 through the same proxy dialect over
+// `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER` (docs/CLOUDFLARE.md 4.3: the second harness
+// mode, against `wrangler dev`'s D1 on a checkout and the preview Worker's D1 on the preview);
+// `<dbPath>` is then ignored. The `mail` and `alias` reads can go through wrangler instead when
+// `TURBOSLIDE_SEED_D1=wrangler` names the way (4.3's `wrangler d1 execute <database> --local|--remote
+// --json --command`), with `TURBOSLIDE_SEED_D1_DATABASE` (default `turboslide-accounts`),
+// `TURBOSLIDE_SEED_D1_REMOTE=1` for `--remote`, `TURBOSLIDE_SEED_D1_ENV` for `--env` and
+// `TURBOSLIDE_SEED_D1_PERSIST` for `--persist-to`; the binary is the workspace's
+// apps/realtime-worker/node_modules/.bin/wrangler, never a global one. Node strips the types of
+// the studio's modules (erasable syntax only, explicit extensions); nothing here imports the
+// framework. Every value it prints is a test fixture and never a deployment's secret, and no
+// bearer is ever printed.
 //
 //   node identity-seed.mts key <dbPath> <email> <name> <scope,scope>   -> { userId, tokenId, secret }
 //   node identity-seed.mts revoke <dbPath> <tokenId>                   -> { revoked }
@@ -16,6 +27,8 @@
 //   node identity-seed.mts picture <jpeg|png|webp|gif> <w> <h> [noise|gradient]
 //                                                                      -> { base64, mime, bytes } a picture of that size (gradient by default; noise does not compress)
 //   node identity-seed.mts cookie <principalId> <origin>              -> { name, value } the sealed identity cookie of an anonymous record (build/b5.md R2): `ts_id` on an http origin, `__Host-ts_id` on https; sealed under TURBOSLIDE_SESSION_SECRET, else the overlay's state folder's file
+//   node identity-seed.mts engine                                    -> { engine, reads, host? } which engine and which read path this environment selects (the d1 harness mode)
+import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 
@@ -29,10 +42,20 @@ import type { Sharp } from 'sharp';
 
 import { dbAliasStore } from '../src/server/auth/alias.ts';
 import { fileAvatarStore, newAvatarKey, processAvatar } from '../src/server/auth/avatar.ts';
-import { migrateAuthDb, openAuthDb } from '../src/server/auth/db.ts';
+import {
+  ACCOUNTS_VARIABLE,
+  migrateAuthDb,
+  openAuthDb,
+  selectAuthDb,
+} from '../src/server/auth/db.ts';
 import type { AuthDb } from '../src/server/auth/db.ts';
 import { dbCaptureStore } from '../src/server/auth/mail/mailer.ts';
-import { PRINCIPALS_DIR, filePrincipalStore } from '../src/server/auth/principal.ts';
+import type { PrincipalStore } from '@turboslide/identity/principal';
+import {
+  PRINCIPALS_DIR,
+  d1PrincipalStore,
+  filePrincipalStore,
+} from '../src/server/auth/principal.ts';
 import { sessionSecret } from '../src/server/auth/secret.ts';
 import { sealPrincipalCookie } from '../src/server/auth/session.ts';
 import { dbApiKeyStore } from '../src/server/auth/tokens.ts';
@@ -111,9 +134,61 @@ function isSeedFormat(value: string | undefined): value is SeedFormat {
   return value === 'jpeg' || value === 'png' || value === 'webp' || value === 'gif';
 }
 
+/** The engine of the server under test (the header): D1 through the proxy under `TURBOSLIDE_ACCOUNTS=d1`, else the SQLite file named. */
+function d1Mode(): boolean {
+  return (process.env[ACCOUNTS_VARIABLE] ?? '').trim().toLowerCase() === 'd1';
+}
+
 function open(path: string): AuthDb {
+  if (d1Mode()) {
+    const selection = selectAuthDb(process.env, process.cwd());
+    if (selection.kind !== 'd1') throw new Error('TURBOSLIDE_ACCOUNTS=d1 selected no d1 engine');
+    return openAuthDb(selection, process.env);
+  }
   return openAuthDb({ kind: 'sqlite', path, reason: 'e2e seed' });
 }
+
+/** The server's principal store for a seeded record: `ts_principal` on D1, the files under the state folder otherwise. */
+function principalsFor(stateDir: string, auth: AuthDb | null): PrincipalStore {
+  if (auth !== null && auth.kind === 'd1') return d1PrincipalStore(auth.db, { cacheMs: 0 });
+  return filePrincipalStore(`${stateDir}/${PRINCIPALS_DIR}`);
+}
+
+/**
+ * One read through wrangler (`TURBOSLIDE_SEED_D1=wrangler`): the rows of a select against the
+ * local or the remote D1, as `wrangler d1 execute --json` prints them (an array with one
+ * `{ results, success, meta }` per statement). The statement carries its values as SQL literals,
+ * quoted here, since the command takes no parameters; the values are an address and an id.
+ */
+function wranglerRows(sql: string): Record<string, unknown>[] {
+  const root = join(import.meta.dirname, '..', '..', '..');
+  const worker = join(root, 'apps', 'realtime-worker');
+  const database = process.env.TURBOSLIDE_SEED_D1_DATABASE ?? 'turboslide-accounts';
+  const args = ['d1', 'execute', database, '--json', '--command', sql];
+  args.push(process.env.TURBOSLIDE_SEED_D1_REMOTE === '1' ? '--remote' : '--local');
+  const env = process.env.TURBOSLIDE_SEED_D1_ENV;
+  if (env !== undefined && env !== '') args.push('--env', env);
+  const persist = process.env.TURBOSLIDE_SEED_D1_PERSIST;
+  if (persist !== undefined && persist !== '') args.push('--persist-to', persist);
+  const config = process.env.TURBOSLIDE_SEED_D1_CONFIG;
+  if (config !== undefined && config !== '') args.push('--config', config);
+  const out = execFileSync(join(worker, 'node_modules', '.bin', 'wrangler'), args, {
+    cwd: worker,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, WRANGLER_SEND_METRICS: 'false' },
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  const start = out.indexOf('[');
+  const parsed = JSON.parse(out.slice(start)) as { results?: Record<string, unknown>[] }[];
+  return parsed[0]?.results ?? [];
+}
+
+function sqlLiteral(value: string): string {
+  return `'${value.replaceAll("'", "''")}'`;
+}
+
+const wranglerReads = (): boolean => (process.env.TURBOSLIDE_SEED_D1 ?? '') === 'wrangler';
 
 async function ensureUser(auth: AuthDb, email: string, name: string): Promise<string> {
   const lower = email.toLowerCase();
@@ -146,7 +221,7 @@ async function main(): Promise<unknown> {
     case 'key': {
       const [path, email, name, scopes] = rest;
       const auth = open(path ?? '');
-      await migrateAuthDb(auth);
+      if (auth.kind !== 'd1') await migrateAuthDb(auth);
       const userId = await ensureUser(auth, email ?? 'e2e@example.test', 'E2E');
       const store = dbApiKeyStore(auth);
       const { record, secret } = await store.create({
@@ -166,24 +241,48 @@ async function main(): Promise<unknown> {
     }
     case 'mail': {
       const [path, email] = rest;
-      const auth = open(path ?? '');
-      await migrateAuthDb(auth);
-      const mails = await dbCaptureStore(auth.db).list({ limit: 50 });
-      await auth.close();
-      const mail = mails.find((m) => m.to === (email ?? '').toLowerCase() && m.kind === 'sign-in');
-      if (mail === undefined) return { code: null, link: null };
+      const lower = (email ?? '').toLowerCase();
+      let text: string | undefined;
+      if (wranglerReads()) {
+        const rows = wranglerRows(
+          `select text from ts_mail where toAddress = ${sqlLiteral(lower)} and kind = 'sign-in' order by createdAt desc limit 1`,
+        );
+        text = typeof rows[0]?.text === 'string' ? rows[0].text : undefined;
+      } else {
+        const auth = open(path ?? '');
+        if (auth.kind !== 'd1') await migrateAuthDb(auth);
+        const mails = await dbCaptureStore(auth.db).list({ limit: 50 });
+        await auth.close();
+        text = mails.find((m) => m.to === lower && m.kind === 'sign-in')?.text;
+      }
+      if (text === undefined) return { code: null, link: null };
       return {
-        code: /Code: (\d{6})/.exec(mail.text)?.[1] ?? null,
-        link: /(https?:\/\/\S+magic-link\/verify\S+)/.exec(mail.text)?.[1] ?? null,
+        code: /Code: (\d{6})/.exec(text)?.[1] ?? null,
+        link: /(https?:\/\/\S+magic-link\/verify\S+)/.exec(text)?.[1] ?? null,
       };
     }
     case 'alias': {
       const [path, anonymousId] = rest;
+      if (wranglerReads()) {
+        const rows = wranglerRows(
+          `select userId from ts_alias where anonymousId = ${sqlLiteral(anonymousId ?? '')}`,
+        );
+        return { userId: typeof rows[0]?.userId === 'string' ? rows[0].userId : null };
+      }
       const auth = open(path ?? '');
-      await migrateAuthDb(auth);
+      if (auth.kind !== 'd1') await migrateAuthDb(auth);
       const userId = await dbAliasStore(auth.db).accountOf(anonymousId ?? '');
       await auth.close();
       return { userId };
+    }
+    case 'engine': {
+      /* which engine this seed reads, for a spec's annotation: never a host's bearer */
+      const selection = d1Mode() ? selectAuthDb(process.env, process.cwd()) : null;
+      return {
+        engine: selection?.kind ?? 'sqlite',
+        reads: wranglerReads() ? 'wrangler' : selection?.kind === 'd1' ? 'proxy' : 'file',
+        ...(selection?.kind === 'd1' ? { host: selection.host } : {}),
+      };
     }
     case 'avatar': {
       const [stateDir, pngBase64] = rest;
@@ -208,7 +307,8 @@ async function main(): Promise<unknown> {
       // until two hash to one label (the space is 57,280, so a few hundred draws suffice), written
       // where the server reads them (`<stateDir>/principals/`)
       const [stateDir] = rest;
-      const store = filePrincipalStore(`${stateDir ?? '.turboslide'}/${PRINCIPALS_DIR}`);
+      const auth = d1Mode() ? open('') : null;
+      const store = principalsFor(stateDir ?? '.turboslide', auth);
       const seen = new Map<string, string>();
       let pair: [string, string] | null = null;
       let label = '';
@@ -231,6 +331,7 @@ async function main(): Promise<unknown> {
       if (pair === null) throw new Error('no label collision found');
       const now = new Date();
       for (const id of pair) await store.put(newPrincipalRecord(id, now));
+      await auth?.close();
       return { ids: pair, label };
     }
     case 'oriented': {

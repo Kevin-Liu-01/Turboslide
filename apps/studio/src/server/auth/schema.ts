@@ -15,6 +15,18 @@
 //                  admin.mail.list
 //   ts_quota       small counters with a reset time (avatar uploads per identity per day, device
 //                  code attempts), so a second instance sees the same count
+//   ts_principal   the principal records on the D1 engine (docs/CLOUDFLARE.md 4.2; the row
+//                  `realtime.departed-guest.name-stable`): one row per principal with the record
+//                  as JSON, `last_seen_at` and `expires_at` in epoch milliseconds, so every
+//                  instance reads one name for one person; the file store and the Redis store
+//                  keep their own copies on the other engines (principal.ts)
+//   ts_schema      one row `turboslide` carrying the schema version a boot wrote after it migrated
+//                  (CLOUDFLARE.md 4.2): a cold instance on the D1 engine reads it once and skips
+//                  the few dozen statements of the two migration sets when it matches
+//
+// The two control tables of the realtime Worker (`rt_open`, `rt_flags`, CLOUDFLARE.md 3.6.2) are
+// not here: the wrangler migration apps/realtime-worker/migrations/0001_control.sql makes and seeds
+// them, since the Worker reads them without the function and runs no code at deploy.
 //
 // Booleans are integers and dates ISO strings in every table, on both engines, so a row reads the
 // same whatever the dialect (node:sqlite binds neither type).
@@ -121,6 +133,21 @@ export type QuotaTable = {
   resetAt: string;
 };
 
+export type PrincipalTable = {
+  principal_id: string;
+  /** The `PrincipalRecord` as JSON (packages/identity/src/principal.ts). */
+  record: string;
+  /** `lastSeenAt` of the record in epoch milliseconds, for the hourly touch rule. */
+  last_seen_at: number;
+  /** `lastSeenAt` plus the 90 day TTL in epoch milliseconds; a row past it reads as missing. */
+  expires_at: number;
+};
+
+export type SchemaTable = {
+  k: string;
+  v: string;
+};
+
 export type AuthDatabase = {
   user: UserTable;
   session: SessionTable;
@@ -131,6 +158,8 @@ export type AuthDatabase = {
   ts_profile: ProfileTable;
   ts_mail: MailTable;
   ts_quota: QuotaTable;
+  ts_principal: PrincipalTable;
+  ts_schema: SchemaTable;
 };
 
 /** The names of Turboslide's own tables, in creation order. */
@@ -140,7 +169,18 @@ export const TURBOSLIDE_TABLES = [
   'ts_profile',
   'ts_mail',
   'ts_quota',
+  'ts_principal',
+  'ts_schema',
 ] as const;
+
+/**
+ * The version of the whole identity schema, the library's tables and Turboslide's together, as the
+ * `ts_schema` row records it on the D1 engine. Bump it when a table or a column changes here, and
+ * when the better-auth dependency moves to a version whose tables differ, so the next cold
+ * instance runs the two migration sets once more; a row that matches skips them.
+ */
+export const AUTH_SCHEMA_VERSION = 'better-auth 1.7.4; turboslide 2026-10-01.1';
+export const AUTH_SCHEMA_KEY = 'turboslide';
 
 /** Creates Turboslide's tables when they are missing; idempotent on both engines. */
 export async function migrateTurboslideTables(db: Kysely<AuthDatabase>): Promise<void> {
@@ -209,6 +249,47 @@ export async function migrateTurboslideTables(db: Kysely<AuthDatabase>): Promise
     .addColumn('key', 'text', (col) => col.primaryKey())
     .addColumn('count', 'integer', (col) => col.notNull().defaultTo(0))
     .addColumn('resetAt', 'text', (col) => col.notNull())
+    .execute();
+  await db.schema
+    .createTable('ts_principal')
+    .ifNotExists()
+    .addColumn('principal_id', 'text', (col) => col.primaryKey())
+    .addColumn('record', 'text', (col) => col.notNull())
+    .addColumn('last_seen_at', 'integer', (col) => col.notNull())
+    .addColumn('expires_at', 'integer', (col) => col.notNull())
+    .execute();
+  await db.schema
+    .createTable('ts_schema')
+    .ifNotExists()
+    .addColumn('k', 'text', (col) => col.primaryKey())
+    .addColumn('v', 'text', (col) => col.notNull())
+    .execute();
+}
+
+/**
+ * Whether the database carries the current schema version (the `ts_schema` row). False when the
+ * table does not exist yet (the first boot against an empty database) or the row names another
+ * version; never throws for a missing table.
+ */
+export async function schemaIsCurrent(db: Kysely<AuthDatabase>): Promise<boolean> {
+  try {
+    const row = await db
+      .selectFrom('ts_schema')
+      .select('v')
+      .where('k', '=', AUTH_SCHEMA_KEY)
+      .executeTakeFirst();
+    return row?.v === AUTH_SCHEMA_VERSION;
+  } catch {
+    return false;
+  }
+}
+
+/** Writes the current schema version after both migration sets ran. */
+export async function markSchemaCurrent(db: Kysely<AuthDatabase>): Promise<void> {
+  await db
+    .insertInto('ts_schema')
+    .values({ k: AUTH_SCHEMA_KEY, v: AUTH_SCHEMA_VERSION })
+    .onConflict((oc) => oc.column('k').doUpdateSet({ v: AUTH_SCHEMA_VERSION }))
     .execute();
 }
 

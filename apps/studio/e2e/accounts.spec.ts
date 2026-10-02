@@ -2009,7 +2009,16 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
 // client Google knows); the fourth row reads a second server with TURBOSLIDE_MAIL=off from
 // TURBOSLIDE_MAIL_OFF_BASE and is not driven without it. The round trip itself (the code
 // exchange at Google's token endpoint) cannot run here and is the hand row
-// `accounts.google-roundtrip` (docs/gslides-parity/realtime/build/google.md).
+// `accounts.google-roundtrip` (docs/gslides-parity/cloudflare/build/google.md).
+//
+// The second harness mode of the Cloudflare phase (docs/CLOUDFLARE.md 4.3): the same rows against
+// a server whose account database is the realtime Worker's D1 (`TURBOSLIDE_ACCOUNTS=d1` with
+// `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_INSECURE` on a checkout and `TURBOSLIDE_ROOM_BEARER` in
+// this process's environment; the gate forwards its environment unchanged). Nothing of the rows
+// changes: the seed reads the captured code and the alias through the same proxy the server uses
+// (identity-seed.mts, the d1 mode; `TURBOSLIDE_SEED_D1=wrangler` reads them through
+// `wrangler d1 execute --json` instead), and `AUTH_DB` is then a path the seed ignores. The engine
+// the seed selected is annotated on the describe's first row for the ledger.
 
 /** The second server with `TURBOSLIDE_MAIL=off` (REALTIME.md 4.4 row 4), or null when none is named. */
 const MAIL_OFF_BASE = (process.env.TURBOSLIDE_MAIL_OFF_BASE ?? '').replace(/\/$/, '') || null;
@@ -2082,6 +2091,15 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     expect(probe.status(), 'the server has an identity database').toBe(200);
     deck = await newDeck(A, scratch, 'Google rows deck');
   });
+
+  /** The engine the seed reads (sqlite file, or d1 through the proxy or wrangler), for the ledger. */
+  function annotateEngine(): void {
+    const engine = seedOrError('engine');
+    test.info().annotations.push({
+      type: 'accounts engine',
+      description: engine.out === null ? (engine.error ?? 'unknown') : JSON.stringify(engine.out),
+    });
+  }
   test.afterAll(async () => {
     test.setTimeout(120_000);
     try {
@@ -2093,6 +2111,7 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
 
   test(localTitle(...GOOGLE_ROWS.button), async () => {
     test.setTimeout(120_000);
+    annotateEngine();
     await openEditor(A, deck);
     const route = await openSignIn(A);
     expect(route, 'the own chip menu opens the Sign in dialog').not.toBeNull();

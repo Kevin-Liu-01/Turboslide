@@ -627,9 +627,14 @@ export type EditorSync = {
   pending: number;
   retained: number;
   tier: 'redis' | 'memory' | 'blob' | 'do';
-  transport: 'sse' | 'poll' | 'none';
+  /** the wire's kind: `ws` on the `do` tier's socket (docs/CLOUDFLARE.md 3.6.3), `sse` on the stream route */
+  transport: 'sse' | 'ws' | 'poll' | 'none';
   connected: boolean;
   offline?: boolean;
+  /** the last hello's `covered`, the committed seq (CLOUDFLARE.md 3.4 item 5); null before a hello (build/r5.md CF-R2a) */
+  covered?: number | null;
+  /** the object's colo from the hello on the `do` tier; null elsewhere (CF-R2a) */
+  colo?: string | null;
   /**
    * The room's store refused its poll (a 429, a 5xx) and the poll is backing off: the title row
    * reads Reconnecting until a poll succeeds (the blob tier budget; b7 FR3-R5, b1 R46).

@@ -12,6 +12,9 @@
 //      the record's registered name and `agent:<tokenId>`, the header's run id kept (8.2).
 //   2. A sign in session (better-auth): the account principal `usr_<id>` with its address and the
 //      admin flag; the anonymous cookie beside it is linked to the account if it is not yet (7.4).
+//      The session's facts are read through a per instance cache under the SHA-256 of the session
+//      cookie for 300 s on the D1 engine (`accountSession`; docs/CLOUDFLARE.md 4.1), and a D1
+//      proxy that does not answer makes the request anonymous after one retry.
 //   3. The anonymous cookie: `anon_<uuid>` with its record's typed name or label.
 //   4. Nothing: a fresh anonymous principal is minted and the cookie handed back to set.
 //
@@ -26,6 +29,7 @@ import { Resend } from 'resend';
 import type { AgentContext, AuthContext, LinkGrant, Principal } from '@turboslide/identity/access';
 import { accountPrincipalId, agentPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
+import { sha256Hex } from '@turboslide/identity/sha256';
 import type { HueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
@@ -51,6 +55,7 @@ import {
   signInMethods,
 } from './better-auth.ts';
 import type { SignInMethods, TurboslideAuth } from './better-auth.ts';
+import { isD1ProxyError } from './d1-proxy-dialect.ts';
 import { migrateAuthDb, openAuthDb, selectAuthDb } from './db.ts';
 import type { AuthDb, AuthDbSelection } from './db.ts';
 import {
@@ -61,16 +66,16 @@ import {
   selectMailer,
 } from './mail/mailer.ts';
 import type { CaptureStore, MailMode, Mailer } from './mail/mailer.ts';
-import { selectPrincipalStore } from './principal.ts';
+import { bindPrincipalD1, d1PrincipalStore, selectPrincipalStore } from './principal.ts';
 import { adminEmails, dbProfileStore, memoryProfileStore } from './profile.ts';
 import type { Profile, ProfileStore } from './profile.ts';
 import { dbQuotaStore, memoryQuotaStore } from './quota.ts';
 import type { QuotaStore } from './quota.ts';
-import { flagOf, stampOf } from './schema.ts';
+import { flagOf, markSchemaCurrent, schemaIsCurrent, stampOf } from './schema.ts';
 import { sessionSecret } from './secret.ts';
 import { redisSecondaryStorage } from './secondary-storage.ts';
 import type { RedisKvLike } from './secondary-storage.ts';
-import { boundPrincipal, ensurePrincipal, readPrincipal } from './session.ts';
+import { boundPrincipal, ensurePrincipal, parseCookies, readPrincipal } from './session.ts';
 import type { EnsuredPrincipal } from './session.ts';
 import {
   checkoutToken,
@@ -123,6 +128,8 @@ export type IdentityRuntime = {
   env: Env;
   hosted: boolean;
   stateDir: string;
+  /** The runtime's log line sink (the console's error stream by default). */
+  log: (line: string) => void;
   /** The identity cookie's secret. */
   secret: string;
   dbSelection: AuthDbSelection;
@@ -138,6 +145,8 @@ export type IdentityRuntime = {
   checkoutToken: string | null;
   methods: SignInMethods;
   hooks: IdentityHooks;
+  /** The per instance cache of a session's account facts (docs/CLOUDFLARE.md 4.1); `ttlMs` 0 is off. */
+  sessionFacts: SessionFactsCache;
   /** Resolves when the tables exist; every database read awaits it. */
   ready: Promise<void>;
   close: () => Promise<void>;
@@ -154,7 +163,67 @@ export type BuildRuntimeInput = {
   log?: (line: string) => void;
   /** Injected so tests never construct Resend's SDK. */
   resend?: (apiKey: string) => Resend;
+  /** The fetch the D1 proxy posts with; a test hands a fake `/db/query`. */
+  fetch?: typeof fetch;
+  /** The session facts cache's life; the default is 300 s on the `d1` engine and off elsewhere. */
+  sessionFactsCacheMs?: number;
 };
+
+// ------------------------------------------------------------------------------------------
+// The session facts cache (docs/CLOUDFLARE.md 4.1, 4.2; the rows `cost.d1.reads`,
+// `cost.d1.writes`)
+
+/** The cookie cache's life (better-auth.ts `cookieCache.maxAge`), the cache's too. */
+export const SESSION_FACTS_CACHE_MS = 5 * 60_000;
+
+export type AccountSession = {
+  session: {
+    id: string;
+    userId: string;
+    token: string;
+    createdAt: Date;
+    updatedAt: Date;
+    expiresAt: Date;
+  };
+  account: AccountFacts;
+  /** The anonymous ids linked to the account, as the context carries them. */
+  aliases: string[];
+};
+
+type SessionFactsRow = {
+  at: number;
+  value: AccountSession;
+  /** The anonymous ids this instance already linked under this session, so the alias read is not repeated. */
+  linked: Set<string>;
+};
+
+export type SessionFactsCache = {
+  ttlMs: number;
+  rows: Map<string, SessionFactsRow>;
+  /** The cache keys of each account principal, for the drop by principal id. */
+  byPrincipal: Map<string, Set<string>>;
+};
+
+function newSessionFactsCache(ttlMs: number): SessionFactsCache {
+  return { ttlMs, rows: new Map(), byPrincipal: new Map() };
+}
+
+/** The library's session cookie names under the `ts` prefix (better-auth.ts `cookiePrefix`), secure first. */
+const SESSION_COOKIES = ['__Secure-ts.session_token', 'ts.session_token'];
+
+/**
+ * The key a request's session is cached under: the SHA-256 of the session cookie's value (the
+ * token and its signature), never the value itself; null when the request carries no session
+ * cookie, in which case the library would answer no session without a read.
+ */
+export function sessionCacheKey(request: Request): string | null {
+  const cookies = parseCookies(request.headers.get('cookie'));
+  for (const name of SESSION_COOKIES) {
+    const value = cookies.get(name);
+    if (value !== undefined && value !== '') return sha256Hex(value);
+  }
+  return null;
+}
 
 function emptyHooks(): IdentityHooks {
   return {
@@ -214,7 +283,9 @@ export function principalKvOf(client: RedisKvLike): KvClient {
  * built with a client or one is bound (`bindIdentityRedis`), the file store otherwise. One store
  * object for the runtime's life, so `runtime.principals` keeps its identity.
  */
-function tieredPrincipalStore(input: Pick<BuildRuntimeInput, 'redis' | 'stateDir'>): PrincipalStore {
+function tieredPrincipalStore(
+  input: Pick<BuildRuntimeInput, 'redis' | 'stateDir'>,
+): PrincipalStore {
   const file = selectPrincipalStore({ stateDir: input.stateDir }).store;
   let kvStore: PrincipalStore | undefined;
   let kvClient: RedisKvLike | undefined;
@@ -240,7 +311,10 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
   const log = input.log ?? ((line: string) => console.error(line));
   const secret = sessionSecret(input.env, input.hosted ? undefined : input.stateDir, log).secret;
   const dbSelection = selectAuthDb(input.env, input.root);
-  const db = dbSelection.kind === 'none' ? null : openAuthDb(dbSelection);
+  const db =
+    dbSelection.kind === 'none'
+      ? null
+      : openAuthDb(dbSelection, input.env, input.fetch === undefined ? {} : { fetch: input.fetch });
   const captureStore: CaptureStore =
     db !== null
       ? dbCaptureStore(db.db)
@@ -252,7 +326,10 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     resend: input.resend ?? ((apiKey) => new Resend(apiKey)),
     warn: log,
   });
-  const principals = tieredPrincipalStore(input);
+  /* the principal records follow the account database on the `d1` engine (docs/CLOUDFLARE.md
+     4.2: one `ts_principal` table for every instance); the redis tier's binding and the file
+     store stand for the other engines */
+  const principals = db?.kind === 'd1' ? d1PrincipalStore(db.db) : tieredPrincipalStore(input);
   const hooks = emptyHooks();
   /* the mail mode gates the email method (REALTIME.md 4.1, default 7.7): with TURBOSLIDE_MAIL=off
      the dialog hides the field, so a database with no sender never offers a mail that is dropped */
@@ -261,6 +338,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     env: input.env,
     hosted: input.hosted,
     stateDir: input.stateDir,
+    log,
     secret,
     dbSelection,
     mailMode,
@@ -275,6 +353,9 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     checkoutToken: input.hosted ? null : checkoutToken(input.stateDir, input.announce ?? log),
     methods: signInMethods(input.env, db !== null, mailMode),
     hooks,
+    sessionFacts: newSessionFactsCache(
+      input.sessionFactsCacheMs ?? (db?.kind === 'd1' ? SESSION_FACTS_CACHE_MS : 0),
+    ),
     ready: Promise.resolve(),
     close: async () => {
       await db?.close();
@@ -299,8 +380,29 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
       log,
     });
     runtime.ready = (async () => {
-      await migrateAuthDb(db);
-      await migrateBetterAuth(runtime.auth!);
+      /* the `ts_schema` row (docs/CLOUDFLARE.md 4.2): a cold instance on the D1 engine makes one
+         statement and skips the two migration sets when the version matches; the first instance
+         of a deployment with a new version runs them once and writes the row. Two cold instances
+         of one deployment may boot together on a new version: the library's `createTable` has no
+         `if not exists`, so the second reads "already exists", waits, and reads the row the first
+         wrote; three tries, then the error stands */
+      if (db.kind !== 'd1') {
+        await migrateAuthDb(db);
+        await migrateBetterAuth(runtime.auth!);
+        return;
+      }
+      for (let attempt = 0; ; attempt += 1) {
+        if (await schemaIsCurrent(db.db)) return;
+        try {
+          await migrateAuthDb(db);
+          await migrateBetterAuth(runtime.auth!);
+          await markSchemaCurrent(db.db);
+          return;
+        } catch (error) {
+          if (attempt >= 2) throw error;
+          await new Promise<void>((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        }
+      }
     })().catch((error: unknown) => {
       log(
         `turboslide auth: the identity database did not migrate: ${error instanceof Error ? error.message : String(error)}`,
@@ -319,18 +421,33 @@ function holder(): Record<symbol, IdentityRuntime | undefined> {
 
 /** The process wide runtime, built on first use from the environment and the store's folders. */
 export function identityRuntime(): IdentityRuntime {
-  return (holder()[HOLDER] ??= buildIdentityRuntime({
+  const existing = holder()[HOLDER];
+  if (existing !== undefined) return existing;
+  const built = buildIdentityRuntime({
     env: process.env,
     root: repoRoot(),
     stateDir: stateDir(),
     hosted: isHosted(),
-  }));
+  });
+  holder()[HOLDER] = built;
+  bindProcessPrincipals(built);
+  return built;
+}
+
+/**
+ * The process's principal store binding (principal.ts `bindPrincipalD1`): on the `d1` engine
+ * every `selectPrincipalStore` of the process (the room's state among them) reads the runtime's
+ * table; on the other engines the binding is cleared and each caller keeps its own store.
+ */
+function bindProcessPrincipals(runtime: IdentityRuntime | undefined): void {
+  bindPrincipalD1(runtime?.db?.kind === 'd1' ? runtime.principals : undefined);
 }
 
 /** Replaces the process runtime (tests, or B2 rebinding the Redis client); the previous one is closed. */
 export async function setIdentityRuntime(runtime: IdentityRuntime | undefined): Promise<void> {
   const previous = holder()[HOLDER];
   holder()[HOLDER] = runtime;
+  bindProcessPrincipals(runtime);
   if (previous !== undefined && previous !== runtime) await previous.close();
 }
 
@@ -411,6 +528,132 @@ async function accountProfile(
   };
 }
 
+// ------------------------------------------------------------------------------------------
+// The account session through the cache (docs/CLOUDFLARE.md 4.1, 4.2)
+
+let d1FailureLoggedAt = 0;
+
+function rememberSession(
+  runtime: IdentityRuntime,
+  key: string,
+  value: AccountSession,
+  now: number,
+): SessionFactsRow {
+  const row: SessionFactsRow = { at: now, value, linked: new Set() };
+  if (runtime.sessionFacts.ttlMs <= 0) return row;
+  runtime.sessionFacts.rows.set(key, row);
+  const keys = runtime.sessionFacts.byPrincipal.get(value.account.principalId) ?? new Set<string>();
+  keys.add(key);
+  runtime.sessionFacts.byPrincipal.set(value.account.principalId, keys);
+  return row;
+}
+
+/**
+ * Drops every cached session of an account principal (a rename, an avatar change, a deletion, a
+ * sign out on this instance), so the next request reads the rows again inside the cookie cache's
+ * 300 s. The room's `forgetIdentity` (room.ts) calls it beside its own cache drop.
+ */
+export function forgetAccountFacts(
+  principalId: string,
+  runtime: IdentityRuntime = identityRuntime(),
+): void {
+  const keys = runtime.sessionFacts.byPrincipal.get(principalId);
+  if (keys === undefined) return;
+  for (const key of keys) runtime.sessionFacts.rows.delete(key);
+  runtime.sessionFacts.byPrincipal.delete(principalId);
+}
+
+/** Drops the whole cache (a test, a rebuilt runtime). */
+export function forgetAllAccountFacts(runtime: IdentityRuntime = identityRuntime()): void {
+  runtime.sessionFacts.rows.clear();
+  runtime.sessionFacts.byPrincipal.clear();
+}
+
+async function readAccountSession(
+  runtime: IdentityRuntime,
+  request: Request,
+): Promise<AccountSession | null> {
+  const found = await sessionOf(runtime.auth!, request);
+  if (found === null) return null;
+  const account = await accountFacts(runtime, found.user.id);
+  if (account === null || account.profile.deletedAt !== null) return null;
+  /* the verified address and the aliased anonymous ids (docs/PEOPLE.md 3.6; b1.md R3), as the
+     room's session branch carries them (room.ts sessionIdentity): a pending grant by email admits
+     the invitee and a deck made before the sign in keeps its creator as owner */
+  const aliases = await runtime.aliases.aliasesOf(account.userId).catch(() => []);
+  return { session: found.session, account, aliases };
+}
+
+/**
+ * The account session of a request and its facts (the user row, the profile, the aliases), or
+ * null for a request with no live session: through the per instance cache under the SHA-256 of
+ * the session cookie for the cookie cache's 300 s on the `d1` engine (`fresh: true` reads past
+ * it; `forgetAccountFacts` drops it), so a signed in editor hour costs at most about twelve
+ * misses of four to five indexed rows each (docs/CLOUDFLARE.md 2.2, `cost.d1.reads`). A refused
+ * or timed out D1 proxy call is retried once and then read as no session, so the request falls
+ * to its anonymous cookie (CLOUDFLARE.md 3.8's row for the D1 route) and the failure is logged
+ * at most once a minute.
+ */
+export async function accountSession(
+  runtime: IdentityRuntime,
+  request: Request,
+  options: { now?: Date; fresh?: boolean } = {},
+): Promise<AccountSession | null> {
+  if (runtime.auth === null) return null;
+  const key = sessionCacheKey(request);
+  if (key === null) return null;
+  const now = (options.now ?? new Date()).getTime();
+  const cache = runtime.sessionFacts;
+  if (options.fresh !== true && cache.ttlMs > 0) {
+    const hit = cache.rows.get(key);
+    if (hit !== undefined) {
+      if (now - hit.at < cache.ttlMs && hit.value.session.expiresAt.getTime() > now)
+        return hit.value;
+      cache.rows.delete(key);
+      cache.byPrincipal.get(hit.value.account.principalId)?.delete(key);
+    }
+  }
+  await runtime.ready;
+  let value: AccountSession | null = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      value = await readAccountSession(runtime, request);
+      break;
+    } catch (error) {
+      const proxy = isD1ProxyError(error);
+      if (proxy && attempt === 0) continue;
+      if (now - d1FailureLoggedAt > 60_000) {
+        d1FailureLoggedAt = now;
+        (runtime.log ?? ((line: string) => console.error(line)))(
+          `turboslide auth: the account session was not read${proxy ? ' from the D1 proxy after one retry' : ''}: ${error instanceof Error ? error.message : String(error)}; the request is anonymous`,
+        );
+      }
+      return null;
+    }
+  }
+  if (value === null) return null;
+  rememberSession(runtime, key, value, now);
+  return value;
+}
+
+/**
+ * Links the request's anonymous principal to the session's account once per cached session: the
+ * alias read of `linkAnonymous` runs the first time this instance sees the pair and not on every
+ * request of the 300 s (CLOUDFLARE.md 2.2).
+ */
+async function linkUnderSession(
+  runtime: IdentityRuntime,
+  request: Request,
+  found: AccountSession,
+  anonymousId: string,
+): Promise<void> {
+  const key = sessionCacheKey(request);
+  const row = key === null ? undefined : runtime.sessionFacts.rows.get(key);
+  if (row?.linked.has(anonymousId)) return;
+  await linkAnonymous(runtime, anonymousId, found.account.userId);
+  row?.linked.add(anonymousId);
+}
+
 /** Links the browser's anonymous principal to the account and merges the records once (7.4). */
 export async function linkAnonymous(
   runtime: IdentityRuntime,
@@ -448,6 +691,7 @@ async function onSessionCreated(
 }
 
 async function onUserDeleted(runtime: IdentityRuntime, userId: string): Promise<void> {
+  forgetAccountFacts(accountPrincipalId(userId), runtime);
   await runtime.profiles.markDeleted(userId);
   await runtime.aliases.unlinkAll(userId);
   await runtime.principals.delete(accountPrincipalId(userId));
@@ -513,7 +757,7 @@ export function displayNameOf(record: PrincipalRecord | null, principalId: strin
 export async function requestIdentity(
   request: Request,
   runtime: IdentityRuntime = identityRuntime(),
-  options: { mint?: boolean; now?: Date } = {},
+  options: { mint?: boolean; now?: Date; fresh?: boolean } = {},
 ): Promise<RequestIdentity> {
   const now = options.now ?? new Date();
   const bearer = resolveBearerSync(bearerToken(request), {
@@ -603,52 +847,50 @@ export async function requestIdentity(
   const bound = boundPrincipal(request);
   const anonymous = bound?.principal ?? (await readPrincipal(request, runtime.secret));
   if (runtime.auth !== null) {
-    await runtime.ready;
-    const found = await sessionOf(runtime.auth, request).catch(() => null);
+    const found = await accountSession(runtime, request, {
+      now,
+      ...(options.fresh === true ? { fresh: true } : {}),
+    });
     if (found !== null) {
-      const account = await accountFacts(runtime, found.user.id);
-      if (account !== null && account.profile.deletedAt === null) {
-        if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, account.userId);
-        const record =
-          (await runtime.principals.touch(account.principalId, now, true)) ??
-          newPrincipalRecord(account.principalId, now);
-        const name = account.name.trim() || displayNameOf(record, account.principalId);
-        /* the verified address and the aliased anonymous ids (docs/PEOPLE.md 3.6; b1.md R3), as
-           the room's session branch carries them (room.ts sessionIdentity): a pending grant by
-           email admits the invitee and a deck made before the sign in keeps its creator as owner */
-        const aliases = await runtime.aliases.aliasesOf(account.userId).catch(() => []);
-        return {
-          kind: 'account',
-          ctx: {
-            principal: {
-              id: account.principalId,
-              kind: 'account',
-              ...(account.emailVerified ? { email: account.email } : {}),
-              admin: account.admin,
-              ...(aliases.length > 0 ? { aliases } : {}),
-            },
-            linkGrants: record.linkGrants,
+      const { account, aliases } = found;
+      if (anonymous !== null) await linkUnderSession(runtime, request, found, anonymous.id);
+      const record =
+        (await runtime.principals.touch(account.principalId, now, true)) ??
+        newPrincipalRecord(account.principalId, now);
+      const name = account.name.trim() || displayNameOf(record, account.principalId);
+      return {
+        kind: 'account',
+        ctx: {
+          principal: {
+            id: account.principalId,
+            kind: 'account',
+            ...(account.emailVerified ? { email: account.email } : {}),
+            admin: account.admin,
+            ...(aliases.length > 0 ? { aliases } : {}),
           },
-          principalId: account.principalId,
-          author: { kind: 'human', name, principalId: account.principalId },
-          session: {
-            id: found.session.id,
-            userId: found.user.id,
-            fresh: isFreshSession(found.session, now),
-            expiresAt: found.session.expiresAt.toISOString(),
-          },
-          account,
-          agent: null,
-          bearer,
-          minted: null,
-          record,
-        };
-      }
+          linkGrants: record.linkGrants,
+        },
+        principalId: account.principalId,
+        author: { kind: 'human', name, principalId: account.principalId },
+        session: {
+          id: found.session.id,
+          userId: found.session.userId,
+          fresh: isFreshSession(found.session, now),
+          expiresAt: found.session.expiresAt.toISOString(),
+        },
+        account,
+        agent: null,
+        bearer,
+        minted: null,
+        record,
+      };
     }
   }
   if (anonymous !== null) {
+    /* a principal store that does not answer (the D1 proxy down, CLOUDFLARE.md 3.8) leaves the
+       request its anonymous id and its label for this request, as before the records moved */
     const record =
-      (await runtime.principals.touch(anonymous.id, now, true)) ??
+      (await runtime.principals.touch(anonymous.id, now, true).catch(() => null)) ??
       newPrincipalRecord(anonymous.id, now);
     return {
       kind: 'anonymous',
@@ -697,7 +939,7 @@ export async function requestIdentity(
     };
   }
   const record = newPrincipalRecord(minted.principal.id, now);
-  await runtime.principals.put(record);
+  await runtime.principals.put(record).catch(() => undefined);
   return {
     kind: 'anonymous',
     ctx: { principal: minted.principal, linkGrants: [] },

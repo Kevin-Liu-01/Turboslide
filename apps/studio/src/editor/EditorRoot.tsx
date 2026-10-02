@@ -940,7 +940,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     pending: snap.sync?.pending ?? snap.pending,
     retained: snap.sync?.retained ?? 0,
     tier: snap.sync?.tier ?? payload.room?.tier ?? 'memory',
-    transport: snap.sync === null ? 'none' : 'sse',
+    /* the wire's kind from the room client (`ws` on the do tier's socket, docs/CLOUDFLARE.md 3.6.3; build/r2.md R2-C7) */
+    transport: snap.sync?.transport ?? 'none',
     connected: snap.sync?.connected ?? false,
     offline: snap.sync?.offline ?? false,
     storeDegraded: snap.sync?.storeDegraded ?? false,

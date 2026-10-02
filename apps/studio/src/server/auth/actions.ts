@@ -31,7 +31,7 @@ import {
   sweepOrphanAvatars,
 } from './avatar.ts';
 import type { AvatarStore } from './avatar.ts';
-import { deckIndexFor, identityRuntime, identityViewFor } from './identity.ts';
+import { deckIndexFor, forgetAccountFacts, identityRuntime, identityViewFor } from './identity.ts';
 import type { AccountFacts, DeckIndexView, IdentityRuntime, RequestIdentity } from './identity.ts';
 import { ANON_COOKIE, sealPrincipalCookie, serializeAnonymousCookie } from './session.ts';
 import type { ApiKeyRecord } from './tokens.ts';
@@ -386,13 +386,16 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
   /* the choice and the name out of this instance's identity cache, so the next presence post
      resolves the new record at once (b1.md R18), and onto the principal's deck index, the
      carrier every instance reads (R17; PEOPLE.md 3.13): a refused index write leaves the record
-     standing */
+     standing. The account's cached session facts leave too (identity.ts `accountSession`, the D1
+     engine's 300 s cache; docs/CLOUDFLARE.md 4.1), so a renamed account reads its new name on the
+     next request of this instance */
   const propagate = async (
     principalId: string,
     write: (access: typeof import('../access')) => Promise<void>,
   ): Promise<void> => {
     const [access, room] = await Promise.all([import('../access'), import('../room')]);
     await write(access).catch(() => undefined);
+    forgetAccountFacts(principalId, runtime());
     room.forgetIdentity(principalId);
   };
 
@@ -484,6 +487,8 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const { identity, request } = facts;
     if (rt.auth === null || identity.kind !== 'account' || request === undefined)
       return { signedOut: 0 };
+    /* a revoked session must not answer from the facts cache for the rest of its 300 s */
+    if (identity.principalId !== null) forgetAccountFacts(identity.principalId, rt);
     const listed = (await rt.auth.api.listSessions({ headers: request.headers })) as {
       id: string;
       token: string;

@@ -7,10 +7,11 @@
 // resolves the bearer to its record and its owner.
 //
 // The resolver is synchronous on purpose: `requireAgentAuth(request)` (server/auth.ts) is called
-// without an await by the routes that exist, and `node:sqlite` reads synchronously. Postgres has
-// no synchronous read, so its store answers from a cache refreshed every five seconds and after
-// every write in this process; a revocation on another instance lands within that window, the
-// same class as the kill switch cache of SPEC-3 0.33.
+// without an await by the routes that exist, and `node:sqlite` reads synchronously. Postgres and
+// the D1 proxy have no synchronous read, so their store answers from a cache refreshed every five
+// seconds and after every write in this process; a revocation on another instance lands within
+// that window, the same class as the kill switch cache of SPEC-3 0.33 (docs/CLOUDFLARE.md 4.2:
+// any engine with no synchronous read takes the cache path).
 //
 // `TURBOSLIDE_TOKEN` stays the bootstrap admin token: valid for every action while no key record
 // exists (today's deployments), for `admin.bootstrap` alone once one does (09 6.1). The per
@@ -184,8 +185,8 @@ async function insertKey(
 
 /**
  * The store over the identity database. SQLite reads the key synchronously through the raw
- * handle; Postgres keeps a cache of every live key, refreshed every KEY_CACHE_MS and after each
- * write here.
+ * handle; Postgres and the D1 proxy keep a cache of every live key, refreshed every KEY_CACHE_MS
+ * and after each write here.
  */
 export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()): ApiKeyStore {
   const { db } = auth;
@@ -207,11 +208,13 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
     });
     return refreshing;
   };
+  /* the cache path: every engine without the raw synchronous handle (Postgres, the D1 proxy) */
+  const cached = auth.sqlite === undefined;
   const refreshIfStale = (): void => {
-    if (auth.kind === 'sqlite') return;
+    if (!cached) return;
     if (now().getTime() - refreshedAt >= KEY_CACHE_MS) void refresh().catch(() => undefined);
   };
-  if (auth.kind === 'postgres') void refresh().catch(() => undefined);
+  if (cached) void refresh().catch(() => undefined);
 
   const syncRow = (hash: string): ApiKeyRecord | null => {
     if (auth.sqlite !== undefined) {
@@ -231,7 +234,7 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
   const store: ApiKeyStore = {
     async create(input) {
       const created = await insertKey(db, input);
-      if (auth.kind === 'postgres') await refresh();
+      if (cached) await refresh();
       return created;
     },
     async list(userId) {
@@ -261,7 +264,7 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
         .set({ revokedAt: stamp, enabled: 0, updatedAt: stamp })
         .where('id', '=', tokenId)
         .execute();
-      if (auth.kind === 'postgres') await refresh();
+      if (cached) await refresh();
       return { ...existing, revokedAt: stamp, enabled: false, updatedAt: stamp };
     },
     async resolve(secret) {

@@ -18,7 +18,7 @@
 // prints a secret: the secret is `BETTER_AUTH_SECRET`, else a value derived from the identity
 // cookie's secret, so a checkout needs no variable.
 import { betterAuth } from 'better-auth';
-import type { Auth } from 'better-auth';
+import type { Auth, BetterAuthOptions } from 'better-auth';
 import { getMigrations } from 'better-auth/db/migration';
 import { deviceAuthorization } from 'better-auth/plugins/device-authorization';
 import { emailOTP } from 'better-auth/plugins/email-otp';
@@ -248,7 +248,13 @@ function buildAuth(deps: AuthDeps): Auth {
     // (REALTIME.md 4.1): no boot warning and no redirect URI on a host Google would refuse
     baseURL: authBaseURL(deps.env, deps.hosted),
     secret: betterAuthSecret(deps.env, deps.sessionSecret),
-    database: { db: deps.db.db, type: deps.db.kind === 'sqlite' ? 'sqlite' : 'postgres' },
+    // on the `d1` kind the library takes the binding shaped facade over the proxy and runs its own
+    // D1 dialect and index introspector (d1-proxy-dialect.ts: D1 refuses the generic SQLite index
+    // read of getMigrations); on the other kinds the Kysely of db.ts with its type
+    database:
+      deps.db.kind === 'd1' && deps.db.d1 !== undefined
+        ? (deps.db.d1 as unknown as NonNullable<BetterAuthOptions['database']>)
+        : { db: deps.db.db, type: deps.db.kind === 'postgres' ? 'postgres' : 'sqlite' },
     ...(deps.secondaryStorage !== undefined ? { secondaryStorage: deps.secondaryStorage } : {}),
     // the origin of the request itself: the dev server's port varies per builder and the hosted
     // name is the deployment's own; a cross site page's Origin header never matches it
@@ -270,6 +276,11 @@ function buildAuth(deps: AuthDeps): Auth {
       cookiePrefix: COOKIE_PREFIX,
       useSecureCookies: deps.hosted,
       ipAddress: { ipAddressHeaders: ['x-forwarded-for'] },
+      // the library's own schema check introspects every table once per instance (two proxy
+      // calls, a dozen statements); on the D1 engine the boot path runs the migrations itself and
+      // the `ts_schema` row carries the version (identity.ts, docs/CLOUDFLARE.md 4.2), so the
+      // check is off there and a cold instance makes one statement
+      ...(deps.db.kind === 'd1' ? { database: { validateSchema: false } } : {}),
     },
     rateLimit: {
       enabled: !(deps.env[AUTH_RATE_LIMIT_VARIABLE] === 'off' && !deps.hosted),

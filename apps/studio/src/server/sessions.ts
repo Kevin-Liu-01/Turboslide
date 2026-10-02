@@ -47,6 +47,8 @@ export const SESSIONS_PER_IDENTITY_MAX = 20;
 export const SESSIONS_PER_DECK_MAX = 200;
 /** A binding not touched by a poll for this long is gone (the poll cycle is 20 s, the sweep 45 s). */
 export const SESSION_BINDING_TTL_MS = 90_000;
+/** A binding of a page on the room's socket, which polls every five minutes (R2-F2c). */
+export const SOCKET_BINDING_TTL_MS = 6 * 60_000;
 
 export type SessionBinding = {
   id: string;
@@ -58,6 +60,8 @@ export type SessionBinding = {
   attachedAt: string;
   lastSeenAt: string;
   userAgent?: string;
+  /** the page polls at the socket's slow pace (R2-F2c) */
+  socket?: boolean;
 };
 
 export type BindRefusal = { ok: false; reason: 'identity' | 'deck'; cap: number };
@@ -74,7 +78,8 @@ export type SessionDirectory = {
 type Kv = { call: (command: string, ...args: (string | number)[]) => Promise<unknown> };
 
 const fresh = (row: SessionBinding, now: string): boolean =>
-  Date.parse(now) - Date.parse(row.lastSeenAt) <= SESSION_BINDING_TTL_MS;
+  Date.parse(now) - Date.parse(row.lastSeenAt) <=
+  (row.socket === true ? SOCKET_BINDING_TTL_MS : SESSION_BINDING_TTL_MS);
 
 /** One directory over a load and save of the whole table; the two backends differ only there. */
 function directoryOver(
@@ -200,6 +205,8 @@ export type AttachSessionInput = {
   state?: Record<string, unknown>;
   /** A session id the page already holds: re-attaches it after an owner change or a server restart. */
   id?: string;
+  /** the page hears its commands on the room's socket (R2-F2c) */
+  socket?: boolean;
 };
 
 const attachFn = createServerFn({ method: 'POST' })
@@ -214,6 +221,7 @@ const attachFn = createServerFn({ method: 'POST' })
       ...(typeof input.url === 'string' ? { url: input.url.slice(0, 2000) } : {}),
       ...(state !== undefined ? { state } : {}),
       ...(typeof input.id === 'string' && /^[0-9a-f-]{36}$/.test(input.id) ? { id: input.id } : {}),
+      ...(input.socket === true ? { socket: true } : {}),
     };
   })
   .handler(async ({ data }): Promise<string> => {
@@ -230,6 +238,7 @@ const attachFn = createServerFn({ method: 'POST' })
       kind: who.kind,
       attachedAt: session.attachedAt,
       lastSeenAt: now,
+      ...(rest.socket === true ? { socket: true } : {}),
     });
     if (!bound.ok) {
       studioSessions().detach(session.id);

@@ -27,6 +27,8 @@ export type StudioSession = {
    */
   principalId?: string;
   url?: string;
+  /** the page hears its commands on the room's socket and polls at the slow pace (R2-F2c) */
+  socket?: boolean;
   attachedAt: string;
   lastSeenAt: string;
   /** describe().state of the page's owner, as last reported. */
@@ -47,6 +49,7 @@ export type AttachInput = {
   principalId?: string;
   url?: string;
   state?: Record<string, unknown>;
+  socket?: boolean;
 };
 
 export type SessionRegistry = {
@@ -92,6 +95,8 @@ export type SessionRegistryOptions = {
 };
 
 export const DEFAULT_STALE_MS = 45_000;
+/** How long a session that polls at the socket's slow pace stays attached (R2-F2c). */
+export const SOCKET_STALE_MS = 6 * 60_000;
 /**
  * How long a command waits for the page's answer. The page polls every 20 s when idle
  * (useStudioSession.ts `EMPTY_ANSWER_PAUSE_MS`) and the poll is not held, so a command issued just
@@ -158,7 +163,9 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
 
   const stamp = (): string => new Date(now()).toISOString();
 
-  const fresh = (entry: Entry): boolean => now() - Date.parse(entry.session.lastSeenAt) <= staleMs;
+  const fresh = (entry: Entry): boolean =>
+    now() - Date.parse(entry.session.lastSeenAt) <=
+    (entry.session.socket === true ? Math.max(staleMs, SOCKET_STALE_MS) : staleMs);
 
   const drop = (entry: Entry): void => {
     entries.delete(entry.session.id);
@@ -184,6 +191,7 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
         ...(input.author !== undefined ? { author: input.author } : {}),
         ...(input.principalId !== undefined ? { principalId: input.principalId } : {}),
         ...(input.url !== undefined ? { url: input.url } : {}),
+        ...(input.socket === true ? { socket: true } : {}),
         attachedAt: existing?.session.attachedAt ?? at,
         lastSeenAt: at,
         state: { ...(input.state ?? {}) },

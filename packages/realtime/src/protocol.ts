@@ -418,6 +418,7 @@ export const roomEventSchema = z.discriminatedUnion('type', [
     ok: z.boolean(),
     retryAfterMs: nonNegativeInt.optional(),
   }),
+  z.strictObject({ type: z.literal('session'), sessionId: z.string().min(1).max(128) }),
 ]) satisfies z.ZodType<RoomEvent>;
 
 // ---------------------------------------------------------------------------------------------

@@ -904,7 +904,15 @@ function registerViewActions(dispatcher: Dispatcher, deckId: string): void {
         `No studio page is attached to deck ${deckId}; open /deck/${deckId} or /edit/${deckId}`,
       );
     }
-    return studioSessions().request(session.id, 'view.goto', input);
+    const answer = studioSessions().request(session.id, 'view.goto', input);
+    // on the do tier the page hears the command on the room's socket (build/r2.md R2-F2b): the
+    // object sends the nudge on every socket of the deck and the page polls at once; a failed
+    // publish leaves the command to the page's slow poll
+    if (realtimeTier() === 'do')
+      void realtimeChannel()
+        .publish(deckId, { type: 'session', sessionId: session.id })
+        .catch(() => undefined);
+    return answer;
   });
 }
 

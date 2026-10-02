@@ -6,6 +6,12 @@ import { activeStudio, READY_EVENT, whenStudioReady } from '@turboslide/agent/wi
 import { errorStatus } from '@turboslide/schema/errors';
 
 import {
+  SESSION_NUDGE_EVENT,
+  SESSION_SOCKET_EVENT,
+  sessionSocketOpen,
+} from '../editor/session-word';
+import type { SessionNudgeDetail, SessionSocketDetail } from '../editor/session-word';
+import {
   answerStudioSession,
   attachStudioSession,
   detachStudioSession,
@@ -55,6 +61,12 @@ export const EMPTY_ANSWER_PAUSE_MS = 20_000;
 export const HOT_PAUSE_MS = 1_000;
 /** How long after a command the hook keeps the quick pace. */
 export const HOT_WINDOW_MS = 30_000;
+/**
+ * The pause after an empty poll while the room's socket is open (build/r2.md R2-F2d): the socket
+ * carries a nudge for every command, so this poll is the fallback and the session's heartbeat
+ * (the registry keeps a socket session attached for six minutes).
+ */
+export const SOCKET_IDLE_PAUSE_MS = 5 * 60_000;
 /** How long a tab stays hidden before the page detaches; a quick tab switch never detaches. */
 export const HIDDEN_DETACH_MS = 10_000;
 /** The pause after a poll or an attach that threw (a deploy's 5xx, a refused rate). */
@@ -110,6 +122,12 @@ export type SessionLoopDeps = {
   /** the page's address, for the manifest's session list */
   href: () => string;
   now: () => number;
+  /** whether the room's socket is open now (session-word.ts), read at the start */
+  socketOpen?: () => boolean;
+  /** subscribes to the room transport's socket word; returns the unsubscribe */
+  onSocket?: (listener: (open: boolean) => void) => () => void;
+  /** subscribes to the room's nudges, each with the session id it names; returns the unsubscribe */
+  onNudge?: (listener: (sessionId: string) => void) => () => void;
 };
 
 function ownerOf(studio: StudioAutomation): SessionOwner {
@@ -128,6 +146,8 @@ export function startStudioSession(deps: SessionLoopDeps): () => void {
   let sessionId: string | undefined;
   let attached = false;
   let lastCommandAt = Number.NEGATIVE_INFINITY;
+  /* the room's socket is open: the page hears its commands there and polls at the slow pace */
+  let socket = deps.socketOpen?.() ?? false;
   /* the interruptible wait: a visibility change or the stop ends a pause early, and a change that
      lands while no wait is pending is kept so the next wait returns at once */
   let changed = false;
@@ -170,6 +190,7 @@ export function startStudioSession(deps: SessionLoopDeps): () => void {
       url: deps.href(),
       state: described.state,
       ...(sessionId !== undefined ? { id: sessionId } : {}),
+      ...(socket ? { socket: true } : {}),
     });
     sessionId = session.id;
     attached = true;
@@ -255,7 +276,7 @@ export function startStudioSession(deps: SessionLoopDeps): () => void {
       if (!alive) break;
       if (commands.length === 0) {
         const hot = deps.now() - lastCommandAt < HOT_WINDOW_MS;
-        await wait(hot ? HOT_PAUSE_MS : EMPTY_ANSWER_PAUSE_MS);
+        await wait(hot ? HOT_PAUSE_MS : socket ? SOCKET_IDLE_PAUSE_MS : EMPTY_ANSWER_PAUSE_MS);
         continue;
       }
       lastCommandAt = deps.now();
@@ -265,11 +286,29 @@ export function startStudioSession(deps: SessionLoopDeps): () => void {
 
   const offVisibility = deps.onVisibilityChange(wakeUp);
   const offReady = deps.onReady(onReady);
+  /* the socket's word (R2-F2d): a change re-attaches with the flag, so the registry keeps the
+     session at the pace it polls at, and a socket that ended returns the loop to 20 s at once */
+  const offSocket =
+    deps.onSocket?.((open) => {
+      if (open === socket) return;
+      socket = open;
+      if (attached && alive && deps.visible()) void attach().catch(() => undefined);
+      wakeUp();
+    }) ?? (() => {});
+  /* a nudge for this page's session: poll now and keep the quick pace until the command lands */
+  const offNudge =
+    deps.onNudge?.((id) => {
+      if (id !== sessionId) return;
+      lastCommandAt = deps.now();
+      wakeUp();
+    }) ?? (() => {});
   void run();
   return () => {
     alive = false;
     offVisibility();
     offReady();
+    offSocket();
+    offNudge();
     wakeUp();
     if (attached) void detach();
   };
@@ -311,6 +350,23 @@ export function useStudioSession({ deckId, author, enabled = true }: StudioSessi
       },
       href: () => window.location.href,
       now: () => Date.now(),
+      socketOpen: () => sessionSocketOpen(deckId),
+      onSocket: (listener) => {
+        const on = (event: Event): void => {
+          const detail = (event as CustomEvent<SessionSocketDetail>).detail;
+          if (detail?.deckId === deckId) listener(detail.open);
+        };
+        window.addEventListener(SESSION_SOCKET_EVENT, on);
+        return () => window.removeEventListener(SESSION_SOCKET_EVENT, on);
+      },
+      onNudge: (listener) => {
+        const on = (event: Event): void => {
+          const detail = (event as CustomEvent<SessionNudgeDetail>).detail;
+          if (detail?.deckId === deckId) listener(detail.sessionId);
+        };
+        window.addEventListener(SESSION_NUDGE_EVENT, on);
+        return () => window.removeEventListener(SESSION_NUDGE_EVENT, on);
+      },
     });
   }, [deckId, author, enabled]);
 }

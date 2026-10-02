@@ -286,7 +286,9 @@ export type RoomEvent =
    * C3-F2): a tab's title row reads Reconnecting while `ok` is false. `retryAfterMs` is the wait
    * before the next poll. The blob tier alone sends it; the other tiers have no store poll.
    */
-  | { type: 'store'; ok: boolean; retryAfterMs?: number };
+  | { type: 'store'; ok: boolean; retryAfterMs?: number }
+  /** the hosted agent surface queued a command for this studio session (build/r2.md R2-F2a) */
+  | { type: 'session'; sessionId: string };
 
 export type RoomEventType = RoomEvent['type'];
 

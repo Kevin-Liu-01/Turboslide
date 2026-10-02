@@ -4,6 +4,7 @@ import {
   createSessionRegistry,
   DEFAULT_COMMAND_TIMEOUT_MS,
   DEFAULT_STALE_MS,
+  SOCKET_STALE_MS,
 } from '@turboslide/agent/http/sessions';
 import type { SessionCommand } from '@turboslide/agent/http/sessions';
 import type { StudioAutomation } from '@turboslide/agent/window/adapter';
@@ -15,6 +16,7 @@ import {
   HOT_PAUSE_MS,
   HOT_WINDOW_MS,
   POLL_MS,
+  SOCKET_IDLE_PAUSE_MS,
   startStudioSession,
 } from './useStudioSession';
 import type { SessionLoopDeps } from './useStudioSession';
@@ -195,6 +197,56 @@ describe('the session loop', () => {
     stop();
   });
 
+  it('on the room socket: attaches with the flag, pauses five minutes, polls at once on its nudge (R2-F2d)', async () => {
+    const h = harness();
+    let socketListener: ((open: boolean) => void) | undefined;
+    let nudgeListener: ((sessionId: string) => void) | undefined;
+    const attaches: Array<{ socket?: boolean }> = [];
+    const attach = h.deps.api.attach;
+    h.deps.api.attach = async (input) => {
+      attaches.push({ ...(input.socket === true ? { socket: true } : {}) });
+      return attach(input);
+    };
+    h.deps.socketOpen = () => true;
+    h.deps.onSocket = (listener) => {
+      socketListener = listener;
+      return () => undefined;
+    };
+    h.deps.onNudge = (listener) => {
+      nudgeListener = listener;
+      return () => undefined;
+    };
+    const stop = startStudioSession(h.deps);
+    await tick(0);
+    expect(attaches).toEqual([{ socket: true }]);
+    expect(h.of('poll')).toHaveLength(1);
+    /* three idle minutes: no poll (docs/CLOUDFLARE.md 2.2 cost.editor-idle.calls) */
+    await tick(3 * 60_000);
+    expect(h.of('poll')).toHaveLength(1);
+    /* another page's nudge is not this one's */
+    nudgeListener?.('session-9');
+    await tick(0);
+    expect(h.of('poll')).toHaveLength(1);
+    nudgeListener?.('session-1');
+    await tick(0);
+    expect(h.of('poll')).toHaveLength(2);
+    /* the quick pace follows the nudge until the command lands on the instance polled */
+    await tick(HOT_PAUSE_MS);
+    expect(h.of('poll')).toHaveLength(3);
+    await tick(HOT_WINDOW_MS);
+    const settled = h.of('poll').length;
+    await tick(SOCKET_IDLE_PAUSE_MS - 1);
+    expect(h.of('poll').length).toBeLessThanOrEqual(settled + 1);
+    /* the socket ends: re-attached without the flag and back to 20 s at once */
+    socketListener?.(false);
+    await tick(0);
+    expect(attaches[attaches.length - 1]).toEqual({});
+    const before = h.of('poll').length;
+    await tick(EMPTY_ANSWER_PAUSE_MS * 2);
+    expect(h.of('poll').length - before).toBeGreaterThanOrEqual(2);
+    stop();
+  });
+
   it('issues no poll while the document is hidden', async () => {
     const h = harness({ visible: false });
     const stop = startStudioSession(h.deps);
@@ -280,6 +332,23 @@ describe('the registry half (packages/agent/src/http/sessions.ts)', () => {
     }
   });
 
+  it('keeps a session on the room socket attached past the 45 s sweep, up to six minutes (R2-F2c)', () => {
+    let now = Date.parse('2026-10-02T15:00:00.000Z');
+    const registry = createSessionRegistry({ now: () => now });
+    const plain = registry.attach({ deckId: 'fixture', owner: 'editor', actions: ['view.goto'] });
+    const socket = registry.attach({
+      deckId: 'fixture',
+      owner: 'editor',
+      actions: ['view.goto'],
+      socket: true,
+    });
+    now += DEFAULT_STALE_MS + 1;
+    expect(registry.list('fixture').map((session) => session.id)).toEqual([socket.id]);
+    expect(plain.id).not.toBe(socket.id);
+    now += SOCKET_STALE_MS - DEFAULT_STALE_MS;
+    expect(registry.list('fixture')).toEqual([]);
+  });
+
   it('answers a known id with no queue after the hold it was asked for, zero included', async () => {
     const registry = createSessionRegistry();
     const session = registry.attach({ deckId: 'fixture', owner: 'viewer', actions: ['view.goto'] });
@@ -296,6 +365,12 @@ describe('the cadence constants', () => {
     /* the pause, the round trip of the next poll and the page's own work, with room */
     expect(EMPTY_ANSWER_PAUSE_MS + 5_000).toBeLessThanOrEqual(DEFAULT_COMMAND_TIMEOUT_MS);
     expect(HOT_PAUSE_MS).toBeLessThan(EMPTY_ANSWER_PAUSE_MS);
+  });
+
+  it('keeps the socket pace inside the socket session freshness (R2-F2c, R2-F2d)', () => {
+    expect(SOCKET_IDLE_PAUSE_MS + HIDDEN_DETACH_MS).toBeLessThan(SOCKET_STALE_MS);
+    /* the do tier's idle row: no poll in its three minute window */
+    expect(SOCKET_IDLE_PAUSE_MS).toBeGreaterThan(3 * 60_000);
   });
 
   it('fits the idle cost row: at most 4 polls in any 60 s window (SYNC.md 6.1 cost.editor-idle.calls)', () => {

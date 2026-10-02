@@ -9690,11 +9690,11 @@
     {
       "id": "accounts.google-button",
       "feature": "share",
-      "interaction": "Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and the passkey row; with the e2e mail mode capture the email field is present",
+      "interaction": "Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and no passkey row while the deployment offers no passkeys; with the e2e mail mode capture the email field is present",
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "design-google-login.md 6.2 row 1",
-      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4; the e2e server gains fake GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET. Cloudflare phase; docs/CLOUDFLARE.md 2.1, 4.3: the local run on the e2e server stands; a second narrowed run against the preview Worker's D1 (TURBOSLIDE_ACCOUNTS=d1, the OTP read with wrangler d1 execute --remote --json) is R4's harness mode"
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4; the e2e server gains fake GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET. Cloudflare phase; docs/CLOUDFLARE.md 2.1, 4.3: the local run on the e2e server stands; a second narrowed run against the preview Worker's D1 (TURBOSLIDE_ACCOUNTS=d1, the OTP read with wrangler d1 execute --remote --json) is R4's harness mode. docs/NEXT.md 3.2 H4: the passkey row is drawn only where a passkey can complete, so the driver reads that the dialog draws none"
     },
     {
       "id": "accounts.google-leaves",
@@ -9732,6 +9732,16 @@
       "evidence": "design-google-login.md 6.2 last paragraph, 8 step 9",
       "manual": "Google issues no authorization code to a test and the token endpoint is fixed in the provider, so the round trip is a hand sign in on localhost:4321 and on www.turboslide.com (docs/REALTIME.md 4.4); R4 writes the recipe, Kevin signs in, the verifier reads",
       "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4 writes the recipe; Kevin signs in; the verifier reads. Cloudflare phase; docs/CLOUDFLARE.md 2.1: first on localhost:4321 against the preview Worker's D1 with TURBOSLIDE_REALTIME=memory forced, then on www.turboslide.com after section 6 step 16; the callback's wall time recorded against a 5 s bound"
+    },
+    {
+      "id": "accounts.no-dead-method",
+      "feature": "share",
+      "interaction": "The dialog shows no method that cannot complete",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-auth 50; audit-brand-surfaces 48",
+      "note": "docs/NEXT.md 3.2 H4 and 4.3.3: the passkey row is drawn only where the deployment offers passkeys and the roadmap sentence left strings.ts; a deployment without an identity database offers no Sign in row, and there the row reads the account menu and the page"
     },
     {
       "id": "cost.do.requests",

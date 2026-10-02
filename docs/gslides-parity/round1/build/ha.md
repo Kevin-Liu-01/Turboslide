@@ -87,3 +87,13 @@ Unit and static checks, at any load: `deck-scope.test.ts` 13 passed; `auth/actio
 5. To A1 (A1a, NEXT.md 4.3.2 item 1): on an unsaved draft the window transport has no stored deck, so Sign out there falls back to the library's route and keeps the anonymous cookie. Moving the rotation into the sign out route (`apps/studio/src/routes/api/auth.$.ts`) or letting the account actions run without a deck closes it.
 6. To B2, the owner of `apps/studio/src/routes/decks.css`: `.ts-recent-lead` (251) is unused after the caption left.
 7. To B3a, the owner of `scripts/probes/core-matrix.test.mjs`: the total at 456 gained `+ 3`, `+ 1` and `+ 1` with a comment line each.
+
+### Commits
+
+On `next/round1`, in this order, each staged by an explicit path list under `.turboslide/git.lock`, none pushed:
+
+1. `6ac04388` H2: the deck listing is scoped to the viewer on /decks and in the deck.list action
+2. `40164663` H3: Sign out from the account menu ends this browser's session in one click and leaves it a new anonymous visitor
+3. H4 (the commit that carries this list): the sign in dialog draws no passkey row until the deployment offers passkeys, and the roadmap sentence leaves the product
+
+The dev server on 4501 was stopped after the last commit; port 4511 was not used.

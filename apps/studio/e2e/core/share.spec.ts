@@ -3129,6 +3129,69 @@ test(title('realtime.departed-guest.name-stable'), async ({ browser }) => {
   );
 });
 
+/* ---------------------------------------------------------------------------------------------
+   The next program's hotfix H4 (docs/NEXT.md 3.2, 4.3.3): the sign in dialog draws no method that
+   cannot complete, and the passkey roadmap sentence is gone. A deployment without an identity
+   database offers no Sign in row at all; there the row reads the account menu and the page. */
+
+test(title('accounts.no-dead-method'), async () => {
+  test.setTimeout(120_000);
+  const ROADMAP = 'Passkeys arrive once the address is final';
+  await openEditor(page, deck);
+  await page.keyboard.press('Escape');
+  let switched = false;
+  if ((await ctl(page, 'title.account').count()) === 0) {
+    await page.locator('[data-control="menubar.tools"]').click();
+    await page.locator('[data-control="menu.tools.advancedTools"]').click();
+    await expect.poll(() => advancedToolsOn(page), { timeout: 5000 }).toBe(true);
+    if ((await page.locator('#ts-menu-tools').count()) > 0) await page.keyboard.press('Escape');
+    switched = true;
+  }
+  type Method = { control: string; disabled: boolean; later: boolean; text: string };
+  let methods: Method[] = [];
+  let offered = false;
+  let roadmap = 0;
+  try {
+    await ctl(page, 'title.account').click();
+    const menu = page.locator('#ts-menu-account');
+    await menu.waitFor({ timeout: 8000 });
+    const signIn = menu.locator('[data-control="account.signIn"]');
+    offered = (await signIn.count()) > 0;
+    if (offered) {
+      await signIn.first().click();
+      await ctl(page, 'dialog.signIn').waitFor({ timeout: 8000 });
+      methods = await ctl(page, 'dialog.signIn').evaluate((card) =>
+        [...card.querySelectorAll('.ts-sign-in-methods [data-control]')].map((el) => ({
+          control: el.getAttribute('data-control') ?? '',
+          disabled:
+            el.getAttribute('aria-disabled') === 'true' ||
+            (el instanceof HTMLButtonElement && el.disabled),
+          later: el.classList.contains('is-later') || el.getAttribute('data-status') === 'later',
+          text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        })),
+      );
+    }
+    roadmap = await page.getByText(ROADMAP).count();
+  } finally {
+    await page.keyboard.press('Escape');
+    if ((await ctl(page, 'dialog.signIn').count()) > 0) await page.keyboard.press('Escape');
+    if (switched) await switchOff(page);
+  }
+  test.info().annotations.push({
+    type: 'methods',
+    description: offered
+      ? methods
+          .map((m) => `${m.control}${m.disabled || m.later ? ' (cannot complete)' : ''}`)
+          .join(', ') || 'no method row'
+      : 'the account menu offers no Sign in row on this deployment (no identity database)',
+  });
+  expect(
+    methods.filter((m) => m.disabled || m.later),
+    'every method the dialog draws can complete',
+  ).toEqual([]);
+  expect(roadmap, 'no roadmap sentence about passkeys').toBe(0);
+});
+
 coverage(import.meta.filename, [
   'share.dialog.open',
   'share.copy-view-link',
@@ -3179,5 +3242,7 @@ coverage(import.meta.filename, [
   /* the realtime round (docs/REALTIME.md section 2) */
   'realtime.share-link.every-instance',
   'realtime.departed-guest.name-stable',
+  /* the next program's hotfix H4 (docs/NEXT.md 3.2, 4.3.3) */
+  'accounts.no-dead-method',
 ]);
 void statusOf;

@@ -98,7 +98,10 @@ describe('the default view strings of SPEC-3 15', () => {
     expect(DIALOGS.publish.published).toBe(
       'Anyone with the published link can view the current version; every edit is published',
     );
-    expect(ACCOUNT.signInDialog.passkeysLater).toBe('Passkeys arrive once the address is final');
+    /* the roadmap sentence left the product with the greyed passkey row (docs/NEXT.md 3.2 H4) */
+    expect(Object.values(ACCOUNT.signInDialog)).not.toContain(
+      'Passkeys arrive once the address is final',
+    );
     expect(TITLE_ROW.offline).toBe('Offline. Changes will save when you reconnect');
     expect(TITLE_ROW.retrying).toBe("Couldn't save, retrying");
     /* the blob tier budget's word for a store that refuses the room's poll (build/b7.md FR3-R5) */

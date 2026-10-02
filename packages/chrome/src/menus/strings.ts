@@ -242,7 +242,6 @@ export const ACCOUNT = {
     code: 'Six digit code',
     verify: 'Verify',
     passkey: 'Use a passkey',
-    passkeysLater: 'Passkeys arrive once the address is final',
     github: 'Continue with GitHub',
     google: 'Continue with Google',
     /* the library's own error redirect after a social sign in (`?error=<reason>`, docs/REALTIME.md

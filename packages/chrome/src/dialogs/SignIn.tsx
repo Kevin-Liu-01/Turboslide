@@ -15,13 +15,14 @@ import './accounts.css';
  * field, Continue; one mail with a magic link and a six digit code, the same answer whether or
  * not the address exists), then the code entry so the tab that asked can finish when the mail
  * opens on a phone. Under the field the methods list: Google first, then GitHub, each when its
- * client is configured, then passkeys greyed with "Passkeys arrive once the address is final"
- * until the production domain is fixed. With no mail sender (`TURBOSLIDE_MAIL=off`, the
- * production default of REALTIME.md 7.7) the field and Continue are absent and Google is the
- * primary action: first in the list, focused on open so Enter runs it, and it may be the only
- * method. No passwords. A reserved 20 px error row speaks without moving the box. The exchanges
- * run through the route's handlers over better-auth's own routes; without them the dialog says
- * sign in is not available on this deployment.
+ * client is configured, then passkeys when the deployment offers them (TURBOSLIDE_PASSKEY_RPID
+ * and the plugin; docs/NEXT.md 3.2 H4, question 14). The dialog draws no method that cannot
+ * complete, so before then there is no passkey row. With no mail sender
+ * (`TURBOSLIDE_MAIL=off`, the production default of REALTIME.md 7.7) the field and Continue are
+ * absent and Google is the primary action: first in the list, focused on open so Enter runs it,
+ * and it may be the only method. No passwords. A reserved 20 px error row speaks without moving
+ * the box. The exchanges run through the route's handlers over better-auth's own routes; without
+ * them the dialog says sign in is not available on this deployment.
  */
 type State = 'methods' | 'code' | 'passkey';
 
@@ -185,31 +186,25 @@ export function SignInDialog() {
                   </button>
                 </li>
               ) : null}
-              <li>
-                <button
-                  type="button"
-                  className={cn(
-                    'ts-sign-in-method',
-                    account?.passkeysAvailable !== true && 'is-later',
-                  )}
-                  aria-disabled={account?.passkeysAvailable !== true}
-                  data-control="dialog.signIn.passkey"
-                  data-status={account?.passkeysAvailable === true ? 'now' : 'later'}
-                  onClick={account?.passkeysAvailable === true ? passkey : undefined}
-                  {...tipProps({
-                    name: ACCOUNT.signInDialog.passkey,
-                    doc:
-                      account?.passkeysAvailable === true
-                        ? 'Your device confirms it is you'
-                        : ACCOUNT.signInDialog.passkeysLater,
-                  })}
-                >
-                  <span>{ACCOUNT.signInDialog.passkey}</span>
-                  {account?.passkeysAvailable !== true ? (
-                    <span className="ts-sign-in-note">{ACCOUNT.signInDialog.passkeysLater}</span>
-                  ) : null}
-                </button>
-              </li>
+              {/* the passkey row exists only where a passkey can complete (docs/NEXT.md 3.2 H4;
+                  audit-auth finding 12): no greyed row and no roadmap sentence before then */}
+              {account?.passkeysAvailable === true ? (
+                <li>
+                  <button
+                    type="button"
+                    className="ts-sign-in-method"
+                    data-control="dialog.signIn.passkey"
+                    disabled={busy}
+                    onClick={passkey}
+                    {...tipProps({
+                      name: ACCOUNT.signInDialog.passkey,
+                      doc: 'Your device confirms it is you',
+                    })}
+                  >
+                    <span>{ACCOUNT.signInDialog.passkey}</span>
+                  </button>
+                </li>
+              ) : null}
             </ul>
           </>
         ) : (

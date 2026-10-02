@@ -2040,7 +2040,7 @@ function localTitle(id: string, interaction: string): string {
 const GOOGLE_ROWS = {
   button: [
     'accounts.google-button',
-    'Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and the passkey row; with the e2e mail mode capture the email field is present',
+    'Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and no passkey row while the deployment offers no passkeys; with the e2e mail mode capture the email field is present',
   ],
   leaves: [
     'accounts.google-leaves',
@@ -2127,13 +2127,13 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     const github = order.indexOf('dialog.signIn.github');
     const passkey = order.indexOf('dialog.signIn.passkey');
     expect(google, 'the Google button is drawn').toBeGreaterThanOrEqual(0);
-    expect(passkey, 'the passkey row is drawn under Google').toBeGreaterThan(google);
+    /* no passkey row while the deployment offers no passkeys (docs/NEXT.md 3.2 H4) */
+    expect(passkey, 'no passkey row without TURBOSLIDE_PASSKEY_RPID and the plugin').toBe(-1);
     if (github >= 0) expect(github, 'GitHub under Google').toBeGreaterThan(google);
     else
       test.info().annotations.push({
         type: 'github',
-        description:
-          'not configured on this server (no fake GitHub pair); the order is read against the passkey row alone',
+        description: 'not configured on this server (no fake GitHub pair); Google is read alone',
       });
     /* the e2e mail mode is capture: the email field and Continue are present */
     await expect(ctl(A, 'dialog.signIn.email')).toHaveCount(1);

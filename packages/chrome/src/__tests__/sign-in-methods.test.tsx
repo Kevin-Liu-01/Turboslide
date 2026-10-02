@@ -1,0 +1,95 @@
+// @vitest-environment jsdom
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { workedDocument } from '@turboslide/schema/fixtures';
+
+import { SignInDialog } from '../dialogs/SignIn';
+import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
+import type { EditorAccount, EditorShellInput } from '../editor-shell';
+import { EditorShellContext } from '../editor-shell-context';
+import type { EditorShellState } from '../editor-shell-context';
+import { hideTooltip } from '../Tooltip';
+
+// The sign in dialog draws no method that cannot complete (docs/NEXT.md 3.2 H4; audit-auth
+// finding 12, audit-brand-surfaces rank 23): the passkey row is absent until the deployment offers
+// passkeys, and the roadmap sentence "Passkeys arrive once the address is final" is gone.
+
+afterEach(() => {
+  hideTooltip();
+  cleanup();
+});
+
+const doc = workedDocument();
+
+function account(extra: Partial<EditorAccount> = {}): EditorAccount {
+  return {
+    principal: 'anon_11111111-1111-4111-8111-111111111111',
+    signedIn: false,
+    signInAvailable: true,
+    passkeysAvailable: false,
+    githubAvailable: false,
+    googleAvailable: true,
+    google: vi.fn(),
+    requestCode: vi.fn(() => Promise.resolve(null)),
+    ...extra,
+  } as unknown as EditorAccount;
+}
+
+function Host({ value, children }: { value: EditorShellInput; children: React.ReactNode }) {
+  const state = {
+    input: value,
+    platform: 'mac',
+    menuContext: buildMenuContext(value, DEFAULT_SETTINGS, 'mac'),
+    settings: DEFAULT_SETTINGS,
+    closeDialog: vi.fn(),
+    openDialog: vi.fn(),
+    say: vi.fn(),
+  } as unknown as EditorShellState;
+  return <EditorShellContext.Provider value={state}>{children}</EditorShellContext.Provider>;
+}
+
+function draw(extra: Partial<EditorAccount> = {}) {
+  const value: EditorShellInput = {
+    deckId: doc.deck.id,
+    document: doc,
+    slideId: 'content-rule',
+    revision: 1,
+    dispatch: vi.fn(() => Promise.resolve(null)),
+    account: account(extra),
+  };
+  return render(
+    <Host value={value}>
+      <SignInDialog />
+    </Host>,
+  );
+}
+
+function methods(root: HTMLElement): string[] {
+  return [...root.querySelectorAll('.ts-sign-in-methods [data-control]')].map(
+    (el) => el.getAttribute('data-control') ?? '',
+  );
+}
+
+describe('the sign in methods (docs/NEXT.md 3.2 H4)', () => {
+  it('draws no passkey row and no roadmap sentence while the deployment offers no passkeys', () => {
+    const { container } = draw();
+    expect(methods(container)).toEqual(['dialog.signIn.google']);
+    expect(container.querySelector('[data-control="dialog.signIn.passkey"]')).toBeNull();
+    expect(container.textContent).not.toContain('Passkeys arrive');
+    expect(container.querySelector('.is-later, [aria-disabled="true"]')).toBeNull();
+  });
+
+  it('draws the passkey row, enabled, where the deployment offers passkeys', () => {
+    const { container } = draw({
+      passkeysAvailable: true,
+      passkey: vi.fn(() => Promise.resolve(null)),
+    });
+    expect(methods(container)).toEqual(['dialog.signIn.google', 'dialog.signIn.passkey']);
+    const row = container.querySelector<HTMLButtonElement>(
+      '[data-control="dialog.signIn.passkey"]',
+    );
+    expect(row?.disabled).toBe(false);
+    expect(row?.getAttribute('aria-disabled')).toBeNull();
+  });
+});

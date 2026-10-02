@@ -1,0 +1,334 @@
+{
+  "startedAt": "2026-10-02T09:56:52.677Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "agent",
+    "reload",
+    "offline",
+    "dims",
+    "revoke",
+    "ticket"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "09-agent-banner-a.png",
+    "10-caret-dimmed-a.png",
+    "11-revoked-c.png",
+    "11-revoked-c-reload.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-jscs",
+  "slides": [
+    "title",
+    "split-1-8cd4",
+    "split-2-8cd4"
+  ],
+  "setup": {
+    "clients": {
+      "a": "28b510f8ac6314df9c0cfac05e048cd4",
+      "b": "f9d9e4c0c86a41badb0382412a56a07c"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "971c75c5",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "971c75c5",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790935025291,
+      "connectedAt": 1790935025295,
+      "navMs": 325
+    }
+  },
+  "agent": {
+    "status": 200,
+    "answerMs": 38,
+    "bannerMs": 41,
+    "bannerText": "Assistant changed slide 1: Before became Written byUndo",
+    "textInAms": 42,
+    "afterUndoAgentTextStays": true,
+    "afterUndoOwnWordStays": false,
+    "versions": "Error: page.evaluate: TypeError: version.list: invalid input at /id: Unrecognized key: \"id\"\n    at Object.dispatch (http://localhost:4479/assets/SlideList-DsbNTKwt.js:1:1479)\n    at cn (http://localho"
+  },
+  "agent.seconds": 3.5,
+  "reload": {
+    "equalMsAfterLastKey": 3,
+    "textA": "A writes here ra1 ra2 ra3 ra4 ra5",
+    "textB": "B writes here rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 19,
+      "revision": 9,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "971c75c5",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "reload.seconds": 6,
+  "offline": {
+    "offlineSeconds": 35.5,
+    "whileOff": {
+      "connected": false,
+      "plate": null
+    },
+    "everyWordBothMsAfterReconnect": 601,
+    "textA": "A writes here ra1 ra2 ra3 ra4 ra5 oa1 oa2 oa3 oa4",
+    "textB": "B writes here rb1 rb2 rb3 rb4 rb5 ob1 ob2 ob3",
+    "ws": [
+      {
+        "at": 1790935053477,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261002-jscs",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1790935061480,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261002-jscs",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1790935069483,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261002-jscs",
+        "code": 1006,
+        "reason": ""
+      }
+    ],
+    "records": {
+      "revision": 18
+    }
+  },
+  "offline.seconds": 38.9,
+  "dims": {
+    "dimMs": 30897,
+    "goneMs": 6
+  },
+  "dims.seconds": 33.1,
+  "revoke.reload": {
+    "status": 200,
+    "url": "http://localhost:4489/edit/untitled-20261002-jscs",
+    "title": "Hand drive, editor, Turboslide",
+    "editor": true,
+    "role": null,
+    "text": "Hand drive Last edit 2 minutes ago P M B Slideshow Share File View Tools Help View only 1 Hand drive A writes here ra1 ra2 ra3 ra4 ra5 oa1 oa2 oa3 oa4 B writes here rb1 rb2 rb3 rb4 rb5 ob1 ob2 ob3 d W",
+    "ms": 2706
+  },
+  "revoke": {
+    "cConnected": true,
+    "cRole": "viewer",
+    "answeredMs": 21,
+    "closeMsAfterRevoke": null,
+    "close": null,
+    "cAfter": {
+      "connected": true,
+      "url": "http://localhost:4489/edit/untitled-20261002-jscs",
+      "error": null
+    },
+    "sentAfter": [
+      "ticket@23",
+      "ping@4877",
+      "ping@9878",
+      "ping@14881",
+      "ping@19884",
+      "ping@24886"
+    ],
+    "opensAfter": 0
+  },
+  "revoke.seconds": 30.5,
+  "ticket": {
+    "waitedSeconds": 631,
+    "marks": [
+      {
+        "s": 30,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 150,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 270,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 390,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 510,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 630,
+        "a": true,
+        "b": true
+      }
+    ],
+    "ticketFramesA": [
+      480
+    ],
+    "ticketFramesB": [
+      480
+    ],
+    "reopensA": 1,
+    "reopensB": 1,
+    "closesA": [
+      {
+        "s": 480,
+        "code": 4401
+      }
+    ],
+    "closesB": [
+      {
+        "s": 480,
+        "code": 4403
+      }
+    ],
+    "wordInAmsAfterWait": null
+  },
+  "ticket.seconds": 636.5,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 27,
+      "revision": 23,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "971c75c5",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 27,
+      "revision": 23,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "971c75c5",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 26,
+        "opsFrames": 19,
+        "presenceFrames": 7,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 1,
+        "rowsWritten": 0,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 20,
+        "messages": 133,
+        "opsFrames": 43,
+        "presenceFrames": 88,
+        "alarms": 17,
+        "checkpoints": 12,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 116,
+        "rowsWritten": 104,
+        "wakes": 2
+      },
+      "head": 27,
+      "covered": 27,
+      "revision": 23,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790935768586,
+      "alarmAt": null,
+      "databaseSize": 45056,
+      "colo": "SJC",
+      "object": "971c75c5"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-jscs",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T10:09:34.294Z"
+}

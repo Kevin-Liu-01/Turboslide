@@ -1,0 +1,2443 @@
+{
+  "base": "http://localhost:4479",
+  "tier": "do",
+  "secondBase": null,
+  "roomHost": "127.0.0.1:8799",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": null,
+  "startedAt": "2026-10-02T10:12:40.204Z",
+  "ms": 954591,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 954569,
+    "json": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier/gate-undo-do/core-walk.json",
+    "deckId": "untitled-20261002-b7zp",
+    "steps": 215
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "images",
+      "arrange",
+      "shapes",
+      "lines",
+      "polish-text"
+    ],
+    "costRows": null
+  },
+  "rows": 183,
+  "passed": 115,
+  "failed": 18,
+  "notDriven": 50,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e6178bbb",
+  "origin": "http://localhost:4479",
+  "date": "2026-10-02",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "images.insert.toolbar-sources": "passed",
+    "images.select.chip-handles-tail": "not driven",
+    "images.delete.key": "not driven",
+    "images.move.drag-frame": "not driven",
+    "images.guides.edge-snap": "not driven",
+    "images.guides.centre-y": "not driven",
+    "images.guides.centre-x": "not driven",
+    "images.nudge.arrows": "not driven",
+    "images.resize.eight-handles": "not driven",
+    "images.resize.eight-handles-shift": "not driven",
+    "images.resize.edge-fill": "not driven",
+    "images.resize.alt-centre": "not driven",
+    "images.rotate.ring": "not driven",
+    "images.crop.double-click": "not driven",
+    "images.crop.east-edge": "not driven",
+    "images.crop.south-edge": "not driven",
+    "images.crop.enter": "not driven",
+    "images.crop.undo": "not driven",
+    "images.crop.redo": "not driven",
+    "images.crop.menu-escape": "not driven",
+    "images.crop.toolbar-escape-cancels": "not driven",
+    "images.options.panel": "not driven",
+    "images.options.transparency": "not driven",
+    "images.options.reset": "not driven",
+    "images.reset-image.menu": "not driven",
+    "images.background.colour": "not driven",
+    "images.background.toolbar": "not driven",
+    "images.background.reset": "not driven",
+    "images.present.picture-and-ground": "not driven",
+    "images.context.image": "not driven",
+    "images.options.menu-row": "not driven",
+    "images.background.hex-field": "not driven",
+    "arrange.select.click": "passed",
+    "arrange.select.shift-add": "passed",
+    "arrange.multi.drag-inside-moves-all": "passed",
+    "arrange.select.shift-remove": "passed",
+    "arrange.select.marquee": "passed",
+    "arrange.select.marquee-partial": "passed",
+    "arrange.select.click-away": "passed",
+    "arrange.select.cmd-a": "passed",
+    "arrange.select.escape": "passed",
+    "arrange.order.bring-to-front": "passed",
+    "arrange.order.send-to-back": "passed",
+    "arrange.order.bring-forward": "passed",
+    "arrange.order.send-backward": "passed",
+    "arrange.order.keys": "passed",
+    "arrange.align.left": "passed",
+    "arrange.align.center": "passed",
+    "arrange.align.right": "passed",
+    "arrange.align.top": "passed",
+    "arrange.align.middle": "passed",
+    "arrange.align.bottom": "passed",
+    "arrange.align.single-to-slide": "passed",
+    "arrange.center.horizontal": "passed",
+    "arrange.center.vertical": "passed",
+    "arrange.undo.toolbar-on-arrange": "passed",
+    "arrange.undo.menu-on-arrange": "passed",
+    "arrange.clipboard.copy-paste": "passed",
+    "arrange.clipboard.delete": "passed",
+    "arrange.clipboard.undo-redo-delete": "passed",
+    "arrange.clipboard.cut-paste-undo": "passed",
+    "arrange.clipboard.menu-copy-paste": "failed",
+    "arrange.clipboard.paste-after-new-slide-button": "passed",
+    "arrange.clipboard.paste-with-filmstrip-focus": "passed",
+    "arrange.clipboard.paste-keeps-position": "failed",
+    "arrange.duplicate.cmd-d": "passed",
+    "arrange.duplicate.menu-selects-copy": "passed",
+    "arrange.duplicate.nothing-selected": "passed",
+    "arrange.redo.after-undone-duplicate": "failed",
+    "arrange.keys.backspace-empty-selection": "passed",
+    "arrange.nudge.arrows": "passed",
+    "arrange.nudge.shift": "passed",
+    "arrange.nudge.undo": "passed",
+    "arrange.zoom.box-reads": "passed",
+    "arrange.zoom.menu-in": "passed",
+    "arrange.zoom.cmd-minus": "passed",
+    "arrange.zoom.cmd-plus": "passed",
+    "arrange.zoom.fit": "passed",
+    "arrange.zoom.type-percent": "passed",
+    "arrange.zoom.arrow-menu": "passed",
+    "arrange.zoom.cmd-0": "passed",
+    "arrange.zoom.menu-out": "passed",
+    "arrange.readout.fit": "passed",
+    "arrange.readout.200": "passed",
+    "arrange.selection-colour.light": "passed",
+    "arrange.selection-colour.dark": "passed",
+    "arrange.escape.text-then-selection": "passed",
+    "arrange.zoom.menu-presets": "passed",
+    "arrange.toolbar.select": "passed",
+    "shapes.insert.rectangle-click": "passed",
+    "shapes.insert.rounded-click": "passed",
+    "shapes.insert.ellipse-click": "passed",
+    "shapes.insert.rectangle-drag": "passed",
+    "shapes.insert.ellipse-drag": "passed",
+    "shapes.insert.named-rows": "passed",
+    "shapes.default-look": "passed",
+    "shapes.select": "passed",
+    "shapes.move": "passed",
+    "shapes.resize.eight-handles": "passed",
+    "shapes.rotate": "passed",
+    "shapes.fill.colour": "failed",
+    "shapes.border.colour-weight-dash": "failed",
+    "shapes.text.type-align-bold": "passed",
+    "shapes.duplicate-delete-undo-redo": "passed",
+    "shapes.format-options.size-position": "passed",
+    "shapes.reload-and-viewer": "passed",
+    "shapes.context.shape": "passed",
+    "lines.insert.line-drag": "passed",
+    "lines.insert.arrow-drag": "passed",
+    "lines.end-handle": "passed",
+    "lines.tail.colour-weight-dash-ends": "failed",
+    "lines.context.line": "passed",
+    "shapes.text.colour-toolbar": "passed",
+    "shapes.text.enter-opens-label": "passed",
+    "shapes.borders-lines.menu": "failed",
+    "lines.connector.elbow": "failed",
+    "lines.connector.curved": "failed",
+    "lines.connector.re-end": "failed",
+    "lines.insert.arrow-head": "passed",
+    "lines.tail.line-start-end-menu": "failed",
+    "arrange.distribute.horizontal": "failed",
+    "arrange.distribute.vertical": "failed",
+    "arrange.distribute.needs-three": "passed",
+    "arrange.rotate.quarter-turns": "passed",
+    "arrange.rotate.flips-menu": "passed",
+    "arrange.group.chords": "failed",
+    "arrange.group.menu-regroup": "failed",
+    "arrange.group.context-rows": "passed",
+    "arrange.context.rotate-distribute": "failed",
+    "arrange.ruler.show-hide": "passed",
+    "arrange.guides.from-ruler": "passed",
+    "arrange.guides.show-toggle": "passed",
+    "arrange.guides.add-vertical-horizontal": "passed",
+    "arrange.guides.drag": "passed",
+    "arrange.snap.guides-on-off": "failed",
+    "arrange.snap.grid-toggle": "passed",
+    "arrange.snap.grid-effect": "passed",
+    "arrange.guides.context": "passed",
+    "arrange.guides.clear": "passed",
+    "arrange.select-none.menu": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "arrange.insert.selected-after-menu": "passed",
+    "arrange.insert.free-rectangle": "passed",
+    "images.caption.add": "not driven",
+    "images.options.picture-sections-only": "not driven",
+    "images.transparency.slider": "not driven",
+    "images.border.drawn": "not driven",
+    "shapes.label.centred-default": "passed",
+    "shapes.geometry.shapes.hexagon-sheet": "passed",
+    "shapes.geometry.shapes.star5-adjust": "passed",
+    "shapes.geometry.shapes.pie-arc": "passed",
+    "shapes.geometry.shapes.multipath-can": "passed",
+    "shapes.geometry.shapes.flowchart-own-space": "passed",
+    "shapes.geometry.arrows.right-arrow": "passed",
+    "shapes.geometry.arrows.curved-right": "passed",
+    "shapes.geometry.callouts.wedge-rect": "passed",
+    "shapes.geometry.callouts.cloud": "passed",
+    "shapes.geometry.equation.plus-divide": "passed",
+    "shapes.geometry.pinned-three": "passed",
+    "shapes.geometry.sites": "passed",
+    "shapes.geometry.resize-keeps-adjust": "passed",
+    "shapes.insert.grid-shapes": "passed",
+    "shapes.insert.grid-arrows": "passed",
+    "shapes.insert.grid-callouts": "passed",
+    "shapes.insert.grid-equation": "passed",
+    "shapes.icons.named-rows": "passed",
+    "shapes.change-shape.plate": "passed",
+    "shapes.mask-image.plate": "passed",
+    "arrange.group.tail-text-controls": "not driven",
+    "lines.chip.kind-name": "failed",
+    "text.bold.toolbar-marks-run": "not driven",
+    "text.paragraph.toolbar-live": "not driven",
+    "text.list.enter-tab-no-error": "not driven",
+    "text.size.run-and-typed-value": "not driven",
+    "text.marks.whole-block-from-menu": "not driven",
+    "text.tail.heading-takes-list-indent": "not driven",
+    "text.heading.enter-keeps-session": "not driven",
+    "text.link.chip-on-click": "not driven",
+    "text.title.shrink-on-overflow": "not driven",
+    "text.title.second-session-survives-reload": "not driven",
+    "text.link.popover-anchored": "not driven",
+    "text.link.detection-setting": "not driven",
+    "text.tail.size-reads-heading": "not driven",
+    "text.polish.highlight-console": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "images.select.chip-handles-tail",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.delete.key",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.move.drag-frame",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.edge-snap",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.centre-y",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.guides.centre-x",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.nudge.arrows",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.eight-handles",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.eight-handles-shift",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.edge-fill",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.resize.alt-centre",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.rotate.ring",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.double-click",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.east-edge",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.south-edge",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.enter",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.undo",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.redo",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.menu-escape",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.crop.toolbar-escape-cancels",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.panel",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.transparency",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.reset",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.reset-image.menu",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.colour",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.toolbar",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.reset",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.present.picture-and-ground",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.context.image",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.menu-row",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.background.hex-field",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "arrange.clipboard.menu-copy-paste",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.clipboard.paste-keeps-position",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.redo.after-undone-duplicate",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.fill.colour",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.border.colour-weight-dash",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "lines.tail.colour-weight-dash-ends",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "shapes.borders-lines.menu",
+        "feature": "shapes",
+        "result": "failed"
+      },
+      {
+        "id": "lines.connector.elbow",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "lines.connector.curved",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "lines.connector.re-end",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "lines.tail.line-start-end-menu",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.distribute.horizontal",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.distribute.vertical",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.group.chords",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.group.menu-regroup",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.context.rotate-distribute",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "arrange.snap.guides-on-off",
+        "feature": "arrange",
+        "result": "failed"
+      },
+      {
+        "id": "images.caption.add",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.options.picture-sections-only",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.transparency.slider",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "images.border.drawn",
+        "feature": "images",
+        "result": "not driven"
+      },
+      {
+        "id": "lines.chip.kind-name",
+        "feature": "lines",
+        "result": "failed"
+      },
+      {
+        "id": "text.bold.toolbar-marks-run",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.paragraph.toolbar-live",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.list.enter-tab-no-error",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.size.run-and-typed-value",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.marks.whole-block-from-menu",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.tail.heading-takes-list-indent",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.heading.enter-keeps-session",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.chip-on-click",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.shrink-on-overflow",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.title.second-session-survives-reload",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.popover-anchored",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.link.detection-setting",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.tail.size-reads-heading",
+        "feature": "text",
+        "result": "not driven"
+      },
+      {
+        "id": "text.polish.highlight-console",
+        "feature": "text",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "shapes",
+    "lines"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "arrange.group.tail-text-controls",
+      "parks": [
+        "toolbar.group.text"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "images.select.chip-handles-tail",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.delete.key",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.move.drag-frame",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.guides.centre-y",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.guides.centre-x",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.nudge.arrows",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.rotate.ring",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.double-click",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.east-edge",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.south-edge",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.enter",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.undo",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.redo",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.options.panel",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.options.transparency",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.options.reset",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.background.colour",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.background.toolbar",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.background.reset",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.context.image",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.options.menu-row",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.background.hex-field",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.distribute.horizontal",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.distribute.vertical",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.group.chords",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.group.menu-regroup",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.context.rotate-distribute",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "arrange.snap.guides-on-off",
+      "feature": "arrange",
+      "result": "failed"
+    },
+    {
+      "id": "images.caption.add",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.options.picture-sections-only",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.transparency.slider",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "images.border.drawn",
+      "feature": "images",
+      "result": "not driven"
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "result": "not driven"
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "images.insert.toolbar-sources",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.select.chip-handles-tail",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.delete.key",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.move.drag-frame",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.guides.edge-snap",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.guides.centre-y",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.guides.centre-x",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.nudge.arrows",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.resize.eight-handles",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.resize.eight-handles-shift",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.resize.edge-fill",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.resize.alt-centre",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.rotate.ring",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.double-click",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.east-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.south-edge",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.enter",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.undo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.redo",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.menu-escape",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.crop.toolbar-escape-cancels",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.options.panel",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.options.transparency",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.options.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.reset-image.menu",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.background.colour",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.background.toolbar",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.background.reset",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.present.picture-and-ground",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.context.image",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.options.menu-row",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.background.hex-field",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "arrange.select.click",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.shift-add",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.multi.drag-inside-moves-all",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.shift-remove",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.marquee",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.marquee-partial",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.click-away",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.cmd-a",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select.escape",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.bring-to-front",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.send-to-back",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.bring-forward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.send-backward",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.order.keys",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.left",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.center",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.right",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.top",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.middle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.bottom",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.align.single-to-slide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.center.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.center.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.undo.toolbar-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.undo.menu-on-arrange",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.undo-redo-delete",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.cut-paste-undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.menu-copy-paste",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Edit > Copy then Edit > Paste on a clean stage: 3 -> 3"
+    },
+    {
+      "id": "arrange.clipboard.paste-after-new-slide-button",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.paste-with-filmstrip-focus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.clipboard.paste-keeps-position",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "copy a1, paste onto another slide from its stage: h at 137,129 1326x49 (source 152,150 240x150)"
+    },
+    {
+      "id": "arrange.duplicate.cmd-d",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.menu-selects-copy",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.duplicate.nothing-selected",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.redo.after-undone-duplicate",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Cmd+D, Cmd+Z, then Cmd+Shift+Z (Cmd+Y, the toolbar Redo, Edit > Redo when needed): Cmd+Shift+Z: nothing; Cmd+Y: nothing; toolbar Redo: nothing; Edit > Redo: nothing; toolbar Redo aria-disabled true"
+    },
+    {
+      "id": "arrange.keys.backspace-empty-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.arrows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.shift",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.nudge.undo",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.box-reads",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-in",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-minus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-plus",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.type-percent",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.arrow-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.cmd-0",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-out",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.readout.fit",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.readout.200",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.selection-colour.light",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.selection-colour.dark",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.escape.text-then-selection",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.zoom.menu-presets",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.toolbar.select",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rectangle-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rounded-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.ellipse-click",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.rectangle-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.ellipse-drag",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.default-look",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.select",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.move",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.resize.eight-handles",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.rotate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.fill.colour",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the toolbar Fill color: a swatch, then a hex value; Undo: fill rgba(242, 242, 240, 0.05) -> rgb(47, 92, 224) (stored blue true) -> rgb(170, 51, 102); after two undos rgb(47, 92, 224)"
+    },
+    {
+      "id": "shapes.border.colour-weight-dash",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the toolbar Border color, Border weight and Border dash, then Format > Borders & lines; Undo: colour rgb(242, 242, 240) -> rgb(229, 72, 77); weight 1px -> 2px (menu.toolbar.borderWeight.weight-2); dash none -> 8px, 6px (toolbar.borderDash.pick.dash); Format > Borders & lines > Border color (plate format.bordersLines.borderColor.plate) rgb(229, 72, 77) -> rgb(18, 163, 122); after four undos stroke rgb(229, 72, 77) 2px dash none"
+    },
+    {
+      "id": "shapes.text.type-align-bold",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.duplicate-delete-undo-redo",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.format-options.size-position",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.reload-and-viewer",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.context.shape",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.insert.line-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.insert.arrow-drag",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.end-handle",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.tail.colour-weight-dash-ends",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "the line toolbar's Line color, Line weight, Line dash, Line start and Line end; Undo: colour rgb(242, 242, 240) -> rgb(229, 72, 77); weight 1px -> 1.5px (menu.toolbar.lineWeight.line-1.5); dash none -> 6px, 4.5px (toolbar.lineDash.pick.dash); start true (toolbar.lineStart.pick.fillCircle); end true (toolbar.lineEnd.pick.fillArrow); marker-end none; after 5 undos stroke rgb(229, 72, 77) 1.5px dash 6px, 4.5px, block restored false"
+    },
+    {
+      "id": "lines.context.line",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.text.colour-toolbar",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.text.enter-opens-label",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.borders-lines.menu",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "select the rectangle; Format > Borders & lines > Border color, a red swatch; Border dash > Dot; Cmd+Z each: swatch format.bordersLines.borderColor.red: stroke rgb(229, 72, 77) -> rgb(229, 72, 77) -> Cmd+Z rgb(229, 72, 77); Dot: dash none -> 1px, 2px; block restored true"
+    },
+    {
+      "id": "lines.connector.elbow",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Insert > Line > Elbow connector dragged from A's right site to B's left site; B moved by 150 px: the two rectangles were not placed"
+    },
+    {
+      "id": "lines.connector.curved",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Insert > Line > Curved connector dragged from A's right site to B's left site; B moved by 150 px: the two rectangles were not placed"
+    },
+    {
+      "id": "lines.connector.re-end",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a third rectangle C; select the elbow connector, drag its end handle from B's site to C's left site; move C: no elbow connector to re-end"
+    },
+    {
+      "id": "lines.insert.arrow-head",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "lines.tail.line-start-end-menu",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "select the line; Format > Borders & lines > Line start > Arrow, Cmd+Z; Line end > None, Cmd+Z: Line start > Arrow: start field true (drawn parts 2 -> 3), Cmd+Z restored true; Line end > Arrow then None: arrow true -> false (drawn parts 2); two Cmd+Z restored false"
+    },
+    {
+      "id": "arrange.distribute.horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "three objects selected, Arrange > Distribute > Horizontally; Cmd+Z: error: Cannot read properties of null (reading 'free')"
+    },
+    {
+      "id": "arrange.distribute.vertical",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "three objects selected, Arrange > Distribute > Vertically; Cmd+Z: error: Cannot read properties of null (reading 'free')"
+    },
+    {
+      "id": "arrange.distribute.needs-three",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.rotate.quarter-turns",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.rotate.flips-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.chords",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "a1 and a2 selected, Cmd+Option+G, ArrowRight twice, Cmd+Option+Shift+G; three Cmd+Z: chip \"2 objects\" -> \"Group\" (group group); x 152,600 -> 154,602; after ungroup undefined; 6 Cmd+Z returned the start false"
+    },
+    {
+      "id": "arrange.group.menu-regroup",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "Arrange > Group, Ungroup, Regroup; read the enabled states; Cmd+Z: enabled before {\"group\":false,\"ungroup\":false,\"regroup\":false}; Group -> undefined; enabled then {\"group\":false,\"ungroup\":false,\"regroup\":false}; Ungroup -> undefined; enabled then {\"group\":false,\"ungroup\":false,\"regroup\":false}; Regroup -> undefined; Cmd+Z -> undefined"
+    },
+    {
+      "id": "arrange.group.context-rows",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.context.rotate-distribute",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "right click a shape, a text block and a line: Rotate > Rotate clockwise 90 on each (Cmd+Z each); three selected, right click one, Distribute > Horizontally: error: Cannot read properties of null (reading 'free')"
+    },
+    {
+      "id": "arrange.ruler.show-hide",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.from-ruler",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.show-toggle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.add-vertical-horizontal",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.drag",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.snap.guides-on-off",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "failed",
+      "reason": "drop a1 4 px short of the guide at 1000 with Snap to > Guides on, then off: guide at 1001; aimed 997: with Snap to guides on landed 152; off landed 997"
+    },
+    {
+      "id": "arrange.snap.grid-toggle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.snap.grid-effect",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.context",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.guides.clear",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.select-none.menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.insert.selected-after-menu",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.insert.free-rectangle",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.caption.add",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.options.picture-sections-only",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.transparency.slider",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "images.border.drawn",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a picture on the slide"
+    },
+    {
+      "id": "shapes.label.centred-default",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.hexagon-sheet",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.star5-adjust",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.pie-arc",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.multipath-can",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.shapes.flowchart-own-space",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.arrows.right-arrow",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.arrows.curved-right",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.callouts.wedge-rect",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.callouts.cloud",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.equation.plus-divide",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.pinned-three",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.sites",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.geometry.resize-keeps-adjust",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-shapes",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-arrows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-callouts",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.insert.grid-equation",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.icons.named-rows",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.change-shape.plate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shapes.mask-image.plate",
+      "feature": "shapes",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "arrange.group.tail-text-controls",
+      "feature": "arrange",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: toolbar.group.text (docs/PRODUCT.md 7.1, B3); chip \"Group\"; the group tail lists toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.formatOptions and none of the text controls (P1, FEATURES.md 2.3 item 6)"
+    },
+    {
+      "id": "lines.chip.kind-name",
+      "feature": "lines",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "select the elbow connector, the line, the arrow, the curved connector and rectangle A in turn; read the chip: the elbow connector: chip not on the slide (Elbow connector); the line: chip \"Line\" (Line); the arrow: chip \"Arrow\" (Arrow); the curved connector: chip not on the slide (Curved connector); rectangle A: chip none (Shape) (docs/OBJECTS.md 4.2 item 5, B3: blockDisplayName)"
+    },
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a blank slide for the polish round text rows"
+    }
+  ]
+}

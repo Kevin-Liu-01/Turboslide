@@ -1,0 +1,29 @@
+{
+  "startedAt": "2026-10-02T11:52:54.544Z",
+  "base": "https://www.turboslide.com",
+  "trials": [
+    {
+      "name": "a nudge, then a resize by the se handle, then two Cmd+Z",
+      "start": "200,560 480x120 r0",
+      "afterNudge": "200,561 480x120 r0",
+      "afterGesture": "200,561 564x177 r0",
+      "afterUndo1": "200,561 480x120 r0",
+      "afterUndo2": "200,560 480x120 r0",
+      "undo1TookGesture": true,
+      "undo2TookNudge": true
+    },
+    {
+      "name": "a nudge, then a rotation by the ring, then two Cmd+Z",
+      "start": "200,560 480x120 r0",
+      "afterNudge": "200,561 480x120 r0",
+      "afterGesture": "200,561 480x120 r19",
+      "afterUndo1": "200,561 480x120 r0",
+      "afterUndo2": "200,560 480x120 r0",
+      "undo1TookGesture": true,
+      "undo2TookNudge": true
+    }
+  ],
+  "deckId": "untitled-20261002-0wjn",
+  "teardownError": "Error: page.evaluate: Error: baseRevision 9 is stale; untitled-20261002-0wjn is at revision 10\n    at Object.deserialize (https://www.turboslide.com/assets/index-BFThf855.js:13:23374)\n    at Do (https",
+  "endedAt": "2026-10-02T11:53:13.742Z"
+}

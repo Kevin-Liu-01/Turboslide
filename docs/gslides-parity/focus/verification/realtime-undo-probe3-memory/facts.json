@@ -1,0 +1,29 @@
+{
+  "startedAt": "2026-10-02T11:52:24.047Z",
+  "base": "http://localhost:4479",
+  "trials": [
+    {
+      "name": "a nudge, then a resize by the se handle, then two Cmd+Z",
+      "start": "200,560 480x120 r0",
+      "afterNudge": "200,561 480x120 r0",
+      "afterGesture": "200,561 564x177 r0",
+      "afterUndo1": "200,561 480x120 r0",
+      "afterUndo2": "200,560 480x120 r0",
+      "undo1TookGesture": true,
+      "undo2TookNudge": true
+    },
+    {
+      "name": "a nudge, then a rotation by the ring, then two Cmd+Z",
+      "start": "200,560 480x120 r0",
+      "afterNudge": "200,561 480x120 r0",
+      "afterGesture": "200,561 480x120 r19",
+      "afterUndo1": "200,561 480x120 r19",
+      "afterUndo2": "200,561 480x120 r0",
+      "undo1TookGesture": false,
+      "undo2TookNudge": false
+    }
+  ],
+  "deckId": "untitled-20261002-bhhi",
+  "teardown": 404,
+  "endedAt": "2026-10-02T11:52:38.672Z"
+}

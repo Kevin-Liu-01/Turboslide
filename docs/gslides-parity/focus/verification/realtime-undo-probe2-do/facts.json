@@ -1,0 +1,96 @@
+{
+  "startedAt": "2026-10-02T10:27:27.487Z",
+  "base": "http://localhost:4479",
+  "trials": [
+    {
+      "label": "start",
+      "pos": "200,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": "true",
+      "external": null,
+      "seq": 2,
+      "revision": 2,
+      "serverRevision": 2,
+      "snackbar": ""
+    },
+    {
+      "label": "after nudge 1",
+      "pos": "201,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": "true",
+      "external": null,
+      "seq": 3,
+      "revision": 2,
+      "serverRevision": 2,
+      "snackbar": ""
+    },
+    {
+      "label": "after nudge 2",
+      "pos": "202,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": "true",
+      "external": null,
+      "seq": 4,
+      "revision": 2,
+      "serverRevision": 2,
+      "snackbar": ""
+    },
+    {
+      "label": "after undo 1",
+      "pos": "201,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": null,
+      "external": null,
+      "seq": 5,
+      "revision": 2,
+      "serverRevision": 2,
+      "snackbar": ""
+    },
+    {
+      "label": "after undo 2",
+      "pos": "200,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": null,
+      "external": null,
+      "seq": 6,
+      "revision": 3,
+      "serverRevision": 3,
+      "snackbar": ""
+    },
+    {
+      "label": "after redo 1",
+      "pos": "201,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": null,
+      "external": null,
+      "seq": 7,
+      "revision": 4,
+      "serverRevision": 4,
+      "snackbar": ""
+    },
+    {
+      "label": "4 s later",
+      "pos": "201,560 480x120",
+      "undoDisabled": null,
+      "redoDisabled": null,
+      "external": null,
+      "seq": 7,
+      "revision": 5,
+      "serverRevision": 5,
+      "snackbar": ""
+    },
+    {
+      "label": "duplicate",
+      "blocks": [
+        4,
+        5,
+        4,
+        5
+      ],
+      "redoDisabledAfterUndo": null
+    }
+  ],
+  "deckId": "untitled-20261002-0ncx",
+  "teardown": 404,
+  "endedAt": "2026-10-02T10:27:48.747Z"
+}

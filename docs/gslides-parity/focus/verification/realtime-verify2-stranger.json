@@ -1,0 +1,51 @@
+{
+  "startedAt": "2026-10-02T16:51:24.899Z",
+  "loadAtStart": [
+    34.01513671875,
+    36.48974609375,
+    44.017578125
+  ],
+  "worker": "http://127.0.0.1:8799",
+  "cases": [
+    {
+      "label": "silent",
+      "deckId": "verify2-stranger-silent-mur79vfo",
+      "upgraded": true,
+      "status": 101,
+      "sent": "nothing",
+      "framesReceived": [],
+      "closed": {
+        "code": 4401,
+        "reason": "no join",
+        "ms": 15019
+      },
+      "seedsAfter": 0,
+      "headAfter": 0,
+      "countersStatus": 200,
+      "listedOpen": false
+    },
+    {
+      "label": "forged-join",
+      "deckId": "verify2-stranger-forged-join-mur7a71p",
+      "upgraded": true,
+      "status": 101,
+      "sent": "join",
+      "framesReceived": [],
+      "closed": {
+        "code": 4401,
+        "reason": "join refused: shape",
+        "ms": 9
+      },
+      "seedsAfter": 0,
+      "headAfter": 0,
+      "countersStatus": 200,
+      "listedOpen": false
+    }
+  ],
+  "endedAt": "2026-10-02T16:51:39.966Z",
+  "loadAtEnd": [
+    35.267578125,
+    36.64501953125,
+    43.9404296875
+  ]
+}

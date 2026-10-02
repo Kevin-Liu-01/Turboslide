@@ -1,0 +1,714 @@
+{
+  "startedAt": "2026-10-02T09:51:00.503Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "caret",
+    "merge",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow",
+    "agent",
+    "reload",
+    "offline",
+    "dims",
+    "revoke"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png",
+    "11-revoked-c.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-epxk",
+  "slides": [
+    "title",
+    "split-1-2af3",
+    "split-2-2af3"
+  ],
+  "setup": {
+    "clients": {
+      "a": "8851e331ce72c907c8e194c555622af3",
+      "b": "49801cca1e0c832f4cb2693f18b8a486"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "22e20dcb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "22e20dcb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790934673286,
+      "connectedAt": 1790934673290,
+      "navMs": 417
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790934673956,
+      "navMs": 237,
+      "bChipInAms": 56,
+      "aChipInBms": 59,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790934674356,
+      "navMs": 275,
+      "bChipInAms": 53,
+      "aChipInBms": 54,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790934674814,
+      "navMs": 337,
+      "bChipInAms": 59,
+      "aChipInBms": 61,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "22e20dcb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.1,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1220
+      },
+      {
+        "ch": "a",
+        "ms": 215
+      },
+      {
+        "ch": "b",
+        "ms": 227
+      },
+      {
+        "ch": "c",
+        "ms": 212
+      },
+      {
+        "ch": "d",
+        "ms": 212
+      },
+      {
+        "ch": "e",
+        "ms": 212
+      },
+      {
+        "ch": "f",
+        "ms": 221
+      },
+      {
+        "ch": "g",
+        "ms": 220
+      },
+      {
+        "ch": "h",
+        "ms": 216
+      },
+      {
+        "ch": "i",
+        "ms": 220
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefghi",
+    "load": null
+  },
+  "keystroke.seconds": 11.2,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1098,
+        "offset": "25",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 88,
+        "offset": "25",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 111,
+        "offset": "26",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 97,
+        "offset": "27",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 94,
+        "offset": "28",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 93,
+        "offset": "29",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 93,
+        "offset": "30",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 97,
+        "offset": "31",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 95,
+        "offset": "32",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 95,
+        "offset": "33",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(47, 92, 224)",
+      "caretHue": "#2f5ce0",
+      "chipHue": "",
+      "flagText": "BBismuth"
+    },
+    "textB": "A writes here abcdefghi jklmnopqr",
+    "drawnLength": 33
+  },
+  "caret.seconds": 11.5,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1 br1",
+      "bCaretInA": "21",
+      "bWordEnd": 21,
+      "aCaretInB": "17",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 br2 al2",
+      "bCaretInA": "25",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 br2 al2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 br3 al3",
+      "bCaretInA": "33",
+      "bWordEnd": 33,
+      "aCaretInB": "37",
+      "aWordEnd": 37,
+      "textB": "B writes here al1 br1 br2 al2 br3 al3"
+    }
+  ],
+  "merge.seconds": 9.1,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 101
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 103
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 97
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 107
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 96
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 96
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 98
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 99
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.3,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "BBismuth · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 176,
+    "blockMovedInAms": 59,
+    "blockA": [
+      {
+        "dt": -2368,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 59,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 4.9,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 172
+      },
+      {
+        "i": 1,
+        "ms": 179
+      },
+      {
+        "i": 2,
+        "ms": 0
+      },
+      {
+        "i": 3,
+        "ms": 173
+      },
+      {
+        "i": 4,
+        "ms": 179
+      },
+      {
+        "i": 5,
+        "ms": 1
+      },
+      {
+        "i": 6,
+        "ms": 172
+      },
+      {
+        "i": 7,
+        "ms": 180
+      },
+      {
+        "i": 8,
+        "ms": 0
+      },
+      {
+        "i": 9,
+        "ms": 183
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.2,
+  "card": {
+    "drawnMs": 212,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 39
+    }
+  },
+  "card.seconds": 1,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "AArgon 956owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "AFollowing Argon 956·Stop",
+      "stop": true
+    },
+    "followedMs": 120,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 8
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "BBismuth 981editor · slide 3Follow"
+    },
+    "aFollowedMs": 123
+  },
+  "follow.seconds": 54.7,
+  "agent.error": "page.evaluate: TypeError: slide.get: invalid input at /id: Invalid input: expected string, received undefined\n    at Object.dispatch (http://localhost:4479/assets/SlideList-DsbNTKwt.js:1:1479)\n    at cn (http://localhost:4479/assets/EditorRoot-DFKNMJ9u.js:20:91419)\n    at Object.<anonymous> (http://localhost:4479/assets/SlideList-DsbNTKwt.js:1:2096)\n    at ut (http://localhost:4479/assets/SlideList-DsbNTKwt.js:1:8272)\n    at Object.invoke (http://localhost:4479/assets/SlideList-DsbNTKwt.js:1:10217)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:38)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at invoke (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:70:8)\n    at slideJson (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:119:33)\n    at /Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1162:30\n    at poll (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:85:18)\n    at /Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1160:26\n    at async section (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:418:5)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1126:3",
+  "agent.seconds": 1.6,
+  "reload.error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run=\"null\"]').first()\n\n    at openRunEnd (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:157:24)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1206:5\n    at async section (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:418:5)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1200:3",
+  "reload.seconds": 46.4,
+  "offline.error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run=\"null\"]').first()\n\n    at openRunEnd (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:157:24)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1254:5\n    at async section (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:418:5)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1250:3",
+  "offline.seconds": 46.3,
+  "dims.error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run=\"null\"]').first()\n\n    at openRunEnd (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:157:24)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1308:5\n    at async section (/Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:418:5)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1305:3",
+  "dims.seconds": 45.9,
+  "revoke": {
+    "cConnected": true,
+    "cRole": "viewer",
+    "answeredMs": 22,
+    "closeMsAfterRevoke": null,
+    "close": null,
+    "cAfter": {
+      "connected": true,
+      "url": "http://localhost:4489/edit/untitled-20261002-epxk",
+      "error": null
+    },
+    "sentAfter": [
+      "ticket@20",
+      "presence@25",
+      "ping@4944",
+      "ping@9947",
+      "ping@14947",
+      "ping@19950",
+      "ping@24951"
+    ],
+    "opensAfter": 0
+  },
+  "revoke.seconds": 27.5,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 34,
+      "revision": 17,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "22e20dcb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 34,
+      "revision": 17,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "22e20dcb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 4,
+        "messages": 3,
+        "opsFrames": 0,
+        "presenceFrames": 2,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 37,
+        "rowsWritten": 0,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 38,
+        "messages": 179,
+        "opsFrames": 31,
+        "presenceFrames": 141,
+        "alarms": 27,
+        "checkpoints": 14,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 210,
+        "rowsWritten": 127,
+        "wakes": 3
+      },
+      "head": 34,
+      "covered": 34,
+      "revision": 17,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790934957235,
+      "alarmAt": 1790934967314,
+      "databaseSize": 49152,
+      "colo": "SJC",
+      "object": "22e20dcb"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-epxk",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T09:55:57.321Z"
+}

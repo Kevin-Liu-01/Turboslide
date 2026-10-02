@@ -1,0 +1,628 @@
+{
+  "startedAt": "2026-10-02T10:04:01.475Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1280,
+  "appearance": "dark",
+  "sections": [
+    "join",
+    "caret",
+    "merge",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-41t0",
+  "slides": [
+    "title",
+    "split-1-1562",
+    "split-2-1562"
+  ],
+  "setup": {
+    "clients": {
+      "a": "efe0a7559216acc592c68c63cdd81562",
+      "b": "b17b6d24b8078f09a6041d36a9a1a80e"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "2bf84695",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "2bf84695",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "dark",
+      "b": "dark"
+    },
+    "bJoin": {
+      "ready": 1790935453918,
+      "connectedAt": 1790935453921,
+      "navMs": 249
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790935454487,
+      "navMs": 175,
+      "bChipInAms": 75,
+      "aChipInBms": 77,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790935454827,
+      "navMs": 213,
+      "bChipInAms": 73,
+      "aChipInBms": 74,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790935455147,
+      "navMs": 202,
+      "bChipInAms": 76,
+      "aChipInBms": 77,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "2bf84695",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 1.9,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1100,
+        "offset": "15",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 89,
+        "offset": "15",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 94,
+        "offset": "16",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 93,
+        "offset": "17",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 90,
+        "offset": "18",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 101,
+        "offset": "19",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 88,
+        "offset": "20",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 100,
+        "offset": "21",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 92,
+        "offset": "22",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 86,
+        "offset": "23",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(47, 92, 224)",
+      "caretHue": "#2f5ce0",
+      "chipHue": "",
+      "flagText": "TTin"
+    },
+    "textB": "A writes here jklmnopqr",
+    "drawnLength": 23
+  },
+  "caret.seconds": 11.4,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1 br1",
+      "bCaretInA": "21",
+      "bWordEnd": 21,
+      "aCaretInB": "17",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 br2 al2",
+      "bCaretInA": "25",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 br2 al2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 al3 br3",
+      "bCaretInA": "37",
+      "bWordEnd": 37,
+      "aCaretInB": "33",
+      "aWordEnd": 33,
+      "textB": "B writes here al1 br1 br2 al2 al3 br3"
+    }
+  ],
+  "merge.seconds": 9,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 103
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 96
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 98
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 96
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 101
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 101
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 101
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 102
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        383,
+        529,
+        770,
+        81
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        381,
+        527,
+        774,
+        20
+      ]
+    }
+  },
+  "outline.seconds": 12.3,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "TTin · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 182,
+    "blockMovedInAms": 55,
+    "blockA": [
+      {
+        "dt": -2416,
+        "v": "[381,648,774,20]"
+      },
+      {
+        "dt": 55,
+        "v": "[541,648,774,20]"
+      }
+    ],
+    "blockB": {
+      "x": 540.52001953125,
+      "y": 648.0999755859375,
+      "width": 774.4000244140625,
+      "height": 19.96502685546875
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 4.9,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 171
+      },
+      {
+        "i": 1,
+        "ms": 179
+      },
+      {
+        "i": 2,
+        "ms": 178
+      },
+      {
+        "i": 3,
+        "ms": 1
+      },
+      {
+        "i": 4,
+        "ms": 4
+      },
+      {
+        "i": 5,
+        "ms": 174
+      },
+      {
+        "i": 6,
+        "ms": 1
+      },
+      {
+        "i": 7,
+        "ms": 0
+      },
+      {
+        "i": 8,
+        "ms": 176
+      },
+      {
+        "i": 9,
+        "ms": 187
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.1,
+  "card": {
+    "drawnMs": 118,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 1010
+    }
+  },
+  "card.seconds": 0.9,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "CCement 233owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "CFollowing Cement 233·Stop",
+      "stop": true
+    },
+    "followedMs": 133,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 8
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "TTin 288editor · slide 3Follow"
+    },
+    "aFollowedMs": 133
+  },
+  "follow.seconds": 54.8,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 23,
+      "revision": 14,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "2bf84695",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 23,
+      "revision": 14,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "2bf84695",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 9,
+        "messages": 17,
+        "opsFrames": 0,
+        "presenceFrames": 16,
+        "alarms": 0,
+        "checkpoints": 1,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 30,
+        "rowsWritten": 4,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 34,
+        "messages": 139,
+        "opsFrames": 21,
+        "presenceFrames": 112,
+        "alarms": 17,
+        "checkpoints": 12,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 129,
+        "rowsWritten": 93,
+        "wakes": 2
+      },
+      "head": 23,
+      "covered": 23,
+      "revision": 14,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790935551280,
+      "alarmAt": null,
+      "databaseSize": 45056,
+      "colo": "SJC",
+      "object": "2bf84695"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-41t0",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T10:05:58.665Z"
+}

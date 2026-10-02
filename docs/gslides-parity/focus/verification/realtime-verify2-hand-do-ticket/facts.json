@@ -1,0 +1,336 @@
+{
+  "startedAt": "2026-10-02T17:03:35.766Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "ticket"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261002-fizk",
+  "slides": [
+    "title",
+    "split-1-47a6",
+    "split-2-47a6"
+  ],
+  "setup": {
+    "clients": {
+      "a": "7b98f5b497c284f442755febeaf947a6",
+      "b": "53731ede4b4eaa57a4675bf6deb6fa9a"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "3765441d",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "3765441d",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790960628503,
+      "connectedAt": 1790960628507,
+      "navMs": 416
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790960629200,
+      "navMs": 277,
+      "bChipInAms": 52,
+      "aChipInBms": 54,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790960629667,
+      "navMs": 336,
+      "bChipInAms": 54,
+      "aChipInBms": 55,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790960630131,
+      "navMs": 344,
+      "bChipInAms": 53,
+      "aChipInBms": 55,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "3765441d",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.2,
+  "ticket": {
+    "waitedSeconds": 631,
+    "marks": [
+      {
+        "s": 30,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 150,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 270,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 390,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 510,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 630,
+        "a": true,
+        "b": true
+      }
+    ],
+    "ticketFramesA": [
+      477
+    ],
+    "ticketFramesB": [
+      478
+    ],
+    "reopensA": 0,
+    "reopensB": 0,
+    "closesA": [],
+    "closesB": [],
+    "wordInAmsAfterWait": 675
+  },
+  "ticket.seconds": 631.7,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 10,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "3765441d",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 10,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "3765441d",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 11,
+        "opsFrames": 4,
+        "presenceFrames": 7,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 18,
+        "rowsWritten": 13,
+        "wakes": 1,
+        "requestUnits": 1.55
+      },
+      "total": {
+        "requests": 6,
+        "messages": 19,
+        "opsFrames": 9,
+        "presenceFrames": 10,
+        "alarms": 5,
+        "checkpoints": 6,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 55,
+        "rowsWritten": 50,
+        "wakes": 2,
+        "requestUnits": 11.95
+      },
+      "head": 10,
+      "covered": 6,
+      "revision": 6,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790961262113,
+      "alarmAt": 1790961264531,
+      "databaseSize": 45056,
+      "colo": "SJC",
+      "object": "3765441d"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-fizk",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-02T17:14:23.023Z"
+}

@@ -1,0 +1,297 @@
+{
+  "startedAt": "2026-10-02T11:26:23.448Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "revoke"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "11-revoked-c.png",
+    "11-revoked-c-reload.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-tfxl",
+  "slides": [
+    "title",
+    "split-1-fc72",
+    "split-2-fc72"
+  ],
+  "setup": {
+    "clients": {
+      "a": "90eca4efce1898c4d71ccdf9b269fc72",
+      "b": "74eea7a50bfc3e1045a508a32cd7056e"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1d9d5985",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1d9d5985",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790940397980,
+      "connectedAt": 1790940397985,
+      "navMs": 1188
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790940398650,
+      "navMs": 265,
+      "bChipInAms": 51,
+      "aChipInBms": 54,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790940399090,
+      "navMs": 303,
+      "bChipInAms": 53,
+      "aChipInBms": 55,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790940399560,
+      "navMs": 338,
+      "bChipInAms": 36,
+      "aChipInBms": 37,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "1d9d5985",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.2,
+  "revoke.reload": {
+    "status": 404,
+    "url": "http://localhost:4489/edit/untitled-20261002-tfxl",
+    "title": "Turboslide",
+    "editor": false,
+    "role": null,
+    "text": "You need access This presentation is not available to you, or does not exist. Your presentations New presentation Ask for access Access Viewer Commenter Editor Message Email Request access If you were",
+    "ms": 2630
+  },
+  "revoke": {
+    "cConnected": false,
+    "cRole": null,
+    "answeredMs": 22,
+    "closeMsAfterRevoke": null,
+    "close": null,
+    "cAfter": {
+      "connected": null,
+      "url": "http://localhost:4489/edit/untitled-20261002-tfxl",
+      "error": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')\n    at eval (eval at evaluate (:"
+    },
+    "sentAfter": [],
+    "opensAfter": 0
+  },
+  "revoke.seconds": 140.4,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1d9d5985",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "error": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:31)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n  "
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 4,
+        "messages": 1,
+        "opsFrames": 0,
+        "presenceFrames": 1,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 9,
+        "rowsWritten": 0,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 9,
+        "messages": 9,
+        "opsFrames": 5,
+        "presenceFrames": 4,
+        "alarms": 5,
+        "checkpoints": 6,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 47,
+        "rowsWritten": 36,
+        "wakes": 2
+      },
+      "head": 6,
+      "covered": 6,
+      "revision": 6,
+      "months": [
+        "202610"
+      ],
+      "sockets": 1,
+      "members": 1,
+      "awakeSince": 1790940540969,
+      "alarmAt": 1790940551026,
+      "databaseSize": 32768,
+      "colo": "SJC",
+      "object": "1d9d5985"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-tfxl",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T11:29:01.034Z"
+}

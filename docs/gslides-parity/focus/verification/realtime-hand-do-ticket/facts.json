@@ -1,0 +1,219 @@
+{
+  "startedAt": "2026-10-02T10:12:17.877Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "ticket"
+  ],
+  "pictures": [
+    "00-a-after-setup.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-471b",
+  "slides": [
+    "title",
+    "split-1-bab0",
+    "split-2-bab0"
+  ],
+  "setup": {
+    "clients": {
+      "a": "b9efdb2071f470b9cd122bfbd7d1bab0",
+      "b": "d23bad0e096cfb5f6f5bff972de26c95"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1c0507fb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1c0507fb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790935950060,
+      "connectedAt": 1790935950062,
+      "navMs": 211
+    }
+  },
+  "ticket": {
+    "waitedSeconds": 630,
+    "marks": [
+      {
+        "s": 30,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 150,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 270,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 390,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 510,
+        "a": true,
+        "b": true
+      },
+      {
+        "s": 630,
+        "a": true,
+        "b": true
+      }
+    ],
+    "ticketFramesA": [
+      479
+    ],
+    "ticketFramesB": [
+      479
+    ],
+    "reopensA": 1,
+    "reopensB": 0,
+    "closesA": [
+      {
+        "s": 479,
+        "code": 4401,
+        "reason": "ticket refused: deck"
+      }
+    ],
+    "closesB": [],
+    "wordInAmsAfterWait": 611
+  },
+  "ticket.seconds": 631.5,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 7,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1c0507fb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 7,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "1c0507fb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 8,
+        "opsFrames": 1,
+        "presenceFrames": 7,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 11,
+        "rowsWritten": 3,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 6,
+        "messages": 16,
+        "opsFrames": 6,
+        "presenceFrames": 10,
+        "alarms": 5,
+        "checkpoints": 6,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 49,
+        "rowsWritten": 39,
+        "wakes": 2
+      },
+      "head": 7,
+      "covered": 6,
+      "revision": 6,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790936581246,
+      "alarmAt": 1790936583921,
+      "databaseSize": 32768,
+      "colo": "SJC",
+      "object": "1c0507fb"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-471b",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T10:23:02.000Z"
+}

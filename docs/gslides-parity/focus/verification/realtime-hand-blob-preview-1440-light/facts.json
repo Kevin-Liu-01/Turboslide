@@ -1,0 +1,568 @@
+{
+  "startedAt": "2026-10-02T10:29:16.268Z",
+  "baseA": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "baseB": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "caret",
+    "merge",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png"
+  ],
+  "worker.health.before": {
+    "error": "TypeError: fetch failed"
+  },
+  "deck.id": "untitled-20261002-j1et",
+  "slides": [
+    "title",
+    "split-1-7389",
+    "split-2-7389"
+  ],
+  "setup": {
+    "clients": {
+      "a": "f4a5c75ec178b75c46c8f73837917389",
+      "b": "4fff10c8993f8b22568c5e7ddedc3ccf"
+    },
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1790936975209,
+      "connectedAt": 1790936975324,
+      "navMs": 1139
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790936976618,
+      "navMs": 911,
+      "bChipInAms": 8839,
+      "aChipInBms": 8840,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790936986403,
+      "navMs": 801,
+      "bChipInAms": 1562,
+      "aChipInBms": 1563,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790936988913,
+      "navMs": 804,
+      "bChipInAms": 1192,
+      "aChipInBms": 1193,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 15.4,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1584
+      },
+      {
+        "ch": "a",
+        "ms": 577
+      },
+      {
+        "ch": "b",
+        "ms": 891
+      },
+      {
+        "ch": "c",
+        "ms": 1187
+      },
+      {
+        "ch": "d",
+        "ms": 1506
+      },
+      {
+        "ch": "e",
+        "ms": 1767
+      },
+      {
+        "ch": "f",
+        "ms": 2125
+      },
+      {
+        "ch": "g",
+        "ms": 2579
+      },
+      {
+        "ch": "h",
+        "ms": 1582
+      },
+      {
+        "ch": "i",
+        "ms": null
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefgh",
+    "load": null
+  },
+  "keystroke.seconds": 11.2,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 62,
+        "offset": "23",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 172,
+        "offset": "25",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 2190,
+        "offset": "28",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 1184,
+        "offset": "28",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 178,
+        "offset": "28",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 212,
+        "offset": "29",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 175,
+        "offset": "30",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 185,
+        "offset": "31",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 180,
+        "offset": "32",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 62,
+        "offset": "32",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(29, 143, 200)",
+      "caretHue": "#1d8fc8",
+      "chipHue": "",
+      "flagText": "PPumice"
+    },
+    "textB": "A writes here abcdefghi jklmnopqr",
+    "drawnLength": 33
+  },
+  "caret.seconds": 11.4,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here br1 al1",
+      "bCaretInA": "21",
+      "bWordEnd": 17,
+      "aCaretInB": "13",
+      "aWordEnd": 21,
+      "textB": "B writes here br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here br1 al1 br2 al2",
+      "bCaretInA": "29",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here br1 al1 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here br1 al1 br2 al2 al3",
+      "bCaretInA": "37",
+      "bWordEnd": null,
+      "aCaretInB": "35",
+      "aWordEnd": 33,
+      "textB": "B writes here br1 al1 br2 al2 al3 br3"
+    }
+  ],
+  "merge.seconds": 9.1,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 4040
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 339
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 197
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 218
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 194
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 226
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 204
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 255
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.3,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "PPumice · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 16,
+    "firstGhostMs": 259,
+    "blockMovedInAms": 626,
+    "blockA": [
+      {
+        "dt": -2351,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 626,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 4.8,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 254
+      },
+      {
+        "i": 1,
+        "ms": 267
+      },
+      {
+        "i": 2,
+        "ms": 11
+      },
+      {
+        "i": 3,
+        "ms": 13
+      },
+      {
+        "i": 4,
+        "ms": 37
+      },
+      {
+        "i": 5,
+        "ms": 8
+      },
+      {
+        "i": 6,
+        "ms": 3
+      },
+      {
+        "i": 7,
+        "ms": 11
+      },
+      {
+        "i": 8,
+        "ms": 16
+      },
+      {
+        "i": 9,
+        "ms": 5
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.2,
+  "card": {
+    "drawnMs": 209,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 49
+    }
+  },
+  "card.seconds": 1,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "CCork 622owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "CFollowing Cork 622·Stop",
+      "stop": true
+    },
+    "followedMs": 243,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 111
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "PPumice 292editor · slide 3Follow"
+    },
+    "aFollowedMs": 2212
+  },
+  "follow.seconds": 57.7,
+  "sync.end": {
+    "a": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 29,
+      "revision": 29,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 29,
+      "revision": 29,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-j1et",
+    "editStatus": 302
+  },
+  "worker.health.after": {
+    "error": "TypeError: fetch failed"
+  },
+  "endedAt": "2026-10-02T10:31:49.433Z"
+}

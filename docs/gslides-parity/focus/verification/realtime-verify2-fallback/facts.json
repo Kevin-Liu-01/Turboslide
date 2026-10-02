@@ -1,0 +1,1371 @@
+{
+  "startedAt": "2026-10-02T18:35:04.466Z",
+  "loadAtStart": [
+    72.8369140625,
+    65.65478515625,
+    58.28369140625
+  ],
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "reads": [
+    {
+      "at": 9857,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 4,
+        "closes": "4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": false,
+        "revision": 0,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 10900,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 4,
+        "closes": "4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 0,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 15558,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 5,
+        "closes": "4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 16572,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 5,
+        "closes": "4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 17602,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 5,
+        "closes": "4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 18631,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 5,
+        "closes": "4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 19644,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 5,
+        "closes": "4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 20662,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 21677,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 22727,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 23751,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 24778,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 25798,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 26840,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 27875,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 6,
+        "closes": "4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 28888,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 29898,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 30910,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 31940,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 32953,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 33963,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 34975,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 35985,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 7,
+        "closes": "4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 36999,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 38011,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 39062,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 40116,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 41143,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 42162,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 43199,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 44221,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 8,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 45240,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 46259,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 47273,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 48285,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 49299,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 50320,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 51348,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 52361,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 9,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 53385,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 54396,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 55415,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 56433,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 57444,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 58462,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 59475,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 60487,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 10,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 61502,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 62515,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 63526,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 64557,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 65578,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 66596,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 67615,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 68638,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": false,
+        "revision": 0,
+        "opens": 11,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 0,
+        "closes": ""
+      }
+    },
+    {
+      "at": 69650,
+      "callbacks": "failing",
+      "realtime": "on",
+      "A": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 1,
+        "opens": 12,
+        "closes": "4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500,4500"
+      },
+      "B": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "revision": 2,
+        "opens": 0,
+        "closes": ""
+      }
+    }
+  ],
+  "health0": {
+    "ok": true,
+    "protocol": 1,
+    "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+    "realtime": "on",
+    "appOrigin": "http://127.0.0.1:4499",
+    "callbacks": "ok"
+  },
+  "deck": {
+    "deckId": "verify2-fallback-muraz8pz",
+    "copy": 200,
+    "link": 200,
+    "hasUrl": true
+  },
+  "tabs": {
+    "A": {
+      "base": "http://localhost:4479",
+      "firstOther": {
+        "at": 69653,
+        "msAfterOpen": 65919,
+        "tier": "blob",
+        "transport": "sse"
+      },
+      "wrote": {
+        "answer": "ok",
+        "readOn": "http://localhost:4489",
+        "found": true,
+        "at": 73092
+      }
+    },
+    "B": {
+      "base": "http://localhost:4489",
+      "firstOther": {
+        "at": 10905,
+        "msAfterOpen": 6048,
+        "tier": "blob",
+        "transport": "sse"
+      },
+      "wrote": {
+        "answer": "ok",
+        "readOn": "http://localhost:4479",
+        "found": true,
+        "at": 14549
+      }
+    }
+  },
+  "wsA": {
+    "opens": [
+      {
+        "at": 1790966109209,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966109787,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966110800,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966112816,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966116827,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966124857,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966132869,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966140880,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966149162,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966157185,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966165208,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      },
+      {
+        "at": 1790966173217,
+        "url": "ws://127.0.0.1:8799/rooms/verify2-fallback-muraz8pz"
+      }
+    ],
+    "closes": [
+      {
+        "at": 1790966109285,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966109798,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966110814,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966112825,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966116855,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966124867,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966132878,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966140892,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966149183,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966157206,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966165216,
+        "code": 4500,
+        "reason": "seed failed"
+      },
+      {
+        "at": 1790966173229,
+        "code": 4500,
+        "reason": "seed failed"
+      }
+    ]
+  },
+  "wsB": {
+    "opens": [],
+    "closes": []
+  },
+  "healthEnd": {
+    "ok": true,
+    "protocol": 1,
+    "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+    "realtime": "on",
+    "appOrigin": "http://127.0.0.1:4499",
+    "callbacks": "failing"
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "after": 404
+  },
+  "endedAt": "2026-10-02T18:36:17.702Z",
+  "loadAtEnd": [
+    64.03955078125,
+    64.4287109375,
+    58.39599609375
+  ]
+}

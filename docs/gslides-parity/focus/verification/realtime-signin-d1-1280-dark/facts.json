@@ -1,0 +1,119 @@
+{
+  "startedAt": "2026-10-02T11:26:05.070Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1280,
+  "appearance": "dark",
+  "label": "d1",
+  "deck.id": "untitled-20261002-awoz",
+  "dialog.capture": {
+    "account": true,
+    "rows": [
+      "account.sentence",
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signIn",
+      "account.forget"
+    ],
+    "signIn": true,
+    "box": [
+      400,
+      320
+    ],
+    "methods": [
+      {
+        "id": "dialog.signIn.close",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.email",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.google",
+        "text": "Continue with Google",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.passkey",
+        "text": "Use a passkeyPasskeys arrive once the ad",
+        "disabled": true
+      },
+      {
+        "id": "dialog.signIn.error",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.cancel",
+        "text": "Cancel",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.continue",
+        "text": "Continue",
+        "disabled": true
+      }
+    ],
+    "text": "Sign inEmailContinue with GoogleUse a passkeyPasskeys arrive once the address is finalCancelContinue",
+    "emailField": true,
+    "theme": "dark"
+  },
+  "dialog.mailOff": {
+    "account": true,
+    "rows": [
+      "account.sentence",
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signIn",
+      "account.forget"
+    ],
+    "signIn": true,
+    "box": [
+      400,
+      320
+    ],
+    "methods": [
+      {
+        "id": "dialog.signIn.close",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.google",
+        "text": "Continue with Google",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.passkey",
+        "text": "Use a passkeyPasskeys arrive once the ad",
+        "disabled": true
+      },
+      {
+        "id": "dialog.signIn.error",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.cancel",
+        "text": "Cancel",
+        "disabled": false
+      }
+    ],
+    "text": "Sign inContinue with GoogleUse a passkeyPasskeys arrive once the address is finalCancel",
+    "emailField": false,
+    "theme": "dark"
+  },
+  "errorSentence": {
+    "sentence": "Sign in did not complete (account not linked). Try again or use another method",
+    "url": "http://localhost:4479/edit/untitled-20261002-awoz",
+    "paramGone": true
+  },
+  "teardown": {
+    "id": "untitled-20261002-awoz",
+    "editStatus": 404
+  },
+  "endedAt": "2026-10-02T11:26:10.330Z"
+}

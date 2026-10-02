@@ -1,0 +1,628 @@
+{
+  "startedAt": "2026-10-02T10:00:05.849Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "dark",
+  "sections": [
+    "join",
+    "caret",
+    "merge",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "deck.id": "untitled-20261002-ha17",
+  "slides": [
+    "title",
+    "split-1-79fa",
+    "split-2-79fa"
+  ],
+  "setup": {
+    "clients": {
+      "a": "2168bbcd650ecf48ab5078c28afd79fa",
+      "b": "13fa21edec75e74daa200775579f5ee1"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 7,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "7ac6cad7",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 7,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "7ac6cad7",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "dark",
+      "b": "dark"
+    },
+    "bJoin": {
+      "ready": 1790935218640,
+      "connectedAt": 1790935218645,
+      "navMs": 375
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1790935219309,
+      "navMs": 258,
+      "bChipInAms": 42,
+      "aChipInBms": 44,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1790935219841,
+      "navMs": 407,
+      "bChipInAms": 63,
+      "aChipInBms": 69,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1790935220322,
+      "navMs": 260,
+      "bChipInAms": 55,
+      "aChipInBms": 57,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 7,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "7ac6cad7",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.3,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1104,
+        "offset": "15",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 95,
+        "offset": "15",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 87,
+        "offset": "16",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 91,
+        "offset": "17",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 94,
+        "offset": "18",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 97,
+        "offset": "19",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 100,
+        "offset": "20",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 90,
+        "offset": "21",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 92,
+        "offset": "22",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 100,
+        "offset": "23",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(15, 106, 106)",
+      "caretHue": "#0f6a6a",
+      "chipHue": "",
+      "flagText": "NNiobium"
+    },
+    "textB": "A writes here jklmnopqr",
+    "drawnLength": 23
+  },
+  "caret.seconds": 11.4,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here br1 al1",
+      "bCaretInA": "17",
+      "bWordEnd": 17,
+      "aCaretInB": "21",
+      "aWordEnd": 21,
+      "textB": "B writes here br1 al1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here br1 al1 al2 br2",
+      "bCaretInA": "29",
+      "bWordEnd": 29,
+      "aCaretInB": "25",
+      "aWordEnd": 25,
+      "textB": "B writes here br1 al1 al2 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here br1 al1 al2 br2 br3 al3",
+      "bCaretInA": "33",
+      "bWordEnd": 33,
+      "aCaretInB": "37",
+      "aWordEnd": 37,
+      "textB": "B writes here br1 al1 al2 br2 br3 al3"
+    }
+  ],
+  "merge.seconds": 9.2,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 117
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 110
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 104
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 103
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 99
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 106
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 108
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 109
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.3,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "NNiobium · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 175,
+    "blockMovedInAms": 55,
+    "blockA": [
+      {
+        "dt": -2344,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 55,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 4.8,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 171
+      },
+      {
+        "i": 1,
+        "ms": 175
+      },
+      {
+        "i": 2,
+        "ms": 180
+      },
+      {
+        "i": 3,
+        "ms": 0
+      },
+      {
+        "i": 4,
+        "ms": 178
+      },
+      {
+        "i": 5,
+        "ms": 0
+      },
+      {
+        "i": 6,
+        "ms": 180
+      },
+      {
+        "i": 7,
+        "ms": 4
+      },
+      {
+        "i": 8,
+        "ms": 0
+      },
+      {
+        "i": 9,
+        "ms": 181
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.1,
+  "card": {
+    "drawnMs": 216,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 985
+    }
+  },
+  "card.seconds": 1,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "MMagnesium 887owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "MFollowing Magnesium 887·Stop",
+      "stop": true
+    },
+    "followedMs": 123,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 8
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "NNiobium 395editor · slide 3Follow"
+    },
+    "aFollowedMs": 126
+  },
+  "follow.seconds": 54.7,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 24,
+      "revision": 14,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "7ac6cad7",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 24,
+      "revision": 14,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "7ac6cad7",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "sinceWake": {
+        "requests": 9,
+        "messages": 17,
+        "opsFrames": 0,
+        "presenceFrames": 16,
+        "alarms": 0,
+        "checkpoints": 1,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 31,
+        "rowsWritten": 4,
+        "wakes": 1
+      },
+      "total": {
+        "requests": 34,
+        "messages": 147,
+        "opsFrames": 22,
+        "presenceFrames": 119,
+        "alarms": 19,
+        "checkpoints": 12,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 132,
+        "rowsWritten": 96,
+        "wakes": 2
+      },
+      "head": 24,
+      "covered": 24,
+      "revision": 14,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1790935316737,
+      "alarmAt": null,
+      "databaseSize": 45056,
+      "colo": "SJC",
+      "object": "7ac6cad7"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261002-ha17",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479"
+    }
+  },
+  "endedAt": "2026-10-02T10:02:03.922Z"
+}

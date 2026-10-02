@@ -1,0 +1,450 @@
+{
+ "base": "https://turboslide-q6vp1ng7n-kl01s-projects.vercel.app",
+ "deck": "gt-brand",
+ "startedAt": "2026-10-02T10:14:19.029Z",
+ "reads": [
+  {
+   "s": 14,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 3,
+     "closes": [
+      {
+       "at": 1790936070825,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936072510,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 3,
+     "closes": [
+      {
+       "at": 1790936070823,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936072517,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 19,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 4,
+     "closes": [
+      {
+       "at": 1790936072510,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936075248,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 4,
+     "closes": [
+      {
+       "at": 1790936072517,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936075253,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 24,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 5,
+     "closes": [
+      {
+       "at": 1790936075248,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936080428,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 5,
+     "closes": [
+      {
+       "at": 1790936075253,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936080420,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 29,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 5,
+     "closes": [
+      {
+       "at": 1790936075248,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936080428,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 5,
+     "closes": [
+      {
+       "at": 1790936075253,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936080420,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 34,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 6,
+     "closes": [
+      {
+       "at": 1790936080428,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936089175,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 6,
+     "closes": [
+      {
+       "at": 1790936080420,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936089177,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 39,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 7,
+     "closes": [
+      {
+       "at": 1790936080428,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936089175,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 7,
+     "closes": [
+      {
+       "at": 1790936080420,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936089177,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 44,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 7,
+     "closes": [
+      {
+       "at": 1790936089175,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936098745,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 7,
+     "closes": [
+      {
+       "at": 1790936089177,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936098741,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 49,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 8,
+     "closes": [
+      {
+       "at": 1790936098745,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936107526,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 8,
+     "closes": [
+      {
+       "at": 1790936098741,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936107530,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "s": 54,
+   "a": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 8,
+     "closes": [
+      {
+       "at": 1790936098745,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936107526,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   },
+   "b": {
+    "tier": "do",
+    "transport": "ws",
+    "connected": false,
+    "room": null,
+    "streamDown": true,
+    "chips": 0,
+    "ws": {
+     "opens": 8,
+     "closes": [
+      {
+       "at": 1790936098741,
+       "code": 4500,
+       "reason": "seed failed"
+      },
+      {
+       "at": 1790936107530,
+       "code": 4500,
+       "reason": "seed failed"
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "readyMs": 9078,
+ "endedAt": "2026-10-02T10:15:13.215Z"
+}

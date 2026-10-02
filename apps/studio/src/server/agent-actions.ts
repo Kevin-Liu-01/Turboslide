@@ -413,6 +413,12 @@ export type StoreStatusDeps = {
   deckId: string;
   store: DeckStore;
   tier: SyncTier;
+  /**
+   * The colo of the deck's object on the do tier, read by the caller from the object's counters
+   * route under the room bearer (server/actions.ts; the channel lives in ./room, which this module
+   * never imports because controller.tsx pulls it into the client graph); absent off the do tier.
+   */
+  objectColo?: () => Promise<string | null>;
 };
 
 /** How long one deck's object colo is kept per instance before the counters route is read again. */
@@ -421,28 +427,18 @@ const objectColoCache = new Map<string, { colo: string | null; readAt: number }>
 
 /**
  * The colo of the deck's object on the do tier (docs/CLOUDFLARE.md 2.1: `sync.status` names the
- * object's colo, one across both tabs; build/r5.md CF-R1b), read from the object's counters route
- * under the room bearer and kept per deck for a minute per instance, so the cost probe's five
- * samples of `sync.status` cost one object request. Null when the Worker did not answer; undefined
- * (the field left out) off the do tier and on a tree whose action table does not carry it.
+ * object's colo, one across both tabs; build/r5.md CF-R1b), read through the caller's
+ * `objectColo` and kept per deck for a minute per instance, so the cost probe's five samples of
+ * `sync.status` cost one object request. Null when the Worker did not answer; undefined (the field
+ * left out) off the do tier, without a reader, and on a tree whose action table does not carry it.
  */
 async function objectColoFor(deps: StoreStatusDeps): Promise<string | null | undefined> {
-  if (deps.tier !== 'do' || !outputAccepts('sync.status', ['colo'])) return undefined;
+  if (deps.tier !== 'do' || deps.objectColo === undefined) return undefined;
+  if (!outputAccepts('sync.status', ['colo'])) return undefined;
   const cached = objectColoCache.get(deps.deckId);
   const now = Date.now();
   if (cached !== undefined && now - cached.readAt < OBJECT_COLO_CACHE_MS) return cached.colo;
-  const { realtimeChannel } = await import('./room');
-  const { isDoChannel } = await import('@turboslide/realtime/do');
-  const channel = realtimeChannel();
-  let colo: string | null = null;
-  if (isDoChannel(channel)) {
-    try {
-      const counters = await channel.counters(deps.deckId);
-      colo = typeof counters.colo === 'string' && counters.colo !== '' ? counters.colo : null;
-    } catch {
-      colo = null;
-    }
-  }
+  const colo = await deps.objectColo().catch(() => null);
   objectColoCache.set(deps.deckId, { colo, readAt: now });
   return colo;
 }

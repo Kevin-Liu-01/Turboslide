@@ -104,11 +104,13 @@ import { registerMigrateStorage } from './migrate';
 import {
   commentCallerFor,
   decideFor,
+  realtimeChannel,
   realtimeTier,
   redisCommands,
   requestIdentity as roomIdentity,
   roomBackedStore,
 } from './room';
+import { isDoChannel } from '@turboslide/realtime/do';
 import {
   deckDir,
   ensureDeckAssets,
@@ -1197,6 +1199,18 @@ export type DeckDispatcherOptions = {
  * route wrote through the FileStore alone and a hosted agent write never left the instance
  * (measured 2026-09-11: eight HTTP writes answered r11 to r18 while the Blob store stayed at r10).
  */
+/** The colo the deck's object answers in its counters on the do tier; null when the Worker did not answer or the channel is another tier's. */
+async function objectColoOf(deckId: string): Promise<string | null> {
+  const channel = realtimeChannel();
+  if (!isDoChannel(channel)) return null;
+  try {
+    const counters = await channel.counters(deckId);
+    return typeof counters.colo === 'string' && counters.colo !== '' ? counters.colo : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function deckDispatcher(
   deckId: string,
   options: DeckDispatcherOptions = {},
@@ -1293,7 +1307,14 @@ export async function deckDispatcher(
   // the store's view of the deck for the HTTP and MCP transports (docs/SYNC.md 6.3, 3.6; the sync
   // round, build/b3.md R2): `sync.status` with `storeCalls` replaces the CLI's placeholder the
   // record actions register above, and `deck.info` gains `counts.records` and `counts.holes`
-  registerStoreStatusActions(dispatcher, { deckId, store: liveStore, tier: realtimeTier() });
+  registerStoreStatusActions(dispatcher, {
+    deckId,
+    store: liveStore,
+    tier: realtimeTier(),
+    // the object's colo for `sync.status` on the do tier (docs/CLOUDFLARE.md 2.1; build/r5.md
+    // CF-R1b): one counters read under the room bearer, cached a minute per deck by the handler
+    objectColo: () => objectColoOf(deckId),
+  });
   if (request !== undefined) {
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);

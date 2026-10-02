@@ -16,7 +16,7 @@ the Prototemplate checkout at `/Users/kevinliu/repos/Prototemplate/deck`. Contai
 147.0.7727.0 on SwiftShader, LibreOffice 25.2.3.2, pdftocairo 25.03.0). The deck revision this tree
 carries is 13. The evidence directory `.turboslide/m2-final/` (one log per step, `results.txt`, the
 deck snapshots and version records of the write steps, the diff crops, `vitest.json`) is
-git-ignored; the export reports and two diff images are copied to `docs/m2-evidence/`; this file
+git-ignored; the export reports and two diff images are copied to `docs/archive/status/m2-evidence/`; this file
 is the record.
 
 ## What shipped
@@ -210,7 +210,7 @@ of the writes is under `.turboslide/m2-final/` (`step-2x.log`, `version-list.jso
 | 30   | `docker run … export pptx --mode native --theme light --verify`                                                    | exit 1        | 120 s wall (119.5 s reported; verification 35.5 s): `gt-brand-light.pptx` 27.95 MiB, 85 slides, revision 13, 11 GT Inter faces embedded, Menlo required on the viewer, 1090 shapes, 0 `custGeom`, 0 `normAutofit`, geometry in bounds; `passed` false because two gated blocks are out of budget (step 31), and the CLI exits 1 on a report that did not pass                                                                                                                                                                                                                                                                                         |
 | 31   | native report assertion                                                                                            | fail          | exit 1 naming `avoid` and `surfaces`. 27 all-native slides, 79 text blocks gated: 77 within budget, 2 not: `avoid#p1` dw +4 (ink 420 px wide in LibreOffice against 416 in Chromium, budget 3) and `surfaces#rows` dw -6 with dy +1 (841 against 847 px). Over the 79: `dx` 0 on 76, +1 on 1, -1 on 2; `dy` 0 on 70, +1 on 8, -1 on 1; `dw` 0 on 50, +1 on 4, -1 on 23, +4 on 1, -6 on 1. The 58 slides with raster blocks are listed, not gated (210 blocks: 153 text, 19 line, 38 raster; 5 out of budget: `audience#p1` dw +4, `mark#mark` dx +1 dw -2, `lines#dia1` dx +1 dy +1 dw -2, `motion#dia1` dy +2, `build-log#p1` dy +2)                 |
 | 32   | `turboslide fonts build --check && .turboslide/venv/bin/python3 -c "from pptx import Presentation; …"` (85 slides) | pass          | `fonts build --check` through `.turboslide/venv/bin/python`: 0 stale files at version 4.001+gt.1 (the venv existed; the command creates it from `scripts/requirements.txt` when it is missing); python-pptx 1.0.2 on Python 3.14.6 opens `gt-brand-light.pptx` with 85 slides; 25 s                                                                                                                                                                                                                                                                                                                                                                   |
-| 33   | `pnpm format:check`                                                                                                | pass (re-run) | the runner's step 33 exited 1 on one file, `docs/M2-STATUS.md`, which was being rewritten during the run; after the document was formatted, `pnpm format:check` was run again and every matched file is clean (step 19 of `pnpm check` had passed the same check on the rest of the tree at 19:39)                                                                                                                                                                                                                                                                                                                                                    |
+| 33   | `pnpm format:check`                                                                                                | pass (re-run) | the runner's step 33 exited 1 on one file, `docs/archive/status/M2-STATUS.md`, which was being rewritten during the run; after the document was formatted, `pnpm format:check` was run again and every matched file is clean (step 19 of `pnpm check` had passed the same check on the rest of the tree at 19:39)                                                                                                                                                                                                                                                                                                                                     |
 
 ### Render records
 
@@ -264,7 +264,7 @@ is 4 px wider in LibreOffice than in Chromium (ink 420 against 416 px, budget 3)
 `dx` 0 on 76, +1 on 1, -1 on 2; `dy` 0 on 70, +1 on 8, -1 on 1; `dw` 0 on 50, +1 on 4, -1 on 23,
 +4 and -6 once each. The vertical budget holds on every gated block, which is the first-baseline
 shift (decision 9) at work: the 88 px title heading measures dy +1, dw 0
-(`docs/m2-evidence/native-light-02-title.diff.png`). On the 58 listed slides, 210 blocks (153
+(`docs/archive/status/m2-evidence/native-light-02-title.diff.png`). On the 58 listed slides, 210 blocks (153
 text, 19 line, 38 raster) measure 5 out of budget: `audience#p1` dw +4, `mark#mark` dx +1 dw -2,
 `lines#dia1` dx +1 dy +1 dw -2, `motion#dia1` dy +2, `build-log#p1` dy +2. Ink was measured with
 the review's cut on 254 of the 289 blocks and with the fixed 40-unit edge on the other 35 (opaque
@@ -276,8 +276,8 @@ Chromium antialias every glyph edge differently, which is why this mode is gated
 not per page. Geometry read-back in bounds: 1090 shapes, 0 `custGeom`, 0 `normAutofit`, 11
 embedded fonts. `gt-brand-light.pptx` 27.95 MiB; export 119.5 s, of which verification 35.5 s.
 The two failing blocks are listed under "Blockers"; their diff images are
-`docs/m2-evidence/native-light-30-avoid.diff.png` and
-`docs/m2-evidence/native-light-32-surfaces.diff.png`.
+`docs/archive/status/m2-evidence/native-light-30-avoid.diff.png` and
+`docs/archive/status/m2-evidence/native-light-32-surfaces.diff.png`.
 
 ### Report facts common to both runs
 
@@ -289,12 +289,12 @@ PowerPoint for the web and Google Slides. The residual carries the renderer stri
 ("the slide is a 2x raster of the sheet; text is an invisible native layer" for flatten), the
 fonts line and the two `verify:` lines per file. File hashes are in the reports (`files[].sha256`).
 
-Evidence: `docs/m2-evidence/export-report-flatten.json` (the merged flatten report, 170 slide
-entries with `theme` and `verify`), `docs/m2-evidence/export-report-native-light.json`,
-`docs/m2-evidence/flatten-light-63-skills-marks.diff.png` (the 2x diff of the page that carried
-the cover residual before decision 12) and `docs/m2-evidence/native-light-02-title.diff.png` (the
-88 px title heading after the baseline shift), `docs/m2-evidence/native-light-30-avoid.diff.png`
-and `docs/m2-evidence/native-light-32-surfaces.diff.png` (the two blocks the native gate names),
+Evidence: `docs/archive/status/m2-evidence/export-report-flatten.json` (the merged flatten report, 170 slide
+entries with `theme` and `verify`), `docs/archive/status/m2-evidence/export-report-native-light.json`,
+`docs/archive/status/m2-evidence/flatten-light-63-skills-marks.diff.png` (the 2x diff of the page that carried
+the cover residual before decision 12) and `docs/archive/status/m2-evidence/native-light-02-title.diff.png` (the
+88 px title heading after the baseline shift), `docs/archive/status/m2-evidence/native-light-30-avoid.diff.png`
+and `docs/archive/status/m2-evidence/native-light-32-surfaces.diff.png` (the two blocks the native gate names),
 all from this run. The complete runs, with the
 pages, references, diffs and `verify-summary.json`, are under `.turboslide/export` and
 `.turboslide/export-native`; the first integration pass's runs and its QuickLook and LibreOffice
@@ -341,7 +341,7 @@ report at revision 13 is 122 findings: 2 at severity 3 (both known), 28 at 2, 92
 `opener/sentence-lists-section` 6, `copy/full-sentence-caption` 5, `escape/html-block` 4,
 `dia/half-pixel` 3, `numbers/contradiction` 3, `copy/metaphor-candidate` 2, `copy/sentence-case` 1,
 `type/sizes-ladder` 1, `icon/known` 1, `type/svg-label-min` 1. The 4 html escape blocks and the 12
-slides with residual CSS under `ext` are as listed in `docs/M1-STATUS.md`.
+slides with residual CSS under `ext` are as listed in `docs/archive/status/M1-STATUS.md`.
 
 ## Integration fixes
 
@@ -364,7 +364,7 @@ Made by the integrators to reconcile the builders' trees; every one is in this c
 - The final pass: `pnpm format` over the 35 files the review left (the ten `apps/render-worker`
   sources, `apps/cli/src/commands/fonts.ts` and its test, 13 `packages/export` files,
   `packages/fonts/export/fonts.json`, `packages/fonts/src/export.ts` and its test,
-  `packages/lint/src/static/export-non-native.test.ts`, `docs/M1-STATUS.md`, `docs/README.md`,
+  `packages/lint/src/static/export-non-native.test.ts`, `docs/archive/status/M1-STATUS.md`, `docs/README.md`,
   `docs/spec/SPEC.md`, the three experiment reports); AGENTS.md's acceptance paragraph names the
   19-step chain; `docs/README.md` gained this file's row.
 - `docs/export-verification.md` and `AGENTS.md` record the deviations.
@@ -484,7 +484,7 @@ Applied on 2026-09-10 after the M2 review, in the files the review named, before
   prefix is one constant in `scripts/build-fonts.py` and `fonts.json`.
 - Express the 4 escape blocks in the grammar (the `composite` block, SPEC 4.2, is M5) and retire
   the 2 known findings with them; map the 17 residual CSS rules and 12 inline styles on the 12
-  slides listed in `docs/M1-STATUS.md`, or decide they stay under `ext`.
+  slides listed in `docs/archive/status/M1-STATUS.md`, or decide they stay under `ext`.
 - The 28 severity 2 findings, mostly `dia/stroke-grammar` (14) on raw svg diagrams and
   `rows/two-lines` (8).
 - Google Slides export (M6), the editor and the window API (M3), the judge loop and lease

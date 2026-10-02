@@ -15,7 +15,7 @@ specs create and remove (`decks/e2e-window`, `decks/e2e-editor`, `decks/e2e-undo
 `git status decks` is empty after the run. The evidence directory `.turboslide/m3-final/`
 (`check.log`, one Playwright log per spec, `vitest-window.json`, `lint-chrome-edit.log`, the capped
 `dev-server.log` at 17.6 KB) is git-ignored, as is the integrator's `.turboslide/m3/`; the eight
-editor screenshots are committed under `docs/m3-evidence/`; this file is the record.
+editor screenshots are committed under `docs/archive/status/m3-evidence/`; this file is the record.
 
 ## What shipped
 
@@ -319,7 +319,7 @@ React glue is the route's `useStudioOwner` over `createLiveAdapter`.
 
 ## Evidence
 
-`docs/m3-evidence/` holds eight JPEGs of `/edit/gt-brand` at 1440 by 900 on slide 53
+`docs/archive/status/m3-evidence/` holds eight JPEGs of `/edit/gt-brand` at 1440 by 900 on slide 53
 (`content-rule`), light and dark, taken by the integrator at 21:40 on the integrated tree:
 `edit-inspector-*` (Tab selected `paragraph · p1`; the ring, the chip, the Block section),
 `edit-source-*` (Cmd /, the drawer over the stage column), `edit-palette-*` (Cmd K, 157 entries)

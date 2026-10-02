@@ -1,6 +1,6 @@
 # The verifier's drive of the final preview
 
-Preview `turboslide-8hol2vfyy` (the tree of the editor depth commit), `node scripts/editor-depth-drive.mjs` at 2026-09-11 21:13 PDT (2026-09-12 04:13 UTC), stopped by the verifier after the tenth row because every row after the text insert could only time out on the broken deck (docs/EDITOR-DEPTH-STATUS.md section 9). The rows as the script wrote them:
+Preview `turboslide-8hol2vfyy` (the tree of the editor depth commit), `node docs/archive/status/editor-depth-drive.mjs` at 2026-09-11 21:13 PDT (2026-09-12 04:13 UTC), stopped by the verifier after the tenth row because every row after the text insert could only time out on the broken deck (docs/archive/status/EDITOR-DEPTH-STATUS.md section 9). The rows as the script wrote them:
 
 | Step                                                           | Result | Numbers                                                                                                       |
 | -------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |

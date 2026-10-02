@@ -218,7 +218,7 @@ FOCUS.md 6.2's rule as `docs/PEOPLE.md` 6.2 states it since the comments hotfix 
 - Peer to peer (5d): section 1.
 - The store on Cloudflare R2 and the app on Workers: three parts do not run there today (Chromium work, the native effects addon, the Blob store), and the egress line is $8 a month (`research-costs-actual.md` sections 3 and 4).
 - `docs/SYNC.md` 5.2's P1 items that the redis tier makes moot on that tier and that stay as the blob tier's: the lost claim without a discard (the blob path's writer is the checkpointer now), the idle stream closed after 5 minutes (still wanted on every tier; the round after), `flags.json` on the store (the flags live in Redis on this tier). R6 annotates the table.
-- The command frame over the channel replacing the agent session poll (`docs/sessions-polling.md` 3.4): it needs this channel and is the round after's.
+- The command frame over the channel replacing the agent session poll (`docs/archive/status/sessions-polling.md` 3.4): it needs this channel and is the round after's.
 - Google: `linkSocial` from the Profile dialog, the Google picture as an avatar source, a fixed preview alias for a registered redirect URI, the `hd` restriction, passkeys (`design-google-login.md` section 9).
 - Observability event sampling and the personal project's git deployments (`research-costs-actual.md` cuts 4 and 6): Kevin's decisions, not code of this round.
 - The viewer's live pointer publication and a per deck opt out of pointers: Google's rule is applied as written; a seller asking for more is a product question.

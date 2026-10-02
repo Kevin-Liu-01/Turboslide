@@ -4,7 +4,7 @@ The binding specification of the focus round, written 2026-09-15 by the round's 
 
 Every audit drove production through the product's own controls with headless Chromium at 1440 by 900 at human speed, on scratch decks created from `/new` and trashed and deleted forever afterwards; each audit's method section records this. A row in an audit is "works", "broken", "flaky" (it passed on a later try or on another deck) or "not driven" with the reason. This document keeps those four words and no others for a row's state. It reports what happened; a step nobody drove is not driven, never passed.
 
-The matrix of section 6 is data: `docs/gslides-parity/focus/core-matrix.json`. This document is rendered from that file and from the prose in `docs/gslides-parity/focus/focus-body.md` by `docs/gslides-parity/focus/render-focus.mjs` (`node docs/gslides-parity/focus/render-focus.mjs`, then prettier); the table of section 6.4, every count of section 6.3, the held list of section 7 and the by feature reading of rule 4 are rendered, never typed. The matrix holds <!-- render:rows --> rows.
+The matrix of section 6 is data: `docs/gslides-parity/focus/core-matrix.json`. This document is rendered from that file and from the prose in `docs/gslides-parity/focus/focus-body.md` by `docs/gslides-parity/focus/render-focus.mjs` (`node docs/gslides-parity/focus/render-focus.mjs`, then prettier); the table of section 6.4 (written to `docs/gslides-parity/focus/rows.md` since Round 1), every count of section 6.3, the held list of section 7 and the by feature reading of rule 4 are rendered, never typed. The matrix holds <!-- render:rows --> rows.
 
 ## 1. Kevin's directive and the rule it sets
 
@@ -251,7 +251,7 @@ Every not driven core row is driven before the ship by the person named, on the 
 
 ## 6. The test matrix
 
-Every core interaction is a row with a stable id, `area.feature.interaction`, and a `feature` field. The matrix is the file `docs/gslides-parity/focus/core-matrix.json`; the table of 6.4 is rendered from it and the file is the source when the two differ. Every row records what production did on 2026-09-15 ("Today on production") and names the audit row or the file that saw it; a row the audits measured carries its time bound in the interaction text, so the pass criterion is fixed before the run and not chosen after it (5 s for a picture to land, 5 s for a listing, 5 s three of three for collaboration, 20 s for a comment, 30 s for a download).
+Every core interaction is a row with a stable id, `area.feature.interaction`, and a `feature` field. The matrix is the file `docs/gslides-parity/focus/core-matrix.json`; the table of 6.4 (`docs/gslides-parity/focus/rows.md`) is rendered from it and the file is the source when the two differ. Every row records what production did on 2026-09-15 ("Today on production") and names the audit row or the file that saw it; a row the audits measured carries its time bound in the interaction text, so the pass criterion is fixed before the run and not chosen after it (5 s for a picture to land, 5 s for a listing, 5 s three of three for collaboration, 20 s for a comment, 30 s for a download).
 
 ### 6.1 What drives a row
 

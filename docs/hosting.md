@@ -3,7 +3,7 @@ The move of the hosted studio to the General Translation team is planned in [doc
 # Hosting the studio
 
 How a deployed studio finds its decks, keeps edits and serves the asset twins, written for the
-hosting round of 2026-09-11 (`docs/hosting-diagnosis.md` is the measured cause: the Vercel function
+hosting round of 2026-09-11 (`docs/archive/status/hosting-diagnosis.md` is the measured cause: the Vercel function
 has no checkout above it, no `decks/` folder and a read-only filesystem apart from `/tmp`, so
 `repoRoot()` fell back to the working directory and the root route's create-from-template threw).
 Kevin's directive, verbatim: "https://studio-delta-six-40.vercel.app/ shows something went wrong".
@@ -311,7 +311,7 @@ them from disk (an export). Round four adds the thumbnail cache under the same p
 
 ### Costs
 
-Vercel Blob prices (read on 2026-09-11, `docs/hosting-diagnosis.md` section 7): `head` and a URL
+Vercel Blob prices (read on 2026-09-11, `docs/archive/status/hosting-diagnosis.md` section 7): `head` and a URL
 read on a cache miss are simple operations, `put`, `list` and `copy` are advanced. A page view of
 the editor is a handful of `head` calls; a write is one `list` (only when the manifest moved), one
 `put` per changed slide, one for the version record and one for the manifest; a deck created from
@@ -453,7 +453,7 @@ function instance committed r12 of a deck, the next write landed on another inst
 `head(deck.json)` saw the new etag while its listing still carried r11's, so the mirror's
 listing-based pull kept the stale copy, the conditional commit answered "Precondition failed", and
 the editor showed `decks/<id>/deck.json changed in the Blob store since it was read` and rebased
-onto r11 (`docs/editor-depth-evidence/README.md`; every second write of the drive failed this way).
+onto r11 (`docs/archive/status/editor-depth-evidence/README.md`; every second write of the drive failed this way).
 `packages/store/src/blob-store.ts` `pull()` now reads `deck.json` straight from `get`, walks the
 version records above the mirror's last one by number until the store has none or the record reaches
 the document's revision, and fetches the slides those records touched whatever the listing says;
@@ -472,10 +472,10 @@ and exits 1 on a failure. Ten rows since the Google Slides parity round (six bef
 development token in the Trusted Sources header when `VERCEL_OIDC_TOKEN` is in the environment
 (`vercel env pull <file>`, never printed or committed); `vercel curl` does the same for one request,
 and so do `turboslide deck push` and `deck pull` (docs/deck-transfer.md) and the editor depth
-round's drive, `node scripts/editor-depth-drive.mjs <url>` (docs/editor-depth-evidence/README.md).
+round's drive, `node docs/archive/status/editor-depth-drive.mjs <url>` (docs/archive/status/editor-depth-evidence/README.md).
 
 Measured on 2026-09-11 against the preview deploys of the `turboslide` project (the full table with
-the files is `docs/hosted-evidence/README.md`):
+the files is `docs/archive/status/hosted-evidence/README.md`):
 
 - The smoke table: 6 of 6 on the last four previews; `/` 568 ms warm and 1.6 to 3.9 s on a cold
   instance (the seed's 183 documents in about 300 ms, the 24 package files in about 310 ms, the
@@ -642,7 +642,7 @@ Every route below runs on the file, tmp and Blob backends through the same serve
   are the pieces to wire.
 - `/openapi.json`, `/llms.txt` and `/llms-full.txt` still read `packages/agent/generated` under
   `repoRoot()`, which is the overlay when hosted, so they serve the placeholder stubs
-  (`docs/hosting-diagnosis.md` section 2; production answered a 236 byte `/openapi.json` on
+  (`docs/archive/status/hosting-diagnosis.md` section 2; production answered a 236 byte `/openapi.json` on
   2026-09-13). Bundling the generated files as imports fixes it; round four does so (section 12.5).
 - Renders and exports inside the function are `docs/hosting-chromium.md` (section 3b has what the
   previews taught); the render worker's local mode reads the overlay through `TURBOSLIDE_DECKS_DIR`.

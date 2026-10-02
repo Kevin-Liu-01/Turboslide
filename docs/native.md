@@ -289,15 +289,19 @@ item 6) puts the crate into the deployment and the browser without a cargo step 
   bytes, `turboslide_native.d.ts` and `turboslide_native_bg.wasm.d.ts`) and the Linux x64 glibc
   addon (`packages/native/npm/linux-x64-gnu/turboslide-native.linux-x64-gnu.node`, about 770 KB).
   Every other platform's addon stays untracked; a checkout builds its own.
-- A GitHub Actions job (`.github/workflows/native.yml`) builds the addon against a glibc floor of
-  2.28 (`cargo zigbuild --target x86_64-unknown-linux-gnu.2.28`, or a `manylinux_2_28` container)
-  with `dtolnay/rust-toolchain`, the `wasm32-unknown-unknown` target and `wasm-bindgen-cli`
-  0.2.128 pinned (the crate's `wasm-bindgen` is `=0.2.128`, its `napi` `=3.12.3`), because the
-  Vercel Node 24 runtime's operating system and glibc are named on no page the round's judges
-  read, and an addon that fails to load would fall back to TypeScript silently. A committed binary
-  changes only in a commit that also carries the job's rebuild record: the run id and the sha256
-  per file in `packages/native/BUILD-RECORD.json`. `pnpm check` step 29 rebuilds and diffs when
-  cargo is present (the wasm module is rebuildable on a Mac; the Linux addon only in CI).
+- The plan built the addon in a GitHub Actions job against a glibc floor of 2.28
+  (`cargo zigbuild --target x86_64-unknown-linux-gnu.2.28`, or a `manylinux_2_28` container) with
+  `dtolnay/rust-toolchain`, the `wasm32-unknown-unknown` target and `wasm-bindgen-cli` 0.2.128
+  pinned (the crate's `wasm-bindgen` is `=0.2.128`, its `napi` `=3.12.3`), because the Vercel
+  Node 24 runtime's operating system and glibc are named on no page the round's judges read, and
+  an addon that fails to load would fall back to TypeScript silently. That job was never
+  committed: the repository has no `.github/` folder, and `docs/archive/status/M1-STATUS.md` 198
+  records why GitHub refused the first workflow push. On 2026-10-02 the wasm module is the one
+  committed output, built locally (`builtBy` "local" in `packages/native/BUILD-RECORD.json`), and
+  the Linux addon is not tracked. A committed binary changes only in a commit that also carries
+  its rebuild record: the run id where one exists and the sha256 per file in
+  `packages/native/BUILD-RECORD.json`. `pnpm check` step 29 rebuilds and diffs when cargo is
+  present (the wasm module is rebuildable on a Mac; the Linux addon needs a Linux build).
 - `.gitignore` (the integrator, day 0): `crates/*/target` and `*.node` stay, the one addon file is
   negated and the wasm folder is tracked. `packages/native/npm/linux-x64-gnu/.gitignore` still
   carries its own `*.node` line on 2026-09-14, which outranks the root's negation; B4 drops it in
@@ -331,8 +335,8 @@ item 6) puts the crate into the deployment and the browser without a cargo step 
   `crates/**`; without that `pnpm lint` parses the wasm-bindgen output on a machine that built it,
   and the glue is tracked now.
 - The release CI matrix that builds the five other declared targets does not exist yet (SPEC 10:
-  "CI builds the native matrix only on tagged releases"); `native.yml` builds the Linux x64 glibc
-  addon and the wasm module alone.
+  "CI builds the native matrix only on tagged releases"). No workflow is committed at all: the
+  Linux x64 glibc addon is not tracked, and the wasm module is built locally.
 - Wiring `dssim` into `ExportReport.verify` as the text gate, with calibrated thresholds, is the
   native PPTX builder's change; the API is `dssim(cropRgba(ref, box), cropRgba(got, box))`.
 - The parity test reads the twins as inputs until the source photographs are restored or pointed at

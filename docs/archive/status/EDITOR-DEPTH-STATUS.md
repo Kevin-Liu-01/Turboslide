@@ -21,7 +21,7 @@ acceptance run on the tree this commit carries with its numbers, the tooltip aud
 result, the transfer commands, the state of the bearer token, the blockers and what Kevin must do.
 The references are `docs/freeform.md` (the document, the renderer, the linter and the exporter),
 `docs/deck-transfer.md` (the bundle, the CLI commands and the routes), `docs/hosting.md` (the store
-and the token decision) and `docs/editor-depth-evidence/README.md` (the preview drives with their
+and the token decision) and `docs/archive/status/editor-depth-evidence/README.md` (the preview drives with their
 files). Every number below comes from this machine (Node 24.13.0, pnpm 11.15.1, Chrome for Testing
 147.0.7727.15 on ANGLE Metal, Apple M5 Max, the Prototemplate checkout present) or from a preview
 deployment of the `turboslide` Vercel project, and the sentence says which.
@@ -142,7 +142,7 @@ Taken as the founder's direction over the specification's earlier rule and recor
   replays the version records through `applyWrite` when the CDN body lags, discards a mirror
   tainted by a failed commit and refuses an unprovable base (`StaleMirrorError`); `blob-fake.ts`
   gained `holdList`, `holdGet` and md5 versions; two regression tests. The cause and the live
-  proof are in `docs/hosting.md` section 6 and `docs/editor-depth-evidence/README.md`.
+  proof are in `docs/hosting.md` section 6 and `docs/archive/status/editor-depth-evidence/README.md`.
 - `apps/studio/src/server/actions.ts`: `deckDispatcher` is async and writes through the hosted
   store, opened before the folder check; the four call sites await it.
 - `apps/studio/src/server/lint.ts` and `render.ts`: both open the deck through `openDeckStore`
@@ -166,7 +166,7 @@ Taken as the founder's direction over the specification's earlier rule and recor
   count, the actions paragraph, the freeform deviation, the bundle contract, the acceptance
   section), README.md (the layout, the pages, the CLI list, the hosting paragraph, the export),
   `docs/README.md`, `docs/hosting.md`, `docs/deck-transfer.md`, `docs/freeform.md` section 8,
-  `scripts/editor-depth-drive.mjs` (the preview drive, section 9).
+  `docs/archive/status/editor-depth-drive.mjs` (the preview drive, section 9).
 
 ## 4. `pnpm check`
 
@@ -194,7 +194,7 @@ archiving the tree during the first run:
 | 19 format                    | pass              | 6.5 s                                                                                                                                                                                                                                                          |
 
 The editor, window API and deck transfer e2e specs are the integrator's and the reviewer's runs
-(`docs/editor-depth-evidence/README.md`): 8 of 8 in 28.8 s against the dev server for the first
+(`docs/archive/status/editor-depth-evidence/README.md`): 8 of 8 in 28.8 s against the dev server for the first
 two, and `deck-transfer.spec.ts` plus `editor.spec.ts` 10 of 10 in 36.6 s against a `vite preview`
 of the built studio after the hydration wait.
 
@@ -203,7 +203,7 @@ of the built studio after the hydration wait.
 `node scripts/tooltip-audit.mjs --base <origin>` walks the built client's pages (the editor on the
 GT deck with editing on, the viewer, the deck list, and a scratch deck's freeform slide with a
 block selected) and their menus (Insert, Export, the palette, a slide row's menu, the inspector)
-and lists every interactive element without the Tooltip primitive. The verifier's run against a `vite preview` of the built studio on this checkout (port 4461, 2026-09-11 21:13 PDT, after the chain's step 6 built it): 0 missing, 610 title only, 0 pages not walked, exit 0; per page, /edit/gt-brand?edit=1 0 missing and 510 title only, /deck/gt-brand 0 and 85, /decks 0 and 12, the scratch deck's freeform slide 0 and 3. The title-only controls are the sidebar's slide rows (`ListRow.tsx` `title={item.title}`), the /decks row links and buttons, the two Connect card copy buttons and the report card's download and close buttons; they fail only under `--strict`. The review fix round's run gave the same count, and `docs/editor-depth-evidence/tooltip-audit.txt` is this run's output.
+and lists every interactive element without the Tooltip primitive. The verifier's run against a `vite preview` of the built studio on this checkout (port 4461, 2026-09-11 21:13 PDT, after the chain's step 6 built it): 0 missing, 610 title only, 0 pages not walked, exit 0; per page, /edit/gt-brand?edit=1 0 missing and 510 title only, /deck/gt-brand 0 and 85, /decks 0 and 12, the scratch deck's freeform slide 0 and 3. The title-only controls are the sidebar's slide rows (`ListRow.tsx` `title={item.title}`), the /decks row links and buttons, the two Connect card copy buttons and the report card's download and close buttons; they fail only under `--strict`. The review fix round's run gave the same count, and `docs/archive/status/editor-depth-evidence/tooltip-audit.txt` is this run's output.
 
 ## 6. The export result
 
@@ -222,7 +222,7 @@ PPTX stays the one export target (`docs/pptx.md`), and the primitives joined the
   `ellipse` with its fill and stroke, a line or arrow as a native line with triangle heads, a rule
   as a line, a text primitive as a text box (`docs/freeform.md` section 7). The icon block stays a
   raster like every glyph (SPEC 8.6).
-- The checked files and reports are in `docs/editor-depth-evidence/`. The production export after
+- The checked files and reports are in `docs/archive/status/editor-depth-evidence/`. The production export after
   the push is the verifier's report (section 12).
 
 ## 7. The bundle and connect commands
@@ -263,7 +263,7 @@ Protection remains a project setting Kevin can turn on.
 
 ## 9. The preview lines
 
-Eleven previews were deployed in the round; `docs/editor-depth-evidence/README.md` has the
+Eleven previews were deployed in the round; `docs/archive/status/editor-depth-evidence/README.md` has the
 per-preview table with what each tree carried and `smoke-table.md` and `drive.json` the drive of
 preview 9 (`turboslide-owb42s633`). The verifier deployed the final tree as
 `turboslide-8hol2vfyy` (`vercel deploy --yes --archive=tgz` from the linked repository root,
@@ -278,8 +278,8 @@ preview 9 (`turboslide-owb42s633`). The verifier deployed the final tree as
 | `/decks/gt-brand/assets/cover-fumadocs.png` | 200    | 229  | pass   | image/png, 335,538 B                                    |
 | `/api/agent`                                | 401    | 110  | pass   | the bearer rule                                         |
 
-The verifier then ran `node scripts/editor-depth-drive.mjs` against that preview (21:13 PDT;
-`docs/editor-depth-evidence/drive-final-preview.md` has the rows, `17-` and `18-` the screenshots):
+The verifier then ran `node docs/archive/status/editor-depth-drive.mjs` against that preview (21:13 PDT;
+`docs/archive/status/editor-depth-evidence/drive-final-preview.md` has the rows, `17-` and `18-` the screenshots):
 5 of 19 rows passed and the run was stopped after the tenth row. The head read Turboslide with 85
 thumbnail cards (settled in 4.1 s on a cold instance); the template deck `editor-depth-09120413`
 was created in 4.7 s with 85 slides; the editor opened `content-rule` at r0; the box insert landed
@@ -406,7 +406,7 @@ used `grep` on the saved body and counted zero because this machine's `grep` tre
 long UTF-8 lines as binary; a byte count with Python found the marker at once.)
 
 `node scripts/hosted-smoke.mjs https://turboslide.vercel.app` at 21:28 PDT
-(`docs/editor-depth-evidence/smoke-production.md`):
+(`docs/archive/status/editor-depth-evidence/smoke-production.md`):
 
 | Path                                        | Status | ms   | Result | Detail                                                    |
 | ------------------------------------------- | ------ | ---- | ------ | --------------------------------------------------------- |

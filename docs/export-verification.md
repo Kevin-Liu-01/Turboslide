@@ -158,7 +158,7 @@ numbers (geometry and first baseline within 1 px, the residual is the substitute
 ## The width gate and native export of every block type (M5)
 
 The M2 native export left two of 79 gated text blocks outside the 3 px width budget (`avoid#p1`
-dw +4, `surfaces#rows` dw -6; `docs/M2-STATUS.md`) and, listed but not gated, five more on slides
+dw +4, `surfaces#rows` dw -6; `docs/archive/status/M2-STATUS.md`) and, listed but not gated, five more on slides
 with raster blocks. The M5 baseline run of the M3 tree in the render worker image, both themes,
 measured 20 blocks out of budget over 170 pages; each had a cause in the file, not in the budget,
 and `packages/export/src/calibration/calibration.json` records every measurement under

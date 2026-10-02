@@ -5,7 +5,7 @@ Vercel project for the editor depth round (Kevin's directives: the sidebar head 
 with thumbnails as the default density; drag to move and reorder, a clearer inspector with icons
 and tooltips everywhere, reusable primitives with color and typography controls; decks created and
 edited in the deployment, the GT template presentation visible; a way to move a deck between a
-checkout and the deployment). The drive is `node scripts/editor-depth-drive.mjs <preview>` with the
+checkout and the deployment). The drive is `node docs/archive/status/editor-depth-drive.mjs <preview>` with the
 project's development token in the Trusted Sources header (docs/hosting.md section 7); one
 Playwright page at 1440 by 900; every row below comes from its own clock or the route's answer.
 
@@ -45,7 +45,7 @@ for the server revision, and every read of the deck by the function then failed 
 403 that this machine could not reproduce against the same blobs with the same token, before it
 cleared on the preview and on production
 (`drive-final-preview.md`, `17-final-preview-viewer-turboslide-thumbs-1440x900.jpg`,
-`18-final-preview-text-insert-failed-1440x900.jpg`; `docs/EDITOR-DEPTH-STATUS.md` sections 9 and
+`18-final-preview-text-insert-failed-1440x900.jpg`; `docs/archive/status/EDITOR-DEPTH-STATUS.md` sections 9 and
 10 have the store's state and the second defect found on the way, the instance-local
 `deck.create` over HTTP). `tooltip-audit.txt` is the verifier's rerun on the built client: 0
 missing, 610 title only.

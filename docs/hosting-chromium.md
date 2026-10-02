@@ -1,7 +1,7 @@
 # Hosting Chromium: renders and exports inside the function
 
 How a render or a PPTX export runs inside a Vercel function, measured on 2026-09-11 for the hosting
-round (`docs/hosting-diagnosis.md` sections 4 and 5 name the two facts this closes: the function
+round (`docs/archive/status/hosting-diagnosis.md` sections 4 and 5 name the two facts this closes: the function
 has no browser and the worker spawned a CLI binary the bundle does not carry). Two recorded
 deviations from the specification come with it, both stated in the code and in every record they
 touch: the browser is `chrome-headless-shell`, not Chrome for Testing (SPEC 5.3), and inside the
@@ -120,7 +120,7 @@ for every combination the slide's text uses). No fallback registration is needed
 own text.
 
 What the host's fonts do decide is the fallback for glyphs Inter lacks: the language specimen
-(`multilingual#lang`, `docs/M4-M5-STATUS.md`) renders through fallback faces. Under `VERCEL` the
+(`multilingual#lang`, `docs/archive/status/M4-M5-STATUS.md`) renders through fallback faces. Under `VERCEL` the
 package's `fonts.conf` and Open Sans (Latin, Greek, Cyrillic) are the whole fallback set; other
 scripts render as missing glyph boxes there. Adding faces means a `fonts` directory at one of the
 four paths above, which is the hosting store builder's bundle decision, not a code change here.
@@ -130,7 +130,7 @@ four paths above, which is the hosting store builder's bundle decision, not a co
 `apps/render-worker/src/cli.ts` `execMode(env)`: `TURBOSLIDE_WORKER_EXEC=spawn|inprocess` wins;
 `TURBOSLIDE_BIN` means spawn; inside a function the default is `inprocess`; otherwise `inprocess`
 only when `import.meta.resolve('@turboslide/cli/package.json')` fails or names a missing file,
-which is the traced bundle's case (`docs/hosting-diagnosis.md` section 4). `runTurboslideInProcess`
+which is the traced bundle's case (`docs/archive/status/hosting-diagnosis.md` section 4). `runTurboslideInProcess`
 calls `runCli(args, { cwd, env, streams, stdin })` from `@turboslide/cli/cli`, the pure entry the
 CLI's tests drive, with stdout and stderr captured into the same `CliRun` the spawn produces
 (`code`, `stdout`, `stderr`, `ms`, `args`, plus `exec`). Every job (render, sheet, export, verify,
@@ -142,7 +142,7 @@ spawn only and the platform's duration limit bounds the function.
 This is the deviation from SPEC 3.3 item 7, which keeps Chromium out of the web app's function
 because a browser crash would take the request with it and because the worker image carries
 LibreOffice. Inside one Vercel function there is no second process to hand the work to, so the
-choice is this or a container service (`docs/hosting-diagnosis.md` section 4, unverified). The
+choice is this or a container service (`docs/archive/status/hosting-diagnosis.md` section 4, unverified). The
 Docker worker path is unchanged: `TURBOSLIDE_WORKER_URL` still selects the HTTP client and the
 image still spawns the binary.
 
@@ -214,7 +214,7 @@ Google`, so the exact build is 147.0.7727.0, the same as the worker image's.
   The whole deck in native mode then ran in 127.4 s (light, 23,689,436 bytes, 22.59 MiB) and
   125.4 s (dark, 24,847,042 bytes, 23.70 MiB), 85 pages each, `passed: true`, geometry in
   bounds, 242 native text and 70 raster blocks per theme, both stored on Blob and valid under
-  `turboslide export check` (`docs/hosted-evidence/README.md` has the rows and the files).
+  `turboslide export check` (`docs/archive/status/hosted-evidence/README.md` has the rows and the files).
 
 ## 4. The synchronous export
 
@@ -263,7 +263,7 @@ verifyNote, log }`, the full report and the file list without the bytes.
 - Errors: 404 for a missing deck (the job's `RangeError` message), 502 with the job's message when
   the export failed, 400 for an invalid body as before.
 - Inside a function (`VERCEL` or `AWS_LAMBDA_FUNCTION_NAME`) a body over 4,718,592 bytes
-  (`VERCEL_BODY_CAP`, the 4.5 MB of `docs/hosting-diagnosis.md` section 4) cannot leave, so the
+  (`VERCEL_BODY_CAP`, the 4.5 MB of `docs/archive/status/hosting-diagnosis.md` section 4) cannot leave, so the
   route answers 413 with `code: response_too_large` and the JSON body, and the caller exports one
   theme or a slide subset, or reads the stored copy the hosting store builder writes. The measured
   full deck is 28 to 29 MB per theme in native mode, so the whole deck never fits; the three-slide
@@ -288,7 +288,7 @@ skipped` with that line, `passed: true`, `gt-brand-light.pptx` 62,318 bytes.
 
 Time budget: `SYNC_EXPORT_TIMEOUT_MS` is 780 s, under the Pro maximum duration of 800 s with room
 to answer; the hosting store builder sets `functionRules` for `/api/export/**`, `/api/render/**`
-and `/_serverFn/**` at `maxDuration: 800` and `memory: 4096` (`docs/hosting-diagnosis.md` section
+and `/_serverFn/**` at `maxDuration: 800` and `memory: 4096` (`docs/archive/status/hosting-diagnosis.md` section
 6; the package's README wants 1600 MB for Chromium alone). The base function keeps the defaults.
 
 The editor's `export.run` in a checkout (`apps/studio/src/server/download.ts` `startExport` and

@@ -1,6 +1,6 @@
 # docs/gslides-parity
 
-The evidence of every Turboslide round. Each round has one folder with its notes, its run ledgers and the drivers its agents wrote. No program reads a file here. The folder is out of every deployment and out of prettier.
+The evidence of every Turboslide round. Each round has one folder with its notes, its run ledgers and the drivers its agents wrote. Seven programs still read text files here: the gate reads `focus/core-matrix.json`, the guard reads the newest `focus/ship-*.json`, and five tools read the manual checklist, two audit outputs, the performance runs and the logo coverage list (`next/audit-repo.md` 146 to 154). Rule 10 below forbids a new reader. The folder is out of every deployment and out of prettier.
 
 ## The pictures of the closed rounds
 
@@ -38,7 +38,7 @@ These rules are `docs/NEXT.md` 5.3.
 4. A second pass links the first pass's picture. It never copies it.
 5. After a ship the integrator prunes the round's pictures that no note names.
 6. Each pass writes one verification file. No matrix is copied into prose.
-7. No folder holds more than 1,000 entries. A shared ledger folder takes one subfolder per round, for example `focus/verification/<round>/`.
+7. No folder holds more than 1,000 entries. A shared ledger folder takes one subfolder per round, for example `focus/verification/<round>/`. Pictures stay in the round's own folder, so `focus/` holds none.
 8. A tool that a later round runs moves to `scripts/` at the ship. The evidence keeps one-off drivers.
 9. The folder stays out of every deployment (`.vercelignore`, `.dockerignore`) and out of prettier (`.prettierignore`).
 10. No new program opens a path under this folder. A reviewer refuses a new reader.

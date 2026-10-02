@@ -596,7 +596,7 @@ The cost line: $0 on Workers Free if an SSR invocation stays under 10 ms of CPU,
 - The `enam` placement hint and the 10 s cadence: both are Worker variables in stage 1 and switches Kevin turns (section 8 questions 7 and 8), not builds.
 - The WebSocket on Vercel Functions, a CRDT and peer to peer: as `docs/REALTIME.md` section 6.
 - `docs/SYNC.md` 5.2's P1 items the `do` tier makes moot on that tier (the lost claim without a discard, `flags.json` on the store) and the idle stream closed after 5 minutes: R6 annotates the table; the flags of this tier live in `rt_flags`.
-- The command frame over the channel replacing the agent session poll (`docs/sessions-polling.md` 3.4): it needs this channel and is the round after's.
+- The command frame over the channel replacing the agent session poll (`docs/archive/status/sessions-polling.md` 3.4): it needs this channel and is the round after's.
 - Google: `linkSocial` from the Profile dialog, the Google picture as an avatar source, a fixed preview alias, the `hd` restriction, passkeys (`design-google-login.md` section 9); the `/privacy` and `/terms` pages Google calls "required for all external production apps" (W5 summary 9) and the brand verification that puts the name on the consent screen.
 - Observability event sampling and the personal project's git deployments (`research-costs-actual.md` cuts 4 and 6): Kevin's decisions.
 - A second Cloudflare account for the preview Worker, which would separate the Free day's caps from production's: an account creation (B 10 item 1).

@@ -1,12 +1,14 @@
-// The editor depth round's preview drive (docs/editor-depth-evidence/README.md). One Playwright page
-// at 1440 by 900 walks a deployed studio: the sidebar head and density, a deck created from the GT
+// The editor depth round's preview drive (docs/archive/status/editor-depth-evidence/README.md),
+// archived in Round 1 (docs/NEXT.md 5.4 item 1; it has no caller). One Playwright page at 1440 by
+// 900 walks a deployed studio: the sidebar head and density, a deck created from the GT
 // template, the Insert menu's primitives, the freeform switch, a drag with guides landing as one
 // mutation, a resize, an align, palette and custom colors with the lint mark, typography, a drag
 // across columns on a grammar slide, three tooltips, the synchronous PPTX export from the menu, the
 // bundle download and upload, and the present view. Every step is recorded as pass or fail with its
 // numbers in smoke-table.md and drive.json; the screenshots are small JPEGs.
 //
-//   VERCEL_OIDC_TOKEN=... node scripts/editor-depth-drive.mjs <url> [--out docs/editor-depth-evidence]
+//   VERCEL_OIDC_TOKEN=... node docs/archive/status/editor-depth-drive.mjs <url> \
+//     [--out docs/archive/status/editor-depth-evidence]
 //
 // A preview sits behind Vercel Authentication, so the page sends the project's development token in
 // the Trusted Sources header when VERCEL_OIDC_TOKEN is in the environment (docs/hosting.md section
@@ -22,7 +24,9 @@ const { chromium } = require('playwright-core');
 const argv = process.argv.slice(2);
 const BASE = (argv.find((a) => a.startsWith('http')) ?? 'http://localhost:4321').replace(/\/$/, '');
 const outIndex = argv.indexOf('--out');
-const OUT = resolve(outIndex >= 0 ? argv[outIndex + 1] : 'docs/editor-depth-evidence');
+const OUT = resolve(
+  outIndex >= 0 ? argv[outIndex + 1] : 'docs/archive/status/editor-depth-evidence',
+);
 mkdirSync(OUT, { recursive: true });
 
 const oidc = process.env.VERCEL_OIDC_TOKEN;

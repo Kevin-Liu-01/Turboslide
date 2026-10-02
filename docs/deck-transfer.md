@@ -107,7 +107,7 @@ made on another instance counts.
 ## 4. Hosted limits
 
 A Vercel function accepts a 4.5 MB request body and answers at most 4.5 MB
-(docs/hosting-diagnosis.md section 4), and the GT deck's bundle is 19.3 MB. Two paths around it:
+(docs/archive/status/hosting-diagnosis.md section 4), and the GT deck's bundle is 19.3 MB. Two paths around it:
 
 - Download: inside a function a bundle over the cap is stored on the Blob store under
   `bundles/<deckId>/<stamp>-<random>/<file>` (public, unguessable) and the route answers 302 to

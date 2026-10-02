@@ -1,6 +1,6 @@
 # Production smoke after the push
 
-`node scripts/hosted-smoke.mjs https://turboslide.vercel.app` at 2026-09-11 21:28 PDT, production deployment `turboslide-kgu6an9md` of commit 3f1be80ed8871e5cba24e718d704a353f7e6ae4c (docs/EDITOR-DEPTH-STATUS.md section 12):
+`node scripts/hosted-smoke.mjs https://turboslide.vercel.app` at 2026-09-11 21:28 PDT, production deployment `turboslide-kgu6an9md` of commit 3f1be80ed8871e5cba24e718d704a353f7e6ae4c (docs/archive/status/EDITOR-DEPTH-STATUS.md section 12):
 
 ```
 path                                       status  ms     result  detail

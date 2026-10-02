@@ -857,8 +857,9 @@ describe('the server transforms before it places, on the blob tier too (the sync
       post('client-id').post,
     );
     expect(rows).toEqual([{ mutation: splice(0, 0, 'pa1'), insertTie: 'left' }]);
+    // a row of the POST's own making keeps server order and is marked, so the run rule passes it by
     expect(landedOwn([splice(0, 0, 'x')])).toEqual([
-      { mutation: splice(0, 0, 'x'), insertTie: 'right' },
+      { mutation: splice(0, 0, 'x'), insertTie: 'right', own: true },
     ]);
     expect(transformEntry([splice(0, 0, 'g')], rows)).toEqual([splice(0, 0, 'g')]);
     expect(transformEntry([splice(0, 0, 'g')], landedOwn([splice(0, 0, 'pa1')]))).toEqual([

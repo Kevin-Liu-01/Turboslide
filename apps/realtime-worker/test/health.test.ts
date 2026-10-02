@@ -1,7 +1,12 @@
 import { SELF, env } from 'cloudflare:test';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { dropFlagCache } from '../src/control.ts';
+import {
+  CALLBACKS_FAILING_TTL_MS,
+  callbacksStateOf,
+  dropFlagCache,
+  noteCallbacks,
+} from '../src/control.ts';
 
 // The router's unauthenticated surface (docs/CLOUDFLARE.md 3.6.2): GET /health answers the health
 // body with the flag the control table holds, OPTIONS answers CORS for the ticket POSTs, a bearer
@@ -13,6 +18,7 @@ describe('the realtime worker router', () => {
     await env.ACCOUNTS.prepare(
       "INSERT OR REPLACE INTO rt_flags (k, v) VALUES ('realtime', 'on')",
     ).run();
+    await env.ACCOUNTS.prepare("DELETE FROM rt_flags WHERE k = 'callbacks'").run();
     dropFlagCache();
   });
 
@@ -25,7 +31,31 @@ describe('the realtime worker router', () => {
       commit: '',
       realtime: 'on',
       appOrigin: env.TURBOSLIDE_APP_ORIGIN,
+      callbacks: 'ok',
     });
+  });
+
+  it('answers callbacks failing while an object stamped its app calls failing in the last two minutes (3.8)', async () => {
+    const read = async (): Promise<string> => {
+      dropFlagCache();
+      return (
+        (await (await SELF.fetch('https://rooms.test/health')).json()) as { callbacks: string }
+      ).callbacks;
+    };
+    await noteCallbacks(env.ACCOUNTS, 'failing', Date.now(), 302);
+    expect(await read()).toBe('failing');
+    // the realtime row stands: the hand off is the function's reading of the two together
+    expect(
+      ((await (await SELF.fetch('https://rooms.test/health')).json()) as { realtime: string })
+        .realtime,
+    ).toBe('on');
+    await noteCallbacks(env.ACCOUNTS, 'ok', Date.now());
+    expect(await read()).toBe('ok');
+    // a stamp older than the TTL holds nothing, so an instance tries the Worker again
+    await noteCallbacks(env.ACCOUNTS, 'failing', Date.now() - CALLBACKS_FAILING_TTL_MS - 1, 401);
+    expect(await read()).toBe('ok');
+    expect(callbacksStateOf('failing:x:1', Date.now())).toBe('ok');
+    expect(callbacksStateOf(null, Date.now())).toBe('ok');
   });
 
   it('reads unset when the realtime row is gone and off when it says so, through the 30 s cache drop', async () => {

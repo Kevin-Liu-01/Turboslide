@@ -151,6 +151,32 @@ describe('doChannel', () => {
     expect(await channel.flag('presence')).toBe(true);
   });
 
+  it('reads the flag off while the objects cannot reach the app, and on again when they can (3.8)', async () => {
+    let callbacks: 'ok' | 'failing' | undefined = 'failing';
+    let t = 1_000_000;
+    const { fetchFn } = fakeFetch(() =>
+      json({
+        ok: true,
+        protocol: 1,
+        commit: 'abc',
+        realtime: 'on',
+        appOrigin: 'http://a',
+        ...(callbacks === undefined ? {} : { callbacks }),
+      }),
+    );
+    const channel = doChannel({ host: 'rooms.test', bearer: 'b', fetch: fetchFn, now: () => t });
+    expect(await channel.flag('realtime')).toBe(false);
+    expect((await channel.health())?.callbacks).toBe('failing');
+    callbacks = 'ok';
+    t += DO_FLAG_CACHE_MS;
+    expect(await channel.flag('realtime')).toBe(true);
+    // a Worker of the round before, whose health names no callbacks, reads on
+    callbacks = undefined;
+    t += DO_FLAG_CACHE_MS;
+    expect(await channel.flag('realtime')).toBe(true);
+    expect((await channel.health())?.callbacks).toBe('ok');
+  });
+
   it('throws a TypeError on what the object owns and has no bus', async () => {
     const channel = doChannel({
       host: 'rooms.test',

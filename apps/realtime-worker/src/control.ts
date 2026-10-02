@@ -9,28 +9,84 @@
 
 export type RealtimeFlag = 'on' | 'off' | 'unset';
 
+/**
+ * Whether the deck objects reach the app (3.8; VERIFICATION.md realtime pass 1 finding 7): an
+ * object whose seed or checkpoint calls fail for the deployment's reason (no answer, a redirect,
+ * 401, 403, a seed route's 5xx; deck-room.ts `AppCallError.reach`) twice in a row writes `rt_flags.callbacks` as `failing:<ms>:<status>`, and one
+ * whose call answers after that writes `ok:<ms>`. `/health` reads `failing` while the stamp is
+ * younger than CALLBACKS_FAILING_TTL_MS, and the function's flag reads off then, so its
+ * instance hands the tabs to the blob tier as for an unreachable Worker (3.8 item 4); the stamp
+ * running out lets the instance try the Worker again.
+ */
+export type CallbacksState = 'ok' | 'failing';
+
 /** How long the router trusts the flag it read (3.6.2: "30 s cache per isolate"). */
 export const FLAG_CACHE_MS = 30_000;
+/** How long a `failing` stamp of the callbacks row holds without a new one. */
+export const CALLBACKS_FAILING_TTL_MS = 120_000;
 
-const flagCache: { at: number; value: RealtimeFlag } = { at: -Infinity, value: 'unset' };
+const flagCache: { at: number; value: RealtimeFlag; callbacks: string | null } = {
+  at: -Infinity,
+  value: 'unset',
+  callbacks: null,
+};
 
-/** The `realtime` row of `rt_flags`, cached; `unset` when the table or the row is missing. */
-export async function realtimeFlag(db: D1Database, now = Date.now()): Promise<RealtimeFlag> {
-  if (now - flagCache.at < FLAG_CACHE_MS) return flagCache.value;
+async function readControlRows(db: D1Database, now: number): Promise<void> {
+  if (now - flagCache.at < FLAG_CACHE_MS) return;
   let value: RealtimeFlag = 'unset';
+  let callbacks: string | null = null;
   try {
-    const row = await db
-      .prepare('SELECT v FROM rt_flags WHERE k = ?')
-      .bind('realtime')
-      .first<{ v: string }>();
-    if (row?.v === 'on') value = 'on';
-    else if (row?.v === 'off') value = 'off';
+    const result = await db
+      .prepare("SELECT k, v FROM rt_flags WHERE k IN ('realtime', 'callbacks')")
+      .all<{ k: string; v: string }>();
+    for (const row of result.results) {
+      if (row.k === 'realtime') value = row.v === 'on' ? 'on' : row.v === 'off' ? 'off' : 'unset';
+      else if (row.k === 'callbacks') callbacks = row.v;
+    }
   } catch {
     value = 'unset';
   }
   flagCache.at = now;
   flagCache.value = value;
-  return value;
+  flagCache.callbacks = callbacks;
+}
+
+/** The `realtime` row of `rt_flags`, cached; `unset` when the table or the row is missing. */
+export async function realtimeFlag(db: D1Database, now = Date.now()): Promise<RealtimeFlag> {
+  await readControlRows(db, now);
+  return flagCache.value;
+}
+
+/** The callbacks state as `/health` answers it: `failing` while a failing stamp is younger than its TTL. */
+export function callbacksStateOf(value: string | null, now: number): CallbacksState {
+  if (value === null) return 'ok';
+  const [word, at] = value.split(':');
+  if (word !== 'failing') return 'ok';
+  const stamp = Number(at);
+  return Number.isFinite(stamp) && now - stamp < CALLBACKS_FAILING_TTL_MS ? 'failing' : 'ok';
+}
+
+/** Whether the deck objects reach the app, cached with the realtime flag. */
+export async function callbacksState(db: D1Database, now = Date.now()): Promise<CallbacksState> {
+  await readControlRows(db, now);
+  return callbacksStateOf(flagCache.callbacks, now);
+}
+
+/** The object's word on its app calls (`failing` with the status that failed, or `ok`); one upsert. */
+export async function noteCallbacks(
+  db: D1Database,
+  state: CallbacksState,
+  now: number,
+  status?: number,
+): Promise<void> {
+  const value = state === 'failing' ? `failing:${now}:${status ?? 0}` : `ok:${now}`;
+  await db
+    .prepare(
+      'INSERT INTO rt_flags (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v',
+    )
+    .bind('callbacks', value)
+    .run();
+  dropFlagCache();
 }
 
 /** Forgets the cached flag (a `POST /control/flags` on this isolate; the tests). */

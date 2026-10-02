@@ -330,12 +330,15 @@ describe('DeckRoom checkpoints', () => {
     await a.next(isEvent('hello'));
     const body = (await (await call(`/rooms/${deck}/counters?probe=drop&spin=20`)).json()) as {
       probe: { insertRowsWritten: number; dropRowsWritten: number; dropRowsRead: number };
-      spinMs: number;
+      spinBlocks: number;
+      spinIterations: number;
       sinceWake: { rowsWritten: number };
     };
     expect(body.probe.insertRowsWritten).toBe(1000);
     expect(typeof body.probe.dropRowsWritten).toBe('number');
-    expect(body.spinMs).toBe(20);
+    // counted by iterations, never by the clock, which does not move inside a synchronous loop
+    expect(body.spinBlocks).toBe(20);
+    expect(body.spinIterations).toBe(2_000_000);
     a.close();
   });
 

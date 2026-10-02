@@ -1,0 +1,83 @@
+{
+  "mode": "fallback",
+  "startedAt": "2026-10-02T14:45:55.690Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    72.4296875,
+    37.52001953125,
+    30.46142578125
+  ],
+  "readings": {
+    "health0": {
+      "at": 178,
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4499",
+      "callbacks": "ok"
+    },
+    "deck": {
+      "at": 8456,
+      "id": "r1fix-fallback-mur2skm5",
+      "copy": 200,
+      "link": 200
+    },
+    "exchange": {
+      "at": 9322,
+      "on": "http://127.0.0.1:4481",
+      "status": 303,
+      "location": "/edit/r1fix-fallback-mur2skm5"
+    },
+    "open1": {
+      "at": 9716,
+      "closedBeforeHello": {
+        "code": 4500,
+        "reason": "seed failed",
+        "at": 9716
+      },
+      "hello": false,
+      "refused": false
+    },
+    "open2": {
+      "at": 9999,
+      "closedBeforeHello": {
+        "code": 4500,
+        "reason": "seed failed",
+        "at": 9999
+      },
+      "hello": false,
+      "refused": false
+    },
+    "healthFailing": {
+      "at": 10121,
+      "callbacks": "failing",
+      "msAfterOpens": 122
+    },
+    "ticketTier http://127.0.0.1:4481": {
+      "at": 72198,
+      "tier": "blob",
+      "msToBlob": 62077
+    },
+    "ticketTier http://127.0.0.1:4471": {
+      "at": 73873,
+      "tier": "blob",
+      "msToBlob": 1675
+    },
+    "teardown": {
+      "at": 74162,
+      "deckId": "r1fix-fallback-mur2skm5",
+      "trash": 200,
+      "remove": 200,
+      "after": 404
+    }
+  },
+  "endedAt": "2026-10-02T14:47:10.071Z",
+  "loadAtEnd": [
+    78.3740234375,
+    49.7607421875,
+    35.8837890625
+  ]
+}

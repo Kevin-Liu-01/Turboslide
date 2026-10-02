@@ -1,0 +1,81 @@
+{
+  "mode": "revoke",
+  "startedAt": "2026-10-02T14:41:23.337Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    17.4609375,
+    29.8271484375,
+    27.61279296875
+  ],
+  "readings": {
+    "deck": {
+      "at": 435,
+      "id": "r1fix-revoke-mur2mntx",
+      "copy": 200,
+      "link": 200
+    },
+    "exchange": {
+      "at": 1042,
+      "on": "http://127.0.0.1:4481",
+      "status": 303,
+      "location": "/edit/r1fix-revoke-mur2mntx"
+    },
+    "viewerJoined": {
+      "at": 1095,
+      "role": "viewer",
+      "on": "http://127.0.0.1:4481"
+    },
+    "warmTicket": {
+      "at": 1100,
+      "status": 200
+    },
+    "restricted": {
+      "at": 1133,
+      "status": 200,
+      "through": "http://127.0.0.1:4471"
+    },
+    "viewer": {
+      "at": 21149,
+      "closed": null,
+      "closedMsAfterWrite": null,
+      "events": [
+        {
+          "kind": "reauth",
+          "at": 1144
+        },
+        {
+          "kind": "reauth-ticket",
+          "status": 404,
+          "ms": 5,
+          "at": 1149
+        },
+        {
+          "kind": "close",
+          "code": 1000,
+          "reason": "closed",
+          "at": 21163
+        }
+      ]
+    },
+    "viewerTicketAfter": {
+      "at": 21161,
+      "status": 404,
+      "error": "not_found"
+    },
+    "teardown": {
+      "at": 21320,
+      "deckId": "r1fix-revoke-mur2mntx",
+      "trash": 200,
+      "remove": 200,
+      "after": 404
+    }
+  },
+  "endedAt": "2026-10-02T14:41:44.658Z",
+  "loadAtEnd": [
+    15.58447265625,
+    28.5654296875,
+    27.20947265625
+  ]
+}

@@ -22,6 +22,7 @@ import {
 import type { TicketClaims } from '@turboslide/realtime/frames';
 
 import {
+  callbacksState,
   dropFlagCache,
   openDecks,
   readFlags,
@@ -29,6 +30,7 @@ import {
   workerCounters,
   writeFlags,
 } from './control.ts';
+import type { CallbacksState } from './control.ts';
 import { dbBatch, dbCountersAnswer, dbQuery } from './db.ts';
 import {
   ADDRESS_HEADER,
@@ -55,6 +57,8 @@ export type HealthBody = {
   commit: string;
   realtime: 'on' | 'off' | 'unset';
   appOrigin: string;
+  /** whether the deck objects reach `appOrigin` (control.ts `CallbacksState`; 3.8) */
+  callbacks: CallbacksState;
 };
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
@@ -130,6 +134,7 @@ async function health(env: Env): Promise<HealthBody> {
     commit: env.TURBOSLIDE_BUILD_COMMIT ?? '',
     realtime: await realtimeFlag(env.ACCOUNTS),
     appOrigin: env.TURBOSLIDE_APP_ORIGIN ?? '',
+    callbacks: await callbacksState(env.ACCOUNTS),
   };
 }
 
@@ -142,12 +147,18 @@ function roomStub(env: Env, deckId: string): DurableObjectStub<DeckRoom> {
     : env.DECK_ROOM.get(id);
 }
 
-/** The request as the object receives it: the original headers plus the router's stamps. */
-function forwarded(
+/**
+ * The request as the object receives it: the original headers plus the router's stamps, and the
+ * body read here in full (at most the ops cap or a bearer body), so no stream is left for the
+ * runtime to read after the object answered (VERIFICATION.md realtime pass 1 finding 11: the
+ * flush route, which reads no body, logged "Can't read from request stream after response has
+ * been sent" after each answer).
+ */
+async function forwarded(
   request: Request,
   stamps: Record<string, string | null>,
   realtime: 'on' | 'off' | 'unset',
-): Request {
+): Promise<Request> {
   const headers = new Headers(request.headers);
   headers.delete(CLAIMS_HEADER);
   headers.delete(JOIN_HEADER);
@@ -164,10 +175,12 @@ function forwarded(
   const origin = request.headers.get('origin');
   headers.set(ORIGIN_HEADER, origin ?? '');
   if (origin === null) headers.delete(ORIGIN_HEADER);
+  const body =
+    request.method === 'GET' || request.method === 'HEAD' ? null : await request.arrayBuffer();
   return new Request(request.url, {
     method: request.method,
     headers,
-    body: request.method === 'GET' || request.method === 'HEAD' ? null : request.body,
+    body: body === null || body.byteLength === 0 ? null : body,
   });
 }
 
@@ -213,7 +226,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
       const token = ticketOfProtocols(protocols);
       if (token === null) {
         // the fallback carrier (3.3): the object waits JOIN_WINDOW_MS for `{ t: 'join', ticket }`
-        return roomStub(env, deckId).fetch(forwarded(request, { [JOIN_HEADER]: '1' }, flag));
+        return roomStub(env, deckId).fetch(await forwarded(request, { [JOIN_HEADER]: '1' }, flag));
       }
       const verdict = await verifyClaims(token, env, deckId, request);
       if (!verdict.ok)
@@ -222,7 +235,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
           `ticket ${verdict.reason}`,
         );
       const response = await roomStub(env, deckId).fetch(
-        forwarded(request, { [CLAIMS_HEADER]: JSON.stringify(verdict.claims) }, flag),
+        await forwarded(request, { [CLAIMS_HEADER]: JSON.stringify(verdict.claims) }, flag),
       );
       // the answered subprotocol rides the 101 (3.3)
       if (
@@ -257,7 +270,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
         );
       const flag = await realtimeFlag(env.ACCOUNTS);
       const response = await roomStub(env, deckId).fetch(
-        forwarded(request, { [CLAIMS_HEADER]: JSON.stringify(verdict.claims) }, flag),
+        await forwarded(request, { [CLAIMS_HEADER]: JSON.stringify(verdict.claims) }, flag),
       );
       return withCors(response, request);
     }
@@ -266,7 +279,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
       if (!(await bearerOk(request, env))) return json({ error: 'bearer' }, 401);
       const flag = await realtimeFlag(env.ACCOUNTS);
       return roomStub(env, deckId).fetch(
-        forwarded(
+        await forwarded(
           request,
           {},
           tail === 'counters' || tail === 'roster' || tail === 'document' ? 'on' : flag,

@@ -9,6 +9,7 @@
 // may.
 import type { CommentOp as SchemaCommentOp } from '@turboslide/schema/comments';
 import type { Author, MarkMutation, Mutation, SpliceMutation } from '@turboslide/schema/mutations';
+import type { Side } from '@turboslide/schema/transform';
 
 import type { DropBus } from './bus.ts';
 
@@ -104,6 +105,34 @@ export type Entry = {
 
 /** What a writer hands `append`: everything but the seq the stream assigns. */
 export type NewEntry = Omit<Entry, 'seq'>;
+
+/**
+ * The run rule of two inserts at one offset (the realtime round fix round; VERIFICATION.md
+ * "Realtime round, pass 1" finding 3, the row `realtime.title.two-typers`). Server order alone
+ * cuts a word: A's " ta" lands, B types " tb" right after it, and A's "3", typed after its own
+ * " ta" before B's " tb" reached A, ties with " tb" at one offset and lands after it, so the
+ * heading reads " ta tb3" plus a stray "3" (the integrator's finding 14, read from the object's
+ * log). The client id tie of `insertTieSide` keeps the word only for the author with the lower id.
+ * The rule here: an entry whose insert continues its author's own text at the point the author
+ * typed (the client declares it on the entry as `run: true`, computed where it typed: the
+ * insert's offset is the end of the author's last insert into that text, a point another
+ * author's insert at exactly that offset does not move) keeps the left of another author's
+ * insert at the same offset. The server applies it to an incoming entry against every landed
+ * insert (room-core.ts `transformEntry`), and the client that moves its pending inserts past a
+ * remote one applies it to its pending entry (and the inverse side to the remote), so both ends
+ * read one declared bit and place one text. An entry without the declaration keeps the side it
+ * took before (server order, or the client id tie its POST declares). Two inserts that both
+ * continue their authors' text at one offset do not occur (the character before the offset has
+ * one author); the rule still answers one side for them, the declaring entry's left.
+ */
+export function runTieSide(run: boolean | undefined, fallback: Side): Side {
+  return run === true ? 'left' : fallback;
+}
+
+/** Whether an ops post entry declares the run rule (`run: true`; protocol.ts carries the field). */
+export function entryRun(entry: unknown): boolean {
+  return typeof entry === 'object' && entry !== null && (entry as { run?: unknown }).run === true;
+}
 
 export type AppendResult =
   | { ok: true; entries: Entry[] }

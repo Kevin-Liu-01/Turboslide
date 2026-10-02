@@ -49,6 +49,12 @@ export type RoomHealth = {
   commit: string;
   realtime: 'on' | 'off' | 'unset';
   appOrigin: string;
+  /**
+   * Whether the deck objects reach the app (the Worker's `rt_flags.callbacks`; 3.8): `failing`
+   * after an object's seed or checkpoint calls failed for the deployment's reason, which the flag
+   * reads as off; `ok` when the Worker answers nothing for it (an older Worker)
+   */
+  callbacks: 'ok' | 'failing';
 };
 
 /** The object's live document at its head (`GET /rooms/:id/document`), or null for an object without one. */
@@ -170,6 +176,7 @@ export function doChannel(options: DoChannelOptions): DoChannel {
             ? body.realtime
             : 'unset',
         appOrigin: typeof body.appOrigin === 'string' ? body.appOrigin : '',
+        callbacks: body.callbacks === 'failing' ? 'failing' : 'ok',
       };
     } catch (error) {
       onError(error, 'health');
@@ -248,7 +255,10 @@ export function doChannel(options: DoChannelOptions): DoChannel {
         return flagValue;
       }
       flagFailures = 0;
-      flagValue = read.realtime === 'on';
+      // an object that cannot reach the app (a protected preview, the routes answering 5xx)
+      // strands its tabs on the ladder, so the instance hands off as for an unreachable Worker
+      // (VERIFICATION.md realtime pass 1 finding 7)
+      flagValue = read.realtime === 'on' && read.callbacks !== 'failing';
       flagAt = t;
       return flagValue;
     },

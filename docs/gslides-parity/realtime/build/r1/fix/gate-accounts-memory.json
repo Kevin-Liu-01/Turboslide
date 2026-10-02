@@ -1,0 +1,133 @@
+{
+  "base": "http://localhost:4471",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": "127.0.0.1:8791",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-02T15:28:22.941Z",
+  "ms": 82523,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 1,
+    "ms": 82506,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r1fix/gate-accounts/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": [
+      "people.versions-author-account",
+      "people.labels-disambiguated",
+      "share.dialog.grant-email-line"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 3,
+  "passed": 0,
+  "failed": 3,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e6178bbb",
+  "origin": "http://localhost:4471",
+  "date": "2026-10-02",
+  "results": {
+    "people.versions-author-account": "failed",
+    "people.labels-disambiguated": "failed",
+    "share.dialog.grant-email-line": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.versions-author-account",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "people.labels-disambiguated",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "share.dialog.grant-email-line",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "result": "failed"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: a record by the anonymous id"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    }
+  ]
+}

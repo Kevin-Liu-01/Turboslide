@@ -27,11 +27,12 @@ import type { Issue } from '@turboslide/schema/validate';
 import { touchedSlides } from '@turboslide/store/store';
 
 import { CAPS } from './admission.ts';
+import { entryRun, runTieSide } from './channel.ts';
 import type { Entry, NewEntry, RejectReason, RoomEvent, RosterEntry } from './channel.ts';
 import { EDITING_TABS_MAX } from './protocol.ts';
 import type { OpsPost } from './protocol.ts';
 
-export { touchedSlides };
+export { entryRun, runTieSide, touchedSlides };
 
 // ---------------------------------------------------------------------------------------------
 // The answer's `between` (SPEC-3 3.4; the focus round, cycle 3 stream fix round two)
@@ -123,7 +124,12 @@ function rewritesText(against: Mutation, op: Mutation): boolean {
  * (`OpsPost.insertTie`), server order (`right`) when it does not, so the server places an
  * incoming insert exactly where the client that sent it moved its own copy.
  */
-export type Landed = { mutation: Mutation; insertTie: Side };
+export type Landed = {
+  mutation: Mutation;
+  insertTie: Side;
+  /** the POST's own making (the undo of a refused sibling): the run rule does not apply to it */
+  own?: true;
+};
 
 /** The landed entries' mutations in order, each with the tie the POST's inserts take against it. */
 export function landedOf(entries: ReadonlyArray<Entry>, post: OpsPost): Landed[] {
@@ -138,7 +144,7 @@ export function landedOf(entries: ReadonlyArray<Entry>, post: OpsPost): Landed[]
 
 /** Mutations of this POST's own making (the undo of a refused entry) that the later entries move past by server order. */
 export function landedOwn(mutations: ReadonlyArray<Mutation>): Landed[] {
-  return mutations.map((mutation) => ({ mutation, insertTie: 'right' }));
+  return mutations.map((mutation) => ({ mutation, insertTie: 'right', own: true }));
 }
 
 /**
@@ -147,15 +153,19 @@ export function landedOwn(mutations: ReadonlyArray<Mutation>): Landed[] {
  * NotImplementedError, which keeps a non concurrent keystroke flowing), a text op against a whole
  * Text rewrite returned to its author, `after` anchors re-resolved by the reducer at apply time,
  * everything else unchanged. Null when nothing survives. Two inserts at one offset tie by each
- * landed row's `insertTie` (`landedOf`).
+ * landed row's `insertTie` (`landedOf`), and an entry that declares the run rule (`run`,
+ * channel.ts `runTieSide`) keeps the left of every landed insert but its own POST's undo rows.
  */
 export function transformEntry(
   mutations: readonly Mutation[],
   landed: ReadonlyArray<Landed>,
+  run = false,
 ): Mutation[] | null {
   let out: Mutation[] = yieldConcurrentConversion(mutations, landed);
   if (out.length === 0) return null;
-  for (const { mutation: against, insertTie } of landed) {
+  for (const row of landed) {
+    const against = row.mutation;
+    const insertTie = row.own === true ? row.insertTie : runTieSide(run, row.insertTie);
     const next: Mutation[] = [];
     for (const mutation of out) {
       if (rewritesText(against, mutation)) continue;

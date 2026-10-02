@@ -1,0 +1,119 @@
+{
+  "base": "http://localhost:4471",
+  "tier": "do",
+  "secondBase": "http://localhost:4481",
+  "roomHost": "127.0.0.1:8791",
+  "health": {
+    "host": "127.0.0.1:8791",
+    "scheme": "http",
+    "knownSkew": null,
+    "status": 200,
+    "ms": 63,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4471",
+      "callbacks": "ok"
+    },
+    "baseCommit": "e6178bbbdb1d6db0131fcfd844bbcdcbca968aeb",
+    "commitWord": "commit e6178bbbdb1d equal to the base's",
+    "result": "passed",
+    "reason": ""
+  },
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": null,
+  "startedAt": "2026-10-02T15:27:53.540Z",
+  "ms": 20338,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 20255,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r1fix/gate-setup/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "setup",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 2,
+  "failed": 0,
+  "notDriven": 2,
+  "manual": [
+    "setup.free-plan.caps",
+    "setup.do.memory"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e6178bbb",
+  "origin": "http://localhost:4471",
+  "date": "2026-10-02",
+  "results": {
+    "setup.do.two-instances": "passed",
+    "setup.worker.health": "passed",
+    "setup.free-plan.caps": "not driven",
+    "setup.do.memory": "not driven"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "setup.worker.health",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "setup.do.two-instances",
+      "feature": "setup",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "setup.free-plan.caps",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the dashboard's figures before and after the run were not given (--caps-before <json> and --caps-after <json>, each { readAt, doRequests, doRowsWritten, workerRequests })"
+    },
+    {
+      "id": "setup.do.memory",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the verifier's hand reading was not given (--memory-reading <json> with result, reason and the dashboard's memory percentiles)"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "mode": "revoke",
+  "startedAt": "2026-10-02T14:45:03.414Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    23.5078125,
+    25.5009765625,
+    26.11376953125
+  ],
+  "readings": {
+    "deck": {
+      "at": 296,
+      "id": "r1fix-revoke-mur2rdks",
+      "copy": 200,
+      "link": 200
+    },
+    "exchange": {
+      "at": 341,
+      "on": "http://127.0.0.1:4481",
+      "status": 303,
+      "location": "/edit/r1fix-revoke-mur2rdks"
+    },
+    "viewerJoined": {
+      "at": 390,
+      "role": "viewer",
+      "on": "http://127.0.0.1:4481"
+    },
+    "warmTicket": {
+      "at": 394,
+      "status": 200
+    },
+    "restricted": {
+      "at": 428,
+      "status": 200,
+      "through": "http://127.0.0.1:4471"
+    },
+    "viewer": {
+      "at": 20504,
+      "closed": {
+        "code": 4403,
+        "reason": "reauth timed out",
+        "at": 20504
+      },
+      "closedMsAfterWrite": 20076,
+      "events": [
+        {
+          "kind": "reauth",
+          "at": 442
+        },
+        {
+          "kind": "reauth-ticket",
+          "status": 404,
+          "ms": 9,
+          "at": 451
+        },
+        {
+          "kind": "close",
+          "code": 4403,
+          "reason": "reauth timed out",
+          "at": 20504
+        }
+      ]
+    },
+    "viewerTicketAfter": {
+      "at": 20516,
+      "status": 404,
+      "error": "not_found"
+    },
+    "teardown": {
+      "at": 20747,
+      "deckId": "r1fix-revoke-mur2rdks",
+      "trash": 200,
+      "remove": 200,
+      "after": 404
+    }
+  },
+  "endedAt": "2026-10-02T14:45:24.162Z",
+  "loadAtEnd": [
+    29.55126953125,
+    26.734375,
+    26.54052734375
+  ]
+}

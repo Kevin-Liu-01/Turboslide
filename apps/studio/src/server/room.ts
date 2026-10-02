@@ -55,6 +55,7 @@ import {
   BETWEEN_MAX_ENTRIES,
   betweenEntries,
   editingCount,
+  entryRun,
   filterEventForReader as filterEventForReaderCore,
   grantHueSlot,
   landCandidate,
@@ -1832,7 +1833,9 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       });
       continue;
     }
-    const transformed = transformEntry(entry.mutations ?? [], landedMutations);
+    // the run rule (channel.ts runTieSide): an entry that continues its author's own text keeps
+    // the left of a landed insert at its offset, as the client that sent it moved it
+    const transformed = transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
     if (transformed === null) {
       rejected.push({ opId: entry.opId, reason: 'stale' });
       continue;
@@ -1863,6 +1866,8 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   if (candidates.length === 0) {
     return { ok: true, entries: replayed, rejected, head, revision: live.document.deck.revision };
   }
+  // the run declaration of each posted entry, for the transform past a moved head below
+  const runOf = new Map(post.entries.map((entry) => [entry.opId, entryRun(entry)] as const));
   const result = await appendWithRetry(channel, deckId, head, candidates, (entries, more) => {
     // the head moved while this request transformed: transform once more against what landed
     // (SPEC-3 3.4 step 5); a candidate that cannot be placed is dropped and rejected
@@ -1880,7 +1885,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
         out.push(entry);
         continue;
       }
-      const transformed = transformEntry(entry.mutations, moreMutations);
+      const transformed = transformEntry(entry.mutations, moreMutations, runOf.get(entry.opId));
       if (transformed === null) {
         rejected.push({ opId: entry.opId, reason: 'stale' });
         continue;
@@ -2222,7 +2227,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       const moved =
         landedMutations.length === 0
           ? (entry.mutations ?? [])
-          : transformEntry(entry.mutations ?? [], landedMutations);
+          : transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
       if (moved === null) {
         // a whole Text rewrite landed first: the op returns to its author with a sentence
         rejected.push({ opId: entry.opId, reason: 'stale', message: STALE_AFTER_REMOTE });
@@ -2531,6 +2536,7 @@ export {
   BETWEEN_MAX_ENTRIES,
   betweenEntries,
   editingCount,
+  entryRun,
   grantHueSlot,
   landedOf,
   landedOwn,

@@ -1,0 +1,229 @@
+{
+  "base": "http://localhost:4471",
+  "tier": "do",
+  "secondBase": "http://localhost:4481",
+  "roomHost": "127.0.0.1:8791",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": null,
+  "startedAt": "2026-10-02T15:04:08.760Z",
+  "ms": 1424623,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 74376,
+    "json": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r1fix/gate-realtime/core-walk.json",
+    "deckId": "untitled-20261002-glef",
+    "steps": 20
+  },
+  "specs": {
+    "exit": 0,
+    "ms": 406999,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r1fix/gate-realtime/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "realtime",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 16,
+  "passed": 16,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e6178bbb",
+  "origin": "http://localhost:4471",
+  "date": "2026-10-02",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "realtime.card.chip-painted": "passed",
+    "realtime.agent.write-announced": "passed",
+    "realtime.keystroke.within-300ms": "passed",
+    "realtime.caret.within-300ms": "passed",
+    "realtime.caret.offset-after-merge": "passed",
+    "realtime.selection.outline-within-300ms": "passed",
+    "realtime.block.drag-live": "passed",
+    "realtime.title.two-typers": "passed",
+    "realtime.join.chip-within-1s": "passed",
+    "realtime.follow.for-everyone": "passed",
+    "realtime.reload.loses-nothing": "passed",
+    "realtime.reconnect.loses-nothing": "passed",
+    "realtime.pointer.second-browser": "passed",
+    "realtime.caret.dims-and-leaves": "passed",
+    "realtime.share-link.every-instance": "passed",
+    "realtime.departed-guest.name-stable": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "realtime.keystroke.within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.caret.within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.caret.offset-after-merge",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.selection.outline-within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.block.drag-live",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.follow.for-everyone",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.share-link.every-instance",
+      "feature": "realtime",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.reconnect.loses-nothing",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.pointer.second-browser",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.caret.dims-and-leaves",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.departed-guest.name-stable",
+      "feature": "realtime",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

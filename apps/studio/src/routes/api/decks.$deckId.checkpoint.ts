@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import type { Entry } from '@turboslide/realtime/channel';
 import { checkpointBodySchema } from '@turboslide/realtime/frames';
+import type { CheckpointBody } from '@turboslide/realtime/frames';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { DeckStore } from '@turboslide/store/store';
 
@@ -61,13 +62,20 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     );
   }
   const body = parsed.data;
-  let room;
   try {
-    room = await roomFor(deckId);
+    return await commit(deckId, body);
   } catch (error) {
-    if (error instanceof RangeError) return jsonResponse({ error: 'not_found' }, 404);
+    // a deck removed while its object still held entries (the store's `No deck.json`): a 404 the
+    // object reads as final, so its alarm stops retrying (VERIFICATION.md realtime pass 1 finding
+    // 10: the route answered 500 and the alarm retried with backoff, one run per removed deck)
+    if (error instanceof RangeError)
+      return jsonResponse({ error: 'not_found', gone: true, message: error.message }, 404);
     throw error;
   }
+}
+
+async function commit(deckId: string, body: CheckpointBody): Promise<Response> {
+  const room = await roomFor(deckId);
   const store = room.store;
   const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
   if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);

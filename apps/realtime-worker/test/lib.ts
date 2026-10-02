@@ -238,8 +238,14 @@ export type FakeApp = {
   conflictOnce: boolean;
   /** the next checkpoint answers this tier */
   tier: string;
-  /** the next checkpoint fails with 503 this many times (the attempt is recorded first) */
+  /** the next checkpoint fails with `failStatus` (503 unless set) this many times (the attempt is recorded first) */
   failTimes: number;
+  failStatus: number;
+  /** the next seed fails with `seedFailStatus` (302, a protected preview's sign in redirect, unless set) this many times */
+  seedFailTimes: number;
+  seedFailStatus: number;
+  /** the checkpoint route answers 404 `{ gone: true }`: the deck was removed */
+  gone: boolean;
   /** forgets this deck's state; the stub stays for the file so a late call of an earlier test's object meets a benign answer */
   restore: () => void;
 };
@@ -277,6 +283,15 @@ function installFakeFetch(): void {
         if (app === undefined) return json({ error: 'not_found' }, 404);
         const since = parsed.searchParams.get('since');
         app.seeds.push({ since: since === null ? null : Number(since) });
+        if (app.seedFailTimes > 0) {
+          app.seedFailTimes -= 1;
+          return app.seedFailStatus >= 300 && app.seedFailStatus < 400
+            ? new Response(null, {
+                status: app.seedFailStatus,
+                headers: { location: 'https://vercel.com/sso' },
+              })
+            : json({ error: 'seed' }, app.seedFailStatus);
+        }
         const document: DeckDocument = JSON.parse(JSON.stringify(app.document)) as DeckDocument;
         document.deck.revision = app.revision;
         return json({
@@ -296,9 +311,10 @@ function installFakeFetch(): void {
         closed?: boolean;
       };
       app.checkpoints.push(body);
+      if (app.gone) return json({ error: 'not_found', gone: true }, 404);
       if (app.failTimes > 0) {
         app.failTimes -= 1;
-        return json({ error: 'store_busy' }, 503);
+        return json({ error: 'store_busy' }, app.failStatus);
       }
       if (app.conflictOnce) {
         app.conflictOnce = false;
@@ -349,6 +365,10 @@ export function fakeApp(
     conflictOnce: false,
     tier: 'do',
     failTimes: 0,
+    failStatus: 503,
+    seedFailTimes: 0,
+    seedFailStatus: 302,
+    gone: false,
     restore: () => {
       apps.delete(deck);
     },

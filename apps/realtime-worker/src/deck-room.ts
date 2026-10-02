@@ -7,10 +7,11 @@
 // fans it out to every socket the reader's role may see, keeps the live document in memory and in
 // `doc` rows, holds the roster in memory and in each socket's attachment, and on its one alarm
 // posts the uncommitted entries to the app's checkpoint route under the bearer (2 s idle, 10 s at
-// most, the Worker's two variables). No `setTimeout` or `setInterval` anywhere: a standing timer
-// keeps the object awake and is the most expensive line one can write (W1 finding 4); the
-// heartbeat is the runtime's auto response pair, the deadlines (the join window, the ticket grace,
-// the reauth grace, the liveness sweep) ride the same alarm, and the constructor does the minimum
+// most, the Worker's two variables). No standing `setTimeout` or `setInterval`: a timer keeps the
+// object awake and is the most expensive line one can write (W1 finding 4); the one timer is an
+// app call's deadline, cleared the moment the call settles (`withDeadline`), the heartbeat is the
+// runtime's auto response pair, the deadlines (the join window, the ticket grace, the reauth
+// grace, the liveness sweep) ride the same alarm, and the constructor does the minimum
 // on a wake (two `CREATE TABLE IF NOT EXISTS`, the one `meta` row, the roster from
 // `getWebSockets()`). The router (index.ts) verifies every ticket and bearer before anything
 // reaches here and hands the claims in a header; the object trusts them.
@@ -50,6 +51,7 @@ import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import {
   betweenEntries,
   editingCount,
+  entryRun,
   filterEventForReader,
   grantHueSlot,
   landCandidate,
@@ -67,7 +69,7 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 
-import { noteClosed, noteOpen } from './control.ts';
+import { noteCallbacks, noteClosed, noteOpen } from './control.ts';
 import {
   DOC_DDL,
   ENTRY_COLUMNS,
@@ -114,6 +116,29 @@ const ADDRESS_CAP = CAPS.streams.ip;
 export const DOC_REFRESH_ENTRIES = 200;
 /** A deadline further away than this does not arm the alarm on its own: the next message or alarm sweeps it (one row written saved per checkpoint). */
 export const SWEEP_ALARM_WINDOW_MS = 60_000;
+/**
+ * The key of the deck id in the object's synchronous KV (the SQLite storage API's `ctx.storage.kv`,
+ * read 2026-10-02). A woken object's constructor reads `ctx.id.name` first (the id page of
+ * 2026-05-27: set for an id made by `idFromName`, undefined for an alarm scheduled before
+ * 2026-03-15 and for an id read back with `idFromString`), then this key, then the sockets'
+ * ticket claims, so a checkpoint and a ticket refresh after a hibernation wake name the deck
+ * (VERIFICATION.md realtime pass 1 finding 1).
+ */
+export const DECK_KEY = 'deck';
+/** App calls that failed for a reason no single deck explains (`AppCallError.reach`) in a row before the object tells the router (3.8). */
+export const CALLBACK_FAILURES_BEFORE_FLAG = 2;
+/** The object writes the `callbacks` row at most this often while its calls keep failing. */
+export const CALLBACK_FLAG_EVERY_MS = 60_000;
+/**
+ * The rows a `meta` upsert writes (one row, no secondary index): written into the stored counters
+ * before the statement runs, so the total read after a wake equals the last total read before it
+ * (finding 6: the upsert's own row was counted in memory and not in the row it wrote).
+ */
+export const META_UPSERT_ROWS = 1;
+/** The iterations of one block of `GET /rooms/:id/counters?spin=<blocks>` (the CPU probe). */
+export const SPIN_BLOCK_ITERATIONS = 100_000;
+/** Incoming WebSocket messages per billed request (the Durable Objects pricing page's 20:1). */
+export const MESSAGES_PER_REQUEST_UNIT = 20;
 
 type Member = {
   cid: string;
@@ -133,6 +158,15 @@ type Member = {
   joinBy: number | null;
   /** the presence budget's fixed window */
   presenceWindow: { second: number; count: number };
+  /**
+   * rebuilt from its attachment by a woken constructor: the other tabs may hold its roster entry
+   * while this object holds none until the `resend` brings its presence back, so its leave is
+   * announced either way (the fix round's do run: B's tab closed while the object slept, the
+   * woken object held no entry for B, sent no leave, and B's chip stayed in A)
+   */
+  restored?: true;
+  /** the hue slot (0 based) the attachment kept, so a woken object gives the tab back its colour */
+  keptHueSlot?: number;
 };
 
 /** What a socket's attachment holds through hibernation (3.3; at most 16,384 bytes). */
@@ -146,6 +180,13 @@ type Attachment = {
   slideId?: string;
   hueSlot?: number;
   joinBy?: number | null;
+  /**
+   * when the object asked for a fresh ticket (3.3's reauth), so the 10 s grace survives a
+   * hibernation wake: before this the deadline lived in memory alone, a revoked viewer's object
+   * hibernated inside the grace, and the woken roster held no deadline to close it by (the fix
+   * round's revoke drive on wrangler dev: no close within 45 s without a fetch to keep it awake)
+   */
+  reauthAt?: number | null;
 };
 
 type Live = { document: DeckDocument; seq: number };
@@ -216,6 +257,60 @@ function parseIntVar(value: string | undefined, fallback: number): number {
   return Number.isInteger(n) && n > 0 ? n : fallback;
 }
 
+/**
+ * An app call the object made (the seed route, the checkpoint route) that failed. `reach` names
+ * the failures of the deployment and not of one deck (no answer, a redirect such as a protected
+ * preview's sign in page, 401, 403, and a seed route's 5xx); a 404 (a deck removed) and a 409 (a
+ * conflict) are the deck's. Thrown by `fetchSeed` and `postCheckpoint` so the failure count of 3.8
+ * reads one class.
+ */
+export class AppCallError extends Error {
+  readonly status: number;
+  readonly route: 'seed' | 'checkpoint';
+  constructor(route: 'seed' | 'checkpoint', status: number, message?: string) {
+    super(message ?? `the ${route} route answered ${status}`);
+    this.name = 'AppCallError';
+    this.route = route;
+    this.status = status;
+  }
+  /**
+   * Whether the deployment, not the deck, explains the failure (status 0 is no answer): no answer,
+   * a redirect, 401 or 403 on either route, and a 5xx on the seed route alone. A checkpoint route
+   * that answers 5xx leaves the tabs editing (the entries wait in the object's rows and the alarm
+   * retries), and one deck whose commit throws must not hand every tab of the deployment to the
+   * blob tier; a seed route that answers 5xx leaves the tab with no socket at all, and the page
+   * that asked for it was served, so the route and not the deck is what fails.
+   */
+  get reach(): boolean {
+    return (
+      this.status === 0 ||
+      (this.status >= 300 && this.status < 400) ||
+      this.status === 401 ||
+      this.status === 403 ||
+      (this.route === 'seed' && this.status >= 500)
+    );
+  }
+}
+
+/**
+ * Runs `run` under an abort deadline of `ms` and clears the deadline the moment it settles, so no
+ * timer outlives the call (the object hibernates only with nothing pending; `appCall`).
+ */
+async function withDeadline<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error(`no answer within ${ms} ms`)), ms);
+  try {
+    return await run(controller.signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** The request units of a counters bucket: the fetches and the alarms, and the messages at 20:1 (cost.do.requests). */
+function requestUnitsOf(counters: Counters): number {
+  return counters.requests + counters.alarms + counters.messages / MESSAGES_PER_REQUEST_UNIT;
+}
+
 export class DeckRoom extends DurableObject<Env> {
   private readonly db: Sql;
   private readonly counters: Counters;
@@ -225,6 +320,8 @@ export class DeckRoom extends DurableObject<Env> {
   /** the roster and the sockets, by client id */
   private readonly members = new Map<string, Member>();
   private readonly byWs = new Map<WebSocket, string>();
+  /** the sockets this instance closed itself, whose leave and last close already ran (`closedWhileAsleep` skips them) */
+  private readonly closedHere = new WeakSet<WebSocket>();
   /** fixed window budgets as keys.ts shapes them (`admitOps`) */
   private readonly budgets = new Map<string, { count: number; resetAt: number }>();
   private alarmAt: number | null = null;
@@ -235,7 +332,14 @@ export class DeckRoom extends DurableObject<Env> {
   private editedSinceOpen = false;
   private readonly awakeSince = Date.now();
   private colo = '';
+  /** the deck this object orders; restored on a wake before any handler runs (finding 1) */
   private deckId: string | null = null;
+  /** the deck id is in the object's KV (written once per object, read on a wake without a name) */
+  private deckStored = false;
+  /** app calls of the deployment class (`AppCallError.reach`) that failed in a row */
+  private callbackFailures = 0;
+  /** when this object last wrote the `callbacks` row as failing; null once a call succeeded after it */
+  private callbackFlaggedAt: number | null = null;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -249,6 +353,20 @@ export class DeckRoom extends DurableObject<Env> {
     this.meta = row === undefined ? null : metaOfRow(row);
     if (row !== undefined) this.persisted = countersOf(row.counters);
     this.counters.wakes = 1;
+    // the deck id survives the wake (finding 1): the id's name, else the object's KV; the
+    // sockets' claims below are the last source
+    this.deckId = ctx.id.name ?? null;
+    if (this.deckId === null) {
+      try {
+        const stored = ctx.storage.kv.get<string>(DECK_KEY);
+        if (typeof stored === 'string' && stored !== '') {
+          this.deckId = stored;
+          this.deckStored = true;
+        }
+      } catch {
+        // no KV on this runtime: the claims below
+      }
+    }
     ctx.setWebSocketAutoResponse(
       new WebSocketRequestResponsePair(HEARTBEAT_REQUEST, HEARTBEAT_RESPONSE),
     );
@@ -272,12 +390,16 @@ export class DeckRoom extends DurableObject<Env> {
         origin: attachment.origin ?? null,
         joinedAt: attachment.joinedAt,
         lastMessageAt: ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? attachment.joinedAt,
-        reauthAt: null,
+        reauthAt: attachment.reauthAt ?? null,
         joinBy: attachment.joinBy ?? null,
         presenceWindow: { second: 0, count: 0 },
+        ...(attachment.claims === null ? {} : { restored: true as const }),
+        ...(typeof attachment.hueSlot === 'number' ? { keptHueSlot: attachment.hueSlot } : {}),
       };
       this.members.set(member.cid, member);
       this.byWs.set(ws, member.cid);
+      if (this.deckId === null && typeof attachment.claims?.deck === 'string')
+        this.deckId = attachment.claims.deck;
     }
     this.alarmRead = ctx.storage.getAlarm().then(
       (at) => {
@@ -301,7 +423,7 @@ export class DeckRoom extends DurableObject<Env> {
     const deckId = parts[1] === undefined ? null : decodeURIComponent(parts[1]);
     const tail = parts[2] ?? '';
     if (deckId === null) return json({ error: 'not_found' }, 404);
-    this.deckId = deckId;
+    this.rememberDeck(deckId);
     this.colo = request.headers.get(COLO_HEADER) ?? this.colo;
     try {
       if (request.headers.get(REALTIME_HEADER) === 'off') {
@@ -427,15 +549,45 @@ export class DeckRoom extends DurableObject<Env> {
     this.closeWs(ws, code === 1005 || code === 1006 ? 1000 : code, 'closed');
     const member = this.memberOf(ws);
     this.byWs.delete(ws);
-    if (member === undefined) return;
+    if (member === undefined) {
+      await this.closedWhileAsleep(ws);
+      return;
+    }
     await this.dropMember(member, 'close');
   }
 
   override async webSocketError(ws: WebSocket, _error: unknown): Promise<void> {
     const member = this.memberOf(ws);
     this.byWs.delete(ws);
-    if (member === undefined) return;
+    if (member === undefined) {
+      await this.closedWhileAsleep(ws);
+      return;
+    }
     await this.dropMember(member, 'error');
+  }
+
+  /**
+   * A socket closed while the object slept: the close wakes it, and the closing socket is not
+   * among `getWebSockets()`, so the constructor built no member for it (read on the plugin's
+   * eviction: B's close woke the object, the roster held A alone, and no leave reached A). Its
+   * attachment still names it: the others hear its leave, unless a newer socket of the same
+   * client holds its place, and the last close's work runs when nobody is left.
+   */
+  private async closedWhileAsleep(ws: WebSocket): Promise<void> {
+    // the close handshake of a socket this instance closed itself: its leave and last close ran
+    if (this.closedHere.has(ws)) return;
+    let attachment: Attachment | null = null;
+    try {
+      attachment = ws.deserializeAttachment() as Attachment | null;
+    } catch {
+      attachment = null;
+    }
+    if (attachment === null || typeof attachment.cid !== 'string' || attachment.claims === null)
+      return;
+    const current = this.members.get(attachment.cid);
+    if (current !== undefined) return;
+    this.broadcast({ type: 'leave', clientId: attachment.cid });
+    if (this.members.size === 0) await this.lastClosed();
   }
 
   override async alarm(): Promise<void> {
@@ -460,6 +612,32 @@ export class DeckRoom extends DurableObject<Env> {
     await this.armSweeps(now);
   }
 
+  /**
+   * The deck of a request (the router names it in the path): kept in memory and, once per object,
+   * in the object's KV, so a wake whose id carries no name still knows it (finding 1). The router
+   * reaches this object by `idFromName(deckId)` alone, so the path and the id's name agree.
+   */
+  private rememberDeck(deckId: string): void {
+    this.deckId = deckId;
+    if (this.deckStored) return;
+    try {
+      if (this.ctx.storage.kv.get<string>(DECK_KEY) !== deckId)
+        this.ctx.storage.kv.put(DECK_KEY, deckId);
+      this.deckStored = true;
+    } catch (error) {
+      this.log('warn', 'the deck id was not kept', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /** The deck id an app call names; an object that cannot name its deck refuses the call instead of posting to `/api/decks//...` (finding 1). */
+  private requireDeckId(): string {
+    if (this.deckId === null || this.deckId === '')
+      throw new Error('the object does not know its deck');
+    return this.deckId;
+  }
+
   // -------------------------------------------------------------------------------------------
   // The upgrade (3.2 "A join", 3.3)
 
@@ -478,8 +656,10 @@ export class DeckRoom extends DurableObject<Env> {
       .filter((id) => /^[0-9a-f]{32}$/.test(id))
       .slice(0, 8);
     // the hello needs head, revision and covered: an object with no meta row reads the seed
-    // route before its first hello (3.4 item 7); one with a meta row answers from it
-    if (this.meta === null) {
+    // route before its first hello (3.4 item 7); one with a meta row answers from it. A socket
+    // that carried no ticket (the join frame's carrier, 3.3) reads nothing before its join is
+    // verified (handleJoin), so a stranger's upgrade makes no app call and no row (finding 12)
+    if (claims !== null && this.meta === null) {
       try {
         await this.seed();
       } catch (error) {
@@ -490,7 +670,7 @@ export class DeckRoom extends DurableObject<Env> {
       }
     }
     const meta = this.meta;
-    if (meta === null) return this.refuseUpgrade(CLOSE_CODES.error, 'no meta');
+    if (claims !== null && meta === null) return this.refuseUpgrade(CLOSE_CODES.error, 'no meta');
     const cid = claims?.cid ?? `join:${crypto.randomUUID().replace(/-/g, '')}`;
     // the tab's earlier sockets go first (4409), then the ids it names, then an older socket of
     // the same client id (3.3)
@@ -546,9 +726,10 @@ export class DeckRoom extends DurableObject<Env> {
     this.members.set(cid, member);
     this.byWs.set(server, cid);
     this.writeAttachment(member);
-    const first = this.members.size === 1;
-    if (first) this.ctx.waitUntil(this.noteOpenRow(now));
-    if (claims !== null) {
+    if (claims !== null && meta !== null) {
+      // the `rt_open` row at the first verified socket (a join socket is not one until its
+      // ticket verifies, handleJoin)
+      if (this.verifiedSockets() === 1) this.ctx.waitUntil(this.noteOpenRow(now));
       // one handler, no await between the cursor and the frames (3.4 item 5): hello, the
       // replay, the room frame; the joiner's own presence frame follows its first post
       this.sayHello(member, claims, Number.isFinite(since) ? since : meta.head);
@@ -631,7 +812,11 @@ export class DeckRoom extends DurableObject<Env> {
 
   private async handleJoin(member: Member, ticket: string, now: number): Promise<void> {
     if (member.claims !== null) return;
-    const deckId = this.deckId ?? '';
+    const deckId = this.deckId;
+    if (deckId === null) {
+      this.closeMember(member, CLOSE_CODES.error, 'join refused: the room does not know its deck');
+      return;
+    }
     // the join frame carries no Origin of its own: the router's stamp on the upgrade is the
     // request's and the claim must match it (3.3); a stamp of `null` is an upgrade with no
     // Origin header, which the cross site rule refuses
@@ -659,12 +844,38 @@ export class DeckRoom extends DurableObject<Env> {
     this.members.set(member.cid, member);
     if (member.ws !== null) this.byWs.set(member.ws, member.cid);
     this.writeAttachment(member);
-    if (this.meta === null) await this.seed();
+    // the seed waits for a verified join (finding 12): only now may a meta-less object call the app
+    if (this.meta === null) {
+      try {
+        await this.seed();
+      } catch (error) {
+        this.log('error', 'seed after join failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        this.closeMember(member, CLOSE_CODES.error, 'seed failed');
+        return;
+      }
+    }
+    if (this.verifiedSockets() === 1) this.ctx.waitUntil(this.noteOpenRow(now));
     this.sayHello(member, verdict.claims, this.meta?.head ?? 0);
   }
 
+  /** The open sockets whose ticket verified (a join socket counts once its join did). */
+  private verifiedSockets(): number {
+    let n = 0;
+    for (const member of this.members.values())
+      if (member.ws !== null && member.claims !== null) n += 1;
+    return n;
+  }
+
   private async handleTicket(member: Member, ticket: string, now: number): Promise<void> {
-    const deckId = this.deckId ?? '';
+    const deckId = this.deckId;
+    if (deckId === null) {
+      // never verified against an empty deck (finding 1): the tab reopens, and the upgrade's
+      // fetch names the deck
+      this.closeMember(member, CLOSE_CODES.error, 'the room does not know its deck');
+      return;
+    }
     const verdict = await verifyTicket(ticket, this.env.TURBOSLIDE_ROOM_SECRET, {
       deck: deckId,
       origin: member.claims?.org ?? null,
@@ -791,7 +1002,9 @@ export class DeckRoom extends DurableObject<Env> {
         });
         continue;
       }
-      const transformed = transformEntry(entry.mutations ?? [], landedMutations);
+      // the run rule (channel.ts runTieSide): an entry that continues its author's own text keeps
+      // the left of a landed insert at its offset, as the client that sent it moved it
+      const transformed = transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
       if (transformed === null) {
         rejected.push({ opId: entry.opId, reason: 'stale' });
         continue;
@@ -926,7 +1139,7 @@ export class DeckRoom extends DurableObject<Env> {
     if (member.presenceWindow.count > PRESENCE_PER_SECOND) return 'budget';
     if (member.entry !== null && member.entry.clock > state.clock) return 'clock';
     const roster = this.rosterEntries();
-    const entry = this.rosterEntryOf(claims, state, roster, member.entry);
+    const entry = this.rosterEntryOf(claims, state, roster, member.entry, member.keptHueSlot);
     const slideChanged = member.entry?.slideId !== entry.slideId || member.entry === null;
     member.entry = entry;
     // the attachment is rewritten on a slide change alone, not per frame (3.3)
@@ -946,12 +1159,15 @@ export class DeckRoom extends DurableObject<Env> {
     state: PresencePost,
     existing: readonly RosterEntry[],
     previous: RosterEntry | null,
+    kept?: number,
   ): RosterEntry {
     const principalId = claims.pid ?? claims.id;
     const slot =
-      previous === null
-        ? grantHueSlot(principalId, existing)
-        : ((previous.hueSlot + 1) as 1 | 2 | 3 | 4 | 5 | 6);
+      previous !== null
+        ? ((previous.hueSlot + 1) as 1 | 2 | 3 | 4 | 5 | 6)
+        : kept !== undefined && kept >= 0 && kept <= 5
+          ? ((kept + 1) as 1 | 2 | 3 | 4 | 5 | 6)
+          : grantHueSlot(principalId, existing);
     const canEdit = claims.role === 'owner' || claims.role === 'editor';
     const joinOrder = existing.findIndex((row) => row.clientId === state.clientId);
     const amongFirst =
@@ -997,8 +1213,9 @@ export class DeckRoom extends DurableObject<Env> {
   }
 
   private leave(member: Member, announce: boolean): void {
-    const had = member.entry !== null;
+    const had = member.entry !== null || member.restored === true;
     member.entry = null;
+    delete member.restored;
     if (had && announce) this.broadcast({ type: 'leave', clientId: member.cid });
   }
 
@@ -1060,6 +1277,7 @@ export class DeckRoom extends DurableObject<Env> {
       ...(member.entry?.slideId === undefined ? {} : { slideId: member.entry.slideId }),
       ...(member.entry === null ? {} : { hueSlot: member.entry.hueSlot }),
       joinBy: member.joinBy,
+      ...(member.reauthAt === null ? {} : { reauthAt: member.reauthAt }),
     };
     try {
       member.ws.serializeAttachment(attachment);
@@ -1084,6 +1302,7 @@ export class DeckRoom extends DurableObject<Env> {
     member.ws = null;
     if (ws !== null) {
       this.byWs.delete(ws);
+      this.closedHere.add(ws);
       this.closeWs(ws, code, reason);
     }
     this.members.delete(member.cid);
@@ -1131,7 +1350,7 @@ export class DeckRoom extends DurableObject<Env> {
       this.alarmAt = null;
     }
     try {
-      await noteClosed(this.env.ACCOUNTS, this.deckId ?? '');
+      if (this.deckId !== null) await noteClosed(this.env.ACCOUNTS, this.deckId);
     } catch {
       // the control table is not made yet (3.6.2): nothing to delete
     }
@@ -1139,7 +1358,7 @@ export class DeckRoom extends DurableObject<Env> {
 
   private async noteOpenRow(now: number): Promise<void> {
     try {
-      await noteOpen(this.env.ACCOUNTS, this.deckId ?? '', now);
+      await noteOpen(this.env.ACCOUNTS, this.requireDeckId(), now);
     } catch (error) {
       this.log('warn', 'rt_open not written', {
         error: error instanceof Error ? error.message : String(error),
@@ -1240,7 +1459,7 @@ export class DeckRoom extends DurableObject<Env> {
   private async seed(): Promise<void> {
     if (this.seeding !== null) return this.seeding;
     this.seeding = (async () => {
-      const deckId = this.deckId ?? '';
+      const deckId = this.requireDeckId();
       // the meta row as it stands now: one row read, so a row another handler of this object
       // wrote since the constructor (or a test seeded) is the order and not the store's covered
       const row = this.db.exec<MetaRow>('SELECT * FROM meta WHERE id = 1')[0];
@@ -1296,23 +1515,109 @@ export class DeckRoom extends DurableObject<Env> {
 
   private async fetchSeed(deckId: string, since: number | undefined): Promise<SeedAnswer> {
     const url = `${this.appOrigin()}/api/decks/${encodeURIComponent(deckId)}/seed${since === undefined ? '' : `?since=${since}`}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: this.appHeaders(false),
-      signal: AbortSignal.timeout(SEED_TIMEOUT_MS),
+    const answer = await this.appCall(
+      'seed',
+      url,
+      { method: 'GET', headers: this.appHeaders(false) },
+      SEED_TIMEOUT_MS,
+    );
+    return answer.body as SeedAnswer;
+  }
+
+  /**
+   * One call of the app's seed or checkpoint route (3.2, 3.5) under its deadline: redirects are
+   * not followed (a protected preview answers 302 to its sign in page, which is a failure and not
+   * a document), an answer other than 2xx or 409 throws `AppCallError`, and the failures of the
+   * deployment class are counted so a run of them reaches the router's `callbacks` row (3.8;
+   * finding 7 of the realtime pass 1: a tab whose object cannot reach the app fell to no tier at
+   * all). The answer's body is read inside the deadline. The deadline is a timer the call clears
+   * as soon as it settles, never `AbortSignal.timeout`: that one stands for its whole 25 s after a
+   * call of 50 ms, and a pending timer keeps the object from hibernating (W1 finding 4; read on
+   * the plugin's eviction, which waited 25,002 ms after a seed under `AbortSignal.timeout` and
+   * returns at once without one), which is 25 s of duration after every checkpoint.
+   */
+  private async appCall(
+    route: 'seed' | 'checkpoint',
+    url: string,
+    init: RequestInit,
+    timeoutMs: number,
+  ): Promise<{ status: number; body: unknown }> {
+    let outcome: { status: number; body: unknown };
+    try {
+      outcome = await withDeadline(timeoutMs, async (signal) => {
+        const response = await fetch(url, { ...init, redirect: 'manual', signal });
+        if (response.ok || response.status === 409)
+          return { status: response.status, body: (await response.json()) as unknown };
+        await response.body?.cancel().catch(() => undefined);
+        return { status: response.status, body: null };
+      });
+    } catch (error) {
+      const failure = new AppCallError(
+        route,
+        0,
+        `the ${route} route did not answer: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      await this.noteCallback(failure);
+      throw failure;
+    }
+    if (outcome.status >= 200 && outcome.status < 300) {
+      await this.noteCallback(null);
+      return outcome;
+    }
+    if (outcome.status === 409) return outcome;
+    const failure = new AppCallError(route, outcome.status);
+    await this.noteCallback(failure);
+    throw failure;
+  }
+
+  /**
+   * Counts the app calls that failed for the deployment's reason in a row; at
+   * CALLBACK_FAILURES_BEFORE_FLAG the object writes `rt_flags.callbacks` as failing (once a
+   * minute at most while they go on), which `/health` answers and the function's flag reads as
+   * off, so the instance hands its tabs to the blob tier as for an unreachable Worker (3.8 item
+   * 4). A call that answers after this object flagged the row writes it back to `ok`. A 404 or a
+   * 409 is the deck's and changes nothing.
+   */
+  private async noteCallback(failure: AppCallError | null): Promise<void> {
+    const now = Date.now();
+    if (failure === null) {
+      this.callbackFailures = 0;
+      if (this.callbackFlaggedAt === null) return;
+      this.callbackFlaggedAt = null;
+      await noteCallbacks(this.env.ACCOUNTS, 'ok', now).catch((error: unknown) =>
+        this.log('warn', 'the callbacks row was not written', {
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return;
+    }
+    if (!failure.reach) return;
+    this.callbackFailures += 1;
+    if (this.callbackFailures < CALLBACK_FAILURES_BEFORE_FLAG) return;
+    if (this.callbackFlaggedAt !== null && now - this.callbackFlaggedAt < CALLBACK_FLAG_EVERY_MS)
+      return;
+    this.callbackFlaggedAt = now;
+    this.log('error', 'the app does not answer the object', {
+      route: failure.route,
+      status: failure.status,
+      failures: this.callbackFailures,
     });
-    if (!response.ok) throw new Error(`the seed route answered ${response.status}`);
-    return (await response.json()) as SeedAnswer;
+    await noteCallbacks(this.env.ACCOUNTS, 'failing', now, failure.status).catch((error: unknown) =>
+      this.log('warn', 'the callbacks row was not written', {
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
   }
 
   private async seedDocument(answer: SeedAnswer): Promise<DeckDocument> {
     if (answer.document !== undefined) return answer.document;
     if (answer.snapshotUrl !== undefined) {
-      const response = await fetch(answer.snapshotUrl, {
-        signal: AbortSignal.timeout(SEED_TIMEOUT_MS),
+      const url = answer.snapshotUrl;
+      return withDeadline(SEED_TIMEOUT_MS, async (signal) => {
+        const response = await fetch(url, { signal });
+        if (!response.ok) throw new Error(`the snapshot answered ${response.status}`);
+        return (await response.json()) as DeckDocument;
       });
-      if (!response.ok) throw new Error(`the snapshot answered ${response.status}`);
-      return (await response.json()) as DeckDocument;
     }
     throw new Error('the seed route answered no document');
   }
@@ -1341,9 +1646,19 @@ export class DeckRoom extends DurableObject<Env> {
     });
   }
 
-  private writeMeta(): void {
+  /**
+   * Upserts the one `meta` row with the counters as they stand, its own row written included
+   * (META_UPSERT_ROWS), and answers the counters it stored: a reader that is handed this value
+   * never reads a lower one after a wake, since the next constructor starts from it (finding 6).
+   * Null when the object has no meta row yet.
+   */
+  private writeMeta(): Counters | null {
     const meta = this.meta;
-    if (meta === null) return;
+    if (meta === null) return null;
+    const stored = addCounters(this.persisted, {
+      ...this.counters,
+      rowsWritten: this.counters.rowsWritten + META_UPSERT_ROWS,
+    });
     this.db.run(
       `INSERT INTO meta (id, head, covered, revision, last_checkpoint_at, first_uncommitted_at, months, seeded, stale, counters, doc_seq)
        VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -1359,9 +1674,10 @@ export class DeckRoom extends DurableObject<Env> {
       JSON.stringify(meta.months),
       meta.seeded ? 1 : 0,
       meta.stale ? 1 : 0,
-      JSON.stringify(addCounters(this.persisted, this.counters)),
+      JSON.stringify(stored),
       meta.docSeq,
     );
+    return stored;
   }
 
   // -------------------------------------------------------------------------------------------
@@ -1474,12 +1790,21 @@ export class DeckRoom extends DurableObject<Env> {
     // the live document is rebuilt on the first thing that needs it (3.4 item 7): the doc rows
     // the run touched are written from it below
     await this.ensureLive();
-    const answer = await this.postCheckpoint({
-      fromSeq,
-      toSeq,
-      entries,
-      ...(closed && toSeq >= meta.head ? { closed: true } : {}),
-    });
+    let answer: Awaited<ReturnType<DeckRoom['postCheckpoint']>>;
+    try {
+      answer = await this.postCheckpoint({
+        fromSeq,
+        toSeq,
+        entries,
+        ...(closed && toSeq >= meta.head ? { closed: true } : {}),
+      });
+    } catch (error) {
+      if (error instanceof AppCallError && error.status === 404) {
+        this.abandonTail(error);
+        return;
+      }
+      throw error;
+    }
     this.counters.checkpoints += 1;
     if ('conflict' in answer) {
       await this.readmit(answer.revision);
@@ -1527,31 +1852,49 @@ export class DeckRoom extends DurableObject<Env> {
     if (meta.head > meta.covered) await this.armAlarm(Date.now() + 50);
   }
 
+  /**
+   * The checkpoint route answered 404: the deck is gone (trashed and deleted while this object
+   * held entries). The tail has no store to land in, so it is dropped as covered and the alarm
+   * is not re-armed for it; a retry would meet the same 404 for ever (finding 10).
+   */
+  private abandonTail(error: AppCallError): void {
+    const meta = this.meta;
+    if (meta === null) return;
+    this.log('warn', 'the deck is gone; its uncommitted entries are dropped', {
+      covered: meta.covered,
+      head: meta.head,
+      status: error.status,
+    });
+    meta.covered = meta.head;
+    meta.firstUncommittedAt = null;
+    this.writeMeta();
+  }
+
   private async postCheckpoint(body: {
     fromSeq: number;
     toSeq: number;
     entries: Entry[];
     closed?: boolean;
   }): Promise<CheckpointAnswer & { comments?: { revision: number; threadIds: string[] } }> {
-    const deckId = this.deckId ?? '';
+    const deckId = this.requireDeckId();
     // the object's revision rides the body (3.5): a store at another revision answers 409 before
     // anything is written and the re-admission path runs
     const revision = this.meta?.revision;
-    const response = await fetch(
+    const answer = await this.appCall(
+      'checkpoint',
       `${this.appOrigin()}/api/decks/${encodeURIComponent(deckId)}/checkpoint`,
       {
         method: 'POST',
         headers: this.appHeaders(true),
         body: JSON.stringify({ ...body, ...(revision === undefined ? {} : { revision }) }),
-        signal: AbortSignal.timeout(CHECKPOINT_TIMEOUT_MS),
       },
+      CHECKPOINT_TIMEOUT_MS,
     );
-    if (response.status === 409) {
-      const conflict = (await response.json()) as { conflict?: true; revision?: number };
+    if (answer.status === 409) {
+      const conflict = (answer.body ?? {}) as { conflict?: true; revision?: number };
       return { conflict: true, revision: conflict.revision ?? 0 };
     }
-    if (!response.ok) throw new Error(`the checkpoint route answered ${response.status}`);
-    return (await response.json()) as CheckpointAnswer & {
+    return answer.body as CheckpointAnswer & {
       comments?: { revision: number; threadIds: string[] };
     };
   }
@@ -1566,7 +1909,7 @@ export class DeckRoom extends DurableObject<Env> {
   private async readmit(revision: number): Promise<void> {
     const meta = this.meta;
     if (meta === null) return;
-    const deckId = this.deckId ?? '';
+    const deckId = this.requireDeckId();
     const answer = await this.fetchSeed(deckId, meta.revision);
     const document = await this.seedDocument(answer);
     const foreign = (answer.records ?? [])
@@ -1969,11 +2312,16 @@ export class DeckRoom extends DurableObject<Env> {
 
   private async httpCounters(url: URL): Promise<Response> {
     const spin = Math.min(200, Math.max(0, Number(url.searchParams.get('spin') ?? 0)));
+    let spun = 0;
     if (spin > 0) {
-      // day 0's CPU probe (docs/CLOUDFLARE.md 1.3): burns `spin` ms inside the object
-      const until = Date.now() + spin;
+      // day 0's CPU probe (docs/CLOUDFLARE.md 1.3): `spin` blocks of a fixed amount of work
+      // (SPIN_BLOCK_ITERATIONS each), counted by iterations, since the Workers clock does not
+      // advance during synchronous execution and a loop on `Date.now()` never ended on the
+      // preview Worker (the integrator's finding 1: killed after about 30 s)
       let x = 0;
-      while (Date.now() < until) x = (x + 1) % 7;
+      for (let block = 0; block < spin; block += 1)
+        for (let i = 0; i < SPIN_BLOCK_ITERATIONS; i += 1) x = (x * 31 + i) % 1_000_003;
+      spun = spin * SPIN_BLOCK_ITERATIONS + (x === -1 ? 1 : 0);
     }
     let probe: Record<string, number> | undefined;
     if (url.searchParams.get('probe') === 'drop') {
@@ -2000,11 +2348,19 @@ export class DeckRoom extends DurableObject<Env> {
     const meta = this.meta;
     let sockets = 0;
     for (const member of this.members.values()) if (member.ws !== null) sockets += 1;
+    // the counts this read answers are written first (finding 6): `total` is the value the meta
+    // row now holds, so a reading after a wake is never below this one; the write is the read's
+    // own row (`selfRowsWritten`) as the fetch is its own request (`countsSelf`)
+    const stored = this.writeMeta();
+    const total = stored ?? addCounters(this.persisted, this.counters);
     return json({
       // a counters read is a bearer fetch into the object and counts as one request (R5's CF-R1a)
       countsSelf: true,
-      sinceWake: { ...this.counters },
-      total: addCounters(this.persisted, this.counters),
+      selfRowsWritten: stored === null ? 0 : META_UPSERT_ROWS,
+      // false while the object has no meta row: `total` is then this wake's alone
+      durable: stored !== null,
+      sinceWake: { ...this.counters, requestUnits: requestUnitsOf(this.counters) },
+      total: { ...total, requestUnits: requestUnitsOf(total) },
       head: meta?.head ?? 0,
       covered: meta?.covered ?? 0,
       revision: meta?.revision ?? 0,
@@ -2017,7 +2373,7 @@ export class DeckRoom extends DurableObject<Env> {
       colo: this.colo,
       object: this.ctx.id.toString().slice(0, 8),
       ...(probe === undefined ? {} : { probe }),
-      ...(spin > 0 ? { spinMs: spin } : {}),
+      ...(spin > 0 ? { spinBlocks: spin, spinIterations: spun } : {}),
     });
   }
 
@@ -2032,6 +2388,8 @@ export class DeckRoom extends DurableObject<Env> {
       if (member.ws === null || member.claims === null) continue;
       if (named !== null && !named.has(member.claims.pid ?? member.claims.id)) continue;
       member.reauthAt = now;
+      // the deadline rides the attachment, so a wake inside the grace still closes the socket
+      this.writeAttachment(member);
       this.send(member, { t: 'reauth' });
       asked += 1;
     }

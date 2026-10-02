@@ -1,0 +1,128 @@
+{
+  "mode": "wake",
+  "startedAt": "2026-10-02T14:36:37.864Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    42.0439453125,
+    40.69140625,
+    28.9140625
+  ],
+  "readings": {
+    "deck": {
+      "at": 768,
+      "id": "r1fix-wake-mur2gjny",
+      "copy": 200,
+      "link": 200
+    },
+    "exchange": {
+      "at": 1579,
+      "on": "http://127.0.0.1:4481",
+      "status": 303,
+      "location": "/edit/r1fix-wake-mur2gjny"
+    },
+    "firstEdit": {
+      "at": 1698,
+      "ok": true,
+      "head": 1
+    },
+    "countersBeforeIdle": {
+      "at": 5206,
+      "awakeSince": 1790951798583,
+      "head": 1,
+      "covered": 1,
+      "total": {
+        "requests": 6,
+        "messages": 1,
+        "opsFrames": 1,
+        "presenceFrames": 0,
+        "alarms": 1,
+        "checkpoints": 1,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 99,
+        "rowsWritten": 186,
+        "wakes": 1,
+        "requestUnits": 7.05
+      }
+    },
+    "afterIdle": {
+      "at": 246313,
+      "ticketRoute": 200,
+      "editOk": true,
+      "head": 2,
+      "socketOpen": true,
+      "events": [
+        {
+          "kind": "close",
+          "code": 1000,
+          "reason": "closed",
+          "at": 250343
+        }
+      ]
+    },
+    "countersAfter": {
+      "at": 250342,
+      "awakeSince": 1790952043124,
+      "woke": true,
+      "head": 2,
+      "covered": 2,
+      "revisionBefore": 1,
+      "revisionAfter": 2,
+      "total": {
+        "requests": 11,
+        "messages": 3,
+        "opsFrames": 2,
+        "presenceFrames": 0,
+        "alarms": 2,
+        "checkpoints": 2,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 192,
+        "rowsWritten": 191,
+        "wakes": 2,
+        "requestUnits": 13.15
+      },
+      "sinceWake": {
+        "requests": 5,
+        "messages": 2,
+        "opsFrames": 1,
+        "presenceFrames": 0,
+        "alarms": 1,
+        "checkpoints": 1,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 94,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 6.1
+      }
+    },
+    "countersMonotonic": {
+      "at": 250342,
+      "wentBack": [],
+      "delta": {
+        "requests": 5,
+        "messages": 2,
+        "alarms": 1,
+        "checkpoints": 1,
+        "rowsWritten": 5,
+        "rowsRead": 93
+      }
+    },
+    "teardown": {
+      "at": 251963,
+      "deckId": "r1fix-wake-mur2gjny",
+      "trash": 200,
+      "remove": 200,
+      "after": 404
+    }
+  },
+  "endedAt": "2026-10-02T14:40:49.829Z",
+  "loadAtEnd": [
+    19.23779296875,
+    31.623046875,
+    28.12646484375
+  ]
+}

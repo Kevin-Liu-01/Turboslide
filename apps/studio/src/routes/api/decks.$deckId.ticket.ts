@@ -4,10 +4,12 @@ import { jsonResponse } from '@turboslide/agent/http/errors';
 import { CLIENT_ID_PATTERN } from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { readStoredAccessFresh } from '../../server/access';
 import { denialBody } from '../../server/authorize';
 import {
   clientIdMatches,
   decideFor,
+  ensureRealtimeTier,
   mintClientId,
   realtimeTier,
   refuseCrossSite,
@@ -25,7 +27,9 @@ import { hasStoredDeck } from '../../server/root';
  * own MAC (`clientIdMatches`, so a tab refreshes its own id alone), then `mintRoomTicket`. The
  * answer is `{ ticket, expiresAt, tier, url }` where `tier` is the instance's selection as the
  * hand off leaves it; on another tier the answer carries `tier` alone, which the transport reads
- * as the word to switch to (3.6.3). Refused with `denialBody` as the stream route refuses.
+ * as the word to switch to (3.6.3). Refused with `denialBody` as the stream route refuses. The
+ * tier is read after the hand off check and the access record past the cache (the realtime pass 1
+ * fix round, findings 7 and 9).
  */
 
 export const Route = createFileRoute('/api/decks/$deckId/ticket')({
@@ -46,6 +50,16 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   if (given !== null && !CLIENT_ID_PATTERN.test(given))
     return jsonResponse({ error: 'invalid', message: 'client is a server issued client id' }, 400);
   if (!(await hasStoredDeck(deckId))) return jsonResponse({ error: 'not_found' }, 404);
+  // the hand off of 3.8 first (the Worker's `/health`, cached 60 s per instance): a Worker that is
+  // off, unreachable or whose objects cannot reach this app names the blob tier here, which the
+  // transport switches to after its 30 s of failed opens (VERIFICATION.md realtime pass 1 finding
+  // 7: the object closed every open with 4500 `seed failed` and this route kept answering `do`)
+  await ensureRealtimeTier().catch(() => undefined);
+  // the access record past this instance's cache (finding 9): the route answers the object's
+  // `reauth` within milliseconds of an access write on another instance, and the object asks
+  // once (3.3), so a cached record let a revoked viewer keep its socket. One store read per
+  // ticket, which a tab asks for every 8 minutes and at a reauth
+  await readStoredAccessFresh(deckId).catch(() => undefined);
   const identity = await requestIdentity(request);
   const cookieHeaders: Record<string, string> =
     identity.setCookie === undefined ? {} : { 'set-cookie': identity.setCookie };

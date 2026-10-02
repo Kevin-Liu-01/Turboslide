@@ -1,0 +1,37 @@
+{
+  "mode": "stranger",
+  "startedAt": "2026-10-02T14:36:14.018Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    44.90673828125,
+    41.12158203125,
+    28.7138671875
+  ],
+  "readings": {
+    "before": {
+      "at": 49,
+      "status": 200,
+      "seeds": 0
+    },
+    "stranger": {
+      "at": 15091,
+      "upgraded": true,
+      "closed": {
+        "code": 4401,
+        "reason": "no join",
+        "at": 15073
+      },
+      "seedsAfter": 0,
+      "head": 0,
+      "listedOpen": false
+    }
+  },
+  "endedAt": "2026-10-02T14:36:29.114Z",
+  "loadAtEnd": [
+    41.185546875,
+    40.4921875,
+    28.70654296875
+  ]
+}

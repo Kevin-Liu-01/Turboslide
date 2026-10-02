@@ -882,9 +882,15 @@ export const presenceListResultSchema = z.strictObject({
   others: z.array(participantSchema),
 });
 
-/** The realtime tiers and transports (SPEC-3 2.5, 3.10). */
-export const SYNC_TIERS = ['memory', 'redis', 'blob'] as const;
-export const SYNC_TRANSPORTS = ['sse', 'poll', 'file'] as const;
+/**
+ * The realtime tiers and transports (SPEC-3 2.5, 3.10). `do` is the Durable Object tier of the
+ * Cloudflare phase (docs/CLOUDFLARE.md 3.6.1; build/r1.md R1-INTd) and `ws` the socket a tab holds
+ * to its deck's object there (3.6.3; build/r2.md R2-C10).
+ */
+export const SYNC_TIERS = ['memory', 'redis', 'blob', 'do'] as const;
+export const SYNC_TRANSPORTS = ['sse', 'poll', 'file', 'ws'] as const;
+export type SyncTier = (typeof SYNC_TIERS)[number];
+export type SyncTransport = (typeof SYNC_TRANSPORTS)[number];
 
 export const syncStatusSchema = z.strictObject({
   seq: z.number().int().nonnegative().describe('The last stream entry this client saw'),
@@ -908,6 +914,17 @@ export const syncStatusSchema = z.strictObject({
       lists: z.record(z.string(), z.number().int().nonnegative()).optional(),
     })
     .optional(),
+  /** The object this tab's socket reached on the do tier, from the object's `room` frame (docs/CLOUDFLARE.md 3.6.3; build/r2.md R2-C10): the colo that answered the upgrade, the first characters of the object id and the checkpoint cadence in ms; absent off the do tier and in the server's answer */
+  room: z
+    .strictObject({
+      colo: z.string(),
+      object: z.string(),
+      idleMs: z.number().int().nonnegative(),
+      maxMs: z.number().int().nonnegative(),
+    })
+    .optional(),
+  /** The object's colo as the server read it from the object's counters on the do tier (docs/CLOUDFLARE.md 2.1; build/r5.md CF-R1b), one across every instance of one deck; null when the Worker did not answer, absent off the do tier */
+  colo: z.string().nullable().optional(),
 });
 
 const shareLinkView = z.strictObject({

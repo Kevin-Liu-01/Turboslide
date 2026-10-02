@@ -5,6 +5,7 @@
 // act through an attached studio page on the hosted transports; on a checkout without one they
 // refuse with the sentence that names what is missing, except the pointer's persistence on the
 // principal record, which the CLI writes so the next editor session on this checkout reads it.
+import type { SyncTier, SyncTransport } from '@turboslide/schema/actions';
 import type { Author } from '@turboslide/schema/mutations';
 
 import type { LocalPrincipalRecord } from './principal.ts';
@@ -105,8 +106,8 @@ export async function syncStatus(deps: PresenceDeps): Promise<{
   revision: number;
   pending: number;
   retained: number;
-  tier: 'memory' | 'redis' | 'blob';
-  transport: 'sse' | 'poll' | 'file';
+  tier: SyncTier;
+  transport: SyncTransport;
   connected: boolean;
 }> {
   return {

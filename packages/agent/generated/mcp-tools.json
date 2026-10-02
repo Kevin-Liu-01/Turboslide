@@ -45997,7 +45997,8 @@
           "enum": [
             "memory",
             "redis",
-            "blob"
+            "blob",
+            "do"
           ]
         },
         "transport": {
@@ -46005,7 +46006,8 @@
           "enum": [
             "sse",
             "poll",
-            "file"
+            "file",
+            "ws"
           ]
         },
         "connected": {
@@ -46070,6 +46072,40 @@
             "instance"
           ],
           "additionalProperties": false
+        },
+        "room": {
+          "type": "object",
+          "properties": {
+            "colo": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "idleMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maxMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "colo",
+            "object",
+            "idleMs",
+            "maxMs"
+          ],
+          "additionalProperties": false
+        },
+        "colo": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -66718,7 +66754,8 @@
             "enum": [
               "memory",
               "redis",
-              "blob"
+              "blob",
+              "do"
             ]
           },
           "transport": {
@@ -66726,7 +66763,8 @@
             "enum": [
               "sse",
               "poll",
-              "file"
+              "file",
+              "ws"
             ]
           },
           "connected": {
@@ -66791,6 +66829,40 @@
               "instance"
             ],
             "additionalProperties": false
+          },
+          "room": {
+            "type": "object",
+            "properties": {
+              "colo": {
+                "type": "string"
+              },
+              "object": {
+                "type": "string"
+              },
+              "idleMs": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "maxMs": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "colo",
+              "object",
+              "idleMs",
+              "maxMs"
+            ],
+            "additionalProperties": false
+          },
+          "colo": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [

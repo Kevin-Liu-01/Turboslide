@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import type { Dispatcher } from '@turboslide/agent/dispatch';
-import type { ActionId } from '@turboslide/schema/actions';
+import type { ActionId, SyncTier } from '@turboslide/schema/actions';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { authorSchema } from '@turboslide/schema/mutations';
@@ -412,8 +412,40 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
 export type StoreStatusDeps = {
   deckId: string;
   store: DeckStore;
-  tier: 'memory' | 'redis' | 'blob';
+  tier: SyncTier;
 };
+
+/** How long one deck's object colo is kept per instance before the counters route is read again. */
+const OBJECT_COLO_CACHE_MS = 60_000;
+const objectColoCache = new Map<string, { colo: string | null; readAt: number }>();
+
+/**
+ * The colo of the deck's object on the do tier (docs/CLOUDFLARE.md 2.1: `sync.status` names the
+ * object's colo, one across both tabs; build/r5.md CF-R1b), read from the object's counters route
+ * under the room bearer and kept per deck for a minute per instance, so the cost probe's five
+ * samples of `sync.status` cost one object request. Null when the Worker did not answer; undefined
+ * (the field left out) off the do tier and on a tree whose action table does not carry it.
+ */
+async function objectColoFor(deps: StoreStatusDeps): Promise<string | null | undefined> {
+  if (deps.tier !== 'do' || !outputAccepts('sync.status', ['colo'])) return undefined;
+  const cached = objectColoCache.get(deps.deckId);
+  const now = Date.now();
+  if (cached !== undefined && now - cached.readAt < OBJECT_COLO_CACHE_MS) return cached.colo;
+  const { realtimeChannel } = await import('./room');
+  const { isDoChannel } = await import('@turboslide/realtime/do');
+  const channel = realtimeChannel();
+  let colo: string | null = null;
+  if (isDoChannel(channel)) {
+    try {
+      const counters = await channel.counters(deps.deckId);
+      colo = typeof counters.colo === 'string' && counters.colo !== '' ? counters.colo : null;
+    } catch {
+      colo = null;
+    }
+  }
+  objectColoCache.set(deps.deckId, { colo, readAt: now });
+  return colo;
+}
 
 /**
  * True when the action table's output schema accepts a field at `path` (a strict object at every
@@ -461,9 +493,11 @@ export function registerStoreStatusActions(dispatcher: Dispatcher, deps: StoreSt
       transport: 'file' as const,
       connected: false,
     };
-    if (!outputAccepts('sync.status', ['storeCalls'])) return status;
+    const colo = await objectColoFor(deps);
+    const named = colo === undefined ? status : { ...status, colo };
+    if (!outputAccepts('sync.status', ['storeCalls'])) return named;
     const { storeCallsFor } = await import('@turboslide/store/blob-store');
-    return { ...status, storeCalls: storeCallsFor(deps.deckId) };
+    return { ...named, storeCalls: storeCallsFor(deps.deckId) };
   });
   dispatcher.register('deck.info', async () => {
     const { deckInfo } = await import('@turboslide/agent/http/readers');

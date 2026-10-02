@@ -1,9 +1,114 @@
 {
-  // The realtime Worker's configuration (docs/CLOUDFLARE.md 3.6.2). This is the integrator's
-  // placeholder with the three required keys alone; R6 owns the file and lands the Durable Object
-  // binding and its sqlite export, the D1 bindings, the vars and the preview environment on day 0
-  // from R1's request.
+  // The realtime Worker's configuration (docs/CLOUDFLARE.md 3.6.2; lane R6 owns this file, 5.2).
+  // One Worker, turboslide-realtime, holds one SQLite backed Durable Object per deck (DeckRoom,
+  // bound as DECK_ROOM) and the accounts database D1 (bound as ACCOUNTS). The preview environment
+  // is the second Worker turboslide-realtime-preview with its own object namespace and its own D1
+  // (the environments page: "Cloudflare effectively creates a new Worker with the name
+  // <top-level-name>-<environment-name>", 2026-09-22). The hosts are
+  // turboslide-realtime.kk23907751.workers.dev and turboslide-realtime-preview.kk23907751.workers.dev
+  // (the account's existing workers.dev subdomain; ~/.config/turboslide/cloudflare.env carries the
+  // account id, the subdomain and the two D1 ids, none of them a secret).
+  //
+  // What is not here, on purpose: no account_id (CLOUDFLARE_ACCOUNT_ID carries it, the system
+  // environment variables page as W5 3.2 cites it); no secret (TURBOSLIDE_ROOM_SECRET,
+  // TURBOSLIDE_ROOM_BEARER and, on the preview, VERCEL_AUTOMATION_BYPASS_SECRET are set with
+  // `wrangler secret put <NAME> [--env preview]` from stdin by `scripts/hosting/realtime-env.mjs
+  // worker-secrets`, 3.6.2); no `migrations` block (the declarative `exports` map replaces it and
+  // the two are mutually exclusive, the configuration page of 2026-09-30); no placement hint on the
+  // object (TURBOSLIDE_ROOM_HINT empty: idFromName with no hint, section 8 question 8).
+  //
+  // Inheritance (the configuration page, "Inheritable keys" and "Non-inheritable keys", read
+  // 2026-10-01): name, main, compatibility_date, workers_dev, observability and exports are
+  // inheritable and are written once; durable_objects, d1_databases and vars are bindings and
+  // are repeated in the preview environment, because a named environment inherits none of them.
+  // So the open question of design B 10 item 11 (whether `exports` repeats per environment) is
+  // answered by the page: it does not.
+  //
+  // Deploys: `pnpm exec wrangler deploy --var TURBOSLIDE_BUILD_COMMIT:<sha>` (production) and
+  // `pnpm exec wrangler deploy --env preview --var TURBOSLIDE_BUILD_COMMIT:<sha> --var
+  // TURBOSLIDE_APP_ORIGIN:<the Vercel preview url>` (the preview, per Vercel preview deployment,
+  // 5.5 item 2), from this folder, by the integrator (preview) and the ship step or the guard
+  // (production) alone. `pnpm exec wrangler deploy --dry-run [--env preview]` validates this file
+  // and the bundle without an upload.
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "turboslide-realtime",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "observability": {
+    // Workers Logs on, every request (setup.do.memory reads the hour's logs for an isolate
+    // restart or a memory error, 2.3); traces are not enabled here, since no row reads them and
+    // their plan availability was read on no page this round
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  // The object: one per deck by idFromName(deckId); the class DeckRoom is exported by src/index.ts
+  // (R1's src/deck-room.ts) with the SQLite backend, the only backend the Free plan offers
+  // ("Workers Free plan: Only Durable Objects with SQLite storage backend are available", the
+  // Durable Objects limits page, 2026-06-01)
+  "durable_objects": {
+    "bindings": [{ "name": "DECK_ROOM", "class_name": "DeckRoom" }],
+  },
+  "exports": {
+    "DeckRoom": { "type": "durable-object", "storage": "sqlite" },
+  },
+  // The accounts database (section 4): created 2026-10-01 with --location=enam; the id is the
+  // database's and not a secret. The control tables (rt_open, rt_flags) and the realtime flag row
+  // come from migrations/0001_control.sql (R1's), applied with `realtime-env.mjs worker-migrate`
+  // (wrangler d1 migrations apply turboslide-accounts --remote) before the first deploy.
+  "d1_databases": [
+    {
+      "binding": "ACCOUNTS",
+      "database_name": "turboslide-accounts",
+      "database_id": "87d3f46e-ef12-428d-b115-5c34fd322b5b",
+      // the folder of the .sql files `wrangler d1 migrations apply` reads (R1's request R1-R6c;
+      // the default is the same folder, written out so the two environments read alike)
+      "migrations_dir": "migrations",
+    },
+  ],
+  "vars": {
+    // the app the object calls back (the checkpoint and seed routes, 3.2) and the only origin a
+    // ticket's `org` claim may name on production; echoed by /health as appOrigin
+    "TURBOSLIDE_APP_ORIGIN": "https://www.turboslide.com",
+    // the room protocol version the hello and the ticket carry (3.3)
+    "TURBOSLIDE_PROTOCOL": "1",
+    // the object's location hint for idFromName: empty means none (section 8 question 8; `enam`
+    // would pin the object near iad1)
+    "TURBOSLIDE_ROOM_HINT": "",
+    // the checkpoint cadence (3.4 item 8): today's product rule of one record per typing run;
+    // 10000 and 30000 are the first lever of cost.do.rows-written (2.2, section 8 question 7)
+    "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
+    "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+    // the commit the Worker serves, answered by /health; empty here and passed at every deploy as
+    // `--var TURBOSLIDE_BUILD_COMMIT:<sha>` (the way /api/agent reads the Vercel deployment's
+    // stamp, apps/studio/src/server/build-commit.ts)
+    "TURBOSLIDE_BUILD_COMMIT": "",
+  },
+  "env": {
+    // The preview Worker turboslide-realtime-preview: the gate's Worker (5.5 item 2), never a
+    // Version URL of the production Worker ("Not generated for Durable Objects", W1 6.1). Its
+    // TURBOSLIDE_APP_ORIGIN is empty here and set per Vercel preview deployment with --var; its
+    // D1 is turboslide-accounts-preview; its secrets are its own (worker-secrets --env preview).
+    "preview": {
+      "durable_objects": {
+        "bindings": [{ "name": "DECK_ROOM", "class_name": "DeckRoom" }],
+      },
+      "d1_databases": [
+        {
+          "binding": "ACCOUNTS",
+          "database_name": "turboslide-accounts-preview",
+          "database_id": "9b66676e-55ac-4d14-a063-5cc7f0091789",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "vars": {
+        "TURBOSLIDE_APP_ORIGIN": "",
+        "TURBOSLIDE_PROTOCOL": "1",
+        "TURBOSLIDE_ROOM_HINT": "",
+        "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
+        "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+        "TURBOSLIDE_BUILD_COMMIT": "",
+      },
+    },
+  },
 }

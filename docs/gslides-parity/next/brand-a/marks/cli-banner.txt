@@ -1,0 +1,30 @@
+# 4 lines, 8 half rows over the cap, 33 columns
+     ██████████████  ███████████▀  Turboslide 0.0.0
+ ▄▄▄▄▄█▀                 ██        https://www.turboslide.com
+▀▀▀▀▀██     ██████      ▄█         193 actions, effects backend: wasm
+  ████████████████      ██         checkout /Users/kevinliu/repos/Turboslide-next
+
+# 5 lines, 10 half rows over the cap, 41 columns
+      ██████████████████  ▄██████████████  Turboslide 0.0.0
+       ███                     ███         https://www.turboslide.com
+▄████████      ▄▄▄▄▄▄▄         ██          193 actions, effects backend: wasm
+      ███     ▄███████        ███          checkout /Users/kevinliu/repos/Turboslide-next
+  ████████████████████        ██▀
+
+# 6 lines, 12 half rows over the cap, 50 columns
+       ▄████████████████████▀   █████████████████   Turboslide 0.0.0
+       ▀▀███▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    ▀▀▀▀▀████▀▀▀▀▀▀▀▀   https://www.turboslide.com
+ ██████████▀                         ███            193 actions, effects backend: wasm
+▄██████████       ▄████████         ▄███            checkout /Users/kevinliu/repos/Turboslide-next
+   ▄▄▄▄▄███▄▄▄▄▄▄▄█████████         ███▀
+  ████████████████████████          ███
+
+# 8 lines, 16 half rows over the cap, 66 columns
+          ████████████████████████████     ██████████████████████   Turboslide 0.0.0
+         ▄███████████████████████████▀    ███████████████████████   https://www.turboslide.com
+            ████                                 ▄████              193 actions, effects backend: wasm
+ ▀▀▀▀▀▀▀▀▀▀▀▀▀▀                                  ▀▀▀▀▀              checkout /Users/kevinliu/repos/Turboslide-next
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄         ▄▄▄▄▄▄▄▄▄▄▄▄             ▄▄▄▄
+          ████▀         ████████████            █████
+   ▄███████████████████████████████▀            ████
+   ████████████████████████████████            ▄████

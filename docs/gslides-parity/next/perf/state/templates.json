@@ -1,0 +1,50 @@
+[
+  {
+    "c": "templates.card.gt-brand",
+    "t": "BrandThis section covers the company, its values, its voice, the name, and the m"
+  },
+  {
+    "c": "templates.card.gt-brand.open",
+    "t": ""
+  },
+  {
+    "c": "templates.card.gt-brand.name",
+    "t": "General Translation brand deck"
+  },
+  {
+    "c": "templates.card.gt-brand.menu",
+    "t": "⋮"
+  },
+  {
+    "c": "templates.card.core-spec-template-muouve9u",
+    "t": ".ts-sheet:not([data-theme-base]):not([data-theme='dark']) { --blue: #0b3d91; --a"
+  },
+  {
+    "c": "templates.card.core-spec-template-muouve9u.open",
+    "t": ""
+  },
+  {
+    "c": "templates.card.core-spec-template-muouve9u.name",
+    "t": "Core spec"
+  },
+  {
+    "c": "templates.card.core-spec-template-muouve9u.menu",
+    "t": "⋮"
+  },
+  {
+    "c": "templates.card.blank",
+    "t": "Click to add titleClick to add subtitleUsed for new presentationsBlank1 slideOne"
+  },
+  {
+    "c": "templates.card.blank.default",
+    "t": "Used for new presentations"
+  },
+  {
+    "c": "templates.card.blank.open",
+    "t": ""
+  },
+  {
+    "c": "templates.card.blank.name",
+    "t": "Blank"
+  }
+]

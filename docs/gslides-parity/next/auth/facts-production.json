@@ -1,0 +1,89 @@
+{
+  "startedAt": "2026-10-02T01:55:11.025Z",
+  "uptime": "18:55  up 7 days,  8:52, 2 users, load averages: 19.47 23.02 30.87",
+  "steps": {
+    "prod1.new": {
+      "ok": true,
+      "at": "2026-10-02T01:55:11.266Z",
+      "value": {
+        "status": 200,
+        "state": {
+          "account": {
+            "principalId": "anon_fc502f17-d86c-422b-8ae0-fba9885453cb",
+            "label": "Tantalum 788",
+            "trust": "label",
+            "signedIn": false,
+            "signInAvailable": false,
+            "mark": {
+              "density": 4,
+              "glyphSeed": 1887741533,
+              "presenter": false,
+              "self": true,
+              "trust": "label",
+              "label": "Tantalum 788",
+              "variant": "initials",
+              "initials": "T",
+              "hue": null
+            }
+          },
+          "revision": 0,
+          "url": "https://www.turboslide.com/new"
+        },
+        "info": {
+          "id": "untitled-20261002-amrk",
+          "revision": 0
+        },
+        "shot": "30-production-editor.png"
+      },
+      "ms": 3338
+    },
+    "prod2.account-menu": {
+      "ok": true,
+      "at": "2026-10-02T01:55:14.604Z",
+      "value": {
+        "rows": [
+          "account.sentence",
+          "account.changeName",
+          "account.changeAvatar",
+          "account.forget"
+        ],
+        "head": "TTantalum 788Not signed in",
+        "shot": "31-production-account-menu.png"
+      },
+      "ms": 708
+    },
+    "prod3.picture-tab": {
+      "ok": true,
+      "at": "2026-10-02T01:55:15.313Z",
+      "value": {
+        "sentence": "Sign in to upload a picture",
+        "uploadControls": 0,
+        "shot": "32-production-picture-tab.png"
+      },
+      "ms": 1505
+    },
+    "prod4.files-page": {
+      "ok": true,
+      "at": "2026-10-02T01:55:16.818Z",
+      "value": {
+        "status": 200,
+        "signInWords": false,
+        "words": "Turboslide\nStart a new presentation\nTemplate gallery\nBlank presentation\nGT brand deck\nRecent presentations\n\nEvery presentation on this Turboslide is listed here\n\nSort by\nLast opened by me\nLast modified\nTitle\nCost probe cost.redis.commands\nCost probe cost.redis.commands\nEdited today at 6:53 PM\nPerf audit scratch\nPerf audit scratch\nEdited today at 6:50 PM\nGeneral Translation brand deck\nGeneral Translation brand deck\nEdited today at 6:42 PM\nUntitled presentation\nUntitled presentation\nEdited today a",
+        "shot": "33-production-files-page.png"
+      },
+      "ms": 17087
+    },
+    "prod5.access-page": {
+      "ok": true,
+      "at": "2026-10-02T01:55:33.905Z",
+      "value": {
+        "status": 404,
+        "words": "You need access\n\nThis presentation is not available to you, or does not exist.\n\nYour presentations\nNew presentation\n\nIf you were invited by email, sign in with that address from your presentations, then open this address again",
+        "shot": "34-production-access-page.png"
+      },
+      "ms": 2956
+    }
+  },
+  "draft": "untitled-20261002-amrk",
+  "endedAt": "2026-10-02T01:55:36.862Z"
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide sign in C</title>
+<script>(function(){var t=new URLSearchParams(location.search).get('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<link rel="stylesheet" href="../../../../../packages/chrome/src/tokens.css">
+<link rel="stylesheet" href="../../../../../packages/chrome/src/brand.css">
+<link rel="stylesheet" href="c-tokens.css">
+<link rel="stylesheet" href="c.css">
+<script src="data.js"></script>
+<script src="mock.js"></script>
+<link rel="stylesheet" href="editor.css">
+<script src="editor.js"></script>
+<style>
+  .s-scrim { position: fixed; inset: 0; background: var(--pt-scrim); z-index: 20; }
+  .s-dialog {
+    position: fixed; z-index: 21; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 760px; height: 440px; display: grid; grid-template-columns: 400px minmax(0, 1fr);
+    background: var(--pt-paper); border: 1px solid var(--pt-hair);
+  }
+  .s-col { display: flex; flex-direction: column; padding: 40px 40px 28px; min-width: 0; color: var(--pt-ink); }
+  .s-col h2 { margin-top: 36px; font-size: var(--ts-h2); line-height: 1.18; letter-spacing: -0.025em; }
+  .s-col p.s-say { margin-top: 12px; font-size: var(--ts-body); line-height: 1.6; color: var(--pt-ink-2); }
+  .s-error { min-height: 20px; margin-top: 8px; font-size: var(--ts-label); line-height: 20px; color: var(--pt-ink-2); }
+  .s-foot { margin-top: auto; border-top: 1px solid var(--pt-hair-soft); padding-top: 14px; font-size: var(--ts-small); line-height: 1.55; color: var(--pt-ink-2); }
+  .s-field { position: relative; border-left: 1px solid var(--pt-hair); }
+  .s-field .c-credit { right: 0; bottom: 0; max-width: 236px; }
+  .s-close {
+    position: absolute; right: 8px; top: 8px; z-index: 5; width: 32px; height: 32px; display: grid; place-items: center;
+    appearance: none; padding: 0; border: 1px solid var(--pt-hair); border-radius: 0; background: var(--pt-paper); color: var(--pt-ink-2);
+  }
+  /* Google's button, drawn to developers.google.com/identity/branding-guidelines (read 2026-10-01): the light theme
+     on paper, the dark theme on ink, the standard colour G on white, 14/20 Google Sans Medium, the rectangular shape.
+     Google's constants, so the token remap does not touch them. */
+  .g-btn {
+    position: relative; width: 100%; height: 40px; margin-top: 32px; display: flex; align-items: center; justify-content: center;
+    padding: 0 12px 0 42px; border: 1px solid #747775; border-radius: 4px; background: #ffffff; color: #1f1f1f;
+    font: 500 14px/20px 'Google Sans', Roboto, Arial, sans-serif; letter-spacing: 0.25px; white-space: nowrap; appearance: none;
+  }
+  .g-btn .g { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; display: grid; place-items: center; }
+  :root[data-theme='dark'] .g-btn { background: #131314; border-color: #8e918f; color: #e3e3e3; }
+  :root[data-theme='dark'] .g-btn .g { background: #ffffff; border-radius: 50%; width: 26px; height: 26px; left: 8px; }
+  /* the phone: the dialog is a sheet over the whole viewport, the field a band at its head */
+  .s-sheet { position: fixed; inset: 0; z-index: 21; background: var(--pt-paper); display: flex; flex-direction: column; overflow: hidden; }
+  .s-sheet .s-field { position: relative; height: 176px; flex: 0 0 auto; border-left: 0; border-bottom: 1px solid var(--pt-hair); }
+  .s-sheet .s-field img { position: absolute; right: 0; top: 0; }
+  .s-sheet .s-col { padding: 24px 24px 24px; flex: 1 1 auto; }
+  .s-sheet .s-col h2 { margin-top: 28px; }
+  .s-sheet .s-foot { margin-top: 24px; }
+</style>
+</head>
+<body>
+<div id="editor"></div>
+<div id="layer"></div>
+<script>
+  document.fonts.ready.then(function () {
+    const narrow = matchMedia('(max-width: 799px)').matches;
+    C.buildEditor(document.getElementById('editor'));
+    const credit = { title: 'The Oxford English Dictionary', credit: 'Oxford University Press, 1897, scanned by the Internet Archive, public domain' };
+    const col =
+      '<div class="s-col">' +
+      '<span style="color:var(--pt-ink)">' + C.mark(16) + '</span>' +
+      '<h2 id="s-title">Sign in</h2>' +
+      '<p class="s-say">The presentations you made in this browser move to your Google account. Sign in on another device to open them there.</p>' +
+      '<button class="g-btn"><span class="g">' + C.googleG(18) + '</span>Continue with Google</button>' +
+      '<p class="s-error" role="alert"></p>' +
+      '<p class="s-foot">You can keep working without an account.</p>' +
+      '</div>';
+    const field = C.field(narrow ? 'signin-band' : 'signin-wide', 's-field', credit, narrow, '<button class="s-close" aria-label="Close">' + C.icon('close') + '</button>');
+    document.getElementById('layer').innerHTML = narrow
+      ? '<div class="s-sheet" role="dialog" aria-labelledby="s-title">' + field + col + '</div>'
+      : '<div class="s-scrim"></div><div class="s-dialog" role="dialog" aria-labelledby="s-title">' + col + field + '</div>';
+    document.body.dataset.ready = '1';
+  });
+</script>
+</body>
+</html>

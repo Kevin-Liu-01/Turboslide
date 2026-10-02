@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide editor C</title>
+<script>(function(){var t=new URLSearchParams(location.search).get('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<link rel="stylesheet" href="../../../../../packages/chrome/src/tokens.css">
+<link rel="stylesheet" href="../../../../../packages/chrome/src/brand.css">
+<link rel="stylesheet" href="c-tokens.css">
+<link rel="stylesheet" href="c.css">
+<script src="data.js"></script>
+<script src="mock.js"></script>
+<link rel="stylesheet" href="editor.css">
+<script src="editor.js"></script>
+</head>
+<body>
+<div id="editor"></div>
+<script>
+  document.fonts.ready.then(function () { C.buildEditor(document.getElementById('editor')); document.body.dataset.ready = '1'; });
+</script>
+</body>
+</html>

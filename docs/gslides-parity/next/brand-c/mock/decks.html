@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide decks C</title>
+<script>(function(){var t=new URLSearchParams(location.search).get('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<link rel="stylesheet" href="../../../../../packages/chrome/src/tokens.css">
+<link rel="stylesheet" href="../../../../../packages/chrome/src/brand.css">
+<link rel="stylesheet" href="c-tokens.css">
+<link rel="stylesheet" href="c.css">
+<script src="data.js"></script>
+<script src="mock.js"></script>
+<style>
+  .d-bar { height: var(--ts-nav-h); background: var(--pt-paper); }
+  .d-bar-row { height: 100%; display: flex; align-items: center; gap: 16px; }
+  .d-search {
+    margin: 0 auto; width: min(480px, 100%); height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    border: 1px solid var(--pt-field); border-radius: var(--pt-radius); color: var(--pt-titanium); font-size: var(--ts-small);
+  }
+  .d-bar-right { display: flex; align-items: center; gap: 8px; }
+  .d-h { font-size: var(--ts-title); line-height: 1.35; letter-spacing: -0.01em; }
+  .d-new { padding-top: 24px; padding-bottom: 28px; }
+  .d-templates { margin-top: 16px; display: flex; gap: 24px; }
+  .d-t { display: flex; flex-direction: column; gap: 10px; width: 208px; }
+  .d-t .frame { border: 1px solid var(--pt-edge); line-height: 0; }
+  .d-t b { font-size: var(--ts-small); font-weight: 500; letter-spacing: -0.005em; }
+  .d-recent { padding-top: 24px; }
+  .d-head { display: flex; align-items: center; justify-content: space-between; }
+  .d-tools { display: flex; align-items: center; gap: 8px; }
+  .d-seg { display: inline-flex; height: 32px; border: 1px solid var(--pt-hair); border-radius: var(--pt-radius); overflow: hidden; }
+  .d-seg button { appearance: none; width: 34px; border: 0; background: none; color: var(--pt-ink-2); display: grid; place-items: center; padding: 0; }
+  .d-seg button + button { border-left: 1px solid var(--pt-hair); }
+  .d-seg button.is-on { background: var(--pt-ink); color: var(--pt-paper); }
+  .d-sort { height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--pt-field); border-radius: var(--pt-radius); font-size: var(--ts-label); color: var(--pt-ink); }
+  .d-table { margin-top: 16px; border-top: 1px solid var(--pt-hair); }
+  .d-tr { display: grid; grid-template-columns: minmax(0, 1fr) 200px 220px 32px; gap: 16px; align-items: center; min-height: 56px; border-bottom: 1px solid var(--pt-hair-soft); font-size: var(--ts-small); }
+  .d-tr.is-head { min-height: 36px; font-size: var(--ts-label); color: var(--pt-ink-2); }
+  .d-name { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .d-name .frame { border: 1px solid var(--pt-edge); line-height: 0; flex: 0 0 auto; }
+  .d-name b { font-weight: 500; letter-spacing: -0.005em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-name small { display: none; }
+  .d-owner, .d-date { color: var(--pt-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-date { font-variant-numeric: tabular-nums; }
+  @media (max-width: 720px) {
+    .d-bar-row { gap: 8px; }
+    .d-search { display: none; }
+    .d-bar-right { margin-left: auto; }
+    .d-templates { gap: 16px; }
+    .d-t { width: calc((100% - 16px) / 2); }
+    .d-tr { grid-template-columns: minmax(0, 1fr) 32px; gap: 12px; min-height: 60px; }
+    .d-tr.is-head { display: none; }
+    .d-owner, .d-date { display: none; }
+    .d-name { align-items: center; }
+    .d-name span { display: flex; flex-direction: column; min-width: 0; }
+    .d-name small { display: block; font-size: var(--ts-label); color: var(--pt-ink-2); white-space: nowrap; }
+    .d-seg { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="c-rails"></div>
+<header class="d-bar"><div class="c-col d-bar-row" id="bar"></div></header>
+<div class="c-seam"></div>
+<section class="c-col d-new" id="new"></section>
+<div class="c-seam"></div>
+<section class="c-col d-recent" id="recent"></section>
+<div style="height:200px"></div>
+<script>
+  const narrow = matchMedia('(max-width: 720px)').matches;
+  document.getElementById('bar').innerHTML =
+    '<a class="c-lockup" href="#">' + C.mark(16) + '<b>Turboslide</b></a>' +
+    '<label class="d-search">' + C.icon('search') + '<span>Search presentations</span></label>' +
+    '<div class="d-bar-right">' + (narrow ? '<button class="c-glyph" aria-label="Search presentations">' + C.icon('search') + '</button>' : '') + C.themeGlyph() + '<button class="c-glyph" aria-label="Your account">' + C.chip(11) + '</button></div>';
+  const tw = narrow ? Math.floor((window.innerWidth - 64 - 16) / 2) - 2 : 206;
+  const tk = tw / 1600;
+  document.getElementById('new').innerHTML =
+    '<h2 class="d-h">Start a new presentation</h2>' +
+    '<div class="d-templates">' +
+    '<a class="d-t" href="#"><span class="frame">' + C.slide({ k: tk }) + '</span><b>Blank presentation</b></a>' +
+    '<a class="d-t" href="#"><span class="frame">' + C.slide({ k: tk, gt: true }) + '</span><b>GT brand deck</b></a>' +
+    '</div>';
+  const decks = [
+    ['Q4 board update', 'You', 'Today at 6:38 PM'],
+    ['Acme renewal pitch', 'You', 'Today at 2:10 PM'],
+    ['Hiring plan for 2027', 'Shared with you', 'Yesterday at 4:52 PM'],
+    ['Customer onboarding walkthrough', 'You', 'Sep 29, 2026'],
+    ['October design review', 'You', 'Sep 26, 2026'],
+    ['Untitled presentation', 'You', 'Sep 24, 2026'],
+    ['Pricing page proposal', 'Shared with you', 'Sep 19, 2026'],
+    ['Sales kickoff agenda', 'You', 'Sep 12, 2026'],
+    ['Partner program overview', 'You', 'Sep 3, 2026'],
+  ];
+  let rows = '<div class="d-tr is-head"><span>Name</span><span>Owner</span><span>Last opened by me</span><span></span></div>';
+  decks.forEach(function (d, i) {
+    rows += '<div class="d-tr"><span class="d-name"><span class="frame">' + C.slide({ k: 64 / 1600, title: d[0] === 'Untitled presentation' ? '' : d[0] }) + '</span><span><b>' + d[0] + '</b><small>' + d[2] + '</small></span></span>' +
+      '<span class="d-owner">' + d[1] + '</span><span class="d-date">' + d[2] + '</span>' +
+      '<button class="c-glyph" aria-label="More actions for ' + d[0] + '">' + C.icon('ellipsis-vertical') + '</button></div>';
+  });
+  document.getElementById('recent').innerHTML =
+    '<div class="d-head"><h2 class="d-h">Recent presentations</h2><div class="d-tools">' +
+    '<span class="d-seg"><button class="is-on" aria-label="List">' + C.icon('queue-list') + '</button><button aria-label="Grid">' + C.icon('squares-2x2') + '</button></span>' +
+    (narrow ? '<button class="c-glyph" aria-label="Sort by: Last opened by me">' + C.icon('arrows-up-down') + '</button>' : '<span class="d-sort">Last opened by me' + C.icon('chevron-down') + '</span>') + '</div></div>' +
+    '<div class="d-table">' + rows + '</div>';
+  document.fonts.ready.then(function () { C.crosses(); document.body.dataset.ready = '1'; });
+</script>
+</body>
+</html>

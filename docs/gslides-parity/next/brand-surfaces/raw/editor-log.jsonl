@@ -1,0 +1,76 @@
+{"at":"2026-10-02T01:44:37.677Z","draftSettledMs":2440}
+{"at":"2026-10-02T01:45:09.390Z","created":"untitled-20261002-77a7","ms":34153}
+{"at":"2026-10-02T01:45:09.390Z","settledMs":34153}
+{"at":"2026-10-02T01:45:11.882Z","open":"1440-light","ms":2374}
+{"at":"2026-10-02T01:45:11.906Z","shot":"editor-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:12.725Z","shot":"menu-file-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:14.282Z","shot":"menu-insert-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:15.839Z","shot":"menu-help-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:18.205Z","shot":"dialog-share-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:19.758Z","shot":"menu-account-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:19.771Z","accountRows":["Change name","Change avatar","Forget this browser","File","Edit","View","Insert","Format","Slide","Arrange","Tools","Help"]}
+{"at":"2026-10-02T01:45:22.662Z","shot":"panel-versions-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:25.032Z","shot":"panel-themes-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:26.868Z","shot":"dialog-shortcuts-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:29.208Z","thumbs":3}
+{"at":"2026-10-02T01:45:30.065Z","shot":"snackbar-1440-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7#s/split-1-0ef1"}
+{"at":"2026-10-02T01:45:33.829Z","shot":"present-1440-light.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:34.656Z","shot":"present-bar-1440-light.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:38.180Z","shot":"view-1440-light.png","url":"https://www.turboslide.com/deck/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:41.033Z","access":404}
+{"at":"2026-10-02T01:45:41.056Z","shot":"access-1440-light.png","url":"https://www.turboslide.com/edit/brand-audit-no-such-deck-0001"}
+{"at":"2026-10-02T01:45:41.612Z","deckHtml":200}
+{"at":"2026-10-02T01:45:44.555Z","open":"390-light","ms":2797}
+{"at":"2026-10-02T01:45:44.577Z","shot":"editor-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:45.397Z","shot":"menu-file-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:46.978Z","shot":"menu-insert-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:48.551Z","shot":"menu-help-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:50.946Z","shot":"dialog-share-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:52.567Z","shot":"menu-account-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:45:52.588Z","accountRows":["Change name","Change avatar","Forget this browser","File","Edit","View","Insert","Format","Slide","Arrange","Tools","Help"]}
+{"at":"2026-10-02T01:46:01.410Z","step":"versions","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:46:09.413Z","step":"themes","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:46:10.451Z","shot":"dialog-shortcuts-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:12.838Z","thumbs":4}
+{"at":"2026-10-02T01:46:13.692Z","shot":"snackbar-390-light.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7#s/split-1-6bd2"}
+{"at":"2026-10-02T01:46:17.786Z","shot":"present-390-light.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:18.613Z","shot":"present-bar-390-light.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:22.564Z","shot":"view-390-light.png","url":"https://www.turboslide.com/deck/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:25.436Z","access":404}
+{"at":"2026-10-02T01:46:25.454Z","shot":"access-390-light.png","url":"https://www.turboslide.com/edit/brand-audit-no-such-deck-0001"}
+{"at":"2026-10-02T01:46:27.896Z","open":"1440-dark","ms":2316}
+{"at":"2026-10-02T01:46:27.929Z","shot":"editor-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:28.730Z","shot":"menu-file-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:30.295Z","shot":"menu-insert-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:31.854Z","shot":"menu-help-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:34.219Z","shot":"dialog-share-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:35.795Z","shot":"menu-account-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:35.806Z","accountRows":["Change name","Change avatar","Forget this browser","File","Edit","View","Insert","Format","Slide","Arrange","Tools","Help"]}
+{"at":"2026-10-02T01:46:38.712Z","shot":"panel-versions-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:41.115Z","shot":"panel-themes-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:42.952Z","shot":"dialog-shortcuts-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:45.290Z","thumbs":5}
+{"at":"2026-10-02T01:46:46.130Z","shot":"snackbar-1440-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7#s/split-1-44f0"}
+{"at":"2026-10-02T01:46:53.105Z","shot":"present-1440-dark.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:53.960Z","shot":"present-bar-1440-dark.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:46:57.499Z","shot":"view-1440-dark.png","url":"https://www.turboslide.com/deck/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:00.359Z","access":404}
+{"at":"2026-10-02T01:47:00.383Z","shot":"access-1440-dark.png","url":"https://www.turboslide.com/edit/brand-audit-no-such-deck-0001"}
+{"at":"2026-10-02T01:47:02.980Z","open":"390-dark","ms":2445}
+{"at":"2026-10-02T01:47:02.996Z","shot":"editor-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:03.789Z","shot":"menu-file-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:05.354Z","shot":"menu-insert-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:06.916Z","shot":"menu-help-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:09.274Z","shot":"dialog-share-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:10.821Z","shot":"menu-account-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:10.833Z","accountRows":["Change name","Change avatar","Forget this browser","File","Edit","View","Insert","Format","Slide","Arrange","Tools","Help"]}
+{"at":"2026-10-02T01:47:19.649Z","step":"versions","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:47:27.651Z","step":"themes","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:47:28.679Z","shot":"dialog-shortcuts-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:31.014Z","thumbs":6}
+{"at":"2026-10-02T01:47:31.838Z","shot":"snackbar-390-dark.png","url":"https://www.turboslide.com/edit/untitled-20261002-77a7#s/split-1-a150"}
+{"at":"2026-10-02T01:47:35.424Z","shot":"present-390-dark.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:36.273Z","shot":"present-bar-390-dark.png","url":"https://www.turboslide.com/present/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:39.894Z","shot":"view-390-dark.png","url":"https://www.turboslide.com/deck/untitled-20261002-77a7"}
+{"at":"2026-10-02T01:47:42.723Z","access":404}
+{"at":"2026-10-02T01:47:42.735Z","shot":"access-390-dark.png","url":"https://www.turboslide.com/edit/brand-audit-no-such-deck-0001"}

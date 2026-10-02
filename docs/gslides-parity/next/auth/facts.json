@@ -1,0 +1,673 @@
+{
+  "startedAt": "2026-10-02T01:45:33.863Z",
+  "uptimeStart": "18:45  up 7 days,  8:42, 2 users, load averages: 41.91 42.71 39.63",
+  "steps": {
+    "a1.new-deck-anonymous": {
+      "ok": true,
+      "ms": 4499,
+      "value": {
+        "deck": "untitled-20261002-dbir",
+        "loadMs": 1385,
+        "url": "http://localhost:4494/edit/untitled-20261002-dbir",
+        "anon": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+        "cookies": [
+          "__Host-ts_id;Lax;HttpOnly;Secure"
+        ],
+        "describe": {
+          "account": {
+            "principalId": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+            "label": "Glass 257",
+            "trust": "label",
+            "signedIn": false,
+            "signInAvailable": true,
+            "mark": {
+              "density": 3,
+              "glyphSeed": 4093368800,
+              "presenter": false,
+              "self": false,
+              "trust": "label",
+              "label": "Glass 257",
+              "variant": "initials",
+              "initials": "G",
+              "hue": {
+                "slot": 5,
+                "hex": "#148d51"
+              }
+            }
+          },
+          "presence": {
+            "clientId": "7e7da7ef837fdb81150b9a75e7443ebd",
+            "count": 0,
+            "others": []
+          },
+          "access": {
+            "deckId": "untitled-20261002-dbir",
+            "revision": 0,
+            "owner": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+            "pendingOwner": null,
+            "generalAccess": {
+              "mode": "restricted",
+              "role": "viewer"
+            },
+            "links": [],
+            "publish": null,
+            "grants": [],
+            "requests": [],
+            "settings": {
+              "editorsCanShare": true,
+              "viewersCanDownload": true,
+              "viewersCanSeeComments": false,
+              "showNamesToLinkVisitors": false,
+              "allowHtmlBlocks": false
+            },
+            "claimable": false,
+            "role": "owner",
+            "via": "owner",
+            "capabilities": [
+              "read",
+              "presence",
+              "readSkipped",
+              "comment",
+              "readComments",
+              "readNotes",
+              "write",
+              "history",
+              "export",
+              "exportNotes",
+              "rename",
+              "copy",
+              "trash",
+              "restore",
+              "publish",
+              "follow",
+              "share",
+              "settings",
+              "remove",
+              "transfer"
+            ],
+            "mode": "restricted"
+          },
+          "revision": 1
+        },
+        "shot": "01-anonymous-editor.png"
+      }
+    },
+    "a2.account-menu-anonymous": {
+      "ok": true,
+      "ms": 102,
+      "value": {
+        "rows": [
+          "account.sentence",
+          "account.changeName",
+          "account.changeAvatar",
+          "account.signIn",
+          "account.forget"
+        ],
+        "head": "GGlass 257Not signed in",
+        "shot": "02-account-menu-anonymous.png"
+      }
+    },
+    "a3.sign-in-dialog": {
+      "ok": true,
+      "ms": 1471,
+      "value": {
+        "box": {
+          "x": 520,
+          "y": 290,
+          "width": 400,
+          "height": 320
+        },
+        "methods": [
+          {
+            "id": "dialog.signIn.passkey",
+            "text": "Use a passkeyPasskeys arrive once the address is final",
+            "status": "later"
+          },
+          {
+            "id": "dialog.signIn.github",
+            "text": "Continue with GitHub",
+            "status": null
+          }
+        ],
+        "focused": "dialog.signIn.email",
+        "google": 0,
+        "fonts": {
+          "font": "Inter, \"Inter Fallback\", \"Helvetica Neue\", Arial, sans-serif",
+          "bg": "rgb(255, 255, 255)",
+          "radius": "0px",
+          "shadow": "none",
+          "btnBg": "rgb(138, 143, 152)",
+          "btnColor": "rgb(255, 255, 255)",
+          "btnRadius": "8px"
+        },
+        "shot": "03-sign-in-dialog.png",
+        "shotBox": "03b-sign-in-dialog-box.png"
+      }
+    },
+    "a4.invalid-address": {
+      "ok": true,
+      "ms": 2636,
+      "value": {
+        "error": "[body.email] Invalid email address",
+        "state": "methods",
+        "shot": "04-invalid-address.png"
+      }
+    },
+    "a5.request-code": {
+      "ok": true,
+      "ms": 141,
+      "value": {
+        "codeStepMs": 58,
+        "mailMs": 62,
+        "mails": 1,
+        "subject": "Your Turboslide sign in code is <code>",
+        "hasHtml": true,
+        "sent": "If that address can sign in, a message with a link and a six digit code is on its way",
+        "shot": "05-code-step.png"
+      }
+    },
+    "a6.mail-rendered": {
+      "ok": true,
+      "ms": 104,
+      "value": {
+        "shot": "06-sign-in-mail.png",
+        "textLines": [
+          "Sign in to Turboslide with this link, or type the code into the tab that asked.",
+          "http://localhost:4494/api/auth/magic-link/verify?token=<token>",
+          "Code: <code>",
+          "The link and the code work once and expire in 5 minutes.",
+          "If you did not ask to sign in, ignore this message."
+        ]
+      }
+    },
+    "a7.wrong-code": {
+      "ok": true,
+      "ms": 2622,
+      "value": {
+        "error": "That code did not match. Try again or request a new one",
+        "shot": "07-wrong-code.png"
+      }
+    },
+    "a8.verify-code": {
+      "ok": true,
+      "ms": 1040,
+      "value": {
+        "verifyToSignedInMs": 1021,
+        "continueToSignedInMs": 3889,
+        "anonBefore": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+        "anonAfter": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+        "alias": {
+          "userId": "vSr1GFtgPPwh3JxsPKTaSgKxUv0jvwrL",
+          "linkedAt": "2026-10-02T01:45:45.998Z"
+        },
+        "cookies": [
+          "__Host-ts_id;Lax;HttpOnly;Secure",
+          "__Secure-ts.session_token;Lax;HttpOnly;Secure",
+          "__Secure-ts.session_data;Lax;HttpOnly;Secure"
+        ],
+        "db": {
+          "userId": "vSr1GFtgPPwh3JxsPKTaSgKxUv0jvwrL",
+          "sessions": 1,
+          "accounts": [],
+          "aliases": 1
+        },
+        "describe": {
+          "account": {
+            "principalId": "usr_vSr1GFtgPPwh3JxsPKTaSgKxUv0jvwrL",
+            "label": "Cobalt 516",
+            "trust": "verified",
+            "signedIn": true,
+            "signInAvailable": true,
+            "mark": {
+              "density": 3,
+              "glyphSeed": 3287500765,
+              "presenter": false,
+              "self": true,
+              "trust": "verified",
+              "label": "Cobalt 516",
+              "variant": "initials",
+              "initials": "C5",
+              "hue": null
+            }
+          },
+          "presence": {
+            "clientId": "99a847c7c2619e437fd3d7ac27353e4c",
+            "count": 0,
+            "others": []
+          },
+          "access": {
+            "deckId": "untitled-20261002-dbir",
+            "revision": 0,
+            "owner": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+            "pendingOwner": null,
+            "generalAccess": {
+              "mode": "restricted",
+              "role": "viewer"
+            },
+            "links": [],
+            "publish": null,
+            "grants": [],
+            "requests": [],
+            "settings": {
+              "editorsCanShare": true,
+              "viewersCanDownload": true,
+              "viewersCanSeeComments": false,
+              "showNamesToLinkVisitors": false,
+              "allowHtmlBlocks": false
+            },
+            "claimable": false,
+            "role": "owner",
+            "via": "owner",
+            "capabilities": [
+              "read",
+              "presence",
+              "readSkipped",
+              "comment",
+              "readComments",
+              "readNotes",
+              "write",
+              "history",
+              "export",
+              "exportNotes",
+              "rename",
+              "copy",
+              "trash",
+              "restore",
+              "publish",
+              "follow",
+              "share",
+              "settings",
+              "remove",
+              "transfer"
+            ],
+            "mode": "restricted"
+          },
+          "revision": 1
+        },
+        "url": "http://localhost:4494/edit/untitled-20261002-dbir"
+      }
+    },
+    "a9.signed-in-chip-menu": {
+      "ok": true,
+      "ms": 1087,
+      "value": {
+        "chip": {
+          "label": "Account",
+          "text": "C5",
+          "badge": false
+        },
+        "rows": [
+          "account.sentence",
+          "account.changeName",
+          "account.changeAvatar",
+          "account.signOut",
+          "account.forget",
+          "account.sessions"
+        ],
+        "head": "C5Cobalt 516Signed in as auth-audit-a-1790905534174@example.test",
+        "shot": "08-signed-in-account-menu.png"
+      }
+    },
+    "a10.anonymous-deck-kept": {
+      "ok": true,
+      "ms": 3685,
+      "value": {
+        "access": {
+          "deckId": "untitled-20261002-dbir",
+          "revision": 0,
+          "owner": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+          "pendingOwner": null,
+          "generalAccess": {
+            "mode": "restricted",
+            "role": "viewer"
+          },
+          "links": [],
+          "publish": null,
+          "grants": [],
+          "requests": [],
+          "settings": {
+            "editorsCanShare": true,
+            "viewersCanDownload": true,
+            "viewersCanSeeComments": false,
+            "showNamesToLinkVisitors": false,
+            "allowHtmlBlocks": false
+          },
+          "claimable": false,
+          "role": "owner",
+          "via": "owner",
+          "capabilities": [
+            "read",
+            "presence",
+            "readSkipped",
+            "comment",
+            "readComments",
+            "readNotes",
+            "write",
+            "history",
+            "export",
+            "exportNotes",
+            "rename",
+            "copy",
+            "trash",
+            "restore",
+            "publish",
+            "follow",
+            "share",
+            "settings",
+            "remove",
+            "transfer"
+          ],
+          "mode": "restricted"
+        },
+        "url": "http://localhost:4494/edit/untitled-20261002-dbir",
+        "info": {
+          "id": "untitled-20261002-dbir",
+          "owner": null,
+          "keys": [
+            "id",
+            "title",
+            "theme",
+            "revision",
+            "sections",
+            "counts",
+            "defaults"
+          ]
+        },
+        "share": "{\"record\":{\"schemaVersion\":1,\"deckId\":\"untitled-20261002-dbir\",\"owner\":\"anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4\",\"pendingOwner\":null,\"createdAt\":\"2026-10-02T01:45:37.068Z\",\"createdBy\":\"anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4\",\"assetKey\":\"untitled-20261002-dbir\",\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"revision\":0},\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"re",
+        "owner": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+        "shareRole": "owner",
+        "shareKeys": [
+          "record",
+          "role",
+          "via",
+          "capabilities"
+        ],
+        "filesPageListsDeck": 2,
+        "filesPageSignInWords": 0,
+        "shot": "09-files-page-signed-in.png"
+      }
+    },
+    "a11.profile-dialog": {
+      "ok": true,
+      "ms": 1755,
+      "value": {
+        "trust": "Signed in as auth-audit-a-1790905534174@example.test, verified",
+        "sessions": 0,
+        "deleteAccount": 1,
+        "box": {
+          "x": 440,
+          "y": 130,
+          "width": 560,
+          "height": 640
+        },
+        "shot": "10-profile-dialog.png"
+      }
+    },
+    "a12.picture-upload": {
+      "ok": true,
+      "ms": 3591,
+      "value": {
+        "progress": [
+          "dialog",
+          "tabs dialog.avatarBuilder.tab.initials,dialog.avatarBuilder.tab.glyph,dialog.avatarBuilder.tab.dither,dialog.avatarBuilder.tab.picture",
+          "picture tab",
+          "file set",
+          "crop loaded true",
+          "apply disabled false"
+        ],
+        "closed": true,
+        "applyMs": 218,
+        "error": null,
+        "src": "/api/avatar/u/jPHjCVXqCQxLsf8yRMDGaQ/3e646d02aca28537e6e8717c4feb5865fd9f953152253a1cfc4877ebee835146-64.webp",
+        "requestBytes": [],
+        "shotCrop": "11-avatar-picture-crop.png",
+        "shotChip": "12-avatar-applied.png"
+      }
+    },
+    "b1.second-browser-badge": {
+      "ok": true,
+      "ms": 31668,
+      "value": {
+        "route": "direct /edit",
+        "status": 200,
+        "openMs": 1019,
+        "badgeWaitMs": 30555,
+        "chips": [
+          {
+            "id": "presence.chip.99a847c7c2619e437fd3d7ac27353e4c",
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ],
+        "describe": {
+          "account": {
+            "principalId": "anon_7368291a-2dd1-422e-9130-ae5c43251b2f",
+            "label": "Manganese 570",
+            "trust": "label",
+            "signedIn": false,
+            "signInAvailable": true,
+            "mark": {
+              "density": 4,
+              "glyphSeed": 1317632250,
+              "presenter": false,
+              "self": false,
+              "trust": "label",
+              "label": "Manganese 570",
+              "variant": "initials",
+              "initials": "M",
+              "hue": {
+                "slot": 2,
+                "hex": "#789000"
+              }
+            }
+          },
+          "presence": {
+            "clientId": "ba3f5778d9e350e7b354f96d9a7063cc",
+            "count": 1,
+            "others": [
+              {
+                "clientId": "99a847c7c2619e437fd3d7ac27353e4c",
+                "trust": "label"
+              }
+            ]
+          },
+          "access": {
+            "deckId": "untitled-20261002-dbir",
+            "revision": 0,
+            "owner": "anon_168f4bbc-3a35-4adc-bc02-2804c4cc94a4",
+            "pendingOwner": null,
+            "generalAccess": {
+              "mode": "restricted",
+              "role": "viewer"
+            },
+            "links": [],
+            "publish": null,
+            "grants": [],
+            "requests": [],
+            "settings": {
+              "editorsCanShare": true,
+              "viewersCanDownload": true,
+              "viewersCanSeeComments": false,
+              "showNamesToLinkVisitors": false,
+              "allowHtmlBlocks": false
+            },
+            "claimable": false,
+            "role": "viewer",
+            "via": "open",
+            "capabilities": [
+              "read",
+              "presence",
+              "export",
+              "copy"
+            ],
+            "mode": "restricted"
+          },
+          "revision": 1
+        },
+        "shot": "13-second-browser-sees-a.png"
+      }
+    },
+    "b2.badge-latency-after-sign-in": {
+      "ok": false,
+      "ms": 180075,
+      "error": "page.waitForFunction: Timeout 60000ms exceeded."
+    },
+    "c1.magic-link": {
+      "ok": true,
+      "ms": 826,
+      "value": {
+        "ask": 200,
+        "hasLink": true,
+        "linkHost": "localhost:4494",
+        "callback": "http://localhost:4494/decks",
+        "landedMs": 165,
+        "status": 200,
+        "landed": "http://localhost:4494/decks",
+        "signedIn": true,
+        "alias": {
+          "userId": "WhiiQe7n47q7UuRSfql8mDofAeVcKd7M",
+          "linkedAt": "2026-10-02T01:49:29.519Z"
+        },
+        "againStatus": 200,
+        "againUrl": "http://localhost:4494/decks?error=INVALID_TOKEN",
+        "shot": "17-magic-link-landing.png",
+        "shotAgain": "18-magic-link-used-twice.png"
+      }
+    },
+    "c2.address-quota": {
+      "ok": true,
+      "ms": 825,
+      "value": {
+        "answers": [
+          200,
+          200,
+          200,
+          200,
+          200
+        ],
+        "mailsWritten": 3
+      }
+    },
+    "c3.three-wrong-codes-then-right": {
+      "ok": true,
+      "ms": 523,
+      "value": {
+        "wrong": [
+          {
+            "status": 400,
+            "body": "{\"message\":\"Invalid OTP\",\"code\":\"INVALID_OTP\"}"
+          },
+          {
+            "status": 400,
+            "body": "{\"message\":\"Invalid OTP\",\"code\":\"INVALID_OTP\"}"
+          },
+          {
+            "status": 400,
+            "body": "{\"message\":\"Invalid OTP\",\"code\":\"INVALID_OTP\"}"
+          }
+        ],
+        "right": {
+          "status": 403,
+          "body": "{\"message\":\"Too many attempts\",\"code\":\"TOO_MANY_ATTEMPTS\"}"
+        },
+        "dialogSaysForEveryRefusal": "That code did not match. Try again or request a new one"
+      }
+    },
+    "c4.github-redirect": {
+      "ok": true,
+      "ms": 38037,
+      "value": {
+        "via": "api (A is signed in, so the dialog row is absent)",
+        "host": "github.com",
+        "path": "/login/oauth/authorize",
+        "params": [
+          "response_type",
+          "client_id",
+          "state",
+          "scope",
+          "redirect_uri",
+          "code_challenge_method",
+          "code_challenge"
+        ],
+        "redirect_uri": "http://localhost:4494/api/auth/callback/github",
+        "scope": "read:user user:email"
+      }
+    },
+    "c5.google-on-main": {
+      "ok": true,
+      "ms": 5,
+      "value": {
+        "status": 404,
+        "body": "{\"message\":\"Provider not found\",\"code\":\"PROVIDER_NOT_FOUND\"}"
+      }
+    },
+    "c6.github-callback-error": {
+      "ok": true,
+      "ms": 29,
+      "value": {
+        "status": 403,
+        "url": "http://localhost:4494/api/auth/callback/github?error=access_denied&state=bogus",
+        "shot": "19-github-callback-refused.png"
+      }
+    },
+    "c7.device-page": {
+      "ok": true,
+      "ms": 1585,
+      "value": {
+        "status": 200,
+        "shot": "20-device-page.png"
+      }
+    },
+    "c8.dialog-dark": {
+      "ok": true,
+      "ms": 2507,
+      "value": {
+        "shot": "21-sign-in-dialog-dark.png"
+      }
+    },
+    "c9.access-page-sign-in": {
+      "ok": true,
+      "ms": 2662,
+      "value": {
+        "status": 404,
+        "text": "You need access\n\nThis presentation is not available to you, or does not exist.\n\nYour presentations\nNew presentation\n\nIf you were invited by email, sign in with that address from your presentations, then open this address again",
+        "shot": "22-access-page.png"
+      }
+    },
+    "c10.delete-account": {
+      "ok": true,
+      "ms": 94,
+      "value": {
+        "before": {
+          "userId": "WhiiQe7n47q7UuRSfql8mDofAeVcKd7M",
+          "sessions": 1,
+          "accounts": [],
+          "aliases": 1
+        },
+        "status": 200,
+        "body": "{\"success\":true,\"message\":\"User deleted\"}",
+        "after": null
+      }
+    }
+  },
+  "consoleErrorsA": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker work volume: 305986",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uqax0i1-6e8da0 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uqax0i1-6e8da0 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uqax0i1-6e8da0 rend",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Froot.ts%3A87%3A3\n →  turboslide hosting: worker uqax0i1-6e8da0 rend",
+    "Failed to load resource: the server responded with a status of 400 (400)",
+    "Failed to load resource: the server responded with a status of 400 (BAD_REQUEST)",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Fauth%2Fidentity.ts%3A174%3A47\n →  turboslide auth: sign in mail wit",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Fauth%2Fidentity.ts%3A174%3A47\n →  turboslide auth: sign in mail wit",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; 2026-10-02T01:50:09.068Z ERROR [Better Auth]: Provider not found. Make sure to add the provider in your auth config {provider: google}"
+  ],
+  "consoleErrorsB": [
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Fauth%2Fidentity.ts%3A174%3A47\n →  turboslide auth: sign in mail wit",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; LOG http://localhost:4494/__tsd/open-source?source=%2Fsrc%2Fserver%2Fauth%2Fidentity.ts%3A174%3A47\n →  turboslide auth: sign in mail wit",
+    "%c[Server]%c color: #9333ea; font-weight: bold; color: inherit; 2026-10-02T01:50:09.068Z ERROR [Better Auth]: Provider not found. Make sure to add the provider in your auth config {provider: google}"
+  ],
+  "deck": "untitled-20261002-dbir",
+  "endedAt": "2026-10-02T01:50:15.955Z",
+  "uptimeEnd": "18:50  up 7 days,  8:47, 2 users, load averages: 15.30 32.55 36.51"
+}

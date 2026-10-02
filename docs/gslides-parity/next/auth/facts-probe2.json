@@ -1,0 +1,99 @@
+{
+  "startedAt": "2026-10-02T01:51:40.860Z",
+  "uptime": "18:51  up 7 days,  8:48, 2 users, load averages: 20.05 29.62 34.99",
+  "deck": "untitled-20261002-z3s7",
+  "steps": {
+    "p1.a-signs-in-and-makes-a-deck": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "deck": "untitled-20261002-z3s7",
+        "invite": "{\"record\":{\"schemaVersion\":1,\"deckId\":\"untitled-20261002-z3s7\",\"owner\":\"usr_SX5mvQwAtbgEQULL0LxQEZhwOzKxBJuH\",\"pendingOwner\":null,\"createdAt\":\"2026-10-02T01:51:42.785Z\",\"createdBy\":\"usr_SX5mvQwAtbgEQULL0LxQEZhwOzKxBJuH\",\"assetKey\":\"untitled-20261002-z3s7\",\"generalAccess\":{\"mode\":\"restricted\",\"role\":"
+      },
+      "ms": 1835
+    },
+    "p2.b-signs-in-and-opens": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "status": 200,
+        "role": "editor",
+        "via": "grant"
+      },
+      "ms": 923
+    },
+    "p3.menu-sign-out-row": {
+      "ok": true,
+      "value": {
+        "answers": [],
+        "sessionStillValid": true,
+        "describeSignedIn": true,
+        "snack": [
+          "",
+          "Edits are kept on this server instance only and do not persist until a Blob store is connected; connect one to the Vercel project to keep them."
+        ]
+      },
+      "ms": 6114
+    },
+    "p4.badge-on-b-after-a-signs-in": {
+      "ok": true,
+      "value": {
+        "signOut": 200,
+        "aOut": {
+          "principalId": "anon_f5fa2971-af0a-4686-a569-9a919ed81fe8",
+          "label": "Granite 319",
+          "trust": "verified",
+          "signedIn": false
+        },
+        "bSeesOut": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ],
+        "signIn": [
+          200,
+          429
+        ],
+        "signInToBadgeMs": null,
+        "pageLoadedToBadgeMs": null,
+        "seen": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ]
+      },
+      "ms": 16441
+    },
+    "p5.same-account-second-browser": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          429
+        ],
+        "bChips": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          },
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ],
+        "sessionsAction": "{\"sessions\":[]}"
+      },
+      "ms": 3912
+    }
+  },
+  "endedAt": "2026-10-02T01:52:10.243Z",
+  "uptimeEnd": "18:52  up 7 days,  8:49, 2 users, load averages: 18.31 28.33 34.34"
+}

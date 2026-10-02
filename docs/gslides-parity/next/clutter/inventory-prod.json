@@ -1,0 +1,7774 @@
+{
+ "base": "https://www.turboslide.com",
+ "tag": "prod",
+ "startedAt": "2026-10-02T01:42:06.943Z",
+ "pages": {
+  "new-light": {
+   "loadMs": 5114,
+   "url": "https://www.turboslide.com/new",
+   "title": "Untitled presentation, editor, Turboslide",
+   "theme": "light",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=light"
+   ],
+   "controls": [
+    {
+     "id": "title.row",
+     "tag": "header",
+     "role": null,
+     "label": "Assist",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 0,
+     "y": 0,
+     "w": 1440,
+     "h": 44
+    },
+    {
+     "id": "title.home",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide home",
+     "tip": "Turboslide home",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 10,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "deck.name",
+     "tag": "button",
+     "role": null,
+     "label": "Presentation title",
+     "tip": "Rename",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 50,
+     "y": 6,
+     "w": 157,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 215,
+     "y": 6,
+     "w": 141,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit",
+     "tag": "button",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": "Last edit just now",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 215,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit.words",
+     "tag": "span",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 247,
+     "y": 15,
+     "w": 109,
+     "h": 13
+    },
+    {
+     "id": "title.presence",
+     "tag": "div",
+     "role": "group",
+     "label": "Collaborators",
+     "tip": "Collaborators",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 847,
+     "y": 6,
+     "w": 184,
+     "h": 32
+    },
+    {
+     "id": "title.account",
+     "tag": "button",
+     "role": null,
+     "label": "Account",
+     "tip": "Felt 280 (you)",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1007,
+     "y": 10,
+     "w": 24,
+     "h": 24
+    },
+    {
+     "id": "title.assist.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Assist",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1039,
+     "y": 6,
+     "w": 83,
+     "h": 32
+    },
+    {
+     "id": "title.assist",
+     "tag": "button",
+     "role": null,
+     "label": "Assist",
+     "tip": "Assist",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1039,
+     "y": 6,
+     "w": 83,
+     "h": 32
+    },
+    {
+     "id": "title.comments.slot",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1129,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.comments",
+     "tag": "button",
+     "role": null,
+     "label": "Show all comments",
+     "tip": "Show all comments",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1129,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.sidePanel.slot",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1169,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.sidePanel",
+     "tag": "button",
+     "role": null,
+     "label": "Show side panel",
+     "tip": "Show side panel",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1169,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "present.split",
+     "tag": "span",
+     "role": "group",
+     "label": "Slideshow",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1209,
+     "y": 6,
+     "w": 133,
+     "h": 32
+    },
+    {
+     "id": "present.open",
+     "tag": "button",
+     "role": null,
+     "label": "Slideshow",
+     "tip": "Slideshow",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1210,
+     "y": 7,
+     "w": 103,
+     "h": 30
+    },
+    {
+     "id": "present.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Presentation options",
+     "tip": "Presentation options",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1313,
+     "y": 7,
+     "w": 28,
+     "h": 30
+    },
+    {
+     "id": "share.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Share",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1350,
+     "y": 6,
+     "w": 78,
+     "h": 32
+    },
+    {
+     "id": "share.open",
+     "tag": "button",
+     "role": null,
+     "label": "Share",
+     "tip": "Share",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1350,
+     "y": 6,
+     "w": 78,
+     "h": 32
+    },
+    {
+     "id": "menubar",
+     "tag": "nav",
+     "role": null,
+     "label": "Menus",
+     "tip": null,
+     "disabled": false,
+     "region": "menubar",
+     "interactive": false,
+     "x": 0,
+     "y": 44,
+     "w": 1440,
+     "h": 28
+    },
+    {
+     "id": "menubar.file",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "File",
+     "tip": "File menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 6,
+     "y": 44,
+     "w": 46,
+     "h": 27
+    },
+    {
+     "id": "menubar.edit",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Edit",
+     "tip": "Edit menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 52,
+     "y": 44,
+     "w": 47,
+     "h": 27
+    },
+    {
+     "id": "menubar.view",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "View",
+     "tip": "View menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 99,
+     "y": 44,
+     "w": 54,
+     "h": 27
+    },
+    {
+     "id": "menubar.insert",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Insert",
+     "tip": "Insert menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 153,
+     "y": 44,
+     "w": 59,
+     "h": 27
+    },
+    {
+     "id": "menubar.format",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Format",
+     "tip": "Format menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 212,
+     "y": 44,
+     "w": 67,
+     "h": 27
+    },
+    {
+     "id": "menubar.slide",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Slide",
+     "tip": "Slide menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 279,
+     "y": 44,
+     "w": 54,
+     "h": 27
+    },
+    {
+     "id": "menubar.arrange",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Arrange",
+     "tip": "Arrange menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 333,
+     "y": 44,
+     "w": 74,
+     "h": 27
+    },
+    {
+     "id": "menubar.tools",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Tools",
+     "tip": "Tools menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 407,
+     "y": 44,
+     "w": 57,
+     "h": 27
+    },
+    {
+     "id": "menubar.help",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Help",
+     "tip": "Help menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 464,
+     "y": 44,
+     "w": 52,
+     "h": 27
+    },
+    {
+     "id": "toolbar",
+     "tag": "div",
+     "role": "toolbar",
+     "label": "Toolbar",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 0,
+     "y": 72,
+     "w": 1440,
+     "h": 40
+    },
+    {
+     "id": "toolbar.head",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 8,
+     "y": 76,
+     "w": 323,
+     "h": 32
+    },
+    {
+     "id": "toolbar.search",
+     "tag": "button",
+     "role": null,
+     "label": "Search the menus",
+     "tip": "Search the menus",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 8,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide.split",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 44,
+     "y": 76,
+     "w": 60,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide",
+     "tag": "button",
+     "role": null,
+     "label": "New slide",
+     "tip": "New slide",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 44,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "New slide with layout",
+     "tip": "New slide with layout",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 72,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.undo",
+     "tag": "button",
+     "role": null,
+     "label": "Undo",
+     "tip": "Undo",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 108,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.redo",
+     "tag": "button",
+     "role": null,
+     "label": "Redo",
+     "tip": "Redo",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 144,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.print",
+     "tag": "button",
+     "role": null,
+     "label": "Print",
+     "tip": "Print",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 180,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "tag": "button",
+     "role": null,
+     "label": "Paint format",
+     "tip": "Paint format",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 216,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.zoom",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 252,
+     "y": 76,
+     "w": 66,
+     "h": 32
+    },
+    {
+     "id": "view.zoom.value",
+     "tag": "input",
+     "role": null,
+     "label": "Zoom",
+     "tip": "Zoom",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 253,
+     "y": 77,
+     "w": 44,
+     "h": 30
+    },
+    {
+     "id": "view.zoom.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Zoom levels",
+     "tip": "Zoom levels",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 297,
+     "y": 77,
+     "w": 20,
+     "h": 30
+    },
+    {
+     "id": "toolbar.tail",
+     "tag": "div",
+     "role": null,
+     "label": "Background",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 335,
+     "y": 76,
+     "w": 1097,
+     "h": 32
+    },
+    {
+     "id": "toolbar.select",
+     "tag": "button",
+     "role": null,
+     "label": "Select",
+     "tip": "Select",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 335,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.textBox",
+     "tag": "button",
+     "role": null,
+     "label": "Text box",
+     "tip": "Text box",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 371,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertImage",
+     "tag": "button",
+     "role": null,
+     "label": "Insert image",
+     "tip": "Insert image",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 407,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Image",
+     "tip": "Image",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 439,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertShape",
+     "tag": "button",
+     "role": null,
+     "label": "Insert shape",
+     "tip": "Insert shape",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 475,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Shape",
+     "tip": "Shape",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 507,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertLine",
+     "tag": "button",
+     "role": null,
+     "label": "Insert line",
+     "tip": "Insert line",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 543,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Line",
+     "tip": "Line",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 575,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertComment",
+     "tag": "button",
+     "role": null,
+     "label": "Insert comment",
+     "tip": "Insert comment",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 611,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.background",
+     "tag": "button",
+     "role": null,
+     "label": "Background",
+     "tip": "Background",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 660,
+     "y": 76,
+     "w": 92,
+     "h": 32
+    },
+    {
+     "id": "toolbar.layout",
+     "tag": "button",
+     "role": null,
+     "label": "Layout",
+     "tip": "Layout",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 756,
+     "y": 76,
+     "w": 75,
+     "h": 32
+    },
+    {
+     "id": "toolbar.theme",
+     "tag": "button",
+     "role": null,
+     "label": "Theme",
+     "tip": "Theme",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 835,
+     "y": 76,
+     "w": 61,
+     "h": 32
+    },
+    {
+     "id": "toolbar.end",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 1364,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.pointer",
+     "tag": "button",
+     "role": null,
+     "label": "Show my pointer",
+     "tip": "Show my pointer",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 1364,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "tag": "button",
+     "role": null,
+     "label": "Hide the menus",
+     "tip": "Hide the menus",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 1400,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "filmstrip",
+     "tag": "div",
+     "role": "listbox",
+     "label": "Slides",
+     "tip": null,
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": false,
+     "x": 0,
+     "y": 112,
+     "w": 255,
+     "h": 788
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "tag": "div",
+     "role": "option",
+     "label": "Slide 1",
+     "tip": "Slide 1",
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": true,
+     "x": 8,
+     "y": 126,
+     "w": 231,
+     "h": 114
+    },
+    {
+     "id": "filmstrip.comments.title",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": false,
+     "x": 13,
+     "y": 148,
+     "w": 20,
+     "h": 16
+    },
+    {
+     "id": "notes",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "notes",
+     "interactive": false,
+     "x": 256,
+     "y": 836,
+     "w": 1184,
+     "h": 64
+    },
+    {
+     "id": "notes.handle",
+     "tag": "button",
+     "role": null,
+     "label": "Resize speaker notes",
+     "tip": "Speaker notes",
+     "disabled": false,
+     "region": "notes",
+     "interactive": true,
+     "x": 826,
+     "y": 830,
+     "w": 44,
+     "h": 13
+    },
+    {
+     "id": "notes.text",
+     "tag": "textarea",
+     "role": null,
+     "label": "Speaker notes",
+     "tip": "Speaker notes",
+     "disabled": false,
+     "region": "notes",
+     "interactive": true,
+     "x": 256,
+     "y": 837,
+     "w": 1184,
+     "h": 63
+    },
+    {
+     "id": "presence.announcements",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": -1,
+     "y": -1,
+     "w": 1,
+     "h": 1
+    }
+   ],
+   "interactive": [
+    {
+     "id": "title.home",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide home",
+     "tip": "Turboslide home",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 10
+    },
+    {
+     "id": "deck.name",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Presentation title",
+     "tip": "Rename",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 50
+    },
+    {
+     "id": "deck.lastEdit",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": "Last edit just now",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 215
+    },
+    {
+     "id": "title.account",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Account",
+     "tip": "Felt 280 (you)",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 10,
+     "x": 1007
+    },
+    {
+     "id": "title.assist",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Assist",
+     "tip": "Assist",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1039
+    },
+    {
+     "id": "title.comments",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show all comments",
+     "tip": "Show all comments",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1129
+    },
+    {
+     "id": "title.sidePanel",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show side panel",
+     "tip": "Show side panel",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1169
+    },
+    {
+     "id": "present.open",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Slideshow",
+     "tip": "Slideshow",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 7,
+     "x": 1210
+    },
+    {
+     "id": "present.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Presentation options",
+     "tip": "Presentation options",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 7,
+     "x": 1313
+    },
+    {
+     "id": "share.open",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Share",
+     "tip": "Share",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1350
+    },
+    {
+     "id": "menubar.file",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "File",
+     "tip": "File menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 6
+    },
+    {
+     "id": "menubar.edit",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Edit",
+     "tip": "Edit menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 52
+    },
+    {
+     "id": "menubar.view",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "View",
+     "tip": "View menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 99
+    },
+    {
+     "id": "menubar.insert",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Insert",
+     "tip": "Insert menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 153
+    },
+    {
+     "id": "menubar.format",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Format",
+     "tip": "Format menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 212
+    },
+    {
+     "id": "menubar.slide",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Slide",
+     "tip": "Slide menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 279
+    },
+    {
+     "id": "menubar.arrange",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Arrange",
+     "tip": "Arrange menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 333
+    },
+    {
+     "id": "menubar.tools",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Tools",
+     "tip": "Tools menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 407
+    },
+    {
+     "id": "menubar.help",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Help",
+     "tip": "Help menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 464
+    },
+    {
+     "id": "toolbar.search",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Search the menus",
+     "tip": "Search the menus",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 8
+    },
+    {
+     "id": "toolbar.newSlide",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "New slide",
+     "tip": "New slide",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 44
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "New slide with layout",
+     "tip": "New slide with layout",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 72
+    },
+    {
+     "id": "toolbar.undo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Undo",
+     "tip": "Undo",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 108
+    },
+    {
+     "id": "toolbar.redo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Redo",
+     "tip": "Redo",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 144
+    },
+    {
+     "id": "toolbar.print",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Print",
+     "tip": "Print",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 180
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Paint format",
+     "tip": "Paint format",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 216
+    },
+    {
+     "id": "view.zoom.value",
+     "own": true,
+     "tag": "input",
+     "role": null,
+     "label": "Zoom",
+     "tip": "Zoom",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 77,
+     "x": 253
+    },
+    {
+     "id": "view.zoom.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Zoom levels",
+     "tip": "Zoom levels",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 77,
+     "x": 297
+    },
+    {
+     "id": "toolbar.select",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Select",
+     "tip": "Select",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 335
+    },
+    {
+     "id": "toolbar.textBox",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Text box",
+     "tip": "Text box",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 371
+    },
+    {
+     "id": "toolbar.insertImage",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert image",
+     "tip": "Insert image",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 407
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Image",
+     "tip": "Image",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 439
+    },
+    {
+     "id": "toolbar.insertShape",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert shape",
+     "tip": "Insert shape",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 475
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Shape",
+     "tip": "Shape",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 507
+    },
+    {
+     "id": "toolbar.insertLine",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert line",
+     "tip": "Insert line",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 543
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Line",
+     "tip": "Line",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 575
+    },
+    {
+     "id": "toolbar.insertComment",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert comment",
+     "tip": "Insert comment",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 611
+    },
+    {
+     "id": "toolbar.background",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Background",
+     "tip": "Background",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 660
+    },
+    {
+     "id": "toolbar.layout",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Layout",
+     "tip": "Layout",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 756
+    },
+    {
+     "id": "toolbar.theme",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Theme",
+     "tip": "Theme",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 835
+    },
+    {
+     "id": "toolbar.pointer",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show my pointer",
+     "tip": "Show my pointer",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 1364
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Hide the menus",
+     "tip": "Hide the menus",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 1400
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "own": true,
+     "tag": "div",
+     "role": "option",
+     "label": "Slide 1",
+     "tip": "Slide 1",
+     "region": "filmstrip",
+     "disabled": false,
+     "y": 126,
+     "x": 8
+    },
+    {
+     "id": "notes.handle",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Resize speaker notes",
+     "tip": "Speaker notes",
+     "region": "notes",
+     "disabled": false,
+     "y": 830,
+     "x": 826
+    },
+    {
+     "id": "notes.text",
+     "own": true,
+     "tag": "textarea",
+     "role": null,
+     "label": "Speaker notes",
+     "tip": "Speaker notes",
+     "region": "notes",
+     "disabled": false,
+     "y": 837,
+     "x": 256
+    }
+   ],
+   "text": [
+    {
+     "t": "Untitled presentation",
+     "region": "titleRow",
+     "ctl": "deck.name"
+    },
+    {
+     "t": "Last edit just now",
+     "region": "titleRow",
+     "ctl": "deck.lastEdit.words"
+    },
+    {
+     "t": "F",
+     "region": "titleRow",
+     "ctl": "title.account"
+    },
+    {
+     "t": "Assist",
+     "region": "titleRow",
+     "ctl": "title.assist"
+    },
+    {
+     "t": "Slideshow",
+     "region": "titleRow",
+     "ctl": "present.open"
+    },
+    {
+     "t": "Share",
+     "region": "titleRow",
+     "ctl": "share.open"
+    },
+    {
+     "t": "F",
+     "region": "menubar",
+     "ctl": "menubar.file"
+    },
+    {
+     "t": "ile",
+     "region": "menubar",
+     "ctl": "menubar.file"
+    },
+    {
+     "t": "E",
+     "region": "menubar",
+     "ctl": "menubar.edit"
+    },
+    {
+     "t": "dit",
+     "region": "menubar",
+     "ctl": "menubar.edit"
+    },
+    {
+     "t": "V",
+     "region": "menubar",
+     "ctl": "menubar.view"
+    },
+    {
+     "t": "iew",
+     "region": "menubar",
+     "ctl": "menubar.view"
+    },
+    {
+     "t": "I",
+     "region": "menubar",
+     "ctl": "menubar.insert"
+    },
+    {
+     "t": "nsert",
+     "region": "menubar",
+     "ctl": "menubar.insert"
+    },
+    {
+     "t": "F",
+     "region": "menubar",
+     "ctl": "menubar.format"
+    },
+    {
+     "t": "ormat",
+     "region": "menubar",
+     "ctl": "menubar.format"
+    },
+    {
+     "t": "S",
+     "region": "menubar",
+     "ctl": "menubar.slide"
+    },
+    {
+     "t": "lide",
+     "region": "menubar",
+     "ctl": "menubar.slide"
+    },
+    {
+     "t": "A",
+     "region": "menubar",
+     "ctl": "menubar.arrange"
+    },
+    {
+     "t": "rrange",
+     "region": "menubar",
+     "ctl": "menubar.arrange"
+    },
+    {
+     "t": "T",
+     "region": "menubar",
+     "ctl": "menubar.tools"
+    },
+    {
+     "t": "ools",
+     "region": "menubar",
+     "ctl": "menubar.tools"
+    },
+    {
+     "t": "H",
+     "region": "menubar",
+     "ctl": "menubar.help"
+    },
+    {
+     "t": "elp",
+     "region": "menubar",
+     "ctl": "menubar.help"
+    },
+    {
+     "t": "T",
+     "region": "toolbar",
+     "ctl": "toolbar.textBox"
+    },
+    {
+     "t": "Background",
+     "region": "toolbar",
+     "ctl": "toolbar.background"
+    },
+    {
+     "t": "Layout",
+     "region": "toolbar",
+     "ctl": "toolbar.layout"
+    },
+    {
+     "t": "Theme",
+     "region": "toolbar",
+     "ctl": "toolbar.theme"
+    },
+    {
+     "t": "1",
+     "region": "filmstrip",
+     "ctl": "filmstrip.slide.title"
+    },
+    {
+     "t": "01 / 01",
+     "region": "stage",
+     "ctl": null
+    }
+   ],
+   "tips": [
+    {
+     "id": "title.home",
+     "tip": "Turboslide home"
+    },
+    {
+     "id": "deck.name",
+     "tip": "Rename"
+    },
+    {
+     "id": "deck.lastEdit",
+     "tip": "Last edit just now"
+    },
+    {
+     "id": "title.presence",
+     "tip": "Collaborators"
+    },
+    {
+     "id": "title.account",
+     "tip": "Felt 280 (you)"
+    },
+    {
+     "id": "title.assist",
+     "tip": "Assist"
+    },
+    {
+     "id": "title.comments",
+     "tip": "Show all comments"
+    },
+    {
+     "id": "title.sidePanel",
+     "tip": "Show side panel"
+    },
+    {
+     "id": "present.open",
+     "tip": "Slideshow"
+    },
+    {
+     "id": "present.arrow",
+     "tip": "Presentation options"
+    },
+    {
+     "id": "share.open",
+     "tip": "Share"
+    },
+    {
+     "id": "menubar.file",
+     "tip": "File menu"
+    },
+    {
+     "id": "menubar.edit",
+     "tip": "Edit menu"
+    },
+    {
+     "id": "menubar.view",
+     "tip": "View menu"
+    },
+    {
+     "id": "menubar.insert",
+     "tip": "Insert menu"
+    },
+    {
+     "id": "menubar.format",
+     "tip": "Format menu"
+    },
+    {
+     "id": "menubar.slide",
+     "tip": "Slide menu"
+    },
+    {
+     "id": "menubar.arrange",
+     "tip": "Arrange menu"
+    },
+    {
+     "id": "menubar.tools",
+     "tip": "Tools menu"
+    },
+    {
+     "id": "menubar.help",
+     "tip": "Help menu"
+    },
+    {
+     "id": "toolbar.search",
+     "tip": "Search the menus"
+    },
+    {
+     "id": "toolbar.newSlide",
+     "tip": "New slide"
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "tip": "New slide with layout"
+    },
+    {
+     "id": "toolbar.undo",
+     "tip": "Undo"
+    },
+    {
+     "id": "toolbar.redo",
+     "tip": "Redo"
+    },
+    {
+     "id": "toolbar.print",
+     "tip": "Print"
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "tip": "Paint format"
+    },
+    {
+     "id": "view.zoom.value",
+     "tip": "Zoom"
+    },
+    {
+     "id": "view.zoom.arrow",
+     "tip": "Zoom levels"
+    },
+    {
+     "id": "toolbar.select",
+     "tip": "Select"
+    },
+    {
+     "id": "toolbar.textBox",
+     "tip": "Text box"
+    },
+    {
+     "id": "toolbar.insertImage",
+     "tip": "Insert image"
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "tip": "Image"
+    },
+    {
+     "id": "toolbar.insertShape",
+     "tip": "Insert shape"
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "tip": "Shape"
+    },
+    {
+     "id": "toolbar.insertLine",
+     "tip": "Insert line"
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "tip": "Line"
+    },
+    {
+     "id": "toolbar.insertComment",
+     "tip": "Insert comment"
+    },
+    {
+     "id": "toolbar.background",
+     "tip": "Background"
+    },
+    {
+     "id": "toolbar.layout",
+     "tip": "Layout"
+    },
+    {
+     "id": "toolbar.theme",
+     "tip": "Theme"
+    },
+    {
+     "id": "toolbar.pointer",
+     "tip": "Show my pointer"
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "tip": "Hide the menus"
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "tip": "Slide 1"
+    },
+    {
+     "id": "notes.handle",
+     "tip": "Speaker notes"
+    },
+    {
+     "id": "notes.text",
+     "tip": "Speaker notes"
+    }
+   ],
+   "live": [
+    {
+     "id": "presence.announcements",
+     "cls": "ts-announce",
+     "text": ""
+    }
+   ],
+   "menus": {
+    "menubar.file": [
+     {
+      "id": "file.new.presentation",
+      "label": "Presentation",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Presentation"
+     },
+     {
+      "id": "file.open",
+      "label": "Open",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Open"
+     },
+     {
+      "id": "file.importSlides",
+      "label": "Import slides",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Import slides"
+     },
+     {
+      "id": "file.makeCopy.entire",
+      "label": "Make a copy",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Make a copy"
+     },
+     {
+      "id": "file.share",
+      "label": "Share",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Share"
+     },
+     {
+      "id": "file.download",
+      "label": "Download",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Download"
+     },
+     {
+      "id": "file.rename",
+      "label": "Rename",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Rename"
+     },
+     {
+      "id": "file.moveToTrash",
+      "label": "Move to trash",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Move to trash"
+     },
+     {
+      "id": "file.versionHistory",
+      "label": "Version history",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Version history"
+     },
+     {
+      "id": "file.details",
+      "label": "Details",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Details"
+     },
+     {
+      "id": "file.printPreview",
+      "label": "Print settings and preview",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Print settings and preview"
+     },
+     {
+      "id": "file.print",
+      "label": "Print",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Print"
+     }
+    ],
+    "menubar.edit": [
+     {
+      "id": "edit.undo",
+      "label": "Undo",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Undo"
+     },
+     {
+      "id": "edit.redo",
+      "label": "Redo",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Redo"
+     },
+     {
+      "id": "edit.cut",
+      "label": "Cut",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Cut"
+     },
+     {
+      "id": "edit.copy",
+      "label": "Copy",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Copy"
+     },
+     {
+      "id": "edit.paste",
+      "label": "Paste",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Paste"
+     },
+     {
+      "id": "edit.pasteWithoutFormatting",
+      "label": "Paste without formatting",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Paste without formatting"
+     },
+     {
+      "id": "edit.delete",
+      "label": "Delete",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Delete"
+     },
+     {
+      "id": "edit.duplicate",
+      "label": "Duplicate",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Duplicate"
+     },
+     {
+      "id": "edit.selectAll",
+      "label": "Select all",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Select all"
+     },
+     {
+      "id": "edit.selectNone",
+      "label": "Select none",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Select none"
+     },
+     {
+      "id": "edit.findReplace",
+      "label": "Find and replace",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Find and replace"
+     }
+    ],
+    "menubar.view": [
+     {
+      "id": "view.slideshow",
+      "label": "Slideshow",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Slideshow"
+     },
+     {
+      "id": "view.zoom",
+      "label": "Zoom",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Zoom"
+     },
+     {
+      "id": "view.showRuler",
+      "label": "Show ruler",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Show ruler"
+     },
+     {
+      "id": "view.guides",
+      "label": "Guides",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Guides"
+     },
+     {
+      "id": "view.snapTo",
+      "label": "Snap to",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Snap to"
+     },
+     {
+      "id": "view.comments",
+      "label": "Comments",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Comments"
+     },
+     {
+      "id": "view.showSpeakerNotes",
+      "label": "Show speaker notes",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Show speaker notes"
+     },
+     {
+      "id": "view.showFilmstrip",
+      "label": "Show filmstrip",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Show filmstrip"
+     },
+     {
+      "id": "view.mode",
+      "label": "Mode",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Mode"
+     },
+     {
+      "id": "view.playShaders",
+      "label": "Play shaders",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Play shaders"
+     },
+     {
+      "id": "view.fullScreen",
+      "label": "Full screen",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Full screen"
+     },
+     {
+      "id": "view.appearance",
+      "label": "Appearance",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Appearance"
+     }
+    ],
+    "menubar.insert": [
+     {
+      "id": "insert.image",
+      "label": "Image",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Image"
+     },
+     {
+      "id": "insert.logo",
+      "label": "Logo",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Logo"
+     },
+     {
+      "id": "insert.textBox",
+      "label": "Text box",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Text box"
+     },
+     {
+      "id": "insert.shape",
+      "label": "Shape",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Shape"
+     },
+     {
+      "id": "insert.table",
+      "label": "Table",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Table"
+     },
+     {
+      "id": "insert.chart",
+      "label": "Chart",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Chart"
+     },
+     {
+      "id": "insert.diagram",
+      "label": "Diagram",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Diagram"
+     },
+     {
+      "id": "insert.wordArt",
+      "label": "Word art",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Word art"
+     },
+     {
+      "id": "insert.line",
+      "label": "Line",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Line"
+     },
+     {
+      "id": "insert.link",
+      "label": "Link",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Link"
+     },
+     {
+      "id": "insert.comment",
+      "label": "Comment",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Comment"
+     },
+     {
+      "id": "insert.newSlide",
+      "label": "New slide",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "New slide"
+     },
+     {
+      "id": "insert.slideNumbers",
+      "label": "Slide numbers",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Slide numbers"
+     },
+     {
+      "id": "insert.shader",
+      "label": "Shader",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Shader"
+     }
+    ],
+    "menubar.format": [
+     {
+      "id": "format.text",
+      "label": "Text",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Text"
+     },
+     {
+      "id": "format.alignIndent",
+      "label": "Align & indent",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Align & indent"
+     },
+     {
+      "id": "format.spacing",
+      "label": "Line & paragraph spacing",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Line & paragraph spacing"
+     },
+     {
+      "id": "format.bulletsNumbering",
+      "label": "Bullets & numbering",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Bullets & numbering"
+     },
+     {
+      "id": "format.table",
+      "label": "Table",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Table"
+     },
+     {
+      "id": "format.image",
+      "label": "Image",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Image"
+     },
+     {
+      "id": "format.bordersLines",
+      "label": "Borders & lines",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Borders & lines"
+     },
+     {
+      "id": "format.formatOptions",
+      "label": "Format options",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Format options"
+     },
+     {
+      "id": "format.clearFormatting",
+      "label": "Clear formatting",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Clear formatting"
+     },
+     {
+      "id": "format.altText",
+      "label": "Alt text",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Alt text"
+     },
+     {
+      "id": "format.textFitting",
+      "label": "Text fitting",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Text fitting"
+     }
+    ],
+    "menubar.slide": [
+     {
+      "id": "slide.newSlide",
+      "label": "New slide",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "New slide"
+     },
+     {
+      "id": "slide.duplicateSlide",
+      "label": "Duplicate slide",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Duplicate slide"
+     },
+     {
+      "id": "slide.deleteSlide",
+      "label": "Delete slide",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Delete slide"
+     },
+     {
+      "id": "slide.skipSlide",
+      "label": "Skip slide",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Skip slide"
+     },
+     {
+      "id": "slide.moveSlide",
+      "label": "Move slide",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Move slide"
+     },
+     {
+      "id": "slide.changeBackground",
+      "label": "Change background",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Change background"
+     },
+     {
+      "id": "slide.applyLayout",
+      "label": "Apply layout",
+      "disabled": false,
+      "sub": true,
+      "status": "now",
+      "tip": "Apply layout"
+     },
+     {
+      "id": "slide.editTheme",
+      "label": "Edit theme",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Edit theme"
+     },
+     {
+      "id": "slide.changeTheme",
+      "label": "Change theme",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Change theme"
+     }
+    ],
+    "menubar.arrange": [
+     {
+      "id": "arrange.order",
+      "label": "Order",
+      "disabled": true,
+      "sub": true,
+      "status": "now",
+      "tip": "Order"
+     },
+     {
+      "id": "arrange.align",
+      "label": "Align",
+      "disabled": true,
+      "sub": true,
+      "status": "now",
+      "tip": "Align"
+     },
+     {
+      "id": "arrange.distribute",
+      "label": "Distribute",
+      "disabled": true,
+      "sub": true,
+      "status": "now",
+      "tip": "Distribute"
+     },
+     {
+      "id": "arrange.centerOnPage",
+      "label": "Center on page",
+      "disabled": true,
+      "sub": true,
+      "status": "now",
+      "tip": "Center on page"
+     },
+     {
+      "id": "arrange.rotate",
+      "label": "Rotate",
+      "disabled": true,
+      "sub": true,
+      "status": "now",
+      "tip": "Rotate"
+     },
+     {
+      "id": "arrange.group",
+      "label": "Group",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Group"
+     },
+     {
+      "id": "arrange.ungroup",
+      "label": "Ungroup",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Ungroup"
+     },
+     {
+      "id": "arrange.regroup",
+      "label": "Regroup",
+      "disabled": true,
+      "sub": false,
+      "status": "now",
+      "tip": "Regroup"
+     }
+    ],
+    "menubar.tools": [
+     {
+      "id": "tools.preferences.linkDetection",
+      "label": "Link detection",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Link detection"
+     },
+     {
+      "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+      "label": "Turn on collaborator announcements",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Turn on collaborator announcements"
+     },
+     {
+      "id": "tools.tailor",
+      "label": "Tailor for a customer",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Tailor for a customer"
+     },
+     {
+      "id": "tools.assist",
+      "label": "Assist",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Assist"
+     },
+     {
+      "id": "tools.checkSlides",
+      "label": "Check slides",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Check slides"
+     },
+     {
+      "id": "tools.advancedTools",
+      "label": "Advanced tools",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Advanced tools"
+     }
+    ],
+    "menubar.help": [
+     {
+      "id": "help.searchMenus",
+      "label": "Search the menus",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Search the menus"
+     },
+     {
+      "id": "help.help",
+      "label": "Help",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Help"
+     },
+     {
+      "id": "help.improve",
+      "label": "Help Turboslide improve",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Help Turboslide improve"
+     },
+     {
+      "id": "help.keyboardShortcuts",
+      "label": "Keyboard shortcuts",
+      "disabled": false,
+      "sub": false,
+      "status": "now",
+      "tip": "Keyboard shortcuts"
+     }
+    ]
+   },
+   "state": {
+    "deckId": "untitled-20261002-tebn",
+    "revision": 0,
+    "keys": [
+     "deckId",
+     "revision",
+     "serverRevision",
+     "pending",
+     "slideId",
+     "blockId",
+     "mode",
+     "theme",
+     "zoom",
+     "settings",
+     "gesture",
+     "assets",
+     "author",
+     "sync",
+     "presence",
+     "access",
+     "account",
+     "identities",
+     "comments",
+     "inbox"
+    ]
+   },
+   "pathAfter": "/new",
+   "pathAfterTails": "/new",
+   "pathEnd": "/new"
+  },
+  "decks-light": {
+   "loadMs": 21707,
+   "url": "https://www.turboslide.com/decks",
+   "title": "Recent presentations, Turboslide",
+   "theme": "light",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=light"
+   ],
+   "controls": [
+    {
+     "id": "appbar.home",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "Turboslide",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 177,
+     "y": 40,
+     "w": 16,
+     "h": 24
+    },
+    {
+     "id": "appbar.about",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "About Turboslide",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 203,
+     "y": 40,
+     "w": 105,
+     "h": 24
+    },
+    {
+     "id": "home.search",
+     "tag": "input",
+     "role": null,
+     "label": "Search presentations",
+     "tip": "Search presentations",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 430,
+     "y": 32,
+     "w": 720,
+     "h": 40
+    },
+    {
+     "id": "home.gallery",
+     "tag": "a",
+     "role": null,
+     "label": "Template gallery",
+     "tip": "Template gallery",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1147,
+     "y": 116,
+     "w": 102,
+     "h": 16
+    },
+    {
+     "id": "home.blank",
+     "tag": "a",
+     "role": null,
+     "label": "Blank presentation",
+     "tip": "Blank presentation",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 177,
+     "y": 149,
+     "w": 160,
+     "h": 144
+    },
+    {
+     "id": "home.template.gt-brand",
+     "tag": "button",
+     "role": null,
+     "label": "GT brand deck",
+     "tip": "GT brand deck",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 357,
+     "y": 149,
+     "w": 160,
+     "h": 144
+    },
+    {
+     "id": "home.view.grid",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "Grid view",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1018,
+     "y": 343,
+     "w": 30,
+     "h": 30
+    },
+    {
+     "id": "home.view.list",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "List view",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1048,
+     "y": 343,
+     "w": 30,
+     "h": 30
+    },
+    {
+     "id": "home.sort",
+     "tag": "select",
+     "role": null,
+     "label": "Last opened by meLast modifiedTitle",
+     "tip": "Sort by",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1091,
+     "y": 342,
+     "w": 158,
+     "h": 32
+    },
+    {
+     "id": "home.cards",
+     "tag": "ul",
+     "role": null,
+     "label": "Acme renewal deck v3Acme renewal deck v3Edited today at 6:42 PMUntitled presenta",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 409,
+     "w": 1072,
+     "h": 8349
+    },
+    {
+     "id": "home.card.untitled-20261002-6qmf",
+     "tag": "li",
+     "role": null,
+     "label": "Acme renewal deck v3Acme renewal deck v3Edited today at 6:42 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-6qmf",
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-6qmf",
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 190,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 389,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-8a9n",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:41 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-8a9n",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-8a9n",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 463,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 662,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-pldo",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:41 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-pldo",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-pldo",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 736,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 935,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-lv57",
+     "tag": "li",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.callsCost probe cost.two-tabs-idle.callsEdited tod",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-lv57",
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-lv57",
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1009,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1208,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-ujll",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:40 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-ujll",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-ujll",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 190,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 389,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-zmrc",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:40 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-zmrc",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-zmrc",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 463,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-zmrc",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 662,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-nng9",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-nng9",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-nng9",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 736,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-nng9",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 935,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-08qn",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-08qn",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-08qn",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1009,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-08qn",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1208,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-dzkk",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-dzkk",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-jnx8",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:38 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-jnx8",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-r828",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:37 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-r828",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-uf0s",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:37 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-uf0s",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    }
+   ],
+   "interactive": [
+    {
+     "id": "appbar.home",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "Turboslide",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 40,
+     "x": 177
+    },
+    {
+     "id": "appbar.about",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "About Turboslide",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 40,
+     "x": 203
+    },
+    {
+     "id": "home.search",
+     "own": true,
+     "tag": "input",
+     "role": null,
+     "label": "Search presentations",
+     "tip": "Search presentations",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 32,
+     "x": 430
+    },
+    {
+     "id": "home.gallery",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Template gallery",
+     "tip": "Template gallery",
+     "region": "other",
+     "disabled": false,
+     "y": 116,
+     "x": 1147
+    },
+    {
+     "id": "home.blank",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Blank presentation",
+     "tip": "Blank presentation",
+     "region": "other",
+     "disabled": false,
+     "y": 149,
+     "x": 177
+    },
+    {
+     "id": "home.template.gt-brand",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "GT brand deck",
+     "tip": "GT brand deck",
+     "region": "other",
+     "disabled": false,
+     "y": 149,
+     "x": 357
+    },
+    {
+     "id": "home.view.grid",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "Grid view",
+     "region": "other",
+     "disabled": false,
+     "y": 343,
+     "x": 1018
+    },
+    {
+     "id": "home.view.list",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "List view",
+     "region": "other",
+     "disabled": false,
+     "y": 343,
+     "x": 1048
+    },
+    {
+     "id": "home.sort",
+     "own": true,
+     "tag": "select",
+     "role": null,
+     "label": "Last opened by meLast modifiedTitle",
+     "tip": "Sort by",
+     "region": "other",
+     "disabled": false,
+     "y": 342,
+     "x": 1091
+    },
+    {
+     "id": "home.open.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 178
+    },
+    {
+     "id": "home.title.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 190
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 389
+    },
+    {
+     "id": "home.open.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 451
+    },
+    {
+     "id": "home.title.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 463
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 662
+    },
+    {
+     "id": "home.open.untitled-20261002-pldo",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 724
+    },
+    {
+     "id": "home.title.untitled-20261002-pldo",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 736
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 935
+    },
+    {
+     "id": "home.open.untitled-20261002-lv57",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 997
+    },
+    {
+     "id": "home.title.untitled-20261002-lv57",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 1009
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 1208
+    },
+    {
+     "id": "home.open.untitled-20261002-ujll",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 178
+    },
+    {
+     "id": "home.title.untitled-20261002-ujll",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 190
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 389
+    },
+    {
+     "id": "home.open.untitled-20261002-zmrc",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 451
+    },
+    {
+     "id": "home.title.untitled-20261002-zmrc",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 463
+    },
+    {
+     "id": "home.more.untitled-20261002-zmrc",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 662
+    },
+    {
+     "id": "home.open.untitled-20261002-nng9",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 724
+    },
+    {
+     "id": "home.title.untitled-20261002-nng9",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 736
+    },
+    {
+     "id": "home.more.untitled-20261002-nng9",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 935
+    },
+    {
+     "id": "home.open.untitled-20261002-08qn",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 997
+    },
+    {
+     "id": "home.title.untitled-20261002-08qn",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 1009
+    },
+    {
+     "id": "home.more.untitled-20261002-08qn",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 1208
+    },
+    {
+     "id": "home.open.untitled-20261002-dzkk",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 178
+    },
+    {
+     "id": "home.open.untitled-20261002-jnx8",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 451
+    },
+    {
+     "id": "home.open.untitled-20261002-r828",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 724
+    },
+    {
+     "id": "home.open.untitled-20261002-uf0s",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 997
+    }
+   ],
+   "text": [
+    {
+     "t": "Turboslide",
+     "region": "titleRow",
+     "ctl": "appbar.about"
+    },
+    {
+     "t": "Start a new presentation",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Template gallery",
+     "region": "other",
+     "ctl": "home.gallery"
+    },
+    {
+     "t": "Blank presentation",
+     "region": "other",
+     "ctl": "home.blank"
+    },
+    {
+     "t": "GT brand deck",
+     "region": "other",
+     "ctl": "home.template.gt-brand"
+    },
+    {
+     "t": "Recent presentations",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Every presentation on this Turboslide is listed here",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Sort by",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Acme renewal deck v3",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-6qmf"
+    },
+    {
+     "t": "Acme renewal deck v3",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-6qmf"
+    },
+    {
+     "t": "Edited today at 6:42 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-6qmf"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Edited today at 6:41 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-pldo"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-pldo"
+    },
+    {
+     "t": "Edited today at 6:41 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-pldo"
+    },
+    {
+     "t": "Cost probe cost.two-tabs-idle.calls",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-lv57"
+    },
+    {
+     "t": "Cost probe cost.two-tabs-idle.calls",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-lv57"
+    },
+    {
+     "t": "Edited today at 6:40 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-lv57"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-ujll"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-ujll"
+    },
+    {
+     "t": "Edited today at 6:40 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-ujll"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-zmrc"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-zmrc"
+    },
+    {
+     "t": "Edited today at 6:40 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-zmrc"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-nng9"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-nng9"
+    },
+    {
+     "t": "Edited today at 6:39 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-nng9"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-08qn"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-08qn"
+    },
+    {
+     "t": "Edited today at 6:39 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-08qn"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-dzkk"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-jnx8"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-r828"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-uf0s"
+    }
+   ],
+   "tips": [
+    {
+     "id": "appbar.home",
+     "tip": "Turboslide"
+    },
+    {
+     "id": "appbar.about",
+     "tip": "About Turboslide"
+    },
+    {
+     "id": "home.search",
+     "tip": "Search presentations"
+    },
+    {
+     "id": "home.gallery",
+     "tip": "Template gallery"
+    },
+    {
+     "id": "home.blank",
+     "tip": "Blank presentation"
+    },
+    {
+     "id": "home.template.gt-brand",
+     "tip": "GT brand deck"
+    },
+    {
+     "id": "home.view.grid",
+     "tip": "Grid view"
+    },
+    {
+     "id": "home.view.list",
+     "tip": "List view"
+    },
+    {
+     "id": "home.sort",
+     "tip": "Sort by"
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-zmrc",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-nng9",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-08qn",
+     "tip": "More actions"
+    }
+   ],
+   "live": []
+  },
+  "home-light": {
+   "loadMs": 18845,
+   "url": "https://www.turboslide.com/home",
+   "title": "Turboslide, a slides editor in the browser",
+   "theme": "light",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=light"
+   ],
+   "controls": [
+    {
+     "id": "home.nav.lockup",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 160,
+     "y": 11,
+     "w": 131,
+     "h": 22
+    },
+    {
+     "id": "home.nav.docs",
+     "tag": "a",
+     "role": null,
+     "label": "Documentation",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 814,
+     "y": 6,
+     "w": 115,
+     "h": 32
+    },
+    {
+     "id": "home.nav.github",
+     "tag": "a",
+     "role": null,
+     "label": "GitHub",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 934,
+     "y": 6,
+     "w": 64,
+     "h": 32
+    },
+    {
+     "id": "home.theme",
+     "tag": "span",
+     "role": "group",
+     "label": "Appearance",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1010,
+     "y": 6,
+     "w": 107,
+     "h": 32
+    },
+    {
+     "id": "home.theme.light",
+     "tag": "button",
+     "role": null,
+     "label": "Light",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1010,
+     "y": 6,
+     "w": 52,
+     "h": 32
+    },
+    {
+     "id": "home.theme.dark",
+     "tag": "button",
+     "role": null,
+     "label": "Dark",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1066,
+     "y": 6,
+     "w": 51,
+     "h": 32
+    },
+    {
+     "id": "home.nav.new",
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1149,
+     "y": 6,
+     "w": 131,
+     "h": 32
+    },
+    {
+     "id": "home.hero.new",
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 160,
+     "y": 373,
+     "w": 151,
+     "h": 40
+    },
+    {
+     "id": "home.hero.deck",
+     "tag": "a",
+     "role": null,
+     "label": "Open the Example Deck",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 319,
+     "y": 373,
+     "w": 193,
+     "h": 40
+    }
+   ],
+   "interactive": [
+    {
+     "id": "home.nav.lockup",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 11,
+     "x": 160
+    },
+    {
+     "id": "home.nav.docs",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Documentation",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 814
+    },
+    {
+     "id": "home.nav.github",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "GitHub",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 934
+    },
+    {
+     "id": "home.theme.light",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Light",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1010
+    },
+    {
+     "id": "home.theme.dark",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Dark",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1066
+    },
+    {
+     "id": "home.nav.new",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1149
+    },
+    {
+     "id": "home.hero.new",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 373,
+     "x": 160
+    },
+    {
+     "id": "home.hero.deck",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Open the Example Deck",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 373,
+     "x": 319
+    }
+   ],
+   "text": [
+    {
+     "t": "Turboslide",
+     "region": "titleRow",
+     "ctl": "home.nav.lockup"
+    },
+    {
+     "t": "Documentation",
+     "region": "titleRow",
+     "ctl": "home.nav.docs"
+    },
+    {
+     "t": "GitHub",
+     "region": "titleRow",
+     "ctl": "home.nav.github"
+    },
+    {
+     "t": "Light",
+     "region": "titleRow",
+     "ctl": "home.theme.light"
+    },
+    {
+     "t": "Dark",
+     "region": "titleRow",
+     "ctl": "home.theme.dark"
+    },
+    {
+     "t": "New Presentation",
+     "region": "titleRow",
+     "ctl": "home.nav.new"
+    },
+    {
+     "t": "Build the pitch, present it and send the link",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "New Presentation",
+     "region": "other",
+     "ctl": "home.hero.new"
+    },
+    {
+     "t": "Open the Example Deck",
+     "region": "other",
+     "ctl": "home.hero.deck"
+    }
+   ],
+   "tips": [],
+   "live": []
+  },
+  "new-dark": {
+   "loadMs": 3686,
+   "url": "https://www.turboslide.com/new",
+   "title": "Untitled presentation, editor, Turboslide",
+   "theme": "dark",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=dark"
+   ],
+   "controls": [
+    {
+     "id": "title.row",
+     "tag": "header",
+     "role": null,
+     "label": "Assist",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 0,
+     "y": 0,
+     "w": 1440,
+     "h": 44
+    },
+    {
+     "id": "title.home",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide home",
+     "tip": "Turboslide home",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 10,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "deck.name",
+     "tag": "button",
+     "role": null,
+     "label": "Presentation title",
+     "tip": "Rename",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 50,
+     "y": 6,
+     "w": 157,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 215,
+     "y": 6,
+     "w": 141,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit",
+     "tag": "button",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": "Last edit just now",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 215,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "deck.lastEdit.words",
+     "tag": "span",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 247,
+     "y": 15,
+     "w": 109,
+     "h": 13
+    },
+    {
+     "id": "title.presence",
+     "tag": "div",
+     "role": "group",
+     "label": "Collaborators",
+     "tip": "Collaborators",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 847,
+     "y": 6,
+     "w": 184,
+     "h": 32
+    },
+    {
+     "id": "title.account",
+     "tag": "button",
+     "role": null,
+     "label": "Account",
+     "tip": "Glass 488 (you)",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1007,
+     "y": 10,
+     "w": 24,
+     "h": 24
+    },
+    {
+     "id": "title.assist.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Assist",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1039,
+     "y": 6,
+     "w": 83,
+     "h": 32
+    },
+    {
+     "id": "title.assist",
+     "tag": "button",
+     "role": null,
+     "label": "Assist",
+     "tip": "Assist",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1039,
+     "y": 6,
+     "w": 83,
+     "h": 32
+    },
+    {
+     "id": "title.comments.slot",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1129,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.comments",
+     "tag": "button",
+     "role": null,
+     "label": "Show all comments",
+     "tip": "Show all comments",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1129,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.sidePanel.slot",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1169,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "title.sidePanel",
+     "tag": "button",
+     "role": null,
+     "label": "Show side panel",
+     "tip": "Show side panel",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1169,
+     "y": 6,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "present.split",
+     "tag": "span",
+     "role": "group",
+     "label": "Slideshow",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1209,
+     "y": 6,
+     "w": 133,
+     "h": 32
+    },
+    {
+     "id": "present.open",
+     "tag": "button",
+     "role": null,
+     "label": "Slideshow",
+     "tip": "Slideshow",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1210,
+     "y": 7,
+     "w": 103,
+     "h": 30
+    },
+    {
+     "id": "present.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Presentation options",
+     "tip": "Presentation options",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1313,
+     "y": 7,
+     "w": 28,
+     "h": 30
+    },
+    {
+     "id": "share.slot",
+     "tag": "span",
+     "role": null,
+     "label": "Share",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1350,
+     "y": 6,
+     "w": 78,
+     "h": 32
+    },
+    {
+     "id": "share.open",
+     "tag": "button",
+     "role": null,
+     "label": "Share",
+     "tip": "Share",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1350,
+     "y": 6,
+     "w": 78,
+     "h": 32
+    },
+    {
+     "id": "menubar",
+     "tag": "nav",
+     "role": null,
+     "label": "Menus",
+     "tip": null,
+     "disabled": false,
+     "region": "menubar",
+     "interactive": false,
+     "x": 0,
+     "y": 44,
+     "w": 1440,
+     "h": 28
+    },
+    {
+     "id": "menubar.file",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "File",
+     "tip": "File menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 6,
+     "y": 44,
+     "w": 46,
+     "h": 27
+    },
+    {
+     "id": "menubar.edit",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Edit",
+     "tip": "Edit menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 52,
+     "y": 44,
+     "w": 47,
+     "h": 27
+    },
+    {
+     "id": "menubar.view",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "View",
+     "tip": "View menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 99,
+     "y": 44,
+     "w": 54,
+     "h": 27
+    },
+    {
+     "id": "menubar.insert",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Insert",
+     "tip": "Insert menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 153,
+     "y": 44,
+     "w": 59,
+     "h": 27
+    },
+    {
+     "id": "menubar.format",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Format",
+     "tip": "Format menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 212,
+     "y": 44,
+     "w": 67,
+     "h": 27
+    },
+    {
+     "id": "menubar.slide",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Slide",
+     "tip": "Slide menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 279,
+     "y": 44,
+     "w": 54,
+     "h": 27
+    },
+    {
+     "id": "menubar.arrange",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Arrange",
+     "tip": "Arrange menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 333,
+     "y": 44,
+     "w": 74,
+     "h": 27
+    },
+    {
+     "id": "menubar.tools",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Tools",
+     "tip": "Tools menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 407,
+     "y": 44,
+     "w": 57,
+     "h": 27
+    },
+    {
+     "id": "menubar.help",
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Help",
+     "tip": "Help menu",
+     "disabled": false,
+     "region": "menubar",
+     "interactive": true,
+     "x": 464,
+     "y": 44,
+     "w": 52,
+     "h": 27
+    },
+    {
+     "id": "toolbar",
+     "tag": "div",
+     "role": "toolbar",
+     "label": "Toolbar",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 0,
+     "y": 72,
+     "w": 1440,
+     "h": 40
+    },
+    {
+     "id": "toolbar.head",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 8,
+     "y": 76,
+     "w": 323,
+     "h": 32
+    },
+    {
+     "id": "toolbar.search",
+     "tag": "button",
+     "role": null,
+     "label": "Search the menus",
+     "tip": "Search the menus",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 8,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide.split",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 44,
+     "y": 76,
+     "w": 60,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide",
+     "tag": "button",
+     "role": null,
+     "label": "New slide",
+     "tip": "New slide",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 44,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "New slide with layout",
+     "tip": "New slide with layout",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 72,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.undo",
+     "tag": "button",
+     "role": null,
+     "label": "Undo",
+     "tip": "Undo",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 108,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.redo",
+     "tag": "button",
+     "role": null,
+     "label": "Redo",
+     "tip": "Redo",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 144,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.print",
+     "tag": "button",
+     "role": null,
+     "label": "Print",
+     "tip": "Print",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 180,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "tag": "button",
+     "role": null,
+     "label": "Paint format",
+     "tip": "Paint format",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 216,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.zoom",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 252,
+     "y": 76,
+     "w": 66,
+     "h": 32
+    },
+    {
+     "id": "view.zoom.value",
+     "tag": "input",
+     "role": null,
+     "label": "Zoom",
+     "tip": "Zoom",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 253,
+     "y": 77,
+     "w": 44,
+     "h": 30
+    },
+    {
+     "id": "view.zoom.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Zoom levels",
+     "tip": "Zoom levels",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 297,
+     "y": 77,
+     "w": 20,
+     "h": 30
+    },
+    {
+     "id": "toolbar.tail",
+     "tag": "div",
+     "role": null,
+     "label": "Background",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 335,
+     "y": 76,
+     "w": 1097,
+     "h": 32
+    },
+    {
+     "id": "toolbar.select",
+     "tag": "button",
+     "role": null,
+     "label": "Select",
+     "tip": "Select",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 335,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.textBox",
+     "tag": "button",
+     "role": null,
+     "label": "Text box",
+     "tip": "Text box",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 371,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertImage",
+     "tag": "button",
+     "role": null,
+     "label": "Insert image",
+     "tip": "Insert image",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 407,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Image",
+     "tip": "Image",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 439,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertShape",
+     "tag": "button",
+     "role": null,
+     "label": "Insert shape",
+     "tip": "Insert shape",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 475,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Shape",
+     "tip": "Shape",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 507,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertLine",
+     "tag": "button",
+     "role": null,
+     "label": "Insert line",
+     "tip": "Insert line",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 543,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "tag": "button",
+     "role": null,
+     "label": "Line",
+     "tip": "Line",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 575,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.insertComment",
+     "tag": "button",
+     "role": null,
+     "label": "Insert comment",
+     "tip": "Insert comment",
+     "disabled": true,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 611,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.background",
+     "tag": "button",
+     "role": null,
+     "label": "Background",
+     "tip": "Background",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 660,
+     "y": 76,
+     "w": 92,
+     "h": 32
+    },
+    {
+     "id": "toolbar.layout",
+     "tag": "button",
+     "role": null,
+     "label": "Layout",
+     "tip": "Layout",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 756,
+     "y": 76,
+     "w": 75,
+     "h": 32
+    },
+    {
+     "id": "toolbar.theme",
+     "tag": "button",
+     "role": null,
+     "label": "Theme",
+     "tip": "Theme",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 835,
+     "y": 76,
+     "w": 61,
+     "h": 32
+    },
+    {
+     "id": "toolbar.end",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": false,
+     "x": 1364,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.pointer",
+     "tag": "button",
+     "role": null,
+     "label": "Show my pointer",
+     "tip": "Show my pointer",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 1364,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "tag": "button",
+     "role": null,
+     "label": "Hide the menus",
+     "tip": "Hide the menus",
+     "disabled": false,
+     "region": "toolbar",
+     "interactive": true,
+     "x": 1400,
+     "y": 76,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "filmstrip",
+     "tag": "div",
+     "role": "listbox",
+     "label": "Slides",
+     "tip": null,
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": false,
+     "x": 0,
+     "y": 112,
+     "w": 255,
+     "h": 788
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "tag": "div",
+     "role": "option",
+     "label": "Slide 1",
+     "tip": "Slide 1",
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": true,
+     "x": 8,
+     "y": 126,
+     "w": 231,
+     "h": 114
+    },
+    {
+     "id": "filmstrip.comments.title",
+     "tag": "span",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "filmstrip",
+     "interactive": false,
+     "x": 13,
+     "y": 148,
+     "w": 20,
+     "h": 16
+    },
+    {
+     "id": "notes",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "notes",
+     "interactive": false,
+     "x": 256,
+     "y": 836,
+     "w": 1184,
+     "h": 64
+    },
+    {
+     "id": "notes.handle",
+     "tag": "button",
+     "role": null,
+     "label": "Resize speaker notes",
+     "tip": "Speaker notes",
+     "disabled": false,
+     "region": "notes",
+     "interactive": true,
+     "x": 826,
+     "y": 830,
+     "w": 44,
+     "h": 13
+    },
+    {
+     "id": "notes.text",
+     "tag": "textarea",
+     "role": null,
+     "label": "Speaker notes",
+     "tip": "Speaker notes",
+     "disabled": false,
+     "region": "notes",
+     "interactive": true,
+     "x": 256,
+     "y": 837,
+     "w": 1184,
+     "h": 63
+    },
+    {
+     "id": "presence.announcements",
+     "tag": "div",
+     "role": null,
+     "label": "",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": -1,
+     "y": -1,
+     "w": 1,
+     "h": 1
+    }
+   ],
+   "interactive": [
+    {
+     "id": "title.home",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide home",
+     "tip": "Turboslide home",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 10
+    },
+    {
+     "id": "deck.name",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Presentation title",
+     "tip": "Rename",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 50
+    },
+    {
+     "id": "deck.lastEdit",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Last edit just now",
+     "tip": "Last edit just now",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 215
+    },
+    {
+     "id": "title.account",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Account",
+     "tip": "Glass 488 (you)",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 10,
+     "x": 1007
+    },
+    {
+     "id": "title.assist",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Assist",
+     "tip": "Assist",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1039
+    },
+    {
+     "id": "title.comments",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show all comments",
+     "tip": "Show all comments",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1129
+    },
+    {
+     "id": "title.sidePanel",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show side panel",
+     "tip": "Show side panel",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1169
+    },
+    {
+     "id": "present.open",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Slideshow",
+     "tip": "Slideshow",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 7,
+     "x": 1210
+    },
+    {
+     "id": "present.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Presentation options",
+     "tip": "Presentation options",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 7,
+     "x": 1313
+    },
+    {
+     "id": "share.open",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Share",
+     "tip": "Share",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1350
+    },
+    {
+     "id": "menubar.file",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "File",
+     "tip": "File menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 6
+    },
+    {
+     "id": "menubar.edit",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Edit",
+     "tip": "Edit menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 52
+    },
+    {
+     "id": "menubar.view",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "View",
+     "tip": "View menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 99
+    },
+    {
+     "id": "menubar.insert",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Insert",
+     "tip": "Insert menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 153
+    },
+    {
+     "id": "menubar.format",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Format",
+     "tip": "Format menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 212
+    },
+    {
+     "id": "menubar.slide",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Slide",
+     "tip": "Slide menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 279
+    },
+    {
+     "id": "menubar.arrange",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Arrange",
+     "tip": "Arrange menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 333
+    },
+    {
+     "id": "menubar.tools",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Tools",
+     "tip": "Tools menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 407
+    },
+    {
+     "id": "menubar.help",
+     "own": true,
+     "tag": "button",
+     "role": "menuitem",
+     "label": "Help",
+     "tip": "Help menu",
+     "region": "menubar",
+     "disabled": false,
+     "y": 44,
+     "x": 464
+    },
+    {
+     "id": "toolbar.search",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Search the menus",
+     "tip": "Search the menus",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 8
+    },
+    {
+     "id": "toolbar.newSlide",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "New slide",
+     "tip": "New slide",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 44
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "New slide with layout",
+     "tip": "New slide with layout",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 72
+    },
+    {
+     "id": "toolbar.undo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Undo",
+     "tip": "Undo",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 108
+    },
+    {
+     "id": "toolbar.redo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Redo",
+     "tip": "Redo",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 144
+    },
+    {
+     "id": "toolbar.print",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Print",
+     "tip": "Print",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 180
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Paint format",
+     "tip": "Paint format",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 216
+    },
+    {
+     "id": "view.zoom.value",
+     "own": true,
+     "tag": "input",
+     "role": null,
+     "label": "Zoom",
+     "tip": "Zoom",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 77,
+     "x": 253
+    },
+    {
+     "id": "view.zoom.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Zoom levels",
+     "tip": "Zoom levels",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 77,
+     "x": 297
+    },
+    {
+     "id": "toolbar.select",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Select",
+     "tip": "Select",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 335
+    },
+    {
+     "id": "toolbar.textBox",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Text box",
+     "tip": "Text box",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 371
+    },
+    {
+     "id": "toolbar.insertImage",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert image",
+     "tip": "Insert image",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 407
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Image",
+     "tip": "Image",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 439
+    },
+    {
+     "id": "toolbar.insertShape",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert shape",
+     "tip": "Insert shape",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 475
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Shape",
+     "tip": "Shape",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 507
+    },
+    {
+     "id": "toolbar.insertLine",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert line",
+     "tip": "Insert line",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 543
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Line",
+     "tip": "Line",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 575
+    },
+    {
+     "id": "toolbar.insertComment",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Insert comment",
+     "tip": "Insert comment",
+     "region": "toolbar",
+     "disabled": true,
+     "y": 76,
+     "x": 611
+    },
+    {
+     "id": "toolbar.background",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Background",
+     "tip": "Background",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 660
+    },
+    {
+     "id": "toolbar.layout",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Layout",
+     "tip": "Layout",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 756
+    },
+    {
+     "id": "toolbar.theme",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Theme",
+     "tip": "Theme",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 835
+    },
+    {
+     "id": "toolbar.pointer",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Show my pointer",
+     "tip": "Show my pointer",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 1364
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Hide the menus",
+     "tip": "Hide the menus",
+     "region": "toolbar",
+     "disabled": false,
+     "y": 76,
+     "x": 1400
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "own": true,
+     "tag": "div",
+     "role": "option",
+     "label": "Slide 1",
+     "tip": "Slide 1",
+     "region": "filmstrip",
+     "disabled": false,
+     "y": 126,
+     "x": 8
+    },
+    {
+     "id": "notes.handle",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Resize speaker notes",
+     "tip": "Speaker notes",
+     "region": "notes",
+     "disabled": false,
+     "y": 830,
+     "x": 826
+    },
+    {
+     "id": "notes.text",
+     "own": true,
+     "tag": "textarea",
+     "role": null,
+     "label": "Speaker notes",
+     "tip": "Speaker notes",
+     "region": "notes",
+     "disabled": false,
+     "y": 837,
+     "x": 256
+    }
+   ],
+   "text": [
+    {
+     "t": "Untitled presentation",
+     "region": "titleRow",
+     "ctl": "deck.name"
+    },
+    {
+     "t": "Last edit just now",
+     "region": "titleRow",
+     "ctl": "deck.lastEdit.words"
+    },
+    {
+     "t": "G",
+     "region": "titleRow",
+     "ctl": "title.account"
+    },
+    {
+     "t": "Assist",
+     "region": "titleRow",
+     "ctl": "title.assist"
+    },
+    {
+     "t": "Slideshow",
+     "region": "titleRow",
+     "ctl": "present.open"
+    },
+    {
+     "t": "Share",
+     "region": "titleRow",
+     "ctl": "share.open"
+    },
+    {
+     "t": "F",
+     "region": "menubar",
+     "ctl": "menubar.file"
+    },
+    {
+     "t": "ile",
+     "region": "menubar",
+     "ctl": "menubar.file"
+    },
+    {
+     "t": "E",
+     "region": "menubar",
+     "ctl": "menubar.edit"
+    },
+    {
+     "t": "dit",
+     "region": "menubar",
+     "ctl": "menubar.edit"
+    },
+    {
+     "t": "V",
+     "region": "menubar",
+     "ctl": "menubar.view"
+    },
+    {
+     "t": "iew",
+     "region": "menubar",
+     "ctl": "menubar.view"
+    },
+    {
+     "t": "I",
+     "region": "menubar",
+     "ctl": "menubar.insert"
+    },
+    {
+     "t": "nsert",
+     "region": "menubar",
+     "ctl": "menubar.insert"
+    },
+    {
+     "t": "F",
+     "region": "menubar",
+     "ctl": "menubar.format"
+    },
+    {
+     "t": "ormat",
+     "region": "menubar",
+     "ctl": "menubar.format"
+    },
+    {
+     "t": "S",
+     "region": "menubar",
+     "ctl": "menubar.slide"
+    },
+    {
+     "t": "lide",
+     "region": "menubar",
+     "ctl": "menubar.slide"
+    },
+    {
+     "t": "A",
+     "region": "menubar",
+     "ctl": "menubar.arrange"
+    },
+    {
+     "t": "rrange",
+     "region": "menubar",
+     "ctl": "menubar.arrange"
+    },
+    {
+     "t": "T",
+     "region": "menubar",
+     "ctl": "menubar.tools"
+    },
+    {
+     "t": "ools",
+     "region": "menubar",
+     "ctl": "menubar.tools"
+    },
+    {
+     "t": "H",
+     "region": "menubar",
+     "ctl": "menubar.help"
+    },
+    {
+     "t": "elp",
+     "region": "menubar",
+     "ctl": "menubar.help"
+    },
+    {
+     "t": "T",
+     "region": "toolbar",
+     "ctl": "toolbar.textBox"
+    },
+    {
+     "t": "Background",
+     "region": "toolbar",
+     "ctl": "toolbar.background"
+    },
+    {
+     "t": "Layout",
+     "region": "toolbar",
+     "ctl": "toolbar.layout"
+    },
+    {
+     "t": "Theme",
+     "region": "toolbar",
+     "ctl": "toolbar.theme"
+    },
+    {
+     "t": "1",
+     "region": "filmstrip",
+     "ctl": "filmstrip.slide.title"
+    },
+    {
+     "t": "01 / 01",
+     "region": "stage",
+     "ctl": null
+    }
+   ],
+   "tips": [
+    {
+     "id": "title.home",
+     "tip": "Turboslide home"
+    },
+    {
+     "id": "deck.name",
+     "tip": "Rename"
+    },
+    {
+     "id": "deck.lastEdit",
+     "tip": "Last edit just now"
+    },
+    {
+     "id": "title.presence",
+     "tip": "Collaborators"
+    },
+    {
+     "id": "title.account",
+     "tip": "Glass 488 (you)"
+    },
+    {
+     "id": "title.assist",
+     "tip": "Assist"
+    },
+    {
+     "id": "title.comments",
+     "tip": "Show all comments"
+    },
+    {
+     "id": "title.sidePanel",
+     "tip": "Show side panel"
+    },
+    {
+     "id": "present.open",
+     "tip": "Slideshow"
+    },
+    {
+     "id": "present.arrow",
+     "tip": "Presentation options"
+    },
+    {
+     "id": "share.open",
+     "tip": "Share"
+    },
+    {
+     "id": "menubar.file",
+     "tip": "File menu"
+    },
+    {
+     "id": "menubar.edit",
+     "tip": "Edit menu"
+    },
+    {
+     "id": "menubar.view",
+     "tip": "View menu"
+    },
+    {
+     "id": "menubar.insert",
+     "tip": "Insert menu"
+    },
+    {
+     "id": "menubar.format",
+     "tip": "Format menu"
+    },
+    {
+     "id": "menubar.slide",
+     "tip": "Slide menu"
+    },
+    {
+     "id": "menubar.arrange",
+     "tip": "Arrange menu"
+    },
+    {
+     "id": "menubar.tools",
+     "tip": "Tools menu"
+    },
+    {
+     "id": "menubar.help",
+     "tip": "Help menu"
+    },
+    {
+     "id": "toolbar.search",
+     "tip": "Search the menus"
+    },
+    {
+     "id": "toolbar.newSlide",
+     "tip": "New slide"
+    },
+    {
+     "id": "toolbar.newSlide.arrow",
+     "tip": "New slide with layout"
+    },
+    {
+     "id": "toolbar.undo",
+     "tip": "Undo"
+    },
+    {
+     "id": "toolbar.redo",
+     "tip": "Redo"
+    },
+    {
+     "id": "toolbar.print",
+     "tip": "Print"
+    },
+    {
+     "id": "toolbar.paintFormat",
+     "tip": "Paint format"
+    },
+    {
+     "id": "view.zoom.value",
+     "tip": "Zoom"
+    },
+    {
+     "id": "view.zoom.arrow",
+     "tip": "Zoom levels"
+    },
+    {
+     "id": "toolbar.select",
+     "tip": "Select"
+    },
+    {
+     "id": "toolbar.textBox",
+     "tip": "Text box"
+    },
+    {
+     "id": "toolbar.insertImage",
+     "tip": "Insert image"
+    },
+    {
+     "id": "toolbar.insertImage.arrow",
+     "tip": "Image"
+    },
+    {
+     "id": "toolbar.insertShape",
+     "tip": "Insert shape"
+    },
+    {
+     "id": "toolbar.insertShape.arrow",
+     "tip": "Shape"
+    },
+    {
+     "id": "toolbar.insertLine",
+     "tip": "Insert line"
+    },
+    {
+     "id": "toolbar.insertLine.arrow",
+     "tip": "Line"
+    },
+    {
+     "id": "toolbar.insertComment",
+     "tip": "Insert comment"
+    },
+    {
+     "id": "toolbar.background",
+     "tip": "Background"
+    },
+    {
+     "id": "toolbar.layout",
+     "tip": "Layout"
+    },
+    {
+     "id": "toolbar.theme",
+     "tip": "Theme"
+    },
+    {
+     "id": "toolbar.pointer",
+     "tip": "Show my pointer"
+    },
+    {
+     "id": "toolbar.hideMenus",
+     "tip": "Hide the menus"
+    },
+    {
+     "id": "filmstrip.slide.title",
+     "tip": "Slide 1"
+    },
+    {
+     "id": "notes.handle",
+     "tip": "Speaker notes"
+    },
+    {
+     "id": "notes.text",
+     "tip": "Speaker notes"
+    }
+   ],
+   "live": [
+    {
+     "id": "presence.announcements",
+     "cls": "ts-announce",
+     "text": ""
+    }
+   ],
+   "pathEnd": "/new"
+  },
+  "decks-dark": {
+   "loadMs": 20923,
+   "url": "https://www.turboslide.com/decks",
+   "title": "Recent presentations, Turboslide",
+   "theme": "dark",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=dark"
+   ],
+   "controls": [
+    {
+     "id": "appbar.home",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "Turboslide",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 177,
+     "y": 40,
+     "w": 16,
+     "h": 24
+    },
+    {
+     "id": "appbar.about",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "About Turboslide",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 203,
+     "y": 40,
+     "w": 105,
+     "h": 24
+    },
+    {
+     "id": "home.search",
+     "tag": "input",
+     "role": null,
+     "label": "Search presentations",
+     "tip": "Search presentations",
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 430,
+     "y": 32,
+     "w": 720,
+     "h": 40
+    },
+    {
+     "id": "home.gallery",
+     "tag": "a",
+     "role": null,
+     "label": "Template gallery",
+     "tip": "Template gallery",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1147,
+     "y": 116,
+     "w": 102,
+     "h": 16
+    },
+    {
+     "id": "home.blank",
+     "tag": "a",
+     "role": null,
+     "label": "Blank presentation",
+     "tip": "Blank presentation",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 177,
+     "y": 149,
+     "w": 160,
+     "h": 144
+    },
+    {
+     "id": "home.template.gt-brand",
+     "tag": "button",
+     "role": null,
+     "label": "GT brand deck",
+     "tip": "GT brand deck",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 357,
+     "y": 149,
+     "w": 160,
+     "h": 144
+    },
+    {
+     "id": "home.view.grid",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "Grid view",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1018,
+     "y": 343,
+     "w": 30,
+     "h": 30
+    },
+    {
+     "id": "home.view.list",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "List view",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1048,
+     "y": 343,
+     "w": 30,
+     "h": 30
+    },
+    {
+     "id": "home.sort",
+     "tag": "select",
+     "role": null,
+     "label": "Last opened by meLast modifiedTitle",
+     "tip": "Sort by",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1091,
+     "y": 342,
+     "w": 158,
+     "h": 32
+    },
+    {
+     "id": "home.cards",
+     "tag": "ul",
+     "role": null,
+     "label": "Acme renewal deck v3Acme renewal deck v3Edited today at 6:42 PMGeneral Translati",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 409,
+     "w": 1072,
+     "h": 8349
+    },
+    {
+     "id": "home.card.untitled-20261002-6qmf",
+     "tag": "li",
+     "role": null,
+     "label": "Acme renewal deck v3Acme renewal deck v3Edited today at 6:42 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-6qmf",
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-6qmf",
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 190,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 389,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.general-translation-brand-deck-muqat38fw5e5",
+     "tag": "li",
+     "role": null,
+     "label": "General Translation brand deckGeneral Translation brand deckEdited today at 6:42",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.general-translation-brand-deck-muqat38fw5e5",
+     "tag": "a",
+     "role": null,
+     "label": "General Translation brand deck",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.general-translation-brand-deck-muqat38fw5e5",
+     "tag": "a",
+     "role": null,
+     "label": "General Translation brand deck",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 463,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.general-translation-brand-deck-muqat38fw5e5",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 662,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-f89y",
+     "tag": "li",
+     "role": null,
+     "label": "Perf audit scratchPerf audit scratchEdited today at 6:42 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-f89y",
+     "tag": "a",
+     "role": null,
+     "label": "Perf audit scratch",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-f89y",
+     "tag": "a",
+     "role": null,
+     "label": "Perf audit scratch",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 736,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-f89y",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 935,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-3ovk",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:42 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 409,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-3ovk",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 410,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-3ovk",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1009,
+     "y": 561,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-3ovk",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1208,
+     "y": 567,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-8a9n",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:41 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-8a9n",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-8a9n",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 190,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 389,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-pldo",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:41 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-pldo",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-pldo",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 463,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 662,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-lv57",
+     "tag": "li",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.callsCost probe cost.two-tabs-idle.callsEdited tod",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-lv57",
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-lv57",
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 736,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 935,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-ujll",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:40 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 635,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-ujll",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 636,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.title.untitled-20261002-ujll",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1009,
+     "y": 787,
+     "w": 191,
+     "h": 26
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 1208,
+     "y": 793,
+     "w": 32,
+     "h": 32
+    },
+    {
+     "id": "home.card.untitled-20261002-zmrc",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:40 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 177,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-zmrc",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 178,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-nng9",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 450,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-nng9",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 451,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-08qn",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 723,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-08qn",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 724,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    },
+    {
+     "id": "home.card.untitled-20261002-dzkk",
+     "tag": "li",
+     "role": null,
+     "label": "Untitled presentationUntitled presentationEdited today at 6:39 PM",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": false,
+     "x": 996,
+     "y": 861,
+     "w": 253,
+     "h": 206
+    },
+    {
+     "id": "home.open.untitled-20261002-dzkk",
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 997,
+     "y": 862,
+     "w": 251,
+     "h": 141
+    }
+   ],
+   "interactive": [
+    {
+     "id": "appbar.home",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "Turboslide",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 40,
+     "x": 177
+    },
+    {
+     "id": "appbar.about",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": "About Turboslide",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 40,
+     "x": 203
+    },
+    {
+     "id": "home.search",
+     "own": true,
+     "tag": "input",
+     "role": null,
+     "label": "Search presentations",
+     "tip": "Search presentations",
+     "region": "titleRow",
+     "disabled": false,
+     "y": 32,
+     "x": 430
+    },
+    {
+     "id": "home.gallery",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Template gallery",
+     "tip": "Template gallery",
+     "region": "other",
+     "disabled": false,
+     "y": 116,
+     "x": 1147
+    },
+    {
+     "id": "home.blank",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Blank presentation",
+     "tip": "Blank presentation",
+     "region": "other",
+     "disabled": false,
+     "y": 149,
+     "x": 177
+    },
+    {
+     "id": "home.template.gt-brand",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "GT brand deck",
+     "tip": "GT brand deck",
+     "region": "other",
+     "disabled": false,
+     "y": 149,
+     "x": 357
+    },
+    {
+     "id": "home.view.grid",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "Grid view",
+     "region": "other",
+     "disabled": false,
+     "y": 343,
+     "x": 1018
+    },
+    {
+     "id": "home.view.list",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "List view",
+     "region": "other",
+     "disabled": false,
+     "y": 343,
+     "x": 1048
+    },
+    {
+     "id": "home.sort",
+     "own": true,
+     "tag": "select",
+     "role": null,
+     "label": "Last opened by meLast modifiedTitle",
+     "tip": "Sort by",
+     "region": "other",
+     "disabled": false,
+     "y": 342,
+     "x": 1091
+    },
+    {
+     "id": "home.open.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 178
+    },
+    {
+     "id": "home.title.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Acme renewal deck v3",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 190
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 389
+    },
+    {
+     "id": "home.open.general-translation-brand-deck-muqat38fw5e5",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "General Translation brand deck",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 451
+    },
+    {
+     "id": "home.title.general-translation-brand-deck-muqat38fw5e5",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "General Translation brand deck",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 463
+    },
+    {
+     "id": "home.more.general-translation-brand-deck-muqat38fw5e5",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 662
+    },
+    {
+     "id": "home.open.untitled-20261002-f89y",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Perf audit scratch",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 724
+    },
+    {
+     "id": "home.title.untitled-20261002-f89y",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Perf audit scratch",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 736
+    },
+    {
+     "id": "home.more.untitled-20261002-f89y",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 935
+    },
+    {
+     "id": "home.open.untitled-20261002-3ovk",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 410,
+     "x": 997
+    },
+    {
+     "id": "home.title.untitled-20261002-3ovk",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 561,
+     "x": 1009
+    },
+    {
+     "id": "home.more.untitled-20261002-3ovk",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 567,
+     "x": 1208
+    },
+    {
+     "id": "home.open.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 178
+    },
+    {
+     "id": "home.title.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 190
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 389
+    },
+    {
+     "id": "home.open.untitled-20261002-pldo",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 451
+    },
+    {
+     "id": "home.title.untitled-20261002-pldo",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 463
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 662
+    },
+    {
+     "id": "home.open.untitled-20261002-lv57",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 724
+    },
+    {
+     "id": "home.title.untitled-20261002-lv57",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Cost probe cost.two-tabs-idle.calls",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 736
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 935
+    },
+    {
+     "id": "home.open.untitled-20261002-ujll",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 636,
+     "x": 997
+    },
+    {
+     "id": "home.title.untitled-20261002-ujll",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 787,
+     "x": 1009
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "",
+     "tip": "More actions",
+     "region": "other",
+     "disabled": false,
+     "y": 793,
+     "x": 1208
+    },
+    {
+     "id": "home.open.untitled-20261002-zmrc",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 178
+    },
+    {
+     "id": "home.open.untitled-20261002-nng9",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 451
+    },
+    {
+     "id": "home.open.untitled-20261002-08qn",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 724
+    },
+    {
+     "id": "home.open.untitled-20261002-dzkk",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Untitled presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 862,
+     "x": 997
+    }
+   ],
+   "text": [
+    {
+     "t": "Turboslide",
+     "region": "titleRow",
+     "ctl": "appbar.about"
+    },
+    {
+     "t": "Start a new presentation",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Template gallery",
+     "region": "other",
+     "ctl": "home.gallery"
+    },
+    {
+     "t": "Blank presentation",
+     "region": "other",
+     "ctl": "home.blank"
+    },
+    {
+     "t": "GT brand deck",
+     "region": "other",
+     "ctl": "home.template.gt-brand"
+    },
+    {
+     "t": "Recent presentations",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Every presentation on this Turboslide is listed here",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Sort by",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Acme renewal deck v3",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-6qmf"
+    },
+    {
+     "t": "Acme renewal deck v3",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-6qmf"
+    },
+    {
+     "t": "Edited today at 6:42 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-6qmf"
+    },
+    {
+     "t": "General Translation brand deck",
+     "region": "other",
+     "ctl": "home.open.general-translation-brand-deck-muqat38fw5e5"
+    },
+    {
+     "t": "General Translation brand deck",
+     "region": "other",
+     "ctl": "home.title.general-translation-brand-deck-muqat38fw5e5"
+    },
+    {
+     "t": "Edited today at 6:42 PM",
+     "region": "other",
+     "ctl": "home.card.general-translation-brand-deck-muqat38fw5e5"
+    },
+    {
+     "t": "Perf audit scratch",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-f89y"
+    },
+    {
+     "t": "Perf audit scratch",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-f89y"
+    },
+    {
+     "t": "Edited today at 6:42 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-f89y"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-3ovk"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-3ovk"
+    },
+    {
+     "t": "Edited today at 6:42 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-3ovk"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Edited today at 6:41 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-8a9n"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-pldo"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-pldo"
+    },
+    {
+     "t": "Edited today at 6:41 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-pldo"
+    },
+    {
+     "t": "Cost probe cost.two-tabs-idle.calls",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-lv57"
+    },
+    {
+     "t": "Cost probe cost.two-tabs-idle.calls",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-lv57"
+    },
+    {
+     "t": "Edited today at 6:40 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-lv57"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-ujll"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.title.untitled-20261002-ujll"
+    },
+    {
+     "t": "Edited today at 6:40 PM",
+     "region": "other",
+     "ctl": "home.card.untitled-20261002-ujll"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-zmrc"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-nng9"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-08qn"
+    },
+    {
+     "t": "Untitled presentation",
+     "region": "other",
+     "ctl": "home.open.untitled-20261002-dzkk"
+    }
+   ],
+   "tips": [
+    {
+     "id": "appbar.home",
+     "tip": "Turboslide"
+    },
+    {
+     "id": "appbar.about",
+     "tip": "About Turboslide"
+    },
+    {
+     "id": "home.search",
+     "tip": "Search presentations"
+    },
+    {
+     "id": "home.gallery",
+     "tip": "Template gallery"
+    },
+    {
+     "id": "home.blank",
+     "tip": "Blank presentation"
+    },
+    {
+     "id": "home.template.gt-brand",
+     "tip": "GT brand deck"
+    },
+    {
+     "id": "home.view.grid",
+     "tip": "Grid view"
+    },
+    {
+     "id": "home.view.list",
+     "tip": "List view"
+    },
+    {
+     "id": "home.sort",
+     "tip": "Sort by"
+    },
+    {
+     "id": "home.more.untitled-20261002-6qmf",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.general-translation-brand-deck-muqat38fw5e5",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-f89y",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-3ovk",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-8a9n",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-pldo",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-lv57",
+     "tip": "More actions"
+    },
+    {
+     "id": "home.more.untitled-20261002-ujll",
+     "tip": "More actions"
+    }
+   ],
+   "live": []
+  },
+  "home-dark": {
+   "loadMs": 14018,
+   "url": "https://www.turboslide.com/home",
+   "title": "Turboslide, a slides editor in the browser",
+   "theme": "dark",
+   "rootAttrs": [
+    "lang=en",
+    "data-theme=dark"
+   ],
+   "controls": [
+    {
+     "id": "home.nav.lockup",
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 160,
+     "y": 11,
+     "w": 131,
+     "h": 22
+    },
+    {
+     "id": "home.nav.docs",
+     "tag": "a",
+     "role": null,
+     "label": "Documentation",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 814,
+     "y": 6,
+     "w": 115,
+     "h": 32
+    },
+    {
+     "id": "home.nav.github",
+     "tag": "a",
+     "role": null,
+     "label": "GitHub",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 934,
+     "y": 6,
+     "w": 64,
+     "h": 32
+    },
+    {
+     "id": "home.theme",
+     "tag": "span",
+     "role": "group",
+     "label": "Appearance",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": false,
+     "x": 1010,
+     "y": 6,
+     "w": 107,
+     "h": 32
+    },
+    {
+     "id": "home.theme.light",
+     "tag": "button",
+     "role": null,
+     "label": "Light",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1010,
+     "y": 6,
+     "w": 52,
+     "h": 32
+    },
+    {
+     "id": "home.theme.dark",
+     "tag": "button",
+     "role": null,
+     "label": "Dark",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1066,
+     "y": 6,
+     "w": 51,
+     "h": 32
+    },
+    {
+     "id": "home.nav.new",
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "titleRow",
+     "interactive": true,
+     "x": 1149,
+     "y": 6,
+     "w": 131,
+     "h": 32
+    },
+    {
+     "id": "home.hero.new",
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 160,
+     "y": 373,
+     "w": 151,
+     "h": 40
+    },
+    {
+     "id": "home.hero.deck",
+     "tag": "a",
+     "role": null,
+     "label": "Open the Example Deck",
+     "tip": null,
+     "disabled": false,
+     "region": "other",
+     "interactive": true,
+     "x": 319,
+     "y": 373,
+     "w": 193,
+     "h": 40
+    }
+   ],
+   "interactive": [
+    {
+     "id": "home.nav.lockup",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Turboslide",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 11,
+     "x": 160
+    },
+    {
+     "id": "home.nav.docs",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Documentation",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 814
+    },
+    {
+     "id": "home.nav.github",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "GitHub",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 934
+    },
+    {
+     "id": "home.theme.light",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Light",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1010
+    },
+    {
+     "id": "home.theme.dark",
+     "own": true,
+     "tag": "button",
+     "role": null,
+     "label": "Dark",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1066
+    },
+    {
+     "id": "home.nav.new",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "region": "titleRow",
+     "disabled": false,
+     "y": 6,
+     "x": 1149
+    },
+    {
+     "id": "home.hero.new",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "New Presentation",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 373,
+     "x": 160
+    },
+    {
+     "id": "home.hero.deck",
+     "own": true,
+     "tag": "a",
+     "role": null,
+     "label": "Open the Example Deck",
+     "tip": null,
+     "region": "other",
+     "disabled": false,
+     "y": 373,
+     "x": 319
+    }
+   ],
+   "text": [
+    {
+     "t": "Turboslide",
+     "region": "titleRow",
+     "ctl": "home.nav.lockup"
+    },
+    {
+     "t": "Documentation",
+     "region": "titleRow",
+     "ctl": "home.nav.docs"
+    },
+    {
+     "t": "GitHub",
+     "region": "titleRow",
+     "ctl": "home.nav.github"
+    },
+    {
+     "t": "Light",
+     "region": "titleRow",
+     "ctl": "home.theme.light"
+    },
+    {
+     "t": "Dark",
+     "region": "titleRow",
+     "ctl": "home.theme.dark"
+    },
+    {
+     "t": "New Presentation",
+     "region": "titleRow",
+     "ctl": "home.nav.new"
+    },
+    {
+     "t": "Build the pitch, present it and send the link",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
+     "region": "other",
+     "ctl": null
+    },
+    {
+     "t": "New Presentation",
+     "region": "other",
+     "ctl": "home.hero.new"
+    },
+    {
+     "t": "Open the Example Deck",
+     "region": "other",
+     "ctl": "home.hero.deck"
+    }
+   ],
+   "tips": [],
+   "live": []
+  }
+ },
+ "endedAt": "2026-10-02T01:43:37.808Z"
+}

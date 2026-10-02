@@ -1,0 +1,104 @@
+{
+  "startedAt": "2026-10-02T01:54:25.303Z",
+  "uptime": "18:54  up 7 days,  8:51, 2 users, load averages: 11.95 22.54 31.15",
+  "deck": "untitled-20261002-h9gr",
+  "steps": {
+    "p1.a-signs-in-and-makes-a-deck": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "deck": "untitled-20261002-h9gr",
+        "invite": "{\"record\":{\"schemaVersion\":1,\"deckId\":\"untitled-20261002-h9gr\",\"owner\":\"usr_LGuEnPIDBsWk8umyodoP7uT3jOfslFmm\",\"pendingOwner\":null,\"createdAt\":\"2026-10-02T01:54:27.261Z\",\"createdBy\":\"usr_LGuEnPIDBsWk8umyodoP7uT3jOfslFmm\",\"assetKey\":\"untitled-20261002-h9gr\",\"generalAccess\":{\"mode\":\"restricted\",\"role\":"
+      },
+      "ms": 1863
+    },
+    "p2.b-signs-in-and-opens": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "status": 200,
+        "role": "editor",
+        "via": "grant"
+      },
+      "ms": 988
+    },
+    "p4.badge-on-b-after-a-signs-in": {
+      "ok": true,
+      "value": {
+        "signOut": 200,
+        "aOut": {
+          "principalId": "anon_2a6eed15-7c45-42e8-87b4-63534157f2d5",
+          "label": "Vellum 386",
+          "trust": "verified",
+          "signedIn": false
+        },
+        "bSeesOut": [
+          {
+            "clientId": "0dd5d230c76a0f19be46d85db3337a79",
+            "trust": "verified",
+            "name": null
+          }
+        ],
+        "signIn": [
+          200,
+          200
+        ],
+        "roster": [
+          {
+            "id": "presence.roster.65b376c6903813275b31bedd604c1ba4",
+            "text": "N3Niobium 397 (you)slide 1",
+            "mark": true
+          },
+          {
+            "id": "presence.roster.6556b0911c99cfa84e2b4707d43abf64",
+            "text": "V3Vellum 386owner · slide 1Go to slide 1",
+            "mark": true
+          }
+        ],
+        "signInToBadgeMs": 1328,
+        "pageLoadedToBadgeMs": 108,
+        "seen": [
+          {
+            "clientId": "6556b0911c99cfa84e2b4707d43abf64",
+            "trust": "verified",
+            "name": null
+          }
+        ]
+      },
+      "ms": 5459
+    },
+    "p5.same-account-second-browser": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "bChips": [
+          {
+            "clientId": "6556b0911c99cfa84e2b4707d43abf64",
+            "trust": "verified",
+            "name": null,
+            "principalId": "usr_LGuEnPIDBsWk8umyodoP7uT3jOfslFmm"
+          },
+          {
+            "clientId": "e812dc4cbe66263ac61fcc12782d15a9",
+            "trust": "verified",
+            "name": null,
+            "principalId": "usr_LGuEnPIDBsWk8umyodoP7uT3jOfslFmm"
+          }
+        ],
+        "sessionsAction": "{\"sessions\":[{\"id\":\"bC5TSZz8A2em5nMTMJvLEMp0voA6P8b4\",\"createdAt\":\"2026-10-02T01:54:32.754Z\",\"lastSeenAt\":\"2026-10-02T01:54:32.754Z\",\"current\":true,\"userAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36\"},{\"id\":\"ucISmWbjJBeYxrgdDNKlG4CPDNfy1lhE\",\"createdAt\":\"2026-10-02T01:54:34.094Z\",\"lastSeenAt\":\"2026-10-02T01"
+      },
+      "ms": 4025
+    }
+  },
+  "endedAt": "2026-10-02T01:54:37.804Z",
+  "uptimeEnd": "18:54  up 7 days,  8:51, 2 users, load averages: 13.53 22.53 31.04"
+}

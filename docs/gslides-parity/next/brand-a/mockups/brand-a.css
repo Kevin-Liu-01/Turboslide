@@ -1,0 +1,269 @@
+/* Brand direction A, shared by the four mockups. The product's own tokens come first and stay as
+   they are; the --a- tokens below are what direction A adds, and the one --pt- override is the
+   selection colour (brand-a.md, rule 9). Every colour on these pages is a token. */
+@import url('../../../../../packages/chrome/src/tokens.css');
+@import url('icons.css');
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../../../packages/fonts/assets/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* the site measurements of deck slide 49: the ruled column, the navigation bar, the site cross */
+  --a-column: 1104px;
+  --a-nav-h: 58px;
+  --a-cross: 9px;
+  --a-gutter: 16px;
+  /* the lockup: the monogram's 128 unit box when its 120 unit cap equals Inter's 0.7275 em cap,
+     the 4 unit clear space under the letters, and a gap of half the cap */
+  --a-mono-h: 0.7765em;
+  --a-mono-drop: 0.0243em;
+  --a-gap: 0.364em;
+  /* the hatch strip of DESIGN.md 75 to 78: 45 degree hairlines every 8 px */
+  --a-hatch: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 8px);
+}
+
+/* the selection colour becomes the GT accent in both appearances (5.63:1 on #ffffff, 3.58:1 on #070707) */
+:root,
+:root[data-theme='dark'] {
+  --pt-select: #2f5ce0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 400 14px/1.45 var(--pt-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1,
+h2,
+h3,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-feature-settings: 'cv11', 'ss01';
+  text-wrap: balance;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* the chrome's icons: Heroicons 20 solid from packages/chrome/src/icons.tsx, at 16 px */
+.ic {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  display: inline-block;
+  background: currentColor;
+  -webkit-mask: var(--m) center / 16px 16px no-repeat;
+  mask: var(--m) center / 16px 16px no-repeat;
+}
+
+/* the twins of a picture: the light file in the light appearance, the dark file in the dark */
+.tw-dark {
+  display: none;
+}
+:root[data-theme='dark'] .tw-light {
+  display: none;
+}
+:root[data-theme='dark'] .tw-dark {
+  display: block;
+}
+.only-light {
+  display: inline-flex;
+}
+.only-dark {
+  display: none;
+}
+:root[data-theme='dark'] .only-light {
+  display: none;
+}
+:root[data-theme='dark'] .only-dark {
+  display: inline-flex;
+}
+
+/* the lockup: the GT bar monogram beside the word in Inter 500 */
+.lockup {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--a-gap);
+  font: 500 22px/1 var(--pt-display);
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv11', 'ss01';
+  white-space: nowrap;
+  color: var(--pt-ink);
+}
+.lockup .mono {
+  height: var(--a-mono-h);
+  width: auto;
+  fill: currentColor;
+  transform: translateY(var(--a-mono-drop));
+  flex: none;
+  display: block;
+}
+.mono-solo {
+  height: 16px;
+  width: auto;
+  fill: currentColor;
+  display: block;
+  flex: none;
+}
+
+/* buttons: square, Title Case labels (DECK-GRAMMAR 22, 39) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 400 13px/1 var(--pt-text);
+  white-space: nowrap;
+}
+.btn.solid {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+  color: var(--pt-paper);
+}
+.btn.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--pt-ink-2);
+}
+.btn.lg {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+.btn.icon {
+  width: 32px;
+  padding: 0;
+}
+
+/* the account chip: a 24 px square, the identity's initial on ink */
+.chip {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 500 12px/1 var(--pt-text);
+  flex: none;
+}
+
+/* the page grammar: full width bands with a seam under each, the ruled column inside with one
+   hairline rail on each side, a 9 px cross where a seam meets a rail (slide 49; DESIGN.md 177) */
+.band {
+  position: relative;
+  border-bottom: 1px solid var(--pt-hair);
+}
+.col {
+  width: var(--a-column);
+  margin: 0 auto;
+  border-inline: 1px solid var(--pt-hair);
+}
+.band > .x {
+  position: absolute;
+  top: calc(100% + 0.5px);
+  width: var(--a-cross);
+  height: var(--a-cross);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.band > .x.l {
+  left: calc(50% - var(--a-column) / 2 + 0.5px);
+}
+.band > .x.r {
+  left: calc(50% + var(--a-column) / 2 - 0.5px);
+}
+.band > .x::before,
+.band > .x::after {
+  content: '';
+  position: absolute;
+  background: var(--pt-cross);
+}
+.band > .x::before {
+  left: 0;
+  right: 0;
+  top: 4px;
+  height: 1px;
+}
+.band > .x::after {
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+}
+.hatch {
+  height: 24px;
+  background: var(--a-hatch);
+}
+
+/* a picture shown at its own cells: 2 px squares, cropped and never scaled (docs/brand.md 217) */
+.cells {
+  position: absolute;
+  width: 1600px;
+  height: 900px;
+  max-width: none;
+  image-rendering: pixelated;
+}
+
+/* under 1024 px a picture is drawn at one CSS px per cell (the 800 by 450 cell grid, nearest
+   neighbour), the cell size the GT sign-in plate's field uses (Prototemplate
+   src/components/plate/brand/moodPictures.ts 60 to 61), so a phone shows the object and not a
+   close crop of its cells */
+@media (max-width: 1023px) {
+  .cells.half {
+    width: 800px;
+    height: 450px;
+  }
+}
+
+/* the one breakpoint of slide 49: under 1024 px every row is one column, the column is the
+   viewport and its rails sit on the viewport's edges, so no cross is drawn */
+@media (max-width: 1023px) {
+  .col {
+    width: 100%;
+    border-inline: 0;
+  }
+  .band > .x {
+    display: none;
+  }
+}

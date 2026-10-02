@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Untitled presentation - Turboslide</title>
+    <script>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+    <link rel="stylesheet" href="brand-a.css" />
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <!--SPRITE-->
+    <!--BODY-->
+    <div class="ed">
+      <header class="titlerow">
+        <a class="home-link" href="/decks" aria-label="Your presentations">
+          <svg class="mono-solo" viewBox="0 0 499.6 128" role="img" aria-label="General Translation"><use href="#gt-bar" /></svg>
+        </a>
+        <span class="docname">Untitled presentation</span>
+        <div class="tr-r">
+          <button class="btn ghost assist">Assist</button>
+          <button class="btn ghost icon comments" aria-label="Show all comments"><i class="ic i-chat"></i></button>
+          <button class="btn ghost icon panel" aria-label="Show side panel"><i class="ic i-view-columns"></i></button>
+          <span class="split">
+            <button class="go" aria-label="Slideshow"><span>Slideshow</span><i class="ic i-play"></i></button>
+            <button class="more" aria-label="Slideshow options"><i class="ic i-chevron-down"></i></button>
+          </span>
+          <button class="btn"><i class="ic i-lock-closed"></i>Share</button>
+          <span class="chip" aria-label="Account">V</span>
+        </div>
+      </header>
+      <nav class="menubar" data-clip>
+        <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Slide</span><span>Arrange</span><span>Tools</span><span>Help</span>
+      </nav>
+      <div class="toolbar" data-clip>
+        <span class="tb" aria-label="Search the menus"><i class="ic i-search"></i></span>
+        <span class="tb" aria-label="New slide"><i class="ic i-plus"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb" aria-label="Undo"><i class="ic i-arrow-uturn-left"></i></span>
+        <span class="tb" aria-label="Redo"><i class="ic i-arrow-uturn-right"></i></span>
+        <span class="tb wide" aria-label="Print"><i class="ic i-printer"></i></span>
+        <span class="tb wide" aria-label="Paint format"><i class="ic i-paint-brush"></i></span>
+        <span class="tb-text zoom wide">Fit <i class="ic i-chevron-down"></i></span>
+        <span class="tb-sep"></span>
+        <span class="tb wide" aria-label="Select"><i class="ic i-cursor-arrow"></i></span>
+        <span class="tb" aria-label="Text box"><span class="tb-glyph">T</span></span>
+        <span class="tb" aria-label="Insert image"><i class="ic i-photo"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb" aria-label="Insert shape"><i class="ic i-square-2-stack"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb wide" aria-label="Insert line"><i class="ic i-minus"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb wide" aria-label="Insert comment"><i class="ic i-chat"></i></span>
+        <span class="tb-sep wide"></span>
+        <span class="tb-text wide">Background</span>
+        <span class="tb-text wide">Layout <i class="ic i-chevron-down"></i></span>
+        <span class="tb-text wide">Theme</span>
+        <span class="tb tb-end wide" aria-label="Hide the menus"><i class="ic i-chevron-up"></i></span>
+        <span class="tb tb-end tb-more" aria-label="More tools"><i class="ic i-ellipsis-horizontal"></i></span>
+      </div>
+      <div class="body">
+        <aside class="film">
+          <div class="card"><span class="n">1</span><div class="frame"></div></div>
+          <div class="add" aria-label="New slide"><i class="ic i-plus"></i></div>
+        </aside>
+        <main class="stage">
+          <div class="sheet">
+            <div class="ph-title">Click to add title</div>
+            <div class="ph-sub">Click to add subtitle</div>
+          </div>
+        </main>
+        <div class="notes">Click to add speaker notes</div>
+      </div>
+    </div>
+    <!--/BODY-->
+  </body>
+</html>

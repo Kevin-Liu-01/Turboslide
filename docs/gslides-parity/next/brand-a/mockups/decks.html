@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Presentations - Turboslide</title>
+    <script>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+    <link rel="stylesheet" href="brand-a.css" />
+    <style>
+      .nav .col {
+        height: calc(var(--a-nav-h) - 1px);
+        display: grid;
+        grid-template-columns: 220px 1fr 220px;
+        align-items: center;
+        padding: 0 24px;
+      }
+      .search {
+        justify-self: center;
+        width: 100%;
+        max-width: 560px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border: 1px solid var(--pt-hair);
+        border-radius: var(--pt-radius);
+        background: var(--pt-plate);
+        color: var(--pt-titanium);
+        font-size: 14px;
+      }
+      .nav-r {
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .head h2 {
+        font-size: 18px;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+      }
+      .new .col {
+        padding: 24px 24px 22px;
+      }
+      .tiles {
+        margin-top: 16px;
+        display: flex;
+        gap: 24px;
+      }
+      .tile {
+        width: 176px;
+      }
+      .tile .frame {
+        position: relative;
+        width: 176px;
+        height: 99px;
+        border: 1px solid var(--pt-edge);
+        overflow: hidden;
+        background: #ffffff;
+        color: #070707;
+        display: grid;
+        place-items: center;
+      }
+      .tile .frame .ic {
+        width: 28px;
+        height: 28px;
+        -webkit-mask-size: 28px;
+        mask-size: 28px;
+      }
+      .tile .frame .cells {
+        width: 1600px;
+        height: 900px;
+        left: 0;
+        top: 0;
+        transform: scale(0.11);
+        transform-origin: 0 0;
+        image-rendering: auto;
+      }
+      .tile span {
+        display: block;
+        margin-top: 8px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .list .col {
+        padding: 22px 24px 0;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--pt-hair);
+        border-radius: var(--pt-radius);
+        overflow: hidden;
+      }
+      .seg button {
+        width: 32px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        color: var(--pt-ink-2);
+      }
+      .seg button[aria-pressed='true'] {
+        background: var(--pt-ink);
+        color: var(--pt-paper);
+      }
+      .sort {
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 10px 0 12px;
+        border: 1px solid var(--pt-hair);
+        border-radius: var(--pt-radius);
+        font-size: 13px;
+        color: var(--pt-ink);
+      }
+      table {
+        margin-top: 14px;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th {
+        text-align: left;
+        font-weight: 400;
+        font-size: 12px;
+        color: var(--pt-titanium);
+        height: 32px;
+        border-bottom: 1px solid var(--pt-hair);
+      }
+      td {
+        height: 56px;
+        border-bottom: 1px solid var(--pt-hair-soft);
+        color: var(--pt-ink-2);
+        font-variant-numeric: tabular-nums;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .name {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: var(--pt-ink);
+        font-size: 14px;
+      }
+      .thumb {
+        position: relative;
+        width: 64px;
+        height: 36px;
+        flex: none;
+        border: 1px solid var(--pt-edge);
+        overflow: hidden;
+        background: #ffffff;
+      }
+      .thumb i {
+        position: absolute;
+        left: 6px;
+        height: 3px;
+        background: #070707;
+      }
+      .thumb i.t {
+        top: 12px;
+        width: 30px;
+      }
+      .thumb i.s {
+        top: 19px;
+        width: 20px;
+        height: 2px;
+        background: #8a8f98;
+      }
+      .thumb.ink {
+        background: #070707;
+      }
+      .thumb.ink i.t {
+        background: #f2f2f0;
+      }
+      .thumb .cells {
+        width: 1600px;
+        height: 900px;
+        left: 0;
+        top: 0;
+        transform: scale(0.04);
+        transform-origin: 0 0;
+        image-rendering: auto;
+      }
+      .meta-sm {
+        display: none;
+      }
+      th.c-owner,
+      td.c-owner {
+        width: 220px;
+      }
+      th.c-time,
+      td.c-time {
+        width: 160px;
+      }
+      th.c-menu,
+      td.c-menu {
+        width: 40px;
+        text-align: right;
+      }
+
+      @media (max-width: 1023px) {
+        .nav .col {
+          grid-template-columns: 1fr auto;
+          padding: 0 var(--a-gutter);
+        }
+        .nav .lockup {
+          font-size: 20px;
+        }
+        .nav .search {
+          display: none;
+        }
+        .find .col {
+          padding: 10px var(--a-gutter);
+        }
+        .find .search {
+          display: flex;
+        }
+        .new .col {
+          padding: 18px var(--a-gutter) 18px;
+        }
+        .tiles {
+          gap: 12px;
+        }
+        .tile {
+          width: calc((100% - 12px) / 2);
+        }
+        .tile .frame {
+          width: 100%;
+          height: auto;
+          aspect-ratio: 16 / 9;
+        }
+        .list .col {
+          padding: 18px var(--a-gutter) 0;
+        }
+        .sort {
+          display: none;
+        }
+        th.c-owner,
+        td.c-owner,
+        th.c-time,
+        td.c-time {
+          display: none;
+        }
+        .meta-sm {
+          display: block;
+          font-size: 12px;
+          color: var(--pt-ink-2);
+          margin-top: 2px;
+        }
+        .name {
+          font-size: 14px;
+          gap: 12px;
+        }
+      }
+      @media (min-width: 1024px) {
+        .find {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="gt-bar" viewBox="-109.1 36 499.6 128"><path d="M-8.5 40L21.5 40L9.6 96L-20.4 96ZM-22.1 104L7.9 104L-4 160L-34 160ZM-8.5 40L181.5 40L175.1 70L-14.9 70ZM-27.6 130L162.4 130L156 160L-34 160ZM137.9 104L167.9 104L156 160L126 160ZM77.9 104L167.9 104L162.4 130L72.4 130ZM-28.5 40L-6.5 40L-12.9 70L-34.9 70ZM-97.4 82L-15.4 82L-18.4 96L-100.4 96ZM-102.1 104L-20.1 104L-23.1 118L-105.1 118ZM-77.6 130L-25.6 130L-32 160L-84 160ZM216.5 40L386.5 40L380.1 70L210.1 70ZM274.5 40L308.5 40L296.6 96L262.6 96ZM260.9 104L294.9 104L283 160L249 160Z"/></symbol></svg>
+    <header class="band nav">
+      <div class="col">
+        <a class="lockup" href="/home" aria-label="Turboslide home">
+          <svg class="mono" viewBox="0 0 499.6 128" aria-hidden="true"><use href="#gt-bar" /></svg>
+          <span>Turboslide</span>
+        </a>
+        <div class="search"><i class="ic i-search"></i>Search presentations</div>
+        <div class="nav-r">
+          <button class="btn ghost icon" aria-label="Dark appearance">
+            <i class="ic i-moon only-light"></i><i class="ic i-sun only-dark"></i>
+          </button>
+          <span class="chip" aria-label="Account">V</span>
+        </div>
+      </div>
+      <i class="x l"></i><i class="x r"></i>
+    </header>
+    <div class="band find">
+      <div class="col"><div class="search"><i class="ic i-search"></i>Search presentations</div></div>
+    </div>
+
+    <section class="band new">
+      <div class="col">
+        <div class="head">
+          <h2>Start a new presentation</h2>
+          <button class="btn ghost">Template Gallery</button>
+        </div>
+        <div class="tiles">
+          <a class="tile" href="/new"><div class="frame"><i class="ic i-plus"></i></div><span>Blank presentation</span></a>
+          <a class="tile" href="/new?template=gt-brand"
+            ><div class="frame" data-clip>
+              <img class="cells" src="assets/opener-brand.jpg" alt="" /></div
+            ><span>GT brand deck</span></a
+          >
+        </div>
+      </div>
+      <i class="x l"></i><i class="x r"></i>
+    </section>
+
+    <div class="band">
+      <div class="col hatch"></div>
+      <i class="x l"></i><i class="x r"></i>
+    </div>
+
+    <section class="band list">
+      <div class="col">
+        <div class="head">
+          <h2>Your presentations</h2>
+          <div class="tools">
+            <div class="seg" role="group" aria-label="View">
+              <button aria-pressed="true" aria-label="List"><i class="ic i-queue-list"></i></button>
+              <button aria-pressed="false" aria-label="Grid"><i class="ic i-squares-2x2"></i></button>
+            </div>
+            <button class="sort">Last opened by me <i class="ic i-chevron-down"></i></button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th class="c-owner">Owner</th>
+              <th class="c-time">Last opened by me</th>
+              <th class="c-menu"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Q4 renewal for Northwind<span class="meta-sm">You, 6:42 PM</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">6:42 PM</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb ink"><i class="t"></i><i class="s"></i></span><div>Onboarding for new sellers<span class="meta-sm">You, 4:10 PM</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">4:10 PM</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Pricing review for October<span class="meta-sm">Ana Ruiz, 11:05 AM</span></div></div></td>
+              <td class="c-owner">Ana Ruiz</td><td class="c-time">11:05 AM</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb" data-clip><img class="cells" src="assets/opener-brand.jpg" alt="" /></span><div>GT brand deck<span class="meta-sm">General Translation, yesterday</span></div></div></td>
+              <td class="c-owner">General Translation</td><td class="c-time">Yesterday</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Launch plan for Japan<span class="meta-sm">You, Sep 29</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">Sep 29</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb ink"><i class="t"></i><i class="s"></i></span><div>Board update<span class="meta-sm">Kenji Sato, Sep 28</span></div></div></td>
+              <td class="c-owner">Kenji Sato</td><td class="c-time">Sep 28</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Customer story for Fabrikam<span class="meta-sm">You, Sep 26</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">Sep 26</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Hiring plan<span class="meta-sm">You, Sep 22</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">Sep 22</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="name"><span class="thumb"><i class="t"></i><i class="s"></i></span><div>Untitled presentation<span class="meta-sm">You, Sep 20</span></div></div></td>
+              <td class="c-owner">You</td><td class="c-time">Sep 20</td>
+              <td class="c-menu"><button class="btn ghost icon" aria-label="More"><i class="ic i-ellipsis-vertical"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </body>
+</html>

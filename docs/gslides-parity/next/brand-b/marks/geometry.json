@@ -1,0 +1,40 @@
+{
+  "source": "packages/fonts/assets/InterVariable.woff2 (Inter 4.1), wght and opsz as below",
+  "chosen": {
+    "text": "Turboslide",
+    "weight": 800,
+    "wide": 300,
+    "tracking": 10,
+    "bars": "before"
+  },
+  "opsz": 32,
+  "capUnits": 120,
+  "baseline": 160,
+  "cut": [
+    "99.81",
+    "107.81"
+  ],
+  "slantDegrees": 12,
+  "stemUnits": "27.79",
+  "tAnatomy": {
+    "left": "3.38",
+    "right": "132.97",
+    "stemL": "53.72",
+    "stemR": "82.63",
+    "barBottom": "64.64"
+  },
+  "wordmarkBox": {
+    "minX": "-96.5",
+    "minY": "38.71",
+    "maxX": "1025.42",
+    "maxY": "162.09"
+  },
+  "wordmarkAspect": "9.09",
+  "monogramBox": {
+    "minX": "-14.5",
+    "minY": "40",
+    "maxX": "158.47",
+    "maxY": "160"
+  },
+  "monogramAspect": "1.44"
+}

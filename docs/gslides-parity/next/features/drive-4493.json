@@ -1,0 +1,497 @@
+{
+ "startedAt": "2026-10-02T01:43:48.480Z",
+ "steps": [
+  {
+   "step": "editor-ready",
+   "at": "2026-10-02T01:43:57.451Z",
+   "ms": 8642
+  },
+  {
+   "step": "menu-file",
+   "at": "2026-10-02T01:43:58.171Z",
+   "rows": [
+    {
+     "id": "file.new.presentation",
+     "label": "Presentation",
+     "status": "now",
+     "disabled": false,
+     "tip": "Presentation"
+    },
+    {
+     "id": "file.open",
+     "label": "Open⌘O",
+     "status": "now",
+     "disabled": false,
+     "tip": "Open"
+    },
+    {
+     "id": "file.importSlides",
+     "label": "Import slides",
+     "status": "now",
+     "disabled": false,
+     "tip": "Import slides"
+    },
+    {
+     "id": "file.makeCopy.entire",
+     "label": "Make a copy",
+     "status": "now",
+     "disabled": false,
+     "tip": "Make a copy"
+    },
+    {
+     "id": "file.share",
+     "label": "Share",
+     "status": "now",
+     "disabled": false,
+     "tip": "Share"
+    },
+    {
+     "id": "file.download",
+     "label": "Download",
+     "status": "now",
+     "disabled": false,
+     "tip": "Download"
+    },
+    {
+     "id": "file.rename",
+     "label": "Rename",
+     "status": "now",
+     "disabled": false,
+     "tip": "Rename"
+    },
+    {
+     "id": "file.moveToTrash",
+     "label": "Move to trash",
+     "status": "now",
+     "disabled": false,
+     "tip": "Move to trash"
+    },
+    {
+     "id": "file.versionHistory",
+     "label": "Version history",
+     "status": "now",
+     "disabled": false,
+     "tip": "Version history"
+    },
+    {
+     "id": "file.details",
+     "label": "Details",
+     "status": "now",
+     "disabled": false,
+     "tip": "Details"
+    },
+    {
+     "id": "file.printPreview",
+     "label": "Print settings and preview",
+     "status": "now",
+     "disabled": false,
+     "tip": "Print settings and preview"
+    },
+    {
+     "id": "file.print",
+     "label": "Print⌘P",
+     "status": "now",
+     "disabled": false,
+     "tip": "Print"
+    }
+   ]
+  },
+  {
+   "step": "menu-insert",
+   "at": "2026-10-02T01:43:58.970Z",
+   "rows": [
+    {
+     "id": "insert.image",
+     "label": "Image",
+     "status": "now",
+     "disabled": false,
+     "tip": "Image"
+    },
+    {
+     "id": "insert.logo",
+     "label": "Logo",
+     "status": "now",
+     "disabled": false,
+     "tip": "Logo"
+    },
+    {
+     "id": "insert.textBox",
+     "label": "Text box",
+     "status": "now",
+     "disabled": false,
+     "tip": "Text box"
+    },
+    {
+     "id": "insert.shape",
+     "label": "Shape",
+     "status": "now",
+     "disabled": false,
+     "tip": "Shape"
+    },
+    {
+     "id": "insert.table",
+     "label": "Table",
+     "status": "now",
+     "disabled": false,
+     "tip": "Table"
+    },
+    {
+     "id": "insert.chart",
+     "label": "Chart",
+     "status": "now",
+     "disabled": false,
+     "tip": "Chart"
+    },
+    {
+     "id": "insert.diagram",
+     "label": "Diagram",
+     "status": "now",
+     "disabled": false,
+     "tip": "Diagram"
+    },
+    {
+     "id": "insert.wordArt",
+     "label": "Word art",
+     "status": "now",
+     "disabled": false,
+     "tip": "Word art"
+    },
+    {
+     "id": "insert.line",
+     "label": "Line",
+     "status": "now",
+     "disabled": false,
+     "tip": "Line"
+    },
+    {
+     "id": "insert.link",
+     "label": "Link⌘K",
+     "status": "now",
+     "disabled": true,
+     "tip": "Link"
+    },
+    {
+     "id": "insert.comment",
+     "label": "Comment⌥⌘M",
+     "status": "now",
+     "disabled": true,
+     "tip": "Comment"
+    },
+    {
+     "id": "insert.newSlide",
+     "label": "New slide⌃M",
+     "status": "now",
+     "disabled": false,
+     "tip": "New slide"
+    },
+    {
+     "id": "insert.slideNumbers",
+     "label": "Slide numbers",
+     "status": "now",
+     "disabled": false,
+     "tip": "Slide numbers"
+    },
+    {
+     "id": "insert.shader",
+     "label": "Shader",
+     "status": "now",
+     "disabled": false,
+     "tip": "Shader"
+    }
+   ]
+  },
+  {
+   "step": "menu-slide",
+   "at": "2026-10-02T01:43:59.741Z",
+   "rows": [
+    {
+     "id": "slide.newSlide",
+     "label": "New slide⌃M",
+     "status": "now",
+     "disabled": false,
+     "tip": "New slide"
+    },
+    {
+     "id": "slide.duplicateSlide",
+     "label": "Duplicate slide⌘D",
+     "status": "now",
+     "disabled": false,
+     "tip": "Duplicate slide"
+    },
+    {
+     "id": "slide.deleteSlide",
+     "label": "Delete slide",
+     "status": "now",
+     "disabled": false,
+     "tip": "Delete slide"
+    },
+    {
+     "id": "slide.skipSlide",
+     "label": "Skip slide",
+     "status": "now",
+     "disabled": false,
+     "tip": "Skip slide"
+    },
+    {
+     "id": "slide.moveSlide",
+     "label": "Move slide",
+     "status": "now",
+     "disabled": false,
+     "tip": "Move slide"
+    },
+    {
+     "id": "slide.changeBackground",
+     "label": "Change background",
+     "status": "now",
+     "disabled": false,
+     "tip": "Change background"
+    },
+    {
+     "id": "slide.applyLayout",
+     "label": "Apply layout",
+     "status": "now",
+     "disabled": false,
+     "tip": "Apply layout"
+    },
+    {
+     "id": "slide.editTheme",
+     "label": "Edit theme",
+     "status": "now",
+     "disabled": false,
+     "tip": "Edit theme"
+    },
+    {
+     "id": "slide.changeTheme",
+     "label": "Change theme",
+     "status": "now",
+     "disabled": false,
+     "tip": "Change theme"
+    }
+   ]
+  },
+  {
+   "step": "menu-tools",
+   "at": "2026-10-02T01:44:00.492Z",
+   "rows": [
+    {
+     "id": "tools.preferences.linkDetection",
+     "label": "Link detection",
+     "status": "now",
+     "disabled": false,
+     "tip": "Link detection"
+    },
+    {
+     "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+     "label": "Turn on collaborator announcements",
+     "status": "now",
+     "disabled": false,
+     "tip": "Turn on collaborator announcements"
+    },
+    {
+     "id": "tools.tailor",
+     "label": "Tailor for a customer",
+     "status": "now",
+     "disabled": false,
+     "tip": "Tailor for a customer"
+    },
+    {
+     "id": "tools.assist",
+     "label": "Assist",
+     "status": "now",
+     "disabled": false,
+     "tip": "Assist"
+    },
+    {
+     "id": "tools.checkSlides",
+     "label": "Check slides",
+     "status": "now",
+     "disabled": false,
+     "tip": "Check slides"
+    },
+    {
+     "id": "tools.advancedTools",
+     "label": "Advanced tools",
+     "status": "now",
+     "disabled": false,
+     "tip": "Advanced tools"
+    }
+   ]
+  },
+  {
+   "step": "menu-view",
+   "at": "2026-10-02T01:44:01.246Z",
+   "rows": [
+    {
+     "id": "view.slideshow",
+     "label": "Slideshow⌘↩",
+     "status": "now",
+     "disabled": false,
+     "tip": "Slideshow"
+    },
+    {
+     "id": "view.zoom",
+     "label": "Zoom",
+     "status": "now",
+     "disabled": false,
+     "tip": "Zoom"
+    },
+    {
+     "id": "view.showRuler",
+     "label": "Show ruler",
+     "status": "now",
+     "disabled": false,
+     "tip": "Show ruler"
+    },
+    {
+     "id": "view.guides",
+     "label": "Guides",
+     "status": "now",
+     "disabled": false,
+     "tip": "Guides"
+    },
+    {
+     "id": "view.snapTo",
+     "label": "Snap to",
+     "status": "now",
+     "disabled": false,
+     "tip": "Snap to"
+    },
+    {
+     "id": "view.comments",
+     "label": "Comments",
+     "status": "now",
+     "disabled": false,
+     "tip": "Comments"
+    },
+    {
+     "id": "view.showSpeakerNotes",
+     "label": "Show speaker notes",
+     "status": "now",
+     "disabled": false,
+     "tip": "Show speaker notes"
+    },
+    {
+     "id": "view.showFilmstrip",
+     "label": "Show filmstrip",
+     "status": "now",
+     "disabled": false,
+     "tip": "Show filmstrip"
+    },
+    {
+     "id": "view.mode",
+     "label": "Mode",
+     "status": "now",
+     "disabled": false,
+     "tip": "Mode"
+    },
+    {
+     "id": "view.playShaders",
+     "label": "Play shaders",
+     "status": "now",
+     "disabled": false,
+     "tip": "Play shaders"
+    },
+    {
+     "id": "view.fullScreen",
+     "label": "Full screen⌃⇧F",
+     "status": "now",
+     "disabled": false,
+     "tip": "Full screen"
+    },
+    {
+     "id": "view.appearance",
+     "label": "Appearance",
+     "status": "now",
+     "disabled": false,
+     "tip": "Appearance"
+    }
+   ]
+  },
+  {
+   "step": "menu-file-download",
+   "at": "2026-10-02T01:44:02.232Z",
+   "rows": [
+    {
+     "id": "file.download.pptx",
+     "label": "Microsoft PowerPoint (.pptx)",
+     "status": "now",
+     "disabled": false,
+     "tip": "Microsoft PowerPoint (.pptx)"
+    },
+    {
+     "id": "file.download.pdf",
+     "label": "PDF Document (.pdf)",
+     "status": "now",
+     "disabled": false,
+     "tip": "PDF Document (.pdf)"
+    },
+    {
+     "id": "file.download.jpg",
+     "label": "JPEG image (.jpg, current slide)",
+     "status": "now",
+     "disabled": false,
+     "tip": "JPEG image (.jpg, current slide)"
+    },
+    {
+     "id": "file.download.png",
+     "label": "PNG image (.png, current slide)",
+     "status": "now",
+     "disabled": false,
+     "tip": "PNG image (.png, current slide)"
+    },
+    {
+     "id": "file.download.html",
+     "label": "Web page (.html)",
+     "status": "now",
+     "disabled": false,
+     "tip": "Web page (.html)"
+    },
+    {
+     "id": "file.download.zip",
+     "label": "Turboslide bundle (.zip)",
+     "status": "now",
+     "disabled": false,
+     "tip": "Turboslide bundle (.zip)"
+    },
+    {
+     "id": "file.download.options",
+     "label": "Download options",
+     "status": "now",
+     "disabled": false,
+     "tip": "Download options"
+    }
+   ]
+  },
+  {
+   "step": "import-slides-pptx",
+   "at": "2026-10-02T01:44:05.065Z",
+   "tabs": [
+    "Presentations",
+    "Upload"
+   ],
+   "dialogText": "Import slidesPresentationsUploadDrop a Turboslide bundle (.zip) here, or pick one from your devicePowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the textSelect a file from your devicePowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text",
+   "fileInput": 1
+  },
+  {
+   "step": "assist-entry",
+   "at": "2026-10-02T01:44:05.165Z",
+   "count": 1
+  },
+  {
+   "step": "assist-panel",
+   "at": "2026-10-02T01:44:06.711Z",
+   "text": "Slide 1: BrandTailor for a customerReplace the customer name, swap the logo and skip slides, as one change you can undoMake it shorterAsks for a shorter reading of this slide’s text; you read the change before it landsWrite speaker notesAsks for a talk track for this slide, under 120 wordsSendNothing is written to your slides until you accept"
+  },
+  {
+   "step": "present-options-button",
+   "at": "2026-10-02T01:44:12.428Z",
+   "count": 0
+  },
+  {
+   "step": "present-bar",
+   "at": "2026-10-02T01:44:12.432Z",
+   "controls": []
+  }
+ ],
+ "endedAt": "2026-10-02T01:44:12.432Z"
+}

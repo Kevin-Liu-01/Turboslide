@@ -1,0 +1,175 @@
+{
+  "record": {
+    "writtenAt": "2026-10-02T02:45:11.361Z",
+    "uptimeAtStart": [
+      47.36376953125,
+      37.75244140625,
+      46.259765625
+    ],
+    "monogram": {
+      "source": "/Users/kevinliu/repos/Prototemplate/public/marks/bar-monogram.svg",
+      "sha256": "5257b4d87d23b91b81cd8bda56d8f23250114fc1c624dd43ae94b6b53cc1f59f",
+      "viewBox": "-109.1 36 499.6 128",
+      "quads": 13,
+      "box": {
+        "x0": -105.1,
+        "x1": 386.5,
+        "y0": 40,
+        "y1": 160
+      }
+    },
+    "word": {
+      "source": "/Users/kevinliu/repos/Turboslide-next/packages/theme/brand/wordmark-outlines.svg",
+      "box": {
+        "x0": 48.2,
+        "x1": 8896.2,
+        "y0": -1496.9,
+        "y1": 24.5
+      },
+      "cap": 1490,
+      "upem": 2048
+    },
+    "lockup": {
+      "cap": 120,
+      "gap": 60,
+      "scale": 0.08053691275167785,
+      "wordX": 442.61812080536913,
+      "viewBox": [
+        -109.1,
+        36,
+        1272.2,
+        128
+      ]
+    },
+    "iconsMissing": [],
+    "banners": [
+      {
+        "rows": 8,
+        "cols": 33,
+        "lines": 4
+      },
+      {
+        "rows": 10,
+        "cols": 41,
+        "lines": 5
+      },
+      {
+        "rows": 12,
+        "cols": 50,
+        "lines": 6
+      },
+      {
+        "rows": 16,
+        "cols": 66,
+        "lines": 8
+      }
+    ],
+    "pngs": {
+      "favicon-16": "9e510439d28279b9bd2d4ca348eb658edfc385e6160336cb99ef73e864ae93ca",
+      "favicon-32": "95a741efbb4bd1d68d8625b5c7c69b8c2ac810f2b047b986ae9961b9bc214a5e",
+      "apple-touch-icon-180": "3890b032b9454700b5b8dd81ae7f82dad2f46cfbf79207b272e6812c0c2a9173",
+      "rejected-bar-16": "117e3abdb6b5eae4d35513a02ec148adc568122cd391deda79ee30b65c134e2c",
+      "rejected-bar-32": "9e4f86d4459b2b98fb6b67b49c1e69ec738c9519b8d764092ce5fe16755d7335",
+      "rejected-bar-180": "319a9a1608f39c1a0e6d8a86a534c4b1ce016b36e681f3a72e772225c4bb4b13",
+      "favicon-16-dark": "f37adf7771cc12fba0810fab189f068a254a380a6b95304baee3515640f9909f",
+      "favicon-32-dark": "8abf9df5fad0b013f9848c367ae896f4a84951d65962bfa19cea61458519292b"
+    },
+    "uptimeAtEnd": [
+      47.36376953125,
+      37.75244140625,
+      46.259765625
+    ]
+  },
+  "log": [
+    {
+      "at": "2026-10-02T02:45:13.734Z",
+      "load": [
+        "47.36",
+        "37.75",
+        "46.26"
+      ],
+      "phase": "marks",
+      "record": {
+        "writtenAt": "2026-10-02T02:45:11.361Z",
+        "uptimeAtStart": [
+          47.36376953125,
+          37.75244140625,
+          46.259765625
+        ],
+        "monogram": {
+          "source": "/Users/kevinliu/repos/Prototemplate/public/marks/bar-monogram.svg",
+          "sha256": "5257b4d87d23b91b81cd8bda56d8f23250114fc1c624dd43ae94b6b53cc1f59f",
+          "viewBox": "-109.1 36 499.6 128",
+          "quads": 13,
+          "box": {
+            "x0": -105.1,
+            "x1": 386.5,
+            "y0": 40,
+            "y1": 160
+          }
+        },
+        "word": {
+          "source": "/Users/kevinliu/repos/Turboslide-next/packages/theme/brand/wordmark-outlines.svg",
+          "box": {
+            "x0": 48.2,
+            "x1": 8896.2,
+            "y0": -1496.9,
+            "y1": 24.5
+          },
+          "cap": 1490,
+          "upem": 2048
+        },
+        "lockup": {
+          "cap": 120,
+          "gap": 60,
+          "scale": 0.08053691275167785,
+          "wordX": 442.61812080536913,
+          "viewBox": [
+            -109.1,
+            36,
+            1272.2,
+            128
+          ]
+        },
+        "iconsMissing": [],
+        "banners": [
+          {
+            "rows": 8,
+            "cols": 33,
+            "lines": 4
+          },
+          {
+            "rows": 10,
+            "cols": 41,
+            "lines": 5
+          },
+          {
+            "rows": 12,
+            "cols": 50,
+            "lines": 6
+          },
+          {
+            "rows": 16,
+            "cols": 66,
+            "lines": 8
+          }
+        ],
+        "pngs": {
+          "favicon-16": "9e510439d28279b9bd2d4ca348eb658edfc385e6160336cb99ef73e864ae93ca",
+          "favicon-32": "95a741efbb4bd1d68d8625b5c7c69b8c2ac810f2b047b986ae9961b9bc214a5e",
+          "apple-touch-icon-180": "3890b032b9454700b5b8dd81ae7f82dad2f46cfbf79207b272e6812c0c2a9173",
+          "rejected-bar-16": "117e3abdb6b5eae4d35513a02ec148adc568122cd391deda79ee30b65c134e2c",
+          "rejected-bar-32": "9e4f86d4459b2b98fb6b67b49c1e69ec738c9519b8d764092ce5fe16755d7335",
+          "rejected-bar-180": "319a9a1608f39c1a0e6d8a86a534c4b1ce016b36e681f3a72e772225c4bb4b13",
+          "favicon-16-dark": "f37adf7771cc12fba0810fab189f068a254a380a6b95304baee3515640f9909f",
+          "favicon-32-dark": "8abf9df5fad0b013f9848c367ae896f4a84951d65962bfa19cea61458519292b"
+        },
+        "uptimeAtEnd": [
+          47.36376953125,
+          37.75244140625,
+          46.259765625
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,3812 @@
+[
+ {
+  "menu": "File",
+  "id": "file.new",
+  "label": "New",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.new.presentation",
+  "label": "Presentation",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "File > New"
+ },
+ {
+  "menu": "File",
+  "id": "file.new.templateGallery",
+  "label": "From template gallery",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > New"
+ },
+ {
+  "menu": "File",
+  "id": "file.open",
+  "label": "Open",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.importSlides",
+  "label": "Import slides",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.makeCopy",
+  "label": "Make a copy",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.makeCopy.entire",
+  "label": "Entire presentation",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Make a copy"
+ },
+ {
+  "menu": "File",
+  "id": "file.makeCopy.selected",
+  "label": "Selected slides",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Make a copy"
+ },
+ {
+  "menu": "File",
+  "id": "file.saveAsTemplate",
+  "label": "Save as template",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.share",
+  "label": "Share",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.share.withOthers",
+  "label": "Share with others",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Share"
+ },
+ {
+  "menu": "File",
+  "id": "file.share.publish",
+  "label": "Publish to web",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Share"
+ },
+ {
+  "menu": "File",
+  "id": "file.share.copyLink",
+  "label": "Copy link",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "File > Share"
+ },
+ {
+  "menu": "File",
+  "id": "file.email",
+  "label": "Email",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The invitation carries your message",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.email.thisFile",
+  "label": "Email this file",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Share sends the link with your message",
+  "path": "File > Email"
+ },
+ {
+  "menu": "File",
+  "id": "file.email.collaborators",
+  "label": "Email collaborators",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The invitation carries your message",
+  "path": "File > Email"
+ },
+ {
+  "menu": "File",
+  "id": "file.download",
+  "label": "Download",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.pptx",
+  "label": "Microsoft PowerPoint (.pptx)",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.odp",
+  "label": "ODP Document (.odp)",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Only PowerPoint, PDF, text, pictures and the web page download",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.pdf",
+  "label": "PDF Document (.pdf)",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.txt",
+  "label": "Plain Text (.txt)",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.jpg",
+  "label": "JPEG image (.jpg, current slide)",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.png",
+  "label": "PNG image (.png, current slide)",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.svg",
+  "label": "Scalable Vector Graphics (.svg, current slide)",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Only PowerPoint, PDF, text, pictures and the web page download",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.html",
+  "label": "Web page (.html)",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.zip",
+  "label": "Turboslide bundle (.zip)",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.download.options",
+  "label": "Download options",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "File > Download"
+ },
+ {
+  "menu": "File",
+  "id": "file.rename",
+  "label": "Rename",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.move",
+  "label": "Move",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No folders",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.addShortcut",
+  "label": "Add shortcut to Drive",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No Drive",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.moveToTrash",
+  "label": "Move to trash",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory",
+  "label": "Version history",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory.nameCurrent",
+  "label": "Name current version",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Version history"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory.see",
+  "label": "See version history",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Version history"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory.showChanges",
+  "label": "Show changes",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "File > Version history"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory.deleteOlder",
+  "label": "Delete this and older versions",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Named versions are kept; older records thin out after 30 days",
+  "path": "File > Version history"
+ },
+ {
+  "menu": "File",
+  "id": "file.versionHistory.deleteHistory",
+  "label": "Delete history",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Named versions are kept; older records thin out after 30 days",
+  "path": "File > Version history"
+ },
+ {
+  "menu": "File",
+  "id": "file.approvals",
+  "label": "Approvals",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Workspace only",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.offline",
+  "label": "Make available offline",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Present mode keeps working after load without the network (R07 rule 29)",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.details",
+  "label": "Details",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.language",
+  "label": "Language",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "One face and English copy rules; spelling follows the browser",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.pageSetup",
+  "label": "Page setup",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The GT theme is 16:9 at 1600 by 900",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.printPreview",
+  "label": "Print settings and preview",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "File",
+  "id": "file.print",
+  "label": "Print",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "File"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.undo",
+  "label": "Undo",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.redo",
+  "label": "Redo",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.cut",
+  "label": "Cut",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.copy",
+  "label": "Copy",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.paste",
+  "label": "Paste",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.pasteWithoutFormatting",
+  "label": "Paste without formatting",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.delete",
+  "label": "Delete",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.duplicate",
+  "label": "Duplicate",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.selectAll",
+  "label": "Select all",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.selectNone",
+  "label": "Select none",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "Edit",
+  "id": "edit.findReplace",
+  "label": "Find and replace",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Edit"
+ },
+ {
+  "menu": "View",
+  "id": "view.slideshow",
+  "label": "Slideshow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.motion",
+  "label": "Motion",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Section 0.5; the one Transition stub sits in Google’s three Transition positions",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.themeBuilder",
+  "label": "Theme builder",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The GT theme is edited in the repository; Slide > Edit theme is the Later stub",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.gridView",
+  "label": "Grid view",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom",
+  "label": "Zoom",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.in",
+  "label": "Zoom in",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.out",
+  "label": "Zoom out",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.fit",
+  "label": "Fit",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.50",
+  "label": "50%",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.100",
+  "label": "100%",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.zoom.200",
+  "label": "200%",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Zoom"
+ },
+ {
+  "menu": "View",
+  "id": "view.showRuler",
+  "label": "Show ruler",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides",
+  "label": "Guides",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.show",
+  "label": "Show guides",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.addVertical",
+  "label": "Add vertical guide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.addHorizontal",
+  "label": "Add horizontal guide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.edit",
+  "label": "Edit guides",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Drag a guide to move it and right-click it to delete it",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.clear",
+  "label": "Clear guides",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.guides.delete",
+  "label": "Delete guide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Guides"
+ },
+ {
+  "menu": "View",
+  "id": "view.snapTo",
+  "label": "Snap to",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.snapTo.guides",
+  "label": "Guides",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Snap to"
+ },
+ {
+  "menu": "View",
+  "id": "view.snapTo.grid",
+  "label": "Grid",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Snap to"
+ },
+ {
+  "menu": "View",
+  "id": "view.comments",
+  "label": "Comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.comments.showAll",
+  "label": "Show all comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Comments"
+ },
+ {
+  "menu": "View",
+  "id": "view.comments.expand",
+  "label": "Expand comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Comments"
+ },
+ {
+  "menu": "View",
+  "id": "view.comments.minimize",
+  "label": "Minimize comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Comments"
+ },
+ {
+  "menu": "View",
+  "id": "view.comments.hide",
+  "label": "Hide comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Comments"
+ },
+ {
+  "menu": "View",
+  "id": "view.livePointers",
+  "label": "Live pointers",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.livePointers.mine",
+  "label": "Show my pointer",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Live pointers"
+ },
+ {
+  "menu": "View",
+  "id": "view.livePointers.collaborators",
+  "label": "Show collaborator pointers",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Live pointers"
+ },
+ {
+  "menu": "View",
+  "id": "view.showSpeakerNotes",
+  "label": "Show speaker notes",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.showFilmstrip",
+  "label": "Show filmstrip",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.mode",
+  "label": "Mode",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.mode.editing",
+  "label": "Editing",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Mode"
+ },
+ {
+  "menu": "View",
+  "id": "view.mode.commenting",
+  "label": "Commenting",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Mode"
+ },
+ {
+  "menu": "View",
+  "id": "view.mode.viewing",
+  "label": "Viewing",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Mode"
+ },
+ {
+  "menu": "View",
+  "id": "view.playShaders",
+  "label": "Play shaders",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.playShaders.on",
+  "label": "On",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Play shaders"
+ },
+ {
+  "menu": "View",
+  "id": "view.playShaders.show",
+  "label": "In the show only",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Play shaders"
+ },
+ {
+  "menu": "View",
+  "id": "view.playShaders.off",
+  "label": "Off",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Play shaders"
+ },
+ {
+  "menu": "View",
+  "id": "view.fullScreen",
+  "label": "Full screen",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.showSections",
+  "label": "Show sections",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.appearance",
+  "label": "Appearance",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "View"
+ },
+ {
+  "menu": "View",
+  "id": "view.appearance.light",
+  "label": "Light",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Appearance"
+ },
+ {
+  "menu": "View",
+  "id": "view.appearance.dark",
+  "label": "Dark",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Appearance"
+ },
+ {
+  "menu": "View",
+  "id": "view.appearance.match",
+  "label": "Match the presentation",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "View > Appearance"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image",
+  "label": "Image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.upload",
+  "label": "Upload from computer",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.logo",
+  "label": "Logo",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.stockWeb",
+  "label": "Stock & web",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Google services and the licensing hazard R07 names",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.drivePhotos",
+  "label": "Drive & Photos",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.camera",
+  "label": "Camera",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.byUrl",
+  "label": "By URL",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.image.fromThisPresentation",
+  "label": "From this presentation",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Image"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.logo",
+  "label": "Logo",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.textBox",
+  "label": "Text box",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.audio",
+  "label": "Audio",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Link to a recording instead",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.video",
+  "label": "Video",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Link to a recording instead",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape",
+  "label": "Shape",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.shapes.rectangle",
+  "label": "Rectangle",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.shapes.rounded",
+  "label": "Rounded rectangle",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.shapes.ellipse",
+  "label": "Ellipse",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.gallery",
+  "label": "Shapes",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.arrows",
+  "label": "Arrows",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.callouts",
+  "label": "Callouts",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shape.equation",
+  "label": "Equation",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Shape"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.table",
+  "label": "Table",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart",
+  "label": "Chart",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart.bar",
+  "label": "Bar",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Chart"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart.column",
+  "label": "Column",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Chart"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart.line",
+  "label": "Line",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Chart"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart.pie",
+  "label": "Pie",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Chart"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.chart.fromSheets",
+  "label": "From Sheets",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Insert > Chart"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.diagram",
+  "label": "Diagram",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.wordArt",
+  "label": "Word art",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line",
+  "label": "Line",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.line",
+  "label": "Line",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.arrow",
+  "label": "Arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.rule",
+  "label": "Rule",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.elbowConnector",
+  "label": "Elbow connector",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.curvedConnector",
+  "label": "Curved connector",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.curve",
+  "label": "Curve",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.polyline",
+  "label": "Polyline",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.line.scribble",
+  "label": "Scribble",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert > Line"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.specialCharacters",
+  "label": "Special characters",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.animation",
+  "label": "Animation",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Section 0.5",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.link",
+  "label": "Link",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.comment",
+  "label": "Comment",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.newSlide",
+  "label": "New slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.slideNumbers",
+  "label": "Slide numbers",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.placeholder",
+  "label": "Placeholder",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Theme builder only",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.templates",
+  "label": "Templates",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Start from the GT brand deck on the home page",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.buildingBlocks",
+  "label": "Building blocks",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Start from the GT brand deck on the home page",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.speakerSpotlight",
+  "label": "Speaker spotlight",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Meet only",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.icon",
+  "label": "Icon",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Insert",
+  "id": "insert.shader",
+  "label": "Shader",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Insert"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text",
+  "label": "Text",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.bold",
+  "label": "Bold",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.italic",
+  "label": "Italic",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.underline",
+  "label": "Underline",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.strikethrough",
+  "label": "Strikethrough",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.superscript",
+  "label": "Superscript",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.subscript",
+  "label": "Subscript",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.font",
+  "label": "Font",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.tabularFigures",
+  "label": "Tabular figures",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.size",
+  "label": "Size",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.size.increase",
+  "label": "Increase font size",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text > Size"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.size.decrease",
+  "label": "Decrease font size",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text > Size"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.capitalization",
+  "label": "Capitalization",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.capitalization.lower",
+  "label": "lowercase",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text > Capitalization"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.capitalization.upper",
+  "label": "UPPERCASE",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text > Capitalization"
+ },
+ {
+  "menu": "Format",
+  "id": "format.text.capitalization.title",
+  "label": "Title Case",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Text > Capitalization"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent",
+  "label": "Align & indent",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.left",
+  "label": "Left",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.center",
+  "label": "Center",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.right",
+  "label": "Right",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.justified",
+  "label": "Justified",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.increaseIndent",
+  "label": "Increase indent",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.decreaseIndent",
+  "label": "Decrease indent",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.alignIndent.indentationOptions",
+  "label": "Indentation options",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Set the indent under Text fitting",
+  "path": "Format > Align & indent"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing",
+  "label": "Line & paragraph spacing",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.single",
+  "label": "Single",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.1_15",
+  "label": "1.15",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.1_5",
+  "label": "1.5",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.double",
+  "label": "Double",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.addBefore",
+  "label": "Add space before paragraph",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.addAfter",
+  "label": "Add space after paragraph",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.spacing.custom",
+  "label": "Custom spacing",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Line & paragraph spacing"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering",
+  "label": "Bullets & numbering",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.numbered",
+  "label": "Numbered list",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Bullets & numbering"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.bulleted",
+  "label": "Bulleted list",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Bullets & numbering"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.listOptions",
+  "label": "List options",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Bullets & numbering"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.listOptions.restart",
+  "label": "Restart numbering",
+  "status": "later",
+  "adv": true,
+  "turboslide": false,
+  "reason": "Numbering starts at 1",
+  "path": "Format > Bullets & numbering > List options"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.listOptions.prefixSuffix",
+  "label": "Edit prefix and suffix",
+  "status": "later",
+  "adv": true,
+  "turboslide": false,
+  "reason": "Numbering starts at 1",
+  "path": "Format > Bullets & numbering > List options"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bulletsNumbering.listOptions.moreBullets",
+  "label": "More bullets",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Bullets & numbering > List options"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table",
+  "label": "Table",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.insertRowAbove",
+  "label": "Insert row above",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.insertRowBelow",
+  "label": "Insert row below",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.insertColumnLeft",
+  "label": "Insert column left",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.insertColumnRight",
+  "label": "Insert column right",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.deleteRow",
+  "label": "Delete row",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.deleteColumn",
+  "label": "Delete column",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.deleteTable",
+  "label": "Delete table",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.distributeRows",
+  "label": "Distribute rows",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.distributeColumns",
+  "label": "Distribute columns",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.headerRow",
+  "label": "Header row",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.mergeCells",
+  "label": "Merge cells",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.table.unmergeCells",
+  "label": "Unmerge cells",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Table"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image",
+  "label": "Image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.cropImage",
+  "label": "Crop image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.maskImage",
+  "label": "Mask image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.replaceImage",
+  "label": "Replace image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.replaceImage.upload",
+  "label": "Upload from computer",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image > Replace image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.replaceImage.byUrl",
+  "label": "By URL",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image > Replace image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.replaceImage.logo",
+  "label": "Logo",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Image > Replace image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.replaceImage.fromThisPresentation",
+  "label": "From this presentation",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Image > Replace image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.addCaption",
+  "label": "Add a caption",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.resetImage",
+  "label": "Reset image",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.useOnEverySlide",
+  "label": "Use on every slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.dither",
+  "label": "Dither",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.image.imageOptions",
+  "label": "Image options",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Image"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines",
+  "label": "Borders & lines",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderColor",
+  "label": "Border color",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderWeight",
+  "label": "Border weight",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash",
+  "label": "Border dash",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.solid",
+  "label": "Solid",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.dot",
+  "label": "Dot",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.dash",
+  "label": "Dash",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.dashDot",
+  "label": "Dash dot",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.longDash",
+  "label": "Long dash",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.borderDash.longDashDot",
+  "label": "Long dash dot",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Border dash"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart",
+  "label": "Line start",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.none",
+  "label": "None",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.fillArrow",
+  "label": "Arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.stealth",
+  "label": "Stealth arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.fillCircle",
+  "label": "Circle",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.fillSquare",
+  "label": "Square",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.fillDiamond",
+  "label": "Diamond",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.openArrow",
+  "label": "Open arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.openCircle",
+  "label": "Open circle",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.openSquare",
+  "label": "Open square",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineStart.openDiamond",
+  "label": "Open diamond",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line start"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd",
+  "label": "Line end",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.none",
+  "label": "None",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.fillArrow",
+  "label": "Arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.stealth",
+  "label": "Stealth arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.fillCircle",
+  "label": "Circle",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.fillSquare",
+  "label": "Square",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.fillDiamond",
+  "label": "Diamond",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.openArrow",
+  "label": "Open arrow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.openCircle",
+  "label": "Open circle",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.openSquare",
+  "label": "Open square",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.bordersLines.lineEnd.openDiamond",
+  "label": "Open diamond",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format > Borders & lines > Line end"
+ },
+ {
+  "menu": "Format",
+  "id": "format.formatOptions",
+  "label": "Format options",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.clearFormatting",
+  "label": "Clear formatting",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.altText",
+  "label": "Alt text",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.textFitting",
+  "label": "Text fitting",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.dropShadow",
+  "label": "Drop shadow",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.changeShape",
+  "label": "Change shape",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.editData",
+  "label": "Edit data",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.editHtml",
+  "label": "Edit HTML",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.chartType",
+  "label": "Chart type",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format"
+ },
+ {
+  "menu": "Format",
+  "id": "format.chartType.bar",
+  "label": "Bar",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Chart type"
+ },
+ {
+  "menu": "Format",
+  "id": "format.chartType.column",
+  "label": "Column",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Chart type"
+ },
+ {
+  "menu": "Format",
+  "id": "format.chartType.line",
+  "label": "Line",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Chart type"
+ },
+ {
+  "menu": "Format",
+  "id": "format.chartType.pie",
+  "label": "Pie",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Format > Chart type"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.newSlide",
+  "label": "New slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.duplicateSlide",
+  "label": "Duplicate slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.deleteSlide",
+  "label": "Delete slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.skipSlide",
+  "label": "Skip slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.moveSlide",
+  "label": "Move slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.moveSlide.up",
+  "label": "Move slide up",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide > Move slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.moveSlide.down",
+  "label": "Move slide down",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide > Move slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.moveSlide.toBeginning",
+  "label": "Move slide to beginning",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide > Move slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.moveSlide.toEnd",
+  "label": "Move slide to end",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide > Move slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.changeBackground",
+  "label": "Change background",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.applyLayout",
+  "label": "Apply layout",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.transition",
+  "label": "Transition",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The GT theme presents still slides",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.editTheme",
+  "label": "Edit theme",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Slide",
+  "id": "slide.changeTheme",
+  "label": "Change theme",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Slide"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.order",
+  "label": "Order",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.order.bringToFront",
+  "label": "Bring to front",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Order"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.order.bringForward",
+  "label": "Bring forward",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Order"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.order.sendBackward",
+  "label": "Send backward",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Order"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.order.sendToBack",
+  "label": "Send to back",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Order"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align",
+  "label": "Align",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.left",
+  "label": "Left",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.center",
+  "label": "Center",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.right",
+  "label": "Right",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.top",
+  "label": "Top",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.middle",
+  "label": "Middle",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.align.bottom",
+  "label": "Bottom",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Align"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.distribute",
+  "label": "Distribute",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.distribute.horizontally",
+  "label": "Horizontally",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Distribute"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.distribute.vertically",
+  "label": "Vertically",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Distribute"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.centerOnPage",
+  "label": "Center on page",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.centerOnPage.horizontally",
+  "label": "Horizontally",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Center on page"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.centerOnPage.vertically",
+  "label": "Vertically",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Center on page"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.rotate",
+  "label": "Rotate",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.rotate.clockwise",
+  "label": "Rotate clockwise 90°",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Rotate"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.rotate.counterClockwise",
+  "label": "Rotate counter-clockwise 90°",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Rotate"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.rotate.flipHorizontally",
+  "label": "Flip horizontally",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Rotate"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.rotate.flipVertically",
+  "label": "Flip vertically",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange > Rotate"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.group",
+  "label": "Group",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.ungroup",
+  "label": "Ungroup",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Arrange",
+  "id": "arrange.regroup",
+  "label": "Regroup",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Arrange"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.spelling",
+  "label": "Spelling",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.spelling.spellCheck",
+  "label": "Spell check",
+  "status": "later",
+  "adv": true,
+  "turboslide": false,
+  "reason": "Your browser underlines misspellings and offers suggestions on right-click",
+  "path": "Tools > Spelling"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.spelling.underlineErrors",
+  "label": "Underline errors",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools > Spelling"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.spelling.personalDictionary",
+  "label": "Personal dictionary",
+  "status": "omit",
+  "adv": true,
+  "turboslide": false,
+  "reason": "The browser’s dictionary applies",
+  "path": "Tools > Spelling"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.explore",
+  "label": "Explore",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Retired by Google in 2024 (R02 8.6)",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.linkedObjects",
+  "label": "Linked objects",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No linked sources",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.dictionary",
+  "label": "Dictionary",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.qaHistory",
+  "label": "Q&A history",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.dictateNotes",
+  "label": "Dictate speaker notes",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.notificationSettings",
+  "label": "Notification settings",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.preferences",
+  "label": "Preferences",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.preferences.linkDetection",
+  "label": "Link detection",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Preferences"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.accessibilitySettings",
+  "label": "Accessibility settings",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+  "label": "Turn on collaborator announcements",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools > Accessibility settings"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.accessibilitySettings.screenReader",
+  "label": "Turn on screen reader support",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The browser’s screen reader works on the DOM",
+  "path": "Tools > Accessibility settings"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.accessibilitySettings.braille",
+  "label": "Turn on braille support",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "The browser’s screen reader works on the DOM",
+  "path": "Tools > Accessibility settings"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.activityDashboard",
+  "label": "Activity dashboard",
+  "status": "now",
+  "adv": true,
+  "turboslide": false,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.activityDashboard.viewers",
+  "label": "Viewers",
+  "status": "later",
+  "adv": true,
+  "turboslide": false,
+  "reason": "Turboslide keeps no record of who viewed a presentation",
+  "path": "Tools > Activity dashboard"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.tailor",
+  "label": "Tailor for a customer",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.assist",
+  "label": "Assist",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.checkSlides",
+  "label": "Check slides",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advancedTools",
+  "label": "Advanced tools",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced",
+  "label": "Developer",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.showSource",
+  "label": "Show source",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.sideBySide",
+  "label": "Light and dark side by side",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.suggestionMarks",
+  "label": "Show suggestion marks on the slide",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.showIds",
+  "label": "Show slide and block ids",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.renderSlide",
+  "label": "Render this slide",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.changeHistory",
+  "label": "Change history",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.sectionsTree",
+  "label": "Show sections as a tree",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.readAsBook",
+  "label": "Read as a book",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.picturesMaterials",
+  "label": "Pictures and materials",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Tools",
+  "id": "tools.advanced.runAction",
+  "label": "Run an action…",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Tools > Developer"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.addOns",
+  "label": "Add-ons",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No marketplace",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.addOns.get",
+  "label": "Get add-ons",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No marketplace",
+  "path": "Extensions > Add-ons"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.addOns.manage",
+  "label": "Manage add-ons",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No marketplace",
+  "path": "Extensions > Add-ons"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.installedAddOns",
+  "label": "Installed add-ons",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No marketplace",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.appsScript",
+  "label": "Apps Script",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service; the name is not reused for unrelated things (section 0.26)",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.appSheet",
+  "label": "AppSheet",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service; the name is not reused for unrelated things (section 0.26)",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.agentAccess",
+  "label": "Agent access",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Extensions",
+  "id": "extensions.embedInSite",
+  "label": "Embed in a site",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Extensions"
+ },
+ {
+  "menu": "Help",
+  "id": "help.searchMenus",
+  "label": "Search the menus",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.help",
+  "label": "Help",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.training",
+  "label": "Training",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No training site",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.updates",
+  "label": "Updates",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No release notes page",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.improve",
+  "label": "Help Turboslide improve",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.privacyPolicy",
+  "label": "Privacy Policy",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No policy page",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.termsOfService",
+  "label": "Terms of Service",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No terms page",
+  "path": "Help"
+ },
+ {
+  "menu": "Help",
+  "id": "help.keyboardShortcuts",
+  "label": "Keyboard shortcuts",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Help"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.appIcon",
+  "label": "Turboslide home",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.name",
+  "label": "Rename",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.star",
+  "label": "Star",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Starring is a per person list; the home page lists every presentation",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.move",
+  "label": "Move",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "No folders",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.saveState",
+  "label": "Document status",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.lastEdit",
+  "label": "Last edit",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.presence",
+  "label": "Collaborators",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.presence.follow",
+  "label": "Follow",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Collaborators"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.presence.goTo",
+  "label": "Go to slide",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Collaborators"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.presence.joinChat",
+  "label": "Join chat",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Leave a comment on the slide instead",
+  "path": "Title row > Collaborators"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.presence.me",
+  "label": "You",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Collaborators"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.assist",
+  "label": "Assist",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.comments",
+  "label": "Show all comments",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.sidePanel",
+  "label": "Show side panel",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.inbox",
+  "label": "Notifications",
+  "status": "now",
+  "adv": true,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.meet",
+  "label": "Meet",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.record",
+  "label": "Record",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.slideshow",
+  "label": "Slideshow",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.slideshow.presenterView",
+  "label": "Presenter view",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row > Slideshow"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.slideshow.startFromBeginning",
+  "label": "Start from beginning",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row > Slideshow"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.slideshow.presentOnAnotherScreen",
+  "label": "Present on another screen",
+  "status": "later",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Presenter view opens a second window you can drag to another screen",
+  "path": "Title row > Slideshow"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.slideshow.displayOptions",
+  "label": "Presentation display options",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "Chrome's multi screen permission flow; Presenter view covers the two window case",
+  "path": "Title row > Slideshow"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.share",
+  "label": "Share",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account",
+  "label": "Account",
+  "status": "now",
+  "adv": false,
+  "turboslide": false,
+  "reason": "",
+  "path": "Title row"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.changeName",
+  "label": "Change name",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.changeAvatar",
+  "label": "Change avatar",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.signIn",
+  "label": "Sign in",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.signOut",
+  "label": "Sign out",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.forget",
+  "label": "Forget this browser",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.account.sessions",
+  "label": "Sessions",
+  "status": "now",
+  "adv": false,
+  "turboslide": true,
+  "reason": "",
+  "path": "Title row > Account"
+ },
+ {
+  "menu": "Title row",
+  "id": "title.gemini",
+  "label": "Ask Gemini",
+  "status": "omit",
+  "adv": false,
+  "turboslide": false,
+  "reason": "A Google service",
+  "path": "Title row"
+ }
+]

@@ -1,0 +1,114 @@
+/* Brand direction C mockups: the shared parts. Every colour reads a --pt- token of the tree's
+   tokens.css or a --ts- token of brand.css with c-tokens.css on top; Inter is the tree's
+   packages/fonts/assets/InterVariable.woff2. No shadow, no gradient fill, no radius outside the
+   named exceptions (--pt-radius on fields and the search pill, 8px on Slideshow, the Google button's
+   own shape). */
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../../../packages/fonts/assets/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: var(--ts-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+p { margin: 0; }
+h1, h2, h3 { margin: 0; font-weight: 500; font-feature-settings: 'cv11', 'ss01'; text-wrap: balance; }
+button { font: inherit; color: inherit; }
+
+.c-ic { width: 16px; height: 16px; fill: currentColor; flex: 0 0 auto; display: block; }
+.c-ic.is-20 { width: 20px; height: 20px; }
+.c-mark { display: block; fill: currentColor; shape-rendering: crispEdges; flex: 0 0 auto; }
+
+/* ---- the rail law (P:DESIGN.md 177 to 188; slide 49) ---- */
+.c-rails {
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  width: min(var(--ts-rail), calc(100% - 32px));
+  transform: translateX(-50%);
+  border-left: 1px solid var(--pt-hair);
+  border-right: 1px solid var(--pt-hair);
+  pointer-events: none; z-index: 6;
+}
+.c-col { width: min(var(--ts-rail), calc(100% - 32px)); margin: 0 auto; padding: 0 var(--ts-gutter); position: relative; }
+.c-seam { position: relative; height: 0; border-top: 1px solid var(--pt-hair); z-index: 6; }
+.c-cross {
+  position: absolute; width: var(--ts-cross); height: var(--ts-cross); pointer-events: none; z-index: 7;
+  background:
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 4px 0 / 1px 9px no-repeat,
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 0 4px / 9px 1px no-repeat;
+}
+.c-hatch {
+  height: 24px;
+  background-image: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 8px);
+}
+
+/* ---- buttons: Title Case labels (DECK-GRAMMAR 22), square, ink only as the solid call to action ---- */
+.c-btn {
+  appearance: none; height: 40px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid var(--pt-hair); border-radius: 0; background: var(--pt-paper); color: var(--pt-ink);
+  font: 500 14px/1 var(--pt-text); white-space: nowrap; cursor: pointer;
+}
+.c-btn.is-solid { background: var(--pt-ink); color: var(--pt-paper); border-color: var(--pt-ink); }
+.c-btn.is-small { height: 32px; padding: 0 12px; font-size: 13px; }
+.c-glyph {
+  appearance: none; width: 32px; height: 32px; display: inline-grid; place-items: center; border: 1px solid transparent;
+  background: none; color: var(--pt-ink-2); border-radius: 0; font: 400 16px/1 var(--pt-text); cursor: pointer; padding: 0;
+}
+
+/* ---- the lockup: the solid mark and the live word (docs/brand.md 3) ---- */
+.c-lockup { display: inline-flex; align-items: center; gap: 10px; color: var(--pt-ink); }
+.c-lockup b { font: 500 22px/1 var(--pt-display); letter-spacing: -0.01em; font-feature-settings: 'cv11', 'ss01'; white-space: nowrap; }
+
+/* ---- ruled rows (DECK-GRAMMAR 36, 39, 40): the row owns the line; an icon only in the key cell ---- */
+.c-rows { border-top: 1px solid var(--pt-hair); }
+.c-rows > div { display: grid; grid-template-columns: var(--key, 128px) 1fr; gap: 24px; padding: 12px 0; border-bottom: 1px solid var(--pt-hair-soft); font-size: var(--ts-small); line-height: 1.55; }
+.c-rows > div:last-child { border-bottom-color: var(--pt-hair); }
+.c-rows b { font-weight: 500; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.c-rows b .c-ic { width: 16px; height: 16px; }
+.c-rows span { color: var(--pt-ink-2); }
+
+/* ---- the picture field: a two colour twin at 2 px cells, shown at its size, never scaled ---- */
+.c-field { position: absolute; overflow: hidden; }
+.c-field img { display: block; image-rendering: pixelated; }
+.c-field .is-dark { display: none; }
+:root[data-theme='dark'] .c-field .is-light { display: none; }
+:root[data-theme='dark'] .c-field .is-dark { display: block; }
+/* the picture's plate: the deck's mood plate (slide 14), solid paper, no rule, no shadow */
+.c-credit { position: absolute; background: var(--pt-paper); padding: 10px 14px 9px; max-width: 280px; z-index: 4; }
+.c-credit b { display: block; font: 500 13px/1.35 var(--pt-display); letter-spacing: -0.005em; color: var(--pt-ink); }
+.c-credit span { display: block; font-size: 13px; line-height: 1.4; color: var(--pt-titanium); margin-top: 2px; }
+.c-credit-key {
+  position: absolute; right: 8px; bottom: 8px; width: 32px; height: 32px; display: grid; place-items: center; z-index: 4;
+  appearance: none; padding: 0; border: 1px solid var(--pt-hair); border-radius: 0; background: var(--pt-paper); color: var(--pt-ink-2);
+}
+
+/* ---- the account chip: round three's generated identity, 24 px ---- */
+.c-chip { width: 24px; height: 24px; display: grid; grid-template-columns: repeat(6, 4px); grid-template-rows: repeat(6, 4px); outline: 1px solid var(--pt-edge); outline-offset: 0; }
+.c-chip i { display: block; }
+.c-chip i.on { background: var(--pt-ink); }
+
+/* ---- the sheet: the customer's slide in its own appearance, whatever the chrome's ---- */
+.c-sheet { position: relative; overflow: hidden; background: #ffffff; }
+.c-sheet-in {
+  --s-paper: #ffffff; --s-ink: #070707; --s-ink-2: #3a3d44; --s-ti: #8a8f98; --s-hair: rgba(7, 7, 7, 0.18); --s-cross: rgba(7, 7, 7, 0.38);
+  position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; background: var(--s-paper); color: var(--s-ink);
+}
+.c-sheet-in .r { position: absolute; background: var(--s-hair); }
+.c-sheet-in .x { position: absolute; width: 11px; height: 11px;
+  background: linear-gradient(var(--s-cross), var(--s-cross)) 5px 0 / 1px 11px no-repeat, linear-gradient(var(--s-cross), var(--s-cross)) 0 5px / 11px 1px no-repeat; }
+.c-sheet-in h1 { position: absolute; left: 137px; top: 352px; font: 500 88px/1.02 var(--pt-display); letter-spacing: -0.025em; color: var(--s-ink); max-width: 1200px; }
+.c-sheet-in .sub { position: absolute; left: 137px; top: 474px; font: 400 26px/1.45 var(--pt-text); color: var(--s-ink-2); }
+.c-sheet-in .counter { position: absolute; right: 72px; bottom: 22px; font: 400 13px/1 var(--pt-display); letter-spacing: 0.02em; color: var(--s-ti); font-variant-numeric: tabular-nums; }
+.c-sheet-in.is-gt { background: #070707; }

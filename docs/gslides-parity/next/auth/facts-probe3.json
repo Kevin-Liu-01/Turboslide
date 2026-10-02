@@ -1,0 +1,150 @@
+{
+  "startedAt": "2026-10-02T01:53:26.778Z",
+  "uptime": "18:53  up 7 days,  8:50, 2 users, load averages: 15.33 25.23 32.65",
+  "deck": "untitled-20261002-arp2",
+  "steps": {
+    "p1.a-signs-in-and-makes-a-deck": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "deck": "untitled-20261002-arp2",
+        "invite": "{\"record\":{\"schemaVersion\":1,\"deckId\":\"untitled-20261002-arp2\",\"owner\":\"usr_HhyW6NhrUIqQBWAzupQhnYZYZ7OvnYSO\",\"pendingOwner\":null,\"createdAt\":\"2026-10-02T01:53:28.906Z\",\"createdBy\":\"usr_HhyW6NhrUIqQBWAzupQhnYZYZ7OvnYSO\",\"assetKey\":\"untitled-20261002-arp2\",\"generalAccess\":{\"mode\":\"restricted\",\"role\":"
+      },
+      "ms": 2025
+    },
+    "p2.b-signs-in-and-opens": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "status": 200,
+        "role": "editor",
+        "via": "grant"
+      },
+      "ms": 1142
+    },
+    "p3.menu-sign-out-row": {
+      "ok": true,
+      "value": {
+        "answers": [
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzLXNlcnZlcmZuLXNwbGl0IiwiZXhwb3J0IjoiYXR0YWNoRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"6f53b1d2-ddd4-4ae1-8db8-3053016c4f42\\\\\\\",\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20261002-arp2\\\\\\\",\\\\\\\"owner\\\\\\\":\\\\\\\"viewer\\\\\\\""
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzLXNlcnZlcmZuLXNwbGl0IiwiZXhwb3J0IjoicG9sbEZuX2NyZWF0ZVNlcnZlckZuX2hhbmRsZXIifQ",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0},\\\\\\\"created\\\\\\\":false}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]"
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"activityForCommenters\\\\\\\":false},\\\\\\\"created\\\\\\\":false}\"},{\"t\""
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzLXNlcnZlcmZuLXNwbGl0IiwiZXhwb3J0IjoiYXR0YWNoRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"id\\\\\\\":\\\\\\\"62022c6c-f1f7-4e2d-850b-0f4908650c6c\\\\\\\",\\\\\\\"deckId\\\\\\\":\\\\\\\"untitled-20261002-arp2\\\\\\\",\\\\\\\"owner\\\\\\\":\\\\\\\"editor\\\\\\\""
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvc2Vzc2lvbnMudHM_dHNzLXNlcnZlcmZuLXNwbGl0IiwiZXhwb3J0IjoicG9sbEZuX2NyZWF0ZVNlcnZlckZuX2hhbmRsZXIifQ",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"[]\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]},\"o\":0}]},\"o\":0}"
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"threads\\\\\\\":[],\\\\\\\"commentsRevision\\\\\\\":0,\\\\\\\"total\\\\\\\":0},\\\\\\\"created\\\\\\\":false}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":"
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"notifications\\\\\\\":[],\\\\\\\"unread\\\\\\\":0},\\\\\\\"created\\\\\\\":false}\"},{\"t\":2,\"s\":1},{\"t\":11,\"i\":1,\"p\":{\"k\":[],\"v\":[]"
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"level\\\\\\\":\\\\\\\"forYou\\\\\\\",\\\\\\\"email\\\\\\\":true,\\\\\\\"activityForCommenters\\\\\\\":false},\\\\\\\"created\\\\\\\":false}\"},{\"t\""
+          },
+          {
+            "url": "/_serverFn/eyJmaWxlIjoiL3NyYy9zZXJ2ZXIvYWdlbnQtYWN0aW9ucy50cz90c3Mtc2VydmVyZm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+            "status": 200,
+            "body": "{\"t\":10,\"i\":0,\"p\":{\"k\":[\"result\",\"error\",\"context\"],\"v\":[{\"t\":1,\"s\":\"{\\\\\\\"output\\\\\\\":{\\\\\\\"sessions\\\\\\\":[{\\\\\\\"id\\\\\\\":\\\\\\\"1kNobqOVepD59DMZTZLjrtQNaM4bMf14\\\\\\\",\\\\\\\"createdAt\\\\\\\":\\\\\\\"2026-10-02T01:53:40.2"
+          }
+        ],
+        "sessionStillValid": true,
+        "describeSignedIn": true,
+        "snack": [
+          "",
+          "Edits are kept on this server instance only and do not persist until a Blob store is connected; connect one to the Vercel project to keep them."
+        ]
+      },
+      "ms": 6133
+    },
+    "p4.badge-on-b-after-a-signs-in": {
+      "ok": true,
+      "value": {
+        "signOut": 200,
+        "aOut": {
+          "principalId": "anon_40bdaee2-bc10-4408-81c4-6b84074515bb",
+          "label": "Cotton 300",
+          "trust": "verified",
+          "signedIn": false
+        },
+        "bSeesOut": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ],
+        "signIn": [
+          200,
+          200
+        ],
+        "signInToBadgeMs": null,
+        "pageLoadedToBadgeMs": null,
+        "seen": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ]
+      },
+      "ms": 16661
+    },
+    "p5.same-account-second-browser": {
+      "ok": true,
+      "value": {
+        "signIn": [
+          200,
+          200
+        ],
+        "bChips": [
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          },
+          {
+            "label": "Go to slide 1",
+            "mark": false
+          }
+        ],
+        "sessionsAction": "{\"sessions\":[{\"id\":\"1kNobqOVepD59DMZTZLjrtQNaM4bMf14\",\"createdAt\":\"2026-10-02T01:53:40.212Z\",\"lastSeenAt\":\"2026-10-02T01:53:40.212Z\",\"current\":true,\"userAgent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36\"},{\"id\":\"ockIYZeikUXbKLJqOLC3RgCs26pu6Ydy\",\"createdAt\":\"2026-10-02T01:53:53.256Z\",\"lastSeenAt\":\"2026-10-02T01"
+      },
+      "ms": 4253
+    }
+  },
+  "endedAt": "2026-10-02T01:53:57.194Z",
+  "uptimeEnd": "18:53  up 7 days,  8:50, 2 users, load averages: 14.64 24.11 31.99"
+}

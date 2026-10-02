@@ -1,0 +1,2 @@
+<!-- Turboslide mark, the solid form for 12 to 63 px. Brand direction C (docs/gslides-parity/next/brand-c.md): the round four geometry of packages/theme/src/brand.ts, unchanged, one color in currentColor. Written by brand-c/tools/build-marks.mjs. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" shape-rendering="crispEdges" role="img" aria-label="Turboslide"><title>Turboslide</title><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg>

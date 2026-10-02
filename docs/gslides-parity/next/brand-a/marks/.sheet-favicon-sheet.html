@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+        @font-face{font-family:Inter;src:url('file:///Users/kevinliu/repos/Turboslide-next/packages/fonts/assets/InterVariable.woff2') format('woff2');font-weight:100 900}
+        body{margin:0;background:#fff;color:#070707;font:14px/1.45 Inter,sans-serif;padding:32px;width:1136px}
+        h2{font-weight:500;font-size:20px;letter-spacing:-0.01em;margin:0 0 4px}
+        p{margin:0 0 16px;color:#3a3d44;max-width:880px}
+        .row{display:grid;grid-template-columns:180px repeat(3,1fr);gap:0;border-top:1px solid rgba(7,7,7,.18);padding:16px 0;align-items:center}
+        .row b{font-weight:500}
+        .cell{display:flex;gap:16px;align-items:center}
+        .strip{display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;width:300px;font:12px Inter;transform:scale(2);transform-origin:0 0;margin-bottom:40px}
+        .strip.l{background:#dee1e6;color:#1f1f1f}.strip.d{background:#202124;color:#e8eaed}
+        .strip .tab{display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;background:#fff;width:220px}
+        .strip.d .tab{background:#35363a}
+        .cap{color:#6f747d;font-size:12px}
+      </style></head><body>
+        <h2>The app icon kept, and the bar monogram in a square</h2>
+        <p>Every image below is rendered from its SVG by this folder's build.mjs. The left column of each row is 1x, the others are the same pixels at 8x.</p>
+        <div class="row"><b>Kept: round four's form in the paper tile</b><div class="cell"><img src="favicon-16.png" style="image-rendering:pixelated;width:16px;height:auto;display:block"><img src="favicon-16.png" style="image-rendering:pixelated;width:128px;height:auto;display:block"></div><div class="cell"><img src="favicon-32.png" style="image-rendering:pixelated;width:32px;height:auto;display:block"><img src="favicon-32.png" style="image-rendering:pixelated;width:256px;height:auto;display:block"></div><div class="cell"><img src="apple-touch-icon-180.png" style="image-rendering:pixelated;width:180px;height:auto;display:block"></div></div>
+        <div class="row"><b>Kept, under prefers-color-scheme dark</b><div class="cell"><img src="favicon-16-dark.png" style="image-rendering:pixelated;width:16px;height:auto;display:block"><img src="favicon-16-dark.png" style="image-rendering:pixelated;width:128px;height:auto;display:block"></div><div class="cell"><img src="favicon-32-dark.png" style="image-rendering:pixelated;width:32px;height:auto;display:block"><img src="favicon-32-dark.png" style="image-rendering:pixelated;width:256px;height:auto;display:block"></div><div class="cell cap">The 180 px touch icon is the ink tile in both.</div></div>
+        <div class="row"><b>Rejected: the bar monogram fitted to the tile</b><div class="cell"><img src="rejected-bar-16.png" style="image-rendering:pixelated;width:16px;height:auto;display:block"><img src="rejected-bar-16.png" style="image-rendering:pixelated;width:128px;height:auto;display:block"></div><div class="cell"><img src="rejected-bar-32.png" style="image-rendering:pixelated;width:32px;height:auto;display:block"><img src="rejected-bar-32.png" style="image-rendering:pixelated;width:256px;height:auto;display:block"></div><div class="cell"><img src="rejected-bar-180.png" style="image-rendering:pixelated;width:180px;height:auto;display:block"></div></div>
+        <h2 style="margin-top:24px">The tab at 2x</h2>
+        <div class="strip l"><div class="tab"><img src="favicon-16.png" width="16" height="16">Untitled presentation - Turboslide</div></div>
+        <div class="strip d"><div class="tab"><img src="favicon-16-dark.png" width="16" height="16">Untitled presentation - Turboslide</div></div>
+        <div class="strip l"><div class="tab"><img src="rejected-bar-16.png" width="16" height="16">Untitled presentation - Turboslide</div></div>
+      </body></html>

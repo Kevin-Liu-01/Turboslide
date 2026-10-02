@@ -1,0 +1,302 @@
+/* The editor's default view under direction A: the product's row heights (--pt-title-h 44,
+   --pt-menu-h 28, --pt-tool-h 40, --pt-notes-h 64), the 256 px filmstrip, the clutter audit's
+   cuts applied (no pointer toggle, no Last edit words on a draft, no sparkle), the GT bar monogram
+   as the home link, and the stage ground in the chrome's appearance with the slide in its own. */
+.ed {
+  display: grid;
+  grid-template-rows: var(--pt-title-h) var(--pt-menu-h) var(--pt-tool-h) minmax(0, 1fr);
+  height: 100vh;
+  overflow: hidden;
+}
+.titlerow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 0 6px;
+  border-bottom: 1px solid var(--pt-hair);
+  min-width: 0;
+}
+.home-link {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  color: var(--pt-ink);
+  flex: none;
+}
+.docname {
+  font: 500 15px/1 var(--pt-display);
+  letter-spacing: -0.01em;
+  padding: 7px 6px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 96px;
+}
+.tr-r {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.tr-r .btn.ghost {
+  color: var(--pt-ink-2);
+}
+.split {
+  display: inline-flex;
+  height: var(--pt-ctl-h);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  margin: 0 4px;
+}
+.split .go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 14px;
+  font-size: 13px;
+}
+.split .go .ic {
+  width: 12px;
+  height: 12px;
+  -webkit-mask-size: 12px;
+  mask-size: 12px;
+}
+.split .more {
+  width: 28px;
+  display: grid;
+  place-items: center;
+  border-left: 1px solid var(--pt-hair-on-ink);
+}
+.tr-r .chip {
+  margin-left: 6px;
+}
+
+.menubar {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.menubar span {
+  padding: 3px 9px;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--pt-hair);
+  color: var(--pt-ink-2);
+  overflow: hidden;
+}
+.tb {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.tb.arrow {
+  width: 16px;
+  margin-left: -4px;
+}
+.tb.arrow .ic {
+  width: 12px;
+  height: 12px;
+  -webkit-mask-size: 12px;
+  mask-size: 12px;
+}
+.tb-glyph {
+  font: 500 16px/1 var(--pt-display);
+  color: var(--pt-ink-2);
+}
+.tb-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--pt-hair);
+  margin: 0 6px;
+  flex: none;
+}
+.tb-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 9px;
+  font-size: 13px;
+  color: var(--pt-ink);
+  flex: none;
+}
+.tb-text .ic {
+  width: 12px;
+  height: 12px;
+  -webkit-mask-size: 12px;
+  mask-size: 12px;
+  color: var(--pt-ink-2);
+}
+.zoom {
+  width: 60px;
+  justify-content: space-between;
+}
+.tb-end {
+  margin-left: auto;
+}
+.tb-more {
+  display: none;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) var(--pt-notes-h);
+  grid-template-areas:
+    'film stage'
+    'film notes';
+  min-height: 0;
+}
+.film {
+  grid-area: film;
+  border-right: 1px solid var(--pt-hair);
+  padding: 14px 16px 0 0;
+}
+.card {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: start;
+}
+.card .n {
+  font: 500 12px/1 var(--pt-text);
+  color: var(--pt-ink);
+  text-align: center;
+  padding-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.card .frame {
+  aspect-ratio: 16 / 9;
+  background: #ffffff;
+  border: 1px solid var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+.film .add {
+  display: none;
+}
+.stage {
+  grid-area: stage;
+  background: var(--pt-plate);
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  min-height: 0;
+}
+.sheet {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 1128px;
+  aspect-ratio: 16 / 9;
+  background: #ffffff;
+  color: #070707;
+  border: 1px solid var(--pt-hair);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8.5cqw 4cqw;
+}
+.sheet .ph-title {
+  font: 500 5.5cqw/1.02 var(--pt-display);
+  letter-spacing: -0.025em;
+  color: #8a8f98;
+  font-feature-settings: 'cv11', 'ss01';
+}
+.sheet .ph-sub {
+  margin-top: 2.2cqw;
+  font: 400 1.75cqw/1.45 var(--pt-text);
+  color: #8a8f98;
+}
+.notes {
+  grid-area: notes;
+  border-top: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  padding: 12px 28px;
+  font-size: 14px;
+  color: var(--pt-titanium);
+}
+
+@media (max-width: 1023px) {
+  .titlerow {
+    padding: 0 8px 0 2px;
+    gap: 2px;
+  }
+  .docname {
+    font-size: 14px;
+  }
+  .tr-r .assist,
+  .tr-r .comments,
+  .tr-r .panel,
+  .split .more,
+  .split .go span {
+    display: none;
+  }
+  .split .go {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .split .go .ic {
+    width: 14px;
+    height: 14px;
+    -webkit-mask-size: 14px;
+    mask-size: 14px;
+  }
+  .split {
+    margin: 0 2px;
+  }
+  .tr-r .chip {
+    margin-left: 2px;
+  }
+  .toolbar .wide {
+    display: none;
+  }
+  .toolbar .tb-more {
+    display: grid;
+  }
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'stage'
+      'film'
+      'notes';
+  }
+  .stage {
+    padding: 16px;
+  }
+  .film {
+    border-right: 0;
+    border-top: 1px solid var(--pt-hair);
+    padding: 10px var(--a-gutter) 12px 0;
+    display: flex;
+    gap: 4px;
+    background: var(--pt-paper);
+  }
+  .card {
+    grid-template-columns: 28px 112px;
+  }
+  .film .add {
+    display: grid;
+    place-items: center;
+    width: 112px;
+    aspect-ratio: 16 / 9;
+    margin-left: 18px;
+    border: 1px solid var(--pt-hair);
+    color: var(--pt-ink-2);
+  }
+  .notes {
+    padding: 12px var(--a-gutter);
+  }
+}

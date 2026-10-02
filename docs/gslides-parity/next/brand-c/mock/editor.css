@@ -1,0 +1,57 @@
+/* Brand direction C: the editor's default view. Rows and sizes are the tree's tokens. */
+.e { position: fixed; inset: 0; display: grid; background: var(--pt-paper); color: var(--pt-ink); font-size: 13px; line-height: 1.2; }
+.e.is-wide { grid-template-rows: var(--pt-title-h) var(--pt-menu-h) var(--pt-tool-h) minmax(0, 1fr); }
+.e.is-narrow { grid-template-rows: var(--pt-title-h) var(--pt-tool-h) minmax(0, 1fr); }
+.e-fill { flex: 1 1 auto; }
+.e-title { display: flex; align-items: center; gap: 4px; padding: 0 12px 0 14px; min-width: 0; }
+.e-home { width: 24px; height: 24px; color: var(--pt-ink); margin-right: 12px; flex: 0 0 auto; }
+.e-name { font: 500 15px/1 var(--pt-display); letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 96px; padding: 6px 4px; margin-left: -4px; }
+.e-status { appearance: none; border: 0; background: none; color: var(--pt-ink-2); font: 13px/1 var(--pt-text); padding: 6px 8px; margin-left: 8px; white-space: nowrap; }
+.e-chip { display: inline-grid; place-items: center; width: 32px; height: 32px; }
+.e-text { appearance: none; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; background: none; color: var(--pt-ink-2); font: 13px/1 var(--pt-text); white-space: nowrap; border-radius: 0; }
+.e-tool { appearance: none; width: 32px; height: 32px; display: inline-grid; place-items: center; padding: 0; border: 1px solid transparent; background: none; color: var(--pt-ink-2); border-radius: 0; flex: 0 0 auto; }
+.e-tool.is-on { color: var(--pt-ink); }
+.e-tool.is-off { color: var(--pt-disabled); }
+.e-drop { display: inline-flex; }
+.e-tool.is-arrow { width: 16px; }
+.e-tool.is-arrow .c-ic { width: 12px; height: 12px; }
+.e-sep { width: 1px; height: 20px; background: var(--pt-hair); margin: 0 8px; flex: 0 0 auto; }
+.e-zoom { appearance: none; height: 32px; padding: 0 6px 0 10px; display: inline-flex; align-items: center; gap: 14px; border: 1px solid transparent; background: none; color: var(--pt-ink-2); font: 13px/1 var(--pt-text); }
+.e-zoom .c-ic { width: 12px; height: 12px; }
+.e-text .c-ic { width: 12px; height: 12px; }
+/* Slideshow is the Present button: the one 8 px corner, the label first and the glyph after (P:DESIGN.md 430) */
+.e-show { display: inline-flex; height: 32px; margin-left: 8px; }
+.e-show-main { appearance: none; height: 32px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px 0 14px; border: 0; background: var(--pt-ink); color: var(--pt-paper); font: 500 13px/1 var(--pt-text); border-radius: 8px 0 0 8px; }
+.e-show-main.is-glyph { width: 32px; padding: 0; justify-content: center; border-radius: 8px; }
+.e-show-more { appearance: none; width: 28px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-left: 1px solid var(--pt-hair-on-ink); background: var(--pt-ink); color: var(--pt-paper); border-radius: 0 8px 8px 0; }
+.e-show-more .c-ic { width: 12px; height: 12px; }
+.e-share { margin-left: 8px; gap: 6px; }
+.e-share .c-ic { width: 14px; height: 14px; }
+.e-menus { display: flex; align-items: center; padding-left: 45px; }
+.e-menus button { appearance: none; height: 24px; padding: 0 8px; border: 1px solid transparent; background: none; color: var(--pt-ink); font: 13px/1 var(--pt-text); border-radius: 0; }
+.e-tools { display: flex; align-items: center; gap: 2px; padding: 0 10px; border-top: 1px solid var(--pt-hair-soft); border-bottom: 1px solid var(--pt-hair); min-width: 0; }
+.e-body { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 0; }
+.e-strip { border-right: 1px solid var(--pt-hair); padding: 14px 12px 14px 8px; }
+.e-card { display: grid; grid-template-columns: 20px auto; gap: 6px; align-items: start; }
+.e-card .n { font: 500 12px/1 var(--pt-display); color: var(--pt-titanium); text-align: right; padding-top: 3px; font-variant-numeric: tabular-nums; }
+.e-card.is-active .n { color: var(--pt-ink); }
+.e-card .frame { display: block; line-height: 0; border: 1px solid var(--pt-edge); }
+.e-card.is-active .frame { border-color: var(--pt-ink); outline: 1px solid var(--pt-ink); outline-offset: 2px; }
+/* the stage ground reads the chrome's tokens; only the sheet keeps its own appearance */
+.e-stage { display: grid; grid-template-rows: minmax(0, 1fr) var(--pt-notes-h); min-height: 0; background: var(--pt-plate); }
+.e-canvas { display: grid; place-items: center; min-height: 0; overflow: hidden; }
+.e-sheet { display: block; line-height: 0; outline: 1px solid var(--pt-edge); }
+.e-notes { position: relative; border-top: 1px solid var(--pt-hair); background: var(--pt-paper); padding: 14px 28px; }
+.e-notes p { color: var(--pt-titanium); font-size: 13px; }
+.e-handle { position: absolute; left: 50%; top: -9px; transform: translateX(-50%); background: var(--pt-paper); color: var(--pt-titanium); padding: 0 6px; line-height: 0; }
+/* the phone: the menus fold into one Menus key, the filmstrip runs under the sheet */
+.e.is-narrow .e-title { padding: 0 12px; }
+.e.is-narrow .e-home { margin-right: 8px; }
+.e.is-narrow .e-tools { padding: 0 8px; }
+.e.is-narrow .e-menus-key { color: var(--pt-ink); padding: 0 10px 0 8px; }
+.e.is-narrow .e-menus-key .c-ic { width: 16px; height: 16px; }
+.e.is-narrow .e-stage { display: flex; flex-direction: column; }
+.e.is-narrow .e-canvas { padding: 16px 0; display: grid; place-items: center; }
+.e.is-narrow .e-strip { display: flex; align-items: center; gap: 12px; border-right: 0; border-top: 1px solid var(--pt-hair); background: var(--pt-paper); padding: 12px 16px 12px 8px; }
+.e.is-narrow .e-add { appearance: none; width: 54px; height: 54px; display: grid; place-items: center; border: 1px solid var(--pt-hair); background: none; color: var(--pt-ink-2); border-radius: 0; }
+.e.is-narrow .e-notes { flex: 1 1 auto; padding: 14px 16px; }

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Untitled presentation - Turboslide</title>
+    <script>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+    <link rel="stylesheet" href="brand-a.css" />
+    <link rel="stylesheet" href="editor.css" />
+    <style>
+      .scrim {
+        position: fixed;
+        inset: 0;
+        background: var(--pt-scrim);
+      }
+      .dlg {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 720px;
+        height: 440px;
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        background: var(--pt-paper);
+        border: 1px solid var(--pt-edge);
+      }
+      .dlg-pic {
+        position: relative;
+        overflow: hidden;
+        border-right: 1px solid var(--pt-hair);
+      }
+      .dlg-pic .cells {
+        left: -330px;
+        top: -200px;
+      }
+      .dlg-pic figcaption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 8px 12px 9px;
+        background: var(--pt-paper);
+        font-size: 12px;
+        line-height: 1.45;
+        letter-spacing: 0.01em;
+        color: var(--pt-titanium);
+      }
+      .dlg-plate {
+        display: flex;
+        flex-direction: column;
+        padding: 22px 24px 20px 32px;
+        min-width: 0;
+      }
+      .dlg-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .dlg-head .lockup {
+        font-size: 18px;
+      }
+      .dlg-head .close {
+        margin-right: -6px;
+        color: var(--pt-ink-2);
+      }
+      .dlg h2 {
+        margin-top: 44px;
+        font-size: 26px;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+      .dlg .lead {
+        margin-top: 12px;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--pt-ink-2);
+        max-width: 360px;
+      }
+      /* Google's light theme button (developers.google.com/identity/branding-guidelines, read
+         2026-10-01): fill #FFFFFF, a 1 px #747775 stroke inside, text #1F1F1F at 14/20, 12 px
+         before the G and 10 px after it. Google names Google Sans Medium; Inter 500 stands in
+         here because the face is not in this tree (brand-a.md, risk 4). */
+      .gbtn {
+        margin-top: 28px;
+        position: relative;
+        width: 100%;
+        max-width: 380px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 12px 0 42px;
+        background: #ffffff;
+        border: 1px solid #747775;
+        color: #1f1f1f;
+        font: 500 14px/20px 'Google Sans', var(--pt-text);
+      }
+      .gbtn .g {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        width: 20px;
+        height: 20px;
+        transform: translateY(-50%);
+        display: grid;
+        place-items: center;
+      }
+      .gbtn .g svg {
+        width: 20px;
+        height: 20px;
+        display: block;
+      }
+      :root[data-theme='dark'] .gbtn {
+        background: #131314;
+        border-color: #8e918f;
+        color: #e3e3e3;
+      }
+      /* the G stays on white (the guideline's sentence); the dark button carries a white disc */
+      :root[data-theme='dark'] .gbtn .g {
+        width: 24px;
+        height: 24px;
+        left: 10px;
+        background: #ffffff;
+        border-radius: 50%;
+      }
+      :root[data-theme='dark'] .gbtn .g svg {
+        width: 16px;
+        height: 16px;
+      }
+      .dlg .alt {
+        margin-top: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--pt-ink-2);
+      }
+      .dlg .foot {
+        margin-top: auto;
+        padding-top: 14px;
+        border-top: 1px solid var(--pt-hair-soft);
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--pt-titanium);
+      }
+
+      @media (max-width: 1023px) {
+        .dlg {
+          left: 0;
+          right: 0;
+          top: auto;
+          bottom: 0;
+          transform: none;
+          width: auto;
+          height: auto;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: 236px auto;
+          border: 0;
+          border-top: 1px solid var(--pt-edge);
+        }
+        .dlg-pic {
+          border-right: 0;
+          border-bottom: 1px solid var(--pt-hair);
+        }
+        .dlg-pic .cells {
+          left: -20px;
+          top: -66px;
+        }
+        .dlg-plate {
+          padding: 16px var(--a-gutter) 18px;
+        }
+        .dlg h2 {
+          margin-top: 24px;
+          font-size: 24px;
+        }
+        .gbtn {
+          max-width: none;
+          margin-top: 22px;
+        }
+        .dlg .foot {
+          margin-top: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="gt-bar" viewBox="-109.1 36 499.6 128"><path d="M-8.5 40L21.5 40L9.6 96L-20.4 96ZM-22.1 104L7.9 104L-4 160L-34 160ZM-8.5 40L181.5 40L175.1 70L-14.9 70ZM-27.6 130L162.4 130L156 160L-34 160ZM137.9 104L167.9 104L156 160L126 160ZM77.9 104L167.9 104L162.4 130L72.4 130ZM-28.5 40L-6.5 40L-12.9 70L-34.9 70ZM-97.4 82L-15.4 82L-18.4 96L-100.4 96ZM-102.1 104L-20.1 104L-23.1 118L-105.1 118ZM-77.6 130L-25.6 130L-32 160L-84 160ZM216.5 40L386.5 40L380.1 70L210.1 70ZM274.5 40L308.5 40L296.6 96L262.6 96ZM260.9 104L294.9 104L283 160L249 160Z"/></symbol></svg>
+    
+    <div class="ed">
+      <header class="titlerow">
+        <a class="home-link" href="/decks" aria-label="Your presentations">
+          <svg class="mono-solo" viewBox="0 0 499.6 128" role="img" aria-label="General Translation"><use href="#gt-bar" /></svg>
+        </a>
+        <span class="docname">Untitled presentation</span>
+        <div class="tr-r">
+          <button class="btn ghost assist">Assist</button>
+          <button class="btn ghost icon comments" aria-label="Show all comments"><i class="ic i-chat"></i></button>
+          <button class="btn ghost icon panel" aria-label="Show side panel"><i class="ic i-view-columns"></i></button>
+          <span class="split">
+            <button class="go" aria-label="Slideshow"><span>Slideshow</span><i class="ic i-play"></i></button>
+            <button class="more" aria-label="Slideshow options"><i class="ic i-chevron-down"></i></button>
+          </span>
+          <button class="btn"><i class="ic i-lock-closed"></i>Share</button>
+          <span class="chip" aria-label="Account">V</span>
+        </div>
+      </header>
+      <nav class="menubar" data-clip>
+        <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Slide</span><span>Arrange</span><span>Tools</span><span>Help</span>
+      </nav>
+      <div class="toolbar" data-clip>
+        <span class="tb" aria-label="Search the menus"><i class="ic i-search"></i></span>
+        <span class="tb" aria-label="New slide"><i class="ic i-plus"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb" aria-label="Undo"><i class="ic i-arrow-uturn-left"></i></span>
+        <span class="tb" aria-label="Redo"><i class="ic i-arrow-uturn-right"></i></span>
+        <span class="tb wide" aria-label="Print"><i class="ic i-printer"></i></span>
+        <span class="tb wide" aria-label="Paint format"><i class="ic i-paint-brush"></i></span>
+        <span class="tb-text zoom wide">Fit <i class="ic i-chevron-down"></i></span>
+        <span class="tb-sep"></span>
+        <span class="tb wide" aria-label="Select"><i class="ic i-cursor-arrow"></i></span>
+        <span class="tb" aria-label="Text box"><span class="tb-glyph">T</span></span>
+        <span class="tb" aria-label="Insert image"><i class="ic i-photo"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb" aria-label="Insert shape"><i class="ic i-square-2-stack"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb wide" aria-label="Insert line"><i class="ic i-minus"></i></span>
+        <span class="tb arrow wide"><i class="ic i-chevron-down"></i></span>
+        <span class="tb wide" aria-label="Insert comment"><i class="ic i-chat"></i></span>
+        <span class="tb-sep wide"></span>
+        <span class="tb-text wide">Background</span>
+        <span class="tb-text wide">Layout <i class="ic i-chevron-down"></i></span>
+        <span class="tb-text wide">Theme</span>
+        <span class="tb tb-end wide" aria-label="Hide the menus"><i class="ic i-chevron-up"></i></span>
+        <span class="tb tb-end tb-more" aria-label="More tools"><i class="ic i-ellipsis-horizontal"></i></span>
+      </div>
+      <div class="body">
+        <aside class="film">
+          <div class="card"><span class="n">1</span><div class="frame"></div></div>
+          <div class="add" aria-label="New slide"><i class="ic i-plus"></i></div>
+        </aside>
+        <main class="stage">
+          <div class="sheet">
+            <div class="ph-title">Click to add title</div>
+            <div class="ph-sub">Click to add subtitle</div>
+          </div>
+        </main>
+        <div class="notes">Click to add speaker notes</div>
+      </div>
+    </div>
+    
+    <div class="scrim"></div>
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="si-title">
+      <figure class="dlg-pic" data-clip>
+        <img class="cells half tw-light" src="assets/mood-tablet-light.jpg" alt="" aria-hidden="true" />
+        <img class="cells half tw-dark" src="assets/mood-tablet.jpg" alt="" aria-hidden="true" />
+        <figcaption>A proto-cuneiform tablet, about 3100 BC. Photograph: The Metropolitan Museum of Art, public domain</figcaption>
+      </figure>
+      <div class="dlg-plate">
+        <div class="dlg-head">
+          <span class="lockup">
+            <svg class="mono" viewBox="0 0 499.6 128" aria-hidden="true"><use href="#gt-bar" /></svg>
+            <span>Turboslide</span>
+          </span>
+          <button class="btn ghost icon close" aria-label="Close"><i class="ic i-close"></i></button>
+        </div>
+        <h2 id="si-title">Sign in</h2>
+        <p class="lead">Your Google name replaces the label on your edits and comments. What you made in this browser before stays yours.</p>
+        <button class="gbtn" data-control="dialog.signIn.google">
+          <span class="g" aria-hidden="true"
+            ><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /></svg></span
+          >Continue with Google
+        </button>
+        <p class="alt">You can edit, present and share without signing in.</p>
+        <p class="foot">Turboslide uses your name and email address from Google and calls no other Google service.</p>
+      </div>
+    </div>
+  </body>
+</html>

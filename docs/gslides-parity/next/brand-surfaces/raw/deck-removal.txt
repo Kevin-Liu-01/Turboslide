@@ -1,0 +1,4 @@
+deck untitled-20261002-77a7, created by the first write on /new at 2026-10-02T01:45:09Z (2026-10-01 18:45 PDT) on https://www.turboslide.com
+removal at 2026-10-02T01:52:43Z through POST /api/actions/deck.info, deck.trash, deck.remove with the agent bearer of hosts.json (wrapper: scratchpad realtime/with-tokens.mjs, TS_ORIGIN=https://www.turboslide.com)
+answer: trash 200, remove 200, deck.info after 404 'No deck untitled-20261002-77a7 in the Blob store'
+the second pass (shoot-extra.mjs) ran on the /new draft and left the address at /new on every context, so it created no deck

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide home C</title>
+<script>(function(){var t=new URLSearchParams(location.search).get('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<link rel="stylesheet" href="../../../../../packages/chrome/src/tokens.css">
+<link rel="stylesheet" href="../../../../../packages/chrome/src/brand.css">
+<link rel="stylesheet" href="c-tokens.css">
+<link rel="stylesheet" href="c.css">
+<script src="data.js"></script>
+<script src="mock.js"></script>
+<style>
+  .h-nav { height: var(--ts-nav-h); position: relative; z-index: 3; background: var(--pt-paper); }
+  .h-nav-row { height: 100%; display: flex; align-items: center; gap: 24px; }
+  .h-links { margin-left: auto; display: flex; gap: 24px; font-size: var(--ts-small); color: var(--pt-ink-2); }
+  .h-links a { display: inline-flex; align-items: center; height: 32px; }
+  .h-hero { position: relative; height: 720px; }
+  .h-field { left: 50%; top: 0; right: 0; bottom: 0; z-index: 1; }
+  .h-field .c-credit { right: calc((100vw - var(--ts-rail)) / 2 + 24px); bottom: 24px; }
+  .h-plate { position: relative; z-index: 2; max-width: 472px; padding-top: 64px; }
+  .h-plate h1 { font-size: var(--ts-h1); line-height: 1.04; letter-spacing: -0.038em; }
+  .h-lead { margin-top: 20px; font-size: var(--ts-lead); line-height: 1.55; color: var(--pt-ink-2); max-width: 440px; }
+  .h-btns { margin-top: 28px; display: flex; gap: 8px; }
+  .h-rows { margin-top: 44px; --key: 112px; }
+  .h-hatchband { width: min(var(--ts-rail), calc(100% - 32px)); margin: 0 auto; }
+  .h-next { padding-top: 36px; }
+  .h-next h2 { font-size: var(--ts-h2); line-height: 1.18; letter-spacing: -0.025em; }
+  .h-next p { margin-top: 12px; font-size: var(--ts-lead); line-height: 1.55; color: var(--pt-ink-2); max-width: 560px; }
+  @media (max-width: 1023px) {
+    .h-nav-row { gap: 8px; }
+    .h-links { display: none; }
+    .h-nav-row .c-glyph { margin-left: auto; }
+    .h-hero { height: auto; padding-bottom: 32px; }
+    .h-field { position: relative; left: 0; right: auto; height: 184px; width: 100%; }
+    .h-field img { position: absolute; right: 0; top: 0; }
+    .h-field .c-credit-key { right: 24px; bottom: 8px; }
+    .h-plate { padding-top: 20px; max-width: none; }
+    .h-lead { margin-top: 14px; }
+    .h-btns { flex-direction: column; margin-top: 22px; }
+    .h-btns .c-btn { width: 100%; }
+    .h-rows { margin-top: 28px; --key: 88px; }
+    .h-rows > div { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="c-rails"></div>
+<header class="h-nav"><div class="c-col h-nav-row" id="nav"></div></header>
+<div class="c-seam"></div>
+<section class="h-hero" id="hero"></section>
+<div class="c-seam"></div>
+<div class="h-hatchband"><div class="c-hatch"></div></div>
+<div class="c-seam"></div>
+<section class="c-col h-next">
+  <h2>Everything on a slide moves</h2>
+  <p>Drag, resize and rotate any object. The first drag turns the slide into a canvas. Undo puts the layout back.</p>
+</section>
+<div style="height:400px"></div>
+<script>
+  const narrow = matchMedia('(max-width: 1023px)').matches;
+  document.getElementById('nav').innerHTML =
+    '<a class="c-lockup" href="#">' + C.mark(16) + '<b>Turboslide</b></a>' +
+    '<nav class="h-links"><a href="#">Your presentations</a><a href="#">Documentation</a></nav>' +
+    C.themeGlyph() +
+    '<a class="c-btn is-solid is-small" href="#">New Presentation</a>';
+  document.getElementById('hero').innerHTML =
+    C.field(narrow ? 'home-band' : 'home-wide', 'h-field', { title: 'A marginal gloss', credit: 'MS f Med. 23, Boston Public Library, public domain' }, narrow) +
+    '<div class="c-col"><div class="h-plate">' +
+    '<h1>Build the pitch, present it and send the link</h1>' +
+    '<p class="h-lead">Turboslide is a slides editor in the browser. It has Google Slides\x27 menus and shortcuts. No account is needed.</p>' +
+    '<div class="h-btns"><a class="c-btn is-solid" href="#">New Presentation</a><a class="c-btn" href="#">Open the Example Deck</a></div>' +
+    '<div class="c-rows h-rows">' +
+    '<div><b>' + C.icon('bars-3') + 'Menus</b><span>The menus run from File to Help in Google\x27s order, with Google\x27s shortcuts.</span></div>' +
+    '<div><b>' + C.icon('arrow-down-tray') + 'Export</b><span>Downloads are PDF and PowerPoint files. The worst page mismatch on the example export is 0.003 percent.</span></div>' +
+    '<div><b>' + C.icon('command-line') + 'Agents</b><span>Agents run the same 193 actions over the CLI, MCP and HTTP.</span></div>' +
+    '</div></div></div>';
+  document.fonts.ready.then(function () { C.crosses(); document.body.dataset.ready = '1'; });
+</script>
+</body>
+</html>

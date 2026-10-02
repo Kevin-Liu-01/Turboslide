@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide mark C</title>
+<script>(function(){var t=new URLSearchParams(location.search).get('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<link rel="stylesheet" href="../../../../../packages/chrome/src/tokens.css">
+<link rel="stylesheet" href="../../../../../packages/chrome/src/brand.css">
+<link rel="stylesheet" href="c-tokens.css">
+<link rel="stylesheet" href="c.css">
+<script src="data.js"></script>
+<script src="mock.js"></script>
+<style>
+  .m-head { padding-top: 40px; padding-bottom: 28px; }
+  .m-head h2 { font-size: var(--ts-h2); line-height: 1.18; letter-spacing: -0.025em; }
+  .m-head p { margin-top: 10px; font-size: var(--ts-lead); line-height: 1.55; color: var(--pt-ink-2); max-width: 720px; }
+  .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; }
+  .m-rows { --key: 120px; }
+  .m-rows > div { align-items: start; padding: 16px 0; }
+  .m-rows b { padding-top: 2px; }
+  .m-set { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; color: var(--pt-ink); }
+  .m-set figure { margin: 0; display: grid; gap: 8px; justify-items: start; }
+  .m-set figcaption { font-size: var(--ts-label); color: var(--pt-ink-2); font-variant-numeric: tabular-nums; }
+  .m-set img { display: block; image-rendering: pixelated; }
+  .m-panel { background: #101010; color: rgba(255, 255, 255, 0.87); padding: 16px 20px; font: 13px/1 Menlo, var(--pt-mono); white-space: pre; }
+  :root[data-theme='dark'] .m-panel { border: 1px solid var(--pt-hair); }
+  @media (max-width: 720px) {
+    .m-grid { grid-template-columns: 1fr; }
+    .m-rows { --key: 1fr; }
+    .m-rows > div { grid-template-columns: 1fr; gap: 10px; }
+    .m-panel { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="c-rails"></div>
+<section class="c-col m-head">
+  <h2>The Turboslide mark</h2>
+  <p>The mark is a slide with the plate cut from it, drawn through the deck's 8 by 8 Bayer screen. Direction C keeps its geometry and writes it in one color for every surface.</p>
+</section>
+<div class="c-seam"></div>
+<section class="c-col"><div class="m-grid" id="grid"></div></section>
+<script>
+  document.fonts.ready.then(function () {
+    const fig = function (inner, cap) { return '<figure>' + inner + '<figcaption>' + cap + '</figcaption></figure>'; };
+    const left =
+      '<div class="c-rows m-rows">' +
+      '<div><b>Solid</b><div class="m-set">' + [16, 24, 32, 48].map(function (s) { return fig(C.mark(s), s + ' px'); }).join('') + '</div></div>' +
+      '<div><b>Cells</b><div class="m-set">' + fig(C.mark(64), '64 px, 2 px cells') + fig(C.mark(128), '128 px, 4 px cells') + '</div></div>' +
+      '<div><b>Lockups</b><div class="m-set">' + fig(C.lockupSvg(40), 'Horizontal, outlines') + '</div></div>' +
+      '</div>';
+    const right =
+      '<div class="c-rows m-rows">' +
+      '<div><b>Tiles</b><div class="m-set">' +
+      fig('<img src="../marks/favicon-16.png" width="16" height="16" alt="">', '16') +
+      fig('<img src="../marks/favicon-16.png" width="64" height="64" alt="">', '16 at 4x') +
+      fig('<img src="../marks/favicon-32.png" width="32" height="32" alt="">', '32') +
+      fig('<img src="../marks/favicon-32.png" width="64" height="64" alt="">', '32 at 2x') +
+      fig('<img src="../marks/apple-touch-icon-180.png" width="90" height="90" alt="">', '180 at 0.5x') +
+      '</div></div>' +
+      '<div><b>Terminal</b><div class="m-panel">' +
+      '████████  Turboslide\n' +
+      '████████  https://www.turboslide.com\n' +
+      '█    ███  193 actions, effects backend: wasm\n' +
+      '█▄▄▄▄███' +
+      '</div></div>' +
+      '</div>';
+    document.getElementById('grid').innerHTML = left + right;
+    C.crosses();
+    document.body.dataset.ready = '1';
+  });
+</script>
+</body>
+</html>

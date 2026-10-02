@@ -1,0 +1,289 @@
+{
+ "startedAt": "2026-10-02T01:45:11.789Z",
+ "steps": [
+  {
+   "step": "present-page",
+   "at": "2026-10-02T01:45:18.674Z",
+   "url": "http://localhost:4493/edit/gt-brand",
+   "controls": [
+    "title.row",
+    "title.home",
+    "deck.name",
+    "deck.lastEdit.slot",
+    "deck.lastEdit",
+    "deck.lastEdit.words",
+    "deck.saveState",
+    "title.presence",
+    "presence.more",
+    "title.account",
+    "title.assist.slot",
+    "title.assist",
+    "title.comments.slot",
+    "title.comments",
+    "title.sidePanel.slot",
+    "title.sidePanel",
+    "title.inbox.slot",
+    "present.split",
+    "present.open",
+    "present.arrow",
+    "share.slot",
+    "share.open",
+    "menubar",
+    "menubar.file",
+    "menubar.edit",
+    "menubar.view",
+    "menubar.insert",
+    "menubar.format",
+    "menubar.slide",
+    "menubar.arrange",
+    "menubar.tools",
+    "menubar.help",
+    "toolbar",
+    "toolbar.head",
+    "toolbar.search",
+    "toolbar.newSlide.split",
+    "toolbar.newSlide",
+    "toolbar.newSlide.arrow",
+    "toolbar.undo",
+    "toolbar.redo",
+    "toolbar.print",
+    "toolbar.paintFormat",
+    "toolbar.zoom",
+    "view.zoom.value",
+    "view.zoom.arrow",
+    "toolbar.tail",
+    "toolbar.select",
+    "toolbar.textBox",
+    "toolbar.insertImage",
+    "toolbar.insertImage.arrow",
+    "toolbar.insertShape",
+    "toolbar.insertShape.arrow",
+    "toolbar.insertLine",
+    "toolbar.insertLine.arrow",
+    "toolbar.insertComment",
+    "toolbar.background",
+    "toolbar.layout",
+    "toolbar.theme",
+    "toolbar.more",
+    "toolbar.end"
+   ]
+  },
+  {
+   "step": "present-options-button",
+   "at": "2026-10-02T01:45:20.340Z",
+   "count": 1
+  },
+  {
+   "step": "present-options",
+   "at": "2026-10-02T01:45:21.373Z",
+   "rows": [
+    {
+     "id": "title.appIcon",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Turboslide home"
+    },
+    {
+     "id": "title.name",
+     "label": "GT brand deck",
+     "status": null,
+     "disabled": false,
+     "tip": "Rename"
+    },
+    {
+     "id": "title.lastEdit",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Last edit 19 days ago by kevinliu"
+    },
+    {
+     "id": "title.saveState",
+     "label": "All changes saved",
+     "status": null,
+     "disabled": false,
+     "tip": "All changes saved"
+    },
+    {
+     "id": "title.presence",
+     "label": "M",
+     "status": null,
+     "disabled": false,
+     "tip": "Collaborators"
+    },
+    {
+     "id": "title.account",
+     "label": "M",
+     "status": null,
+     "disabled": false,
+     "tip": "Magnesium 788 (you)"
+    },
+    {
+     "id": "title.assist",
+     "label": "Assist",
+     "status": null,
+     "disabled": false,
+     "tip": "Assist"
+    },
+    {
+     "id": "title.comments",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Show all comments"
+    },
+    {
+     "id": "title.slideshow",
+     "label": "Slideshow",
+     "status": null,
+     "disabled": false,
+     "tip": "Slideshow"
+    },
+    {
+     "id": "title.share",
+     "label": "Share",
+     "status": null,
+     "disabled": false,
+     "tip": "Share"
+    },
+    {
+     "id": "slide.applyLayout",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "New slide with layout"
+    },
+    {
+     "id": "insert.image",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Image"
+    },
+    {
+     "id": "insert.shape",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Shape"
+    },
+    {
+     "id": "insert.line",
+     "label": "",
+     "status": null,
+     "disabled": false,
+     "tip": "Line"
+    },
+    {
+     "id": "present.options.notes",
+     "label": "Open speaker notesS",
+     "status": "now",
+     "disabled": false,
+     "tip": "Open speaker notes"
+    },
+    {
+     "id": "present.options.laser",
+     "label": "Turn on the laser pointerL",
+     "status": "now",
+     "disabled": false,
+     "tip": "Turn on the laser pointer"
+    },
+    {
+     "id": "present.options.fullScreen",
+     "label": "Exit full screen⇧⌘F",
+     "status": "now",
+     "disabled": false,
+     "tip": "Exit full screen"
+    },
+    {
+     "id": "present.options.playShaders",
+     "label": "Play shaders",
+     "status": "now",
+     "disabled": false,
+     "tip": "Play shaders"
+    },
+    {
+     "id": "present.options.more",
+     "label": "More",
+     "status": "now",
+     "disabled": false,
+     "tip": "More"
+    },
+    {
+     "id": "present.options.exit",
+     "label": "ExitEsc",
+     "status": "now",
+     "disabled": false,
+     "tip": "Exit"
+    }
+   ]
+  },
+  {
+   "step": "present-bar",
+   "at": "2026-10-02T01:45:21.414Z",
+   "controls": [
+    {
+     "id": "present.split",
+     "label": "Slideshow",
+     "disabled": false
+    },
+    {
+     "id": "present.open",
+     "label": "Slideshow",
+     "disabled": false
+    },
+    {
+     "id": "present.arrow",
+     "label": "Presentation options",
+     "disabled": false
+    },
+    {
+     "id": "present.show",
+     "label": "1 of 85●⋯",
+     "disabled": false
+    },
+    {
+     "id": "present.toolbar",
+     "label": "Slideshow controls",
+     "disabled": false
+    },
+    {
+     "id": "present.previous",
+     "label": "Previous slide",
+     "disabled": false
+    },
+    {
+     "id": "present.counter",
+     "label": "1 of 85",
+     "disabled": false
+    },
+    {
+     "id": "present.next",
+     "label": "Next slide",
+     "disabled": false
+    },
+    {
+     "id": "present.laser",
+     "label": "Turn on the laser pointer",
+     "disabled": false
+    },
+    {
+     "id": "present.fullScreen",
+     "label": "Exit full screen",
+     "disabled": false
+    },
+    {
+     "id": "present.exit",
+     "label": "Exit",
+     "disabled": false
+    },
+    {
+     "id": "present.options",
+     "label": "Options",
+     "disabled": false
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,566 @@
+{
+  "record": {
+    "writtenAt": "2026-10-02T02:54:05.075Z",
+    "uptimeAtStart": [
+      27.01171875,
+      36.548828125,
+      42.177734375
+    ],
+    "monogram": {
+      "source": "/Users/kevinliu/repos/Prototemplate/public/marks/bar-monogram.svg",
+      "sha256": "5257b4d87d23b91b81cd8bda56d8f23250114fc1c624dd43ae94b6b53cc1f59f",
+      "viewBox": "-109.1 36 499.6 128",
+      "quads": 13,
+      "box": {
+        "x0": -105.1,
+        "x1": 386.5,
+        "y0": 40,
+        "y1": 160
+      }
+    },
+    "word": {
+      "source": "/Users/kevinliu/repos/Turboslide-next/packages/theme/brand/wordmark-outlines.svg",
+      "box": {
+        "x0": 48.2,
+        "x1": 8896.2,
+        "y0": -1496.9,
+        "y1": 24.5
+      },
+      "cap": 1490,
+      "upem": 2048
+    },
+    "lockup": {
+      "cap": 120,
+      "gap": 60,
+      "scale": 0.08053691275167785,
+      "wordX": 442.61812080536913,
+      "viewBox": [
+        -109.1,
+        36,
+        1272.2,
+        128
+      ]
+    },
+    "pages": [
+      {
+        "out": "shots/home-1440-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/home-1440-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/home-390-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/home-390-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/decks-1440-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/decks-1440-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/decks-390-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/decks-390-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/editor-1440-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/editor-1440-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/editor-390-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/editor-390-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/signin-1440-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/signin-1440-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 1440,
+        "innerWidth": 1440,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/signin-390-light.png",
+        "theme": "light",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      },
+      {
+        "out": "shots/signin-390-dark.png",
+        "theme": "dark",
+        "inter500": true,
+        "inter400": true,
+        "fontsLoaded": [
+          "Inter"
+        ],
+        "scrollWidth": 390,
+        "innerWidth": 390,
+        "overflow": [],
+        "imagesBroken": []
+      }
+    ],
+    "uptimeAtEnd": [
+      29.1728515625,
+      36.83837890625,
+      42.24658203125
+    ]
+  },
+  "log": [
+    {
+      "at": "2026-10-02T02:54:05.828Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/home-1440-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:06.164Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/home-1440-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:06.397Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/home-390-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:06.798Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/home-390-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:07.097Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/decks-1440-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:07.376Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/decks-1440-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:07.599Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/decks-390-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:07.982Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/decks-390-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:08.238Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/editor-1440-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:08.542Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/editor-1440-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:08.769Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/editor-390-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:08.944Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/editor-390-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:09.187Z",
+      "load": [
+        "27.01",
+        "36.55",
+        "42.18"
+      ],
+      "shot": "shots/signin-1440-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:09.483Z",
+      "load": [
+        "29.17",
+        "36.84",
+        "42.25"
+      ],
+      "shot": "shots/signin-1440-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 1440,
+      "innerWidth": 1440,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:09.685Z",
+      "load": [
+        "29.17",
+        "36.84",
+        "42.25"
+      ],
+      "shot": "shots/signin-390-light.png",
+      "theme": "light",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    },
+    {
+      "at": "2026-10-02T02:54:09.911Z",
+      "load": [
+        "29.17",
+        "36.84",
+        "42.25"
+      ],
+      "shot": "shots/signin-390-dark.png",
+      "theme": "dark",
+      "inter500": true,
+      "inter400": true,
+      "fontsLoaded": [
+        "Inter"
+      ],
+      "scrollWidth": 390,
+      "innerWidth": 390,
+      "overflow": [],
+      "imagesBroken": []
+    }
+  ]
+}

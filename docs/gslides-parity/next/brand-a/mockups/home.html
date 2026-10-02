@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Turboslide</title>
+    <script>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+    <link rel="stylesheet" href="brand-a.css" />
+    <style>
+      .nav .col {
+        height: calc(var(--a-nav-h) - 1px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+      }
+      .nav-r {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-r .link {
+        font-size: 13px;
+        color: var(--pt-ink-2);
+        padding: 0 8px;
+      }
+      .nav-menu {
+        display: none;
+      }
+
+      .hero .col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: 560px;
+      }
+      .hero-text {
+        padding: 72px 48px 48px;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero h1 {
+        font-size: 3.5rem;
+        line-height: 1.04;
+        letter-spacing: -0.038em;
+        max-width: 460px;
+      }
+      .lead {
+        margin-top: 24px;
+        font-size: 17px;
+        line-height: 1.55;
+        color: var(--pt-ink-2);
+        max-width: 420px;
+      }
+      .ctas {
+        margin-top: 32px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .mood {
+        position: relative;
+        overflow: hidden;
+        border-left: 1px solid var(--pt-hair);
+      }
+      .mood .cells {
+        left: -160px;
+        top: -150px;
+      }
+      .mood figcaption {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 340px;
+        padding: 18px 20px 16px;
+        background: var(--pt-paper);
+      }
+      .mood figcaption b {
+        display: block;
+        font: 500 18px/1.25 var(--pt-display);
+        letter-spacing: -0.01em;
+      }
+      .mood figcaption p {
+        margin-top: 6px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--pt-ink);
+      }
+      .mood figcaption .credit {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.45;
+        letter-spacing: 0.01em;
+        color: var(--pt-titanium);
+      }
+
+      .facts .col {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .fact {
+        padding: 24px 32px 28px;
+      }
+      .fact + .fact {
+        border-left: 1px solid var(--pt-hair);
+      }
+      .fact b {
+        display: block;
+        font: 500 40px/1 var(--pt-display);
+        letter-spacing: -0.025em;
+        font-variant-numeric: tabular-nums;
+      }
+      .fact p {
+        margin-top: 10px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--pt-ink-2);
+        max-width: 300px;
+      }
+      .next .col {
+        padding: 48px 48px 64px;
+      }
+      .next h2 {
+        font-size: 2.25rem;
+        line-height: 1.18;
+        letter-spacing: -0.025em;
+      }
+
+      @media (max-width: 1023px) {
+        .nav .col {
+          padding: 0 var(--a-gutter);
+        }
+        .nav .lockup {
+          font-size: 20px;
+        }
+        .nav-r .link,
+        .nav-r .theme,
+        .nav-r .signin {
+          display: none;
+        }
+        .nav-menu {
+          display: inline-flex;
+        }
+        .hero .col {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+        .mood {
+          order: -1;
+          height: 268px;
+          border-left: 0;
+          border-bottom: 1px solid var(--pt-hair);
+        }
+        .mood .cells {
+          left: -20px;
+          top: -68px;
+        }
+        .mood figcaption {
+          left: 0;
+          width: auto;
+          padding: 6px var(--a-gutter) 7px;
+        }
+        .mood figcaption b,
+        .mood figcaption p {
+          display: none;
+        }
+        .mood figcaption .credit {
+          margin-top: 0;
+        }
+        .hero-text {
+          padding: 28px var(--a-gutter) 32px;
+        }
+        .hero h1 {
+          font-size: 2.5rem;
+          line-height: 1.06;
+        }
+        .lead {
+          margin-top: 16px;
+          font-size: 16px;
+        }
+        .ctas {
+          margin-top: 24px;
+        }
+        .facts .col {
+          grid-template-columns: 1fr;
+        }
+        .fact {
+          padding: 20px var(--a-gutter) 22px;
+        }
+        .fact + .fact {
+          border-left: 0;
+          border-top: 1px solid var(--pt-hair);
+        }
+        .fact b {
+          font-size: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="gt-bar" viewBox="-109.1 36 499.6 128"><path d="M-8.5 40L21.5 40L9.6 96L-20.4 96ZM-22.1 104L7.9 104L-4 160L-34 160ZM-8.5 40L181.5 40L175.1 70L-14.9 70ZM-27.6 130L162.4 130L156 160L-34 160ZM137.9 104L167.9 104L156 160L126 160ZM77.9 104L167.9 104L162.4 130L72.4 130ZM-28.5 40L-6.5 40L-12.9 70L-34.9 70ZM-97.4 82L-15.4 82L-18.4 96L-100.4 96ZM-102.1 104L-20.1 104L-23.1 118L-105.1 118ZM-77.6 130L-25.6 130L-32 160L-84 160ZM216.5 40L386.5 40L380.1 70L210.1 70ZM274.5 40L308.5 40L296.6 96L262.6 96ZM260.9 104L294.9 104L283 160L249 160Z"/></symbol></svg>
+    <header class="band nav">
+      <div class="col">
+        <a class="lockup" href="/home" aria-label="Turboslide home">
+          <svg class="mono" viewBox="0 0 499.6 128" aria-hidden="true"><use href="#gt-bar" /></svg>
+          <span>Turboslide</span>
+        </a>
+        <nav class="nav-r">
+          <a class="link" href="#">Documentation</a>
+          <button class="btn ghost icon theme" aria-label="Dark appearance">
+            <i class="ic i-moon only-light"></i><i class="ic i-sun only-dark"></i>
+          </button>
+          <a class="btn signin" href="#">Sign In</a>
+          <button class="btn ghost icon nav-menu" aria-label="Menu"><i class="ic i-bars-3"></i></button>
+          <a class="btn solid" href="/new">New Presentation</a>
+        </nav>
+      </div>
+      <i class="x l"></i><i class="x r"></i>
+    </header>
+
+    <section class="band hero">
+      <div class="col">
+        <div class="hero-text">
+          <h1>Build the pitch, present it and send the link</h1>
+          <p class="lead">
+            Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No
+            account is needed.
+          </p>
+          <div class="ctas">
+            <a class="btn solid lg" href="/new">New Presentation</a>
+            <a class="btn lg" href="/deck/gt-brand">Open the Example Deck</a>
+          </div>
+        </div>
+        <figure class="mood" data-clip>
+          <img class="cells half tw-light" src="assets/mood-tablet-light.jpg" alt="A Sumerian clay tablet with an account of malt and barley pressed into it, as a two tone dither" />
+          <img class="cells half tw-dark" src="assets/mood-tablet.jpg" alt="" aria-hidden="true" />
+          <figcaption>
+            <b>A proto-cuneiform tablet</b>
+            <p>An account of malt and barley groats pressed into clay in Sumer about 3100 BC, among the oldest writing that survives.</p>
+            <span class="credit">Photograph: The Metropolitan Museum of Art, Open Access, public domain</span>
+          </figcaption>
+        </figure>
+      </div>
+      <i class="x l"></i><i class="x r"></i>
+    </section>
+
+    <section class="band facts">
+      <div class="col">
+        <div class="fact">
+          <b>9 menus</b>
+          <p>File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's order.</p>
+        </div>
+        <div class="fact">
+          <b>193 actions</b>
+          <p>Every editor action is a command. Agents run the same actions over the CLI, MCP and HTTP.</p>
+        </div>
+        <div class="fact">
+          <b>0.003%</b>
+          <p>The PowerPoint export of the example deck differs from the screen on 0.003 percent of the pixels of its worst page.</p>
+        </div>
+      </div>
+      <i class="x l"></i><i class="x r"></i>
+    </section>
+
+    <div class="band">
+      <div class="col hatch"></div>
+      <i class="x l"></i><i class="x r"></i>
+    </div>
+
+    <section class="band next">
+      <div class="col">
+        <h2>Everything on a slide moves</h2>
+      </div>
+    </section>
+  </body>
+</html>

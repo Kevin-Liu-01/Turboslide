@@ -1,0 +1,30 @@
+{"at":"2026-10-02T01:51:22.288Z","shot":"dialog-shortcuts-1440-light.png"}
+{"at":"2026-10-02T01:51:24.873Z","shot":"dialog-name-1440-light.png"}
+{"at":"2026-10-02T01:51:27.446Z","shot":"dialog-avatar-1440-light.png"}
+{"at":"2026-10-02T01:51:28.992Z","shot":"menu-context-1440-light.png"}
+{"at":"2026-10-02T01:51:30.106Z","snackText":"All changes are saved automatically"}
+{"at":"2026-10-02T01:51:30.133Z","shot":"snackbar-1440-light.png"}
+{"at":"2026-10-02T01:51:30.134Z","path":"/new"}
+{"at":"2026-10-02T01:51:32.129Z","overflow390":"light","scrollWidth":390,"clientWidth":390,"row":{"scrollWidth":491,"clientWidth":390},"name":18,"share":479}
+{"at":"2026-10-02T01:51:33.362Z","shot":"dialog-shortcuts-390-light.png"}
+{"at":"2026-10-02T01:51:35.918Z","shot":"dialog-name-390-light.png"}
+{"at":"2026-10-02T01:51:38.484Z","shot":"dialog-avatar-390-light.png"}
+{"at":"2026-10-02T01:51:47.191Z","step":"context","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:51:47.600Z","snackText":"All changes are saved automatically"}
+{"at":"2026-10-02T01:51:47.612Z","shot":"snackbar-390-light.png"}
+{"at":"2026-10-02T01:51:47.613Z","path":"/new"}
+{"at":"2026-10-02T01:51:50.975Z","shot":"dialog-shortcuts-1440-dark.png"}
+{"at":"2026-10-02T01:51:53.547Z","shot":"dialog-name-1440-dark.png"}
+{"at":"2026-10-02T01:51:56.117Z","shot":"dialog-avatar-1440-dark.png"}
+{"at":"2026-10-02T01:51:57.776Z","shot":"menu-context-1440-dark.png"}
+{"at":"2026-10-02T01:51:58.892Z","snackText":"All changes are saved automatically"}
+{"at":"2026-10-02T01:51:58.911Z","shot":"snackbar-1440-dark.png"}
+{"at":"2026-10-02T01:51:58.912Z","path":"/new"}
+{"at":"2026-10-02T01:52:01.029Z","overflow390":"dark","scrollWidth":390,"clientWidth":390,"row":{"scrollWidth":491,"clientWidth":390},"name":18,"share":479}
+{"at":"2026-10-02T01:52:02.261Z","shot":"dialog-shortcuts-390-dark.png"}
+{"at":"2026-10-02T01:52:04.818Z","shot":"dialog-name-390-dark.png"}
+{"at":"2026-10-02T01:52:07.380Z","shot":"dialog-avatar-390-dark.png"}
+{"at":"2026-10-02T01:52:16.087Z","step":"context","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-02T01:52:16.498Z","snackText":"All changes are saved automatically"}
+{"at":"2026-10-02T01:52:16.521Z","shot":"snackbar-390-dark.png"}
+{"at":"2026-10-02T01:52:16.522Z","path":"/new"}

@@ -28,7 +28,7 @@ describe('RefusedPage', () => {
   it('draws the heading, the sentence, Reload and the caller’s action', () => {
     const html = render();
     expect(html).toContain('data-control="refused"');
-    expect(html).toContain(`<h1 class="ts-empty-title">${REFUSED_PAGE.editorStopped}</h1>`);
+    expect(html).toContain(`<h1 class="ts-page-title">${REFUSED_PAGE.editorStopped}</h1>`);
     expect(html).toContain(REFUSAL_WORDS.storeBusy);
     expect(html).toMatch(/<button[^>]*data-control="refused\.reload"[^>]*>Reload<\/button>/);
     expect(html).toContain('class="pt-ib is-solid"');
@@ -37,9 +37,12 @@ describe('RefusedPage', () => {
 
   it('is the Not found page’s structure inside the document shell', () => {
     const html = render();
-    expect(html).toMatch(/^<main class="ts-notfound ts-refused"/);
-    expect(html).toContain('data-figure="notfound"');
-    expect(html).toContain('class="ts-notfound-actions"');
+    /* the page frame of Round 1 (docs/NEXT.md 4.1.3 item 11): the rails, the bar with the lockup */
+    expect(html).toMatch(/^<main class="ts-page-frame ts-notfound ts-refused"/);
+    expect(html).toContain('class="ts-rails"');
+    expect(html).toContain('ts-brand-lockup');
+    expect(html).not.toContain('data-figure="notfound"');
+    expect(html).toContain('class="ts-page-actions ts-notfound-actions"');
   });
 
   it('never carries the router’s words', () => {

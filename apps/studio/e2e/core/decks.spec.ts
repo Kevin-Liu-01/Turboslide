@@ -1106,12 +1106,30 @@ test(title('decks.nav.back-forward'), async () => {
   expect(seen.length).toBe(6);
 });
 
+/** Whether this deployment offers an anonymous visitor a sign in method: the /decks bar says what
+    its loader read (Round 1, docs/NEXT.md 4.1.3 items 10 and 11). */
+async function signInOffered(p: Page = page): Promise<boolean> {
+  await p.goto('/decks');
+  await p.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  return (await p.locator('.ts-appbar-end').getAttribute('data-sign-in')) === 'offered';
+}
+
 test(title('decks.access.unknown-edit'), async () => {
   const res = await page.goto('/edit/no-such-deck-core-spec');
   expect(res?.status()).toBe(404);
   await expect(ctl(page, 'access.page')).toBeVisible();
   await expect(ctl(page, 'access.sentence')).toContainText(/not available to you|does not exist/);
-  await expect(ctl(page, 'access.signin.decks')).toBeVisible();
+  /* Round 1 (docs/NEXT.md 4.1.3 item 11): the sign in link where a method exists, none without */
+  const offered = await (async () => {
+    const other = await context.newPage();
+    try {
+      return await signInOffered(other);
+    } finally {
+      await other.close();
+    }
+  })();
+  if (offered) await expect(ctl(page, 'access.signin.decks')).toBeVisible();
+  else await expect(ctl(page, 'access.signin.decks')).toHaveCount(0);
 });
 
 test(title('decks.access.paint'), async () => {
@@ -1184,6 +1202,14 @@ test(title('decks.access.paint'), async () => {
 });
 
 test(title('decks.access.sign-in-link'), async () => {
+  /* Round 1 (docs/NEXT.md 4.1.3 item 11): the sentence exists only where a method does */
+  if (!(await signInOffered())) {
+    await page.goto('/edit/no-such-deck-core-spec');
+    await ctl(page, 'access.page').waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(1500);
+    await expect(ctl(page, 'access.signin.decks')).toHaveCount(0);
+    return;
+  }
   await page.goto('/edit/no-such-deck-core-spec');
   await ctl(page, 'access.signin.decks').click();
   await page.waitForURL(/\/decks/, { timeout: 20_000 });
@@ -1591,10 +1617,11 @@ test(title('decks.access.stranger-links'), async ({ browser }) => {
       facts.decks !== null && facts.newLink !== null,
       'Your presentations and New presentation are drawn',
     ).toBe(true);
-    expect(facts.linksText, 'the links read Your presentations and New presentation').toMatch(
-      /Your presentations/,
+    /* Title Case on every button since Round 1 (docs/NEXT.md 4.1.2 "Buttons") */
+    expect(facts.linksText, 'the links read Your Presentations and New Presentation').toMatch(
+      /Your Presentations/,
     );
-    expect(facts.linksText).toMatch(/New presentation/);
+    expect(facts.linksText).toMatch(/New Presentation/);
     if (facts.form !== null)
       expect(facts.decks!, 'the links lead the form').toBeLessThan(facts.form);
     if (mode === 'shadow')
@@ -1618,9 +1645,10 @@ test(title('decks.notfound.sentence-case'), async () => {
     }),
   );
   test.info().annotations.push({ type: 'notfound', description: JSON.stringify(facts) });
+  /* Title Case on every button since Round 1 (docs/NEXT.md 4.1.2 "Buttons") */
   expect(facts.map((f) => f.text)).toEqual([
-    'New presentation',
-    'Your presentations',
+    'New Presentation',
+    'Your Presentations',
     'About Turboslide',
   ]);
   for (const f of facts) expect(f.h, `${f.c} is 40 px`).toBe(40);

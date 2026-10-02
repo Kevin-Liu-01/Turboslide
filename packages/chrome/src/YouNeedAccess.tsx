@@ -19,6 +19,11 @@ import './YouNeedAccess.css';
  * to." with the sign in form in a fixed height region. The answer is always "If this presentation
  * exists, its owner has been asked." with HTTP 200. The route mounts it; with `onRequest` the form
  * posts through the window, else it submits to `action`.
+ *
+ * Round 1 (docs/NEXT.md 4.1.3 item 11): the route draws the page in the page frame with the lockup
+ * (apps/studio PageFrame.tsx), every button label is Title Case (DECK-GRAMMAR 22), every sentence
+ * ends with a period, and the sign in region holds the route's sentence only when the deployment
+ * offers a sign in method (the route decides; `signIn` is then absent and nothing is drawn).
  */
 export type YouNeedAccessProps = {
   /** the requester has no signed in session: the email field is drawn */
@@ -39,11 +44,23 @@ export type YouNeedAccessProps = {
   linkComponent?: LinkComponent;
 };
 
-/** The two links a stranger can use (3.3), in order. */
+/** The two links a stranger can use (3.3), in order, labelled in Title Case (DECK-GRAMMAR 22). */
 export const ACCESS_LINKS = [
-  { to: '/decks', label: 'Your presentations', doc: 'Every presentation on this Turboslide' },
-  { to: '/new', label: 'New presentation', doc: 'Starts a blank presentation' },
+  {
+    to: '/decks',
+    label: 'Your Presentations',
+    doc: 'Your presentations and the ones shared with you',
+  },
+  { to: '/new', label: 'New Presentation', doc: 'Starts a blank presentation' },
 ] as const;
+
+/** The page's own words since Round 1: Title Case on the button, full sentences elsewhere. */
+export const ACCESS_WORDS = {
+  formHead: 'Ask for access',
+  requestAccess: 'Request Access',
+  cookies:
+    'A share link needs cookies to open. Allow them for this site, or sign in with the address the link was shared with.',
+} as const;
 
 export function YouNeedAccess({
   anonymous,
@@ -102,11 +119,7 @@ export function YouNeedAccess({
       <nav className="ts-access-links" aria-label="Where to go" data-control="access.links">
         {ACCESS_LINKS.map((entry, index) => link(entry, index === 0))}
       </nav>
-      {cookiesBlocked ? (
-        <p className="ts-access-cookies">
-          A share link needs cookies to open; allow them for this site, or sign in below.
-        </p>
-      ) : null}
+      {cookiesBlocked ? <p className="ts-access-cookies">{ACCESS_WORDS.cookies}</p> : null}
       {requestForm ? (
         <form
           className="ts-access-form"
@@ -115,7 +128,7 @@ export function YouNeedAccess({
           onSubmit={submit}
           data-control="access.form"
         >
-          <p className="ts-access-form-head">Ask for access</p>
+          <p className="ts-access-form-head">{ACCESS_WORDS.formHead}</p>
           <label className="ts-access-field">
             <span>{ACCESS_PAGE.role}</span>
             <select
@@ -163,9 +176,9 @@ export function YouNeedAccess({
               className="pt-ib"
               disabled={busy || asked}
               data-control="access.request"
-              {...tipProps({ name: ACCESS_PAGE.requestAccess, doc: 'Asks the owner' })}
+              {...tipProps({ name: ACCESS_WORDS.requestAccess, doc: 'Asks the owner' })}
             >
-              <span className="pt-lb">{ACCESS_PAGE.requestAccess}</span>
+              <span className="pt-lb">{ACCESS_WORDS.requestAccess}</span>
             </button>
             <p className="ts-access-answer" role="status" data-control="access.answer">
               {asked ? REFUSALS.requested : ''}
@@ -173,9 +186,11 @@ export function YouNeedAccess({
           </div>
         </form>
       ) : null}
-      <section className="ts-access-signin" aria-label="Sign in" data-control="access.signIn">
-        <div className="ts-access-signin-form">{signIn}</div>
-      </section>
+      {signIn === undefined || signIn === null ? null : (
+        <section className="ts-access-signin" aria-label="Sign in" data-control="access.signIn">
+          <div className="ts-access-signin-form">{signIn}</div>
+        </section>
+      )}
     </main>
   );
 }

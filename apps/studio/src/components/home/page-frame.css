@@ -1,0 +1,89 @@
+/* The frame of the plain pages (PageFrame.tsx): Not found, the refused page and You need access on
+   the page grammar (grammar.css), the lockup in a 58 px bar, the content in the column at the
+   ladder's sizes (slide 29): the page's heading at --ts-h2 in weight 500, its sentences at
+   --ts-body, its buttons the shell's 40 px .pt-ib with Title Case labels (DECK-GRAMMAR 22). */
+.ts-page-frame {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0 0 96px;
+  max-width: none;
+  color: var(--pt-ink);
+  background: var(--pt-paper);
+  font: var(--ts-body) / 1.6 var(--pt-text);
+}
+
+.ts-page-frame-row {
+  display: flex;
+  align-items: center;
+  min-height: var(--ts-nav-h, 58px);
+}
+
+.ts-page-frame-body {
+  padding-top: 72px;
+}
+
+/* the heading and the sentences of the page */
+.ts-page-frame-body .ts-page-title {
+  margin: 0;
+  max-width: 640px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: var(--ts-h2);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.ts-page-frame-body .ts-page-sentence {
+  margin: 16px 0 0;
+  max-width: 560px;
+  font-size: var(--ts-lead);
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+}
+
+.ts-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.ts-page-actions .pt-ib {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  border-radius: 0;
+  text-decoration: none;
+}
+
+.ts-page-actions .pt-ib:not(.is-solid) {
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+/* the page's picture under its words: the figure in its 1 px edge frame, its credit below */
+.ts-page-figure {
+  margin: 56px 0 0;
+}
+
+@media (max-width: 1023px) {
+  .ts-page-frame-body {
+    padding-top: 48px;
+  }
+}
+
+@media (max-width: 720px) {
+  .ts-page-actions {
+    flex-direction: column;
+  }
+
+  .ts-page-actions .pt-ib {
+    width: 100%;
+    justify-content: center;
+  }
+}

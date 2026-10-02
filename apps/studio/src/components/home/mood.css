@@ -1,0 +1,84 @@
+/* ---- a mood picture (MoodFigure.tsx): the twin at its own pixels, cropped by its frame, the
+   deck's plate under it (the picture's name, its credit in titanium) ---- */
+.ts-mood {
+  margin: 0;
+  min-width: 0;
+}
+
+.ts-mood-page {
+  margin-top: 56px;
+}
+
+.ts-mood-frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+}
+
+.ts-mood-page .ts-mood-frame {
+  height: 360px;
+}
+
+.ts-mood-empty {
+  margin-bottom: 24px;
+}
+
+.ts-mood-empty .ts-mood-frame {
+  height: 240px;
+}
+
+/* the twin is never scaled: its 2 px cells stay whole and the frame crops it from its left edge
+   around its middle row, where the deck's mood pictures keep their subject (the Blue Marble's
+   planet stands in the left half of its 1600 by 900 twin) */
+.ts-mood-img {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1600px;
+  max-width: none;
+  height: 900px;
+  transform: translateY(-50%);
+  image-rendering: pixelated;
+}
+
+.ts-mood .ts-mood-only-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-mood .ts-mood-only-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-mood .ts-mood-only-dark {
+  display: block;
+}
+
+.ts-mood-plate {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.ts-mood-title {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: var(--ts-label, 13px);
+  letter-spacing: -0.005em;
+  color: var(--pt-ink);
+}
+
+.ts-mood-credit {
+  font-size: var(--ts-label, 13px);
+  line-height: 1.4;
+  color: var(--pt-titanium);
+}
+
+@media (max-width: 1023px) {
+  .ts-mood-page .ts-mood-frame,
+  .ts-mood-empty .ts-mood-frame {
+    height: 220px;
+  }
+}

@@ -26,6 +26,7 @@ import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 
+import { MoodFigure } from '../components/home/MoodFigure';
 import { SignInButton, offersSignIn, readSignInFacts } from '../components/home/sign-in';
 import { useMountEffect } from '../components/useMountEffect';
 import {
@@ -1409,11 +1410,13 @@ function DeckList({
       {visible.length === 0 ? (
         <div className="ts-home-empty-figure" data-control="home.empty">
           {shown.length === 0 ? (
-            <EmptyFigure
-              figure="figure"
-              title={HOME_EMPTY.title}
-              sentence={HOME_EMPTY.sentence}
-              action={
+            /* the empty list carries one of the deck's mood pictures with its credit (docs/NEXT.md
+               4.1.3 item 11, question 5), the empty state's structure of EmptyFigure around it */
+            <section className="ts-empty ts-home-empty-mood" data-control="empty">
+              <MoodFigure size="empty" control="home.empty.mood" />
+              <h2 className="ts-empty-title">{HOME_EMPTY.title}</h2>
+              <p className="ts-empty-sentence">{HOME_EMPTY.sentence}</p>
+              <div className="ts-empty-action">
                 <Link
                   to="/new"
                   className="pt-ib is-solid"
@@ -1422,8 +1425,8 @@ function DeckList({
                 >
                   {HOME_EMPTY.action}
                 </Link>
-              }
-            />
+              </div>
+            </section>
           ) : (
             <EmptyFigure
               figure="figure"

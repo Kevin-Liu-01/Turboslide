@@ -323,7 +323,7 @@
     {
       "id": "decks.access.unknown-edit",
       "feature": "decks",
-      "interaction": "/edit/<unknown id> answers 404 with the You need access page and its sign in link",
+      "interaction": "/edit/<unknown id> answers 404 with the You need access page, and its sign in link where the deployment offers a method",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 56"
@@ -340,7 +340,7 @@
     {
       "id": "decks.access.sign-in-link",
       "feature": "decks",
-      "interaction": "Sign in from your presentations opens /decks",
+      "interaction": "Sign in from your presentations opens /decks where the deployment offers a method; without one the page draws no sign in sentence",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 58"
@@ -4945,7 +4945,7 @@
     {
       "id": "decks.access.stranger-links",
       "feature": "decks",
-      "interaction": "/deck/<unknown id> leads with Your presentations and New presentation and shows no request form under shadow authorization",
+      "interaction": "/deck/<unknown id> leads with Your Presentations and New Presentation and shows no request form under shadow authorization",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-interface 33",
@@ -4954,11 +4954,12 @@
     {
       "id": "decks.notfound.sentence-case",
       "feature": "decks",
-      "interaction": "Not found's three buttons read in sentence case at 40 px",
+      "interaction": "Not found's three buttons read in Title Case at 40 px",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-interface 37",
-      "severity": 1
+      "severity": 1,
+      "note": "Round 1 (docs/NEXT.md 4.1.2 \"Buttons\", 4.1.3 item 11, B2c): Title Case on every button replaces the clutter audit's sentence case; the id keeps its earlier name"
     },
     {
       "id": "templates.gallery.page",
@@ -9583,6 +9584,26 @@
       "severity": 1,
       "evidence": "audit-brand-surfaces 26 (cards as boxes)",
       "note": "docs/NEXT.md 4.1.3 item 10 and 4.1.5 (B2b): the list view is the default and draws the rows; the cards stay under Grid view. A deployment that offers no sign in method draws no Sign In, and the driver reads the bar's `data-sign-in` for it"
+    },
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "interaction": "Every button label on the editor, `/home`, `/decks`, Not found, You need access and the refused page is Title Case; computed radii are 0 except `--pt-radius` controls and Slideshow at 8 px with its label first",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 43",
+      "note": "docs/NEXT.md 4.1.3 item 11 and 4.1.5 (B2c): the driver is core/chrome-pages.ts; the editor is read on a `/new` draft, which writes nothing"
+    },
+    {
+      "id": "share.access.true-sentence",
+      "feature": "share",
+      "interaction": "You need access names a sign in method only when one exists, ends its sentences with periods and draws the lockup",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 45",
+      "note": "docs/NEXT.md 4.1.3 item 11 and 4.1.5 (B2c): the driver is core/share-round1.ts; it reads the page as the deployment answers and again with the sign in facts' server function refused"
     },
     {
       "id": "realtime.keystroke.within-300ms",

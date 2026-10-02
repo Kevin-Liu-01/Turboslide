@@ -20,6 +20,7 @@ import {
   title,
 } from './lib';
 import { chromeMenus } from './chrome-menus';
+import { chromePages } from './chrome-pages';
 
 // The chrome at two viewports, the spec rows (docs/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
 // plate-four-columns`, `share.dialog.more-row` and `chrome.toolbar.fold-any-width` with the driver
@@ -564,7 +565,11 @@ test(title('shaders.panel.section-groups'), async () => {
 /* lane B3a of Round 1 (docs/NEXT.md 4.1.3 items 20 to 22): its rows live in chrome-menus.ts */
 const MENU_ROWS = chromeMenus(() => wide);
 
+/* lane B2 of Round 1 (docs/NEXT.md 4.1.3 item 11): its row lives in chrome-pages.ts */
+const PAGE_ROWS = chromePages();
+
 coverage(import.meta.filename, [
+  ...PAGE_ROWS,
   ...MENU_ROWS,
   'slides.layout.plate-four-columns',
   'share.dialog.more-row',

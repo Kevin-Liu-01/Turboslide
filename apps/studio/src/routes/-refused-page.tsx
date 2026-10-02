@@ -3,10 +3,12 @@ import type { ReactNode } from 'react';
 import { Link, useMatch, useRouter } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 
-import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
+import type { LinkComponent } from '@turboslide/chrome/editor-shell';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
+import { PageFrame } from '../components/home/PageFrame';
 import { refusalSentence } from '../editor/refusal';
+import { RouterLinkSlot } from './-link-slot';
 
 /**
  * The product's error page (the focus round, cycle 3 fix round; VERIFICATION.md C3-F3). Before
@@ -24,6 +26,11 @@ import { refusalSentence } from '../editor/refusal';
  * stood has stopped. The sentence is `refusalSentence`'s (editor/refusal.ts), the product's words
  * for a store error. A dash prefixed file under routes/ is not a route (the convention of
  * -edit-search.ts).
+ *
+ * Round 1 (docs/NEXT.md 4.1.3 item 11): the page stands in the page frame (PageFrame.tsx: the
+ * 1104 px column, its rails and the 58 px bar with the lockup), its heading and sentence at the
+ * ladder's sizes, its two buttons Title Case (DECK-GRAMMAR 22); the dithered figure and its mark
+ * left, so the lockup is the page's one mark.
  */
 export const REFUSED_PAGE = {
   editorStopped: 'The editor stopped',
@@ -32,48 +39,49 @@ export const REFUSED_PAGE = {
   reload: 'Reload',
   reloadDoc: 'Reads the page again and draws it in place.',
   decks: 'Your Presentations',
-  decksDoc: 'Every presentation on this Turboslide.',
+  decksDoc: 'Your presentations and the ones shared with you.',
 } as const;
 
 /**
- * The page's fixed part: the figure, the heading, the sentence and the Reload button, with the
- * caller's other actions after it. It reads no router, so a test renders it alone.
+ * The page's fixed part: the frame with the lockup, the heading, the sentence and the Reload
+ * button, with the caller's other actions after it. It reads no router unless the caller hands it
+ * the router's link, so a test renders it alone.
  */
 export function RefusedPage({
   heading,
   sentence,
   onReload,
   children,
+  linkComponent,
 }: {
   heading: string;
   sentence: string;
   onReload: () => void;
   children?: ReactNode;
+  /** the router's link for the lockup; plain anchors without it (a test renders the page alone) */
+  linkComponent?: LinkComponent;
 }) {
   return (
-    <main className="ts-notfound ts-refused" data-control="refused">
-      <EmptyFigure
-        figure="notfound"
-        heading="h1"
-        mark={64}
-        title={heading}
-        sentence={sentence}
-        action={
-          <div className="ts-notfound-actions">
-            <button
-              type="button"
-              className="pt-ib is-solid"
-              data-control="refused.reload"
-              onClick={onReload}
-              {...tipProps({ name: REFUSED_PAGE.reload, doc: REFUSED_PAGE.reloadDoc })}
-            >
-              {REFUSED_PAGE.reload}
-            </button>
-            {children}
-          </div>
-        }
-      />
-    </main>
+    <PageFrame
+      className="ts-notfound ts-refused"
+      control="refused"
+      {...(linkComponent === undefined ? {} : { linkComponent })}
+    >
+      <h1 className="ts-page-title">{heading}</h1>
+      <p className="ts-page-sentence">{sentence}</p>
+      <div className="ts-page-actions ts-notfound-actions">
+        <button
+          type="button"
+          className="pt-ib is-solid"
+          data-control="refused.reload"
+          onClick={onReload}
+          {...tipProps({ name: REFUSED_PAGE.reload, doc: REFUSED_PAGE.reloadDoc })}
+        >
+          {REFUSED_PAGE.reload}
+        </button>
+        {children}
+      </div>
+    </PageFrame>
   );
 }
 
@@ -102,6 +110,7 @@ export function RouteRefused({
       heading={status === 'error' ? loaderHeading : renderHeading}
       sentence={refusalSentence(error)}
       onReload={onReload}
+      linkComponent={RouterLinkSlot}
     >
       <Link
         to="/decks"

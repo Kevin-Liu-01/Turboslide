@@ -35,6 +35,7 @@ import {
   typeNote,
   waitEditor,
 } from './lib';
+import { shareRound1 } from './share-round1';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
 // `collab.*`, `comments.reaches-second-browser` and `versions.restore` with the driver
@@ -3192,7 +3193,11 @@ test(title('accounts.no-dead-method'), async () => {
   expect(roadmap, 'no roadmap sentence about passkeys').toBe(0);
 });
 
+/* lane B2 of Round 1 (docs/NEXT.md 4.1.3 item 11): its row lives in share-round1.ts */
+const ACCESS_ROWS = shareRound1();
+
 coverage(import.meta.filename, [
+  ...ACCESS_ROWS,
   'share.dialog.open',
   'share.copy-view-link',
   'share.copy-edit-link',

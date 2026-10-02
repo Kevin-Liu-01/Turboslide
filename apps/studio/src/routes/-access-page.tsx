@@ -6,6 +6,8 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 // the integrator with the one line change B3 named)
 import { YouNeedAccess } from '@turboslide/chrome/YouNeedAccess';
 
+import { PageFrame } from '../components/home/PageFrame';
+import { offersSignIn, readSignInFacts } from '../components/home/sign-in';
 import { useMountEffect } from '../components/useMountEffect';
 import { RouterLinkSlot } from './-link-slot';
 
@@ -31,12 +33,26 @@ import './-access-page.css';
  * which it learns from the access route's `authorize` field after hydration (`GET
  * /api/access/<id>` names the mode whatever the deck's state); the server's HTML keeps the form,
  * so a browser without scripts still has a way to ask.
+ *
+ * Round 1 (docs/NEXT.md 4.1.3 item 11; audit-brand-surfaces rank 20): the page stands in the page
+ * frame with the lockup at its head, its sentences end with periods, and the sign in sentence is
+ * drawn only when the deployment offers a method to an anonymous visitor (`readSignInFacts`,
+ * read after hydration), so production before the sign in flip no longer tells a stranger to
+ * sign in where no method exists. The /decks bar carries Sign In since the same round, so the
+ * sentence's link leads where signing in happens.
  */
 export function AccessPage({ deckId }: { deckId: string }) {
   /* the deployment's mode: undefined until read, then whether the form has someone to reach */
   const [requestForm, setRequestForm] = useState<boolean | undefined>(undefined);
+  /* whether this visitor can sign in here: false until the deployment answers */
+  const [canSignIn, setCanSignIn] = useState(false);
   useMountEffect(() => {
     let live = true;
+    readSignInFacts()
+      .then((facts) => {
+        if (live) setCanSignIn(offersSignIn(facts) && !facts.signedIn);
+      })
+      .catch(() => undefined);
     fetch(`/api/access/${encodeURIComponent(deckId)}`, {
       credentials: 'same-origin',
       headers: { accept: 'application/json' },
@@ -68,30 +84,34 @@ export function AccessPage({ deckId }: { deckId: string }) {
     return response.json() as Promise<unknown>;
   };
   return (
-    <YouNeedAccess
-      anonymous
-      action={`/api/share/${encodeURIComponent(deckId)}/requestAccess`}
-      onRequest={onRequest}
-      requestForm={requestForm ?? true}
-      linkComponent={RouterLinkSlot}
-      signIn={
-        /* one sentence with the link in ink (docs/POLISH.md item 98; audit-pages item 35) */
-        <p className="ts-access-signin-line" data-control="access.signin.line">
-          If you were invited by email, sign in with that address from{' '}
-          <Link
-            to="/decks"
-            data-control="access.signin.decks"
-            style={{ color: 'var(--pt-ink)' }}
-            {...tipProps({
-              name: 'Your presentations',
-              doc: 'Sign in from the account chip on your presentations, then open the link again',
-            })}
-          >
-            your presentations
-          </Link>
-          , then open this address again
-        </p>
-      }
-    />
+    <PageFrame as="div" className="ts-access-frame" linkComponent={RouterLinkSlot}>
+      <YouNeedAccess
+        anonymous
+        action={`/api/share/${encodeURIComponent(deckId)}/requestAccess`}
+        onRequest={onRequest}
+        requestForm={requestForm ?? true}
+        linkComponent={RouterLinkSlot}
+        signIn={
+          canSignIn ? (
+            /* one sentence with the link in ink (docs/POLISH.md item 98; audit-pages item 35) */
+            <p className="ts-access-signin-line" data-control="access.signin.line">
+              If you were invited by email, sign in with that address from{' '}
+              <Link
+                to="/decks"
+                data-control="access.signin.decks"
+                style={{ color: 'var(--pt-ink)' }}
+                {...tipProps({
+                  name: 'Your presentations',
+                  doc: 'Sign In is at the end of the bar there; then open this address again',
+                })}
+              >
+                your presentations
+              </Link>
+              , then open this address again.
+            </p>
+          ) : undefined
+        }
+      />
+    </PageFrame>
   );
 }

@@ -6,9 +6,9 @@ import { registerStudioAutomation } from '@turboslide/agent/window/registry';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { usePtShell } from '@turboslide/chrome/shell-context';
+import { deckAppearance } from '@turboslide/schema/deck';
 import type { Author } from '@turboslide/schema/mutations';
 import { authorLabel } from '@turboslide/store/store';
-import { useTheme } from '@turboslide/viewer/theme';
 
 import { exitPresentFullscreen } from '../components/presentActions';
 import { useStudioSession } from '../components/useStudioSession';
@@ -100,7 +100,9 @@ export function ShellBridge({
 }) {
   const shell = usePtShell();
   const editorShell = useEditorShell();
-  const theme = useTheme();
+  /* the thumbnails draw the deck's own appearance, as the filmstrip's cards do (docs/NEXT.md 4.1.3
+     item 15), so the warm up renders that one */
+  const theme = deckAppearance(controller.getSnapshot().document.deck);
   controller.attachShell(shell);
   api.current = editorShell;
   /* the editor shell's snackbar with one action (docs/PRODUCT.md 6.1; build/b6.md R10): the

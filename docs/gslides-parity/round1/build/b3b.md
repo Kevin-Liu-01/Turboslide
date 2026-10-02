@@ -119,3 +119,23 @@ This push's readings: `chrome.selection.gt-blue` read the ring, the chip and the
 
 Unit tests: the chrome suite 921 passed (98 files), the viewer suite 515, the studio's components and editor 234; `brand.test.ts` 36 of 37, the one red being "counts the check steps" (b1.md request 8, red at HEAD since B5a#19).
 
+
+## Push 11: B3b#11, the stage's appearance (item 15)
+
+The trace. Four causes, one per surface:
+
+1. The editor's workspace. `tokens.css` gave `.ts-stagewrap[data-theme]` the sheet's token block, and `packages/render/src/block-css.ts` 19 paints every `.ts-sheet` root with the deck's `--paper`. The stage root is `.ts-stagewrap.ts-sheet`, so a light deck's workspace drew white in dark chrome.
+2. The filmstrip. `Filmstrip.tsx` drew its cards in `useTheme()`, the chrome's theme, so the same light slide drew black.
+3. The presenter view. `PresenterPage.tsx` rendered the console's slides in `useTheme()`.
+4. The `/deck` view. `DeckViewer.tsx` drew the stage, the show, the grid and the book in `useTheme(serverTheme)`, and the sidebar's cards read the chrome's theme too.
+
+The changes: `.ts-stagewrap` left the sheet appearance selectors of `tokens.css` (the overlay keeps them, so the ring, the seams and the guides keep the sheet's contrast); `packages/viewer/src/Stage.css` gives `.ts-stagewrap.ts-sheet` no ground of its own, so the chrome's `--pt-plate` of `.pt-stagewrap` shows; the filmstrip and the tree sidebar draw the edited deck's appearance; the presenter page draws `deckAppearance`; the `/deck` view draws the payload's appearance (the route's `?theme=`, else the deck's own, `server/decks.ts` `loadShaped`) and passes it to its sidebar through `ViewerShell`'s new `appearance` prop. The stage band's logo twin and the thumbnail warm up follow the slide's appearance (`EditorRoot.tsx`, `shell-bridge.tsx`). The `/deck` view's Theme button now turns the chrome alone.
+
+Files no lane owns, edited here: `apps/studio/src/components/DeckViewer.tsx`, `PresenterPage.tsx`, `apps/studio/src/editor/EditorRoot.tsx` (two lines), `shell-bridge.tsx`, `packages/chrome/src/ViewerShell.tsx`, `packages/viewer/src/Stage.css`.
+
+Row (entered in this push): `chrome.stage.deck-appearance` (broken, 3), driver `core/chrome.spec.ts`; the matrix total gains 1.
+
+Readings: in b3b-all-chrome (17:22Z, load 21.76 to 26.00) the row read the stage, the filmstrip, the presenter and the `/deck` view light in dark chrome and failed on the workspace, which still painted `rgb(255, 255, 255)`: the probe that followed found the paper on the stage root from `block-css.ts`, which is the fourth cause above, and `Stage.css` took the rule. In b3b-all-chrome2 (18:43:07Z to 18:49:51Z, load 16.68 to 54.98) it passed: the chrome dark, the stage `light`, the slide's paint `rgb(255, 255, 255)`, the workspace's paint `rgba(242, 242, 240, 0.08)` equal to the chrome's `--pt-plate`, the filmstrip's cards `light` and painting white; the presenter's frames `light` under dark chrome; the `/deck` view's stage and its sidebar's cards `light` under dark chrome.
+
+Unit tests: the viewer suite 515 passed, the studio's components and editor 234, the chrome suite 921.
+

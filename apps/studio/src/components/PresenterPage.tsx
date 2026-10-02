@@ -11,14 +11,14 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
-import { slideTitle } from '@turboslide/schema/deck';
+import { deckAppearance, slideTitle } from '@turboslide/schema/deck';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { PresenterConsole } from '@turboslide/viewer/present/PresenterConsole';
 import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
 import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
-import { installThemeBridge, readTheme, useTheme } from '@turboslide/viewer/theme';
+import { installThemeBridge, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import type { EditorDeck } from '../server/write';
@@ -111,7 +111,10 @@ export function PresenterPage({
   agent?: boolean;
 }) {
   const { deckId, document } = payload;
-  const theme = useTheme();
+  /* the slides draw the deck's own appearance, as the editor's stage does; the console's chrome
+     keeps the chrome's theme (docs/NEXT.md 4.1.3 item 15; audit-brand-surfaces rank 5: the
+     presenter drew a light deck on black in dark chrome) */
+  const theme: Theme = deckAppearance(document.deck);
   const platform = useMemo(() => detectPlatform(), []);
   const play = useMemo(() => presenterSlides(document, deckId, theme), [document, deckId, theme]);
   const [index, setIndex] = useState(0);

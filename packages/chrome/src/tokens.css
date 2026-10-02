@@ -15,12 +15,15 @@
    Imported once, from the studio's root route. Every other file under
    packages/chrome/src imports only its own sheet. */
 
-/* The stage wrapper and the overlay layer carry the sheet's own appearance as their data-theme
-   (docs/POLISH.md 2.5 item 49; the integrator's merge): the chrome that sits over the sheet (the
-   selection ring and chip, the table's seams and heads, the guides, the marquee, the readouts)
-   reads the sheet's tokens, so a dark presentation under a light chrome keeps its contrast. */
+/* The overlay layer carries the sheet's own appearance as its data-theme (docs/POLISH.md 2.5
+   item 49; the integrator's merge): the chrome that sits over the sheet (the selection ring and
+   chip, the table's seams and heads, the guides, the marquee, the readouts) reads the sheet's
+   tokens, so a dark presentation under a light chrome keeps its contrast. The stage wrapper left
+   these selectors in Round 1 of the next program (docs/NEXT.md 4.1.3 item 15; brand C rule 9): it
+   is the workspace around the sheet, which reads the chrome's tokens (its --pt-plate), so a light
+   deck in dark chrome sits on the dark workspace where it sat on white (audit-brand-surfaces
+   rank 5). The sheet keeps its deck's appearance through the theme's own .ts-sheet tokens. */
 :root,
-.ts-stagewrap[data-theme='light'],
 .ts-overlay[data-theme='light'] {
   --pt-paper: #ffffff;
   --pt-ink: #070707;
@@ -163,7 +166,6 @@
 /* Dark is a token remap. --pt-scrim, --pt-panel-ink and --pt-panel-text do
    not change. */
 :root[data-theme='dark'],
-.ts-stagewrap[data-theme='dark'],
 .ts-overlay[data-theme='dark'] {
   --pt-paper: #070707;
   --pt-ink: #f2f2f0;

@@ -3,6 +3,7 @@ import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { applyLayout, appliedLabel } from '@turboslide/schema/apply-layout';
 import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
+import { deckAppearance } from '@turboslide/schema/deck';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
@@ -435,7 +436,11 @@ export function Filmstrip({
   edit,
 }: Omit<SidebarProps, 'edit'> & { edit: SidebarEdit }) {
   const shell = usePtShell();
-  const theme = useTheme();
+  /* the cards draw the deck's own appearance, as the stage does (docs/NEXT.md 4.1.3 item 15;
+     audit-brand-surfaces rank 5: in dark chrome the stage drew a light deck white and the cards
+     drew it black, since they read the chrome's theme); the chrome's theme only without a deck */
+  const chromeTheme = useTheme();
+  const theme = edit.deck !== undefined ? deckAppearance(edit.deck) : chromeTheme;
   const { active, select, narrow, sidebarOpen, sidebarShown, present, setSidebar, ready } = shell;
   const hidden = !(sidebarShown ?? (sidebarOpen && !present));
   const overlay = narrow && !hidden;

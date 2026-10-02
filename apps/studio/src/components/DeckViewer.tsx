@@ -16,13 +16,7 @@ import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
 import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
 import { Stage } from '@turboslide/viewer/Stage';
-import {
-  applyTheme,
-  installThemeBridge,
-  postTheme,
-  readTheme,
-  useTheme,
-} from '@turboslide/viewer/theme';
+import { applyTheme, installThemeBridge, postTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { getDeckSlides } from '../server/decks';
@@ -209,6 +203,7 @@ export function DeckViewer({
         onSelect={embed ? (_id, n) => postSlide(n) : undefined}
         onModeChange={onModeChange}
         homeHref={embed ? undefined : '/decks'}
+        appearance={payload.theme}
         toolbarSlot={
           <>
             {deck.fallback ? (
@@ -225,7 +220,7 @@ export function DeckViewer({
           </>
         }
       >
-        <StageBridge deck={deck} serverTheme={theme ?? 'dark'} show={show} />
+        <StageBridge deck={deck} slideTheme={payload.theme} show={show} />
         <PresentOnLoad on={present} />
         <ViewerOwner deck={deck} attach={agent} show={show} />
       </ViewerShell>
@@ -257,16 +252,23 @@ function PresentOnLoad({ on }: { on: boolean }) {
  */
 function StageBridge({
   deck,
-  serverTheme,
+  slideTheme,
   show,
 }: {
   deck: ViewerDeck;
-  serverTheme: Theme;
+  /**
+   * The appearance the slides draw in on the stage, the show, the grid and the book: the one the
+   * payload rendered them in, the route's `?theme=` else the deck's own (server/decks.ts
+   * `loadShaped`). The chrome's Theme button no longer turns them (docs/NEXT.md 4.1.3 item 15;
+   * audit-brand-surfaces rank 5: in dark chrome a light deck drew black here and white in the
+   * editor).
+   */
+  slideTheme: Theme;
   show: { current: SlideshowState | null };
 }) {
   const shell = usePtShell();
   const { stageSize } = usePtStage();
-  const themeNow = useTheme(serverTheme);
+  const themeNow = slideTheme;
   const slide = deck.slides.find((entry) => entry.id === shell.active) ?? deck.slides[0];
   /* the show runs over the unskipped slides (gslides-parity SPEC 9.2); the audience payload
      already leaves skipped slides out, and a flag the loader keeps is read as well */

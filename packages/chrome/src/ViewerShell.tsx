@@ -132,6 +132,11 @@ export type ViewerShellProps = {
   /** a node after the sidebar title: the fixture chip */
   headAside?: ReactNode;
   /**
+   * The deck's own appearance (docs/NEXT.md 4.1.3 item 15): the sidebar's cards draw it whatever
+   * the chrome's theme, as the stage does; the chrome's theme when absent
+   */
+  appearance?: 'light' | 'dark';
+  /**
    * The editor's additions (SPEC 6.1, M3). `onSearch` opens the palette from the toolbar's
    * Search pill and Cmd K (the shell's `search` flag follows it); `searchOpen` draws the pill's
    * ink frame; `toolbarStatus` is the status chip left of Search; `panel` is the inspector,
@@ -205,6 +210,7 @@ export function ViewerShell({
   modeLabels,
   homeHref,
   headAside,
+  appearance,
   onSearch,
   searchOpen = false,
   toolbarStatus,
@@ -665,6 +671,7 @@ export function ViewerShell({
       homeHref={homeHref}
       aside={headAside}
       edit={sidebarEdit}
+      {...(appearance === undefined ? {} : { appearance })}
     />
   );
 

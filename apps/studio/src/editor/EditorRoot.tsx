@@ -2069,7 +2069,6 @@ function EditorStage({
   const shell = usePtShell();
   const editorShell = useEditorShell();
   const { stageSize } = usePtStage();
-  const theme = useTheme();
   const [canvasMenu, setCanvasMenu] = useState<EditorContextMenu | null>(null);
   const [gridMenu, setGridMenu] = useState<GridMenu | null>(null);
   const [tile, setTile] = useState<GridTileSize>(GRID_DEFAULT_TILE);
@@ -2254,7 +2253,9 @@ function EditorStage({
           onStep={onStep}
           band={frameBandOf(
             snap.document.deck,
-            theme,
+            /* the band's logo twin follows the slide's appearance, as the stage does (docs/NEXT.md
+               4.1.3 item 15): the chrome's theme drew a dark logo on a light slide */
+            deckAppearance(snap.document.deck),
             bandAssetResolver(
               snap.document.deck,
               (_id, _theme, path) => ASSET_BASE(snap.deckId) + path,

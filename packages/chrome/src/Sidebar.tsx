@@ -1,6 +1,7 @@
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
 import { Fragment, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Deck, DeckDocument, Slide, SlideKind } from '@turboslide/schema/deck';
+import { deckAppearance } from '@turboslide/schema/deck';
 import type { ClipboardStore } from '@turboslide/viewer/clipboard';
 import { useNearWindow } from '@turboslide/viewer/GridView';
 import { useTheme } from '@turboslide/viewer/theme';
@@ -587,6 +588,12 @@ export type SidebarProps = {
   aside?: ReactNode;
   /** edit mode (SPEC 6.2): drag to reorder, the row menu, Alt arrows */
   edit?: SidebarEdit;
+  /**
+   * The deck's own appearance (docs/NEXT.md 4.1.3 item 15; audit-brand-surfaces rank 5): the
+   * cards draw the slides in it, as the stage does, whatever the chrome's theme; the chrome's
+   * theme when absent
+   */
+  appearance?: 'light' | 'dark';
 };
 
 /**
@@ -653,9 +660,13 @@ function TreeSidebar({
   homeHref,
   aside,
   edit,
+  appearance,
 }: SidebarProps) {
   const shell = usePtShell();
-  const theme = useTheme();
+  const chromeTheme = useTheme();
+  /* the deck's own appearance: the route's (the view route) or the edited deck's (the editor's
+     tree under Show sections as a tree), else the chrome's theme (docs/NEXT.md 4.1.3 item 15) */
+  const theme = appearance ?? (edit?.deck !== undefined ? deckAppearance(edit.deck) : chromeTheme);
   const {
     id,
     density,

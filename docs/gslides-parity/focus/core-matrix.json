@@ -8940,6 +8940,16 @@
       "note": "docs/NEXT.md 4.1.3 item 13, push B3b#9. NEXT.md 4.1.5 names the driver probe --core; the walk area chrome.mjs is B3a's file, so the row is driven in core/chrome.spec.ts (round1/build/b3b.md)"
     },
     {
+      "id": "chrome.stage.deck-appearance",
+      "feature": "chrome",
+      "interaction": "In dark chrome a light deck draws white on the stage, the filmstrip, the presenter view and the `/deck` view, and the workspace reads `--pt-plate` of the chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-brand-surfaces 30",
+      "note": "docs/NEXT.md 4.1.3 item 15, push B3b#11: .ts-stagewrap left the sheet appearance selectors of tokens.css (the overlay keeps them); the filmstrip and the tree sidebar draw the edited deck's appearance; the presenter page draws deckAppearance; the /deck view's stage, show, grid, book and cards draw the payload's appearance (the route's ?theme=, else the deck's own); the stage band and the thumbnail warm up read the deck's appearance. The test sets the light deck and the dark chrome as setup and reads the four surfaces in one browser"
+    },
+    {
       "id": "chrome.selection.gt-blue",
       "feature": "chrome",
       "interaction": "The selection ring computes to `#2f5ce0` in both appearances and the chip's text to `#ffffff`",

@@ -2449,11 +2449,21 @@ export function createEditorController(init: {
    * reducer now and flushes them at their cadence; the history takes the entry (typing bursts on
    * one Text inside 400 ms fold into one, SPEC 7.2.15); the promise resolves when the room
    * admitted the op, or rejects with the room's reason and the op's content returned.
+   *
+   * `answer` says what the promise waits for once the room admitted the op. `acknowledged` (every
+   * edit, the window API's writes): the revision the write made, which the next write bases on
+   * (SPEC-3 3.10), so on the memory tier and the do tier the answer waits for the room's
+   * checkpoint (2 s idle, 10 s under activity; ack-wait.ts caps it at 15 s). `admitted` (undo, redo
+   * and undoTo, which hand no revision to anyone): the admission alone, with the revision the page
+   * reports at that moment. The undo chain (serial-chain.ts) waits for each step's promise, and
+   * a step that waited for the checkpoint held every later Cmd+Z and Cmd+Shift+Z 2 to 15 s
+   * (VERIFICATION.md "Realtime round, pass 1" finding 4; build/r2.md R2-F1).
    */
   const commitAs = (
     mutations: Mutation[],
     label: string,
     kind: 'edit' | 'undo' | 'redo',
+    answer: 'acknowledged' | 'admitted' = 'acknowledged',
   ): Promise<Committed> => {
     if (room === null) {
       // a burst typed while the first write is in flight waits for the room (hotfix 2 cause A1)
@@ -2515,7 +2525,7 @@ export function createEditorController(init: {
         });
       }
       return {
-        revision: await acknowledgedAbove(base),
+        revision: answer === 'admitted' ? reportedRevision() : await acknowledgedAbove(base),
         entry: recordOf(mutations, applied.inverse, outcome.seq),
         seq: outcome.seq,
       };
@@ -2791,7 +2801,7 @@ export function createEditorController(init: {
       return;
     }
     try {
-      await commitAs(inverse, `undo ${entry.label}`, 'undo');
+      await commitAs(inverse, `undo ${entry.label}`, 'undo', 'admitted');
     } catch (error) {
       say(`Undo failed: ${errorMessage(error)}`);
     }
@@ -2810,7 +2820,7 @@ export function createEditorController(init: {
       // stack with nothing applied (the product round fix round, beside finding 4)
       if (forward.some((mutation) => mutation.op === 'version.restore'))
         await commitServerFirst(forward, `redo ${entry.label}`, entry);
-      else await commitAs(forward, `redo ${entry.label}`, 'redo');
+      else await commitAs(forward, `redo ${entry.label}`, 'redo', 'admitted');
     } catch (error) {
       say(`Redo failed: ${errorMessage(error)}`);
     }
@@ -2826,6 +2836,7 @@ export function createEditorController(init: {
           stepMutations(entry, entry.inverse, 'inverse'),
           `undo ${entry.label}`,
           'undo',
+          'admitted',
         );
       } catch (error) {
         say(`Undo failed: ${errorMessage(error)}`);

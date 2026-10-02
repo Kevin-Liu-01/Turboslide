@@ -84,6 +84,39 @@ describe('doChannel', () => {
     expect(calls[6]?.body).toEqual({ principalIds: ['anon_1'] });
   });
 
+  it('posts a comment op to the comment route under the bearer and throws on a 5xx', async () => {
+    let status = 200;
+    const { fetchFn, calls } = fakeFetch(() =>
+      status === 200 ? json({ ok: true, revision: 2, seq: 9, covered: 9 }) : json({}, status),
+    );
+    const channel = doChannel({ host: 'rooms.test', bearer: 'the-bearer', fetch: fetchFn });
+    const op = {
+      op: 'resolve' as const,
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      at: 't',
+      by: 'anon_1',
+    };
+    const answer = await channel.serverComment('gt-brand', {
+      author: { kind: 'human', name: 'K', principalId: 'anon_1' },
+      clientId: 'server',
+      comment: op,
+    });
+    expect(answer).toEqual({ ok: true, revision: 2, seq: 9, covered: 9 });
+    expect(`${calls[0]?.method} ${new URL(calls[0]?.url ?? '').pathname}`).toBe(
+      'POST /rooms/gt-brand/comment',
+    );
+    expect(calls[0]?.headers.authorization).toBe('Bearer the-bearer');
+    expect(calls[0]?.body).toMatchObject({ clientId: 'server', comment: op });
+    status = 503;
+    await expect(
+      channel.serverComment('gt-brand', {
+        author: { kind: 'human', name: 'K' },
+        clientId: 'server',
+        comment: op,
+      }),
+    ).rejects.toThrow('the realtime Worker answered 503 on comment');
+  });
+
   it('reads the realtime flag off /health, caches it 60 s and reads off after three failures', async () => {
     let realtime: 'on' | 'off' = 'on';
     let fail = false;

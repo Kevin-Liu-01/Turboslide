@@ -18,6 +18,7 @@ import type { Entry, RejectReason, RoomEvent } from './channel.ts';
 import {
   CLIENT_ID_PATTERN,
   clientIdSchema,
+  commentOpSchema,
   entrySchema,
   opsPostSchema,
   presencePostSchema,
@@ -462,6 +463,20 @@ export const roomWriteBodySchema = z.strictObject({
   note: z.string().min(1).max(120).optional(),
 });
 export type RoomWriteBody = z.infer<typeof roomWriteBodySchema>;
+
+/**
+ * `POST /rooms/:id/comment`: a comment op the function checked against the live thread
+ * (`comments.ts` `landOp` on the do tier). It enters the object's order as a `comment` entry, fans
+ * out as an `op`, and the object checkpoints at once, so the sidecar holds it before the answer
+ * and the next comment action reads it (the integrator's merge pass: on the do tier every comment
+ * action threw "append is not on the do tier").
+ */
+export const roomCommentBodySchema = z.strictObject({
+  author: authorSchema,
+  clientId: z.string().min(1).max(64),
+  comment: commentOpSchema,
+});
+export type RoomCommentBody = z.infer<typeof roomCommentBodySchema>;
 
 /** `POST /rooms/:id/external`: a manifest written outside the object (3.5). */
 export const roomExternalBodySchema = z.strictObject({

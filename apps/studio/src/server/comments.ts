@@ -18,6 +18,7 @@ import { randomBytes } from 'node:crypto';
 import type { Dispatcher } from '@turboslide/agent/dispatch';
 import type { Entry, NewEntry } from '@turboslide/realtime/channel';
 import { appendWithRetry } from '@turboslide/realtime/admission';
+import { isDoChannel } from '@turboslide/realtime/do';
 import type { Capability } from '@turboslide/schema/access';
 import type { ActionId } from '@turboslide/schema/actions';
 import type {
@@ -391,6 +392,26 @@ async function landOp(caller: CommentCaller, op: CommentOp): Promise<ThreadResul
     thread = applyCommentOp(before, op, at, live.revision + 1);
   } catch (error) {
     throw mapCommentError(error);
+  }
+  if (isDoChannel(room.channel)) {
+    // the do tier (the integrator's merge pass): no function appends to the object's log, so the
+    // op enters the object's order through its bearer route; the object fans it out and
+    // checkpoints until it is covered, so the sidecar holds the thread when this answers and the
+    // next action (a reply, a resolve) reads it from the store
+    let answer: Awaited<ReturnType<typeof room.channel.serverComment>>;
+    try {
+      answer = await room.channel.serverComment(room.deckId, {
+        author: caller.author,
+        clientId: 'server',
+        comment: op,
+      });
+    } catch {
+      throw new ConflictError('The room is busy; retry', {
+        currentRevision: current.document.deck.revision,
+      });
+    }
+    if (!answer.ok) throw new TypeError(answer.message);
+    return { thread, commentsRevision: live.revision + 1 };
   }
   const entry: NewEntry = {
     rev: current.document.deck.revision,

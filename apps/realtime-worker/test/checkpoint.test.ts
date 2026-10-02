@@ -161,6 +161,47 @@ describe('DeckRoom checkpoints', () => {
     a.close();
   });
 
+  it('admits a comment op under the bearer, fans it out and answers once a checkpoint covers it', async () => {
+    const a = await connect(deck, await mint({ deck, cid: CID_A }));
+    await a.next(isEvent('hello'));
+    const thread = {
+      id: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      deckId: deck,
+      anchor: { kind: 'slide', slideId: 'content-rule' },
+      comment: {
+        id: '01j8z2kmayaq4e0s7r9x2v8b3c',
+        author: { principalId: ANON_B, label: 'Titanium 471', kind: 'human' },
+        createdAt: '2026-10-01T10:00:00.000Z',
+        body: { text: 'Check this', mentions: [] },
+      },
+      replies: [],
+      createdAt: '2026-10-01T10:00:00.000Z',
+      updatedAt: '2026-10-01T10:00:00.000Z',
+      revision: 0,
+    };
+    const response = await call(`/rooms/${deck}/comment`, {
+      method: 'POST',
+      body: JSON.stringify({
+        author: { kind: 'human', name: 'Titanium 471', principalId: ANON_B },
+        clientId: 'server',
+        comment: { op: 'add', thread },
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, seq: 1, covered: 1 });
+    const op = eventOf(await a.next(isEvent('op')), 'op');
+    expect(op.entry).toMatchObject({ kind: 'comment', clientId: 'server', seq: 1 });
+    expect(app.checkpoints.at(-1)?.entries.map((entry) => entry.kind)).toEqual(['comment']);
+    // a body the schema refuses never enters the log
+    const refused = await call(`/rooms/${deck}/comment`, {
+      method: 'POST',
+      body: JSON.stringify({ author: { kind: 'human', name: 'x' }, clientId: 'server' }),
+    });
+    expect(refused.status).toBe(400);
+    expect(await refused.json()).toMatchObject({ ok: false, code: 'invalid' });
+    a.close();
+  });
+
   it('re-admits its entries past a foreign record after a conflict and tells the tabs to reload', async () => {
     const a = await connect(deck, await mint({ deck, cid: CID_A }));
     await a.next(isEvent('hello'));

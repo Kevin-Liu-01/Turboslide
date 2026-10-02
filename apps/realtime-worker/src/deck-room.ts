@@ -29,6 +29,7 @@ import {
   ackOf,
   parseUpFrame,
   roomAccessChangedSchema,
+  roomCommentBodySchema,
   roomExternalBodySchema,
   roomPublishBodySchema,
   roomWriteBodySchema,
@@ -318,6 +319,8 @@ export class DeckRoom extends DurableObject<Env> {
           return this.httpPresence(request, url);
         case 'write':
           return this.httpWrite(request);
+        case 'comment':
+          return this.httpComment(request);
         case 'flush':
           return this.httpFlush();
         case 'external':
@@ -1848,6 +1851,48 @@ export class DeckRoom extends DurableObject<Env> {
       seq,
       ...(record === undefined ? {} : { record }),
     });
+  }
+
+  /**
+   * A comment op from the function (`comments.ts` `landOp` on the do tier): the function checked it
+   * against the live thread and the caller's role, so the object appends it as a `comment` entry,
+   * fans it out as an `op`, and checkpoints until `covered` passes it, so the route's comments
+   * applier wrote the sidecar before the answer and the next comment action reads the thread.
+   */
+  private async httpComment(request: Request): Promise<Response> {
+    const parsed = roomCommentBodySchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success)
+      return json(
+        { ok: false, code: 'invalid', message: parsed.error.issues[0]?.message ?? 'invalid' },
+        400,
+      );
+    const body = parsed.data;
+    await this.ensureLive();
+    const meta = this.meta;
+    const live = this.live;
+    if (meta === null || live === null)
+      return json({ ok: false, code: 'invalid', message: 'the room has no document' }, 503);
+    const now = Date.now();
+    const candidate: NewEntry = {
+      rev: meta.revision,
+      kind: 'comment',
+      author: body.author,
+      clientId: body.clientId.slice(0, 64),
+      opId: `server:${crypto.randomUUID()}`,
+      comment: body.comment,
+      at: new Date(now).toISOString(),
+    };
+    const [admitted] = this.insertEntries([candidate], now);
+    this.live = { document: live.document, seq: meta.head };
+    this.editedSinceOpen = true;
+    if (admitted !== undefined) this.broadcast({ type: 'op', entry: admitted });
+    const seq = admitted?.seq ?? meta.head;
+    // a run already in flight may have read the log before this entry: run again until it is covered
+    for (let run = 0; run < 3 && (this.meta?.covered ?? 0) < seq; run += 1)
+      await this.checkpoint(false);
+    const after = this.meta ?? meta;
+    if (after.covered < seq) await this.afterAppend(Date.now());
+    return json({ ok: true, revision: after.revision, seq, covered: after.covered });
   }
 
   /** The records the last checkpoint run committed, for the write route's answer. */

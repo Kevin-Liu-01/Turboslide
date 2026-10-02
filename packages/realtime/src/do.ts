@@ -3,16 +3,18 @@
 // the order, the roster and the fan out, so almost nothing of `RealtimeChannel` applies here: the
 // function publishes the deck level events the share, access and notify routes publish today
 // (`publish`), reads the roster for a payload (`presence.roster`), reads the realtime flag off
-// `GET /health` (`flag`, cached 60 s per instance; 3.8), and has five calls of its own on the
+// `GET /health` (`flag`, cached 60 s per instance; 3.8), and has six calls of its own on the
 // `DoChannel` type the room narrows to: `document` (the live document at the head, for the editor
 // loader and `liveIfOpen`), `flush` (the object checkpoints its tail at once), `serverWrite` (an
-// agent's write entering the object's order), `external` (a manifest written outside the object),
+// agent's write entering the object's order), `serverComment` (a comment op entering it, so the
+// comment actions work on this tier), `external` (a manifest written outside the object),
 // `accessChanged` (the reauth of 3.3). Everything else throws `TypeError('not on the do tier')`,
 // since no function appends, replays or binds on this tier; `bus` is undefined, so the readers of
 // access.ts and room.ts fall to their TTLs. Every call carries the bearer and
 // `AbortSignal.timeout`. No `node:`; tested with a fake `fetch`. Not a full channel, so
 // channel-contract.ts does not run it.
 import type { DeckDocument } from '@turboslide/schema/deck';
+import type { CommentOp } from '@turboslide/schema/comments';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 
 import type { RealtimeChannel, RoomEvent, RosterEntry } from './channel.ts';
@@ -76,6 +78,13 @@ export type RoomWriteAnswer =
 
 export type RoomExternalBody = { revision: number; author: Author; note: string };
 
+/** `POST /rooms/:id/comment` (frames.ts `roomCommentBodySchema`): one comment op the function checked. */
+export type RoomCommentBody = { author: Author; clientId: string; comment: CommentOp };
+
+export type RoomCommentAnswer =
+  | { ok: true; revision: number; seq: number; covered: number }
+  | { ok: false; code: 'invalid'; message: string };
+
 export type DoChannel = RealtimeChannel & {
   readonly tier: 'do';
   /** the Worker's origin, `https://<host>` (or `http://` when insecure) */
@@ -84,6 +93,7 @@ export type DoChannel = RealtimeChannel & {
   document: (deckId: string) => Promise<RoomDocument | null>;
   flush: (deckId: string) => Promise<RoomFlush>;
   serverWrite: (deckId: string, body: RoomWriteBody) => Promise<RoomWriteAnswer>;
+  serverComment: (deckId: string, body: RoomCommentBody) => Promise<RoomCommentAnswer>;
   external: (deckId: string, body: RoomExternalBody) => Promise<void>;
   accessChanged: (deckId: string, principalIds?: readonly string[]) => Promise<void>;
   counters: (deckId: string) => Promise<Record<string, unknown>>;
@@ -278,6 +288,14 @@ export function doChannel(options: DoChannelOptions): DoChannel {
         return (await response.json()) as RoomWriteAnswer;
       }
       throw new RoomCallError('write', response.status);
+    },
+
+    async serverComment(deckId, body) {
+      const response = await call('POST', roomRoute(deckId, 'comment'), body);
+      if (response.status === 400 || response.ok) {
+        return (await response.json()) as RoomCommentAnswer;
+      }
+      throw new RoomCallError('comment', response.status);
     },
 
     async external(deckId, body) {

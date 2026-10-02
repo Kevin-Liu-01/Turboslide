@@ -6,8 +6,8 @@
 // `DECK_ROOM.get(idFromName(id), hint)` with the claims in a header; an upgrade without a ticket
 // is forwarded as a join (the fallback carrier of 3.3) and the object waits 5 s for the frame.
 // `POST /rooms/:id/ops` and `/presence` carry `Authorization: Ticket` and are verified the same
-// way. The bearer routes (`/rooms/:id/{write,flush,external,publish,roster,document,counters,
-// access-changed}`, `/db/{query,batch,counters}`, `/control/{open,flags,counters}`) compare the
+// way. The bearer routes (`/rooms/:id/{write,comment,flush,external,publish,roster,document,
+// counters,access-changed}`, `/db/{query,batch,counters}`, `/control/{open,flags,counters}`) compare the
 // bearer in constant time and forward. `GET /health` answers `{ ok, protocol, commit, realtime,
 // appOrigin }`. `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and
 // closed with its code so the browser reads it (3.6.3). The Worker's own work per request stays
@@ -61,6 +61,7 @@ const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
 
 const BEARER_TAILS = new Set([
   'write',
+  'comment',
   'flush',
   'external',
   'publish',

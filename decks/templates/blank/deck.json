@@ -3,6 +3,14 @@
   "id": "blank",
   "title": "Untitled presentation",
   "theme": "gt-ink-paper",
+  "brand": {
+    "mark": {
+      "kind": "none"
+    },
+    "footer": {
+      "logo": "none"
+    }
+  },
   "sections": [
     {
       "id": "deck",

@@ -429,7 +429,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the polish round (docs/POLISH.md 5.1): 130 rows added and one replaced; its fix round added
        text.title.second-session-survives-reload (VERIFICATION.md "Polish round, pass 1" finding 1);
        the people round (docs/PEOPLE.md 6.1) added 21 rows: eleven on every origin and ten local */
-    expect(CORE_MATRIX.length).toBe(565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21);
+    /* the next program's hotfix H6 (docs/NEXT.md 3.2): brand.template.blank-no-gt-mark */
+    expect(CORE_MATRIX.length).toBe(
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1,
+    );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',

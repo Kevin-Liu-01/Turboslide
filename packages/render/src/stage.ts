@@ -88,7 +88,12 @@ export type FrameBand = {
   kit: boolean;
 };
 
-/** The GT band: the wordmark bottom left, no text, `n / N`. */
+/**
+ * The GT band: the wordmark bottom left, no text, `n / N`. It is the band of a deck without a
+ * record, which is the GT template and the GT deck. The blank template carries a record whose
+ * title mark and footer logo are `none` (docs/NEXT.md 3.2 H6), so a new presentation draws no GT
+ * mark and no GT wordmark.
+ */
 export const GT_BAND: FrameBand = {
   logo: { kind: 'default', position: 'bottom-left' },
   counterFormat: 'n / N',

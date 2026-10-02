@@ -11,6 +11,7 @@ import {
   agentBearer,
   coverage,
   ctl,
+  download,
   extraHTTPHeaders,
   isLocalBase,
   isProductionBase,
@@ -21,6 +22,7 @@ import {
   openEditor,
   ownerContext,
   placeBlock,
+  pdfStreams,
   pngBytes,
   settled,
   state,
@@ -30,6 +32,7 @@ import {
   sweepTemplateLeftovers,
   slideOrder,
   clickCard,
+  zipEntries,
 } from './lib';
 
 // The brand kit and the templates, the spec rows (docs/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
@@ -334,6 +337,158 @@ async function record(p: Page): Promise<Record<string, unknown> | null> {
   const info = await invoke<{ brand?: Record<string, unknown> }>(p, 'deck.info');
   return info.brand ?? null;
 }
+
+/**
+ * The GT glyph the editor draws for the current slide: `<use href="#gt-mark">` on the stage and in
+ * the filmstrip's cards (the sprite's own `<symbol>` is no drawing), and a drawn `.wordmark`.
+ */
+async function gtMarksDrawn(
+  p: Page,
+): Promise<{ stage: number; filmstrip: number; wordmark: number }> {
+  return p.evaluate(() => {
+    const uses = (root: Element | null) =>
+      root === null
+        ? 0
+        : [...root.querySelectorAll('use')].filter((use) => {
+            const href = use.getAttribute('href') ?? use.getAttribute('xlink:href') ?? '';
+            return href === '#gt-mark' && use.closest('symbol') === null;
+          }).length;
+    const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+    const cards = [...document.querySelectorAll('[data-control^="filmstrip.slide."]')];
+    const wordmarks = [...(stage?.querySelectorAll('.wordmark') ?? [])].filter(
+      (el) => el.getClientRects().length > 0 && el.children.length > 0,
+    );
+    return {
+      stage: uses(stage),
+      filmstrip: cards.reduce((sum, card) => sum + uses(card), 0),
+      wordmark: wordmarks.length,
+    };
+  });
+}
+/** The fill operators of a PDF's page streams: a drawn GT glyph is one more filled path per page. */
+function pdfFills(bytes: Buffer): number {
+  return (pdfStreams(bytes).match(/(?:^|\s)(?:f\*?|B\*?|b\*?)(?=\s|$)/gm) ?? []).length;
+}
+/** The GT glyph's objects in a PowerPoint: the master's wordmark and the title mark's picture. */
+function pptxGtObjects(bytes: Buffer): string[] {
+  const out: string[] = [];
+  for (const [name, read] of zipEntries(bytes)) {
+    if (!/^ppt\/(slides|slideMasters|slideLayouts)\/[^/]+\.xml$/.test(name)) continue;
+    const xml = read();
+    for (const m of xml.matchAll(/(?:name|descr)="([^"]*)"/g)) {
+      const value = m[1] ?? '';
+      if (/#wordmark|GT wordmark|^(?:word)?mark \(mark\)$/.test(value))
+        out.push(`${name}: ${value}`);
+    }
+  }
+  return out;
+}
+/** One file through File > Download > Download options with PDF or PowerPoint (native) picked. */
+async function downloadAs(p: Page, kind: 'pdf' | 'pptx'): Promise<Buffer> {
+  await menuPath(p, 'file', 'file.download', 'file.download.options');
+  if (kind === 'pdf') {
+    await ctl(p, 'dialog.download.type.pdf').click({ timeout: 8000 });
+    await ctl(p, 'dialog.download.pdf').waitFor({ timeout: 8000 });
+  } else {
+    await ctl(p, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+    await ctl(p, 'dialog.download.mode.native').click({ force: true });
+  }
+  const file = await download(p, () => ctl(p, 'dialog.download.ok').click(), 120_000);
+  for (let i = 0; i < 3; i += 1) {
+    if ((await p.locator('.ts-dialog-scrim [role="dialog"]').count()) === 0) break;
+    const done = p.locator(
+      '[data-control="dialog.download.done"], [data-control="dialog.download.close"], [data-control="dialog.download.cancel"]',
+    );
+    if ((await done.count()) > 0)
+      await done
+        .first()
+        .click({ timeout: 3000 })
+        .catch(() => undefined);
+    else await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+  }
+  return file.bytes;
+}
+
+/*
+ * docs/NEXT.md 3.2 H6 (audit-brand-surfaces 27): the file's deck comes from /new, the Blank
+ * template, with a second slide (beforeAll), and this row reads it before any row writes its kit.
+ * The editor draws no GT glyph on either slide, on the stage or in the filmstrip, and no wordmark;
+ * the PDF and the native PowerPoint carry none. The control proves the reads can see the glyph:
+ * the kit's default logo (the GT mark) set for a moment adds filled paths to the PDF and the
+ * wordmark and mark objects to the PowerPoint, and the record goes back to none.
+ */
+test(title('brand.template.blank-no-gt-mark'), async () => {
+  test.setTimeout(480_000);
+  await openEditor(page, deck);
+  const kit = await record(page);
+  const slides = await slideOrder(page);
+  const drawn: { slide: string; stage: number; filmstrip: number; wordmark: number }[] = [];
+  for (const slide of slides) {
+    await clickCard(page, slide);
+    await page.waitForTimeout(500);
+    drawn.push({ slide, ...(await gtMarksDrawn(page)) });
+  }
+  const pdfNone = await downloadAs(page, 'pdf');
+  const pptxNone = await downloadAs(page, 'pptx');
+  /* the control: the GT mark as the kit's logo in both slots, read, then none again */
+  const s1 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/mark',
+    value: { kind: 'default' },
+    baseRevision: s1.revision,
+  });
+  const s2 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/footer/logo',
+    value: 'default',
+    baseRevision: s2.revision,
+  });
+  await settled(page);
+  await clickCard(page, slides[0]!);
+  await page.waitForTimeout(500);
+  const controlDrawn = await gtMarksDrawn(page);
+  let pdfGt: Buffer | null = null;
+  let pptxGt: Buffer | null = null;
+  try {
+    pdfGt = await downloadAs(page, 'pdf');
+    pptxGt = await downloadAs(page, 'pptx');
+  } finally {
+    const s3 = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/mark',
+      value: { kind: 'none' },
+      baseRevision: s3.revision,
+    }).catch(() => undefined);
+    const s4 = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/footer/logo',
+      value: 'none',
+      baseRevision: s4.revision,
+    }).catch(() => undefined);
+    await settled(page);
+  }
+  const fills = { none: pdfFills(pdfNone), gt: pdfFills(pdfGt) };
+  const objects = { none: pptxGtObjects(pptxNone), gt: pptxGtObjects(pptxGt) };
+  test.info().annotations.push({
+    type: 'blank',
+    description: `record ${JSON.stringify(kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${d.stage}, filmstrip ${d.filmstrip}, wordmark ${d.wordmark}`).join('; ')}; with the GT logo set the title slide drew stage ${controlDrawn.stage}; PDF fills ${fills.none} against ${fills.gt} with the GT logo; PowerPoint GT objects ${objects.none.length} (${objects.none.join(', ') || 'none'}) against ${objects.gt.length} (${objects.gt.slice(0, 4).join(', ')})`,
+  });
+  expect((kit?.['mark'] as { kind?: string } | undefined)?.kind, 'the record names no mark').toBe(
+    'none',
+  );
+  for (const d of drawn) {
+    expect(d.stage, `no GT glyph on the stage of ${d.slide}`).toBe(0);
+    expect(d.filmstrip, `no GT glyph in the filmstrip with ${d.slide} open`).toBe(0);
+    expect(d.wordmark, `no wordmark on ${d.slide}`).toBe(0);
+  }
+  expect(controlDrawn.stage, 'the control: the GT logo set draws the glyph').toBeGreaterThan(0);
+  expect(fills.gt, 'the control: the GT logo adds filled paths to the PDF').toBeGreaterThan(
+    fills.none,
+  );
+  expect(objects.gt.length, 'the control: the GT logo is in the PowerPoint').toBeGreaterThan(0);
+  expect(objects.none, 'no GT wordmark or mark in the PowerPoint').toEqual([]);
+});
 
 test(title('templates.save.as-template'), async () => {
   test.setTimeout(180_000);
@@ -1282,6 +1437,8 @@ test(title('brand.panel.words-match-sheet'), async () => {
 });
 
 coverage(import.meta.filename, [
+  /* docs/NEXT.md 3.2 H6 */
+  'brand.template.blank-no-gt-mark',
   'templates.save.as-template',
   'templates.save.same-name-replaces',
   'templates.card.rename-and-delete',

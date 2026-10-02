@@ -8680,6 +8680,16 @@
       "note": "Polish round; docs/POLISH.md 2.5 item 49; B4"
     },
     {
+      "id": "brand.template.blank-no-gt-mark",
+      "feature": "brand",
+      "interaction": "A deck from Blank shows no GT mark and no GT wordmark band in the editor, the PDF and the PPTX",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 3,
+      "evidence": "audit-brand-surfaces 27",
+      "note": "docs/NEXT.md 3.2 H6 and 4.1.5: the blank template carries a record whose title mark and footer logo are none; GT_BAND stays for the GT template"
+    },
+    {
       "id": "images.byurl.preview-contained",
       "feature": "images",
       "interaction": "A 180 px icon by URL: the preview img's box is inside the preview box with `object-fit: contain`",

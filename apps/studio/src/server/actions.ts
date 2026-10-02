@@ -107,6 +107,7 @@ import {
   realtimeTier,
   redisCommands,
   requestIdentity as roomIdentity,
+  roomBackedStore,
 } from './room';
 import {
   deckDir,
@@ -1203,9 +1204,17 @@ export async function deckDispatcher(
   // the hosted store first: opening it pulls the deck's mirror into this instance's overlay, which
   // the FileStore check below expects (a deck created after this instance started was a 404 here)
   const deckStore = await openDeckStore(deckId);
+  // the do tier (docs/CLOUDFLARE.md 3.2 "An agent HTTP write"; build/r1.md R1-INTg): the document
+  // readers and writers of this dispatcher go through the room, so an agent's write enters the
+  // object's order (admitServerWrite's do branch, the op fan out, the checkpoint at once) and an
+  // agent's read answers the object's live document instead of the store at the last checkpoint;
+  // on the memory, redis and blob tiers the plain store keeps today's path (the follower turns a
+  // write into stream entries there). The asset and snapshot handlers stay on the plain store:
+  // a picture put is no document mutation and the Blob backend's snapshots count is its own.
+  const liveStore = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
-  const load = async (): Promise<DeckDocument> => (await deckStore.read()).document;
+  const load = async (): Promise<DeckDocument> => (await liveStore.read()).document;
   const renderRecords = (document: DeckDocument): RenderRecord[] =>
     cachedRecords(deckId, document.deck.revision, orderOf(document));
   registerReadActions(dispatcher, {
@@ -1236,7 +1245,7 @@ export async function deckDispatcher(
   // on a slide that is not a canvas yet convert on this transport as they do on the CLI, and
   // headless Chromium stays out of this process
   const storeDeps: StoreActionDeps = {
-    store: deckStore,
+    store: liveStore,
     lint: lintLists(),
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
     measureCanvas: async (_deck, slides) => {
@@ -1274,17 +1283,17 @@ export async function deckDispatcher(
   registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));
   // the assistant's two actions on this deck (docs/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
-  registerAssistActions(dispatcher, { store: deckStore, deckId });
+  registerAssistActions(dispatcher, { store: liveStore, deckId });
   // the logo picker's three actions over this deck (docs/FEATURES.md 4.11; build/b6.md R4), so
   // /api/actions/logo.search, deck_logo_search and the window transport answer them
-  registerLogoActionsLazily(dispatcher, deckId, deckStore);
-  registerSlideImport(dispatcher, deckId, storeDeps, store.dir, deckStore, decks);
+  registerLogoActionsLazily(dispatcher, deckId, liveStore);
+  registerSlideImport(dispatcher, deckId, storeDeps, store.dir, liveStore, decks);
   const assets = assetDispatcherLoader(dispatcher, deckId, store, deckStore);
-  registerRecordActionsFor(dispatcher, deckId, store, deckStore, storeDeps, facts, assets);
+  registerRecordActionsFor(dispatcher, deckId, store, liveStore, storeDeps, facts, assets);
   // the store's view of the deck for the HTTP and MCP transports (docs/SYNC.md 6.3, 3.6; the sync
   // round, build/b3.md R2): `sync.status` with `storeCalls` replaces the CLI's placeholder the
   // record actions register above, and `deck.info` gains `counts.records` and `counts.holes`
-  registerStoreStatusActions(dispatcher, { deckId, store: deckStore, tier: realtimeTier() });
+  registerStoreStatusActions(dispatcher, { deckId, store: liveStore, tier: realtimeTier() });
   if (request !== undefined) {
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);

@@ -51,7 +51,7 @@ afterEach(async () => {
 function runtimeOn(
   d1: FakeD1,
   extra: Record<string, string | undefined> = {},
-  options: { cacheMs?: number; log?: (line: string) => void } = {},
+  options: { cacheMs?: number; log?: (line: string) => void; readyRetryMs?: number } = {},
 ): IdentityRuntime {
   const runtime = buildIdentityRuntime({
     env: {
@@ -72,6 +72,7 @@ function runtimeOn(
     log: options.log ?? (() => undefined),
     fetch: d1.fetch,
     ...(options.cacheMs !== undefined ? { sessionFactsCacheMs: options.cacheMs } : {}),
+    ...(options.readyRetryMs !== undefined ? { readyRetryMs: options.readyRetryMs } : {}),
   });
   runtimes.push(runtime);
   return runtime;
@@ -336,6 +337,21 @@ describe('a D1 proxy that does not answer (CLOUDFLARE.md 4.3, 3.8)', () => {
     fake.behaviour.refuse = null;
     const back = await requestIdentity(request('/edit/q4', { cookie }), runtime, { fresh: true });
     expect(back.kind).toBe('account');
+  });
+
+  test('a migration refused while the proxy is down runs again on a later read and the runtime recovers', async () => {
+    const lines: string[] = [];
+    fake.behaviour.refuse = { status: 503, error: 'the Worker is starting' };
+    const runtime = runtimeOn(fake, {}, { log: (line) => lines.push(line), readyRetryMs: 0 });
+    await expect(runtime.ready).rejects.toThrow();
+    expect(lines.filter((l) => l.includes('did not migrate'))).toHaveLength(1);
+    expect(lines.join('\n')).not.toContain(BEARER);
+    /* the Worker answers again: the next read of ready runs the migration and resolves */
+    fake.behaviour.refuse = null;
+    await runtime.ready;
+    const identity = await requestIdentity(request('/edit/q4'), runtime);
+    expect(identity.kind).toBe('anonymous');
+    expect(identity.minted).not.toBeNull();
   });
 
   test('a timed out /db/query falls to anonymous after the two attempts, and so does an anonymous record read', async () => {

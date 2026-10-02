@@ -167,6 +167,8 @@ export type BuildRuntimeInput = {
   fetch?: typeof fetch;
   /** The session facts cache's life; the default is 300 s on the `d1` engine and off elsewhere. */
   sessionFactsCacheMs?: number;
+  /** How long a failed migration stands before the next read runs it again (`READY_RETRY_MS`). */
+  readyRetryMs?: number;
 };
 
 // ------------------------------------------------------------------------------------------
@@ -175,6 +177,14 @@ export type BuildRuntimeInput = {
 
 /** The cookie cache's life (better-auth.ts `cookieCache.maxAge`), the cache's too. */
 export const SESSION_FACTS_CACHE_MS = 5 * 60_000;
+
+/**
+ * How long a failed migration of the identity database stands before the next read of
+ * `runtime.ready` runs it again. A process that boots while its database is not reachable (on the
+ * `d1` engine, the Worker behind the proxy during a deploy or an outage) recovers when it answers,
+ * instead of refusing every identity read for the rest of its life.
+ */
+export const READY_RETRY_MS = 5_000;
 
 export type AccountSession = {
   session: {
@@ -379,7 +389,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
       onUserDeleted: (userId) => onUserDeleted(runtime, userId),
       log,
     });
-    runtime.ready = (async () => {
+    const migrate = async (): Promise<void> => {
       /* the `ts_schema` row (docs/CLOUDFLARE.md 4.2): a cold instance on the D1 engine makes one
          statement and skips the two migration sets when the version matches; the first instance
          of a deployment with a new version runs them once and writes the row. Two cold instances
@@ -403,11 +413,34 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
           await new Promise<void>((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
         }
       }
-    })().catch((error: unknown) => {
-      log(
-        `turboslide auth: the identity database did not migrate: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      throw error;
+    };
+    /* a failed migration is not kept for the process's life (the integrator's merge pass, 2026-10-01:
+       a node server that booted while `wrangler dev` was still starting read "the D1 proxy ... was
+       not reached" three times in 1.5 s and refused every later identity read, so no share link
+       landed on it): the first read of `ready` at least `readyRetryMs` after the failure runs the
+       migration again, and a read while a run is in flight waits on that run */
+    const retryMs = input.readyRetryMs ?? READY_RETRY_MS;
+    let current: Promise<void> = Promise.resolve();
+    let failedAt: number | null = null;
+    const start = (): Promise<void> => {
+      failedAt = null;
+      current = migrate().catch((error: unknown) => {
+        failedAt = Date.now();
+        log(
+          `turboslide auth: the identity database did not migrate: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        throw error;
+      });
+      // a run nobody awaits yet is not an unhandled rejection; every reader still sees the error
+      current.catch(() => undefined);
+      return current;
+    };
+    start();
+    Object.defineProperty(runtime, 'ready', {
+      configurable: true,
+      enumerable: true,
+      get: (): Promise<void> =>
+        failedAt !== null && Date.now() - failedAt >= retryMs ? start() : current,
     });
   }
   return runtime;

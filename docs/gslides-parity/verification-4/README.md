@@ -1,5 +1,7 @@
 # verification-4/
 
+The pictures, PDFs and PowerPoint files of this folder left the tree in Round 1 (`docs/NEXT.md` 5.2 item 1; `docs/gslides-parity/README.md`). Each one is in the history at `cc06189b`: open [this folder at that commit](https://github.com/Kevin-Liu-01/Turboslide/tree/cc06189b/docs/gslides-parity/verification-4) on GitHub, or read one file with `git show cc06189b:docs/gslides-parity/verification-4/<path>`.
+
 The verifier's artefacts of round four (`docs/gslides-parity/SPEC-4.md` sections 0.49 and 6.5; `MILESTONES-4.md` "Verifier").
 
 Present on 2026-09-13, copied from the session scratchpad before the date change by the round four synthesizer:

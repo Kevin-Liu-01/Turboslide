@@ -1,43 +1,48 @@
-/* The Turboslide identity sheet (gslides-parity SPEC-4 0.8, 0.9, 0.40, 1.8; round four B1).
-   Imported once by the studio's root route after tokens.css. It declares the eleven `--ts-`
-   tokens the /home page, Not found, the empty states and the title row mark read, mirrored as
-   data by packages/theme/src/brand.ts BRAND_TOKENS and pinned by brand.test.ts (the pattern of
-   tokens.ts and tokens.test.ts). No colour, no radius, no duration: every colour on an identity
-   surface resolves inside the `--pt-` set of tokens.css, which stays byte identical apart from
-   the `--pt-select` block of the orchestrator's ruling 1. The sheet also carries the two view
-   transition rules of 0.40 (in this file so tokens.css does not change), the `.ts-mark` and
-   `.ts-tile` classes TurboslideMark.tsx draws with, the app bar lockup of 1.2 (AppBarBrand.tsx)
-   and the Not found page's frame (__root.tsx NotFound). Round three's ten `--ts-` presence
-   tokens live in apps/studio/src/styles.css and are not identity tokens. */
+/* The Turboslide identity sheet (gslides-parity SPEC-4 0.8, 0.9, 0.40, 1.8; docs/NEXT.md 4.1.2 and
+   4.1.3 items 1 and 2). Imported once by the studio's root route after tokens.css. It declares the
+   sixteen `--ts-` tokens the /home page, /decks, Not found, the empty states and the title row
+   mark read, mirrored as data by packages/theme/src/brand.ts BRAND_TOKENS and pinned by
+   brand.test.ts (the pattern of tokens.ts and tokens.test.ts). No colour, no radius, no duration:
+   every colour on an identity surface resolves inside the `--pt-` set of tokens.css. The sheet
+   also carries the two view transition rules of 0.40, the `.ts-mark` and `.ts-tile` classes
+   TurboslideMark.tsx draws with, the lockup (AppBarBrand.tsx) and the Not found page's frame
+   (__root.tsx NotFound). Round three's ten `--ts-` presence tokens live in
+   apps/studio/src/styles.css and are not identity tokens. */
 
 :root {
   /* one dither cell at 1x: a twin is 1600 by 900 at 2 px cells, shown at that size with
      image-rendering: pixelated and cropped, never scaled */
   --ts-cell: 2px;
-  /* the title row mark */
+  /* the title row mark: the 24 px square, the mark at a 16 px cap on whole rows */
   --ts-mark: 24px;
-  /* the /home ladder (weight 500, tracking -0.025em on h1 and h2, -0.01em on h3) */
-  --ts-h1: 56px;
-  --ts-h2: 32px;
-  --ts-h3: 20px;
-  --ts-lead: 20px;
-  --ts-body: 15px;
-  /* the chrome size: facts, links, source lines, footer */
-  --ts-small: 13px;
-  /* the numbers strip, tabular-nums */
+  /* the deck's type ladder (Prototemplate deck/slides/29-ladder.html; C's build table): the
+     display, the band head, the subhead, the row title, the lead, the body, the small size and
+     the label, weight 500 on the four heads */
+  --ts-h1: 3.7rem;
+  --ts-h2: 2.25rem;
+  --ts-h3: 1.375rem;
+  --ts-title: 1.125rem;
+  --ts-lead: 17px;
+  --ts-body: 16px;
+  --ts-small: 14px;
+  --ts-label: 13px;
+  /* the numbers row, tabular-nums */
   --ts-figure: 40px;
-  /* the content width of /home, the width .ts-home-page already uses */
-  --ts-rail: 1120px;
+  /* the 1104 px column between one rail on each side, its gutter, the 58 px navigation bar and
+     the 9 px cross where a seam meets a rail (deck/slides/49-shell-numbers.html) */
+  --ts-rail: 1104px;
+  --ts-gutter: 40px;
+  --ts-nav-h: 58px;
+  --ts-cross: 9px;
   /* the plate is the ground showing through and draws no rule */
   --ts-plate: var(--pt-paper);
 }
 
-/* the one media block of 0.9: the display sizes at and under 760 px */
-@media (max-width: 760px) {
+/* the one media block: the display size, the gutter and the figures at and under 720 px */
+@media (max-width: 720px) {
   :root {
-    --ts-h1: 40px;
-    --ts-h2: 26px;
-    --ts-lead: 18px;
+    --ts-h1: 2.5rem;
+    --ts-gutter: 16px;
     --ts-figure: 32px;
   }
 }
@@ -54,15 +59,19 @@
   animation-duration: var(--pt-dur-enter);
 }
 
-/* The mark (TurboslideMark.tsx): currentColor, crisp edges, sized by the component's width and
-   height attributes; the title row's sheet reads --ts-mark over them (TitleRow.css). Never a
-   gradient, a second colour, a rounded corner or a rotation. */
+/* The mark (TurboslideMark.tsx): currentColor, sized by the component's width and height
+   attributes; the title row's sheet reads --ts-mark over them (TitleRow.css). Crisp edges on the
+   16 px rows alone: the vector's slanted edges keep their anti aliasing, and its horizontal edges
+   already sit on whole rows. Never a gradient, a second colour, a rounded corner or a rotation. */
 .ts-mark {
   display: inline-block;
   flex: 0 0 auto;
   fill: currentColor;
-  shape-rendering: crispEdges;
   vertical-align: middle;
+}
+
+.ts-mark[data-form='rows'] {
+  shape-rendering: crispEdges;
 }
 
 /* The tile (SPEC-4 0.4): the mark in ink on an opaque paper plate with a 1 px frame in the
@@ -82,14 +91,22 @@
   fill: var(--pt-ink);
 }
 
-/* The horizontal lockup at 22 px type (SPEC-4 1.2, 1.10; AppBarBrand.tsx): the 16 px solid
-   mark as one link to the files page and the word as a second link to the product page, a 10 px
-   gap, baselines shared. The word is live text in the display face, weight 500, -0.01em from 16
-   to 27 px (R01 6.2 item 5). Focus is the shell's 1 px ink ring, offset so it clears the glyphs. */
+/* The lockup (docs/NEXT.md 4.1.2; brand-a 32 to 43): the mark at the word's cap, the baselines
+   met, half the cap between the mark's ink and the word's T. The product draws one size, the
+   22 px word beside the mark's 24 px placement (AppBarBrand.tsx, size 24): Inter's cap is 1490 of
+   2048 units, 16.0 px at 22 px, the mark's cap on rows 4 to 20 of its 24 px square. Both links
+   are 24 px tall with their content centred, so the word's baseline (0.8638 em under a line
+   height of 1 on Inter's ascender and descender) lands on row 20 with the mark's. The gap is half
+   the cap (8 px) less the T's left bearing at Inter's 22 px optical size (72 of 2048 units,
+   0.77 px; docs/gslides-parity/round1/sheet/marks/bearing.json) less the 0.23 px of the square
+   right of the mark's ink: 7 px. The mark keeps its own width and height attributes, so a size
+   that is not the 24 px step draws its own crisp step centred in the 24 px box. The mark links to
+   the files page and the word to the product page; focus is the shell's 1 px ink ring, offset so
+   it clears the glyphs. */
 .ts-brand-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   min-width: 0;
 }
 
@@ -97,6 +114,7 @@
 .ts-brand-lockup-word {
   display: inline-flex;
   align-items: center;
+  height: 24px;
   color: var(--pt-ink);
   text-decoration: none;
   border: 0;
@@ -106,18 +124,11 @@
 }
 
 .ts-brand-lockup-mark {
-  width: 16px;
-  height: 24px;
+  width: 24px;
   justify-content: center;
 }
 
-.ts-brand-lockup-mark .ts-mark {
-  width: 16px;
-  height: 16px;
-}
-
 .ts-brand-lockup-word {
-  height: 24px;
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;

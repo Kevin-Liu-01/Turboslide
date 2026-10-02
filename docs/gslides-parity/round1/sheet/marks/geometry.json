@@ -1,0 +1,120 @@
+{
+  "construction": "docs/gslides-parity/round1/sheet/mark-lib.mjs, from Prototemplate scripts/build-speed-marks.mjs 94 to 142",
+  "units": {
+    "capTop": 40,
+    "baseline": 160,
+    "cap": 120
+  },
+  "skewDegrees": 12,
+  "cut": [
+    96,
+    104
+  ],
+  "parameters": {
+    "arm": 50,
+    "stem": 34,
+    "bar": 30,
+    "ext": 22,
+    "gap": 12,
+    "midOut": 4,
+    "bottomIn": 16,
+    "midH": 36,
+    "bottomH": 30
+  },
+  "rectangles": {
+    "crossbar": [
+      22,
+      40,
+      134,
+      30
+    ],
+    "stem": [
+      72,
+      40,
+      34,
+      120
+    ],
+    "top bar": [
+      0,
+      40,
+      24,
+      30
+    ],
+    "middle bar": [
+      -4,
+      82,
+      64,
+      36
+    ],
+    "bottom bar": [
+      16,
+      130,
+      44,
+      30
+    ]
+  },
+  "parallelograms": 7,
+  "box": {
+    "minX": -29.08,
+    "minY": 40,
+    "maxX": 147.5,
+    "maxY": 160,
+    "w": 176.58,
+    "h": 120
+  },
+  "aspect": 1.47,
+  "path": {
+    "bytes": 242,
+    "sha256": "3e95914b621faf3bee9b73421ac62b264ee384c165346025c09dec99c154190a"
+  },
+  "rows16": [
+    "................",
+    "................",
+    "...###########..",
+    "...###########..",
+    "...###########..",
+    "........###.....",
+    "........###.....",
+    "..#####.###.....",
+    "................",
+    "..####.###......",
+    ".......###......",
+    ".......###......",
+    "..###.###.......",
+    "..###.###.......",
+    "................",
+    "................"
+  ],
+  "capAtPx": {
+    "16": 10,
+    "24": 16,
+    "32": 21,
+    "180": 122
+  },
+  "tile32Cap": 16,
+  "appIcon180Cap": 76,
+  "inter": {
+    "file": "packages/fonts/assets/InterVariable.woff2",
+    "version": "Version 4.001;git-9221beed3",
+    "unitsPerEm": 2048,
+    "capHeight": 1490,
+    "tLeftSideBearingDefaultInstance": 98,
+    "note": "fontkit 2.0.4 reads the default instance (wght 400, opsz 14); the render measures weight 500"
+  },
+  "lockup": {
+    "capEm": 0.727539,
+    "unitEm": 0.0060628,
+    "markWidthEm": 1.07057,
+    "gapEm": 0.36377,
+    "marginAfterMarkEmDefaultInstance": 0.315918,
+    "bearingSource": "marks/bearing.json (rendered pixels, weight 500)",
+    "marginAfterMarkEmAt": {
+      "14": 0.319824,
+      "18": 0.32373,
+      "22": 0.328613,
+      "32": 0.339844,
+      "66": 0.339844,
+      "120": 0.339844
+    }
+  }
+}

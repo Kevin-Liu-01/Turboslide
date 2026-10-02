@@ -2,8 +2,8 @@
   "generator": "scripts/build-brand.ts",
   "files": {
     "apps/studio/public/apple-touch-icon.png": {
-      "bytes": 753,
-      "sha256": "7522912cd415a5f615ee7021422e64f9d8440bd9048892bc64d731ef759e40e1",
+      "bytes": 1381,
+      "sha256": "1f4ab3a4a95c861c21a16fbffdbe60509d0d294ac687565d07d1af0e3a83f9c5",
       "kind": "built"
     },
     "apps/studio/public/brand/figure-dark.png": {
@@ -25,6 +25,16 @@
       "bytes": 13689,
       "sha256": "b6f649ce71e6a92600a78bfcf17ce23177a6adce93d0402ed67b09b593b6e97e",
       "kind": "captured"
+    },
+    "apps/studio/public/brand/mood-earth-dark.jpg": {
+      "bytes": 179545,
+      "sha256": "d1f1327635b8111f39cd71c2b25eb97a0882d7c3114b8a1b1cf830883750a7c2",
+      "kind": "built"
+    },
+    "apps/studio/public/brand/mood-earth-light.jpg": {
+      "bytes": 179587,
+      "sha256": "1db23b67758c3e6626864ef4d1f614930c1efec72963fe5a0804fb51880316a3",
+      "kind": "built"
     },
     "apps/studio/public/brand/notfound-dark.png": {
       "bytes": 13866,
@@ -48,57 +58,57 @@
     },
     "apps/studio/public/favicon.ico": {
       "bytes": 15086,
-      "sha256": "b04bfab1f1ed901be0b63fc443993e7c2083f76ebd6e9ef1e4817b3d24fa449c",
+      "sha256": "6e572d8fb2c1d0fa3fdabbc0f3d6d614a9cd81968dd2900ae448bc7f1b2bdb3a",
       "kind": "built"
     },
     "apps/studio/public/icon.svg": {
-      "bytes": 957,
-      "sha256": "8ffdbb017ee951a807beed52a442cf811a849c0d5b94f4e08829f7d6297b9ce5",
+      "bytes": 1201,
+      "sha256": "6e04b07da62b88947f34baa2f615fd1317a54e9e84919e6f723fbbe41d71a53f",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-192.png": {
-      "bytes": 257,
-      "sha256": "33fd3b15912e0adda6114e3a048d7dfe813a33fe7cbe689a004f8aaa8cd7a0b9",
+      "bytes": 1358,
+      "sha256": "e1c296895149b32dbf8d03147814bdaa5d1394c9dfdf9e10f29a6667e7bbb7ab",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-512.png": {
-      "bytes": 460,
-      "sha256": "bc568b55e83feb752fc8eceffde36b350596439d00065918ff08a7680765d9e0",
+      "bytes": 3409,
+      "sha256": "fe040f7f4b9a418961a082e4f5f4cca1cb444947884a35a91461db6d5e5705bd",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-dark-192.png": {
-      "bytes": 257,
-      "sha256": "7cf3a6deb87c51858feadd5ff199c43cfd330a5fafa2e9806f589e2a35d83f00",
+      "bytes": 1353,
+      "sha256": "68b6cc84a6f6a5fdf048749dcfdae2422b8da06f61d37841334b0648ab0ea813",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-dark-512.png": {
-      "bytes": 460,
-      "sha256": "bedcdd05bf4bc5314b5a5555c0c6c3ec57ae597e5757d2d4283434b7c9ad16b1",
+      "bytes": 3386,
+      "sha256": "841887d2edf450d97b5af4217b3e723f911d80e851145ee995b59f019140fe0e",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-mask-192.png": {
-      "bytes": 292,
-      "sha256": "de4368e8c7ead34a5334128264d3ac20ea5c2566c12250fd2b4dead6abd221f4",
+      "bytes": 1170,
+      "sha256": "76bdcb50d6db5ec69292668a69069c99100803253b340ee0337b335c01b22d0f",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-mask-512.png": {
-      "bytes": 422,
-      "sha256": "ef7861c6780f0b17dd7312b4db0c1cba353fbd676ed46f0fd0bf2d6ac12dad03",
+      "bytes": 2970,
+      "sha256": "66e5c9aac2ce84a224d198d229641b4ecbca9bf4b97de1a3341f568dcf97f27c",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-mono-512.png": {
-      "bytes": 3083,
-      "sha256": "15ac0d8be4850daffefe89231aac73e2699f5436b306864a601c2096c678b875",
+      "bytes": 3831,
+      "sha256": "9382b1abc79dd2d727b477c3444e4989b64347965df5ebf97911f06df67c6021",
       "kind": "built"
     },
     "apps/studio/public/manifest.webmanifest": {
       "bytes": 955,
-      "sha256": "cd08afdec0eb3353883469ac69b8c4bbd559fae8bf84d6928f47235e7020c19c",
+      "sha256": "bae9bac846cf928239847d5274ff14146a684061a739ce2a6d28caf2acdbd1ce",
       "kind": "built"
     },
     "apps/studio/public/og/turboslide.png": {
-      "bytes": 19617,
-      "sha256": "b518dd6ba813a0d9187524da7f42e5f6d7ab234e74fed51695ef472cdca07297",
+      "bytes": 173321,
+      "sha256": "6bb1502f3d8e2937c7d3cd9464bf6c63378f9ed2a34a31c1c7b4bcd07b0e68d1",
       "kind": "rendered"
     },
     "apps/studio/public/robots.txt": {
@@ -117,43 +127,38 @@
       "kind": "captured"
     },
     "packages/theme/brand/icon-tile.svg": {
-      "bytes": 957,
-      "sha256": "8ffdbb017ee951a807beed52a442cf811a849c0d5b94f4e08829f7d6297b9ce5",
+      "bytes": 1201,
+      "sha256": "6e04b07da62b88947f34baa2f615fd1317a54e9e84919e6f723fbbe41d71a53f",
       "kind": "built"
     },
-    "packages/theme/brand/lockup-stacked.svg": {
-      "bytes": 10463,
-      "sha256": "df29137f3f382db713d3a4828fa77005739ebcb6452c0c5d804e60c5a6e9e929",
+    "packages/theme/brand/mark-24.svg": {
+      "bytes": 903,
+      "sha256": "cce579f1bcf086cc36fd4bcde0a3bc5c24705639cf1e77393ac4813a35cf925e",
       "kind": "built"
     },
     "packages/theme/brand/mark-geometry.json": {
-      "bytes": 2422,
-      "sha256": "a126a8aa78d65482c567650eca03dc780dfcbd114c4357745d62082e89e3de92",
+      "bytes": 2886,
+      "sha256": "618ba43d4153e1c41eec1dacd8b2ae0a7df9ddbc0feccced8040550bde96bb24",
       "kind": "built"
     },
     "packages/theme/brand/mark-small.svg": {
-      "bytes": 553,
-      "sha256": "c2cc3cd24b880a5b0379fb4c4c39f9c491325a59d8f8410d00ebf427beba8ba3",
+      "bytes": 774,
+      "sha256": "b0b57a3ed4ced61c7f7be40c0115a985d384c9a6975237c31a23954284a6363e",
       "kind": "built"
     },
     "packages/theme/brand/mark.svg": {
-      "bytes": 38576,
-      "sha256": "1f5729be4a21abc7a68df2f07e30ad7d47dd38bbe6e126f93b41008e61e21c90",
+      "bytes": 886,
+      "sha256": "deb451c960e247d322a0fee804cb34dcf66851324281fb26c4fc1f80846a007e",
       "kind": "built"
     },
     "packages/theme/brand/og-template.html": {
-      "bytes": 8264,
-      "sha256": "5560c6f6d9ba5e60795f254e4589337a830da2c606d465af141b2561ed568a03",
+      "bytes": 3894,
+      "sha256": "a7ae5dcd8a731a0dca97daad5196b8955df765105c583f74593989437c80eff0",
       "kind": "built"
     },
-    "packages/theme/brand/wordmark-outlines.svg": {
-      "bytes": 5474,
-      "sha256": "82158d3e9d299740aab9657a509b23372655b3aff58fca45d57af44c90180faf",
-      "kind": "outlined"
-    },
     "packages/theme/brand/wordmark.svg": {
-      "bytes": 887,
-      "sha256": "b5f5648a59a1bb8efce1024e9dd3df294dfe241cb63ef6b64a83bf51f83309bd",
+      "bytes": 983,
+      "sha256": "87b3780e9918bc7dd42809c6aee527ebce29427153f8a883b87d9fa53b0a2385",
       "kind": "built"
     }
   }

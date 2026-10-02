@@ -3494,6 +3494,24 @@ test(title('decks.list.action-scoped'), async ({ browser }) => {
   }
 });
 
+/* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.3 item 3, 4.1.5): the installed app's
+   colours are the paper's, the manifest packages/theme/brand/site.ts writes through the brand build */
+test(title('decks.manifest.paper'), async () => {
+  const answer = await page.request.get('/manifest.webmanifest');
+  const body = (await answer.json().catch(() => ({}))) as {
+    background_color?: string;
+    theme_color?: string;
+    start_url?: string;
+  };
+  test.info().annotations.push({
+    type: 'manifest',
+    description: `${answer.status()} ${answer.headers()['content-type'] ?? ''}: background_color ${body.background_color}, theme_color ${body.theme_color}, start_url ${body.start_url}`,
+  });
+  expect(answer.status(), 'the manifest answers').toBe(200);
+  expect(body.background_color, 'background_color is the paper').toBe('#ffffff');
+  expect(body.theme_color, 'theme_color is the paper').toBe('#ffffff');
+});
+
 coverage(import.meta.filename, [
   'decks.home.new-presentation',
   'decks.home.your-presentations',
@@ -3571,6 +3589,8 @@ coverage(import.meta.filename, [
   /* the next program's hotfix H2 (docs/NEXT.md 3.2, 4.1.5) */
   'decks.list.own-and-shared',
   'decks.list.action-scoped',
+  /* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.3 item 3, 4.1.5) */
+  'decks.manifest.paper',
   /* the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.3 item 9, 4.1.5) */
   'decks.home.grammar',
   'decks.home.capture-plain',

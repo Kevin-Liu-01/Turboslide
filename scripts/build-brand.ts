@@ -1,51 +1,53 @@
-// The brand build (gslides-parity SPEC-4 0.7, 0.11, 0.12, 0.13, 1.2, 1.4, 1.5, 1.7, 6.4;
-// MILESTONES-4 B1): every identity asset from one geometry module (packages/theme/src/brand.ts)
-// and one facts object (packages/theme/brand/site.ts), written under apps/studio/public so every
-// icon, manifest, twin and card request is a CDN hit and never a function invocation (research-4
-// report 02 section 1 measured the HTML 404s). Run from the repository root with Node 24 (type
-// stripping, no build step). No new dependency: sharp is in the root devDependencies, the two
-// colour PNGs go through the effects package's 1-bit encoder (encodePng1, deterministic bytes),
-// the card and the previews render through @turboslide/headless (the product's own Chromium),
-// the capture through @turboslide/materials/capture (the implementation of material.capture) and
-// the wordmark outlines through packages/theme/scripts/outline-wordmark.py under the fonts venv.
+// The brand build (docs/NEXT.md 4.1.3 items 1 to 4; gslides-parity SPEC-4 0.7, 0.12, 0.13, 1.4,
+// 1.5, 1.7, 6.4): every identity asset from one geometry module (packages/theme/src/brand.ts) and
+// one facts object (packages/theme/brand/site.ts), written under apps/studio/public so every icon,
+// manifest, twin and card request is a CDN hit and never a function invocation (research-4 report
+// 02 section 1 measured the HTML 404s). Run from the repository root with Node 24 (type stripping,
+// no build step). No new dependency and no font tool: sharp is in the root devDependencies, the
+// mark is five rectangles in brand.ts, the twins' PNGs go through the effects package's 1-bit
+// encoder, the card and the README lockups render through @turboslide/headless (the product's own
+// Chromium) and the capture through @turboslide/materials/capture.
 //
-//   node scripts/build-brand.ts             the icon set, the SVG sources, the wordmarks, the
-//                                           lockup, og-template.html, the card, mark-geometry.json
-//                                           and brand-manifest.json (the twins stay as committed)
+//   node scripts/build-brand.ts             the icon set, the SVG sources, the wordmark,
+//                                           og-template.html, the card, mark-geometry.json and
+//                                           brand-manifest.json (the twins stay as committed)
 //   node scripts/build-brand.ts --capture   the twins (0.7, 0.12): the liquid metal recipe over the
 //                                           anchor scan, the frames cut through the pipeline with
 //                                           the theme palette, hero.recipe.json
-//   node scripts/build-brand.ts --previews  packages/theme/brand/previews/** (the size sheet, the
-//                                           8x upscales, the tab strips, the confusion sheet, the
-//                                           raster edges, the hero scan, variants/)
-//   node scripts/build-brand.ts --readme    docs/readme/brand/lockup-stacked-{dark,light}.png at 2x
+//   node scripts/build-brand.ts --readme    docs/readme/brand/lockup-{dark,light}.png at 2x
 //   node scripts/build-brand.ts --facts     packages/theme/brand/facts.json (0.25) from the tree
-//   node scripts/build-brand.ts --check     step 29: the manifest by bytes and sha256, a rebuild
-//                                           compared (pixels for rasters and the ICO's decoded
-//                                           entries, bytes for text), the file facts of 6.4, the
-//                                           twins' palette and ink sums, the card's pixels when the
-//                                           local browser is chromium-1217, the outlines when the
-//                                           venv python is present, facts.json against the tree
+//   node scripts/build-brand.ts --check     step 29: the mark's committed paths against a rebuild
+//                                           from its rectangles and rows and their sha256, the
+//                                           manifest by bytes and sha256, a rebuild compared
+//                                           (pixels for rasters and the ICO's decoded entries,
+//                                           bytes for text), the file facts, the twins' palette and
+//                                           ink sums, the card's pixels when the local browser is
+//                                           chromium-1217, facts.json against the tree
 //
-// The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries, the plate tile
-// of 0.4), icon.svg (the tile with the prefers-color-scheme block, crispEdges), apple-touch-icon.png
-// (180, the ink tile, no corners), icons/icon-192.png and icon-512.png (the ink tile, `any`),
+// The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries on the paper
+// tile: the 16 px rows, then the vector at a 16 and a 24 px cap), icon.svg (the 16 px tile with the
+// prefers-color-scheme block, crispEdges), apple-touch-icon.png (180, the paper mark on the ink
+// square, no corners), icons/icon-192.png and icon-512.png (the ink tile, `any`),
 // icons/icon-mask-192.png and icon-mask-512.png (`maskable`, the mark inside the 40 percent safe
-// circle), icons/icon-mono-512.png (`monochrome`, the solid form as alpha), icons/icon-dark-192.png
-// and icon-dark-512.png (the paper plate, the inverse of the manifest icons, for the README's
-// <picture>), manifest.webmanifest (start_url /home), robots.txt, og/turboslide.png (the card),
+// circle), icons/icon-mono-512.png (`monochrome`, the mark as alpha), icons/icon-dark-192.png and
+// icon-dark-512.png (the paper plate, the inverse of the manifest icons), manifest.webmanifest
+// (start_url /home, the paper colours), robots.txt, og/turboslide.png (the card),
+// brand/mood-earth-{dark,light}.jpg (the mood picture of site.ts MOOD_PICTURES, from the GT deck),
 // brand/{hero,figure,notfound}-{dark,light}.png and brand/og-screen-{dark,light}.png (the twins),
-// brand-manifest.json; and under packages/theme/brand the SVG sources (mark.svg at 64 cells,
-// mark-small.svg, icon-tile.svg, wordmark.svg, wordmark-outlines.svg, lockup-stacked.svg),
-// og-template.html, hero.recipe.json, mark-geometry.json and facts.json.
+// brand-manifest.json; and under packages/theme/brand the SVG sources (mark.svg, the master
+// drawing; mark-small.svg, the 16 px rows; mark-24.svg, the 24 px placement; icon-tile.svg;
+// wordmark.svg, the lockup with the word as live text), og-template.html, hero.recipe.json,
+// mark-geometry.json and facts.json.
 //
-// Rasters: every mark is drawn on its own cell grid and never resampled (R02 5.4). The tile's
-// 12 px mark at 16 px is the one hinted size (brand.ts solidWindow); the 24 and 40 px marks of
-// the 32 and 48 px tiles keep integer edges by arithmetic. The ICO writer is the design copy's
-// (three 32 bit BMP entries with AND masks; Pillow round trips it with zero differing pixels).
-// The twins are committed assets with their recipe rather than a CI build output: byte identity
-// holds only on a Mac with ANGLE Metal (J1 2.5), so `--check` compares them by bytes against the
-// committed files and regenerates them only under `--capture`.
+// Rasters: the 16 px tile is the rows, three colours with no anti aliased pixel. Every other icon
+// is the vector at its cap with its horizontal edges on whole rows (brand.ts `markQuadsAt`),
+// drawn by this script's own coverage rasterizer (the union of the quads, sixteen sub rows per
+// pixel row, exact spans across), so every pixel is a blend of the plate and the ink and the
+// bytes are deterministic. The ICO writer is the design copy's (three 32 bit BMP entries with AND
+// masks; Pillow round trips it with zero differing pixels). The twins are committed assets with
+// their recipe rather than a CI build output: byte identity holds only on a Mac with ANGLE Metal
+// (J1 2.5), so `--check` compares them by bytes against the committed files and regenerates them
+// only under `--capture`.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
@@ -66,14 +68,13 @@ import type { Page } from 'playwright-core';
 import { format as prettierFormat, resolveConfig } from 'prettier';
 import sharp from 'sharp';
 
-import { bayerThreshold, ditherGray } from '../packages/effects/src/bayer.ts';
+import { ditherGray } from '../packages/effects/src/bayer.ts';
 import type { BitImage, GrayImage, RgbaImage } from '../packages/effects/src/image.ts';
 import { invertBits, litFraction } from '../packages/effects/src/image.ts';
 import { decodeImage } from '../packages/effects/src/io.ts';
 import { PLATE_BOXES } from '../packages/effects/src/metrics.ts';
 import type { PlateClear } from '../packages/effects/src/metrics.ts';
 import { encodePng1 } from '../packages/effects/src/png1.ts';
-import { rampInk } from '../packages/effects/src/ramp.ts';
 import { fitCover, scaleNearest } from '../packages/effects/src/resample.ts';
 import { autocontrast, toGray, tone } from '../packages/effects/src/tone.ts';
 import { twoTone } from '../packages/effects/src/two-tone.ts';
@@ -86,38 +87,45 @@ import { MATERIAL_IDS } from '../packages/materials/src/catalog.ts';
 import { ACTION_IDS } from '../packages/schema/src/actions.ts';
 import { LAYOUTS } from '../packages/schema/src/layouts.ts';
 import { SHAPE_PRESETS } from '../packages/schema/src/shapes.ts';
-import { ICON_PATHS, SITE, TWIN_PATHS, TWIN_SIZE } from '../packages/theme/brand/site.ts';
 import {
+  CARD_MOOD,
+  ICON_PATHS,
+  MOOD_PICTURES,
+  SITE,
+  TWIN_PATHS,
+  TWIN_SIZE,
+} from '../packages/theme/brand/site.ts';
+import {
+  MARK_ASPECT,
+  MARK_PATH,
+  MARK_PATH_SHA256,
+  MARK_VIEWBOX,
+  ROWS16,
+  ROWS16_PATH,
+  ROWS16_PATH_SHA256,
   TILE_COLORS,
   TILE_SIZES,
-  cellRects,
-  litCount,
-  markBits,
-  markGrid,
-  markPath,
+  markQuads,
+  markQuadsAt,
+  markQuadsInBox,
   markSvg,
-  solidBits,
+  quadPath,
+  rowsPath,
   tileMarkPath,
 } from '../packages/theme/src/brand.ts';
-import type { TileGeometry } from '../packages/theme/src/brand.ts';
+import type { Quad, TileGeometry } from '../packages/theme/src/brand.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = 'apps/studio/public';
 const BRAND_DIR = 'packages/theme/brand';
-const PREVIEWS_DIR = `${BRAND_DIR}/previews`;
-const VARIANTS_DIR = `${PREVIEWS_DIR}/variants`;
 const README_BRAND_DIR = 'docs/readme/brand';
 const MANIFEST_PATH = `${PUBLIC_DIR}/brand-manifest.json`;
 const GEOMETRY_PATH = `${BRAND_DIR}/mark-geometry.json`;
 const RECIPE_PATH = `${BRAND_DIR}/hero.recipe.json`;
 const FACTS_PATH = `${BRAND_DIR}/facts.json`;
-const OUTLINES_PATH = `${BRAND_DIR}/wordmark-outlines.svg`;
 const OG_TEMPLATE_PATH = `${BRAND_DIR}/og-template.html`;
 const CARD_PATH = `${PUBLIC_DIR}${ICON_PATHS.card}`;
-const VENV_PYTHON = '.turboslide/venv/bin/python';
-const OUTLINE_SCRIPT = 'packages/theme/scripts/outline-wordmark.py';
-const INTER_WOFF2 = 'packages/fonts/assets/InterVariable.woff2';
-/** The origin the previews and the card are served from, in memory (the capture job's pattern). */
+/** The origin the card and the README lockups are served from, in memory (the capture job's pattern). */
 const BRAND_ORIGIN = 'http://turboslide.brand';
 /** The card's byte ceiling (SPEC-4 1.5 step 7). */
 const CARD_MAX_BYTES = 1_000_000;
@@ -179,60 +187,133 @@ function put(raster: Raster, x: number, y: number, color: Rgb, alpha = 255): voi
   raster.data[i + 3] = alpha;
 }
 
-/** The plate tile of SPEC-4 0.4 at 16, 32 or 48 px: the plate, the 1 px frame, the inset solid mark. */
+/** Sub rows per pixel row in the coverage rasterizer; the hinted edges fall between them exactly. */
+const SUB_ROWS = 16;
+
+/**
+ * The coverage (0 to 1) of the union of `quads` on a `width` by `height` grid: each pixel row is
+ * sampled on SUB_ROWS sub rows, every quad that crosses a sub row gives one span, the spans are
+ * merged, and each pixel takes the exact length of the spans over it.
+ */
+function coverageOf(quads: readonly Quad[], width: number, height: number): Float64Array {
+  const cover = new Float64Array(width * height);
+  for (let py = 0; py < height; py += 1)
+    for (let j = 0; j < SUB_ROWS; j += 1) {
+      const y = py + (j + 0.5) / SUB_ROWS;
+      const spans: [number, number][] = [];
+      for (const [tl, tr, br, bl] of quads) {
+        if (y < tl[1] || y >= bl[1]) continue;
+        const t = (y - tl[1]) / (bl[1] - tl[1]);
+        spans.push([tl[0] + (bl[0] - tl[0]) * t, tr[0] + (br[0] - tr[0]) * t]);
+      }
+      spans.sort((a, b) => a[0] - b[0]);
+      const merged: [number, number][] = [];
+      for (const span of spans) {
+        const last = merged[merged.length - 1];
+        if (last !== undefined && span[0] <= last[1]) last[1] = Math.max(last[1], span[1]);
+        else merged.push([span[0], span[1]]);
+      }
+      for (const [a, b] of merged) {
+        const from = Math.max(0, a);
+        const to = Math.min(width, b);
+        for (let px = Math.floor(from); px < Math.ceil(to); px += 1) {
+          const overlap = Math.min(to, px + 1) - Math.max(from, px);
+          if (overlap > 0)
+            cover[py * width + px] = (cover[py * width + px] ?? 0) + overlap / SUB_ROWS;
+        }
+      }
+    }
+  for (let i = 0; i < cover.length; i += 1) cover[i] = Math.min(1, cover[i] ?? 0);
+  return cover;
+}
+
+/** The colour `level` of 255 of the way from `ground` to `ink`, rounded per channel. */
+function blend(ground: Rgb, ink: Rgb, level: number): Rgb {
+  const mix = (g: number, k: number): number => Math.round(g + ((k - g) * level) / 255);
+  return [mix(ground[0], ink[0]), mix(ground[1], ink[1]), mix(ground[2], ink[2])];
+}
+
+/** The mark's quads drawn in `ink` over an opaque `ground` on a `size` px square. */
+function markRaster(size: number, quads: readonly Quad[], ground: Rgb, ink: Rgb): Raster {
+  const raster = blank(size, size, ground);
+  const cover = coverageOf(quads, size, size);
+  for (let y = 0; y < size; y += 1)
+    for (let x = 0; x < size; x += 1) {
+      const level = Math.round((cover[y * size + x] ?? 0) * 255);
+      if (level > 0) put(raster, x, y, blend(ground, ink, level));
+    }
+  return raster;
+}
+
+/** The ink of a raster's mark in pixels: the coverage summed, at one decimal. */
+function inkOf(quads: readonly Quad[], size: number): number {
+  let sum = 0;
+  for (const value of coverageOf(quads, size, size)) sum += value;
+  return Number(sum.toFixed(1));
+}
+
+/** The quads of a tile's vector mark in tile px. */
+function tileQuads(tile: TileGeometry): Quad[] {
+  return markQuadsAt(tile.size, tile.cap, tile.top, { hinted: true });
+}
+
+/**
+ * The plate tile at 16, 32 or 48 px: the plate, the 1 px frame, the mark. The 16 px tile carries
+ * the rows (three colours, no blend); the 32 and 48 px tiles the hinted vector over the plate.
+ */
 function tileRaster(tile: TileGeometry, colors: typeof LIGHT): Raster {
   const { size } = tile;
-  const raster = blank(size, size, colors.plate);
+  const raster =
+    tile.form === 'rows'
+      ? blank(size, size, colors.plate)
+      : markRaster(size, tileQuads(tile), colors.plate, colors.ink);
+  if (tile.form === 'rows')
+    ROWS16.forEach((row, y) => {
+      for (let x = 0; x < row.length; x += 1) if (row[x] === '#') put(raster, x, y, colors.ink);
+    });
   for (let i = 0; i < size; i += 1) {
     put(raster, i, 0, colors.frame);
     put(raster, i, size - 1, colors.frame);
     put(raster, 0, i, colors.frame);
     put(raster, size - 1, i, colors.frame);
   }
-  const bits = solidBits(tile.mark.size);
-  for (let y = 0; y < tile.mark.size; y += 1)
-    for (let x = 0; x < tile.mark.size; x += 1)
-      if (bits.bits[y * tile.mark.size + x])
-        put(raster, tile.mark.x + x, tile.mark.y + y, colors.ink);
   return raster;
 }
 
-/**
- * A mark of `markPx` on a `size` px tile as one bit image (1 is ink), the mark centred, its
- * cells drawn on their own grid: `markPx / n` px per cell, an integer by construction.
- */
-function markTileBits(size: number, markPx: number, n: number): BitImage {
-  const cell = markPx / n;
-  if (!Number.isInteger(cell)) throw new Error(`non integer cell ${markPx}/${n} at ${size}`);
-  const off = (size - markPx) / 2;
-  if (!Number.isInteger(off)) throw new Error(`non integer offset for a ${markPx} mark on ${size}`);
-  const { bits } = markBits(n);
-  const out = new Uint8Array(size * size);
-  for (let y = 0; y < markPx; y += 1)
-    for (let x = 0; x < markPx; x += 1) {
-      const cx = Math.floor(x / cell);
-      const cy = Math.floor(y / cell);
-      if (bits[cy * n + cx]) out[(off + y) * size + off + x] = 1;
-    }
-  return { width: size, height: size, bits: out };
-}
-
-/** A bit image as an opaque RGBA raster: index 0 the ground, 1 the ink. */
-function rasterOfBits(bits: BitImage, ground: Rgb, ink: Rgb): Raster {
-  const raster = blank(bits.width, bits.height, ground);
-  for (let y = 0; y < bits.height; y += 1)
-    for (let x = 0; x < bits.width; x += 1)
-      if (bits.bits[y * bits.width + x]) put(raster, x, y, ink);
-  return raster;
-}
-
-/** The monochrome icon: the solid form at 448 px as alpha over a transparent ground, black where lit. */
-function monoRaster(size: number, markPx: number): Raster {
+/** The monochrome icon: black with the mark's coverage as alpha over a transparent ground. */
+function monoRaster(size: number, quads: readonly Quad[]): Raster {
   const raster = blank(size, size, null);
-  const bits = markTileBits(size, markPx, 8);
+  const cover = coverageOf(quads, size, size);
   for (let y = 0; y < size; y += 1)
-    for (let x = 0; x < size; x += 1) if (bits.bits[y * size + x]) put(raster, x, y, [0, 0, 0]);
+    for (let x = 0; x < size; x += 1) {
+      const level = Math.round((cover[y * size + x] ?? 0) * 255);
+      if (level > 0) put(raster, x, y, [0, 0, 0], level);
+    }
   return raster;
+}
+
+/** An opaque raster as an 8 bit indexed PNG (deterministic bytes); at most 256 colours. */
+function indexedPng(raster: Raster): Uint8Array {
+  const colours = new Map<string, number>();
+  const palette: Rgb[] = [];
+  const indices = new Uint8Array(raster.width * raster.height);
+  for (let p = 0; p < raster.width * raster.height; p += 1) {
+    const rgb: Rgb = [
+      raster.data[p * 4] ?? 0,
+      raster.data[p * 4 + 1] ?? 0,
+      raster.data[p * 4 + 2] ?? 0,
+    ];
+    const key = rgb.join(',');
+    let index = colours.get(key);
+    if (index === undefined) {
+      index = palette.length;
+      colours.set(key, index);
+      palette.push(rgb);
+    }
+    indices[p] = index;
+  }
+  if (palette.length > 256) throw new Error(`${palette.length} colours do not fit a palette PNG`);
+  return encodePngIndexed(raster.width, raster.height, indices, palette);
 }
 
 async function pngOfRaster(raster: Raster): Promise<Uint8Array> {
@@ -405,18 +486,27 @@ function encodePngIndexed(
 // Text sources
 
 const SVG_NOTE = (what: string): string =>
-  `<!-- Turboslide mark, ${what}. Generated by scripts/build-brand.ts from packages/theme/src/brand.ts (the 8 by 8 Bayer permutation of packages/effects/src/bayer.ts). Ink is currentColor; the plate window is the ground showing through. -->\n`;
+  `<!-- Turboslide mark, ${what}. Generated by scripts/build-brand.ts from packages/theme/src/brand.ts: five rectangles sheared by tan(12 degrees) with the 8 unit cut through the stem and the middle bar, the GT bar monogram's construction (Prototemplate scripts/build-speed-marks.mjs); the 16 px rows are the one hand drawing. -->\n`;
 
-/** icon.svg (SPEC-4 0.13, 1.4): the 16 px tile with the prefers-color-scheme block and crispEdges. */
+/** mark.svg: the master drawing in units, one path in currentColor, with 4 units of clear space. */
+function masterSvg(): string {
+  return (
+    SVG_NOTE(
+      'the master drawing in its units (a 120 unit cap), for any size from 32 px; the product places it by whole pixel cap with its horizontal edges on whole rows',
+    ) +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_VIEWBOX}" fill="currentColor" role="img" aria-label="Turboslide"><title>Turboslide</title><path d="${MARK_PATH}"/></svg>\n`
+  );
+}
+
+/** icon.svg (SPEC-4 0.13, 1.4): the 16 px tile with the rows, the prefers-color-scheme block and crispEdges. */
 function iconTileSvg(): string {
-  const tile = TILE_SIZES[16];
   const l = TILE_COLORS.light;
   const d = TILE_COLORS.dark;
   return (
     SVG_NOTE(
-      'the tab icon: the solid mark on an opaque paper plate with a 1 px frame in the edge composite; paper ink on an ink plate where prefers-color-scheme: dark is honoured',
+      'the tab icon: the 16 px rows in ink on an opaque paper plate with a 1 px frame in the edge composite; paper ink on an ink plate where prefers-color-scheme: dark is honoured',
     ) +
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" role="img" aria-label="Turboslide"><title>Turboslide</title><style>.plate{fill:${l.plate}}.frame{fill:none;stroke:${l.frame};stroke-width:1}.ink{fill:${l.ink}}@media (prefers-color-scheme: dark){.plate{fill:${d.plate}}.frame{stroke:${d.frame}}.ink{fill:${d.ink}}}</style><rect class="plate" x="0" y="0" width="16" height="16"/><rect class="frame" x="0.5" y="0.5" width="15" height="15"/><path class="ink" fill-rule="evenodd" d="${tileMarkPath(tile)}"/></svg>\n`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" role="img" aria-label="Turboslide"><title>Turboslide</title><style>.plate{fill:${l.plate}}.frame{fill:none;stroke:${l.frame};stroke-width:1}.ink{fill:${l.ink}}@media (prefers-color-scheme: dark){.plate{fill:${d.plate}}.frame{stroke:${d.frame}}.ink{fill:${d.ink}}}</style><rect class="plate" x="0" y="0" width="16" height="16"/><rect class="frame" x="0.5" y="0.5" width="15" height="15"/><path class="ink" d="${tileMarkPath(TILE_SIZES[16])}"/></svg>\n`
   );
 }
 
@@ -427,153 +517,109 @@ function robotsTxt(): string {
   return `${lines.join('\n')}\n`;
 }
 
-// The wordmark (SPEC-4 1.2): Inter 500 with cv11 and ss01, tracking -0.025em at 28 px and above;
-// the mark's height is the cap height of the word (1490 of 2048 units, 0.7275 em, so 66 px type
-// gives 48.0 px), the gap is one third of the mark, baselines aligned, the mark solid at 48 px
-// (0.5). The SVG's baseline sits at y 51 in a 66 unit line, so the 48 px mark spans y 3 to 51.
+// The lockup (docs/NEXT.md 4.1.2; brand-a 32 to 43): the mark at the word's cap, the baselines
+// met, half the cap between the mark's ink and the word's T. The word is live text in Inter 500
+// with cv11 and ss01, tracking -0.025em at 28 px and above (docs/brand.md section 3). The mark's
+// box and the baseline sit on whole pixels, so the word's ink and the mark's end on one row
+// (sheet-judge.md fix 9). At 66 px Inter's cap (1490 of 2048 units) is 48.0 px.
 const WORD = 'Turboslide';
 const WORD_PX = 66;
-const WORD_MARK_PX = 48;
-const WORD_GAP_PX = WORD_MARK_PX / 3;
-const WORD_BASELINE_Y = 51;
 const WORD_TRACK_EM = -0.025;
 /** The word's width at 66 px as Chromium measured it with the repository's InterVariable (P1 1.4). */
 const WORD_WIDTH_CHROMIUM_PX = 287.06;
-const WORDMARK_BOX_W = 354;
 const INTER_STACK = "Inter, 'Inter Fallback', system-ui, sans-serif";
-
-function wordText(x: number, y: number, anchor: 'start' | 'middle' = 'start'): string {
-  return `<text x="${x}" y="${y}" font-family="${INTER_STACK}" font-size="${WORD_PX}" font-weight="500" letter-spacing="${(WORD_TRACK_EM * WORD_PX).toFixed(2)}" text-anchor="${anchor}" style="font-feature-settings:'cv11','ss01'">${WORD}</text>`;
-}
-
-/** wordmark.svg: the 48 px solid mark and the word as live text (the studio ships Inter). */
-function wordmarkSvg(): string {
-  return (
-    `<!-- Turboslide wordmark (gslides-parity SPEC-4 1.2): the 48 px solid mark at the cap height of the word set at ${WORD_PX} px, Inter 500, cv11 and ss01, tracking ${WORD_TRACK_EM}em, a ${WORD_GAP_PX} px gap, baselines aligned. The word is live text (the studio ships InterVariable.woff2); wordmark-outlines.svg carries it as outlines for surfaces without the font. Generated by scripts/build-brand.ts. -->\n` +
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WORDMARK_BOX_W} ${WORD_PX}" width="${WORDMARK_BOX_W}" height="${WORD_PX}" fill="currentColor" role="img" aria-label="${WORD}"><title>${WORD}</title>` +
-    `<path transform="translate(0 ${WORD_BASELINE_Y - WORD_MARK_PX}) scale(${WORD_MARK_PX / 16})" shape-rendering="crispEdges" fill-rule="evenodd" d="${markPath(2)}"/>` +
-    wordText(WORD_MARK_PX + WORD_GAP_PX, WORD_BASELINE_Y) +
-    `</svg>\n`
-  );
-}
-
-/** The outlined word as outline-wordmark.py writes it (font units, baseline at 0, y down). */
-type Outline = {
-  word: string;
-  font: string;
-  fontVersion: string;
-  upm: number;
-  wght: number;
-  opsz: number;
-  trackEm: number;
-  capHeight: number;
-  width: number;
-  glyphs: { glyph: string; x: number; advance: number; kern: number }[];
-  d: string;
+/** Inter's cap height over its em: 1490 of 2048 units. */
+const INTER_CAP_EM = 1490 / 2048;
+/**
+ * The T's left side bearing at weight 500 by Inter's optical size axis, in units of 2048, read
+ * from rendered pixels (the Round 1 sheet's measure-bearing.mjs at load 19.60; its bearing.json).
+ * Chrome sets the axis to the font size in px between 14 and 32.
+ */
+const T_BEARING_BY_OPSZ: Readonly<Record<number, number>> = {
+  14: 90,
+  16: 86,
+  18: 82,
+  20: 76,
+  22: 72,
+  24: 68,
+  26: 61,
+  28: 57,
+  30: 53,
+  32: 49,
 };
 
-/** The venv interpreter with fontTools, or null with the reason it is not usable here. */
-function venvPython(): { python: string } | { reason: string } {
-  const python = resolve(ROOT, VENV_PYTHON);
-  if (!existsSync(python))
-    return { reason: `${VENV_PYTHON} is missing (turboslide fonts build creates it)` };
-  const probe = spawnSync(python, ['-c', 'import fontTools'], { encoding: 'utf8' });
-  if (probe.status !== 0) return { reason: `${VENV_PYTHON} has no fontTools` };
-  return { python };
+/** The T's left bearing in px at a word size, interpolated between the measured optical sizes. */
+function tBearingPx(wordPx: number): number {
+  const keys = Object.keys(T_BEARING_BY_OPSZ)
+    .map(Number)
+    .sort((a, b) => a - b);
+  const first = keys[0] ?? 14;
+  const last = keys[keys.length - 1] ?? 32;
+  const opsz = Math.min(last, Math.max(first, wordPx));
+  const lo = [...keys].reverse().find((k) => k <= opsz) ?? first;
+  const hi = keys.find((k) => k >= opsz) ?? last;
+  const at = (k: number): number => T_BEARING_BY_OPSZ[k] ?? 0;
+  const units = lo === hi ? at(lo) : at(lo) + ((at(hi) - at(lo)) * (opsz - lo)) / (hi - lo);
+  return (units / 2048) * wordPx;
 }
 
-/** Runs outline-wordmark.py under the venv; the JSON it prints. */
-function outlineWord(python: string): Outline {
-  const run = spawnSync(
-    python,
-    [
-      resolve(ROOT, OUTLINE_SCRIPT),
-      '--font',
-      resolve(ROOT, INTER_WOFF2),
-      '--word',
-      WORD,
-      '--wght',
-      '500',
-      '--opsz',
-      '32',
-      '--track',
-      String(WORD_TRACK_EM),
-    ],
-    { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 },
-  );
-  if (run.status !== 0) throw new Error(`${OUTLINE_SCRIPT} failed: ${run.stderr.trim()}`);
-  return JSON.parse(run.stdout) as Outline;
+/** The lockup's geometry at a word size: the cap, the mark's width, the word's origin, the box. */
+function lockupGeometry(wordPx: number, wordWidth: number) {
+  const cap = Math.round(INTER_CAP_EM * wordPx);
+  const markWidth = cap * MARK_ASPECT;
+  /* the word's ink starts half the cap after the mark's; its origin is the T's bearing before that */
+  const textX = markWidth + cap / 2 - tBearingPx(wordPx);
+  /* the baseline 51 of 66 rows down the line, where round four's wordmark set it; the cap line a cap above */
+  const baseline = Math.round((wordPx * 51) / 66);
+  const capTop = baseline - cap;
+  return {
+    cap,
+    markWidth,
+    textX,
+    capTop,
+    baseline,
+    width: Math.ceil(textX + wordWidth),
+    height: wordPx,
+  };
 }
 
-/** wordmark-outlines.svg from the outline record: the mark and the word as one path in font units. */
-function wordmarkOutlinesSvg(outline: Outline): string {
-  const scale = WORD_PX / outline.upm;
-  const wordWidth = Math.ceil(outline.width * scale);
-  const box = WORD_MARK_PX + WORD_GAP_PX + wordWidth;
+/** The lockup as one SVG: the hinted mark at the cap and the word as live text on the baseline. */
+function lockupSvg(options: { title?: boolean } = {}): string {
+  const g = lockupGeometry(WORD_PX, WORD_WIDTH_CHROMIUM_PX);
+  const name =
+    options.title === false
+      ? 'aria-hidden="true">'
+      : `role="img" aria-label="${WORD}"><title>${WORD}</title>`;
+  const mark = quadPath(markQuadsInBox(g.cap, 0, g.capTop, { hinted: true }), 2);
   return (
-    `<!-- Turboslide wordmark as outlines (gslides-parity SPEC-4 1.2): the 48 px solid mark and the word "${outline.word}" taken from ${outline.font} (${outline.fontVersion}) at wght ${outline.wght}, opsz ${outline.opsz}, tracking ${outline.trackEm}em, with Inter's pair kerning applied (${outline.glyphs
-      .filter((g) => g.kern !== 0)
-      .map((g) => `${g.glyph} ${g.kern}`)
-      .join(
-        ', ',
-      )} units), by packages/theme/scripts/outline-wordmark.py under the fonts venv; the word is ${(outline.width * scale).toFixed(1)} px wide at ${WORD_PX} px. For the README, npm and the card, where no font can be assumed. Generated by scripts/build-brand.ts. -->\n` +
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${box} ${WORD_PX}" width="${box}" height="${WORD_PX}" fill="currentColor" role="img" aria-label="${outline.word}"><title>${outline.word}</title>` +
-    `<path transform="translate(0 ${WORD_BASELINE_Y - WORD_MARK_PX}) scale(${WORD_MARK_PX / 16})" shape-rendering="crispEdges" fill-rule="evenodd" d="${markPath(2)}"/>` +
-    `<path transform="translate(${WORD_MARK_PX + WORD_GAP_PX} ${WORD_BASELINE_Y}) scale(${scale})" d="${outline.d}"/>` +
-    `</svg>\n`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${g.width} ${g.height}" width="${g.width}" height="${g.height}" fill="currentColor" ${name}` +
+    `<path d="${mark}"/>` +
+    `<text x="${g.textX.toFixed(2)}" y="${g.baseline}" font-family="${INTER_STACK}" font-size="${WORD_PX}" font-weight="500" letter-spacing="${(WORD_TRACK_EM * WORD_PX).toFixed(2)}" style="font-feature-settings:'cv11','ss01'">${WORD}</text>` +
+    `</svg>`
   );
 }
 
-/** The committed outlines' path and width, when the file exists (the card and the lockups read it). */
-function committedOutline(): { d: string; widthPx: number } | null {
-  const file = resolve(ROOT, OUTLINES_PATH);
-  if (!existsSync(file)) return null;
-  const text = readFileSync(file, 'utf8');
-  const d = /<path transform="translate\([^)]*\) scale\([^)]*\)" d="([^"]+)"\/>/.exec(text)?.[1];
-  const width = /the word is ([0-9.]+) px wide/.exec(text)?.[1];
-  if (d === undefined || width === undefined) return null;
-  return { d, widthPx: Number(width) };
-}
-
-// The stacked lockup (SPEC-4 1.2): the 64 px cellular mark (32 cells, 2 px) centred over the word
-// at 66 px, the clear space around the pair equal to the mark's height, a half mark between them.
-const LOCKUP_MARK_PX = 64;
-const LOCKUP_CLEAR_PX = LOCKUP_MARK_PX;
-const LOCKUP_GAP_PX = LOCKUP_MARK_PX / 2;
-
-function lockupGeometry(wordWidth: number) {
-  const content = Math.max(LOCKUP_MARK_PX, Math.ceil(wordWidth));
-  const width = content + 2 * LOCKUP_CLEAR_PX;
-  const height = 2 * LOCKUP_CLEAR_PX + LOCKUP_MARK_PX + LOCKUP_GAP_PX + WORD_PX;
-  /* the mark's left edge on an even pixel so its 2 px cells land on device pixels */
-  const markX = Math.floor((width - LOCKUP_MARK_PX) / 2 / 2) * 2;
-  const markY = LOCKUP_CLEAR_PX;
-  const wordY = LOCKUP_CLEAR_PX + LOCKUP_MARK_PX + LOCKUP_GAP_PX + WORD_BASELINE_Y;
-  return { width, height, markX, markY, wordY, centerX: width / 2 };
-}
-
-/** lockup-stacked.svg with the word as live text; the README PNGs render it with the repository's Inter. */
-function lockupStackedSvg(): string {
-  const g = lockupGeometry(WORD_WIDTH_CHROMIUM_PX);
-  const { n } = markGrid(LOCKUP_MARK_PX);
+/** wordmark.svg: the lockup with the word as live text (the studio, the card and the README render it with InterVariable). */
+function wordmarkSvg(): string {
+  const g = lockupGeometry(WORD_PX, WORD_WIDTH_CHROMIUM_PX);
   return (
-    `<!-- Turboslide stacked lockup (gslides-parity SPEC-4 1.2): the ${LOCKUP_MARK_PX} px mark at ${n} cells (2 px cells) centred over the word at ${WORD_PX} px, a ${LOCKUP_GAP_PX} px gap, clear space of ${LOCKUP_CLEAR_PX} px around the pair; the README hero (docs/readme/brand, rendered at 2x by build-brand.ts --readme) and Not found. Generated by scripts/build-brand.ts. -->\n` +
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${g.width} ${g.height}" width="${g.width}" height="${g.height}" fill="currentColor" role="img" aria-label="${WORD}"><title>${WORD}</title>` +
-    `<g transform="translate(${g.markX} ${g.markY}) scale(${LOCKUP_MARK_PX / n})" shape-rendering="crispEdges">${cellRects(markBits(n))}</g>` +
-    wordText(g.centerX, g.wordY, 'middle') +
-    `</svg>\n`
+    `<!-- Turboslide lockup (docs/NEXT.md 4.1.2): the mark at the cap of the word set at ${WORD_PX} px (a ${g.cap} px cap, its box from row ${g.capTop} to the baseline on row ${g.baseline}), Inter 500, cv11 and ss01, tracking ${WORD_TRACK_EM}em, half the cap between the mark's ink and the word's T. The word is live text (the studio ships InterVariable.woff2). Generated by scripts/build-brand.ts. -->\n` +
+    `${lockupSvg()}\n`
   );
 }
 
-// The Open Graph card (SPEC-4 1.7; design-4/dither/og.html; docs/POLISH.md 3.6): 1200 by 630 in
-// the dark appearance, the hero frame through the screen at 10 px cells behind, the plate cut from
-// it at the mark's proportions (left 150, width 600, top 79, height 236) with the 48 px solid mark,
-// the word as outlines and the lead's first sentence, the address bottom left on its own plate
-// (`SITE.productionOrigin`, so the card prints the domain); nothing that matters within 48 px of
-// an edge. The page links tokens.css, brand.css and inter.css by relative paths so the type and the
-// tokens are the product's.
+// The Open Graph card (SPEC-4 1.7; docs/NEXT.md 4.1.3 item 4): 1200 by 630 in the dark appearance,
+// the mood picture of `CARD_MOOD` (NASA's Blue Marble, public domain; docs/brand.md section 8) at
+// object-fit cover behind, and a paper plate lower right, the mood slide's place on the deck
+// (Prototemplate deck/slides/06-mood-earth.html), carrying the lockup, the lead's first sentence,
+// the address in Inter (`SITE.productionOrigin`, so the card prints the domain) and the picture's
+// credit in titanium. The Earth fills the left half of the picture, so the plate keeps clear of it.
+// Nothing that matters sits within 48 px of an edge (X crops 1.91:1 to 2:1). The page links
+// tokens.css, brand.css and inter.css by relative paths so the type and the tokens are the
+// product's.
 const CARD = { width: 1200, height: 630 } as const;
-const CARD_PLATE = { left: 150, width: 600, top: 79, height: 236 } as const;
+/** The plate's right and bottom edges: 56 px in from the card's, the deck's rail distance. */
+const CARD_PLATE = { right: 56, bottom: 56, width: 528 } as const;
 
 /** The card's sentence: the first sentence of the one description (POLISH.md 3.6). */
 function cardSentence(): string {
@@ -581,15 +627,10 @@ function cardSentence(): string {
   return first === null ? SITE.description : first[0];
 }
 
-async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): Promise<string> {
-  const scale = WORD_PX / 2048;
-  const word =
-    outline === null
-      ? `<b>${WORD}</b>`
-      : `<svg class="word" viewBox="0 0 ${Math.ceil(outline.widthPx)} ${WORD_PX}" width="${Math.ceil(outline.widthPx)}" height="${WORD_PX}" aria-hidden="true"><path transform="translate(0 ${WORD_BASELINE_Y}) scale(${scale})" d="${outline.d}"/></svg>`;
-  const screen = relative(
+async function ogTemplateHtml(): Promise<string> {
+  const picture = relative(
     resolve(ROOT, BRAND_DIR),
-    resolve(ROOT, `${PUBLIC_DIR}${TWIN_PATHS.ogScreen.dark}`),
+    resolve(ROOT, `${PUBLIC_DIR}${CARD_MOOD.dark}`),
   );
   const html = `<!doctype html>
 <html lang="en" data-theme="dark">
@@ -597,15 +638,14 @@ async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): P
 <meta charset="utf-8">
 <title>Turboslide Open Graph card</title>
 <!--
-  The site wide Open Graph image (gslides-parity SPEC-4 1.7; research-4 report 02 section 6.4),
-  1200 by 630, rendered in Chromium at device scale factor 1 by scripts/build-brand.ts into
-  apps/studio/public/og/turboslide.png. The composition is the mark at card size: the hero's frame
-  through the screen at 10 px cells (${TWIN_PATHS.ogScreen.dark}, 120 by 63 cells, so a 552 px feed
-  card still shows 4.6 px cells and a 360 px unfurl 3 px); the plate cut from it at the mark's
-  proportions (left ${CARD_PLATE.left}, width ${CARD_PLATE.width}, top ${CARD_PLATE.top}, height ${CARD_PLATE.height}) carrying the 48 px solid mark, the word
-  as outlines and the lead's first sentence; the address bottom left on its own plate
-  (docs/POLISH.md 3.6). Nothing that matters sits within 48 px of an edge (X crops 1.91:1 to
-  2:1). Generated; edit the template function in scripts/build-brand.ts.
+  The site wide Open Graph image (gslides-parity SPEC-4 1.7; docs/NEXT.md 4.1.3 item 4), 1200 by
+  630, rendered in Chromium at device scale factor 1 by scripts/build-brand.ts into
+  apps/studio/public/og/turboslide.png. ${CARD_MOOD.title} (${CARD_MOOD.dark}, ${CARD_MOOD.license})
+  at object-fit cover behind; the paper plate lower right, ${CARD_PLATE.right} px from the right
+  and the bottom edges and ${CARD_PLATE.width} px wide, carrying the lockup (the mark at the word's
+  48 px cap, the word in live Inter 500), the lead's first sentence, the address and the credit.
+  Nothing that matters sits within 48 px of an edge (X crops 1.91:1 to 2:1). Generated; edit the
+  template function in scripts/build-brand.ts.
 -->
 <link rel="stylesheet" href="../../fonts/src/inter.css">
 <link rel="stylesheet" href="../../chrome/src/tokens.css">
@@ -613,22 +653,24 @@ async function ogTemplateHtml(outline: { d: string; widthPx: number } | null): P
 <style>
 html, body { margin: 0; }
 body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; background: var(--pt-paper); color: var(--pt-ink); font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01'; -webkit-font-smoothing: antialiased; }
-.card { position: relative; width: ${CARD.width}px; height: ${CARD.height}px; background: url('${screen}') 0 0 no-repeat; background-size: ${CARD.width}px ${CARD.height}px; image-rendering: pixelated; }
-.plate { position: absolute; left: ${CARD_PLATE.left}px; top: ${CARD_PLATE.top}px; width: ${CARD_PLATE.width}px; height: ${CARD_PLATE.height}px; box-sizing: border-box; background: var(--ts-plate); padding: 30px 32px 0; }
-.lock { display: flex; align-items: flex-end; gap: ${WORD_GAP_PX}px; height: ${WORD_PX}px; }
-.lock .mark { width: ${WORD_MARK_PX}px; height: ${WORD_MARK_PX}px; fill: currentColor; display: block; margin-bottom: ${WORD_PX - WORD_BASELINE_Y}px; }
-.lock .word { display: block; fill: currentColor; }
-.lock b { font-weight: 500; font-size: ${WORD_PX}px; line-height: 1; letter-spacing: ${WORD_TRACK_EM}em; }
-.plate p { margin: 22px 0 0; font-family: var(--pt-text); font-size: 22px; line-height: 1.4; color: var(--pt-ink-2); max-width: 536px; }
-.url { position: absolute; left: ${CARD_PLATE.left}px; bottom: 60px; font-family: var(--pt-mono); font-size: 20px; color: var(--pt-ink); background: var(--ts-plate); padding: 6px 12px; }
+.card { position: relative; width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; }
+.card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.plate { position: absolute; right: ${CARD_PLATE.right}px; bottom: ${CARD_PLATE.bottom}px; width: ${CARD_PLATE.width}px; box-sizing: border-box; background: var(--ts-plate); padding: 32px 36px 28px; }
+.lock { display: block; }
+.lock svg { display: block; }
+.plate p { margin: 20px 0 0; font-family: var(--pt-text); font-size: 22px; line-height: 1.4; color: var(--pt-ink); }
+.url { margin: 12px 0 0; font-family: var(--pt-text); font-size: 20px; line-height: 1.4; color: var(--pt-ink-2); }
+.credit { margin: 16px 0 0; font-family: var(--pt-text); font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--pt-titanium); }
 </style>
 </head>
 <body>
 <div class="card">
-  <span class="url">${SITE.productionOrigin.replace(/^https?:\/\//, '')}</span>
+  <img src="${picture}" alt="">
   <div class="plate">
-    <div class="lock"><svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="${markPath(2)}"/></svg>${word}</div>
+    <div class="lock">${lockupSvg({ title: false })}</div>
     <p>${cardSentence()}</p>
+    <div class="url">${SITE.productionOrigin.replace(/^https?:\/\//, '')}</div>
+    <div class="credit">${CARD_MOOD.credit}</div>
   </div>
 </div>
 </body>
@@ -640,18 +682,46 @@ body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; backg
 }
 
 // ---------------------------------------------------------------------------------------------
+// The mood pictures (docs/NEXT.md 4.1.2 and question 5; site.ts MOOD_PICTURES): each twin of the
+// GT deck's copy re-encoded as a greyscale JPEG at the deck's 1600 by 900, quality 75 with no
+// chroma subsampling, so a copy under /brand stays under 200 KB with no resampling of its cells.
+
+const MOOD_SIZE = { width: 1600, height: 900 } as const;
+const MOOD_MAX_BYTES = 200_000;
+
+async function moodJpeg(from: string): Promise<Uint8Array> {
+  const source = resolve(ROOT, from);
+  const meta = await sharp(source).metadata();
+  if (meta.width !== MOOD_SIZE.width || meta.height !== MOOD_SIZE.height)
+    fail(
+      `${from} is ${meta.width} by ${meta.height}, expected ${MOOD_SIZE.width} by ${MOOD_SIZE.height}`,
+    );
+  const buffer = await sharp(source)
+    .greyscale()
+    .jpeg({ quality: 75, chromaSubsampling: '4:4:4' })
+    .toBuffer();
+  if (buffer.length > MOOD_MAX_BYTES)
+    fail(`${from} re-encodes to ${buffer.length} bytes, over the ${MOOD_MAX_BYTES} byte ceiling`);
+  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+}
+
+// ---------------------------------------------------------------------------------------------
 // The build of the deterministic outputs
 
-type Kind = 'built' | 'outlined' | 'captured' | 'rendered' | 'facts';
+type Kind = 'built' | 'captured' | 'rendered' | 'facts';
 type Output = { path: string; bytes: Uint8Array; kind: Kind };
 
 type GeometryRow = {
   path: string;
+  /** the raster's size in px */
   tile: number;
-  mark: number;
-  cells: number;
-  cell: number;
-  lit: number;
+  /** the rows (the 16 px hand drawing) or the hinted vector */
+  form: 'rows' | 'vector';
+  /** the mark's cap in px and its cap line's row */
+  cap: number;
+  top: number;
+  /** the ink in px: the coverage summed (the rows count their pixels) */
+  ink: number;
   /** the colour count read back from the file by `--check` (the value written is the build's own read) */
   colours: number;
   plate: 'paper' | 'ink' | 'none';
@@ -659,7 +729,27 @@ type GeometryRow = {
 
 type Build = { outputs: Output[]; geometry: GeometryRow[] };
 
-/** The icon set, the SVG sources, the lockups and the card template, as bytes keyed by repository path. */
+/**
+ * The vector icons: the square, the mark's cap and its cap line. The touch icon is the sheet's
+ * 76 px cap on the 180 px ink square (0.42 of the side); the `any` and `dark` icons keep that
+ * share; the maskable icons take 0.36 of the side so the mark's corners stay inside the 40
+ * percent safe circle (R02 5.5); the monochrome icon is the 512 px `any` mark as alpha.
+ */
+const ICONS = {
+  touch: { size: 180, cap: 76 },
+  any192: { size: 192, cap: 81 },
+  any512: { size: 512, cap: 215 },
+  mask192: { size: 192, cap: 69 },
+  mask512: { size: 512, cap: 184 },
+  mono512: { size: 512, cap: 215 },
+} as const;
+
+/** An icon's quads: the mark at its cap, the cap line centred on a whole row, the edges hinted. */
+function iconQuads(icon: { size: number; cap: number }): Quad[] {
+  return markQuadsAt(icon.size, icon.cap, Math.round((icon.size - icon.cap) / 2), { hinted: true });
+}
+
+/** The icon set, the SVG sources, the wordmark and the card template, as bytes keyed by repository path. */
 async function build(): Promise<Build> {
   const outputs: Output[] = [];
   const geometry: GeometryRow[] = [];
@@ -670,127 +760,107 @@ async function build(): Promise<Build> {
       kind: 'built',
     });
   };
+  const vectorRow = (
+    path: string,
+    icon: { size: number; cap: number },
+    plate: GeometryRow['plate'],
+  ): GeometryRow => ({
+    path,
+    tile: icon.size,
+    form: 'vector',
+    cap: icon.cap,
+    top: Math.round((icon.size - icon.cap) / 2),
+    ink: inkOf(iconQuads(icon), icon.size),
+    colours: 0,
+    plate,
+  });
 
-  /* the SVG sources (1.4) */
-  add(
-    `${BRAND_DIR}/mark.svg`,
-    SVG_NOTE('the full mark at 64 cells (8 px cells at 512 px)') + `${markSvg(64, 512)}\n`,
-  );
+  /* the SVG sources (1.4): the master drawing, the 16 px rows, the 24 px placement, the tile */
+  add(`${BRAND_DIR}/mark.svg`, masterSvg());
   add(
     `${BRAND_DIR}/mark-small.svg`,
-    SVG_NOTE('the small mark: the solid form on the 16 unit grid for 16 to 48 px') +
-      `${markSvg(8, 16)}\n`,
+    SVG_NOTE('the 16 px rows, the one hand drawing (crisp edges)') + `${markSvg(16)}\n`,
+  );
+  add(
+    `${BRAND_DIR}/mark-24.svg`,
+    SVG_NOTE(
+      'the 24 px placement: the vector at a 16 px cap with its horizontal edges on whole rows (the cut half a pixel above mid cap), the title row and the lockup beside the 22 px word',
+    ) + `${markSvg(24)}\n`,
   );
   const tileSvg = iconTileSvg();
   add(`${BRAND_DIR}/icon-tile.svg`, tileSvg);
   add(`${PUBLIC_DIR}/icon.svg`, tileSvg);
 
-  /* the wordmark, the stacked lockup and the card template (1.2, 1.7) */
+  /* the lockup and the card template (1.2, 1.7) */
   add(`${BRAND_DIR}/wordmark.svg`, wordmarkSvg());
-  add(`${BRAND_DIR}/lockup-stacked.svg`, lockupStackedSvg());
-  add(OG_TEMPLATE_PATH, await ogTemplateHtml(committedOutline()));
+  add(OG_TEMPLATE_PATH, await ogTemplateHtml());
 
-  /* the ICO: the plate tiles at 16, 32 and 48 (0.4, 0.5) */
-  const tiles = [TILE_SIZES[16], TILE_SIZES[32], TILE_SIZES[48]].map((tile) =>
-    tileRaster(tile, LIGHT),
-  );
-  add(`${PUBLIC_DIR}/favicon.ico`, writeIco(tiles));
-  for (const tile of [TILE_SIZES[16], TILE_SIZES[32], TILE_SIZES[48]])
+  /* the ICO: the paper tiles at 16 (the rows), 32 and 48 (the hinted vector) */
+  const tiles = [TILE_SIZES[16], TILE_SIZES[32], TILE_SIZES[48]];
+  add(`${PUBLIC_DIR}/favicon.ico`, writeIco(tiles.map((tile) => tileRaster(tile, LIGHT))));
+  for (const tile of tiles)
     geometry.push({
       path: `${PUBLIC_DIR}/favicon.ico#${tile.size}`,
       tile: tile.size,
-      mark: tile.mark.size,
-      cells: 8,
-      cell: tile.mark.size / 8,
-      lit: litCount(solidBits(tile.mark.size)),
-      colours: 3,
+      form: tile.form,
+      cap: tile.cap,
+      top: tile.top,
+      ink:
+        tile.form === 'rows'
+          ? ROWS16.reduce((n, row) => n + [...row].filter((c) => c === '#').length, 0)
+          : inkOf(tileQuads(tile), tile.size),
+      colours: 0,
       plate: 'paper',
     });
 
-  /* the touch icon: the ink tile, the 128 px mark at 4 px cells, truecolor RGBA (1.5 step 3) */
-  const touch = markTileBits(180, 128, markGrid(128).n);
+  /* the touch icon: the paper mark on the ink square, opaque, no corners (1.5 step 3) */
   add(
     `${PUBLIC_DIR}/apple-touch-icon.png`,
-    await pngOfRaster(rasterOfBits(touch, DARK.plate, DARK.ink)),
+    indexedPng(markRaster(ICONS.touch.size, iconQuads(ICONS.touch), DARK.plate, DARK.ink)),
   );
-  geometry.push({
-    path: `${PUBLIC_DIR}/apple-touch-icon.png`,
-    tile: 180,
-    mark: 128,
-    cells: 32,
-    cell: 4,
-    lit: litCount(touch),
-    colours: 2,
-    plate: 'ink',
-  });
+  geometry.push(vectorRow(`${PUBLIC_DIR}/apple-touch-icon.png`, ICONS.touch, 'ink'));
 
-  /* the manifest icons: the ink tile with the mark at 160 and 448 px (1.1's table), palette PNGs */
-  const anyIcons: [string, number, number][] = [
-    [ICON_PATHS.any192, 192, 160],
-    [ICON_PATHS.any512, 512, 448],
-  ];
-  for (const [path, size, markPx] of anyIcons) {
-    const grid = markGrid(markPx);
-    const bits = markTileBits(size, markPx, grid.n);
-    add(`${PUBLIC_DIR}${path}`, png1(bits, DARK.plate, DARK.ink));
-    geometry.push({
-      path: `${PUBLIC_DIR}${path}`,
-      tile: size,
-      mark: markPx,
-      cells: grid.n,
-      cell: grid.cell,
-      lit: litCount(bits),
-      colours: 2,
-      plate: 'ink',
-    });
-    /* the inverse for the README's <picture>: the paper plate with the ink mark */
+  /* the manifest icons on the ink tile and their inverse on the paper plate for a <picture> */
+  for (const [path, icon] of [
+    [ICON_PATHS.any192, ICONS.any192],
+    [ICON_PATHS.any512, ICONS.any512],
+  ] as const) {
+    add(
+      `${PUBLIC_DIR}${path}`,
+      indexedPng(markRaster(icon.size, iconQuads(icon), DARK.plate, DARK.ink)),
+    );
+    geometry.push(vectorRow(`${PUBLIC_DIR}${path}`, icon, 'ink'));
     const darkPath = path.replace('icon-', 'icon-dark-');
-    add(`${PUBLIC_DIR}${darkPath}`, png1(bits, LIGHT.plate, LIGHT.ink));
-    geometry.push({
-      path: `${PUBLIC_DIR}${darkPath}`,
-      tile: size,
-      mark: markPx,
-      cells: grid.n,
-      cell: grid.cell,
-      lit: litCount(bits),
-      colours: 2,
-      plate: 'paper',
-    });
+    add(
+      `${PUBLIC_DIR}${darkPath}`,
+      indexedPng(markRaster(icon.size, iconQuads(icon), LIGHT.plate, LIGHT.ink)),
+    );
+    geometry.push(vectorRow(`${PUBLIC_DIR}${darkPath}`, icon, 'paper'));
   }
 
   /* the maskable icons: the mark inside the 40 percent safe circle (1.5 step 5; R02 5.5) */
-  const maskIcons: [string, number, number][] = [
-    [ICON_PATHS.mask192, 192, 96],
-    [ICON_PATHS.mask512, 512, 256],
-  ];
-  for (const [path, size, markPx] of maskIcons) {
-    const grid = markGrid(markPx);
-    const bits = markTileBits(size, markPx, grid.n);
-    add(`${PUBLIC_DIR}${path}`, png1(bits, DARK.plate, DARK.ink));
-    geometry.push({
-      path: `${PUBLIC_DIR}${path}`,
-      tile: size,
-      mark: markPx,
-      cells: grid.n,
-      cell: grid.cell,
-      lit: litCount(bits),
-      colours: 2,
-      plate: 'ink',
-    });
+  for (const [path, icon] of [
+    [ICON_PATHS.mask192, ICONS.mask192],
+    [ICON_PATHS.mask512, ICONS.mask512],
+  ] as const) {
+    add(
+      `${PUBLIC_DIR}${path}`,
+      indexedPng(markRaster(icon.size, iconQuads(icon), DARK.plate, DARK.ink)),
+    );
+    geometry.push(vectorRow(`${PUBLIC_DIR}${path}`, icon, 'ink'));
   }
 
-  /* the monochrome icon: the solid form as alpha */
-  add(`${PUBLIC_DIR}${ICON_PATHS.mono512}`, await pngOfRaster(monoRaster(512, 448)));
-  geometry.push({
-    path: `${PUBLIC_DIR}${ICON_PATHS.mono512}`,
-    tile: 512,
-    mark: 448,
-    cells: 8,
-    cell: 56,
-    lit: litCount(markTileBits(512, 448, 8)),
-    colours: 2,
-    plate: 'none',
-  });
+  /* the monochrome icon: the mark as alpha */
+  add(
+    `${PUBLIC_DIR}${ICON_PATHS.mono512}`,
+    await pngOfRaster(monoRaster(ICONS.mono512.size, iconQuads(ICONS.mono512))),
+  );
+  geometry.push(vectorRow(`${PUBLIC_DIR}${ICON_PATHS.mono512}`, ICONS.mono512, 'none'));
+
+  /* the mood pictures (docs/NEXT.md question 5): the deck's twins re-encoded under /brand */
+  for (const mood of Object.values(MOOD_PICTURES))
+    for (const appearance of ['dark', 'light'] as const)
+      add(`${PUBLIC_DIR}${mood[appearance]}`, await moodJpeg(`${mood.from}-${appearance}.jpg`));
 
   /* the manifest and robots.txt from site.ts (1.5 step 5) */
   add(
@@ -802,7 +872,7 @@ async function build(): Promise<Build> {
   return { outputs, geometry };
 }
 
-function sha256(bytes: Uint8Array): string {
+function sha256(bytes: Uint8Array | string): string {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
@@ -811,7 +881,7 @@ type BrandManifest = { generator: string; files: Record<string, ManifestRecord> 
 
 /** The paths the manifest covers beyond the deterministic build: by kind, as committed files. */
 function knownPaths(): { path: string; kind: Kind }[] {
-  const out: { path: string; kind: Kind }[] = [{ path: OUTLINES_PATH, kind: 'outlined' }];
+  const out: { path: string; kind: Kind }[] = [];
   for (const twin of Object.values(TWIN_PATHS))
     for (const path of [twin.dark, twin.light])
       out.push({ path: `${PUBLIC_DIR}${path}`, kind: 'captured' });
@@ -846,8 +916,13 @@ function manifestOf(outputs: Output[]): BrandManifest {
 async function geometryJson(rows: GeometryRow[]): Promise<string> {
   return jsonText(GEOMETRY_PATH, {
     generator: 'scripts/build-brand.ts',
-    threshold:
-      'solid below 64 px; 2 px cells at 64, 4 px from 128 to 256, 8 px at 448 and 512 (SPEC-4 0.5, 1.1)',
+    mark: {
+      path: { bytes: MARK_PATH.length, sha256: MARK_PATH_SHA256 },
+      rows16: { bytes: ROWS16_PATH.length, sha256: ROWS16_PATH_SHA256 },
+      aspect: Number(MARK_ASPECT.toFixed(4)),
+    },
+    steps:
+      'the 16 px rows under 24 px; the vector at a 16 px cap in the 24 px square; from 32 px the vector at the size itself, its cap the whole pixels whose box fits the square, every horizontal edge on a whole row',
     rows,
   });
 }
@@ -1385,680 +1460,40 @@ async function checkTwins(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The previews (1.4 `previews/**`; 0.49; MILESTONES-4 B1 day 3): records for the judges and the
-// verifier, regenerated on demand and not in the manifest.
-
-/** An SVG string rasterized by sharp (librsvg) at 1x. */
-async function svgPng(svg: string): Promise<Buffer> {
-  return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
-}
-
-function rasterPngBuffer(raster: Raster): Promise<Buffer> {
-  return sharp(Buffer.from(raster.data.buffer, raster.data.byteOffset, raster.data.byteLength), {
-    raw: { width: raster.width, height: raster.height, channels: 4 },
-  })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
-}
-
-function label(x: number, y: number, text: string, color: string, size = 12): string {
-  return `<text x="${x}" y="${y}" font-family="Helvetica, Arial, sans-serif" font-size="${size}" fill="${color}">${text}</text>`;
-}
-
-async function upscale(png: Buffer, k: number): Promise<Buffer> {
-  const meta = await sharp(png).metadata();
-  return sharp(png)
-    .resize((meta.width ?? 0) * k, (meta.height ?? 0) * k, { kernel: 'nearest' })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
-}
-
-/** The mark at `markPx` on a `size` square of the appearance, as PNG bytes; the tile when `tile`. */
-async function markPreview(
-  size: number,
-  markPx: number,
-  appearance: 'light' | 'dark',
-  tile = false,
-): Promise<Buffer> {
-  const colors = appearance === 'light' ? LIGHT : DARK;
-  if (tile) {
-    const geometry = TILE_SIZES[size as 16 | 32 | 48];
-    return rasterPngBuffer(tileRaster(geometry, colors));
-  }
-  const bits = markTileBits(size, markPx, markGrid(markPx).n);
-  return rasterPngBuffer(rasterOfBits(bits, colors.plate, colors.ink));
-}
-
-type Composite = { input: Buffer; left: number; top: number };
-
-async function sheet(
-  width: number,
-  height: number,
-  background: string,
-  parts: Composite[],
-): Promise<Buffer> {
-  return sharp({ create: { width, height, channels: 4, background } })
-    .composite(parts)
-    .png({ compressionLevel: 9 })
-    .toBuffer();
-}
-
-/** previews/mark-sizes.png: the sizes of 1.1's table on paper and on ink, every raster at 1:1. */
-async function sizeSheet(): Promise<Buffer> {
-  const items: { name: string; size: number; markPx: number; tile: boolean }[] = [
-    { name: '16 tile', size: 16, markPx: 12, tile: true },
-    { name: '24', size: 24, markPx: 24, tile: false },
-    { name: '32 tile', size: 32, markPx: 24, tile: true },
-    { name: '48 tile', size: 48, markPx: 40, tile: true },
-    { name: '64 (2 px cells)', size: 64, markPx: 64, tile: false },
-    { name: '128 (4 px)', size: 128, markPx: 128, tile: false },
-    { name: '180 touch tile', size: 180, markPx: 128, tile: false },
-    { name: '512 (8 px)', size: 512, markPx: 512, tile: false },
-  ];
-  const rowH = 560;
-  const parts: Composite[] = [];
-  const labels: string[] = [];
-  let x = 24;
-  const positions: number[] = [];
-  for (const item of items) {
-    positions.push(x);
-    x += item.size + 40;
-  }
-  const width = x + 24;
-  for (const [row, appearance] of [
-    [0, 'light'],
-    [1, 'dark'],
-  ] as const) {
-    const top = row * rowH;
-    parts.push({
-      input: await sheet(
-        width,
-        rowH,
-        appearance === 'light' ? TILE_COLORS.light.plate : TILE_COLORS.dark.plate,
-        [],
-      ),
-      left: 0,
-      top,
-    });
-    for (const [i, item] of items.entries()) {
-      const png = await markPreview(item.size, item.markPx, appearance, item.tile);
-      parts.push({ input: png, left: positions[i] ?? 0, top: top + 528 - item.size - 8 });
-      labels.push(
-        label(
-          positions[i] ?? 0,
-          top + 546,
-          item.name,
-          appearance === 'light' ? '#3a3d44' : '#b9bcc3',
-        ),
-      );
-    }
-  }
-  parts.push({
-    input: Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${rowH * 2}">${labels.join('')}</svg>`,
-    ),
-    left: 0,
-    top: 0,
-  });
-  return sheet(width, rowH * 2, '#888888', parts);
-}
-
-/**
- * previews/tab-strips-{1x,2x}.png: three strips at the browser's real geometry (a 48 px strip, 176
- * by 36 px tabs, 16 px icons) beside grey boxes standing for other sites' icons: Chrome's light
- * strip with the light tile, Chrome's dark strip with the dark tile (the prefers-color-scheme block
- * honoured), Safari's dark strip with the light tile (the base colours; R02 2.1 T2). At 2x the
- * tiles are the 32 px rasters, never the 16 px ones scaled.
- */
-async function tabStrips(scale: 1 | 2): Promise<Buffer> {
-  const stripW = 720 * scale;
-  const stripH = 48 * scale;
-  const tabW = 176 * scale;
-  const tabH = 36 * scale;
-  const icon = 16 * scale;
-  const cases: {
-    strip: string;
-    tab: string;
-    text: string;
-    tile: 'light' | 'dark';
-    name: string;
-  }[] = [
-    {
-      strip: '#dee1e6',
-      tab: '#ffffff',
-      text: '#3c4043',
-      tile: 'light',
-      name: 'Chrome, light strip: the paper tile',
-    },
-    {
-      strip: '#202124',
-      tab: '#35363a',
-      text: '#e8eaed',
-      tile: 'dark',
-      name: 'Chrome, dark strip: the ink tile through the media block',
-    },
-    {
-      strip: '#2d2d2d',
-      tab: '#3f3f3f',
-      text: '#e8eaed',
-      tile: 'light',
-      name: 'Safari, dark strip: the paper tile (the base colours)',
-    },
-  ];
-  const rows: Buffer[] = [];
-  for (const c of cases) {
-    const parts: Composite[] = [];
-    for (let t = 0; t < 4; t += 1) {
-      const active = t === 1;
-      parts.push({
-        input: await sheet(tabW, tabH, active ? c.tab : c.strip, []),
-        left: (8 + t * 180) * scale,
-        top: 8 * scale,
-      });
-      if (t !== 1 && t !== 2) {
-        const grey = c.tile === 'light' && c.strip === '#dee1e6' ? '#80868b' : '#9aa0a6';
-        parts.push({
-          input: await sheet(icon, icon, grey, []),
-          left: (8 + t * 180 + 12) * scale,
-          top: 18 * scale,
-        });
-      }
-    }
-    const tile = await markPreview(icon, icon === 16 ? 12 : 24, c.tile, true);
-    parts.push({ input: tile, left: (8 + 180 + 12) * scale, top: 18 * scale });
-    parts.push({
-      input: Buffer.from(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${stripW}" height="${stripH}">${label((8 + 180 + 36) * scale, 30 * scale, c.name, c.text, 12 * scale)}</svg>`,
-      ),
-      left: 0,
-      top: 0,
-    });
-    rows.push(await sheet(stripW, stripH, c.strip, parts));
-  }
-  const gap = 8 * scale;
-  return sheet(
-    stripW,
-    stripH * 3 + gap * 2,
-    '#888888',
-    rows.map((input, i) => ({ input, left: 0, top: i * (stripH + gap) })),
-  );
-}
-
-/** The grey silhouettes of R01 6.3 item 12 on a 32 unit box: the forms the mark must not read as. */
-const SILHOUETTES: [string, string][] = [
-  ['triangle', '<path d="M16 5 L28 27 H4 Z"/>'],
-  ['cube', '<path d="M16 3 L28 9.5 V22.5 L16 29 L4 22.5 V9.5 Z"/>'],
-  ['Z', '<path d="M6 6 H26 V10 L12 22 H26 V26 H6 V22 L20 10 H6 Z"/>'],
-  [
-    'rectangle in a rectangle',
-    '<rect x="4" y="8" width="24" height="16"/><rect x="10" y="12" width="12" height="8" fill="#ffffff"/>',
-  ],
-  ['roundel', '<circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="5" fill="#ffffff"/>'],
-  [
-    'chevron pair',
-    '<path d="M6 6 L16 16 L6 26 L10 26 L20 16 L10 6 Z"/><path d="M14 6 L24 16 L14 26 L18 26 L28 16 L18 6 Z"/>',
-  ],
-  [
-    'speed line',
-    '<rect x="4" y="9" width="24" height="3"/><rect x="8" y="15" width="20" height="3"/><rect x="12" y="21" width="16" height="3"/>',
-  ],
-  [
-    'portrait card with a plate',
-    '<rect x="8" y="3" width="16" height="26"/><rect x="11" y="9" width="10" height="7" fill="#ffffff"/>',
-  ],
-];
-
-/** previews/confusion-sheet.png: the 32 px tile and the bare 32 px mark beside the silhouettes, at 1x. */
-function confusionSheetSvg(): string {
-  const cellW = 156;
-  const width = 24 + cellW * (SILHOUETTES.length + 2);
-  const height = 120;
-  const items: string[] = [];
-  let x = 24;
-  const tile = TILE_SIZES[32];
-  items.push(
-    `<g transform="translate(${x} 24)"><rect width="48" height="48" fill="#ffffff"/><rect x="8" y="8" width="32" height="32" fill="${TILE_COLORS.light.plate}"/><rect x="8.5" y="8.5" width="31" height="31" fill="none" stroke="${TILE_COLORS.light.frame}" stroke-width="1"/><path transform="translate(8 8)" fill="${TILE_COLORS.light.ink}" fill-rule="evenodd" shape-rendering="crispEdges" d="${tileMarkPath(tile)}"/></g>${label(x, 92, 'the tile at 32', '#3a3d44')}`,
-  );
-  x += cellW;
-  items.push(
-    `<g transform="translate(${x} 24)"><rect width="48" height="48" fill="#ffffff"/><path transform="translate(8 8) scale(2)" fill="${TILE_COLORS.light.ink}" fill-rule="evenodd" shape-rendering="crispEdges" d="${markPath(2)}"/></g>${label(x, 92, 'the mark at 32', '#3a3d44')}`,
-  );
-  x += cellW;
-  for (const [name, body] of SILHOUETTES) {
-    items.push(
-      `<g transform="translate(${x} 24)"><rect width="48" height="48" fill="#ffffff"/><g transform="translate(8 8)" fill="#8a8f98">${body}</g></g>${label(x, 92, name, '#3a3d44')}`,
-    );
-    x += cellW;
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="#f6f6f6"/>${items.join('')}${label(24, 112, 'Research-4 report 01 section 6.3 item 12: grey stand ins for the forms the mark must not read as; none is a logo. A square with a lower left window shares no silhouette with them.', '#3a3d44', 11)}</svg>`;
-}
-
-type EdgeRecord = {
-  size: number;
-  scale: number;
-  px: number;
-  colours: number;
-  leftRailPx: number;
-  bottomRailPx: number;
-  windowEdges: number[];
-  soft: boolean;
-};
-
-/**
- * The raster edge check of 0.50: the 16 unit path at 16, 20 and 24 px, 1x and 2x, rasterized by
- * librsvg with crispEdges; a soft edge is a third colour. The window's edges in px are recorded so
- * a reader sees where the arithmetic lands (2.5 px at 20 px 1x) and how the renderer snapped it.
- */
-async function rasterEdges(): Promise<{ records: EdgeRecord[]; sheet: Buffer }> {
-  const records: EdgeRecord[] = [];
-  const tiles: Buffer[] = [];
-  for (const size of [16, 20, 24]) {
-    for (const scale of [1, 2]) {
-      const px = size * scale;
-      const svg = markSvg(8, px).replace('fill="currentColor"', `fill="${TILE_COLORS.light.ink}"`);
-      const png = await svgPng(svg);
-      const image = await decodePng(new Uint8Array(png));
-      const colours = colourSet(image).size;
-      const isInk = (x: number, y: number): boolean => image.data[(y * px + x) * 4 + 3] === 255;
-      /* the row through the window's middle and the column through it */
-      const midY = Math.floor(px * 0.8);
-      const midX = Math.floor(px * 0.35);
-      let leftRail = 0;
-      while (leftRail < px && isInk(leftRail, midY)) leftRail += 1;
-      let bottomRail = 0;
-      while (bottomRail < px && isInk(midX, px - 1 - bottomRail)) bottomRail += 1;
-      const unit = px / 16;
-      records.push({
-        size,
-        scale,
-        px,
-        colours,
-        leftRailPx: leftRail,
-        bottomRailPx: bottomRail,
-        windowEdges: [2 * unit, 10 * unit, 8 * unit, 14 * unit],
-        soft: colours > 2,
-      });
-      tiles.push(await upscale(png, 8));
-    }
-  }
-  const parts: Composite[] = [];
-  let x = 24;
-  const labels: string[] = [];
-  for (const [i, tile] of tiles.entries()) {
-    const r = records[i] as EdgeRecord;
-    parts.push({ input: tile, left: x, top: 24 });
-    labels.push(
-      label(
-        x,
-        24 + r.px * 8 + 16,
-        `${r.size} px at ${r.scale}x: ${r.colours} colours, rails ${r.leftRailPx}/${r.bottomRailPx} px`,
-        '#3a3d44',
-        11,
-      ),
-    );
-    x += r.px * 8 + 32;
-  }
-  const width = x;
-  const height = 24 + 48 * 8 + 48;
-  parts.push({
-    input: Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${labels.join('')}</svg>`,
-    ),
-    left: 0,
-    top: 0,
-  });
-  return { records, sheet: await sheet(width, height, '#f6f6f6', parts) };
-}
-
-/** previews/hero-scan.png: the scan's dark twins as a contact sheet (downscaled, a record only) with the plate metrics. */
-async function heroScanSheet(launched: LaunchedBrowser): Promise<Buffer | null> {
-  const recipeFile = resolve(ROOT, RECIPE_PATH);
-  if (!existsSync(recipeFile)) return null;
-  const recipe = JSON.parse(readFileSync(recipeFile, 'utf8')) as {
-    frames: FrameRecord[];
-    chosen: Chosen;
-    renderer: string;
-    capturedAt: string;
-  };
-  const cols = 3;
-  const w = 400;
-  const h = 225;
-  const rows = Math.ceil(recipe.frames.length / cols);
-  const cards: string[] = [];
-  recipe.frames.forEach((f, i) => {
-    const x = 24 + (i % cols) * (w + 24);
-    const y = 24 + Math.floor(i / cols) * (h + 56);
-    const role =
-      f.anchor === recipe.chosen.hero.anchor
-        ? 'hero'
-        : f.anchor === recipe.chosen.figure.anchor
-          ? 'figure'
-          : f.anchor === recipe.chosen.notfound.anchor
-            ? 'notfound'
-            : '';
-    const px = PLATE_BOXES.opener[0] / 4;
-    const py = PLATE_BOXES.opener[1] / 4;
-    const pw = PLATE_BOXES.opener[2] / 4;
-    const ph = PLATE_BOXES.opener[3] / 4;
-    cards.push(
-      `<div class="card" style="left:${x}px;top:${y}px"><div class="twin" style="background-image:url('${BRAND_ORIGIN}/${PUBLIC_DIR}${TWIN_PATHS.hero.dark}')"></div><div class="plate" style="left:${px}px;top:${py}px;width:${pw}px;height:${ph}px"></div><p>${f.anchor} ms${role ? `, ${role}` : ''}: ${f.litUnder} under the plate, ${f.litInBand} in the band, nearest ${f.nearestLitPx} px, lit ${(f.litFraction * 100).toFixed(1)} percent</p></div>`,
-    );
-  });
-  /* the frames other than the three chosen are not committed, so the sheet shows the plate box over the hero twin for each anchor's numbers */
-  const document = `<!doctype html><html><head><meta charset="utf-8"><style>
-body{margin:0;background:#f6f6f6;font:12px Helvetica,Arial,sans-serif;color:#3a3d44;width:${24 + cols * (w + 24)}px;height:${64 + rows * (h + 56)}px;position:relative}
-.card{position:absolute;width:${w}px}.twin{width:${w}px;height:${h}px;background-size:${w}px ${h}px;image-rendering:auto;border:1px solid #656565;box-sizing:border-box}
-.plate{position:absolute;border:1px solid #d6336c;box-sizing:border-box}.card p{margin:6px 0 0}
-</style></head><body>${cards.join('')}<p style="position:absolute;left:24px;top:${rows * (h + 56) - 8}px">The scan of SPEC-4 0.7 over ${recipe.frames.length} anchors, ${recipe.renderer}, ${recipe.capturedAt}. The picture is the committed hero twin downscaled to a quarter (a record, not a product surface); the outline is PLATE_BOXES.opener at the same scale; the numbers are each anchor's own.</p></body></html>`;
-  const shot = await shoot(
-    launched,
-    { document },
-    { width: 24 + cols * (w + 24), height: 64 + rows * (h + 56) },
-    1,
-    'light',
-  );
-  return Buffer.from(shot.png);
-}
-
-// The variants (0.49, 0.51; MILESTONES-4 B1 day 3): the two alternates re-rendered from the
-// repository's generators with a measured reason each, and P1's cell threshold sheet.
-
-/** Proposal 2's geometry (design-4/shader/tools/make-mark.mjs `geometry`, copied so importing the module does not rerun its writes). */
-function p2Geometry(S: number) {
-  const stroke = Math.max(1, Math.round(S / 32));
-  const bar = 2 * Math.max(1, Math.round(S / 32));
-  const cell = S >= 384 ? 8 : S >= 128 ? 4 : S >= 32 ? 2 : 0;
-  const padMin = Math.max(1, Math.round(S / 16));
-  let interior = Math.floor((S - 2 * padMin - 2 * stroke - bar) / 2);
-  if (cell) interior = Math.floor(interior / cell) * cell;
-  const W = 2 * interior + 2 * stroke + bar;
-  const pad = Math.floor((S - W) / 2);
-  const target = (W * 9) / 16;
-  let inner = Math.round(target) - bar - stroke;
-  if (cell) {
-    const lo = Math.floor(inner / cell) * cell;
-    const hi = lo + cell;
-    const dl = Math.abs(bar + lo + stroke - target);
-    const dh = Math.abs(bar + hi + stroke - target);
-    inner = dh <= dl ? hi : lo;
-  }
-  const H = bar + inner + stroke;
-  const y0 = Math.floor((S - H) / 2);
-  return {
-    S,
-    stroke,
-    bar,
-    cell,
-    pad,
-    W,
-    H,
-    interior,
-    inner,
-    x0: pad,
-    y0,
-    stemX: pad + stroke + interior,
-  };
-}
-
-function p2Svg(
-  S: number,
-  ink: string,
-  plate: string,
-): { svg: string; measured: Record<string, number> } {
-  const g = p2Geometry(S);
-  const r = (x: number, y: number, w: number, h: number): string =>
-    `<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`;
-  const parts = [
-    r(g.x0, g.y0, g.W, g.bar),
-    r(g.x0, g.y0 + g.bar, g.stroke, g.H - g.bar),
-    r(g.x0 + g.W - g.stroke, g.y0 + g.bar, g.stroke, g.H - g.bar),
-    r(g.x0, g.y0 + g.H - g.stroke, g.W, g.stroke),
-    r(g.stemX, g.y0 + g.bar, g.bar, g.inner),
-  ];
-  let cells = 0;
-  if (g.cell) {
-    const n = g.interior / g.cell;
-    const m = g.inner / g.cell;
-    const px = g.stemX + g.bar;
-    const py = g.y0 + g.bar;
-    for (let i = 0; i < m; i += 1)
-      for (let j = 0; j < n; j += 1)
-        if (rampInk(j + 1, i, n + 1)) {
-          parts.push(r(px + j * g.cell, py + i * g.cell, g.cell, g.cell));
-          cells += 1;
-        }
-  }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" shape-rendering="crispEdges"><rect width="${S}" height="${S}" fill="${plate}"/><g fill="${ink}">${parts.join('')}</g></svg>`;
-  return {
-    svg,
-    measured: {
-      size: S,
-      frameHeightPx: g.H,
-      rowsOutsideFrame: S - g.H,
-      strokePx: g.stroke,
-      stemPx: g.bar,
-      cellPx: g.cell,
-      rampCells: cells,
-    },
-  };
-}
-
-/** Proposal 3's hint T on the tile (design-4/type/tools/build-marks.mjs HINT and hintRects, copied). */
-const P3_HINT = {
-  barX: 3,
-  barY: 2,
-  barW: 10,
-  barH: 2,
-  stemX: 7,
-  stemW: 2,
-  stemY: 4,
-  footY: 14,
-  rampFromY: 10,
-} as const;
-const P3_END_TONE = 0.25;
-
-function p3TileSvg(
-  size: number,
-  colors: typeof TILE_COLORS.light,
-): { svg: string; measured: Record<string, number> } {
-  const unit = size / 16;
-  const cell = unit >= 4 ? unit / 2 : 0;
-  const r = (x: number, y: number, w: number, h: number): string =>
-    `<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`;
-  const parts = [
-    r(P3_HINT.barX * unit, P3_HINT.barY * unit, P3_HINT.barW * unit, P3_HINT.barH * unit),
-  ];
-  const solidEnd = cell > 0 ? P3_HINT.rampFromY : P3_HINT.footY;
-  parts.push(
-    r(
-      P3_HINT.stemX * unit,
-      P3_HINT.stemY * unit,
-      P3_HINT.stemW * unit,
-      (solidEnd - P3_HINT.stemY) * unit,
-    ),
-  );
-  let cells = 0;
-  if (cell > 0) {
-    const rows = ((P3_HINT.footY - P3_HINT.rampFromY) * unit) / cell;
-    const cols = (P3_HINT.stemW * unit) / cell;
-    for (let row = 0; row < rows; row += 1) {
-      const t = 1 - ((row + 1) / (rows + 1)) * (1 - P3_END_TONE);
-      for (let c = 0; c < cols; c += 1)
-        if (t * 255 > bayerThreshold(row, c)) {
-          parts.push(
-            r(P3_HINT.stemX * unit + c * cell, P3_HINT.rampFromY * unit + row * cell, cell, cell),
-          );
-          cells += 1;
-        }
-    }
-  }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" shape-rendering="crispEdges"><rect width="${size}" height="${size}" fill="${colors.plate}"/><rect x="0.5" y="0.5" width="${size - 1}" height="${size - 1}" fill="none" stroke="${colors.frame}" stroke-width="1"/><g fill="${colors.ink}">${parts.join('')}</g></svg>`;
-  const letterArea = P3_HINT.barW * P3_HINT.barH + P3_HINT.stemW * (P3_HINT.footY - P3_HINT.stemY);
-  return {
-    svg,
-    measured: {
-      size,
-      stemPx: P3_HINT.stemW * unit,
-      armPx: P3_HINT.barH * unit,
-      cellPx: cell,
-      rampCells: cells,
-      letterShareOfBox: Number((letterArea / 256).toFixed(4)),
-    },
-  };
-}
-
-/** P1's cell threshold sheet (P1 1.4): the mark beside 44 px type at 32 and 48 px in the solid, 16 and 24 cell forms, at 1x and 2x. */
-function cellThresholdDocument(): string {
-  const forms: { size: number; n: number }[] = [
-    { size: 32, n: 8 },
-    { size: 32, n: 16 },
-    { size: 48, n: 8 },
-    { size: 48, n: 16 },
-    { size: 48, n: 24 },
-    { size: 64, n: 32 },
-  ];
-  const rows = forms
-    .map((f) => {
-      const cell = f.size / f.n;
-      const body =
-        f.n === 8 ? `<path fill-rule="evenodd" d="${markPath(2)}"/>` : cellRects(markBits(f.n));
-      const box = f.n === 8 ? 16 : f.n;
-      return `<div class="row"><svg width="${f.size}" height="${f.size}" viewBox="0 0 ${box} ${box}" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">${body}</svg><span class="word">Turboslide</span><span class="cap">${f.size} px, ${f.n === 8 ? 'solid' : `${f.n} cells of ${cell} px`}</span></div>`;
-    })
-    .join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="${BRAND_ORIGIN}/packages/fonts/src/inter.css"><style>
-body{margin:0;padding:24px;background:#ffffff;color:#070707;font-family:${INTER_STACK};font-feature-settings:'cv11','ss01';width:560px}
-.row{display:flex;align-items:center;gap:16px;height:72px}.word{font-size:44px;font-weight:500;letter-spacing:-0.025em;line-height:1}.cap{margin-left:auto;font-size:12px;color:#3a3d44;font-family:Helvetica,Arial,sans-serif}
-p{font:12px Helvetica,Arial,sans-serif;color:#3a3d44;max-width:560px}
-</style></head><body>${rows}<p>Proposal 1 section 1.4: the sheet that fixed the cell threshold. A 2 px cell beside 44 px type reads as noise at 32 px (the 8 by 8 tile shows twice across) and as a picture from 64 px; SPEC-4 0.5 sets the one threshold at 64 px for every surface, so the horizontal lockup at 66 px type carries the solid 48 px mark.</p></body></html>`;
-}
-
-async function previews(): Promise<void> {
-  mkdirSync(resolve(ROOT, VARIANTS_DIR), { recursive: true });
-  const written: { path: string; bytes: number }[] = [];
-  const write = (path: string, bytes: Buffer | Uint8Array | string): void => {
-    const file = resolve(ROOT, path);
-    mkdirSync(dirname(file), { recursive: true });
-    writeFileSync(file, bytes);
-    written.push({
-      path,
-      bytes: typeof bytes === 'string' ? Buffer.byteLength(bytes) : bytes.length,
-    });
-  };
-
-  write(`${PREVIEWS_DIR}/mark-sizes.png`, await sizeSheet());
-  for (const [size, tile] of [
-    [16, true],
-    [32, true],
-    [16, false],
-    [32, false],
-  ] as const) {
-    const markPx = tile ? (size === 16 ? 12 : 24) : size;
-    const png = await markPreview(size, markPx, 'light', tile);
-    write(`${PREVIEWS_DIR}/mark-${size}-${tile ? 'tile' : 'paper'}-8x.png`, await upscale(png, 8));
-  }
-  write(`${PREVIEWS_DIR}/tab-strips-1x.png`, await tabStrips(1));
-  write(`${PREVIEWS_DIR}/tab-strips-2x.png`, await tabStrips(2));
-  const confusion = await svgPng(confusionSheetSvg());
-  write(`${PREVIEWS_DIR}/confusion-sheet.png`, confusion);
-  write(`${PREVIEWS_DIR}/confusion-sheet-4x.png`, await upscale(confusion, 4));
-  const edges = await rasterEdges();
-  write(`${PREVIEWS_DIR}/raster-edges.png`, edges.sheet);
-  write(
-    `${PREVIEWS_DIR}/raster-edges.json`,
-    await jsonText(`${PREVIEWS_DIR}/raster-edges.json`, {
-      generator: 'scripts/build-brand.ts --previews',
-      rule: 'SPEC-4 0.50: the 20 px print bar mark and the 24 px title row mark as rasters at 1x and 2x; a soft edge is a third colour; rasterized by librsvg (sharp) from the SVG path with shape-rendering crispEdges',
-      records: edges.records,
-    }),
-  );
-
-  /* the variants: the two alternates from the repository's generators with a measured reason each */
-  const variantRecords: Record<string, unknown>[] = [];
-  for (const S of [16, 32, 64, 512]) {
-    const { svg, measured } = p2Svg(S, TILE_COLORS.light.ink, TILE_COLORS.light.plate);
-    write(`${VARIANTS_DIR}/p2-frame-t-${S}-paper.png`, await svgPng(svg));
-    variantRecords.push({
-      variant: 'proposal 2, the slide frame and T with the ramp panel',
-      source:
-        'docs/gslides-parity/design-4/shader/tools/make-mark.mjs (geometry, panelCells, markShapes; copied here so the module is not rerun)',
-      file: `${VARIANTS_DIR}/p2-frame-t-${S}-paper.png`,
-      measured,
-      reason: `Rejected as the product mark (SPEC-4 0.2; J1 rejection 5, J3 rejection 5): the 16:9 frame leaves ${measured.rowsOutsideFrame} of ${S} rows outside it (${((measured.rowsOutsideFrame / S) * 100).toFixed(0)} percent of the box), its stroke is ${measured.strokePx} px${measured.cellPx ? ` and the panel holds ${measured.rampCells} cells of ${measured.cellPx} px` : ' and no cell fits at this size'}; the form reads as a letter and a screen before a slide, and J2's choice of it is on Kevin's list (section 8).`,
-    });
-  }
-  for (const S of [16, 32, 64]) {
-    const { svg, measured } = p3TileSvg(S, TILE_COLORS.light);
-    write(`${VARIANTS_DIR}/p3-t-tile-${S}-paper.png`, await svgPng(svg));
-    variantRecords.push({
-      variant: 'proposal 3, the Inter T tile with the dissolving foot',
-      source:
-        'docs/gslides-parity/design-4/type/tools/build-marks.mjs (HINT, hintRects; copied here so the module is not rerun)',
-      file: `${VARIANTS_DIR}/p3-t-tile-${S}-paper.png`,
-      measured,
-      reason: `Rejected as the product mark (SPEC-4 0.2; J1 rejection 2, J3 rejection 3): the letter covers ${(measured.letterShareOfBox * 100).toFixed(1)} percent of the box with a ${measured.stemPx} px stem${measured.cellPx ? ` and ${measured.rampCells} ramp cells of ${measured.cellPx} px` : ' and no ramp cell at this size'}; it reads as a Latin letter first (R01 6.3 item 13) and the ramp needs 64 px before a cell exists. Its tile (the plate and the 1 px frame) is what SPEC-4 0.4 kept.`,
-    });
-  }
-  write(
-    `${VARIANTS_DIR}/variants.json`,
-    await jsonText(`${VARIANTS_DIR}/variants.json`, {
-      generator: 'scripts/build-brand.ts --previews',
-      records: variantRecords,
-    }),
-  );
-
-  await withBrowser(async (launched) => {
-    for (const scale of [1, 2] as const) {
-      const shot = await shoot(
-        launched,
-        { document: cellThresholdDocument() },
-        { width: 608, height: 24 * 2 + 72 * 6 + 80 },
-        scale,
-        'light',
-      );
-      write(`${VARIANTS_DIR}/cell-threshold-${scale}x.png`, Buffer.from(shot.png));
-    }
-    const scan = await heroScanSheet(launched);
-    if (scan !== null) write(`${PREVIEWS_DIR}/hero-scan.png`, scan);
-  });
-
-  write(
-    `${PREVIEWS_DIR}/index.json`,
-    await jsonText(`${PREVIEWS_DIR}/index.json`, {
-      generator: 'scripts/build-brand.ts --previews',
-      writtenAt: new Date().toISOString(),
-      files: written.filter((w) => !w.path.endsWith('index.json')),
-    }),
-  );
-  for (const w of written) console.log(`${w.path} ${w.bytes} bytes`);
-}
-
-// ---------------------------------------------------------------------------------------------
-// The README lockups (`--readme`; SPEC-4 section 5, 1.13): the stacked lockup on an opaque plate
-// in each appearance at 2x, rendered by Chromium with the repository's Inter, for the README's
+// The README lockups (`--readme`; docs/NEXT.md 4.1.3 item 7): the lockup on an opaque plate in
+// each appearance at 2x, rendered by Chromium with the repository's Inter, for the README's
 // <picture> (the dark file as the default source on GitHub's light ground, the light file for a
-// reader with the dark GitHub theme). Written to docs/readme/brand for B5 to place.
+// reader with the dark GitHub theme). The clear space around the lockup is the mark's cap, so the
+// mark's box and the word's baseline stay on whole pixels at 1x and at 2x.
+
+/** The README lockup's page box in CSS px: the lockup with its cap of clear space on every side. */
+function readmeBox(): { width: number; height: number; pad: number; top: number } {
+  const g = lockupGeometry(WORD_PX, WORD_WIDTH_CHROMIUM_PX);
+  const pad = g.cap;
+  /* a cap above the cap line and below the baseline; the svg's own rows above its cap line are taken from the margin */
+  return { width: g.width + 2 * pad, height: 3 * pad, pad, top: pad - g.capTop };
+}
 
 function lockupDocument(appearance: 'dark' | 'light'): string {
   const colors = TILE_COLORS[appearance];
-  const svg = lockupStackedSvg().replace(/^<!--[\s\S]*?-->\n/, '');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="${BRAND_ORIGIN}/packages/fonts/src/inter.css"><style>html,body{margin:0}body{background:${colors.plate};color:${colors.ink};-webkit-font-smoothing:antialiased}svg{display:block}</style></head><body>${svg}</body></html>`;
+  const box = readmeBox();
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="${BRAND_ORIGIN}/packages/fonts/src/inter.css"><style>html,body{margin:0}body{width:${box.width}px;height:${box.height}px;overflow:hidden;background:${colors.plate};color:${colors.ink};-webkit-font-smoothing:antialiased}svg{display:block;margin:${box.top}px 0 0 ${box.pad}px}</style></head><body>${lockupSvg()}</body></html>`;
 }
 
 async function readmeLockups(): Promise<void> {
-  const g = lockupGeometry(WORD_WIDTH_CHROMIUM_PX);
+  const box = readmeBox();
   mkdirSync(resolve(ROOT, README_BRAND_DIR), { recursive: true });
   await withBrowser(async (launched) => {
     for (const appearance of ['dark', 'light'] as const) {
       const shot = await shoot(
         launched,
         { document: lockupDocument(appearance) },
-        { width: g.width, height: g.height },
+        { width: box.width, height: box.height },
         2,
         appearance,
       );
       const png = await exactPng(shot);
-      const path = `${README_BRAND_DIR}/lockup-stacked-${appearance}.png`;
+      const path = `${README_BRAND_DIR}/lockup-${appearance}.png`;
       writeFileSync(resolve(ROOT, path), png.bytes);
       console.log(
         `${path} ${png.bytes.length} bytes (${shot.width} by ${shot.height}, ${png.colours} colours, ${png.indexed ? 'indexed' : 'truecolor'})`,
@@ -2282,7 +1717,42 @@ function checkFacts(): void {
 // ---------------------------------------------------------------------------------------------
 // The check (0.11, 6.4)
 
+/** The mark's committed data against a rebuild from its rectangles and its rows (docs/NEXT.md 4.1.2). */
+function checkMarkData(): void {
+  const rebuilt = quadPath(markQuads(), 1);
+  if (rebuilt !== MARK_PATH)
+    fail('brand.ts MARK_PATH differs from the path MARK_RECTS build; rebuild it and its sha256');
+  if (sha256(MARK_PATH) !== MARK_PATH_SHA256)
+    fail(
+      `brand.ts MARK_PATH has the sha256 ${sha256(MARK_PATH)}, MARK_PATH_SHA256 says ${MARK_PATH_SHA256}`,
+    );
+  if (rowsPath(ROWS16) !== ROWS16_PATH)
+    fail('brand.ts ROWS16_PATH differs from the path ROWS16 draws');
+  if (sha256(ROWS16_PATH) !== ROWS16_PATH_SHA256)
+    fail(
+      `brand.ts ROWS16_PATH has the sha256 ${sha256(ROWS16_PATH)}, ROWS16_PATH_SHA256 says ${ROWS16_PATH_SHA256}`,
+    );
+}
+
+/** True when every pixel is opaque and lies on the line from `ground` to `ink` (a blend, no third colour). */
+function blendsOnly(image: Decoded, ground: Rgb, ink: Rgb, extra: Rgb[] = []): boolean {
+  for (let i = 0; i < image.data.length; i += 4) {
+    if (image.data[i + 3] !== 255) return false;
+    const px: Rgb = [image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0];
+    if (extra.some((c) => c[0] === px[0] && c[1] === px[1] && c[2] === px[2])) continue;
+    const span = ink[0] - ground[0] || ink[1] - ground[1] || ink[2] - ground[2] || 1;
+    const lead = ink[0] - ground[0] !== 0 ? 0 : ink[1] - ground[1] !== 0 ? 1 : 2;
+    const level = Math.round((((px[lead] ?? 0) - (ground[lead] ?? 0)) * 255) / span);
+    const want = blend(ground, ink, Math.max(0, Math.min(255, level)));
+    for (let c = 0; c < 3; c += 1) if (Math.abs((want[c] ?? 0) - (px[c] ?? 0)) > 1) return false;
+  }
+  return true;
+}
+
 async function check(): Promise<void> {
+  /* 0. the mark's paths against their rectangles and rows, and their sha256 */
+  checkMarkData();
+
   const manifestFile = resolve(ROOT, MANIFEST_PATH);
   if (!existsSync(manifestFile))
     fail(`${MANIFEST_PATH} is missing; run node scripts/build-brand.ts first`);
@@ -2318,9 +1788,9 @@ async function check(): Promise<void> {
   for (const output of fresh.outputs) {
     if (!(output.path in manifest.files)) fail(`${output.path} is built and not in the manifest`);
     const committed = new Uint8Array(readFileSync(resolve(ROOT, output.path)));
-    if (output.path.endsWith('.png')) {
+    if (output.path.endsWith('.png') || output.path.endsWith('.jpg')) {
       const [a, b] = await Promise.all([decodePng(committed), decodePng(output.bytes)]);
-      if (!samePixels(a, b)) fail(`${output.path}: the rebuilt PNG differs in its pixels`);
+      if (!samePixels(a, b)) fail(`${output.path}: the rebuilt picture differs in its pixels`);
     } else if (output.path.endsWith('.ico')) {
       const a = readIco(committed);
       const b = readIco(output.bytes);
@@ -2336,19 +1806,7 @@ async function check(): Promise<void> {
     }
   }
 
-  /* 3. the wordmark outlines, when the venv python is here */
-  const python = venvPython();
-  if ('python' in python) {
-    const rebuilt = wordmarkOutlinesSvg(outlineWord(python.python));
-    if (rebuilt !== readFileSync(resolve(ROOT, OUTLINES_PATH), 'utf8'))
-      fail(`${OUTLINES_PATH} differs from the rebuild under ${VENV_PYTHON}`);
-  } else {
-    skipped.push(
-      `the outlines rebuild (${python.reason}; the committed file is verified by bytes)`,
-    );
-  }
-
-  /* 4. the file facts of 6.4, read from the committed files */
+  /* 3. the file facts, read from the committed files */
   const publicFile = (path: string): Uint8Array =>
     new Uint8Array(readFileSync(resolve(ROOT, `${PUBLIC_DIR}${path}`)));
   const ico = readIco(publicFile(ICON_PATHS.favicon));
@@ -2356,61 +1814,70 @@ async function check(): Promise<void> {
   if (sizes.join(',') !== '16,32,48')
     fail(`favicon.ico entries are ${sizes.join(', ')}, expected 16, 32, 48`);
   for (const entry of ico) {
-    const colours = colourSet(entry).size;
-    if (colours !== 3)
-      fail(
-        `favicon.ico ${entry.width} px entry has ${colours} colours, expected 3 (plate, frame, ink)`,
-      );
     const tile = TILE_SIZES[entry.width as 16 | 32 | 48];
     if (!samePixels(entry, tileRaster(tile, LIGHT)))
       fail(`favicon.ico ${entry.width} px entry differs from the tile raster`);
+    const colours = colourSet(entry).size;
+    if (tile.form === 'rows' && colours !== 3)
+      fail(
+        `favicon.ico ${entry.width} px entry has ${colours} colours, expected 3 (plate, frame, ink)`,
+      );
+    if (!blendsOnly(entry, LIGHT.plate, LIGHT.ink, [LIGHT.frame]))
+      fail(
+        `favicon.ico ${entry.width} px entry carries a colour that is not the plate, the frame or a blend to the ink`,
+      );
   }
   const iconSvg = new TextDecoder().decode(publicFile(ICON_PATHS.svg));
   if (!iconSvg.includes('@media (prefers-color-scheme: dark)'))
     fail('icon.svg has no prefers-color-scheme block');
   if (!iconSvg.includes('shape-rendering="crispEdges"')) fail('icon.svg has no crispEdges');
+  if (!iconSvg.includes(ROWS16_PATH)) fail('icon.svg does not draw the 16 px rows');
   const touch = await decodePng(publicFile(ICON_PATHS.touch));
   if (touch.width !== 180 || touch.height !== 180)
     fail(`apple-touch-icon.png is ${touch.width} by ${touch.height}`);
-  for (let i = 3; i < touch.data.length; i += 4)
-    if (touch.data[i] !== 255) fail('apple-touch-icon.png is not opaque');
-  if (colourSet(touch).size !== 2)
-    fail(`apple-touch-icon.png has ${colourSet(touch).size} colours, expected 2`);
-  for (const path of [
-    ICON_PATHS.any192,
-    ICON_PATHS.any512,
-    ICON_PATHS.dark192,
-    ICON_PATHS.dark512,
-    ICON_PATHS.mask192,
-    ICON_PATHS.mask512,
-  ]) {
+  if (!blendsOnly(touch, DARK.plate, DARK.ink))
+    fail('apple-touch-icon.png is not opaque paper on ink and the blends between them');
+  for (const [path, ground, ink] of [
+    [ICON_PATHS.any192, DARK.plate, DARK.ink],
+    [ICON_PATHS.any512, DARK.plate, DARK.ink],
+    [ICON_PATHS.dark192, LIGHT.plate, LIGHT.ink],
+    [ICON_PATHS.dark512, LIGHT.plate, LIGHT.ink],
+    [ICON_PATHS.mask192, DARK.plate, DARK.ink],
+    [ICON_PATHS.mask512, DARK.plate, DARK.ink],
+  ] as const) {
     const image = await decodePng(publicFile(path));
-    const colours = colourSet(image).size;
-    if (colours !== 2) fail(`${path} has ${colours} colours, expected 2`);
+    if (!blendsOnly(image, ground, ink))
+      fail(`${path} carries a colour that is not its plate, its ink or a blend between them`);
     if (path.includes('mask') && !insideSafeCircle(image, DARK.plate))
       fail(`${path}: the mark leaves the 40 percent safe circle`);
   }
   const mono = await decodePng(publicFile(ICON_PATHS.mono512));
-  for (let i = 0; i < mono.data.length; i += 4) {
-    const alpha = mono.data[i + 3];
-    if (alpha !== 0 && alpha !== 255) fail('icon-mono-512.png has a partial alpha');
-    if (alpha === 255 && (mono.data[i] !== 0 || mono.data[i + 1] !== 0 || mono.data[i + 2] !== 0))
+  for (let i = 0; i < mono.data.length; i += 4)
+    if (
+      (mono.data[i + 3] ?? 0) > 0 &&
+      (mono.data[i] !== 0 || mono.data[i + 1] !== 0 || mono.data[i + 2] !== 0)
+    )
       fail('icon-mono-512.png carries a colour beside its alpha');
-  }
   const webmanifest = JSON.parse(new TextDecoder().decode(publicFile(ICON_PATHS.manifest))) as {
     start_url?: string;
+    background_color?: string;
+    theme_color?: string;
     icons?: { purpose?: string }[];
   };
   if (webmanifest.start_url !== '/home')
     fail(`manifest.webmanifest start_url is ${webmanifest.start_url}`);
+  if (webmanifest.background_color !== '#ffffff' || webmanifest.theme_color !== '#ffffff')
+    fail(
+      `manifest.webmanifest colours are ${webmanifest.background_color} and ${webmanifest.theme_color}, not the paper #ffffff (docs/NEXT.md 4.1.3 item 3)`,
+    );
   for (const icon of webmanifest.icons ?? [])
     if (icon.purpose !== undefined && icon.purpose.includes(' '))
       fail('manifest.webmanifest has an icon with more than one purpose');
 
-  /* 5. the twins: the theme palette and the ink fractions summing to 1.0 (0.12) */
+  /* 4. the twins: the theme palette and the ink fractions summing to 1.0 (0.12) */
   await checkTwins();
 
-  /* 6. the card: its size and ceiling always; its pixels when the local browser is chromium-1217 (1.5 step 7) */
+  /* 5. the card: its size and ceiling always; its pixels when the local browser is chromium-1217 (1.5 step 7) */
   const cardBytes = new Uint8Array(readFileSync(resolve(ROOT, CARD_PATH)));
   const card = await decodePng(cardBytes);
   if (card.width !== CARD.width || card.height !== CARD.height)
@@ -2431,7 +1898,7 @@ async function check(): Promise<void> {
       fail(`${CARD_PATH}: the card rendered by ${launched.renderer} differs in its pixels`);
   });
 
-  /* 7. mark-geometry.json against the PNGs read back */
+  /* 6. mark-geometry.json against the files read back */
   const geometryFile = resolve(ROOT, GEOMETRY_PATH);
   if (!existsSync(geometryFile)) fail(`${GEOMETRY_PATH} is missing`);
   const geometry = JSON.parse(readFileSync(geometryFile, 'utf8')) as { rows: GeometryRow[] };
@@ -2450,16 +1917,17 @@ async function check(): Promise<void> {
     if (colours !== row.colours)
       fail(`${row.path}: ${colours} colours read back, ${GEOMETRY_PATH} says ${row.colours}`);
   }
+  await readBackColours(fresh);
   const freshGeometry = await geometryJson(fresh.geometry);
   if (freshGeometry !== readFileSync(geometryFile, 'utf8'))
     fail(`${GEOMETRY_PATH} differs from the rebuild`);
 
-  /* 8. facts.json against the tree (0.25) */
+  /* 7. facts.json against the tree (0.25) */
   checkFacts();
 
   for (const line of skipped) note(`skipped ${line}`);
   console.log(
-    `build-brand --check: ${Object.keys(manifest.files).length} files match the manifest, the rebuild and the facts of SPEC-4 6.4`,
+    `build-brand --check: the mark's paths match their rectangles and rows; ${Object.keys(manifest.files).length} files match the manifest, the rebuild and the facts of SPEC-4 6.4`,
   );
 }
 
@@ -2486,15 +1954,7 @@ async function writeManifest(base: string, built: Output[]): Promise<BrandManife
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
-  const known = new Set([
-    '--check',
-    '--capture',
-    '--previews',
-    '--readme',
-    '--facts',
-    '--out',
-    '--no-card',
-  ]);
+  const known = new Set(['--check', '--capture', '--readme', '--facts', '--out', '--no-card']);
   for (const [i, flag] of argv.entries())
     if (flag.startsWith('--') && !known.has(flag) && argv[i - 1] !== '--out')
       fail(`unknown flag ${flag}`);
@@ -2502,9 +1962,10 @@ async function main(): Promise<void> {
     await check();
     return;
   }
+  checkMarkData();
   const outIndex = argv.indexOf('--out');
   const base = outIndex >= 0 ? resolve(ROOT, argv[outIndex + 1] ?? '') : ROOT;
-  const only = argv.filter((a) => ['--capture', '--previews', '--readme', '--facts'].includes(a));
+  const only = argv.filter((a) => ['--capture', '--readme', '--facts'].includes(a));
 
   if (argv.includes('--capture')) await captureTwins();
   if (argv.includes('--facts')) {
@@ -2516,10 +1977,9 @@ async function main(): Promise<void> {
       `${FACTS_PATH}: ${facts.actions.count} actions, ${facts.mcpTools.count} MCP tools, ${facts.httpPaths.count} HTTP paths, ${facts.layouts.count} layouts, ${facts.shapePresets.count} shape presets, ${facts.materials.count} materials, ${facts.checkSteps.count} check steps, ${facts.parityRows.total} parity rows (${facts.parityRows.date}), ${facts.measured.rows.length} measured rows from ${facts.measured.source}`,
     );
   }
-  if (argv.includes('--previews')) await previews();
   if (argv.includes('--readme')) await readmeLockups();
   if (only.length > 0) {
-    /* a flag run rewrites the deterministic outputs (no browser, no python) and the manifest over what is now on disk, then stops */
+    /* a flag run rewrites the deterministic outputs (no browser) and the manifest over what is now on disk, then stops */
     const result = await build();
     await readBackColours(result);
     const built = [
@@ -2535,22 +1995,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  /* the default build: the deterministic outputs, the outlines when python is here, the card */
+  /* the default build: the deterministic outputs and the card */
   const outputs: Output[] = [];
-  const python = venvPython();
-  if ('python' in python) {
-    const outlines = wordmarkOutlinesSvg(outlineWord(python.python));
-    outputs.push({
-      path: OUTLINES_PATH,
-      bytes: new TextEncoder().encode(outlines),
-      kind: 'outlined',
-    });
-    writeOutputs(base, outputs);
-  } else {
-    note(
-      `${OUTLINES_PATH} not rebuilt: ${python.reason}${existsSync(resolve(ROOT, OUTLINES_PATH)) ? '; the committed file stands' : '; wordmark.svg carries the word as live text'}`,
-    );
-  }
   const result = await build();
   await readBackColours(result);
   outputs.push(...result.outputs);
@@ -2567,19 +2013,15 @@ async function main(): Promise<void> {
     note(
       `${missingTwins.length} twin file(s) missing (${missingTwins.map((m) => m.path).join(', ')}); run --capture`,
     );
-  if (!argv.includes('--no-card')) {
-    if (missingTwins.some((m) => m.path.includes('og-screen')))
-      note(`the card is not rendered without ${TWIN_PATHS.ogScreen.dark}`);
-    else
-      await withBrowser(async (launched) => {
-        const card = await renderCard(launched);
-        outputs.push({ path: CARD_PATH, bytes: card.bytes, kind: 'rendered' });
-        writeOutputs(base, [{ path: CARD_PATH, bytes: card.bytes, kind: 'rendered' }]);
-        note(
-          `card rendered by ${launched.product} ${launched.version} (${launched.executableSource}) on ${launched.renderer}: ${card.colours} colours, ${card.indexed ? 'indexed' : 'truecolor'}`,
-        );
-      });
-  }
+  if (!argv.includes('--no-card'))
+    await withBrowser(async (launched) => {
+      const card = await renderCard(launched);
+      outputs.push({ path: CARD_PATH, bytes: card.bytes, kind: 'rendered' });
+      writeOutputs(base, [{ path: CARD_PATH, bytes: card.bytes, kind: 'rendered' }]);
+      note(
+        `card rendered by ${launched.product} ${launched.version} (${launched.executableSource}) on ${launched.renderer}: ${card.colours} colours, ${card.indexed ? 'indexed' : 'truecolor'}, ${card.bytes.length} bytes`,
+      );
+    });
   const manifest = await writeManifest(base, outputs);
   for (const output of outputs) console.log(`${output.path} ${output.bytes.length} bytes`);
   console.log(`${MANIFEST_PATH} ${Object.keys(manifest.files).length} files`);

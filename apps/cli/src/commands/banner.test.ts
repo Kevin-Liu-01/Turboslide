@@ -1,8 +1,9 @@
-// The banner of gslides-parity SPEC-4 0.17 and 1.11: four lines of half block characters from the
-// brand module's bitmap beside the word, the version, the hosted address, the action count and
-// the effects backend; `turboslide --version` prints it and exits 0; the output is byte identical
-// with NO_COLOR set (no colour is ever written); `turboslide info` prints the header before the
-// deck facts. Run through runCli with captured streams over the lint fixture deck.
+// The banner of gslides-parity SPEC-4 0.17 and 1.11 (docs/NEXT.md 4.1.3 item 5): six lines of half
+// block characters from the brand module's 16 px rows, the first four beside the word, the
+// version, the hosted address, the action count and the effects backend; `turboslide --version`
+// prints it and exits 0; the output is byte identical with NO_COLOR set (no colour is ever
+// written); `turboslide info` prints the header before the deck facts. Run through runCli with
+// captured streams over the lint fixture deck.
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -12,11 +13,11 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { document } from '@turboslide/lint/fixtures/deck';
 import { ACTION_IDS } from '@turboslide/schema/actions';
-import { litCount, markBits, markBlocks } from '@turboslide/theme/brand';
+import { ROWS16, markBlocks } from '@turboslide/theme/brand';
 import { SITE } from '@turboslide/theme/brand/site';
 
 import { runCli } from '../cli.ts';
-import { bannerFacts, bannerLines, cliVersion } from './banner.ts';
+import { GLYPH_COLUMNS, bannerFacts, bannerLines, cliVersion } from './banner.ts';
 
 type Run = { code: number; stdout: string; stderr: string };
 
@@ -32,17 +33,21 @@ async function run(argv: string[], cwd: string, env: NodeJS.ProcessEnv = {}): Pr
   return { code, stdout, stderr };
 }
 
-const BLOCKS = /^[█▀▄ ]{8} {2}/;
+const BLOCKS = /^[█▀▄ ]{12} {2}/;
+const GLYPH = /^[█▀▄ ]{1,12}$/;
 const ESCAPE = /\[/;
 
 describe('the banner (SPEC-4 1.11)', () => {
-  test('is four lines: the block glyph of markBlocks(8), then the word, the version, the address, the counts and the fourth line', () => {
+  test('is six lines: the glyph of markBlocks, the word and the version, the address, the counts and the fourth line, then the glyph alone', () => {
     const facts = bannerFacts('checkout /tmp/x');
     const lines = bannerLines(facts);
-    expect(lines).toHaveLength(4);
-    for (const line of lines) expect(line).toMatch(BLOCKS);
-    expect(lines.map((l) => l.slice(0, 8))).toEqual(markBlocks(8));
-    expect(lines[0]).toBe(`${markBlocks(8)[0]}  Turboslide ${cliVersion()}`);
+    expect(lines).toHaveLength(6);
+    for (const line of lines.slice(0, 4)) expect(line).toMatch(BLOCKS);
+    for (const line of lines.slice(4)) expect(line).toMatch(GLYPH);
+    expect(lines.map((l) => l.slice(0, GLYPH_COLUMNS).trimEnd())).toEqual(
+      markBlocks().map((l) => l.trimEnd()),
+    );
+    expect(lines[0]).toBe(`${markBlocks()[0]}  Turboslide ${cliVersion()}`);
     expect(lines[1]).toContain(SITE.productionOrigin);
     expect(lines[2]).toMatch(
       new RegExp(`${ACTION_IDS.length} actions, effects backend: (native|wasm|typescript)$`),
@@ -50,14 +55,17 @@ describe('the banner (SPEC-4 1.11)', () => {
     expect(lines[3]?.endsWith('checkout /tmp/x')).toBe(true);
   });
 
-  test('draws the solid form: 52 of 64 cells lit, the window as spaces in the lower left of the glyph', () => {
-    /* the glyph is the favicon's bitmap at N = 8 (SPEC-4 0.17): the window is rows 4 to 6, columns 1 to 4 */
-    expect(litCount(markBits(8))).toBe(52);
-    const glyph = markBlocks(8);
-    expect(glyph[0]).toBe('████████');
-    expect(glyph[1]).toBe('████████');
-    expect(glyph[2]).toBe('█    ███');
-    expect(glyph[3]).toBe('█▄▄▄▄███');
+  test('draws the 16 px rows of the tab icon: the crossbar, the stem, the cut and the three bars', () => {
+    /* the glyph is the rows' mark area (rows 2 to 13, columns 2 to 13), two pixel rows a line */
+    expect(ROWS16[2]).toBe('...###########..');
+    expect(markBlocks()).toEqual([
+      ' ███████████',
+      ' ▀▀▀▀▀███▀▀▀',
+      '▄▄▄▄▄ ███   ',
+      '▄▄▄▄ ▄▄▄    ',
+      '     ███    ',
+      '███ ███     ',
+    ]);
   });
 
   test('reads the version from apps/cli/package.json', () => {
@@ -96,8 +104,8 @@ describe('turboslide --version and info', () => {
     expect(result.code).toBe(0);
     expect(result.stderr).toBe('');
     const lines = result.stdout.trimEnd().split('\n');
-    expect(lines).toHaveLength(4);
-    expect(lines).toEqual(bannerLines(bannerFacts(lines[3]?.slice(10) ?? '')));
+    expect(lines).toHaveLength(6);
+    expect(lines).toEqual(bannerLines(bannerFacts(lines[3]?.slice(GLYPH_COLUMNS + 2) ?? '')));
     expect(lines[3]).toMatch(/ {2}checkout \//);
   });
 
@@ -116,7 +124,7 @@ describe('turboslide --version and info', () => {
     expect(facts.version).toBe(cliVersion());
     expect(facts.actionCount).toBe(ACTION_IDS.length);
     expect(['native', 'wasm', 'typescript']).toContain(facts.backend);
-    expect(result.stderr.trimEnd().split('\n')).toHaveLength(4);
+    expect(result.stderr.trimEnd().split('\n')).toHaveLength(6);
   });
 
   test('info prints the header before the deck facts, with the deck on the fourth line', async () => {
@@ -124,9 +132,10 @@ describe('turboslide --version and info', () => {
     expect(result.code).toBe(0);
     const lines = result.stdout.split('\n');
     expect(lines.slice(0, 4).every((line) => BLOCKS.test(line))).toBe(true);
+    expect(lines.slice(4, 6).every((line) => GLYPH.test(line))).toBe(true);
     expect(lines[3]).toContain(
       `deck ${document.deck.id} at revision ${document.deck.revision}, ${Object.keys(document.slides).length} slides`,
     );
-    expect(lines[4]).toContain(document.deck.title);
+    expect(lines[6]).toContain(document.deck.title);
   });
 });

@@ -9029,6 +9029,16 @@
       "note": "docs/NEXT.md 3.2 H2 and 4.1.5: the dispatcher's deck.list answers a principal the decks it owns or holds a grant or a link on (server/deck-scope.ts); the bootstrap bearer and a checkout's localhost holder list the store; a deployment refuses the POST without the bearer, which lists nothing, and the row reads the window transport there"
     },
     {
+      "id": "decks.manifest.paper",
+      "feature": "decks",
+      "interaction": "`/manifest.webmanifest` answers `background_color` and `theme_color` `#ffffff`",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-brand-surfaces 54",
+      "note": "docs/NEXT.md 4.1.3 item 3 and 4.1.5 (B1): site.ts writes the paper colours into the manifest scripts/build-brand.ts generates; production answered #070707 for both on 2026-10-02"
+    },
+    {
       "id": "export.print.deck-appearance",
       "feature": "export",
       "interaction": "Print settings and preview on a light deck: the page's sheet background reads paper; the PDF it downloads is light",

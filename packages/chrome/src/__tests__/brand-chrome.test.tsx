@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
 import { rampInk } from '@turboslide/effects/ramp';
-import { cellRuns, markBits, markPath } from '@turboslide/theme/brand';
+import { ROWS16_PATH, TILE_SIZES, markPlacement, tileMarkPath } from '@turboslide/theme/brand';
 
 import { APP_BAR_BRAND, AppBarBrand } from '../AppBarBrand';
 import type { LinkComponent, LinkSlotProps } from '../editor-shell';
@@ -20,10 +20,10 @@ import { TitleHomeLink, TitleRow } from '../TitleRow';
 import { hideTooltip } from '../Tooltip';
 import { TurboslideMark } from '../TurboslideMark';
 
-// The brand components of round four (gslides-parity SPEC-4 1.10; MILESTONES-4 B1 day 1): the
-// mark draws the solid path below 64 px and the cells from 64 px from the one geometry module,
-// names itself alone and stays quiet beside a word; the tile carries the plate, the frame and the
-// inset mark; the app bar lockup and the title row render the router's Link through the slot
+// The brand components (gslides-parity SPEC-4 1.10; docs/NEXT.md 4.1.3 item 2): the mark draws
+// the 16 px rows under 24 px, the 24 px placement under 32 px and the hinted vector from 32 px from
+// the one geometry module, names itself alone and stays quiet beside a word; the tile carries the
+// plate, the frame and the mark; the app bar lockup and the title row render the router's Link through the slot
 // when given and a plain anchor when not, both carrying the Tooltip primitive and their
 // data-control; the empty figure is a labelled crop with a title, one sentence and one action;
 // the progress fill moves with translateX and masks its leading sixteen cells with the ramp.
@@ -41,48 +41,58 @@ const FakeLink: LinkComponent = ({ to, preload, className, children, ...rest }: 
 );
 
 describe('TurboslideMark', () => {
-  it('draws the solid path below 64 px and names itself alone', () => {
+  it('draws the 24 px placement, the mark at a 16 px cap, and names itself alone', () => {
     const { container } = render(<TurboslideMark size={24} />);
     const svg = container.querySelector('svg')!;
     expect(svg.getAttribute('role')).toBe('img');
     expect(svg.getAttribute('aria-label')).toBe('Turboslide');
     expect(svg.getAttribute('width')).toBe('24');
-    expect(svg.getAttribute('viewBox')).toBe('0 0 16 16');
+    expect(svg.getAttribute('viewBox')).toBe('0 0 24 24');
     expect(svg.getAttribute('fill')).toBe('currentColor');
-    expect(svg.getAttribute('shape-rendering')).toBe('crispEdges');
+    expect(svg.getAttribute('shape-rendering')).toBeNull();
+    expect(svg.getAttribute('data-form')).toBe('vector');
+    expect(svg.getAttribute('data-cap')).toBe('16');
     expect(svg.classList.contains('ts-mark')).toBe(true);
-    expect(svg.querySelectorAll('rect')).toHaveLength(0);
-    expect(svg.querySelector('path')?.getAttribute('d')).toBe(markPath(2));
+    expect(svg.querySelectorAll('path')).toHaveLength(1);
+    expect(svg.querySelector('path')?.getAttribute('d')).toBe(markPlacement(24).d);
   });
 
   it('stays quiet beside a word', () => {
-    const { container } = render(<TurboslideMark size={16} aria-hidden="true" />);
+    const { container } = render(<TurboslideMark size={24} aria-hidden="true" />);
     const svg = container.querySelector('svg')!;
     expect(svg.getAttribute('role')).toBeNull();
     expect(svg.getAttribute('aria-label')).toBeNull();
     expect(svg.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('draws the cells of markBits on the size’s own grid from 64 px', () => {
-    const { container } = render(<TurboslideMark size={64} />);
-    const svg = container.querySelector('svg')!;
-    expect(svg.getAttribute('viewBox')).toBe('0 0 32 32');
-    expect(svg.getAttribute('data-cells')).toBe('32');
-    expect(svg.querySelectorAll('rect')).toHaveLength(cellRuns(markBits(32)).length);
-    const big = render(<TurboslideMark size={512} />).container.querySelector('svg')!;
+  it('snaps a size to its step: the crisp 16 px rows under 24 px, the vector at the size from 32 px', () => {
+    const small = render(<TurboslideMark size={20} />).container.querySelector('svg')!;
+    expect(small.getAttribute('width')).toBe('16');
+    expect(small.getAttribute('data-form')).toBe('rows');
+    expect(small.getAttribute('shape-rendering')).toBe('crispEdges');
+    expect(small.querySelector('path')?.getAttribute('d')).toBe(ROWS16_PATH);
+    const big = render(<TurboslideMark size={64} />).container.querySelector('svg')!;
     expect(big.getAttribute('viewBox')).toBe('0 0 64 64');
-    expect(big.querySelectorAll('rect')).toHaveLength(cellRuns(markBits(64)).length);
+    expect(big.getAttribute('data-cap')).toBe('43');
+    expect(big.querySelector('path')?.getAttribute('d')).toBe(markPlacement(64).d);
   });
 
-  it('draws the tile of SPEC-4 0.4 at 16, 32 and 48 and refuses another size', () => {
+  it('draws the tile at 16, 32 and 48 and refuses another size', () => {
     const { container } = render(<TurboslideMark size={16} tile />);
     const svg = container.querySelector('svg.ts-tile')!;
     expect(svg.getAttribute('viewBox')).toBe('0 0 16 16');
+    expect(svg.getAttribute('shape-rendering')).toBe('crispEdges');
     expect(svg.querySelector('.ts-tile-plate')?.getAttribute('width')).toBe('16');
     const frame = svg.querySelector('.ts-tile-frame')!;
     expect(frame.getAttribute('x')).toBe('0.5');
     expect(frame.getAttribute('width')).toBe('15');
-    expect(svg.querySelector('.ts-tile-mark')?.getAttribute('d')).toBe('M2 2h12v12H2z M4 8h6v4H4z');
+    expect(svg.querySelector('.ts-tile-mark')?.getAttribute('d')).toBe(ROWS16_PATH);
+    const tile32 = render(<TurboslideMark size={32} tile />).container.querySelector(
+      'svg.ts-tile',
+    )!;
+    expect(tile32.querySelector('.ts-tile-mark')?.getAttribute('d')).toBe(
+      tileMarkPath(TILE_SIZES[32]),
+    );
     expect(() => render(<TurboslideMark size={20} tile />)).toThrow(RangeError);
   });
 });
@@ -181,7 +191,7 @@ describe('the title row’s mark link', () => {
     expect(anchor.getAttribute('data-slot')).toBeNull();
     expect(anchor.querySelector('svg.ts-mark')?.getAttribute('width')).toBe('24');
     expect(anchor.querySelector('svg.ts-mark')?.querySelector('path')?.getAttribute('d')).toBe(
-      markPath(2),
+      markPlacement(24).d,
     );
     cleanup();
     const routed = render(

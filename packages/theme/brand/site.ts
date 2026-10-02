@@ -12,9 +12,9 @@
 const DESCRIPTION =
   "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.";
 
-/** The card's alt text (SPEC-4 1.6; docs/POLISH.md 3.6). */
+/** The card's alt text (SPEC-4 1.6; docs/POLISH.md 3.6; docs/NEXT.md 4.1.3 item 4). */
 const IMAGE_ALT =
-  'The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser and the address www.turboslide.com, on a plate cut from a two tone dithered frame';
+  "The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither";
 
 export type ManifestIcon = {
   src: string;
@@ -55,6 +55,47 @@ export const TWIN_PATHS = {
   notfound: { dark: '/brand/notfound-dark.png', light: '/brand/notfound-light.png' },
   ogScreen: { dark: '/brand/og-screen-dark.png', light: '/brand/og-screen-light.png' },
 } as const;
+
+/** One mood picture the product carries outside a deck: its twins under /brand and its credit. */
+export type MoodPicture = {
+  /** the picture's name, as the deck's mood slide titles it */
+  title: string;
+  /** the alt text of the picture alone */
+  alt: string;
+  /** the credit line printed beside the picture, the words of the deck's plate */
+  credit: string;
+  /** the licence as the picture's source page states it */
+  license: string;
+  /** the source page the licence was read on (lane B4, 2026-10-02 08:57Z; docs/brand.md section 8) */
+  source: string;
+  /** the GT deck's twins the build cuts the copies from, without the -dark or -light suffix */
+  from: string;
+  dark: string;
+  light: string;
+};
+
+/**
+ * The mood pictures outside a deck (docs/NEXT.md 4.1.2 and question 5: the card, Not found and the
+ * empty /decks state, never /home's first screen; B2's day 0 request 3): each a dark and a light
+ * twin under /brand, 1600 by 900 like the deck's own copies, re-encoded by scripts/build-brand.ts
+ * under 200 KB. Only a picture whose licence was read on its source page is listed here, and
+ * docs/brand.md section 8 carries its line for the brand lint's credits check.
+ */
+export const MOOD_PICTURES = {
+  earth: {
+    title: 'The Blue Marble',
+    alt: "NASA's Blue Marble, the Earth with the Western Hemisphere in daylight, as a two tone dither",
+    credit: 'Image: NASA, Reto Stöckli, 2007, public domain',
+    license: 'Public domain (PD-USGov-NASA); attribution not required',
+    source: 'https://commons.wikimedia.org/wiki/File:Blue_Marble_Western_Hemisphere.jpg',
+    from: 'decks/gt-brand/assets/mood-earth',
+    dark: '/brand/mood-earth-dark.jpg',
+    light: '/brand/mood-earth-light.jpg',
+  },
+} as const satisfies Readonly<Record<string, MoodPicture>>;
+
+/** The mood picture the card carries (docs/NEXT.md 4.1.3 item 4). */
+export const CARD_MOOD: MoodPicture = MOOD_PICTURES.earth;
 
 /** A twin's size: 1600 by 900 at 2 px cells, shown at that size and cropped, never scaled. */
 export const TWIN_SIZE = { width: 1600, height: 900 } as const;
@@ -101,6 +142,7 @@ export const SITE = {
   themeColor: THEME_COLORS,
   icons: ICON_PATHS,
   twins: TWIN_PATHS,
+  mood: MOOD_PICTURES,
   card: { path: ICON_PATHS.card, ...CARD_SIZE, type: 'image/png' as const },
   /** manifest.webmanifest as the build writes it (R02 4.3 with `start_url` /home, SPEC-4 0.13). */
   manifest: {
@@ -111,8 +153,9 @@ export const SITE = {
     start_url: '/home',
     scope: '/',
     display: 'standalone' as const,
-    background_color: THEME_COLORS.dark,
-    theme_color: THEME_COLORS.dark,
+    /* the paper (docs/NEXT.md 4.1.2, A's graft; question 3's sheet): an installed app opens on white */
+    background_color: THEME_COLORS.light,
+    theme_color: THEME_COLORS.light,
     icons: MANIFEST_ICONS,
   },
   robots: ROBOTS,

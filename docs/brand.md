@@ -1,540 +1,509 @@
 # The Turboslide identity
 
-The record of the identity round four shipped (`docs/gslides-parity/SPEC-4.md` section 1, the
-binding specification; `docs/gslides-parity/design-4/proposal-1-dither.md`, the winning proposal;
-`research-4/01-brand-references.md` and `02-icon-favicon-og-production.md`, the facts behind it).
-Written by the documents builder (B5) on 2026-09-14 against the working tree after merge 1
-(`main` at `d5d7f07` plus the day 0 and day 1 files of `docs/gslides-parity/build-4/`); every
-number below is either computed from `packages/theme/src/brand.ts` on that tree, read from a file
-the build wrote, or cited with its source and date. Where an asset had not landed when this
-document was written, the section says so and names the day of `MILESTONES-4.md` that produces
-it; the ship step's reader should treat such a line as a check to run rather than a fact to repeat.
+The record of the identity since Round 1 of the next program (`docs/NEXT.md` 4.1, the binding
+specification). Round 1 replaced round four's dither mark with a mark in General Translation's
+speed register and mapped the GT brand deck of 2026-10-01 (Prototemplate `deck/`, read at
+`speed-marks` 4c23522) onto every surface a seller meets. Written by lane B1 on 2026-10-02 against
+`next/round1`. Every number below is computed from `packages/theme/src/brand.ts`, read back from a
+file `scripts/build-brand.ts` wrote, or cited with its source and date.
 
-The identity is one mark, one wordmark, one icon set, one card, one token sheet and one build
-script. The mark is the product's own composition: a slide and the plate cut from it, drawn
-through the deck's own Bayer screen. There is no accent colour anywhere in the chrome, on `/home`,
-on the card or in this repository's README: the identity is paper and ink (SPEC-4 0.3). The one
-blue in the product is the canvas selection colour, which is an editor affordance outside the
-brand (section 10).
+The identity is one mark, one lockup, one icon set, one card with one mood picture, one token sheet
+and one build script. The mark and the word are ink on paper in both appearances. The one colour
+in the chrome is the selection's GT blue (section 11).
 
-## 1. The mark
+## 1. The register decision
 
-A slide and the plate cut from it. Every GT opener puts a two tone picture under the whole 1600 by
-900 sheet and a title plate lower left, and `plateClear` (`packages/effects/src/metrics.ts`,
-`PLATE_BOXES.opener` is `[137, 500, 740, 271]`) measures that no lit cell intrudes into the plate.
-The mark is that composition at its smallest.
+Kevin's question 1 (`docs/NEXT.md` section 7) asked whether Turboslide joins the GT speed register.
+Its default is yes, and Kevin approved every default on 2026-10-01. The three brand judges split:
+judge 1 chose direction C by one point, and judges 2 and 3 chose direction B (NEXT.md 4.1.2). The
+program took B's square monogram on C's page grammar with A's grafts.
 
-Construction, from `packages/theme/src/brand.ts` (moved from `design-4/dither/mark.mjs`, the one
-geometry source; `TurboslideMark.tsx`, `scripts/build-brand.ts` and the CLI banner import it and
-nothing else computes the mark):
+No direction had drawn that combination, so lane B1 drew a sheet first
+(`docs/gslides-parity/round1/sheet.md`). The sheet builds B's monogram from rectangles the way
+Prototemplate's `scripts/build-speed-marks.mjs` 94 to 142 builds the GT T, with no Inter outline.
+A fresh judge scored it 40 of 50 (`docs/gslides-parity/round1/sheet-judge.md`): fidelity 9,
+product 8, legibility 7, restraint 8 and buildability 8. That total is higher than every total any
+judge gave A (36, 32, 34), B (34, 33, 38) or C (37, 33, 35). The verdict was to build it with
+fixes 1 to 3 before the push. Fix 1 is the hinted placement at the 16 px cap (section 3), fix 2 is
+the size floor (section 3) and fix 3 is the sheet pages' lockup margin.
 
-- Grid: 8 by 8 cells. `WINDOW = [1, 5, 4, 7]`, so columns 1 to 4 and rows 4 to 6 are the window,
-  the body keeps a one cell rail on the left and the bottom, and the window is 4 by 3 cells: 50
-  percent of the width and 37.5 percent of the height, 12.5 percent from the left and the bottom.
-- Field: `field(u, v) = 1 - 0.75 * (windowDistance(u, v) / D_MAX)`, density 1 along the window's
-  edge and 0.25 at the far corner (`FIELD_END = 0.25`; `D_MAX` is 0.625, the top right corner). A
-  far corner at 0.5 would be a checkerboard and 0 would dissolve the silhouette.
-- Threshold: the pipeline's own test, `tone > (bayer8(y, x) + 0.5) / 64`, with `bayer8` from
-  `packages/effects/src/bayer.ts`, so the mark's cells are the cells the two tone pipeline would
-  light for that field.
-- `markBits(N)` for N a multiple of 8. At N = 8 every body cell is ink: 52 of 64 cells, the solid
-  form. At N = 32 the field lights 610 of 1,024 cells (832 body cells); at N = 64 it lights 2,400
-  of 4,096 (3,328 body cells). A raster is drawn on its own cell grid and never resampled
-  (R02 5.4).
-- `markPath(unit)`: the solid form as one even odd path on a 16 unit box, `M0 0h16v16H0z M2 8h8v6H2z`
-  at `unit = 2`, an area of 208 of 256 units. It is what the favicon, the title row, the app bar,
-  the print bar and the terminal draw. SPEC-4 6.4's "208 ink cells" is this area; `brand.test.ts`
-  pins both readings (`b1.md` 1.2 item 1).
-- `cellRects(image)`: the lit cells as row runs of `<rect>` elements, so `mark.svg` at 64 cells is
-  a few hundred elements instead of 4,000.
-- `markBlocks(N)`: the bitmap as half block characters (U+2580, U+2584, U+2588), two grid rows per
-  text line, for the terminal banner (section 11).
+The name check of section 17 found no speed mark sold as Turboslide, so the fallback of NEXT.md
+4.1.2 (round four's square) was not taken.
 
-The sizes, one threshold for every surface (SPEC-4 0.5): solid below 64 px, cellular from 64 px.
+Question 2 asked whether the product shows brand B's outlined weight 800 wordmark. Its default is
+no: the word is live Inter 500 everywhere (DECK-GRAMMAR line 20), and the sheet's
+`pictures/question2.png` shows both. The outline step of round four
+(`packages/theme/scripts/outline-wordmark.py`) and its file `wordmark-outlines.svg` are retired.
 
-| Use                                               | Size           | N         | Cells                                     | Colours in the raster              |
-| ------------------------------------------------- | -------------- | --------- | ----------------------------------------- | ---------------------------------- |
-| Favicon, `icon.svg`, app bar, print bar, terminal | 16 px          | 8         | solid                                     | 3 on the tile; 2 on a clear ground |
-| Title row                                         | 24 px          | 8         | solid (integer edges at 3, 12, 15 and 21) | 2                                  |
-| ICO 32 and 48 px entries, the horizontal lockup   | 32 and 48 px   | 8         | solid                                     | 3 on the tile                      |
-| Not found, the stacked lockup, the README         | 64 px          | 32        | 2 px                                      | 2                                  |
-| Touch icon tile (180 px tile, 128 px mark)        | 128 px         | 32        | 4 px                                      | 2                                  |
-| Manifest icons (192 and 512 px tiles)             | 160 and 448 px | 40 and 56 | 4 and 8 px                                | 2                                  |
-| The full mark, the card                           | 512 px         | 64        | 8 px                                      | 2                                  |
+Round four's mark was a slide with a plate cut from it, drawn through the deck's Bayer screen. Its
+record said it borrowed no speed glyph. That rule is withdrawn: the GT register chosen on
+2026-09-29 is built on speed bars and a forward slant (Prototemplate `src/lib/marks.ts` 73 to 92),
+and the Turboslide mark now shares its construction.
 
-The mark never takes a gradient, a second colour, a 2.5D rendering, a rounded corner, an outline
-or a rotation. It is `currentColor` wherever it stands alone; the tile adds the plate and the frame
-in the host's colours. It is not a triangle, a cube, a Z, a roundel, a chevron pair, a speed line or a
-yellow rectangle with a white rectangle (R01 6.3 item 12), and it borrows no sliding or speed
-glyph that could recall the harmonica, the door or the playground slide sold under the same word
-(R01 section 5). It reads as a form before a letter, so a page in another script carries it
-without a Latin word beside it.
+## 2. The mark
 
-## 2. The tile
+A T with three bars under its left arm. It is five rectangles in an upright space, sheared by
+tan(12 degrees) so that x becomes x minus 0.2126 times y, with the 8 unit cut from y 96 to 104
+applied to the geometry. Each rectangle becomes one or two parallelograms, seven in all. The units
+are the GT monogram's: a cap of 120 units from the cap line at y 40 to the baseline at y 160. The
+weights are the GT T's and the bar heights are the GT bars'.
+
+| Rectangle  | x, y, width, height (upright units) | What it is                                                                           |
+| ---------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
+| crossbar   | 22, 40, 134, 30                     | The T's arm, 50 units on each side of the stem                                       |
+| stem       | 72, 40, 34, 120                     | The cut splits it at y 96 to 104                                                     |
+| top bar    | 0, 40, 24, 30                       | Runs the arm 22 units past its left end and overlaps it by 2                         |
+| middle bar | -4, 82, 64, 36                      | Centred on the cut, so the cut leaves two lines of 14 units; ends 12 before the stem |
+| bottom bar | 16, 130, 44, 30                     | Ends 12 units before the stem                                                        |
+
+`MARK_RECTS` in `brand.ts` holds the five rectangles. `MARK_PATH` is the master path in units,
+242 bytes, with the sha256 `3e95914b621faf3bee9b73421ac62b264ee384c165346025c09dec99c154190a`
+(`MARK_PATH_SHA256`). `brand.test.ts` and `scripts/build-brand.ts --check` rebuild the path from the
+rectangles and compare it and its digest, so the build needs no font tool. The box after the shear
+is 176.58 by 120 units, an aspect of 1.4715 (`MARK_ASPECT`), and `mark.svg` carries the view box
+`-33.1 36 184.6 128`, the box with 4 units of clear space.
+
+The bars stop 12 units before the stem, where the register's bars lead into the first letter. At 32
+px and smaller, bars that run into the stem read as a reversed E (brand-b 59), and NEXT.md 4.1.2
+takes that finding as written.
+
+The mark is one path in `currentColor` with no mask, no id and no font. It never takes a gradient,
+a second colour, a rounded corner, an outline or a rotation.
+
+## 3. The sizes
+
+`TurboslideMark` and every file draw one of three forms, chosen by `markStep(size)`:
+
+- Under 24 px: the 16 px rows (`ROWS16`), the one hand drawing.
+- From 24 px to under 32 px: the 24 px square with the vector at a 16 px cap, every horizontal edge
+  on a whole row.
+- From 32 px: the vector at the size itself, its cap the whole pixels whose box fits the square's
+  width (`capAt`), every horizontal edge on a whole row.
+
+Any other requested size snaps to one of these, so no surface draws the mark at a 10 or 13 px cap
+(sheet-judge.md fix 2).
+
+### The 16 px rows
+
+At 16 px the slant and the 8 unit cut fall between pixels, so the form is set as whole pixels on a
+12 px cap in rows 2 to 13. This is the one hand drawing, recorded here as the deviation from
+DECK-GRAMMAR line 53, which says a mark is never redrawn by hand. Columns 1 and 14 stay clear for
+the tile's frame and its 1 px margin.
+
+```
+................
+................
+...###########..
+...###########..
+...###########..
+........###.....
+........###.....
+..#####.###.....
+................
+..####.###......
+.......###......
+.......###......
+..###.###.......
+..###.###.......
+................
+................
+```
+
+The crossbar is three rows from column 3 to 13, with the top bar folded into a left arm of 5 px
+against a right arm of 3 px. The stem is 3 px and steps one pixel left after the cut and again at
+the bottom bar: the slant as two steps over the cap, where tan(12 degrees) gives 2.55 px. The cut
+is one clear row through the stem and the middle bar. The bars start at column 2 and end one pixel
+before the stem, so they step 5, 4 and 3 px. The rows draw 72 ink pixels. `ROWS16_PATH` is their
+path, 192 bytes, with the sha256
+`b21e4d461ce314206d0ba3bae1e952c458d4cd07d56cdca82421467a21fae72b`. The rows draw with
+`shape-rendering: crispEdges`; the vector does not.
+
+### The hinted placement
+
+Drawn at a 16 px cap with plain scaling, the two middle lines are 1.87 px and the cut 1.07 px, so
+on a 1x screen the lines draw grey and the cut through the stem does not show (sheet-judge.md,
+legibility). `hintedRows(cap)` moves each horizontal edge to a whole row before the shear and keeps
+every rectangle and the slant. At the 16 px cap the rows are:
+
+| Rows (from the cap line) | What they hold                               |
+| ------------------------ | -------------------------------------------- |
+| 0 to 4                   | The crossbar and the top bar                 |
+| 4 to 5                   | The gap                                      |
+| 5 to 7                   | The middle bar's first line                  |
+| 7 to 8                   | The cut, through the stem and the middle bar |
+| 8 to 10                  | The middle bar's second line                 |
+| 10 to 12                 | The gap                                      |
+| 12 to 16                 | The bottom bar                               |
+
+A 1 px cut cannot be centred on a 16 px cap. The cut sits on row 7, half a pixel above mid cap,
+the first of the judge's two variants (`sheet-judge/16cap.png`). Every vector placement is hinted
+the same way at its own cap. `hinted: false` draws the plain scaled vector for a comparison
+picture only.
+
+| Requested size | Drawn                           | Cap and cap line           |
+| -------------- | ------------------------------- | -------------------------- |
+| under 24 px    | The 16 px rows                  | 12 px, rows 2 to 13        |
+| 24 to 31 px    | The 24 px square, hinted vector | 16 px, cap line on row 4   |
+| 32 px          | Hinted vector                   | 21 px, cap line on row 6   |
+| 48 px          | Hinted vector                   | 32 px, cap line on row 8   |
+| 64 px          | Hinted vector                   | 43 px, cap line on row 11  |
+| 180 px         | Hinted vector                   | 122 px, cap line on row 29 |
+
+The title row draws `size={24}` in its 32 px link box (`TitleRow.tsx`) and Not found `size={64}`.
+The `/decks` bar and the `/home` navigation draw the 24 px placement beside the 22 px word once
+`AppBarBrand.tsx` and the `/home` navigation pass 24 (`round1/build/b1.md` requests 1 and 2), and
+the print bar once it passes 24 (request 3).
+
+## 4. The lockup
+
+The lockup follows brand A's rules (`docs/gslides-parity/next/brand-a.md` 32 to 43): the word's cap
+equals the mark's cap, the baselines meet, and the gap from the mark's ink to the word's T is half
+the cap. The word is live text in Inter 500 with `font-feature-settings: 'cv11', 'ss01'`, tracked
+-0.01 em from 16 to 27 px and -0.025 em at 28 px and above. `PROPER_NOUNS` in
+`packages/theme/src/copy.ts` carries "Turboslide" so the sentence case lint keeps its capital.
+
+Inter's cap height is 1490 of 2048 units, 0.727539 em. The mark is therefore 0.727539 em tall and
+1.070570 em wide. The T's left side bearing at weight 500 moves with Inter's optical size axis,
+which Chrome sets to the font size in px between 14 and 32. The sheet measured it from rendered
+pixels (`docs/gslides-parity/round1/sheet/marks/bearing.json`, load 19.60):
+
+| opsz                          | 14  | 16  | 18  | 20  | 22  | 24  | 26  | 28  | 30  | 32  |
+| ----------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| The T's left bearing, of 2048 | 90  | 86  | 82  | 76  | 72  | 68  | 61  | 57  | 53  | 49  |
+
+The space after the mark is half the cap less that bearing. The product draws one lockup size: the
+22 px word beside the 24 px placement (`.ts-brand-lockup` in `packages/chrome/src/brand.css`,
+`AppBarBrand.tsx`). There the cap is 16.0 px, the bearing 72 units (0.77 px) and the square leaves
+0.23 px right of the mark's ink, so the flex gap is 7 px. Both links are 24 px tall with their
+content centred, so the word's baseline lands on row 20 of the box with the mark's.
+
+The 22 px word is the smallest lockup. An 18 px word would ask for a 13 px cap, which the size
+steps do not draw. The README pair and the card draw the lockup at a 66 px word (a 48 px cap)
+with the mark's box and the baseline on whole pixels (sheet-judge.md fix 9);
+`packages/theme/brand/wordmark.svg` is that lockup with the word as live text.
+
+## 5. The tile and the icon set
 
 Every raster the `prefers-color-scheme` block cannot reach (the `favicon.ico` entries, Safari's base
 rendering of `icon.svg`, Windows) is the mark in ink on an opaque paper plate with a 1 px frame in
-the edge composite: `#656565` on paper and `#888887` on ink (`TILE_COLORS` in `brand.ts`; SPEC-4
-0.4, proposal 3's tile applied to proposal 1's form). Where the block is honoured the SVG swaps to
-paper ink on an ink plate with the `#888887` frame. The titanium base of the proposal is out: it
-measured 2.48:1 on Chrome's light inactive strip. The 16 px entry therefore holds three colours
-(plate, frame, ink), which amends R01 acceptance item 5 from two colours to three at 16 px; the
-verifier's six tab screenshots (SPEC-4 6.5) are the proof.
+the edge composite: `#656565` on paper and `#888887` on ink (`TILE_COLORS`). Where the block is
+honoured, `icon.svg` swaps to paper ink on an ink plate with the `#888887` frame. The 16 px tile
+carries the rows; the 32 px tile the hinted vector at a 16 px cap on row 8; the 48 px tile a 24 px
+cap on row 12 (`TILE_SIZES`).
 
-The tile geometry (`TILE_SIZES`): the 16 px tile carries a 12 px mark at (2, 2), the 32 px tile a
-24 px mark at (4, 4), the 48 px tile a 40 px mark at (4, 4). A 12 px mark puts the 16 unit path's
-window edge at 1.5 px, so that one size is hinted once (`solidWindow(12)`): rails of 2 px on the
-left and the bottom, a window 6 px wide and 4 px tall at (2, 6). The 24 and 40 px marks keep the
-arithmetic (1.5 and 2.5 px per unit). SPEC-4 0.50 allows a hint after a raster shows a soft edge;
-here the arithmetic showed it before any raster, and the three ICO entries decode to three
-colours each with no anti aliased pixel (`b1.md` 1.2 item 2).
+The set under `apps/studio/public/`, written by `node scripts/build-brand.ts` on 2026-10-02 and
+served as static files, so every icon, manifest and card request is a CDN answer:
 
-`packages/theme/brand/mark-geometry.json`, written by the build and compared on every `--check`,
-records per raster the tile size, the mark size, the cell count per side, the cell size in pixels,
-the lit cells and the colour count read back from the file: the ICO entries 120, 468 and 1,300 lit
-cells at 3 colours on a paper plate; the touch icon 9,760 at 4 px cells on an ink plate; the 192 px
-icons 15,136 at 4 px; the 512 px icons 117,824 at 8 px; the maskable icons 5,392 (96 px mark, 2 px
-cells) and 38,400 (256 px mark, 4 px cells) inside the 40 percent safe circle; the monochrome icon
-163,072 (the 448 px solid form as alpha).
+| File                                           | What it is                                                                                            | Bytes               |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
+| `favicon.ico`                                  | Three 32 bit BMP entries on the paper tile: the rows at 16 px, the hinted vector at 32 and 48         | 15,086              |
+| `icon.svg`                                     | The 16 px tile with the rows, the `prefers-color-scheme: dark` block and `crispEdges`                 | 1,201               |
+| `apple-touch-icon.png`                         | 180 px, the paper mark at a 76 px cap on the ink square, opaque, no corners                           | 1,381               |
+| `icons/icon-192.png`, `icon-512.png`           | The `any` icons, the paper mark on the ink square at an 81 and a 215 px cap                           | 1,358 and 3,409     |
+| `icons/icon-mask-192.png`, `icon-mask-512.png` | The `maskable` icons, the mark inside the 40 percent safe circle at a 69 and a 184 px cap             | 1,170 and 2,970     |
+| `icons/icon-mono-512.png`                      | The `monochrome` icon, the mark as alpha                                                              | 3,831               |
+| `icons/icon-dark-192.png`, `icon-dark-512.png` | The ink mark on the paper plate, the inverse of the manifest icons                                    | 1,353 and 3,386     |
+| `manifest.webmanifest`                         | `start_url` `/home`, `background_color` and `theme_color` `#ffffff`, five icons with one purpose each | 955                 |
+| `robots.txt`                                   | `Allow: /og/`; `Disallow` for `/new`, `/decks/trash`, `/print/` and `/edit/`                          | 99                  |
+| `brand/mood-earth-dark.jpg`, `-light.jpg`      | The card's mood picture (section 6), 1600 by 900 greyscale                                            | 179,545 and 179,587 |
+| `og/turboslide.png`                            | The card (section 6), 1200 by 630                                                                     | section 6           |
+| `brand-manifest.json`                          | The path, bytes, sha256 and kind of every output                                                      |                     |
 
-## 3. The wordmark and the lockups
+The manifest's colours are the paper `#ffffff` (A's graft, NEXT.md 4.1.2; the row
+`decks.manifest.paper`), so an installed app opens on white. Production answered `#070707` for
+both on 2026-10-02 before this push.
 
-The wordmark is the word Turboslide in Inter, weight 500, `font-feature-settings: 'cv11', 'ss01'`,
-`letter-spacing: -0.025em` at 28 px and above, `-0.01em` from 16 to 27 px, 0 under 16 px (R01 6.2
-item 5). It is live text everywhere the page has text; `PROPER_NOUNS` in
-`packages/theme/src/copy.ts` carries "Turboslide" so the sentence case lint keeps its capital in a
-heading.
+Every raster except the 16 px tile is the vector drawn by the build's own coverage rasterizer: the
+union of the quads, sixteen sub rows per pixel row, exact spans across. Every pixel is therefore a
+blend of the plate and the ink, and the bytes are deterministic. `mark-geometry.json` records per
+raster the size, the form, the cap, the cap line, the ink and the colour count read back from the
+file (the 16 px entry: 72 ink pixels, three colours).
 
-- Horizontal (`packages/theme/brand/wordmark.svg`): the mark's height is the cap height of the word
-  (Inter's cap height is 1490 of 2048 units, 0.7275 em, so 66 px type gives 48.0 px), the gap one
-  third of the mark, baselines aligned, the mark solid at 48 px. The word measured 287.06 px at
-  66 px in Chromium with the repository's `InterVariable.woff2` (proposal 1 section 1.4). For the
-  README, npm and the card, where no font can be assumed, `wordmark-outlines.svg` carries the word
-  as outlines taken from `packages/fonts/assets/InterVariable.woff2` by fontTools with Inter's own
-  pair kerning applied (T to u at minus 197 units; `packages/theme/scripts/outline-wordmark.py`
-  under the fonts venv).
-- Stacked (`lockup-stacked.svg`): the 64 px cellular mark centred over the word at 66 px, clear
-  space equal to the mark's height. The README hero and the Not found page.
-- The horizontal lockup at 22 px type (the `/decks` app bar, the `/home` navigation and footer)
-  uses the 16 px solid mark with a 10 px gap (`AppBarBrand.tsx`, `.ts-brand-lockup` in
-  `brand.css`).
-
-State on 2026-09-14: `wordmark.svg`, `wordmark-outlines.svg`, `lockup-stacked.svg`,
-`packages/theme/scripts/outline-wordmark.py` and the README lockup PNGs landed between 10:37 and
-10:39 while this document was being written (B1's day 3 work). The two PNGs
-(`docs/readme/brand/lockup-stacked-{dark,light}.png`, written by
-`node scripts/build-brand.ts --readme`) are 832 by 580 px, a 2x raster of a 416 by 290 CSS px
-lockup, read back with sharp on 2026-09-14: the dark file's ground is `#070707` (the dark
-appearance twin, paper mark and word on ink) and the light file's `#ffffff`; the README's
-`<picture>` shows the dark file by default at `width="416"` and the light file under
-`prefers-color-scheme: dark` (section 13).
-
-## 4. The GT mark
-
-The GT mark stays content of the `gt-ink-paper` theme: the sheet's wordmark and counter
-(`packages/render/src/stage.ts`), the `mark` block, the closing plate, the icon picker's
-`gt-mark` symbol, the GT template card on `/decks` and the Themes panel. It leaves the title row,
-the `/decks` app bar, the print bar, the favicon, the README, the CLI banner and the Not found
-page. The sprite is unchanged and the Turboslide mark is not added to it (R01 6.5 item 23). No
-Turboslide wordmark appears on any sheet (SPEC-4 1.3).
-
-## 5. The icon set and the head
-
-The set of SPEC-4 0.13 under `apps/studio/public/`, written by `node scripts/build-brand.ts` and
-served at the `handle: filesystem` step so every icon, manifest and card request is a CDN answer
-and never a function invocation with an HTML 404 (R02 section 1 measured the 404s on production
-before this round). As built on 2026-09-14 (`brand-manifest.json` records the bytes and the
-sha256 of every file):
-
-| File                                           | What it is                                                                                                                                                                       | Bytes       |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `favicon.ico`                                  | Three 32 bit BMP entries at 16, 32 and 48 px, the paper tile, three colours each                                                                                                 | 15,086      |
-| `icon.svg`                                     | The tile with the `prefers-color-scheme: dark` block and `shape-rendering="crispEdges"`                                                                                          | 957         |
-| `apple-touch-icon.png`                         | 180 px, the ink tile with the 128 px mark at 4 px cells, opaque, no corners                                                                                                      | 753         |
-| `icons/icon-192.png`, `icon-512.png`           | The `any` icons, the ink tile with the 160 and 448 px marks                                                                                                                      | 257 and 460 |
-| `icons/icon-mask-192.png`, `icon-mask-512.png` | The `maskable` icons, the mark inside the 40 percent safe circle                                                                                                                 | 292 and 422 |
-| `icons/icon-mono-512.png`                      | The `monochrome` icon, the solid form as alpha                                                                                                                                   | 3,083       |
-| `icons/icon-dark-192.png`, `icon-dark-512.png` | The paper plate with the ink mark, the inverse of the manifest icons, for a `<picture>` on a light ground                                                                        | 257 and 460 |
-| `manifest.webmanifest`                         | `name` and `short_name` Turboslide, the description, `start_url` `/home`, `display` standalone, `background_color` and `theme_color` `#070707`, five icons with one purpose each | 971         |
-| `robots.txt`                                   | `Allow: /og/`; `Disallow` for `/new`, `/decks/trash`, `/print/` and `/edit/`                                                                                                     | 99          |
-| `brand-manifest.json`                          | The path, bytes and sha256 of every output                                                                                                                                       | 2,571       |
-| `og/turboslide.png`                            | The card (section 6), 1200 by 630, 29,818 bytes as landed on 2026-09-14                                                                                                          |             |
-
-`icon-dark-*` is the paper plate with the ink mark, the inverse of the ink tile manifest icons, per
-SPEC-4 1.5 step 2; proposal 2 named the two files the other way round (`b1.md` 1.2 item 6). The
-README's `<picture>` (section 15 of `README.md`) uses the lockup PNGs rather than these icons.
-
-The head (`apps/studio/src/routes/__root.tsx` `head()`, SPEC-4 1.6, R02 4.1): the description,
-`application-name` and `apple-mobile-web-app-title`; one `theme-color` meta carrying `#070707` in
-the server's HTML, set by a boot script after `<HeadContent />` to the stamped theme's `--pt-paper`
-(`#ffffff` in the light appearance); `og:site_name`, `og:type`, `og:locale`, `og:title`,
-`og:description`, `og:image` with its type, width, height and alt, and the `twitter:*` set with
-`summary_large_image`; two icon links, `/favicon.ico` with `sizes="32x32"` first and `/icon.svg`
-second; the touch icon; the manifest. The card's address is `SITE.origin()`, which reads
-`TURBOSLIDE_PUBLIC_ORIGIN` else the production origin, so a preview without the variable carries
-production's card address (the same file). `/edit/$deckId` joined `NOINDEX_ROUTES` because the
-`'data-only'` route of SPEC-4 0.34 puts the dehydrated document in the HTML; `/home` stays
-indexable.
-
-Every fact the head carries comes from one object, `SITE` in `packages/theme/brand/site.ts`
-(`@turboslide/theme/brand/site`): the description, the alt text, the origin rule, the theme
-colours, the icon and twin paths, the manifest and the robots rules, so the head, the manifest,
-the card and `robots.txt` never drift apart.
+The head (`apps/studio/src/routes/__root.tsx`) takes every fact from `SITE` in
+`packages/theme/brand/site.ts`: the description, the card's alt text, the origin rule, the theme
+colours, the icon and twin paths, the mood pictures, the manifest and the robots rules.
 
 ## 6. The Open Graph card
 
 `og/turboslide.png`, 1200 by 630, rendered by Chromium from `packages/theme/brand/og-template.html`
-(SPEC-4 1.7): the picture is the hero's frame through the screen at 10 px cells (120 by 63 cells,
-`og-screen-dark.png`), so a 552 px feed card still shows 4.6 px cells and a 360 px unfurl 3 px,
-above R02's 2 px floor; the plate is cut from it at the mark's proportions (left 150 px, width
-600, bottom 79, height 236) and carries the 48 px solid mark, the word at 66 px as outlines and
-the one sentence; the address sits top left on its own plate; nothing that matters is within 48 px
-of an edge (X's 2:1 crop, R02 2.5). `og:image:alt` is `SITE.imageAlt`: "The Turboslide mark and
-name on a plate cut from a two tone dithered liquid metal frame". The card decodes to two colours
-plus the plate's ink and paper and the `--pt-ink-2` sentence, which the verifier records. Every
-route serves this static card; `/deck/$deckId` sets `og:title` and `og:url` from its loader and
-keeps the static image. A per deck card is round five's (SPEC-4 0.48).
+at device scale factor 1. The picture is NASA's Blue Marble (`MOOD_PICTURES.earth`, public domain,
+section 8) at object-fit cover in the dark appearance. A paper plate sits lower right, the mood
+slide's place on the deck (Prototemplate `deck/slides/06-mood-earth.html`), 56 px from the right
+and bottom edges and 528 px wide, clear of the Earth in the picture's left half. It carries the
+lockup at a 66 px word, the description's first sentence, the address `www.turboslide.com` in
+Inter and the credit "Image: NASA, Reto Stöckli, 2007, public domain" at 15 px in titanium.
+Nothing that matters is within 48 px of an edge, which X's 2:1 crop allows. `og:image:alt` is
+`SITE.imageAlt`. Every route serves this card; the deck route's own card is lane B2's (NEXT.md
+4.1.3 item 12).
 
-State on 2026-09-14: the eight twins under `apps/studio/public/brand/` (`hero-`, `figure-`,
-`notfound-` and `og-screen-`, each dark and light) and the card landed at 10:37 and 10:38 while
-this document was being written (B1's day 2 work). Read back with sharp: `hero-dark.png` and
-`hero-light.png` are 1600 by 900 with two colours each, the dark twin's ground `#070707` and the
-light twin's `#ffffff`, 13,679 and 13,689 bytes; the card is 1200 by 630 at 29,818 bytes, under the
-1 MB rule. The recipe and the anchor scan are `packages/theme/brand/hero.recipe.json`; the colour
-count of the card is the verifier's to record (`b1.md` carries B1's own numbers when its day 2
-section lands).
+The card file is also the GitHub social preview for Kevin's setting K7 (NEXT.md 3.1): the
+repository's Settings, the "Social preview" section, Edit, then "Upload an image". GitHub asks for a
+PNG, JPG or GIF under 1 MB and crops to 2:1; the build fails a card over 1 MB.
 
-## 7. The tokens
+## 7. The CLI banner
 
-`packages/chrome/src/brand.css`, imported once by `__root.tsx` after `tokens.css`, declares the
-eleven `--ts-` identity tokens on `:root`; `packages/theme/src/brand.ts` mirrors them as
-`BRAND_TOKENS` and `BRAND_TOKENS_NARROW`, and `brand.test.ts` asserts the sheet and the data
-agree, the pattern of `tokens.ts` and `tokens.test.ts` (SPEC-4 0.8, 1.8). No colour, no radius,
-no duration: the six `--pt-dur-*` durations stay the whole motion vocabulary.
-
-| Token         | Value             | Under 760 px | Read by                                                                                                                                     |
-| ------------- | ----------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--ts-cell`   | `2px`             | `2px`        | Every dithered surface: a twin is 1600 by 900 at 2 px cells, shown at that size with `image-rendering: pixelated` and cropped, never scaled |
-| `--ts-mark`   | `24px`            |              | The title row mark                                                                                                                          |
-| `--ts-h1`     | `56px`            | `40px`       | The `/home` display size, line height 1.05, tracking -0.025em, weight 500                                                                   |
-| `--ts-h2`     | `32px`            | `26px`       | Band headings, line height 1.12                                                                                                             |
-| `--ts-h3`     | `20px`            |              | Card and row titles, line height 1.25, tracking -0.01em                                                                                     |
-| `--ts-lead`   | `20px`            | `18px`       | The hero sentence and section leads, line height 1.45                                                                                       |
-| `--ts-body`   | `15px`            |              | Body text on `/home` and Not found, line height 1.55                                                                                        |
-| `--ts-small`  | `13px`            |              | The chrome size: facts, links, source lines, footer                                                                                         |
-| `--ts-figure` | `40px`            | `32px`       | The numbers strip, `tabular-nums`                                                                                                           |
-| `--ts-rail`   | `1120px`          |              | The content width of `/home`, the width the `/decks` page already uses                                                                      |
-| `--ts-plate`  | `var(--pt-paper)` |              | The plate is the ground showing through and draws no rule                                                                                   |
-
-`brand.css` also carries the two `::view-transition-*` rules of SPEC-4 0.40 (the old root fades
-over `--pt-dur-leave`, the new over `--pt-dur-enter`, which the reduced motion block already sets
-to 0 ms), the `.ts-mark` and `.ts-tile` classes `TurboslideMark.tsx` uses, the app bar lockup
-classes and the Not found frame. Every `--pt-` token keeps its name and value; the one addition to
-`tokens.css` is the selection block of section 10, and the acceptance gate reads
-`git diff d5d7f07 -- packages/chrome/src/tokens.css` differs by that block only.
-`apps/studio/src/styles.css` declares none of the eleven identity tokens (round three's ten
-`--ts-` presence tokens stay there).
-
-## 8. Where dithers and shaders appear, and where they never do
-
-| Surface                                                     | Dither                                                                            | Shader                                  | The rule, as built                                                       |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
-| The mark at 64 px and above                                 | Yes, the construction of section 1                                                | No                                      | Solid below 64 px                                                        |
-| `/home` hero                                                | Yes, one captured frame as twins at 2 px cells, still                             | Captured only; no live mount this round | The plate is opaque, so no cell sits under text                          |
-| Empty states (no presentations, empty trash, no results)    | Yes, a 320 by 180 crop of the figure twin at 1:1 in a `--pt-edge` frame           | No                                      | Title, one sentence, at most one primary action (`EmptyFigure.tsx`)      |
-| Not found                                                   | Yes, the 64 px mark over the notfound twin's crop                                 | No                                      | `__root.tsx` `NotFound`                                                  |
-| The loading curtain (`EditorSkeleton`, `PresenterSkeleton`) | Yes, the figure twin where the sheet will be and the ramp as the progress texture | No                                      | Replaced by the sheet; never shown between slides                        |
-| Progress (`Progress.tsx`)                                   | Yes, the leading sixteen cells of the fill are `rampInk` behind `--ts-cell`       | No                                      | The threshold map is fixed and the length moves                          |
-| Presence chips and anonymous authors                        | Round three's identity mark (SPEC-3 4.1)                                          | No                                      | Not this round's                                                         |
-| README hero and the card                                    | Yes                                                                               | Captured only                           | Sections 6 and 15                                                        |
-| Present mode surround                                       | No                                                                                | No                                      | Flat `--pt-panel-ink`                                                    |
-| Menus, toolbar, panels, dialogs, snackbars, tooltips        | No                                                                                | No                                      | The line law and 13 px text                                              |
-| Text, icons, form controls                                  | No                                                                                | No                                      | Heroicons stay solid                                                     |
-| Filmstrip thumbnails, layout tiles, the workspace           | No                                                                                | No                                      | A thumbnail shows the slide's pixels; the workspace is flat `--pt-plate` |
-| The sheet                                                   | Only as content the user placed                                                   | Only as content                         | The identity never draws on the customer's slide                         |
-
-Cells never shimmer: nothing re-seeds a threshold map, and the identity animates nothing (R01 3.2
-principle 5). The hero is still this round (SPEC-4 0.6); the live monochrome mount is round five's
-(section 17).
-
-## 9. The app chrome
-
-| Surface              | Round three                                           | Round four                                                                                                                                                                                   | State on 2026-09-14                                                                              |
-| -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Title row            | The GT mark at 31 by 20 px in a plain `<a href>`      | `TurboslideMark size={24}`, solid, inside the `linkComponent` the studio passes (the router's `Link`, `preload: 'intent'`); the label, the tooltip and `data-control="title.home"` unchanged | The component landed at merge 1 (`TitleHomeLink`); B3 fills the slot in `EditorRoot` on day 3    |
-| The `/decks` app bar | The GT mark beside the word in one `Link` to `/decks` | `AppBarBrand`: the 16 px mark as one link to `/decks` (`appbar.home`), the word as a second link to `/home` with the tooltip "About Turboslide" (`appbar.about`)                             | The component landed at merge 1; B3 mounts it on day 3                                           |
-| The GT template card | The GT mark at 56 by 36 px                            | Unchanged: the card shows the GT mark because it is the GT template                                                                                                                          | none                                                                                             |
-| Empty states         | One sentence, "No presentations yet. Start one above" | `EmptyFigure` over the title, the sentence and one New Presentation button; the same on the trash and for no search match                                                                    | The component landed at merge 1; the figure twins landed on 2026-09-14; B3 mounts it on day 3    |
-| Not found            | An `h1` and one paragraph                             | The 64 px mark over the notfound twin's crop, the heading "Not found", one sentence, `.pt-ib` buttons to `/new`, `/decks` and `/home` with tooltips                                          | Landed at merge 1; the About Turboslide button is a plain anchor until B2's `/home` route exists |
-| Print preview        | The GT mark at 25 by 16 px in `.ts-print-title`       | `TurboslideMark size={20}` before the title; the pages unchanged                                                                                                                             | B1's day 5                                                                                       |
-| The present surfaces | Flat `--pt-panel-ink`                                 | Unchanged; the presenter's head takes the icon set through the root route                                                                                                                    | none                                                                                             |
-| The loading curtain  | Round three's skeletons                               | The figure twin where the sheet will be and the deck's ramp as the progress texture; the boxes stay the final frame's (the layout shift gate stays at zero)                                  | B1's day 2 (the picture), `apps/studio/src/components/{EditorSkeleton,PresenterSkeleton}.tsx`    |
-| Progress             | The ink fill on the track                             | The fill's leading sixteen cells are the deck's ramp (`rampInk`, one cell row) applied as a mask on the fill's end; the fill moves with `translateX` and the track clips it                  | Landed at merge 1; the track keeps the port's 2 px (`b1.md` 1.2 item 5)                          |
-| The browser tab      | `{ rel: 'icon', href: 'data:,' }`                     | The set of section 5 and the head of section 5                                                                                                                                               | Landed at merge 1                                                                                |
-
-`TurboslideMark.tsx` draws `markPath(2)` below 64 px and the cells of `markBits(N)` from 64 px,
-`currentColor`, `shape-rendering="crispEdges"`, `role="img" aria-label="Turboslide"` alone and
-`aria-hidden` beside a word; the size is written as `width` and `height` attributes so a sheet's
-rule wins over them (the title row reads `--ts-mark`). `PORTED_FROM.json` records it,
-`AppBarBrand.tsx`, `EmptyFigure.tsx` and `brand.css` as Turboslide's own. `GtMark.tsx` stays for
-the sheet's content.
-
-## 10. The selection colour is an editor affordance
-
-Kevin's directive (d) asked that the canvas boxes turn blue so they stop blending into the
-background. The orchestrator's ruling 1 over SPEC-4 0.3 places that colour outside the brand:
-`--pt-select` (`#1a73e8` in the light appearance, `#3d86f0` in the dark) and `--pt-guide`
-(`#d6336c`, `#f0397a`) are the only additions to `packages/chrome/src/tokens.css`. The readers are
-the canvas selection ring, the eight resize handles and the rotation handle with its stem, the
-marquee, the hover outline, the crop frame and its handles, the group box and the selection chip
-(`Overlay.css`, `Marquee.css`) and the snap guides (`Guides.css`). The remote collaborator outlines
-keep round three's six hues; the exports, the deck content, the menus, `/home`, the card and the
-README stay paper and ink. The chrome lint's `select` and `guides` scopes
-(`packages/lint/src/chrome.ts`) are the allow list: a border or an outline in either colour
-anywhere else is a finding.
-
-Each value holds at least 3:1 against both the paper and the ink of its appearance (WCAG 2.2
-SC 1.4.11, section 12), so a ring reads on a white slide and on a dark photograph whichever
-appearance the chrome is in; the chip's text holds 4.5:1 (SC 1.4.3). The numbers are in section
-12; `SELECTION_COLORS` in `brand.ts` records the values and `brand.test.ts` computes the ratios.
-The screenshot pair before and after, on a dark photograph and on a white slide, is
-`docs/gslides-parity/build-4/b1-selection/`.
-
-## 11. The CLI banner and the MCP name
-
-`turboslide --version` (a flag parsed in `apps/cli/src/cli.ts` before the command table, handled by
-`apps/cli/src/commands/banner.ts`; B1's day 3) prints `markBlocks(8)` beside the word, the version,
-the hosted address, the action count from `ACTION_IDS.length` and `effects backend:
-<describeBackends().selected>`, which says what this machine runs (`native` on a checkout that
-built the addon, `typescript` on a Vercel build until SPEC-4 0.38 lands); `turboslide info` prints
-the same header before the deck facts. No colour is used, so the banner is byte identical with
-`NO_COLOR=1`. The block glyph, computed from `brand.ts` on 2026-09-14:
+`turboslide --version` (`apps/cli/src/commands/banner.ts`) prints the 16 px rows' mark area
+(rows 2 to 13, columns 2 to 13) as half block characters (U+2580, U+2584, U+2588), two pixel rows
+to a line, six lines, from `markBlocks()` in `brand.ts`. The first four lines carry the word and
+the version, the address, the action count with the effects backend, and the fourth fact; the last
+two glyph lines stand alone. No colour is written, so the output is byte identical with
+`NO_COLOR=1`. `turboslide info` prints the same header before the deck facts.
 
 ```
-████████  Turboslide <version>
-████████  https://turboslide.vercel.app
-█    ███  <n> actions, effects backend: <selected>
-█▄▄▄▄███  checkout <path>
+ ███████████  Turboslide <version>
+ ▀▀▀▀▀███▀▀▀  https://www.turboslide.com
+▄▄▄▄▄ ███     <n> actions, effects backend: <selected>
+▄▄▄▄ ▄▄▄      checkout <path>
+     ███
+███ ███
 ```
 
-`packages/mcp/src/server.ts` keeps `SERVER_NAME` `turboslide` and the title "Turboslide"; its
-`INSTRUCTIONS` gain one sentence naming `/home` and `/llms.txt` (SPEC-4 0.18). The agent
-manifest's `name` and the four skill names are unchanged: the identity adds nothing to a protocol
-name.
+## 8. The picture credits
+
+Mood pictures appear on the card, Not found, the empty `/decks` state and the Sign in plate, and
+never on `/home`'s first screen (question 5). A picture whose licence was not read on its source
+page stays out of the repository and the product. Lane B4 read each licence on 2026-10-02 between
+08:57Z and 09:01Z from the picture's source page or its record there (`round1/build/b4.md`, "The
+licence read"; the raw reads under `round1/build/b4/licence/`). Prototemplate's
+`deck/shots/OPENERS.md` was not used as a licence source. The brand lint's credits check (lane B5)
+reads this table: a picture counts as credited when one row names its asset id or its path in
+backticks and states its licence.
+
+| Picture                                                  | Files                                                                                                                                                                                                            | Credit                                                                         | Licence as the source states it                                                                                          | Source page                                                                                                                                      |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The Blue Marble, `mood-earth`                            | `decks/gt-brand/assets/mood-earth-{light,dark}.jpg`, `decks/templates/blank/assets/mood-earth-{light,dark}.jpg`, `apps/studio/public/brand/mood-earth-dark.jpg`, `apps/studio/public/brand/mood-earth-light.jpg` | Image: NASA, Reto Stöckli, 2007, public domain                                 | Public domain (PD-USGov-NASA); attribution not required                                                                  | https://commons.wikimedia.org/wiki/File:Blue_Marble_Western_Hemisphere.jpg                                                                       |
+| The Rosetta Stone, `mood-rosetta`                        | `decks/gt-brand/assets/mood-rosetta-{light,dark}.jpg`                                                                                                                                                            | Photograph: Hans Hillewaert, CC BY-SA 4.0                                      | CC BY-SA 4.0, Hans Hillewaert, own work; attribution required                                                            | https://commons.wikimedia.org/wiki/File:Rosetta_Stone.JPG                                                                                        |
+| A proto-cuneiform tablet, `mood-tablet`                  | `decks/gt-brand/assets/mood-tablet-{light,dark}.jpg`                                                                                                                                                             | Photograph: The Metropolitan Museum of Art, Open Access, public domain         | CC0 (the Met's donation of photograph DP293245); the Met's collection API reads `isPublicDomain: true` for object 327385 | https://commons.wikimedia.org/wiki/File:Cuneiform_tablet-_administrative_account_with_entries_concerning_malt_and_barley_groats_MET_DP293245.jpg |
+| Karahisari's calligraphy, `mood-calligraphy`             | `decks/gt-brand/assets/mood-calligraphy-{light,dark}.jpg`                                                                                                                                                        | Calligraphy: Ahmed Karahisari, 16th century, public domain                     | Public domain (PD-Art, PD-old-auto-expired, death year 1556)                                                             | https://commons.wikimedia.org/wiki/File:Ahmed_Karahisari_-_Karalama_(calligraphy_exercise)_-_Google_Art_Project.jpg                              |
+| Johnson's grammar, `mood-johnson`                        | `decks/gt-brand/assets/mood-johnson-{light,dark}.jpg`                                                                                                                                                            | Image: Samuel Johnson, 1755, scanned by the Wellcome Collection, public domain | Public domain: the Creative Commons Public Domain Mark 1.0 in the item's rights field                                    | https://archive.org/details/b30451541_0001                                                                                                       |
+| The Louisbourg lighthouse, `mood-lighthouse`             | `decks/gt-brand/assets/mood-lighthouse-{light,dark}.jpg`                                                                                                                                                         | Photograph: Ken Heaton, CC BY-SA 4.0                                           | CC BY-SA 4.0, Ken Heaton; attribution required                                                                           | https://commons.wikimedia.org/wiki/File:Louisbourg_Lighthouse,_waves_breaking_in_a_fall_storm_1.jpg                                              |
+| The Compact Oxford English Dictionary, `mood-dictionary` | `decks/gt-brand/assets/mood-dictionary-{light,dark}.jpg`                                                                                                                                                         | Photograph: Cullen328, CC BY-SA 4.0                                            | CC BY-SA 4.0, Cullen328; attribution required                                                                            | https://commons.wikimedia.org/wiki/File:Compact_Oxford_English_Dictionary_2.jpg                                                                  |
+| The Prashna Upanishad page, `mood-devanagari`            | `decks/gt-brand/assets/mood-devanagari-{light,dark}.jpg`                                                                                                                                                         | Photograph: Ms Sarah Welch, CC BY-SA 4.0                                       | CC BY-SA 4.0, Ms Sarah Welch; attribution required                                                                       | https://commons.wikimedia.org/wiki/File:Prashna_Upanishad_sample_manuscript_page,_Sanskrit,_Devanagari_script.jpg                                |
+| The glossed Alexandreis, `mood-gloss`                    | `decks/gt-brand/assets/mood-gloss-{light,dark}.jpg`                                                                                                                                                              | Image: MS f Med. 23, Boston Public Library, public domain                      | Public domain in the United States: No Copyright - United States (rightsstatements.org), contributed through the DPLA    | https://commons.wikimedia.org/wiki/File:Alexandreis_with_gloss_-_in_Latin_-_DPLA_-_98b56ea1ebec780d88ec0bdfa6750159_(page_69).jpg                |
+| The Eastern Telegraph chart, `mood-cable`                | `decks/gt-brand/assets/mood-cable-{light,dark}.jpg`                                                                                                                                                              | Map: Eastern Telegraph Company, 1901, public domain                            | Public domain in the United States (PD-US); author unknown                                                               | https://commons.wikimedia.org/wiki/File:1901_Eastern_Telegraph_cables.png                                                                        |
+| Hokusai's wave, `mood-wave`                              | `decks/gt-brand/assets/mood-wave-{light,dark}.jpg`                                                                                                                                                               | Print: Katsushika Hokusai, about 1831, public domain                           | Public domain (PD-Art, PD-old-auto-expired, death year 1849)                                                             | https://commons.wikimedia.org/wiki/File:Tsunami_by_hokusai_19th_century.jpg                                                                      |
+| Bowen's compass rose, `mood-compass`                     | `decks/gt-brand/assets/mood-compass-{light,dark}.jpg`                                                                                                                                                            | Engraving: Emanuel Bowen, 1748, public domain                                  | Public domain (PD-Art, PD-old-100), provided by Geographicus                                                             | https://commons.wikimedia.org/wiki/File:1748_Bowen_Mariner%E2%80%99s_Compass_and_Armillary_Sphere_-_Geographicus_-_CircleofWinds-bowen-1747.jpg  |
+
+Notes on the table:
+
+- The 1897 Oxford English Dictionary page, the dictionary slide of the Prototemplate deck, states no
+  licence on its source page (https://archive.org/details/oxforddictionaryv3p1unse_a5h6: no rights,
+  licence URL or copyright status). It stays out of the repository and the product until a scan
+  whose page states a licence is read. The Turboslide decks keep the Compact OED photograph above.
+- A dithered copy of a CC BY-SA 4.0 photograph is an adaptation: it carries the credit and is shared
+  under CC BY-SA 4.0. None of the four is used outside the decks.
+- The gloss carries No Copyright - United States, which says the item is free of copyright under
+  United States law and may be protected elsewhere. The manuscript is of about 1250.
+- The openers and the closing picture are General Translation's own renders of Prototemplate
+  directions and of Paper Shaders materials (Apache-2.0, read 2026-10-02 09:01Z). They are not mood
+  pictures and carry their material credits.
+- Slide 13's eleven reference thumbnails (`ref-*.jpg`) carry the one line "The photographs come from
+  Wikimedia Commons" and no licence per file. Their licences were not read; they are a finding for
+  Kevin (`round1/build/b4.md`).
+
+## 9. The 2026-10-01 deck mapped to Turboslide
+
+Each rule of `P:deck/DECK-GRAMMAR.md` (P is the Prototemplate checkout) with the Turboslide surface
+it governs and the lane of Round 1 that carries it (NEXT.md 4.1.3 and 4.1.6).
+
+| The deck's rule                                                                         | Turboslide                                                                                                                                                     | Lane          |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| Inter is the only typeface; display weight 500 at most (lines 20, 24)                   | `--pt-display` and `--pt-text` resolve to Inter; the lockup's word is live Inter 500                                                                           | B1, B5 lint   |
+| Sentence case headings with no trailing period; Title Case only on buttons (22)         | Menu rows, tooltips and headings in sentence case; every button label in Title Case                                                                            | B3a, B2c, B3b |
+| Straight technical English, no metaphors, no em dashes, no exclamation marks (23)       | The forbidden words list of `packages/chrome/src/menus/strings.ts`; the words push                                                                             | B3a           |
+| Paper and ink tokens, a dark token remap (27, 28)                                       | `packages/chrome/src/tokens.css`, with the deviations of section 10                                                                                            | B3b           |
+| No accent colour on text, lines or fills (29)                                           | The chrome draws none; the selection's GT blue is the one exception (section 11, question 3)                                                                   | B3b           |
+| Semantic colour on icons only, four hues (30)                                           | Status icons in the shell's per theme hues (section 10)                                                                                                        | B3b           |
+| Code on the `#101010` panel; monospace nowhere else (31)                                | The `/home` command on the panel; the brand lint's monospace check                                                                                             | B2a, B5       |
+| Two rails, two rules and crosses on the sheet (lines 12 to 14)                          | C's page grammar: the 1104 px column with one rail on each side, 9 px crosses where a seam meets a rail, the 58 px bar, the hatch strip; the blank slide plain | B2a, B2b, B4a |
+| Lists are ruled rows; no cards with shadows, no rounded corners, no gradients (39)      | `/decks` as ruled rows; the Share dialog's rows; square chrome with `--pt-radius` on the search field and segmented controls and 8 px on Slideshow             | B2b, B3b      |
+| Heroicons 20 solid, in a key cell or at the start of a row (40)                         | The facts rows on `/home`; no icon before a heading                                                                                                            | B2a           |
+| Diagrams: 11 px square markers, no large arrowheads, labels at 18 px or more (42 to 48) | The `/home` diagrams                                                                                                                                           | B2a           |
+| Speed marks built by the generator, never redrawn by hand (50 to 53)                    | The Turboslide monogram built from rectangles by the same construction; the 16 px rows are the one hand drawing (section 3)                                    | B1            |
+| Full picture and mood slides with a plate and a credit (8)                              | The mood picture on the card; Not found and the empty `/decks` state; the Sign in plate in Round 3                                                             | B1, B2b, B2c  |
+| Every slide checked in both themes (60 to 63)                                           | Every surface in both appearances; the slide keeps its deck's appearance on the stage, the filmstrip, the presenter and the `/deck` view                       | B3b           |
+| The avoid list (slide 39): no sparkles, no smooth scroll                                | Assist as the word alone; no `scroll-behavior: smooth`                                                                                                         | B3b           |
+
+## 10. The tokens and the recorded deviations
+
+`packages/chrome/src/brand.css`, imported once by `__root.tsx` after `tokens.css`, declares sixteen
+`--ts-` identity tokens on `:root`. `packages/theme/src/brand.ts` mirrors them as `BRAND_TOKENS`
+and `BRAND_TOKENS_NARROW`, and `brand.test.ts` asserts the sheet and the data agree. The values are
+C's build table read against the deck's type ladder (slide 29) and shell numbers (slide 49), lane
+B2's request:
+
+| Token         | Value             | At and under 720 px | Read by                                                   |
+| ------------- | ----------------- | ------------------- | --------------------------------------------------------- |
+| `--ts-cell`   | `2px`             |                     | Every dithered twin, shown at 2 px cells and never scaled |
+| `--ts-mark`   | `24px`            |                     | The title row mark                                        |
+| `--ts-h1`     | `3.7rem`          | `2.5rem`            | The `/home` display size                                  |
+| `--ts-h2`     | `2.25rem`         |                     | Band headings                                             |
+| `--ts-h3`     | `1.375rem`        |                     | Subheads                                                  |
+| `--ts-title`  | `1.125rem`        |                     | Row titles                                                |
+| `--ts-lead`   | `17px`            |                     | Leads                                                     |
+| `--ts-body`   | `16px`            |                     | Body text                                                 |
+| `--ts-small`  | `14px`            |                     | Facts, links, source lines                                |
+| `--ts-label`  | `13px`            |                     | Labels                                                    |
+| `--ts-figure` | `40px`            | `32px`              | The numbers row, `tabular-nums`                           |
+| `--ts-rail`   | `1104px`          |                     | The column between the rails                              |
+| `--ts-gutter` | `40px`            | `16px`              | The column's gutter                                       |
+| `--ts-nav-h`  | `58px`            |                     | The navigation bar                                        |
+| `--ts-cross`  | `9px`             |                     | The cross where a seam meets a rail                       |
+| `--ts-plate`  | `var(--pt-paper)` |                     | The plate is the ground showing through and draws no rule |
+
+The layout's one breakpoint is 1023 px (`BRAND_LAYOUT_MAX_PX`, slide 49).
+
+Turboslide's `--pt-` tokens differ from the deck's in these places, each for a measured reason that
+`tokens.css` states beside the value (question 32 records them as deviations):
+
+| Token                                            | The deck                         | Turboslide                    | Why                                                                                                                             |
+| ------------------------------------------------ | -------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `--pt-titanium`, light                           | `#8a8f98`                        | `#6f747d`                     | The chrome's secondary text reads 4.70:1 on paper; the deck's value is 3.25:1, under SC 1.4.3's 4.5:1 (`docs/PRODUCT.md` 3.1)   |
+| `--pt-plate`, light                              | ink at 0.035                     | ink at 0.06                   | The hover ground composites `#f0f0f0`, 1.14:1; 0.035 read 1.08:1 and a hover changed almost nothing                             |
+| `--pt-plate`, dark                               | ink at 0.035                     | ink at 0.08                   | The same step on the ink ground                                                                                                 |
+| `--pt-field`, `--pt-disabled`                    | none                             | ink at 0.44; `#8a8f98`        | An input's boundary at 3.1:1 (SC 1.4.11); a disabled control's text apart from ink-2                                            |
+| `--pt-hair-on-ink`, `--pt-plate-on-ink`, `-open` | none                             | paper tints over ink          | The line and the grounds over the solid ink of the Slideshow split button (`docs/RETURN.md` 4.1)                                |
+| The status hues                                  | one value per hue in both themes | one value per theme           | The deck's amber `#f0a020` is 2.15:1 on paper; the shell's `#c47d00` is 3.34:1, with the lifted hues on ink (lane B3b, push 10) |
+| `--pt-select`                                    | none                             | `#2f5ce0` in both appearances | Section 11                                                                                                                      |
+
+The sheet theme of the slides (`packages/theme/src/gt-ink-paper/sheet.css`) keeps the deck's own
+values, so a slide is the deck's in both appearances.
+
+## 11. The selection colour
+
+The canvas selection ring, the eight resize handles and the rotation handle, the marquee, the hover
+outline, the crop frame and its handles, the group box and the selection chip read `--pt-select`.
+Since Round 1 it is GT blue `#2f5ce0` in both appearances, with `#ffffff` text on the chip through
+`--pt-select-text` (question 3; `SELECTION_COLORS` in `brand.ts`; the row
+`chrome.selection.gt-blue`). The snap guides keep `--pt-guide`, `#d6336c` in the light appearance
+and `#f0397a` in the dark. The remote collaborator outlines keep round three's six hues. The
+exports, the deck content, the menus, `/home`, the card and the README draw no blue.
+
+The blue holds at least 3:1 against the paper and the ink of each appearance (SC 1.4.11), so a ring
+reads on a white slide and on a dark photograph: 5.63:1 on `#ffffff`, 3.58:1 on `#070707` and
+5.03:1 on `#f2f2f0`. The chip's white text on it is 5.63:1 (SC 1.4.3). `brand.test.ts` computes
+each ratio. The tokens land in `tokens.css` and `Overlay.css` in lane B3b's push 10.
 
 ## 12. Accessibility record
 
 Contrast is computed by the WCAG relative luminance formula on the token values
-(`relativeLuminance` and `contrastRatio` in `packages/theme/src/brand.ts`; every ratio below was
-recomputed with those functions on 2026-09-14 and matches `brand.test.ts`), against two success
-criteria of WCAG 2.2, read on 2026-09-14 by this document's author:
+(`relativeLuminance` and `contrastRatio` in `brand.ts`), against SC 1.4.3 Contrast (Minimum) and
+SC 1.4.11 Non-text Contrast of WCAG 2.2
+(https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html and
+https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html). SC 1.4.3 exempts text that is
+part of a logo or brand name.
 
-- SC 1.4.3 Contrast (Minimum), https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html:
-  text and images of text at least 4.5:1, large scale text at least 3:1, and "Text that is part
-  of a logo or brand name has no contrast requirement" (the logotype exemption). The page names
-  itself "Understanding Success Criterion 1.4.3: Contrast (Minimum)" under the WCAG 2.2
-  Understanding Docs. Proposal 3 read the same page on 2026-09-13.
-- SC 1.4.11 Non-text Contrast, https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html:
-  visual information required to identify user interface components and states, and parts of
-  graphics required to understand the content, at least 3:1 against adjacent colours, with the
-  exceptions for inactive components, user agent styled components and graphics whose
-  presentation is essential. The page names itself "Understanding Success Criterion 1.4.11:
-  Non-text Contrast" under the WCAG 2.2 Understanding Docs.
+| Pair                                                         | Light   | Dark    | Where                                                       | Criterion                    |
+| ------------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------- | ---------------------------- |
+| `--pt-ink` on `--pt-paper`                                   | 20.14:1 | 17.97:1 | Headings, body, the mark on its plate                       | 1.4.3, passes 4.5:1          |
+| `--pt-ink-2` on paper                                        | 10.88:1 | 10.59:1 | Captions, the card's address, secondary copy                | 1.4.3, passes 4.5:1          |
+| `--pt-titanium` on paper                                     | 4.70:1  | 6.20:1  | The chrome's secondary text; the deck's `#8a8f98` is 3.25:1 | 1.4.3, passes 4.5:1          |
+| The tile's frame (`#656565` on paper, `#888887` on ink)      | 5.83:1  | 5.68:1  | The tile's edge                                             | 1.4.11, passes 3:1           |
+| The frame against Chrome's tab strips (`#dee1e6`, `#202124`) | 4.45:1  | 4.54:1  | The tile's edge on both strips                              | 1.4.11, passes 3:1           |
+| `--pt-select` `#2f5ce0` on `#ffffff`                         | 5.63:1  | 5.63:1  | The selection ring on a white slide                         | 1.4.11, passes 3:1           |
+| `--pt-select` `#2f5ce0` on `#070707`                         | 3.58:1  | 3.58:1  | The selection ring on a dark photograph                     | 1.4.11, passes 3:1           |
+| `--pt-guide` on `#ffffff`                                    | 4.62:1  | 3.77:1  | A snap guide on a white slide                               | 1.4.11, passes 3:1           |
+| `--pt-guide` on `#070707`                                    | 4.36:1  | 5.34:1  | A snap guide on a dark photograph                           | 1.4.11, passes 3:1           |
+| The chip's `#ffffff` text on `#2f5ce0`                       | 5.63:1  | 5.63:1  | The selection chip                                          | 1.4.3, passes 4.5:1 at 13 px |
 
-| Pair                                                         | Light   | Dark    | Where                                                                                                       | Criterion                    |
-| ------------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `--pt-ink` on `--pt-paper`                                   | 20.14:1 | 17.97:1 | Headings, body, the mark on its plate                                                                       | 1.4.3, passes 4.5:1          |
-| `--pt-ink-2` on paper                                        | 10.88:1 | 10.59:1 | Captions, the fact line, source lines, secondary copy                                                       | 1.4.3, passes 4.5:1          |
-| Ink on `--pt-plate` composited (`#f6f6f6`)                   | 18.64:1 |         | Commands in hairline boxes                                                                                  | 1.4.3, passes 4.5:1          |
-| `--pt-panel-text` on `--pt-panel-ink`                        | 14.69:1 | 14.69:1 | The present toolbar (the 0.87 white composited on `#101010` is `#e0e0e0`; SPEC-4 1.12 rounds it to 14.41:1) | 1.4.3, passes 4.5:1          |
-| The tile's frame (`#656565` on paper, `#888887` on ink)      | 5.83:1  | 5.68:1  | A graphical object                                                                                          | 1.4.11, passes 3:1           |
-| The frame against Chrome's tab strips (`#dee1e6`, `#202124`) | 4.45:1  | 4.54:1  | The tile's edge on both strips                                                                              | 1.4.11, passes 3:1           |
-| The paper plate against Safari's dark strip                  | 15.2:1  |         | The tile reads without its frame (proposal 3 section 6)                                                     | 1.4.11, passes 3:1           |
-| `--pt-titanium` on paper                                     | 3.25:1  | 6.20:1  | Never text under 19 px on the new surfaces                                                                  | 1.4.3 large text only        |
-| `--pt-select` on `#ffffff`                                   | 4.51:1  | 3.58:1  | The selection ring on a white slide                                                                         | 1.4.11, passes 3:1           |
-| `--pt-select` on `#070707`                                   | 4.47:1  | 5.63:1  | The selection ring on a dark photograph                                                                     | 1.4.11, passes 3:1           |
-| `--pt-guide` on `#ffffff`                                    | 4.62:1  | 3.77:1  | A snap guide on a white slide                                                                               | 1.4.11, passes 3:1           |
-| `--pt-guide` on `#070707`                                    | 4.36:1  | 5.34:1  | A snap guide on a dark photograph                                                                           | 1.4.11, passes 3:1           |
-| The selection chip's text on `--pt-select`                   | 4.51:1  | 5.63:1  | Paper text on the light blue, ink text on the dark blue                                                     | 1.4.3, passes 4.5:1 at 13 px |
-
-Rules (SPEC-4 1.12): the smallest text on `/home` is 13 px; the hero plate is opaque paper, so no
-heading sits on cells; a two tone crop used as a figure carries `role="img"` and one sentence, a
-decorative twin `aria-hidden="true"`; the mark's alt text is "Turboslide" and the link's
-`aria-label` "Turboslide home"; every button and link has a visible focus outline
-(`.pt-ib:focus-visible`, 1 px ink; links a 2 px offset); nothing on `/home` moves except the
-`.pt-ib` colour transitions the tokens already define, and the reduced motion block zeroes them;
-the appearance control names the appearance it switches to; `theme-color` follows the stored
-theme; every control carries the Tooltip primitive; the numbers use `tabular-nums`. The verifier
-reads the 20 px print bar raster and the 24 px title row raster at 1x and 2x for soft edges
-(SPEC-4 0.50); the 24 px mark has integer edges by arithmetic (1.5 units per pixel puts the window
-at 3, 12, 15 and 21 px).
+The mark's alt text is "Turboslide"; alone the mark is `role="img"`, beside the word it is
+`aria-hidden` so the name is read once. The card's credit is 15 px titanium on the dark plate.
 
 ## 13. Light and dark
 
-Both appearances are first class; dark is the stored default (`THEME_BOOT_SCRIPT`, the `gt-theme`
-key). Every identity asset exists in both: twins for pictures, `currentColor` for the mark, the
-scheme block for the tile, the two `theme-color` values. The tab icon follows the operating system
-while the page follows its stored theme (R01 6.4 item 17). The README's images are the dark twins
-because GitHub's ground is light (R01 6.9 item 33), inside a `<picture>` whose light source is the
-light twin for a reader with GitHub's dark theme.
+Both appearances are first class. Every identity asset exists in both: `currentColor` for the
+mark, the scheme block for the tab icon, twins for the pictures, the two `theme-color` values. The
+tab icon follows the operating system while the page follows its stored theme. The README's
+`<picture>` shows `docs/readme/brand/lockup-dark.png` (paper on ink) by default on GitHub's light
+ground and `lockup-light.png` (ink on paper) for a reader with GitHub's dark theme. Both are the
+lockup at a 66 px word rendered at 2x by `node scripts/build-brand.ts --readme`.
 
-## 14. The build script and its records
+## 14. The GT mark
 
-`node scripts/build-brand.ts` (also `pnpm build:brand`; `pnpm build:brand -- --check` for the
-check) runs through Node's type stripping with no new dependency: sharp, pixelmatch and
-playwright-core are in the catalog. Its steps (SPEC-4 1.5):
+The GT mark stays content of the `gt-ink-paper` theme and the GT template: the sheet's wordmark
+band and counter on a GT deck (`GT_BAND`, `packages/render/src/stage.ts`), the `mark` block, the
+closing plate, the icon picker's `gt-mark` symbol, the GT template card on `/decks` and the Themes
+panel. Since hotfix H6 the blank template draws no GT mark and no GT wordmark band. The chrome draws
+the Turboslide mark everywhere it draws a product mark; the `/deck` view's sidebar, the viewer
+toolbar and the filmstrip move from `GtMark` to `TurboslideMark` in lane B3b's push 12 (the row
+`chrome.mark.one-product-mark`).
 
-1. Import `markBits` and `markPath` from `@turboslide/theme/brand`; write the SVG sources under
-   `packages/theme/brand/` (`mark.svg` at 64 cells on a 512 unit box, `mark-small.svg` as the 16
-   unit path, `icon-tile.svg` with the scheme block).
-2. Rasterize each PNG at its target size on its own cell grid, the paper tile for 16, 32 and 48,
-   the ink tile for the touch and manifest icons, the paper plate for the `icon-dark-*` inverse.
-   The two colour PNGs are written by `encodePng1` (`packages/effects/src/png1.ts`) with the
-   theme's exact palette (`#070707` and `#f2f2f0` on the dark twin, `#ffffff` and `#070707` on the
-   light), so the bytes are deterministic; the touch icon and the monochrome icon by sharp.
-3. Write `favicon.ico` with three 32 bit BMP entries and AND masks (the design copy's writer round
-   trips in Pillow with zero differing pixels).
-4. Write the maskable icons (the mark inside the 40 percent safe circle), the monochrome icon,
-   `manifest.webmanifest` and `robots.txt` from `site.ts`.
-5. Under `--capture` (B1's day 2): `turboslide material capture paper:liquid-metal` with the
-   recipe of `hero.recipe.json`, the anchor scan of SPEC-4 0.7 over 0 to 10 s in 500 ms steps
-   choosing the frame with the fewest lit cells under `PLATE_BOXES.opener`, the cut at black 160,
-   white 250, gamma 1.5 at 2 px cells, the light twin as `invertBits` of the dark, and the check
-   that the two twins' ink fractions sum to 1.0 per frame; frame one becomes `hero-{dark,light}.png`,
-   frames two and three `figure-*` and `notfound-*`, and the card's 10 px cell screen
-   `og-screen-*`. The twins are committed assets with their recipe: byte identity holds only on a
-   Mac with ANGLE Metal, so `--check` compares them by bytes against the committed files.
-6. Render `og-template.html` to `og/turboslide.png` through `@turboslide/headless` at 1200 by 630
-   and device scale factor 1; fail over 1 MB; compare under `--check` only when the local browser
-   is the `chromium-1217` build.
-7. Write `brand-manifest.json` (path, bytes, sha256 per output) and `mark-geometry.json` (per
-   size: the cell size, the lit cells, the colour count read back from the PNG); under `--facts`
-   write `packages/theme/brand/facts.json` with the counts of SPEC-4 0.25 from the tree (landed
-   on 2026-09-14: 169 actions, 146 MCP tools, 153 OpenAPI paths, 21 layouts, 135 shape presets,
-   17 materials, 31 check steps, 3,369 parity rows, the export's worst page mismatch, the licence,
-   and the measured rows of the verifier's baseline run with their date).
-8. `--check`: rebuild into a temporary directory and compare (pixels for PNGs and the ICO's
-   decoded entries at threshold 0, bytes for text), assert the facts of SPEC-4 6.4 (three ICO
-   entries at 16, 32 and 48 with three colours each; the scheme block and `crispEdges` in
-   `icon.svg`; the 180 px opaque touch icon; two colours on the manifest and dark icons with the
-   maskable marks inside the safe circle; alpha only on the monochrome icon; the manifest's
-   `start_url` and one purpose per icon; the twins' palette and ink fraction sum), and exit 1
-   naming the first path that differs.
+## 15. The build script and its records
 
-`--check` is `pnpm check` step 29 and ran green at merge 1 ("16 files match the manifest, the
-rebuild and the facts of SPEC-4 6.4"). `apps/studio/src/brand-files.test.ts` (B1's day 5) asserts
-the same file list exists with the manifest's sizes, so a deleted icon fails `pnpm test` before
-the build runs. Edit the generator, never a generated file.
+`node scripts/build-brand.ts` (also `pnpm build:brand`) runs through Node's type stripping with no
+new dependency and no font tool. It writes the SVG sources under `packages/theme/brand/`
+(`mark.svg` the master drawing, `mark-small.svg` the rows, `mark-24.svg` the 24 px placement,
+`icon-tile.svg`, `wordmark.svg` the lockup with the word as live text), `og-template.html`, the icon
+set, the manifest, `robots.txt`, the mood picture copies, `mark-geometry.json`, the card and
+`brand-manifest.json`. The flags:
 
-## 15. Repository metadata
+- `--readme`: the README lockup pair under `docs/readme/brand/`.
+- `--facts`: `packages/theme/brand/facts.json`, the counts `/home` and the README state, read from
+  the tree.
+- `--capture`: the two tone twins under `apps/studio/public/brand/` and `hero.recipe.json`. Byte
+  identity holds only on a Mac with ANGLE Metal, so the twins are committed and compared by bytes.
+- `--check` (`pnpm check` step 29): the committed `MARK_PATH` against a rebuild from `MARK_RECTS`
+  and both sha256 digests, the rows' path likewise, then every file against the manifest by bytes
+  and sha256, a rebuild compared by pixels for the rasters and the ICO's decoded entries and by
+  bytes for text, the file facts (three ICO entries at 16, 32 and 48 with the 16 px entry at three
+  colours, the scheme block in `icon.svg`, the opaque touch icon, the manifest's paper colours and
+  one purpose per icon, the maskable marks inside the safe circle, alpha only on the monochrome
+  icon), the twins' palette, the card's size and its pixels when the local browser is the
+  `chromium-1217` build, `mark-geometry.json`, and `facts.json` against the tree.
 
-The GitHub repository's description, topics and social preview are Kevin's manual step (SPEC-4
-section 8 decision 14; the orchestrator's account boundary: no sign up, no paid resource, no DNS
-change). The description and topics refresh may run through `gh repo edit` in the ship step; the
-social preview image is an upload in the repository settings, which no script can do.
+Edit the generator or `brand.ts`, never a generated file.
 
-The description, exact:
+## 16. Repository metadata
+
+The GitHub repository's homepage, description and social preview are Kevin's settings (K5 and K7 of
+NEXT.md 3.1); no lane changes them. `gh repo view` read the homepage as the old project address at
+2026-10-02 04:20Z and `usesCustomOpenGraphImage` as false. The commands, from the repository root
+with `gh` logged in as Kevin:
 
 ```
-Turboslide: an agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export
+gh repo edit Kevin-Liu-01/Turboslide --homepage https://www.turboslide.com
+gh repo edit Kevin-Liu-01/Turboslide --description "Turboslide is a slides editor in the browser with Google Slides' menus and shortcuts, an agent surface and a PowerPoint export"
 ```
 
-The topics, exact, ten of them:
+The social preview is `apps/studio/public/og/turboslide.png` (section 6), uploaded by hand under the
+repository's Settings, Social preview.
 
-```
-slides, presentations, google-slides, pptx, tanstack-start, mcp, agents, bayer-dither, paper-shaders, rust
-```
+## 17. The name check
 
-The `rust` topic is true of the tree (the crate `crates/turboslide-native` and its parity test).
-It licenses no sentence claiming the studio is built on that language: SPEC-4 0.26 forbids that
-phrase on every surface, and no document in this repository writes it.
+Run on 2026-10-01 between 22:00 and 22:20 PDT by lane B1 with web search, the USPTO's TSDR status
+pages, Apple's public search API, npm's registry search and the GitHub search API
+(`docs/gslides-parity/round1/sheet.md`, "The name check"). No product sold as Turboslide or Turbo
+Slide was found with a speed mark, and no software product named Turboslide was found besides this
+one.
 
-Read on 2026-09-14 with `gh repo view Kevin-Liu-01/Turboslide`: the description is "Agent native
-slides editor with Google Slides' structure and behaviours, a canvas where everything moves,
-shader materials and dithers, and pixel identical PPTX export."; the topics are `agent-native`,
-`canvas-editor`, `cli`, `design-system`, `dithering`, `export`, `google-slides`, `mcp`,
-`mcp-server`, `powerpoint`, `pptx`, `presentation-editor`, `presentations`, `react`, `shaders`,
-`slides`, `tanstack-start`, `typescript`, `vercel`, `vite`; the homepage is the pre hosting round
-address `https://studio-delta-six-40.vercel.app`, which should become
-`https://turboslide.vercel.app`. The commands for the ship step, from the repository root with
-`gh` logged in as Kevin:
+| Mark        | Record                                                       | Owner                                   | Status                     | Goods                                                      |
+| ----------- | ------------------------------------------------------------ | --------------------------------------- | -------------------------- | ---------------------------------------------------------- |
+| TURBOSLIDE  | Registration 3761186, serial 77797872, registered 2010-03-16 | Olympia Tools International, Covina, CA | Live, renewed 2020-10-07   | Class 8, utility knives; standard characters               |
+| TURBOSLIDE  | Serial 77854924, filed 2009-10-22                            | JPJ Investment Holding Co.              | Dead, abandoned 2010-05-11 | Class 8, knives; standard characters                       |
+| TURBO-SLIDE | Registration 5018456, serial 86423077, registered 2016-08-09 | Rytec Corporation, Jackson, WI          | Live                       | Class 19, high speed industrial doors; standard characters |
+| TURBO-SLIDE | Serial 86517133, filed 2015-01-28                            | Rytec Corporation                       | Dead, abandoned 2015-12-03 | Industrial sliding doors                                   |
 
-```
-gh repo edit Kevin-Liu-01/Turboslide --description "Turboslide: an agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export" --homepage https://turboslide.vercel.app
-gh repo edit Kevin-Liu-01/Turboslide --remove-topic agent-native,canvas-editor,cli,design-system,dithering,export,mcp-server,powerpoint,presentation-editor,react,shaders,typescript,vercel,vite
-gh repo edit Kevin-Liu-01/Turboslide --add-topic agents,bayer-dither,paper-shaders,rust
-```
-
-The second command removes the topics that are not in the list of ten; the six that are already
-set (`slides`, `presentations`, `google-slides`, `pptx`, `tanstack-start`, `mcp`) stay. Kevin may
-keep more topics; the ten are the identity's.
-
-The social preview file is `apps/studio/public/og/turboslide.png` (section 6), uploaded by hand:
-the repository's Settings tab, the "Social preview" section, Edit, then "Upload an image...".
-GitHub's page "Customizing your repository's social media preview", read on 2026-09-14, says the
-image "should be a PNG, JPG, or GIF file under 1 MB in size" and recommends "at least 640 by 320
-pixels (1280 by 640 pixels for best display)"; the card is 1200 by 630 and the build fails over
-1 MB, so the same file serves the card and the preview. GitHub crops the preview to 2:1, which
-the card's 48 px safe margin allows (R02 2.5).
-
-## 16. The alternates
-
-The build is parameterised on `packages/theme/brand/` and `packages/theme/src/brand.ts` (SPEC-4
-0.10, 0.11, 0.51), so a different mark costs the brand builder's files and nothing else: the tile,
-the tokens, the build, the page and the plan stand. Two judges chose proposal 1 (47 and 45 points);
-one chose proposal 2 made monochrome (47 against 46 for proposal 1); proposal 3 scored 43 and 44.
-Kevin can override the pick (SPEC-4 section 8 decision 1); the candidates by name, each with its
-generator in the repository:
-
-| Candidate                                                         | Form                                                                                                                                                                                                                                           | Generator and previews                                                                                                                |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Proposal 1, the dither mark (shipped)                             | Section 1: the square less the plate window, the density field through the deck's Bayer permutation                                                                                                                                            | `docs/gslides-parity/design-4/dither/mark.mjs` (moved into `brand.ts`), `dither/previews/mark-sizes.png`, `favicon-tab-strips.png`    |
-| Proposal 2, the slide frame and T with the ramp panel (J2's pick) | A 16:9 frame for the slide, its top edge thickened into a T's crossbar, the stem dividing the slide into a paper panel and a panel carrying the deck's dither ramp (`rampInk`), 317 cells lit on the 64 unit master drawing                    | `design-4/shader/tools/make-mark.mjs`, `shader/previews/marks-sheet.png`, `confusion-sheet.png`, `shader/previews/mark-geometry.json` |
-| Proposal 3, the Inter T tile with the dissolving foot             | The letter T of the wordmark, measured from `InterVariable.woff2` at weight 500 (cap height 1490 of 2048 units, the T 1170.5 wide, the stem 223), the foot of the stem dissolving into paper through the 8 by 8 screen; solid from 16 to 48 px | `design-4/type/tools/build-marks.mjs`, `type/mark.svg`, `mark-small.svg`, `type/previews/tab-strip.png`, `marks-sheet.png`            |
-
-What the round kept from the alternates: proposal 3's framed tile as the tab icon (section 2) and
-its contrast method (section 12); proposal 2's build records (`brand-manifest.json`,
-`mark-geometry.json`, the outlined wordmark) and the anchor scan that picks the hero frame. The
-re-rendered variant sheets with a measured reason each (`packages/theme/brand/previews/variants/`)
-landed with the previews (the size sheet, the 8x upscales at 16 and 32 px on paper and on the
-tile, the tab strips at 1x and 2x, the confusion sheet, the hero scan, the raster edge check) on
-2026-09-14 while this document was being written.
-
-Decisions recorded for Kevin beside the pick (SPEC-4 section 8): no accent anywhere in chrome or
-on `/home`; the still hero against the live monochrome mount; the three colour tile at 16 px and
-the solid 32 and 48 px ICO entries against a cellular 48 px lockup mark; the title row's mark to
-`/decks` and the app bar's word to `/home` with `start_url` `/home`; the `monochrome` manifest
-icon kept.
-
-## 17. What stays for round five
-
-Recorded here without naming a round on any product surface (SPEC-4 section 7): the live
-monochrome hero (`paper:liquid-metal` in the `ink-paper` preset mounted after the largest
-contentful paint on an idle callback over the still twin, never under reduced motion, on a hidden
-document, without WebGL2 or under 900 px), only after the shader split has landed and a second
-measurement shows `/home` under 600 KB of JavaScript with the deferred chunk counted; the per deck
-card `/og/deck/:deckId.png` with `s-maxage` per revision and a budget row; a Turboslide branded
-second sheet theme and what a blank presentation's sheet corner shows (recommended against); a
-320 px twin variant for the filmstrip's clones.
+No record under any of the three spellings was found in class 9 (software) or class 42 (software
+services). The two live registrations are standard character marks for knives and for doors, so
+neither claims a design. A filing by Turboslide in classes 9 and 42 would still meet them, which is
+a question for counsel. The products sold under the name (TurboHarp's harmonicas, two water slides,
+a playground slide, Rytec's door, a Second Life slide viewer, an Android game and a Google Slides
+extension named TurboAnimator) carry no speed mark. The software marks named Turbo in thesvg.org's
+registry (Turborepo, Turbopack, Hotwire Turbo, TurboSquid) use no slanted letters, cut or speed
+bars. Stock art of a T with speed lines is sold, so the form is common; the Turboslide mark shares
+its cut and its weights with the GT bar monogram.
 
 ## 18. Sources
 
-- `docs/gslides-parity/SPEC-4.md` sections 0 (0.2 to 0.23, 0.50 to 0.52), 1, 5 and 8, read in
-  full on 2026-09-14.
-- `docs/gslides-parity/design-4/proposal-1-dither.md` sections 1.3, 5 and 6; `proposal-2-shader.md`
-  section 1.1; `proposal-3-type.md` sections 1.1, 1.2 and 6; the judges' totals as SPEC-4's
-  preamble records them.
-- `docs/gslides-parity/research-4/01-brand-references.md` sections 5, 6.4, 6.9 and 8;
-  `02-icon-favicon-og-production.md` section 8 (the cache rules).
-- `docs/gslides-parity/build-4/b1.md` section 1 (what landed on day 1, the readings, the contrast
-  numbers, the screenshot record).
-- The tree on 2026-09-14: `packages/theme/src/brand.ts`, `packages/theme/brand/site.ts`,
+- `docs/NEXT.md` sections 3, 4.0, 4.1, 5, 6 and 7, read in full on 2026-10-02.
+- `docs/gslides-parity/round1/sheet.md` and `sheet-judge.md`, with the sheet's pictures and
+  `sheet-judge/16cap.png`.
+- `docs/gslides-parity/round1/build/b2.md`, `b3b.md`, `b4.md` and `b5.md`, the day 0 requests to
+  lane B1.
+- `P:deck/DECK-GRAMMAR.md` (66 lines), `P:deck/slides/06-mood-earth.html` and
+  `P:scripts/build-speed-marks.mjs` 94 to 142, at Prototemplate `speed-marks` 4c23522.
+- The tree on 2026-10-02: `packages/theme/src/brand.ts`, `packages/theme/brand/site.ts`,
   `packages/theme/brand/mark-geometry.json`, `packages/chrome/src/{brand.css,tokens.css}`,
-  `apps/studio/public/{brand-manifest.json,manifest.webmanifest,robots.txt}`,
-  `apps/studio/src/routes/__root.tsx`.
+  `apps/studio/public/{brand-manifest.json,manifest.webmanifest}`.
 - https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html and
-  https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html, read 2026-09-14.
-- https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview,
-  read 2026-09-14.
-- `gh repo view Kevin-Liu-01/Turboslide --json description,repositoryTopics,homepageUrl`, run
-  2026-09-14.
+  https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html.

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monogram construction</title>
+<link rel="stylesheet" href="../../../../../packages/fonts/src/inter.css">
+<style>
+:root, .ap-light {
+  --pt-paper: #ffffff; --pt-ink: #070707; --pt-ink-2: #3a3d44; --pt-titanium: #6f747d;
+  --pt-hair: rgba(7, 7, 7, 0.18); --pt-hair-soft: rgba(7, 7, 7, 0.09); --pt-plate: rgba(7, 7, 7, 0.06);
+  --pt-cross: rgba(7, 7, 7, 0.38); --pt-edge: rgba(7, 7, 7, 0.62); --pt-scrim: rgba(7, 7, 7, 0.28);
+  --stage: #f0f0f0;
+}
+:root[data-theme='dark'], .ap-dark {
+  --pt-paper: #070707; --pt-ink: #f2f2f0; --pt-ink-2: #b9bcc3; --pt-titanium: #8a8f98;
+  --pt-hair: rgba(242, 242, 240, 0.22); --pt-hair-soft: rgba(242, 242, 240, 0.1); --pt-plate: rgba(242, 242, 240, 0.08);
+  --pt-cross: rgba(255, 255, 255, 0.34); --pt-edge: rgba(242, 242, 240, 0.55);
+  --stage: #161616;
+}
+:root {
+  --pt-select: #2f5ce0; --pt-select-text: #ffffff; --pt-radius: 6px; --panel: #101010;
+  --sans: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --ts-rail: 1104px; --ts-nav-h: 58px; --ts-cross: 9px; --ts-gutter: 40px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--pt-paper); color: var(--pt-ink); font: 400 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+.ap-light, .ap-dark { background: var(--pt-paper); color: var(--pt-ink); }
+.ic { width: 16px; height: 16px; fill: currentColor; flex: none; display: block; }
+.mk { display: block; flex: none; color: var(--pt-ink); }
+.mk.rows { shape-rendering: crispEdges; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; }
+h1, h2, h3, p { margin: 0; }
+h1 { font: 500 32px/1.2 var(--sans); letter-spacing: -0.02em; }
+h2 { font: 500 22px/1.3 var(--sans); letter-spacing: -0.01em; }
+.cap { font-size: 15px; line-height: 1.5; color: var(--pt-titanium); }
+.lead { font-size: 16px; line-height: 1.55; color: var(--pt-ink-2); max-width: 760px; }
+/* the lockup (brand-a.md 34 to 43): the word's cap is the mark's cap, the baselines meet, half the cap between */
+.lk { display: inline-block; line-height: 1; white-space: nowrap; color: var(--pt-ink); }
+.lk-mark { display: inline-block; vertical-align: baseline; height: 0.727539em; width: 1.070570em; margin-right: 0.328613em; overflow: visible; }
+.lk-word { font-weight: 500; font-feature-settings: 'cv11', 'ss01'; letter-spacing: -0.01em; }
+/* ruled key and value rows (DECK-GRAMMAR 36) */
+.rows { border-top: 1px solid var(--pt-hair); }
+.rows > div { display: grid; grid-template-columns: var(--key, 180px) 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--pt-hair); font-size: 15px; line-height: 1.45; }
+.rows > div > b { font-weight: 500; }
+.rows > div > span { color: var(--pt-ink-2); }
+
+body { width: 1440px; height: 900px; overflow: hidden; padding: 40px 56px; }
+.top { display: flex; justify-content: space-between; gap: 48px; }
+.top .lead { margin-top: 10px; max-width: 700px; }
+.dia { display: block; margin-top: 18px; overflow: visible; }
+.dia .hair { stroke: var(--pt-hair); stroke-width: 1; }
+.dia .up { fill: var(--pt-plate); stroke: var(--pt-ink-2); stroke-width: 1; }
+.dia .lab { font: 400 16px var(--sans); fill: var(--pt-ink-2); }
+.dia .cap2 { font: 400 15px var(--sans); fill: var(--pt-titanium); }
+.grid { display: grid; grid-template-columns: 920px 1fr; gap: 40px; }
+.side { padding-top: 18px; }
+.rows { --key: 104px; }
+.rows > div { gap: 12px; padding: 8px 0; }
+.sib { display: flex; align-items: flex-end; gap: 64px; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--pt-hair); }
+.sib figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.sib figcaption { font-size: 15px; color: var(--pt-titanium); }
+.sib svg { display: block; color: var(--pt-ink); }
+.key { display: flex; gap: 20px; margin-top: 8px; font-size: 15px; color: var(--pt-ink-2); }
+.key i { display: inline-block; width: 22px; height: 12px; margin-right: 8px; vertical-align: -1px; }
+</style>
+<script>{ const t = new URLSearchParams(location.search).get('theme'); if (t) document.documentElement.dataset.theme = t; }</script>
+</head>
+<body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-search" viewBox="0 0 20 20"><path d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-plus" viewBox="0 0 20 20"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"/></symbol><symbol id="i-chevron-down" viewBox="0 0 20 20"><path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-arrow-uturn-left" viewBox="0 0 20 20"><path d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-arrow-uturn-right" viewBox="0 0 20 20"><path d="M12.207 2.232a.75.75 0 0 0 .025 1.06l4.146 3.958H6.375a5.375 5.375 0 0 0 0 10.75H9.25a.75.75 0 0 0 0-1.5H6.375a3.875 3.875 0 0 1 0-7.75h10.003l-4.146 3.957a.75.75 0 0 0 1.036 1.085l5.5-5.25a.75.75 0 0 0 0-1.085l-5.5-5.25a.75.75 0 0 0-1.06.025Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-printer" viewBox="0 0 20 20"><path d="M5 2.75C5 1.784 5.784 1 6.75 1h6.5c.966 0 1.75.784 1.75 1.75v3.552c.377.046.752.097 1.126.153A2.212 2.212 0 0 1 18 8.653v4.097A2.25 2.25 0 0 1 15.75 15h-.241l.305 1.984A1.75 1.75 0 0 1 14.084 19H5.915a1.75 1.75 0 0 1-1.73-2.016L4.492 15H4.25A2.25 2.25 0 0 1 2 12.75V8.653c0-1.082.775-2.034 1.874-2.198.374-.056.75-.107 1.127-.153L5 6.25v-3.5Zm8.5 3.397a41.533 41.533 0 0 0-7 0V2.75a.25.25 0 0 1 .25-.25h6.5a.25.25 0 0 1 .25.25v3.397ZM6.608 12.5a.25.25 0 0 0-.247.212l-.693 4.5a.25.25 0 0 0 .247.288h8.17a.25.25 0 0 0 .246-.288l-.692-4.5a.25.25 0 0 0-.247-.212H6.608Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-paint-brush" viewBox="0 0 20 20"><path d="M15.993 1.385a1.87 1.87 0 0 1 2.623 2.622l-4.03 5.27a12.749 12.749 0 0 1-4.237 3.562 4.508 4.508 0 0 0-3.188-3.188 12.75 12.75 0 0 1 3.562-4.236l5.27-4.03ZM6 11a3 3 0 0 0-3 3 .5.5 0 0 1-.72.45.75.75 0 0 0-1.035.931A4.001 4.001 0 0 0 9 14.004V14a3.01 3.01 0 0 0-1.66-2.685A2.99 2.99 0 0 0 6 11Z"/></symbol><symbol id="i-cursor-arrow" viewBox="0 0 20 20"><path d="M5 2.5 L5 15.5 L8.4 12.6 L10.8 17.6 L13.1 16.5 L10.7 11.6 L15.2 11.3 Z"/></symbol><symbol id="i-text" viewBox="0 0 20 20"><path d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 10.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-photo" viewBox="0 0 20 20"><path d="M1 5.25A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5Zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 0 0 .75-.75v-2.69l-2.22-2.219a.75.75 0 0 0-1.06 0l-1.91 1.909.47.47a.75.75 0 1 1-1.06 1.06L6.53 8.091a.75.75 0 0 0-1.06 0l-2.97 2.97ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-square-2-stack" viewBox="0 0 20 20"><path d="M2 4.25A2.25 2.25 0 0 1 4.25 2h6.5A2.25 2.25 0 0 1 13 4.25V5.5H9.25A3.75 3.75 0 0 0 5.5 9.25V13H4.25A2.25 2.25 0 0 1 2 10.75v-6.5Z"/><path d="M9.25 7A2.25 2.25 0 0 0 7 9.25v6.5A2.25 2.25 0 0 0 9.25 18h6.5A2.25 2.25 0 0 0 18 15.75v-6.5A2.25 2.25 0 0 0 15.75 7h-6.5Z"/></symbol><symbol id="i-chat" viewBox="0 0 20 20"><path d="M3.505 2.365A41.369 41.369 0 0 1 9 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 0 0-.577-.069 43.141 43.141 0 0 0-4.706 0C9.229 4.696 7.5 6.727 7.5 8.998v2.24c0 1.413.67 2.735 1.76 3.562l-2.98 2.98A.75.75 0 0 1 5 17.25v-3.443c-.501-.048-1-.106-1.495-.172C2.033 13.438 1 12.162 1 10.72V5.28c0-1.441 1.033-2.717 2.505-2.914Z"/><path d="M14 6c-.762 0-1.52.02-2.271.062C10.157 6.148 9 7.472 9 8.998v2.24c0 1.519 1.147 2.839 2.71 2.935.214.013.428.024.642.034.2.009.385.09.518.224l2.35 2.35a.75.75 0 0 0 1.28-.531v-2.07c1.453-.195 2.5-1.463 2.5-2.915V8.998c0-1.526-1.157-2.85-2.729-2.936A41.645 41.645 0 0 0 14 6Z"/></symbol><symbol id="i-view-columns" viewBox="0 0 20 20"><path d="M14 17h2.75A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H14v14ZM12.5 3h-5v14h5V3ZM3.25 3H6v14H3.25A2.25 2.25 0 0 1 1 14.75v-9.5A2.25 2.25 0 0 1 3.25 3Z"/></symbol><symbol id="i-play" viewBox="0 0 20 20"><path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z"/></symbol><symbol id="i-lock-closed" viewBox="0 0 20 20"><path d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-ellipsis-horizontal" viewBox="0 0 20 20"><path d="M3 10a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM8.5 10a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM15.5 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></symbol><symbol id="i-ellipsis-vertical" viewBox="0 0 20 20"><path d="M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z"/></symbol><symbol id="i-bars-3" viewBox="0 0 20 20"><path d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" fill-rule="evenodd" clip-rule="evenodd"/></symbol><symbol id="i-close" viewBox="0 0 20 20"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/></symbol></svg>
+<div class="top"><div><h1>The monogram from rectangles</h1>
+<p class="lead">Five rectangles in the GT bar monogram's units are sheared 12 degrees and cut once at mid cap height. The result is 7 parallelograms in one path in currentColor, with no font, no mask and no id.</p></div></div>
+<div class="grid"><div>
+<svg class="dia" width="920" height="324" viewBox="0 0 920 324">
+    <rect x="0" y="148" width="777" height="16" fill="var(--pt-plate)"/>
+    <line x1="0" x2="777" y1="36" y2="36" class="hair"/><text x="793" y="42" class="lab">Cap line, y 40</text><line x1="0" x2="777" y1="148" y2="148" class="hair"/><text x="793" y="154" class="lab">Cut, y 96 to 104</text><line x1="0" x2="777" y1="276" y2="276" class="hair"/><text x="793" y="282" class="lab">Baseline, y 160</text>
+    <rect x="72" y="36" width="268" height="60" class="up"/><rect x="172" y="36" width="68" height="240" class="up"/><rect x="28" y="36" width="48" height="60" class="up"/><rect x="20" y="120" width="128" height="72" class="up"/><rect x="60" y="216" width="88" height="60" class="up"/>
+    <path d="M13.5 40L147.5 40L141.1 70L7.1 70ZM63.5 40L97.5 40L85.6 96L51.6 96ZM49.9 104L83.9 104L72 160L38 160ZM-8.5 40L15.5 40L9.1 70L-14.9 70ZM-21.4 82L42.6 82L39.6 96L-24.4 96ZM-26.1 104L37.9 104L34.9 118L-29.1 118ZM-11.6 130L32.4 130L26 160L-18 160Z" transform="matrix(2 0 0 2 462.16 -44)" fill="var(--pt-ink)"/>
+    <text x="20" y="318" class="cap2">Five rectangles, upright</text>
+    <text x="404" y="318" class="cap2">Sheared 12 degrees, then cut</text>
+  </svg>
+<div class="sib">
+<figure><svg style="height:80px;width:327.73px" viewBox="-105.1 40 491.6 120"><path fill="currentColor" d="M-8.5 40L21.5 40L9.6 96L-20.4 96ZM-22.1 104L7.9 104L-4 160L-34 160ZM-8.5 40L181.5 40L175.1 70L-14.9 70ZM-27.6 130L162.4 130L156 160L-34 160ZM137.9 104L167.9 104L156 160L126 160ZM77.9 104L167.9 104L162.4 130L72.4 130ZM-28.5 40L-6.5 40L-12.9 70L-34.9 70ZM-97.4 82L-15.4 82L-18.4 96L-100.4 96ZM-102.1 104L-20.1 104L-23.1 118L-105.1 118ZM-77.6 130L-25.6 130L-32 160L-84 160ZM216.5 40L386.5 40L380.1 70L210.1 70ZM274.5 40L308.5 40L296.6 96L262.6 96ZM260.9 104L294.9 104L283 160L249 160Z"/></svg><figcaption>The GT bar monogram</figcaption></figure>
+<figure><svg style="height:80px;width:117.72px" viewBox="-29.08 40 176.58 120"><path fill="currentColor" d="M13.5 40L147.5 40L141.1 70L7.1 70ZM63.5 40L97.5 40L85.6 96L51.6 96ZM49.9 104L83.9 104L72 160L38 160ZM-8.5 40L15.5 40L9.1 70L-14.9 70ZM-21.4 82L42.6 82L39.6 96L-24.4 96ZM-26.1 104L37.9 104L34.9 118L-29.1 118ZM-11.6 130L32.4 130L26 160L-18 160Z"/></svg><figcaption>The Turboslide monogram</figcaption></figure>
+</div>
+<p class="cap" style="margin-top:10px">Both are set at an 80 px cap. They share the skew, the cut, the crossbar's 30 units and the bars' 30, 36 and 30.</p>
+
+</div><div class="side">
+<div class="rows">
+<div><b>Units</b><span>The GT monogram's: a cap of 120 units from y 40 to the baseline at y 160</span></div>
+<div><b>Skew</b><span>12 degrees: x becomes x minus tan(12°) times y</span></div>
+<div><b>Cut</b><span>y 96 to 104, 8 units, applied to the geometry</span></div>
+<div><b>Crossbar</b><span>134 by 30 units: an arm of 50 on each side of a 34 unit stem</span></div>
+<div><b>Top bar</b><span>Extends the arm 22 units past its left end, overlapping it by 2</span></div>
+<div><b>Middle bar</b><span>64 by 36 units on the cut, left as two lines of 14, 12 units clear of the stem</span></div>
+<div><b>Bottom bar</b><span>44 by 30 units, 12 units clear of the stem</span></div>
+<div><b>The file</b><span>242 bytes of path data, box 176.6 by 120, aspect 1.47, sha256 3e95914b621f</span></div>
+</div>
+</div></div>
+<script>
+(async () => {
+  await document.fonts.ready;
+  
+  document.body.dataset.ready = '1';
+})();
+</script>
+</body>
+</html>

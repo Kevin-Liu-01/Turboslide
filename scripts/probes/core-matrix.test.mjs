@@ -465,8 +465,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's Round 1 push B3a#7 (docs/NEXT.md 4.1.5): three menu rows of the cuts */
     /* the next program's rows (docs/NEXT.md), one term per push in the order of the comments above */
     const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3;
+    /* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.5): decks.manifest.paper */
     expect(CORE_MATRIX.length).toBe(
-      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 22 + 10 + NEXT_ROWS,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 22 + 10 + NEXT_ROWS + 1,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',

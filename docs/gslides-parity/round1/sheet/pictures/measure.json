@@ -1,0 +1,319 @@
+{
+  "at": "2026-10-02T10:07:07.383Z",
+  "loads": {
+    "start": 20.47,
+    "end": 19.31
+  },
+  "shots": [
+    {
+      "name": "editor",
+      "out": "editor-1440-light.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 39495
+    },
+    {
+      "name": "editor",
+      "out": "editor-390-light.png",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "bytes": 17120
+    },
+    {
+      "name": "editor",
+      "out": "editor-1440-dark.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "bytes": 40729
+    },
+    {
+      "name": "editor",
+      "out": "editor-390-dark.png",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "bytes": 17515
+    },
+    {
+      "name": "construction",
+      "out": "construction-light.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 128035
+    },
+    {
+      "name": "lockup",
+      "out": "lockup-light.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 130543
+    },
+    {
+      "name": "decks",
+      "out": "decks-1440-light.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 53496
+    },
+    {
+      "name": "signin",
+      "out": "signin-1440-light.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 172426
+    },
+    {
+      "name": "construction",
+      "out": "construction-dark.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "bytes": 129182
+    },
+    {
+      "name": "lockup",
+      "out": "lockup-dark.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "bytes": 131993
+    },
+    {
+      "name": "decks",
+      "out": "decks-1440-dark.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "bytes": 55538
+    },
+    {
+      "name": "signin",
+      "out": "signin-1440-dark.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "bytes": 173064
+    },
+    {
+      "name": "decks",
+      "out": "decks-390-light.png",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "bytes": 28732
+    },
+    {
+      "name": "signin",
+      "out": "signin-390-light.png",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "bytes": 57213
+    },
+    {
+      "name": "decks",
+      "out": "decks-390-dark.png",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "bytes": 31110
+    },
+    {
+      "name": "signin",
+      "out": "signin-390-dark.png",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "bytes": 58618
+    },
+    {
+      "name": "marks",
+      "out": "marks.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 93474
+    },
+    {
+      "name": "question2",
+      "out": "question2.png",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "bytes": 95500
+    },
+    {
+      "name": "banner",
+      "out": "cli-banner.png",
+      "width": 960,
+      "height": 400,
+      "theme": "light",
+      "bytes": 33278
+    }
+  ],
+  "measure": {
+    "editor-1440-light": {
+      "nameWidth": 154.671875,
+      "rowRight": 1428,
+      "viewport": 1440
+    },
+    "editor-390-light": {
+      "nameWidth": 154.671875,
+      "rowRight": 382,
+      "viewport": 390
+    },
+    "editor-1440-dark": {
+      "nameWidth": 154.671875,
+      "rowRight": 1428,
+      "viewport": 1440
+    },
+    "editor-390-dark": {
+      "nameWidth": 154.671875,
+      "rowRight": 382,
+      "viewport": 390
+    },
+    "lockup-light": {
+      "dom": {
+        "markLeft": 56,
+        "markRight": 184.453125,
+        "markTop": 282.484375,
+        "markBottom": 369.78125,
+        "inkLeft": 228.05877685546875,
+        "tAscent": 87.3046875,
+        "tLeft": -2.82440185546875,
+        "fontSize": "120px"
+      },
+      "ink": {
+        "markInkRight": 131,
+        "wordInkLeft": 176,
+        "gapPx": 44,
+        "markCapPx": 87,
+        "wordTCapPx": 87,
+        "markRows": {
+          "top": 30,
+          "bottom": 116,
+          "height": 87
+        },
+        "tRows": {
+          "top": 31,
+          "bottom": 117,
+          "height": 87
+        },
+        "halfCapPx": 43.65
+      },
+      "sizes": [
+        {
+          "px": 66,
+          "gapPx": 24,
+          "halfCapPx": 24.01,
+          "markCapPx": 48,
+          "wordTCapPx": 48,
+          "markBottomRow": 54,
+          "wordBottomRow": 54
+        },
+        {
+          "px": 22,
+          "gapPx": 8,
+          "halfCapPx": 8,
+          "markCapPx": 16,
+          "wordTCapPx": 16,
+          "markBottomRow": 22,
+          "wordBottomRow": 22
+        },
+        {
+          "px": 18,
+          "gapPx": 7,
+          "halfCapPx": 6.55,
+          "markCapPx": 13,
+          "wordTCapPx": 13,
+          "markBottomRow": 18,
+          "wordBottomRow": 18
+        },
+        {
+          "px": 14,
+          "gapPx": 5,
+          "halfCapPx": 5.09,
+          "markCapPx": 10,
+          "wordTCapPx": 10,
+          "markBottomRow": 15,
+          "wordBottomRow": 15
+        }
+      ]
+    },
+    "lockup-dark": {
+      "dom": {
+        "markLeft": 56,
+        "markRight": 184.453125,
+        "markTop": 282.484375,
+        "markBottom": 369.78125,
+        "inkLeft": 228.05877685546875,
+        "tAscent": 87.3046875,
+        "tLeft": -2.82440185546875,
+        "fontSize": "120px"
+      },
+      "ink": {
+        "markInkRight": 131,
+        "wordInkLeft": 176,
+        "gapPx": 44,
+        "markCapPx": 87,
+        "wordTCapPx": 87,
+        "markRows": {
+          "top": 30,
+          "bottom": 116,
+          "height": 87
+        },
+        "tRows": {
+          "top": 31,
+          "bottom": 117,
+          "height": 87
+        },
+        "halfCapPx": 43.65
+      },
+      "sizes": [
+        {
+          "px": 66,
+          "gapPx": 24,
+          "halfCapPx": 24.01,
+          "markCapPx": 48,
+          "wordTCapPx": 48,
+          "markBottomRow": 54,
+          "wordBottomRow": 54
+        },
+        {
+          "px": 22,
+          "gapPx": 8,
+          "halfCapPx": 8,
+          "markCapPx": 16,
+          "wordTCapPx": 16,
+          "markBottomRow": 22,
+          "wordBottomRow": 22
+        },
+        {
+          "px": 18,
+          "gapPx": 7,
+          "halfCapPx": 6.55,
+          "markCapPx": 13,
+          "wordTCapPx": 13,
+          "markBottomRow": 18,
+          "wordBottomRow": 18
+        },
+        {
+          "px": 14,
+          "gapPx": 5,
+          "halfCapPx": 5.09,
+          "markCapPx": 10,
+          "wordTCapPx": 10,
+          "markBottomRow": 15,
+          "wordBottomRow": 15
+        }
+      ]
+    }
+  }
+}

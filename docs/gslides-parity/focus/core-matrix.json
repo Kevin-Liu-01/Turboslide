@@ -9606,6 +9606,16 @@
       "note": "docs/NEXT.md 4.1.3 item 11 and 4.1.5 (B2c): the driver is core/share-round1.ts; it reads the page as the deployment answers and again with the sign in facts' server function refused"
     },
     {
+      "id": "decks.og.deck-card",
+      "feature": "decks",
+      "interaction": "A deck's page carries `og:title` equal to the deck's title, `og:url` and `og:image` on `www.turboslide.com`; the card's address is set in Inter",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "audit-brand-surfaces 32 to 33",
+      "note": "docs/NEXT.md 4.1.3 item 12 and 4.1.5 (B2d): deck.$deckId.tsx deckCardMeta; the card's address is B1's packages/theme/brand/og-template.html, read from the checkout"
+    },
+    {
       "id": "realtime.keystroke.within-300ms",
       "feature": "realtime",
       "interaction": "A types ten characters into a body block one per second; each is in B's DOM within 300 ms of the keystroke in one region and 800 ms across regions, ten of ten; no character lost or doubled",

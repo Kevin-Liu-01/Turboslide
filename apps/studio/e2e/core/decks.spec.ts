@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import {
@@ -2820,6 +2821,57 @@ test(title('decks.list.ruled-rows'), async () => {
   }
 });
 
+// ---- the next program's Round 1 push B2d#18 (docs/NEXT.md 4.1.3 item 12, 4.1.5): a shared deck's card
+
+test(title('decks.og.deck-card'), async () => {
+  test.setTimeout(90_000);
+  const res = await page.goto(`/deck/${deck}`);
+  expect(res?.status(), "the deck's page answers").toBe(200);
+  await page.locator('.pt-viewer').first().waitFor({ timeout: 60_000 });
+  const meta = await page.evaluate(() => {
+    const read = (key: string) =>
+      document
+        .querySelector(`meta[property="${key}"], meta[name="${key}"]`)
+        ?.getAttribute('content') ?? null;
+    return {
+      title: document.title,
+      ogTitle: read('og:title'),
+      ogUrl: read('og:url'),
+      ogImage: read('og:image'),
+      ogDescription: read('og:description'),
+      twitterTitle: read('twitter:title'),
+      counts: {
+        ogTitle: document.querySelectorAll('meta[property="og:title"]').length,
+        ogUrl: document.querySelectorAll('meta[property="og:url"]').length,
+      },
+    };
+  });
+  /* the card's address in the template the brand build renders the picture from */
+  const root = resolve(import.meta.dirname, '..', '..', '..', '..');
+  const template = readFileSync(
+    resolve(root, 'packages', 'theme', 'brand', 'og-template.html'),
+    'utf8',
+  );
+  const monoAddress = /mono/i.test(
+    (template.match(/[^{}]*www\.turboslide\.com[^{}]*/) ?? [''])[0] +
+      (template.match(/\.(?:address|url|domain)[^{]*\{[^}]*\}/) ?? [''])[0],
+  );
+  test.info().annotations.push({
+    type: 'card',
+    description: `${JSON.stringify(meta)}; the template sets the address in monospace ${monoAddress}`,
+  });
+  const name = meta.title.replace(/, Turboslide$/, '');
+  expect(meta.ogTitle, "og:title is the deck's title").toBe(name);
+  expect(meta.twitterTitle, "twitter:title is the deck's title").toBe(name);
+  expect(meta.counts, 'one og:title and one og:url').toEqual({ ogTitle: 1, ogUrl: 1 });
+  expect(meta.ogUrl ?? '', "og:url is the deck's address on www").toMatch(
+    new RegExp(`^https://www\\.turboslide\\.com/deck/${deck}$`),
+  );
+  expect(meta.ogImage ?? '', 'og:image is on www').toMatch(/^https:\/\/www\.turboslide\.com\//);
+  expect(meta.ogDescription ?? '', 'og:description is one sentence').toMatch(/^[A-Z].*\.$/);
+  expect(monoAddress, "the card's address is not set in monospace").toBe(false);
+});
+
 // ---- the list and the trash (docs/POLISH.md 2.7)
 
 /** The cards of a deck on /decks, with the line under each title. */
@@ -3719,4 +3771,6 @@ coverage(import.meta.filename, [
   'decks.home.phone',
   /* the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.3 item 10, 4.1.5) */
   'decks.list.ruled-rows',
+  /* the next program's Round 1 push B2d#18 (docs/NEXT.md 4.1.3 item 12, 4.1.5) */
+  'decks.og.deck-card',
 ]);

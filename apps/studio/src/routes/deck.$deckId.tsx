@@ -11,6 +11,7 @@ import { deckRevision, getDeck } from '../server/decks';
 import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
 import { AccessPage } from './-access-page';
+import { deckCardMeta } from './-deck-card';
 
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
 // the keys; #NN and #s/<slideId> hashes; the sidebar tree, the toolbar, the
@@ -151,7 +152,13 @@ export const Route = createFileRoute('/deck/$deckId')({
   headers: ({ match }) => deckResponseHeaders(match.search),
   head: ({ loaderData, match }) => ({
     meta: [
-      { title: loaderData ? `${loaderData.payload.deck.title}, Turboslide` : 'Turboslide' },
+      ...(loaderData
+        ? deckCardMeta({
+            id: loaderData.payload.deck.id,
+            title: loaderData.payload.deck.title,
+            slides: loaderData.payload.deck.slides.length,
+          })
+        : [{ title: 'Turboslide' }]),
       ...deckRobotsMeta(match.search),
     ],
   }),

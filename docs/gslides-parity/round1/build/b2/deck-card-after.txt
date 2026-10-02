@@ -1,0 +1,16 @@
+<meta property="og:site_name" content="Turboslide"/>
+<meta property="og:type" content="website"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:image" content="https://www.turboslide.com/og/turboslide.png"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture&#x27;s credit, on a plate beside NASA&#x27;s Blue Marble as a two tone dither"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.turboslide.com/og/turboslide.png"/>
+<meta name="twitter:image:alt" content="The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture&#x27;s credit, on a plate beside NASA&#x27;s Blue Marble as a two tone dither"/>
+<meta property="og:title" content="GT brand deck"/>
+<meta property="og:url" content="https://www.turboslide.com/deck/gt-brand"/>
+<meta property="og:description" content="A presentation of 85 slides, opened in Turboslide in the browser."/>
+<meta name="twitter:title" content="GT brand deck"/>
+<meta name="twitter:description" content="A presentation of 85 slides, opened in Turboslide in the browser."/>

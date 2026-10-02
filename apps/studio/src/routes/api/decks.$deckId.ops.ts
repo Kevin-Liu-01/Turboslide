@@ -12,6 +12,7 @@ import {
   authorOf,
   decideFor,
   readJsonBody,
+  realtimeTier,
   refuseCrossSite,
   refuseNonJson,
   requestIdentity,
@@ -39,6 +40,9 @@ export const Route = createFileRoute('/api/decks/$deckId/ops')({
 
 async function serve(request: Request, deckId: string): Promise<Response> {
   if (!SLUG_PATTERN.test(deckId)) return jsonResponse({ error: 'not_found' }, 404);
+  // the do tier (docs/CLOUDFLARE.md 3.6.1): the ops ride the object's socket or its HTTP belt;
+  // a POST here is an older tab's, read as `resync(head)` by its client (3.7 item 5)
+  if (realtimeTier() === 'do') return jsonResponse({ error: 'resync', tier: 'do' }, 409);
   const cross = refuseCrossSite(request);
   if (cross !== null)
     return jsonResponse({ error: cross.code, message: cross.message }, cross.status);

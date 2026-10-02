@@ -20,6 +20,8 @@
     "./coalesce": "./src/coalesce.ts",
     "./admission": "./src/admission.ts",
     "./room-core": "./src/room-core.ts",
+    "./do": "./src/do.ts",
+    "./frames": "./src/frames.ts",
     "./select": "./src/select.ts",
     "./client/room-client": "./client/room-client.ts",
     "./client/pending-store": "./client/pending-store.ts",

@@ -22,6 +22,7 @@ import {
 } from '@turboslide/store/templates';
 import type { DefaultKit } from '@turboslide/store/templates';
 import { toVersion } from '@turboslide/store/versions';
+import type { RealtimeTier } from '@turboslide/realtime/channel';
 import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
@@ -168,13 +169,25 @@ export function peopleOf(input: {
   return out;
 }
 
-/** The room's facts the editor starts from (SPEC-3 3.6): the stream position of the document it was handed. */
+/**
+ * The room's facts the editor starts from (SPEC-3 3.6): the stream position of the document it
+ * was handed, and on the `do` tier (the Cloudflare move, docs/CLOUDFLARE.md 3.3, 3.6.1) the
+ * socket URL and the ticket the loader minted, so the tab opens its socket without a second
+ * request; the transport refreshes the ticket at `ticketExpiresAt` minus two minutes through
+ * `GET /api/decks/:id/ticket`.
+ */
 export type EditorRoom = {
   /** the last stream entry the document includes; the room client resumes after it */
   seq: number;
-  tier: 'memory' | 'redis' | 'blob';
+  tier: RealtimeTier;
   /** the title row's sentence on the blob tier, else null */
   notice: string | null;
+  /** `wss://<host>/rooms/<id>` on the do tier */
+  url?: string;
+  /** the room ticket of 3.3, a credential for ten minutes; never logged */
+  ticket?: string;
+  /** when the ticket expires, ms since the epoch */
+  ticketExpiresAt?: number;
 };
 
 /**
@@ -475,6 +488,44 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     // an aliased cookie, else the record's name or label
     const resolved = await room.resolveRequestIdentity(identity);
     const selection = room.realtimeSelection();
+    // the do tier (docs/CLOUDFLARE.md 3.3, 3.6.1): the socket URL and the ticket of the reader's
+    // decision ride the payload; a mint that fails leaves the room without one and the transport
+    // asks the ticket route
+    let roomExtra: Pick<EditorRoom, 'url' | 'ticket' | 'ticketExpiresAt'> = {};
+    if (selection.tier === 'do') {
+      try {
+        const ticketing = await import('./room-ticket');
+        const reader = await room.viewerFacts(
+          data.deckId,
+          decision,
+          identity.ctx,
+          identity.identity,
+        );
+        const minted = ticketing.mintRoomTicket(
+          ticketing.ticketClaimsFor({
+            deckId: data.deckId,
+            clientId: room.mintClientId(data.deckId, identity.identity),
+            identity: identity.identity,
+            kind: identity.kind,
+            principalId: identity.principalId,
+            role: decision.role,
+            reader,
+            resolved,
+            origin: new URL(getRequest().url).origin,
+          }),
+        );
+        const url = ticketing.roomUrlFor(data.deckId);
+        roomExtra = {
+          ...(url === null ? {} : { url }),
+          ticket: minted.ticket,
+          ticketExpiresAt: minted.expiresAt,
+        };
+      } catch (error) {
+        console.error(
+          `turboslide editor: the room ticket was not minted for ${data.deckId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
     const result: EditorDeck = {
       deckId: data.deckId,
       // the room's document carries the store's trash stamp (withTrashStamp says why)
@@ -490,7 +541,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
          the store's template index is pulled first so a default set on another instance holds */
       defaultKit: await defaultKitOfCollection(),
-      room: { seq: live.seq, tier: selection.tier, notice: selection.notice },
+      room: { seq: live.seq, tier: selection.tier, notice: selection.notice, ...roomExtra },
       identity: ownIdentityOf(resolved),
       ...(standing.role !== null ? { role: standing.role } : {}),
       ...(standing.via !== null ? { via: standing.via } : {}),

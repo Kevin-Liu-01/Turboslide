@@ -18,6 +18,8 @@ import type {
 import { appendWithRetry, CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admission';
 import type { IdentityKind } from '@turboslide/realtime/admission';
 import { blobChannel, synthesizeReplayed } from '@turboslide/realtime/blob';
+import { doChannel, isDoChannel } from '@turboslide/realtime/do';
+import type { DoChannel } from '@turboslide/realtime/do';
 import type {
   Entry,
   NewEntry,
@@ -42,7 +44,11 @@ import {
 } from '@turboslide/realtime/protocol';
 import { STREAM_HEARTBEAT_MS } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
-import { BLOB_TIER_NOTICE, selectRealtime } from '@turboslide/realtime/select';
+import {
+  BLOB_TIER_NOTICE,
+  ROOM_BEARER_VARIABLE,
+  selectRealtime,
+} from '@turboslide/realtime/select';
 import type { RealtimeSelection } from '@turboslide/realtime/select';
 import {
   BETWEEN_MAX_BYTES,
@@ -94,10 +100,10 @@ import {
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
-import { sessionOf } from './auth/better-auth';
 import {
-  accountFacts,
+  accountSession,
   bindIdentityRedis,
+  forgetAccountFacts,
   identityRuntime,
   linkAnonymous,
   principalKvOf,
@@ -108,6 +114,7 @@ import { selectPrincipalStore } from './auth/principal';
 import type { RedisKvLike } from './auth/secondary-storage';
 import { boundPrincipal, ensurePrincipal, readPrincipal } from './auth/session';
 import { applyStreamEntries, createCheckpointer, coveredSeq } from './checkpoint';
+import { roomHost, roomInsecure } from './room-ticket';
 import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comments';
 import type { CommentActionId, CommentCaller } from './comments';
 import type { Checkpointer } from './checkpoint';
@@ -152,6 +159,8 @@ type Shared = typeof globalThis & {
     selected: RealtimeSelection;
     /** the redis channel on the redis tier, null elsewhere; the hand off reads its `realtime` flag */
     redisChannel: RealtimeChannel | null;
+    /** the Worker's channel on the do tier (docs/CLOUDFLARE.md 3.6.1), null elsewhere; the hand off of 3.8 reads its `/health` */
+    doChannel: DoChannel | null;
     /** the blob channel the redis tier falls to, built on the first hand off */
     fallback?: { channel: RealtimeChannel; presence?: SharedPresence<RosterEntry> };
   };
@@ -201,6 +210,25 @@ function buildChannel(selection: RealtimeSelection): {
         }),
         redis,
         kv: client as unknown as RedisKvLike,
+      };
+    }
+    case 'do': {
+      // the Worker's channel (docs/CLOUDFLARE.md 3.6.1): the object orders the deck, the function
+      // publishes, reads the roster and the document, flushes and forwards writes under the bearer
+      const host = roomHost();
+      const bearer = process.env[ROOM_BEARER_VARIABLE] ?? '';
+      if (host === null || bearer === '') {
+        throw new TypeError(`the do tier needs TURBOSLIDE_ROOM_HOST and ${ROOM_BEARER_VARIABLE}`);
+      }
+      return {
+        channel: doChannel({
+          host,
+          bearer,
+          insecure: roomInsecure(),
+          onError: (error, context) =>
+            log(`worker ${context}: ${error instanceof Error ? error.message : String(error)}`),
+        }),
+        redis: null,
       };
     }
     case 'blob': {
@@ -303,6 +331,7 @@ function state(): NonNullable<Shared['__turboslideRoom']> {
       ...(presence === undefined ? {} : { presence }),
       selected: selection,
       redisChannel: selection.tier === 'redis' ? channel : null,
+      doChannel: selection.tier === 'do' && isDoChannel(channel) ? channel : null,
     };
     // the resolved identity cache leaves on the other instances' word (3.6): a rename or an
     // avatar change on one instance drops the row everywhere at once instead of after 5 s
@@ -331,35 +360,41 @@ let switchingTier: Promise<void> | null = null;
  */
 export async function ensureRealtimeTier(): Promise<void> {
   const s = state();
-  const redis = s.redisChannel;
-  if (redis === null) return;
+  // the tier with a flag driven hand off: redis (docs/REALTIME.md 3.8), or do (docs/CLOUDFLARE.md
+  // 3.8 item 4: the Worker's `/health`, cached 60 s, off or three failed reads)
+  const primary = s.redisChannel ?? s.doChannel;
+  if (primary === null) return;
   if (switchingTier !== null) return switchingTier;
-  const on = await redis.flag('realtime');
+  const on = await primary.flag('realtime');
   const servingBlob = s.selection.tier === 'blob';
   if (on === !servingBlob) return;
+  const word = s.selected.tier;
   switchingTier = (async () => {
     if (!on) {
+      const reason = `handed off from ${word}: the realtime flag reads off`;
       s.fallback ??= buildChannel({
         tier: 'blob',
-        reason: 'handed off from redis: the realtime flag reads off',
-        redis: true,
+        reason,
+        redis: s.selected.redis,
+        room: s.selected.room,
         notice: BLOB_TIER_NOTICE,
       });
       s.channel = s.fallback.channel;
       s.selection = {
         tier: 'blob',
-        reason: 'handed off from redis: the realtime flag reads off',
-        redis: true,
+        reason,
+        redis: s.selected.redis,
+        room: s.selected.room,
         notice: BLOB_TIER_NOTICE,
       };
       if (s.fallback.presence === undefined) delete s.presence;
       else s.presence = s.fallback.presence;
       log('realtime handed off to the blob tier: the realtime flag reads off');
     } else {
-      s.channel = redis;
+      s.channel = primary;
       s.selection = s.selected;
       delete s.presence;
-      log('realtime handed back to the redis tier: the realtime flag reads on');
+      log(`realtime handed back to the ${word} tier: the realtime flag reads on`);
     }
     await supersedeRooms();
   })().finally(() => {
@@ -576,11 +611,13 @@ async function sessionIdentity(
   const runtime = identityRuntime();
   if (runtime.auth === null) return null;
   try {
-    await runtime.ready;
-    const found = await sessionOf(runtime.auth, request);
+    // the session and its facts through R4's per instance cache (auth/identity.ts
+    // `accountSession`; docs/CLOUDFLARE.md 4.1: 300 s under the session token's hash on the D1
+    // engine, one retry on a refused proxy call, null to anonymous), so a signed in request on
+    // the function pays the four reads once per cache life and not once per request (R4-R1c)
+    const found = await accountSession(runtime, request);
     if (found === null) return null;
-    const facts = await accountFacts(runtime, found.user.id);
-    if (facts === null || facts.profile.deletedAt !== null) return null;
+    const facts = found.account;
     if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, facts.userId);
     const now = new Date();
     const record =
@@ -600,7 +637,7 @@ async function sessionIdentity(
     /* the verified address, so a pending grant by email admits the invitee (identity/access.ts
        isPendingEmailGrantFor), and the anonymous ids linked to the account, so a deck made
        before the sign in keeps its creator as the owner (standingOf; b1.md R3) */
-    const aliases = await runtime.aliases.aliasesOf(facts.userId).catch(() => []);
+    const aliases = found.aliases;
     const principal: Principal = {
       id: facts.principalId,
       kind: 'account',
@@ -817,17 +854,33 @@ export async function identityViewsFor(
   return out;
 }
 
-/** `authorize()` for a request on a deck, with the route's transport word. */
+/**
+ * `authorize()` for a request on a deck, with the route's transport word. On the do tier a
+ * refusal of a principal is judged once more over the deck index read past this instance's 5 s
+ * row (docs/CLOUDFLARE.md 2.1 `realtime.share-link.every-instance`, 3.6.1): the object holds no
+ * bus a function could subscribe to, so a link grant exchanged on another instance seconds ago
+ * reaches this one through the store and not a drop; one fresh read on the refusal path alone,
+ * never on a success path, and the request's context keeps the grants it found.
+ */
 export async function decideFor(
   identity: RequestIdentity,
   deckId: string,
   capability: Capability,
   action?: string,
 ): Promise<ShadowedDecision> {
-  return authorize(identity.ctx, deckId, capability, {
-    transport: 'route',
-    ...(action !== undefined ? { action } : {}),
-  });
+  const options = { transport: 'route' as const, ...(action !== undefined ? { action } : {}) };
+  const decision = await authorize(identity.ctx, deckId, capability, options);
+  if (decision.ok || identity.principalId === null || realtimeTier() !== 'do') return decision;
+  try {
+    await refreshIndexFacts(identity.principalId);
+    const grants = await linkGrantsFor(identity.principalId, identity.record);
+    const held = new Set(identity.ctx.linkGrants.map((grant) => grant.linkId));
+    if (grants.every((grant) => held.has(grant.linkId))) return decision;
+    identity.ctx = { ...identity.ctx, linkGrants: grants };
+  } catch {
+    return decision;
+  }
+  return authorize(identity.ctx, deckId, capability, options);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -885,6 +938,10 @@ const applyEntries = applyStreamEntries;
 
 async function createRoom(deckId: string): Promise<Room> {
   const { channel, selection } = state();
+  // the do tier (docs/CLOUDFLARE.md 3.6.1): the object is the live document and the order, so the
+  // room here is a reader of it with the store as the fallback; no checkpointer, no subscription,
+  // no follower and no watch run on the function
+  const onDo = selection.tier === 'do' && isDoChannel(channel) ? channel : null;
   const store = await openDeckStore(deckId);
   const read = await store.read();
   const records = await store.records();
@@ -894,6 +951,8 @@ async function createRoom(deckId: string): Promise<Room> {
     document: read.document,
     chain: Promise.resolve(),
   };
+  /** the object's covered seq from its last document read on the do tier, null before one */
+  let objectCovered: number | null = null;
   const ownRevisions = new Set<number>();
   let followerBusy = false;
 
@@ -905,6 +964,30 @@ async function createRoom(deckId: string): Promise<Room> {
 
   /** Advances the live document to the channel's head, or reloads it from the store when the stream was trimmed past it. */
   const syncLive = async (): Promise<LiveDocument> => {
+    if (onDo !== null) {
+      // the object's document at its head with a 2 s deadline (3.2), else the store at the last
+      // checkpoint (the first open of a deck and every open after its last close)
+      try {
+        const doc = await onDo.document(deckId);
+        if (doc !== null) {
+          live.document = doc.document;
+          live.seq = doc.seq;
+          objectCovered = doc.covered;
+          return { seq: live.seq, document: live.document };
+        }
+      } catch (error) {
+        log(
+          `${deckId}: the object's document was not read: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+      const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+      if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);
+      const current = await store.read();
+      live.document = current.document;
+      live.seq = coveredSeq(await store.records());
+      objectCovered = null;
+      return { seq: live.seq, document: live.document };
+    }
     if (selection.tier === 'blob') {
       const current = await store.read();
       live.document = current.document;
@@ -944,57 +1027,64 @@ async function createRoom(deckId: string): Promise<Room> {
     };
   };
 
-  const checkpointer = createCheckpointer({
-    deckId,
-    channel,
-    store,
-    comments: commentsApplierFor(deckId),
-    onCommitted: (record) => {
-      ownRevisions.add(record.revision);
-      void queued(async () => {
-        setRevision(record.revision, record.createdAt);
-      });
-    },
-    log,
-  });
+  const checkpointer =
+    onDo !== null
+      ? doCheckpointer(onDo, deckId)
+      : createCheckpointer({
+          deckId,
+          channel,
+          store,
+          comments: commentsApplierFor(deckId),
+          onCommitted: (record) => {
+            ownRevisions.add(record.revision);
+            void queued(async () => {
+              setRevision(record.revision, record.createdAt);
+            });
+          },
+          log,
+        });
 
   // every admitted op of every instance reaches the live document in stream order; the room's
-  // listener is passive, so it holds no poll of the store on the blob tier (a client stream does)
-  const stopSubscription = channel.subscribe(
-    deckId,
-    (event) => {
-      if (event.type === 'op') {
-        void queued(async () => {
-          if (event.entry.seq <= live.seq) return;
-          if (event.entry.seq !== live.seq + 1) {
-            await syncLive();
-            return;
-          }
-          try {
-            live.document = applyEntries(live.document, [event.entry]);
-          } catch {
-            const current = await store.read();
-            live.document = current.document;
-          }
-          live.seq = event.entry.seq;
-        });
-      } else if (event.type === 'checkpoint') {
-        void queued(async () => {
-          if (event.external === true) {
-            const current = await store.read();
-            live.document = current.document;
-            return;
-          }
-          setRevision(event.revision, new Date().toISOString());
-          // another instance's run covered the stream up to here (checkpoint.ts `covered`; the
-          // realtime round's two process run): this instance's next run starts above it instead
-          // of committing the same entries again
-          checkpointer.covered(event.toSeq);
-        });
-      }
-    },
-    { passive: true },
-  );
+  // listener is passive, so it holds no poll of the store on the blob tier (a client stream does);
+  // on the do tier the object holds the document and the function subscribes to nothing
+  const stopSubscription =
+    onDo !== null
+      ? () => {}
+      : channel.subscribe(
+          deckId,
+          (event) => {
+            if (event.type === 'op') {
+              void queued(async () => {
+                if (event.entry.seq <= live.seq) return;
+                if (event.entry.seq !== live.seq + 1) {
+                  await syncLive();
+                  return;
+                }
+                try {
+                  live.document = applyEntries(live.document, [event.entry]);
+                } catch {
+                  const current = await store.read();
+                  live.document = current.document;
+                }
+                live.seq = event.entry.seq;
+              });
+            } else if (event.type === 'checkpoint') {
+              void queued(async () => {
+                if (event.external === true) {
+                  const current = await store.read();
+                  live.document = current.document;
+                  return;
+                }
+                setRevision(event.revision, new Date().toISOString());
+                // another instance's run covered the stream up to here (checkpoint.ts `covered`; the
+                // realtime round's two process run): this instance's next run starts above it instead
+                // of committing the same entries again
+                checkpointer.covered(event.toSeq);
+              });
+            }
+          },
+          { passive: true },
+        );
   const supersedeListeners = new Set<() => void>();
 
   /**
@@ -1006,7 +1096,7 @@ async function createRoom(deckId: string): Promise<Room> {
    * append one record twice, and checks the stream's tail for the record's op id first.
    */
   const follow = async (): Promise<void> => {
-    if (selection.tier === 'blob' || followerBusy) return;
+    if (selection.tier === 'blob' || onDo !== null || followerBusy) return;
     followerBusy = true;
     try {
       const all = await store.records();
@@ -1129,7 +1219,7 @@ async function createRoom(deckId: string): Promise<Room> {
   };
 
   const stopWatch =
-    selection.tier === 'blob'
+    selection.tier === 'blob' || onDo !== null
       ? () => {}
       : store.watch((event) => {
           if (event.revision === null) return;
@@ -1137,16 +1227,48 @@ async function createRoom(deckId: string): Promise<Room> {
           void follow();
         });
 
+  // `version.save` on the do tier (3.5): the object flushes its tail first, so every acknowledged
+  // entry is a record under the stamp, then the manifest stamp as today, then the object's
+  // revision follows through `/external`
+  const roomStore: DeckStore =
+    onDo === null
+      ? store
+      : {
+          ...store,
+          async saveVersion(author, note) {
+            await onDo
+              .flush(deckId)
+              .catch((error: unknown) =>
+                log(
+                  `${deckId}: the flush before version.save failed: ${error instanceof Error ? error.message : String(error)}`,
+                ),
+              );
+            const version = await store.saveVersion(author, note);
+            await onDo
+              .external(deckId, { revision: version.revision, author, note })
+              .catch((error: unknown) =>
+                log(
+                  `${deckId}: the object was not told of version.save: ${error instanceof Error ? error.message : String(error)}`,
+                ),
+              );
+            return version;
+          },
+        };
+
   return {
     deckId,
     channel,
     tier: selection.tier,
-    store,
+    store: roomStore,
     live: () => queued(syncLive),
     checkpointer,
     revision: () => live.document.deck.revision,
     covered: () =>
-      selection.tier === 'blob' ? live.seq : Math.max(coveredAtOpen, checkpointer.state().covered),
+      selection.tier === 'blob'
+        ? live.seq
+        : onDo !== null
+          ? (objectCovered ?? coveredAtOpen)
+          : Math.max(coveredAtOpen, checkpointer.state().covered),
     follow,
     onSupersede(fn) {
       supersedeListeners.add(fn);
@@ -1169,6 +1291,44 @@ async function createRoom(deckId: string): Promise<Room> {
       stopWatch();
       await checkpointer.stop();
     },
+  };
+}
+
+/**
+ * The checkpointer's shape over the object (docs/CLOUDFLARE.md 3.6.1): the object commits on its
+ * own alarm, so nothing is scheduled or counted here; `run` is the flush of 3.4 item 8 (the object
+ * posts its tail to the checkpoint route at once), which `flushRoom`, `admitServerWrite`'s callers
+ * and `version.save` ask for. `covered` follows the flush's answer.
+ */
+function doCheckpointer(channel: DoChannel, deckId: string): Checkpointer {
+  let covered = -1;
+  return {
+    schedule() {},
+    noteAppended() {},
+    noteComments() {},
+    pendingComments: () => [],
+    covered(seq) {
+      if (seq > covered) covered = seq;
+    },
+    async run() {
+      try {
+        const flushed = await channel.flush(deckId);
+        covered = Math.max(covered, flushed.covered);
+        return {
+          ok: true,
+          committed: [],
+          fromSeq: flushed.covered,
+          toSeq: flushed.covered,
+          skipped: [],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        log(`${deckId}: the object did not flush: ${message}`);
+        return { ok: false, reason: 'failed', message };
+      }
+    },
+    state: () => ({ retainedEntries: 0, retainedBytes: 0, covered, running: false }),
+    async stop() {},
   };
 }
 
@@ -1266,9 +1426,22 @@ export async function flushRoom(deckId: string): Promise<void> {
  * place the flush before an agent action is not needed.
  */
 export async function roomBackedStore(deckId: string, store: DeckStore): Promise<DeckStore> {
-  const s = shared.__turboslideRoom;
-  const pending = s?.rooms.get(deckId);
-  if (pending === undefined) return store;
+  let pending = shared.__turboslideRoom?.rooms.get(deckId);
+  if (pending === undefined) {
+    // on the do tier the room is a reader of the object and costs no checkpointer, no
+    // subscription and no watch (createRoom), so an instance that never served a page still
+    // answers the agent surface the object's live document instead of the store at the last
+    // checkpoint (R1's two process run of 2026-10-01: `slide.get` through the second instance
+    // read the store 300 ms after the ack, two seconds before the record). `realtimeTier()`
+    // builds the shared state when a bearer's requests alone have reached this instance
+    if (realtimeTier() !== 'do') return store;
+    try {
+      pending = roomFor(deckId);
+      await pending;
+    } catch {
+      return store;
+    }
+  }
   let room: Room;
   try {
     room = await pending;
@@ -2195,6 +2368,12 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
 type IdentityCacheRow = { at: number; facts: string; identity: ResolvedIdentity };
 const identityCache = new Map<string, IdentityCacheRow>();
 const IDENTITY_CACHE_MS = 5000;
+/** The do tier has no drop bus, so the room's identity cache reads 2 s there (docs/CLOUDFLARE.md 2.1, 3.6.1). */
+const IDENTITY_CACHE_DO_MS = 2000;
+
+function identityCacheMs(): number {
+  return realtimeTier() === 'do' ? IDENTITY_CACHE_DO_MS : IDENTITY_CACHE_MS;
+}
 
 /**
  * Drops the cached resolution of one identity (a rename or an avatar change on this instance,
@@ -2205,6 +2384,8 @@ const IDENTITY_CACHE_MS = 5000;
 export function forgetIdentity(identity: string): void {
   identityCache.delete(identity);
   emailMemory.delete(identity);
+  // the cached session facts of the account go with the row (R4-R1d; docs/CLOUDFLARE.md 4.1)
+  forgetAccountFacts(identity);
   void realtimeChannel()
     .bus?.publish('identity', identity)
     .catch((error: unknown) =>
@@ -2256,7 +2437,7 @@ export async function resolveRequestIdentity(identity: RequestIdentity): Promise
   const facts = identityFactsKey(identity);
   const hit = identityCache.get(key);
   const now = Date.now();
-  if (hit !== undefined && now - hit.at < IDENTITY_CACHE_MS && hit.facts === facts)
+  if (hit !== undefined && now - hit.at < identityCacheMs() && hit.facts === facts)
     return hit.identity;
   const resolved = noteResolved(await resolveFresh(identity));
   identityCache.set(key, { at: now, facts, identity: resolved });
@@ -3074,6 +3255,7 @@ export async function admitServerWrite(
   input: ServerWriteInput,
 ): Promise<ServerWriteResult> {
   const { store, channel, deckId } = room;
+  const onDo = isDoChannel(channel) ? channel : null;
   const isRestore = input.mutations.some((mutation) => mutation.op === 'version.restore');
   if (room.tier === 'blob' || isRestore) {
     let outcome: Awaited<ReturnType<DeckStore['write']>>;
@@ -3130,9 +3312,71 @@ export async function admitServerWrite(
         message: `${outcome.message} (this instance's document is at revision ${current}; the write's base was ${input.baseRevision})`,
       };
     }
-    // the follower turns the record into stream entries or an external checkpoint at once
+    // the follower turns the record into stream entries or an external checkpoint at once; on
+    // the do tier the object is told instead (docs/CLOUDFLARE.md 3.5: a restore writes the
+    // manifest outside the object)
     await room.follow();
+    if (onDo !== null) {
+      await onDo
+        .external(deckId, {
+          revision: outcome.revision,
+          author: input.author,
+          note: input.note ?? '',
+        })
+        .catch((error: unknown) =>
+          log(
+            `${deckId}: the object was not told of the restore: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        );
+    }
     return { ok: true, revision: outcome.revision, record: outcome.entry, seq: outcome.revision };
+  }
+  if (onDo !== null) {
+    // the do tier (docs/CLOUDFLARE.md 3.2 "An agent HTTP write"): the write enters the object's
+    // order under the bearer with `agent:<principalId>` as its client id, fans out as an `op`,
+    // and the object checkpoints at once, so the record exists before this answer
+    const answer = await onDo.serverWrite(deckId, {
+      author: input.author,
+      clientId: serverClientId(input.author),
+      mutations: input.mutations,
+      baseRevision: input.baseRevision,
+      ...(input.strict === undefined ? {} : { strict: input.strict }),
+      ...(input.note === undefined ? {} : { note: input.note }),
+    });
+    const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
+    if (!answer.ok) {
+      if (answer.code === 'conflict') {
+        const fresh = await room.live();
+        if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);
+        const records = await store.records();
+        return {
+          ok: false,
+          code: 'conflict',
+          message: answer.message,
+          currentRevision: answer.currentRevision,
+          current: fresh.document,
+          since: records.filter((record) => record.revision > input.baseRevision),
+        };
+      }
+      return { ok: false, code: 'invalid', message: answer.message };
+    }
+    // the record the checkpoint route wrote: read past this instance's mirror
+    if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);
+    const records = await store.records();
+    const record =
+      records.find(
+        (row) =>
+          row.ops !== undefined && row.ops.fromSeq <= answer.seq && answer.seq <= row.ops.toSeq,
+      ) ?? records.find((row) => row.revision === answer.revision);
+    if (record === undefined) {
+      return {
+        ok: false,
+        code: 'invalid',
+        message:
+          'The write landed in the room but no checkpoint committed it yet; read the deck again',
+      };
+    }
+    return { ok: true, revision: record.revision, record, seq: answer.seq };
   }
   const live = await room.live();
   const current = live.document.deck.revision;

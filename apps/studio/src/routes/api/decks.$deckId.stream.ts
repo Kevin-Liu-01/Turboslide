@@ -17,6 +17,7 @@ import {
   filterEventForReader,
   mintClientId,
   overEditingCeiling,
+  realtimeTier,
   replayFor,
   requestIdentity,
   retireCandidates,
@@ -84,8 +85,19 @@ function logLine(line: string): void {
   console.error(`turboslide stream: ${line}`);
 }
 
+/** The wait the do tier's refusal names (seconds): the client's reopen honours it and asks the ticket route which tier (docs/CLOUDFLARE.md 3.6.1). */
+const DO_TIER_RETRY_AFTER_S = 30;
+
 async function serve(request: Request, deckId: string): Promise<Response> {
   if (!SLUG_PATTERN.test(deckId)) return jsonResponse({ error: 'not_found' }, 404);
+  // the do tier (docs/CLOUDFLARE.md 3.6.1): the room is the Worker's object and the tab's channel
+  // is its socket; a stream open here is a tab from before the flip or a transport that has not
+  // switched, answered with the tier word and a wait
+  if (realtimeTier() === 'do') {
+    return jsonResponse({ error: 'tier', tier: 'do' }, 503, {
+      'retry-after': String(DO_TIER_RETRY_AFTER_S),
+    });
+  }
   const identity = await requestIdentity(request);
   const cookieHeaders: Record<string, string> =
     identity.setCookie === undefined ? {} : { 'set-cookie': identity.setCookie };

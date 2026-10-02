@@ -142,6 +142,83 @@ export function applyStreamEntries(
   return next;
 }
 
+export type CommitWriteResult =
+  | { ok: true; record: VersionRecord }
+  | { ok: false; conflict: boolean; message: string; revision?: number };
+
+/**
+ * One coalesced Write through the store at the store's current revision, with `ops` and `force`
+ * (the lease skip, never a bypass of the manifest condition) and, when asked, the write's origin
+ * (`{ clientId, opIds }`, docs/SYNC.md 3.2), so the resync read's `origins` answer the tab on the
+ * do tier (docs/CLOUDFLARE.md 3.5, T1 finding 9). A conflict is answered as one, not retried: the
+ * caller decides (the checkpointer re-bases, the checkpoint route tells the object).
+ */
+export async function commitWrite(
+  store: DeckStore,
+  write: CoalescedWrite,
+  options: { origin: boolean },
+): Promise<CommitWriteResult> {
+  const baseRevision = await store.revision();
+  // a noted run is one record under its history label (coalesce.ts; channel.ts Entry.note)
+  const outcome = await store.write(
+    {
+      baseRevision,
+      author: write.author,
+      mutations: write.mutations,
+      ...(write.note === undefined ? {} : { note: write.note }),
+      ...(options.origin ? { origin: { clientId: write.clientId, opIds: [...write.opIds] } } : {}),
+    },
+    { ops: { fromSeq: write.fromSeq, toSeq: write.toSeq }, force: true },
+  );
+  if (outcome.ok) return { ok: true, record: outcome.entry };
+  if (outcome.code === 'conflict')
+    return {
+      ok: false,
+      conflict: true,
+      message: outcome.message,
+      revision: outcome.currentRevision,
+    };
+  return { ok: false, conflict: false, message: outcome.message };
+}
+
+export type CommitRunsResult =
+  | { ok: true; committed: VersionRecord[]; skipped: string[] }
+  | { ok: false; conflict: true; revision: number; committed: VersionRecord[] };
+
+/**
+ * The body of a checkpoint run as the checkpoint route commits it (docs/CLOUDFLARE.md 3.6.1): one
+ * Write per coalesced run of the edit entries, each with its origin, in order; a Write the store
+ * refuses for its content is skipped and its op ids named (the run goes on, as the checkpointer
+ * does); a conflict stops the run and is answered to the caller with the store's revision, so
+ * the object takes the re-admission path of 3.5 for what remains.
+ */
+export async function commitRuns(
+  store: DeckStore,
+  edits: readonly Entry[],
+  log: (line: string) => void = () => {},
+): Promise<CommitRunsResult> {
+  const committed: VersionRecord[] = [];
+  const skipped: string[] = [];
+  for (const write of coalesceEntries(edits)) {
+    const result = await commitWrite(store, write, { origin: true });
+    if (result.ok) {
+      committed.push(result.record);
+      continue;
+    }
+    if (result.conflict) {
+      return {
+        ok: false,
+        conflict: true,
+        revision: result.revision ?? (await store.revision()),
+        committed,
+      };
+    }
+    skipped.push(...write.opIds);
+    log(`a coalesced write of ${write.opIds.length} ops did not commit: ${result.message}`);
+  }
+  return { ok: true, committed, skipped };
+}
+
 export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
   const { deckId, channel, store } = deps;
   const timers = deps.timers ?? REAL_TIMERS;
@@ -203,19 +280,9 @@ export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
     write: CoalescedWrite,
   ): Promise<{ ok: true; record: VersionRecord } | { ok: false; message: string }> => {
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const baseRevision = await store.revision();
-      // a noted run is one record under its history label (coalesce.ts; channel.ts Entry.note)
-      const outcome = await store.write(
-        {
-          baseRevision,
-          author: write.author,
-          mutations: write.mutations,
-          ...(write.note === undefined ? {} : { note: write.note }),
-        },
-        { ops: { fromSeq: write.fromSeq, toSeq: write.toSeq }, force: true },
-      );
-      if (outcome.ok) return { ok: true, record: outcome.entry };
-      if (outcome.code === 'conflict') continue;
+      const outcome = await commitWrite(store, write, { origin: false });
+      if (outcome.ok) return outcome;
+      if (outcome.conflict) continue;
       return { ok: false, message: outcome.message };
     }
     return { ok: false, message: 'the store kept moving under the checkpoint' };

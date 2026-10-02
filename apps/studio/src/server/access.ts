@@ -37,6 +37,7 @@ import type {
 } from '@turboslide/store/hosted';
 
 import type { DropBus, DropTopic } from '@turboslide/realtime/bus';
+import { isDoChannel } from '@turboslide/realtime/do';
 
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
@@ -132,6 +133,26 @@ function accessBusOver(drops: DropBus): AccessBus {
       }),
     subscribe: (onDrop) => drops.subscribe('access', onDrop),
   };
+}
+
+/**
+ * Tells the deck's Durable Object that an access record or a link grant changed (the Cloudflare
+ * move, docs/CLOUDFLARE.md 3.3): the object sends `reauth` to the named principals' sockets (every
+ * socket when none is named) and closes within 10 s any whose fresh ticket does not arrive or
+ * arrives with a lower role. Nothing on the other tiers; a failed call is logged and never fails
+ * the write that made it.
+ */
+async function roomAccessChanged(deckId: string, principalIds?: readonly string[]): Promise<void> {
+  try {
+    const { realtimeChannel } = await import('./room');
+    const channel = realtimeChannel();
+    if (!isDoChannel(channel)) return;
+    await channel.accessChanged(deckId, principalIds);
+  } catch (error) {
+    warn(
+      `the object was not told of the access change on ${deckId}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 /** Publishes one drop message; nothing on a tier without a bus, a warning on a failed publish. */
@@ -257,6 +278,8 @@ export async function noteLinkGrant(
   // `realtime.share-link.every-instance`: a copied link answered 404 on the next instance for up
   // to 5 s before the round)
   await publishDrop('link', principalId);
+  // the person's sockets on the deck's object refresh their ticket (docs/CLOUDFLARE.md 3.3)
+  await roomAccessChanged(grant.deckId, [principalId]);
 }
 
 /** The link grants the principal's deck index records (`via: 'link'` rows with a link id), read past a 5 s cache. */
@@ -537,6 +560,8 @@ async function defaultHookDeps(): Promise<AccessHookDeps> {
       // signal when the owner turned on "Viewers can see comments")
       const { realtimeChannel } = await import('./room');
       await realtimeChannel().publish(deckId, { type: 'access', revision });
+      // every socket of the deck's object re-proves its right (docs/CLOUDFLARE.md 3.3)
+      await roomAccessChanged(deckId);
     },
   };
 }

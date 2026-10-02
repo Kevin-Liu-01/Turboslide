@@ -2,14 +2,21 @@
 // stream in front of the revision log, the presence roster, the client bindings, the checkpoint
 // lock, the budgets and the kill switch flags, behind one framework free interface with three
 // implementations: `memory` (a checkout, the tests, one process), `redis` (hosted, the Redis
-// protocol, one Lua compare and append) and `blob` (hosted without Redis, every append a commit).
-// Nothing here reaches `node:`; the Redis adapter of redis.ts is the one file that may.
+// protocol, one Lua compare and append), `blob` (hosted without Redis, every append a commit) and,
+// since the Cloudflare move (docs/CLOUDFLARE.md 3.1, 3.6.1), `do`: one Durable Object per deck on
+// the realtime Worker orders the deck over hibernating WebSockets and the function reaches it
+// through do.ts. Nothing here reaches `node:`; the Redis adapter of redis.ts is the one file that
+// may.
 import type { CommentOp as SchemaCommentOp } from '@turboslide/schema/comments';
 import type { Author, MarkMutation, Mutation, SpliceMutation } from '@turboslide/schema/mutations';
 
 import type { DropBus } from './bus.ts';
 
-export const REALTIME_TIERS = ['memory', 'redis', 'blob'] as const;
+/**
+ * The four tiers (docs/CLOUDFLARE.md 3.6.1): the word `do` rides `hello.tier` (protocol.ts reads
+ * this list), so a client that knows it deploys before any hello says it (3.7 item 1).
+ */
+export const REALTIME_TIERS = ['memory', 'redis', 'blob', 'do'] as const;
 export type RealtimeTier = (typeof REALTIME_TIERS)[number];
 
 export type EntryKind = 'edit' | 'comment';

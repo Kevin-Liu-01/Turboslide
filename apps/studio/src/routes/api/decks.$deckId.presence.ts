@@ -13,6 +13,7 @@ import {
   leavePresence,
   presenceBudget,
   readJsonBody,
+  realtimeTier,
   refuseCrossSite,
   refuseNonJson,
   requestIdentity,
@@ -44,6 +45,8 @@ export const Route = createFileRoute('/api/decks/$deckId/presence')({
 
 async function serve(request: Request, deckId: string): Promise<Response> {
   if (!SLUG_PATTERN.test(deckId)) return jsonResponse({ error: 'not_found' }, 404);
+  // the do tier (docs/CLOUDFLARE.md 3.6.1): presence rides the object's socket or its HTTP belt
+  if (realtimeTier() === 'do') return jsonResponse({ error: 'resync', tier: 'do' }, 409);
   const cross = refuseCrossSite(request);
   if (cross !== null)
     return jsonResponse({ error: cross.code, message: cross.message }, cross.status);

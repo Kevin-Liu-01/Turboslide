@@ -166,6 +166,20 @@ export type CspOptions = {
 /** The variable that names the public store's host (the twins' origin), for the policy. */
 export const PUBLIC_STORE_HOST_ENV = 'TURBOSLIDE_PUBLIC_STORE_HOST';
 
+/** The variable that names the realtime Worker's host (docs/CLOUDFLARE.md 3.6.1), for `connect-src`. */
+export const ROOM_HOST_ENV = 'TURBOSLIDE_ROOM_HOST';
+
+/** The Worker's host as the variable names it, trimmed of a scheme and a path; null when unset. */
+export function roomHostOf(env: Env = process.env): string | null {
+  const raw = env[ROOM_HOST_ENV]?.trim();
+  if (!raw) return null;
+  const host = raw
+    .replace(/^(?:https?|wss?):\/\//i, '')
+    .replace(/\/.*$/, '')
+    .trim();
+  return host === '' ? null : host;
+}
+
 /** The public store's host as the variable names it, trimmed of a scheme and a path; null when unset. */
 export function publicStoreHost(env: Env = process.env): string | null {
   const raw = env[PUBLIC_STORE_HOST_ENV]?.trim();
@@ -220,7 +234,17 @@ export function buildCsp(options: CspOptions): string {
   const publicStore = options.publicStoreHost ?? env[PUBLIC_STORE_HOST_ENV] ?? null;
   const presign = options.presignHost ?? env[PRESIGN_HOST_ENV] ?? null;
   const store = publicStore ? ` https://${publicStore}` : '';
-  const connect = `${store}${presign ? ` https://${presign}` : ''}`;
+  // the realtime Worker (docs/CLOUDFLARE.md 3.3): the tab's socket and its HTTP belt reach the
+  // host TURBOSLIDE_ROOM_HOST names, `wss://` and `https://` (`ws://` and `http://` on a checkout
+  // with TURBOSLIDE_ROOM_INSECURE=1 against wrangler dev)
+  const room = roomHostOf(env);
+  const roomSources =
+    room === null
+      ? ''
+      : env.TURBOSLIDE_ROOM_INSECURE === '1'
+        ? ` http://${room} ws://${room}`
+        : ` https://${room} wss://${room}`;
+  const connect = `${store}${presign ? ` https://${presign}` : ''}${roomSources}`;
   const embed = options.pathname !== undefined && isEmbedPath(options.pathname);
   const directives = [
     "default-src 'self'",
@@ -397,7 +421,7 @@ export function csrfFilter(ctx: {
 }
 
 /** The three room routes of SPEC-3 3.3 (the stream, the ops, the presence). */
-const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence)$/;
+const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence|checkpoint|seed|ticket)$/;
 /** The assist route (docs/PRODUCT.md 6.3): a bearer is its proof as on the room routes. */
 const ASSIST_ROUTE_PATTERN = /^\/api\/assist(?:\/|$)/;
 

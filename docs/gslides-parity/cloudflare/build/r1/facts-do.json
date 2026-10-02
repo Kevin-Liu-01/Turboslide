@@ -1,0 +1,766 @@
+{
+  "startedAt": "2026-10-02T00:16:23.061Z",
+  "baseA": "http://127.0.0.1:4471",
+  "baseB": "http://127.0.0.1:4481",
+  "worker": "http://127.0.0.1:8791",
+  "loadAtStart": [
+    29.49755859375,
+    20.68701171875,
+    22.689453125
+  ],
+  "rows": {
+    "setup.worker.health": {
+      "body": {
+        "ok": true,
+        "protocol": 1,
+        "commit": "",
+        "realtime": "on",
+        "appOrigin": "http://127.0.0.1:4471"
+      },
+      "ms": 18.9,
+      "ok": true,
+      "load": [
+        29.49755859375,
+        20.68701171875,
+        22.689453125
+      ]
+    },
+    "realtime.join.chip-within-1s": {
+      "half": "channel",
+      "rounds": [
+        {
+          "fromBOpenMs": 13,
+          "fromPresenceMs": 3,
+          "label": "bootstrap token",
+          "hueSlot": 3
+        },
+        {
+          "fromBOpenMs": 3,
+          "fromPresenceMs": 3,
+          "helloMs": 5.8,
+          "ticketMs": 2.9
+        },
+        {
+          "fromBOpenMs": 1,
+          "fromPresenceMs": 1,
+          "helloMs": 4.5,
+          "ticketMs": 3
+        }
+      ],
+      "ok": true,
+      "bound": "1 s from the join to the frame in A",
+      "load": [
+        29.49755859375,
+        20.68701171875,
+        22.689453125
+      ]
+    },
+    "realtime.share-link.every-instance": {
+      "tries": [
+        {
+          "exchangeOn": "http://127.0.0.1:4481",
+          "mintOn": "http://127.0.0.1:4471",
+          "exchange": 303,
+          "ticket": 200,
+          "ticketMs": 3.7,
+          "afterExchangeMs": 12,
+          "role": "minted"
+        },
+        {
+          "exchangeOn": "http://127.0.0.1:4471",
+          "mintOn": "http://127.0.0.1:4481",
+          "exchange": 303,
+          "ticket": 200,
+          "ticketMs": 3,
+          "afterExchangeMs": 10,
+          "role": "minted"
+        },
+        {
+          "exchangeOn": "http://127.0.0.1:4481",
+          "mintOn": "http://127.0.0.1:4471",
+          "exchange": 303,
+          "ticket": 200,
+          "ticketMs": 2.6,
+          "afterExchangeMs": 10,
+          "role": "minted"
+        },
+        {
+          "exchangeOn": "http://127.0.0.1:4471",
+          "mintOn": "http://127.0.0.1:4481",
+          "exchange": 303,
+          "ticket": 200,
+          "ticketMs": 4.7,
+          "afterExchangeMs": 12,
+          "role": "minted"
+        },
+        {
+          "exchangeOn": "http://127.0.0.1:4481",
+          "mintOn": "http://127.0.0.1:4471",
+          "exchange": 303,
+          "ticket": 200,
+          "ticketMs": 3.2,
+          "afterExchangeMs": 12,
+          "role": "minted"
+        }
+      ],
+      "ok": true,
+      "bound": "1 s from the mint to the editor on the other instance; here the ticket route stands for the editor loader",
+      "load": [
+        29.49755859375,
+        20.68701171875,
+        22.689453125
+      ]
+    },
+    "realtime.keystroke.within-300ms": {
+      "half": "channel",
+      "arrivals": [
+        {
+          "letter": "A",
+          "ackMs": 15,
+          "inBMs": 15,
+          "seq": 1,
+          "ok": true
+        },
+        {
+          "letter": "B",
+          "ackMs": 13.7,
+          "inBMs": 14,
+          "seq": 2,
+          "ok": true
+        },
+        {
+          "letter": "C",
+          "ackMs": 13.1,
+          "inBMs": 13,
+          "seq": 3,
+          "ok": true
+        },
+        {
+          "letter": "D",
+          "ackMs": 12.9,
+          "inBMs": 13,
+          "seq": 4,
+          "ok": true
+        },
+        {
+          "letter": "E",
+          "ackMs": 13.7,
+          "inBMs": 14,
+          "seq": 5,
+          "ok": true
+        },
+        {
+          "letter": "F",
+          "ackMs": 12.7,
+          "inBMs": 12,
+          "seq": 6,
+          "ok": true
+        },
+        {
+          "letter": "G",
+          "ackMs": 16,
+          "inBMs": 15,
+          "seq": 7,
+          "ok": true
+        },
+        {
+          "letter": "H",
+          "ackMs": 13.4,
+          "inBMs": 13,
+          "seq": 8,
+          "ok": true
+        },
+        {
+          "letter": "I",
+          "ackMs": 11,
+          "inBMs": 11,
+          "seq": 9,
+          "ok": true
+        },
+        {
+          "letter": "J",
+          "ackMs": 10.2,
+          "inBMs": 10,
+          "seq": 10,
+          "ok": true
+        }
+      ],
+      "meanInBMs": 13,
+      "maxInBMs": 15,
+      "textThroughA": "ABCDEFGHIJEvery line of copy states a nu",
+      "textThroughB": "ABCDEFGHIJEvery line of copy states a nu",
+      "ok": true,
+      "load": [
+        31.06396484375,
+        21.30712890625,
+        22.88525390625
+      ]
+    },
+    "realtime.selection.outline-within-300ms": {
+      "half": "channel",
+      "outlines": [
+        {
+          "block": "p1",
+          "inAMs": 1,
+          "blockIds": [
+            "p1"
+          ]
+        },
+        {
+          "block": "h",
+          "inAMs": 2,
+          "blockIds": [
+            "h"
+          ]
+        },
+        {
+          "block": "p1",
+          "inAMs": 1,
+          "blockIds": [
+            "p1"
+          ]
+        },
+        {
+          "block": "h",
+          "inAMs": 1,
+          "blockIds": [
+            "h"
+          ]
+        },
+        {
+          "block": "p1",
+          "inAMs": 1,
+          "blockIds": [
+            "p1"
+          ]
+        },
+        {
+          "block": "h",
+          "inAMs": 1,
+          "blockIds": [
+            "h"
+          ]
+        },
+        {
+          "block": "p1",
+          "inAMs": 1,
+          "blockIds": [
+            "p1"
+          ]
+        },
+        {
+          "block": "h",
+          "inAMs": 1,
+          "blockIds": [
+            "h"
+          ]
+        }
+      ],
+      "ok": true,
+      "load": [
+        31.06396484375,
+        21.30712890625,
+        22.88525390625
+      ]
+    },
+    "realtime.caret.within-300ms": {
+      "half": "channel",
+      "carets": [
+        {
+          "offset": 0,
+          "inAMs": 1,
+          "got": 0
+        },
+        {
+          "offset": 1,
+          "inAMs": 1,
+          "got": 1
+        },
+        {
+          "offset": 2,
+          "inAMs": 1,
+          "got": 2
+        },
+        {
+          "offset": 3,
+          "inAMs": 1,
+          "got": 3
+        },
+        {
+          "offset": 4,
+          "inAMs": 1,
+          "got": 4
+        },
+        {
+          "offset": 5,
+          "inAMs": 2,
+          "got": 5
+        },
+        {
+          "offset": 6,
+          "inAMs": 1,
+          "got": 6
+        },
+        {
+          "offset": 7,
+          "inAMs": 1,
+          "got": 7
+        },
+        {
+          "offset": 8,
+          "inAMs": 1,
+          "got": 8
+        },
+        {
+          "offset": 9,
+          "inAMs": 1,
+          "got": 9
+        }
+      ],
+      "ok": true,
+      "load": [
+        31.06396484375,
+        21.30712890625,
+        22.88525390625
+      ]
+    },
+    "realtime.title.two-typers": {
+      "half": "channel",
+      "rounds": [
+        {
+          "ackA": {
+            "seq": 11,
+            "rejected": 0,
+            "ms": 9.9,
+            "between": 0
+          },
+          "ackB": {
+            "seq": 12,
+            "rejected": 0,
+            "ms": 18.5,
+            "between": 1
+          },
+          "bWordInAMs": 18,
+          "aWordInBMs": 10,
+          "bothWordsA": true,
+          "bothWordsB": false,
+          "byteEqual": false,
+          "objectHasBoth": true,
+          "textA": "edIn, GitHub, and Discord. alpha0 bravo0"
+        },
+        {
+          "ackA": {
+            "seq": 13,
+            "rejected": 0,
+            "ms": 10.5,
+            "between": 0
+          },
+          "ackB": {
+            "seq": 14,
+            "rejected": 0,
+            "ms": 19.3,
+            "between": 1
+          },
+          "bWordInAMs": 19,
+          "aWordInBMs": 10,
+          "bothWordsA": true,
+          "bothWordsB": false,
+          "byteEqual": false,
+          "objectHasBoth": true,
+          "textA": "and Discord. alpha0 bravo0 alpha1 bravo1"
+        },
+        {
+          "ackA": {
+            "seq": 15,
+            "rejected": 0,
+            "ms": 11.1,
+            "between": 0
+          },
+          "ackB": {
+            "seq": 16,
+            "rejected": 0,
+            "ms": 21,
+            "between": 1
+          },
+          "bWordInAMs": 21,
+          "aWordInBMs": 11,
+          "bothWordsA": true,
+          "bothWordsB": false,
+          "byteEqual": false,
+          "objectHasBoth": true,
+          "textA": "lpha0 bravo0 alpha1 bravo1 alpha2 bravo2"
+        }
+      ],
+      "ok": true,
+      "note": "textB is the agent surface's read of the dispatcher's plain store on the other instance (R1-INTg); the object's document carries both words",
+      "load": [
+        31.06396484375,
+        21.30712890625,
+        22.88525390625
+      ]
+    },
+    "realtime.reload.loses-nothing": {
+      "half": "server (the loader reads the object between the ack and the checkpoint)",
+      "rounds": [
+        {
+          "acked": true,
+          "ack": {
+            "entries": 2,
+            "rejected": []
+          },
+          "ackMs": 30.8,
+          "loaderOnB": {
+            "status": 200,
+            "ms": 74.8,
+            "hadBurst": true
+          },
+          "readThroughBMs": 216.9,
+          "readBeforeAlarm": true,
+          "throughBHadBurst": true,
+          "after3sObjectHasBurst": true,
+          "after3sObjectLength": 346,
+          "after3s": {
+            "equal": true,
+            "revisionA": 8,
+            "revisionB": 8,
+            "records": 8
+          }
+        },
+        {
+          "acked": true,
+          "ack": {
+            "entries": 2,
+            "rejected": []
+          },
+          "ackMs": 20.1,
+          "loaderOnB": {
+            "status": 200,
+            "ms": 39.2,
+            "hadBurst": true
+          },
+          "readThroughBMs": 164.2,
+          "readBeforeAlarm": true,
+          "throughBHadBurst": true,
+          "after3sObjectHasBurst": true,
+          "after3sObjectLength": 348,
+          "after3s": {
+            "equal": true,
+            "revisionA": 9,
+            "revisionB": 9,
+            "records": 9
+          }
+        },
+        {
+          "acked": true,
+          "ack": {
+            "entries": 2,
+            "rejected": []
+          },
+          "ackMs": 20.5,
+          "loaderOnB": {
+            "status": 200,
+            "ms": 34.3,
+            "hadBurst": true
+          },
+          "readThroughBMs": 179,
+          "readBeforeAlarm": true,
+          "throughBHadBurst": true,
+          "after3sObjectHasBurst": true,
+          "after3sObjectLength": 350,
+          "after3s": {
+            "equal": true,
+            "revisionA": 10,
+            "revisionB": 10,
+            "records": 10
+          }
+        }
+      ],
+      "ok": true,
+      "note": "the editor loader on the other instance is the row's mechanism and reads the object; slide.get through the agent surface reads the dispatcher's plain store until R1-INTg lands",
+      "load": [
+        32.69677734375,
+        21.97265625,
+        23.1025390625
+      ]
+    },
+    "realtime.agent.write-announced": {
+      "half": "channel",
+      "write": {
+        "status": 200,
+        "revision": 11,
+        "ms": 29.7
+      },
+      "opInA": null,
+      "checkpointInA": {
+        "revision": 1,
+        "ms": -13910
+      },
+      "textAfterThroughA": "ha1 bravo1 alpha2 bravo2x0y1z2",
+      "ok": false,
+      "load": [
+        31.919921875,
+        21.9892578125,
+        23.1015625
+      ]
+    },
+    "setup.do.two-instances": {
+      "instances": {
+        "a": "port-4471 (TURBOSLIDE_INSTANCE_NAME)",
+        "b": "port-4481"
+      },
+      "byteEqual": true,
+      "revisionA": 11,
+      "revisionB": 11,
+      "hello": {
+        "a": {
+          "seq": 0,
+          "covered": 0
+        },
+        "b": {
+          "seq": 0,
+          "covered": 0
+        }
+      },
+      "object": {
+        "colo": "SJC",
+        "id": "47dbf7d4",
+        "head": 22,
+        "covered": 22,
+        "revision": 10
+      },
+      "roomFrame": {
+        "t": "room",
+        "colo": "SJC",
+        "object": "47dbf7d4",
+        "idleMs": 2000,
+        "maxMs": 10000,
+        "__at": 264.941792
+      },
+      "ok": true,
+      "note": "sync.status is not read: its output table refuses the tier word until R1-INTd lands; deck.info names the revision on each instance instead",
+      "load": [
+        31.919921875,
+        21.9892578125,
+        23.1015625
+      ]
+    },
+    "wake.after-pause": {
+      "awakeSinceBefore": 1790900183211,
+      "awakeSinceAfter": 1790900183211,
+      "woke": false,
+      "totalWakes": 1,
+      "resendSeen": false,
+      "presenceAfterPauseMs": 1,
+      "note": "wrangler dev hibernates a Durable Object after 10 s idle only if the local runtime does; a changed awakeSince is the proof, an unchanged one means no hibernation locally",
+      "load": [
+        36.4443359375,
+        23.6845703125,
+        23.68408203125
+      ]
+    },
+    "cost.do.requests": {
+      "sliceSeconds": 180,
+      "editSeconds": 36,
+      "idleSeconds": 144,
+      "ops": 8,
+      "pings": 58,
+      "object": {
+        "requests": 9,
+        "messages": 16,
+        "opsFrames": 8,
+        "presenceFrames": 8,
+        "alarms": 7,
+        "checkpoints": 7,
+        "rowsWritten": 374,
+        "rowsRead": 384
+      },
+      "worker": {
+        "upgrades": 0,
+        "upgradesRefused": 0,
+        "ticketPosts": 0,
+        "bearerCalls": 9,
+        "dbCalls": 0,
+        "controlCalls": 1,
+        "health": 1,
+        "options": 0,
+        "other": 0
+      },
+      "scaledToOneHour": {
+        "requestUnits": 340,
+        "rowsWritten": 7480,
+        "alarms": 140
+      },
+      "ceilings": {
+        "cost.do.requests": 300,
+        "cost.do.rows-written": 800,
+        "cost.worker.requests": 90
+      },
+      "note": "a scaled slice on wrangler dev, read from the object's own counters; the account's figures and the Free plan caps are the preview's and the dashboard's (docs/CLOUDFLARE.md 2.2); the heartbeat pings are answered by the runtime and do not count as messages",
+      "scaledRequestUnits": 340,
+      "ok": false,
+      "load": [
+        14.7451171875,
+        18.837890625,
+        21.60205078125
+      ]
+    },
+    "cost.do.rows-written": {
+      "scaledRowsWritten": 7480,
+      "perOp": 46.8,
+      "ok": false,
+      "load": [
+        14.7451171875,
+        18.837890625,
+        21.60205078125
+      ]
+    },
+    "cost.do.duration": {
+      "note": "the dashboard's duration metric is the only reading; not readable locally",
+      "ok": null,
+      "load": [
+        14.7451171875,
+        18.837890625,
+        21.60205078125
+      ]
+    },
+    "cost.worker.requests": {
+      "worker": {
+        "upgrades": 0,
+        "upgradesRefused": 0,
+        "ticketPosts": 0,
+        "bearerCalls": 9,
+        "dbCalls": 0,
+        "controlCalls": 1,
+        "health": 1,
+        "options": 0,
+        "other": 0
+      },
+      "scaled": 220,
+      "ok": null,
+      "note": "per isolate counts of the lane's wrangler dev, two tabs; the dashboard is the figure of record",
+      "load": [
+        14.7451171875,
+        18.837890625,
+        21.60205078125
+      ]
+    },
+    "probe.drop-table": {
+      "probe": {
+        "insertRowsWritten": 1000,
+        "dropRowsWritten": 0,
+        "dropRowsRead": 9
+      },
+      "spinMs": 50,
+      "note": "miniflare's cursor counts; the preview Worker's reading is the one that bills (W1 open 1)",
+      "load": [
+        14.7451171875,
+        18.837890625,
+        21.60205078125
+      ]
+    }
+  },
+  "notes": [],
+  "deck": {
+    "id": "r1-do-muq7q98w",
+    "copy": 200,
+    "revision": 0
+  },
+  "deckInfoThroughB": {
+    "status": 200,
+    "revision": 0
+  },
+  "link": {
+    "shareGet": 200,
+    "opened": 200,
+    "path": "/s/<token>"
+  },
+  "exchangeA": {
+    "status": 303,
+    "location": "/edit/r1-do-muq7q98w",
+    "ms": 7.9,
+    "on": "http://127.0.0.1:4481"
+  },
+  "aIdentity": "cookie",
+  "tabA": {
+    "hello": {
+      "seq": 0,
+      "revision": 0,
+      "role": "editor",
+      "tier": "do",
+      "covered": 0,
+      "clients": 0
+    },
+    "room": {
+      "t": "room",
+      "colo": "SJC",
+      "object": "47dbf7d4",
+      "idleMs": 2000,
+      "maxMs": 10000,
+      "__at": 264.941792
+    },
+    "replay": "ops",
+    "ticketMs": 3.2,
+    "helloMs": 27.8,
+    "protocol": "turboslide.v1"
+  },
+  "tabB": {
+    "hello": {
+      "seq": 0,
+      "revision": 0,
+      "role": "owner",
+      "tier": "do",
+      "covered": 0,
+      "clients": 0
+    },
+    "room": {
+      "t": "room",
+      "colo": "SJC",
+      "object": "47dbf7d4",
+      "idleMs": 2000,
+      "maxMs": 10000,
+      "__at": 274.463
+    },
+    "ticketMs": 2.5,
+    "helloMs": 6.6
+  },
+  "rtOpenAfterClose": {
+    "decks": []
+  },
+  "workerCounters": {
+    "before": {
+      "startedAt": 0,
+      "upgrades": 24,
+      "upgradesRefused": 0,
+      "ticketPosts": 0,
+      "bearerCalls": 222,
+      "dbCalls": 0,
+      "controlCalls": 25,
+      "health": 18,
+      "options": 0,
+      "other": 0
+    },
+    "after": {
+      "startedAt": 0,
+      "upgrades": 28,
+      "upgradesRefused": 0,
+      "ticketPosts": 0,
+      "bearerCalls": 291,
+      "dbCalls": 0,
+      "controlCalls": 29,
+      "health": 21,
+      "options": 0,
+      "other": 0
+    }
+  },
+  "teardown": {
+    "trash": 200,
+    "remove": 200,
+    "after": 404
+  },
+  "endedAt": "2026-10-02T00:20:14.683Z",
+  "loadAtEnd": [
+    14.7451171875,
+    18.837890625,
+    21.60205078125
+  ]
+}

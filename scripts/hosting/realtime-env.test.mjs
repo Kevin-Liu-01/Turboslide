@@ -1,8 +1,10 @@
-// scripts/hosting/realtime-env.mjs against a fake `vercel` on PATH and a temp config folder: the
-// parsers, the plan of every subcommand, the dry run that never calls vercel, the real run that
-// passes a value on stdin and never on the command line, the names only output, the private
-// mode rule and the linked project refusal. Nothing here reaches the network or a real project.
-// Runs under the root vitest project `scripts` (vitest.config.ts includes scripts/**/*.test.mjs).
+// scripts/hosting/realtime-env.mjs against a fake `vercel` on PATH, a fake wrangler, a fake fetch
+// and a temp config folder: the parsers, the plan of every subcommand, the dry run that makes no
+// call, the real run that passes a value on stdin and never on the command line, the names only
+// output, the private mode rule, the linked project refusal, the retired subcommand and the Worker
+// side (the drain, the flag, the migration and the secrets). Nothing here reaches the network, a
+// real project or a real Worker. Runs under the root vitest project `scripts` (vitest.config.ts
+// includes scripts/**/*.test.mjs).
 import { spawnSync } from 'node:child_process';
 import {
   chmodSync,
@@ -19,27 +21,42 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  DEFAULT_DATABASES,
+  DEFAULT_ROOM_HOSTS,
   EXPECTATION_REL,
   EXPECTED_NAMES,
   FILES,
+  NEVER_NAMES,
+  RETIRED,
+  ROOM_NAMES,
   SUBCOMMANDS,
+  TIERS,
   UsageError,
+  VERCEL_SUBCOMMANDS,
+  databaseFor,
   execute,
   isPrivateMode,
   namesFromEnvLs,
+  openDecksOf,
   parseArgs,
   parseEnvFile,
   planFor,
   readExpectation,
   readSecretFile,
+  roomHostFor,
   run,
   scrub,
+  writeExpectation,
 } from './realtime-env.mjs';
 
 const SCRIPT = join(import.meta.dirname, 'realtime-env.mjs');
 const SECRET_ID = 'client-id-1234567890.apps.googleusercontent.com';
 const SECRET_KEY = 'GOCSPX-this-is-a-fake-secret-value-0001';
 const RESEND = 're_fake_resend_key_000000000000';
+const ROOM_SECRET = 'a'.repeat(64);
+const ROOM_BEARER = 'b'.repeat(64);
+const BYPASS = 'c'.repeat(32);
+const ACCOUNT_ID = '0123456789abcdef0123456789abcdef';
 
 let dir;
 let config;
@@ -70,8 +87,30 @@ exit 0
   chmodSync(join(bin, 'vercel'), 0o755);
 }
 
+/** A fake wrangler binary: logs argv and the stdin byte count. */
+function installFakeWrangler() {
+  const path = join(dir, 'fake-wrangler');
+  writeFileSync(
+    path,
+    `#!/bin/sh
+printf '%s\\n' "wrangler-argv: $*" >> "${join(dir, 'calls.log')}"
+printf '%s\\n' "wrangler-account: \${CLOUDFLARE_ACCOUNT_ID:-none}" >> "${join(dir, 'calls.log')}"
+bytes=$(wc -c | tr -d ' ')
+printf '%s\\n' "wrangler-stdin-bytes: $bytes" >> "${join(dir, 'calls.log')}"
+exit 0
+`,
+  );
+  chmodSync(path, 0o755);
+  return path;
+}
+
 function calls() {
   return existsSync(callLog) ? readFileSync(callLog, 'utf8') : '';
+}
+
+function writePrivateFile(name, text) {
+  writeFileSync(join(config, name), text);
+  chmodSync(join(config, name), 0o600);
 }
 
 function runScript(args, envNames = []) {
@@ -87,6 +126,48 @@ function runScript(args, envNames = []) {
   return { status: r.status, stdout: r.stdout, stderr: r.stderr };
 }
 
+const filesOf = () =>
+  Object.fromEntries(
+    Object.entries(FILES).map(([k, s]) => [k, readSecretFile(join(config, s.name))]),
+  );
+
+const options = (sub, extra = {}) => ({
+  subcommand: sub,
+  flag: null,
+  dryRun: true,
+  scope: 'general-translation',
+  project: 'turboslide-gt',
+  cwd: linked,
+  environments: ['production', 'preview'],
+  configDir: config,
+  adminEmails: null,
+  force: false,
+  tier: null,
+  env: 'production',
+  local: false,
+  host: null,
+  wrangler: null,
+  workerDir: null,
+  ...extra,
+});
+
+const quietIo = (extra = {}) => ({
+  out: () => {},
+  vercel: () => {
+    throw new Error('vercel: never');
+  },
+  wrangler: () => {
+    throw new Error('wrangler: never');
+  },
+  fetch: () => {
+    throw new Error('fetch: never');
+  },
+  mint: () => 'x',
+  writeFile: () => {},
+  root: dir,
+  ...extra,
+});
+
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'realtime-env-'));
   config = join(dir, 'config');
@@ -97,11 +178,18 @@ beforeEach(() => {
     join(linked, '.vercel', 'project.json'),
     JSON.stringify({ projectId: 'prj_x', orgId: 'team_x', projectName: 'turboslide-gt' }),
   );
-  writeFileSync(
-    join(config, FILES.google.name),
+  writePrivateFile(
+    FILES.google.name,
     `GOOGLE_CLIENT_ID=${SECRET_ID}\nGOOGLE_CLIENT_SECRET="${SECRET_KEY}"\n`,
   );
-  chmodSync(join(config, FILES.google.name), 0o600);
+  writePrivateFile(
+    FILES.room.name,
+    `TURBOSLIDE_ROOM_SECRET=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER=${ROOM_BEARER}\n`,
+  );
+  writePrivateFile(
+    FILES.cloudflare.name,
+    `CLOUDFLARE_ACCOUNT_ID=${ACCOUNT_ID}\nCLOUDFLARE_WORKERS_SUBDOMAIN=sub\nD1_ACCOUNTS_NAME=turboslide-accounts\nD1_ACCOUNTS_ID=11111111-1111-1111-1111-111111111111\nD1_ACCOUNTS_PREVIEW_NAME=turboslide-accounts-preview\nD1_ACCOUNTS_PREVIEW_ID=22222222-2222-2222-2222-222222222222\nTURBOSLIDE_ROOM_HOST=turboslide-realtime.sub.workers.dev\nTURBOSLIDE_ROOM_HOST_PREVIEW=turboslide-realtime-preview.sub.workers.dev\n`,
+  );
 });
 
 afterEach(() => {
@@ -158,7 +246,7 @@ describe('the parsers', () => {
     );
   });
 
-  it('parses the arguments and refuses an unknown subcommand, environment or flag', () => {
+  it('parses the arguments and refuses an unknown subcommand, environment, tier or flag', () => {
     const o = parseArgs([
       'google',
       '--dry-run',
@@ -171,61 +259,133 @@ describe('the parsers', () => {
     expect(o.dryRun).toBe(true);
     expect(o.environments).toEqual(['preview']);
     expect(o.adminEmails).toBe('a@b.c');
+    expect(parseArgs(['flip', '--tier', 'do']).tier).toBe('do');
+    expect(parseArgs(['worker-secrets', '--env', 'preview']).env).toBe('preview');
+    expect(parseArgs(['do-flag', 'off']).flag).toBe('off');
     expect(() => parseArgs(['nope'])).toThrow(UsageError);
     expect(() => parseArgs(['flip', '--environments', 'development'])).toThrow(UsageError);
+    expect(() => parseArgs(['flip', '--tier', 'memory'])).toThrow(UsageError);
+    expect(() => parseArgs(['drain', '--env', 'production,preview'])).toThrow(UsageError);
+    expect(() => parseArgs(['do-flag'])).toThrow(UsageError);
+    expect(() => parseArgs(['do-flag', 'maybe'])).toThrow(UsageError);
     expect(() => parseArgs(['flip', '--what'])).toThrow(UsageError);
     expect(() => parseArgs([])).toThrow(UsageError);
+  });
+
+  it('names the retired redis subcommand with its reason', () => {
+    expect(() => parseArgs(['redis'])).toThrow(/retired: the redis tier stays in the tree/);
+    expect(Object.keys(RETIRED)).toEqual(['redis']);
+    expect(SUBCOMMANDS).not.toContain('redis');
+  });
+
+  it('reads the expectation as blob, redis or do and nothing else', () => {
+    mkdirSync(join(dir, 'scripts', 'hosting'), { recursive: true });
+    expect(readExpectation(dir)).toBe('blob');
+    writeExpectation('do', dir);
+    expect(readExpectation(dir)).toBe('do');
+    writeFileSync(join(dir, EXPECTATION_REL), '{"realtime":"memory"}');
+    expect(readExpectation(dir)).toBe('blob');
+    expect(() => writeExpectation('memory', dir)).toThrow(RangeError);
+    expect(TIERS).toEqual(['blob', 'redis', 'do']);
+  });
+
+  it('reads the Worker host and the database per environment from cloudflare.env, else the defaults', () => {
+    const files = filesOf();
+    expect(roomHostFor('production', options('do'), files)).toBe(
+      'turboslide-realtime.sub.workers.dev',
+    );
+    expect(roomHostFor('preview', options('do'), files)).toBe(
+      'turboslide-realtime-preview.sub.workers.dev',
+    );
+    expect(roomHostFor('preview', options('do', { host: 'h.example' }), files)).toBe('h.example');
+    expect(databaseFor('preview', files)).toBe('turboslide-accounts-preview');
+    rmSync(join(config, FILES.cloudflare.name));
+    const none = filesOf();
+    expect(roomHostFor('production', options('do'), none)).toBe(DEFAULT_ROOM_HOSTS.production);
+    expect(databaseFor('production', none)).toBe(DEFAULT_DATABASES.production);
+  });
+
+  it('reads the open decks of /control/open in its three shapes and drops a bad id', () => {
+    expect(openDecksOf(['a-1', 'b'])).toEqual(['a-1', 'b']);
+    expect(openDecksOf({ decks: [{ deckId: 'x' }, { id: 'y' }, { id: 'Bad Id' }] })).toEqual([
+      'x',
+      'y',
+    ]);
+    expect(openDecksOf({ open: ['z'] })).toEqual(['z']);
+    expect(() => openDecksOf({})).toThrow(TypeError);
   });
 });
 
 describe('the plan', () => {
-  const options = (sub, extra = {}) => ({
-    subcommand: sub,
-    dryRun: true,
-    scope: 'general-translation',
-    project: 'turboslide-gt',
-    cwd: linked,
-    environments: ['production', 'preview'],
-    configDir: config,
-    adminEmails: null,
-    force: false,
-    ...extra,
-  });
-  const filesOf = () =>
-    Object.fromEntries(
-      Object.entries(FILES).map(([k, s]) => [k, readSecretFile(join(config, s.name))]),
-    );
-
   it('has a plan for every subcommand', () => {
     for (const sub of SUBCOMMANDS)
-      expect(planFor(sub, options(sub), filesOf()).length).toBeGreaterThan(0);
+      expect(
+        planFor(sub, options(sub, sub === 'do-flag' ? { flag: 'off' } : {}), filesOf()).length,
+      ).toBeGreaterThan(0);
   });
 
-  it('redis sets nothing and requires REDIS_URL on both environments', () => {
-    const steps = planFor('redis', options('redis'), filesOf());
-    expect(steps.filter((s) => s.kind === 'add' || s.kind === 'rm')).toEqual([]);
-    expect(steps.filter((s) => s.kind === 'require').map((s) => s.environment)).toEqual([
-      'production',
-      'preview',
+  it('do reads /health per Worker first, then sets the host plain and the two secrets sensitive', () => {
+    const steps = planFor('do', options('do'), filesOf());
+    expect(steps.slice(0, 2).map((s) => [s.kind, s.environment, s.host])).toEqual([
+      ['health', 'production', 'turboslide-realtime.sub.workers.dev'],
+      ['health', 'preview', 'turboslide-realtime-preview.sub.workers.dev'],
     ]);
+    const adds = steps.filter((s) => s.kind === 'add');
+    expect(
+      adds.map((s) => `${s.name} ${s.environment} ${s.plain ? 'plain' : 'sensitive'}`),
+    ).toEqual([
+      'TURBOSLIDE_ROOM_HOST production plain',
+      'TURBOSLIDE_ROOM_SECRET production sensitive',
+      'TURBOSLIDE_ROOM_BEARER production sensitive',
+      'TURBOSLIDE_ROOM_HOST preview plain',
+      'TURBOSLIDE_ROOM_SECRET preview sensitive',
+      'TURBOSLIDE_ROOM_BEARER preview sensitive',
+    ]);
+    expect(adds[3].source).toMatchObject({
+      file: 'cloudflare',
+      key: 'TURBOSLIDE_ROOM_HOST_PREVIEW',
+    });
+    expect(adds[1].source).toEqual({ file: 'room', key: 'TURBOSLIDE_ROOM_SECRET' });
   });
 
-  it('database mints one secret per environment and sets BETTER_AUTH_SECRET from it', () => {
+  it('do stops with exit 1 when room.env is absent or loose', () => {
+    rmSync(join(config, FILES.room.name));
+    expect(planFor('do', options('do'), filesOf())[0]).toMatchObject({ kind: 'stop', exit: 1 });
+    writeFileSync(
+      join(config, FILES.room.name),
+      `TURBOSLIDE_ROOM_SECRET=a\nTURBOSLIDE_ROOM_BEARER=b\n`,
+    );
+    chmodSync(join(config, FILES.room.name), 0o644);
+    const stop = planFor('do', options('do'), filesOf())[0];
+    expect(stop.kind).toBe('stop');
+    expect(stop.text).toContain('chmod 600');
+  });
+
+  it('database requires the host and the bearer, mints one secret per environment and sets TURBOSLIDE_ACCOUNTS=d1 with BETTER_AUTH_SECRET', () => {
     const steps = planFor('database', options('database'), filesOf());
+    expect(steps.filter((s) => s.kind === 'require').map((s) => s.names)).toEqual([
+      ['TURBOSLIDE_ROOM_HOST', 'TURBOSLIDE_ROOM_BEARER'],
+      ['TURBOSLIDE_ROOM_HOST', 'TURBOSLIDE_ROOM_BEARER'],
+    ]);
     expect(steps.filter((s) => s.kind === 'mint').map((s) => s.key)).toEqual([
       'BETTER_AUTH_SECRET_PRODUCTION',
       'BETTER_AUTH_SECRET_PREVIEW',
     ]);
     const adds = steps.filter((s) => s.kind === 'add');
-    expect(adds.map((s) => [s.name, s.environment, s.source.key])).toEqual([
-      ['BETTER_AUTH_SECRET', 'production', 'BETTER_AUTH_SECRET_PRODUCTION'],
-      ['BETTER_AUTH_SECRET', 'preview', 'BETTER_AUTH_SECRET_PREVIEW'],
+    expect(
+      adds.map((s) => [s.name, s.environment, s.plain === true, s.source.key ?? s.source.literal]),
+    ).toEqual([
+      ['TURBOSLIDE_ACCOUNTS', 'production', true, 'd1'],
+      ['BETTER_AUTH_SECRET', 'production', false, 'BETTER_AUTH_SECRET_PRODUCTION'],
+      ['TURBOSLIDE_ACCOUNTS', 'preview', true, 'd1'],
+      ['BETTER_AUTH_SECRET', 'preview', false, 'BETTER_AUTH_SECRET_PREVIEW'],
     ]);
+    expect(steps.some((s) => s.kind === 'require' && s.names.includes('DATABASE_URL'))).toBe(false);
   });
 
-  it('google sets the two client values and the admin addresses, after a database', () => {
+  it('google sets the two client values and the admin addresses, after TURBOSLIDE_ACCOUNTS', () => {
     const steps = planFor('google', options('google'), filesOf());
-    expect(steps[0]).toMatchObject({ kind: 'require', names: ['DATABASE_URL'] });
+    expect(steps[0]).toMatchObject({ kind: 'require', names: ['TURBOSLIDE_ACCOUNTS'] });
     const adds = steps.filter((s) => s.kind === 'add').map((s) => `${s.name} ${s.environment}`);
     expect(adds).toEqual([
       'GOOGLE_CLIENT_ID production',
@@ -255,11 +415,10 @@ describe('the plan', () => {
 
   it('mail without its file sets nothing; with it sets the pair, removes the production row and sets capture on preview', () => {
     expect(planFor('mail', options('mail'), filesOf()).map((s) => s.kind)).toEqual(['note']);
-    writeFileSync(
-      join(config, FILES.mail.name),
+    writePrivateFile(
+      FILES.mail.name,
       `RESEND_API_KEY=${RESEND}\nTURBOSLIDE_MAIL_FROM=hello@turboslide.com\n`,
     );
-    chmodSync(join(config, FILES.mail.name), 0o600);
     const steps = planFor('mail', options('mail'), filesOf());
     expect(steps.map((s) => `${s.kind} ${s.name} ${s.environment}`)).toEqual([
       'add RESEND_API_KEY production',
@@ -272,48 +431,143 @@ describe('the plan', () => {
     expect(steps[5].source.literal).toBe('capture');
   });
 
-  it('flip requires REDIS_URL, removes the forced row on both environments and expects redis; rollback forces blob', () => {
-    const flip = planFor('flip', options('flip'), filesOf());
-    expect(flip.filter((s) => s.kind === 'require').length).toBe(2);
+  it('flip --tier do requires the three room names, removes the forced row on both environments and expects do', () => {
+    const flip = planFor('flip', options('flip', { tier: 'do' }), filesOf());
+    expect(flip.filter((s) => s.kind === 'require').map((s) => s.names)).toEqual([
+      [...ROOM_NAMES],
+      [...ROOM_NAMES],
+    ]);
     expect(flip.filter((s) => s.kind === 'rm').map((s) => `${s.name} ${s.environment}`)).toEqual([
       'TURBOSLIDE_REALTIME production',
       'TURBOSLIDE_REALTIME preview',
     ]);
-    expect(flip.find((s) => s.kind === 'expect').realtime).toBe('redis');
+    expect(flip.find((s) => s.kind === 'expect').realtime).toBe('do');
+    expect(
+      planFor('flip', options('flip'), filesOf()).find((s) => s.kind === 'expect').realtime,
+    ).toBe('do');
+  });
+
+  it('flip --tier redis and --tier blob are refused with exit 2 and the reason', () => {
+    const redis = planFor('flip', options('flip', { tier: 'redis' }), filesOf());
+    expect(redis).toEqual([
+      expect.objectContaining({
+        kind: 'stop',
+        exit: 2,
+        text: expect.stringContaining('never deployed'),
+      }),
+    ]);
+    const blob = planFor('flip', options('flip', { tier: 'blob' }), filesOf());
+    expect(blob[0]).toMatchObject({ kind: 'stop', exit: 2 });
+    expect(blob[0].text).toContain('rollback');
+  });
+
+  it('rollback forces blob on both environments, expects blob and names the drain first', () => {
     const back = planFor('rollback', options('rollback'), filesOf());
     expect(
       back.filter((s) => s.kind === 'add').every((s) => s.source.literal === 'blob' && s.force),
     ).toBe(true);
     expect(back.find((s) => s.kind === 'expect').realtime).toBe('blob');
+    expect(back.at(-1).text).toContain('`drain`');
   });
 
-  it('status reports every expected name per environment and the files', () => {
+  it('status reports every expected name, the never set names and the files per environment', () => {
     const steps = planFor('status', options('status'), filesOf());
     expect(steps.filter((s) => s.kind === 'report').map((s) => s.names)).toEqual(
       [EXPECTED_NAMES, EXPECTED_NAMES].map((n) => [...n]),
     );
-    expect(steps.filter((s) => s.kind === 'note').length).toBe(4);
+    expect(steps.filter((s) => s.kind === 'never').map((s) => s.names)).toEqual(
+      [NEVER_NAMES, NEVER_NAMES].map((n) => [...n]),
+    );
+    expect(EXPECTED_NAMES).not.toContain('REDIS_URL');
+    expect(EXPECTED_NAMES).not.toContain('DATABASE_URL');
+    expect(EXPECTED_NAMES).toEqual(expect.arrayContaining([...ROOM_NAMES, 'TURBOSLIDE_ACCOUNTS']));
+    expect(steps.filter((s) => s.kind === 'note').length).toBe(Object.keys(FILES).length + 1);
+  });
+
+  it('drain and do-flag name the Worker of --env; worker-migrate names the database and the remote or local switch; worker-secrets puts the two secrets and the bypass on the preview alone', () => {
+    const drain = planFor('drain', options('drain', { env: 'preview' }), filesOf());
+    expect(drain).toEqual([
+      {
+        kind: 'flush',
+        environment: 'preview',
+        host: 'turboslide-realtime-preview.sub.workers.dev',
+      },
+    ]);
+    const flag = planFor('do-flag', options('do-flag', { flag: 'off' }), filesOf());
+    expect(flag).toEqual([
+      {
+        kind: 'flag',
+        environment: 'production',
+        host: 'turboslide-realtime.sub.workers.dev',
+        realtime: 'off',
+      },
+    ]);
+    const migrate = planFor('worker-migrate', options('worker-migrate'), filesOf());
+    expect(migrate[0].args).toEqual([
+      'd1',
+      'migrations',
+      'apply',
+      'turboslide-accounts',
+      '--remote',
+    ]);
+    const migratePreview = planFor(
+      'worker-migrate',
+      options('worker-migrate', { env: 'preview' }),
+      filesOf(),
+    );
+    expect(migratePreview[0].args).toEqual([
+      'd1',
+      'migrations',
+      'apply',
+      'turboslide-accounts-preview',
+      '--remote',
+      '--env',
+      'preview',
+    ]);
+    const migrateLocal = planFor(
+      'worker-migrate',
+      options('worker-migrate', { local: true }),
+      filesOf(),
+    );
+    expect(migrateLocal[0].args).toContain('--local');
+    expect(migrateLocal.some((s) => s.kind === 'note')).toBe(false);
+    const prod = planFor('worker-secrets', options('worker-secrets'), filesOf());
+    expect(prod.filter((s) => s.kind === 'wrangler').map((s) => s.args)).toEqual([
+      ['secret', 'put', 'TURBOSLIDE_ROOM_SECRET'],
+      ['secret', 'put', 'TURBOSLIDE_ROOM_BEARER'],
+    ]);
+    const preview = planFor(
+      'worker-secrets',
+      options('worker-secrets', { env: 'preview' }),
+      filesOf(),
+    );
+    expect(preview.filter((s) => s.kind === 'wrangler').map((s) => s.args)).toEqual([
+      ['secret', 'put', 'TURBOSLIDE_ROOM_SECRET', '--env', 'preview'],
+      ['secret', 'put', 'TURBOSLIDE_ROOM_BEARER', '--env', 'preview'],
+    ]);
+    expect(preview.find((s) => s.kind === 'note').text).toContain('vercel-bypass.env is absent');
+    writePrivateFile(FILES.bypass.name, `VERCEL_AUTOMATION_BYPASS_SECRET=${BYPASS}\n`);
+    const withBypass = planFor(
+      'worker-secrets',
+      options('worker-secrets', { env: 'preview' }),
+      filesOf(),
+    );
+    expect(withBypass.filter((s) => s.kind === 'wrangler').at(-1).args).toEqual([
+      'secret',
+      'put',
+      'VERCEL_AUTOMATION_BYPASS_SECRET',
+      '--env',
+      'preview',
+    ]);
   });
 });
 
 describe('execute', () => {
-  const options = {
-    subcommand: 'google',
-    dryRun: false,
-    scope: 'general-translation',
-    project: 'turboslide-gt',
-    environments: ['production'],
-    configDir: '',
-    adminEmails: null,
-    force: false,
-  };
+  const real = (sub, extra = {}) =>
+    options(sub, { dryRun: false, environments: ['production'], ...extra });
 
-  it('skips a present variable unless --force, and passes --force only then', () => {
-    const files = {
-      google: readSecretFile(join(config, FILES.google.name)),
-      mail: readSecretFile(join(config, 'none')),
-      auth: readSecretFile(join(config, 'none2')),
-    };
+  it('skips a present variable unless --force, passes --force only then, and omits --sensitive for a plain value', () => {
+    const files = filesOf();
     const calls = [];
     const lines = [];
     const vercel = (args, input) => {
@@ -321,18 +575,20 @@ describe('execute', () => {
       if (args[1] === 'ls')
         return {
           status: 0,
-          stdout: JSON.stringify({ envs: [{ key: 'DATABASE_URL' }, { key: 'GOOGLE_CLIENT_ID' }] }),
+          stdout: JSON.stringify({
+            envs: [{ key: 'TURBOSLIDE_ACCOUNTS' }, { key: 'GOOGLE_CLIENT_ID' }],
+          }),
           stderr: '',
         };
       return { status: 0, stdout: '', stderr: '' };
     };
-    const code = execute(planFor('google', options, files), options, files, {
-      out: (l) => lines.push(l),
-      vercel,
-      mint: () => 'x',
-      writeFile: () => {},
-      root: dir,
-    });
+    const o = real('google');
+    const code = execute(
+      planFor('google', o, files),
+      o,
+      files,
+      quietIo({ out: (l) => lines.push(l), vercel }),
+    );
     expect(code).toBe(0);
     const adds = calls.filter((c) => c.args[1] === 'add');
     expect(adds.map((c) => c.args[2])).toEqual(['GOOGLE_CLIENT_SECRET', 'TURBOSLIDE_ADMIN_EMAILS']);
@@ -344,81 +600,137 @@ describe('execute', () => {
     expect(lines.join('\n')).not.toContain(SECRET_KEY);
     expect(lines.join('\n')).not.toContain(SECRET_ID);
     const forced = [];
+    const f = real('google', { force: true });
     execute(
-      planFor('google', { ...options, force: true }, files),
-      { ...options, force: true },
+      planFor('google', f, files),
+      f,
       files,
-      {
-        out: () => {},
+      quietIo({
         vercel: (args, input) => {
           forced.push(args);
           return vercel(args, input);
         },
-        mint: () => 'x',
-        writeFile: () => {},
-        root: dir,
-      },
+      }),
     );
     expect(forced.find((a) => a[2] === 'GOOGLE_CLIENT_ID')).toContain('--force');
+    // the plain host of `do`
+    const doCalls = [];
+    const d = real('do');
+    const health = () => ({
+      status: 200,
+      json: { ok: true, realtime: 'on', commit: 'abc', appOrigin: 'https://www.turboslide.com' },
+    });
+    expect(
+      execute(
+        planFor('do', d, files),
+        d,
+        files,
+        quietIo({
+          vercel: (args, input) => {
+            doCalls.push({ args, input });
+            return args[1] === 'ls'
+              ? { status: 0, stdout: JSON.stringify({ envs: [] }), stderr: '' }
+              : { status: 0, stdout: '', stderr: '' };
+          },
+          fetch: health,
+        }),
+      ),
+    ).toBe(0);
+    const hostAdd = doCalls.find(
+      (c) => c.args[1] === 'add' && c.args[2] === 'TURBOSLIDE_ROOM_HOST',
+    );
+    expect(hostAdd.args).not.toContain('--sensitive');
+    expect(hostAdd.input).toBe('turboslide-realtime.sub.workers.dev');
+    const secretAdd = doCalls.find(
+      (c) => c.args[1] === 'add' && c.args[2] === 'TURBOSLIDE_ROOM_SECRET',
+    );
+    expect(secretAdd.args).toContain('--sensitive');
+    expect(secretAdd.input).toBe(ROOM_SECRET);
   });
 
-  it('stops with exit 1 when a required name is absent and names the reason', () => {
-    const files = {
-      google: readSecretFile(join(config, FILES.google.name)),
-      mail: readSecretFile(join(config, 'none')),
-      auth: readSecretFile(join(config, 'none2')),
-    };
+  it('do stops with exit 1 when /health is unreachable, not ok or unset, before any variable is set', () => {
+    const files = filesOf();
+    for (const fetch of [
+      () => {
+        throw new Error('fetch failed');
+      },
+      () => ({ status: 503, json: null }),
+      () => ({ status: 200, json: { ok: true, realtime: 'unset', commit: '', appOrigin: '' } }),
+    ]) {
+      const lines = [];
+      const o = real('do');
+      const vercelCalls = [];
+      const code = execute(
+        planFor('do', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => lines.push(l),
+          fetch,
+          vercel: (args) => {
+            vercelCalls.push(args);
+            return { status: 0, stdout: JSON.stringify({ envs: [] }), stderr: '' };
+          },
+        }),
+      );
+      expect(code).toBe(1);
+      expect(vercelCalls).toEqual([]);
+      expect(lines.at(-1)).toContain('/health');
+    }
+  });
+
+  it('stops with exit 1 when a required name is absent and names the step', () => {
+    const files = filesOf();
     const lines = [];
+    const o = real('database');
     const code = execute(
-      planFor('redis', { ...options, subcommand: 'redis' }, files),
-      { ...options, subcommand: 'redis' },
+      planFor('database', o, files),
+      o,
       files,
-      {
+      quietIo({
         out: (l) => lines.push(l),
         vercel: () => ({ status: 0, stdout: JSON.stringify({ envs: [] }), stderr: '' }),
-        mint: () => 'x',
-        writeFile: () => {},
-        root: dir,
-      },
+      }),
     );
     expect(code).toBe(1);
-    expect(lines.at(-1)).toContain('REDIS_URL absent');
-    expect(lines.at(-1)).toContain('Kevin installs');
+    expect(lines.at(-1)).toContain('TURBOSLIDE_ROOM_HOST, TURBOSLIDE_ROOM_BEARER absent');
+    expect(lines.at(-1)).toContain('run `do` first');
   });
 
   it('mints into the auth file once per environment, 600, and the expectation file follows flip and rollback', () => {
     const authPath = join(config, FILES.auth.name);
-    const files = {
-      google: readSecretFile(join(config, 'none')),
-      mail: readSecretFile(join(config, 'none2')),
-      auth: readSecretFile(authPath),
-    };
+    const files = filesOf();
     const written = [];
     const minted = ['a'.repeat(64), 'b'.repeat(64)];
     const vercel = (args) =>
       args[1] === 'ls'
         ? {
             status: 0,
-            stdout: JSON.stringify({ envs: [{ key: 'DATABASE_URL' }, { key: 'REDIS_URL' }] }),
+            stdout: JSON.stringify({
+              envs: [
+                { key: 'TURBOSLIDE_ROOM_HOST' },
+                { key: 'TURBOSLIDE_ROOM_SECRET' },
+                { key: 'TURBOSLIDE_ROOM_BEARER' },
+                { key: 'TURBOSLIDE_REALTIME' },
+              ],
+            }),
             stderr: '',
           }
         : { status: 0, stdout: '', stderr: '' };
-    const o = {
-      ...options,
-      subcommand: 'database',
-      environments: ['production', 'preview'],
-      configDir: config,
-    };
-    const code = execute(planFor('database', o, files), o, files, {
-      out: () => {},
-      vercel,
-      mint: () => minted.shift(),
-      writeFile: (p, t) => {
-        written.push(p);
-        writeFileSync(p, t, { mode: 0o600 });
-      },
-      root: dir,
-    });
+    const o = real('database', { environments: ['production', 'preview'] });
+    const code = execute(
+      planFor('database', o, files),
+      o,
+      files,
+      quietIo({
+        vercel,
+        mint: () => minted.shift(),
+        writeFile: (p, t) => {
+          written.push(p);
+          writeFileSync(p, t, { mode: 0o600 });
+        },
+      }),
+    );
     expect(code).toBe(0);
     expect(written).toEqual([authPath, authPath]);
     const text = readFileSync(authPath, 'utf8');
@@ -426,29 +738,139 @@ describe('execute', () => {
       `BETTER_AUTH_SECRET_PRODUCTION=${'a'.repeat(64)}\nBETTER_AUTH_SECRET_PREVIEW=${'b'.repeat(64)}\n`,
     );
     mkdirSync(join(dir, 'scripts', 'hosting'), { recursive: true });
-    const f = { ...options, subcommand: 'flip', environments: ['production'] };
+    const f = real('flip', { tier: 'do' });
+    const rms = [];
     expect(
-      execute(planFor('flip', f, files), f, files, {
-        out: () => {},
-        vercel,
-        mint: () => 'x',
-        writeFile: () => {},
-        root: dir,
-      }),
+      execute(
+        planFor('flip', f, files),
+        f,
+        files,
+        quietIo({
+          vercel: (args, input) => {
+            if (args[1] === 'rm') rms.push(args);
+            return vercel(args, input);
+          },
+        }),
+      ),
     ).toBe(0);
-    expect(readExpectation(dir)).toBe('redis');
-    const b = { ...options, subcommand: 'rollback', environments: ['production'] };
-    expect(
-      execute(planFor('rollback', b, files), b, files, {
-        out: () => {},
-        vercel,
-        mint: () => 'x',
-        writeFile: () => {},
-        root: dir,
-      }),
-    ).toBe(0);
+    expect(rms).toEqual([
+      ['env', 'rm', 'TURBOSLIDE_REALTIME', 'production', '--yes', '--scope', 'general-translation'],
+    ]);
+    expect(readExpectation(dir)).toBe('do');
+    const b = real('rollback');
+    expect(execute(planFor('rollback', b, files), b, files, quietIo({ vercel }))).toBe(0);
     expect(readExpectation(dir)).toBe('blob');
     expect(existsSync(join(dir, EXPECTATION_REL))).toBe(true);
+  });
+
+  it('drain reads /control/open under the bearer and flushes every open deck; the flag is posted and read back', () => {
+    const files = filesOf();
+    const requests = [];
+    const fetch = (url, init) => {
+      requests.push({
+        url,
+        method: init.method,
+        auth: init.headers.authorization,
+        body: init.body,
+      });
+      if (url.endsWith('/control/open'))
+        return { status: 200, json: { decks: ['deck-a', 'deck-b'] } };
+      if (url.endsWith('/flush')) return { status: 200, json: { ok: true } };
+      if (url.endsWith('/control/flags') && init.method === 'POST')
+        return { status: 200, json: { ok: true } };
+      if (url.endsWith('/control/flags')) return { status: 200, json: { realtime: 'off' } };
+      return { status: 404, json: null };
+    };
+    const lines = [];
+    const d = real('drain', { env: 'preview' });
+    expect(
+      execute(planFor('drain', d, files), d, files, quietIo({ out: (l) => lines.push(l), fetch })),
+    ).toBe(0);
+    expect(requests.map((r) => `${r.method} ${r.url}`)).toEqual([
+      'GET https://turboslide-realtime-preview.sub.workers.dev/control/open',
+      'POST https://turboslide-realtime-preview.sub.workers.dev/rooms/deck-a/flush',
+      'POST https://turboslide-realtime-preview.sub.workers.dev/rooms/deck-b/flush',
+    ]);
+    expect(requests.every((r) => r.auth === `Bearer ${ROOM_BEARER}`)).toBe(true);
+    expect(lines.at(-1)).toBe(
+      'preview: 2 of 2 open decks flushed on turboslide-realtime-preview.sub.workers.dev',
+    );
+    expect(lines.join('\n')).not.toContain(ROOM_BEARER);
+    requests.length = 0;
+    const g = real('do-flag', { flag: 'off' });
+    const flagLines = [];
+    expect(
+      execute(
+        planFor('do-flag', g, files),
+        g,
+        files,
+        quietIo({ out: (l) => flagLines.push(l), fetch }),
+      ),
+    ).toBe(0);
+    expect(requests[0]).toMatchObject({
+      method: 'POST',
+      url: 'https://turboslide-realtime.sub.workers.dev/control/flags',
+      body: '{"realtime":"off"}',
+    });
+    expect(flagLines.at(-1)).toContain('realtime flag off on turboslide-realtime.sub.workers.dev');
+    // a flush that fails reads exit 1 with the deck named
+    const failing = (url, init) =>
+      url.endsWith('/control/open')
+        ? { status: 200, json: ['deck-a'] }
+        : { status: 500, json: null, method: init.method };
+    const failLines = [];
+    expect(
+      execute(
+        planFor('drain', d, files),
+        d,
+        files,
+        quietIo({ out: (l) => failLines.push(l), fetch: failing }),
+      ),
+    ).toBe(1);
+    expect(failLines.at(-1)).toContain('failed: deck-a (500)');
+  });
+
+  it('worker-secrets hands the value to wrangler on stdin, in order, and a failed command reads exit 2', () => {
+    const files = filesOf();
+    const ran = [];
+    const o = real('worker-secrets', { env: 'preview' });
+    const lines = [];
+    expect(
+      execute(
+        planFor('worker-secrets', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => lines.push(l),
+          wrangler: (args, input) => {
+            ran.push({ args, input });
+            return { status: 0, stdout: '', stderr: '' };
+          },
+        }),
+      ),
+    ).toBe(0);
+    expect(ran.map((r) => [r.args.join(' '), r.input])).toEqual([
+      ['secret put TURBOSLIDE_ROOM_SECRET --env preview', ROOM_SECRET],
+      ['secret put TURBOSLIDE_ROOM_BEARER --env preview', ROOM_BEARER],
+    ]);
+    expect(lines.join('\n')).not.toContain(ROOM_SECRET);
+    expect(lines.join('\n')).not.toContain(ROOM_BEARER);
+    const failLines = [];
+    expect(
+      execute(
+        planFor('worker-secrets', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => failLines.push(l),
+          wrangler: () => ({ status: 1, stdout: '', stderr: `not logged in ${ROOM_SECRET}` }),
+        }),
+      ),
+    ).toBe(2);
+    expect(failLines.at(-1)).toContain(
+      'wrangler secret put TURBOSLIDE_ROOM_SECRET --env preview failed (exit 1)',
+    );
+    expect(failLines.at(-1)).not.toContain(ROOM_SECRET);
   });
 });
 
@@ -465,7 +887,7 @@ describe('the command', () => {
   });
 
   it('a real run passes the value on stdin, never on the command line, and prints no value', () => {
-    const r = runScript(['google'], ['DATABASE_URL']);
+    const r = runScript(['google'], ['TURBOSLIDE_ACCOUNTS']);
     expect(r.status).toBe(0);
     const log = calls();
     expect(log).toContain('argv: env ls production --json --scope general-translation');
@@ -483,12 +905,12 @@ describe('the command', () => {
     );
   });
 
-  it('refuses a real run from a root linked to another project and says so in a dry run', () => {
+  it('refuses a real Vercel run from a root linked to another project and says so in a dry run', () => {
     writeFileSync(
       join(linked, '.vercel', 'project.json'),
       JSON.stringify({ projectName: 'turboslide' }),
     );
-    const real = runScript(['google'], ['DATABASE_URL']);
+    const real = runScript(['google'], ['TURBOSLIDE_ACCOUNTS']);
     expect(real.status).toBe(2);
     expect(real.stdout).toContain('is turboslide, not turboslide-gt; refused');
     expect(calls()).toBe('');
@@ -497,23 +919,68 @@ describe('the command', () => {
     expect(dry.stdout).toContain('a real run would refuse');
   });
 
-  it('exits 1 when a Kevin step is absent and 2 on usage', () => {
-    expect(runScript(['redis'], []).status).toBe(1);
+  it('a Worker subcommand needs no linked project and runs the given wrangler with the account id, the value on stdin', () => {
+    writeFileSync(
+      join(linked, '.vercel', 'project.json'),
+      JSON.stringify({ projectName: 'other' }),
+    );
+    const wrangler = installFakeWrangler();
+    const r = runScript([
+      'worker-secrets',
+      '--env',
+      'preview',
+      '--wrangler',
+      wrangler,
+      '--worker-dir',
+      dir,
+    ]);
+    expect(r.status).toBe(0);
+    const log = calls();
+    expect(log).toContain('wrangler-argv: secret put TURBOSLIDE_ROOM_SECRET --env preview');
+    expect(log).toContain('wrangler-argv: secret put TURBOSLIDE_ROOM_BEARER --env preview');
+    expect(log).toContain(`wrangler-account: ${ACCOUNT_ID}`);
+    expect(log).toContain('wrangler-stdin-bytes: 64');
+    expect(log).not.toContain(ROOM_SECRET);
+    expect(r.stdout).not.toContain(ROOM_SECRET);
+    expect(r.stdout).toContain('ran wrangler secret put TURBOSLIDE_ROOM_SECRET --env preview');
+    expect(r.stdout).toContain('worker environment preview');
+    expect(VERCEL_SUBCOMMANDS).not.toContain('worker-secrets');
+    const migrate = runScript(['worker-migrate', '--dry-run']);
+    expect(migrate.status).toBe(0);
+    expect(migrate.stdout).toContain(
+      'would run wrangler d1 migrations apply turboslide-accounts --remote',
+    );
+    const missing = runScript(['worker-migrate', '--wrangler', join(dir, 'absent-wrangler')]);
+    expect(missing.status).toBe(2);
+    expect(missing.stdout).toContain('is absent');
+  });
+
+  it('exits 1 when a step is absent, 2 on usage and 2 on the retired subcommand', () => {
+    expect(runScript(['database'], []).status).toBe(1);
     const usage = runScript(['nothing']);
     expect(usage.status).toBe(2);
     expect(usage.stderr).toContain('unknown subcommand');
+    const retired = runScript(['redis']);
+    expect(retired.status).toBe(2);
+    expect(retired.stderr).toContain('retired');
+    expect(runScript(['flip', '--tier', 'redis', '--dry-run']).status).toBe(2);
   });
 
-  it('status lists the files with their modes and keys and the expectation', () => {
-    const r = runScript(['status'], ['TURBOSLIDE_REALTIME']);
+  it('status lists the names, the never set names, the files with their modes and keys and the expectation', () => {
+    const r = runScript(['status'], ['TURBOSLIDE_REALTIME', 'REDIS_URL']);
     expect(r.status).toBe(0);
-    expect(r.stdout).toContain('production: REDIS_URL absent');
+    expect(r.stdout).toContain('production: TURBOSLIDE_ROOM_HOST absent');
     expect(r.stdout).toContain('TURBOSLIDE_REALTIME present');
+    expect(r.stdout).toContain('production: REDIS_URL PRESENT; these names are never set');
     expect(r.stdout).toContain(
       'google-oauth.env: mode 600, keys GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET',
     );
+    expect(r.stdout).toContain(
+      'room.env: mode 600, keys TURBOSLIDE_ROOM_SECRET, TURBOSLIDE_ROOM_BEARER',
+    );
     expect(r.stdout).toContain('mail.env: absent');
     expect(r.stdout).toContain(`${EXPECTATION_REL}: realtime blob`);
+    expect(r.stdout).not.toContain(ROOM_SECRET);
   });
 });
 
@@ -521,26 +988,8 @@ describe('run', () => {
   it('reads the files once and hands execute the plan', () => {
     const lines = [];
     const code = run(
-      {
-        subcommand: 'mail',
-        dryRun: true,
-        scope: 's',
-        project: 'turboslide-gt',
-        cwd: linked,
-        environments: ['production'],
-        configDir: config,
-        adminEmails: null,
-        force: false,
-      },
-      {
-        out: (l) => lines.push(l),
-        vercel: () => {
-          throw new Error('never');
-        },
-        mint: () => 'x',
-        writeFile: () => {},
-        root: dir,
-      },
+      options('mail', { environments: ['production'], scope: 's' }),
+      quietIo({ out: (l) => lines.push(l) }),
     );
     expect(code).toBe(0);
     expect(lines[0]).toContain(

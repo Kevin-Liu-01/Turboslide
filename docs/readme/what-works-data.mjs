@@ -300,7 +300,8 @@ export const FEATURES = [
       '**Costs.** An open editor, a hidden tab, an editing session, two tabs on one deck and a show each make a bounded number of requests a minute, and the store calls a deck costs a minute are counted in every release run and stay under their ceilings.',
     shots: [],
   },
-  /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier; unparkable */
+  /* the realtime round (docs/REALTIME.md section 2) and its Cloudflare phase (docs/CLOUDFLARE.md 2.1):
+     two people on one slide over the do tier, the deck's Durable Object on the Worker; unparkable */
   {
     key: 'realtime',
     heading: 'Realtime',

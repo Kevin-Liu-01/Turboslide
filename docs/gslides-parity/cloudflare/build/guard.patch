@@ -1,0 +1,293 @@
+--- gt-follow.sh
++++ gt-follow.sh
+@@ -18,7 +18,20 @@
+ # green production smoke it writes gt-follow.last and the log line "deployed <sha> (exit 0)";
+ # (5) red: production stays, "held <sha>: ..." in the log, the
+ # sha in gt-follow.held so the loop skips it until main moves again (--retry <sha> clears it);
+-# (6) a deploy or check that errors is retried in 120 s, at most three times per sha, then held.
++# (6) a deploy or check that errors is retried in 120 s, at most three times per sha, then held;
++# (7, the Cloudflare phase of the realtime round, docs/CLOUDFLARE.md 5.6 and scripts/hosting/README.md
++# in the repository) the realtime Worker rides the same pass: after the Vercel preview deploy, a
++# push that touches the Worker's files (apps/realtime-worker/**, packages/realtime/src/room-core.ts
++# or frames.ts), or any push while the tree's scripts/hosting/production.json expects the `do`
++# tier, deploys the preview Worker turboslide-realtime-preview with the preview URL as its app
++# origin and reads /health for the sha; the three two browser realtime rows join the spec rows
++# only when the tree's matrix carries them, the tree expects `do` and the deployment's environment
++# names carry TURBOSLIDE_ROOM_HOST (read through `vercel env ls`, names only); on green the
++# production Worker turboslide-realtime deploys first and /health must answer the sha before the
++# Vercel production deploy; a tree that expects `do` is held before the production deploy while
++# TURBOSLIDE_ROOM_HOST is absent from the production environment names; on a red production smoke
++# the previous sha's Worker is redeployed beside the promote back. A docs-only push leaves the
++# Worker alone.
+ #
+ #   gt-follow.sh                       the loop (started detached, see README.md)
+ #   gt-follow.sh --check <origin>      the check alone against an origin, exit 0 green, 1 red, 2 error
+@@ -52,6 +65,19 @@
+ STANDING_ROWS="decks.file.open-list-search
+ fonts.table.takes-family"
+ SPEC_ROWS=decks.list.read,decks.list.open-title,share.dialog.open,share.copy-view-link,comments.reply,comments.resolve,present.keys.arrow-right,export.download.pdf-direct,export.download.pptx-direct
++# The realtime round's Cloudflare phase (docs/CLOUDFLARE.md 5.6; scripts/hosting/README.md "The
++# guard patch"): the three two browser rows join the spec rows only when the tree's matrix carries
++# them, the tree expects the `do` tier and the deployment's environment names carry
++# TURBOSLIDE_ROOM_HOST (spec_rows_for below); otherwise the log says they were skipped and why. The
++# ids are REALTIME.md section 2's, spelled as the matrix spells them.
++REALTIME_ROWS=realtime.title.two-typers,realtime.caret.within-300ms,realtime.join.chip-within-1s
++# The Worker (CLOUDFLARE.md 3.6.2): the app folder the wrangler commands run from, the paths whose
++# change deploys it, the variable that selects the `do` tier, and the account facts file (the
++# account id and the two hosts; mode 600; none of them a secret) that cf_env reads.
++WORKER_DIR=apps/realtime-worker
++WORKER_PATHS_RE='^apps/realtime-worker/|^packages/realtime/src/(room-core|frames)\.ts$'
++ROOM_HOST_VARIABLE=TURBOSLIDE_ROOM_HOST
++CF_ENV=$DIR/cloudflare.env
+ # A red row whose reason reads as timing is rerun once narrowed before the verdict.
+ TIMING_RE='timed out|timeout|within [0-9]|[0-9] ?ms|bound|exceeded|waiting for|after [0-9]+ ?s|load [0-9]'
+ export PATH="$HOME/.nvm/versions/node/v24.13.0/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+@@ -64,6 +90,153 @@
+ scrub() { grep -v -i 'token\|bearer\|authorization' | sed -e 's/eyJ[A-Za-z0-9_-]\{20,\}/<jwt>/g'; }
+ 
+ # ---------------------------------------------------------------------------------------------
++# the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md 5.6): the environment names, the
++# tree's tier expectation, the realtime rows' rule, the account facts and the Worker steps
++
++# The variable names of one environment of turboslide-gt, one per line, from `vercel env ls
++# <environment> --json` run in the worktree (the JSON carries no value for a sensitive or an
++# encrypted row; only `key` is read, so nothing here can print a value). Returns 2 when the CLI
++# failed or answered no list.
++env_names() {
++  local raw
++  raw=$(cd "$WT" && env -u VERCEL_OIDC_TOKEN vercel env ls "$1" --json --scope "$SCOPE" 2>/dev/null) || return 2
++  printf '%s' "$raw" | node -e 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>{let rows=null;try{const j=JSON.parse(t);rows=Array.isArray(j)?j:(j&&Array.isArray(j.envs)?j.envs:null);}catch{rows=null;}if(rows===null)process.exit(2);for(const r of rows)if(r&&typeof r.key==="string")console.log(r.key);});'
++}
++# 0 when the name is among the environment's variables, 1 when absent, 2 when the names could
++# not be read (an empty list reads as unreadable: every environment of the project carries rows).
++has_env_name() {
++  local names
++  names=$(env_names "$1") || return 2
++  [ -n "$names" ] || return 2
++  printf '%s\n' "$names" | grep -q -x -F -- "$2"
++}
++# What the checked out tree expects of production's realtime tier: the `realtime` word of
++# scripts/hosting/production.json (`blob`, `redis` or `do`), `blob` when the file is absent or
++# unreadable (the tier a deployment without a channel selects on its own, packages/realtime/src/select.ts).
++tree_expects() {
++  node -e 'const fs=require("fs");try{const j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));console.log(["blob","redis","do"].includes(j.realtime)?j.realtime:"blob");}catch{console.log("blob");}' "$WT/scripts/hosting/production.json"
++}
++# The spec rows for a check of an origin: SPEC_ROWS, plus REALTIME_ROWS when the tree's matrix
++# carries the first of them (by its quoted id), the tree expects `do` and the deployment's
++# environment (preview for a preview deployment, production for production itself) names
++# TURBOSLIDE_ROOM_HOST. Sets SPEC_ROWS_FOR (the rows) and ROWS_NOTE (the sentence for the log);
++# called directly, never in a command substitution, so both reach the caller.
++SPEC_ROWS_FOR=
++ROWS_NOTE=
++spec_rows_for() {
++  local origin=$1 environment=preview
++  [ "$origin" = "$PROD" ] && environment=production
++  SPEC_ROWS_FOR=$SPEC_ROWS
++  ROWS_NOTE=
++  if ! grep -q -F "\"${REALTIME_ROWS%%,*}\"" "$WT/docs/gslides-parity/focus/core-matrix.json" 2>/dev/null; then
++    ROWS_NOTE="realtime rows skipped: not in the tree's matrix"; return 0
++  fi
++  local expects; expects=$(tree_expects)
++  if [ "$expects" != do ]; then
++    ROWS_NOTE="realtime rows skipped: the tree expects the $expects tier (scripts/hosting/production.json)"; return 0
++  fi
++  has_env_name "$environment" "$ROOM_HOST_VARIABLE"
++  case $? in
++    0) ROWS_NOTE="realtime rows joined: the tree expects do and $ROOM_HOST_VARIABLE is among the $environment environment names"; SPEC_ROWS_FOR="$SPEC_ROWS,$REALTIME_ROWS" ;;
++    1) ROWS_NOTE="realtime rows skipped: $ROOM_HOST_VARIABLE absent from the $environment environment names" ;;
++    *) ROWS_NOTE="realtime rows skipped: the $environment environment names could not be read (vercel env ls)" ;;
++  esac
++  return 0
++}
++# The account facts of cloudflare.env (CLOUDFLARE_ACCOUNT_ID, TURBOSLIDE_ROOM_HOST and
++# TURBOSLIDE_ROOM_HOST_PREVIEW; none a secret) read into three shell variables, never exported;
++# the account id reaches the wrangler child alone. cf_host prints the Worker's hostname for an
++# environment, with the hosts of docs/CLOUDFLARE.md 3.1 when the file does not name them.
++CF_ACCOUNT_ID=
++CF_HOST_PRODUCTION=
++CF_HOST_PREVIEW=
++cf_env() {
++  [ -f "$CF_ENV" ] || return 0
++  local line k v
++  while IFS= read -r line || [ -n "$line" ]; do
++    case $line in ''|'#'*) continue ;; esac
++    k=${line%%=*}; v=${line#*=}; v=${v%\"}; v=${v#\"}
++    case $k in
++      CLOUDFLARE_ACCOUNT_ID) CF_ACCOUNT_ID=$v ;;
++      TURBOSLIDE_ROOM_HOST) CF_HOST_PRODUCTION=$v ;;
++      TURBOSLIDE_ROOM_HOST_PREVIEW) CF_HOST_PREVIEW=$v ;;
++    esac
++  done < "$CF_ENV"
++}
++cf_host() {
++  cf_env
++  if [ "$1" = preview ]; then echo "${CF_HOST_PREVIEW:-turboslide-realtime-preview.kk23907751.workers.dev}"; else echo "${CF_HOST_PRODUCTION:-turboslide-realtime.kk23907751.workers.dev}"; fi
++}
++# Whether a push changed the Worker's code: a path of WORKER_PATHS_RE between the last deployed
++# sha and this one. An empty or unknown base reads as touched (the conservative reading; docs_only
++# reads the same case as a whole check).
++worker_touched() {
++  local base=$1 sha=$2
++  [ -n "$base" ] || return 0
++  git -C "$WT" cat-file -e "$base^{commit}" 2>/dev/null || return 0
++  git -C "$WT" diff --name-only "$base" "$sha" 2>/dev/null | grep -q -E "$WORKER_PATHS_RE"
++}
++# One Worker deploy: $1 environment (preview|production), $2 sha, $3 the app origin for the
++# preview (empty for production, whose origin is fixed in wrangler.jsonc), $4 the output file.
++# Runs the workspace's wrangler through pnpm from the worktree's apps/realtime-worker (never a
++# global one) with the account id in the child's environment and the output scrubbed; the --var
++# pairs are the sha and, on the preview, the app origin (docs/CLOUDFLARE.md 5.6 item 1); the
++# production deploy passes --env "" to name the top level environment on purpose (wrangler warns
++# otherwise). Sets WORKER_NOTE; 0 deployed, 2 error (wrangler absent from the worktree's
++# node_modules, or the deploy failed).
++WORKER_NOTE=
++worker_deploy() {
++  local environment=$1 sha=$2 origin=$3 out=$4
++  local dir=$WT/$WORKER_DIR
++  if [ ! -x "$dir/node_modules/.bin/wrangler" ]; then
++    WORKER_NOTE="wrangler is not installed in $dir (node_modules/.bin/wrangler); run pnpm install --frozen-lockfile in $WT once, the Worker's dependencies are in the lockfile"; return 2
++  fi
++  cf_env
++  local envflag=('--env' '') vars=('--var' "TURBOSLIDE_BUILD_COMMIT:$sha") envp=()
++  [ "$environment" = preview ] && envflag=('--env' 'preview')
++  [ -n "$origin" ] && vars+=('--var' "TURBOSLIDE_APP_ORIGIN:$origin")
++  [ -n "$CF_ACCOUNT_ID" ] && envp=("CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID")
++  (cd "$dir" && env -u VERCEL_OIDC_TOKEN "${envp[@]}" pnpm exec wrangler deploy "${envflag[@]}" "${vars[@]}") > "$out" 2>&1
++  local code=$?
++  if [ $code -ne 0 ]; then
++    WORKER_NOTE="wrangler deploy ${envflag[*]} for $sha exit $code: $(grep -v '^$' "$out" | scrub | tail -2 | tr '\n' ' ' | cut -c1-240)"; return 2
++  fi
++  WORKER_NOTE="wrangler deploy ${envflag[*]} for $sha: $(grep -E 'Deployed|Version ID|Current Version' "$out" | scrub | tr '\n' ' ' | cut -c1-200)"
++  return 0
++}
++# GET https://<host>/health with a 10 s deadline: 0 when ok is true, commit equals the sha and,
++# when $3 is given, appOrigin equals it; 1 on a mismatch, 2 when unreachable or not JSON. Sets
++# WORKER_HEALTH to the reading. Three tries 10 s apart, since a deploy propagates.
++WORKER_HEALTH=
++worker_health() {
++  local host=$1 sha=$2 origin=$3 n=0 body code
++  while :; do
++    body=$(curl -s -S --max-time 10 "https://$host/health" 2>&1)
++    WORKER_HEALTH=$(printf '%s' "$body" | node -e 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>{let j;try{j=JSON.parse(t);}catch{console.log("unreachable: "+t.replace(/\s+/g," ").slice(0,160));process.exit(2);}const want=process.argv[1],origin=process.argv[2];console.log(`/health ok ${j.ok} commit ${j.commit||"(empty)"} realtime ${j.realtime} appOrigin ${j.appOrigin||"(empty)"}`);if(j.ok!==true||j.commit!==want||(origin&&j.appOrigin!==origin))process.exit(1);});' "$sha" "$origin")
++    code=$?
++    [ $code -eq 0 ] && return 0
++    n=$((n + 1)); [ $n -ge 3 ] && return $code
++    sleep 10
++  done
++}
++# The previous sha's Worker redeployed to production (docs/CLOUDFLARE.md 5.6 item 3): the worktree
++# is checked out at $1 (the last deployed sha), the Worker deployed with that sha's stamp and
++# /health read, then the worktree checked out at $2 again. Prints one sentence for the log.
++worker_rollback() {
++  local prev=$1 cur=$2 result
++  if [ -z "$prev" ]; then echo "no previous sha in gt-follow.last; the Worker stays at $cur"; return 1; fi
++  if ! git -C "$WT" checkout -q --detach "$prev" 2>>"$LOG"; then echo "checkout of $prev for the Worker rollback failed; the Worker stays at $cur"; return 1; fi
++  if worker_deploy production "$prev" "" "$GUARD/rollback-worker-$(date -u +%Y%m%dT%H%M%SZ)-${prev:0:8}.out"; then
++    worker_health "$(cf_host production)" "$prev" ""
++    result="rolled the Worker back to $prev ($WORKER_HEALTH)"
++  else
++    result="the Worker rollback to $prev failed: $WORKER_NOTE"
++  fi
++  git -C "$WT" checkout -q --detach "$cur" 2>>"$LOG"
++  echo "$result"
++}
++
++# ---------------------------------------------------------------------------------------------
+ # the check: CHECK_REASON and CHECK_NUMBERS are set for the caller; the return is 0 green, 1 red,
+ # 2 error (a reading that says nothing about the build: the CLI's fetch failed, 401 on the
+ # preview, a driver that wrote no result)
+@@ -248,9 +421,12 @@
+     if [ $w2 -eq 0 ]; then w=0; walkRed=; else walkRed="$walkRed (red once: $(echo "$walkRed" | cut -c1-120); rerun: $GATE_RED)"; [ $w2 -eq 2 ] && w=2; fi
+   fi
+   if [ $w -eq 2 ]; then CHECK_REASON="$GATE_RED"; CHECK_NUMBERS="$smokeLine; $walkLine"; return 2; fi
+-  # 3. the spec rows
+-  run_gate "$origin" "$oidc" specs "$SPEC_ROWS" "$out/specs" "$out/specs.json" "$parked"
+-  local p=$? specLine="specs $GATE_COUNTS in ${GATE_SECONDS}s"
++  # 3. the spec rows (the realtime rows join by spec_rows_for's rule; its note goes to the log
++  # and rides the numbers line)
++  spec_rows_for "$origin"
++  [ -n "$ROWS_NOTE" ] && log "$ROWS_NOTE ($origin)"
++  run_gate "$origin" "$oidc" specs "$SPEC_ROWS_FOR" "$out/specs" "$out/specs.json" "$parked"
++  local p=$? specLine="specs $GATE_COUNTS in ${GATE_SECONDS}s${ROWS_NOTE:+ ($ROWS_NOTE)}"
+   local specRed="$GATE_RED" specIds="$GATE_IDS" specTiming=$GATE_TIMING
+   if [ $p -eq 1 ] && [ $specTiming -eq 1 ] && [ -n "$specIds" ]; then
+     run_gate "$origin" "$oidc" specs "$specIds" "$out/specs-rerun" "$out/specs-rerun.json" "$parked"
+@@ -321,6 +497,22 @@
+   fi
+   CHECK_SMOKE_ONLY=
+   if docs_only "$(cat "$LAST" 2>/dev/null)" "$sha"; then CHECK_SMOKE_ONLY=1; log "docs-only push $sha against $(cut -c1-8 "$LAST" 2>/dev/null): the smoke alone"; fi
++  # the Worker (docs/CLOUDFLARE.md 5.6 item 1): the preview Worker follows the push with the
++  # preview URL as its app origin when the tree expects the do tier or the push touches the
++  # Worker's files; /health must answer the sha and that origin before a row runs; a docs-only
++  # push leaves the Worker alone
++  WORKER_PASS=
++  local expects; expects=$(tree_expects)
++  if [ -z "$CHECK_SMOKE_ONLY" ] && { [ "$expects" = do ] || worker_touched "$(cat "$LAST" 2>/dev/null)" "$sha"; }; then
++    WORKER_PASS=1
++    if ! worker_deploy preview "$sha" "$url" "$GUARD/$tag-worker-preview.out"; then
++      PASS_NOTE="the preview Worker deploy for $sha failed: $WORKER_NOTE"; return 2
++    fi
++    if ! worker_health "$(cf_host preview)" "$sha" "$url"; then
++      PASS_NOTE="the preview Worker's /health did not answer $short with appOrigin $url: $WORKER_HEALTH"; return 2
++    fi
++    log "deployed preview Worker $(cf_host preview) for $sha ($WORKER_HEALTH)"
++  fi
+   check "$url" "$tag"
+   local c=$?
+   if [ $c -eq 2 ]; then PASS_NOTE="check errored on $url: $CHECK_REASON"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2; fi
+@@ -333,6 +525,35 @@
+   # production read commit null (241c1df1 held on 2026-10-01 04:59Z after a green check); the
+   # production deploy carries the stamp, aliases on completion, and the production smoke below
+   # still rolls back to the previous deployment on red
++  # the Cloudflare phase (docs/CLOUDFLARE.md 5.6 items 2, 4 and 5): a tree that expects the do
++  # tier is not deployed to production while TURBOSLIDE_ROOM_HOST is absent from the production
++  # environment names (the deployment would select blob on its own and serve a tier the tree
++  # does not describe; held until the orchestrator's step 14 lands, then --retry <sha>); then
++  # the production Worker deploys before the app, since its app origin is fixed and a newer Worker
++  # verifies an older app's tickets, and /health must answer the sha, else the previous sha's
++  # Worker is put back and the pass errors
++  if [ "$expects" = do ]; then
++    has_env_name production "$ROOM_HOST_VARIABLE"
++    local hostPresence=$?
++    if [ $hostPresence -eq 2 ]; then
++      PASS_NOTE="could not read the production environment names (vercel env ls) for the $ROOM_HOST_VARIABLE check before the production deploy"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2
++    fi
++    if [ $hostPresence -eq 1 ]; then
++      PASS_NOTE="the tree expects the do tier (scripts/hosting/production.json) and $ROOM_HOST_VARIABLE is absent from the production environment names; nothing deployed to production"; PASS_NUMBERS="$CHECK_NUMBERS"; PASS_URL=$url
++      return 1
++    fi
++    log "$ROOM_HOST_VARIABLE is among the production environment names and the tree expects the do tier; deploying $sha to production"
++  fi
++  if [ -n "$WORKER_PASS" ]; then
++    if ! worker_deploy production "$sha" "" "$GUARD/$tag-worker-production.out"; then
++      PASS_NOTE="the production Worker deploy for $sha failed: $WORKER_NOTE"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2
++    fi
++    if ! worker_health "$(cf_host production)" "$sha" ""; then
++      local wb; wb=$(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")
++      PASS_NOTE="the production Worker's /health did not answer $short: $WORKER_HEALTH; $wb"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2
++    fi
++    log "deployed Worker $(cf_host production) for $sha ($WORKER_HEALTH)"
++  fi
+   local pout
+   pout=$(cd "$WT" && env -u VERCEL_OIDC_TOKEN vercel deploy --prod --yes --non-interactive --archive=tgz --scope "$SCOPE" -e "TURBOSLIDE_BUILD_COMMIT=$sha" --build-env "TURBOSLIDE_BUILD_COMMIT=$sha" 2>&1)
+   code=$?
+@@ -357,7 +578,9 @@
+     back=$(cd "$WT" && env -u VERCEL_OIDC_TOKEN vercel promote "$prev" --scope "$SCOPE" --yes 2>&1 | scrub | grep -v '^$' | tail -1 | cut -c1-160)
+     sleep 20
+     local now; now=$(cd "$WT" && vercel inspect "$PROD" --scope "$SCOPE" 2>&1 | awk '$1=="url"{print $2}')
+-    PASS_NOTE="production smoke red after the promote of $url (production deployment $live): ${SMOKE_RED:-$SMOKE_RED}; promoted $prev back ($back); $PROD now serves ${now:-unknown}"
++    local wb=
++    [ -n "$WORKER_PASS" ] && wb="; $(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")"
++    PASS_NOTE="production smoke red after the promote of $url (production deployment $live): ${SMOKE_RED:-$SMOKE_RED}; promoted $prev back ($back); $PROD now serves ${now:-unknown}$wb"
+     PASS_NUMBERS="$CHECK_NUMBERS; $prodLine"; PASS_URL=$url
+     return 1
+   fi
+@@ -425,7 +648,7 @@
+   *) echo "usage: $0 [--check <origin> | --once <sha> | --retry <sha>]"; exit 2 ;;
+ esac
+ 
+-log "guard started (pid $$): smoke standing rows [$STANDING_SMOKE]; gate standing rows [$(echo "$STANDING_ROWS" | tr '\n' ' ')]; walk areas $WALK_AREAS; spec rows $SPEC_ROWS; poll 120 s"
++log "guard started (pid $$): smoke standing rows [$STANDING_SMOKE]; gate standing rows [$(echo "$STANDING_ROWS" | tr '\n' ' ')]; walk areas $WALK_AREAS; spec rows $SPEC_ROWS; realtime rows $REALTIME_ROWS when the matrix carries them, the tree expects do and $ROOM_HOST_VARIABLE is among the environment names; the Worker $WORKER_DIR deployed per push when the tree expects do or the push touches $WORKER_PATHS_RE; poll 120 s"
+ while true; do
+   if git -C "$WT" fetch -q origin 2>>"$LOG"; then
+     sha=$(git -C "$WT" rev-parse origin/main 2>/dev/null)

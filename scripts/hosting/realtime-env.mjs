@@ -1,41 +1,61 @@
 #!/usr/bin/env node
-// The production variables of the realtime round (docs/REALTIME.md 3.7, 3.8 and 4.5), set in
-// the order of 4.5 as subcommands, each reading its values from a 600 file under
-// ~/.config/turboslide/ and setting them with `vercel env add <NAME> <environment> --sensitive`
-// with the value on stdin. Nothing here prints a value: the output names variables and
-// environments, and the Vercel CLI's own output is scrubbed of every value it was given before a
-// line of it is shown. `--dry-run` prints what the command would read, mint, set and remove and
-// never runs `vercel` (the realtime round runs the dry run alone; an env command on a Vercel
-// project is Kevin's step, REALTIME.md 4.5).
+// The hosting setup of the realtime round's Cloudflare phase (docs/CLOUDFLARE.md 3.6.1, 3.7,
+// 3.8, 4.4 and section 6), as subcommands. The Vercel side sets variables on the General
+// Translation team's project turboslide-gt with `vercel env add <NAME> <environment> [--sensitive]`
+// and the value on stdin; the Worker side runs the workspace's wrangler from apps/realtime-worker
+// with a secret's value on stdin, or talks to the Worker's control routes under the room bearer.
+// Every value comes from a 600 file under ~/.config/turboslide/ and is printed nowhere: the output
+// names variables, environments, hosts and deck ids, and the CLIs' own output is scrubbed of every
+// value read before a line of it is shown. `--dry-run` prints what a subcommand would read, mint,
+// set, remove, post or run and makes no call (no vercel, no wrangler, no network).
 //
 //   node scripts/hosting/realtime-env.mjs <subcommand> [--dry-run] [--scope <team>]
 //     [--project <name>] [--cwd <linked root>] [--environments production,preview]
-//     [--config-dir <dir>] [--admin-emails <a,b>] [--force]
+//     [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview]
+//     [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>]
 //
-//   status     the expected names per environment (present or absent), the 600 files and their
-//              keys, the tree's tier expectation; sets nothing
-//   redis      4.5 step 1: requires REDIS_URL on every environment (Kevin's Upstash install);
-//              sets nothing
-//   database   4.5 step 2: requires DATABASE_URL (Kevin's Neon install); mints BETTER_AUTH_SECRET
-//              per environment into better-auth.env with `openssl rand -hex 32` when absent and
-//              sets it
-//   google     4.5 step 4: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET from google-oauth.env, and
-//              TURBOSLIDE_ADMIN_EMAILS, on every environment
-//   mail       4.5 step 5: with mail.env (RESEND_API_KEY, TURBOSLIDE_MAIL_FROM) sets both, removes
-//              the forced TURBOSLIDE_MAIL on production and sets TURBOSLIDE_MAIL=capture on preview;
-//              without the file TURBOSLIDE_MAIL stays off (REALTIME.md 7.7) and nothing is set
-//   flip       4.5 step 7 and 3.7: requires REDIS_URL, removes the forced TURBOSLIDE_REALTIME row
-//              (so `REDIS_URL` selects redis, select.ts 79; default 7.9) and writes the tree's
-//              expectation scripts/hosting/production.json to redis for the guard
-//   rollback   3.8: sets TURBOSLIDE_REALTIME=blob (--force) and writes the expectation to blob
+//   status          the expected names per environment (present or absent), the names that must
+//                   never be set (REDIS_URL, DATABASE_URL, the Upstash pair; CLOUDFLARE.md 4.4), the
+//                   600 files and their keys, the tree's tier expectation; sets nothing
+//   do              section 6 step 14: reads /health on each environment's Worker, then sets
+//                   TURBOSLIDE_ROOM_HOST (plain, from cloudflare.env), TURBOSLIDE_ROOM_SECRET and
+//                   TURBOSLIDE_ROOM_BEARER (sensitive, from room.env) on production and preview
+//   database        4.4 step 2: requires the host and the bearer on each environment (run `do`
+//                   first); mints BETTER_AUTH_SECRET per environment into better-auth.env with
+//                   `openssl rand -hex 32` when absent; sets TURBOSLIDE_ACCOUNTS=d1 (plain) and
+//                   BETTER_AUTH_SECRET (sensitive)
+//   google          4.4 step 4: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET from google-oauth.env, and
+//                   TURBOSLIDE_ADMIN_EMAILS, on every environment; requires TURBOSLIDE_ACCOUNTS
+//   mail            4.4 step 5: with mail.env (RESEND_API_KEY, TURBOSLIDE_MAIL_FROM) sets both, removes
+//                   the forced TURBOSLIDE_MAIL on production and sets TURBOSLIDE_MAIL=capture on
+//                   preview; without the file TURBOSLIDE_MAIL stays off (REALTIME.md 7.7)
+//   flip --tier do  3.7 item 4: requires the three room variables on each environment, removes the
+//                   forced TURBOSLIDE_REALTIME row (so TURBOSLIDE_ROOM_HOST selects do, select.ts;
+//                   REALTIME.md default 7.9) and writes scripts/hosting/production.json to do.
+//                   `--tier redis` is refused: the redis tier stays in the tree and is never
+//                   deployed (CLOUDFLARE.md 5.1)
+//   rollback        3.8 item 2: sets TURBOSLIDE_REALTIME=blob (--force) and writes the expectation to
+//                   blob; run `drain` first so no acknowledged entry is left in an object
+//   drain           3.8 item 2: GET /control/open on the Worker and POST /rooms/<id>/flush per deck
+//   do-flag on|off  3.8 item 1: POST /control/flags { realtime } on the Worker, then reads it back
+//   worker-migrate  3.6.2: `wrangler d1 migrations apply <database> --remote` (--local for a
+//                   checkout's wrangler dev; --env preview for the preview database)
+//   worker-secrets  3.6.2 and section 6 step 11: pipes TURBOSLIDE_ROOM_SECRET and
+//                   TURBOSLIDE_ROOM_BEARER from room.env into `wrangler secret put <NAME>` one at a
+//                   time (--env preview for the preview Worker, which also takes
+//                   VERCEL_AUTOMATION_BYPASS_SECRET from vercel-bypass.env when the file exists)
 //
-// Rules. The linked project of `--cwd` (its .vercel/project.json) must be `--project`
-// (turboslide-gt by default), else a real run refuses; a dry run says so and goes on. A 600 file
-// is read only when its mode lets nobody else read it ((mode & 0o077) is zero); a looser mode is
-// refused with the chmod to run. A variable already present on an environment is skipped unless
-// `--force` (rotation is docs/security.md section 9's runbook). Exit 0 when done or nothing to
-// do, 1 when a precondition is absent (a Kevin step named in the output), 2 on usage or a refusal.
-// Node only; no dependency. Tested by realtime-env.test.mjs against a fake `vercel` on PATH.
+// Rules. The Vercel subcommands run from a root whose linked project (.vercel/project.json) is
+// `--project` (turboslide-gt by default), else a real run refuses; a dry run says so and goes on.
+// A 600 file is read only when its mode lets nobody else read it ((mode & 0o077) is zero); a
+// looser mode is refused with the chmod to run. A variable already present on an environment is
+// skipped unless `--force` (rotation is docs/security.md section 12's runbook). The Worker
+// subcommands use the workspace's wrangler (apps/realtime-worker/node_modules/.bin/wrangler, or
+// `--wrangler`) with CLOUDFLARE_ACCOUNT_ID from cloudflare.env in the child's environment; a remote
+// wrangler command is the integrator's (preview) and the ship step's (production) by the round's
+// rules. Exit 0 when done or nothing to do, 1 when a precondition is absent (a step named in the
+// output), 2 on usage or a refusal. Node only; no dependency. Tested by realtime-env.test.mjs
+// against a fake `vercel` on PATH, a fake wrangler and a fake fetch.
 import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -47,23 +67,60 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(here, '..', '..');
 /** The tree's expectation of production's realtime tier, read by the guard before a production deploy. */
 export const EXPECTATION_REL = 'scripts/hosting/production.json';
+/** The Worker app the wrangler commands run from (docs/CLOUDFLARE.md 3.6.2). */
+export const WORKER_DIR_REL = 'apps/realtime-worker';
 
 export const SUBCOMMANDS = Object.freeze([
   'status',
-  'redis',
+  'do',
+  'database',
+  'google',
+  'mail',
+  'flip',
+  'rollback',
+  'drain',
+  'do-flag',
+  'worker-migrate',
+  'worker-secrets',
+]);
+/** The subcommands that touch the Vercel project and need the linked root. */
+export const VERCEL_SUBCOMMANDS = Object.freeze([
+  'status',
+  'do',
   'database',
   'google',
   'mail',
   'flip',
   'rollback',
 ]);
+/** Subcommands of the first realtime round that this phase retired, with the reason the output gives. */
+export const RETIRED = Object.freeze({
+  redis:
+    'the redis tier stays in the tree and is never deployed (docs/CLOUDFLARE.md 5.1); REDIS_URL and the Upstash pair are never set on either project (4.4). The channel is the Worker: run `do`, then `database`, then `flip --tier do`',
+});
 export const ENVIRONMENTS = Object.freeze(['production', 'preview']);
+/** The realtime tiers the expectation file may name (packages/realtime/src/channel.ts REALTIME_TIERS less memory). */
+export const TIERS = Object.freeze(['blob', 'redis', 'do']);
 export const DEFAULT_PROJECT = 'turboslide-gt';
 export const DEFAULT_SCOPE = 'general-translation';
 export const DEFAULT_ADMIN_EMAILS = 'kevin@generaltranslation.com';
 export const DEFAULT_CONFIG_DIR = join(homedir(), '.config', 'turboslide');
+/** The Worker hosts when cloudflare.env does not name them (docs/CLOUDFLARE.md 3.1; the account's subdomain). */
+export const DEFAULT_ROOM_HOSTS = Object.freeze({
+  production: 'turboslide-realtime.kk23907751.workers.dev',
+  preview: 'turboslide-realtime-preview.kk23907751.workers.dev',
+});
+/** The D1 database names (docs/CLOUDFLARE.md 3.6.2, section 6 step 9). */
+export const DEFAULT_DATABASES = Object.freeze({
+  production: 'turboslide-accounts',
+  preview: 'turboslide-accounts-preview',
+});
 
-/** The 600 files under the config folder and the keys each may carry. */
+/**
+ * The files under the config folder and the keys each may carry. `public` marks a file whose
+ * values are account facts and not secrets (the Cloudflare account id, the hosts, the D1 ids);
+ * they are still printed only where the output names a host or a database.
+ */
 export const FILES = Object.freeze({
   google: {
     name: 'google-oauth.env',
@@ -74,14 +131,30 @@ export const FILES = Object.freeze({
     name: 'better-auth.env',
     keys: ['BETTER_AUTH_SECRET_PRODUCTION', 'BETTER_AUTH_SECRET_PREVIEW'],
   },
+  room: { name: 'room.env', keys: ['TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_ROOM_BEARER'] },
+  bypass: { name: 'vercel-bypass.env', keys: ['VERCEL_AUTOMATION_BYPASS_SECRET'] },
+  cloudflare: {
+    name: 'cloudflare.env',
+    public: true,
+    keys: [
+      'CLOUDFLARE_ACCOUNT_ID',
+      'CLOUDFLARE_WORKERS_SUBDOMAIN',
+      'D1_ACCOUNTS_NAME',
+      'D1_ACCOUNTS_ID',
+      'D1_ACCOUNTS_PREVIEW_NAME',
+      'D1_ACCOUNTS_PREVIEW_ID',
+      'TURBOSLIDE_ROOM_HOST',
+      'TURBOSLIDE_ROOM_HOST_PREVIEW',
+    ],
+  },
 });
 
-/** The names `status` reports per environment, in the order of REALTIME.md 4.5. */
+/** The names `status` reports per environment, in the order of CLOUDFLARE.md 4.4 and section 6. */
 export const EXPECTED_NAMES = Object.freeze([
-  'REDIS_URL',
-  'UPSTASH_REDIS_REST_URL',
-  'UPSTASH_REDIS_REST_TOKEN',
-  'DATABASE_URL',
+  'TURBOSLIDE_ROOM_HOST',
+  'TURBOSLIDE_ROOM_SECRET',
+  'TURBOSLIDE_ROOM_BEARER',
+  'TURBOSLIDE_ACCOUNTS',
   'BETTER_AUTH_SECRET',
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
@@ -91,14 +164,28 @@ export const EXPECTED_NAMES = Object.freeze([
   'TURBOSLIDE_MAIL',
   'TURBOSLIDE_REALTIME',
 ]);
+/** The names that must never be set on either project (CLOUDFLARE.md 4.4): `status` reports them apart. */
+export const NEVER_NAMES = Object.freeze([
+  'REDIS_URL',
+  'UPSTASH_REDIS_REST_URL',
+  'UPSTASH_REDIS_REST_TOKEN',
+  'DATABASE_URL',
+]);
+/** The three variables the `do` tier needs on a Vercel environment (packages/realtime/src/select.ts; CLOUDFLARE.md 3.6.1). */
+export const ROOM_NAMES = Object.freeze([
+  'TURBOSLIDE_ROOM_HOST',
+  'TURBOSLIDE_ROOM_SECRET',
+  'TURBOSLIDE_ROOM_BEARER',
+]);
 
-const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force]`;
+const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [on|off for do-flag] [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview] [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>]`;
 
 export class UsageError extends Error {}
 
 export function parseArgs(argv) {
   const out = {
     subcommand: null,
+    flag: null,
     dryRun: false,
     scope: DEFAULT_SCOPE,
     project: DEFAULT_PROJECT,
@@ -107,6 +194,12 @@ export function parseArgs(argv) {
     configDir: DEFAULT_CONFIG_DIR,
     adminEmails: null,
     force: false,
+    tier: null,
+    env: 'production',
+    local: false,
+    host: null,
+    wrangler: null,
+    workerDir: null,
     help: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
@@ -118,13 +211,25 @@ export function parseArgs(argv) {
     };
     if (arg === '--dry-run') out.dryRun = true;
     else if (arg === '--force') out.force = true;
+    else if (arg === '--local') out.local = true;
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (arg === '--scope') out.scope = value();
     else if (arg === '--project') out.project = value();
     else if (arg === '--cwd') out.cwd = resolve(value());
     else if (arg === '--config-dir') out.configDir = resolve(value());
     else if (arg === '--admin-emails') out.adminEmails = value();
-    else if (arg === '--environments') {
+    else if (arg === '--host') out.host = value();
+    else if (arg === '--wrangler') out.wrangler = resolve(value());
+    else if (arg === '--worker-dir') out.workerDir = resolve(value());
+    else if (arg === '--tier') {
+      out.tier = value();
+      if (!TIERS.includes(out.tier))
+        throw new UsageError(`--tier takes one of ${TIERS.join(', ')}, not ${out.tier}`);
+    } else if (arg === '--env') {
+      out.env = value();
+      if (!ENVIRONMENTS.includes(out.env))
+        throw new UsageError(`--env takes ${ENVIRONMENTS.join(' or ')}, not ${out.env}`);
+    } else if (arg === '--environments') {
       out.environments = value()
         .split(',')
         .map((s) => s.trim())
@@ -135,11 +240,19 @@ export function parseArgs(argv) {
       if (out.environments.length === 0) throw new UsageError(`--environments wants a list`);
     } else if (arg.startsWith('-')) throw new UsageError(`unknown argument ${arg}\n${USAGE}`);
     else if (out.subcommand === null) {
+      if (Object.hasOwn(RETIRED, arg))
+        throw new UsageError(`the subcommand ${arg} is retired: ${RETIRED[arg]}`);
       if (!SUBCOMMANDS.includes(arg)) throw new UsageError(`unknown subcommand ${arg}\n${USAGE}`);
       out.subcommand = arg;
+    } else if (out.subcommand === 'do-flag' && out.flag === null) {
+      if (arg !== 'on' && arg !== 'off')
+        throw new UsageError(`do-flag takes on or off, not ${arg}`);
+      out.flag = arg;
     } else throw new UsageError(`one subcommand at a time\n${USAGE}`);
   }
   if (!out.help && out.subcommand === null) throw new UsageError(USAGE);
+  if (out.subcommand === 'do-flag' && out.flag === null)
+    throw new UsageError(`do-flag wants on or off\n${USAGE}`);
   return out;
 }
 
@@ -217,17 +330,18 @@ export function scrub(text, values) {
   return out.replace(/eyJ[A-Za-z0-9_-]{20,}/g, '<jwt>');
 }
 
-/** The tree's expectation file: `{ realtime: 'blob' | 'redis' }`; absent reads as blob. */
+/** The tree's expectation file: `{ realtime: 'blob' | 'redis' | 'do' }`; absent or unknown reads as blob. */
 export function readExpectation(root = ROOT) {
   try {
     const j = JSON.parse(readFileSync(join(root, EXPECTATION_REL), 'utf8'));
-    return j.realtime === 'redis' ? 'redis' : 'blob';
+    return TIERS.includes(j.realtime) ? j.realtime : 'blob';
   } catch {
     return 'blob';
   }
 }
 
 export function writeExpectation(realtime, root = ROOT) {
+  if (!TIERS.includes(realtime)) throw new RangeError(`no tier ${realtime}`);
   const path = join(root, EXPECTATION_REL);
   const current = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
   const next = { ...current, realtime };
@@ -235,17 +349,45 @@ export function writeExpectation(realtime, root = ROOT) {
   return path;
 }
 
+/** The Worker host for an environment: `--host`, else cloudflare.env's row, else the default. */
+export function roomHostFor(environment, options, files) {
+  if (options.host) return options.host;
+  const key = environment === 'preview' ? 'TURBOSLIDE_ROOM_HOST_PREVIEW' : 'TURBOSLIDE_ROOM_HOST';
+  return files.cloudflare.values.get(key) ?? DEFAULT_ROOM_HOSTS[environment];
+}
+
+/** The D1 database name for an environment: cloudflare.env's row, else the default. */
+export function databaseFor(environment, files) {
+  const key = environment === 'preview' ? 'D1_ACCOUNTS_PREVIEW_NAME' : 'D1_ACCOUNTS_NAME';
+  return files.cloudflare.values.get(key) ?? DEFAULT_DATABASES[environment];
+}
+
 // ---------------------------------------------------------------------------------------------
 // the plan: one list of steps per subcommand, executed or printed
 
 const step = (kind, fields) => ({ kind, ...fields });
 
+const roomFileMissing = (room) =>
+  !room.exists ||
+  !room.private ||
+  !room.values.has('TURBOSLIDE_ROOM_SECRET') ||
+  !room.values.has('TURBOSLIDE_ROOM_BEARER');
+
+const roomFileStop = (room) =>
+  step('stop', {
+    exit: 1,
+    text: `${FILES.room.name} ${room.exists ? (room.private ? 'lacks TURBOSLIDE_ROOM_SECRET or TURBOSLIDE_ROOM_BEARER' : `has mode ${octal(room.mode)}; chmod 600 it`) : 'is absent'}: mint both with \`openssl rand -hex 32\` into ~/.config/turboslide/room.env (docs/CLOUDFLARE.md section 6 step 10)`,
+  });
+
 /**
- * The steps of a subcommand. `files` is `{ google, mail, auth }` as `readSecretFile` returns them.
- * Step kinds: `report` (names per environment), `require` (names that must be present, else
- * stop with exit 1), `mint` (a key into better-auth.env), `add` (vercel env add; `source` names
- * the file and key or the literal's name, never the value; `when: 'absent'` skips a present
- * variable unless `force`), `rm` (vercel env rm when present), `expect` (the expectation file),
+ * The steps of a subcommand. `files` is `{ google, mail, auth, room, bypass, cloudflare }` as
+ * `readSecretFile` returns them. Step kinds: `report` (names per environment), `never` (the names
+ * that must be absent), `require` (names that must be present, else stop with exit 1), `mint` (a
+ * key into better-auth.env), `add` (vercel env add; `source` names the file and key or the
+ * literal's name, never the value; `when: 'absent'` skips a present variable unless `force`;
+ * `plain` omits --sensitive), `rm` (vercel env rm when present), `expect` (the expectation file),
+ * `health` (GET /health on a Worker host), `flush` (the drain), `flag` (POST then GET
+ * /control/flags), `wrangler` (one wrangler command, a secret's value on stdin when `source`),
  * `note` (a sentence), `stop` (end with an exit code).
  */
 export function planFor(sub, options, files) {
@@ -254,10 +396,12 @@ export function planFor(sub, options, files) {
   const google = files.google;
   const mail = files.mail;
   const auth = files.auth;
+  const room = files.room;
   switch (sub) {
     case 'status': {
       for (const e of envs)
         steps.push(step('report', { environment: e, names: [...EXPECTED_NAMES] }));
+      for (const e of envs) steps.push(step('never', { environment: e, names: [...NEVER_NAMES] }));
       for (const [key, spec] of Object.entries(FILES)) {
         const f = files[key];
         steps.push(
@@ -273,26 +417,54 @@ export function planFor(sub, options, files) {
       );
       break;
     }
-    case 'redis': {
+    case 'do': {
+      if (roomFileMissing(room)) {
+        steps.push(roomFileStop(room));
+        break;
+      }
       for (const e of envs)
         steps.push(
-          step('require', {
+          step('health', {
             environment: e,
-            names: ['REDIS_URL'],
+            host: roomHostFor(e, options, files),
             reason:
-              'Kevin installs Upstash Redis from the Storage tab of turboslide-gt, Fixed 250 MB, us-east-1, connected to production and preview (REALTIME.md 4.5 step 1); the pipeline sets nothing for this step',
+              'the Worker answers /health before any Vercel variable names it (docs/CLOUDFLARE.md 3.8 last row, section 6 step 14); deploy it and run worker-migrate first',
           }),
         );
-      for (const e of envs)
+      for (const e of envs) {
         steps.push(
-          step('report', {
+          step('add', {
+            name: 'TURBOSLIDE_ROOM_HOST',
             environment: e,
-            names: ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
+            plain: true,
+            source: {
+              file: 'cloudflare',
+              key: e === 'preview' ? 'TURBOSLIDE_ROOM_HOST_PREVIEW' : 'TURBOSLIDE_ROOM_HOST',
+              fallback: roomHostFor(e, options, files),
+            },
+            when: 'absent',
           }),
         );
+        steps.push(
+          step('add', {
+            name: 'TURBOSLIDE_ROOM_SECRET',
+            environment: e,
+            source: { file: 'room', key: 'TURBOSLIDE_ROOM_SECRET' },
+            when: 'absent',
+          }),
+        );
+        steps.push(
+          step('add', {
+            name: 'TURBOSLIDE_ROOM_BEARER',
+            environment: e,
+            source: { file: 'room', key: 'TURBOSLIDE_ROOM_BEARER' },
+            when: 'absent',
+          }),
+        );
+      }
       steps.push(
         step('note', {
-          text: 'nothing to set: the deployment stays on the blob tier while TURBOSLIDE_REALTIME is forced; `flip` removes the row after the redis preview gate (REALTIME.md 3.7, 5.4)',
+          text: 'the forced TURBOSLIDE_REALTIME=blob row stands, so the next main deploy reads the host and stays on blob (docs/CLOUDFLARE.md 3.7 item 2); `flip --tier do` removes it after the gates of 5.5',
         }),
       );
       break;
@@ -302,15 +474,24 @@ export function planFor(sub, options, files) {
         steps.push(
           step('require', {
             environment: e,
-            names: ['DATABASE_URL'],
+            names: ['TURBOSLIDE_ROOM_HOST', 'TURBOSLIDE_ROOM_BEARER'],
             reason:
-              'Kevin installs Neon Postgres from the Storage tab of turboslide-gt, Free, us-east-1, connected to production and preview (REALTIME.md 4.5 step 2)',
+              'the d1 accounts kind reaches the database through the Worker under the room bearer (docs/CLOUDFLARE.md 4.2, auth/db.ts); run `do` first (section 6 step 14)',
           }),
         );
       for (const e of envs) {
         const key = `BETTER_AUTH_SECRET_${e.toUpperCase()}`;
         steps.push(
           step('mint', { file: 'auth', key, when: auth.values.has(key) ? 'present' : 'absent' }),
+        );
+        steps.push(
+          step('add', {
+            name: 'TURBOSLIDE_ACCOUNTS',
+            environment: e,
+            plain: true,
+            source: { literal: 'd1', label: 'the literal d1' },
+            when: 'absent',
+          }),
         );
         steps.push(
           step('add', {
@@ -321,6 +502,11 @@ export function planFor(sub, options, files) {
           }),
         );
       }
+      steps.push(
+        step('note', {
+          text: 'DATABASE_URL is never set (docs/CLOUDFLARE.md 4.4 step 2): the accounts are D1 rows behind the Worker, one database for every instance',
+        }),
+      );
       break;
     }
     case 'google': {
@@ -333,7 +519,7 @@ export function planFor(sub, options, files) {
         steps.push(
           step('stop', {
             exit: 1,
-            text: `${FILES.google.name} ${google.exists ? (google.private ? 'lacks GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET' : `has mode ${octal(google.mode)}; chmod 600 it`) : 'is absent'}: Kevin creates the Google Cloud project Turboslide and the Web application client (REALTIME.md 4.5 step 3) and writes the two values into the file (design-google-login.md section 8 line 6)`,
+            text: `${FILES.google.name} ${google.exists ? (google.private ? 'lacks GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET' : `has mode ${octal(google.mode)}; chmod 600 it`) : 'is absent'}: the Google Cloud project Turboslide and the Web application client Turboslide web are Kevin's console steps or the orchestrator's in his session (docs/CLOUDFLARE.md section 6 step 13); the two values go into the file (design-google-login.md section 8 line 6)`,
           }),
         );
         break;
@@ -342,9 +528,9 @@ export function planFor(sub, options, files) {
         steps.push(
           step('require', {
             environment: e,
-            names: ['DATABASE_URL'],
+            names: ['TURBOSLIDE_ACCOUNTS'],
             reason:
-              'the Google button needs a database (better-auth.ts signInMethods); run `database` first (REALTIME.md 4.5 step 2)',
+              'the Google button needs a database (better-auth.ts signInMethods, databaseConfigured under the d1 kind); run `database` first (docs/CLOUDFLARE.md 4.4 step 2)',
           }),
         );
       const adminEmails =
@@ -376,7 +562,7 @@ export function planFor(sub, options, files) {
                 ? '--admin-emails'
                 : google.values.has('TURBOSLIDE_ADMIN_EMAILS')
                   ? `${FILES.google.name} TURBOSLIDE_ADMIN_EMAILS`
-                  : 'the default of REALTIME.md 4.5 step 4',
+                  : 'the default of CLOUDFLARE.md 4.4 step 4',
             },
             when: 'absent',
           }),
@@ -388,7 +574,7 @@ export function planFor(sub, options, files) {
       if (!mail.exists) {
         steps.push(
           step('note', {
-            text: `${FILES.mail.name} is absent: TURBOSLIDE_MAIL stays off and Google may be the only method (REALTIME.md 4.5 step 5, default 7.7); nothing set`,
+            text: `${FILES.mail.name} is absent: TURBOSLIDE_MAIL stays off and Google may be the only method (docs/CLOUDFLARE.md 4.4 step 5, REALTIME.md default 7.7); nothing set`,
           }),
         );
         break;
@@ -448,13 +634,29 @@ export function planFor(sub, options, files) {
       break;
     }
     case 'flip': {
+      const tier = options.tier ?? 'do';
+      if (tier === 'redis') {
+        steps.push(
+          step('stop', { exit: 2, text: `flip --tier redis is refused: ${RETIRED.redis}` }),
+        );
+        break;
+      }
+      if (tier === 'blob') {
+        steps.push(
+          step('stop', {
+            exit: 2,
+            text: 'flip --tier blob is not a flip: `rollback` sets the forced blob row and writes the expectation (docs/CLOUDFLARE.md 3.8 item 2)',
+          }),
+        );
+        break;
+      }
       for (const e of envs)
         steps.push(
           step('require', {
             environment: e,
-            names: ['REDIS_URL'],
+            names: [...ROOM_NAMES],
             reason:
-              'a removal without REDIS_URL would select blob on its own and the tree would expect redis (REALTIME.md 3.7); REDIS_URL comes from the Upstash install (4.5 step 1)',
+              'a removal without the host, the ticket secret and the bearer would select blob on its own and the tree would expect do (docs/CLOUDFLARE.md 3.6.1 select.ts, 3.7 item 4); run `do` first',
           }),
         );
       for (const e of envs)
@@ -462,13 +664,14 @@ export function planFor(sub, options, files) {
           step('rm', {
             name: 'TURBOSLIDE_REALTIME',
             environment: e,
-            reason: 'REDIS_URL then selects redis at the next deploy (select.ts 79; default 7.9)',
+            reason:
+              'TURBOSLIDE_ROOM_HOST then selects do at the next deploy (select.ts; REALTIME.md default 7.9: the removal, never a forced do)',
           }),
         );
-      steps.push(step('expect', { realtime: 'redis' }));
+      steps.push(step('expect', { realtime: 'do' }));
       steps.push(
         step('note', {
-          text: `commit ${EXPECTATION_REL} with the push that follows; the next main deploy through the guard selects redis and every open tab reloads once (REALTIME.md 3.7); Instant Rollback lands on the previous production deployment, built with the forced blob row`,
+          text: `commit ${EXPECTATION_REL} with the push that follows; the guard deploys the Worker before the app on that push and reads /health for the sha (docs/CLOUDFLARE.md 5.6); the next production deployment selects do and every open tab resyncs once (3.7 item 5); the rollback is \`drain\` then \`rollback\` (3.8 item 2), or \`do-flag off\` with no deploy (3.8 item 1)`,
         }),
       );
       break;
@@ -482,13 +685,97 @@ export function planFor(sub, options, files) {
             source: { literal: 'blob', label: 'the literal blob' },
             when: 'always',
             force: true,
-            reason: 'the rollback switch of REALTIME.md 3.8',
+            reason: 'the rollback switch of docs/CLOUDFLARE.md 3.8 item 2',
           }),
         );
       steps.push(step('expect', { realtime: 'blob' }));
       steps.push(
         step('note', {
-          text: `redeploy the environment (the guard's next pass, or \`vercel rollback --scope ${options.scope} --yes\` to the previous production deployment) and commit ${EXPECTATION_REL}; the runtime switch without a deploy is \`turboslide admin flag realtime off --to https://www.turboslide.com\`, read within 5 s on every instance (apps/studio/src/server/flags.ts FLAG_CACHE_MS)`,
+          text: `run \`drain\` before this when production was on do, so no acknowledged entry is left in an object's SQLite with no committer (3.8 item 2); then redeploy (the guard's next pass, or \`vercel rollback --scope ${options.scope} --yes\` to the previous production deployment) and commit ${EXPECTATION_REL}; the Worker stays deployed and the tabs reload onto the blob deployment at the object's next checkpoint; the runtime switch without a deploy is \`do-flag off\` (3.8 item 1)`,
+        }),
+      );
+      break;
+    }
+    case 'drain': {
+      if (roomFileMissing(room)) {
+        steps.push(roomFileStop(room));
+        break;
+      }
+      steps.push(
+        step('flush', {
+          environment: options.env,
+          host: roomHostFor(options.env, options, files),
+        }),
+      );
+      break;
+    }
+    case 'do-flag': {
+      if (roomFileMissing(room)) {
+        steps.push(roomFileStop(room));
+        break;
+      }
+      steps.push(
+        step('flag', {
+          environment: options.env,
+          host: roomHostFor(options.env, options, files),
+          realtime: options.flag,
+        }),
+      );
+      break;
+    }
+    case 'worker-migrate': {
+      const database = databaseFor(options.env, files);
+      const args = ['d1', 'migrations', 'apply', database, options.local ? '--local' : '--remote'];
+      if (options.env === 'preview') args.push('--env', 'preview');
+      steps.push(
+        step('wrangler', {
+          args,
+          label: `the control tables rt_open and rt_flags and the realtime = on row from apps/realtime-worker/migrations/ (docs/CLOUDFLARE.md 3.6.2) on ${options.local ? `the local D1 of wrangler dev` : `the remote database ${database}`}`,
+        }),
+      );
+      if (!options.local)
+        steps.push(
+          step('note', {
+            text: `a remote migration is the integrator's for the preview and the ship step's for production (the round's rules); /health answers realtime: 'on' once the row exists`,
+          }),
+        );
+      break;
+    }
+    case 'worker-secrets': {
+      if (roomFileMissing(room)) {
+        steps.push(roomFileStop(room));
+        break;
+      }
+      const envArgs = options.env === 'preview' ? ['--env', 'preview'] : [];
+      for (const name of ['TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_ROOM_BEARER'])
+        steps.push(
+          step('wrangler', {
+            args: ['secret', 'put', name, ...envArgs],
+            source: { file: 'room', key: name },
+            label: `${name} on the ${options.env} Worker (the value on stdin)`,
+          }),
+        );
+      if (options.env === 'preview') {
+        const bypass = files.bypass;
+        if (bypass.exists && bypass.private && bypass.values.has('VERCEL_AUTOMATION_BYPASS_SECRET'))
+          steps.push(
+            step('wrangler', {
+              args: ['secret', 'put', 'VERCEL_AUTOMATION_BYPASS_SECRET', ...envArgs],
+              source: { file: 'bypass', key: 'VERCEL_AUTOMATION_BYPASS_SECRET' },
+              label:
+                'VERCEL_AUTOMATION_BYPASS_SECRET on the preview Worker (the value on stdin; the object’s callbacks to a protected preview, docs/CLOUDFLARE.md section 6 step 15)',
+            }),
+          );
+        else
+          steps.push(
+            step('note', {
+              text: `${FILES.bypass.name} ${bypass.exists ? (bypass.private ? 'lacks VERCEL_AUTOMATION_BYPASS_SECRET' : `has mode ${octal(bypass.mode)}; chmod 600 it`) : 'is absent'}: the preview Worker gets no VERCEL_AUTOMATION_BYPASS_SECRET, so the object cannot call a protected Vercel preview back and the hosted realtime rows are read on the local two process run and on production (docs/CLOUDFLARE.md 5.5 item 2; the project setting is Kevin's, section 6 step 15)`,
+            }),
+          );
+      }
+      steps.push(
+        step('note', {
+          text: 'each `wrangler secret put` creates and deploys a new version of the Worker at once (the wrangler skill); the ticket secret and the bearer must equal the Vercel environment’s TURBOSLIDE_ROOM_SECRET and TURBOSLIDE_ROOM_BEARER (`do`), both from room.env',
         }),
       );
       break;
@@ -504,22 +791,48 @@ export function planFor(sub, options, files) {
 
 function describeAdd(s, dry) {
   const src = s.source.file
-    ? `value from ${FILES[s.source.file].name} ${s.source.key} on stdin`
+    ? `value from ${FILES[s.source.file].name} ${s.source.key}${s.source.fallback !== undefined ? ' or its default' : ''} on stdin`
     : `value ${s.source.label}`;
   const guard =
     s.when === 'absent' ? (dry ? ' when absent on the environment; --force replaces' : '') : '';
-  return `${s.name} ${s.environment} (sensitive, ${src})${guard}`;
+  return `${s.name} ${s.environment} (${s.plain ? 'plain' : 'sensitive'}, ${src})${guard}`;
+}
+
+const lastLine = (text) =>
+  String(text ?? '')
+    .trim()
+    .split('\n')
+    .pop() ?? '';
+
+/** The deck ids of GET /control/open's answer: an array of ids or of `{ deckId | id }`, or an object with `decks` or `open`. */
+export function openDecksOf(body) {
+  const list = Array.isArray(body)
+    ? body
+    : Array.isArray(body?.decks)
+      ? body.decks
+      : Array.isArray(body?.open)
+        ? body.open
+        : null;
+  if (list === null) throw new TypeError('/control/open answered no list of decks');
+  const ids = [];
+  for (const d of list) {
+    const id = typeof d === 'string' ? d : (d?.deckId ?? d?.id);
+    if (typeof id === 'string' && /^[a-z0-9][a-z0-9-]{0,127}$/.test(id)) ids.push(id);
+  }
+  return ids;
 }
 
 /**
- * Runs or prints the steps. `io` carries `out(line)`, `vercel(args, input)` (spawnSync's result
- * shape: `{ status, stdout, stderr }`), `mint()` (the hex string of `openssl rand -hex 32`),
- * `writeFile(path, text)` and `root`. Returns the exit code.
+ * Runs or prints the steps. `io` carries `out(line)`, `vercel(args, input)` and `wrangler(args,
+ * input)` (spawnSync's result shape: `{ status, stdout, stderr }`), `fetch(url, init)` (an
+ * answer `{ status, json }`), `mint()` (the hex string of `openssl rand -hex 32`), `writeFile(path,
+ * text)` and `root`. Returns the exit code.
  */
 export function execute(steps, options, files, io) {
   const dry = options.dryRun;
   const secrets = new Set();
-  for (const f of Object.values(files)) for (const v of f.values.values()) secrets.add(v);
+  for (const [key, f] of Object.entries(files))
+    if (!FILES[key]?.public) for (const v of f.values.values()) secrets.add(v);
   const say = (line) => io.out(scrub(line, secrets));
   const namesCache = new Map();
   const names = (environment) => {
@@ -527,13 +840,7 @@ export function execute(steps, options, files, io) {
     const r = io.vercel(['env', 'ls', environment, '--json', '--scope', options.scope], undefined);
     if (r.status !== 0)
       throw new Error(
-        `vercel env ls ${environment} failed (exit ${r.status}): ${scrub(
-          String(r.stderr ?? '')
-            .trim()
-            .split('\n')
-            .pop() ?? '',
-          secrets,
-        )}`,
+        `vercel env ls ${environment} failed (exit ${r.status}): ${scrub(lastLine(r.stderr), secrets)}`,
       );
     const set = namesFromEnvLs(r.stdout);
     namesCache.set(environment, set);
@@ -542,10 +849,18 @@ export function execute(steps, options, files, io) {
   const valueOf = (source) => {
     if (source.file) {
       const v = files[source.file].values.get(source.key);
-      if (v === undefined) throw new Error(`${FILES[source.file].name} lacks ${source.key}`);
+      if (v === undefined) {
+        if (source.fallback !== undefined) return source.fallback;
+        throw new Error(`${FILES[source.file].name} lacks ${source.key}`);
+      }
       return v;
     }
     return source.literal;
+  };
+  const bearer = () => files.room.values.get('TURBOSLIDE_ROOM_BEARER');
+  const call = (host, path, init = {}) => {
+    const headers = { authorization: `Bearer ${bearer()}`, ...(init.headers ?? {}) };
+    return io.fetch(`https://${host}${path}`, { ...init, headers });
   };
   for (const s of steps) {
     switch (s.kind) {
@@ -557,6 +872,22 @@ export function execute(steps, options, files, io) {
         const set = names(s.environment);
         say(
           `${s.environment}: ${s.names.map((n) => `${n} ${set.has(n) ? 'present' : 'absent'}`).join(', ')}`,
+        );
+        break;
+      }
+      case 'never': {
+        if (dry) {
+          say(
+            `would read vercel env ls ${s.environment} --json and confirm ${s.names.join(', ')} absent (never set, docs/CLOUDFLARE.md 4.4)`,
+          );
+          break;
+        }
+        const set = names(s.environment);
+        const present = s.names.filter((n) => set.has(n));
+        say(
+          present.length === 0
+            ? `${s.environment}: ${s.names.join(', ')} absent, as they must be (never set, docs/CLOUDFLARE.md 4.4)`
+            : `${s.environment}: ${present.join(', ')} PRESENT; these names are never set on either project (docs/CLOUDFLARE.md 4.4) and are Kevin's to remove`,
         );
         break;
       }
@@ -618,26 +949,14 @@ export function execute(steps, options, files, io) {
           break;
         }
         const force = present && (s.force || options.force);
-        const args = [
-          'env',
-          'add',
-          s.name,
-          s.environment,
-          '--sensitive',
-          '--yes',
-          '--scope',
-          options.scope,
-        ];
+        const args = ['env', 'add', s.name, s.environment];
+        if (!s.plain) args.push('--sensitive');
+        args.push('--yes', '--scope', options.scope);
         if (force) args.push('--force');
         const r = io.vercel(args, valueOf(s.source));
         if (r.status !== 0) {
           say(
-            `vercel env add ${s.name} ${s.environment} failed (exit ${r.status}): ${
-              String(r.stderr ?? '')
-                .trim()
-                .split('\n')
-                .pop() ?? ''
-            }`,
+            `vercel env add ${s.name} ${s.environment} failed (exit ${r.status}): ${lastLine(r.stderr)}`,
           );
           return 2;
         }
@@ -661,12 +980,7 @@ export function execute(steps, options, files, io) {
         );
         if (r.status !== 0) {
           say(
-            `vercel env rm ${s.name} ${s.environment} failed (exit ${r.status}): ${
-              String(r.stderr ?? '')
-                .trim()
-                .split('\n')
-                .pop() ?? ''
-            }`,
+            `vercel env rm ${s.name} ${s.environment} failed (exit ${r.status}): ${lastLine(r.stderr)}`,
           );
           return 2;
         }
@@ -681,6 +995,108 @@ export function execute(steps, options, files, io) {
         }
         const path = writeExpectation(s.realtime, io.root ?? ROOT);
         say(`wrote ${path}: realtime ${s.realtime}`);
+        break;
+      }
+      case 'health': {
+        if (dry) {
+          say(`would read https://${s.host}/health for the ${s.environment} Worker (${s.reason})`);
+          break;
+        }
+        let answer;
+        try {
+          answer = io.fetch(`https://${s.host}/health`, { method: 'GET' });
+        } catch (error) {
+          say(
+            `${s.environment}: https://${s.host}/health unreachable (${error instanceof Error ? error.message : String(error)}); ${s.reason}`,
+          );
+          return 1;
+        }
+        const body = answer.json ?? {};
+        if (answer.status !== 200 || body.ok !== true) {
+          say(`${s.environment}: https://${s.host}/health answered ${answer.status}; ${s.reason}`);
+          return 1;
+        }
+        if (body.realtime === 'unset') {
+          say(
+            `${s.environment}: https://${s.host}/health answers realtime unset (the control tables are not made); run worker-migrate${s.environment === 'preview' ? ' --env preview' : ''} first (docs/CLOUDFLARE.md 3.6.2)`,
+          );
+          return 1;
+        }
+        say(
+          `${s.environment}: https://${s.host}/health ok, realtime ${body.realtime}, commit ${body.commit || '(empty)'}, appOrigin ${body.appOrigin || '(empty)'}`,
+        );
+        break;
+      }
+      case 'flush': {
+        if (dry) {
+          say(
+            `would read https://${s.host}/control/open under the room bearer and post /rooms/<id>/flush per open deck (the ${s.environment} Worker)`,
+          );
+          break;
+        }
+        const open = call(s.host, '/control/open', { method: 'GET' });
+        if (open.status !== 200) {
+          say(`${s.environment}: GET https://${s.host}/control/open answered ${open.status}`);
+          return 2;
+        }
+        const ids = openDecksOf(open.json);
+        if (ids.length === 0) {
+          say(`${s.environment}: no open deck on ${s.host}; nothing to flush`);
+          break;
+        }
+        let flushed = 0;
+        const failed = [];
+        for (const id of ids) {
+          const r = call(s.host, `/rooms/${id}/flush`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: '{}',
+          });
+          if (r.status >= 200 && r.status < 300) flushed += 1;
+          else failed.push(`${id} (${r.status})`);
+        }
+        say(
+          `${s.environment}: ${flushed} of ${ids.length} open deck${ids.length === 1 ? '' : 's'} flushed on ${s.host}${failed.length ? `; failed: ${failed.join(', ')}` : ''}`,
+        );
+        if (failed.length > 0) return 1;
+        break;
+      }
+      case 'flag': {
+        if (dry) {
+          say(
+            `would post https://${s.host}/control/flags { realtime: ${JSON.stringify(s.realtime)} } under the room bearer and read it back (the ${s.environment} Worker)`,
+          );
+          break;
+        }
+        const r = call(s.host, '/control/flags', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ realtime: s.realtime }),
+        });
+        if (r.status < 200 || r.status >= 300) {
+          say(`${s.environment}: POST https://${s.host}/control/flags answered ${r.status}`);
+          return 2;
+        }
+        const back = call(s.host, '/control/flags', { method: 'GET' });
+        const value = back.json?.realtime ?? back.json?.flags?.realtime;
+        say(
+          `${s.environment}: realtime flag ${value ?? 'unread'} on ${s.host} (read within 30 s by the router and every awake object, docs/CLOUDFLARE.md 3.8 item 1)`,
+        );
+        if (value !== s.realtime) return 1;
+        break;
+      }
+      case 'wrangler': {
+        const shown = `wrangler ${s.args.join(' ')}`;
+        if (dry) {
+          say(`would run ${shown} from ${WORKER_DIR_REL}: ${s.label}`);
+          break;
+        }
+        const r = io.wrangler(s.args, s.source ? valueOf(s.source) : undefined);
+        if (r.status !== 0) {
+          say(`${shown} failed (exit ${r.status}): ${lastLine(r.stderr) || lastLine(r.stdout)}`);
+          return 2;
+        }
+        say(`ran ${shown}: ${s.label}`);
         break;
       }
       case 'note':
@@ -707,6 +1123,52 @@ export function spawnVercel(cwd) {
   };
 }
 
+/**
+ * The `wrangler` call: the workspace's binary from apps/realtime-worker (never a global one), the
+ * value on stdin, CLOUDFLARE_ACCOUNT_ID from cloudflare.env in the child's environment when the
+ * file names it, VERCEL_OIDC_TOKEN out. A missing binary answers 127 with the install sentence.
+ */
+export function spawnWrangler(options, files) {
+  const workerDir = options.workerDir ?? join(ROOT, WORKER_DIR_REL);
+  const binary = options.wrangler ?? join(workerDir, 'node_modules', '.bin', 'wrangler');
+  return (args, input) => {
+    if (!existsSync(binary))
+      return {
+        status: 127,
+        stdout: '',
+        stderr: `${binary} is absent: the workspace's wrangler is installed by the integrator's pnpm install (docs/CLOUDFLARE.md section 6 step 6), or pass --wrangler <path>`,
+      };
+    const env = { ...process.env };
+    delete env.VERCEL_OIDC_TOKEN;
+    const account = files.cloudflare.values.get('CLOUDFLARE_ACCOUNT_ID');
+    if (account) env.CLOUDFLARE_ACCOUNT_ID = account;
+    const r = spawnSync(binary, args, { cwd: workerDir, input, encoding: 'utf8', env });
+    if (r.error) return { status: 127, stdout: '', stderr: r.error.message };
+    return { status: r.status ?? 1, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
+  };
+}
+
+/** One HTTP call with a 10 s deadline, answered as `{ status, json }` (json null when the body is not JSON). */
+export function fetchJsonSync(url, init) {
+  // spawnSync keeps the script synchronous: one node child per call, the body on stdout as JSON.
+  const script = `
+const [url, init] = [process.argv[1], JSON.parse(process.argv[2])];
+fetch(url, { ...init, signal: AbortSignal.timeout(10000) }).then(async (r) => {
+  const text = await r.text();
+  let json = null;
+  try { json = JSON.parse(text); } catch {}
+  process.stdout.write(JSON.stringify({ status: r.status, json }));
+}).catch((e) => { process.stdout.write(JSON.stringify({ error: String(e && e.message || e) })); });
+`;
+  const r = spawnSync(process.execPath, ['-e', script, url, JSON.stringify(init ?? {})], {
+    encoding: 'utf8',
+  });
+  if (r.status !== 0 || !r.stdout) throw new Error(`fetch ${url} failed (exit ${r.status})`);
+  const answer = JSON.parse(r.stdout);
+  if (answer.error) throw new Error(answer.error);
+  return answer;
+}
+
 export function mintWithOpenssl() {
   const r = spawnSync('openssl', ['rand', '-hex', '32'], { encoding: 'utf8' });
   if (r.status !== 0)
@@ -720,7 +1182,7 @@ function writePrivate(path, text) {
   chmodSync(path, 0o600);
 }
 
-/** Reads the three files, checks the link, builds the plan and runs or prints it; returns the exit code. */
+/** Reads the files, checks the link for a Vercel subcommand, builds the plan and runs or prints it; returns the exit code. */
 export function run(options, io = {}) {
   const out = io.out ?? ((line) => console.log(line));
   const files = Object.fromEntries(
@@ -729,24 +1191,29 @@ export function run(options, io = {}) {
       readSecretFile(join(options.configDir, spec.name)),
     ]),
   );
-  const linked = linkedProject(options.cwd);
+  const vercelSide = VERCEL_SUBCOMMANDS.includes(options.subcommand);
   out(
-    `realtime-env ${options.subcommand}${options.dryRun ? ' --dry-run' : ''} (project ${options.project}, scope ${options.scope}, environments ${options.environments.join(', ')}, config ${options.configDir})`,
+    `realtime-env ${options.subcommand}${options.flag ? ` ${options.flag}` : ''}${options.dryRun ? ' --dry-run' : ''} (${vercelSide ? `project ${options.project}, scope ${options.scope}, environments ${options.environments.join(', ')}` : `worker environment ${options.env}`}, config ${options.configDir})`,
   );
-  if (linked !== options.project) {
-    const line = `the linked project of ${options.cwd} is ${linked ?? 'none (.vercel/project.json absent)'}, not ${options.project}`;
-    if (!options.dryRun) {
-      out(
-        `${line}; refused. Run from a root linked to ${options.project}, or pass --project <name> on purpose`,
-      );
-      return 2;
+  if (vercelSide) {
+    const linked = linkedProject(options.cwd);
+    if (linked !== options.project) {
+      const line = `the linked project of ${options.cwd} is ${linked ?? 'none (.vercel/project.json absent)'}, not ${options.project}`;
+      if (!options.dryRun) {
+        out(
+          `${line}; refused. Run from a root linked to ${options.project}, or pass --project <name> on purpose`,
+        );
+        return 2;
+      }
+      out(`${line}; a real run would refuse`);
     }
-    out(`${line}; a real run would refuse`);
   }
   const steps = planFor(options.subcommand, options, files);
   return execute(steps, options, files, {
     out,
     vercel: io.vercel ?? spawnVercel(options.cwd),
+    wrangler: io.wrangler ?? spawnWrangler(options, files),
+    fetch: io.fetch ?? fetchJsonSync,
     mint: io.mint ?? mintWithOpenssl,
     writeFile: io.writeFile ?? writePrivate,
     root: io.root ?? ROOT,

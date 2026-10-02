@@ -6,7 +6,10 @@
 import { describe, expect, test } from 'vitest';
 
 import type { Deck, DeckDocument, Slide } from '../contracts.ts';
+import { createContext } from '../context.ts';
 import { lintStatic } from '../lint-static.ts';
+import { record } from '../rendered/fixtures.ts';
+import { lintRecord, onlyGlyphArtUnder } from '../rendered/rules.ts';
 import { withoutMasks } from './color.ts';
 import { withoutGlyphArt } from './type.ts';
 
@@ -70,5 +73,23 @@ describe('the speed mark slides under the deck rules', () => {
     expect(rule(document([slide('speed-ascii', proportional)]), 'type/svg-label-min')).toEqual([
       'speed-ascii font-size 10 px',
     ]);
+  });
+
+  test("type/floor-15 reads the ASCII mark's 10 px rows as cells of the mark, and still reads a small label (request 16)", () => {
+    const floor = (html: string): number => {
+      const doc = document([slide('speed-ascii', html)]);
+      const r = record('speed-ascii', 'light', {
+        blocks: { mark: { type: 'html', box: [320, 335, 960, 230], fontSize: 10 } },
+      });
+      return lintRecord(createContext(doc), r, { bitmap: null }).filter(
+        (f) => f.rule === 'type/floor-15',
+      ).length;
+    };
+    expect(onlyGlyphArtUnder(ASCII, 15)).toBe(true);
+    expect(floor(ASCII)).toBe(0);
+    expect(
+      floor(ASCII.replace('</svg>', '<text x="0" y="220" font-size="12">Mark</text></svg>')),
+    ).toBe(1);
+    expect(floor(ASCII.replace(/font-family="[^"]*"/, 'font-family="Inter"'))).toBe(1);
   });
 });

@@ -21,6 +21,7 @@ import { checkTextOverflow } from './overflow.ts';
 import { indexBlocks } from './shared.ts';
 import { checkStretched } from './stretched.ts';
 import { checkThumbLegible } from './thumb.ts';
+import { withoutGlyphArt } from '../static/type.ts';
 
 export type { RenderedInputs } from './bitmap.ts';
 
@@ -63,6 +64,21 @@ const TEXT_TYPES = new Set([
 function renderDirOf(options: object): string | undefined {
   const value: unknown = (options as Record<string, unknown>).renderDir;
   return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+/**
+ * True when a block's only text under the floor is glyph art: its markup draws a mark out of
+ * characters (a `<text>` with `xml:space="preserve"` in a monospace face, the ASCII speed mark of
+ * P:public/marks, DECK-GRAMMAR.md:52) and declares no other font size under `floor`. The record
+ * measures the block's smallest text, which is then a cell of the mark and never a reading size
+ * (the static half is `withoutGlyphArt` in static/type.ts; round1/build/b4.md requests 7 and 16).
+ */
+export function onlyGlyphArtUnder(markup: string, floor: number): boolean {
+  const rest = withoutGlyphArt(markup);
+  if (rest === markup) return false;
+  for (const m of rest.matchAll(/font-size\s*[:=]\s*["']?(\d+(?:\.\d+)?)(?:px)?["']?/gi))
+    if (Number(m[1]) < floor) return false;
+  return true;
 }
 
 /** Distance from a box to the four rails and rules; 0 when the box crosses one. */
@@ -156,7 +172,18 @@ export function lintRecord(
       }
       continue;
     }
-    if (block.fontSize !== undefined && block.fontSize < FLOOR_PX) {
+    const source = refs.get(blockId)?.block;
+    const markup =
+      source?.type === 'html'
+        ? `${source.css}\n${source.html}`
+        : source?.type === 'dia'
+          ? (source.svg ?? '')
+          : '';
+    if (
+      block.fontSize !== undefined &&
+      block.fontSize < FLOOR_PX &&
+      !(markup && onlyGlyphArtUnder(markup, FLOOR_PX))
+    ) {
       out.push(
         ctx.finding('type/floor-15', record.slideId, {
           blockId,

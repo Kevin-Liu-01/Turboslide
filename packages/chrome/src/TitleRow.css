@@ -630,21 +630,29 @@
    32 px key, Share as a 32 px key and More on the right. The presence slot, Assist, the comments
    and side panel glyphs, the inbox, Sign In and the Slideshow arrow fold into More, whose rows run
    what each did (TitleRow.tsx `titleMoreItems`). The name takes what the row leaves, up to the
-   900 px block's 160 px. */
-@media (max-width: 479px) {
-  .ts-title-row {
-    padding: 0 8px 0 6px;
-  }
-
+   900 px block's 160 px. The phone editor moves the first five to the 720 px block below. */
+/* The phone editor (NEXT.md 4.1.3 item 18; PhoneEditor.css): under 720 px Assist, the comments
+   and side panel glyphs, the presence slot and the inbox fold into More, so the row holds the
+   name, Slideshow, Share, Sign In and More */
+@media (max-width: 719px) {
   .ts-title-r > .ts-presence,
-  .ts-title-r > .ts-title-slot,
-  .ts-title-r > .pt-ib.ts-title-signin,
-  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow {
+  .ts-title-r > .ts-title-slot {
     display: none;
   }
 
   .pt-ib.ts-title-more {
     display: inline-flex;
+  }
+}
+
+@media (max-width: 479px) {
+  .ts-title-row {
+    padding: 0 8px 0 6px;
+  }
+
+  .ts-title-r > .pt-ib.ts-title-signin,
+  .ts-title-slideshow > .pt-ib.is-solid.ts-title-present-arrow {
+    display: none;
   }
 
   .ts-title-slideshow > .pt-ib.is-solid.ts-title-present {

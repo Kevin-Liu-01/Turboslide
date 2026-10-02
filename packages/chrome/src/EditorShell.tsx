@@ -75,6 +75,7 @@ import type { FormatSectionId } from './inspector/format-sections';
 import { LayoutGrid } from './LayoutGrid';
 import { LintPanel } from './LintPanel';
 import { MenuBar } from './MenuBar';
+import { MenusKey } from './MenusKey';
 import { detectPlatform } from './menus/keys';
 import type { KeyBinding } from './menus/keys';
 import { evaluate, findItem, isEnabled, itemById, resolveEffect } from './menus/model';
@@ -115,6 +116,7 @@ import { useMountEffect } from './lib/useMountEffect';
 import type { Version } from '@turboslide/schema/mutations';
 
 import './EditorShell.css';
+import './PhoneEditor.css';
 
 /**
  * The editor's chrome (gslides-parity SPEC 1, 2, 3, 12, 13; SPEC-2 sections 4 to 6, 8.6, 9),
@@ -2438,6 +2440,9 @@ export function EditorShell({
         ) : null
       ) : (
         <div className="ts-toolbar" role="toolbar" aria-label="Toolbar" data-control="toolbar">
+          {/* the phone editor's one Menus key, drawn under 720 px where the menu bar row leaves
+              (NEXT.md 4.1.3 item 18; PhoneEditor.css) */}
+          <MenusKey />
           <ToolbarHead />
           <ToolbarTail />
         </div>

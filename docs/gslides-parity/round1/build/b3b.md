@@ -166,3 +166,17 @@ Readings: in b3b-all-chrome `versions.panel.seam-and-time` failed on its own dri
 
 Unit tests: `share-dialog.test.tsx` 21 passed, `shader-section.test.tsx` 5, `insert-menu.test.tsx` with the palette 30, the chrome suite 921.
 
+
+## Push 14: B3b#14, the phone editor (item 18, question 7's default)
+
+- `packages/chrome/src/MenusKey.tsx` (new): the Menus key at the toolbar's head under 720 px; its menu is the menus the role can use, each a row whose submenu holds that menu's rows, run through the shell as the bar's plate runs them.
+- `packages/chrome/src/PhoneEditor.css` (new, imported by `EditorShell.tsx` after `EditorShell.css`): under 720 px the menu bar row leaves, the canvas column's two children join the editor's grid, the sheet takes a 16:10 box, the filmstrip one 104 px row of cards under it and the notes the rest.
+- `Filmstrip.tsx`: on a phone the strip is drawn whatever the column's toggle says and never as an overlay (`usePhone()` over the one 720 px query).
+- `TitleRow.css`: under 720 px Assist, the comments and side panel glyphs, the presence slot and the inbox fold into More; Sign In and the Slideshow arrow follow under 480 px as in push 9.
+
+Row (entered in this push): `chrome.phone.menus-key` (not driven, as NEXT.md 4.1.5 writes it), driver `core/chrome.spec.ts`; the matrix total gains 1. Question 7's default ships the phone editor because its row passed at its push.
+
+Readings: in b3b-all-chrome the row read the layout and the nine rows and failed on its own submenu read, which waited for the first `[data-menu-item^="insert."]` on the page, a toolbar button the phone hides; the driver now reads the open submenu. In b3b-all-chrome2 every assertion held and the file's teardown timed out: `teardown` in `core/lib.ts` opens File from the menu bar, which the phone editor folds into its Menus key, so the lane's teardown hooks widen a phone context to 1440 first. b3b-chrome3 (20:06:27Z to 20:07:09Z, load 10.80 to 17.87) passed: at 390 the page is 390 px wide, the menu bar row is not drawn, the Menus key sits at x 8 to 91.6 on the tool row, its menu lists `menus.file` to `menus.help` (nine), its Insert row opens Insert's rows, the sheet's box runs y 84 to 327.75, the filmstrip y 327.75 to 431.75 under it, and its two cards stand at y 339. `chrome.title-row.phone` passed on the same tree in b3b-all-chrome (17:22Z).
+
+Request 8, to the integrator, the owner of `apps/studio/e2e/core/lib.ts`: since push 14 a page under 720 px draws no menu bar, so `teardown` (lib.ts 583) cannot open File there. A spec that drives the editor at a phone width and tears down with the same page fails its teardown unless it widens first, as `chrome-round1.ts` and `b3b-dialogs.ts` do. The fix in `lib.ts` is one line before the File click: `await page.setViewportSize({ width: 1440, height: 900 })` when the page's width is under 720, or the Menus key path (`toolbar.menus`, then `menu.menus.file`, then `menu.file.moveToTrash`).
+

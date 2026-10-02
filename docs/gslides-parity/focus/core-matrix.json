@@ -8950,6 +8950,15 @@
       "note": "docs/NEXT.md 4.1.3 item 13 and 4.1.5, push B3b#9: under 480 px the presence slot, Assist, the comments and side panel glyphs, the inbox, Sign In and the Slideshow arrow fold into one More key (TitleRow.tsx titleMoreItems); the test is in apps/studio/e2e/core/chrome-round1.ts, called from the spec"
     },
     {
+      "id": "chrome.phone.menus-key",
+      "feature": "chrome",
+      "interaction": "At 390 the editor shows one Menus key that opens the nine menus; the filmstrip runs under the sheet",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "evidence": "brand-c 198",
+      "note": "docs/NEXT.md 4.1.3 item 18 and question 7's default, push B3b#14: under 720 px the menu bar row leaves for the Menus key at the toolbar's head (MenusKey.tsx), the sheet takes a 16:10 box, the filmstrip one row of cards under it and the notes the rest (PhoneEditor.css, Filmstrip.tsx usePhone), and the title row folds Assist, the comments and side panel glyphs, the presence slot and the inbox into More (TitleRow.css)"
+    },
+    {
       "id": "chrome.title-row.name-after-first-write",
       "feature": "chrome",
       "interaction": "At 1440 px, within 5 s after the first write, the deck name keeps its full width while the name plate shows",

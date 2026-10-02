@@ -1,5 +1,5 @@
 import type { CSSProperties, DragEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
-import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { applyLayout, appliedLabel } from '@turboslide/schema/apply-layout';
 import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
@@ -34,6 +34,29 @@ import './Filmstrip.css';
 // for its slide at the local commit and never asks the render route for a capture, and one
 // IntersectionObserver over the list decides which cards hold a clone (0.41). Sidebar.tsx picks
 // this component for the editor and keeps the viewer's tree.
+
+/** The phone editor's width: under 720 px (PhoneEditor.css's one breakpoint). */
+export const PHONE_QUERY = '(max-width: 719px)';
+
+function subscribePhone(onChange: () => void): () => void {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => {};
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener?.('change', onChange);
+  return () => query.removeEventListener?.('change', onChange);
+}
+
+function phoneNow(): boolean {
+  try {
+    return window.matchMedia(PHONE_QUERY).matches;
+  } catch {
+    return false;
+  }
+}
+
+/** True while the viewport is a phone's (under 720 px); false on the server. */
+export function usePhone(): boolean {
+  return useSyncExternalStore(subscribePhone, phoneNow, () => false);
+}
 
 /** the distance a followed row keeps from the list's edges */
 export const FOLLOW_MARGIN = 8;
@@ -442,8 +465,11 @@ export function Filmstrip({
   const chromeTheme = useTheme();
   const theme = edit.deck !== undefined ? deckAppearance(edit.deck) : chromeTheme;
   const { active, select, narrow, sidebarOpen, sidebarShown, present, setSidebar, ready } = shell;
-  const hidden = !(sidebarShown ?? (sidebarOpen && !present));
-  const overlay = narrow && !hidden;
+  /* the phone editor (docs/NEXT.md 4.1.3 item 18; PhoneEditor.css): under 720 px the cards run
+     in one row under the sheet, drawn whatever the column's toggle says, never an overlay */
+  const phone = usePhone();
+  const hidden = phone ? present : !(sidebarShown ?? (sidebarOpen && !present));
+  const overlay = narrow && !hidden && !phone;
   const listRef = useRef<HTMLDivElement>(null);
   const readyRef = useRef(ready ?? true);
   readyRef.current = ready ?? true;

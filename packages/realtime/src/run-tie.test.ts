@@ -62,7 +62,9 @@ describe('the run rule on the server', () => {
     const post = {
       clientId: 'a',
       base: { seq: 1 },
-      entries: [{ opId: 'a:3', kind: 'edit' as const, mutations: [splice(3, '3')], run: true }],
+      entries: [
+        { opId: 'a:3', kind: 'edit' as const, mutations: [splice(3, '3')], run: true as const },
+      ],
     };
     const rows = landedOf(landed, post);
     expect(entryRun(post.entries[0])).toBe(true);

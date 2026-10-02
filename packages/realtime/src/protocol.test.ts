@@ -125,6 +125,24 @@ describe('opsPostSchema', () => {
     expect(opsPostSchema.safeParse({ ...base, insertTie: true }).success).toBe(false);
   });
 
+  it('carries the run rule on an edit and refuses any other value (build/r1.md R1-R2h)', () => {
+    const run = opsPostSchema.safeParse({
+      clientId: CLIENT,
+      base: { seq: 0 },
+      entries: [{ ...editEntry(1), run: true }],
+    });
+    expect(run.success).toBe(true);
+    if (run.success) expect(run.data.entries[0]?.run).toBe(true);
+    for (const value of [false, 'yes', 1])
+      expect(
+        opsPostSchema.safeParse({
+          clientId: CLIENT,
+          base: { seq: 0 },
+          entries: [{ ...editEntry(1), run: value }],
+        }).success,
+      ).toBe(false);
+  });
+
   it('caps a post at 64 entries and refuses the 65th (SPEC-3 3.4 step 1)', () => {
     const entries = Array.from({ length: OPS_POST_MAX_ENTRIES }, (_, i) => editEntry(i + 1));
     expect(opsPostSchema.safeParse({ clientId: CLIENT, base: { seq: 0 }, entries }).success).toBe(

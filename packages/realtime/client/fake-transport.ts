@@ -24,6 +24,7 @@ import type {
   RoomEvent,
   RosterEntry,
 } from '../src/channel.ts';
+import { entryRun, runTieSide } from '../src/channel.ts';
 import type { PresencePost } from '../src/protocol.ts';
 import { rewritesText } from './room-client.ts';
 import type { Rejected, RoomTransport, StreamFailure, StreamHandle } from './room-client.ts';
@@ -52,10 +53,13 @@ type Connection = {
   unsubscribe: () => void;
 };
 
+/** The admission's transform (room-core.ts transformEntry): an entry that declares the run rule keeps the left of a landed insert at its offset. */
 function transformPast(
   mutations: readonly Mutation[],
   landed: readonly Mutation[],
+  run = false,
 ): Mutation[] | null {
+  const tie = runTieSide(run, 'right');
   let out = [...mutations];
   for (const against of landed) {
     const next: Mutation[] = [];
@@ -63,7 +67,7 @@ function transformPast(
       if (rewritesText(against, mutation)) continue;
       if (isTextOp(mutation) && isTextOp(against) && sameText(mutation, against)) {
         try {
-          next.push(...transformMutation(mutation, against, 'right'));
+          next.push(...transformMutation(mutation, against, 'right', tie));
         } catch (error) {
           if (error instanceof NotImplementedError) next.push(mutation);
           else throw error;
@@ -284,7 +288,11 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               });
               continue;
             }
-            const transformed = transformPast(entry.mutations ?? [], landedMutations);
+            const transformed = transformPast(
+              entry.mutations ?? [],
+              landedMutations,
+              entryRun(entry),
+            );
             if (transformed === null) {
               rejected.push({ opId: entry.opId, reason: 'stale' });
               continue;
@@ -311,6 +319,9 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
           }
           if (candidates.length === 0)
             return { ok: true, entries: [], rejected, head, revision: live.deck.revision };
+          const runOf = new Map(
+            body.entries.map((entry) => [entry.opId, entryRun(entry)] as const),
+          );
           const result = await appendWithRetry(
             channel,
             deckId,
@@ -324,7 +335,11 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
                   out.push(entry);
                   continue;
                 }
-                const moved = transformPast(entry.mutations ?? [], moreMutations);
+                const moved = transformPast(
+                  entry.mutations ?? [],
+                  moreMutations,
+                  runOf.get(entry.opId),
+                );
                 if (moved === null) {
                   rejected.push({ opId: entry.opId, reason: 'stale' });
                   continue;

@@ -22,6 +22,8 @@ export type PersistedOp = {
   comment?: Record<string, unknown>;
   /** the history label the edit carries into Version history (room-client.ts `apply` options) */
   note?: string;
+  /** the run rule's declaration the op was posted with (room-client.ts `PendingOp.run`) */
+  run?: true;
   /** the stream seq once admitted (a retained op), absent while pending */
   seq?: number;
 };

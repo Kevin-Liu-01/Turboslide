@@ -24,6 +24,7 @@ import { memoryPendingStore, pendingKey } from './pending-store.ts';
 import {
   BACKOFF_MAX_MS,
   GAP_REOPEN_MS,
+  advanceRunEnds,
   createRoomClient,
   legacyFieldOf,
   presenceRefusalOf,
@@ -40,6 +41,7 @@ import type {
   OpsResponse,
   RoomClientOptions,
   RoomTransport,
+  RunEnds,
   SyncStatus,
 } from './room-client.ts';
 
@@ -2817,5 +2819,91 @@ describe('the Cloudflare phase: the socket transport’s frames the client reads
     expect(plain.status().transport).toBe('sse');
     await client.stop();
     await plain.stop();
+  });
+});
+
+describe("the run rule's client half (build/r1.md R1-R2h; the row realtime.title.two-typers)", () => {
+  it('declares the rule on an op that continues its own insert, keeps that op left of a remote insert at its offset, and both ends place one text', async () => {
+    const h = harness();
+    const base = tabTransport(h.server, kevin);
+    const posts: OpsPost[] = [];
+    let hold: Promise<void> | null = null;
+    let release: () => void = () => undefined;
+    const gated: RoomTransport = {
+      ...base,
+      async postOps(body) {
+        posts.push(body);
+        if (hold !== null) await hold;
+        return base.postOps(body);
+      },
+    };
+    // the schema's transform, so a tie at one offset takes the side each op declares
+    const a = h.client(kevin, { transport: gated, transform: undefined });
+    const b = h.client(maya, { transform: undefined });
+    a.room.start();
+    b.room.start();
+    await until(() => a.room.status().connected && b.room.status().connected);
+    const start = textOf(a.room.document());
+    const end = start.length;
+    a.room.apply([splice(end, 0, ' ta')], 'type', 'now');
+    await settled([a.room, b.room]);
+    await until(() => textOf(b.room.document()) === `${start} ta`);
+    // A's "3" continues its own " ta" and waits on the wire; B appends " tb" at the same offset
+    hold = new Promise((resolve) => {
+      release = resolve;
+    });
+    a.room.apply([splice(end + 3, 0, '3')], 'type', 'now');
+    b.room.apply([splice(end + 3, 0, ' tb')], 'type', 'now');
+    await settled([b.room]);
+    await until(() => textOf(a.room.document()).includes(' tb'));
+    // A's own copy keeps its pending "3" left of B's word, as the server will place it
+    expect(textOf(a.room.document())).toBe(`${start} ta3 tb`);
+    release();
+    hold = null;
+    await settled([a.room, b.room]);
+    const server = textOf(h.server.document());
+    expect(server).toBe(`${start} ta3 tb`);
+    expect(textOf(a.room.document())).toBe(server);
+    expect(textOf(b.room.document())).toBe(server);
+    // the first insert declared nothing (no run end yet); the "3" declared the rule
+    expect(posts.flatMap((post) => post.entries).map((entry) => entry.run ?? null)).toEqual([
+      null,
+      true,
+    ]);
+    await a.room.stop();
+    await b.room.stop();
+  });
+
+  it("moves a run end past later splices, keeps it where another author's insert lands exactly on it, and drops it with a rewrite of the text", () => {
+    const runEnds: RunEnds = new Map();
+    // the first insert has no run end to continue; the next one at its end does
+    expect(advanceRunEnds(runEnds, [splice(5, 0, 'ab')], true)).toBe(false);
+    expect(advanceRunEnds(runEnds, [splice(7, 0, 'c')], true)).toBe(true);
+    // another author's insert exactly at the run end leaves it; one before it moves it
+    advanceRunEnds(runEnds, [splice(8, 0, 'XYZ')], false);
+    expect(advanceRunEnds(runEnds, [splice(8, 0, 'd')], true)).toBe(true);
+    advanceRunEnds(runEnds, [splice(0, 0, 'QQ')], false);
+    expect(advanceRunEnds(runEnds, [splice(11, 0, 'e')], true)).toBe(true);
+    // a backspace at the run end keeps the run; an insert elsewhere declares nothing
+    advanceRunEnds(runEnds, [splice(11, 1, '')], true);
+    expect(advanceRunEnds(runEnds, [splice(11, 0, 'f')], true)).toBe(true);
+    expect(advanceRunEnds(runEnds, [splice(0, 0, 'z')], true)).toBe(false);
+    expect(advanceRunEnds(runEnds, [splice(1, 0, 'y')], true)).toBe(true);
+    // a whole value write of the text drops its run end
+    advanceRunEnds(
+      runEnds,
+      [
+        {
+          op: 'block.set',
+          slideId: SLIDE,
+          blockId: BLOCK,
+          path: '/text',
+          value: 'new',
+        } as Mutation,
+      ],
+      false,
+    );
+    expect(runEnds.size).toBe(0);
+    expect(advanceRunEnds(runEnds, [splice(3, 0, 'w')], true)).toBe(false);
   });
 });

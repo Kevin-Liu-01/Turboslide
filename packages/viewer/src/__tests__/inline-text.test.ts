@@ -591,6 +591,29 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
     expect(absorbedText(base, base, 'Alpha', [11, 11]).selection).toEqual([5, 5]);
   });
 
+  it("keeps unflushed keystrokes that begin where another person's word landed before that word, with the caret (build/r1.md R1-R2h)", () => {
+    // A handed " ta" and still holds "3" in the editable when B's " tb" lands at the end of " ta":
+    // the "3" finishes A's word and B's word follows (realtime.title.two-typers lost " ta3")
+    const base = 'Heading ta';
+    const dom = 'Heading ta3';
+    expect(absorbedText(base, dom, 'Heading ta tb', [11, 11])).toEqual({
+      text: 'Heading ta3 tb',
+      selection: [11, 11],
+    });
+    // a caret before the keystrokes stays where it is
+    expect(absorbedText(base, dom, 'Heading ta tb', [10, 10]).selection).toEqual([10, 10]);
+    // a caret past the keystrokes in a longer text moves with the insertion
+    expect(absorbedText('ab cd', 'ab3 cd', 'abXY cd', [5, 5])).toEqual({
+      text: 'ab3XY cd',
+      selection: [7, 7],
+    });
+    // an insertion elsewhere keeps the old rule: the keystrokes move past one before them
+    expect(absorbedText(base, dom, 'Heading tb ta', [11, 11])).toEqual({
+      text: 'Heading tb ta3',
+      selection: [14, 14],
+    });
+  });
+
   it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
     // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
     const base = 'Every line of copy';

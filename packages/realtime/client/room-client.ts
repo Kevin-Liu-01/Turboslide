@@ -26,7 +26,7 @@ import type { Mutation } from '@turboslide/schema/mutations';
 import { isSlideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { isTextOp, sameText, shiftRange, transformMutation } from '@turboslide/schema/transform';
-import type { Splice } from '@turboslide/schema/transform';
+import type { Side, Splice } from '@turboslide/schema/transform';
 
 import type {
   CommentOp,
@@ -38,6 +38,7 @@ import type {
   RoomMutation,
   RosterEntry,
 } from '../src/channel.ts';
+import { runTieSide } from '../src/channel.ts';
 import { foldMutation } from '../src/coalesce.ts';
 import {
   CLIENT_ID_PATTERN,
@@ -284,6 +285,12 @@ export type PendingOp = {
   note?: string;
   /** sent in the POST in flight */
   inflight: boolean;
+  /**
+   * The run rule (channel.ts `runTieSide`; build/r1.md R1-R2h): the op's first insert starts at
+   * the end of this tab's last insert into that text, in the frame it was written in. Declared on
+   * the POST, and the op keeps the left of a remote insert at its offset here as on the server.
+   */
+  run?: true;
   /** the local clock the op was recorded at, for `transformSince` */
   at: number;
   /** the mutations that undo this op on the document it was applied to, for the rebase of the ops after it when it is refused */
@@ -385,8 +392,11 @@ export type RoomClientOptions = {
   retire?: readonly string[];
   pendingStore?: PendingStore;
   now?: () => number;
-  /** the schema's transform unless a test injects one */
-  transform?: (mutation: Mutation, against: Mutation) => Mutation[];
+  /**
+   * the schema's transform unless a test injects one; `insertTie` is the side the moved insert
+   * takes in a tie at one offset ('right' unless the op declares the run rule)
+   */
+  transform?: (mutation: Mutation, against: Mutation, insertTie?: Side) => Mutation[];
   /** the flush timers, for tests; the globals by default */
   timers?: {
     setTimeout: (run: () => void, ms: number) => unknown;
@@ -465,11 +475,19 @@ function bytesOf(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).byteLength;
 }
 
-/** The default transform: the schema's, identity while B1's functions throw NotImplementedError. */
-export function defaultTransform(mutation: Mutation, against: Mutation): Mutation[] {
+/**
+ * The default transform: the schema's, identity while B1's functions throw NotImplementedError.
+ * An insert tied with `against` at one offset lands after it unless `insertTie` says 'left' (an
+ * op that declares the run rule, channel.ts `runTieSide`).
+ */
+export function defaultTransform(
+  mutation: Mutation,
+  against: Mutation,
+  insertTie: Side = 'right',
+): Mutation[] {
   if (!isTextOp(mutation) || !isTextOp(against) || !sameText(mutation, against)) return [mutation];
   try {
-    return transformMutation(mutation, against, 'right');
+    return transformMutation(mutation, against, 'right', insertTie);
   } catch (error) {
     if (error instanceof NotImplementedError) return [mutation];
     throw error;
@@ -701,6 +719,66 @@ export function shiftPoint(offset: number, splice: Splice): number {
   return shiftRange([offset, offset], splice)[0];
 }
 
+/** A text the run rule tracks: the slide, the block and the Text path of a splice. */
+type RunText = { slideId: string; blockId: string; path: string };
+
+/**
+ * The run ends of a tab (build/r1.md R1-R2h; channel.ts `runTieSide`): per text the tab typed
+ * into, the offset right after its last insert there, in the local document's frame.
+ */
+export type RunEnds = Map<string, RunText & { end: number }>;
+
+function runTextKey(text: RunText): string {
+  return `${text.slideId}\u0000${text.blockId}\u0000${text.path}`;
+}
+
+/**
+ * Moves the run ends past mutations applied in their frame and answers the run rule's
+ * declaration for them. `own` mutations are this tab's: the first insert among them declares the
+ * rule when it starts at its text's run end, and every insert sets its text's run end at the
+ * insert's end. Every other splice moves a run end by `shiftPoint`, so another author's insert
+ * exactly at the point leaves it (the point stays at the end of this tab's own text). A write
+ * that rewrites a whole text drops that text's run end.
+ */
+export function advanceRunEnds(
+  runEnds: RunEnds,
+  mutations: readonly Mutation[],
+  own: boolean,
+): boolean {
+  let run: boolean | undefined;
+  for (const mutation of mutations) {
+    if (mutation.op === 'text.splice') {
+      const key = runTextKey(mutation);
+      const row = runEnds.get(key);
+      if (own && mutation.insert.length > 0) {
+        if (run === undefined) run = row?.end === mutation.at;
+        runEnds.set(key, {
+          slideId: mutation.slideId,
+          blockId: mutation.blockId,
+          path: mutation.path,
+          end: mutation.at + mutation.insert.length,
+        });
+        continue;
+      }
+      if (row !== undefined) row.end = shiftPoint(row.end, mutation);
+      continue;
+    }
+    for (const [key, row] of runEnds) {
+      const probe: Mutation = {
+        op: 'text.splice',
+        slideId: row.slideId,
+        blockId: row.blockId,
+        path: row.path,
+        at: 0,
+        remove: 0,
+        insert: '',
+      };
+      if (rewritesText(mutation, probe)) runEnds.delete(key);
+    }
+  }
+  return run === true;
+}
+
 /** The slides a mutation list touches, for the change signal; deck level ops mark `all`. */
 export function changedSlides(mutations: readonly Mutation[]): readonly string[] | 'all' {
   const ids = new Set<string>();
@@ -764,6 +842,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let revision = options.document.deck.revision;
   let pending: PendingOp[] = [];
   let retained: RetainedOp[] = [];
+  /* the run ends of this tab's own texts (advanceRunEnds; build/r1.md R1-R2h): dropped at a
+     resync and at a refusal, whose re-fold moves the local frame in ways no splice names */
+  const runEnds: RunEnds = new Map();
   const recent: Entry[] = [];
   /**
    * The entries buffered ahead of the position, by seq. A list per seq, because the blob tier
@@ -929,6 +1010,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           ? {}
           : { comment: op.comment as unknown as Record<string, unknown> }),
         ...(op.note === undefined ? {} : { note: op.note }),
+        ...(op.run === true ? { run: true as const } : {}),
       })),
     ];
     const queue: PersistedQueue = {
@@ -1003,6 +1085,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         rejects.push({ ...rejected, mutations: op.mutations });
         op.settle?.({ rejected });
         changed = 'all';
+        runEnds.clear();
         // the ops after it were recorded on a text that carried it: they move past its inverse
         pending = queue;
         rebasePast(op);
@@ -1363,15 +1446,33 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       emitStatus();
       return;
     }
-    // another author's op: the pending text ops move past it, then the local document re-derives
+    // another author's op: the pending text ops move past it, then the local document re-derives.
+    // The run ends follow the entry into the local frame first: the entry moved past each pending
+    // op with the side that op leaves it (the inverse of the op's own side in a tie)
+    let bridged: Mutation[] = mutations;
+    for (const op of pending) {
+      if (op.kind !== 'edit' || op.mutations === undefined) continue;
+      const side: Side = runTieSide(op.run, 'right') === 'left' ? 'right' : 'left';
+      bridged =
+        transformPast(bridged, op.mutations, (mutation, against) =>
+          transform(mutation, against, side),
+        ) ?? [];
+    }
+    advanceRunEnds(runEnds, bridged, false);
     const next: PendingOp[] = [];
     for (const op of pending) {
       if (op.kind !== 'edit' || op.mutations === undefined) {
         next.push(op);
         continue;
       }
-      const moved = transformPast(op.mutations, mutations, transform);
+      // an op that declares the run rule keeps the left of an insert at its offset, as the
+      // server places it (room-core.ts transformEntry); every other op lands after it
+      const tie = runTieSide(op.run, 'right');
+      const moved = transformPast(op.mutations, mutations, (mutation, against) =>
+        transform(mutation, against, tie),
+      );
       if (moved === null) {
+        runEnds.clear();
         options.onUnplaceable?.(op);
         const rejected: Rejected = { opId: op.opId, reason: 'stale' };
         rejects.push({ ...rejected, mutations: op.mutations });
@@ -1594,6 +1695,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const fresh = answer.document;
     server = fresh;
     revision = Math.max(revision, fresh.deck.revision);
+    runEnds.clear();
     settleFromResync(answer, since);
     // the reload brought the document to the head. On the blob tier the seq of an entry is the
     // revision its record made (blob.ts), so the fresh document's revision is the stream
@@ -1834,6 +1936,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
               kind: 'edit' as const,
               mutations: op.mutations ?? [],
               ...(op.note === undefined ? {} : { note: op.note }),
+              ...(op.run === true ? { run: true as const } : {}),
             }
           : {
               opId: op.opId,
@@ -1910,6 +2013,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           options.onReject?.(notice);
         }
         if (refused > 0) {
+          runEnds.clear();
           const folded = fold();
           emitChange(folded.document, 'all', 'reject');
         }
@@ -1973,6 +2077,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // a refusal that will not change on a retry (a forbidden write, a deck gone for good): the
       // ops return to the author
       notFoundRetries = 0;
+      runEnds.clear();
       if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {
         pending = pending.filter((row) => row !== op);
@@ -2317,6 +2422,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     apply(mutations, label, flush, applyOptions) {
       const result = applyMutations(local, mutations);
       clock += 1;
+      // the run rule's declaration, read in the frame the op was written in (R1-R2h)
+      const run = advanceRunEnds(runEnds, mutations, true);
       const note = applyOptions?.note?.trim();
       let settle: ((outcome: Settled) => void) | undefined;
       const settled = new Promise<Settled>((resolve) => {
@@ -2332,6 +2439,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         mutations: [...mutations],
         label,
         inflight: false,
+        ...(run ? { run: true as const } : {}),
         at: clock,
         inverse: result.inverse,
         ...(note === undefined || note === '' ? {} : { note: note.slice(0, ENTRY_NOTE_MAX) }),

@@ -759,8 +759,23 @@ export function absorbedText(
   const shift = (offset: number): number =>
     change.start <= offset ? Math.max(change.start, offset + delta) : offset;
   const untouched = local.text === '' && local.end === local.start;
-  const at = shift(local.start);
-  const remove = Math.min(Math.max(at, shift(local.end)) - at, plainLength(remote) - at);
+  /* unflushed keystrokes that begin exactly where another person's pure insertion landed stay
+     before it, and the caret with them (the realtime round's fix round 2, build/r1.md R1-R2h; the
+     row realtime.title.two-typers). The room keeps the later arrival to the right of the text a
+     person continues (the run rule, channel.ts `runTieSide`, and the collapsed caret's rule
+     below), so the keystrokes finish their own word instead of landing after the other person's
+     word: A's " ta" was handed, A's "3" still in the editable when B's " tb" landed at its end, and
+     the "3" moved past " tb" and cut A's word (" ta tb3") */
+  const keepsBefore =
+    local.text !== '' &&
+    local.end === local.start &&
+    change.text !== '' &&
+    change.end === change.start &&
+    local.start === change.start;
+  const at = keepsBefore ? change.start : shift(local.start);
+  const remove = keepsBefore
+    ? 0
+    : Math.min(Math.max(at, shift(local.end)) - at, plainLength(remote) - at);
   let text = remote;
   let applied = false;
   if (!untouched) {
@@ -790,6 +805,9 @@ export function absorbedText(
     collapsed && untouched && offset === change.start && change.end === change.start;
   const carry = (offset: number): number => {
     if (staysBefore(offset)) return offset;
+    /* the keystrokes kept before the insertion: an offset up to their end stands, one past them
+       is a base offset after the insertion and moves with it */
+    if (keepsBefore && applied) return offset <= local.start + inserted ? offset : offset + delta;
     if (offset <= local.start) return shift(offset);
     if (offset < local.start + local.text.length) {
       return at + Math.min(offset - local.start, inserted);

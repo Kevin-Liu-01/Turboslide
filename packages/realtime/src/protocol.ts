@@ -194,6 +194,9 @@ export const insertTieRuleSchema = z.enum(INSERT_TIE_RULES);
  * edit may carry `note`, the history label Version history lists it under (the brand kit's and
  * the assist's writes; channel.ts `Entry.note`); the author is never the body's. `insertTie`
  * names the tie rule the client applies to its pending inserts (above); absent, server order.
+ * An edit's `run: true` declares the run rule (channel.ts `runTieSide`): the entry's first insert
+ * starts where the author's own last insert into that text ended, so it keeps the left of another
+ * author's insert at its offset on the server as in the client that sent it.
  */
 export const opsPostSchema = z
   .strictObject({
@@ -209,6 +212,7 @@ export const opsPostSchema = z
             mutations: z.array(roomMutationSchema).optional(),
             comment: commentOpSchema.optional(),
             note: entryNoteSchema.optional(),
+            run: z.literal(true).optional(),
           })
           .refine(hasPayload, PAYLOAD_RULE)
           .refine(noteOnEdit, NOTE_RULE),

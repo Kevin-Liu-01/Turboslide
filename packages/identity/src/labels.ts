@@ -109,7 +109,23 @@ export function labelFor(principalId: string): string {
   return `${word} ${number}`;
 }
 
-const LABEL_GRAMMAR = new RegExp(`^(${LABEL_WORDS.join('|')}) [1-9][0-9]{2}$`, 'i');
+/**
+ * The word before a generated label where it names another person (Round 1, docs/NEXT.md 4.1.3
+ * item 21; audit-clutter 119): "Guest Titanium 471". The label itself stays the identity's stable
+ * key: the avatar's initials and hue read it (marks.ts), and version history renders it.
+ */
+export const GUEST_PREFIX = 'Guest';
+
+/** A generated label as a person's name for others: "Guest Titanium 471". */
+export function guestNameFor(label: string): string {
+  return `${GUEST_PREFIX} ${label}`;
+}
+
+/* the generated grammar, with or without the guest word, so a typed name can be neither */
+const LABEL_GRAMMAR = new RegExp(
+  `^(${GUEST_PREFIX} )?(${LABEL_WORDS.join('|')}) [1-9][0-9]{2}$`,
+  'i',
+);
 const WORDS_LOWER = new Set(LABEL_WORDS.map((w) => w.toLowerCase()));
 
 /** True for a list word alone, in any case, so no typed name can be one (11 4.5). */
@@ -117,7 +133,7 @@ export function isLabelWord(text: string): boolean {
   return WORDS_LOWER.has(text.trim().toLowerCase());
 }
 
-/** True for `<Word> <NNN>` in any case, the generated grammar (11 4.5). */
+/** True for `<Word> <NNN>` or `Guest <Word> <NNN>` in any case, the generated grammar (11 4.5). */
 export function matchesLabelGrammar(text: string): boolean {
   return LABEL_GRAMMAR.test(text.trim().replace(/\s+/g, ' '));
 }

@@ -3,10 +3,12 @@ import { describe, expect, test } from 'vitest';
 import ldnoobw from '../fixtures/ldnoobw-en.json' with { type: 'json' };
 import {
   DENIED_NUMBERS,
+  GUEST_PREFIX,
   LABEL_NUMBERS,
   LABEL_SPACE,
   LABEL_WORDS,
   disambiguateLabels,
+  guestNameFor,
   isLabelWord,
   labelFor,
   labelPartsFor,
@@ -92,6 +94,21 @@ describe('the grammar guards', () => {
     expect(matchesLabelGrammar('Titanium 4711')).toBe(false);
     expect(matchesLabelGrammar('Kevin 471')).toBe(false);
     expect(matchesLabelGrammar('Titanium')).toBe(false);
+  });
+
+  /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 119): another person's generated label
+     reads "Guest <label>"; the grammar takes the guest word, so no typed name can be one */
+  test('guestNameFor and the guest grammar', () => {
+    expect(GUEST_PREFIX).toBe('Guest');
+    expect(guestNameFor('Titanium 471')).toBe('Guest Titanium 471');
+    const label = labelFor('anon_9f1c2a3e-4b5d-4e6f-8a9b-0c1d2e3f4a5b');
+    expect(matchesLabelGrammar(guestNameFor(label))).toBe(true);
+    expect(matchesLabelGrammar('guest titanium 471')).toBe(true);
+    expect(matchesLabelGrammar('Guest Kevin 471')).toBe(false);
+    expect(matchesLabelGrammar('Guest Titanium')).toBe(false);
+    expect(matchesLabelGrammar('Guest')).toBe(false);
+    /* the label itself is unchanged: the marks read its first letter */
+    expect(label.startsWith(GUEST_PREFIX)).toBe(false);
   });
 
   test('disambiguateLabels suffixes by first appearance and never the first', () => {

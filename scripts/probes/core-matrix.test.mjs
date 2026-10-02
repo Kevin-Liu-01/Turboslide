@@ -463,8 +463,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the next program's hotfix H4 (docs/NEXT.md 3.2): one accounts row on every origin */
     /* the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.5): four /home rows */
     /* the next program's Round 1 push B3a#7 (docs/NEXT.md 4.1.5): three menu rows of the cuts */
+    /* the next program's Round 1 push B3a#8 (docs/NEXT.md 4.1.5): chrome.words.no-process-words */
     /* the next program's rows (docs/NEXT.md), one term per push in the order of the comments above */
-    const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3;
+    const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3 + 1;
     /* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.5): decks.manifest.paper */
     /* the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.5): decks.list.ruled-rows */
     /* the next program's Round 1 push B2c#17 (docs/NEXT.md 4.1.5): two rows */

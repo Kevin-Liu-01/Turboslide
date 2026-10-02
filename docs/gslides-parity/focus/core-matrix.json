@@ -372,7 +372,7 @@
     {
       "id": "decks.card.download",
       "feature": "decks",
-      "interaction": "Card menu > Download starts the PowerPoint download within 30 s: a PK file named .pptx (docs/POLISH.md 2.7 item 85; the bundle is File > Download > More formats > Turboslide bundle, export.zip.bundle)",
+      "interaction": "Card menu > Download starts the PowerPoint download within 30 s: a PK file named .pptx (docs/POLISH.md 2.7 item 85; the bundle is File > Download > More formats > Turboslide file, export.zip.bundle)",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 41",
@@ -4637,7 +4637,7 @@
     {
       "id": "export.zip.bundle",
       "feature": "export",
-      "interaction": "File > Download > More formats > Turboslide bundle arrives within 30 s with deck.json and the snackbar reads \"Saved <name>\" with the file's name (docs/POLISH.md 2.7 item 86)",
+      "interaction": "File > Download > More formats > Turboslide file arrives within 30 s with deck.json and the snackbar reads \"Saved <name>\" with the file's name (docs/POLISH.md 2.7 item 86)",
       "driver": "core/export.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 30",
@@ -7062,7 +7062,7 @@
     {
       "id": "shaders.insert.gallery-thumbnails",
       "feature": "shaders",
-      "interaction": "Insert > Shader opens a grid titled Shader with one sentence under the title naming the brand kit's colours; every card has a decoded thumbnail within 2 s; the search narrows to \"metal\" in one row; a category chip narrows the grid; no canvas is mounted in the dialog",
+      "interaction": "Insert > Animated pattern opens a grid titled Animated pattern with one sentence under the title naming the theme's colours; every card has a decoded thumbnail within 2 s; the search narrows to \"metal\" in one row; a category chip narrows the grid; no canvas is mounted in the dialog",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 3 (s03-insert-material-dialog.png, s09b-background-material-list.png)",
@@ -7084,7 +7084,7 @@
     {
       "id": "shaders.insert.words",
       "feature": "shaders",
-      "interaction": "The Insert row, the chip, the section title and the alt text read Shader; no paper: id and no \"not captured\" is drawn on the sheet, the card, the viewer or the show",
+      "interaction": "The Insert row reads Animated pattern; the chip, the section title and the alt text read Animated pattern, or Shader until their owners take the noun; no paper: id and no \"not captured\" is drawn on the sheet, the card, the viewer or the show",
       "driver": "probe --core",
       "today": "broken",
       "severity": 3,
@@ -7331,7 +7331,7 @@
     {
       "id": "shaders.view.play-setting",
       "feature": "view",
-      "interaction": "Tools > Preferences > Play shaders lists On, In the show only and Off with In the show only checked by default; the pick is stored per browser and describe().state.settings.playShaders reads it; the Slideshow's Options menu mirrors it",
+      "interaction": "Tools > Preferences > Play animated patterns lists On, In the show only and Off with In the show only checked by default; the pick is stored per browser and describe().state.settings.playShaders reads it; the Slideshow's Options menu mirrors it",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 17 (walk-run2.json row 25)",
@@ -7341,7 +7341,7 @@
     {
       "id": "shaders.show.plays-when-on",
       "feature": "shaders",
-      "interaction": "With Play shaders on, the block's Play in the show on and no reduced motion, the show's title slide has one canvas and two clips 900 ms apart differ",
+      "interaction": "With Play animated patterns on, the block's Play in the show on and no reduced motion, the show's title slide has one canvas and two clips 900 ms apart differ",
       "driver": "core/shaders.spec.ts",
       "today": "broken",
       "severity": 3,
@@ -7353,7 +7353,7 @@
     {
       "id": "shaders.show.frame-when-off",
       "feature": "shaders",
-      "interaction": "With Play shaders off, or under prefers-reduced-motion: reduce, the show has no canvas and shows the frame",
+      "interaction": "With Play animated patterns off, or under prefers-reduced-motion: reduce, the show has no canvas and shows the frame",
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 17, section 7 (walk-run2.json row 25)",
@@ -8095,7 +8095,7 @@
     {
       "id": "surface.domain.build-commit",
       "feature": "surface",
-      "interaction": "`GET /api/agent` on the gate's origin answers `instance.commit` equal to the ship's sha and Tools > Preferences lists Play shaders; `scripts/hosted-smoke.mjs` exits 1 when either differs",
+      "interaction": "`GET /api/agent` on the gate's origin answers `instance.commit` equal to the ship's sha and Tools > Preferences lists Play animated patterns; `scripts/hosted-smoke.mjs` exits 1 when either differs",
       "driver": "core/surface.spec.ts",
       "today": "broken",
       "severity": 3,
@@ -8968,6 +8968,16 @@
       "severity": 1,
       "evidence": "audit-clutter 103",
       "note": "docs/NEXT.md 4.1.3 item 20 and 4.1.5, push B3a#7: More formats holds Web page, the Turboslide bundle and Download options (round1/build/b3a.md request 10)"
+    },
+    {
+      "id": "chrome.words.no-process-words",
+      "feature": "chrome",
+      "interaction": "No label or tooltip in the default view contains a word of the extended forbidden list; the toolbar button, the Slide rows and the panel title all read \"Theme\"",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "audit-clutter 57 to 68; audit-brand-surfaces 50",
+      "note": "docs/NEXT.md 4.1.3 items 21 and 22, push B3a#8; the menus with every submenu, the toolbar and the title row read with Tools > Advanced tools off. NEXT.md 4.1.5 also names \"the account tooltip reads You\": that word is drawn by presence/PresenceSlot.tsx, outside B3a's files, so the clause joins this row with the integrator's change (round1/build/b3a.md request 3)"
     },
     {
       "id": "chrome.menus.structure-sweep",

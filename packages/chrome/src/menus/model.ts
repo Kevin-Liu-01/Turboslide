@@ -502,6 +502,12 @@ export type MenuItem = {
   altEffect?: { when: MenuPredicate; effect: MenuEffect };
   /** the underlined letter; `assignAccessKeys` in keys.ts fills it */
   accessKey?: string;
+  /**
+   * The label the row draws when its submenu collapses into it (`visibleItems` with
+   * `collapseSingles`): File's New with the template gallery parked draws "New presentation"
+   * where the row alone would read "Presentation" (Round 1, docs/NEXT.md 4.1.3 item 21)
+   */
+  collapsedLabel?: string;
   /** a 1 px rule is drawn above this item */
   dividerBefore?: true;
   items?: ReadonlyArray<MenuItem>;
@@ -760,9 +766,11 @@ const shapeGrid = (category: ShapeCategory): MenuEffect => ({
 // 2.0 The title row and 9.1 the Slideshow arrow; SPEC-3 4.2 the five fixed slots of the right group
 
 export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
+  /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 117): the page lists the viewer's own and
+     shared presentations since H2 */
   now('title.appIcon', 'Turboslide home', route('/decks'), {
     google: 'App icon',
-    doc: 'Every presentation on this Turboslide',
+    doc: 'Your presentations',
   }),
   now('title.name', 'Rename', action('deck.rename'), {
     google: 'Title field',
@@ -832,7 +840,6 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
      starter opens that dialog), so the doc no longer names it */
   now('title.assist', 'Assist', panel('Assist'), {
     turboslide: true,
-    icon: 'sparkles',
     key: shortcut('Cmd+J'),
     when: 'write',
     doc: 'Ask for a shorter slide or for speaker notes; nothing changes until you accept',
@@ -847,7 +854,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   now('title.sidePanel', 'Show side panel', client('toggleSidePanel'), {
     turboslide: true,
     icon: 'sidebar',
-    doc: 'Reopens the last panel: Format options, Brand kit, Comments or Version history; closes the open one',
+    doc: 'Reopens the last panel: Format options, Theme, Comments or Version history; closes the open one',
   }),
   now('title.inbox', 'Notifications', panel('Notifications'), {
     turboslide: true,
@@ -886,6 +893,15 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   now('title.share', 'Share', dialog('Share'), {
     icon: 'link',
     doc: 'Who can open this presentation, and the link to send',
+  }),
+  /* Round 1 (docs/NEXT.md 4.1.2, B's graft; 4.1.3 item 13; round1/build/b3a.md request 5): Sign In
+     as text after Share for a visitor the deployment can sign in, Title Case as every button is
+     (DECK-GRAMMAR 22). It opens the dialog the account menu's Sign in row opens, under the same
+     predicate; TitleRow.tsx draws it (B3b) */
+  now('title.signIn', 'Sign In', dialog('Sign in'), {
+    turboslide: true,
+    when: 'canSignIn',
+    doc: 'Keep your name across browsers and receive invitations by email',
   }),
   /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear. Parked whole
      in the focus round (docs/FOCUS.md 3.2); in the default view since the people round
@@ -946,6 +962,8 @@ const FILE: Menu = {
       now('file.new.presentation', 'Presentation', route('/new', true), {
         icon: 'plus',
         turboslide: true,
+        /* the row File draws first while the template gallery is parked (audit-clutter 83, 113) */
+        collapsedLabel: 'New presentation',
       }),
       /* parked with the templates feature at the product round's ship (docs/PRODUCT.md 8.2; the
          parks rule of the ship step): templates.card.rename-and-delete and
@@ -988,7 +1006,7 @@ const FILE: Menu = {
       /* parked with the templates feature at the product round's ship (the comment on
          file.new.templateGallery above); the dialog and template.create stay for agents */
       advanced: true,
-      doc: 'Saves this presentation as a template for new ones on this Turboslide, with its brand kit',
+      doc: 'Saves this presentation as a template that new presentations can start from, with its theme',
     }),
     sub(
       'file.share',
@@ -1063,7 +1081,8 @@ const FILE: Menu = {
               turboslide: true,
               doc: 'One file that opens in any browser',
             }),
-            now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
+            /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 115): the file, not the bundle */
+            now('file.download.zip', 'Turboslide file (.zip)', action('deck.pack'), {
               turboslide: true,
               doc: 'The file Open and Import slides read',
             }),
@@ -1079,7 +1098,7 @@ const FILE: Menu = {
           {
             turboslide: true,
             dividerBefore: true,
-            doc: 'A web page, a Turboslide bundle, or PowerPoint and PDF with their options',
+            doc: 'A web page, a Turboslide file, or PowerPoint and PDF with their options',
           },
         ),
       ],
@@ -1636,17 +1655,18 @@ const INSERT: Menu = {
     now('insert.icon', 'Icon', action('block.insert'), {
       turboslide: true,
       advanced: true,
-      icon: 'sparkles',
+      icon: 'squares-2x2',
       dividerBefore: true,
       doc: 'One of the theme’s icons',
     }),
     /* the features round, ship two (docs/FEATURES.md 5.4; build/b1.md R1): Insert > Shader in the
        default view, the Material row renamed and unflagged; the gallery is dialogs/ShaderGallery.tsx */
-    now('insert.shader', 'Shader', action('block.insert'), {
+    /* Round 1 (docs/NEXT.md 4.1.3 item 21, question 10's default): the seller's noun for a shader */
+    now('insert.shader', 'Animated pattern', action('block.insert'), {
       turboslide: true,
       icon: 'cube',
-      doc: 'A moving shader in your brand kit’s colors; every export carries its still',
-      terms: ['shader', 'material', 'animation', 'gradient', 'motion'],
+      doc: 'A moving pattern in your theme’s colors; every export carries its still frame',
+      terms: ['shader', 'pattern', 'material', 'animation', 'gradient', 'motion'],
     }),
   ],
 };
@@ -2460,25 +2480,26 @@ const TOOLS: Menu = {
          per browser setting; the editor mount and the show read it, reduced motion forces Off */
       sub(
         'tools.preferences.playShaders',
-        'Play shaders',
+        /* question 10's default (docs/NEXT.md 4.1.3 item 21): "Play animated patterns" */
+        'Play animated patterns',
         [
           now('tools.preferences.playShaders.on', 'On', toggle('playShaders', 'on'), {
-            doc: 'Shaders move on the slide while you edit and in the show',
+            doc: 'Animated patterns move on the slide while you edit and in the show',
           }),
           now(
             'tools.preferences.playShaders.show',
             'In the show only',
             toggle('playShaders', 'show'),
-            { doc: 'Shaders hold their frame while you edit and move in the show' },
+            { doc: 'Animated patterns hold their frame while you edit and move in the show' },
           ),
           now('tools.preferences.playShaders.off', 'Off', toggle('playShaders', 'off'), {
-            doc: 'Shaders show their frame everywhere',
+            doc: 'Animated patterns show their frame everywhere',
           }),
         ],
         {
           turboslide: true,
           icon: 'cube',
-          terms: ['shader', 'animation', 'motion', 'reduced motion'],
+          terms: ['shader', 'play shaders', 'pattern', 'animation', 'motion', 'reduced motion'],
         },
       ),
       sub(
@@ -2557,7 +2578,7 @@ const TOOLS: Menu = {
        97): the title row's Assist and Cmd+J open the panel */
     now('tools.tailor', 'Tailor for a customer', dialog('Tailor for a customer'), {
       turboslide: true,
-      icon: 'sparkles',
+      icon: 'chat',
       dividerBefore: true,
       when: 'write',
       doc: 'Replaces the customer name everywhere, swaps the pictures named after the old one and skips slides, as one change',
@@ -2572,7 +2593,8 @@ const TOOLS: Menu = {
        row over the `advancedTools` setting, off by default and kept per browser */
     now('tools.advancedTools', 'Advanced tools', toggle('advancedTools'), {
       turboslide: true,
-      doc: 'Shows the tools that are not yet tested end to end, in every menu, on the toolbar and in the right click menus',
+      /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 112): no process words */
+      doc: 'Shows more tools in every menu, on the toolbar and in the right click menus. Some of them may not work yet',
     }),
     parked(
       sub(
@@ -2918,7 +2940,7 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'tools.notificationSettings': 'bell',
   'tools.activityDashboard': 'clock',
   'tools.advanced.sideBySide': 'columns',
-  'tools.advanced.suggestionMarks': 'sparkles',
+  'tools.advanced.suggestionMarks': 'light-bulb',
   'tools.advanced.showIds': 'hashtag',
   'tools.advanced.renderSlide': 'photo',
   'tools.advanced.sectionsTree': 'queue-list',
@@ -3948,8 +3970,10 @@ export function visibleItems(
     });
     const only = children.length === 1 ? children[0] : undefined;
     if (only === undefined) return item;
-    /* a dialog reached by the one row takes the container's name (Make a copy opens the Make a
-       copy dialog for the whole presentation); a toggle keeps its own words (Link detection) */
+    /* a row with a collapsed label draws it (New presentation); a dialog reached by the one row
+       takes the container's name (Make a copy opens the Make a copy dialog for the whole
+       presentation); a toggle keeps its own words */
+    if (only.collapsedLabel !== undefined) return { ...only, label: only.collapsedLabel };
     return only.effect?.kind === 'dialog' ? { ...only, label: item.label } : only;
   });
 }

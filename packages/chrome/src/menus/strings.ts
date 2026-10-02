@@ -101,6 +101,10 @@ export const PRESENCE = {
       .filter((part) => part !== null)
       .join(' · '),
   you: '(you)',
+  /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 119): the own chip's tooltip name and the
+     roster's own row read this word alone once presence/PresenceSlot.tsx and RosterMenu.tsx draw
+     it (round1/build/b3a.md request 3) */
+  youName: 'You',
   guest: 'guest',
   /* the accessible word after a signed in account's name, beside the 14 px check badge
      (docs/PEOPLE.md 2.2 default 3, 3.7): "Ada Lovelace, signed in" */
@@ -826,7 +830,9 @@ export const PANELS = {
   /* the Brand kit panel (docs/PRODUCT.md 4.1; B5a): the section names, the one line under each
      control and the snackbar sentences, in the marketer's words */
   brand: {
-    title: 'Brand kit',
+    /* question 10's default (docs/NEXT.md 4.1.3 item 21): one noun for the toolbar button, the
+       Slide row and the panel */
+    title: 'Theme',
     appearance: 'Appearance',
     logo: 'Logo',
     logoLine: 'Shown on the title slide and in the corner of every slide',
@@ -882,7 +888,7 @@ export const PANELS = {
     useOnEverySlide: 'Use on every slide',
     useOnEverySlideDoc:
       'Makes this picture the logo on the title slide and in the footer of every slide',
-    noKitYet: 'The brand kit cannot be changed here yet',
+    noKitYet: 'The theme cannot be changed here yet',
   },
   formatOptions: {
     title: 'Format options',
@@ -991,7 +997,7 @@ export const HOME = {
 
 /** The PowerPoint import refusal (SPEC 12 "Import"). */
 export const IMPORT_PPTX =
-  'PowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text';
+  'PowerPoint import is not available in Turboslide yet. Import a Turboslide file (.zip), or open the file in Google Slides and paste the text';
 
 /** Present mode and Presenter view (SPEC 12 "Present mode"). */
 export const PRESENT = {
@@ -1039,7 +1045,7 @@ export const LOGO_DIALOG = {
   includeCloudDoc: 'Adds the AWS, Azure, Google Cloud and Kubernetes icon sets to the results',
   searching: 'Searching thesvg.org',
   tileDoc: (title: string, sentence: string) => `${title}, ${sentence}; a click inserts it`,
-  kitTileDoc: (name: string) => `${name}’s logo, from the brand kit`,
+  kitTileDoc: (name: string) => `${name}’s logo, from the theme`,
   assetTileDoc: 'A logo this presentation already holds',
   noMarkReplace: 'The theme mark cannot replace a picture. Pick a logo or upload a file',
   noEditor: SNACKBARS.noFilePicker,
@@ -1057,18 +1063,22 @@ export const LOGO_DIALOG = {
  * (apps/studio/src/server/shader-frames.ts imports it; build/b7.md R4).
  */
 export const SHADER_GALLERY = {
-  title: 'Shader',
+  /* Round 1 (docs/NEXT.md 4.1.3 item 21, question 10's default): the gallery Insert > Animated
+     pattern opens reads the seller's noun. The block's own words (the chip, the Format options
+     section, the alt and the history label below) and the Background row keep "Shader" until their
+     owners take the noun with the row shaders.insert.words (round1/build/b3a.md request 4) */
+  title: 'Animated pattern',
   sentence:
-    'Each still shows the shader in one preset. On the slide the shader takes your brand kit’s colors',
-  search: 'Search shaders',
+    'Each still shows the pattern in one preset. On the slide the pattern takes your theme’s colors',
+  search: 'Search patterns',
   searchDoc: 'The name, what it draws, or its engine',
   categories: 'Categories',
   all: 'All',
-  allDoc: 'Every shader of the library',
-  categoryDoc: (label: string) => `The ${label.toLowerCase()} shaders`,
+  allDoc: 'Every animated pattern',
+  categoryDoc: (label: string) => `The ${label.toLowerCase()} patterns`,
   engines: 'Engines',
-  engineDoc: (label: string) => `The shaders ${label} renders`,
-  empty: (query: string) => `No shader matches “${query}”`,
+  engineDoc: (label: string) => `The patterns ${label} renders`,
+  empty: (query: string) => `No pattern matches “${query}”`,
   presetDoc: (label: string, preset: string) => `Inserts ${label} with the ${preset} preset`,
   alt: (label: string) => `The ${label.toLowerCase()} shader`,
   insertLabel: 'Shader',
@@ -1143,6 +1153,14 @@ export const FORBIDDEN_DEFAULT_VIEW_WORDS: ReadonlyArray<string> = [
   'convert',
   'conversion',
   'measure',
+  /* Round 1 (docs/NEXT.md 4.1.3 item 22; audit-clutter 59 to 70): the process and hosting words
+     the clutter audit read in the default view, which no label or tooltip carries any more */
+  'tested',
+  'end to end',
+  'bundle',
+  'Blob store',
+  'server instance',
+  'this Turboslide',
 ];
 
 /** The forbidden words a text contains, as written in the list; empty when it is clean. */

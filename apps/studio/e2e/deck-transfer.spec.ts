@@ -245,7 +245,7 @@ test('Import slides copies the assets the slides need, through slide.import', as
   expect(Object.keys(targetManifest.assets).length).toBeGreaterThan(0);
 });
 
-test('File > Download > Turboslide bundle (.zip) downloads the deck from the editor', async ({
+test('File > Download > More formats > Turboslide file (.zip) downloads the deck from the editor', async ({
   page,
 }) => {
   await page.goto(`/edit/${DECK}`);

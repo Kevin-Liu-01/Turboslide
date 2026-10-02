@@ -464,8 +464,8 @@ export async function run(t) {
 
   await t.step(
     'shaders.insert.gallery-thumbnails',
-    'Insert > Shader; read the title, the sentence and the cards; search "metal"; a category chip',
-    "a grid titled Shader with one sentence under the title naming the brand kit's colours; every card decoded within 2 s; the search narrows to one row; a chip narrows; no canvas",
+    'Insert > Animated pattern; read the title, the sentence and the cards; search "metal"; a category chip',
+    "a grid titled Animated pattern with one sentence under the title naming the theme's colours; every card decoded within 2 s; the search narrows to one row; a chip narrows; no canvas",
     async () => {
       const o = await openGallery();
       if (!o.open) return o.why;
@@ -490,7 +490,7 @@ export async function run(t) {
           ? (el.textContent ?? '').replace(/\s+/g, ' ').trim()
           : null;
       });
-      const sentenceOk = sentence !== null && sentence.length > 0 && /brand kit/i.test(sentence);
+      const sentenceOk = sentence !== null && sentence.length > 0 && /\btheme/i.test(sentence);
       const all = await t
         .pollUntil(cards, (list) => list.length > 0 && list.every((c) => c.thumb), 2000, 100)
         .catch(cards);
@@ -537,7 +537,7 @@ export async function run(t) {
       return {
         ok:
           all.length > 0 &&
-          /^Shader$/i.test(words.title ?? '') &&
+          /^Animated pattern$/i.test(words.title ?? '') &&
           sentenceOk &&
           decoded === all.length &&
           decodedMs <= 2000 &&
@@ -549,7 +549,7 @@ export async function run(t) {
           chip !== null &&
           chipped.length > 0 &&
           chipped.length < all.length,
-        observed: `title "${words.title ?? 'none'}"; ${sentence !== null ? `sentence "${sentence}"${sentenceOk ? '' : ' (names no brand kit)'}` : 'sentence missing'}; ${all.length} cards, ${decoded} with a decoded thumbnail ${decodedMs} ms after the open (${perRow} a row); ${canvases} canvas in the dialog; search ${searchOn ? `"metal" narrows to ${narrowed.length} (${narrowed.map((c) => c.title).join(', ') || 'none'})` : 'field absent'}; chips ${chips.length} (${chip ?? 'none'} narrows to ${chipped.length})${o.switched ? '; with the switch on' : ''}`,
+        observed: `title "${words.title ?? 'none'}"; ${sentence !== null ? `sentence "${sentence}"${sentenceOk ? '' : ' (names no theme)'}` : 'sentence missing'}; ${all.length} cards, ${decoded} with a decoded thumbnail ${decodedMs} ms after the open (${perRow} a row); ${canvases} canvas in the dialog; search ${searchOn ? `"metal" narrows to ${narrowed.length} (${narrowed.map((c) => c.title).join(', ') || 'none'})` : 'field absent'}; chips ${chips.length} (${chip ?? 'none'} narrows to ${chipped.length})${o.switched ? '; with the switch on' : ''}`,
       };
     },
   );
@@ -610,7 +610,7 @@ export async function run(t) {
   await t.step(
     'shaders.insert.words',
     'read the Insert row, the chip, the section title and the alt; the sheet, the viewer and the show for a paper: id or "not captured"',
-    'every word reads Shader; no id and no "not captured" is drawn',
+    'the Insert row reads Animated pattern and the block\'s words read Animated pattern or Shader; no id and no "not captured" is drawn',
     async () => {
       const id = t.deck.shaderBlock;
       let block = id ? ((await t.blockOf(S, id))?.block ?? null) : null;
@@ -690,11 +690,12 @@ export async function run(t) {
       const bad = /paper:|not captured/i;
       return {
         ok:
-          /^Shader$/i.test(rowLabel ?? '') &&
-          chip === 'Shader' &&
+          /* the Insert row took the seller's noun in Round 1 (docs/NEXT.md 4.1.3 item 21) */
+          /^Animated pattern$/i.test(rowLabel ?? '') &&
+          /^(Shader|Animated pattern)$/.test(chip ?? '') &&
           section.section &&
-          /^Shader$/i.test(section.title ?? '') &&
-          /shader/i.test(block.alt ?? '') &&
+          /^(Shader|Animated pattern)$/i.test(section.title ?? '') &&
+          /shader|pattern/i.test(block.alt ?? '') &&
           !/material/i.test(block.alt ?? '') &&
           !bad.test(sheetText) &&
           labels === 0 &&
@@ -1557,7 +1558,7 @@ export async function run(t) {
 
   await t.step(
     'shaders.view.play-setting',
-    'Tools > Preferences > Play shaders; read the three rows; pick Off; reload; the show Options menu; the default back',
+    'Tools > Preferences > Play animated patterns; read the three rows; pick Off; reload; the show Options menu; the default back',
     'On, In the show only and Off with In the show only checked by default; the pick is stored and describe reads it; the Options menu mirrors it',
     async () => {
       /* under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */

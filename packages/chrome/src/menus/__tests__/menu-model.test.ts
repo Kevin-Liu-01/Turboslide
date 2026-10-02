@@ -133,6 +133,8 @@ const SPEC_ROWS: Row[] = [
   row('title', 'omit', ['title.meet', 'title.record']),
   row('title', 'now', ['title.slideshow']),
   row('title', 'now', ['title.share']),
+  /* Round 1 (docs/NEXT.md 4.1.2, 4.1.3 item 13): Sign In as text after Share */
+  row('title', 'now', ['title.signIn']),
   row(
     'title',
     'now',
@@ -652,7 +654,8 @@ const OTHER_ROWS: Row[] = [
  */
 const COUNTS: Record<string, Counts> = {
   /* twelve since the product round: Assist and the side panel toggle (docs/PRODUCT.md 6.1, section 2 rank 25) */
-  title: [12, 1, 4],
+  /* thirteen since Round 1: Sign In as text (docs/NEXT.md 4.1.3 item 13) */
+  title: [13, 1, 4],
   /* the product round adds Save as template and Download options (docs/PRODUCT.md 4.3, section 2 rank 8) */
   file: [26, 5, 5],
   edit: [11, 0, 0],
@@ -817,11 +820,11 @@ describe('the SPEC rows', () => {
        features round's Logo and Tabular figures rows (docs/FEATURES.md 4.3, 3.1 item 4) */
     /* Round 1 (docs/NEXT.md 4.1.3 item 20): Tools > Assist left (one Now row fewer) and Edit
        theme is omitted (one Now row to Omit) */
-    expect(total).toEqual([158, 15, 25]);
+    expect(total).toEqual([159, 15, 25]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
        round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
-       198 after Round 1's cuts */
-    expect(total[0] + total[1] + total[2]).toBe(198);
+       198 after Round 1's cuts; 199 with Sign In as text */
+    expect(total[0] + total[1] + total[2]).toBe(199);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
@@ -1139,6 +1142,8 @@ describe('the role predicates of SPEC-3 13.4', () => {
        Sessions row is an account's since the people round (docs/PEOPLE.md 3.14; accounts 8) */
     const identityRows = new Set([
       'title.account.signIn',
+      /* Round 1: the title row's Sign In reads the same fact as the account menu's row */
+      'title.signIn',
       'title.account.signOut',
       'title.account.sessions',
     ]);
@@ -1686,6 +1691,8 @@ describe('statuses and effects', () => {
         'title.inbox',
         'title.slideshow',
         'title.share',
+        /* Round 1 (docs/NEXT.md 4.1.3 item 13): Sign In as text after Share */
+        'title.signIn',
         'title.account',
       ],
     );
@@ -2526,9 +2533,9 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(isEnabled(itemById('edit.paste'), { ...OFF, clipboard: 'empty' })).toBe(true);
   });
 
-  it('lists Insert > Shader where Material was, unflagged and in the default view, found by "shader" and "animation" (docs/FEATURES.md 5.4; build/b1.md R1)', () => {
+  it('lists Insert > Animated pattern where Material was, unflagged and in the default view, found by "shader" and "animation" (docs/FEATURES.md 5.4; docs/NEXT.md 4.1.3 item 21, question 10)', () => {
     const shader = itemById('insert.shader');
-    expect(shader.label).toBe('Shader');
+    expect(shader.label).toBe('Animated pattern');
     expect(shader.status).toBe('now');
     expect(shader.turboslide).toBe(true);
     expect(shader.advanced).toBeUndefined();
@@ -2541,10 +2548,12 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
 
   it('Tools > Preferences > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20)', () => {
     const sub = itemById('tools.preferences.playShaders');
-    expect(sub.label).toBe('Play shaders');
+    expect(sub.label).toBe('Play animated patterns');
     expect(sub.turboslide).toBe(true);
     expect(sub.advanced).toBeUndefined();
-    expect(itemPath(sub.id)).toEqual(['Tools', 'Preferences', 'Play shaders']);
+    expect(itemPath(sub.id)).toEqual(['Tools', 'Preferences', 'Play animated patterns']);
+    /* Search the menus still answers the old words (docs/NEXT.md 4.1.3 item 21) */
+    expect(sub.terms).toEqual(expect.arrayContaining(['shader', 'play shaders']));
     expect((sub.items ?? []).map((item) => item.id)).toEqual([
       'tools.preferences.playShaders.on',
       'tools.preferences.playShaders.show',
@@ -3194,7 +3203,8 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'insert.line.scribble': 'line-scribble',
       'insert.specialCharacters': 'language',
       'insert.slideNumbers': 'hashtag',
-      'insert.icon': 'sparkles',
+      /* no sparkle on a model row since Round 1 (B3b's request 7, NEXT.md 4.1.3 item 16) */
+      'insert.icon': 'squares-2x2',
       /* the features round's ship two renamed the Material row to Shader (build/b1.md R1) */
       'insert.shader': 'cube',
       'insert.link': 'link',
@@ -3294,5 +3304,81 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'format.image.imageOptions',
     ])
       expect(isEnabled(itemById(id), svg), id).toBe(true);
+  });
+});
+
+describe('the words of Round 1 (docs/NEXT.md 4.1.3 items 21 and 22; audit-clutter 112 to 124)', () => {
+  const OFF: MenuContext = {
+    ...DEFAULT_MENU_CONTEXT,
+    settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: false },
+  };
+  const ON: MenuContext = {
+    ...DEFAULT_MENU_CONTEXT,
+    settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
+  };
+  const ROUND1_WORDS = [
+    'tested',
+    'end to end',
+    'bundle',
+    'Blob store',
+    'server instance',
+    'this Turboslide',
+  ];
+  it("draws File's first row as New presentation while the template gallery is parked, and New with it on", () => {
+    const file = MENUS.find((menu) => menu.id === 'file')!;
+    const off = visibleItems(file.items, { context: OFF, collapseSingles: true });
+    expect(off[0]?.id).toBe('file.new.presentation');
+    expect(off[0]?.label).toBe('New presentation');
+    const on = visibleItems(file.items, { context: ON, collapseSingles: true });
+    expect(on[0]?.id).toBe('file.new');
+    expect(on[0]?.label).toBe('New');
+    expect(itemById('file.new.presentation').label).toBe('Presentation');
+  });
+
+  it("names the file, the home page, the switch and the panel in a seller's words", () => {
+    expect(itemById('file.download.zip').label).toBe('Turboslide file (.zip)');
+    expect(itemById('title.appIcon').doc).toBe('Your presentations');
+    expect(itemById('tools.advancedTools').doc).toBe(
+      'Shows more tools in every menu, on the toolbar and in the right click menus. Some of them may not work yet',
+    );
+    expect(itemById('title.sidePanel').doc).toContain('Theme');
+    expect(itemById('slide.changeTheme').label).toBe('Change theme');
+    /* the Help row's target stays GitHub (question 11's default) */
+    expect(itemById('help.improve').effect).toEqual({
+      kind: 'route',
+      path: 'https://github.com/Kevin-Liu-01/Turboslide/issues/new',
+      newTab: true,
+    });
+  });
+
+  it('draws Sign In as text in the title row for a visitor the deployment can sign in', () => {
+    const item = itemById('title.signIn');
+    expect(item.label).toBe('Sign In');
+    expect(item.effect).toEqual({ kind: 'dialog', title: 'Sign in' });
+    expect(item.when).toBe('canSignIn');
+    const visitor: MenuContext = {
+      ...OFF,
+      account: { signedIn: false, signInAvailable: true },
+    } as MenuContext;
+    expect(isPresent(item, visitor)).toBe(true);
+    expect(isPresent(item, OFF)).toBe(false);
+    expect(
+      isPresent(item, {
+        ...visitor,
+        account: { signedIn: true, signInAvailable: true },
+      } as MenuContext),
+    ).toBe(false);
+    const ids = TITLE_ROW_ITEMS.map((each) => each.id);
+    expect(ids.indexOf('title.signIn')).toBe(ids.indexOf('title.share') + 1);
+  });
+
+  it('keeps every word of the extended list out of every label and tooltip of the default view', () => {
+    for (const word of ROUND1_WORDS) expect(forbiddenWordsIn(`a ${word} b`), word).toEqual([word]);
+    const round1 = (text: string) => forbiddenWordsIn(text).filter((w) => ROUND1_WORDS.includes(w));
+    for (const item of allItems()) {
+      if (item.status === 'omit') continue;
+      expect(round1(item.label), item.id).toEqual([]);
+      expect(round1(item.doc ?? ''), item.id).toEqual([]);
+    }
   });
 });

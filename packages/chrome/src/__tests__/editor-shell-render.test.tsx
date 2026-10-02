@@ -708,7 +708,7 @@ describe('the Insert menu, compact mode and the title row', () => {
     /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader is in the default view */
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.shader');
-    const dialog = await screen.findByRole('dialog', { name: 'Shader' });
+    const dialog = await screen.findByRole('dialog', { name: 'Animated pattern' });
     const cards = dialog.querySelectorAll<HTMLElement>('[data-control^="dialog.shader.tile."]');
     expect(cards.length).toBeGreaterThan(0);
     const first = cards[0] as HTMLElement;
@@ -726,7 +726,7 @@ describe('the Insert menu, compact mode and the title row', () => {
         }),
       }),
     );
-    expect(screen.queryByRole('dialog', { name: 'Shader' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Animated pattern' })).toBeNull();
   });
 
   it('Insert > Image > Upload from computer opens the file picker on the current slide; without one it says so', () => {

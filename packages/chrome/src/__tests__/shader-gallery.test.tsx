@@ -260,7 +260,7 @@ describe('the Shader gallery dialog', () => {
         <ShaderGalleryDialog />
       </Host>,
     );
-    expect(screen.getByRole('dialog', { name: 'Shader' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Animated pattern' })).toBeTruthy();
     expect(control('dialog.shader')).not.toBeNull();
     expect(control('dialog.shader.sentence')?.textContent).toBe(SHADER_GALLERY.sentence);
     expect(document.activeElement).toBe(control('dialog.shader.search'));
@@ -328,7 +328,7 @@ describe('the Shader gallery dialog', () => {
     expect(control('dialog.shader.tile.paper:liquid-metal')).toBeNull();
     expect(control(`dialog.shader.tile.${graphic[0]?.id}`)).not.toBeNull();
     fireEvent.change(search, { target: { value: 'zzqx' } });
-    expect(control('dialog.shader.empty')?.textContent).toBe('No shader matches “zzqx”');
+    expect(control('dialog.shader.empty')?.textContent).toBe('No pattern matches “zzqx”');
     expect((control('dialog.shader.grid') as HTMLElement).dataset.count).toBe('0');
   });
 

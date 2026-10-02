@@ -578,7 +578,7 @@ test(title('surface.domain.build-commit'), async () => {
   }
   test.info().annotations.push({
     type: 'build',
-    description: `HEAD ${head.slice(0, 12)}; /api/agent ${res ? res.status() : 'no bearer for this origin'} instance.commit ${commit ?? 'none'}; Tools > Preferences > Play shaders drawn ${playShaders}${switched ? ' with the switch on' : ''}`,
+    description: `HEAD ${head.slice(0, 12)}; /api/agent ${res ? res.status() : 'no bearer for this origin'} instance.commit ${commit ?? 'none'}; Tools > Preferences > Play animated patterns drawn ${playShaders}${switched ? ' with the switch on' : ''}`,
   });
   expect(
     res,
@@ -590,7 +590,7 @@ test(title('surface.domain.build-commit'), async () => {
     head.startsWith(commit!) || commit!.startsWith(head.slice(0, 7)),
     `instance.commit ${commit} equals the checkout's HEAD ${head.slice(0, 12)}`,
   ).toBe(true);
-  expect(playShaders, 'Tools > Preferences lists Play shaders').toBe(true);
+  expect(playShaders, 'Tools > Preferences lists Play animated patterns').toBe(true);
   void isLocalBase;
 });
 

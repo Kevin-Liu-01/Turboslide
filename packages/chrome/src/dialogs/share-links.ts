@@ -104,5 +104,27 @@ export function rememberedGeneralUrl(
   return null;
 }
 
+/**
+ * The id of the newest live general link among a record's links: the link `share.setGeneralAccess`
+ * minted when it answers a `url` (its answer names the record and not the link), else null.
+ */
+export function generalLinkIdOf(
+  links: ReadonlyArray<{
+    id: string;
+    label?: string;
+    createdAt: string;
+    revokedAt?: string | null;
+  }>,
+): string | null {
+  const live = links
+    .filter(
+      (link) =>
+        link.label === GENERAL_LINK_LABEL &&
+        (link.revokedAt === undefined || link.revokedAt === null),
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return live[0]?.id ?? null;
+}
+
 /** The label of the general access link, as the record carries it (`@turboslide/store/access-store` GENERAL_LINK_LABEL). */
 export const GENERAL_LINK_LABEL = 'Anyone with the link';

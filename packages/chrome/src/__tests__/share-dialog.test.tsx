@@ -33,6 +33,7 @@ import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { EditorAccess, EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
+import { generalLinkIdOf } from '../dialogs/share-links';
 import { FORBIDDEN_DEFAULT_VIEW_WORDS, forbiddenWordsIn } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
@@ -1322,6 +1323,65 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(dialog!.querySelector('[data-control="dialog.share.loading"]')).not.toBeNull();
     expect(dialog!.querySelector('[data-control="dialog.namePrompt"]')).not.toBeNull();
     localStorage.removeItem(SHARE_NAME_ASKED_KEY);
+    vi.unstubAllGlobals();
+  });
+
+  /* the general link minted by the mode change (the realtime round's fix round 2, build/r1.md
+   R1-R4g; the row share.dialog.grant-email-line): `share.setGeneralAccess` answers the record and
+   the address, never the link, and the dialog kept the address in state alone, so after a reload
+   the owner's field was empty and Copy link rotated the link already sent */
+  const general = {
+    id: 'lnk_general',
+    role: 'viewer' as const,
+    label: 'Anyone with the link',
+    createdAt: '2026-10-02T00:00:00Z',
+    expiresAt: null,
+    revokedAt: null,
+  };
+
+  it('finds the newest live general link of a record', () => {
+    expect(generalLinkIdOf([])).toBeNull();
+    expect(
+      generalLinkIdOf([
+        { ...general, id: 'lnk_old', createdAt: '2026-10-01T00:00:00Z' },
+        general,
+        { ...general, id: 'lnk_dead', createdAt: '2026-10-03T00:00:00Z', revokedAt: 'x' },
+        { ...general, id: 'lnk_view', label: 'View link', createdAt: '2026-10-04T00:00:00Z' },
+      ]),
+    ).toBe('lnk_general');
+  });
+
+  it('remembers it under the link the answer names, so the next open of the dialog shows it', async () => {
+    const url = 'https://x.test/s/generalminttokentokentok';
+    const answered = record({
+      revision: 4,
+      generalAccess: { mode: 'link', role: 'viewer' },
+      links: [general],
+    });
+    const dispatch = vi.fn(() => Promise.resolve({ record: answered, url }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 }))),
+    );
+    const input = baseInput({
+      dispatch: dispatch as unknown as EditorShellInput['dispatch'],
+      access: accessViewOfRecord(record({ revision: 3 }), { signedIn: false, via: 'owner' }),
+      role: 'owner',
+      capabilities: ['read', 'share', 'settings'],
+    });
+    render(
+      <Host state={host(input).state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    const mode = document.querySelector<HTMLSelectElement>('[data-control="dialog.share.mode"]');
+    expect(mode).not.toBeNull();
+    fireEvent.change(mode!, { target: { value: 'link' } });
+    await flush();
+    await flush();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(readLinkUrls(DECK)).toEqual({ lnk_general: url });
     vi.unstubAllGlobals();
   });
 });

@@ -1,4 +1,9 @@
-import { pruneLinkUrls, rememberLinkUrl, rememberedGeneralUrl } from './share-links';
+import {
+  generalLinkIdOf,
+  pruneLinkUrls,
+  rememberLinkUrl,
+  rememberedGeneralUrl,
+} from './share-links';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 
@@ -972,6 +977,26 @@ export function ShareDialog() {
   };
   const address = generalAddress();
 
+  /**
+   * Remembers the address a `share.setGeneralAccess` answer minted (a `url`, shown once) under the
+   * general link's id, which the answer's record names (the action answers the record, not the
+   * link), and answers the address. Every path that can mint the general link goes through it, so
+   * after a reload the field holds the address and Copy link copies it instead of rotating the
+   * link already sent. Before this the mode change kept the address in state alone (the realtime
+   * round's fix round 2, build/r1.md R1-R4g; the row share.dialog.grant-email-line).
+   */
+  const rememberGeneral = (result: unknown): string | undefined => {
+    const answer = result as {
+      url?: string;
+      link?: { id?: string };
+      record?: { links?: Parameters<typeof generalLinkIdOf>[0] };
+    };
+    if (answer.url === undefined) return undefined;
+    const id = answer.link?.id ?? generalLinkIdOf(answer.record?.links ?? []);
+    if (id !== null) rememberLinkUrl(input.deckId, id, answer.url);
+    return answer.url;
+  };
+
   /** Copy link (rank 3): the field's address; under a link mode with no address yet it mints one. */
   const generalCopy = () => {
     if (address !== '') {
@@ -996,12 +1021,10 @@ export function ShareDialog() {
         'share.setGeneralAccess',
         { mode: 'link', role: access.generalAccess.role },
         (result) => {
-          const answer = result as { url?: string; link?: { id?: string } };
-          if (answer.url !== undefined) {
-            if (answer.link?.id !== undefined)
-              rememberLinkUrl(input.deckId, answer.link.id, answer.url);
-            setLinkUrl(answer.url);
-            copy(asShow ? rowAddress('present', answer.url) : answer.url);
+          const url = rememberGeneral(result);
+          if (url !== undefined) {
+            setLinkUrl(url);
+            copy(asShow ? rowAddress('present', url) : url);
           }
         },
       );
@@ -1229,7 +1252,7 @@ export function ShareDialog() {
                 const next = event.target.value;
                 if (next === 'link')
                   write('share.setGeneralAccess', { mode: 'link', role: 'viewer' }, (result) =>
-                    setLinkUrl((result as { url?: string }).url ?? null),
+                    setLinkUrl(rememberGeneral(result) ?? null),
                   );
                 else
                   write('share.setGeneralAccess', { mode: 'restricted' }, () => setLinkUrl(null));
@@ -1256,7 +1279,7 @@ export function ShareDialog() {
                   write(
                     'share.setGeneralAccess',
                     { mode: 'link', role: event.target.value },
-                    (result) => setLinkUrl((result as { url?: string }).url ?? linkUrl),
+                    (result) => setLinkUrl(rememberGeneral(result) ?? linkUrl),
                   )
                 }
                 {...tipProps({ name: 'Link role', doc: 'What anyone with the link may do' })}

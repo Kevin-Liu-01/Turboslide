@@ -28,7 +28,9 @@ function entry(n: number): NewEntry {
     author: kevin,
     clientId: CLIENT,
     opId: `${CLIENT}:${n}`,
-    mutations: [{ op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: n }],
+    mutations: [
+      { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: n },
+    ],
     at: '2026-10-01T10:00:00.000Z',
   };
 }
@@ -96,7 +98,11 @@ describe('serverClientId (docs/REALTIME.md 3.3)', () => {
     ).toBe('agent:agent:bootstrap');
     expect(serverClientId({ kind: 'agent', name: 'checkout' })).toBe('agent:checkout');
     expect(serverClientId({ kind: 'human', name: 'kevin', principalId: 'anon_x' })).toBe('server');
-    const long = serverClientId({ kind: 'agent', name: 'x', principalId: `agent:${'k'.repeat(90)}` });
+    const long = serverClientId({
+      kind: 'agent',
+      name: 'x',
+      principalId: `agent:${'k'.repeat(90)}`,
+    });
     expect(long).toHaveLength(64);
     expect(long.startsWith('agent:agent:')).toBe(true);
   });

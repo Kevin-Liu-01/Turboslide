@@ -17,7 +17,9 @@ import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
 const ROOT = '/Users/kevinliu/repos/Turboslide-realtime';
-const { chromium } = require(`${ROOT}/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright`);
+const { chromium } = require(
+  `${ROOT}/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright`,
+);
 const sharp = require(`${ROOT}/node_modules/sharp`);
 
 const argv = process.argv.slice(2);
@@ -36,7 +38,13 @@ const OUT = arg('out', `${ROOT}/docs/gslides-parity/realtime/build/r3/run`);
 mkdirSync(OUT, { recursive: true });
 const TYPE_DELAY = 60;
 
-const facts = { startedAt: new Date().toISOString(), base: BASE, appearance: APPEARANCE, advancedTools: ADVANCED, rows: {} };
+const facts = {
+  startedAt: new Date().toISOString(),
+  base: BASE,
+  appearance: APPEARANCE,
+  advancedTools: ADVANCED,
+  rows: {},
+};
 const say = (key, value) => {
   facts[key] = value;
   console.log(`${key}: ${JSON.stringify(value)}`);
@@ -48,7 +56,9 @@ const row = (id, reading) => {
 const ms = (from) => Math.round(performance.now() - from);
 const load = () => {
   try {
-    return require('node:os').loadavg().map((n) => Math.round(n * 100) / 100);
+    return require('node:os')
+      .loadavg()
+      .map((n) => Math.round(n * 100) / 100);
   } catch {
     return null;
   }
@@ -115,7 +125,10 @@ async function clickCard(page, slideId) {
 }
 
 async function ownClientId(page) {
-  await poll(async () => /^[0-9a-f]{32}$/.test((await state(page)).presence?.clientId ?? ''), 15_000);
+  await poll(
+    async () => /^[0-9a-f]{32}$/.test((await state(page)).presence?.clientId ?? ''),
+    15_000,
+  );
   return (await state(page)).presence.clientId;
 }
 
@@ -142,7 +155,14 @@ async function openRoster(page, clientId) {
     shown,
     item: shown ? await rowEl.getAttribute('data-menu-item') : null,
     text: shown ? ((await rowEl.textContent()) ?? '').trim() : '',
-    act: shown ? ((await rowEl.locator('.ts-roster-act').textContent().catch(() => '')) ?? '').trim() : '',
+    act: shown
+      ? (
+          (await rowEl
+            .locator('.ts-roster-act')
+            .textContent()
+            .catch(() => '')) ?? ''
+        ).trim()
+      : '',
   };
 }
 
@@ -186,9 +206,16 @@ async function cardChipPixels(page, slideId, name) {
     };
   }, slideId);
   if (!box) return { box: null };
-  const clip = { x: box.marks[0] - 2, y: box.marks[1] - 2, width: box.marks[2] + 4, height: box.marks[3] + 4 };
+  const clip = {
+    x: box.marks[0] - 2,
+    y: box.marks[1] - 2,
+    width: box.marks[2] + 4,
+    height: box.marks[3] + 4,
+  };
   const drawn = await page.screenshot({ clip });
-  const style = await page.addStyleTag({ content: '.ts-card-marks { visibility: hidden !important }' });
+  const style = await page.addStyleTag({
+    content: '.ts-card-marks { visibility: hidden !important }',
+  });
   await page.waitForTimeout(120);
   const hidden = await page.screenshot({ clip });
   await style.evaluate((el) => el.remove());
@@ -215,7 +242,10 @@ async function cardChipPixels(page, slideId, name) {
     height: 40,
   };
   await shot(page, `${name}-card-corner`, corner);
-  const scaled = await sharp(await page.screenshot({ clip: corner })).resize({ width: 96 * 4, kernel: 'nearest' }).png().toBuffer();
+  const scaled = await sharp(await page.screenshot({ clip: corner }))
+    .resize({ width: 96 * 4, kernel: 'nearest' })
+    .png()
+    .toBuffer();
   writeFileSync(join(OUT, `${name}-card-corner-4x.png`), scaled);
   return { box, differing, pixels: n };
 }
@@ -276,7 +306,8 @@ for (const ctx of [ctxA, ctxB]) {
     ([theme, advanced]) => {
       try {
         localStorage.setItem('gt-theme', theme);
-        if (advanced) localStorage.setItem('ts-editor-settings', JSON.stringify({ advancedTools: true }));
+        if (advanced)
+          localStorage.setItem('ts-editor-settings', JSON.stringify({ advancedTools: true }));
       } catch {
         /* a private window */
       }
@@ -304,7 +335,8 @@ try {
   await A.waitForURL(/\/edit\//, { timeout: 30_000 });
   const prompt = ctl(A, 'dialog.namePrompt');
   if (await prompt.isVisible().catch(() => false)) {
-    if ((await ctl(A, 'dialog.namePrompt.close').count()) > 0) await ctl(A, 'dialog.namePrompt.close').click();
+    if ((await ctl(A, 'dialog.namePrompt.close').count()) > 0)
+      await ctl(A, 'dialog.namePrompt.close').click();
     else await ctl(A, 'dialog.namePrompt.skip').click();
   }
   while ((await slideOrder(A)).length < 3) {
@@ -332,11 +364,21 @@ try {
   await waitEditor(B);
   const bId = await ownClientId(B);
   const aId = await ownClientId(A);
-  await poll(async () => ((await state(A)).presence?.others ?? []).some((o) => o.clientId === bId), 30_000);
+  await poll(
+    async () => ((await state(A)).presence?.others ?? []).some((o) => o.clientId === bId),
+    30_000,
+  );
   say('join.chipInAMs', ms(tJoin));
   const bAccess = (await state(B)).access ?? null;
-  say('B.access', { role: bAccess?.role ?? null, via: bAccess?.via ?? null, capabilities: bAccess?.capabilities ?? null });
-  say('A.access', { role: (await state(A)).access?.role ?? null, capabilities: (await state(A)).access?.capabilities ?? null });
+  say('B.access', {
+    role: bAccess?.role ?? null,
+    via: bAccess?.via ?? null,
+    capabilities: bAccess?.capabilities ?? null,
+  });
+  say('A.access', {
+    role: (await state(A)).access?.role ?? null,
+    capabilities: (await state(A)).access?.capabilities ?? null,
+  });
   say('A.settings.advancedTools', (await state(A)).settings?.advancedTools ?? null);
   await shot(A, '01-a-after-join');
 
@@ -367,7 +409,10 @@ try {
   /* realtime.follow.for-everyone: A (the owner) follows B */
   const first = await followFromRoster(A, bId, '03-a-roster-for-b');
   if (!first.took) await A.keyboard.press('Escape').catch(() => undefined);
-  const fol = { ownerOffersFollow: first.offered, ownerRow: { item: first.item, text: first.text, act: first.act } };
+  const fol = {
+    ownerOffersFollow: first.offered,
+    ownerRow: { item: first.item, text: first.text, act: first.act },
+  };
   if (first.took) {
     fol.plate = await plateText(A);
     await shot(A, '04-a-following-plate');
@@ -417,7 +462,10 @@ try {
       ends.slideshow = Boolean(await poll(async () => (await following(A)) === null, 3000));
       await A.waitForTimeout(400);
       await A.keyboard.press('Escape');
-      await poll(async () => (await state(A)).view?.present === false || (await state(A)).present === false, 5000);
+      await poll(
+        async () => (await state(A)).view?.present === false || (await state(A)).present === false,
+        5000,
+      );
       await waitEditor(A);
     } else ends.slideshow = 'refollow refused';
     /* 5 Version history */
@@ -426,7 +474,13 @@ try {
       if ((await clock.count()) > 0) await clock.click();
       else await A.keyboard.press('Meta+Alt+Shift+h');
       const panel = await poll(
-        () => A.evaluate(() => document.documentElement.getAttribute('data-rpanel') ?? document.querySelector('[data-rpanel]')?.getAttribute('data-rpanel') ?? null),
+        () =>
+          A.evaluate(
+            () =>
+              document.documentElement.getAttribute('data-rpanel') ??
+              document.querySelector('[data-rpanel]')?.getAttribute('data-rpanel') ??
+              null,
+          ),
         3000,
       );
       ends.versionHistoryPanel = panel;
@@ -458,7 +512,13 @@ try {
     await ctxB.close();
     const ended = await poll(async () => (await following(A)) === null, 5000, 50);
     fol.leaveEndsWithinMs = ended ? ms(t0) : null;
-    fol.chipGoneWithinMs = (await poll(async () => !((await state(A)).presence?.others ?? []).some((o) => o.clientId === bId), 5000, 50)) ? ms(t0) : null;
+    fol.chipGoneWithinMs = (await poll(
+      async () => !((await state(A)).presence?.others ?? []).some((o) => o.clientId === bId),
+      5000,
+      50,
+    ))
+      ? ms(t0)
+      : null;
   } else {
     fol.leaveEndsWithinMs = 'refollow refused';
     await ctxB.close();
@@ -467,18 +527,27 @@ try {
   fol.pass =
     fol.ownerOffersFollow === true &&
     fol.linkEditorOffersFollow === true &&
-    typeof fol.stageWithinMs === 'number' && fol.stageWithinMs <= 1000 &&
-    typeof fol.linkStageWithinMs === 'number' && fol.linkStageWithinMs <= 1000 &&
-    /Following/.test(fol.plate ?? '') && /Stop/.test(fol.plate ?? '') &&
-    sixEnds.ownClick === true && sixEnds.ownKey === true && sixEnds.ownEdit === true &&
-    sixEnds.ownComment === true && sixEnds.slideshow === true && sixEnds.versionHistory === true &&
-    typeof fol.leaveEndsWithinMs === 'number' && fol.leaveEndsWithinMs <= 2000;
+    typeof fol.stageWithinMs === 'number' &&
+    fol.stageWithinMs <= 1000 &&
+    typeof fol.linkStageWithinMs === 'number' &&
+    fol.linkStageWithinMs <= 1000 &&
+    /Following/.test(fol.plate ?? '') &&
+    /Stop/.test(fol.plate ?? '') &&
+    sixEnds.ownClick === true &&
+    sixEnds.ownKey === true &&
+    sixEnds.ownEdit === true &&
+    sixEnds.ownComment === true &&
+    sixEnds.slideshow === true &&
+    sixEnds.versionHistory === true &&
+    typeof fol.leaveEndsWithinMs === 'number' &&
+    fol.leaveEndsWithinMs <= 2000;
   row('realtime.follow.for-everyone', fol);
 
   /* realtime.agent.write-announced, R3's reading on the memory tier: the checkout agent's write */
   await clickCard(A, slides[0]);
   const runsA = await runsOf(A);
-  const lead = runsA.find((r) => /lead|subtitle|body/.test(r.run) && !/heading/.test(r.run))?.run ?? null;
+  const lead =
+    runsA.find((r) => /lead|subtitle|body/.test(r.run) && !/heading/.test(r.run))?.run ?? null;
   const headRun = runsA.find((r) => /heading/.test(r.run))?.run ?? runsA[0]?.run;
   await typeInto(A, headRun, 'R3 follow drive');
   await poll(async () => (await state(A)).pending === 0, 10_000);
@@ -515,7 +584,11 @@ try {
   const leadAfterUndo = lead ? (afterUndo.find((r) => r.run === lead)?.text ?? null) : null;
   await shot(A, '10-a-after-cmd-z');
   row('realtime.agent.write-announced', {
-    post: { status: answer.status, tookMs: answer.tookMs, replaced: answer.json?.count ?? answer.json?.replaced ?? answer.json?.error ?? null },
+    post: {
+      status: answer.status,
+      tookMs: answer.tookMs,
+      replaced: answer.json?.count ?? answer.json?.replaced ?? answer.json?.error ?? null,
+    },
     bannerWithinMs: bannerMs,
     banner,
     headBefore,
@@ -524,7 +597,12 @@ try {
     leadAfterUndo,
     cmdZLeftAgentText: headAfterUndo !== null && /Agent wrote this/.test(headAfterUndo),
     cmdZTookOwnEdit: lead ? leadAfterUndo !== null && !/Own words by A/.test(leadAfterUndo) : null,
-    pass: answer.status === 200 && bannerMs !== null && bannerMs <= 1000 && headAfterUndo !== null && /Agent wrote this/.test(headAfterUndo),
+    pass:
+      answer.status === 200 &&
+      bannerMs !== null &&
+      bannerMs <= 1000 &&
+      headAfterUndo !== null &&
+      /Agent wrote this/.test(headAfterUndo),
   });
 } catch (error) {
   say('error', error instanceof Error ? `${error.message}\n${error.stack}` : String(error));
@@ -535,9 +613,16 @@ try {
   if (deckId) {
     try {
       const info = await invoke(A, 'deck.info', {});
-      const trash = await invoke(A, 'deck.trash', { id: deckId, baseRevision: info.revision }).catch((e) => ({ error: String(e) }));
+      const trash = await invoke(A, 'deck.trash', {
+        id: deckId,
+        baseRevision: info.revision,
+      }).catch((e) => ({ error: String(e) }));
       const info2 = await invoke(A, 'deck.info', {}).catch(() => info);
-      const remove = await invoke(A, 'deck.remove', { id: deckId, confirm: true, baseRevision: info2.revision ?? info.revision }).catch((e) => ({ error: String(e) }));
+      const remove = await invoke(A, 'deck.remove', {
+        id: deckId,
+        confirm: true,
+        baseRevision: info2.revision ?? info.revision,
+      }).catch((e) => ({ error: String(e) }));
       say('teardown', { trash: trash?.error ?? 'ok', remove: remove?.error ?? 'ok' });
     } catch (error) {
       say('teardown.error', String(error));

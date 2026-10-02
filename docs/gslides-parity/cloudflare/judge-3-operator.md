@@ -6,11 +6,11 @@ Judge 3 of three in the Cloudflare design round, written 2026-10-01 in the workt
 
 Each dimension is 1 to 10. Latency: the rows of `docs/REALTIME.md` section 2 met with evidence. Free tier: the Free plan holds at 50 editor hours a day and at 500 with the math shown. Migration: no deck lost, a rollback that works, the two deployments of the switch handled. Size: smaller is better, a build the pipeline finishes in two to four days scores high. Honesty: what cannot run is named with a source, no hand waving.
 
-| Design | Latency | Free tier | Migration | Size | Honesty | Total of 50 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| A, the channel on a Durable Object, everything else where it is | 6 | 7 | 8 | 8 | 9 | 38 |
-| B, the free backend (object, D1 accounts behind the Worker, R2 store, files Worker) | 7 | 7 | 6 | 4 | 7 | 31 |
-| C, all on Cloudflare (app Worker, object committing to R2, D1, render service on Vercel, DNS cut) | 7 | 6 | 5 | 2 | 7 | 27 |
+| Design                                                                                            | Latency | Free tier | Migration | Size | Honesty | Total of 50 |
+| ------------------------------------------------------------------------------------------------- | ------: | --------: | --------: | ---: | ------: | ----------: |
+| A, the channel on a Durable Object, everything else where it is                                   |       6 |         7 |         8 |    8 |       9 |          38 |
+| B, the free backend (object, D1 accounts behind the Worker, R2 store, files Worker)               |       7 |         7 |         6 |    4 |       7 |          31 |
+| C, all on Cloudflare (app Worker, object committing to R2, D1, render service on Vercel, DNS cut) |       7 |         6 |         5 |    2 |       7 |          27 |
 
 The winner under this lens is A.
 

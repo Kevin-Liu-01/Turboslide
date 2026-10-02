@@ -31,7 +31,15 @@ const SLIDE = WORKED_SLIDES.find((slide) => slide.id === 'content-rule')!;
 const BLOCK = 'p1';
 
 function splice(at: number, insert: string): Mutation {
-  return { op: 'text.splice', slideId: SLIDE.id, blockId: BLOCK, path: '/text', at, remove: 0, insert };
+  return {
+    op: 'text.splice',
+    slideId: SLIDE.id,
+    blockId: BLOCK,
+    path: '/text',
+    at,
+    remove: 0,
+    insert,
+  };
 }
 const replace: Mutation = { op: 'slide.replace', slideId: SLIDE.id, slide: SLIDE };
 const typography: Mutation = {
@@ -55,8 +63,15 @@ describe('yieldConcurrentConversion (docs/REALTIME.md row realtime.title.two-typ
     const landed = landedOwn([replace]);
     expect(yieldConcurrentConversion([replace], landed)).toEqual([replace]);
     // a replacement of another slide is not touched either
-    const other: Mutation = { op: 'slide.replace', slideId: 'title', slide: { ...SLIDE, id: 'title' } };
-    expect(yieldConcurrentConversion([other, splice(1, 'x')], landed)).toEqual([other, splice(1, 'x')]);
+    const other: Mutation = {
+      op: 'slide.replace',
+      slideId: 'title',
+      slide: { ...SLIDE, id: 'title' },
+    };
+    expect(yieldConcurrentConversion([other, splice(1, 'x')], landed)).toEqual([
+      other,
+      splice(1, 'x'),
+    ]);
   });
 
   it('transformEntry then moves the second typist’s splice past the first’s and lands no replacement', () => {

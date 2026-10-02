@@ -27,10 +27,10 @@ The arithmetic of the three cost sections reproduces from the stated counts: A 2
 ## 4. The scores
 
 | Design | Latency | Free tier | Migration | Size | Honesty | Total |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| A | 6 | 6 | 8 | 9 | 9 | 38 |
-| B | 8 | 7 | 6 | 4 | 8 | 33 |
-| C | 8 | 7 | 5 | 2 | 8 | 30 |
+| ------ | ------: | --------: | --------: | ---: | ------: | ----: |
+| A      |       6 |         6 |         8 |    9 |       9 |    38 |
+| B      |       8 |         7 |         6 |    4 |       8 |    33 |
+| C      |       8 |         7 |         5 |    2 |       8 |    30 |
 
 Design A. Latency 6: fourteen rows met with a mechanism each (section 8); two rows kept at the blob tier's standing on purpose; the wake through the seed route is the one path that threatens the 300 ms bound and A names it with its levers (risk 2) and the 4.5 MB cap (risk 18); no placement hint. Free tier 6: the Free plan holds at 50 with the math shown; at 500 both the rows written and the requests lines break; the Vercel line stays the largest of the three. Migration 8: the store never moves, so no deck can be lost in a copy; three rollbacks that work (5.3); the two deployment window handled at today's class without the transform (5.2); an idle tab across the flip reads Reconnecting until a reload (5.1); no runtime kill switch. Size 9: three new lanes beside the realtime round's six, one Worker, one seam commit; the build the pipeline can finish in two to four days. Honesty 9: every unmet row named with the reason; eighteen risks; the REALTIME.md against SYNC.md 4.2 discrepancy on advanced operations per record caught (section 8); fetched nothing and says so.
 

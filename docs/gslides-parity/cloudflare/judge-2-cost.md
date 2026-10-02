@@ -12,30 +12,30 @@ The caps every design counts against, as the pages printed them on 2026-10-01 (W
 
 Each design's own per editor hour counts, re-added here, with the break day computed as the cap divided by the per hour count. A break day is the number of editor hours in one UTC day at which the named line passes its Free cap.
 
-| Line, per editor hour | Design A (section 6) | Design B (6.1 to 6.3) | Design C (6.1) |
-| --- | ---: | ---: | ---: |
-| Checkpoint cadence | 2 s idle, 144 commits | 10 s idle, 30 s max, 24 commits, 72 alarm fires | 2 s idle, 10 s floor, 72 commits |
-| Object requests | 230 | 156 | 155 |
-| Object rows written | 432 to 576 | 456 | 216 to 360 as written; 360 to 720 once the design's own `meta` and `doc` tables are counted (section 5) |
-| Object duration | 13.2 GB-s | 3.1 GB-s | 3.1 GB-s |
-| Store writes | 144 Blob records at 5 advanced and 2 to 3 simple each (Vercel) | about 100 R2 Class A, 255 Class B | 288 R2 Class A, about 35 Class B |
-| Worker requests | about 10 plus a 60 an hour health probe per active instance | about 20 plus the files Worker's public reads | about 40 on the app Worker, 3 on the realtime Worker, plus 21 per show view |
+| Line, per editor hour |                                           Design A (section 6) |                           Design B (6.1 to 6.3) |                                                                                          Design C (6.1) |
+| --------------------- | -------------------------------------------------------------: | ----------------------------------------------: | ------------------------------------------------------------------------------------------------------: |
+| Checkpoint cadence    |                                          2 s idle, 144 commits | 10 s idle, 30 s max, 24 commits, 72 alarm fires |                                                                        2 s idle, 10 s floor, 72 commits |
+| Object requests       |                                                            230 |                                             156 |                                                                                                     155 |
+| Object rows written   |                                                     432 to 576 |                                             456 | 216 to 360 as written; 360 to 720 once the design's own `meta` and `doc` tables are counted (section 5) |
+| Object duration       |                                                      13.2 GB-s |                                        3.1 GB-s |                                                                                                3.1 GB-s |
+| Store writes          | 144 Blob records at 5 advanced and 2 to 3 simple each (Vercel) |               about 100 R2 Class A, 255 Class B |                                                                        288 R2 Class A, about 35 Class B |
+| Worker requests       |    about 10 plus a 60 an hour health probe per active instance |   about 20 plus the files Worker's public reads |                             about 40 on the app Worker, 3 on the realtime Worker, plus 21 per show view |
 
-| Break day, editor hours a day | A | B | C |
-| --- | ---: | ---: | ---: |
-| Rows written, 100,000 a day | 174 to 231 (not printed by A; A prints the UTC hour at 500, which is the 432 shape's) | 219 (B prints about 220) | 278 to 463 as printed; about 140 to 280 corrected (section 5) |
-| Object requests, 100,000 a day | 435 | 641 | 645 |
-| R2 Class A, 1 million a month | not used | 333 | 116 at 288 an hour |
-| Worker requests, 100,000 a day | thousands | about 1,400 before the public set; a 200 twin deck viewed by 1,000 browsers passes it alone (B 6.3) | about 1,975 before the public set; the same 200 twin case passes it alone and C's table does not say so |
+| Break day, editor hours a day  |                                                                                     A |                                                                                                   B |                                                                                                       C |
+| ------------------------------ | ------------------------------------------------------------------------------------: | --------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------------------: |
+| Rows written, 100,000 a day    | 174 to 231 (not printed by A; A prints the UTC hour at 500, which is the 432 shape's) |                                                                            219 (B prints about 220) |                                           278 to 463 as printed; about 140 to 280 corrected (section 5) |
+| Object requests, 100,000 a day |                                                                                   435 |                                                                                                 641 |                                                                                                     645 |
+| R2 Class A, 1 million a month  |                                                                              not used |                                                                                                 333 |                                                                                      116 at 288 an hour |
+| Worker requests, 100,000 a day |                                                                             thousands | about 1,400 before the public set; a 200 twin deck viewed by 1,000 browsers passes it alone (B 6.3) | about 1,975 before the public set; the same 200 twin case passes it alone and C's table does not say so |
 
-| The bill a month | A | B | C |
-| --- | ---: | ---: | ---: |
-| Cloudflare at 50 editor hours a day | $0 (Free holds; largest line rows written at 22 to 29 %) | $0 (largest line rows written at 23 %) | $0 if an SSR invocation stays under 10 ms of CPU, else $5 (C 6.4); R2 Class A at 43 % of the free million |
-| Cloudflare at 500 | $5.45 (Paid, rows written and requests both over on Free) | $7.55 ($5.30 Paid plus $2.25 R2 Class A) | $5.30 plus $0 to $14.94 R2 Class A |
-| Vercel residual at 50 | about $7 (A's own: $5.40 Blob advanced, $0.89 memory, $0.26 simple, $0.14 invocations) | $0.14 for the commits plus "the page loads", unquantified | $2 to $5 render service (C's own) |
-| Vercel residual at 500 | about $70, of which $54 Blob advanced (A's own) | not given; about $1.40 of commits plus the page loads by B's figures | $5 to $10 |
-| Total at 50 | about $7 | about $1 | $2 to $10 |
-| Total at 500 | about $75 | about $10 | $10 to $32 |
+| The bill a month                    |                                                                                      A |                                                                    B |                                                                                                         C |
+| ----------------------------------- | -------------------------------------------------------------------------------------: | -------------------------------------------------------------------: | --------------------------------------------------------------------------------------------------------: |
+| Cloudflare at 50 editor hours a day |                               $0 (Free holds; largest line rows written at 22 to 29 %) |                               $0 (largest line rows written at 23 %) | $0 if an SSR invocation stays under 10 ms of CPU, else $5 (C 6.4); R2 Class A at 43 % of the free million |
+| Cloudflare at 500                   |                              $5.45 (Paid, rows written and requests both over on Free) |                             $7.55 ($5.30 Paid plus $2.25 R2 Class A) |                                                                        $5.30 plus $0 to $14.94 R2 Class A |
+| Vercel residual at 50               | about $7 (A's own: $5.40 Blob advanced, $0.89 memory, $0.26 simple, $0.14 invocations) |            $0.14 for the commits plus "the page loads", unquantified |                                                                         $2 to $5 render service (C's own) |
+| Vercel residual at 500              |                                        about $70, of which $54 Blob advanced (A's own) | not given; about $1.40 of commits plus the page loads by B's figures |                                                                                                 $5 to $10 |
+| Total at 50                         |                                                                               about $7 |                                                             about $1 |                                                                                                 $2 to $10 |
+| Total at 500                        |                                                                              about $75 |                                                            about $10 |                                                                                                $10 to $32 |
 
 Two readings of the tables. First, no design's Free plan holds at ten times today: every one passes the rows written cap, because an op durable before its acknowledgement is one row and `setAlarm` and deletes are rows too (W1 1.1, pricing lines 104 and 106; W1 finding 3); the Paid plan at $5.00 is every design's answer at 500 hours and the designs differ only in the overage and in what they leave on Vercel. Second, today's traffic is two orders of magnitude under the 50 hour scenario (18 production requests in three quiet hours, `research-costs-actual.md` 32 as `docs/REALTIME.md` 1.1 reads it), so "the Free plan holds at today" is true of all three with a wide margin, and the break day is the number that separates them.
 
@@ -64,10 +64,10 @@ Scores: latency 7 (the commit through the binding with no Vercel hop; the wake p
 ## 6. The scores
 
 | Design | Latency | Free tier | Migration | Size | Honesty | Total |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| A | 6 | 6 | 8 | 8 | 9 | 37 |
-| B | 7 | 8 | 7 | 4 | 8 | 34 |
-| C | 7 | 5 | 5 | 2 | 6 | 25 |
+| ------ | ------: | --------: | --------: | ---: | ------: | ----: |
+| A      |       6 |         6 |         8 |    8 |       9 |    37 |
+| B      |       7 |         8 |         7 |    4 |       8 |    34 |
+| C      |       7 |         5 |         5 |    2 |       6 |    25 |
 
 ## 7. The winner under the lens, and where the total disagrees
 

@@ -29,7 +29,12 @@ mkdirSync(OUT, { recursive: true });
 const TYPE_DELAY = 70;
 const REDIS_DB = arg('redis-db', '1');
 
-const facts = { startedAt: new Date().toISOString(), baseA: BASE_A, baseB: BASE_B, load: loadavg() };
+const facts = {
+  startedAt: new Date().toISOString(),
+  baseA: BASE_A,
+  baseB: BASE_B,
+  load: loadavg(),
+};
 const say = (key, value) => {
   facts[key] = value;
   console.log(`${key}: ${JSON.stringify(value)}`);
@@ -56,9 +61,12 @@ async function post(base, action, deckId, body) {
 /** `INFO commandstats` of the lane's database, summed over commands (the cost row's reading). */
 function redisCommandStats() {
   try {
-    const out = execSync(`docker exec turboslide-redis redis-cli -n ${REDIS_DB} INFO commandstats`, {
-      encoding: 'utf8',
-    });
+    const out = execSync(
+      `docker exec turboslide-redis redis-cli -n ${REDIS_DB} INFO commandstats`,
+      {
+        encoding: 'utf8',
+      },
+    );
     const rows = {};
     let total = 0;
     for (const line of out.split('\n')) {
@@ -170,7 +178,12 @@ async function dismissPrompt(page) {
 }
 
 /** Opens an inline session on a run and types without closing it. */
-async function beginTyping(page, run, text, { replace = true, startDelay = 0, delay = TYPE_DELAY } = {}) {
+async function beginTyping(
+  page,
+  run,
+  text,
+  { replace = true, startDelay = 0, delay = TYPE_DELAY } = {},
+) {
   if (startDelay > 0) await page.waitForTimeout(startDelay);
   await runEl(page, run).dblclick();
   await page.waitForTimeout(150);
@@ -335,7 +348,9 @@ try {
         openedMsAfterMint: ms(t0),
         landedOnEditor: landed,
         editorReady: ready,
-        finalPath: new URL(page.url()).pathname.replace(deckId, '<id>').replace(/\/s\/.*/, '/s/<token>'),
+        finalPath: new URL(page.url()).pathname
+          .replace(deckId, '<id>')
+          .replace(/\/s\/.*/, '/s/<token>'),
       });
       await ctx.close();
     }
@@ -350,7 +365,9 @@ try {
   const joins = [];
   for (let i = 0; i < 3; i += 1) {
     if (i > 0) {
-      await B.context().close().catch(() => undefined);
+      await B.context()
+        .close()
+        .catch(() => undefined);
       const fresh = await mk(BASE_B);
       B = await fresh.newPage();
       watchB();
@@ -365,7 +382,11 @@ try {
     const bReadyMs = ms(tJoin);
     // B's own chip, by B's client id, in A's title row (never A's own chip, which is there before
     // the join), and A's chip by A's client id in B's; each timed from B's editor being ready
-    const bSelf = await poll(async () => (await state(B)).presence?.self?.clientId ?? null, 10_000, 50);
+    const bSelf = await poll(
+      async () => (await state(B)).presence?.self?.clientId ?? null,
+      10_000,
+      50,
+    );
     const aSees = await firstMoment(async () => {
       const d = await remoteDrawings(A);
       const s = await state(A);
@@ -375,7 +396,10 @@ try {
         (s.presence?.others ?? []).some((o) => o.clientId === bSelf)
       );
     }, 15_000);
-    const aSeesAfterReady = aSees === null ? null : Math.max(0, Math.round(aSees - (performance.now() - tReady - aSees) * 0));
+    const aSeesAfterReady =
+      aSees === null
+        ? null
+        : Math.max(0, Math.round(aSees - (performance.now() - tReady - aSees) * 0));
     const bSees = await firstMoment(async () => {
       const d = await remoteDrawings(B);
       const s = await state(B);
@@ -400,7 +424,13 @@ try {
   say('B.sync', { tier: syncB.tier, transport: syncB.transport, connected: syncB.connected });
   row('realtime.join.chip-within-1s', {
     rounds: joins,
-    pass: joins.every((j) => j.aSeesBChipAfterReadyMs !== null && j.aSeesBChipAfterReadyMs <= 1000 && j.bSeesAChipAfterReadyMs !== null && j.bSeesAChipAfterReadyMs <= 1000),
+    pass: joins.every(
+      (j) =>
+        j.aSeesBChipAfterReadyMs !== null &&
+        j.aSeesBChipAfterReadyMs <= 1000 &&
+        j.bSeesAChipAfterReadyMs !== null &&
+        j.bSeesAChipAfterReadyMs <= 1000,
+    ),
     origins: { A: new URL(BASE_A).port, B: new URL(BASE_B).port },
     load: loadavg(),
   });
@@ -420,18 +450,26 @@ try {
       const t0 = performance.now();
       await A.keyboard.type(ch);
       const want = chars.slice(0, i + 1).join('');
-      const seen = await firstMoment(async () => {
-        const text = (await runText(B, subtitle)) ?? '';
-        return text.endsWith(want) || text === want;
-      }, 3000, 30);
+      const seen = await firstMoment(
+        async () => {
+          const text = (await runText(B, subtitle)) ?? '';
+          return text.endsWith(want) || text === want;
+        },
+        3000,
+        30,
+      );
       timings.push({ char: ch, inBMs: seen });
       await sleep(Math.max(0, 1000 - ms(t0)));
     }
     await A.keyboard.press('Escape');
-    const finalB = await poll(async () => {
-      const t = (await runText(B, subtitle)) ?? '';
-      return t === chars.join('') ? t : null;
-    }, 5000, 50);
+    const finalB = await poll(
+      async () => {
+        const t = (await runText(B, subtitle)) ?? '';
+        return t === chars.join('') ? t : null;
+      },
+      5000,
+      50,
+    );
     const over = timings.filter((t) => t.inBMs === null || t.inBMs > 300);
     row('realtime.keystroke.within-300ms', {
       timings,
@@ -470,22 +508,29 @@ try {
         const t0 = performance.now();
         const bSelf = (await state(B)).presence?.self?.clientId ?? null;
         await B.keyboard.type('k');
-        const seen = await firstMoment(async () => {
-          const d = await remoteDrawings(A);
-          const box = d.carets[0]?.box ?? null;
-          if (!box) return false;
-          if (lastBox === null || box[0] !== lastBox[0] || box[1] !== lastBox[1]) {
-            lastBox = box;
-            return true;
-          }
-          return false;
-        }, 2000, 30);
+        const seen = await firstMoment(
+          async () => {
+            const d = await remoteDrawings(A);
+            const box = d.carets[0]?.box ?? null;
+            if (!box) return false;
+            if (lastBox === null || box[0] !== lastBox[0] || box[1] !== lastBox[1]) {
+              lastBox = box;
+              return true;
+            }
+            return false;
+          },
+          2000,
+          30,
+        );
         // the channel's half: the frame itself reached A (the other's caret offset in A's state)
         const other = ((await state(A)).presence?.others ?? []).find((o) => o.clientId === bSelf);
         stateClocks.push(other?.selection?.caret ?? null);
         moves.push({ keystroke: i + 1, caretMovedInAMs: seen, box: lastBox });
         if (i === 2)
-          say(`shot.caret.A.${open ? 'open' : 'closed'}`, await shot(A, `r1-03-a-sees-b-caret-${open ? 'open' : 'closed'}`, await stageClip(A)));
+          say(
+            `shot.caret.A.${open ? 'open' : 'closed'}`,
+            await shot(A, `r1-03-a-sees-b-caret-${open ? 'open' : 'closed'}`, await stageClip(A)),
+          );
         await sleep(Math.max(0, 500 - ms(t0)));
       }
       const flags = (await remoteDrawings(A)).flags.map((f) => f.text);
@@ -501,7 +546,11 @@ try {
         pass: over.length === 0 && flags.length > 0,
       });
     }
-    row('realtime.caret.within-300ms', { variants, pass: variants.every((v) => v.pass), load: loadavg() });
+    row('realtime.caret.within-300ms', {
+      variants,
+      pass: variants.every((v) => v.pass),
+      load: loadavg(),
+    });
   }
 
   // ---- realtime.selection.outline-within-300ms: B clicks blocks; A draws and moves the outline
@@ -515,29 +564,54 @@ try {
     const bSelf = (await state(B)).presence?.self?.clientId ?? null;
     const travel = [];
     let lastBox = null;
-    const targets = [leadBlock, headingBlock, leadBlock, headingBlock, leadBlock, headingBlock, leadBlock, headingBlock];
+    const targets = [
+      leadBlock,
+      headingBlock,
+      leadBlock,
+      headingBlock,
+      leadBlock,
+      headingBlock,
+      leadBlock,
+      headingBlock,
+    ];
     for (const [i, target] of targets.entries()) {
       const run = target === leadBlock ? subtitle : heading;
       await sleep(600);
       const t0 = performance.now();
       await runEl(B, run).click();
-      const seen = await firstMoment(async () => {
-        const d = await remoteDrawings(A);
-        const box = d.outlines[0]?.box ?? null;
-        if (!box) return false;
-        if (lastBox === null || box[1] !== lastBox[1]) {
-          lastBox = box;
-          return true;
-        }
-        return false;
-      }, 3000, 30);
+      const seen = await firstMoment(
+        async () => {
+          const d = await remoteDrawings(A);
+          const box = d.outlines[0]?.box ?? null;
+          if (!box) return false;
+          if (lastBox === null || box[1] !== lastBox[1]) {
+            lastBox = box;
+            return true;
+          }
+          return false;
+        },
+        3000,
+        30,
+      );
       const s = await state(A);
       const other = (s.presence?.others ?? []).find((o) => o.clientId === bSelf);
-      travel.push({ round: i + 1, target, outlineInAMs: seen, aStateBlockIds: other?.selection?.blockIds ?? null, box: lastBox });
-      if (i === 0) say('shot.selection.A', await shot(A, 'r1-04-a-sees-b-outline', await stageClip(A)));
+      travel.push({
+        round: i + 1,
+        target,
+        outlineInAMs: seen,
+        aStateBlockIds: other?.selection?.blockIds ?? null,
+        box: lastBox,
+      });
+      if (i === 0)
+        say('shot.selection.A', await shot(A, 'r1-04-a-sees-b-outline', await stageClip(A)));
     }
     const over = travel.filter((t) => t.outlineInAMs === null || t.outlineInAMs > 300);
-    row('realtime.selection.outline-within-300ms', { rounds: travel, overBound: over.length, pass: over.length === 0, load: loadavg() });
+    row('realtime.selection.outline-within-300ms', {
+      rounds: travel,
+      overBound: over.length,
+      pass: over.length === 0,
+      load: loadavg(),
+    });
   }
 
   // ---- realtime.title.two-typers: both type a word each into the title within 200 ms, then
@@ -561,10 +635,15 @@ try {
       const seenOther = { aSawB: null, bSawA: null };
       const done = { a: null, b: null };
       const watcher = (async () => {
-        while (performance.now() - t0 < 8000 && (seenOther.aSawB === null || seenOther.bSawA === null)) {
+        while (
+          performance.now() - t0 < 8000 &&
+          (seenOther.aSawB === null || seenOther.bSawA === null)
+        ) {
           const [a, b] = await Promise.all([runText(A, heading), runText(B, heading)]);
-          if (seenOther.aSawB === null && (a ?? '').includes(wordB.trim())) seenOther.aSawB = ms(t0);
-          if (seenOther.bSawA === null && (b ?? '').includes(wordA.trim())) seenOther.bSawA = ms(t0);
+          if (seenOther.aSawB === null && (a ?? '').includes(wordB.trim()))
+            seenOther.aSawB = ms(t0);
+          if (seenOther.bSawA === null && (b ?? '').includes(wordA.trim()))
+            seenOther.bSawA = ms(t0);
           await sleep(40);
         }
       })();
@@ -578,11 +657,15 @@ try {
       ]);
       const tEsc = performance.now();
       await Promise.all([A.keyboard.press('Escape'), B.keyboard.press('Escape')]);
-      const converged = await poll(async () => {
-        const [a, b] = await Promise.all([runText(A, heading), runText(B, heading)]);
-        const both = (t) => t !== null && t.includes(wordA.trim()) && t.includes(wordB.trim());
-        return both(a) && both(b) && a === b ? { at: ms(tEsc), text: a } : null;
-      }, 10_000, 40);
+      const converged = await poll(
+        async () => {
+          const [a, b] = await Promise.all([runText(A, heading), runText(B, heading)]);
+          const both = (t) => t !== null && t.includes(wordA.trim()) && t.includes(wordB.trim());
+          return both(a) && both(b) && a === b ? { at: ms(tEsc), text: a } : null;
+        },
+        10_000,
+        40,
+      );
       await watcher;
       results.push({
         round,
@@ -591,8 +674,10 @@ try {
         convergedAfterEscapeMs: converged?.at ?? null,
         text: converged?.text ?? { a: await runText(A, heading), b: await runText(B, heading) },
         // the other's whole word in the DOM, timed from the typist's last keystroke
-        aSawBWordAfterBLastKeyMs: seenOther.aSawB === null || done.b === null ? null : seenOther.aSawB - done.b,
-        bSawAWordAfterALastKeyMs: seenOther.bSawA === null || done.a === null ? null : seenOther.bSawA - done.a,
+        aSawBWordAfterBLastKeyMs:
+          seenOther.aSawB === null || done.b === null ? null : seenOther.aSawB - done.b,
+        bSawAWordAfterALastKeyMs:
+          seenOther.bSawA === null || done.a === null ? null : seenOther.bSawA - done.a,
         typingDoneMs: done,
         wire: { A: [...wire.A], B: [...wire.B] },
       });
@@ -631,7 +716,9 @@ try {
     let written = await post(BASE_B, 'slide.update', deckId, {
       slideId: slideNow,
       baseRevision: infoNow.json?.revision ?? 0,
-      mutations: [{ op: 'slide.set', slideId: slideNow, path: '/heading', value: 'Written by the agent' }],
+      mutations: [
+        { op: 'slide.set', slideId: slideNow, path: '/heading', value: 'Written by the agent' },
+      ],
     });
     if (written.status !== 200) {
       written = await post(BASE_B, 'block.set', deckId, {
@@ -642,9 +729,22 @@ try {
         baseRevision: infoNow.json?.revision ?? 0,
       });
     }
-    say('agent.write', { status: written.status, ms: ms(t0), base: infoNow.json?.revision ?? null, body: written.status === 200 ? { revision: written.json?.revision } : written.json });
-    const textInA = await firstMoment(async () => ((await runText(A, heading)) ?? '').includes('Written by the agent'), 5000, 30);
-    const banner = await firstMoment(async () => (await remoteDrawings(A)).snackbar.length > 0, 5000, 30);
+    say('agent.write', {
+      status: written.status,
+      ms: ms(t0),
+      base: infoNow.json?.revision ?? null,
+      body: written.status === 200 ? { revision: written.json?.revision } : written.json,
+    });
+    const textInA = await firstMoment(
+      async () => ((await runText(A, heading)) ?? '').includes('Written by the agent'),
+      5000,
+      30,
+    );
+    const banner = await firstMoment(
+      async () => (await remoteDrawings(A)).snackbar.length > 0,
+      5000,
+      30,
+    );
     const snackbar = (await remoteDrawings(A)).snackbar;
     say('shot.agent.A', await shot(A, 'r1-06-a-agent-banner'));
     await A.mouse.click(20, 500);
@@ -654,7 +754,10 @@ try {
     let versions = null;
     try {
       const list = await invoke(A, 'version.list', {});
-      versions = (list.versions ?? list).slice?.(-3)?.map((v) => ({ n: v.n, author: v.author, revision: v.revision })) ?? list;
+      versions =
+        (list.versions ?? list)
+          .slice?.(-3)
+          ?.map((v) => ({ n: v.n, author: v.author, revision: v.revision })) ?? list;
     } catch (error) {
       versions = { error: error instanceof Error ? error.message : String(error) };
     }
@@ -667,7 +770,11 @@ try {
       headingAfterUndo: afterUndo,
       agentWriteKeptAfterUndo: (afterUndo ?? '').includes('Written by the agent'),
       versions,
-      pass: written.status === 200 && banner !== null && banner <= 1000 && (afterUndo ?? '').includes('Written by the agent'),
+      pass:
+        written.status === 200 &&
+        banner !== null &&
+        banner <= 1000 &&
+        (afterUndo ?? '').includes('Written by the agent'),
       load: loadavg(),
     });
   }
@@ -699,7 +806,9 @@ try {
     }
     say('guest.comment', { bPrincipal, added: added?.thread?.id ?? added });
     await sleep(800);
-    await B.context().close().catch(() => undefined);
+    await B.context()
+      .close()
+      .catch(() => undefined);
     B = null;
     const reloads = [];
     for (let i = 0; i < 3; i += 1) {
@@ -711,16 +820,32 @@ try {
       if ((await slot.count()) > 0) await slot.click();
       else await ctl(A, 'title.comments').click();
       await ctl(A, 'panel.comments').waitFor({ timeout: 8000 });
-      const read = await poll(async () => {
-        const text = await A.evaluate((principal) => {
-          const rows = [...document.querySelectorAll('[data-control^="panel.comments.thread."]')];
-          const mine = rows.find((r) => principal === null || r.querySelector(`.ts-chip[data-principal="${principal}"]`) !== null) ?? rows[0];
-          return mine ? mine.textContent?.replace(/\s+/g, ' ').trim() : null;
-        }, bPrincipal);
-        return text && /Maya Guest/.test(text) ? { at: ms(t0), text } : null;
-      }, 6000, 50);
+      const read = await poll(
+        async () => {
+          const text = await A.evaluate((principal) => {
+            const rows = [...document.querySelectorAll('[data-control^="panel.comments.thread."]')];
+            const mine =
+              rows.find(
+                (r) =>
+                  principal === null ||
+                  r.querySelector(`.ts-chip[data-principal="${principal}"]`) !== null,
+              ) ?? rows[0];
+            return mine ? mine.textContent?.replace(/\s+/g, ' ').trim() : null;
+          }, bPrincipal);
+          return text && /Maya Guest/.test(text) ? { at: ms(t0), text } : null;
+        },
+        6000,
+        50,
+      );
       const sync = await invoke(A, 'sync.status');
-      reloads.push({ reload: i + 1, readMs: read?.at ?? null, rowText: read?.text ?? null, guestWord: /guest/i.test(read?.text ?? ''), instance: new URL(BASE_A).port, tier: sync.tier });
+      reloads.push({
+        reload: i + 1,
+        readMs: read?.at ?? null,
+        rowText: read?.text ?? null,
+        guestWord: /guest/i.test(read?.text ?? ''),
+        instance: new URL(BASE_A).port,
+        tier: sync.tier,
+      });
       if (i === 0) say('shot.guest.A', await shot(A, 'r1-07-a-departed-guest-row'));
       await A.keyboard.press('Escape');
     }
@@ -739,9 +864,16 @@ try {
   facts.redis = {
     before: statsBefore.total,
     after: statsAfter.total,
-    commandsDuringDrive: statsBefore.total !== null && statsAfter.total !== null ? statsAfter.total - statsBefore.total : null,
+    commandsDuringDrive:
+      statsBefore.total !== null && statsAfter.total !== null
+        ? statsAfter.total - statsBefore.total
+        : null,
     byCommand: statsAfter.rows
-      ? Object.fromEntries(Object.entries(statsAfter.rows).map(([k, v]) => [k, v - (statsBefore.rows?.[k] ?? 0)]).filter(([, v]) => v > 0))
+      ? Object.fromEntries(
+          Object.entries(statsAfter.rows)
+            .map(([k, v]) => [k, v - (statsBefore.rows?.[k] ?? 0)])
+            .filter(([, v]) => v > 0),
+        )
       : null,
   };
   say('redis', facts.redis);
@@ -752,7 +884,11 @@ try {
     const trash = await post(BASE_A, 'deck.trash', deckId, { id: deckId, baseRevision: rev });
     const info2 = await post(BASE_B, 'deck.info', deckId, {});
     rev = info2.json?.revision ?? rev;
-    const remove = await post(BASE_B, 'deck.remove', deckId, { id: deckId, confirm: true, baseRevision: rev });
+    const remove = await post(BASE_B, 'deck.remove', deckId, {
+      id: deckId,
+      confirm: true,
+      baseRevision: rev,
+    });
     const gone = await fetch(`${BASE_A}/edit/${deckId}`, { redirect: 'manual' });
     say('teardown', { trash: trash.status, remove: remove.status, editStatusAfter: gone.status });
   }

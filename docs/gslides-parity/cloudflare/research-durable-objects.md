@@ -19,13 +19,13 @@ The load model used throughout is the one `docs/REALTIME.md` section 2 adopts fr
 
 https://developers.cloudflare.com/durable-objects/platform/pricing/ (dateModified 2026-09-30), read 2026-10-01:
 
-| Dimension | Free plan | Paid plan |
-| --- | --- | --- |
-| Requests | "100,000 / day" | "1 million / month, + $0.15/million. Includes HTTP requests, RPC sessions, WebSocket messages, and alarm invocations" (line 41) |
-| Duration | "13,000 GB-s / day" | "400,000 GB-s / month, + $12.50/million GB-s" (line 42) |
-| Rows read (SQLite) | "5 million / day" | "First 25 billion / month included + $0.001 / million rows" (line 88) |
-| Rows written (SQLite) | "100,000 / day" | "First 50 million / month included + $1.00 / million rows" (line 89) |
-| SQL stored data | "5 GB (total)" | "5 GB-month, + $0.20/ GB-month" (storage table) |
+| Dimension             | Free plan           | Paid plan                                                                                                                       |
+| --------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Requests              | "100,000 / day"     | "1 million / month, + $0.15/million. Includes HTTP requests, RPC sessions, WebSocket messages, and alarm invocations" (line 41) |
+| Duration              | "13,000 GB-s / day" | "400,000 GB-s / month, + $12.50/million GB-s" (line 42)                                                                         |
+| Rows read (SQLite)    | "5 million / day"   | "First 25 billion / month included + $0.001 / million rows" (line 88)                                                           |
+| Rows written (SQLite) | "100,000 / day"     | "First 50 million / month included + $1.00 / million rows" (line 89)                                                            |
+| SQL stored data       | "5 GB (total)"      | "5 GB-month, + $0.20/ GB-month" (storage table)                                                                                 |
 
 The sentences the figures depend on, same page:
 
@@ -59,14 +59,14 @@ Per editor hour, per tab, from the load model above:
 
 ### 1.3 Against the caps, at 50 and at 500 editor hours a day
 
-| Cap (Free, per day) | At 50 editor hours a day | At 500 editor hours a day |
-| --- | --- | --- |
-| Requests, 100,000 | 5,200 (auto-response heartbeat, 24 alarms, 1 connect) to 12,750 (no auto-response, 144 alarms, 3 connects): 5 to 13 % | 52,000 to 127,500: 52 to 128 %, over the cap in the high shape |
-| Duration, 13,000 GB-s | (a) 75 GB-s, 0.6 %; (b) 4,500, 35 %; (c) 22,500, 173 %, over | (a) 750, 6 %; (b) 45,000, 346 %, over; (c) 225,000, over |
-| Rows written, 100,000 | 8,400 (ops + 24 alarms, no compaction deletes) to 21,600 (ops + 144 alarms + 144 deletes): 8 to 22 % | 84,000 to 216,000: 84 to 216 %, over the cap in every shape with row by row compaction |
-| Rows read, 5 million | under 25,000 with the auto-response (0.5 %); 288,000 to 1.44 million without (6 to 29 %) | under 250,000 with (5 %); 2.9 to 14.4 million without (58 to 288 %, over) |
-| SQL stored data, 5 GB total | 64.8 MB a month uncompacted, 77 months to the cap | 648 MB a month uncompacted, 7.7 months to the cap; a compaction after each Blob checkpoint keeps each object to its pending window |
-| Worker requests, 100,000 | 50 to 150 upgrades a day plus the HTTP routes the Worker serves | 500 to 1,500 upgrades a day |
+| Cap (Free, per day)         | At 50 editor hours a day                                                                                              | At 500 editor hours a day                                                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Requests, 100,000           | 5,200 (auto-response heartbeat, 24 alarms, 1 connect) to 12,750 (no auto-response, 144 alarms, 3 connects): 5 to 13 % | 52,000 to 127,500: 52 to 128 %, over the cap in the high shape                                                                     |
+| Duration, 13,000 GB-s       | (a) 75 GB-s, 0.6 %; (b) 4,500, 35 %; (c) 22,500, 173 %, over                                                          | (a) 750, 6 %; (b) 45,000, 346 %, over; (c) 225,000, over                                                                           |
+| Rows written, 100,000       | 8,400 (ops + 24 alarms, no compaction deletes) to 21,600 (ops + 144 alarms + 144 deletes): 8 to 22 %                  | 84,000 to 216,000: 84 to 216 %, over the cap in every shape with row by row compaction                                             |
+| Rows read, 5 million        | under 25,000 with the auto-response (0.5 %); 288,000 to 1.44 million without (6 to 29 %)                              | under 250,000 with (5 %); 2.9 to 14.4 million without (58 to 288 %, over)                                                          |
+| SQL stored data, 5 GB total | 64.8 MB a month uncompacted, 77 months to the cap                                                                     | 648 MB a month uncompacted, 7.7 months to the cap; a compaction after each Blob checkpoint keeps each object to its pending window |
+| Worker requests, 100,000    | 50 to 150 upgrades a day plus the HTTP routes the Worker serves                                                       | 500 to 1,500 upgrades a day                                                                                                        |
 
 Reading of the table. At 50 editor hours a day every row holds if the object is written in shape (a) or (b), with the heartbeat auto-answered and presence out of SQLite; shape (c) alone passes a cap. At 500 editor hours a day the binding row is rows written, not duration or requests: one row per op is the floor for an op that must be durable before the acknowledgement (`research-options.md` 5b: "every piece of state that matters must be in SQLite or on Blob before the answer goes out"), and compaction by `DELETE` doubles it. Whether `DROP TABLE` or `storage.deleteAll()` is counted as rows written is not stated on the pricing page and is left open (section 8). The pipeline's gate runs are not in the table: `docs/REALTIME.md` 1.1 rule 1 keeps the whole matrix on the local memory tier, and a hosted gate that opened tabs against the object would count every tab's connects, messages and alarms against the same daily caps (`research-costs-actual.md` section 2 found 200 to 750 GB hours on a gate day against 6 to 27 on a quiet one on Vercel).
 
@@ -140,11 +140,11 @@ The minimal block from https://developers.cloudflare.com/durable-objects/referen
 ```jsonc
 {
   "durable_objects": {
-    "bindings": [{ "name": "MY_DURABLE_OBJECT", "class_name": "MyDurableObject" }]
+    "bindings": [{ "name": "MY_DURABLE_OBJECT", "class_name": "MyDurableObject" }],
   },
   "exports": {
-    "MyDurableObject": { "type": "durable-object", "storage": "sqlite" }
-  }
+    "MyDurableObject": { "type": "durable-object", "storage": "sqlite" },
+  },
 }
 ```
 

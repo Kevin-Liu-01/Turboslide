@@ -88,7 +88,13 @@ function entry(over: Partial<Entry> & Pick<Entry, 'clientId' | 'author'>): Entry
     opId: `${over.clientId}:1`,
     at: '2026-10-01T12:00:00.000Z',
     mutations: [
-      { op: 'block.set', slideId: 'title', blockId: 'heading', path: '/text', value: 'Agent wrote' },
+      {
+        op: 'block.set',
+        slideId: 'title',
+        blockId: 'heading',
+        path: '/text',
+        value: 'Agent wrote',
+      },
     ],
     ...over,
   } as Entry;
@@ -152,9 +158,9 @@ describe('the agent banner’s gate', () => {
       note: 'Assist: shorter',
     });
     const notes = new Set(['Assist: shorter']);
-    expect(agentEntriesOf([accepted], { clientId: OWN, earlierIds: [], assistNotes: notes })).toEqual(
-      [],
-    );
+    expect(
+      agentEntriesOf([accepted], { clientId: OWN, earlierIds: [], assistNotes: notes }),
+    ).toEqual([]);
     expect(notes.size).toBe(0);
     /* the same note again is another tab's accept and is announced */
     expect(

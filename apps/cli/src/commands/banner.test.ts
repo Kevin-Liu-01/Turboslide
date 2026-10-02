@@ -17,7 +17,7 @@ import { ROWS16, markBlocks } from '@turboslide/theme/brand';
 import { SITE } from '@turboslide/theme/brand/site';
 
 import { runCli } from '../cli.ts';
-import { GLYPH_COLUMNS, bannerFacts, bannerLines, cliVersion } from './banner.ts';
+import { GLYPH_COLUMNS, bannerFacts, bannerLines, cliVersion, releaseVersion } from './banner.ts';
 
 type Run = { code: number; stdout: string; stderr: string };
 
@@ -75,6 +75,23 @@ describe('the banner (SPEC-4 1.11)', () => {
       version: string;
     };
     expect(cliVersion()).toBe(pkg.version);
+  });
+
+  test('carries the release of docs/updates.md as its version and never 0.0.0 (docs/NEXT.md 4.1.3 item 6)', () => {
+    const updates = readFileSync(new URL('../../../../docs/updates.md', import.meta.url), 'utf8');
+    expect(cliVersion()).not.toBe('0.0.0');
+    expect(cliVersion()).toBe(releaseVersion(updates));
+    expect(bannerLines(bannerFacts('x'))[0]).toContain(`Turboslide ${releaseVersion(updates)}`);
+    /* the calendar version: the newest entry's date, then that day's entries counted from the oldest */
+    expect(
+      releaseVersion('# Updates\n\n## 2026-09-30, the people round\n\n## 2026-09-29, a hotfix\n'),
+    ).toBe('2026.930.1');
+    expect(
+      releaseVersion(
+        '## 2026-10-01, the third\n## 2026-10-01, the second\n## 2026-10-01, the first\n## 2026-09-30, a\n',
+      ),
+    ).toBe('2026.1001.3');
+    expect(() => releaseVersion('# Updates\n')).toThrow();
   });
 
   test('carries no escape sequence, so NO_COLOR changes nothing', () => {

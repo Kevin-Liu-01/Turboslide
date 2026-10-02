@@ -31,7 +31,23 @@ export type BannerFacts = {
   fourth: string;
 };
 
-/** The version of apps/cli/package.json; 0.0.0 when it cannot be read. */
+/**
+ * The release a version names (docs/NEXT.md 4.1.3 item 6): the newest entry of docs/updates.md, the
+ * release notes, as the calendar version YYYY.MMDD.N, where MMDD is the entry's month times 100
+ * plus its day and N counts that day's entries from the oldest, so a second release on one day
+ * sorts after the first. apps/cli/package.json carries the version; banner.test.ts compares the two
+ * and refuses 0.0.0, so the push that writes a release's entry stamps the version with it.
+ */
+export function releaseVersion(updates: string): string {
+  const dates = [...updates.matchAll(/^## (\d{4})-(\d{2})-(\d{2}), /gm)];
+  const newest = dates[0];
+  if (newest === undefined) throw new Error('docs/updates.md names no release');
+  const [, year, month, day] = newest;
+  const sameDay = dates.filter((d) => d[1] === year && d[2] === month && d[3] === day).length;
+  return `${Number(year)}.${Number(month) * 100 + Number(day)}.${sameDay}`;
+}
+
+/** The version of apps/cli/package.json, the release's (releaseVersion); 0.0.0 when it cannot be read. */
 export function cliVersion(): string {
   try {
     const text = readFileSync(new URL('../../package.json', import.meta.url), 'utf8');

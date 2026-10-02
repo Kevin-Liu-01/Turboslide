@@ -249,6 +249,13 @@ the version, the address, the action count with the effects backend, and the fou
 two glyph lines stand alone. No colour is written, so the output is byte identical with
 `NO_COLOR=1`. `turboslide info` prints the same header before the deck facts.
 
+The version is the release's, stamped in `apps/cli/package.json` (NEXT.md 4.1.3 item 6): the
+calendar version YYYY.MMDD.N of the newest entry of `docs/updates.md`, where MMDD is the entry's
+month times 100 plus its day and N counts that day's entries from the oldest, so a second release
+on one day sorts after the first. `banner.test.ts` compares the two and refuses `0.0.0`, so the
+push that writes a release's entry stamps the version with it. It read `2026.1001.3` at push 3,
+the third entry dated 2026-10-01.
+
 ```
  ███████████  Turboslide <version>
  ▀▀▀▀▀███▀▀▀  https://www.turboslide.com

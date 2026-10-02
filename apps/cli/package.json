@@ -1,6 +1,6 @@
 {
   "name": "@turboslide/cli",
-  "version": "0.0.0",
+  "version": "2026.1001.3",
   "private": true,
   "type": "module",
   "description": "The turboslide binary: the file transport that needs no browser page (SPEC 7.2). No React.",

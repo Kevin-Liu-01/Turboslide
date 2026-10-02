@@ -42,8 +42,13 @@ export type ActionRequestFacts = {
   request?: Request;
   /** The deck the transport runs the action on, for per deck name uniqueness (0.19). */
   deckId?: string;
-  /** Sets a header on the transport's response (Forget this browser's cookie, 7.4). */
-  setHeader?: (name: string, value: string) => void;
+  /**
+   * Sets a header on the transport's response (Forget this browser's cookie, 7.4). A list sets
+   * every value at once: the cookies of a sign out (the library's cleared session cookies and the
+   * fresh anonymous cookie) are several `set-cookie` lines, and one value at a time replaces the
+   * last (docs/NEXT.md 3.2 H3).
+   */
+  setHeader?: (name: string, value: string | string[]) => void;
   /** Whether the request arrived over https or localhost, for the cookie's name. */
   secure?: boolean;
 };
@@ -364,6 +369,25 @@ export async function ensureUserByEmail(
   return { id, created: true };
 }
 
+/**
+ * A fresh anonymous principal for this browser (SPEC-3 7.4): its record and the sealed cookie's
+ * `set-cookie` line. Forget this browser sets it, and since docs/NEXT.md 3.2 H3 so does the sign
+ * out of this browser's own session, so a signed out browser reads as a new label to itself and
+ * to others; the anonymous id it held before stays linked to the account, and the edits made
+ * under it keep the account's name.
+ */
+async function freshAnonymousCookie(
+  rt: IdentityRuntime,
+  facts: ActionRequestFacts,
+  at: Date,
+): Promise<{ principalId: string; cookie: string }> {
+  const principalId = anonymousPrincipalId(crypto.randomUUID());
+  await rt.principals.put(newPrincipalRecord(principalId, at));
+  const value = await sealPrincipalCookie(principalId, rt.secret, at.getTime());
+  const name = facts.secure === false ? 'ts_id' : ANON_COOKIE;
+  return { principalId, cookie: serializeAnonymousCookie(name, value) };
+}
+
 export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActionDeps): void {
   const runtime = (): IdentityRuntime => deps.runtime ?? identityRuntime();
   const now = deps.now ?? (() => new Date());
@@ -500,15 +524,21 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const target = listed.find((session) => session.id === sessionId);
     if (target === undefined) return { signedOut: 0 };
     if (target.id === identity.session?.id) {
+      const cookies: string[] = [];
       try {
         const response = await rt.auth.api.signOut({ headers: request.headers, asResponse: true });
-        for (const line of response.headers.getSetCookie()) facts.setHeader?.('set-cookie', line);
+        cookies.push(...response.headers.getSetCookie());
       } catch {
         await rt.auth.api.revokeSession({
           body: { token: target.token },
           headers: request.headers,
         });
       }
+      /* the browser leaves as a new anonymous principal (audit-auth finding 3: the old id is
+         aliased to the account, so a browser that kept it rendered as the account with the
+         badge); every cookie line goes in one call */
+      cookies.push((await freshAnonymousCookie(rt, facts, now())).cookie);
+      facts.setHeader?.('set-cookie', cookies);
       return { signedOut: 1 };
     }
     await rt.auth.api.revokeSession({ body: { token: target.token }, headers: request.headers });
@@ -517,13 +547,8 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
 
   dispatcher.register('account.forget', async () => {
     const facts = await deps.facts();
-    const rt = runtime();
-    const principalId = anonymousPrincipalId(crypto.randomUUID());
-    const record = newPrincipalRecord(principalId, now());
-    await rt.principals.put(record);
-    const value = await sealPrincipalCookie(principalId, rt.secret, now().getTime());
-    const name = facts.secure === false ? 'ts_id' : ANON_COOKIE;
-    facts.setHeader?.('set-cookie', serializeAnonymousCookie(name, value));
+    const { principalId, cookie } = await freshAnonymousCookie(runtime(), facts, now());
+    facts.setHeader?.('set-cookie', cookie);
     facts.setHeader?.(FORGET_HEADER, '1');
     return { principalId };
   });

@@ -456,8 +456,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     /* the realtime round (docs/REALTIME.md section 2) added 22 rows: sixteen realtime rows, the
        Redis command row and five local accounts rows; its Cloudflare phase (docs/CLOUDFLARE.md
        section 2) added 10: six cost rows per Cloudflare product and four setup rows */
+    /* the next program's hotfix H3 (docs/NEXT.md 3.2), carried in the realtime round's R4 push:
+       one local accounts row, accounts.sign-out-clean */
     expect(CORE_MATRIX.length).toBe(
-      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22 + 10,
+      565 + 133 + 16 + 71 + 29 + 43 - 1 + 33 + 1 - 1 + 130 + 1 + 21 + 1 + 1 + 22 + 10 + 1,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',

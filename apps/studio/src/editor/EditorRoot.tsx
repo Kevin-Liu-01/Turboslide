@@ -1068,7 +1068,23 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       ? {
           signOut: async (sessionId) => {
             if (sessionId === undefined) {
-              await authPost('sign-out', {});
+              /* this browser's own session through the action, which ends it and mints a
+                 fresh anonymous cookie in the same answer (docs/NEXT.md 3.2 H3; audit-auth
+                 findings 2 and 3), then the page loads again as the new visitor. The action
+                 names its session (`sessionId` or `all`), so the current one is read first. An
+                 unsaved draft has no stored deck for the window transport to run on, so there
+                 the library's own route ends the session and the anonymous cookie stays (A1a,
+                 NEXT.md 4.3.2) */
+              try {
+                const listed = (await controller.invoke('account.sessions', {})) as {
+                  sessions?: { id: string; current: boolean }[];
+                };
+                const current = listed.sessions?.find((session) => session.current)?.id;
+                if (current === undefined) throw new RangeError('no current session');
+                await controller.invoke('account.signOut', { sessionId: current });
+              } catch {
+                await authPost('sign-out', {});
+              }
               window.location.reload();
               return null;
             }
@@ -1353,6 +1369,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const shellDispatch: EditorDispatch = (action, input) => {
     if (action === 'view.present' && (input as { on?: boolean }).on === true) {
       requestPresentFullscreen();
+    }
+    /* the account menu's Sign out row (docs/NEXT.md 3.2 H3): this browser's sign out in one
+       click, the page reloading as a new visitor; a row naming a session or every other session
+       (the Profile dialog) runs the action as it is */
+    if (action === 'account.signOut' && account.signOut !== undefined) {
+      const named = input as { sessionId?: unknown; all?: unknown };
+      if (named.sessionId === undefined && named.all === undefined)
+        return account.signOut().then(() => ({ signedOut: 1 }));
     }
     if (action === 'account.forget' && shellApi.current) {
       // the own chip's row asks first with ACCOUNT.forgetConfirm (SPEC-3 7.4); Forget in the

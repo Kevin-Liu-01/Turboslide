@@ -44,7 +44,7 @@ let dir = '';
 let runtime: IdentityRuntime;
 let dispatcher: Dispatcher;
 let facts: ActionRequestFacts;
-const headers: [string, string][] = [];
+const headers: [string, string | string[]][] = [];
 const store: AvatarStore & { files: Map<string, AvatarFile> } = {
   files: new Map(),
   put(file) {
@@ -421,5 +421,100 @@ describe('API keys and the admin actions', () => {
     };
     expect(mail.mail[0]).toMatchObject({ to: 'a@example.test', kind: 'sign-in' });
     expect(mail.mail[0]?.sentAt).toMatch(/^\d{4}-/);
+  });
+});
+
+/** The cookie pairs a jar holds after a response's `set-cookie` lines: a cleared cookie leaves. */
+function applyCookies(jar: string, lines: readonly string[]): string {
+  const pairs = new Map<string, string>();
+  for (const part of jar.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq > 0) pairs.set(part.slice(0, eq).trim(), part.slice(eq + 1).trim());
+  }
+  for (const line of lines) {
+    const first = line.split(';')[0] ?? '';
+    const eq = first.indexOf('=');
+    if (eq <= 0) continue;
+    const name = first.slice(0, eq).trim();
+    const value = first.slice(eq + 1).trim();
+    if (value === '' || /max-age=0/i.test(line)) pairs.delete(name);
+    else pairs.set(name, value);
+  }
+  return [...pairs.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+/** Signs an address in through the library's routes on top of a browser's cookies; the new jar. */
+async function signInThroughLibrary(email: string, jar: string): Promise<string> {
+  const asked = await runtime.auth!.handler(
+    request('/api/auth/sign-in/magic-link', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, callbackURL: '/decks' }),
+      cookie: jar,
+    }),
+  );
+  expect(asked.status).toBe(200);
+  const mail = (await runtime.mailer.list()).find((m) => m.to === email && m.kind === 'sign-in');
+  const code = /Code: (\d{6})/.exec(mail?.text ?? '')?.[1] ?? '';
+  expect(code).toHaveLength(6);
+  const verified = await runtime.auth!.handler(
+    request('/api/auth/sign-in/email-otp', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, otp: code }),
+      cookie: jar,
+    }),
+  );
+  expect(verified.status).toBe(200);
+  return applyCookies(jar, verified.headers.getSetCookie());
+}
+
+describe('Sign out of this browser (docs/NEXT.md 3.2 H3)', () => {
+  test('the current session ends and a fresh anonymous cookie is set in one header call', async () => {
+    const { identity: before, cookie } = await anonymous();
+    const jar = await signInThroughLibrary('h3-out@example.test', cookie);
+    const signedInRequest = request('/edit/q4', { cookie: jar });
+    const signedIn = await requestIdentity(signedInRequest, runtime);
+    expect(signedIn.kind).toBe('account');
+    expect(await runtime.aliases.accountOf(before.principalId ?? '')).not.toBeNull();
+    facts = {
+      identity: signedIn,
+      request: signedInRequest,
+      setHeader: (name, value) => headers.push([name, value]),
+    };
+    /* the client names its own session: the current row of account.sessions */
+    const listed = (await run('account.sessions')) as {
+      sessions: { id: string; current: boolean }[];
+    };
+    const current = listed.sessions.find((session) => session.current)?.id;
+    expect(current).toBeDefined();
+    expect(await run('account.signOut', { sessionId: current })).toEqual({ signedOut: 1 });
+    /* every cookie line in one call, so the last does not replace the others */
+    const calls = headers.filter(([name]) => name === 'set-cookie');
+    expect(calls).toHaveLength(1);
+    const lines = calls[0]![1];
+    expect(Array.isArray(lines)).toBe(true);
+    const all = lines as string[];
+    const anonymousLine = all.find((line) => line.startsWith('__Host-ts_id=v1.'));
+    expect(anonymousLine).toBeDefined();
+    expect(all.some((line) => /session_token=/.test(line))).toBe(true);
+    /* the browser after the answer: no session, a new principal nothing links to the account */
+    const after = await requestIdentity(
+      request('/edit/q4', { cookie: applyCookies(jar, all) }),
+      runtime,
+    );
+    expect(after.kind).toBe('anonymous');
+    expect(after.principalId).toMatch(/^anon_/);
+    expect(after.principalId).not.toBe(before.principalId);
+    expect(await runtime.aliases.accountOf(after.principalId ?? '')).toBeNull();
+    /* the old anonymous id stays linked, so its edits keep the account's name */
+    expect(await runtime.aliases.accountOf(before.principalId ?? '')).not.toBeNull();
+  });
+
+  test('an anonymous browser has no session to end and keeps its cookie', async () => {
+    const { identity } = await anonymous();
+    facts = { identity, setHeader: (name, value) => headers.push([name, value]) };
+    expect(await run('account.signOut', { sessionId: 'sess_none' })).toEqual({ signedOut: 0 });
+    expect(headers).toEqual([]);
   });
 });

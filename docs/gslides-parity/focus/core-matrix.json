@@ -9640,6 +9640,15 @@
       "note": "Realtime round; docs/REALTIME.md section 2; R1 (the PRESENCE_SET script), R5 (the probe's --redis-url through a wrapper); over the ceiling on the preview holds the ship. A measurement row (docs/SYNC.md 6.1): the probe drives an editing window and an idle window of --minutes each and counts the hour as 12 editing minutes plus 48 idle minutes from them (--minutes 12 --idle-minutes 48 drives the literal hour); without a Redis URL the row is not driven with the reason. Cloudflare phase; docs/CLOUDFLARE.md 2.2: the row stays for the redis tier and is not driven on do (the probe records the reason)"
     },
     {
+      "id": "accounts.sign-out-clean",
+      "feature": "share",
+      "interaction": "Sign out from the menu ends the session in one click; the tab reloads with a fresh label and no badge; other tabs read the badge gone within 2 s",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-auth 40 to 41, 67",
+      "note": "docs/NEXT.md 3.2 H3 and 4.3.3: local row; not driven today by the matrix rule for local rows (production holds no account; NEXT.md 4.3.3 reads it broken from audit-auth 40 to 41); the menu row runs EditorAccount.signOut(), whose account.signOut ends this browser session and mints a fresh anonymous cookie in the same answer; the revocation bound is A1b accounts.revoke-within-5s"
+    },
+    {
       "id": "accounts.google-button",
       "feature": "share",
       "interaction": "Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and the passkey row; with the e2e mail mode capture the email field is present",

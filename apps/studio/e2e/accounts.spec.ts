@@ -2225,3 +2225,113 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     }
   });
 });
+
+/* ---------------------------------------------------------------------------------------------
+   The next program's hotfix H3 (docs/NEXT.md 3.2, 4.3.3): Sign out from the account menu. */
+
+test.describe("the next program's hotfix H3: sign out in one click (docs/NEXT.md 3.2)", () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+
+  test(coreTitle('accounts.sign-out-clean'), async ({ browser }) => {
+    test.setTimeout(300_000);
+    const scratch = new Scratch();
+    const { context: aCtx, page: A } = await ownerContext(browser);
+    let bCtx: BrowserContext | null = null;
+    let B: Page | null = null;
+    const stamp = Date.now();
+    const emailA = `h3-a-${stamp}@example.test`;
+    const emailB = `h3-b-${stamp}@example.test`;
+    try {
+      const probe = await A.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+      expect(probe.status(), 'the server has an identity database').toBe(200);
+      expect((await signInWithCode(A.request, ORIGIN, emailA)).status).toBe(200);
+      const deck = await newDeck(A, scratch, 'H3 sign out deck');
+      /* B holds an email grant, so B reads A as signed in (a link visitor reads a label) */
+      await inviteByEmail(A, emailB, 'editor');
+      ({ context: bCtx, page: B } = await otherContext(browser));
+      expect((await signInWithCode(B.request, ORIGIN, emailB)).status).toBe(200);
+      await B.goto(`/edit/${deck}`);
+      await waitEditor(B);
+      await openEditor(A, deck);
+      const before = (await peopleState(A)).account ?? {};
+      const aAccount = before.principalId ?? '';
+      const aCookieBefore = await principalOf(A);
+      expect(before.signedIn, 'A is signed in').toBe(true);
+      expect(aAccount, "A's account principal").toMatch(/^usr_/);
+      const verifiedOnB = async (): Promise<boolean> =>
+        ((await peopleState(B!)).presence?.others ?? []).some(
+          (row) => row.principalId === aAccount && row.trust === 'verified',
+        );
+      await expect
+        .poll(verifiedOnB, { timeout: 30_000, message: "B reads A's chip as signed in" })
+        .toBe(true);
+      /* one click on the account menu's Sign out row */
+      const reloaded = A.waitForEvent('load', { timeout: 30_000 });
+      const clicked = await withOwnMenu(A, async (menu) => {
+        await menu.locator('[data-control="account.signOut"]').first().click();
+        return Date.now();
+      });
+      expect(clicked, 'the own chip menu draws the Sign out row').not.toBeNull();
+      await reloaded;
+      const reloadedAt = Date.now();
+      /* B reads the badge gone, read every 100 ms from A's reload */
+      let goneMs: number | null = null;
+      while (Date.now() - reloadedAt < 5_000) {
+        if (!(await verifiedOnB())) {
+          goneMs = Date.now() - reloadedAt;
+          break;
+        }
+        await B.waitForTimeout(100);
+      }
+      await waitEditor(A);
+      const after = (await peopleState(A)).account ?? {};
+      const aCookieAfter = await principalOf(A);
+      const session = await A.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+      const sessionBody = (await session.json().catch(() => null)) as { user?: unknown } | null;
+      /* the own chip and the account menu's head carry no badge */
+      const chipBadge = await badgeIn(ctl(A, 'title.account').first());
+      const ownBadge = await withOwnMenu(A, async (menu) =>
+        (await menu.locator('.ts-account-head').count()) > 0
+          ? badgeIn(menu.locator('.ts-account-head').first())
+          : { present: false, label: null, size: null },
+      );
+      test.info().annotations.push({
+        type: 'sign out',
+        description: JSON.stringify({
+          clickToReloadMs: clicked === null ? null : reloadedAt - clicked.value,
+          badgeGoneOnBMs: goneMs,
+          before: { principalId: aAccount, label: before.label, trust: before.trust },
+          after: { principalId: after.principalId, label: after.label, trust: after.trust },
+          cookieChanged: aCookieBefore !== aCookieAfter,
+          session: sessionBody === null ? null : sessionBody.user === undefined ? 'none' : 'user',
+          chipBadge,
+          ownBadge: ownBadge?.value ?? null,
+        }),
+      });
+      expect(after.signedIn, 'the tab reloads signed out').toBe(false);
+      expect(after.trust, 'a fresh label').toBe('label');
+      expect(after.principalId ?? '', 'a new anonymous principal').toMatch(/^anon_/);
+      expect(after.principalId, 'not the account').not.toBe(aAccount);
+      expect(aCookieAfter, 'the identity cookie is a new one').not.toBe(aCookieBefore);
+      expect(after.principalId, "the cookie's principal").toBe(aCookieAfter);
+      expect(after.label ?? '', 'the label of a new visitor').toMatch(LABEL);
+      expect(sessionBody?.user, 'the session answers no user').toBeUndefined();
+      expect(chipBadge.present, 'no badge on the own chip').toBe(false);
+      expect(ownBadge?.value.present ?? false, "no badge on the account menu's head").toBe(false);
+      expect(goneMs, "B reads A's badge gone within 2 s of A's reload").not.toBeNull();
+      expect(goneMs!).toBeLessThanOrEqual(2_000);
+    } finally {
+      try {
+        /* the deck is the account's: A signs in again to remove it */
+        await closeSecond(bCtx, B);
+        if (scratch.ids.size > 0) {
+          expect((await signInWithCode(A.request, ORIGIN, emailA)).status).toBe(200);
+          await teardownAll(A, scratch);
+        }
+      } finally {
+        await aCtx.close();
+      }
+    }
+  });
+});

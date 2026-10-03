@@ -220,6 +220,10 @@ const INNER_HTML_ALLOW = [
   'packages/viewer/standalone/runtime.ts',
   'packages/identity/src/names.ts',
   'apps/studio/src/server/decks.ts',
+  // the landing (docs/LANDING.md 2.0, 6.1): HomeSheet writes the renderer's output, rendered at
+  // build from the page deck (slides.generated.ts), into the server's markup only; the client
+  // renders the same element empty and React leaves it as hydration found it
+  'apps/studio/src/components/home/HomeSheet.tsx',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

@@ -1,7 +1,7 @@
 import { AGENTS, ANNOUNCE, HISTORY } from '../copy';
 import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId } from '../deck.generated';
-import { LIVE_SLIDE_HTML } from '../live-slides.generated';
+import { LIVE_SLIDE_HTML } from '../bands/live.generated';
 import {
   NAME_MAX,
   formatLines,
@@ -596,7 +596,7 @@ export function startAgents(ctx: LiveContext): void {
           agentStep: n as AgentStep,
           order:
             n === 1 && !s.order.includes('next-steps')
-              ? insertAfter(s.order, 'ships', 'next-steps')
+              ? insertAfter(s.order as readonly HomeSlideId[], 'ships', 'next-steps')
               : s.order,
         }),
       });

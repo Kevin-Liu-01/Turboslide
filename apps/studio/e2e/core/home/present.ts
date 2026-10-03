@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 import { PRESENT } from '../../../src/components/home/copy';
 import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { title } from '../lib';
-import { freshPage, loadReading, noteTiming, openHome, typeLine } from './agents';
+import { bandReady, freshPage, loadReading, noteTiming, openHome, typeLine } from './agents';
 
 // A lane module of core/home.spec.ts (docs/LANDING.md 2.7, 6.7; build/integrator.md "Landing,
 // day 0" 4.9 and 5.1). L3's, push 5: the show (home.present.show), its focus (home.present.focus)
@@ -23,6 +23,8 @@ const presentButton = (page: Page) =>
 const show = (page: Page) => band(page).locator('[data-show]');
 const stage = (page: Page) => band(page).locator('[data-show-stage]');
 const SLIDESHOW_KEY = process.platform === 'darwin' ? 'Meta+Enter' : 'Control+F5';
+/** The deck's slides at rest (nine since V1#8). */
+const N = HOME_DECK.order.length;
 
 /**
  * In the page: the time from the next press or key on the band to the show's motion at rest (the
@@ -78,9 +80,9 @@ export function rows(): void {
     const page = await freshPage(browser);
     await openHome(page);
     /* a change of the visitor's and an agent's before the show */
-    await page.locator('[data-band="agents"]').scrollIntoViewIfNeeded();
+    await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'present');
     /* S opens nothing */
     await page.locator('body').press('s');
     await expect(show(page)).toHaveCount(0);
@@ -99,31 +101,34 @@ export function rows(): void {
     if (loadReading().read) expect(opened).toBeLessThanOrEqual(800);
     await expect(show(page)).toHaveAttribute('role', 'dialog');
     await expect(show(page)).toHaveAttribute('aria-modal', 'true');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(2, 8));
-    await expect(show(page)).toContainText(PRESENT.counter(2, 8));
-    await expect(stage(page)).toContainText('Onboarding plan for Globex');
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(2, N));
+    await expect(show(page)).toContainText(PRESENT.counter(2, N));
+    /* slide 2 as the deck holds it, the name Tailor set on it */
+    await expect(stage(page)).toContainText(HOME_DECK.slides.plan.title.split(HOME_DECK.customer).join('Globex'));
+    await expect(stage(page)).toContainText('Globex');
+    await expect(stage(page)).not.toContainText(HOME_DECK.customer);
     await expect(show(page)).toContainText(/\d:\d\d/);
     const notes = HOME_DECK.slides.plan.notes.split(HOME_DECK.customer).join('Globex');
     if (notes !== '') await expect(show(page)).toContainText(notes);
     /* keys page with a cut */
     await page.keyboard.press('ArrowRight');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(3, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(3, N));
     expect(await stage(page).evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
     await page.keyboard.press('Space');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(4, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(4, N));
     await page.keyboard.press('Home');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(1, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(1, N));
     /* slide 1 carries the hero's picture and its credit */
     await expect(stage(page).locator('[data-field]')).toHaveCount(1);
     await expect(stage(page)).toContainText('NASA');
     await page.keyboard.press('End');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(8, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(N, N));
     await page.keyboard.press('PageUp');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(7, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(N - 1, N));
     /* Enter on a focused Previous goes back, not forward */
     await show(page).locator('[data-show-button="previous"]').focus();
     await page.keyboard.press('Enter');
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(6, 8));
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(N - 2, N));
     /* Escape returns with focus on Present, within 400 ms and one frame (the 400 ms exit motion) */
     await watchMotion(page, 'closed');
     await page.keyboard.press('Escape');
@@ -151,7 +156,7 @@ export function rows(): void {
   test(title('home.present.focus'), async ({ browser }) => {
     const page = await freshPage(browser);
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'present');
     await presentButton(page).click();
     await expect(stage(page)).toBeFocused();
     const order: string[] = [];
@@ -180,7 +185,7 @@ export function rows(): void {
     /* the deck as the visitor left it, one 16 by 9 page per slide */
     const page = await freshPage(browser);
     await openHome(page);
-    await page.locator('[data-band="agents"]').scrollIntoViewIfNeeded();
+    await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
     /* the button opens the browser's print after it loads slide 7's still */
     await page.evaluate(() => {
@@ -194,6 +199,7 @@ export function rows(): void {
         timeout: 10_000,
       })
       .catch(() => null);
+    await bandReady(page, 'present');
     await band(page).locator('[data-print]').click();
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { __printed: number }).__printed))
@@ -202,7 +208,7 @@ export function rows(): void {
     /* Cmd or Ctrl+P fires beforeprint as the button's print does: the container holds the deck */
     await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
     const deck = page.locator('[data-print-deck]');
-    await expect(deck.locator(':scope > *')).toHaveCount(8);
+    await expect(deck.locator(':scope > *')).toHaveCount(HOME_DECK.order.length);
     await expect(deck).toContainText('Onboarding plan for Globex');
     await expect(deck).not.toContainText('Northwind');
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
@@ -210,7 +216,7 @@ export function rows(): void {
     /* Chromium's own print of the page under print emulation */
     await page.emulateMedia({ media: 'print' });
     const read = pdfPages(await page.pdf({ preferCSSPageSize: true }));
-    expect(read.pages).toBe(8);
+    expect(read.pages).toBe(HOME_DECK.order.length);
     /* 16 by 9 inches, 1152 by 648 pt; soft, so the hero's print below is read whatever this reads */
     for (const box of read.boxes)
       expect.soft(box.split(/\s+/).map(Number).slice(2)).toEqual([1152, 648]);

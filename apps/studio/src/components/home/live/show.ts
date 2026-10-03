@@ -2,7 +2,7 @@ import { ANNOUNCE, PRESENT } from '../copy';
 import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId } from '../deck.generated';
 import { homeAsset } from '../assets';
-import { LIVE_SLIDE_HTML } from '../live-slides.generated';
+import { LIVE_SLIDE_HTML } from '../bands/live.generated';
 import { settleEntrance } from './agents';
 import type { LiveContext } from './index';
 import { finishBand, play, reduced } from './motion';
@@ -277,7 +277,7 @@ export function startShow(ctx: LiveContext): void {
   const paintList = (state: HomeDeckState): void => {
     if (!state.order.includes(chosen)) chosen = state.order[0] as HomeSlideId;
     let before: Element | null = null;
-    for (const id of state.order) {
+    for (const id of state.order as readonly HomeSlideId[]) {
       const row = rowsById.get(id);
       if (row === undefined) continue;
       itemOf(row).hidden = false;
@@ -286,7 +286,7 @@ export function startShow(ctx: LiveContext): void {
       const title = cells[1];
       if (n !== undefined) n.textContent = String(state.order.indexOf(id) + 1);
       if (title !== undefined)
-        title.textContent = customerText(HOME_DECK.slides[id].title, state.customer);
+        title.textContent = customerText(HOME_DECK.slides[id as HomeSlideId].title, state.customer);
       const button = buttonOf(row);
       if (id === chosen) button.setAttribute('aria-current', 'true');
       else button.removeAttribute('aria-current');
@@ -408,7 +408,7 @@ export function startShow(ctx: LiveContext): void {
     stage.setAttribute('aria-label', PRESENT.stageName(current + 1, total));
     if (parts.count) parts.count.textContent = PRESENT.counter(current + 1, total);
     if (parts.notes)
-      parts.notes.textContent = customerText(HOME_DECK.slides[id].notes, state.customer);
+      parts.notes.textContent = customerText(HOME_DECK.slides[id as HomeSlideId].notes, state.customer);
   };
   const paintTime = (): void => {
     const s = Math.floor((Date.now() - openedAt) / 1000);
@@ -463,7 +463,7 @@ export function startShow(ctx: LiveContext): void {
     clearInterval(clock);
     const leaving = show;
     const leavingStage = stage!;
-    chosen = store.get().order[current] ?? chosen;
+    chosen = (store.get().order[current] as HomeSlideId | undefined) ?? chosen;
     const state = store.get();
     paintDisplay(state);
     paintList(state);

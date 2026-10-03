@@ -4,11 +4,12 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 import { HOME_ASSETS } from '../../../src/components/home/assets';
+import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { EXPORT, formatPercentFigure } from '../../../src/components/home/copy';
 import { HOME_FACTS } from '../../../src/components/home/facts';
 import FACTS from '../../../../../packages/theme/brand/facts.json' with { type: 'json' };
 import { extraHTTPHeaders, title } from '../lib';
-import { freshPage, openHome } from './agents';
+import { bandReady, freshPage, openHome } from './agents';
 
 // A lane module of core/home.spec.ts (docs/LANDING.md 2.8, 6.7; build/integrator.md "Landing,
 // day 0" 4.9 and 5.1). L3's, push 6: the seam (home.export.seam) and the figure with the PDF
@@ -32,7 +33,7 @@ export function rows(): void {
   test(title('home.export.seam'), async ({ browser }) => {
     const page = await freshPage(browser);
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'export');
     /* the labels and the slider */
     await expect(band(page)).toContainText(EXPORT.labels.perfect);
     await expect(band(page)).toContainText(EXPORT.labels.editable);
@@ -107,7 +108,7 @@ export function rows(): void {
       if (/\/home\/.*\.pdf/.test(r.url())) pdfRequests.push(r.url());
     });
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'export');
     await page.waitForTimeout(500);
     expect(pdfRequests).toEqual([]);
     /* the figure is facts.json's export reading, in the sentence that names its measure */
@@ -135,8 +136,10 @@ export function rows(): void {
     const sha = createHash('sha256').update(bytes).digest('hex');
     const pdf = HOME_ASSETS.find((a) => a.role === 'pdf' && a.sha256 === sha);
     expect(pdf, 'the downloaded PDF is a file of assets.json').toBeDefined();
-    expect(pdf!.pages).toBe(8);
-    expect((bytes.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length).toBe(8);
+    expect(pdf!.pages).toBe(HOME_DECK.order.length);
+    expect((bytes.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length).toBe(
+      HOME_DECK.order.length,
+    );
     /* the link points at the file of the shown appearance, requested by this click alone */
     expect(new URL(file.url()).pathname).toBe(
       HOME_ASSETS.find((a) => a.role === 'pdf' && a.appearance === 'light')!.path,

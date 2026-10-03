@@ -1,4 +1,5 @@
 import { homeAsset } from '../assets';
+import type { HomeSlideId } from '../deck.generated';
 import { settleEntrance } from './agents';
 import type { LiveContext } from './index';
 import { appearance, cloneSlide, endHeroSequence, loadStill } from './show';
@@ -47,7 +48,7 @@ export function startPrint(ctx: LiveContext): void {
     endHeroSequence();
     const state = store.get();
     /* one sheet a page: print.css sizes each child of the container to 16 by 9 inches */
-    deck.replaceChildren(...state.order.map((id) => cloneSlide(root, state, id)));
+    deck.replaceChildren(...state.order.map((id) => cloneSlide(root, state, id as HomeSlideId)));
     settleEntrance(deck);
   };
   const empty = (): void => {

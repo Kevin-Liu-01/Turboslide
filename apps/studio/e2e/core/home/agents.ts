@@ -63,6 +63,24 @@ export async function openHome(page: Page, width: 'desktop' | 'phone' = 'desktop
   await page.waitForSelector('main#top[data-live="ready"]', { timeout: 90_000 });
 }
 
+/**
+ * Brings a band below the first screen into view and waits for its chunk (LANDING.md 4.2): the
+ * reserved box filled and the band's entries started, so a press reaches its handlers.
+ */
+export async function bandReady(page: Page, id: string): Promise<void> {
+  const el = page.locator(`[data-band="${id}"]`);
+  await el.scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    (b) =>
+      [...document.querySelectorAll(`[data-band="${b}"] [data-reserve]`)].every((box) =>
+        box.hasAttribute('data-filled'),
+      ),
+    id,
+    { timeout: 90_000 },
+  );
+  await page.waitForTimeout(300);
+}
+
 /** A fresh context for a test, so no visit or kit carries over. */
 export async function freshPage(browser: Browser, js = true): Promise<Page> {
   const context = await browser.newContext({ extraHTTPHeaders, javaScriptEnabled: js });
@@ -162,8 +180,19 @@ export function rows(): void {
         const page = await freshPage(browser, js);
         await page.setViewportSize(width === 'phone' ? PHONE : DESKTOP);
         await page.goto('/home');
-        if (js) await page.waitForSelector('main#top[data-live="ready"]', { timeout: 90_000 });
+        if (js) {
+          await page.waitForSelector('main#top[data-live="ready"]', { timeout: 90_000 });
+          await bandReady(page, 'agents');
+        }
         const lines = await panelLines(page, 'cli');
+        if (!js) {
+          /* without script the reserved box holds its ruled frame and no screen (LANDING.md 2.0
+             "At rest", question 16); the words and the three rows are in the document */
+          expect(lines, `no screen without script at ${width}`).toEqual([]);
+          await expect(band(page).locator('[data-history-row]')).toHaveCount(3);
+          await page.context().close();
+          continue;
+        }
         const screen = HOME_RUN.screens.transcript[width === 'phone' ? 'narrow' : 'wide'];
         expect(lines, `the resting transcript at ${width}, script ${js}`).toEqual([...screen]);
         expect(lines.length).toBeLessThanOrEqual(width === 'phone' ? 22 : 14);
@@ -193,7 +222,8 @@ export function rows(): void {
           await expect(history.nth(i)).toContainText(AGENTS.author.agent);
           await expect(history.nth(i)).toContainText(AGENTS.recorded);
         }
-        for (const c of await counters(page)) expect(c).toMatch(/^\d \/ 8$/);
+        for (const c of await counters(page))
+          expect(c).toMatch(new RegExp(`^\\d / ${HOME_DECK.order.length}$`));
         await page.context().close();
       }
   });
@@ -202,7 +232,7 @@ export function rows(): void {
     test.setTimeout(120_000);
     const page = await freshPage(browser);
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'agents');
     const caption = await band(page).innerText();
     expect(HOME_RUN.captionSeconds).toBe(Math.round(HOME_RUN.totalMs / 1000));
     expect(caption).toContain(AGENTS.caption(HOME_RUN.captionSeconds));
@@ -339,13 +369,15 @@ export function rows(): void {
               ).__start,
           );
           expect(start.banner).toContain('$ turboslide --version');
-          for (const c of start.counters) expect(c).toMatch(/^\d \/ 7$/);
+          for (const c of start.counters)
+            expect(c).toMatch(new RegExp(`^\\d / ${HOME_DECK.startOrder.length}$`));
           /* slide 5 left the deck: its place in the band is absent and band 3's filmstrip lost it */
           expect(start.absent).toBe(true);
           expect(start.thumb).toBe(false);
         }
       }
-      for (const c of await counters(page)) expect(c).toMatch(/^\d \/ 8$/);
+      for (const c of await counters(page))
+        expect(c).toMatch(new RegExp(`^\\d / ${HOME_DECK.order.length}$`));
       noteTiming(`steps with ${name.length} character name`, Math.max(...lengths));
       for (const t of typing) noteTiming('mean key gap', t);
       if (loadReading().read) {
@@ -365,7 +397,7 @@ export function rows(): void {
     test.setTimeout(120_000);
     const page = await freshPage(browser);
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'agents');
     /* help */
     await typeLine(page, 'help');
     await expect
@@ -451,7 +483,7 @@ export function rows(): void {
   test(title('home.agents.transports'), async ({ browser }) => {
     const page = await freshPage(browser);
     await openHome(page);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'agents');
     const tabs = band(page).locator('[data-transports] [role="tab"]');
     await expect(tabs).toHaveCount(3);
     await expect(tabs.nth(0)).toHaveText('CLI');
@@ -493,6 +525,7 @@ export function rows(): void {
   test(title('home.agents.history'), async ({ browser }) => {
     const page = await freshPage(browser);
     await openHome(page);
+    await bandReady(page, 'agents');
     const history = band(page).locator('[data-history-row]');
     /* the time cell, "6:45 PM" (ICU writes a narrow no-break space before PM, as the product's) */
     const time = /^\d{1,2}:\d{2}\s[AP]M$/;
@@ -517,7 +550,7 @@ export function rows(): void {
     expect(await history.first().innerHTML()).toContain(await iconOf('agent'));
     /* the visitor's change: the hero's title moved, then undone */
     await page.evaluate(() => window.scrollTo(0, 0));
-    const titleBox = page.locator('[data-object="title#heading"]');
+    const titleBox = page.locator('[data-band="hero"] [data-hero-slide] [data-object="title#heading"]').first();
     const box = (await titleBox.boundingBox())!;
     await page.mouse.move(box.x + 40, box.y + 20);
     await page.mouse.down();
@@ -546,6 +579,7 @@ export function rows(): void {
     expect(check.status, `${check.stdout}\n${check.stderr}`).toBe(0);
     const page = await freshPage(browser);
     await openHome(page);
+    await bandReady(page, 'agents');
     const cli = await panelLines(page, 'cli');
     expect(cli).toEqual([...HOME_RUN.screens.transcript.wide]);
     for (const step of HOME_RUN.steps) {

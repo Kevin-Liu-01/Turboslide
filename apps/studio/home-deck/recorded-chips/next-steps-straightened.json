@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "next-steps",
+  "template": "rows",
+  "grammar": {
+    "kind": "content",
+    "layout": {
+      "type": "cols",
+      "ratio": "5/7",
+      "gap": 72,
+      "align": "center"
+    },
+    "slots": {
+      "left": [
+        "h",
+        "p1"
+      ],
+      "right": [
+        "rows"
+      ]
+    },
+    "boxes": {
+      "h": {
+        "x": 137,
+        "y": 389.296875,
+        "w": 522.5,
+        "h": 48.390625,
+        "z": 0
+      },
+      "p1": {
+        "x": 137,
+        "y": 477.6875,
+        "w": 522.5,
+        "h": 33,
+        "z": 1
+      },
+      "rows": {
+        "x": 731.5,
+        "y": 362.5,
+        "w": 731.5,
+        "h": 175,
+        "z": 2
+      }
+    },
+    "fields": {
+      "template": "rows"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "pos": {
+          "x": 137,
+          "y": 389.296875,
+          "w": 522.5,
+          "h": 48.390625,
+          "z": 0
+        },
+        "type": "heading",
+        "level": "h2",
+        "text": "Next steps with Northwind",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "pos": {
+          "x": 137,
+          "y": 477.6875,
+          "w": 522.5,
+          "h": 33,
+          "z": 1
+        },
+        "type": "paragraph",
+        "text": "",
+        "measure": 56,
+        "autofit": "shrink"
+      },
+      {
+        "id": "rows",
+        "pos": {
+          "x": 731.5,
+          "y": 362.5,
+          "w": 731.5,
+          "h": 175,
+          "z": 2
+        },
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Monday",
+            "value": "Northwind sellers get the deck"
+          },
+          {
+            "key": "Wednesday",
+            "value": "Agents draft slides over MCP"
+          },
+          {
+            "key": "Friday",
+            "value": "The first call uses this deck"
+          }
+        ]
+      }
+    ]
+  }
+}

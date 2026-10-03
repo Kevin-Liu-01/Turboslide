@@ -1,0 +1,1031 @@
+{
+  "generator": "scripts/home/run.ts --record",
+  "fixtureSha256": "07fd26398406461c8fdea22881fe90129cb0a2f0c160b7ae70f271868cb9fe96",
+  "deckTitle": "Onboarding plan",
+  "save": {
+    "argv": [
+      "version",
+      "save",
+      "-m",
+      "Onboarding plan"
+    ],
+    "code": 0,
+    "stdout": [
+      "saved version 1 at revision 0: \"Onboarding plan\""
+    ],
+    "stderr": []
+  },
+  "steps": [
+    {
+      "argv": [
+        "slide",
+        "new",
+        "--layout",
+        "rows",
+        "--after",
+        "ships",
+        "--id",
+        "next-steps"
+      ],
+      "code": 0,
+      "stdout": [
+        "new rows slide next-steps after ships: revision 1"
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "block",
+        "set",
+        "next-steps#h",
+        "/text",
+        "Next steps with Northwind"
+      ],
+      "code": 0,
+      "stdout": [
+        "set h /text on next-steps: revision 2, 8 finding(s)",
+        "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+        "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+        "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder."
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "block",
+        "set",
+        "next-steps#rows",
+        "/items",
+        "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+      ],
+      "code": 0,
+      "stdout": [
+        "set rows /items on next-steps: revision 3, 2 finding(s)",
+        "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+        "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+      ],
+      "stderr": []
+    }
+  ],
+  "versionList": {
+    "argv": [
+      "version",
+      "list"
+    ],
+    "code": 0,
+    "stdout": [
+      "  1  r0     2026-10-03T18:19:31.770Z  agent:landing      \"Onboarding plan\"",
+      "  2  r1     2026-10-03T18:19:35.353Z  agent:landing      1 mutation(s): slide.insert",
+      "  3  r2     2026-10-03T18:19:38.768Z  agent:landing      1 mutation(s): block.set",
+      "  4  r3     2026-10-03T18:19:42.044Z  agent:landing      1 mutation(s): block.set"
+    ],
+    "stderr": []
+  },
+  "restores": [
+    {
+      "argv": [
+        "version",
+        "restore",
+        "1"
+      ],
+      "code": 0,
+      "stdout": [
+        "restored version 1: revision 4"
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "version",
+        "restore",
+        "2"
+      ],
+      "code": 0,
+      "stdout": [
+        "restored version 2: revision 4"
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "version",
+        "restore",
+        "3"
+      ],
+      "code": 0,
+      "stdout": [
+        "restored version 3: revision 4"
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "version",
+        "restore",
+        "4"
+      ],
+      "code": 0,
+      "stdout": [
+        "restored version 4: revision 4"
+      ],
+      "stderr": []
+    }
+  ],
+  "restoreAbsent": {
+    "argv": [
+      "version",
+      "restore",
+      "9"
+    ],
+    "code": 2,
+    "stdout": [],
+    "stderr": [
+      "turboslide: mutation 0 (version.restore): No version 9 in the log"
+    ]
+  },
+  "loop": {
+    "restore": {
+      "argv": [
+        "version",
+        "restore",
+        "1"
+      ],
+      "code": 0,
+      "stdout": [
+        "restored version 1: revision 4"
+      ],
+      "stderr": []
+    },
+    "steps": [
+      {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "new rows slide next-steps after ships: revision 5"
+        ],
+        "stderr": []
+      },
+      {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "set h /text on next-steps: revision 6, 8 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items on next-steps: revision 7, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    ]
+  },
+  "chips": [
+    {
+      "chip": "tailor",
+      "dir": "on",
+      "after": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Initech"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 4"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "on",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Initech"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "on",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Initech"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "on",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Initech"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "off",
+      "after": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "off",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 6"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "off",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 6"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "off",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 6"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "on",
+      "after": null,
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "8"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 8 degrees on next-steps: revision 4, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "on",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "8"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 8 degrees on next-steps: revision 5, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Initech\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "on",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "8"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 8 degrees on next-steps: revision 5, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "on",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "8"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 8 degrees on next-steps: revision 5, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "off",
+      "after": null,
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "0"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 0 degrees on next-steps: revision 5, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "off",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "0"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 0 degrees on next-steps: revision 6, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Initech\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "off",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "0"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 0 degrees on next-steps: revision 6, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "off",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "0"
+        ],
+        "code": 0,
+        "stdout": [
+          "rotated h to 0 degrees on next-steps: revision 6, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "on",
+      "after": null,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck and its notes"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 4, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "on",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck and its notes"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 5, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Initech\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "on",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck and its notes"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 5, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "on",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck and its notes"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 5, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "off",
+      "after": null,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 5, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "off",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 6, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Initech\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "off",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 6, 3 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "off",
+      "after": "skip",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items/2/value on next-steps: revision 6, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "on",
+      "after": null,
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "skipped next-steps: revision 4"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "on",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "skipped next-steps: revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "on",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "skipped next-steps: revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "on",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "skipped next-steps: revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "off",
+      "after": null,
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps",
+          "--off"
+        ],
+        "code": 0,
+        "stdout": [
+          "showing next-steps: revision 5"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "off",
+      "after": "tailor",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps",
+          "--off"
+        ],
+        "code": 0,
+        "stdout": [
+          "showing next-steps: revision 6"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "off",
+      "after": "turn",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps",
+          "--off"
+        ],
+        "code": 0,
+        "stdout": [
+          "showing next-steps: revision 6"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "off",
+      "after": "row",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps",
+          "--off"
+        ],
+        "code": 0,
+        "stdout": [
+          "showing next-steps: revision 6"
+        ],
+        "stderr": []
+      }
+    }
+  ],
+  "absentChips": [
+    {
+      "chip": "tailor",
+      "dir": "on",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Initech"
+        ],
+        "code": 0,
+        "stdout": [
+          "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 1"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "tailor",
+      "dir": "off",
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 2"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "dir": "on",
+      "answer": {
+        "argv": [
+          "block",
+          "rotate",
+          "next-steps#h",
+          "--to",
+          "8"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: No slide \"next-steps\""
+        ]
+      }
+    },
+    {
+      "chip": "row",
+      "dir": "on",
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items/2/value",
+          "The first call uses this deck and its notes"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: mutation 0 (block.set): No slide \"next-steps\""
+        ]
+      }
+    },
+    {
+      "chip": "skip",
+      "dir": "on",
+      "answer": {
+        "argv": [
+          "slide",
+          "skip",
+          "next-steps"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: No slide \"next-steps\""
+        ]
+      }
+    }
+  ],
+  "chipVersionLists": [
+    {
+      "chip": "tailor",
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r0     2026-10-03T18:19:31.770Z  agent:landing      \"Onboarding plan\"",
+          "  2  r1     2026-10-03T18:19:35.353Z  agent:landing      1 mutation(s): slide.insert",
+          "  3  r2     2026-10-03T18:19:38.768Z  agent:landing      1 mutation(s): block.set",
+          "  4  r3     2026-10-03T18:19:42.044Z  agent:landing      1 mutation(s): block.set",
+          "  5  r4     2026-10-03T18:21:20.920Z  agent:landing      13 mutation(s): slide.set, slide.set, block.set, block.set, block.set, slide.set, block.set, slide.set, slide.set, slide.set, block.set, block.set, block.set"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "turn",
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r0     2026-10-03T18:19:31.770Z  agent:landing      \"Onboarding plan\"",
+          "  2  r1     2026-10-03T18:19:35.353Z  agent:landing      1 mutation(s): slide.insert",
+          "  3  r2     2026-10-03T18:19:38.768Z  agent:landing      1 mutation(s): block.set",
+          "  4  r3     2026-10-03T18:19:42.044Z  agent:landing      1 mutation(s): block.set",
+          "  5  r4     2026-10-03T18:20:54.303Z  agent:landing      2 mutation(s): slide.replace, block.set"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "row",
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r0     2026-10-03T18:19:31.770Z  agent:landing      \"Onboarding plan\"",
+          "  2  r1     2026-10-03T18:19:35.353Z  agent:landing      1 mutation(s): slide.insert",
+          "  3  r2     2026-10-03T18:19:38.768Z  agent:landing      1 mutation(s): block.set",
+          "  4  r3     2026-10-03T18:19:42.044Z  agent:landing      1 mutation(s): block.set",
+          "  5  r4     2026-10-03T18:21:02.918Z  agent:landing      1 mutation(s): block.set"
+        ],
+        "stderr": []
+      }
+    },
+    {
+      "chip": "skip",
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r0     2026-10-03T18:19:31.770Z  agent:landing      \"Onboarding plan\"",
+          "  2  r1     2026-10-03T18:19:35.353Z  agent:landing      1 mutation(s): slide.insert",
+          "  3  r2     2026-10-03T18:19:38.768Z  agent:landing      1 mutation(s): block.set",
+          "  4  r3     2026-10-03T18:19:42.044Z  agent:landing      1 mutation(s): block.set",
+          "  5  r4     2026-10-03T18:21:12.198Z  agent:landing      1 mutation(s): slide.set"
+        ],
+        "stderr": []
+      }
+    }
+  ],
+  "tailorAbsent": {
+    "argv": [
+      "tailor",
+      "--replace=Globex=Initech"
+    ],
+    "code": 0,
+    "stdout": [
+      "0 replacements on 0 slides, 0 pictures swapped, 0 skipped; revision 3"
+    ],
+    "stderr": []
+  },
+  "tailorCounts": {
+    "start": {
+      "argv": [
+        "tailor",
+        "--replace=Northwind=Initech"
+      ],
+      "code": 0,
+      "stdout": [
+        "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 1"
+      ],
+      "stderr": []
+    },
+    "rest": {
+      "argv": [
+        "tailor",
+        "--replace=Northwind=Initech"
+      ],
+      "code": 0,
+      "stdout": [
+        "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 4"
+      ],
+      "stderr": []
+    }
+  }
+}

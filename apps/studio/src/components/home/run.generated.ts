@@ -120,7 +120,7 @@ export const HOME_RUN: HomeRun = {
   banner: [
     ' ███████████  Turboslide 2026.1001.3',
     ' ▀▀▀▀▀███▀▀▀  https://www.turboslide.com',
-    '▄▄▄▄▄ ███     193 actions, effects backend: wasm',
+    '▄▄▄▄▄ ███     193 actions, effects backend: native',
     '▄▄▄▄ ▄▄▄',
     '     ███',
     '███ ███',
@@ -325,7 +325,7 @@ export const HOME_RUN: HomeRun = {
       step: null,
       argv: ['tailor', '--replace=Northwind=Globex'],
       code: 0,
-      answer: ['6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 1'],
+      answer: ['11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 1'],
       findings: [],
       names: {
         from: 'Northwind',
@@ -409,7 +409,7 @@ export const HOME_RUN: HomeRun = {
       step: null,
       argv: ['tailor', '--replace=Northwind=Globex'],
       code: 0,
-      answer: ['6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 2'],
+      answer: ['11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 2'],
       findings: [],
       names: {
         from: 'Northwind',
@@ -439,7 +439,7 @@ export const HOME_RUN: HomeRun = {
       code: 0,
       answer: [],
       findings: [
-        '1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert',
+        '1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert',
       ],
       names: null,
     },
@@ -507,7 +507,7 @@ export const HOME_RUN: HomeRun = {
       step: null,
       argv: ['tailor', '--replace=Northwind=Globex'],
       code: 0,
-      answer: ['7 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 3'],
+      answer: ['12 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 3'],
       findings: [],
       names: {
         from: 'Northwind',
@@ -537,8 +537,8 @@ export const HOME_RUN: HomeRun = {
       code: 0,
       answer: [],
       findings: [
-        '1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert',
-        '2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set',
+        '1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert',
+        '2  r2     2026-10-03T18:16:24.704Z  agent:landing      1 mutation(s): block.set',
       ],
       names: null,
     },
@@ -606,7 +606,7 @@ export const HOME_RUN: HomeRun = {
       step: null,
       argv: ['tailor', '--replace=Northwind=Globex'],
       code: 0,
-      answer: ['8 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 4'],
+      answer: ['13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 4'],
       findings: [],
       names: {
         from: 'Northwind',
@@ -636,9 +636,9 @@ export const HOME_RUN: HomeRun = {
       code: 0,
       answer: [],
       findings: [
-        '1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert',
-        '2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set',
-        '3  r3     2026-10-03T04:01:35.630Z  agent:landing      1 mutation(s): block.set',
+        '1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert',
+        '2  r2     2026-10-03T18:16:24.704Z  agent:landing      1 mutation(s): block.set',
+        '3  r3     2026-10-03T18:16:28.630Z  agent:landing      1 mutation(s): block.set',
       ],
       names: null,
     },
@@ -718,12 +718,12 @@ export const HOME_RUN: HomeRun = {
   ],
   tailorCounts: {
     start: {
-      places: 6,
-      slides: 3,
+      places: 11,
+      slides: 5,
     },
     rest: {
-      places: 8,
-      slides: 4,
+      places: 13,
+      slides: 6,
     },
   },
   screens: {
@@ -732,7 +732,7 @@ export const HOME_RUN: HomeRun = {
         '$ turboslide --version',
         ' ███████████  Turboslide 2026.1001.3',
         ' ▀▀▀▀▀███▀▀▀  https://www.turboslide.com',
-        '▄▄▄▄▄ ███     193 actions, effects backend: wasm',
+        '▄▄▄▄▄ ███     193 actions, effects backend: native',
         '▄▄▄▄ ▄▄▄',
         '     ███',
         '███ ███',
@@ -742,7 +742,7 @@ export const HOME_RUN: HomeRun = {
         ' ███████████  Turboslide 2026.1001.3',
         ' ▀▀▀▀▀███▀▀▀  https://www.turboslide.com',
         '▄▄▄▄▄ ███     193 actions, effects backend:',
-        '              wasm',
+        '              native',
         '▄▄▄▄ ▄▄▄',
         '     ███',
         '███ ███',
@@ -883,16 +883,16 @@ export const HOME_RUN: HomeRun = {
   refusal: "This page runs 5 of the CLI's 180 commands.",
   gestures: [
     {
-      argv: ['slide', 'to-canvas', 'rosetta'],
-      answer: ['rosetta: arranged by hand (mood), 5 object(s)'],
+      argv: ['slide', 'to-canvas', 'lighthouse'],
+      answer: ['lighthouse: arranged by hand (mood), 5 object(s)'],
     },
     {
-      argv: ['block', 'set', 'rosetta#h', '/pos', '{"x":612,"y":388,"w":520,"h":96}'],
-      answer: ['set h /pos on rosetta: revision 5, 2 finding(s)'],
+      argv: ['block', 'set', 'lighthouse#h', '/pos', '{"x":612,"y":388,"w":520,"h":96}'],
+      answer: ['set h /pos on lighthouse: revision 5, 2 finding(s)'],
     },
     {
-      argv: ['block', 'rotate', 'rosetta#h', '--to', '15'],
-      answer: ['rotated h to 15 degrees on rosetta: revision 6, 2 finding(s)'],
+      argv: ['block', 'rotate', 'lighthouse#h', '--to', '15'],
+      answer: ['rotated h to 15 degrees on lighthouse: revision 6, 2 finding(s)'],
     },
   ],
 };

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "next-steps",
+  "template": "rows",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Next steps with Northwind",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "",
+        "measure": 56,
+        "autofit": "shrink"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Monday",
+            "value": "Northwind sellers get the deck"
+          },
+          {
+            "key": "Wednesday",
+            "value": "Agents draft slides over MCP"
+          },
+          {
+            "key": "Friday",
+            "value": "The first call uses this deck and its notes"
+          }
+        ]
+      }
+    ]
+  }
+}

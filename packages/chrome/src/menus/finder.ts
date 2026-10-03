@@ -60,15 +60,6 @@ export const SELLER_TERMS: Readonly<Record<string, ReadonlyArray<string>>> = {
     'swap words',
   ],
   'tools.tailor': ['tailor', 'customer', 'prospect', 'rename the customer', 'logo', 'personalize'],
-  'tools.assist': [
-    'assistant',
-    'ask',
-    'help me write',
-    'shorter',
-    'summarize',
-    'speaker notes',
-    'talk track',
-  ],
   'title.assist': [
     'assistant',
     'ask',

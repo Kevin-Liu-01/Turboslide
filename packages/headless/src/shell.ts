@@ -25,8 +25,9 @@ export type ShellProbe = {
 export type ShellStateSpec = {
   /**
    * The key that enters the state ('[' for the list, 'g' for the grid, 'Meta+k' for the search),
-   * or a click: `click:<selector>` presses the first element the selector finds (the editor binds
-   * no bare letters, gslides-parity SPEC 10.2, so its states enter through its controls).
+   * or a click: `click:<selector>` presses the first visible element the selector finds (the
+   * editor binds no bare letters, gslides-parity SPEC 10.2, so its states enter through its
+   * controls; a selector list names the control each width draws).
    */
   key: string;
   /** The audit name this state records under; may depend on the probe and the viewport width. */
@@ -59,7 +60,9 @@ export const SHELL_STATES: Record<string, ShellStateSpec> = {
     settleMs: 700,
   },
   editorMenu: {
-    key: 'click:[data-control="menubar.file"]',
+    /* the menu bar's File, else the Menus key the editor draws in its place under 720 px
+       (B3b#14, docs/NEXT.md 4.1.3 item 18) */
+    key: 'click:[data-control="menubar.file"], [data-control="toolbar.menus"]',
     applied: (p) => Boolean(p.menu),
     leave: 'Escape',
     settleMs: 500,
@@ -203,7 +206,13 @@ export type ShellDriveResult<TAudit> = {
 async function press(target: Frame, key: string, deck: boolean): Promise<void> {
   if (key.startsWith('click:')) {
     const selector = key.slice('click:'.length);
-    const el = await target.$(selector);
+    const all = await target.$$(selector);
+    let el = null;
+    for (const candidate of all)
+      if (await candidate.isVisible()) {
+        el = candidate;
+        break;
+      }
     if (el === null) throw new Error(`state control not found: ${selector}`);
     await el.click();
     return;

@@ -1,7 +1,9 @@
 import { HOME_DECK } from "../deck.generated";
+import { renumber } from "./filmstrip";
 import { startObjects } from "./objects";
 import { createHomeStore, restState } from "./state";
 import type { Band, HomeStore, UndoBand } from "./state";
+import { startTailor } from "./tailor";
 
 /**
  * The live module's entry (docs/LANDING.md 4.2, 6.1; integrator.md 4.6): the route imports it after
@@ -31,6 +33,7 @@ export type Registration = {
 const REGISTRATIONS: readonly Registration[] = [
   { band: "hero", start: (ctx) => startObjects(ctx, "hero") },
   { band: "canvas", start: (ctx) => startObjects(ctx, "canvas") },
+  { band: "tailor", start: startTailor },
 ];
 
 const UNDO_BANDS: readonly UndoBand[] = ["hero", "tailor", "canvas"];
@@ -121,6 +124,8 @@ export function startLive(root: HTMLElement): void {
   }
   const store = createHomeStore(restState(HOME_DECK, restRows(root)));
   wireUndo(root, store);
+  // every counter on the page and the filmstrip follow the deck's order, whichever band moved it
+  store.subscribe((state) => renumber(root, state));
   for (const registration of REGISTRATIONS) {
     const band = root.querySelector<HTMLElement>(
       `[data-band="${registration.band}"]`,

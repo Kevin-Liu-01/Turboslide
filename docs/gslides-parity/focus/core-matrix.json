@@ -10243,6 +10243,36 @@
       "severity": 1,
       "evidence": "research-motion 4.9; critic 3.2",
       "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.tailor.apply",
+      "feature": "decks",
+      "interaction": "Typing Globex and pressing Apply or Enter replaces every Northwind in the deck's text and notes within 1 s; the count reads TAILOR.count and equals the CLI's recorded answer for the deck the page holds (with and without slide 5); the snackbar reads TAILOR.result with Undo and leaves by a cut; Undo restores every name; an empty field answers \"Type a customer name first.\"; the field takes at most 24 characters",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-2 8 (try-a.mjs); research-product 5.2",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.tailor.theme",
+      "feature": "decks",
+      "interaction": "The Kestrel swatch sets the six kit variables on every slide of the page deck within 500 ms; sampled every 40 ms, no text box's text falls under 4.5:1 against its ground; the show then draws Kestrel; GT restores; Fenwick sets #0a1b38, #f4f1ea, #c9cbd3 and #8d97ab and the selection ring holds 3:1 on it; each swatch's tooltip and the kit sentence name GT the deck's own kit and Kestrel and Fenwick example customers' kits; at rest the one colour outside paper and ink on /home is the Fenwick swatch's ground and no #2f5ce0 is drawn (answers 3 and 4); the row's key reads Example kits",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-1 c-kit-230.png; judge-3 6 graft 7",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.tailor.filmstrip",
+      "feature": "decks",
+      "interaction": "Dragging slide 2 to place 4 lifts it with a 2 px outline, the others make room in 200 ms and it settles in 240 ms; every counter on the page renumbers; Cmd or Ctrl with Up or Down and Move Up or Move Down move the focused slide; Undo returns it; on touch a 350 ms press lifts it",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "direction-a filmstrip-move.png",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
     }
   ]
 }

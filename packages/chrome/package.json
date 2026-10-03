@@ -80,6 +80,7 @@
     "./dialogs/DeleteForever": "./src/dialogs/DeleteForever.tsx",
     "./dialogs/share-links": "./src/dialogs/share-links.ts",
     "./panels/AssistViewerPanel": "./src/panels/AssistViewerPanel.tsx",
+    "./panels/assist-strings": "./src/panels/assist-strings.ts",
     "./LayoutGrid": "./src/LayoutGrid.tsx",
     "./editor-shell": "./src/editor-shell.ts",
     "./editor-shell-context": "./src/editor-shell-context.ts",

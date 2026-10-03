@@ -6,10 +6,14 @@ import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { title } from '../lib';
 import { bandReady, freshPage, loadReading, noteTiming, openHome, typeLine } from './agents';
 
-// A lane module of core/home.spec.ts (docs/LANDING.md 2.7, 6.7; build/integrator.md "Landing,
-// day 0" 4.9 and 5.1). L3's, push 5: the show (home.present.show), its focus (home.present.focus)
-// and Print This Deck (home.present.print). Every observation is through the page; the print is
-// read from the PDF Chromium prints under print emulation, one page per slide.
+/** The Present list's word for a skipped slide (2.11), the copy's when it holds one. */
+const PRESENT_SKIPPED = (PRESENT as unknown as { skipped?: string }).skipped ?? 'Skipped';
+
+// A lane module of core/home.spec.ts (docs/LANDING.md 2.11, 6.7, the second pass). V3's, push
+// V3#16: the show for the deck's nine slides with skipped slides left out (home.present.show), its
+// focus (home.present.focus) and Print This Deck (home.present.print). Every observation is through
+// the page; the print is read from the PDF Chromium prints under print emulation, one page per
+// slide.
 
 export const ROWS: readonly string[] = [
   'home.present.show',
@@ -23,8 +27,25 @@ const presentButton = (page: Page) =>
 const show = (page: Page) => band(page).locator('[data-show]');
 const stage = (page: Page) => band(page).locator('[data-show-stage]');
 const SLIDESHOW_KEY = process.platform === 'darwin' ? 'Meta+Enter' : 'Control+F5';
-/** The deck's slides at rest (nine since V1#8). */
+/** The deck's slides at rest (nine; the page holds what deck.generated.ts says). */
 const N = HOME_DECK.order.length;
+const placeOf = (id: string): number => (HOME_DECK.order as readonly string[]).indexOf(id) + 1;
+
+/** Waits for the agents band's running step to end (a press while one plays only finishes it, 2.9). */
+async function agentsIdle(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => document.querySelector('[data-band="agents"] [data-chip][aria-disabled="true"]') === null,
+  );
+}
+
+/** Presses one of the agents band's chips and waits for its step to end. */
+async function pressChip(page: Page, chip: 'skip' | 'tailor'): Promise<void> {
+  await bandReady(page, 'agents');
+  await page.locator(`[data-band="agents"] [data-chip="${chip}"]`).click();
+  await page.waitForFunction(
+    () => document.querySelector('[data-band="agents"] [data-chip][aria-disabled="true"]') === null,
+  );
+}
 
 /**
  * In the page: the time from the next press or key on the band to the show's motion at rest (the
@@ -82,6 +103,7 @@ export function rows(): void {
     /* a change of the visitor's and an agent's before the show */
     await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
+    await agentsIdle(page);
     await bandReady(page, 'present');
     /* S opens nothing */
     await page.locator('body').press('s');
@@ -143,13 +165,125 @@ export function rows(): void {
     await page.keyboard.press(SLIDESHOW_KEY);
     await page.waitForTimeout(300);
     await expect(show(page)).toHaveCount(0);
-    await band(page).scrollIntoViewIfNeeded();
+    await bandReady(page, 'present');
     await page.keyboard.press(SLIDESHOW_KEY);
     await expect(stage(page)).toBeFocused();
     /* a focused Exit exits on Space */
     await show(page).locator('[data-show-button="exit"]').focus();
     await page.keyboard.press('Space');
     await expect(show(page)).toHaveCount(0);
+
+    /* a skipped slide: marked in the list and left out of the show (2.11) */
+    await pressChip(page, 'skip');
+    await bandReady(page, 'present');
+    const row = band(page).locator('[data-slide-row="next-steps"]');
+    await expect(row).toContainText(PRESENT_SKIPPED);
+    await band(page).locator('[data-slide-row="ships"]').click();
+    await presentButton(page).click();
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(placeOf('ships'), N - 1));
+    await page.keyboard.press('ArrowRight');
+    /* the slide after slide 5 comes next, counted among the slides the show shows */
+    const after = HOME_DECK.order[placeOf('next-steps')] as string;
+    await expect(stage(page).locator(`[data-home-slides][data-slide="${after}"]`)).toHaveCount(1);
+    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(placeOf('ships') + 1, N - 1));
+    for (let i = 0; i < N; i += 1) {
+      await expect(stage(page).locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(0);
+      await page.keyboard.press('ArrowRight');
+    }
+    /* slide 8, the pattern: its still frame unless the pattern chunk is in and motion is allowed */
+    if ((HOME_DECK.order as readonly string[]).includes('pattern')) {
+      const mounted = await page.evaluate(
+        () => (window as unknown as { tsHomePattern?: unknown }).tsHomePattern !== undefined,
+      );
+      await page.keyboard.press('Home');
+      for (let i = 0; i < N; i += 1) {
+        if ((await stage(page).locator('[data-home-slides][data-slide="pattern"]').count()) > 0) break;
+        await page.keyboard.press('ArrowRight');
+      }
+      /* a drawing canvas: shown and sized (the print box's own empty canvas is hidden, V4's Q2) */
+      const canvases = await stage(page)
+        .locator('[data-home-slides][data-slide="pattern"] canvas')
+        .evaluateAll((els) =>
+          els.filter((el) => {
+            const r = el.getBoundingClientRect();
+            return getComputedStyle(el).visibility === 'visible' && r.width > 0 && r.height > 0;
+          }).length,
+        );
+      test.info().annotations.push({
+        type: 'reading',
+        description: `slide 8 in the show: ${canvases} shader canvas, the pattern chunk ${mounted ? 'loaded' : 'not loaded'}`,
+      });
+      if (!mounted) expect(canvases).toBe(0);
+    }
+    await page.keyboard.press('Escape');
+    await expect(show(page)).toHaveCount(0);
+    await pressChip(page, 'skip');
+    await expect(band(page).locator('[data-slide-row="next-steps"]')).not.toContainText(PRESENT_SKIPPED);
+
+    /* openShow: the same show in the miniature's stage (View > Slideshow, V2's menus band) */
+    const menus = page.locator('[data-band="menus"]');
+    if ((await menus.count()) > 0) {
+      await menus.scrollIntoViewIfNeeded();
+      await menus.locator('[data-menubar] [role="menuitem"]', { hasText: 'View' }).first().click();
+      await page.getByRole('menuitem', { name: /^Slideshow/ }).first().click();
+      const mini = menus.locator('[data-show]');
+      await expect(mini).toHaveCount(1);
+      await expect(mini.locator('[data-show-stage]')).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(mini).toHaveCount(0);
+      test.info().annotations.push({
+        type: 'reading',
+        description: "openShow through the menus band's View > Slideshow: the show in the miniature's stage, focus on its stage, Escape closes it",
+      });
+    } else {
+      /* no menus band in the tree: openShow called on a container of the page's own, through the
+         module the present chunk loaded (the dev server serves it by its path) */
+      const opened = await page.evaluate(async () => {
+        const url = '/src/components/home/live/show.ts';
+        try {
+          const m = (await import(/* @vite-ignore */ url)) as {
+            openShow(container: HTMLElement, slideId: string): { close(): void } | null;
+          };
+          const box = document.createElement('div');
+          box.dataset['testShowBox'] = '';
+          box.style.cssText = 'width: 640px; height: 360px';
+          const opener = document.createElement('button');
+          opener.dataset['testShowOpener'] = '';
+          opener.textContent = 'Open';
+          document.querySelector('[data-band="present"]')?.append(opener, box);
+          opener.focus();
+          return m.openShow(box, 'plan') !== null;
+        } catch {
+          return null;
+        }
+      });
+      if (opened === null)
+        test.info().annotations.push({
+          type: 'not driven',
+          description: 'openShow: the tree holds no menus band and the server does not serve the module by its path',
+        });
+      else {
+        expect(opened).toBe(true);
+        const boxed = page.locator('[data-test-show-box] [data-show]');
+        await expect(boxed).toHaveCount(1);
+        await expect(boxed.locator('[data-show-stage]')).toBeFocused();
+        /* sized to the box, on slide 2 of the shown slides */
+        const [outer, inner] = await Promise.all([
+          page.locator('[data-test-show-box]').boundingBox(),
+          boxed.boundingBox(),
+        ]);
+        expect(inner!.width).toBeLessThanOrEqual(outer!.width + 1);
+        expect(inner!.height).toBeLessThanOrEqual(outer!.height + 1);
+        await expect(boxed).toContainText(HOME_DECK.slides.plan.title);
+        await page.keyboard.press('Escape');
+        await expect(boxed).toHaveCount(0);
+        await expect(page.locator('[data-test-show-opener]')).toBeFocused();
+        test.info().annotations.push({
+          type: 'reading',
+          description: 'openShow driven on a container of the page (the tree holds no menus band): the show inside it, focus on its stage, Escape back to the opener',
+        });
+      }
+    }
     await page.context().close();
   });
 
@@ -177,6 +311,18 @@ export function rows(): void {
     ).toBe('exit');
     await page.keyboard.press('Escape');
     await expect(presentButton(page)).toBeFocused();
+    /* Exit, by the keyboard and by a click, gives focus back to Present */
+    await page.keyboard.press('Enter');
+    await expect(stage(page)).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Enter');
+    await expect(show(page)).toHaveCount(0);
+    await expect(presentButton(page)).toBeFocused();
+    await presentButton(page).click();
+    await expect(stage(page)).toBeFocused();
+    await show(page).locator('[data-show-button="exit"]').click();
+    await expect(show(page)).toHaveCount(0);
+    await expect(presentButton(page)).toBeFocused();
     await page.context().close();
   });
 
@@ -187,6 +333,7 @@ export function rows(): void {
     await openHome(page);
     await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
+    await agentsIdle(page);
     /* the button opens the browser's print after it loads slide 7's still */
     await page.evaluate(() => {
       (window as unknown as { __printed: number }).__printed = 0;
@@ -208,7 +355,7 @@ export function rows(): void {
     /* Cmd or Ctrl+P fires beforeprint as the button's print does: the container holds the deck */
     await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
     const deck = page.locator('[data-print-deck]');
-    await expect(deck.locator(':scope > *')).toHaveCount(HOME_DECK.order.length);
+    await expect(deck.locator(':scope > *')).toHaveCount(N);
     await expect(deck).toContainText('Onboarding plan for Globex');
     await expect(deck).not.toContainText('Northwind');
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
@@ -216,10 +363,20 @@ export function rows(): void {
     /* Chromium's own print of the page under print emulation */
     await page.emulateMedia({ media: 'print' });
     const read = pdfPages(await page.pdf({ preferCSSPageSize: true }));
-    expect(read.pages).toBe(HOME_DECK.order.length);
+    expect(read.pages).toBe(N);
     /* 16 by 9 inches, 1152 by 648 pt; soft, so the hero's print below is read whatever this reads */
     for (const box of read.boxes)
       expect.soft(box.split(/\s+/).map(Number).slice(2)).toEqual([1152, 648]);
+    /* a skipped slide leaves the print, as the product's print leaves it (2.11) */
+    await page.emulateMedia({ media: 'screen' });
+    await pressChip(page, 'skip');
+    await expect(band(page).locator('[data-slide-row="next-steps"]')).toContainText(PRESENT_SKIPPED);
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    await expect(deck.locator(':scope > *')).toHaveCount(N - 1);
+    await expect(deck.locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(0);
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    await page.emulateMedia({ media: 'print' });
+    expect(pdfPages(await page.pdf({ preferCSSPageSize: true })).pages).toBe(N - 1);
     await page.context().close();
     /* without the live module, the hero slide alone */
     const bare = await freshPage(browser);

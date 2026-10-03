@@ -10375,34 +10375,34 @@
       "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
       "id": "home.present.show",
-      "feature": "decks",
-      "interaction": "Present, or Cmd+Enter (Ctrl+F5 off macOS) with the band half in view and no text field focused, opens the show on the slide chosen in the list within 800 ms with focus on the stage; keys page with a cut; Space and Enter go forward on the stage and press a focused Previous or Exit; the counter, notes and timer show; the slides carry the visitor's changes, slide 1 with the hero's Blue Marble and its credit (answer 1); Escape returns within 400 ms with focus on Present; S opens nothing",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 2,
-      "evidence": "judge-2 a-show-try.png",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3). The 800 ms and 400 ms bounds are interaction bounds, read at a one minute load under 24"
+      "interaction": "Present, or Cmd+Enter (Ctrl+F5 off macOS) with the band half in view and no text field focused, opens the show on the slide chosen in the list within 800 ms with focus on the stage; keys page with a cut through the deck's nine slides, a skipped slide left out and marked \"Skipped\" in the list; the counter, notes and timer show; the slides carry the visitor's changes; slide 8 draws its pattern moving while motion is allowed and the pattern chunk has loaded, its still frame otherwise; Escape returns within 400 ms with focus on Present; `openShow` opens the same show in a container; S opens nothing",
+      "evidence": "present-show.png",
+      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3). The 800 ms and 400 ms bounds are interaction bounds, read at a one minute load under 24"
     },
     {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
       "id": "home.present.focus",
-      "feature": "decks",
-      "interaction": "On open focus is on the show's stage; Tab cycles among Previous, Next and Exit and never reaches the page behind",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 2,
-      "evidence": "judge-3 a-show.png",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3)"
+      "interaction": "On open focus is on the show's stage; Tab cycles among Previous, Next and Exit and never reaches the page behind; Exit gives focus back to the control that opened the show",
+      "evidence": "judge-3 a-show.png (avoided)",
+      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3)"
     },
     {
-      "id": "home.present.print",
       "feature": "decks",
-      "interaction": "Print This Deck and Cmd or Ctrl+P print the page deck as the visitor left it, one 16 by 9 page per slide (eight pages under print emulation); with the live module absent, the hero slide alone",
       "driver": "core/home.spec.ts",
       "today": "broken",
+      "id": "home.present.print",
       "severity": 1,
+      "interaction": "Print This Deck and Cmd or Ctrl+P print the page deck as the visitor left it, one 16 by 9 page per slide, skipped slides left out (nine pages, eight with one skipped); with the live module absent, the hero alone",
       "evidence": "print-deck.jpg",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3)"
+      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3)"
     },
     {
       "id": "home.export.seam",

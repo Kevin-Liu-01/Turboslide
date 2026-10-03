@@ -185,7 +185,8 @@ describe('the inlined stills and the slide markup', () => {
     expect(LIVE_SLIDE_HTML.field).toContain('data-still="field-still"');
     expect(LIVE_SLIDE_HTML.nextSteps.placeholders).toContain('data-slide="next-steps"');
     expect(LIVE_SLIDE_HTML.nextSteps.titled).toContain('Next steps with Northwind');
-    expect(AGENTS_FILLS['panel-cli']).toContain('data-panel-text="narrow"');
+    /* the console's resting screen is the agents chunk's (v3.md R18): no panel fill */
+    expect(AGENTS_FILLS['panel-cli']).toBeUndefined();
     expect(EXPORT_FILLS['export-editable']).toContain('data-seam-text');
   });
 });

@@ -2006,12 +2006,12 @@ async function homeScroll(p: Page): Promise<void> {
 }
 /**
  * The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358
- * (the second pass: the hero frame's slide 540 and 326; the agents band's slide 5 keeps the first
- * pass's 412 until V3#13 sets it above the console at 588).
+ * (the second pass: the hero frame's slide 540 and 326; the agents band's slide 5 above the console
+ * at 588 and 358 from V3#13, 2.9).
  */
 const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
   hero: [540, 326],
-  agents: [412, 358],
+  agents: [588, 358],
   'tailor-stage': [856, 358],
   'tailor-thumb-title': [144, 80],
   'tailor-thumb-plan': [144, 80],

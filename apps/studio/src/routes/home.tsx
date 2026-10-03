@@ -28,6 +28,7 @@ import '../components/home/icons.generated.css';
 import '../components/home/selection.css';
 import '../components/home/print.css';
 import './home.css';
+import '../components/home/agents.css';
 import '../components/home/editing.css';
 import '../components/home/motion.css';
 

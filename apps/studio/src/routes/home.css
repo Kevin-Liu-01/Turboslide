@@ -875,15 +875,6 @@ html:has(.ts-product) {
   height: 160px;
 }
 
-/* ---- Agents (LANDING.md 2.4): the panel 588 px and slide 5 412 px, 24 px apart ---- */
-.ts-agents {
-  display: grid;
-  grid-template-columns: minmax(0, 588fr) minmax(0, 412fr);
-  gap: 24px;
-  align-items: start;
-  margin-top: 32px;
-}
-
 /* the one monospace on the page (SPEC-4 0.20; DECK-GRAMMAR 31): the #101010 panel, the same in
    both appearances; 14 px on 20 px lines with 20 px a side (64 columns), 12 px on 18 px with 12 px
    a side under 720 px (44 columns); lines break only where panel-format.ts broke them */
@@ -998,29 +989,6 @@ html:has(.ts-product) {
 .ts-home-panel-input:focus-within {
   outline: 2px solid var(--pt-select);
   outline-offset: -2px;
-}
-
-.ts-agents-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.ts-home-step {
-  font-size: 13px;
-  color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
-}
-
-.ts-agents-run > .ts-caption {
-  margin-top: 12px;
-}
-
-.ts-agents-slide > .ts-label {
-  margin-top: 24px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--pt-hair);
 }
 
 .ts-home-history {
@@ -1290,7 +1258,6 @@ html:has(.ts-product) {
   --ts-kit-paper: #f3efe6;
   --ts-kit-ink: #1f1b16;
 }
-
 
 .ts-tailor-editor {
   display: grid;
@@ -2192,24 +2159,10 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     height: 96px;
   }
 
-  .ts-agents,
   .ts-tailor-top,
   :where(.ts-product) .ts-present {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
-  }
-
-  /* the order of LANDING.md 2.4 at 390: slide 5, the panel, Run, the caption, Version history */
-  .ts-agents {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 32px;
-  }
-
-  .ts-agents-run,
-  .ts-agents-slide {
-    display: contents;
   }
 
   .ts-agents-sheet {
@@ -2221,29 +2174,8 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     order: 2;
   }
 
-  .ts-agents-controls {
-    order: 3;
-  }
-
-  .ts-agents-run > .ts-caption {
-    order: 4;
-  }
-
-  .ts-agents-slide > .ts-label {
-    order: 5;
-  }
-
   .ts-home-history {
     order: 6;
-  }
-
-  .ts-agents-controls .ts-button {
-    width: auto;
-    flex: 1 1 auto;
-  }
-
-  .ts-home-step {
-    flex: 0 0 auto;
   }
 
   .ts-home-panel-screen {

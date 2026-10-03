@@ -1,5 +1,4 @@
 import { AGENTS } from './copy';
-import { HOME_RUN_FACTS } from './deck.generated';
 import { HOME_FACTS } from './facts';
 import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { HomeSheet, ServerHtml } from './HomeSheet';
@@ -7,16 +6,15 @@ import { HOME_RUN } from './run.generated';
 import { iconMarkup } from './SectionIcon';
 
 /**
- * Agents run the same actions (docs/LANDING.md 2.9, the agents band of Kevin's picks "A+B" and
- * "C"), after the editing bands. Until V3#13 rebuilds it around the chips and the scrubber, the
- * band is the first pass's, painted at the run's end at rest: the one `#101010` console (the
- * page's second code surface, 2.0) with its CLI, MCP and HTTP tabs, the transcript of the three
- * recorded commands in its fixed line slots (14 of 64 columns at 720 px and over, 22 of 44 under),
- * the typed line, Run Again with the step label and the staged caption; beside it slide 5 as the
- * run wrote it and Version history with the run's three Agent rows. The console's screen and
- * slide 5 are placeholders in the band's reserved box, written by its chunk after `load` (4.2);
- * Version history's rows are words and stay in the document. Hooks: integrator.md 4.1, l3.md R1,
- * R5, v1.md "To V3".
+ * Agents run the same actions (docs/LANDING.md 2.9, Kevin's picks "A+B" and "C"), from V3#13:
+ * slide 5, the slide above, over the one `#101010` console with its CLI, MCP and HTTP tabs and the
+ * typed line; under it the four chips that run recorded commands on slide 5 and their caption;
+ * beside them Version history, its rows newest first in ten reserved rows of 44 px (V2's scrubber
+ * joins the column in V2#14). Slide 5 is a placeholder of the band's reserved box written by its
+ * chunk after `load` (4.2); the console's screens are V3's chunk's (`live/agents.ts` writes the
+ * resting `version list`); the chips' labels, the caption and the run's three rows are words and
+ * stay in the document. The band's look is V3's `agents.css`, which the route imports. Hooks:
+ * v3.md R1 and R18.
  */
 
 const esc = (text: string): string =>
@@ -44,8 +42,11 @@ export function HomeAgents() {
   return (
     <HomeSection id="agents">
       <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS.lead(HOME_FACTS)} span={7} />
-      <Reserve band="agents" className="ts-agents">
-        <div className="ts-agents-run">
+      <Reserve band="agents" className="ts-agents-grid">
+        <div className="ts-agents-left">
+          <div className="ts-agents-stage" data-agents-stage>
+            <HomeSheet instance="agents" fill className="ts-agents-sheet" />
+          </div>
           <div className="ts-home-panel" data-panel-root>
             <div
               className="ts-home-panel-tabs"
@@ -69,35 +70,17 @@ export function HomeAgents() {
                 </button>
               ))}
             </div>
-            <ServerHtml
-              role="tabpanel"
-              id="ts-agents-panel-cli"
-              aria-labelledby="ts-agents-tab-cli"
-              className="ts-home-panel-screen"
-              data-panel
-              data-fill="panel-cli"
-              data-transport-panel="cli"
-              html=""
-            />
-            {/* the MCP and HTTP screens are the live module's (L3, push 4), written from
-                run.generated.ts when their tab opens: without script the tabs do not switch, so
-                the document carries the CLI screen alone (LANDING.md 4.1, the 80 KB line) */}
-            <div
-              role="tabpanel"
-              id="ts-agents-panel-mcp"
-              aria-labelledby="ts-agents-tab-mcp"
-              className="ts-home-panel-screen"
-              data-transport-panel="mcp"
-              hidden
-            />
-            <div
-              role="tabpanel"
-              id="ts-agents-panel-http"
-              aria-labelledby="ts-agents-tab-http"
-              className="ts-home-panel-screen"
-              data-transport-panel="http"
-              hidden
-            />
+            {TABS.map((tab, i) => (
+              <div
+                key={tab.id}
+                role="tabpanel"
+                id={`ts-agents-panel-${tab.id}`}
+                aria-labelledby={`ts-agents-tab-${tab.id}`}
+                className="ts-home-panel-screen"
+                data-transport-panel={tab.id}
+                {...(i === 0 ? { 'data-panel': '' } : { hidden: true })}
+              />
+            ))}
             <label className="ts-home-panel-input">
               <span className="ts-home-panel-prompt" aria-hidden="true">
                 {AGENTS.panel.prompt}
@@ -115,18 +98,24 @@ export function HomeAgents() {
               />
             </label>
           </div>
-          <div className="ts-agents-controls">
-            <button type="button" className="pt-ib is-solid ts-button" data-agent-run>
-              {AGENTS.run.again}
+          <div className="ts-agents-chips" role="group" aria-label={AGENTS.chipsLabel}>
+            {/* the chip's customer, 2.9's "Tailor for Initech" (chips.generated.ts chipCustomer) */}
+            <button type="button" className="ts-chip" data-chip="tailor">
+              {AGENTS.chips.tailor('Initech')}
             </button>
-            <span className="ts-home-step" data-step>
-              {AGENTS.stepLabel(3, 3)}
-            </span>
+            <button type="button" className="ts-chip" data-chip="turn">
+              {AGENTS.chips.turn}
+            </button>
+            <button type="button" className="ts-chip" data-chip="row">
+              {AGENTS.chips.row}
+            </button>
+            <button type="button" className="ts-chip" data-chip="skip">
+              {AGENTS.chips.skip}
+            </button>
           </div>
-          <p className="ts-caption">{AGENTS.caption(HOME_RUN_FACTS.captionSeconds)}</p>
+          <p className="ts-caption ts-agents-caption">{AGENTS.chipsCaption}</p>
         </div>
-        <div className="ts-agents-slide">
-          <HomeSheet instance="agents" fill className="ts-agents-sheet" />
+        <div className="ts-agents-right">
           <p className="ts-label" id="ts-agents-history">
             {AGENTS.historyLabel}
           </p>

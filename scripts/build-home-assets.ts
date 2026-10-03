@@ -1468,8 +1468,10 @@ function instanceHtml(doc: DeckDoc, options: InstanceOptions): string {
      frame's slide 1 wraps its title and subtitle in boxes that draw their clear zone over the Blue
      Marble (l2.md Q2). A thumbnail carries the renderer's block attributes alone: the core's
      painter marks its blocks when it shows one (V2's `markObjects`), which keeps about 2.5 KB of
-     attributes out of the document (4.1). Slide 5's earlier states keep the blocks they hold */
-  const tab = 0;
+     attributes out of the document (4.1). Slide 5's earlier states keep the blocks they hold.
+     The objects take Tab only where a band edits them, the hero frame and the canvas band (V2's
+     core keeps or drops each stop at its first drawing; v3.md R18) */
+  const tab = options.instance === 'hero' || options.instance === 'canvas' ? 0 : -1;
   const objects = isThumb(options.instance) ? [] : slideObjects(options.slideId);
   for (const object of objects) {
     if (options.instance === 'hero' && object.block === 'heading')
@@ -2349,12 +2351,6 @@ async function deriveSlidesSource(
   }
   const esc = (text: string): string =>
     text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  /* one screen of the agents panel at both widths, one span a line (l3.md R1) */
-  const screenHtml = (screen: PanelText): string => {
-    const lines = (list: readonly string[]): string =>
-      list.map((line) => `<span>${esc(line)}</span>`).join('');
-    return `<div class="ts-home-panel-text is-wide" data-panel-text="wide">${lines(screen.wide)}</div><div class="ts-home-panel-text is-narrow" data-panel-text="narrow">${lines(screen.narrow)}</div>`;
-  };
   const instances = Object.fromEntries(
     Object.entries(slides.instances).map(([instance, v]) => [
       instance,
@@ -2363,7 +2359,6 @@ async function deriveSlidesSource(
   );
   const fills: Record<FillBand, Record<string, string>> = {
     ...slides.bands,
-    agents: { ...slides.bands.agents, 'panel-cli': screenHtml(transcript) },
     export: { ...slides.bands.export, 'export-editable': editable },
   };
   const instanceIds = Object.keys(instances);
@@ -2803,6 +2798,10 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
     {
       path: `${HOME}/chips.generated.ts`,
       content: await formatTs(`${HOME}/chips.generated.ts`, chips.source),
+    },
+    {
+      path: `${HOME}/loop.generated.ts`,
+      content: await formatTs(`${HOME}/loop.generated.ts`, chips.loopSource),
     },
     {
       path: `${HOME}/pattern.generated.ts`,

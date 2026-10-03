@@ -21,6 +21,7 @@ import {
   copyDeck,
   createDeck,
   listDeckHeads,
+  missingTemplateTwins,
   removeDeck,
   restoreDeck,
   trashDeck,
@@ -44,6 +45,8 @@ export type Overlay = {
   ensureAssets: (deckId: string) => Promise<void>;
   /** every seed deck's twins; what deck.create from a template needs */
   ensureAllAssets: () => Promise<void>;
+  /** the twins a template names past its seed deck's manifest (fetchTemplateTwins) */
+  ensureTemplateAssets: (from: string) => Promise<void>;
   seedDecks: () => Promise<string[]>;
 };
 
@@ -81,6 +84,36 @@ function writeAtomic(path: string, bytes: Uint8Array): void {
   const tmp = `${path}.${process.pid}.tmp`;
   writeFileSync(tmp, bytes);
   renameSync(tmp, path);
+}
+
+/**
+ * Writes the twins a template's own manifest names that its seed deck's folder lacks
+ * (`missingTemplateTwins`), fetched from the static source by the seed deck's id, into the
+ * overlay's folder alone: never to the seed deck's store prefix, since no write of this program
+ * touches the stored seed deck (docs/NEXT.md 4.1.4, question 29). Returns how many were written.
+ */
+export async function fetchTemplateTwins(
+  decksDir: string,
+  from: string,
+  seedIds: readonly string[],
+  fetchAsset: (deckId: string, relative: string) => Promise<Uint8Array | null>,
+  log: (line: string) => void,
+): Promise<number> {
+  const found = missingTemplateTwins(decksDir, from, seedIds);
+  if (found === null || found.missing.length === 0) return 0;
+  const t = performance.now();
+  let written = 0;
+  await eachLimit(found.missing, 8, async (twin) => {
+    const file = twin.slice('assets/'.length);
+    const bytes = await fetchAsset(found.seedId, file);
+    if (bytes === null) return;
+    writeAtomic(join(found.assetsDir, file), bytes);
+    written += 1;
+  });
+  log(
+    `fetched ${written} of ${found.missing.length} twins the template ${from} names past ${found.seedId} in ${Math.round(performance.now() - t)} ms`,
+  );
+  return written;
 }
 
 export function createOverlay(options: OverlayOptions): Overlay {
@@ -165,6 +198,13 @@ export function createOverlay(options: OverlayOptions): Overlay {
     async ensureAllAssets() {
       for (const deckId of await seedDecks()) await ensureAssets(deckId);
     },
+    async ensureTemplateAssets(from) {
+      const fetchAsset = options.fetchAsset;
+      if (fetchAsset === undefined) return;
+      await fetchTemplateTwins(decksDir, from, await seedDecks(), fetchAsset, (line) =>
+        log(`tmp: ${line}`),
+      );
+    },
     seedDecks,
   };
 }
@@ -211,7 +251,10 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
       await overlay.ready();
       // a template names the twins of the deck it was cut from (decks/templates/gt-brand/template.json
       // `assets: ../../gt-brand/assets`), so they must be on disk before createDeck copies them
-      if (input.from !== 'blank') await overlay.ensureAllAssets();
+      if (input.from !== 'blank') {
+        await overlay.ensureAllAssets();
+        await overlay.ensureTemplateAssets(input.from);
+      }
       return createDeck(decksDir, input, storeOptions);
     },
     async copy(input, baseRevision) {

@@ -96,7 +96,7 @@ import { AssetExistsError } from './store.ts';
 import { byNewest, copyDeck, createDeck, deckIdFor, restoreDeck, trashDeck } from './templates.ts';
 import type { DeckHead, TrashState } from './templates.ts';
 import { blobTemplates } from './blob-templates.ts';
-import { createOverlay } from './tmp-store.ts';
+import { createOverlay, fetchTemplateTwins } from './tmp-store.ts';
 import type { Overlay } from './tmp-store.ts';
 import { readRevision } from './watch.ts';
 
@@ -2808,6 +2808,17 @@ export function blobDecks(options: HostedOptions): HostedDecks {
             await (await storeFor(seedId)).pullAssets().catch(() => 0);
           await fetchMissingTwins(seedId, true);
         }
+        // the template's own manifest can name pictures the stored seed deck's does not (the
+        // 95 slide GT template over the stored 85 slide deck): those come from the static source
+        // into the overlay alone, never to the seed deck's prefix
+        if (options.fetchAsset !== undefined)
+          await fetchTemplateTwins(
+            decksDir,
+            input.from,
+            await overlay.seedDecks(),
+            options.fetchAsset,
+            (line) => log(`blob: ${line}`),
+          );
       }
       const dir = join(decksDir, deckId);
       rmSync(dir, { recursive: true, force: true });

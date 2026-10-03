@@ -490,6 +490,44 @@ export function templateEntry(decksDir: string, id: string): TemplateIndexEntry 
   return readTemplateIndex(decksDir).find((row) => row.id === id) ?? null;
 }
 
+/**
+ * The twins a template's own manifest names that its assets folder lacks, when that folder is a
+ * seed deck's (`decks/templates/gt-brand/template.json` names `../../gt-brand/assets`). A hosted
+ * tier's copy of the seed deck's manifest can name fewer pictures than the template does: the
+ * stored GT deck keeps its 85 slides while the template carries the 95 slide import (docs/NEXT.md
+ * 4.1.4, question 29). The answer names the seed deck, the folder and the missing files as
+ * `assets/<file>`; null for a template that is not on disk or keeps its own assets folder.
+ */
+export function missingTemplateTwins(
+  decksDir: string,
+  from: string,
+  seedIds: readonly string[],
+): { seedId: string; assetsDir: string; missing: string[] } | null {
+  if (!isTemplateSlug(from)) return null;
+  const templateDir = join(templatesDir(decksDir), from);
+  if (!existsSync(join(templateDir, 'template.json'))) return null;
+  try {
+    const template = readTemplate(templateDir);
+    const assetsDir = resolve(template.dir, template.record.assets);
+    const seedId = seedIds.find((id) => resolve(decksDir, id, 'assets') === assetsDir);
+    if (seedId === undefined) return null;
+    const manifest = readTemplateManifest(template);
+    const assets = isRecord(manifest?.assets) ? Object.values(manifest.assets) : [];
+    const named = new Set<string>();
+    for (const asset of assets) {
+      if (!isRecord(asset) || !isRecord(asset.twins)) continue;
+      for (const twin of Object.values(asset.twins))
+        if (typeof twin === 'string' && /^assets\/[A-Za-z0-9._-]+$/.test(twin)) named.add(twin);
+    }
+    const missing = [...named].filter(
+      (twin) => !existsSync(join(assetsDir, twin.slice('assets/'.length))),
+    );
+    return { seedId, assetsDir, missing };
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------------------------
 // The deployment default (docs/archive/rounds/PRODUCT.md 4.1 "The deployment default", 4.3)
 

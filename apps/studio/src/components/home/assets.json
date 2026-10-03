@@ -1,0 +1,5 @@
+{
+  "generator": "scripts/build-home-assets.ts --stills --export",
+  "note": "Day 0 stub (docs/gslides-parity/landing/build/integrator.md, Landing, day 0, section 6); L1's push 1 writes every file under public/home/ here with its bytes, sha256, size, decoded pixels sha256, part sha256 and page count.",
+  "assets": []
+}

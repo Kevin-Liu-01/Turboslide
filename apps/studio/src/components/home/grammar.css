@@ -69,3 +69,47 @@
   height: 24px;
   background-image: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 8px);
 }
+
+/* The motion tokens of docs/LANDING.md 3.1, L4's day 0 block in L1's file (6.4; landed by the
+   integrator, docs/gslides-parity/landing/build/integrator.md "Landing, day 0" section 4.5): the
+   GT films' curves (Prototemplate motion/MOTION.md, through research-motion.md 4.3) and the
+   page's durations. Every motion of /home reads its duration and curve from here, the live
+   module through getComputedStyle, so the one media block below sets every duration to 0 ms
+   under reduced motion (3.6) and no file writes the length of a motion as a literal. Holds,
+   clocks and input windows stay constants of their code and are not zeroed: the agent flag's
+   800 ms hold, the 24 ms agent clock, the 34 to 60 ms key gaps, the 700 ms nudge step, the 400 ms
+   gesture end and the 350 ms press. No bounce, overshoot, spring, blur, glow or scroll link. The
+   hero's develop (H5 with Kevin's answer 1, 1,500 ms) reads --ts-d-gather. */
+:root {
+  --ts-ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ts-ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+  --ts-ease-tone: cubic-bezier(0.333, 0, 0.667, 1);
+  --ts-ease-fade: ease-out;
+  --ts-d-fast: 120ms;
+  --ts-d-state: 160ms;
+  --ts-d-row: 200ms;
+  --ts-d-settle: 240ms;
+  --ts-d-ground: 300ms;
+  --ts-d-exit: 400ms;
+  --ts-d-beat: 500ms;
+  --ts-d-line: 600ms;
+  --ts-d-lit: 900ms;
+  --ts-d-gather: 1500ms;
+  --ts-d-develop: 2400ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ts-d-fast: 0ms;
+    --ts-d-state: 0ms;
+    --ts-d-row: 0ms;
+    --ts-d-settle: 0ms;
+    --ts-d-ground: 0ms;
+    --ts-d-exit: 0ms;
+    --ts-d-beat: 0ms;
+    --ts-d-line: 0ms;
+    --ts-d-lit: 0ms;
+    --ts-d-gather: 0ms;
+    --ts-d-develop: 0ms;
+  }
+}

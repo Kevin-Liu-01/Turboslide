@@ -707,7 +707,7 @@ async function closeShare(p: Page): Promise<void> {
   else await ctl(p, 'dialog.share.close').click();
   await expect(ctl(p, 'dialog.share')).toHaveCount(0, { timeout: 5000 });
 }
-/** Names a second browser through the first Share's prompt (docs/archive/rounds/PRODUCT.md rank 4); false when no prompt came. */
+/** Names a second browser through the first Share's prompt (docs/archive/rounds/PRODUCT.md rank 4), else the own chip's Change name; false when neither names it. */
 async function nameByPrompt(p: Page, name: string): Promise<boolean> {
   let named = await setDisplayName(p, name);
   if (!named) {
@@ -721,6 +721,9 @@ async function nameByPrompt(p: Page, name: string): Promise<boolean> {
     )
       await closeShare(p);
   }
+  /* the Share dialog asks no name from Round 1 on (B3b#13, docs/NEXT.md 4.1.3 item 17): the own
+     chip's Change name opens the same prompt */
+  if (!named) named = (await nameSelf(p, name)).named;
   if (named) await settled(p);
   return named;
 }

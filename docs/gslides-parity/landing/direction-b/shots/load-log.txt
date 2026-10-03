@@ -1,0 +1,104 @@
+2026-10-02 17:01:17 wait 1 one-minute load 52.93
+2026-10-02 17:06:17 wait 2 one-minute load 83.91
+2026-10-02 17:11:17 after wait: 180.92
+2026-10-03T00:11:33.447Z raster start one-minute load 162.29
+2026-10-03T00:11:39.060Z raster end one-minute load 154.25
+2026-10-03T00:11:40.212Z check 1440 light start one-minute load 154.25
+2026-10-03T00:11:54.906Z check 1440 light end one-minute load 132.33
+2026-10-03T00:18:20.526Z raster start one-minute load 57.89
+2026-10-03T00:18:23.772Z raster end one-minute load 56.22
+2026-10-03T00:18:25.138Z check 1440 light start one-minute load 56.22
+2026-10-03T00:18:39.249Z check 1440 light end one-minute load 52.34
+2026-10-03T00:18:40.263Z check 390 dark start one-minute load 52.34
+2026-10-03T00:18:52.769Z check 390 dark end one-minute load 49.27
+2026-10-03T00:23:07.886Z shots b-1440-light start one-minute load 51.26
+2026-10-03T00:23:17.546Z shots b-1440-light end one-minute load 52.00
+2026-10-03T00:23:18.314Z shots b-1440-dark start one-minute load 52.00
+2026-10-03T00:23:28.759Z shots b-1440-dark end one-minute load 50.87
+2026-10-03T00:26:34.949Z shots b-390-light start one-minute load 52.13
+2026-10-03T00:26:43.139Z shots b-390-light end one-minute load 52.94
+2026-10-03T00:26:43.868Z shots b-390-dark start one-minute load 52.94
+2026-10-03T00:26:50.980Z shots b-390-dark end one-minute load 52.95
+2026-10-03T00:26:51.883Z shots b-1440-light-reduced start one-minute load 51.43
+2026-10-03T00:27:08.663Z shots b-1440-light-reduced end one-minute load 49.52
+2026-10-03T00:29:00.657Z strips agent light start one-minute load 51.99
+2026-10-03T00:29:19.878Z strips agent light end one-minute load 50.83
+2026-10-03T00:32:35.468Z strips agent light start one-minute load 60.52
+2026-10-03T00:32:55.570Z strips agent light end one-minute load 58.19
+2026-10-03T00:32:56.254Z strips work light start one-minute load 58.19
+2026-10-03T00:33:11.225Z strips work light end one-minute load 56.76
+2026-10-03T00:35:55.028Z strips work light start one-minute load 65.90
+2026-10-03T00:36:09.273Z strips work light end one-minute load 69.05
+2026-10-03T00:36:09.889Z strips people light start one-minute load 69.05
+2026-10-03T00:36:22.350Z strips people light end one-minute load 66.54
+2026-10-03T00:36:22.842Z strips present light start one-minute load 66.54
+2026-10-03T00:36:33.050Z strips present light end one-minute load 64.56
+2026-10-03T00:38:59.923Z strips agent light start one-minute load 57.57
+2026-10-03T00:39:18.893Z strips agent light end one-minute load 57.21
+2026-10-03T00:39:19.637Z strips work light start one-minute load 57.21
+2026-10-03T00:39:34.580Z strips work light end one-minute load 54.03
+2026-10-03T00:39:35.400Z strips people light start one-minute load 54.03
+2026-10-03T00:39:48.371Z strips people light end one-minute load 54.47
+2026-10-03T00:41:34.421Z strips present light start one-minute load 51.11
+2026-10-03T00:41:44.536Z strips present light end one-minute load 53.96
+2026-10-03T00:41:45.026Z strips export light start one-minute load 53.96
+2026-10-03T00:41:51.502Z strips export light end one-minute load 53.94
+2026-10-03T00:41:51.979Z strips pattern light start one-minute load 53.94
+2026-10-03T00:41:57.187Z strips pattern light end one-minute load 53.71
+2026-10-03T00:41:57.644Z strips fields light start one-minute load 53.71
+2026-10-03T00:42:05.920Z strips fields light end one-minute load 52.13
+2026-10-03T00:43:57.690Z strips export light start one-minute load 52.59
+2026-10-03T00:44:04.965Z strips export light end one-minute load 52.30
+2026-10-03T00:44:05.617Z shots b-1440-light start one-minute load 52.30
+2026-10-03T00:44:16.367Z shots b-1440-light end one-minute load 53.01
+2026-10-03T00:44:17.283Z shots b-1440-dark start one-minute load 53.01
+2026-10-03T00:44:28.318Z shots b-1440-dark end one-minute load 52.32
+2026-10-03T00:45:58.689Z shots b-390-light start one-minute load 56.93
+2026-10-03T00:46:03.934Z shots b-390-light end one-minute load 54.69
+2026-10-03T00:46:04.328Z shots b-390-dark start one-minute load 54.69
+2026-10-03T00:46:09.998Z shots b-390-dark end one-minute load 54.16
+2026-10-03T00:46:10.336Z shots b-1440-light-reduced start one-minute load 54.16
+2026-10-03T00:46:17.594Z shots b-1440-light-reduced end one-minute load 53.12
+2026-10-03T00:48:23.359Z measure 1440 end one-minute load 60.59
+2026-10-03T00:48:55.540Z measure 390 end one-minute load 56.83
+2026-10-03T00:52:08.714Z measure 1440 end one-minute load 62.79
+2026-10-03T00:54:17.021Z measure 1440 end one-minute load 64.36
+2026-10-03T00:54:42.219Z measure 390 end one-minute load 61.89
+2026-10-03T00:55:56.959Z check 1440 dark start one-minute load 66.51
+2026-10-03T00:56:11.357Z check 1440 dark end one-minute load 67.58
+2026-10-03T00:56:40.286Z strips agent light start one-minute load 67.41
+2026-10-03T00:57:00.299Z strips agent light end one-minute load 66.88
+2026-10-03T00:57:01.648Z strips work light start one-minute load 68.49
+2026-10-03T00:57:17.990Z strips work light end one-minute load 66.80
+2026-10-03T00:57:19.256Z strips people light start one-minute load 66.80
+2026-10-03T00:57:32.548Z strips people light end one-minute load 66.04
+2026-10-03T00:58:33.413Z strips present light start one-minute load 58.98
+2026-10-03T00:58:43.889Z strips present light end one-minute load 59.31
+2026-10-03T00:58:44.529Z strips export light start one-minute load 59.31
+2026-10-03T00:58:51.205Z strips export light end one-minute load 60.17
+2026-10-03T00:58:51.904Z strips pattern light start one-minute load 59.43
+2026-10-03T00:58:57.103Z strips pattern light end one-minute load 58.76
+2026-10-03T00:58:58.051Z strips fields light start one-minute load 58.76
+2026-10-03T00:59:06.450Z strips fields light end one-minute load 57.41
+2026-10-03T01:00:07.178Z shots b-NaN-undefined start one-minute load 55.93
+2026-10-03T01:00:08.520Z shots b-NaN-undefined start one-minute load 55.93
+2026-10-03T01:00:09.912Z shots b-NaN-undefined start one-minute load 55.93
+2026-10-03T01:00:11.282Z shots b-NaN-undefined start one-minute load 55.93
+2026-10-03T01:00:12.997Z shots b-NaN-undefined start one-minute load 56.26
+2026-10-03T01:02:06.876Z measure 1440 end one-minute load 55.02
+2026-10-03T01:03:02.794Z measure 390 end one-minute load 52.81
+2026-10-03T01:03:15.982Z shots b-1440-light start one-minute load 52.06
+2026-10-03T01:03:30.936Z shots b-1440-light end one-minute load 54.37
+2026-10-03T01:03:32.040Z shots b-1440-dark start one-minute load 53.14
+2026-10-03T01:03:44.797Z shots b-1440-dark end one-minute load 53.40
+2026-10-03T01:03:45.551Z shots b-390-light start one-minute load 53.40
+2026-10-03T01:03:52.844Z shots b-390-light end one-minute load 53.67
+2026-10-03T01:03:54.146Z shots b-390-dark start one-minute load 53.67
+2026-10-03T01:04:02.975Z shots b-390-dark end one-minute load 54.44
+2026-10-03T01:04:04.866Z shots b-1440-light-reduced start one-minute load 54.44
+2026-10-03T01:04:22.315Z shots b-1440-light-reduced end one-minute load 57.00
+2026-10-03T01:05:17.957Z measure 390 end one-minute load 55.46
+2026-10-03T01:05:49.001Z strips export light start one-minute load 53.96
+2026-10-03T01:05:55.971Z strips export light end one-minute load 55.08
+2026-10-03T01:08:07.668Z final check start one-minute load 55.08
+2026-10-03T01:08:16.438Z final check end one-minute load 55.71

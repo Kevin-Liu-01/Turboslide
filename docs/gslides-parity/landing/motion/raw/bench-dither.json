@@ -1,0 +1,102 @@
+{
+ "cpu1x": {
+  "band2d_1104x360_cell2": {
+   "cells": 99360,
+   "median": 1.9,
+   "p95": 2.6,
+   "frameGapMedian": 8.3
+  },
+  "band2d_1104x360_cell3": {
+   "cells": 44160,
+   "median": 0.8,
+   "p95": 1.2,
+   "frameGapMedian": 8.3
+  },
+  "hero2d_1440x900_cell3": {
+   "cells": 144000,
+   "median": 2.6,
+   "p95": 2.8,
+   "frameGapMedian": 8.3
+  },
+  "phone2d_390x300_cell2": {
+   "cells": 29250,
+   "median": 0.5,
+   "p95": 0.6,
+   "frameGapMedian": 8.3
+  },
+  "bandGL_1104x360_cell2": {
+   "cells": 99360,
+   "setupMs": 78.4,
+   "median": 0,
+   "p95": 0.1,
+   "frameGapMedian": 8.3
+  },
+  "heroGL_1440x900_cell3": {
+   "cells": 144000,
+   "setupMs": 5.9,
+   "median": 0,
+   "p95": 0.1,
+   "frameGapMedian": 8.3
+  },
+  "reveal60": {
+   "syncMs": 0.1,
+   "anims": 0,
+   "taskMs": 9,
+   "styleMs": 0,
+   "layoutMs": 6
+  }
+ },
+ "cpu4x": {
+  "band2d_1104x360_cell2": {
+   "cells": 99360,
+   "median": 7.5,
+   "p95": 10.8,
+   "frameGapMedian": 8.3
+  },
+  "band2d_1104x360_cell3": {
+   "cells": 44160,
+   "median": 3.3,
+   "p95": 4.4,
+   "frameGapMedian": 8.3
+  },
+  "hero2d_1440x900_cell3": {
+   "cells": 144000,
+   "median": 10.8,
+   "p95": 11.6,
+   "frameGapMedian": 11.5
+  },
+  "phone2d_390x300_cell2": {
+   "cells": 29250,
+   "median": 2.2,
+   "p95": 2.8,
+   "frameGapMedian": 8.3
+  },
+  "bandGL_1104x360_cell2": {
+   "cells": 99360,
+   "setupMs": 17,
+   "median": 0,
+   "p95": 0.2,
+   "frameGapMedian": 8.3
+  },
+  "heroGL_1440x900_cell3": {
+   "cells": 144000,
+   "setupMs": 9.3,
+   "median": 0,
+   "p95": 0.2,
+   "frameGapMedian": 8.3
+  },
+  "reveal60": {
+   "syncMs": 0.2,
+   "anims": 0,
+   "taskMs": 33,
+   "styleMs": 1,
+   "layoutMs": 26
+  }
+ },
+ "load": [
+  57.6640625,
+  55.4873046875,
+  53.6435546875
+ ],
+ "date": "2026-10-02T23:02:48.270Z"
+}

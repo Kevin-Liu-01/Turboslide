@@ -1,0 +1,147 @@
+{
+  "base": "https://www.turboslide.com",
+  "viewport": "390x844",
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+  "runs": 5,
+  "summary": {
+    "finalHeaders": {
+      "median": 85,
+      "worst": 119
+    },
+    "fcp": {
+      "median": 252,
+      "worst": 332
+    },
+    "lcp": {
+      "median": 292,
+      "worst": 392
+    },
+    "load": {
+      "median": 253,
+      "worst": 382
+    },
+    "jsEncoded": {
+      "median": 346602,
+      "worst": 346630
+    },
+    "jsDecoded": {
+      "median": 1234881,
+      "worst": 1234881
+    },
+    "jsFiles": {
+      "median": 3,
+      "worst": 3
+    },
+    "cssDecoded": {
+      "median": 54504,
+      "worst": 54504
+    },
+    "fontEncoded": {
+      "median": 352589,
+      "worst": 352649
+    },
+    "imgEncoded": {
+      "median": 261961,
+      "worst": 261971
+    },
+    "docEncoded": {
+      "median": 15854,
+      "worst": 15854
+    },
+    "totalEncoded": {
+      "median": 994437,
+      "worst": 1056685
+    },
+    "totalDecoded": {
+      "median": 1959435,
+      "worst": 1959435
+    },
+    "requests": {
+      "median": 17,
+      "worst": 18
+    },
+    "cls": {
+      "median": 0,
+      "worst": 0
+    },
+    "scriptMs": {
+      "median": 84,
+      "worst": 93
+    },
+    "lcpElement": [
+      "IMG.ts-product-shot-img.ts-product-only-light https://www.turboslide.com/home/hero-light-fdb7c9b176.jpg",
+      "IMG.ts-product-shot-img.ts-product-only-light https://www.turboslide.com/home/hero-light-fdb7c9b176.jpg",
+      "IMG.ts-product-shot-img.ts-product-only-light https://www.turboslide.com/home/hero-light-fdb7c9b176.jpg",
+      "IMG.ts-product-shot-img.ts-product-only-light https://www.turboslide.com/home/hero-light-fdb7c9b176.jpg",
+      "IMG.ts-product-shot-img.ts-product-only-light https://www.turboslide.com/home/hero-light-fdb7c9b176.jpg"
+    ],
+    "loads": [
+      "57.67 50.70 49.97",
+      "57.61 50.81 50.01",
+      "57.24 50.84 50.03",
+      "57.70 51.04 50.10",
+      "61.89 52.02 50.45"
+    ]
+  },
+  "files": {
+    "doc": {
+      "n": 1,
+      "encoded": 15854,
+      "decoded": 55597,
+      "files": [
+        "/home 15854/55597"
+      ]
+    },
+    "js": {
+      "n": 3,
+      "encoded": 346630,
+      "decoded": 1234881,
+      "files": [
+        "/assets/home-Usd4t-7s.js 18360/56780",
+        "/assets/theme-DO8NCsMh.js 1039/2028",
+        "/assets/index-BhUVPN0m.js 327231/1176073"
+      ]
+    },
+    "css": {
+      "n": 7,
+      "encoded": 16206,
+      "decoded": 54504,
+      "files": [
+        "/assets/inter-DT2i1OZC.css 653/470",
+        "/assets/index-OSCyi9or.css 5547/24132",
+        "/assets/tokens-uaGcKwje.css 2049/6236",
+        "/assets/brand-Qt_Fkm7b.css 1202/2717",
+        "/assets/stage-DAHOds8-.css 1062/931",
+        "/assets/sheet-DAl5uK5r.css 4018/15227",
+        "/assets/styles-BS0ww1Sd.css 1675/4791"
+      ]
+    },
+    "font": {
+      "n": 1,
+      "encoded": 352614,
+      "decoded": 352240,
+      "files": [
+        "/assets/InterVariable-DiVDrmQJ.woff2 352614/352240"
+      ]
+    },
+    "img": {
+      "n": 3,
+      "encoded": 261938,
+      "decoded": 261256,
+      "files": [
+        "/home/canvas-light-21a170e381.png 39245/39016",
+        "/home/hero-light-fdb7c9b176.jpg 153556/153286",
+        "/home/menus-light-aa2b00e489.png 69137/68954"
+      ]
+    },
+    "other": {
+      "n": 2,
+      "encoded": 1161,
+      "decoded": 957,
+      "files": [
+        "/icon.svg 1161/957",
+        "/decks ?/?"
+      ]
+    }
+  }
+}

@@ -1,0 +1,588 @@
+{
+ "dir": "b",
+ "W": 1440,
+ "theme": "light",
+ "rm": "reduce",
+ "loadStart": " 53.60 56.74 58.07",
+ "text": {
+  "words": 958,
+  "emDash": 0,
+  "enDash": 0,
+  "bang": 0,
+  "bangCtx": [],
+  "realtime": false,
+  "h1": [
+   "Build the pitch, present it and send the link"
+  ],
+  "h2": [
+   "Everything on a slide moves",
+   "Two people edit the same slide",
+   "Present from the browser",
+   "Export to PDF and PowerPoint",
+   "Animated patterns in the theme's colors",
+   "Features and where to find them",
+   "Free under the MIT license"
+  ],
+  "headingPeriod": [],
+  "scrollBehavior": "auto",
+  "viewportMeta": "width=device-width, initial-scale=1",
+  "userSelectBody": "auto",
+  "title": "Turboslide is a slides editor in the browser",
+  "lang": "en"
+ },
+ "fonts": {
+  "monoBgs": {
+   "rgb(16, 16, 16)": 12
+  },
+  "nonInter": []
+ },
+ "colours": {
+  "rgb(47,92,224) borderTopColor": {
+   "n": 6,
+   "ex": [
+    "sel",
+    "I",
+    "presence is-mine is-on"
+   ]
+  },
+  "rgb(47,92,224) backgroundColor": {
+   "n": 4,
+   "ex": [
+    "chip",
+    "guide v",
+    "guide hz",
+    "caret"
+   ]
+  }
+ },
+ "contrast": {
+  "checked": 137,
+  "below": 5,
+  "belowOutsideSlides": 0,
+  "worst": [
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 4.4608,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 5.494,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Globex",
+    "cr": 3.25,
+    "px": 3.8704,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Globex",
+    "cr": 3.25,
+    "px": 3.8704,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 4.61378,
+    "cls": "s-foot",
+    "inSlide": true
+   }
+  ]
+ },
+ "names": {
+  "nameless": [],
+  "namelessN": 0,
+  "canvases": [
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Slide 1"
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Slide 1"
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Picture: the Blue Marble"
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   }
+  ],
+  "imgsNoAlt": 0,
+  "live": [
+   "polite:snack",
+   "polite:sr",
+   "status:follow-plate"
+  ]
+ },
+ "tabs": [
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 151,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Open the Example Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 192,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "Slide 1",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 73,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slide 2",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 73,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slide 3",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 73,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slide 4",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 73,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slide 5",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 73,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Undo",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 49,
+   "h": 22
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": false,
+   "outline": "rgba(255, 255, 255, 0.87) 0px",
+   "inView": true,
+   "w": 292,
+   "h": 21
+  },
+  {
+   "tag": "button",
+   "name": "New Slideslide new --layout split",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 256,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Set the Titleblock set pricing#tit",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 256,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Tailor for Globextailor --replace ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 256,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Restoreversion restore 25",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 256,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Replay",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 67,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Title",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 289,
+   "h": 82
+  },
+  {
+   "tag": "div",
+   "name": "Text",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 235,
+   "h": 46
+  },
+  {
+   "tag": "div",
+   "name": "Picture: the Blue Marble",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 197,
+   "h": 196
+  },
+  {
+   "tag": "button",
+   "name": "Undo",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 59,
+   "h": 32
+  },
+  {
+   "tag": "p",
+   "name": "Title on Maya's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 378,
+   "h": 26
+  },
+  {
+   "tag": "p",
+   "name": "Subtitle on Maya's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 330,
+   "h": 16
+  },
+  {
+   "tag": "p",
+   "name": "Title on Sam's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 378,
+   "h": 26
+  },
+  {
+   "tag": "p",
+   "name": "Subtitle on Sam's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 330,
+   "h": 16
+  },
+  {
+   "tag": "button",
+   "name": "Replay",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 67,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Presenter view. The arrow keys cha",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 613,
+   "h": 349
+  },
+  {
+   "tag": "button",
+   "name": "Previous",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 79,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Next",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 55,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Move the line between the browser ",
+   "ring": true,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 44,
+   "h": 575
+  },
+  {
+   "tag": "a",
+   "name": "Read the record",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 106,
+   "h": 17
+  },
+  {
+   "tag": "button",
+   "name": "Moving",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 72,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Still Frame",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 90,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "GitHub",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 104,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 135,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "New presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 117,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Your presentations",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 124,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 101,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "GitHub",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 46,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "License",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 51,
+   "h": 22
+  },
+  null,
+  {
+   "tag": "a",
+   "name": "Skip to the content",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 165,
+   "h": 42
+  },
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 143,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 101,
+   "h": 22
+  },
+  {
+   "tag": "button",
+   "name": "Light",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 57,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Dark",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 55,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 135,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 151,
+   "h": 40
+  }
+ ],
+ "tabNoRing": [
+  "input:"
+ ],
+ "rafTop": {
+  "perSec": 0,
+  "anims": 0
+ },
+ "afterScroll": {
+  "perSec": 0,
+  "running": [],
+  "total": 0
+ },
+ "height": 7898,
+ "overflowX": 0,
+ "errs": [],
+ "netRequests": [],
+ "loadEnd": " 54.23 56.78 58.07"
+}

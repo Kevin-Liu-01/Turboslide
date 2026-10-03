@@ -1,0 +1,111 @@
+{
+  "d": "c",
+  "width": 1440,
+  "load": [
+    "54.30",
+    "55.63"
+  ],
+  "ms": 3517,
+  "errors": [],
+  "requests": [],
+  "title": "Turboslide is a slides editor in the browser",
+  "height": 6255,
+  "heads": [
+    {
+      "tag": "H1",
+      "text": "Build the pitch, present it and send the link",
+      "x": 713,
+      "y": 370,
+      "w": 415,
+      "h": 172
+    },
+    {
+      "tag": "H2",
+      "text": "The menus are Google's",
+      "x": 208,
+      "y": 1491,
+      "w": 397,
+      "h": 42
+    },
+    {
+      "tag": "H2",
+      "text": "Present from the browser",
+      "x": 208,
+      "y": 2431,
+      "w": 397,
+      "h": 42
+    },
+    {
+      "tag": "H2",
+      "text": "Export to PDF and PowerPoint",
+      "x": 208,
+      "y": 3229,
+      "w": 397,
+      "h": 85
+    },
+    {
+      "tag": "H2",
+      "text": "Agents run the same actions",
+      "x": 208,
+      "y": 3979,
+      "w": 397,
+      "h": 85
+    },
+    {
+      "tag": "H2",
+      "text": "Every change has an author",
+      "x": 208,
+      "y": 5010,
+      "w": 397,
+      "h": 85
+    },
+    {
+      "tag": "H2",
+      "text": "Free under the MIT license",
+      "x": 208,
+      "y": 5792,
+      "w": 555,
+      "h": 45
+    }
+  ],
+  "ctas": [
+    {
+      "text": "New Presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 1080,
+      "y": 9,
+      "w": 152,
+      "h": 40
+    },
+    {
+      "text": "New Presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 208,
+      "y": 901,
+      "w": 152,
+      "h": 40
+    },
+    {
+      "text": "Open the Example Deck",
+      "href": "https://www.turboslide.com/deck/gt-brand",
+      "x": 368,
+      "y": 901,
+      "w": 194,
+      "h": 40
+    },
+    {
+      "text": "New presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 712,
+      "y": 6118,
+      "w": 117,
+      "h": 22
+    }
+  ],
+  "navPos": "static",
+  "emDash": 0,
+  "enDash": 0,
+  "bang": [],
+  "scrollBehavior": "auto",
+  "anims": 0
+}

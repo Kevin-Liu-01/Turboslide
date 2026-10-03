@@ -1,0 +1,1688 @@
+/* Direction A, quiet object: the stylesheet of the /home prototype.
+
+   MOTION TABLE. Every duration and easing the page uses, with what moves and what starts it.
+   Curves: arrive = cubic-bezier(0.16, 1, 0.3, 1) (expo.out); arrive-soft = cubic-bezier(0.25, 1, 0.5, 1)
+   (power3.out); move = cubic-bezier(0.65, 0, 0.35, 1) (power2.inOut); tone = cubic-bezier(0.333, 0, 0.667, 1)
+   (smoothstep); fade = ease-out; process = linear. No bounce, no spring overshoot, no blur, no scroll link.
+
+   | id  | what moves                                   | start                             | duration                         | delay / stagger          | easing      |
+   | M1  | hero slide: rails and rules draw out of their crosses | page load + fonts ready      | 600 ms per line                  | 0, 60, 120, 180 ms       | arrive      |
+   | M2  | hero caret appears, blinks once               | M1 + 300 ms                       | 1000 ms cycle (400 off, 90 rise, 510 on) | one cycle      | steps       |
+   | M3  | hero subtitle typed                           | M1 + 900 ms                       | about 3.6 s (34 to 60 ms a key, +30 ms at a space, +280 ms after a stop) | per key | process |
+   | M4  | caret holds on the last letter, then leaves   | end of M3                         | 400 ms; the sequence ends at about 4.9 s |               | steps       |
+   | M5  | mood picture develops through the Bayer screen (tone 0 to the picture's) | band 35 percent in view, once | 2400 ms | cells switch in Bayer order | tone |
+   | M6  | selection ring, handles and chip              | press or focus                    | 0 ms (the editor's)              |                          |             |
+   | M7  | object follows the pointer (move, resize, rotate) | pointer                       | 0 ms (direct)                    |                          |             |
+   | M8  | Undo returns an object to its last place      | Undo or Cmd+Z                     | 300 ms + distance / 2, max 700   |                          | move        |
+   | M9  | snap guide shows                              | object within 6 px of a guide     | 0 ms                             |                          |             |
+   | M10 | Tailor: each replaced name is set and lit as selected text | Apply                  | lit 900 ms, unlit 160 ms         | 55 ms per name, reading order | fade   |
+   | M11 | filmstrip: the other slides make room         | a slide picked up and moved       | 200 ms                           |                          | arrive      |
+   | M12 | filmstrip: the dropped slide settles          | release                           | 240 ms                           |                          | arrive      |
+   | M13 | agent answer lines print                      | Run                               | 120 ms fade per line             | 55 ms per line           | fade        |
+   | M14 | agent's new slide: rails draw out of crosses  | answer printed + 500 ms (one beat) | 600 ms per line                 | 60 ms                    | arrive      |
+   | M15 | agent's words land with the agent's flag      | answer printed + 500 ms           | 160 ms fade; flag holds 1800 ms, leaves in 160 ms |         | fade        |
+   | M16 | version history row enters                    | any change                        | 200 ms, 8 px rise                |                          | arrive      |
+   | M17 | Present: the ground turns to ink              | Present or S                      | 300 ms                           |                          | fade        |
+   | M18 | Present: the slide moves from its place to the stage | Present or S              | 500 ms                           |                          | move        |
+   | M19 | Present: next and previous slide              | arrow keys, click                 | 0 ms (a cut, as Slideshow)       |                          |             |
+   | M20 | Present: Exit returns the slide to its place  | Escape or Exit                    | 400 ms; ground 300 ms            |                          | move, fade  |
+   | M21 | Present: the timer counts                     | while showing                     | 1 s steps                        |                          | process     |
+   | M22 | closing slide: the mark's seven bars arrive from the left | slide 35 percent in view, once | 600 ms each, 48 unit travel | 70 ms, leftmost first | arrive |
+   | M23 | buttons: ground on hover and press            | hover, press                      | 120 ms                           |                          | fade        |
+   | M24 | buttons: press                                | press                             | 120 ms, scale 0.98               |                          | fade        |
+
+   Under prefers-reduced-motion: reduce, M1 to M5, M8, M10's stagger, M11 to M18, M20 and M22 do not run:
+   the page renders the end state of each, and the duration tokens below are 0 ms. Nothing loops. */
+
+/* the face: fonts/inter.css (Inter, the product's file, subset) */
+
+/* ---- tokens: the product's paper and ink (packages/chrome/src/tokens.css) ---- */
+:root {
+  color-scheme: light;
+  --paper: #ffffff;
+  --ink: #070707;
+  --ink-2: #3a3d44;
+  --titanium: #6f747d;
+  --hair: rgba(7, 7, 7, 0.18);
+  --hair-soft: rgba(7, 7, 7, 0.09);
+  --cross: rgba(7, 7, 7, 0.38);
+  --edge: rgba(7, 7, 7, 0.62);
+  --plate: rgba(7, 7, 7, 0.06);
+  --ink-press: #26272b;
+  --panel: #101010;
+  --panel-text: rgba(255, 255, 255, 0.87);
+  --panel-dim: rgba(255, 255, 255, 0.5);
+  --select: #2f5ce0;
+  --select-soft: rgba(47, 92, 224, 0.45);
+  --select-text: #ffffff;
+  --show: #070707;
+  --show-text: #f2f2f0;
+  --show-hair: rgba(242, 242, 240, 0.22);
+
+  --rail: 1104px;
+  --gutter: 40px;
+  --nav-h: 58px;
+  --band-pad: 112px;
+
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-tone: cubic-bezier(0.333, 0, 0.667, 1);
+  --d-fast: 120ms;
+  --d-state: 160ms;
+  --d-row: 200ms;
+  --d-settle: 240ms;
+  --d-ground: 300ms;
+  --d-flip: 500ms;
+  --d-line: 600ms;
+
+  --display: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #070707;
+    --ink: #f2f2f0;
+    --ink-2: #b9bcc3;
+    --titanium: #8a8f98;
+    --hair: rgba(242, 242, 240, 0.22);
+    --hair-soft: rgba(242, 242, 240, 0.1);
+    --cross: rgba(255, 255, 255, 0.34);
+    --edge: rgba(242, 242, 240, 0.55);
+    --plate: rgba(242, 242, 240, 0.08);
+    --ink-press: #d6d6d3;
+    --show: #000000;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #070707;
+  --ink: #f2f2f0;
+  --ink-2: #b9bcc3;
+  --titanium: #8a8f98;
+  --hair: rgba(242, 242, 240, 0.22);
+  --hair-soft: rgba(242, 242, 240, 0.1);
+  --cross: rgba(255, 255, 255, 0.34);
+  --edge: rgba(242, 242, 240, 0.55);
+  --plate: rgba(242, 242, 240, 0.08);
+  --ink-press: #d6d6d3;
+  --show: #000000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-fast: 0ms;
+    --d-state: 0ms;
+    --d-row: 0ms;
+    --d-settle: 0ms;
+    --d-ground: 0ms;
+    --d-flip: 0ms;
+    --d-line: 0ms;
+  }
+}
+
+/* ---- the document: native scroll, said explicitly ---- */
+html {
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.fonts-wait body {
+  opacity: 0;
+  animation: ts-show 0s linear 1.2s forwards;
+}
+
+@keyframes ts-show {
+  to { opacity: 1; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--display);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---- the page grammar: one rail on each side of the 1104 px column, drawn once ---- */
+.page {
+  position: relative;
+  overflow-x: clip;
+}
+
+.rails {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - min(var(--rail), 100% - 32px) / 2);
+  width: min(var(--rail), 100% - 32px);
+  box-sizing: border-box;
+  border-inline: 1px solid var(--hair);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.col {
+  box-sizing: border-box;
+  width: min(var(--rail), 100% - 32px);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  min-width: 0;
+}
+
+/* a full bleed seam under a band, with a 9 px cross where it meets each rail */
+.seam,
+.seam-top {
+  position: relative;
+}
+
+.seam {
+  border-bottom: 1px solid var(--hair);
+}
+
+.seam-top {
+  border-top: 1px solid var(--hair);
+}
+
+.seam::before,
+.seam::after,
+.seam-top::before,
+.seam-top::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background:
+    linear-gradient(var(--cross), var(--cross)) 4px 0 / 1px 100% no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 0 4px / 100% 1px no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.seam::before,
+.seam::after {
+  bottom: -5px;
+}
+
+.seam-top::before,
+.seam-top::after {
+  top: -5px;
+}
+
+.seam::before,
+.seam-top::before {
+  left: calc(50% - min(var(--rail), 100% - 32px) / 2 - 4px);
+}
+
+.seam::after,
+.seam-top::after {
+  left: calc(50% + min(var(--rail), 100% - 32px) / 2 - 5px);
+}
+
+/* ---- type: weight 500 on every heading; sentence case; no eyebrows ---- */
+.h2 {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.say {
+  margin-top: 16px;
+  max-width: 560px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.inline {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 5px;
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+  font: 500 12px/1 var(--display);
+  color: var(--ink);
+}
+
+/* ---- buttons: Title Case labels; ground on hover and press (M23, M24) ---- */
+.btn,
+.ib {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--d-fast) ease-out,
+    color var(--d-fast) ease-out,
+    transform var(--d-fast) ease-out;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font: 500 14px/1 var(--display);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-solid {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-line {
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--ink);
+}
+
+.ib {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: 400 14px/1 var(--display);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ib[aria-pressed='true'] {
+  border-color: var(--hair);
+}
+
+.ib:disabled {
+  color: var(--titanium);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-solid:hover {
+    background: var(--ink-press);
+    border-color: var(--ink-press);
+  }
+  .btn-line:hover,
+  .ib:not(:disabled):hover {
+    background: var(--plate);
+  }
+}
+
+.btn:active,
+.ib:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible,
+.ib:focus-visible,
+.lockup:focus-visible,
+.inline:focus-visible,
+.foot-links a:focus-visible,
+.card:focus-visible,
+.field:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+}
+
+/* ---- the navigation ---- */
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: var(--nav-h);
+}
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.lockup-mark {
+  display: block;
+  fill: currentColor;
+}
+
+.lockup-word {
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.nav-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.appearance {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+/* ---- bands ---- */
+.band {
+  padding-block: var(--band-pad);
+}
+
+.band-hero {
+  padding-block: 48px 72px;
+}
+
+.band-head {
+  max-width: 640px;
+}
+
+.band-head + .stage {
+  margin-top: 48px;
+}
+
+/* the line under a slide: one ruled row */
+.under {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+  min-height: 36px;
+}
+
+.under-say {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.under-act {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kv {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.kv dt {
+  color: var(--titanium);
+}
+
+.kv dd {
+  margin: 0;
+  font-weight: 500;
+  min-width: 52px;
+}
+
+/* ================= the slide: 1600 by 900 units, the GT deck's sheet =================
+   Inside a sheet, 1 unit = var(--u) = 1/1600 of the sheet's width (container query units), so
+   every slide on the page is the same drawing at its own size. */
+.stage {
+  position: relative;
+}
+
+.sheet {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  overflow: clip;
+  background: var(--paper);
+  color: var(--ink);
+  box-sizing: border-box;
+  border: 1px solid var(--edge);
+}
+
+/* the sheet mat: the sanctioned doubled line (DESIGN.md 2), an edge border, a 1 px paper gap, a soft outline */
+.sheet-mat {
+  outline: 1px solid var(--hair-soft);
+  outline-offset: 1px;
+}
+
+.sheet > *,
+.sel-layer {
+  --u: calc(100cqw / 1600);
+}
+
+.sheet-frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.sheet-frame .r {
+  position: absolute;
+  background: var(--hair);
+}
+
+.r-t,
+.r-b {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.r-l,
+.r-r {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.r-t { top: calc(56 * var(--u)); transform-origin: calc(56 * var(--u)) 50%; }
+.r-b { bottom: calc(56 * var(--u)); transform-origin: calc(100% - 56 * var(--u)) 50%; }
+.r-l { left: calc(56 * var(--u)); transform-origin: 50% calc(56 * var(--u)); }
+.r-r { right: calc(56 * var(--u)); transform-origin: 50% calc(100% - 56 * var(--u)); }
+
+.sheet-frame .x {
+  position: absolute;
+  width: max(5px, calc(11 * var(--u)));
+  height: max(5px, calc(11 * var(--u)));
+  margin: calc(max(5px, calc(11 * var(--u))) / -2) 0 0 calc(max(5px, calc(11 * var(--u))) / -2);
+  background:
+    linear-gradient(var(--cross), var(--cross)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 0 50% / 100% 1px no-repeat;
+}
+
+.x-tl { left: calc(56.5 * var(--u)); top: calc(56.5 * var(--u)); }
+.x-tr { left: calc(1543.5 * var(--u)); top: calc(56.5 * var(--u)); }
+.x-bl { left: calc(56.5 * var(--u)); top: calc(843.5 * var(--u)); }
+.x-br { left: calc(1543.5 * var(--u)); top: calc(843.5 * var(--u)); }
+
+.sheet-mark {
+  position: absolute;
+  left: calc(72 * var(--u));
+  bottom: calc(17 * var(--u));
+  width: calc(26 * var(--u));
+  height: calc(18 * var(--u));
+  fill: var(--titanium);
+  z-index: 3;
+}
+
+.sheet-count {
+  position: absolute;
+  right: calc(72 * var(--u));
+  bottom: calc(19 * var(--u));
+  font-size: calc(13 * var(--u));
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--titanium);
+  font-variant-numeric: tabular-nums;
+  z-index: 3;
+}
+
+/* the deck's type, in units */
+.t-title,
+.t-h2,
+.t-big {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.t-title { font-size: calc(88 * var(--u)); line-height: 1.02; }
+.t-title-s { font-size: calc(80 * var(--u)); }
+.t-h2 { font-size: calc(44 * var(--u)); line-height: 1.08; }
+.t-big { font-size: calc(72 * var(--u)); line-height: 1.06; }
+.t-lead { font-size: calc(26 * var(--u)); line-height: 1.45; color: var(--ink-2); }
+.t-p { font-size: calc(22 * var(--u)); line-height: 1.5; }
+.t-cap { font-size: calc(15 * var(--u)); line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
+.t-muted { color: var(--ink-2); }
+
+/* deck layouts inside a sheet (the .slide box: inset 57, padded 72 and 80) */
+.sl {
+  position: absolute;
+  inset: calc(57 * var(--u));
+  padding: calc(72 * var(--u)) calc(80 * var(--u));
+  box-sizing: border-box;
+}
+
+.sl-leftmid {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(26 * var(--u));
+}
+
+.sl-leftmid .t-lead {
+  max-width: 34ch;
+}
+
+.sl-center {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.sl-center .t-big {
+  max-width: 18ch;
+}
+
+.sl-cols {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: calc(72 * var(--u));
+  align-items: center;
+}
+
+.sl-cols .t-p {
+  margin-top: calc(18 * var(--u));
+}
+
+.s-rows {
+  border-top: 1px solid var(--hair);
+}
+
+.s-rows > div {
+  display: grid;
+  grid-template-columns: calc(200 * var(--u)) 1fr;
+  gap: calc(28 * var(--u));
+  padding: calc(14 * var(--u)) 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: calc(20 * var(--u));
+  line-height: 1.45;
+  min-height: calc(29 * var(--u));
+}
+
+.s-rows b {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.notes[hidden] {
+  display: none;
+}
+
+/* ---- editable objects (hero and mood slides): position and size in units ---- */
+.obj {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  top: calc(var(--y) * var(--u));
+  width: calc(var(--w) * var(--u));
+  min-height: calc(var(--h, 0) * var(--u));
+  transform: rotate(calc(var(--r, 0) * 1deg));
+  transform-origin: 50% 50%;
+  box-sizing: border-box;
+  outline: none;
+  cursor: default;
+  z-index: 2;
+}
+
+.obj.is-selected {
+  touch-action: none;
+  cursor: move;
+}
+
+.obj.is-editing,
+.obj.is-editing [data-text] {
+  cursor: text;
+  touch-action: auto;
+}
+
+.obj [data-text] {
+  outline: none;
+  caret-color: var(--select);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .obj:not(.is-selected):hover {
+    box-shadow: none;
+    outline: 1px solid var(--select-soft);
+    outline-offset: 0;
+  }
+}
+
+.obj.is-settling {
+  transition:
+    left var(--d-settle) var(--ease-move),
+    top var(--d-settle) var(--ease-move),
+    width var(--d-settle) var(--ease-move),
+    transform var(--d-settle) var(--ease-move);
+}
+
+/* a slide in its layout: its objects sit in the deck's flow (the hero's left-mid block) until the
+   first move, resize or turn pins them where they are, as the editor turns a layout slide into a
+   canvas; Undo of that change puts the layout back */
+.sheet:not(.is-pinned) .sl .obj {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  min-height: 0;
+  transform: none;
+}
+
+.sheet.is-pinned .sl {
+  display: contents;
+}
+
+.sl-hero {
+  gap: calc(30 * var(--u));
+}
+
+.sheet:not(.is-pinned) .sl-hero .obj-hero-title {
+  max-width: calc(1180 * var(--u));
+}
+
+.sheet:not(.is-pinned) .sl-hero .obj-hero-lead {
+  max-width: calc(900 * var(--u));
+}
+
+.br-wide {
+  display: inline;
+}
+
+/* the mood slide's plate: a paper shape */
+.obj-plate {
+  background: var(--paper);
+}
+
+.sheet-mood .t-h2 {
+  font-size: calc(44 * var(--u));
+}
+
+.mood-cv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  z-index: 0;
+}
+
+/* the mood slide's counter sits on a paper chip, as the deck's mood slides do */
+.chip-count {
+  padding: calc(5 * var(--u)) calc(8 * var(--u));
+  right: calc(64 * var(--u));
+  bottom: calc(13 * var(--u));
+  background: var(--paper);
+}
+
+/* the hero's subtitle, typed once (M2 to M4) */
+/* the caret is a 3 unit bar drawn at the end of the typed letters (an outset box shadow on the
+   span, the one place a shadow property is used, and it draws a line, not a shadow), so it moves
+   no box and the typing shifts nothing */
+.hero-intro #hero-lead .rest {
+  color: transparent;
+  animation: ts-reveal 0s linear 9s forwards; /* a still page even when the script never runs */
+}
+
+.hero-intro.hero-typing #hero-lead .rest {
+  animation: none;
+}
+
+.hero-intro #hero-lead.caret-on .typed {
+  box-shadow: max(2px, calc(3 * var(--u))) 0 0 var(--select);
+}
+
+.hero-intro #hero-lead.caret-blink .typed {
+  animation: ts-blink 1000ms steps(1, end) infinite;
+}
+
+.hero-intro .band-hero .sheet-frame .r {
+  transform: scale(0);
+}
+
+.hero-intro .band-hero .sheet-frame .r-t,
+.hero-intro .band-hero .sheet-frame .r-b {
+  transform: scaleX(0);
+}
+
+.hero-intro .band-hero .sheet-frame .r-l,
+.hero-intro .band-hero .sheet-frame .r-r {
+  transform: scaleY(0);
+}
+
+@keyframes ts-blink {
+  0% { box-shadow: none; }
+  40% { box-shadow: none; }
+  49% { box-shadow: max(2px, calc(3 * var(--u))) 0 0 var(--select); }
+  100% { box-shadow: max(2px, calc(3 * var(--u))) 0 0 var(--select); }
+}
+
+@keyframes ts-reveal {
+  to { color: inherit; }
+}
+
+/* ---- the selection layer: drawn over a sheet, in px, the editor's grammar ---- */
+.sel-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.sel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.sel[hidden] {
+  display: none;
+}
+
+.sel-ring {
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--select);
+}
+
+.sel-h {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -5px 0 0 -5px;
+  box-sizing: content-box;
+  border: 1px solid var(--select);
+  background: var(--paper);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.sel-h::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.sel-h[data-h='nw'] { left: 0; top: 0; cursor: nwse-resize; }
+.sel-h[data-h='n'] { left: 50%; top: 0; cursor: ns-resize; }
+.sel-h[data-h='ne'] { left: 100%; top: 0; cursor: nesw-resize; }
+.sel-h[data-h='e'] { left: 100%; top: 50%; cursor: ew-resize; }
+.sel-h[data-h='se'] { left: 100%; top: 100%; cursor: nwse-resize; }
+.sel-h[data-h='s'] { left: 50%; top: 100%; cursor: ns-resize; }
+.sel-h[data-h='sw'] { left: 0; top: 100%; cursor: nesw-resize; }
+.sel-h[data-h='w'] { left: 0; top: 50%; cursor: ew-resize; }
+
+.sel-stem {
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  width: 1px;
+  height: 18px;
+  background: var(--select);
+}
+
+.sel-knob {
+  position: absolute;
+  left: 50%;
+  top: -31px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--select);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sel-knob::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+}
+
+.sel-chip {
+  position: absolute;
+  left: -1px;
+  bottom: calc(100% + 6px);
+  padding: 3px 6px;
+  background: var(--select);
+  color: var(--select-text);
+  font: 500 12px/1.1 var(--display);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.sel.is-editing .sel-h,
+.sel.is-editing .sel-stem,
+.sel.is-editing .sel-knob {
+  display: none;
+}
+
+.guide {
+  position: absolute;
+  background: var(--select);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+
+.guide.is-on {
+  opacity: 1;
+}
+
+.guide-v { top: 0; bottom: 0; width: 1px; }
+.guide-h { left: 0; right: 0; height: 1px; }
+
+/* ================= Tailor ================= */
+.tailor-top {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  gap: 72px;
+  align-items: start;
+}
+
+.tailor {
+  border-top: 1px solid var(--hair);
+}
+
+.tailor-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  border-bottom: 1px solid var(--hair-soft);
+}
+
+.tailor-foot {
+  border-bottom-color: var(--hair);
+}
+
+.tailor-key {
+  font-size: 14px;
+  color: var(--titanium);
+}
+
+.tailor-from {
+  font-weight: 500;
+}
+
+.field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: 400 16px/1 var(--display);
+}
+
+.field::placeholder {
+  color: var(--titanium);
+}
+
+.tailor-foot {
+  grid-template-columns: 1fr auto;
+}
+
+.tailor-count {
+  font-size: 14px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.tailor-snack {
+  grid-template-columns: 1fr auto;
+  min-height: 48px;
+  border-bottom: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.tailor-snack:not(.is-on) > * {
+  visibility: hidden;
+}
+
+.strip {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.card {
+  position: relative;
+  outline: none;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card.is-lifted {
+  z-index: 5;
+  cursor: grabbing;
+}
+
+.card.is-lifted .sheet {
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+}
+
+.card.is-shifting {
+  transition: transform var(--d-row) var(--ease-arrive);
+}
+
+.card.is-settling {
+  transition: transform var(--d-settle) var(--ease-arrive);
+}
+
+.card-hole {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--hair);
+  pointer-events: none;
+}
+
+.cust {
+  transition:
+    background-color var(--d-state) ease-out,
+    color var(--d-state) ease-out;
+}
+
+.cust.is-lit {
+  background: var(--select);
+  color: var(--select-text);
+  transition: none;
+}
+
+/* ================= Agents ================= */
+.agents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.panel {
+  margin-top: 40px;
+  background: var(--panel);
+  color: var(--panel-text);
+  border-radius: 0;
+}
+
+.panel-text {
+  margin: 0;
+  box-sizing: border-box;
+  height: 296px;
+  padding: 18px 20px;
+  overflow: hidden;
+  font: 400 13px/1.62 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.panel-text .cmd {
+  color: #ffffff;
+}
+
+.panel-text .dim {
+  color: var(--panel-dim);
+}
+
+/* the CLI's block letter banner keeps a terminal's line pitch so its rows meet */
+.panel-text .banner {
+  line-height: 1;
+  color: var(--panel-text);
+}
+
+.panel-text .banner:last-child {
+  margin-bottom: 0.5em;
+}
+
+.panel-text .ln {
+  display: block;
+}
+
+.agents-act {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.agents-step {
+  font-size: 14px;
+  color: var(--titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.agents-right {
+  padding-top: 8px;
+}
+
+.stage-agents {
+  aspect-ratio: 16 / 9;
+}
+
+.sheet-agents[data-exists='false'] {
+  visibility: hidden;
+}
+
+.absent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--hair);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--titanium);
+  text-align: center;
+}
+
+.absent[hidden] {
+  display: none;
+}
+
+.ph:empty::before {
+  content: attr(data-ph);
+  color: var(--titanium);
+}
+
+.flag {
+  position: absolute;
+  left: calc(137 * var(--u));
+  top: calc(196 * var(--u));
+  padding: calc(5 * var(--u)) calc(9 * var(--u));
+  background: var(--ink);
+  color: var(--paper);
+  font: 500 max(10px, calc(16 * var(--u))) / 1.1 var(--display);
+  white-space: nowrap;
+  opacity: 0;
+  z-index: 4;
+  transition: opacity var(--d-state) ease-out;
+}
+
+.flag.is-on {
+  opacity: 1;
+}
+
+.history {
+  margin-top: 40px;
+}
+
+.history-rows {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+  height: calc(4 * 49px);
+  overflow: hidden;
+}
+
+.history-rows li {
+  display: grid;
+  grid-template-columns: 20px 92px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  border-bottom: 1px solid var(--hair-soft);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.history-rows li.history-empty {
+  display: block;
+  padding-top: 14px;
+  border-bottom: 0;
+  color: var(--titanium);
+}
+
+.history-rows .ic {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.history-rows .who {
+  font-weight: 500;
+}
+
+.history-rows .when {
+  color: var(--titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= Present ================= */
+.band-present {
+  position: relative;
+}
+
+.present-grid {
+  display: grid;
+  grid-template-columns: 4fr 7fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.present-act {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.keyhint {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.present-current {
+  aspect-ratio: 16 / 9;
+}
+
+.present-current .sheet,
+.show-stage .sheet {
+  width: 100%;
+}
+
+.thumbs {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.thumbs li {
+  position: relative;
+  cursor: pointer;
+}
+
+.thumbs li .sheet {
+  pointer-events: none;
+}
+
+.thumbs li.is-current .sheet {
+  outline: 1px solid var(--edge);
+  outline-offset: 2px;
+}
+
+.thumbs button {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.thumbs button:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+  background: transparent;
+}
+
+.show {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  padding: 40px max(16px, calc(50% - min(var(--rail), 100% - 32px) / 2 + 40px)) 28px;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--show-text);
+  outline: none;
+  transition: background-color var(--d-ground) ease-out;
+}
+
+.show[hidden] {
+  display: none;
+}
+
+.show.is-dark {
+  background: var(--show);
+}
+
+.show-stage {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+
+.show-stage .sheet {
+  border-color: transparent;
+}
+
+.show-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  margin-top: 16px;
+  min-height: 36px;
+  border-top: 1px solid var(--show-hair);
+  padding-top: 12px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity var(--d-ground) ease-out;
+}
+
+.show.is-dark .show-bar {
+  opacity: 1;
+}
+
+.show-count,
+.show-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.show-notes {
+  color: rgba(242, 242, 240, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ib-on-ink {
+  color: var(--show-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ib-on-ink:hover {
+    background: rgba(242, 242, 240, 0.1) !important;
+  }
+}
+
+/* ================= The parts ================= */
+.parts {
+  margin-top: 40px;
+  border-top: 1px solid var(--hair);
+}
+
+.part {
+  display: grid;
+  grid-template-columns: 220px 1fr 160px;
+  gap: 32px;
+  align-items: baseline;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.part b {
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.part .ic {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: -4px;
+  fill: currentColor;
+}
+
+.part > span {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 560px;
+}
+
+.part em {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= The close ================= */
+.close-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.sheet-close {
+  width: min(720px, 100%);
+}
+
+.sl-close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-mark {
+  width: calc(206 * var(--u));
+  height: calc(143 * var(--u));
+  fill: var(--ink);
+  overflow: visible;
+}
+
+.close-mark path {
+  transform-box: fill-box;
+}
+
+.close-word {
+  margin-top: calc(40 * var(--u));
+  font-size: calc(72 * var(--u));
+}
+
+.close-sign {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(40 * var(--u));
+  font-size: calc(18 * var(--u));
+}
+
+.close-col .h2 {
+  margin-top: 64px;
+}
+
+.close-col .say {
+  margin-inline: auto;
+}
+
+.close-act {
+  display: flex;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+/* ================= The footer ================= */
+.foot {
+  padding-block: 28px 40px;
+}
+
+.foot-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  font-size: 14px;
+}
+
+.foot-links a {
+  text-decoration: none;
+}
+
+.foot-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.foot-legal {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--titanium);
+}
+
+/* ================= one breakpoint at 1023 px, the phone at 720 px ================= */
+@media (max-width: 1023px) {
+  :root {
+    --band-pad: 80px;
+  }
+  .tailor-top,
+  .agents-grid,
+  .present-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .part {
+    grid-template-columns: 180px 1fr 110px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --gutter: 16px;
+    --band-pad: 64px;
+  }
+  .nav-row {
+    flex-wrap: wrap;
+    gap: 0;
+    padding-block: 10px 6px;
+  }
+  .nav-links {
+    display: contents;
+  }
+  .nav-links > a.ib {
+    order: 3;
+    margin-left: -10px;
+  }
+  .appearance {
+    order: 4;
+    margin: 0 0 0 auto;
+  }
+  .nav-new {
+    order: 2;
+    margin-left: auto;
+  }
+  .nav-row::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+    height: 8px;
+  }
+  .h2 {
+    font-size: 28px;
+  }
+  .band-hero {
+    padding-block: 24px 48px;
+  }
+  /* the hero slide on a phone: the type keeps a reading floor; the composition opens up */
+  .band-hero .t-title {
+    font-size: max(calc(88 * var(--u)), 27px);
+    line-height: 1.04;
+  }
+  .band-hero .t-lead {
+    font-size: max(calc(26 * var(--u)), 12.5px);
+    line-height: 1.4;
+  }
+  .sl-hero {
+    padding: calc(40 * var(--u)) calc(60 * var(--u));
+    gap: 10px;
+  }
+  .sl-hero .obj-hero-title,
+  .sl-hero .obj-hero-lead,
+  .sl-hero .t-lead {
+    max-width: none;
+  }
+  .br-wide {
+    display: none;
+  }
+  .under {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .under-act {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+  .under-hero .undo {
+    order: 3;
+  }
+  .under-hero .btn,
+  .close-act .btn {
+    flex: 1 1 100%;
+    height: 40px;
+  }
+  .under-hero .undo:disabled {
+    display: none;
+  }
+  .panel-text .banner {
+    font-size: 9.5px;
+  }
+  .under-canvas {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .under-canvas .under-say {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .under-canvas .under-act {
+    margin-left: auto;
+  }
+  .band-head + .stage {
+    margin-top: 32px;
+  }
+  .strip {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .card {
+    touch-action: pan-y;
+  }
+  .panel-text {
+    height: 318px;
+    font-size: 12px;
+    padding: 14px 14px;
+  }
+  .history-rows li {
+    grid-template-columns: 20px 64px 1fr auto;
+    gap: 10px;
+  }
+  .thumbs {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .show {
+    padding: 24px 16px 20px;
+  }
+  .show-bar {
+    grid-template-columns: auto 1fr auto;
+    row-gap: 6px;
+  }
+  .show-notes {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    white-space: normal;
+  }
+  .show-act {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    display: flex;
+    gap: 4px;
+  }
+  .part {
+    grid-template-columns: 1fr auto;
+    gap: 6px 16px;
+    padding: 16px 0;
+  }
+  .part > span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: 15px;
+  }
+  .part em {
+    font-size: 24px;
+  }
+  .close-col .h2 {
+    margin-top: 48px;
+  }
+  .close-act {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-self: stretch;
+  }
+  .foot-row {
+    gap: 16px;
+  }
+}
+
+/* print: the hero slide alone, the page's defined still */
+@media print {
+  .nav,
+  .under,
+  .band:not(.band-hero),
+  .foot,
+  .rails {
+    display: none !important;
+  }
+  .band-hero {
+    padding: 0;
+    border: 0;
+  }
+}

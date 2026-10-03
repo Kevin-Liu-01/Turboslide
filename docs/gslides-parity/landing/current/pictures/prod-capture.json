@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-02T22:42:12.510Z",
+  "uptime": "15:42  up 8 days,  5:39, 1 user, load averages: 60.90 51.99 45.20",
+  "base": "https://www.turboslide.com",
+  "results": [
+    {
+      "tag": "prod-1440-light",
+      "dataTheme": "light",
+      "fullHeight": 4898,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-1440-light-first.jpg",
+        "bytes": 86420,
+        "q": 80,
+        "width": 1440
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-1440-light-full.jpg",
+        "bytes": 246892,
+        "q": 80,
+        "width": 1200
+      }
+    },
+    {
+      "tag": "prod-1440-dark",
+      "dataTheme": "dark",
+      "fullHeight": 4898,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-1440-dark-first.jpg",
+        "bytes": 85445,
+        "q": 80,
+        "width": 1440
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-1440-dark-full.jpg",
+        "bytes": 245365,
+        "q": 80,
+        "width": 1200
+      }
+    },
+    {
+      "tag": "prod-390-light",
+      "dataTheme": "light",
+      "fullHeight": 4263,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-390-light-first.jpg",
+        "bytes": 34220,
+        "q": 80,
+        "width": 390
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-390-light-full.jpg",
+        "bytes": 160245,
+        "q": 80,
+        "width": 390
+      }
+    },
+    {
+      "tag": "prod-390-dark",
+      "dataTheme": "dark",
+      "fullHeight": 4263,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-390-dark-first.jpg",
+        "bytes": 33742,
+        "q": 80,
+        "width": 390
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/prod-390-dark-full.jpg",
+        "bytes": 157025,
+        "q": 80,
+        "width": 390
+      }
+    }
+  ]
+}

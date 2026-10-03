@@ -1,0 +1,68 @@
+{
+  "load": [
+    "62.66",
+    "61.80"
+  ],
+  "seconds": 12.503,
+  "errors": [],
+  "log": [
+    [
+      "3.7",
+      "hero select",
+      "Drag to move it. The squares resize it and the circle turns it. Double click to type. Title · x 789 · y 362 · 0°"
+    ],
+    [
+      "3.8",
+      "hero drag",
+      "The slide is a canvas now. Undo puts the layout back.Undo Title · x 414 · y 437 · 0°"
+    ],
+    [
+      "4.5",
+      "kit",
+      "The Globex kit set the colours of all 5 slides.Undo Title · x 414 · y 437 · 0°"
+    ],
+    [
+      "6.7",
+      "File > Share",
+      "Share opens the Share dialog. People and links sit in ruled rows."
+    ],
+    [
+      "7.5",
+      "tailor dialog text",
+      "Tailor for a customer Rename the customer, swap the pictures named after the old one and skip the slides they should not see, as one change Replace With 4 places on 2 slides Cancel Apply"
+    ],
+    [
+      "8.8",
+      "present of",
+      "Slide 4 of 5"
+    ],
+    [
+      "10.9",
+      "agent tailor",
+      [
+        "# The deck on this page answers these commands. Type help to list them.",
+        "$ turboslide tailor --replace Kestrel=Initech",
+        "{ \"ok\": true, \"author\": \"agent:pitch-agent\", \"action\": \"deck.tailor\", \"places\": 4, \"slides\": 2 }"
+      ]
+    ],
+    [
+      "10.9",
+      "agent last write",
+      "Tailored the deck for Initech. 4 places on 2 slides."
+    ],
+    [
+      "11.4",
+      "agent unknown",
+      [
+        "{ \"ok\": true, \"author\": \"agent:pitch-agent\", \"action\": \"deck.tailor\", \"places\": 4, \"slides\": 2 }",
+        "$ turboslide slide delete mood",
+        "turboslide: this page does not run \"slide delete mood\". Type help for the eleven it runs."
+      ]
+    ],
+    [
+      "12.4",
+      "versions top rows",
+      []
+    ]
+  ]
+}

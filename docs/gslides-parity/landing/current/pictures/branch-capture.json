@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-02T22:43:28.645Z",
+  "uptime": "15:43  up 8 days,  5:40, 1 user, load averages: 69.16 56.46 47.46",
+  "base": "http://localhost:4542",
+  "results": [
+    {
+      "tag": "branch-1440-light",
+      "dataTheme": "light",
+      "fullHeight": 4919,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-1440-light-first.jpg",
+        "bytes": 90491,
+        "q": 80,
+        "width": 1440
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-1440-light-full.jpg",
+        "bytes": 251989,
+        "q": 80,
+        "width": 1200
+      }
+    },
+    {
+      "tag": "branch-1440-dark",
+      "dataTheme": "dark",
+      "fullHeight": 4919,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-1440-dark-first.jpg",
+        "bytes": 89823,
+        "q": 80,
+        "width": 1440
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-1440-dark-full.jpg",
+        "bytes": 251558,
+        "q": 80,
+        "width": 1200
+      }
+    },
+    {
+      "tag": "branch-390-light",
+      "dataTheme": "light",
+      "fullHeight": 5162,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-390-light-first.jpg",
+        "bytes": 37040,
+        "q": 80,
+        "width": 390
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-390-light-full.jpg",
+        "bytes": 190396,
+        "q": 80,
+        "width": 390
+      }
+    },
+    {
+      "tag": "branch-390-dark",
+      "dataTheme": "dark",
+      "fullHeight": 5162,
+      "first": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-390-dark-first.jpg",
+        "bytes": 36918,
+        "q": 80,
+        "width": 390
+      },
+      "full": {
+        "path": "/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/current/pictures/branch-390-dark-full.jpg",
+        "bytes": 188918,
+        "q": 80,
+        "width": 390
+      }
+    }
+  ]
+}

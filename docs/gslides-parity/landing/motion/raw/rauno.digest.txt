@@ -1,0 +1,29 @@
+# rauno  https://rauno.me/ 2026-10-02T22:51:55.988Z
+LCP {"t":8468,"size":122873,"url":"","el":"h3"} CLS 0.000 ctx [] longtasks 0 sum 0
+scroll-behavior auto auto lenis false locomotive false docH 6108 fonts ["X","JetBrains Mono"]
+bytes {"Document":{"n":1,"kb":10},"Script":{"n":17,"kb":178},"Stylesheet":{"n":2,"kb":4},"Font":{"n":1,"kb":51},"Fetch":{"n":7,"kb":3},"Other":{"n":9,"kb":394}}
+bigJs [{"url":"https://rauno.me/_next/static/chunks/pages/_app-8bc0311d52546293.js","kb":62},{"url":"https://rauno.me/_next/static/chunks/framework-7c95b8e5103c9e90.js","kb":57},{"url":"https://rauno.me/_next/static/chunks/main-bff256145eb15a4d.js","kb":34},{"url":"https://rauno.me/_next/static/chunks/540-088f4efa2701a7ea.js","kb":11},{"url":"https://rauno.me/_next/static/chunks/pages/index-6f720d660d3ff7f8.js","kb":8},{"url":"https://rauno.me/_vercel/insights/script.js","kb":2},{"url":"https://rauno.me/_next/static/chunks/webpack-8b0d1a8e7707cac6.js","kb":2},{"url":"https://rauno.me/_next/static/nf-5fPrMS_TjUIJDeX_SG/_buildManifest.js","kb":1}]
+media []
+videos []
+canvases []
+
+## phase load (load) 5.11s frames 144 main {"task":272,"script":86,"layout":12,"style":23} rafTotal 285
+  7x CSSAnimation|index_fadeFrames__RAnv2|350|linear|it1| delays[800] start@281..282 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 7x CSSAnimation|index_fadeFrames__RAnv2|350|ease-in-out|it1|opacity|DocumentTimeline delays[800] seen@206..206 tgt a.index_frame__XKrH1 ; div.index_frame__XKrH1 from {"opacity":"0"} to {"opacity":"1"}
+  pixel change: first 464 last 1984 frames>0.15: 82/143
+  series 464:17.94 484:4.13 504:0.16 537:0.51 570:0.72 599:0.39 640:0.43 711:2.57 736:0.83 762:0.44 800:0.44 831:0.48 882:1.47 905:0.42 939:0.46 972:0.62 1041:0.4 1078:1.01 1097:0.48 1137:0.44 1168:0.46 1198:1.03 1240:1.54 1272:0.92 1307:0.72 1339:0.47 1382:0.47 1405:0.18 1441:0.03 1472:0.04 1505:0.04 1534:0.01 1565:0.01 1596:0.01 1629:0.01 1663:0.01 1693:0 1726:0.07 1757:0 1793:0.01 1820:0.09 1858:0 1924:0 1958:0 2039:0.15 2256:0 2460:0 2660:0
+
+## phase idle (idle) 3.01s frames 1 main {"task":4,"script":2,"layout":0,"style":0} rafTotal 285
+
+## phase s1 (scroll) 3.02s frames 53 main {"task":68,"script":18,"layout":6,"style":13} rafTotal 378
+  pixel change: first 21 last 400 frames>0.15: 34/52
+  series 21:46.32 24:1.15 32:8 42:42.77 53:29.36 65:26.55 76:42.84 84:24.57 109:20.37 111:34.38 116:15.28 127:15.69 140:12.2 153:20.19 161:9.5 169:7.16 182:11.09 192:5.07 204:4.08 214:3.39 224:5.59 235:2.23 245:1.95 265:3.86 275:0.94 292:1.5 299:0.57 311:0.49 327:0.74 334:0.3 345:0.26 358:0.4 365:0.16 373:0.14 390:0.1 400:1.17 407:0.05 415:0.04 425:0.03 440:0.02 448:0.01 457:0.01 469:0.01 484:0.03 496:0 500:0.01 511:0 530:0.01 534:0.01 542:0 572:0.03 614:0
+
+## phase s2 (scroll) 3.01s frames 39 main {"task":66,"script":16,"layout":7,"style":12} rafTotal 469
+  pixel change: first 18 last 481 frames>0.15: 33/38
+  series 18:47.57 25:0.98 26:12.04 41:33.89 44:21.92 55:21.57 81:33.06 86:20.05 87:15.98 104:24.73 116:11.43 118:12.99 135:19.4 148:10.99 152:11.04 171:15.89 181:7.1 186:8.12 203:11.56 221:4.95 226:4.69 237:6.86 249:3.17 260:4.73 286:3.91 291:1.92 319:5.09 337:1.71 382:3 397:0.81 402:0.3 414:0.33 481:2.57 501:0 529:0.02 555:0.02 595:0 612:0
+
+## phase s3 (scroll) 3.05s frames 47 main {"task":59,"script":13,"layout":1,"style":12} rafTotal 567
+  pixel change: first 25 last 289 frames>0.15: 26/46
+  series 25:22.14 30:2.11 33:9.48 56:16.38 66:16.66 74:14.23 84:16.94 98:18.72 108:12.15 119:11.67 132:15.75 141:7.93 151:5.92 164:9.1 172:4.33 184:3.24 192:3.12 206:4.25 214:1.83 227:1.3 245:2.05 253:0.64 259:0.64 273:0.81 283:0.24 289:0.19 298:0.13 321:0.14 329:0.02 335:0 370:0.07 392:0.06 413:0.04 425:0.1 437:0.02 439:0.02 458:0.04 463:0.01 473:0.01 489:0.02 503:0.01 505:0.01 535:0.02 548:0.01 582:0 625:0

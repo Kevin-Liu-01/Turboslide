@@ -1,0 +1,169 @@
+[2026-10-02T22:58:00.313Z] editor ready 1665 ms
+[2026-10-02T22:58:01.560Z] target {"stage":{"x":256,"y":112,"w":1184,"h":724},"sheet":{"x":284,"y":157,"w":1128,"h":634.5},"block":{"id":"h","x":938.9450073242188,"y":550.90771484375,"w":358.13995361328125,"h":33.49853515625},"all":["p1"]}
+[2026-10-02T22:58:01.628Z] frame 0 ms the slide at rest
+[2026-10-02T22:58:02.129Z] frame 501 ms one click selects the block
+[2026-10-02T22:58:02.135Z] move handle present true
+[2026-10-02T22:58:02.372Z] frame 760 ms dragging: guides and the box follow
+[2026-10-02T22:58:02.602Z] frame 978 ms dragging, before release
+[2026-10-02T22:58:02.609Z] drag ms 449
+[2026-10-02T22:58:03.172Z] frame 1549 ms released: the slide is a canvas
+[2026-10-02T22:58:03.470Z] frame 1828 ms resizing from the corner handle
+[2026-10-02T22:58:04.049Z] frame 2430 ms rotating with Shift: 15 degree steps
+[2026-10-02T22:58:04.551Z] frame 2932 ms after the rotation
+[2026-10-02T22:58:06.409Z] frame 4786 ms Cmd+Z three times
+[2026-10-02T22:58:06.944Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/canvas-strip.jpg 196186 bytes quality 80 3516x309
+[2026-10-02T22:59:12.629Z] editor ready 1945 ms
+[2026-10-02T22:59:13.865Z] target {"stage":{"x":256,"y":112,"w":1184,"h":724},"sheet":{"x":284,"y":157,"w":1128,"h":634.5},"block":{"id":"h","x":938.9450073242188,"y":527.6427001953125,"w":358.13995361328125,"h":33.49853515625},"all":["p1"]}
+[2026-10-02T22:59:13.922Z] frame 0 ms the slide at rest
+[2026-10-02T22:59:14.406Z] frame 489 ms one click selects the block
+[2026-10-02T22:59:14.410Z] move handle present true
+[2026-10-02T22:59:14.629Z] frame 713 ms dragging: guides and the box follow
+[2026-10-02T22:59:14.896Z] frame 957 ms dragging, before release
+[2026-10-02T22:59:14.903Z] drag ms 474
+[2026-10-02T22:59:15.561Z] frame 1643 ms released: the slide is a canvas
+[2026-10-02T22:59:15.867Z] frame 1961 ms resizing from the east handle
+[2026-10-02T22:59:16.435Z] frame 2525 ms rotating with Shift: 15 degree steps
+[2026-10-02T22:59:16.887Z] slide after rotate {"slide":{"schemaVersion":1,"id":"mood-rosetta","template":"mood","grammar":{"kind":"mood","slots":{"plate":["h","p1","credit"]},"boxes":{"picture":{"x":0,"y":0,"w":1600,"h":900,"z":0},"plate":{"x":903,"y":503.734375,"w":560,"h":267.265625,"z":1,"group":"plate"},"h":{"x":929,"y":525.734375,"w":508,"
+[2026-10-02T22:59:16.934Z] frame 3022 ms after the rotation
+[2026-10-02T22:59:19.558Z] slide after four Cmd+Z: kind content layout {"type":"freeform"}
+[2026-10-02T22:59:19.611Z] frame 5693 ms Cmd+Z four times: the layout is back
+[2026-10-02T22:59:20.159Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/canvas-strip.jpg 400129 bytes quality 72 3876x368
+[2026-10-02T23:00:11.847Z] editor ready 1947 ms
+[2026-10-02T23:00:13.083Z] target {"stage":{"x":256,"y":112,"w":1184,"h":724},"sheet":{"x":284,"y":157,"w":1128,"h":634.5},"block":{"id":"h","x":938.9450073242188,"y":550.90771484375,"w":358.13995361328125,"h":33.49853515625},"all":["p1"]}
+[2026-10-02T23:00:13.134Z] frame 0 ms the slide at rest
+[2026-10-02T23:00:13.622Z] frame 483 ms one click selects the block
+[2026-10-02T23:00:13.630Z] move handle present true
+[2026-10-02T23:00:13.847Z] frame 718 ms dragging: guides and the box follow
+[2026-10-02T23:00:14.111Z] frame 958 ms dragging, before release
+[2026-10-02T23:00:14.122Z] drag ms 486
+[2026-10-02T23:00:14.781Z] frame 1645 ms released: the slide is a canvas
+[2026-10-02T23:00:15.126Z] frame 1965 ms resizing from the east handle
+[2026-10-02T23:00:15.715Z] frame 2580 ms rotating with Shift: 15 degree steps
+[2026-10-02T23:00:16.170Z] slide after rotate {"slide":{"schemaVersion":1,"id":"mood-lighthouse","template":"mood","grammar":{"kind":"mood","slots":{"plate":["h","p1","credit"]},"boxes":{"picture":{"x":0,"y":0,"w":1600,"h":900,"z":0},"plate":{"x":903,"y":536.734375,"w":560,"h":234.265625,"z":1,"group":"plate"},"h":{"x":929,"y":558.734375,"w":50
+[2026-10-02T23:00:16.226Z] frame 3087 ms after the rotation
+[2026-10-02T23:00:16.278Z] undo 0 kind content template mood revision 29
+[2026-10-02T23:00:17.060Z] undo 1 kind content template mood revision 29
+[2026-10-02T23:00:17.786Z] undo 2 kind content template mood revision 29
+[2026-10-02T23:00:18.594Z] undo 3 kind content template mood revision 30
+[2026-10-02T23:00:19.346Z] undo 4 kind content template mood revision 30
+[2026-10-02T23:00:20.086Z] undo 5 kind content template mood revision 30
+[2026-10-02T23:00:20.823Z] undo 6 kind mood template  revision 31
+[2026-10-02T23:00:21.379Z] frame 8242 ms Cmd+Z 6 times: the layout is back
+[2026-10-02T23:00:21.955Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/canvas-strip.jpg 354490 bytes quality 64 3876x368
+[2026-10-02T23:00:40.133Z] editor ready 2506 ms
+[2026-10-02T23:00:41.408Z] frame 0 ms the GT deck on its title slide
+[2026-10-02T23:00:42.642Z] frame 1215 ms Tools > Tailor for a customer
+[2026-10-02T23:00:44.464Z] count sentence "9 places on 8 slides"
+[2026-10-02T23:00:44.508Z] frame 3090 ms the dialog counts the places
+[2026-10-02T23:00:46.877Z] apply to closed dialog and new revision 2325 ms; revision 32 -> 33
+[2026-10-02T23:00:46.879Z] snackbar "Tailored for Globex: 9 places on 8 slidesUndo"
+[2026-10-02T23:00:47.226Z] frame 5807 ms Apply: one write, the snackbar offers Undo
+[2026-10-02T23:00:49.060Z] frame 7653 ms the filmstrip and the slide carry the new name
+[2026-10-02T23:00:50.633Z] after one Cmd+Z the slide reads General Translation again true
+[2026-10-02T23:00:50.677Z] frame 9259 ms one Cmd+Z puts every slide back
+[2026-10-02T23:00:51.125Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/tailor-strip.jpg 127102 bytes quality 80 2712x363
+[2026-10-02T23:01:05.800Z] editor ready 1156 ms
+[2026-10-02T23:01:07.098Z] frame 0 ms the GT deck on its title slide
+[2026-10-02T23:01:07.643Z] frame 530 ms Tools > Tailor for a customer
+[2026-10-02T23:01:09.425Z] count sentence "9 places on 8 slides"
+[2026-10-02T23:01:09.477Z] frame 2363 ms the dialog counts the places
+[2026-10-02T23:01:11.834Z] apply to closed dialog and new revision 2311 ms; revision 34 -> 35
+[2026-10-02T23:01:11.838Z] snackbar "Tailored for Globex: 9 places on 8 slidesUndo"
+[2026-10-02T23:01:12.177Z] frame 5077 ms Apply: one write, the snackbar offers Undo
+[2026-10-02T23:01:14.023Z] frame 6915 ms the filmstrip and the slide carry the new name
+[2026-10-02T23:01:15.582Z] after one Cmd+Z the slide reads General Translation again true
+[2026-10-02T23:01:15.624Z] frame 8521 ms one Cmd+Z puts every slide back
+[2026-10-02T23:01:16.113Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/tailor-strip.jpg 140557 bytes quality 80 3432x443
+[2026-10-02T23:01:52.110Z] A /new ready 1804 ms
+[2026-10-02T23:01:52.126Z] setName A Error: page.evaluate: Error: No deck untitled-20261002-dqyc under decks/
+    at Object.deserialize (http://localhost:4541/@fs/Users/kevinliu/repos/Turboslide-la
+[2026-10-02T23:01:52.130Z] A runs [{"run":"heading/text","text":"Click to add title"},{"run":"lead/text","text":"Click to add subtitle"}]
+[2026-10-02T23:01:55.809Z] deck untitled-20261002-dqyc
+[2026-10-02T23:01:55.850Z] editor link minted /s/5aJ...
+[2026-10-02T23:01:55.951Z] frame 0 ms Maya alone on the deck
+[2026-10-02T23:01:58.004Z] B chip in A after 2053 ms from B goto
+[2026-10-02T23:01:58.057Z] B editor ready 2106 ms
+[2026-10-02T23:01:58.111Z] frame 2168 ms Sam opens the link: his chip in Maya's title row
+[2026-10-02T23:01:59.963Z] B runs [{"run":"heading/text","text":"Globex onboarding plan"},{"run":"lead/text","text":"Click to add subtitle"}]
+[2026-10-02T23:02:00.237Z] B outline or flag in A after 274 ms from B click
+[2026-10-02T23:02:00.278Z] frame 4348 ms Sam selects the subtitle: his outline and flag in Maya's view
+[2026-10-02T23:02:01.562Z] frame 5638 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:02:02.706Z] frame 6773 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:02:04.185Z] B words complete in A after 3598 ms from first key; typing took 2450 ms at 70 ms a key
+[2026-10-02T23:02:04.217Z] frame 8296 ms the words are in both browsers
+[2026-10-02T23:02:04.871Z] A sync {"seq":12,"revision":1,"pending":0,"retained":0,"tier":"memory","transport":"sse","room":null,"connected":true,"offline":false,"storeDegraded":false,"streamDown":false} presence {"clientId":"4e6be39c21246f9961e976d5ec500a46","self":{"clientId":"4e6be39c21246f9961e976d5ec500a46","principalId":"anon_ebad2064-3f1b-47ca-bf81-8b853a3f01f3","kind":"human","label":"Iron 308","trust":"label","mark":{"density":2,"glyphSeed":1417965030,"presenter":false,"self":false,"trust":"label","
+[2026-10-02T23:02:04.875Z] B client id seen by A present others 1
+[2026-10-02T23:02:04.905Z] presence.follow {"following":"e89e1286ed85b17b664b33a9add005e4","slideId":"title"} 30 ms
+[2026-10-02T23:02:05.602Z] A's stage followed B to the new slide after 288 ms
+[2026-10-02T23:02:06.140Z] frame 10219 ms Maya follows Sam: her stage moves to his new slide
+[2026-10-02T23:02:06.629Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/people-strip.jpg 113601 bytes quality 80 3370x420
+[2026-10-02T23:02:42.652Z] A /new ready 1699 ms
+[2026-10-02T23:02:42.654Z] A runs [{"run":"heading/text","text":"Click to add title"},{"run":"lead/text","text":"Click to add subtitle"}]
+[2026-10-02T23:02:46.092Z] deck untitled-20261002-w241
+[2026-10-02T23:02:46.116Z] editor link minted /s/99V...
+[2026-10-02T23:02:46.143Z] ERROR RangeError: Maximum call stack size exceeded
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mjs:56:16)
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mjs:57:11)
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mjs:57:11)
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mjs:57:11)
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mjs:57:11)
+    at both (file:///private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/drive/people.mj
+[2026-10-02T23:02:52.951Z] A /new ready 843 ms
+[2026-10-02T23:02:52.954Z] A runs [{"run":"heading/text","text":"Click to add title"},{"run":"lead/text","text":"Click to add subtitle"}]
+[2026-10-02T23:02:56.375Z] deck untitled-20261002-if3w
+[2026-10-02T23:02:56.393Z] editor link minted /s/1Ub...
+[2026-10-02T23:02:56.462Z] frame 0 ms Maya alone on the deck
+[2026-10-02T23:02:56.490Z] frame 47 ms Maya alone on the deck
+[2026-10-02T23:02:57.766Z] B chip in A after 1276 ms from B goto
+[2026-10-02T23:02:57.801Z] B editor ready 1311 ms
+[2026-10-02T23:02:57.829Z] frame 1385 ms Sam opens the link: his chip in Maya's title row
+[2026-10-02T23:02:57.856Z] frame 1413 ms Sam opens the link: his chip in Maya's title row
+[2026-10-02T23:02:58.679Z] B runs [{"run":"heading/text","text":"Globex onboarding plan"},{"run":"lead/text","text":"Click to add subtitle"}]
+[2026-10-02T23:02:58.891Z] B outline or flag in A after 212 ms from B click
+[2026-10-02T23:02:58.922Z] frame 2475 ms Sam selects the subtitle: his outline and flag in Maya's view
+[2026-10-02T23:02:58.939Z] frame 2506 ms Sam selects the subtitle: his outline and flag in Maya's view
+[2026-10-02T23:03:00.097Z] frame 3646 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:03:00.126Z] frame 3681 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:03:01.254Z] frame 4767 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:03:01.280Z] frame 4838 ms Sam types: Maya sees his caret and words
+[2026-10-02T23:03:02.704Z] B words complete in A after 3478 ms from first key; typing took 2450 ms at 70 ms a key
+[2026-10-02T23:03:02.737Z] frame 6288 ms the words are in both browsers
+[2026-10-02T23:03:02.763Z] frame 6322 ms the words are in both browsers
+[2026-10-02T23:03:03.394Z] A sync {"seq":7,"revision":1,"pending":0,"retained":0,"tier":"memory","transport":"sse","room":null,"connected":true,"offline":false,"storeDegraded":false,"streamDown":false} presence {"clientId":"768d3c3406e2912dd94a32119330df83","self":{"clientId":"768d3c3406e2912dd94a32119330df83","principalId":"anon_fe36be71-3284-4880-8421-fa02a6308b79","kind":"human","label":"Maya","trust":"guest","mark":{"density":4,"glyphSeed":2850084752,"presenter":false,"self":false,"trust":"guest","labe
+[2026-10-02T23:03:03.397Z] B client id seen by A present others 1
+[2026-10-02T23:03:03.418Z] presence.follow {"following":"aacc122c70b4d2f375557279a1e6acdc","slideId":"title"} 20 ms
+[2026-10-02T23:03:04.066Z] A's stage followed B to the new slide after 244 ms
+[2026-10-02T23:03:04.598Z] frame 8151 ms Maya follows Sam: her stage moves to his new slide
+[2026-10-02T23:03:04.629Z] frame 8182 ms Maya follows Sam: her stage moves to his new slide
+[2026-10-02T23:03:05.045Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/people-zoom-strip.jpg 133650 bytes quality 80 3720x469
+[2026-10-02T23:03:05.466Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/people-strip.jpg 113708 bytes quality 80 3370x420
+[2026-10-02T23:03:14.092Z] editor ready 1143 ms
+[2026-10-02T23:03:15.229Z] frame 0 ms the GT deck
+[2026-10-02T23:03:15.746Z] frame 544 ms Slide > Change theme opens the Brand kit
+[2026-10-02T23:03:15.748Z] colour appearance shown 
+[2026-10-02T23:03:16.539Z] frame 1329 ms Background: typing previews on the sheet
+[2026-10-02T23:03:18.835Z] background #0b1d3a committed after 2267 ms
+[2026-10-02T23:03:20.095Z] frame 4879 ms Background: Enter applies it to every slide
+[2026-10-02T23:03:20.923Z] frame 5711 ms Text: typing previews on the sheet
+[2026-10-02T23:03:23.214Z] text #f4f1ea committed after 2272 ms
+[2026-10-02T23:03:24.484Z] frame 9261 ms Text: Enter applies it to every slide
+[2026-10-02T23:03:26.458Z] frame 11252 ms two Cmd+Z put the kit back
+[2026-10-02T23:03:26.945Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/brand-strip.jpg 163706 bytes quality 80 3160x363
+[2026-10-02T23:03:52.701Z] editor ready 1098 ms
+[2026-10-02T23:03:52.704Z] kit before {"brand":{"colors":{"dark":{"text":"#f2f2f0","background":"#0b1d3a"}}},"own":true,"revision":39}
+[2026-10-02T23:03:56.496Z] kit reset {"brand":{},"own":false,"revision":40}
+[2026-10-02T23:03:57.611Z] frame 0 ms the GT deck
+[2026-10-02T23:03:58.161Z] frame 548 ms Slide > Change theme opens the Brand kit
+[2026-10-02T23:03:58.165Z] colour appearance shown 
+[2026-10-02T23:03:58.959Z] frame 1335 ms Background: typing previews on the sheet
+[2026-10-02T23:04:01.219Z] background #0b1d3a committed after 2242 ms
+[2026-10-02T23:04:02.490Z] frame 4858 ms Background: Enter applies it to every slide
+[2026-10-02T23:04:03.315Z] frame 5696 ms Text: typing previews on the sheet
+[2026-10-02T23:04:05.565Z] text #f4f1ea committed after 2235 ms
+[2026-10-02T23:04:06.816Z] frame 9199 ms Text: Enter applies it to every slide
+[2026-10-02T23:04:07.149Z] undo 0 kit has the navy true the cream true
+[2026-10-02T23:04:08.133Z] undo 1 kit has the navy true the cream false
+[2026-10-02T23:04:09.039Z] undo 2 kit has the navy true the cream false
+[2026-10-02T23:04:09.949Z] undo 3 kit has the navy false the cream false
+[2026-10-02T23:04:10.799Z] frame 13185 ms Cmd+Z 3 times: the kit is back
+[2026-10-02T23:04:11.295Z] strip /Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/product/frames/brand-strip.jpg 155696 bytes quality 80 3720x356

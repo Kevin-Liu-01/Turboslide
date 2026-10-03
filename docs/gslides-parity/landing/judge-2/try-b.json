@@ -1,0 +1,79 @@
+{
+  "load": [
+    "64.92",
+    "62.84"
+  ],
+  "seconds": 16.438,
+  "errors": [],
+  "log": [
+    [
+      "6.1",
+      "first screen anims",
+      3
+    ],
+    [
+      "9.0",
+      "tailor snack",
+      "Tailored for Northwind: 13 places on 6 slides"
+    ],
+    [
+      "9.1",
+      "tailor term",
+      [
+        "$ turboslide tailor --replace Acme=North",
+        "wind",
+        "{\"ok\":true,\"places\":13,\"slides\":6,\"revis",
+        "ion\":27}"
+      ]
+    ],
+    [
+      "9.7",
+      "help term",
+      [
+        "ion\":27}",
+        "$ help",
+        "This page runs four commands: slide new,",
+        "block set, tailor and version restore."
+      ]
+    ],
+    [
+      "10.3",
+      "unknown term",
+      [
+        "$ turboslide slide delete 3",
+        "error: this page runs slide new, block s",
+        "et, tailor and version restore. Type hel",
+        "p for the list."
+      ]
+    ],
+    [
+      "11.6",
+      "gesture log",
+      [
+        "eeform\",\"revision\":42}",
+        "$ turboslide block set review#picture /p",
+        "os '{\"x\":454,\"y\":245,\"w\":470,\"h\":470}'",
+        "{\"ok\":true,\"revision\":43}"
+      ]
+    ],
+    [
+      "12.4",
+      "present count after 4 Right",
+      "Slide 4 of 4"
+    ],
+    [
+      "14.1",
+      "loupe",
+      "0 of 196 pixels differ at x 480, y 180."
+    ],
+    [
+      "16.3",
+      "after Pause Motion",
+      {
+        "pressed": "true",
+        "label": "Play Motion",
+        "anims": 0
+      }
+    ]
+  ]
+}

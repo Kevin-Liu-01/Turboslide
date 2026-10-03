@@ -1,0 +1,228 @@
+{
+  "rows": [
+    {
+      "run": 1,
+      "load": "57.00",
+      "width": 390,
+      "fcp": 100,
+      "lcp": 132,
+      "lcpEl": "P.lead",
+      "clsAfterScroll": 0,
+      "shifts": [
+        {
+          "t": 101,
+          "v": 0.00001,
+          "src": [
+            "SPAN."
+          ]
+        }
+      ],
+      "longTasks": [],
+      "toLoad": {
+        "task": 89,
+        "script": 34,
+        "layout": 29,
+        "style": 8
+      },
+      "loadTo3s": {
+        "task": 73,
+        "script": 12
+      },
+      "heroRunningPerSecond": {
+        "task": 21,
+        "script": 3
+      },
+      "pausedPerSecond": {
+        "task": 0,
+        "script": 0
+      },
+      "clsFirstScreen": 0,
+      "scrollPerSecond": {
+        "task": 78,
+        "script": 25
+      },
+      "firstScreenRequests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js"
+      ],
+      "requests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js",
+        "img/earth-tone.js",
+        "img/export-page-light.png"
+      ]
+    },
+    {
+      "run": 2,
+      "load": "56.64",
+      "width": 390,
+      "fcp": 72,
+      "lcp": 108,
+      "lcpEl": "P.lead",
+      "clsAfterScroll": 0,
+      "shifts": [
+        {
+          "t": 82,
+          "v": 0.00001,
+          "src": [
+            "SPAN."
+          ]
+        }
+      ],
+      "longTasks": [],
+      "toLoad": {
+        "task": 78,
+        "script": 25,
+        "layout": 28,
+        "style": 8
+      },
+      "loadTo3s": {
+        "task": 75,
+        "script": 13
+      },
+      "heroRunningPerSecond": {
+        "task": 22,
+        "script": 3
+      },
+      "pausedPerSecond": {
+        "task": 0,
+        "script": 0
+      },
+      "clsFirstScreen": 0,
+      "scrollPerSecond": {
+        "task": 77,
+        "script": 24
+      },
+      "firstScreenRequests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js"
+      ],
+      "requests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js",
+        "img/earth-tone.js",
+        "img/export-page-light.png"
+      ]
+    },
+    {
+      "run": 3,
+      "load": "57.92",
+      "width": 390,
+      "fcp": 92,
+      "lcp": 124,
+      "lcpEl": "P.lead",
+      "clsAfterScroll": 0,
+      "shifts": [
+        {
+          "t": 95,
+          "v": 0.00001,
+          "src": [
+            "SPAN."
+          ]
+        }
+      ],
+      "longTasks": [],
+      "toLoad": {
+        "task": 78,
+        "script": 23,
+        "layout": 29,
+        "style": 8
+      },
+      "loadTo3s": {
+        "task": 76,
+        "script": 13
+      },
+      "heroRunningPerSecond": {
+        "task": 21,
+        "script": 3
+      },
+      "pausedPerSecond": {
+        "task": 0,
+        "script": 0
+      },
+      "clsFirstScreen": 0,
+      "scrollPerSecond": {
+        "task": 77,
+        "script": 25
+      },
+      "firstScreenRequests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js"
+      ],
+      "requests": [
+        "index.html",
+        "fonts/inter-latin.css",
+        "landing.css",
+        "landing.js",
+        "img/earth-tone.js",
+        "img/export-page-light.png"
+      ]
+    }
+  ],
+  "weight": [
+    {
+      "file": "index.html",
+      "bytes": 39023,
+      "gzip": 8831,
+      "brotli": 7251
+    },
+    {
+      "file": "landing.css",
+      "bytes": 41420,
+      "gzip": 9638,
+      "brotli": 8367
+    },
+    {
+      "file": "landing.js",
+      "bytes": 82429,
+      "gzip": 23036,
+      "brotli": 19863
+    },
+    {
+      "file": "fonts/inter-latin.woff2",
+      "bytes": 57864,
+      "gzip": 57902,
+      "brotli": 57868
+    },
+    {
+      "file": "img/earth-tone.jpg",
+      "bytes": 28630,
+      "gzip": 24788,
+      "brotli": 24654
+    },
+    {
+      "file": "img/earth-tone.js",
+      "bytes": 38472,
+      "gzip": 25141,
+      "brotli": 25024
+    },
+    {
+      "file": "img/export-page-light.png",
+      "bytes": 31425,
+      "gzip": 25070,
+      "brotli": 24919
+    },
+    {
+      "file": "img/export-page-dark.png",
+      "bytes": 33837,
+      "gzip": 27663,
+      "brotli": 27452
+    },
+    {
+      "file": "img/export-pages.js",
+      "bytes": 87493,
+      "gzip": 54062,
+      "brotli": 53592
+    }
+  ]
+}

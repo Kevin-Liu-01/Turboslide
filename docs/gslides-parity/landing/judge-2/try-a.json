@@ -1,0 +1,81 @@
+{
+  "load": [
+    "68.03",
+    "66.36"
+  ],
+  "seconds": 22.712,
+  "errors": [],
+  "log": [
+    [
+      "8.8",
+      "hero selected",
+      true
+    ],
+    [
+      "9.2",
+      "hero moved px",
+      160
+    ],
+    [
+      "9.8",
+      "hero h1 text",
+      "Turboslide is a slides editor in the browser"
+    ],
+    [
+      "9.8",
+      "hero undo enabled",
+      true
+    ],
+    [
+      "10.7",
+      "hero after two Undo",
+      "Turboslide is a slides editor in the browser"
+    ],
+    [
+      "12.4",
+      "tailor count",
+      "8 places on 3 slides"
+    ],
+    [
+      "12.4",
+      "tailor snack",
+      "Tailored for Initech: 8 places on 3 slides"
+    ],
+    [
+      "12.4",
+      "Initech on page",
+      9
+    ],
+    [
+      "20.5",
+      "agents step",
+      "The slide is written"
+    ],
+    [
+      "20.5",
+      "history rows",
+      [
+        "Agent Filled the three rows on slide 6 6:19 PM",
+        "Agent Wrote the title and the text on slide 6 6:19 PM",
+        "Agent Added slide 6 with the Ruled rows layout 6:19 PM",
+        "You Tailored for Initech: 8 places on 3 slides 6:19 PM",
+        "You Moved the title on slide 1 6:19 PM"
+      ]
+    ],
+    [
+      "21.9",
+      "show count",
+      "3 / 7"
+    ],
+    [
+      "21.9",
+      "show notes",
+      "Notes: Open with the goals Initech named on the call."
+    ],
+    [
+      "22.6",
+      "show hidden after Escape",
+      true
+    ]
+  ]
+}

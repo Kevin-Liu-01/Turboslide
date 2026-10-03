@@ -1,0 +1,36 @@
+# vercel  https://vercel.com/ 2026-10-02T22:49:23.809Z
+LCP {"t":296,"size":51156,"url":"","el":"h1.my-0.text-balance"} CLS 0.000 ctx ["2d"] longtasks 1 sum 67
+scroll-behavior auto auto lenis false locomotive false docH 5930 fonts ["Geist Mono","GeistSans","GeistSans Fallback","GeistPixelSquare","GeistPixelGrid","GeistPixelCircle","GeistPixelTriangle","GeistPixelLine"]
+bytes {"Document":{"n":1,"kb":58},"Stylesheet":{"n":6,"kb":150},"Font":{"n":7,"kb":223},"Image":{"n":9,"kb":161},"Script":{"n":76,"kb":1235},"Fetch":{"n":16,"kb":189},"Ping":{"n":3,"kb":6},"Prefetch":{"n":6,"kb":319},"Other":{"n":1,"kb":2}}
+bigJs [{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0kt-yjxnd11yh.js","kb":101},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/29bytqjf302he.js","kb":69},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/1svnet-ny3jwt.js","kb":66},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/3piozel-ktpqf.js","kb":62},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/1f37tb5wn3n9j.js","kb":51},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0lrw4-fakpcxi.js","kb":50},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0nftg6ktig9fi.js","kb":47},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0e4frq3wd7-57.js","kb":36}]
+media [{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/797e433ab948586e.p.1v5bejj26fx9h.woff2","mime":"font/woff2","kb":23,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Line.p.3lxddzyuwzx1_.woff2","mime":"font/woff2","kb":18,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Square.p.3ig4wtfmw09gh.woff2","mime":"font/woff2","kb":28,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Triangle.p.0s2yyo-clipe_.woff2","mime":"font/woff2","kb":29,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Grid.p.0c5uz3kz61pux.woff2","mime":"font/woff2","kb":28,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/image?url=%2Fvc-ap-vercel-marketing%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Ffallback-dark-glow-mobile.3b4fyu5pe7o","mime":"image/avif","kb":5,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/Geist_Variable-s.p.2v-cf9syxr5ni.woff2","mime":"font/woff2","kb":68,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Circle.p.2p5mi6n8co77s.woff2","mime":"font/woff2","kb":28,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/image?url=%2Fvc-ap-vercel-marketing%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Ffallback-dark-glow-desktop.25ylksegig","mime":"image/avif","kb":5,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/vercel-light.3_gxxexgi1nmy.svg","mime":"image/svg+xml","kb":1,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/eve-dark.2l_s1mlvozam3.svg","mime":"image/svg+xml","kb":1,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/vercel-dark.1f3cgy23m5_jy.svg","mime":"image/svg+xml","kb":1,"status":200},{"url":"https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/eve-light.1e3bxs4ejw62x.svg","mime":"image/svg+xml","kb":1,"status":200}]
+videos []
+canvases [{"w":1080,"h":720,"cssW":1080,"cssH":720,"cls":"absolute inset-0 block h-full w-full opacity-0 transition-op"}]
+
+## phase load (load) 5.2s frames 265 main {"task":604,"script":230,"layout":14,"style":81} rafTotal 10
+  1x CSSTransition|opacity|1200|linear|it1| delays[0] start@1315..1315 tgt  from undefined to undefined
+  1x CSSTransition|opacity|700|linear|it1| delays[0] start@2497..2497 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x CSSTransition|opacity|1200|linear|it1|opacity|DocumentTimeline delays[0] seen@1327..1327 tgt canvas.absolute.inset-0 from {"opacity":"0"} to {"opacity":"1"}
+  S 1x CSSTransition|opacity|700|linear|it1|opacity|DocumentTimeline delays[0] seen@2527..2527 tgt div.absolute.inset-0 from {"opacity":"1"} to {"opacity":"0"}
+  pixel change: first 283 last 313 frames>0.15: 2/264
+  series 283:0.96 1324:0 1391:0 1448:0 1515:0 1574:0 1640:0 1708:0 1773:0.01 1840:0.01 1900:0.01 1967:0 2033:0 2098:0.01 2160:0 2225:0 2292:0 2367:0.01 2425:0.01 2742:0.02 2808:0 2867:0 2935:0 3002:0 3075:0 3134:0 3200:0 3307:0 3408:0 3526:0 3639:0 3752:0 3857:0 3958:0 4075:0 4192:0 4299:0 4409:0 4542:0 4641:0 4758:0 4870:0 4985:0 5083:0
+
+## phase idle (idle) 3s frames 166 main {"task":53,"script":10,"layout":0,"style":0} rafTotal 10
+  pixel change: first undefined last undefined frames>0.15: 0/165
+  series -126:0 -60:0 4:0 87:0 169:0 255:0 337:0 403:0 462:0 545:0 629:0 709:0 770:0 837:0 989:0 1080:0 1162:0 1226:0 1297:0 1361:0 1444:0 1520:0 1603:0 1662:0 1743:0 1819:0 1887:0 1969:0 2046:0 2113:0 2187:0 2246:0 2312:0 2378:0 2446:0 2520:0 2595:0 2670:0 2745:0 2812:0 2879:0 2970:0
+
+## phase s1 (scroll) 3.01s frames 12 main {"task":19,"script":10,"layout":1,"style":1} rafTotal 11
+  pixel change: first 218 last 218 frames>0.15: 1/11
+  series -146:0 -132:0 -115:0 -87:0 -70:0 -54:0 -39:0 -24:0 -7:0 218:11.4 221:0
+
+## phase s2 (scroll) 3.02s frames 3 main {"task":37,"script":3,"layout":22,"style":4} rafTotal 12
+  1x CSSAnimation|fade-in|200|linear|it1| delays[0] start@44..44 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x CSSAnimation|fade-in|200|ease-out|it1|opacity|DocumentTimeline delays[0] seen@38..38 tgt span.col-start-1.row-start-1 from {"opacity":"0"} to {"opacity":"1"}
+  pixel change: first 17 last 41 frames>0.15: 2/2
+  series 17:8.42 41:0.53
+
+## phase s3 (scroll) 3.01s frames 4 main {"task":57,"script":4,"layout":0,"style":32} rafTotal 13
+  pixel change: first 685 last 685 frames>0.15: 1/3
+  series 685:19.61 688:0 696:0

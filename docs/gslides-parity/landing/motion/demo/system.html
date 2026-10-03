@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion system demo</title>
+<!--
+  A reference for docs/gslides-parity/landing/research-motion.md section 4, not product code.
+  One band of the Turboslide landing grammar entering once on the 0.5 s beat: the seam draws out
+  of its cross, the heading rises through its own clip, the ruled rows rise 16 px 55 ms apart, the
+  Bayer field raises its tone from 0 (cells switch in Bayer order), and the slide mock shows a
+  selection then a move. Transform and opacity only; canvas for the field. Under
+  prefers-reduced-motion nothing animates and the markup is the final frame.
+-->
+<style>
+  :root {
+    --paper: #ffffff; --ink: #070707; --ink-2: #3a3d44;
+    --hair: rgba(7, 7, 7, 0.18); --cross: rgba(7, 7, 7, 0.38); --edge: rgba(7, 7, 7, 0.62);
+    --select: #2f5ce0;
+    --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);   /* expo.out, max error 1.2 percent */
+    --ease-move: cubic-bezier(0.65, 0, 0.35, 1);    /* power2.inOut, max error 0.95 percent */
+    --ease-tone: cubic-bezier(0.333, 0, 0.667, 1);  /* smoothstep, exact */
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 Inter, 'Helvetica Neue', Arial, sans-serif; }
+  .spacer { height: 110vh; display: grid; place-items: center; color: var(--ink-2); }
+  .rails { position: relative; width: min(1104px, 100% - 32px); margin: 0 auto; border-inline: 1px solid var(--hair); }
+  .band { position: relative; padding: 56px 40px 64px; }
+  .seam { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--hair); transform-origin: 0 50%; }
+  .seam::before, .seam::after { content: ''; position: absolute; top: -4px; width: 9px; height: 9px;
+    background: linear-gradient(var(--cross), var(--cross)) 4px 0 / 1px 100% no-repeat, linear-gradient(var(--cross), var(--cross)) 0 4px / 100% 1px no-repeat; }
+  .seam::before { left: -5px; } .seam::after { right: -5px; }
+  .cols { display: grid; grid-template-columns: 5fr 7fr; gap: 40px; align-items: start; }
+  h2 { font-weight: 500; font-size: 40px; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 24px; }
+  h2 .line { display: block; overflow: hidden; }
+  h2 .line > span { display: block; }
+  .rows { border-top: 1px solid var(--hair); }
+  .row { display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hair); font-size: 15px; }
+  .row svg { width: 20px; height: 20px; fill: var(--ink); margin-top: 1px; }
+  .stage { position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--edge); overflow: hidden; background: var(--paper); }
+  canvas.field { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  .box { position: absolute; left: 8%; top: 58%; padding: 10px 14px; background: var(--paper); border: 1px solid transparent; font-size: 18px; font-weight: 500; }
+  .sel { position: absolute; inset: -1px; border: 1px solid var(--select); pointer-events: none; }
+  .sel i { position: absolute; width: 7px; height: 7px; background: var(--paper); border: 1px solid var(--select); }
+  .sel i:nth-child(1) { left: -4px; top: -4px; } .sel i:nth-child(2) { right: -4px; top: -4px; }
+  .sel i:nth-child(3) { left: -4px; bottom: -4px; } .sel i:nth-child(4) { right: -4px; bottom: -4px; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } .band { padding: 40px 16px; } h2 { font-size: 30px; } }
+</style>
+</head>
+<body>
+<div class="spacer">Scroll</div>
+<div class="rails">
+  <section class="band" id="band">
+    <div class="cols">
+      <div>
+        <h2><span class="line"><span>Everything on a slide</span></span><span class="line"><span>moves</span></span></h2>
+        <div class="rows">
+          <div class="row"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v12H3z"/></svg><span>Select any shape, text box or picture.</span></div>
+          <div class="row"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l3 4H7zM10 18l-3-4h6zM2 10l4-3v6zM18 10l-4 3V7z"/></svg><span>Drag it, nudge it or set its position.</span></div>
+          <div class="row"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12v3H4zM4 9h12v3H4zM4 14h8v3H4z"/></svg><span>Every change is one action in the history.</span></div>
+          <div class="row"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l11 7-11 7z"/></svg><span>Agents run the same actions.</span></div>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <canvas class="field" id="field" aria-hidden="true"></canvas>
+        <div class="box" id="box">Quarterly review<span class="sel" id="sel"><i></i><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+    <div class="seam" id="seam"></div>
+  </section>
+</div>
+<div class="spacer"></div>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const BEAT = 500;
+  const $ = (id) => document.getElementById(id);
+  // the Bayer field: 2 css px cells, one buffer pixel per cell, tone scales the whole field
+  const B8 = [0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21].map((v) => (v + 0.5) / 64);
+  const canvas = $('field'); const ctx = canvas.getContext('2d');
+  let w = 0, h = 0, img, px;
+  function size() { const r = canvas.getBoundingClientRect(); w = Math.max(1, Math.round(r.width / 2)); h = Math.max(1, Math.round(r.height / 2)); canvas.width = w; canvas.height = h; img = ctx.createImageData(w, h); px = new Uint32Array(img.data.buffer); }
+  const field = (u, v, t) => { const dx = u - 0.72, dy = v - 0.38; const r = Math.max(0, 1 - Math.hypot(dx * 1.4, dy) * 1.5); const drift = 0.03 * Math.sin(t * Math.PI * 2 / 4 + u * 3); return Math.min(1, 0.72 * r * r + drift * r); };
+  function draw(tone, t) { const ink = 0xff070707, paper = 0xffffffff; for (let y = 0; y < h; y++) { const v = y / (h - 1), row = (y & 7) << 3; for (let x = 0; x < w; x++) px[y * w + x] = field(x / (w - 1), v, t) * tone > B8[row | (x & 7)] ? ink : paper; } ctx.putImageData(img, 0, 0); }
+  size();
+  if (reduce) { draw(1, 0); return; }   // the markup and one still are the final frame
+  // the hidden first pose is set by script only, so no-script and reduced motion keep the final markup
+  const lines = [...document.querySelectorAll('h2 .line > span')];
+  const rows = [...document.querySelectorAll('.row')];
+  const hide = () => { lines.forEach((l) => (l.style.transform = 'translateY(100%)')); rows.forEach((r) => { r.style.opacity = 0; r.style.transform = 'translateY(16px)'; }); $('seam').style.transform = 'scaleX(0)'; $('sel').style.opacity = 0; draw(0, 0); };
+  hide();
+  let running = false, tone = 0, t0 = 0, visible = false, last = 0;
+  function frame(now) {
+    if (!running) return;
+    const t = (now - t0) / 1000;
+    // after the tone mix the field only drifts: draw at 30 fps, which halves its cost on a 60 Hz display
+    if (t * 1000 > 2 * BEAT && now - last < 32) { requestAnimationFrame(frame); return; }
+    last = now;
+    const k = Math.min(1, Math.max(0, (t * 1000 - BEAT) / BEAT));   // the tone mix runs from beat 1 to beat 2 on smoothstep
+    tone = k * k * (3 - 2 * k);
+    draw(tone, t);
+    if (visible && !document.hidden) requestAnimationFrame(frame); else running = false;
+  }
+  function play() {
+    const opt = (delay, duration, easing) => ({ delay, duration, easing, fill: 'backwards' });
+    const ea = getComputedStyle(document.documentElement);
+    const arrive = ea.getPropertyValue('--ease-arrive').trim(), move = ea.getPropertyValue('--ease-move').trim();
+    // one clock: every delay is an offset from this play() on the 0.5 s beat grid
+    $('seam').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], opt(0, 600, arrive));
+    lines.forEach((l, i) => l.animate([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], opt(BEAT * 0 + 60 * i, 600, arrive)));
+    rows.forEach((r, i) => r.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], opt(BEAT + 55 * i, 620, arrive)));
+    $('sel').animate([{ opacity: 0 }, { opacity: 1 }], opt(BEAT * 3, 120, 'linear'));
+    $('box').animate([{ transform: 'none' }, { transform: 'translateX(180px)' }], { delay: BEAT * 4, duration: 500, easing: move, fill: 'forwards' });
+    [...lines, ...rows, $('seam'), $('sel')].forEach((el) => { el.style.transform = ''; el.style.opacity = ''; });
+    t0 = performance.now(); running = true; requestAnimationFrame(frame);
+  }
+  let played = false;
+  new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      visible = e.isIntersecting;
+      if (visible && !played) { played = true; play(); }
+      else if (visible && played && !running) { running = true; requestAnimationFrame(frame); }   // the drift resumes on screen
+    }
+  }, { threshold: 0.35 }).observe($('band'));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible && played && !running) { running = true; requestAnimationFrame(frame); } });
+  addEventListener('resize', () => { size(); draw(tone, 0); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+{
+ "dir": "c",
+ "W": 390,
+ "theme": "light",
+ "rm": "",
+ "loadStart": " 55.71 58.03 58.61",
+ "text": {
+  "words": 537,
+  "emDash": 0,
+  "enDash": 0,
+  "bang": 0,
+  "bangCtx": [],
+  "realtime": false,
+  "h1": [
+   "Build the pitch, present it and send the link"
+  ],
+  "h2": [
+   "The menus are Google's",
+   "Present from the browser",
+   "Export to PDF and PowerPoint",
+   "Agents run the same actions",
+   "Every change has an author",
+   "Free under the MIT license"
+  ],
+  "headingPeriod": [],
+  "scrollBehavior": "auto",
+  "viewportMeta": "width=device-width, initial-scale=1",
+  "userSelectBody": "auto",
+  "title": "Turboslide is a slides editor in the browser",
+  "lang": "en"
+ },
+ "fonts": {
+  "monoBgs": {
+   "rgb(16, 16, 16)": 2
+  },
+  "nonInter": []
+ },
+ "colours": {
+  "rgb(11,29,58) backgroundColor": {
+   "n": 1,
+   "ex": [
+    "I"
+   ]
+  }
+ },
+ "contrast": {
+  "checked": 77,
+  "below": 0,
+  "belowOutsideSlides": 0,
+  "worst": []
+ },
+ "names": {
+  "nameless": [],
+  "namelessN": 0,
+  "canvases": [
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Slide 1 of the deck on this page. Tab to"
+   }
+  ],
+  "imgsNoAlt": 0,
+  "live": [
+   "polite:msg",
+   "polite:msg",
+   "polite:audience",
+   "polite:rows rise",
+   "log:term-out"
+  ]
+ },
+ "tabs": [
+  {
+   "tag": "button",
+   "name": "Reset",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 61,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "GT",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 60,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Kestrel",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 84,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Globex",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 85,
+   "h": 32
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 92,
+   "h": 32
+  },
+  {
+   "tag": "h1",
+   "name": "Title: Build the pitch, present it",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 227,
+   "h": 94
+  },
+  {
+   "tag": "div",
+   "name": "Text: This slide runs in the page.",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 227,
+   "h": 23
+  },
+  {
+   "tag": "div",
+   "name": "Credit: Image: NASA, Reto Stöckli,",
+   "ring": false,
+   "outline": "rgb(111, 116, 125) 3px",
+   "inView": true,
+   "w": 227,
+   "h": 8
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 152,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Open the Example Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 194,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "0.003%",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 113,
+   "h": 39
+  },
+  {
+   "tag": "button",
+   "name": "Search the menus",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 42,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slideshow",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 113,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Menus",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 92,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Slide 1: Build the pitch, present ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 112,
+   "h": 52
+  },
+  {
+   "tag": "button",
+   "name": "Slide 2: The plan for Kestrel",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 112,
+   "h": 52
+  },
+  {
+   "tag": "button",
+   "name": "Slide 3: Actions for Kestrel and i",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 112,
+   "h": 52
+  },
+  {
+   "tag": "button",
+   "name": "Slide 4: Louisbourg lighthouse",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 112,
+   "h": 52
+  },
+  {
+   "tag": "button",
+   "name": "Slide 5: Made in Turboslide",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 112,
+   "h": 52
+  },
+  {
+   "tag": "div",
+   "name": "Title: The plan for Kestrel",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 245,
+   "h": 9
+  },
+  {
+   "tag": "div",
+   "name": "Rows",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 245,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "Present",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 109,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "Full Screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 132,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "Previous slide",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 32,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Next slide",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 32,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Seam between the two kinds of Powe",
+   "ring": true,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 32,
+   "h": 183
+  },
+  {
+   "tag": "button",
+   "name": "Print This Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 159,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "CLI",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 49,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "MCP",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 59,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "HTTP",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 64,
+   "h": 36
+  },
+  {
+   "tag": "div",
+   "name": "Command output",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 240
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": false,
+   "outline": "rgb(255, 255, 255) 3px",
+   "inView": true,
+   "w": 190,
+   "h": 28
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide slide get titleReads ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 38
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide tailor --replace \"Kes",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 59
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide block rotate title#h ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 59
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide slide background titl",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 59
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide block set title#h /te",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 59
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide slide skip moodLeaves",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 38
+  },
+  {
+   "tag": "button",
+   "name": "$ turboslide version listLists the",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 324,
+   "h": 38
+  },
+  {
+   "tag": "button",
+   "name": "Play",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 77,
+   "h": 32
+  },
+  {
+   "tag": "input",
+   "name": "4",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 237,
+   "h": 28
+  },
+  {
+   "tag": "button",
+   "name": "MCWrote the speaker notesMaya Chen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 326,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Added the numbers slideAssistant, ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 326,
+   "h": 82
+  },
+  {
+   "tag": "button",
+   "name": "SOWrote the titleSam Ortiz. Slide ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 326,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Inserted two picturesPitch agent, ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 326,
+   "h": 100
+  }
+ ],
+ "tabNoRing": [
+  "h1:Title: Build the pitch, present it",
+  "div:Text: This slide runs in the page.",
+  "div:Credit: Image: NASA, Reto Stöckli,",
+  "div:Title: The plan for Kestrel",
+  "div:Rows",
+  "input:"
+ ],
+ "rafTop": {
+  "perSec": 0.5,
+  "anims": 0
+ },
+ "afterScroll": {
+  "perSec": 0,
+  "running": [],
+  "total": 3
+ },
+ "height": 7988,
+ "overflowX": 0,
+ "smallTargets": [
+  "New presentation 117x22",
+  "Your presentations 125x22",
+  "Documentation 101x22",
+  "GitHub 46x22",
+  "License 51x22"
+ ],
+ "errs": [],
+ "netRequests": [],
+ "loadEnd": " 53.70 57.44 58.39"
+}

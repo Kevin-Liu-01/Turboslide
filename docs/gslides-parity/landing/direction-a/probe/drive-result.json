@@ -1,0 +1,36 @@
+{
+ "selected": true,
+ "introDone": true,
+ "guideOn": [
+  false,
+  false
+ ],
+ "afterDrag": [
+  "450.1",
+  "400.83"
+ ],
+ "editing": true,
+ "title": "Turboslide is a slides editor in the browser today",
+ "undoEnabled": true,
+ "titleAfterUndo": "Turboslide is a slides editor in the browser",
+ "posAfterUndo": [
+  "",
+  ""
+ ],
+ "wAfter": "633.24",
+ "rot": "90",
+ "layout": "Canvas",
+ "snack": "Tailored for Globex: 8 places on 3 slides",
+ "names": "Globex,Globex,Globex,Globex,Globex,Globex,Globex,Globex",
+ "count": "8 places on 3 slides",
+ "order": "gets:3 / 6 week-one:4 / 6 plan:5 / 6",
+ "agentTitle": "Week one at Globex",
+ "rows": "Monday,Wednesday,Friday",
+ "counts": "1 / 7 | 2 / 7 | 3 / 7 | 4 / 7 | 5 / 7 | 6 / 7 | 7 / 7",
+ "history": "AgentFilled the three rows on slide 65:42 PM || AgentWrote the title and the text on slide 65:42 PM || AgentAdded slide 6 with the Ruled rows layout5:42 PM || YouMoved \"Onboarding plan\" to slide 55:42 PM || YouTailored for Globex: 8 places on 3 slides5:42 PM || YouMoved the heading on slide 25:42 PM",
+ "showOpen": true,
+ "showCount": "3 / 7",
+ "showNotes": "Notes: Read the three rows aloud.",
+ "showClosed": true
+}
+[]

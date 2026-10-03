@@ -1,0 +1,249 @@
+{
+  "390": {
+    "words": 344,
+    "height": 5162,
+    "h1": {
+      "size": "40px",
+      "weight": "500",
+      "lh": "41.6px",
+      "ls": "-1.52px",
+      "family": "Inter, \"Inter Fallback\", \"Helvetica Neue"
+    },
+    "imgs": [
+      {
+        "src": "/home/hero-light-fdb7c9b176.jpg",
+        "shown": "324x203",
+        "natural": "326x203"
+      },
+      {
+        "src": "/home/menus-light-2x-fbf9d72b74.png",
+        "shown": "324x267",
+        "natural": "326x269"
+      }
+    ],
+    "bands": [
+      {
+        "cls": "ts-rails",
+        "band": "",
+        "top": 0,
+        "h": 5162
+      },
+      {
+        "cls": "ts-product-nav",
+        "band": "",
+        "top": 0,
+        "h": 103
+      },
+      {
+        "cls": "ts-product-hero",
+        "band": "hero",
+        "top": 103,
+        "h": 993
+      },
+      {
+        "cls": "ts-product-numbers",
+        "band": "numbers",
+        "top": 1096,
+        "h": 361
+      },
+      {
+        "cls": "ts-product-hatch",
+        "band": "",
+        "top": 1457,
+        "h": 25
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "canvas",
+        "top": 1482,
+        "h": 566
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "menus",
+        "top": 2048,
+        "h": 649
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "present",
+        "top": 2696,
+        "h": 619
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "export",
+        "top": 3315,
+        "h": 513
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "agents",
+        "top": 3828,
+        "h": 679
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "licence",
+        "top": 4507,
+        "h": 359
+      },
+      {
+        "cls": "ts-product-footer",
+        "band": "footer",
+        "top": 4866,
+        "h": 296
+      }
+    ],
+    "controls": [
+      "home.nav.lockup a /home \"Turboslide\"",
+      "home.nav.docs a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md \"Documentation\"",
+      "home.theme span  \"LightDark\"",
+      "home.theme.light button  \"Light\"",
+      "home.theme.dark button  \"Dark\"",
+      "home.nav.new a /new \"New Presentation\"",
+      "home.hero.new a /new \"New Presentation\"",
+      "home.hero.deck a /deck/gt-brand \"Open the Example Deck\"",
+      "home.facts dl  \"MenusThe menus go from File to Help in G\"",
+      "home.export.record a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md \"0.003%\"",
+      "home.agents.docs a https://github.com/Kevin-Liu-01/Turboslide/tree/main/skills \"Read the agent documentation\"",
+      "home.licence.github a https://github.com/Kevin-Liu-01/Turboslide \"GitHub\"",
+      "home.foot.lockup a #top \"Turboslide\"",
+      "home.foot.new a /new \"New presentation\"",
+      "home.foot.decks a /decks \"Your presentations\"",
+      "home.foot.docs a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md \"Documentation\"",
+      "home.foot.github a https://github.com/Kevin-Liu-01/Turboslide \"GitHub\"",
+      "home.foot.licence a https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE \"License\"",
+      "home.foot.notices a https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md \"Third party notices\"",
+      "home.foot.maker p  \"Turboslide is made by General Translatio\""
+    ],
+    "signIn": false,
+    "animations": 0,
+    "scrollBehavior": "auto"
+  },
+  "1440": {
+    "words": 344,
+    "height": 4919,
+    "h1": {
+      "size": "59.2px",
+      "weight": "500",
+      "lh": "61.568px",
+      "ls": "-2.2496px",
+      "family": "Inter, \"Inter Fallback\", \"Helvetica Neue"
+    },
+    "imgs": [
+      {
+        "src": "/home/hero-light-2x-d6106a0704.jpg",
+        "shown": "1022x639",
+        "natural": "1024x640"
+      },
+      {
+        "src": "/home/menus-light-2x-fbf9d72b74.png",
+        "shown": "553x457",
+        "natural": "556x458"
+      }
+    ],
+    "bands": [
+      {
+        "cls": "ts-rails",
+        "band": "",
+        "top": 0,
+        "h": 4919
+      },
+      {
+        "cls": "ts-product-nav",
+        "band": "",
+        "top": 0,
+        "h": 59
+      },
+      {
+        "cls": "ts-product-hero",
+        "band": "hero",
+        "top": 59,
+        "h": 1215
+      },
+      {
+        "cls": "ts-product-numbers",
+        "band": "numbers",
+        "top": 1274,
+        "h": 174
+      },
+      {
+        "cls": "ts-product-hatch",
+        "band": "",
+        "top": 1448,
+        "h": 25
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "canvas",
+        "top": 1473,
+        "h": 588
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "menus",
+        "top": 2061,
+        "h": 684
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "present",
+        "top": 2745,
+        "h": 588
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "export",
+        "top": 3333,
+        "h": 497
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "agents",
+        "top": 3830,
+        "h": 524
+      },
+      {
+        "cls": "ts-product-band",
+        "band": "licence",
+        "top": 4354,
+        "h": 382
+      },
+      {
+        "cls": "ts-product-footer",
+        "band": "footer",
+        "top": 4735,
+        "h": 183
+      }
+    ],
+    "controls": [
+      "home.nav.lockup a /home \"Turboslide\"",
+      "home.nav.docs a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md \"Documentation\"",
+      "home.theme span  \"LightDark\"",
+      "home.theme.light button  \"Light\"",
+      "home.theme.dark button  \"Dark\"",
+      "home.nav.new a /new \"New Presentation\"",
+      "home.hero.new a /new \"New Presentation\"",
+      "home.hero.deck a /deck/gt-brand \"Open the Example Deck\"",
+      "home.facts dl  \"MenusThe menus go from File to Help in G\"",
+      "home.export.record a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md \"0.003%\"",
+      "home.agents.docs a https://github.com/Kevin-Liu-01/Turboslide/tree/main/skills \"Read the agent documentation\"",
+      "home.licence.github a https://github.com/Kevin-Liu-01/Turboslide \"GitHub\"",
+      "home.foot.lockup a #top \"Turboslide\"",
+      "home.foot.new a /new \"New presentation\"",
+      "home.foot.decks a /decks \"Your presentations\"",
+      "home.foot.docs a https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md \"Documentation\"",
+      "home.foot.github a https://github.com/Kevin-Liu-01/Turboslide \"GitHub\"",
+      "home.foot.licence a https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE \"License\"",
+      "home.foot.notices a https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md \"Third party notices\"",
+      "home.foot.maker p  \"Turboslide is made by General Translatio\""
+    ],
+    "signIn": false,
+    "animations": 0,
+    "scrollBehavior": "auto"
+  },
+  "at": "2026-10-02T22:44:16.005Z",
+  "uptime": "15:44  up 8 days,  5:41, 1 user, load averages: 67.55 58.07 48.57",
+  "base": "http://localhost:4542"
+}

@@ -1,0 +1,503 @@
+{
+ "dir": "a",
+ "W": 390,
+ "theme": "light",
+ "rm": "",
+ "loadStart": " 60.01 58.98 58.96",
+ "text": {
+  "words": 495,
+  "emDash": 0,
+  "enDash": 0,
+  "bang": 0,
+  "bangCtx": [],
+  "realtime": false,
+  "h1": [
+   "Turboslide is a slides editor in the browser"
+  ],
+  "h2": [
+   "Everything on a slide moves",
+   "One name on every slide",
+   "Agents run the same actions",
+   "Present from the browser",
+   "Turboslide today",
+   "A new presentation needs no account"
+  ],
+  "headingPeriod": [],
+  "scrollBehavior": "auto",
+  "viewportMeta": "width=device-width, initial-scale=1",
+  "userSelectBody": "auto",
+  "title": "Turboslide is a slides editor in the browser",
+  "lang": "en"
+ },
+ "fonts": {
+  "monoBgs": {
+   "rgb(16, 16, 16)": 7
+  },
+  "nonInter": []
+ },
+ "colours": {
+  "rgb(47,92,224) backgroundColor": {
+   "n": 4,
+   "ex": [
+    "guide guide-v",
+    "guide guide-h"
+   ]
+  }
+ },
+ "contrast": {
+  "checked": 99,
+  "below": 0,
+  "belowOutsideSlides": 0,
+  "worst": []
+ },
+ "names": {
+  "nameless": [],
+  "namelessN": 0,
+  "canvases": [
+   {
+    "hidden": "true",
+    "role": null,
+    "label": ""
+   }
+  ],
+  "imgsNoAlt": 0,
+  "live": [
+   "polite:tailor-count",
+   "polite:tailor-row tailor-snack",
+   "polite:panel-text",
+   "polite:history-rows"
+  ]
+ },
+ "tabs": [
+  {
+   "tag": "div",
+   "name": "Plate. Arrow keys move it.",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 113,
+   "h": 50
+  },
+  {
+   "tag": "div",
+   "name": "Heading box. Enter edits the text,",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 10
+  },
+  {
+   "tag": "div",
+   "name": "Text box. Enter edits the text, ar",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 20
+  },
+  {
+   "tag": "div",
+   "name": "Credit box. Arrow keys move it.",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 4
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 214,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "Apply",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 69,
+   "h": 36
+  },
+  {
+   "tag": "li",
+   "name": "Onboarding plan",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "li",
+   "name": "What Northwind gets",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "li",
+   "name": "The first deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "button",
+   "name": "Run",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 56,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "Present",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 81,
+   "h": 36
+  },
+  {
+   "tag": "a",
+   "name": "Read the export record",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 163,
+   "h": 19
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Open the Example Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 136,
+   "h": 24
+  },
+  {
+   "tag": "a",
+   "name": "Your presentations",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 125,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 101,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "GitHub",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 46,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "License",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 51,
+   "h": 22
+  },
+  null,
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 136,
+   "h": 24
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 123,
+   "h": 34
+  },
+  {
+   "tag": "button",
+   "name": "Light",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 55,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Dark",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 53,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 147,
+   "h": 36
+  },
+  {
+   "tag": "div",
+   "name": "Title box. Enter edits the text, a",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 239,
+   "h": 56
+  },
+  {
+   "tag": "div",
+   "name": "Subtitle box. Enter edits the text",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 182,
+   "h": 53
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Open the Example Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "div",
+   "name": "Plate. Arrow keys move it.",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 113,
+   "h": 50
+  },
+  {
+   "tag": "div",
+   "name": "Heading box. Enter edits the text,",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 10
+  },
+  {
+   "tag": "div",
+   "name": "Text box. Enter edits the text, ar",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 20
+  },
+  {
+   "tag": "div",
+   "name": "Credit box. Arrow keys move it.",
+   "ring": false,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 103,
+   "h": 4
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 214,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "Apply",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 69,
+   "h": 36
+  },
+  {
+   "tag": "li",
+   "name": "Onboarding plan",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "li",
+   "name": "What Northwind gets",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "li",
+   "name": "The first deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 183
+  },
+  {
+   "tag": "button",
+   "name": "Run",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 56,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "Present",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 81,
+   "h": 36
+  },
+  {
+   "tag": "button",
+   "name": "Show slide 1 first",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 76,
+   "h": 42
+  },
+  {
+   "tag": "button",
+   "name": "Show slide 2 first",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 76,
+   "h": 42
+  },
+  {
+   "tag": "button",
+   "name": "Show slide 3 first",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 76,
+   "h": 42
+  },
+  {
+   "tag": "button",
+   "name": "Show slide 4 first",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 76,
+   "h": 42
+  },
+  {
+   "tag": "button",
+   "name": "Show slide 5 first",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 76,
+   "h": 42
+  }
+ ],
+ "tabNoRing": [
+  "div:Plate. Arrow keys move it.",
+  "div:Heading box. Enter edits the text,",
+  "div:Text box. Enter edits the text, ar",
+  "div:Credit box. Arrow keys move it.",
+  "div:Title box. Enter edits the text, a",
+  "div:Subtitle box. Enter edits the text",
+  "div:Plate. Arrow keys move it.",
+  "div:Heading box. Enter edits the text,",
+  "div:Text box. Enter edits the text, ar",
+  "div:Credit box. Arrow keys move it."
+ ],
+ "rafTop": {
+  "perSec": 0,
+  "anims": 0
+ },
+ "afterScroll": {
+  "perSec": 0,
+  "running": [],
+  "total": 0
+ },
+ "height": 5912,
+ "overflowX": 0,
+ "smallTargets": [
+  "Read the export record 163x19",
+  "Your presentations 125x22",
+  "Documentation 101x22",
+  "GitHub 46x22",
+  "License 51x22"
+ ],
+ "errs": [],
+ "netRequests": [],
+ "loadEnd": " 57.38 58.43 58.76"
+}

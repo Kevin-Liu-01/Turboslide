@@ -1,0 +1,28 @@
+# emil  https://emilkowal.ski/ 2026-10-02T22:52:30.517Z
+LCP {"t":408,"size":28842,"url":"","el":"p.text-gray-1100"} CLS 0.000 ctx [] longtasks 1 sum 67
+scroll-behavior auto auto lenis false locomotive false docH 2480 fonts ["Sans","Sans Fallback","Mono","Mono Fallback","serifInline","serifInline Fallback","Serif","Serif Fallback"]
+bytes {"Document":{"n":1,"kb":6},"Font":{"n":9,"kb":1059},"Stylesheet":{"n":10,"kb":33},"Script":{"n":42,"kb":1141},"Other":{"n":1,"kb":66},"Fetch":{"n":10,"kb":98}}
+bigJs [{"url":"https://emilkowal.ski/_next/static/chunks/3690-fc1e072938a38ee3.js","kb":272},{"url":"https://emilkowal.ski/_next/static/chunks/6976-afa014d9d52a0f11.js","kb":122},{"url":"https://emilkowal.ski/_next/static/chunks/1f12fe1d-69b1cf52b427f46b.js","kb":82},{"url":"https://emilkowal.ski/_next/static/chunks/7136-c95978a54371c351.js","kb":59},{"url":"https://emilkowal.ski/_next/static/chunks/093d1e54-ddd47114d128671a.js","kb":56},{"url":"https://emilkowal.ski/_next/static/chunks/7672a648-07248d29c8081f5f.js","kb":56},{"url":"https://emilkowal.ski/_next/static/chunks/3cf2b3a0-7907689060cc9612.js","kb":53},{"url":"https://emilkowal.ski/_next/static/chunks/1803-5ca4bb95e14a4830.js","kb":51}]
+media [{"url":"https://emilkowal.ski/_next/static/media/6b697c3de9bf57d2-s.p.woff2","mime":"font/woff2","kb":47,"status":200},{"url":"https://emilkowal.ski/_next/static/media/f5e9a8959650a783-s.p.woff2","mime":"font/woff2","kb":69,"status":200},{"url":"https://emilkowal.ski/_next/static/media/70004bd4b6989aa2-s.p.woff2","mime":"font/woff2","kb":55,"status":200},{"url":"https://emilkowal.ski/_next/static/media/393612ac92cdf094-s.p.woff2","mime":"font/woff2","kb":48,"status":200},{"url":"https://emilkowal.ski/_next/static/media/85c5b1acc9af2fa7-s.p.woff2","mime":"font/woff2","kb":24,"status":200},{"url":"https://emilkowal.ski/_next/static/media/0336a89fb4e7fc1d-s.p.woff2","mime":"font/woff2","kb":344,"status":200},{"url":"https://emilkowal.ski/_next/static/media/1bb87caddaaf6c2d-s.p.woff2","mime":"font/woff2","kb":159,"status":200},{"url":"https://emilkowal.ski/_next/static/media/648293620770408b-s.p.woff2","mime":"font/woff2","kb":151,"status":200},{"url":"https://emilkowal.ski/_next/static/media/49fce7c6966c54d3-s.p.woff2","mime":"font/woff2","kb":162,"status":200}]
+videos []
+canvases []
+
+## phase load (load) 5.11s frames 2 main {"task":173,"script":49,"layout":9,"style":5} rafTotal 4
+  1x WebAnimation|undefined|50|linear(0 0%, 1 25%, 1 50%, 1 75%, 1 100%)|it1| delays[0] start@271..271 tgt  from undefined to undefined
+  1x WebAnimation|undefined|0|linear(0 0%, 1 100%)|it1| delays[0] start@271..271 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x Animation||50|linear(0 0%, 1 25%, 1 50%, 1 75%, 1 100%)|it1|opacity|DocumentTimeline delays[0] seen@225..225 tgt div.sticky.left-0 from {"opacity":"0"} to {"opacity":"0"}
+  pixel change: first 400 last 400 frames>0.15: 1/1
+  series 400:3.3
+
+## phase idle (idle) 3.02s frames 1 main {"task":4,"script":1,"layout":0,"style":0} rafTotal 4
+
+## phase s1 (scroll) 3.02s frames 2 main {"task":59,"script":5,"layout":0,"style":0} rafTotal 4
+  pixel change: first 14 last 14 frames>0.15: 1/1
+  series 14:2.82
+
+## phase s2 (scroll) 3.01s frames 2 main {"task":4,"script":1,"layout":0,"style":0} rafTotal 4
+  pixel change: first 9 last 9 frames>0.15: 1/1
+  series 9:4.24
+
+## phase s3 (scroll) 3.02s frames 1 main {"task":4,"script":1,"layout":0,"style":0} rafTotal 4

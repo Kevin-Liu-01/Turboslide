@@ -1,0 +1,64 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>bench</title>
+<style>body{margin:0;background:#fff} canvas{display:block;image-rendering:pixelated} .row{height:40px;transform:translateY(16px);opacity:0;transition:transform 620ms cubic-bezier(0.16,1,0.3,1),opacity 620ms cubic-bezier(0.16,1,0.3,1);border-bottom:1px solid #ddd;font:16px Inter,Helvetica} .row.on{transform:none;opacity:1}</style>
+</head><body>
+<div id="host"></div>
+<script>
+// Bayer field benchmarks: Canvas 2D at the cell grid, and WebGL2 at the cell grid.
+const B8 = [0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21].map(v => (v + 0.5) / 64);
+// a smooth field: two drifting sines and a radial falloff (the cost class of the engine's "globe" or "streak bands")
+function field(u, v, t) { const a = Math.sin(u * 6.0 + t * 0.6) * 0.5 + 0.5; const b = Math.sin(v * 4.0 - t * 0.4 + u * 2.0) * 0.5 + 0.5; const dx = u - 0.65, dy = v - 0.5; const r = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) * 1.6); return 0.15 + 0.55 * r * (0.6 * a + 0.4 * b); }
+window.bench2d = async (cssW, cssH, cell, frames) => {
+  const w = Math.ceil(cssW / cell), h = Math.ceil(cssH / cell);
+  const c = document.createElement('canvas'); c.width = w; c.height = h; c.style.width = cssW + 'px'; c.style.height = cssH + 'px';
+  document.getElementById('host').replaceChildren(c);
+  const ctx = c.getContext('2d'); const img = ctx.createImageData(w, h); const px = new Uint32Array(img.data.buffer);
+  const ink = 0xff111111, paper = 0xfff2f2f0; const times = []; let last = 0; const gaps = [];
+  for (let f = 0; f < frames; f++) {
+    await new Promise(requestAnimationFrame);
+    const now = performance.now(); if (last) gaps.push(now - last); last = now;
+    const t0 = performance.now(); const t = f / 60;
+    for (let y = 0; y < h; y++) { const v = y / (h - 1); const row = (y & 7) << 3; for (let x = 0; x < w; x++) { px[y * w + x] = field(x / (w - 1), v, t) > B8[row | (x & 7)] ? ink : paper; } }
+    ctx.putImageData(img, 0, 0); times.push(performance.now() - t0);
+  }
+  times.sort((a, b) => a - b); gaps.sort((a, b) => a - b);
+  return { cells: w * h, median: +times[times.length >> 1].toFixed(2), p95: +times[Math.floor(times.length * 0.95)].toFixed(2), frameGapMedian: +gaps[gaps.length >> 1].toFixed(1) };
+};
+window.benchGL = async (cssW, cssH, cell, frames) => {
+  const w = Math.ceil(cssW / cell), h = Math.ceil(cssH / cell);
+  const c = document.createElement('canvas'); c.width = w; c.height = h; c.style.width = cssW + 'px'; c.style.height = cssH + 'px';
+  document.getElementById('host').replaceChildren(c);
+  const t00 = performance.now();
+  const gl = c.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'low-power' });
+  const vs = `#version 300 es
+in vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
+  const fs = `#version 300 es
+precision mediump float; uniform vec2 res; uniform float t; out vec4 o;
+float bayer(ivec2 q){ int i = (q.y & 7) * 8 + (q.x & 7); const float m[64] = float[64](${B8.map(v => v.toFixed(6)).join(',')}); return m[i]; }
+void main(){ vec2 uv = gl_FragCoord.xy / res; uv.y = 1. - uv.y; float a = sin(uv.x*6.+t*.6)*.5+.5; float b = sin(uv.y*4.-t*.4+uv.x*2.)*.5+.5; vec2 d = uv - vec2(.65,.5); float r = max(0., 1. - length(d)*1.6); float v = .15 + .55*r*(.6*a+.4*b); float on = step(bayer(ivec2(gl_FragCoord.xy)), v); o = vec4(mix(vec3(.949,.949,.941), vec3(.067), on), 1.); }`;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); gl.useProgram(pr);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const ures = gl.getUniformLocation(pr, 'res'), ut = gl.getUniformLocation(pr, 't'); gl.uniform2f(ures, w, h); gl.viewport(0, 0, w, h);
+  gl.drawArrays(gl.TRIANGLES, 0, 3); gl.finish();
+  const setup = performance.now() - t00;
+  const times = []; let last = 0; const gaps = [];
+  for (let f = 0; f < frames; f++) {
+    await new Promise(requestAnimationFrame);
+    const now = performance.now(); if (last) gaps.push(now - last); last = now;
+    const t0 = performance.now(); gl.uniform1f(ut, f / 60); gl.drawArrays(gl.TRIANGLES, 0, 3); times.push(performance.now() - t0);
+  }
+  times.sort((a, b) => a - b); gaps.sort((a, b) => a - b);
+  return { cells: w * h, setupMs: +setup.toFixed(1), median: +times[times.length >> 1].toFixed(3), p95: +times[Math.floor(times.length * 0.95)].toFixed(3), frameGapMedian: +gaps[gaps.length >> 1].toFixed(1) };
+};
+// 60 ruled rows entering with the deck's rise (CSS transitions, 55 ms apart)
+window.benchReveal = async (n) => {
+  const host = document.getElementById('host'); host.replaceChildren(...Array.from({ length: n }, (_, i) => { const d = document.createElement('div'); d.className = 'row'; d.textContent = 'Row ' + i; d.style.transitionDelay = (i * 55) + 'ms'; return d; }));
+  await new Promise(requestAnimationFrame);
+  const t0 = performance.now(); for (const d of host.children) d.classList.add('on'); const sync = performance.now() - t0;
+  await new Promise(r => setTimeout(r, 620 + n * 55 + 200));
+  return { syncMs: +sync.toFixed(2), anims: document.getAnimations().length };
+};
+</script>
+</body></html>

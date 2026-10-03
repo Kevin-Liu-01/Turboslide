@@ -1,0 +1,73 @@
+# linear  https://linear.app/ 2026-10-02T22:46:20.447Z
+LCP {"t":2200,"size":135818,"url":"https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/cd9c3c96-fbba-4687-8e50-da703a608000/f=auto,fit=scale-down,metadata=none","el":"div.SPbJba_grain.SPbJba_grainSubtle"} CLS 0.000 ctx [] longtasks 5 sum 354
+scroll-behavior auto auto lenis false locomotive false docH 9960 fonts ["Inter Variable","Berkeley Mono"]
+bytes {"Document":{"n":1,"kb":173},"Image":{"n":19,"kb":283},"Stylesheet":{"n":90,"kb":184},"Script":{"n":314,"kb":1373},"Other":{"n":5,"kb":7},"Font":{"n":2,"kb":503},"Fetch":{"n":12,"kb":460}}
+bigJs [{"url":"https://static.linear.app/web/_next/static/chunks/CmqM19p4.js","kb":145},{"url":"https://static.linear.app/web/_next/static/chunks/TrjeIfSK.js","kb":107},{"url":"https://static.linear.app/web/_next/static/chunks/BLVKr7JD.js","kb":104},{"url":"https://static.linear.app/web/_next/static/chunks/ClNs5Wg5.js","kb":57},{"url":"https://static.linear.app/web/_next/static/chunks/CovFF7Cu2.js","kb":53},{"url":"https://static.linear.app/web/_next/static/chunks/BkD8tjRY2.js","kb":36},{"url":"https://e.linear.app/static/surveys.js?v=1.257.1","kb":34},{"url":"https://static.linear.app/web/_next/static/chunks/ICFJTjkM.js","kb":29}]
+media []
+videos []
+canvases []
+
+## phase load (load) 5.25s frames 84 main {"task":1960,"script":235,"layout":77,"style":305} rafTotal 48
+  27x WebAnimation|undefined|1000|cubic-bezier(0.25, 0.1, 0.25, 1)|it1| delays[400,433,466,499,500,600,850,2000] start@1041..1046 tgt  from undefined to undefined
+  5x WebAnimation|undefined|1500|cubic-bezier(0.455, 0.03, 0.515, 0.955)|it1| delays[1300] start@1046..1047 tgt  from undefined to undefined
+  3x CSSAnimation|sx-45fvhf-B|2400|linear|itundefined| delays[0] start@703..706 tgt  from undefined to undefined
+  3x CSSAnimation|-VOcTG_agentBorderSweep|2000|linear|itundefined| delays[-80] start@705..706 tgt  from undefined to undefined
+  3x CSSAnimation|-VOcTG_agentLabelSweep|2000|linear|it1| delays[0] start@705..718 tgt  from undefined to undefined
+  3x WebAnimation|undefined|300|linear(0 0%, 0.0411 3.4482758620689653%, 0.1342 6.896551724137931%, 0.2478 10.344827586206897%, 0.3638 13.793103448275863%, 0.4725 17.24137931034483%, 0.5692 20.689655172413794%, 0.6524 24.137931034482758%, 0.7222 27.586206896551722%, 0.7798 31.034482758620687%, 0.8267 34.48275862068965%, 0.8644 37.93103448275862%, 0.8944 41.37931034482759%, 0.9181 44.827586206896555%, 0.9367 48.27586206896552%, 0.9513 51.72413793103449%, 0.9626 55.17241379310346%, 0.9714 58.62068965517243%, 0.9782 62.068965517241395%, 0.9834 65.51724137931036%, 0.9874 68.96551724137933%, 0.9904 72.4137931034483%, 0.9927 75.86206896551727%, 0.9945 79.31034482758623%, 0.9959 82.7586206896552%, 0.9969 86.20689655172416%, 0.9976 89.65517241379311%, 0.9982 93.10344827586208%, 0.9987 96.55172413793105%, 1 100%)|it1| delays[0] start@4772..5203 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-1-agent|3200|linear|itundefined| delays[0] start@703..703 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-1-3-upDown|2800|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-0-agent|3200|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-0-pong|1600|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-1-pong|1600|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-1-0-upDown|2800|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-3-pong|1600|linear|itundefined| delays[0] start@704..704 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-1-agent|3200|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-2-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-2-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-0-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-4-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-2-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-0-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-4-3-pong|1600|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-4-pong|1600|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-3-1-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-4-pong|1600|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-1-upDown|2800|linear|itundefined| delays[0] start@705..705 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-4-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-0-pong|1600|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-1-3-pong|1600|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-1-1-upDown|2800|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-4-3-upDown|2800|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-4-1-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-3-upDown|2800|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-2-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-0-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-3-upDown|2800|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-0-1-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-4-0-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-1-3-agent|3200|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-2-pong|1600|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  1x CSSAnimation|grid-dot-2-0-upDown|2800|linear|itundefined| delays[0] start@706..706 tgt  from undefined to undefined
+  pixel change: first 1028 last 5196 frames>0.15: 8/83
+  series 1028:245.35 1215:0 1911:0 2180:4.47 2205:1.12 2806:1.75 3120:4.61 3123:0.11 3141:0.03 3169:0.03 3199:0.07 3213:0.03 3238:0.02 3255:0.02 3280:0.03 3297:0.02 3321:0.02 3338:0.02 3364:0.02 3406:0.02 3439:0.04 3455:0.01 3479:0.47 3495:0.02 3524:0.03 3555:0.03 3571:0.01 3604:0.02 3629:0.01 3661:0.02 3691:0.02 3714:0 3730:0.01 3764:0.01 3782:0 3807:0 3825:0 4021:0 4065:0 4933:0 5196:0.6 5201:0.04
+
+## phase idle (idle) 3.02s frames 131 main {"task":784,"script":9,"layout":1,"style":109} rafTotal 108
+  4x WebAnimation|undefined|300|linear(0 0%, 0.0411 3.4482758620689653%, 0.1342 6.896551724137931%, 0.2478 10.344827586206897%, 0.3638 13.793103448275863%, 0.4725 17.24137931034483%, 0.5692 20.689655172413794%, 0.6524 24.137931034482758%, 0.7222 27.586206896551722%, 0.7798 31.034482758620687%, 0.8267 34.48275862068965%, 0.8644 37.93103448275862%, 0.8944 41.37931034482759%, 0.9181 44.827586206896555%, 0.9367 48.27586206896552%, 0.9513 51.72413793103449%, 0.9626 55.17241379310346%, 0.9714 58.62068965517243%, 0.9782 62.068965517241395%, 0.9834 65.51724137931036%, 0.9874 68.96551724137933%, 0.9904 72.4137931034483%, 0.9927 75.86206896551727%, 0.9945 79.31034482758623%, 0.9959 82.7586206896552%, 0.9969 86.20689655172416%, 0.9976 89.65517241379311%, 0.9982 93.10344827586208%, 0.9987 96.55172413793105%, 1 100%)|it1| delays[0] start@1756..2053 tgt  from undefined to undefined
+  2x WebAnimation||300|linear(0 0%, 0.0411 3.4482758620689653%, 0.1342 6.896551724137931%, 0.2478 10.344827586206897%, 0.3638 13.793103448275863%, 0.4725 17.24137931034483%, 0.5692 20.689655172413794%, 0.6524 24.137931034482758%, 0.7222 27.586206896551722%, 0.7798 31.034482758620687%, 0.8267 34.48275862068965%, 0.8644 37.93103448275862%, 0.8944 41.37931034482759%, 0.9181 44.827586206896555%, 0.9367 48.27586206896552%, 0.9513 51.72413793103449%, 0.9626 55.17241379310346%, 0.9714 58.62068965517243%, 0.9782 62.068965517241395%, 0.9834 65.51724137931036%, 0.9874 68.96551724137933%, 0.9904 72.4137931034483%, 0.9927 75.86206896551727%, 0.9945 79.31034482758623%, 0.9959 82.7586206896552%, 0.9969 86.20689655172416%, 0.9976 89.65517241379311%, 0.9982 93.10344827586208%, 0.9987 96.55172413793105%, 1 100%)|it1|filter delays[0] start@1757..2053 tgt div from {"filter":"blur(2px)"} to {"filter":"blur(0px)"}
+  pixel change: first undefined last undefined frames>0.15: 0/130
+  series 67:0.01 101:0 127:0 160:0 193:0 226:0 279:0 343:0 386:0 426:0 460:0 499:0 535:0 579:0 609:0 652:0 684:0 778:0 811:0 843:0 876:0 910:0 936:0 1010:0 1043:0 1075:0 1110:0 1150:0 1193:0 1230:0 1251:0 1284:0 1309:0 1351:0 1393:0 1426:0 1451:0 1493:0 1510:0 1554:0 1594:0 1991:0.01 2034:0 2068:0
+
+## phase s1 (scroll) 3.04s frames 18 main {"task":689,"script":10,"layout":1,"style":86} rafTotal 133
+  pixel change: first 539 last 539 frames>0.15: 1/17
+  series 539:22.36 541:0 542:0 788:0 789:0 857:0 1058:0 1255:0 1458:0 1574:0.01 1660:0 1856:0 2057:0 2256:0 2457:0 2660:0 2857:0
+
+## phase s2 (scroll) 3.01s frames 5 main {"task":554,"script":3,"layout":17,"style":108} rafTotal 135
+  pixel change: first 905 last 905 frames>0.15: 1/4
+  series -146:0 905:15.23 912:0.03 986:0
+
+## phase s3 (scroll) 3.01s frames 24 main {"task":890,"script":16,"layout":18,"style":151} rafTotal 141
+  437x CSSAnimation|fFDhtq_dotIn|420|linear|it1| delays[0,2,4,6,8,10,12,14,16,18,20,22...] start@98..191 tgt  from undefined to undefined
+  1x WebAnimation|undefined|800|cubic-bezier(0.22, 1, 0.36, 1)|it1| delays[0] start@62..62 tgt  from undefined to undefined
+  1x CSSAnimation|fFDhtq_dotIn|420|cubic-bezier(0.25, 0.46, 0.45, 0.94)|it1|transform+opacity delays[290] start@141..141 tgt circle from {"transform":"scale(0.4)","opacity":"0"} to {"transform":"scale(1)","opacity":"1"}
+  pixel change: first 498 last 498 frames>0.15: 1/23
+  series 498:5.5 503:0 515:0 530:0.01 559:0 593:0 693:0 699:0 703:0 716:0 723:0 731:0 740:0 757:0 775:0 791:0 798:0 806:0 815:0 834:0 841:0 864:0 873:0

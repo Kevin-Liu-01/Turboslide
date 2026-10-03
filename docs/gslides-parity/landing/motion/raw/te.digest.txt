@@ -1,0 +1,26 @@
+# te  https://teenage.engineering/ 2026-10-02T22:51:30.157Z
+LCP {"t":540,"size":1176961,"url":"https://assets.teenage.engineering/_img/6a3afd2f71543654d645de7d_opt.svg","el":"img"} CLS 0.000 ctx [] longtasks 0 sum 0
+scroll-behavior auto auto lenis false locomotive false docH 15233 fonts ["te-20","te-40","Unicode","franxurter","TechnoType","swingus","riddim","riddimscript","te-vjs","UniversTE20T","UniversTE40L","ttregular"]
+bytes {"Document":{"n":1,"kb":51},"Script":{"n":50,"kb":851},"Font":{"n":3,"kb":66},"Stylesheet":{"n":18,"kb":45},"Image":{"n":11,"kb":791},"Fetch":{"n":8,"kb":28},"Ping":{"n":1,"kb":1},"Other":{"n":1,"kb":2}}
+bigJs [{"url":"https://www.googletagmanager.com/gtag/js?id=G-BJE1ZP05H0","kb":196},{"url":"https://teenage.engineering/assets/video.RFSHMuvC.js","kb":187},{"url":"https://www.googletagmanager.com/gtag/js?id=AW-924686147&cx=c&gtm=4e69u2","kb":163},{"url":"https://teenage.engineering/assets/client.CCBhioJS.js","kb":53},{"url":"https://teenage.engineering/assets/te013.Dvb4vr0r.js","kb":46},{"url":"https://teenage.engineering/assets/chunk-EVOBXE3Y.CsEuXLJ4.js","kb":37},{"url":"https://teenage.engineering/assets/layout.DLU2A1zs.js","kb":36},{"url":"https://teenage.engineering/assets/entry.client.BXqN-z7V.js","kb":24}]
+media [{"url":"https://teenage.engineering/assets/video.DyYfRNFE.css","mime":"text/css","kb":13,"status":200},{"url":"https://teenage.engineering/assets/video.RFSHMuvC.js","mime":"application/javascript","kb":187,"status":200}]
+videos []
+canvases []
+
+## phase load (load) 5.17s frames 3 main {"task":343,"script":224,"layout":40,"style":9} rafTotal 4
+  pixel change: first 340 last 535 frames>0.15: 2/2
+  series 340:4.43 535:40.75
+
+## phase idle (idle) 3.01s frames 1 main {"task":4,"script":1,"layout":0,"style":0} rafTotal 4
+
+## phase s1 (scroll) 3.01s frames 2 main {"task":8,"script":2,"layout":0,"style":0} rafTotal 4
+  pixel change: first 7 last 7 frames>0.15: 1/1
+  series 7:195.79
+
+## phase s2 (scroll) 3.02s frames 2 main {"task":7,"script":2,"layout":0,"style":0} rafTotal 4
+  pixel change: first 46 last 46 frames>0.15: 1/1
+  series 46:34.78
+
+## phase s3 (scroll) 3.02s frames 2 main {"task":8,"script":2,"layout":0,"style":0} rafTotal 4
+  pixel change: first 49 last 49 frames>0.15: 1/1
+  series 49:40.7

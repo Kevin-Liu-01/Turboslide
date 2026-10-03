@@ -1,0 +1,2570 @@
+/* Turboslide /home, direction C: the playground (docs/gslides-parity/landing/direction-c.md).
+
+   A prototype, not product code. The tokens are the product's (packages/chrome/src/tokens.css and
+   brand.css, copied by value under the same --pt- and --ts- names), the selection grammar is
+   Overlay.css's, the slide grammar is the GT deck's (Prototemplate deck/DECK-GRAMMAR.md and
+   parts/head.html). Inter is the one face. Paper and ink everywhere; #2f5ce0 only where the
+   interface draws a state (selection, focus, a pressed seam, the caret).
+
+   ---------------------------------------------------------------------------------------------
+   MOTION TABLE. Every duration and easing on the page is named here and read through the tokens
+   below. Under prefers-reduced-motion: reduce every duration is 0 ms, the script draws each
+   field at its final tone and plays no sequence, and the markup is the final frame.
+
+   What moves                         Duration                 Easing             Trigger
+   ---------------------------------  -----------------------  -----------------  -----------------------------
+   Hover ground, button colour         120 ms (--m-fast)        ease-out           pointer over, focus
+   Press on a Title Case button        120 ms, scale 0.98       ease-out           :active
+   Selection ring and handles appear   120 ms opacity           ease-out           click on an object
+   Menu plate and submenu              160 ms (--m-menu),       arrive             click, hover while open, keys
+                                       4 px rise
+   Status sentence and toast           160 ms (--m-menu),       arrive             after an action
+                                       6 px rise
+   Drag, resize, rotate, seam drag     none: follows the        none               pointer; no inertia, no spring
+                                       pointer 1:1
+   Keyboard nudge, undo, redo          none: a cut              none               keys (high frequency)
+   Hero field develops                 1500 ms (--m-develop)    tone (smoothstep)  load + one idle callback,
+                                       cells switch in Bayer                       capped at 1500 ms; once
+                                       order
+   Brand kit change                    500 ms (--m-beat)        tone (smoothstep)  kit pressed or hex entered;
+                                       ink and ground mix on                       the field mixes ink on the
+                                       one curve                                   same curve
+   Band seam draws out of its cross    600 ms (--m-line)        arrive             band 35 percent in view, once
+   Heading rises through its clip      600 ms (--m-line),       arrive             same, at 0 ms
+                                       lines 60 ms apart
+   Lead, rows, instrument rise 16 px   620 ms (--m-enter),      arrive             same, from 500 ms
+                                       55 ms apart, 7 at most
+   Export seam shows it moves          600 ms (--m-move-long)   move               export band in view, once:
+                                       from 82 to 50 percent                       the handle travels and stops
+   Agent ring travels to the change    300 + d / 2 ms,          move               a command runs
+                                       300 to 700 ms
+   Agent output rows                   160 ms, 6 px rise,       arrive             a command runs
+                                       30 ms apart
+   Version Play                        one version per 900 ms   linear progress    Play pressed; stops on any
+                                       (--m-step), a cut                           touch of the slider
+   Presenter timer                     1 s steps                linear (process)   Present pressed
+   Mark sting (license band)           600 ms per piece,        arrive             band in view, once
+                                       70 ms apart, 7 pieces
+   Light and Dark                      none: a cut              none               the appearance buttons
+
+   Easings: arrive cubic-bezier(0.16, 1, 0.3, 1) (expo.out); arrive-soft cubic-bezier(0.25, 1,
+   0.5, 1) (power3.out); move cubic-bezier(0.65, 0, 0.35, 1) (power2.inOut); tone
+   cubic-bezier(0.333, 0, 0.667, 1) (smoothstep); process linear. No bounce, no overshoot, no
+   blur, no shadow, no smooth scrolling, no scroll capture, nothing loops on its own.
+   --------------------------------------------------------------------------------------------- */
+
+/* Inter loads from fonts/inter-subset.css (the subset, inlined for file://) */
+
+:root {
+  color-scheme: light;
+  --pt-paper: #ffffff;
+  --pt-ink: #070707;
+  --pt-ink-2: #3a3d44;
+  --pt-titanium: #6f747d;
+  --pt-field: rgba(7, 7, 7, 0.44);
+  --pt-hair: rgba(7, 7, 7, 0.18);
+  --pt-hair-soft: rgba(7, 7, 7, 0.09);
+  --pt-plate: rgba(7, 7, 7, 0.06);
+  --pt-cross: rgba(7, 7, 7, 0.38);
+  --pt-edge: rgba(7, 7, 7, 0.62);
+  --pt-thumb: rgba(7, 7, 7, 0.32);
+  --pt-panel-ink: #101010;
+  --pt-panel-text: rgba(255, 255, 255, 0.87);
+  --pt-panel-dim: rgba(255, 255, 255, 0.56);
+  --pt-panel-hair: rgba(255, 255, 255, 0.16);
+  --pt-select: #2f5ce0;
+  --pt-select-text: #ffffff;
+  --pt-display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-text: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --ts-h1: 3.7rem;
+  --ts-h2: 2.25rem;
+  --ts-h3: 1.375rem;
+  --ts-lead: 17px;
+  --ts-body: 16px;
+  --ts-small: 14px;
+  --ts-label: 13px;
+  --ts-figure: 40px;
+  --ts-rail: 1104px;
+  --ts-gutter: 40px;
+  --ts-nav-h: 58px;
+  --ts-cross: 9px;
+  --col: min(var(--ts-rail), 100% - 32px);
+
+  /* motion tokens (the table above) */
+  --m-fast: 120ms;
+  --m-menu: 160ms;
+  --m-beat: 500ms;
+  --m-line: 600ms;
+  --m-enter: 620ms;
+  --m-develop: 1500ms;
+  --m-move-long: 600ms;
+  --m-step: 900ms;
+  --m-stagger: 55ms;
+  --m-lines: 60ms;
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-arrive-soft: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-tone: cubic-bezier(0.333, 0, 0.667, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --pt-paper: #070707;
+    --pt-ink: #f2f2f0;
+    --pt-ink-2: #b9bcc3;
+    --pt-titanium: #8a8f98;
+    --pt-field: rgba(242, 242, 240, 0.44);
+    --pt-hair: rgba(242, 242, 240, 0.22);
+    --pt-hair-soft: rgba(242, 242, 240, 0.1);
+    --pt-plate: rgba(242, 242, 240, 0.08);
+    --pt-cross: rgba(255, 255, 255, 0.34);
+    --pt-edge: rgba(242, 242, 240, 0.55);
+    --pt-thumb: rgba(242, 242, 240, 0.32);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --pt-paper: #070707;
+  --pt-ink: #f2f2f0;
+  --pt-ink-2: #b9bcc3;
+  --pt-titanium: #8a8f98;
+  --pt-field: rgba(242, 242, 240, 0.44);
+  --pt-hair: rgba(242, 242, 240, 0.22);
+  --pt-hair-soft: rgba(242, 242, 240, 0.1);
+  --pt-plate: rgba(242, 242, 240, 0.08);
+  --pt-cross: rgba(255, 255, 255, 0.34);
+  --pt-edge: rgba(242, 242, 240, 0.55);
+  --pt-thumb: rgba(242, 242, 240, 0.32);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ts-h1: 2.5rem;
+    --ts-h2: 1.75rem;
+    --ts-gutter: 16px;
+    --ts-figure: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --m-fast: 0ms;
+    --m-menu: 0ms;
+    --m-beat: 0ms;
+    --m-line: 0ms;
+    --m-enter: 0ms;
+    --m-develop: 0ms;
+    --m-move-long: 0ms;
+    --m-step: 0ms;
+    --m-stagger: 0ms;
+    --m-lines: 0ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The page */
+
+html {
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: var(--ts-body) / 1.6 var(--pt-text);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  position: relative;
+  display: block;
+  overflow-x: clip;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 1px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the one rail law: one hairline on each side of the column, drawn once */
+.rails {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - var(--col) / 2);
+  width: var(--col);
+  border-inline: 1px solid var(--pt-hair);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.col {
+  width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--ts-gutter);
+  min-width: 0;
+}
+
+/* the seam: a full bleed hairline under a band with a 9 px cross where it meets each rail */
+.seam {
+  position: relative;
+  height: 0;
+}
+
+.seam::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--pt-hair);
+  transform-origin: calc(50% - var(--col) / 2) 0;
+}
+
+.seam i {
+  position: absolute;
+  top: -4px;
+  width: var(--ts-cross);
+  height: var(--ts-cross);
+  background:
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 4px 0 / 1px 100% no-repeat,
+    linear-gradient(var(--pt-cross), var(--pt-cross)) 0 4px / 100% 1px no-repeat;
+  z-index: 2;
+}
+
+.seam i:first-child {
+  left: calc(50% - var(--col) / 2 - 4px);
+}
+
+.seam i:last-child {
+  left: calc(50% + var(--col) / 2 - 5px);
+}
+
+.hatch {
+  height: 24px;
+  background-image: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 8px);
+}
+
+/* ---- buttons: the shell's .pt-ib, square, Title Case labels ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pt-ink);
+  font-size: var(--ts-small);
+  font-weight: 450;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--m-fast) ease-out,
+    border-color var(--m-fast) ease-out,
+    color var(--m-fast) ease-out,
+    transform var(--m-fast) ease-out;
+}
+
+.btn:hover {
+  background: var(--pt-plate);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn.solid {
+  border-color: var(--pt-ink);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.btn.solid:hover {
+  background: var(--pt-ink-2);
+  border-color: var(--pt-ink-2);
+}
+
+.btn.sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: var(--ts-label);
+}
+
+.btn.icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-color: transparent;
+}
+
+.btn.icon:hover {
+  border-color: transparent;
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  color: var(--pt-titanium);
+  cursor: default;
+  background: transparent;
+  transform: none;
+}
+
+.btn svg,
+.ic {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+/* ---- the navigation: 58 px in the column, the seam under it ---- */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: var(--ts-nav-h);
+}
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--ts-nav-h);
+  color: var(--pt-ink);
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+
+.lockup svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.lockup span {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.nav-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-links > a.btn {
+  border-color: transparent;
+}
+
+.appearance {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.appearance .btn {
+  border-color: transparent;
+}
+
+.appearance .btn[aria-pressed='true'] {
+  border-color: var(--pt-ink);
+}
+
+.signin-slot {
+  display: inline-flex;
+  flex: 0 0 64px;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The slide: the GT deck's sheet drawn in units of the slide's own width (--u is one sheet px),
+   so a slide renders at any size with no transform and no script for its first paint */
+
+.sl {
+  --u: calc(100cqw / 1600);
+  --k-paper: var(--pt-paper);
+  --k-ink: var(--pt-ink);
+  --k-ink-2: var(--pt-ink-2);
+  --k-titanium: var(--pt-titanium);
+  --k-hair: var(--pt-hair);
+  --k-cross: var(--pt-cross);
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--k-paper);
+  color: var(--k-ink);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  /* a kit change mixes the six registered colour roles on one curve (landing.js registers them) */
+  transition:
+    --k-paper var(--m-beat) var(--ease-tone),
+    --k-ink var(--m-beat) var(--ease-tone),
+    --k-ink-2 var(--m-beat) var(--ease-tone),
+    --k-titanium var(--m-beat) var(--ease-tone),
+    --k-hair var(--m-beat) var(--ease-tone),
+    --k-cross var(--m-beat) var(--ease-tone);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* the appearance buttons cut, they never mix (the motion table) */
+html.no-tx .sl,
+html.no-tx .sl *,
+.sl.no-mix {
+  transition: none !important;
+}
+
+/* an editable slide lets its selection chrome sit past the sheet; the content stays clipped */
+.sl.ed-host {
+  overflow: visible;
+}
+
+.sl.ed-host > .sl-c {
+  overflow: hidden;
+}
+
+.sl.ed-host .sl-b.is-sel {
+  touch-action: none;
+}
+
+.sl-edge {
+  outline: 1px solid var(--pt-edge);
+  outline-offset: 0;
+}
+
+.sl canvas.sl-field {
+  position: absolute;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.sl-frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.sl-frame::before,
+.sl-frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--k-hair);
+}
+
+.sl-frame::before {
+  left: calc(56 * var(--u));
+}
+
+.sl-frame::after {
+  right: calc(56 * var(--u));
+}
+
+.sl-frame b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--k-hair);
+}
+
+.sl-frame b.t {
+  top: calc(56 * var(--u));
+}
+
+.sl-frame b.b {
+  bottom: calc(56 * var(--u));
+}
+
+.sl-frame i {
+  position: absolute;
+  width: calc(11 * var(--u));
+  height: calc(11 * var(--u));
+  min-width: 5px;
+  min-height: 5px;
+  background:
+    linear-gradient(var(--k-cross), var(--k-cross)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--k-cross), var(--k-cross)) 0 50% / 100% 1px no-repeat;
+}
+
+.sl-frame i.tl { left: calc(56 * var(--u)); top: calc(56 * var(--u)); transform: translate(-50%, -50%); }
+.sl-frame i.tr { right: calc(56 * var(--u)); top: calc(56 * var(--u)); transform: translate(50%, -50%); }
+.sl-frame i.bl { left: calc(56 * var(--u)); bottom: calc(56 * var(--u)); transform: translate(-50%, 50%); }
+.sl-frame i.br { right: calc(56 * var(--u)); bottom: calc(56 * var(--u)); transform: translate(50%, 50%); }
+
+.sl-thumb .sl-frame i {
+  display: none;
+}
+
+.sl-mark {
+  position: absolute;
+  left: calc(72 * var(--u));
+  bottom: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  width: calc(27 * var(--u));
+  fill: var(--k-titanium);
+  z-index: 3;
+}
+
+.sl-count {
+  position: absolute;
+  right: calc(72 * var(--u));
+  bottom: calc(20 * var(--u));
+  font-size: calc(13 * var(--u));
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--k-titanium);
+  font-variant-numeric: tabular-nums;
+  z-index: 3;
+}
+
+/* the content layer: the usable area of the sheet */
+.sl-c {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* the plate of a picture slide: paper under the words, square, no rule */
+.sl-plate {
+  position: absolute;
+  background: var(--k-paper);
+}
+
+.sl-plate.flow.narrow {
+  width: calc(560 * var(--u));
+}
+
+.sl-plate.flow {
+  right: calc(137 * var(--u));
+  bottom: calc(129 * var(--u));
+  width: calc(700 * var(--u));
+  padding: calc(22 * var(--u)) calc(26 * var(--u)) calc(20 * var(--u));
+  display: flex;
+  flex-direction: column;
+}
+
+.sl-flow {
+  position: absolute;
+  left: calc(137 * var(--u));
+  right: calc(137 * var(--u));
+  top: calc(129 * var(--u));
+  bottom: calc(129 * var(--u));
+  display: flex;
+  flex-direction: column;
+}
+
+.sl-flow.is-numbers,
+.sl-flow.is-closing {
+  justify-content: center;
+}
+
+.sl-b {
+  position: relative;
+  margin: 0;
+  color: var(--k-ink);
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.sl-b.abs {
+  position: absolute;
+  transform-origin: 50% 50%;
+}
+
+.sl-b[contenteditable='true'] {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  caret-color: var(--pt-select);
+}
+
+/* the deck's sizes on the 1600 sheet: h1 88, the mood title 44, big 72, h2 44, p 22, credit 15,
+   rows 20 */
+.sl-b.t-h1 {
+  font-size: calc(88 * var(--u));
+  line-height: 1.02;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.sl-b.t-h2 {
+  font-size: calc(44 * var(--u));
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.sl-b.t-big {
+  font-size: calc(200 * var(--u));
+  line-height: 0.9;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sl-b.t-p {
+  font-size: calc(22 * var(--u));
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--k-ink);
+}
+
+.sl-b.t-lead {
+  font-size: calc(26 * var(--u));
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--k-ink-2);
+}
+
+.sl-b.t-credit {
+  font-size: calc(15 * var(--u));
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--k-titanium);
+}
+
+.sl-b.is-bold {
+  font-weight: 500;
+}
+
+.sl-b.is-under {
+  text-decoration: underline;
+  text-decoration-thickness: max(1px, calc(1.5 * var(--u)));
+  text-underline-offset: calc(6 * var(--u));
+}
+
+.sl-b.a-center {
+  text-align: center;
+}
+
+.sl-b.a-right {
+  text-align: right;
+}
+
+/* ruled rows on a slide (.rows: key and value, 20 px, the hairline between) */
+.sl-rows {
+  display: grid;
+  grid-template-columns: calc(240 * var(--u)) 1fr;
+  font-size: calc(20 * var(--u));
+  line-height: 1.45;
+  border-top: max(1px, calc(1 * var(--u))) solid var(--k-hair);
+}
+
+.sl-rows > div {
+  display: contents;
+}
+
+.sl-rows b,
+.sl-rows span {
+  padding: calc(18 * var(--u)) 0;
+  border-bottom: max(1px, calc(1 * var(--u))) solid var(--k-hair);
+}
+
+.sl-rows b {
+  font-weight: 500;
+}
+
+.sl-rows span {
+  color: var(--k-ink-2);
+}
+
+.sl-table {
+  display: grid;
+  font-size: calc(20 * var(--u));
+  line-height: 1.4;
+  border-top: max(1px, calc(1 * var(--u))) solid var(--k-hair);
+}
+
+.sl-table span {
+  padding: calc(12 * var(--u)) calc(8 * var(--u));
+  border-bottom: max(1px, calc(1 * var(--u))) solid var(--k-hair);
+  color: var(--k-ink-2);
+}
+
+.sl-shape {
+  border: max(1px, calc(1.5 * var(--u))) solid var(--k-ink);
+}
+
+.sl-shape.oval {
+  border-radius: 50%;
+}
+
+.sl-closing-mark {
+  fill: var(--k-ink);
+}
+
+/* a skipped slide in a thumbnail: the eye slash over a hatch, the product's mark */
+.sl-skip {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background-image: repeating-linear-gradient(-45deg, var(--pt-hair) 0 1px, transparent 1px 6px);
+}
+
+.sl-skip svg {
+  width: 18px;
+  height: 18px;
+  padding: 3px;
+  box-sizing: content-box;
+  fill: var(--pt-ink);
+  background: var(--pt-paper);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The selection grammar (packages/chrome/src/Overlay.css): a 1 px ring in the selection colour,
+   the chip naming the block above it, the eight 11 px squares on paper with a ring in the
+   selection colour, the 12 px rotation ring joined by a 13.5 px stem, the guides */
+
+.ov {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ov-turn {
+  position: absolute;
+  pointer-events: none;
+  animation: fade-in var(--m-fast) ease-out both;
+}
+
+.ov-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--pt-select);
+}
+
+.ov-hover {
+  position: absolute;
+  border: 1px solid var(--pt-select);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.ov-chip {
+  position: absolute;
+  left: -1px;
+  bottom: calc(100% + 4px);
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+  font: 500 var(--ts-label) / 1 var(--pt-text);
+  white-space: nowrap;
+}
+
+.ov-chip.up-rot {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+.ov-h {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border: 1px solid var(--pt-select);
+  background: var(--pt-paper);
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 2;
+}
+
+.ov-h::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.ov-h:hover,
+.ov-h.is-active {
+  background: var(--pt-select);
+}
+
+.ov-rot {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 1px solid var(--pt-select);
+  border-radius: 50%;
+  background: var(--pt-paper);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  z-index: 1;
+}
+
+.ov-rot::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 13.5px;
+  margin-left: -0.5px;
+  background: var(--pt-select);
+}
+
+.ov-rot::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.ov-rot:hover,
+.ov-rot.is-active {
+  background: var(--pt-select);
+}
+
+.ov-guide {
+  position: absolute;
+  background: var(--pt-select);
+  pointer-events: none;
+}
+
+.ov-guide.v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.ov-guide.h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.ov-readout {
+  position: absolute;
+  padding: 2px 6px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 500 var(--ts-label) / 1.3 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ed-host .sl-b[data-id] {
+  cursor: default;
+}
+
+.ed-host .sl-b.is-sel {
+  cursor: move;
+}
+
+.ed-host .sl-b.is-editing {
+  cursor: text;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The hero: the playground slide */
+
+.hero {
+  padding-top: 32px;
+  padding-bottom: 72px;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 0 0 8px;
+  flex-wrap: wrap;
+}
+
+.tools .sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 8px;
+  background: var(--pt-hair);
+}
+
+.tools .lbl {
+  margin: 0 8px 0 4px;
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+}
+
+.kit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kit button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px 0 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--ts-label);
+  cursor: pointer;
+  transition: background-color var(--m-fast) ease-out, border-color var(--m-fast) ease-out;
+}
+
+.kit button:hover {
+  background: var(--pt-plate);
+}
+
+.kit button[aria-pressed='true'] {
+  border-color: var(--pt-ink);
+}
+
+.kit .sw {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  width: 20px;
+  height: 20px;
+  outline: 1px solid var(--pt-hair);
+}
+
+.kit .sw i:first-child {
+  background: var(--a);
+}
+
+.kit .sw i:last-child {
+  background: var(--b);
+}
+
+.hex {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+}
+
+.hex input {
+  width: 92px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-field);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pt-ink);
+  font-size: var(--ts-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.hex input:focus {
+  outline: 1px solid var(--pt-select);
+  outline-offset: -1px;
+  border-color: var(--pt-select);
+}
+
+.tools .push {
+  margin-left: auto;
+}
+
+.stage-wrap {
+  position: relative;
+}
+
+.hero .sl {
+  touch-action: pan-x pan-y;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.status .msg {
+  min-width: 0;
+}
+
+/* the first sentence is written for the pointer in hand, chosen by CSS so it never shifts */
+.on-coarse {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .on-fine {
+    display: none;
+  }
+
+  .on-coarse {
+    display: inline;
+  }
+}
+
+.status .msg.is-new {
+  animation: rise-in var(--m-menu) var(--ease-arrive) both;
+}
+
+.status .msg button {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.status .read {
+  flex: 0 0 auto;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-foot {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 72px;
+  margin-top: 40px;
+  align-items: start;
+}
+
+.lead {
+  max-width: 560px;
+  font-size: var(--ts-lead);
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+/* ruled key and value rows with a Heroicon in the key cell (the facts rows) */
+.rows {
+  display: grid;
+  grid-template-columns: 136px 1fr;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.rows > div {
+  display: contents;
+}
+
+.rows dt,
+.rows dd {
+  margin: 0;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.rows dt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.rows dt .ic {
+  margin-top: 3px;
+}
+
+.rows dd {
+  color: var(--pt-ink-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ---- the numbers row: still on purpose ---- */
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.numbers > div {
+  padding: 40px 32px 44px 0;
+}
+
+.numbers > div + div {
+  padding-left: 32px;
+  border-left: 1px solid var(--pt-hair);
+}
+
+.numbers b {
+  display: block;
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: var(--ts-figure);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.numbers p {
+  margin-top: 14px;
+  max-width: 300px;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+.numbers a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The bands below: a head (h2 and lead) over one working instrument */
+
+.band {
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+
+.band-head {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 72px;
+  align-items: end;
+  margin-bottom: 48px;
+}
+
+.h2 {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: var(--ts-h2);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.h2 .clip {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.h2 .clip > span {
+  display: block;
+}
+
+.band-head .lead {
+  max-width: 600px;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--pt-ink);
+  font-variant-numeric: tabular-nums;
+  vertical-align: 1px;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Instrument 1: the editor in miniature, its menus open */
+
+.mini {
+  position: relative;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+}
+
+.mini-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 8px 0 12px;
+}
+
+.mini-title svg.mk {
+  width: 24px;
+  height: 24px;
+  fill: var(--pt-ink);
+}
+
+.mini-title .name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mini-title .meta {
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+}
+
+.mini-title .push {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.menubar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.menubar > .mt {
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  cursor: default;
+  transition: background-color var(--m-fast) ease-out;
+}
+
+.menubar > .mt:hover,
+.menubar > .mt[aria-expanded='true'] {
+  background: var(--pt-plate);
+}
+
+.menus-key {
+  display: none;
+}
+
+.plate {
+  position: absolute;
+  z-index: 20;
+  min-width: 248px;
+  max-width: 320px;
+  padding: 6px 0;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  animation: menu-in var(--m-menu) var(--ease-arrive) both;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.plate [role='menuitem'] {
+  display: grid;
+  grid-template-columns: 1fr auto 16px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px 0 16px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  text-align: left;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.plate [role='menuitem'] .k {
+  color: var(--pt-titanium);
+  font-size: var(--ts-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.plate [role='menuitem'] svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--pt-titanium);
+}
+
+.plate [role='menuitem']:hover,
+.plate [role='menuitem']:focus,
+.plate [role='menuitem'][aria-expanded='true'] {
+  background: var(--pt-plate);
+  outline: none;
+}
+
+.plate [role='menuitem'][aria-disabled='true'] {
+  color: var(--pt-titanium);
+}
+
+.plate [role='separator'] {
+  height: 1px;
+  margin: 6px 0;
+  background: var(--pt-hair-soft);
+}
+
+.mini-body {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  min-height: 0;
+}
+
+.mini-body.no-strip {
+  grid-template-columns: 1fr;
+}
+
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 10px 14px 6px;
+  border-right: 1px solid var(--pt-hair);
+  max-height: 520px;
+  overflow: auto;
+}
+
+.no-strip .strip {
+  display: none;
+}
+
+.strip button {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 6px;
+  align-items: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: right;
+}
+
+.strip button > span {
+  font-size: 11px;
+  line-height: 1;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.strip button .sl {
+  outline: 1px solid var(--pt-hair);
+}
+
+.strip button[aria-current='true'] .sl {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 1px;
+}
+
+.mini-stage {
+  padding: 24px 32px;
+  background: var(--pt-plate);
+  min-width: 0;
+}
+
+.mini-stage .sl {
+  outline: 1px solid var(--pt-hair);
+}
+
+.mini-notes {
+  display: none;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.mini.show-notes .mini-notes {
+  display: block;
+}
+
+.mini-notes textarea {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  resize: vertical;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+}
+
+.mini-notes textarea:focus {
+  outline: 1px solid var(--pt-select);
+  outline-offset: -1px;
+}
+
+.mini-grid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 24px 32px;
+  background: var(--pt-plate);
+}
+
+.mini.show-grid .mini-grid {
+  display: grid;
+}
+
+.mini.show-grid .mini-body {
+  display: none;
+}
+
+.mini-grid button {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.mini .status {
+  padding: 0 14px;
+  border-top: 1px solid var(--pt-hair);
+  border-bottom: 0;
+}
+
+.dialog {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  top: 92px;
+  width: min(420px, calc(100% - 32px));
+  transform: translateX(-50%);
+  padding: 20px 20px 16px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  animation: fade-in var(--m-menu) ease-out both;
+}
+
+.dialog h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.dialog p.d {
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.dialog label {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+}
+
+.dialog input {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-field);
+  border-radius: 0;
+  background: transparent;
+  font-size: var(--ts-small);
+}
+
+.dialog input:focus {
+  outline: 1px solid var(--pt-select);
+  outline-offset: -1px;
+  border-color: var(--pt-select);
+}
+
+.dialog .count {
+  margin-top: 12px;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog .row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.finder {
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 10px;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.finder button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  background: none;
+  font-size: var(--ts-small);
+  text-align: left;
+  cursor: pointer;
+}
+
+.finder button:hover,
+.finder button:focus {
+  background: var(--pt-plate);
+  outline: none;
+}
+
+.finder button span:last-child {
+  color: var(--pt-titanium);
+  font-size: var(--ts-label);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Instrument 2: present */
+
+.present {
+  display: grid;
+  grid-template-columns: 1fr 296px;
+  gap: 0;
+  border: 1px solid var(--pt-edge);
+}
+
+.audience {
+  position: relative;
+  display: grid;
+  align-content: center;
+  background: #000;
+  padding: 0;
+  min-width: 0;
+}
+
+.audience:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: -2px;
+}
+
+.audience:fullscreen {
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.audience:fullscreen .sl {
+  width: min(100vw, 177.78vh);
+}
+
+.audience .rest {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10;
+}
+
+.presenter {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--pt-edge);
+  min-width: 0;
+}
+
+.presenter > div {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.presenter .k {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+}
+
+.timer {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.presenter .notes {
+  flex: 1;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+  min-height: 72px;
+}
+
+.presenter .nav2 {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  border-bottom: 0;
+}
+
+.presenter .nav2 .of {
+  margin-left: auto;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.present-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.present-tools .hint {
+  margin-left: auto;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Instrument 3: export, a seam over one slide drawn two ways */
+
+.seamx {
+  --cut: 50%;
+  position: relative;
+  outline: 1px solid var(--pt-edge);
+  touch-action: pan-y;
+}
+
+.seamx .layer {
+  position: relative;
+}
+
+.seamx .layer.b {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 0 0 var(--cut));
+}
+
+.seamx .layer.a {
+  clip-path: inset(0 calc(100% - var(--cut)) 0 0);
+}
+
+.seamx .anno {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.seamx .anno .box {
+  position: absolute;
+  border: 1px solid var(--pt-select);
+}
+
+.seamx .anno .tag {
+  position: absolute;
+  left: -1px;
+  top: -19px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+  font: 500 12px/18px var(--pt-text);
+  white-space: nowrap;
+}
+
+.seamx .anno .tag.in {
+  top: 4px;
+  left: 4px;
+}
+
+.seamx .handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--cut);
+  width: 32px;
+  margin-left: -16px;
+  z-index: 8;
+  cursor: ew-resize;
+  touch-action: none;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+/* the seam is an ink hairline between two paper hairlines, so it reads over the picture's ink
+   and over its paper alike (the deck's doubled line) */
+.seamx .handle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: linear-gradient(to right, var(--pt-paper) 0 1px, var(--pt-ink) 1px 2px, var(--pt-paper) 2px 3px);
+}
+
+.seamx .handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border: 1px solid var(--pt-ink);
+  background: var(--pt-paper);
+}
+
+.seamx .handle:hover::after,
+.seamx .handle.is-active::after {
+  background: var(--pt-ink);
+}
+
+.seamx .handle:focus-visible {
+  outline: none;
+}
+
+.seamx .handle:focus-visible::after {
+  border-color: var(--pt-select);
+  background: var(--pt-select);
+}
+
+.seamx.is-hint .handle {
+  transition: left var(--m-move-long) var(--ease-move);
+}
+
+.seamx.is-hint .layer.a,
+.seamx.is-hint .layer.b,
+.seamx.is-hint .anno > div {
+  transition: clip-path var(--m-move-long) var(--ease-move);
+}
+
+.seam-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: var(--ts-label);
+  color: var(--pt-ink-2);
+}
+
+.export-grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.export-grid .rows {
+  grid-template-columns: 148px 1fr;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Instrument 4: the agent's command line over the slide it changes */
+
+.agents-top {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.agents-top .sl {
+  outline: 1px solid var(--pt-edge);
+}
+
+.agent-ring {
+  position: absolute;
+  z-index: 6;
+  border: 1px solid var(--pt-select);
+  pointer-events: none;
+}
+
+.agent-ring .ov-chip {
+  font-size: 12px;
+}
+
+.term {
+  margin-top: 32px;
+  border: 1px solid var(--pt-hair-soft);
+  background: var(--pt-panel-ink);
+  color: var(--pt-panel-text);
+  font-family: var(--pt-mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.term-head {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--pt-panel-hair);
+  font-family: var(--pt-text);
+}
+
+.term-head button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid var(--pt-panel-hair);
+  background: transparent;
+  color: var(--pt-panel-dim);
+  font-size: var(--ts-label);
+  cursor: pointer;
+}
+
+.term-head button[aria-selected='true'] {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.term-head .note {
+  margin-left: auto;
+  padding: 0 14px;
+  font-size: 12px;
+  color: var(--pt-panel-dim);
+}
+
+.term-out {
+  height: 232px;
+  overflow: auto;
+  padding: 12px 16px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+
+.term-out pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.term-out .cmd {
+  color: #fff;
+}
+
+.term-out .dim {
+  color: var(--pt-panel-dim);
+}
+
+.term-out .err {
+  color: #f0a020;
+}
+
+.term-out .new {
+  animation: rise-in var(--m-menu) var(--ease-arrive) both;
+}
+
+.term-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--pt-panel-hair);
+}
+
+.term-in span {
+  color: var(--pt-panel-dim);
+}
+
+.term-in input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  caret-color: #fff;
+  outline: none;
+}
+
+.term-in input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.term:focus-within .term-in {
+  box-shadow: inset 0 0 0 1px var(--pt-select);
+}
+
+.term-ex {
+  display: grid;
+  border-top: 1px solid var(--pt-panel-hair);
+}
+
+.term-ex button {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--pt-panel-hair);
+  background: transparent;
+  color: var(--pt-panel-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-fast) ease-out;
+}
+
+.term-ex button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.term-ex button span:last-child {
+  font-family: var(--pt-text);
+  font-size: 12px;
+  color: var(--pt-panel-dim);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Instrument 5: version history */
+
+.versions {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.versions .sl {
+  outline: 1px solid var(--pt-edge);
+}
+
+.versions > *,
+.agents-top > *,
+.export-grid > *,
+.hero-foot > *,
+.band-head > * {
+  min-width: 0;
+}
+
+.scrub {
+  margin-top: 20px;
+}
+
+.scrub-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scrub input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.scrub input[type='range']::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--pt-ink);
+}
+
+.scrub input[type='range']::-moz-range-track {
+  height: 1px;
+  background: var(--pt-ink);
+}
+
+.scrub input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -6px;
+  border: 1px solid var(--pt-ink);
+  border-radius: 0;
+  background: var(--pt-paper);
+}
+
+.scrub input[type='range']::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--pt-ink);
+  border-radius: 0;
+  background: var(--pt-paper);
+}
+
+.scrub input[type='range']:focus-visible::-webkit-slider-thumb {
+  border-color: var(--pt-select);
+  background: var(--pt-select);
+}
+
+.ticks {
+  position: relative;
+  height: 10px;
+}
+
+.ticks i {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 7px;
+  background: var(--pt-hair);
+}
+
+.ticks i.you {
+  background: var(--pt-ink);
+}
+
+.scrub .prog {
+  height: 1px;
+  margin-top: 6px;
+  background: var(--pt-hair-soft);
+}
+
+.scrub .prog i {
+  display: block;
+  height: 1px;
+  width: 0;
+  background: var(--pt-ink);
+}
+
+#ver-cap .undo-link {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.vlist {
+  max-height: 452px;
+  overflow: auto;
+  border-top: 1px solid var(--pt-hair);
+  scrollbar-width: thin;
+}
+
+.vlist button {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+  padding: 12px 8px 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--m-fast) ease-out;
+}
+
+.vlist button:hover {
+  background: var(--pt-plate);
+}
+
+.vlist button[aria-current='true'] {
+  background: var(--pt-plate);
+  box-shadow: inset 2px 0 0 var(--pt-ink);
+}
+
+.vlist .who {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  border: 1px solid var(--pt-hair);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.vlist .who.you {
+  border-color: var(--pt-ink);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.vlist .who svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.vlist .what b {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.vlist .what span {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--ts-label);
+  line-height: 1.4;
+  color: var(--pt-ink-2);
+}
+
+.vlist .when {
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vlist .new {
+  animation: rise-in var(--m-menu) var(--ease-arrive) both;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The license band and the mark */
+
+.license {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.sting {
+  justify-self: end;
+  width: 220px;
+  height: 152px;
+  fill: var(--pt-ink);
+  overflow: visible;
+}
+
+.sting path {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+
+.foot {
+  padding-top: 40px;
+  padding-bottom: 56px;
+}
+
+.foot-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.foot-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  font-size: var(--ts-small);
+}
+
+.foot-links a {
+  text-decoration: none;
+}
+
+.foot-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.foot p {
+  margin-top: 20px;
+  font-size: var(--ts-label);
+  color: var(--pt-titanium);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Entrances (once per band, armed by the script only when the band starts below the fold and
+   motion is allowed, so a page without script, a reduced motion reader and a crawler get the
+   final markup) */
+
+.seam.armed::after {
+  transform: scaleX(0);
+}
+
+.armed .h2 .clip > span {
+  transform: translateY(105%);
+}
+
+.armed .rise {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.seam.armed.in::after {
+  transform: none;
+  transition: transform var(--m-line) var(--ease-arrive);
+}
+
+.armed.in .h2 .clip > span {
+  transform: none;
+  transition: transform var(--m-line) var(--ease-arrive) calc(var(--l, 0) * var(--m-lines));
+}
+
+.armed.in .rise {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--m-enter) var(--ease-arrive) calc(500ms + var(--i, 0) * var(--m-stagger)),
+    transform var(--m-enter) var(--ease-arrive) calc(500ms + var(--i, 0) * var(--m-stagger));
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Breakpoints: 1023 px (one column) and 720 px (the phone) */
+
+@media (max-width: 1023px) {
+  .hero-foot,
+  .band-head,
+  .export-grid,
+  .agents-top,
+  .versions,
+  .license {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .band {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .present {
+    grid-template-columns: 1fr;
+  }
+
+  .presenter {
+    border-left: 0;
+    border-top: 1px solid var(--pt-edge);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .presenter .notes {
+    grid-column: 1 / -1;
+  }
+
+  .presenter .nav2 {
+    grid-column: 1 / -1;
+  }
+
+  .sting {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .nav {
+    flex-wrap: wrap;
+    gap: 0 12px;
+    padding-bottom: 8px;
+  }
+
+  .nav .lockup {
+    height: 52px;
+  }
+
+  .nav-new {
+    margin-left: auto;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    margin-left: -12px;
+  }
+
+  .appearance {
+    margin: 0;
+  }
+
+  .signin-slot {
+    display: none;
+  }
+
+  .hero {
+    padding-top: 16px;
+  }
+
+  /* the phone keeps the slide at reading size and lets it run past the rail: the stage scrolls
+     sideways inside the column, opened on the plate */
+  .stage-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    margin-inline: calc(var(--ts-gutter) * -1);
+    padding-inline: var(--ts-gutter);
+    scrollbar-width: none;
+  }
+
+  .stage-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stage-scroll .stage-wrap {
+    width: 560px;
+  }
+
+  .tools {
+    gap: 2px;
+  }
+
+  .tools .sep {
+    display: none;
+  }
+
+  .tools .lbl {
+    display: none;
+  }
+
+  .kit button {
+    padding: 0 8px 0 4px;
+  }
+
+  .hex {
+    margin-left: 0;
+  }
+
+  .status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px 0;
+  }
+
+  .rows {
+    grid-template-columns: 112px 1fr;
+  }
+
+  .numbers {
+    grid-template-columns: 1fr;
+  }
+
+  .numbers > div,
+  .numbers > div + div {
+    padding: 28px 0 32px;
+    border-left: 0;
+  }
+
+  .numbers > div + div {
+    border-top: 1px solid var(--pt-hair);
+  }
+
+  .band {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .band-head {
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+
+  .menubar > .mt {
+    display: none;
+  }
+
+  .menus-key {
+    display: inline-flex;
+  }
+
+  .mini-title .meta {
+    display: none;
+  }
+
+  .mini-title .name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .mini-body {
+    grid-template-columns: 1fr;
+  }
+
+  .strip {
+    order: 2;
+    flex-direction: row;
+    max-height: none;
+    padding: 10px;
+    border-right: 0;
+    border-top: 1px solid var(--pt-hair);
+    overflow-x: auto;
+  }
+
+  .strip button {
+    flex: 0 0 112px;
+  }
+
+  .mini-stage {
+    padding: 14px;
+  }
+
+  .mini-grid {
+    grid-template-columns: 1fr 1fr;
+    padding: 14px;
+  }
+
+  .plate {
+    left: 8px !important;
+    right: 8px;
+    max-width: none;
+  }
+
+  .presenter {
+    grid-template-columns: 1fr;
+  }
+
+  .present-tools .hint {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .term-out {
+    height: 240px;
+  }
+
+  .scrub-row {
+    flex-wrap: wrap;
+  }
+
+  .scrub-row input[type='range'] {
+    flex: 1 1 200px;
+  }
+
+  #ver-restore {
+    order: 3;
+  }
+
+  .term-head .note {
+    display: none;
+  }
+
+  .term-ex button span:last-child {
+    display: none;
+  }
+
+  .foot-links {
+    margin-left: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Print: the page's defined still is the visitor's deck, one slide per page */
+
+#print-deck {
+  display: none;
+}
+
+@media screen {
+  #print-deck.prep {
+    display: block;
+    position: absolute;
+    left: -20000px;
+    top: 0;
+    width: 1536px;
+  }
+}
+
+@media print {
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+
+  body > *:not(#print-deck) {
+    display: none !important;
+  }
+
+  #print-deck {
+    display: block;
+  }
+
+  #print-deck .sl {
+    width: 16in;
+    break-after: page;
+    outline: 0;
+  }
+}

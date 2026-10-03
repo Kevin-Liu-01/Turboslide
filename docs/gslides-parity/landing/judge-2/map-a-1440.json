@@ -1,0 +1,119 @@
+{
+  "d": "a",
+  "width": 1440,
+  "load": [
+    "55.53",
+    "54.84"
+  ],
+  "ms": 3150,
+  "errors": [],
+  "requests": [],
+  "title": "Turboslide is a slides editor in the browser",
+  "height": 5719,
+  "heads": [
+    {
+      "tag": "H1",
+      "text": "Turboslide is a slides editor in the browser",
+      "x": 297,
+      "y": 304,
+      "w": 754,
+      "h": 115
+    },
+    {
+      "tag": "H2",
+      "text": "Everything on a slide moves",
+      "x": 208,
+      "y": 924,
+      "w": 640,
+      "h": 41
+    },
+    {
+      "tag": "H2",
+      "text": "One name on every slide",
+      "x": 208,
+      "y": 1939,
+      "w": 433,
+      "h": 41
+    },
+    {
+      "tag": "H2",
+      "text": "Agents run the same actions",
+      "x": 208,
+      "y": 2611,
+      "w": 484,
+      "h": 41
+    },
+    {
+      "tag": "H2",
+      "text": "Present from the browser",
+      "x": 208,
+      "y": 3443,
+      "w": 346,
+      "h": 83
+    },
+    {
+      "tag": "H2",
+      "text": "Turboslide today",
+      "x": 208,
+      "y": 3969,
+      "w": 1024,
+      "h": 41
+    },
+    {
+      "tag": "H2",
+      "text": "A new presentation needs no account",
+      "x": 433,
+      "y": 5297,
+      "w": 574,
+      "h": 41
+    }
+  ],
+  "ctas": [
+    {
+      "text": "New Presentation",
+      "href": "/new",
+      "x": 1085,
+      "y": 11,
+      "w": 147,
+      "h": 36
+    },
+    {
+      "text": "New Presentation",
+      "href": "/new",
+      "x": 888,
+      "y": 703,
+      "w": 147,
+      "h": 36
+    },
+    {
+      "text": "Open the Example Deck",
+      "href": "/deck/gt-brand",
+      "x": 1044,
+      "y": 703,
+      "w": 188,
+      "h": 36
+    },
+    {
+      "text": "New Presentation",
+      "href": "/new",
+      "x": 548,
+      "y": 5440,
+      "w": 147,
+      "h": 36
+    },
+    {
+      "text": "Open the Example Deck",
+      "href": "/deck/gt-brand",
+      "x": 703,
+      "y": 5440,
+      "w": 188,
+      "h": 36
+    }
+  ],
+  "navPos": "relative",
+  "emDash": 0,
+  "enDash": 0,
+  "bang": [],
+  "scrollBehavior": "auto",
+  "anims": 4
+}

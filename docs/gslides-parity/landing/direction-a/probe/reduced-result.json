@@ -1,0 +1,14 @@
+{
+ "classes": "js",
+ "leadAt300ms": "It has Google Slides' menus and shortcuts. No account is needed.",
+ "animsAtLoad": 0,
+ "moodP": 1,
+ "namesImmediately": "Globex,Globex,Globex,Globex,Globex,Globex,Globex,Globex",
+ "animsAfterTailor": 0,
+ "animsInShow": 0,
+ "showDark": "rgb(7, 7, 7)",
+ "showClosedAt0": true,
+ "markOpacity": "1,1,1,1,1,1,1,1,1,1,1,1,1,1",
+ "animsEnd": 0,
+ "errs": []
+}

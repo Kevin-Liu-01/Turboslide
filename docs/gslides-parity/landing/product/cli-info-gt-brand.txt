@@ -1,0 +1,685 @@
+{
+  "id": "gt-brand",
+  "title": "GT brand deck",
+  "theme": "gt-ink-paper",
+  "revision": 25,
+  "dir": "/Users/kevinliu/repos/Turboslide-landing/decks/gt-brand",
+  "counts": {
+    "slides": 85,
+    "sections": 8,
+    "assets": 115,
+    "kinds": {
+      "opener": 8,
+      "title": 1,
+      "statement": 1,
+      "content": 65,
+      "mood": 9,
+      "closing": 1
+    },
+    "canvas": 0,
+    "charts": 0,
+    "guides": 0
+  },
+  "sections": [
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slides": [
+        {
+          "id": "opener-brand",
+          "n": 1,
+          "title": "Brand",
+          "kind": "opener"
+        },
+        {
+          "id": "title",
+          "n": 2,
+          "title": "General Translation",
+          "kind": "title"
+        },
+        {
+          "id": "thesis",
+          "n": 3,
+          "title": "Every product in every language",
+          "kind": "statement"
+        },
+        {
+          "id": "reputation",
+          "n": 4,
+          "title": "Reputation",
+          "kind": "content"
+        },
+        {
+          "id": "why",
+          "n": 5,
+          "title": "Why the redesign",
+          "kind": "content"
+        },
+        {
+          "id": "mood-earth",
+          "n": 6,
+          "title": "The Blue Marble",
+          "kind": "mood"
+        },
+        {
+          "id": "positioning",
+          "n": 7,
+          "title": "Open source and platform",
+          "kind": "content"
+        },
+        {
+          "id": "audience",
+          "n": 8,
+          "title": "Audience",
+          "kind": "content"
+        },
+        {
+          "id": "values",
+          "n": 9,
+          "title": "Values",
+          "kind": "content"
+        },
+        {
+          "id": "mood-rosetta",
+          "n": 10,
+          "title": "The Rosetta Stone",
+          "kind": "mood"
+        },
+        {
+          "id": "character",
+          "n": 11,
+          "title": "Brand personality",
+          "kind": "content"
+        },
+        {
+          "id": "voice",
+          "n": 12,
+          "title": "Writing style",
+          "kind": "content"
+        },
+        {
+          "id": "inspirations",
+          "n": 13,
+          "title": "Visual references",
+          "kind": "content"
+        },
+        {
+          "id": "naming",
+          "n": 14,
+          "title": "The name",
+          "kind": "content"
+        },
+        {
+          "id": "mark",
+          "n": 15,
+          "title": "The mark",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "design-system",
+      "name": "Design system",
+      "slides": [
+        {
+          "id": "opener-design-system",
+          "n": 16,
+          "title": "Design system",
+          "kind": "opener"
+        },
+        {
+          "id": "compression",
+          "n": 17,
+          "title": "Small sizes",
+          "kind": "content"
+        },
+        {
+          "id": "color",
+          "n": 18,
+          "title": "Color",
+          "kind": "content"
+        },
+        {
+          "id": "type",
+          "n": 19,
+          "title": "Typography",
+          "kind": "content"
+        },
+        {
+          "id": "multilingual",
+          "n": 20,
+          "title": "Scripts",
+          "kind": "content"
+        },
+        {
+          "id": "ladder",
+          "n": 21,
+          "title": "Type scale",
+          "kind": "content"
+        },
+        {
+          "id": "lines",
+          "n": 22,
+          "title": "Line rules",
+          "kind": "content"
+        },
+        {
+          "id": "doubled-line",
+          "n": 23,
+          "title": "The doubled line",
+          "kind": "content"
+        },
+        {
+          "id": "mood-calligraphy",
+          "n": 24,
+          "title": "Karahisari's calligraphy",
+          "kind": "mood"
+        },
+        {
+          "id": "diagrams",
+          "n": 25,
+          "title": "Diagrams",
+          "kind": "content"
+        },
+        {
+          "id": "dither",
+          "n": 26,
+          "title": "Dither",
+          "kind": "content"
+        },
+        {
+          "id": "iso",
+          "n": 27,
+          "title": "Isometric illustration",
+          "kind": "content"
+        },
+        {
+          "id": "language-as-material",
+          "n": 28,
+          "title": "Animated text",
+          "kind": "content"
+        },
+        {
+          "id": "motion",
+          "n": 29,
+          "title": "Motion rules",
+          "kind": "content"
+        },
+        {
+          "id": "avoid",
+          "n": 30,
+          "title": "Anti-patterns",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "website",
+      "name": "Website",
+      "slides": [
+        {
+          "id": "opener-website",
+          "n": 31,
+          "title": "Website",
+          "kind": "opener"
+        },
+        {
+          "id": "surfaces",
+          "n": 32,
+          "title": "Public surfaces",
+          "kind": "content"
+        },
+        {
+          "id": "site",
+          "n": 33,
+          "title": "The production site",
+          "kind": "content"
+        },
+        {
+          "id": "dark-mode",
+          "n": 34,
+          "title": "Dark mode",
+          "kind": "content"
+        },
+        {
+          "id": "pages-a",
+          "n": 35,
+          "title": "Pricing and enterprise",
+          "kind": "content"
+        },
+        {
+          "id": "pages-b",
+          "n": 36,
+          "title": "Contact and report card",
+          "kind": "content"
+        },
+        {
+          "id": "mood-lighthouse",
+          "n": 37,
+          "title": "Louisbourg lighthouse",
+          "kind": "mood"
+        },
+        {
+          "id": "details",
+          "n": 38,
+          "title": "Details",
+          "kind": "content"
+        },
+        {
+          "id": "details-two",
+          "n": 39,
+          "title": "Three close-ups",
+          "kind": "content"
+        },
+        {
+          "id": "shell-numbers",
+          "n": 40,
+          "title": "Layout measurements",
+          "kind": "content"
+        },
+        {
+          "id": "horizon",
+          "n": 41,
+          "title": "The horizon field",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "slides": [
+        {
+          "id": "opener-documentation",
+          "n": 42,
+          "title": "Documentation",
+          "kind": "opener"
+        },
+        {
+          "id": "docs",
+          "n": 43,
+          "title": "The docs",
+          "kind": "content"
+        },
+        {
+          "id": "nearest-page-routing",
+          "n": 44,
+          "title": "Nearest-page routing",
+          "kind": "content"
+        },
+        {
+          "id": "mood-dictionary",
+          "n": 45,
+          "title": "The Compact Oxford English Dictionary",
+          "kind": "mood"
+        },
+        {
+          "id": "docs-for-agents",
+          "n": 46,
+          "title": "Markdown twins",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "blog-and-content",
+      "name": "Blog and content",
+      "slides": [
+        {
+          "id": "opener-blog",
+          "n": 47,
+          "title": "Blog and content",
+          "kind": "opener"
+        },
+        {
+          "id": "blog-index",
+          "n": 48,
+          "title": "Blog index",
+          "kind": "content"
+        },
+        {
+          "id": "blog-covers",
+          "n": 49,
+          "title": "Generated covers",
+          "kind": "content"
+        },
+        {
+          "id": "mood-devanagari",
+          "n": 50,
+          "title": "A Devanagari manuscript",
+          "kind": "mood"
+        },
+        {
+          "id": "gem-smoke",
+          "n": 51,
+          "title": "Designed covers",
+          "kind": "content"
+        },
+        {
+          "id": "blog-vision",
+          "n": 52,
+          "title": "Blog content",
+          "kind": "content"
+        },
+        {
+          "id": "content-rule",
+          "n": 53,
+          "title": "The copy test",
+          "kind": "content"
+        },
+        {
+          "id": "two-registers",
+          "n": 54,
+          "title": "Site copy and founder posts",
+          "kind": "content"
+        },
+        {
+          "id": "off-the-site",
+          "n": 55,
+          "title": "Brand assets outside the site",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "developer-experience",
+      "name": "Developer experience",
+      "slides": [
+        {
+          "id": "opener-developer-experience",
+          "n": 56,
+          "title": "Developer experience",
+          "kind": "opener"
+        },
+        {
+          "id": "dx",
+          "n": 57,
+          "title": "Translation as a build step",
+          "kind": "content"
+        },
+        {
+          "id": "mood-cable",
+          "n": 58,
+          "title": "The Eastern Telegraph cable chart",
+          "kind": "mood"
+        },
+        {
+          "id": "cli",
+          "n": 59,
+          "title": "The CLI",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "prototemplate-and-glyphfield",
+      "name": "Prototemplate and Glyphfield",
+      "slides": [
+        {
+          "id": "opener-prototemplate",
+          "n": 60,
+          "title": "Prototemplate and Glyphfield",
+          "kind": "opener"
+        },
+        {
+          "id": "lab",
+          "n": 61,
+          "title": "Prototemplate",
+          "kind": "content"
+        },
+        {
+          "id": "knowledge-base",
+          "n": 62,
+          "title": "The knowledge base",
+          "kind": "content"
+        },
+        {
+          "id": "skills-marks",
+          "n": 63,
+          "title": "Skills and marks",
+          "kind": "content"
+        },
+        {
+          "id": "viewer-shell",
+          "n": 64,
+          "title": "The viewer shell",
+          "kind": "content"
+        },
+        {
+          "id": "shell-views",
+          "n": 65,
+          "title": "The shell in use",
+          "kind": "content"
+        },
+        {
+          "id": "line-law",
+          "n": 66,
+          "title": "The line law in chrome",
+          "kind": "content"
+        },
+        {
+          "id": "presenter-compare",
+          "n": 67,
+          "title": "Compare and the presenter",
+          "kind": "content"
+        },
+        {
+          "id": "dossier",
+          "n": 68,
+          "title": "The Dossier",
+          "kind": "content"
+        },
+        {
+          "id": "directions",
+          "n": 69,
+          "title": "Directions",
+          "kind": "content"
+        },
+        {
+          "id": "mood-wave",
+          "n": 70,
+          "title": "The Great Wave off Kanagawa",
+          "kind": "mood"
+        },
+        {
+          "id": "archive",
+          "n": 71,
+          "title": "The archive",
+          "kind": "content"
+        },
+        {
+          "id": "engines",
+          "n": 72,
+          "title": "Shared engines",
+          "kind": "content"
+        },
+        {
+          "id": "build-log",
+          "n": 73,
+          "title": "The build log",
+          "kind": "content"
+        },
+        {
+          "id": "glyphfield",
+          "n": 74,
+          "title": "Glyphfield",
+          "kind": "content"
+        },
+        {
+          "id": "glyphfield-tools",
+          "n": 75,
+          "title": "Fifteen tools",
+          "kind": "content"
+        },
+        {
+          "id": "books-and-templates",
+          "n": 76,
+          "title": "Books and templates",
+          "kind": "content"
+        },
+        {
+          "id": "glyphfield-materials",
+          "n": 77,
+          "title": "134 live materials",
+          "kind": "content"
+        },
+        {
+          "id": "agent-api",
+          "n": 78,
+          "title": "The agent API",
+          "kind": "content"
+        }
+      ]
+    },
+    {
+      "id": "status-and-plan",
+      "name": "Status and plan",
+      "slides": [
+        {
+          "id": "opener-status",
+          "n": 79,
+          "title": "Status and plan",
+          "kind": "opener"
+        },
+        {
+          "id": "state",
+          "n": 80,
+          "title": "Current status",
+          "kind": "content"
+        },
+        {
+          "id": "mood-compass",
+          "n": 81,
+          "title": "Bowen's compass rose",
+          "kind": "mood"
+        },
+        {
+          "id": "identity-project",
+          "n": 82,
+          "title": "The identity project",
+          "kind": "content"
+        },
+        {
+          "id": "fixed-points",
+          "n": 83,
+          "title": "Fixed points",
+          "kind": "content"
+        },
+        {
+          "id": "goals",
+          "n": 84,
+          "title": "Success criteria",
+          "kind": "content"
+        },
+        {
+          "id": "closing",
+          "n": 85,
+          "title": "Every product in every language",
+          "kind": "closing"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-09-13T03:49:55.295Z"
+}
+ ███████████  Turboslide 2026.1001.3
+ ▀▀▀▀▀███▀▀▀  https://www.turboslide.com
+▄▄▄▄▄ ███     193 actions, effects backend: wasm
+▄▄▄▄ ▄▄▄      deck gt-brand at revision 25, 85 slides
+     ███
+███ ███
+GT brand deck (gt-brand), theme gt-ink-paper, revision 25
+85 slides in 8 sections, 115 assets
+  Brand (brand): 15 slides
+     1  opener-brand  opener  Brand
+     2  title  title  General Translation
+     3  thesis  statement  Every product in every language
+     4  reputation  content  Reputation
+     5  why  content  Why the redesign
+     6  mood-earth  mood  The Blue Marble
+     7  positioning  content  Open source and platform
+     8  audience  content  Audience
+     9  values  content  Values
+    10  mood-rosetta  mood  The Rosetta Stone
+    11  character  content  Brand personality
+    12  voice  content  Writing style
+    13  inspirations  content  Visual references
+    14  naming  content  The name
+    15  mark  content  The mark
+  Design system (design-system): 15 slides
+    16  opener-design-system  opener  Design system
+    17  compression  content  Small sizes
+    18  color  content  Color
+    19  type  content  Typography
+    20  multilingual  content  Scripts
+    21  ladder  content  Type scale
+    22  lines  content  Line rules
+    23  doubled-line  content  The doubled line
+    24  mood-calligraphy  mood  Karahisari's calligraphy
+    25  diagrams  content  Diagrams
+    26  dither  content  Dither
+    27  iso  content  Isometric illustration
+    28  language-as-material  content  Animated text
+    29  motion  content  Motion rules
+    30  avoid  content  Anti-patterns
+  Website (website): 11 slides
+    31  opener-website  opener  Website
+    32  surfaces  content  Public surfaces
+    33  site  content  The production site
+    34  dark-mode  content  Dark mode
+    35  pages-a  content  Pricing and enterprise
+    36  pages-b  content  Contact and report card
+    37  mood-lighthouse  mood  Louisbourg lighthouse
+    38  details  content  Details
+    39  details-two  content  Three close-ups
+    40  shell-numbers  content  Layout measurements
+    41  horizon  content  The horizon field
+  Documentation (documentation): 5 slides
+    42  opener-documentation  opener  Documentation
+    43  docs  content  The docs
+    44  nearest-page-routing  content  Nearest-page routing
+    45  mood-dictionary  mood  The Compact Oxford English Dictionary
+    46  docs-for-agents  content  Markdown twins
+  Blog and content (blog-and-content): 9 slides
+    47  opener-blog  opener  Blog and content
+    48  blog-index  content  Blog index
+    49  blog-covers  content  Generated covers
+    50  mood-devanagari  mood  A Devanagari manuscript
+    51  gem-smoke  content  Designed covers
+    52  blog-vision  content  Blog content
+    53  content-rule  content  The copy test
+    54  two-registers  content  Site copy and founder posts
+    55  off-the-site  content  Brand assets outside the site
+  Developer experience (developer-experience): 4 slides
+    56  opener-developer-experience  opener  Developer experience
+    57  dx  content  Translation as a build step
+    58  mood-cable  mood  The Eastern Telegraph cable chart
+    59  cli  content  The CLI
+  Prototemplate and Glyphfield (prototemplate-and-glyphfield): 19 slides
+    60  opener-prototemplate  opener  Prototemplate and Glyphfield
+    61  lab  content  Prototemplate
+    62  knowledge-base  content  The knowledge base
+    63  skills-marks  content  Skills and marks
+    64  viewer-shell  content  The viewer shell
+    65  shell-views  content  The shell in use
+    66  line-law  content  The line law in chrome
+    67  presenter-compare  content  Compare and the presenter
+    68  dossier  content  The Dossier
+    69  directions  content  Directions
+    70  mood-wave  mood  The Great Wave off Kanagawa
+    71  archive  content  The archive
+    72  engines  content  Shared engines
+    73  build-log  content  The build log
+    74  glyphfield  content  Glyphfield
+    75  glyphfield-tools  content  Fifteen tools
+    76  books-and-templates  content  Books and templates
+    77  glyphfield-materials  content  134 live materials
+    78  agent-api  content  The agent API
+  Status and plan (status-and-plan): 7 slides
+    79  opener-status  opener  Status and plan
+    80  state  content  Current status
+    81  mood-compass  mood  Bowen's compass rose
+    82  identity-project  content  The identity project
+    83  fixed-points  content  Fixed points
+    84  goals  content  Success criteria
+    85  closing  closing  Every product in every language

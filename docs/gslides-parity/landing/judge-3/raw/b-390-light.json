@@ -1,0 +1,616 @@
+{
+ "dir": "b",
+ "W": 390,
+ "theme": "light",
+ "rm": "",
+ "loadStart": " 57.38 58.43 58.76",
+ "text": {
+  "words": 950,
+  "emDash": 0,
+  "enDash": 0,
+  "bang": 0,
+  "bangCtx": [],
+  "realtime": false,
+  "h1": [
+   "Build the pitch, present it and send the link"
+  ],
+  "h2": [
+   "Everything on a slide moves",
+   "Two people edit the same slide",
+   "Present from the browser",
+   "Export to PDF and PowerPoint",
+   "Animated patterns in the theme's colors",
+   "Features and where to find them",
+   "Free under the MIT license"
+  ],
+  "headingPeriod": [],
+  "scrollBehavior": "auto",
+  "viewportMeta": "width=device-width, initial-scale=1",
+  "userSelectBody": "auto",
+  "title": "Turboslide is a slides editor in the browser",
+  "lang": "en"
+ },
+ "fonts": {
+  "monoBgs": {
+   "rgb(16, 16, 16)": 12
+  },
+  "nonInter": []
+ },
+ "colours": {
+  "rgb(47,92,224) borderTopColor": {
+   "n": 5,
+   "ex": [
+    "sel",
+    "I"
+   ]
+  },
+  "rgb(47,92,224) backgroundColor": {
+   "n": 4,
+   "ex": [
+    "chip",
+    "guide v",
+    "guide hz",
+    "caret"
+   ]
+  }
+ },
+ "contrast": {
+  "checked": 136,
+  "below": 7,
+  "belowOutsideSlides": 0,
+  "worst": [
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 2.4764,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 2.6568,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Click to add subtitle",
+    "cr": 3.25,
+    "px": 7.644,
+    "cls": "ph",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Globex",
+    "cr": 3.25,
+    "px": 2.4108,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Click to add subtitle",
+    "cr": 3.25,
+    "px": 7.644,
+    "cls": "ph",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Globex",
+    "cr": 3.25,
+    "px": 2.4108,
+    "cls": "s-foot",
+    "inSlide": true
+   },
+   {
+    "t": "Prepared for Acme",
+    "cr": 3.25,
+    "px": 2.6568,
+    "cls": "s-foot",
+    "inSlide": true
+   }
+  ]
+ },
+ "names": {
+  "nameless": [],
+  "namelessN": 0,
+  "canvases": [
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Slide 1"
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Slide 1"
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": "Picture: the Blue Marble"
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": "true",
+    "role": null,
+    "label": ""
+   },
+   {
+    "hidden": null,
+    "role": null,
+    "label": ""
+   }
+  ],
+  "imgsNoAlt": 0,
+  "live": [
+   "polite:snack",
+   "polite:sr",
+   "status:follow-plate"
+  ]
+ },
+ "tabs": [
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Open the Example Deck",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "button",
+   "name": "Slide 1",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 64,
+   "h": 37
+  },
+  {
+   "tag": "button",
+   "name": "Slide 2",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 64,
+   "h": 37
+  },
+  {
+   "tag": "button",
+   "name": "Slide 3",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 64,
+   "h": 37
+  },
+  {
+   "tag": "button",
+   "name": "Slide 4",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 64,
+   "h": 37
+  },
+  {
+   "tag": "button",
+   "name": "Slide 5",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 64,
+   "h": 37
+  },
+  {
+   "tag": "button",
+   "name": "Undo",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 49,
+   "h": 22
+  },
+  {
+   "tag": "input",
+   "name": "",
+   "ring": false,
+   "outline": "rgba(255, 255, 255, 0.87) 0px",
+   "inView": true,
+   "w": 283,
+   "h": 20
+  },
+  {
+   "tag": "button",
+   "name": "New Slideslide new --layout split",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 163,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Set the Titleblock set pricing#tit",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 163,
+   "h": 64
+  },
+  {
+   "tag": "button",
+   "name": "Tailor for Globextailor --replace ",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 163,
+   "h": 83
+  },
+  {
+   "tag": "button",
+   "name": "Restoreversion restore 25",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 163,
+   "h": 83
+  },
+  {
+   "tag": "button",
+   "name": "Replay",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 67,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Title",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 140,
+   "h": 39
+  },
+  {
+   "tag": "div",
+   "name": "Text",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 113,
+   "h": 22
+  },
+  {
+   "tag": "div",
+   "name": "Picture: the Blue Marble",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 1px",
+   "inView": true,
+   "w": 95,
+   "h": 95
+  },
+  {
+   "tag": "button",
+   "name": "Undo",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 59,
+   "h": 32
+  },
+  {
+   "tag": "p",
+   "name": "Title on Maya's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 235,
+   "h": 16
+  },
+  {
+   "tag": "p",
+   "name": "Subtitle on Maya's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 206,
+   "h": 10
+  },
+  {
+   "tag": "p",
+   "name": "Title on Sam's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 235,
+   "h": 16
+  },
+  {
+   "tag": "p",
+   "name": "Subtitle on Sam's screen",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 206,
+   "h": 10
+  },
+  {
+   "tag": "button",
+   "name": "Replay",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 67,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Presenter view. The arrow keys cha",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 392
+  },
+  {
+   "tag": "button",
+   "name": "Previous",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 79,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Next",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 55,
+   "h": 32
+  },
+  {
+   "tag": "div",
+   "name": "Move the line between the browser ",
+   "ring": true,
+   "outline": "rgb(7, 7, 7) 3px",
+   "inView": true,
+   "w": 44,
+   "h": 182
+  },
+  {
+   "tag": "a",
+   "name": "Read the record",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 106,
+   "h": 17
+  },
+  {
+   "tag": "button",
+   "name": "Moving",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 72,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Still Frame",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 90,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "GitHub",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 326,
+   "h": 40
+  },
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 135,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "New presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 117,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Your presentations",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 124,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 101,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "GitHub",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 46,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "License",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 51,
+   "h": 22
+  },
+  null,
+  {
+   "tag": "a",
+   "name": "Skip to the content",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 165,
+   "h": 42
+  },
+  {
+   "tag": "a",
+   "name": "Turboslide, back to the top",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 135,
+   "h": 22
+  },
+  {
+   "tag": "a",
+   "name": "Documentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 101,
+   "h": 22
+  },
+  {
+   "tag": "button",
+   "name": "Light",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 53,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Dark",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 51,
+   "h": 32
+  },
+  {
+   "tag": "button",
+   "name": "Pause Motion",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 106,
+   "h": 32
+  },
+  {
+   "tag": "a",
+   "name": "New Presentation",
+   "ring": true,
+   "outline": "rgb(47, 92, 224) 2px",
+   "inView": true,
+   "w": 131,
+   "h": 32
+  }
+ ],
+ "tabNoRing": [
+  "input:"
+ ],
+ "rafTop": {
+  "perSec": 120,
+  "anims": 1
+ },
+ "afterScroll": {
+  "perSec": 0,
+  "running": [
+   "blink:caret"
+  ],
+  "total": 1
+ },
+ "height": 8924,
+ "overflowX": 0,
+ "smallTargets": [
+  "Turboslide, back to the  135x22",
+  "Documentation 101x22",
+  "Undo 49x22",
+  " 283x20",
+  "Read the record 106x17",
+  "Turboslide, back to the  135x22",
+  "New presentation 117x22",
+  "Your presentations 124x22",
+  "Documentation 101x22",
+  "GitHub 46x22",
+  "License 51x22"
+ ],
+ "errs": [],
+ "netRequests": [],
+ "loadEnd": " 55.71 58.03 58.61"
+}

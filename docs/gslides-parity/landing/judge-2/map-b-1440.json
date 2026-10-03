@@ -1,0 +1,119 @@
+{
+  "d": "b",
+  "width": 1440,
+  "load": [
+    "54.84",
+    "54.30"
+  ],
+  "ms": 4428,
+  "errors": [],
+  "requests": [],
+  "title": "Turboslide is a slides editor in the browser",
+  "height": 7769,
+  "heads": [
+    {
+      "tag": "H1",
+      "text": "Build the pitch, present it and send the link",
+      "x": 208,
+      "y": 139,
+      "w": 1024,
+      "h": 279
+    },
+    {
+      "tag": "H2",
+      "text": "Everything on a slide moves",
+      "x": 208,
+      "y": 1609,
+      "w": 720,
+      "h": 56
+    },
+    {
+      "tag": "H2",
+      "text": "Two people edit the same slide",
+      "x": 208,
+      "y": 2574,
+      "w": 720,
+      "h": 56
+    },
+    {
+      "tag": "H2",
+      "text": "Present from the browser",
+      "x": 208,
+      "y": 3526,
+      "w": 720,
+      "h": 56
+    },
+    {
+      "tag": "H2",
+      "text": "Export to PDF and PowerPoint",
+      "x": 208,
+      "y": 4331,
+      "w": 720,
+      "h": 56
+    },
+    {
+      "tag": "H2",
+      "text": "Animated patterns in the theme's colors",
+      "x": 208,
+      "y": 5605,
+      "w": 403,
+      "h": 168
+    },
+    {
+      "tag": "H2",
+      "text": "Features and where to find them",
+      "x": 208,
+      "y": 6361,
+      "w": 810,
+      "h": 56
+    },
+    {
+      "tag": "H2",
+      "text": "Free under the MIT license",
+      "x": 208,
+      "y": 7245,
+      "w": 565,
+      "h": 112
+    }
+  ],
+  "ctas": [
+    {
+      "text": "New Presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 1097,
+      "y": 13,
+      "w": 135,
+      "h": 32
+    },
+    {
+      "text": "New Presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 880,
+      "y": 470,
+      "w": 151,
+      "h": 40
+    },
+    {
+      "text": "Open the Example Deck",
+      "href": "https://www.turboslide.com/deck/gt-brand",
+      "x": 1040,
+      "y": 470,
+      "w": 192,
+      "h": 40
+    },
+    {
+      "text": "New presentation",
+      "href": "https://www.turboslide.com/new",
+      "x": 383,
+      "y": 7649,
+      "w": 117,
+      "h": 22
+    }
+  ],
+  "navPos": "relative",
+  "emDash": 0,
+  "enDash": 0,
+  "bang": [],
+  "scrollBehavior": "auto",
+  "anims": 2
+}

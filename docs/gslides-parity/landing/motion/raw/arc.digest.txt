@@ -1,0 +1,43 @@
+# arc  https://arc.net/ 2026-10-02T22:50:24.896Z
+LCP {"t":1484,"size":888480,"url":"https://arc.net/images/dia-background-image.png","el":"div.c-kXWSNC"} CLS 0.001 ctx [] longtasks 0 sum 0
+scroll-behavior auto auto lenis false locomotive false docH 6125 fonts ["Marlin","Marlin Soft Basic","Inter","InterVariable","Sohne Breit","Space Mono","Sohne Breit Extrafett","EB Garamond","ABC Favorit Mono","Marlin Soft SQ","ABC Oracle","Exposure VAR"]
+bytes {"Document":{"n":1,"kb":155},"Image":{"n":20,"kb":4635},"Stylesheet":{"n":1,"kb":1},"Media":{"n":10,"kb":5408},"Script":{"n":26,"kb":488},"Font":{"n":10,"kb":447},"Fetch":{"n":5,"kb":4},"Other":{"n":11,"kb":71}}
+bigJs [{"url":"https://arc.net/_next/static/chunks/4196-e646878f89c77cbb.js","kb":125},{"url":"https://arc.net/_next/static/chunks/1606-c4260f233328d341.js","kb":90},{"url":"https://arc.net/_next/static/chunks/9182-84d5580a6c7b8724.js","kb":51},{"url":"https://arc.net/_next/static/chunks/7112840a-127f2773c0a86c59.js","kb":49},{"url":"https://arc.net/_next/static/chunks/framework-552547284f246270.js","kb":46},{"url":"https://arc.net/_next/static/chunks/pages/_app-549c2dcbaa19fc61.js","kb":40},{"url":"https://arc.net/_next/static/chunks/main-0ed5ce4e590b0f33.js","kb":39},{"url":"https://arc.net/_next/static/chunks/e8085b2a-0762b558c513b73b.js","kb":25}]
+media [{"url":"https://arc.net/video/ArcDiaPLG_Video.webm","mime":"video/webm","kb":1470,"status":206},{"url":"https://arc.net/video/ArcDiaPLG_Video-poster.jpg","mime":"image/jpeg","kb":55,"status":200},{"url":"https://arc.net/theme-picker.mp4","mime":"video/mp4","kb":127,"status":206},{"url":"https://arc.net/space-swiping.mp4","mime":"video/mp4","kb":0,"status":206},{"url":"https://arc.net/zero-chrome.mp4","mime":"video/mp4","kb":279,"status":206},{"url":"https://arc.net/theme-picker.mp4","mime":"video/mp4","kb":33,"status":206},{"url":"https://arc.net/space-swiping.mp4","mime":"video/mp4","kb":18,"status":206},{"url":"https://arc.net/theme-picker.mp4","mime":"video/mp4","kb":1058,"status":206},{"url":"https://arc.net/space-swiping.mp4","mime":"video/mp4","kb":1629,"status":206},{"url":"https://arc.net/zero-chrome.mp4","mime":"video/mp4","kb":7,"status":206},{"url":"https://arc.net/zero-chrome.mp4","mime":"video/mp4","kb":786,"status":206}]
+videos [{"src":"https://arc.net/video/ArcDiaPLG_Video.webm","sources":[["video/webm","https://arc.net/video/ArcDiaPLG_Video.webm"],["video/mp4","https://arc.net/video/ArcDiaPLG_Video.mp4"]],"poster":"https://arc.net/video/ArcDiaPLG_Video-poster.jpg","autoplay":true,"loop":false,"muted":true,"playsInline":true,"preload":"metadata","w":3106,"h":2160,"cssW":720,"dur":6.7,"paused":true},{"src":"https://arc.net/zero-chrome.mp4","sources":[["video/mp4","https://arc.net/zero-chrome.mp4"]],"poster":"https://arc.net/zero-chrome.png","autoplay":true,"loop":true,"muted":true,"playsInline":true,"preload":"metadata","w":3300,"h":2200,"cssW":1440,"dur":3,"paused":false},{"src":"https://arc.net/space-swiping.mp4","sources":[["video/mp4","https://arc.net/space-swiping.mp4"]],"poster":"https://arc.net/space-swiping.png","autoplay":true,"loop":true,"muted":true,"playsInline":true,"preload":"metadata","w":3300,"h":2200,"cssW":1440,"dur":3,"paused":false},{"src":"https://arc.net/theme-picker.mp4","sources":[["video/mp4","https://arc.net/theme-picker.mp4"]],"poster":"https://arc.net/theme-picker.png","autoplay":true,"loop":true,"muted":true,"playsInline":true,"preload":"metadata","w":3300,"h":2200,"cssW":1440,"dur":3,"paused":false}]
+canvases []
+
+## phase load (load) 5.19s frames 110 main {"task":870,"script":119,"layout":72,"style":49} rafTotal 458
+  2x CSSAnimation|scroll|0|linear|itundefined| delays[0] start@325..325 tgt  from undefined to undefined
+  2x WebAnimation|undefined|300|linear|it1| delays[0] start@325..325 tgt  from undefined to undefined
+  1x WebAnimation|undefined|300|ease-in-out|it1| delays[0] start@325..325 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 2x Animation||300|linear|it1|opacity|DocumentTimeline delays[0] seen@276..276 tgt a.c-kYDOWo ; div from {"opacity":"1"} to {"opacity":"1"}
+  S 2x CSSAnimation|scroll|77176|linear|itnull|transform|DocumentTimeline delays[0] seen@329..329 tgt div.marquee from {"transform":"translateX(0%)"} to {"transform":"translateX(-100%)"}
+  S 1x Animation||300|ease-in-out|it1|opacity|DocumentTimeline delays[0] seen@277..277 tgt div.c-fdRmVl from {"opacity":"0.4"} to {"opacity":"0.4"}
+  pixel change: first 1476 last 2799 frames>0.15: 5/109
+  series 1476:62.12 1690:1.2 1695:0.03 1723:0.03 1797:0.01 1865:0 1930:0.01 1996:0.01 2063:0.01 2139:0.03 2202:0.01 2264:0.02 2329:0.01 2398:0 2464:0 2530:0 2596:0 2663:0 2732:0 2799:0.18 2863:0 2930:0.02 2997:0.04 3063:0.05 3137:0.05 3209:0.06 3263:0.03 3329:0.05 3397:0.03 3463:0.03 3530:0.01 3599:0.01 3664:0 3731:0 3797:0 3864:0 3930:0 3997:0 4064:0 4130:0 4196:0 4264:0 4330:0 4396:0 4463:0 4530:0 4597:0 4663:0 4731:0 4798:0 4863:0 4930:0 4997:0 5063:0.03 5130:0
+
+## phase idle (idle) 3s frames 77 main {"task":283,"script":56,"layout":35,"style":32} rafTotal 839
+  pixel change: first undefined last undefined frames>0.15: 0/76
+  series -118:0 -85:0 -52:0.01 -17:0 17:0 48:0 82:0 115:0 150:0 183:0 218:0 248:0 283:0 315:0 350:0 383:0 418:0 449:0 481:0 514:0 550:0 582:0 615:0 648:0 682:0 722:0 748:0 782:0 814:0 849:0 882:0 921:0 948:0 981:0 1015:0 1049:0 1081:0 1117:0 1148:0 1192:0 1219:0 1248:0 1281:0 1316:0 1349:0 1384:0 1418:0 1455:0 1482:0 1515:0 1548:0 1581:0 1614:0 1648:0 1681:0 1715:0 1753:0 1783:0 1817:0 1848:0 1882:0 1914:0 1948:0 1982:0 2016:0 2048:0 2085:0 2115:0 2148:0 2182:0 2214:0 2248:0 2281:0 2315:0 2348:0 2659:0
+
+## phase s1 (scroll) 3.04s frames 194 main {"task":283,"script":62,"layout":36,"style":32} rafTotal 1184
+  1x WebAnimation|undefined|200|linear|it1| delays[0] start@46..46 tgt  from undefined to undefined
+  1x WebAnimation|undefined|300|ease-in-out|it1| delays[0] start@46..46 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x Animation||200|linear|it1|opacity|DocumentTimeline delays[0] seen@25..25 tgt div.c-dubYtK from {"opacity":"0"} to {"opacity":"1"}
+  S 1x Animation||300|ease-in-out|it1|opacity|DocumentTimeline delays[0] seen@25..25 tgt div.c-fdRmVl from {"opacity":"0.4"} to {"opacity":"1"}
+  pixel change: first 219 last 511 frames>0.15: 4/193
+  series 219:91.98 504:0.82 584:0.03 625:0.03 665:0.03 715:0.05 757:0.05 799:0.03 878:0.02 961:0.03 998:0.03 1041:0.03 1091:0.04 1131:0.03 1174:0.03 1223:0.04 1275:0.04 1315:0.03 1360:0.03 1399:0.03 1440:0.03 1496:0.05 1532:0.04 1574:0.05 1614:0.05 1665:0.02 1713:0.03 1773:0.05 1815:0.03 1857:0.03 1898:0.03 1942:0.03 1999:0.04 2042:0.05 2083:0.05 2125:0.05 2165:0.05 2206:0.03 2253:0.03 2315:0.04 2434:0.05 2515:0.04 2588:0.05 2657:0.04 2715:0.05 2782:0.05 2848:0.05 2948:0.05 3015:0.05
+
+## phase s2 (scroll) 3.07s frames 150 main {"task":184,"script":39,"layout":21,"style":19} rafTotal 1408
+  1x WebAnimation|undefined|300|ease-in-out|it1| delays[0] start@63..63 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x Animation||300|ease-in-out|it1|opacity|DocumentTimeline delays[0] seen@20..20 tgt div.c-fdRmVl from {"opacity":"1"} to {"opacity":"0.4"}
+  pixel change: first 63 last 2421 frames>0.15: 33/149
+  series -147:0.03 -114:0.02 -81:0.03 -47:0.05 -15:0.04 80:0 112:0 163:0.01 204:0.04 262:0.03 305:0.16 359:3.42 421:3.78 471:2.76 526:1.9 604:0.93 657:0.56 704:0.29 755:0.08 811:0.01 872:0.01 927:0.01 972:0.01 1021:0.01 1071:0 1121:0 1171:0.01 1221:0 1271:0 1321:0 1370:0 1422:0 1473:0 1589:0.09 1638:0.01 1688:0 1730:0 1798:0 1882:0 1947:0 2014:0.29 2097:6.55 2323:8.76 2432:0.04 2614:0.07 2680:0.01 2727:0 2909:0.01 2960:0.01 3025:0
+
+## phase s3 (scroll) 3.02s frames 185 main {"task":166,"script":35,"layout":21,"style":18} rafTotal 1615
+  pixel change: first 35 last 2997 frames>0.15: 53/184
+  series -132:0 -66:0.01 3:0.02 59:0.54 103:0.12 159:1.42 274:0.9 352:0.21 451:0.09 517:0.04 586:0.06 650:0.04 717:0.04 784:0.03 851:0.03 917:0.03 984:0.04 1051:0.03 1117:0.04 1184:0.04 1250:0.03 1359:0 1426:0 1484:0.54 1551:0.11 1618:0.09 1684:0.14 1750:0.47 1814:2.2 1879:0.94 1947:0.5 2012:0.34 2079:0.24 2148:0.22 2214:0.05 2280:0.04 2346:0.06 2413:0.06 2479:0.05 2546:0.04 2613:0.05 2679:0.05 2747:0.06 2813:0.06 2880:0.06 2947:0.06

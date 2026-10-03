@@ -1,0 +1,29 @@
+# config  https://config.figma.com/ 2026-10-02T22:51:01.706Z
+LCP {"t":612,"size":45240,"url":"","el":"p"} CLS 0.053 ctx [] longtasks 0 sum 0
+scroll-behavior smooth auto lenis false locomotive false docH 1650 fonts ["figmaSans","figmaSans Fallback","figmaMono","figmaMono Fallback"]
+bytes {"Document":{"n":4,"kb":80},"Script":{"n":21,"kb":1198},"Image":{"n":3,"kb":209},"Font":{"n":2,"kb":617},"Stylesheet":{"n":1,"kb":1},"Other":{"n":4,"kb":755},"Fetch":{"n":5,"kb":3},"XHR":{"n":1,"kb":1}}
+bigJs [{"url":"https://config.figma.com/_next/static/chunks/8521-4d2d03cfa9a05450.js","kb":630},{"url":"https://config.figma.com/_next/static/chunks/8838-a61198b2f879464e.js","kb":181},{"url":"https://config.figma.com/_next/static/chunks/8668-88ba95952bdcf0bb.js","kb":85},{"url":"https://consent.figma.com/assets/entries/src_pages_index.A1axZ7gM.js","kb":70},{"url":"https://config.figma.com/_next/static/chunks/4bd1b696-182b6b13bdad92e3.js","kb":55},{"url":"https://config.figma.com/_next/static/chunks/1255-14e6ad5a2ad87821.js","kb":45},{"url":"https://config.figma.com/_next/static/chunks/44917a20-567dd112029a858e.js","kb":43},{"url":"https://config.figma.com/_next/static/chunks/3985-b57b747093f23bde.js","kb":22}]
+media [{"url":"https://config.figma.com/_next/static/media/7c42ed55a7834032-s.p.woff2","mime":"font/woff2","kb":309,"status":200},{"url":"https://config.figma.com/_next/static/media/rive.bb0e66df.wasm","mime":"application/wasm","kb":719,"status":200},{"url":"https://player.vimeo.com/video/1172606652?h=ae4d9a610e&title=0&byline=0&portrait=0&muted=1&autopause=0&controls=0&dnt=1&loop=1&app_id=122963","mime":"text/html","kb":0,"status":200}]
+videos []
+canvases []
+
+## phase load (load) 5.41s frames 7 main {"task":285,"script":123,"layout":9,"style":10} rafTotal 5
+  1x WebAnimation|undefined|300|cubic-bezier(0.25, 0.1, 0.35, 1)|it1| delays[500] start@3842..3842 tgt  from undefined to undefined
+  -- sampled (with targets) --
+  S 1x Animation||300|cubic-bezier(0.25, 0.1, 0.35, 1)|it1|opacity|DocumentTimeline delays[500] seen@3830..3830 tgt div from {"opacity":"1"} to {"opacity":"0"}
+  pixel change: first 634 last 1014 frames>0.15: 3/6
+  series 634:110.82 1005:15.58 1014:1.57 1200:0 1644:0 1649:0
+
+## phase idle (idle) 3.01s frames 1 main {"task":9,"script":4,"layout":0,"style":0} rafTotal 5
+
+## phase s1 (scroll) 3.05s frames 45 main {"task":10,"script":4,"layout":0,"style":0} rafTotal 5
+  pixel change: first 37 last 3001 frames>0.15: 44/44
+  series 37:116.99 304:20.47 308:1.21 314:1.63 396:9.14 460:2.76 527:2.93 594:2.93 660:2.65 727:3.06 795:2.69 871:2.65 935:2.83 993:3.7 1067:3.54 1126:5.87 1194:3.73 1264:3.45 1327:3.77 1393:4.55 1462:3.76 1530:2.48 1594:4.61 1659:2.68 1727:2.66 1793:2.48 1860:3.52 1926:3.21 1998:3.08 2067:3.3 2129:2.9 2193:2.8 2274:2.82 2335:3 2398:3.13 2460:2.9 2531:3.33 2597:3.24 2664:2.66 2734:3.4 2793:3.3 2860:3.26 2927:2.45 3001:2.85
+
+## phase s2 (scroll) 3.02s frames 49 main {"task":9,"script":4,"layout":0,"style":0} rafTotal 5
+  pixel change: first -149 last 2953 frames>0.15: 48/48
+  series -149:2.74 -109:2.74 -44:2.76 21:3.24 88:2.27 159:2.36 218:2.74 287:2.66 356:3.1 421:2.98 490:2.95 552:3.79 621:4.26 685:4.23 755:3.04 821:3.22 885:2.4 955:2.42 1024:2.17 1085:2.41 1151:2.52 1218:2.41 1285:3.23 1354:3.83 1419:4.77 1485:4.65 1552:3.79 1618:3.28 1688:3.12 1754:3.3 1818:2.89 1885:3.09 1952:3.27 2019:3.54 2087:3.46 2154:3.92 2221:3.1 2287:2.95 2358:3.2 2425:2.39 2486:2.52 2552:2.18 2632:2.06 2685:2.3 2752:1.73 2819:2.05 2887:1.86 2953:2.04
+
+## phase s3 (scroll) 3.01s frames 49 main {"task":9,"script":4,"layout":0,"style":0} rafTotal 5
+  pixel change: first -143 last 2989 frames>0.15: 48/48
+  series -143:2.27 -72:2.08 -10:1.99 57:1.62 123:1.86 191:1.69 256:2.07 325:2.06 391:2.43 456:2.92 522:2.8 594:2.23 656:1.86 722:1.68 788:2.07 856:1.74 925:1.72 989:1.51 1055:1.92 1123:1.91 1193:2.12 1256:1.87 1322:2.08 1389:2.5 1456:2.06 1529:1.87 1589:2.11 1656:2.63 1722:2.05 1789:2.7 1860:2.53 1925:2.46 1991:3.16 2058:2.76 2125:2.93 2189:2.93 2261:2.65 2327:3.06 2393:2.69 2457:2.65 2522:2.83 2591:3.7 2655:3.54 2722:5.87 2789:3.73 2859:3.45 2923:3.77 2989:4.55

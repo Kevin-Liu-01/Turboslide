@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Turboslide is a slides editor in the browser</title>
+    <meta
+      name="description"
+      content="Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed."
+    />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070707" media="(prefers-color-scheme: dark)" />
+    <script>
+      /* the appearance before first paint: gt-theme when the visitor chose one, the system's otherwise */
+      try {
+        var t = localStorage.getItem('gt-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="fonts/inter-latin.css" />
+    <link rel="stylesheet" href="landing.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="mark" viewBox="-33.1 36 184.6 128">
+        <path
+          fill="currentColor"
+          d="M13.5 40L147.5 40L141.1 70L7.1 70ZM63.5 40L97.5 40L85.6 96L51.6 96ZM49.9 104L83.9 104L72 160L38 160ZM-8.5 40L15.5 40L9.1 70L-14.9 70ZM-21.4 82L42.6 82L39.6 96L-24.4 96ZM-26.1 104L37.9 104L34.9 118L-29.1 118ZM-11.6 130L32.4 130L26 160L-18 160Z"
+        />
+      </symbol>
+      <symbol id="i-command-line" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-user-group" viewBox="0 0 20 20"><path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z"/></symbol>
+      <symbol id="i-arrow-down-tray" viewBox="0 0 20 20"><path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z"/><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z"/></symbol>
+      <symbol id="i-swatch" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.5 2A1.5 1.5 0 0 0 2 3.5V15a3 3 0 1 0 6 0V3.5A1.5 1.5 0 0 0 6.5 2h-3Zm11.753 6.99L9.5 14.743V6.257l1.51-1.51a1.5 1.5 0 0 1 2.122 0l2.121 2.121a1.5 1.5 0 0 1 0 2.122ZM8.364 18H16.5a1.5 1.5 0 0 0 1.5-1.5v-3a1.5 1.5 0 0 0-1.5-1.5h-2.136l-6 6ZM5 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-bars-3" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-chat-bubble-left-right" viewBox="0 0 20 20"><path d="M3.505 2.365A41.369 41.369 0 0 1 9 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 0 0-.577-.069 43.141 43.141 0 0 0-4.706 0C9.229 4.696 7.5 6.727 7.5 8.998v2.24c0 1.413.67 2.735 1.76 3.562l-2.98 2.98A.75.75 0 0 1 5 17.25v-3.443c-.501-.048-1-.106-1.495-.172C2.033 13.438 1 12.162 1 10.72V5.28c0-1.441 1.033-2.717 2.505-2.914Z"/> <path d="M14 6c-.762 0-1.52.02-2.271.062C10.157 6.148 9 7.472 9 8.998v2.24c0 1.519 1.147 2.839 2.71 2.935.214.013.428.024.642.034.2.009.385.09.518.224l2.35 2.35a.75.75 0 0 0 1.28-.531v-2.07c1.453-.195 2.5-1.463 2.5-2.915V8.998c0-1.526-1.157-2.85-2.729-2.936A41.645 41.645 0 0 0 14 6Z"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-pencil-square" viewBox="0 0 20 20"><path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z"/> <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z"/></symbol>
+      <symbol id="i-presentation-chart-bar" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M1 2.75A.75.75 0 0 1 1.75 2h16.5a.75.75 0 0 1 0 1.5H18v8.75A2.75 2.75 0 0 1 15.25 15h-1.072l.798 3.06a.75.75 0 0 1-1.452.38L13.41 18H6.59l-.114.44a.75.75 0 0 1-1.452-.38L5.823 15H4.75A2.75 2.75 0 0 1 2 12.25V3.5h-.25A.75.75 0 0 1 1 2.75ZM7.373 15l-.391 1.5h6.037l-.392-1.5H7.373ZM13.25 5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0v-5.5a.75.75 0 0 1 .75-.75Zm-6.5 4a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 6.75 9Zm4-1.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-cube" viewBox="0 0 20 20"><path d="M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 9.143l7.477-4.125-7.115-3.925ZM18 6.443l-7.25 4v8.25l6.862-3.786A.75.75 0 0 0 18 14.25V6.443ZM9.25 18.693v-8.25l-7.25-4v7.807a.75.75 0 0 0 .388.657l6.862 3.786Z"/></symbol>
+      <symbol id="i-arrow-top-right-on-square" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z" clip-rule="evenodd"/> <path fill-rule="evenodd" d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z" clip-rule="evenodd"/></symbol>
+    </svg>
+
+    <a class="skip" href="#main">Skip to the content</a>
+
+    <div class="page" id="top">
+      <div class="rails" aria-hidden="true"></div>
+
+      <header class="seam">
+        <nav class="col nav-row" aria-label="Turboslide">
+          <a class="lockup" href="#top" aria-label="Turboslide, back to the top">
+            <svg aria-hidden="true"><use href="#mark" /></svg>Turboslide
+          </a>
+          <a class="nav-link" href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md">Documentation</a>
+          <div class="nav-tools">
+            <div class="seg" role="group" aria-label="Appearance">
+              <button class="btn is-small" type="button" data-theme-set="light" aria-pressed="false">Light</button>
+              <button class="btn is-small" type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+            </div>
+            <button class="btn is-small" type="button" id="pause-motion" aria-pressed="false">Pause Motion</button>
+          </div>
+          <a class="btn is-solid is-small nav-new" href="https://www.turboslide.com/new">New Presentation</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <!-- the hero: the claim in big type, then the product working under it -->
+        <section class="hero col seam" aria-labelledby="h1">
+          <div class="hero-top">
+            <h1 class="h1" id="h1"><span>Build the pitch,</span> <span>present it and</span> <span>send the link</span></h1>
+            <div class="hero-side">
+              <p class="lead">
+                Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is
+                needed.
+              </p>
+              <div class="actions">
+                <a class="btn is-solid" href="https://www.turboslide.com/new">New Presentation</a>
+                <a class="btn" href="https://www.turboslide.com/deck/gt-brand">Open the Example Deck</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-stage" id="agent" data-loop="agent">
+            <p class="sr" id="agent-desc">
+              A staged sequence. An agent runs four Turboslide commands on the example deck. A new slide appears, its
+              title is set, the customer name changes from Acme to Globex on every slide, and the deck is restored.
+            </p>
+            <div class="stage" role="group" aria-label="An agent edits the example deck" aria-describedby="agent-desc">
+              <div class="ed">
+                <div class="ed-title">
+                  <svg class="mark" aria-hidden="true"><use href="#mark" /></svg>
+                  <span class="ed-name">Onboarding plan</span>
+                  <span class="ed-status">All changes saved</span>
+                  <span class="ed-right" aria-hidden="true">
+                    <span class="ed-pill is-solid">Slideshow</span>
+                    <span class="ed-pill">Share</span>
+                  </span>
+                </div>
+                <div class="ed-menus" aria-hidden="true">
+                  <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span
+                  ><span>Slide</span><span>Arrange</span><span>Tools</span><span>Help</span>
+                </div>
+                <div class="ed-body">
+                  <div class="strip" id="strip" aria-label="Slides"></div>
+                  <div class="ed-stage">
+                    <div class="deck" id="deck">
+                      <div class="sheet is-on" data-id="opener" aria-label="Slide 1">
+                        <canvas class="ground" data-field="opener" aria-hidden="true"></canvas>
+                        <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span
+                        ><span class="x br"></span>
+                        <div class="s-plate">
+                          <p class="s-h1">Onboarding plan for Acme</p>
+                          <p class="s-p s-muted">Four weeks from the kickoff call to the first release.</p>
+                        </div>
+                        <p class="s-foot">Prepared for Acme</p>
+                        <p class="s-num">1</p>
+                      </div>
+                      <div class="sheet" data-id="weeks" aria-label="Slide 2">
+                        <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span
+                        ><span class="x br"></span>
+                        <div class="sl">
+                          <p class="s-h2">The four weeks</p>
+                          <div class="s-rows">
+                            <div><b>Week 1</b><span>Kickoff and access for the Acme team</span></div>
+                            <div><b>Week 2</b><span>The first deck in Acme's brand kit</span></div>
+                            <div><b>Week 3</b><span>Review with Acme's sales leads</span></div>
+                            <div><b>Week 4</b><span>Release to every seller</span></div>
+                          </div>
+                        </div>
+                        <p class="s-foot">Prepared for Acme</p>
+                        <p class="s-num">2</p>
+                      </div>
+                      <div class="sheet" data-id="statement" aria-label="Slide 3">
+                        <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span
+                        ><span class="x br"></span>
+                        <div class="sl" style="display: grid; align-content: center">
+                          <p class="s-big">One deck for every Acme seller</p>
+                        </div>
+                        <p class="s-foot">Prepared for Acme</p>
+                        <p class="s-num">3</p>
+                      </div>
+                      <div class="sheet" data-id="roles" aria-label="Slide 4">
+                        <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span
+                        ><span class="x br"></span>
+                        <div class="sl">
+                          <p class="s-h2">Who does what</p>
+                          <div class="s-cols">
+                            <div class="s-rows">
+                              <div><b>Acme</b><span>The brand kit and the logo</span></div>
+                              <div><b>&nbsp;</b><span>The customer names</span></div>
+                              <div><b>&nbsp;</b><span>The final review</span></div>
+                            </div>
+                            <div class="s-rows">
+                              <div><b>Our team</b><span>The slides and layouts</span></div>
+                              <div><b>&nbsp;</b><span>The speaker notes</span></div>
+                              <div><b>&nbsp;</b><span>The share link</span></div>
+                            </div>
+                          </div>
+                        </div>
+                        <p class="s-foot">Prepared for Acme</p>
+                        <p class="s-num">4</p>
+                      </div>
+                      <div class="sheet" data-id="next" aria-label="Slide 5">
+                        <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span
+                        ><span class="x br"></span>
+                        <div class="sl">
+                          <p class="s-h2">Next steps</p>
+                          <div class="s-rows">
+                            <div><b>Today</b><span>Share the deck with Acme</span></div>
+                            <div><b>Friday</b><span>The kickoff call</span></div>
+                            <div><b>October 30</b><span>The first release</span></div>
+                          </div>
+                        </div>
+                        <p class="s-foot">Prepared for Acme</p>
+                        <p class="s-num">5</p>
+                      </div>
+                      <div class="sel" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="chip">Title</span></div>
+                    </div>
+                    <div class="snack" role="status" aria-live="polite">
+                      <span class="snack-text"></span><button type="button" class="snack-undo">Undo</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="term" id="agent-term">
+                <div class="term-head" aria-hidden="true"><span>~/decks/onboarding</span><span>agent</span></div>
+                <ol class="term-log" aria-hidden="true">
+                  <li>$ turboslide --version</li>
+                  <li class="out">Turboslide 2026.1001.3</li>
+                  <li class="out">https://www.turboslide.com</li>
+                  <li class="out">193 actions</li>
+                </ol>
+                <form class="term-in" id="agent-form" autocomplete="off">
+                  <span aria-hidden="true">$</span>
+                  <label class="sr" for="cmd">Type a Turboslide command</label>
+                  <input id="cmd" name="cmd" spellcheck="false" placeholder="turboslide tailor --replace Acme=Initech" />
+                </form>
+              </div>
+            </div>
+
+            <div class="steps" role="tablist" aria-label="The four commands">
+              <button class="step" type="button" role="tab" aria-selected="false" data-step="0">
+                <i class="rule"></i>New Slide<small>slide new --layout split</small>
+              </button>
+              <button class="step" type="button" role="tab" aria-selected="false" data-step="1">
+                <i class="rule"></i>Set the Title<small>block set pricing#title</small>
+              </button>
+              <button class="step" type="button" role="tab" aria-selected="false" data-step="2">
+                <i class="rule"></i>Tailor for Globex<small>tailor --replace Acme=Globex</small>
+              </button>
+              <button class="step" type="button" role="tab" aria-selected="false" data-step="3">
+                <i class="rule"></i>Restore<small>version restore 25</small>
+              </button>
+            </div>
+            <div class="band-foot">
+              <p class="caption">
+                A staged sequence of 17 seconds. An agent runs four Turboslide commands on the example deck. Type in the
+                terminal to run one yourself.
+              </p>
+              <div class="band-controls">
+                <button class="btn is-small" type="button" data-ctl="pause">Pause</button>
+                <button class="btn is-small" type="button" data-ctl="replay">Replay</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- the numbers row: still on purpose -->
+        <section class="col-bare seam" aria-label="Turboslide in four numbers">
+          <div class="numbers">
+            <div>
+              <b><span data-fact="actions">193</span> actions</b>
+              <p>Every menu row is an action. Agents run the same actions over the CLI, MCP and HTTP.</p>
+            </div>
+            <div>
+              <b><span data-fact="layouts">22</span> layouts</b>
+              <p>A new slide starts from one of these layouts.</p>
+            </div>
+            <div>
+              <b><span data-fact="materials">17</span> patterns</b>
+              <p>Insert > Animated pattern draws one in the theme's colors.</p>
+            </div>
+            <div>
+              <b><span data-fact="shapePresets">135</span> shapes</b>
+              <p>Every shape preset is drawn from its PowerPoint definition.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="select"></canvas></div>
+
+        <!-- everything on a slide moves: the visitor's gestures, and the action each one writes -->
+        <section class="band col seam" id="canvas" aria-labelledby="h-canvas" data-loop="work">
+          <div class="band-text">
+            <h2 class="h2" id="h-canvas">Everything on a slide moves</h2>
+            <p class="lead">
+              Drag, resize and rotate any object. The first drag turns the slide into a canvas. Undo puts the layout
+              back.
+            </p>
+          </div>
+          <div class="band-figure work">
+            <div class="sheet" id="work-sheet" role="group" aria-label="A slide you can edit. Select the title, the text or the picture, then drag it, resize it from a handle or rotate it from the stem. The arrow keys move a selected object.">
+              <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+              <div class="obj" data-obj="title" data-role="Title" tabindex="0" aria-label="Title">
+                <p class="s-h1">One release for every region</p>
+              </div>
+              <div class="obj" data-obj="body" data-role="Text" tabindex="0" aria-label="Text">
+                <p class="s-p s-muted">Acme's sellers in every region open the same deck on the same day.</p>
+              </div>
+              <div class="obj pic" data-obj="picture" data-role="Image" tabindex="0" aria-label="Picture: the Blue Marble">
+                <canvas data-field="earth" aria-hidden="true"></canvas>
+              </div>
+              <i class="guide v" aria-hidden="true"></i><i class="guide hz" aria-hidden="true"></i>
+              <div class="ring" hidden aria-hidden="true">
+                <span class="stem"></span>
+                <span class="chip">Title</span>
+                <span class="deg" hidden>0°</span>
+                <i class="h" data-h="nw"></i><i class="h" data-h="n"></i><i class="h" data-h="ne"></i
+                ><i class="h" data-h="e"></i><i class="h" data-h="se"></i><i class="h" data-h="s"></i
+                ><i class="h" data-h="sw"></i><i class="h" data-h="w"></i><i class="h" data-h="rot"></i>
+              </div>
+              <span class="ghost" aria-hidden="true"
+                ><svg viewBox="0 0 20 20"><path class="line" d="M3 1.5v15.2l4.1-3.9 2.6 5.8 3-1.4-2.6-5.6h5.6z" /><path class="fill" d="M4.2 4.3v9.6l3.2-3 2.8 6.1 1-.5-2.8-6h4.4z" /></svg
+              ></span>
+              <p class="s-foot">Prepared for Acme</p>
+              <p class="s-num">6</p>
+            </div>
+            <div class="term" id="work-term">
+              <div class="term-head" aria-hidden="true"><span>~/decks/onboarding</span><span>actions</span></div>
+              <ol class="term-log" aria-hidden="true">
+                <li class="out is-wait">Waiting for a gesture on the slide.</li>
+              </ol>
+              <p class="sr" id="work-live" aria-live="polite"></p>
+              <div class="term-in" aria-hidden="true"><span>$</span><span class="caret"></span></div>
+            </div>
+          </div>
+          <div class="band-foot">
+            <p class="caption">
+              Each gesture writes one action. The panel prints the command an agent would send for the same change.
+            </p>
+            <div class="band-controls">
+              <button class="btn is-small" type="button" id="work-undo">Undo</button>
+            </div>
+          </div>
+          <p class="credit">The Blue Marble. Image: NASA, Reto Stöckli, 2007, public domain.</p>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="people"></canvas></div>
+
+        <!-- two people on one slide -->
+        <section class="band col seam" id="people" aria-labelledby="h-people" data-loop="people">
+          <div class="band-text">
+            <h2 class="h2" id="h-people">Two people edit the same slide</h2>
+            <p class="lead">
+              Share an editor link. Each person's outline, caret and name show on the other screen. Follow keeps your
+              view on the slide the other person is on.
+            </p>
+          </div>
+          <div class="split-labels" aria-hidden="true"><span>Maya's screen</span><span>Sam's screen</span></div>
+          <div class="band-figure pair">
+            <div class="screen" data-who="maya">
+              <div class="screen-title">
+                <svg class="mark" aria-hidden="true" style="width: 20px; height: 14px"><use href="#mark" /></svg>
+                <span class="ed-name">Globex onboarding plan</span>
+                <span class="chips"><span class="pchip is-away" data-chip="sam" title="Sam">S</span></span>
+              </div>
+              <div class="screen-stage">
+                <div class="sheet" data-sheet="maya-1">
+                  <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+                  <div class="tbox" data-box="title" style="left: 8.5%; top: 36%; width: 80%">
+                    <p class="s-h1" contenteditable="true" spellcheck="false" aria-label="Title on Maya's screen">Globex onboarding plan</p>
+                  </div>
+                  <div class="tbox" data-box="sub" style="left: 8.5%; top: 55%; width: 70%">
+                    <p class="s-sub s-muted" contenteditable="true" spellcheck="false" aria-label="Subtitle on Maya's screen"><span class="ph">Click to add subtitle</span></p>
+                  </div>
+                  <div class="presence" data-pres="title"><span class="flag"></span></div>
+                  <div class="presence" data-pres="sub"><span class="flag"></span></div>
+                  <p class="s-foot">Prepared for Globex</p>
+                  <p class="s-num">1</p>
+                </div>
+                <div class="sheet" data-sheet="maya-2" hidden>
+                  <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+                  <div class="sl"><p class="s-h2 s-ph">Click to add title</p><p class="s-p s-ph">Click to add text</p></div>
+                  <p class="s-num">2</p>
+                </div>
+                <div class="follow-plate" role="status"><b>Following Sam</b><span>Stop</span></div>
+              </div>
+            </div>
+            <div class="screen" data-who="sam">
+              <div class="screen-title">
+                <svg class="mark" aria-hidden="true" style="width: 20px; height: 14px"><use href="#mark" /></svg>
+                <span class="ed-name">Globex onboarding plan</span>
+                <span class="chips"><span class="pchip" data-chip="maya" title="Maya">M</span></span>
+              </div>
+              <div class="screen-stage">
+                <div class="sheet" data-sheet="sam-1">
+                  <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+                  <div class="tbox" data-box="title" style="left: 8.5%; top: 36%; width: 80%">
+                    <p class="s-h1" contenteditable="true" spellcheck="false" aria-label="Title on Sam's screen">Globex onboarding plan</p>
+                  </div>
+                  <div class="tbox" data-box="sub" style="left: 8.5%; top: 55%; width: 70%">
+                    <p class="s-sub s-muted" contenteditable="true" spellcheck="false" aria-label="Subtitle on Sam's screen"><span class="ph">Click to add subtitle</span></p>
+                  </div>
+                  <div class="presence" data-pres="title"><span class="flag"></span></div>
+                  <div class="presence" data-pres="sub"><span class="flag"></span></div>
+                  <p class="s-foot">Prepared for Globex</p>
+                  <p class="s-num">1</p>
+                </div>
+                <div class="sheet" data-sheet="sam-2" hidden>
+                  <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+                  <div class="sl"><p class="s-h2 s-ph">Click to add title</p><p class="s-p s-ph">Click to add text</p></div>
+                  <p class="s-num">2</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="band-foot">
+            <p class="caption">
+              A staged sequence of 14 seconds, drawn with the editor's own presence marks. Click a text box on either
+              screen to type as that person.
+            </p>
+            <div class="band-controls">
+              <button class="btn is-small" type="button" data-ctl="pause">Pause</button>
+              <button class="btn is-small" type="button" data-ctl="replay">Replay</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="play"></canvas></div>
+
+        <!-- present from the browser -->
+        <section class="band col seam" id="present" aria-labelledby="h-present" data-loop="present">
+          <div class="band-text">
+            <h2 class="h2" id="h-present">Present from the browser</h2>
+            <p class="lead">
+              Slideshow starts on the current slide. Presenter view opens in a second window with the timer, the notes
+              and the next slide. A skipped slide stays out of the show.
+            </p>
+          </div>
+          <div class="band-figure show">
+            <div class="presenter" tabindex="0" aria-label="Presenter view. The arrow keys change the slide.">
+              <div class="presenter-bar">
+                <span class="timer" aria-label="Time since the show started">00:00</span>
+                <span class="count">Slide 1 of 4</span>
+                <button class="btn is-small" type="button" data-p="prev">Previous</button>
+                <button class="btn is-small next-btn" type="button" data-p="next">Next<i class="rule"></i></button>
+              </div>
+              <div class="presenter-body">
+                <div data-show="current"></div>
+                <div>
+                  <div>
+                    <p class="next-label">Next slide</p>
+                    <div data-show="next"></div>
+                  </div>
+                  <div class="notes"><b>Speaker notes</b><p data-show="notes"></p></div>
+                </div>
+              </div>
+            </div>
+            <div class="audience">
+              <p class="next-label">Audience screen</p>
+              <div class="audience-ground"><div data-show="audience" style="width: 100%"></div></div>
+            </div>
+          </div>
+          <div class="band-foot">
+            <p class="caption">Slide 4 is skipped, so the show goes from slide 3 to slide 5. Use the arrow keys or the buttons.</p>
+          </div>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="pages"></canvas></div>
+
+        <!-- export compared pixel to pixel -->
+        <section class="band col seam" id="export" aria-labelledby="h-export">
+          <div class="band-text">
+            <h2 class="h2" id="h-export">Export to PDF and PowerPoint</h2>
+            <p class="lead">
+              File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches the screen pixel for pixel.
+            </p>
+          </div>
+          <div class="split-labels" aria-hidden="true"><span>In the browser</span><span>In the PowerPoint file</span></div>
+          <figure class="band-figure compare" id="compare">
+            <div class="layer">
+              <img class="only-light" src="img/export-page-light.png" width="1600" height="900" alt="The exported PowerPoint page of the slide Who does what." loading="lazy" decoding="async" />
+              <img class="only-dark" src="img/export-page-dark.png" width="1600" height="900" alt="The exported PowerPoint page of the slide Who does what." loading="lazy" decoding="async" />
+            </div>
+            <div class="live" data-clone="roles"></div>
+            <div class="seam-track" aria-hidden="false">
+            <div
+              class="handle"
+              role="slider"
+              tabindex="0"
+              aria-label="Move the line between the browser and the PowerPoint file"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="50"
+              aria-valuetext="50 percent from the left"
+            ></div>
+            </div>
+            <div class="loupe" aria-hidden="true">
+              <figure><canvas width="14" height="14"></canvas><figcaption>Browser</figcaption></figure>
+              <figure><canvas width="14" height="14"></canvas><figcaption>PowerPoint file</figcaption></figure>
+              <p class="loupe-read">Hold the pointer on the slide.</p>
+            </div>
+          </figure>
+          <div class="band-foot">
+            <p class="caption">
+              Drag the handle to compare the two. Hold the pointer on the slide to see both at ten times their size.
+            </p>
+          </div>
+          <div class="fact-row">
+            <b><span data-fact="mismatch">0.003</span>%</b>
+            <p>
+              The worst page of the example deck's PowerPoint export differs from the screen by this share.
+              <a class="inline-link" href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md">Read the record</a>
+            </p>
+          </div>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="pattern"></canvas></div>
+
+        <!-- animated patterns -->
+        <section class="band col seam" id="patterns" aria-labelledby="h-patterns" data-loop="pattern">
+          <div class="two">
+            <div class="band-text">
+              <h2 class="h2" id="h-patterns">Animated patterns in the theme's colors</h2>
+              <p class="lead">
+                Insert > Animated pattern adds one of <span data-fact="materials">17</span> patterns to a slide. It
+                moves in the editor and in the show. Every export carries its still frame.
+              </p>
+              <div class="band-controls" style="margin-top: 28px">
+                <div class="seg" role="group" aria-label="The pattern">
+                  <button class="btn is-small" type="button" data-pat="moving" aria-pressed="true">Moving</button>
+                  <button class="btn is-small" type="button" data-pat="still" aria-pressed="false">Still Frame</button>
+                </div>
+              </div>
+              <p class="caption" style="margin-top: 14px">The still frame is the picture the PDF and the PowerPoint file carry.</p>
+            </div>
+            <figure class="band-figure">
+              <div class="sheet" id="pattern-sheet">
+                <canvas class="ground" data-field="pattern" aria-hidden="true"></canvas>
+                <span class="x tl"></span><span class="x tr"></span><span class="x bl"></span><span class="x br"></span>
+                <div class="s-plate" style="width: 36cqw">
+                  <p class="s-h1">Questions from Acme</p>
+                  <p class="s-p s-muted">Thank you for the time today.</p>
+                </div>
+                <p class="s-foot">Prepared for Acme</p>
+                <p class="s-num">7</p>
+              </div>
+            </figure>
+          </div>
+        </section>
+
+        <div class="field-strip col-bare seam" aria-hidden="true"><canvas data-glyph="rows"></canvas></div>
+
+        <!-- the page ends on its densest evidence: a ruled table -->
+        <section class="band col seam" id="features" aria-labelledby="h-features">
+          <h2 class="h2" id="h-features">Features and where to find them</h2>
+          <div class="table" role="list">
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-bars-3" /></svg>Menus</b><span>File to Help</span
+              ><em>The menus and shortcuts are Google's, in Google's order.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-pencil-square" /></svg>Tailor for a customer</b
+              ><span>Tools</span><em>One customer name is replaced on every slide and in the notes as one change.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-swatch" /></svg>Brand kit</b><span>Slide > Change theme</span
+              ><em>Six colors, the faces and the logo apply to every slide.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-chat-bubble-left-right" /></svg>Comments</b
+              ><span>Insert > Comment</span><em>A comment sits on an object, a text range or the slide, and can be assigned.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-clock" /></svg>Version history</b
+              ><span>File > Version history</span><em>Each version names its author, a person or an agent.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-user-group" /></svg>Share</b><span>Share</span
+              ><em>An editor link or a viewer link opens the deck in the browser.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-presentation-chart-bar" /></svg>Presenter view</b
+              ><span>Slideshow > Presenter view</span><em>The timer, the notes and the next slide in a second window.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-arrow-down-tray" /></svg>Download</b
+              ><span>File > Download</span><em>PowerPoint and PDF files that match the screen.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-cube" /></svg>Animated pattern</b
+              ><span>Insert > Animated pattern</span><em><span data-fact="materials">17</span> patterns in the theme's colors.</em>
+            </div>
+            <div role="listitem">
+              <b><svg class="ic" aria-hidden="true"><use href="#i-command-line" /></svg>Agents</b><span>CLI, MCP and HTTP</span
+              ><em><span data-fact="actions">193</span> actions, <span data-fact="mcpTools">169</span> MCP tools and <span data-fact="httpPaths">177</span> HTTP paths.</em>
+            </div>
+          </div>
+        </section>
+
+        <!-- the license, and the mark that closes the page -->
+        <section class="band col seam" id="license" aria-labelledby="h-license">
+          <div class="closing">
+            <div>
+              <h2 class="h2" id="h-license">Free under the MIT license</h2>
+              <p class="lead" style="margin-top: 20px">Run it from a checkout or deploy it to Vercel. The code is on GitHub.</p>
+              <div class="actions">
+                <a class="btn" href="https://github.com/Kevin-Liu-01/Turboslide"
+                  >GitHub<svg class="ic" aria-hidden="true"><use href="#i-arrow-top-right-on-square" /></svg
+                ></a>
+              </div>
+            </div>
+            <div class="big-mark" id="big-mark" aria-hidden="true">
+              <svg viewBox="-33.1 36 184.6 128" fill="currentColor">
+                <path d="M-8.5 40L15.5 40L9.1 70L-14.9 70Z" />
+                <path d="M13.5 40L147.5 40L141.1 70L7.1 70Z" />
+                <path d="M63.5 40L97.5 40L85.6 96L51.6 96Z" />
+                <path d="M-21.4 82L42.6 82L39.6 96L-24.4 96Z" />
+                <path d="M-26.1 104L37.9 104L34.9 118L-29.1 118Z" />
+                <path d="M49.9 104L83.9 104L72 160L38 160Z" />
+                <path d="M-11.6 130L32.4 130L26 160L-18 160Z" />
+              </svg>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="foot col">
+        <div class="foot-row">
+          <a class="lockup" href="#top" aria-label="Turboslide, back to the top"
+            ><svg aria-hidden="true"><use href="#mark" /></svg>Turboslide</a
+          >
+          <div class="foot-links">
+            <a href="https://www.turboslide.com/new">New presentation</a>
+            <a href="https://www.turboslide.com/decks">Your presentations</a>
+            <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md">Documentation</a>
+            <a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a>
+            <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE">License</a>
+          </div>
+        </div>
+        <p>Turboslide is made by General Translation. Google Slides is a product of Google LLC.</p>
+      </footer>
+    </div>
+
+    <script src="landing.js" defer></script>
+  </body>
+</html>

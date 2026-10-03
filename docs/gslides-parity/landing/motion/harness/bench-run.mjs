@@ -1,0 +1,34 @@
+import { createRequire } from 'node:module';
+import fs from 'node:fs';
+const require = createRequire('/Users/kevinliu/repos/Turboslide-landing/package.json');
+const { chromium } = require('playwright-core');
+const browser = await chromium.launch({ headless: true, channel: 'chromium', args: ['--ignore-gpu-blocklist', '--enable-gpu-rasterization'] });
+const out = {};
+for (const throttle of [1, 4]) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const page = await ctx.newPage();
+  const cdp = await ctx.newCDPSession(page);
+  await page.goto('file://' + new URL('./bench.html', import.meta.url).pathname);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+  const r = {};
+  r.band2d_1104x360_cell2 = await page.evaluate(() => window.bench2d(1104, 360, 2, 120));
+  r.band2d_1104x360_cell3 = await page.evaluate(() => window.bench2d(1104, 360, 3, 120));
+  r.hero2d_1440x900_cell3 = await page.evaluate(() => window.bench2d(1440, 900, 3, 90));
+  r.phone2d_390x300_cell2 = await page.evaluate(() => window.bench2d(390, 300, 2, 120));
+  r.bandGL_1104x360_cell2 = await page.evaluate(() => window.benchGL(1104, 360, 2, 120));
+  r.heroGL_1440x900_cell3 = await page.evaluate(() => window.benchGL(1440, 900, 3, 120));
+  const m0 = Object.fromEntries((await cdp.send('Performance.enable').then(() => cdp.send('Performance.getMetrics'))).metrics.map((x) => [x.name, x.value]));
+  r.reveal60 = await page.evaluate(() => window.benchReveal(60));
+  const m1 = Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map((x) => [x.name, x.value]));
+  r.reveal60.taskMs = Math.round((m1.TaskDuration - m0.TaskDuration) * 1000);
+  r.reveal60.styleMs = Math.round((m1.RecalcStyleDuration - m0.RecalcStyleDuration) * 1000);
+  r.reveal60.layoutMs = Math.round((m1.LayoutDuration - m0.LayoutDuration) * 1000);
+  out['cpu' + throttle + 'x'] = r;
+  await ctx.close();
+}
+const os = await import('node:os');
+out.load = os.loadavg();
+out.date = new Date().toISOString();
+console.log(JSON.stringify(out, null, 1));
+fs.writeFileSync('/Users/kevinliu/repos/Turboslide-landing/docs/gslides-parity/landing/motion/raw/bench-dither.json', JSON.stringify(out, null, 1));
+await browser.close();

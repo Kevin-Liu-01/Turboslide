@@ -746,7 +746,13 @@ export function chromeRound1(): string[] {
       if (!row || !sub) return null;
       const r = row.getBoundingClientRect();
       const s = sub.getBoundingClientRect();
-      return { rowBottom: r.bottom, rowLeft: r.left, subTop: s.top, subLeft: s.left, subRight: s.right };
+      return {
+        rowBottom: r.bottom,
+        rowLeft: r.left,
+        subTop: s.top,
+        subLeft: s.left,
+        subRight: s.right,
+      };
     });
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');

@@ -611,6 +611,20 @@ export async function statusOf(page: Page, path: string): Promise<number> {
  * record when the product path throws; the 404 is asserted either way.
  */
 export async function teardown(page: Page, deckId: string): Promise<void> {
+  /* the editor under 720 px draws one Menus key and no menu bar (Round 1, B3b#14), so the page is
+     widened for File > Move to trash and put back after */
+  const viewport = page.viewportSize();
+  if (viewport !== null && viewport.width < 720)
+    await page.setViewportSize({ width: 1440, height: 900 }).catch(() => undefined);
+  try {
+    await teardownAtWidth(page, deckId);
+  } finally {
+    if (viewport !== null && viewport.width < 720)
+      await page.setViewportSize(viewport).catch(() => undefined);
+  }
+}
+
+async function teardownAtWidth(page: Page, deckId: string): Promise<void> {
   let trashed = false;
   try {
     const status = await statusOf(page, `/edit/${deckId}`);

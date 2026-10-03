@@ -1,5 +1,7 @@
 import { HOME_DECK } from '../deck.generated';
+import { startAgents } from './agents';
 import { renumber } from './filmstrip';
+import { startHistory } from './history';
 import { startObjects } from './objects';
 import { createHomeStore, restState } from './state';
 import type { Band, HomeStore, UndoBand } from './state';
@@ -34,6 +36,8 @@ const REGISTRATIONS: readonly Registration[] = [
   { band: 'hero', start: (ctx) => startObjects(ctx, 'hero') },
   { band: 'canvas', start: (ctx) => startObjects(ctx, 'canvas') },
   { band: 'tailor', start: startTailor },
+  { band: 'agents', start: startHistory },
+  { band: 'agents', start: startAgents },
 ];
 
 const UNDO_BANDS: readonly UndoBand[] = ['hero', 'tailor', 'canvas'];

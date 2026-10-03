@@ -7,8 +7,8 @@ import { fallbackSrcOf, shotOf, srcsetOf } from './Shot';
 import { SHOTS_MANIFEST } from './shots';
 
 // The pictures of the /home page (docs/archive/rounds/POLISH.md 3.3 item 1, 3.5): the manifest
-// scripts/build-home-assets.ts --capture writes holds the product's own render of the hero, the
-// canvas crop and the menus crop in both appearances, each with a 2x and a 1x candidate under
+// scripts/build-home-assets.ts --capture writes holds the product's own render of the hero and
+// the menus crop in both appearances (Round 1 retired the canvas crop), each with a 2x and a 1x candidate under
 // apps/studio/public/home, and the module twin the page imports equals the JSON. The chrome
 // record each picture carries, read from the DOM as the picture was taken, proves the title row
 // carried the Turboslide mark and the menu bar no Extensions menu (the row
@@ -40,10 +40,8 @@ describe('shots.json and its module', () => {
     expect(SHOTS_MANIFEST.scale).toBe(2);
   });
 
-  it('holds the hero and the two crops in both appearances, each with a 2x and a 1x candidate', () => {
+  it('holds the hero and the menus crop in both appearances, each with a 2x and a 1x candidate', () => {
     expect(SHOTS_MANIFEST.shots.map((shot) => shot.name).sort()).toEqual([
-      'canvas-dark',
-      'canvas-light',
       'hero-dark',
       'hero-light',
       'menus-dark',
@@ -67,14 +65,11 @@ describe('shots.json and its module', () => {
     }
   });
 
-  it('draws the hero from the whole window, the canvas crop at the slot and the menus crop with the whole Insert menu', () => {
+  it('draws the hero from the whole window and the menus crop with the whole Insert menu', () => {
     for (const theme of ['dark', 'light'] as const) {
       const hero = shotOf(`hero-${theme}`);
       expect(hero.format).toBe('jpeg');
       expect([hero.width, hero.height]).toEqual([1440, 900]);
-      const canvas = shotOf(`canvas-${theme}`);
-      expect(canvas.format).toBe('png');
-      expect([canvas.width, canvas.height]).toEqual([612, 400]);
       const menus = shotOf(`menus-${theme}`);
       expect(menus.format).toBe('png');
       /* 3.2 item 3 wrote "under 480 px tall" for a shorter menu; the Insert menu of this build
@@ -114,10 +109,8 @@ describe('shots.json and its module', () => {
         shotOf(`${kind}-${theme}`).variants.find((v) => v.scale === 2)?.bytes ?? 0;
       /* the first screen at 1440 holds the hero alone */
       expect(two('hero'), `hero-${theme} 2x`).toBeLessThan(FIRST_SCREEN_BYTES);
-      /* a full scroll loads the hero and the two crops of the stored appearance */
-      expect(two('hero') + two('canvas') + two('menus'), `${theme} 2x`).toBeLessThan(
-        FULL_SCROLL_BYTES,
-      );
+      /* a full scroll loads the hero and the menus crop of the stored appearance */
+      expect(two('hero') + two('menus'), `${theme} 2x`).toBeLessThan(FULL_SCROLL_BYTES);
     }
   });
 });

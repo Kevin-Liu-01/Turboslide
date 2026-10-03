@@ -2,12 +2,12 @@
 // SPEC-4 2.4 stand under it): the product's own render, never a stock picture and never the
 // README's captures. `--capture` opens the editor on the example deck through
 // @turboslide/headless at 1440 by 900 and device scale factor 2 in both appearances and writes
-// three pictures per appearance under apps/studio/public/home as content hashed files, each with a
-// 2x and a 1x candidate: the hero (the whole window on the Blue Marble slide, JPEG at quality 82),
-// the canvas crop (the stage with one picture selected, its ring, its eight handles and the
-// rotation readout held mid drag, 612 by 400 CSS px, PNG) and the menus crop (the title row and
-// the menu bar with the Insert menu open, 612 px wide and under 480 tall, PNG, so its text stays
-// crisp). apps/studio/src/components/home/shots.json records every candidate's path, size, bytes
+// two pictures per appearance under apps/studio/public/home as content hashed files, each with a
+// 2x and a 1x candidate: the hero (the whole window on the Blue Marble slide, JPEG at quality 82)
+// and the menus crop (the title row and the menu bar with the Insert menu open, 612 px wide and
+// under 480 tall, PNG, so its text stays crisp). Round 1 retired the canvas crop (the stage with a
+// picture selected): /home draws the move, the resize and the turn as a diagram, since no /home
+// picture shows a selection ring (docs/NEXT.md 4.1.5 `decks.home.capture-plain`). apps/studio/src/components/home/shots.json records every candidate's path, size, bytes
 // and sha256 plus what the chrome carried when the picture was taken (the Turboslide mark in the
 // title row, the menu bar's labels), which `shots.test.ts` asserts; shots.ts is the JSON's typed
 // twin the studio imports (its tsconfig reaches no JSON file). The hashed names let
@@ -79,8 +79,6 @@ const SLIDE = 'mood-earth';
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const SCALE = 2;
 const JPEG_QUALITY = 82;
-/** The canvas crop in CSS px: the seven column slot of the two column band (POLISH.md 3.4). */
-const CANVAS_CROP = { width: 612, height: 400 } as const;
 /**
  * The menus crop: the slot's width, the title row, the menu bar and the whole Insert menu. 3.2
  * item 3 wrote "under 480 px tall" for a shorter menu; the Insert menu of this build stands
@@ -88,14 +86,7 @@ const CANVAS_CROP = { width: 612, height: 400 } as const;
  * menu is never cut.
  */
 const MENUS_CROP = { width: 612, maxHeight: 520 } as const;
-/**
- * The canvas crop's picture: the Blue Marble slide's own picture, selected at this zoom so the
- * whole ring with its eight handles, the rotation handle and the readout fit the 612 by 400 crop
- * (the sheet is 1600 by 900; at the factor 0.3 it is 480 by 270 CSS px on screen, and turned
- * by 12 degrees its ring, the rotation handle and the readout stay inside 612 by 400).
- */
-const CANVAS_ZOOM = 0.3;
-const KINDS = ['hero', 'canvas', 'menus'] as const;
+const KINDS = ['hero', 'menus'] as const;
 const THEMES = ['dark', 'light'] as const;
 
 export type ShotKind = (typeof KINDS)[number];
@@ -197,8 +188,6 @@ async function rectOf(page: Page, selector: string): Promise<Rect | null> {
   }, selector);
 }
 
-const center = (r: Rect): Point => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
-
 async function state(page: Page): Promise<{ slideId?: string; sync?: { pending?: number } }> {
   return page.evaluate(
     () =>
@@ -253,36 +242,6 @@ async function hideStoreNotice(page: Page): Promise<void> {
   });
 }
 
-async function handleControls(page: Page): Promise<string[]> {
-  return page.evaluate(() =>
-    [...document.querySelectorAll('.ts-overlay [data-control^="handle."]')].map(
-      (el) => el.getAttribute('data-control') ?? '',
-    ),
-  );
-}
-
-async function handleRect(page: Page, dir: string): Promise<Rect> {
-  const control = (await handleControls(page)).find((c) => c.endsWith(`.${dir}`));
-  if (!control) throw new Error(`no ${dir} handle`);
-  const r = await rectOf(page, `.ts-overlay [data-control="${control}"]`);
-  if (!r) throw new Error(`no box for ${control}`);
-  return r;
-}
-
-/** The selected object's box on screen, from its nw and se handles. */
-async function selectionRect(page: Page): Promise<Rect> {
-  const a = center(await handleRect(page, 'nw'));
-  const b = center(await handleRect(page, 'se'));
-  return { x: a.x, y: a.y, w: b.x - a.x, h: b.y - a.y };
-}
-
-async function selectAt(page: Page, at: Point): Promise<Rect> {
-  await clearAll(page);
-  await clickAt(page, at.x, at.y);
-  await page.locator('.ts-overlay [data-control$=".rotate"]').first().waitFor({ timeout: 8000 });
-  return selectionRect(page);
-}
-
 async function editorReady(page: Page): Promise<void> {
   await page.waitForFunction(
     () => Boolean((window as unknown as { turboslide?: { studio?: unknown } }).turboslide?.studio),
@@ -295,21 +254,10 @@ async function editorReady(page: Page): Promise<void> {
 type Captured = {
   theme: Theme;
   hero: Uint8Array;
-  canvas: Uint8Array;
   menus: Uint8Array;
   menusHeight: number;
   chrome: ChromeRecord;
 };
-
-/** A crop of the given size around a point, kept inside the viewport. */
-function cropAround(at: Point, size: { width: number; height: number }): Rect {
-  const x = Math.max(0, Math.min(VIEWPORT.width - size.width, Math.round(at.x - size.width / 2)));
-  const y = Math.max(
-    0,
-    Math.min(VIEWPORT.height - size.height, Math.round(at.y - size.height / 2)),
-  );
-  return { x, y, w: size.width, h: size.height };
-}
 
 async function captureTheme(
   launched: LaunchedBrowser,
@@ -380,62 +328,7 @@ async function captureTheme(
       }),
     );
     await clearAll(page);
-
-    /* the canvas crop: the Blue Marble slide's own picture selected at 0.3 of its size, so its
-       whole ring, its eight handles, the rotation handle and the readout fit the crop, then held
-       mid rotation so the readout shows; the gesture is cancelled with Escape before the button
-       is released, so nothing is written. (Insert > Image > Upload from computer would place a
-       free picture, but on the tree of 2026-09-28 the upload lands nothing on the seed deck or on
-       a fresh one while B4's picture placement is in progress; the row images.insert.upload is
-       one of the two named for owners, so this capture reads the stage without it.) */
-    await page.evaluate(
-      (zoom) =>
-        (
-          window as unknown as {
-            turboslide: { studio: { invoke(id: string, input: unknown): Promise<unknown> } };
-          }
-        ).turboslide.studio.invoke('view.zoom', { zoom }),
-      CANVAS_ZOOM,
-    );
-    await sleep(600);
-    await clearAll(page);
-    const sheet = await rectOf(page, '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
-    if (!sheet) throw new Error('no sheet on the stage');
-    /* the picture covers the sheet under the plate at the lower right; a click above the plate
-       selects the picture like any picture */
-    const rect = await selectAt(page, { x: sheet.x + sheet.w * 0.35, y: sheet.y + sheet.h * 0.3 });
-    const ring = center(await handleRect(page, 'rotate'));
-    const pivot = center(rect);
-    const radius = Math.hypot(ring.x - pivot.x, ring.y - pivot.y);
-    const a0 = Math.atan2(ring.y - pivot.y, ring.x - pivot.x);
-    const a1 = a0 + (12 * Math.PI) / 180;
-    const to = { x: pivot.x + radius * Math.cos(a1), y: pivot.y + radius * Math.sin(a1) };
-    await moveHuman(page, { x: ring.x - 30, y: ring.y - 20 }, ring, 6);
-    await sleep(80);
-    await page.mouse.down();
-    await sleep(80);
-    await moveHuman(page, ring, to, 14);
-    await sleep(350);
-    await page
-      .locator('.ts-overlay .ts-readout')
-      .first()
-      .waitFor({ timeout: 4000 })
-      .catch(() => undefined);
-    const clip = cropAround({ x: pivot.x, y: pivot.y + 8 }, CANVAS_CROP);
-    const canvas = new Uint8Array(
-      await page.screenshot({
-        type: 'png',
-        animations: 'disabled',
-        clip: { x: clip.x, y: clip.y, width: clip.w, height: clip.h },
-      }),
-    );
-    /* Escape cancels the gesture while the button is down, so the seed deck is not written */
-    await page.keyboard.press('Escape');
-    await sleep(120);
-    await page.mouse.up();
-    await sleep(300);
-    await clearAll(page);
-    return { theme, hero, canvas, menus, menusHeight, chrome };
+    return { theme, hero, menus, menusHeight, chrome };
   } finally {
     await context.close();
   }
@@ -578,7 +471,7 @@ function moduleSource(manifest: ShotsManifest): string {
     'export type ChromeRecord = { mark: boolean; menubar: string[]; extensions: boolean };',
     'export type ShotRecord = {',
     '  name: string;',
-    "  kind: 'hero' | 'canvas' | 'menus';",
+    "  kind: 'hero' | 'menus';",
     "  theme: 'dark' | 'light';",
     "  format: 'jpeg' | 'png';",
     '  width: number;',

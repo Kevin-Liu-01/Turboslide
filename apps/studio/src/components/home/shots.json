@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/build-home-assets.ts",
-  "capturedAt": "2026-09-29T02:23:22.705Z",
-  "commit": "14612488",
+  "capturedAt": "2026-10-03T04:09:29.183Z",
+  "commit": "a904ef00",
   "deck": "gt-brand",
   "slide": "mood-earth",
   "viewport": {
@@ -20,61 +20,20 @@
       "height": 900,
       "variants": [
         {
-          "path": "/home/hero-dark-2x-dfd9c8d761.jpg",
+          "path": "/home/hero-dark-2x-4570266dd0.jpg",
           "scale": 2,
           "width": 2880,
           "height": 1800,
-          "bytes": 395602,
-          "sha256": "dfd9c8d761239ae7eea3f9d87d9400a8516e04a1ddd42a63639e9f46a6751152"
+          "bytes": 393956,
+          "sha256": "4570266dd0c12262c57dc3f10d23092c3c1aaf0cb82d0ec571e5863c263f4ec5"
         },
         {
-          "path": "/home/hero-dark-ba3e172d10.jpg",
+          "path": "/home/hero-dark-b999fa7593.jpg",
           "scale": 1,
           "width": 1440,
           "height": 900,
-          "bytes": 154628,
-          "sha256": "ba3e172d10584c03feedd2c17db372b607303e451998008705f2cc0e186423cc"
-        }
-      ],
-      "chrome": {
-        "mark": true,
-        "menubar": [
-          "File",
-          "Edit",
-          "View",
-          "Insert",
-          "Format",
-          "Slide",
-          "Arrange",
-          "Tools",
-          "Help"
-        ],
-        "extensions": false
-      }
-    },
-    {
-      "name": "canvas-dark",
-      "kind": "canvas",
-      "theme": "dark",
-      "format": "png",
-      "width": 612,
-      "height": 400,
-      "variants": [
-        {
-          "path": "/home/canvas-dark-2x-525ba0e769.png",
-          "scale": 2,
-          "width": 1224,
-          "height": 800,
-          "bytes": 104117,
-          "sha256": "525ba0e7699454c6eb64e2166d9ba167f83df5c2e1ad84a20872f130e3d3621f"
-        },
-        {
-          "path": "/home/canvas-dark-adab5434a8.png",
-          "scale": 1,
-          "width": 612,
-          "height": 400,
-          "bytes": 39142,
-          "sha256": "adab5434a8999a2890bf9a30d8d73e84ee611aa154ec40cdf2a336841724bf24"
+          "bytes": 154153,
+          "sha256": "b999fa75930923a4cd5e3fe80d81064b0ecd9ea4b71c4d7c7758545ae64f146a"
         }
       ],
       "chrome": {
@@ -99,23 +58,23 @@
       "theme": "dark",
       "format": "png",
       "width": 612,
-      "height": 505,
+      "height": 477,
       "variants": [
         {
-          "path": "/home/menus-dark-2x-2d19e0a345.png",
+          "path": "/home/menus-dark-2x-e76028dd0d.png",
           "scale": 2,
           "width": 1224,
-          "height": 1010,
-          "bytes": 171841,
-          "sha256": "2d19e0a345454326e38aa7d7baf6e50e57c90943795ea6fa7fbcc631cda11f98"
+          "height": 954,
+          "bytes": 160939,
+          "sha256": "e76028dd0d168911d907d710e670b2c601256d39480f1a6d46442fb8457d4f30"
         },
         {
-          "path": "/home/menus-dark-7e1af41db7.png",
+          "path": "/home/menus-dark-509a0fe74f.png",
           "scale": 1,
           "width": 612,
-          "height": 505,
-          "bytes": 67213,
-          "sha256": "7e1af41db71aaf3a50c734518d9f8cd275eb267138e72f06f788d5f28f24b5af"
+          "height": 477,
+          "bytes": 61787,
+          "sha256": "509a0fe74fdedfc067b62e9e355e6c3508e0bda51d729287ea7a293038b29048"
         }
       ],
       "chrome": {
@@ -143,61 +102,20 @@
       "height": 900,
       "variants": [
         {
-          "path": "/home/hero-light-2x-d6106a0704.jpg",
+          "path": "/home/hero-light-2x-6706009907.jpg",
           "scale": 2,
           "width": 2880,
           "height": 1800,
-          "bytes": 392483,
-          "sha256": "d6106a07049a72cf748d1aa8d412141e341139d6a041c71a9b9185bc4ddb8469"
+          "bytes": 395570,
+          "sha256": "67060099079ec9996a1847fcf4917137b1e53aa314b987b3cc1e813b70df57c4"
         },
         {
-          "path": "/home/hero-light-fdb7c9b176.jpg",
+          "path": "/home/hero-light-0e57b46af4.jpg",
           "scale": 1,
           "width": 1440,
           "height": 900,
-          "bytes": 153286,
-          "sha256": "fdb7c9b176bf53c8efe766aed683d1277d71ac69d61942cc49b38d36f9d4dc5b"
-        }
-      ],
-      "chrome": {
-        "mark": true,
-        "menubar": [
-          "File",
-          "Edit",
-          "View",
-          "Insert",
-          "Format",
-          "Slide",
-          "Arrange",
-          "Tools",
-          "Help"
-        ],
-        "extensions": false
-      }
-    },
-    {
-      "name": "canvas-light",
-      "kind": "canvas",
-      "theme": "light",
-      "format": "png",
-      "width": 612,
-      "height": 400,
-      "variants": [
-        {
-          "path": "/home/canvas-light-2x-09aa8d9a15.png",
-          "scale": 2,
-          "width": 1224,
-          "height": 800,
-          "bytes": 106228,
-          "sha256": "09aa8d9a1587581061f3005682160ea7f4218e8fa4e5609fefc94ce6bd41360f"
-        },
-        {
-          "path": "/home/canvas-light-21a170e381.png",
-          "scale": 1,
-          "width": 612,
-          "height": 400,
-          "bytes": 39016,
-          "sha256": "21a170e38116eae2908781fe494296919a5f13b713bc259fa9b7d2fdc3de9c46"
+          "bytes": 154189,
+          "sha256": "0e57b46af4c312c86aadfd6548095d04585f7cc770702b8555a53a42e9e5c1a4"
         }
       ],
       "chrome": {
@@ -222,23 +140,23 @@
       "theme": "light",
       "format": "png",
       "width": 612,
-      "height": 505,
+      "height": 477,
       "variants": [
         {
-          "path": "/home/menus-light-2x-fbf9d72b74.png",
+          "path": "/home/menus-light-2x-c6c854b7de.png",
           "scale": 2,
           "width": 1224,
-          "height": 1010,
-          "bytes": 187210,
-          "sha256": "fbf9d72b7490a5ea27da41b3235e1b9ec7361a858911f768e99d30b1dfd664d8"
+          "height": 954,
+          "bytes": 161279,
+          "sha256": "c6c854b7dece6f75a620e7f818825552c5facc6ce83dc84752cf8d356e5155bc"
         },
         {
-          "path": "/home/menus-light-aa2b00e489.png",
+          "path": "/home/menus-light-0e398277e0.png",
           "scale": 1,
           "width": 612,
-          "height": 505,
-          "bytes": 68954,
-          "sha256": "aa2b00e48993a66d726e3fab42b7d2b957b2599046a1144c602f54d2b2d24d2a"
+          "height": 477,
+          "bytes": 61512,
+          "sha256": "0e398277e0088ce2632e73ac0d4190f161cf5c3f4c5213a8d1d937143ef473a6"
         }
       ],
       "chrome": {

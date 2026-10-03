@@ -21,7 +21,7 @@
       {
         "id": "p1",
         "type": "paragraph",
-        "text": "Both pages run in the same viewer and read pure data files. The skills page is built from the frontmatter of every published SKILL.md; the marks page reads nine SVG files and their construction overlays. Both crops follow the deck theme.",
+        "text": "Both pages run in the same viewer and read pure data files. The skills page is built from the frontmatter of every published SKILL.md; the marks page presents the seven speed marks and the two kept from the earlier round, Two-way and Globe G, each on paper and on ink at every size. Both crops follow the deck theme.",
         "marginTop": 10
       }
     ],
@@ -39,9 +39,9 @@
           },
           {
             "assets": [
-              "proto-marks-nine"
+              "proto-marks-speed"
             ],
-            "caption": "Nine marks in three families, bilingual, counterform and reflection, in the judged order, at 96 pixels positive and reversed. Each is one filled path on a 256 unit grid."
+            "caption": "The presentation field of the marks page: the seven speed marks and the two kept marks, Two-way and Globe G, together at one height, positive; the page repeats the field reversed on ink. Every file is one color in currentColor with a tight viewBox."
           }
         ]
       }

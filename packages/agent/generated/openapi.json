@@ -48098,7 +48098,7 @@
           "from": {
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-            "description": "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder"
+            "description": "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (95 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder"
           },
           "id": {
             "description": "The deck id under decks/; derived from the name when absent",

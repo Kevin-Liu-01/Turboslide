@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-tablet",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-tablet",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "A proto-cuneiform tablet"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "An account of malt and barley groats pressed into clay in Sumer about 3100 BC, among the oldest writing that survives. Writing began as a record of trade, and the company builds for trade across languages.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: The Metropolitan Museum of Art, Open Access, public domain"
+      }
+    ]
+  }
+}

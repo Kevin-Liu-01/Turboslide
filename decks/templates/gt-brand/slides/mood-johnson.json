@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-johnson",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-johnson",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "Johnson's Dictionary"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The grammar's rules for the letter O in A Dictionary of the English Language, London, 1755. One author wrote the whole book from a plan he published first, and a design system starts from the same kind of plan.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Image: Samuel Johnson, 1755, scanned by the Wellcome Collection, public domain"
+      }
+    ]
+  }
+}

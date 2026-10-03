@@ -17,9 +17,9 @@
     "id": "gt-brand",
     "name": "General Translation brand deck",
     "category": "work",
-    "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents l...",
+    "description": "The General Translation brand deck in 95 slides: the company and its marks, the design system, the website, the docs, the blog, the developer experience, Prototemplate and Glyphfield, and the plan.",
     "cover": "opener-brand",
-    "slides": 85,
+    "slides": 95,
     "theme": "gt-ink-paper",
     "appearance": "dark",
     "organisation": true

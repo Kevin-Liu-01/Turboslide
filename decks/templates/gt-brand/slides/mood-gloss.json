@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-gloss",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-gloss",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "A marginal gloss"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Readers of this Alexandreis, copied in France about 1250, wrote the meaning of hard words between the lines and beside the verse, the step before the dictionary. The blog is the company's notes in the margin of the product.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Image: MS f Med. 23, Boston Public Library, public domain"
+      }
+    ]
+  }
+}

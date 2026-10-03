@@ -105,7 +105,7 @@ describe('decks/templates/templates.json (docs/archive/rounds/PRODUCT.md 4.3)', 
       name: 'General Translation brand deck',
       organisation: true,
       cover: 'opener-brand',
-      slides: 85,
+      slides: 95,
       theme: 'gt-ink-paper',
     });
     expect(gt?.name).not.toContain('GT brand deck');

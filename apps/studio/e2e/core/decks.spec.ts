@@ -396,7 +396,7 @@ test(title('decks.list.gt-brand-deck'), async () => {
     description: `the copy ${id}: its editor address ${addressed} ms after the click, the editor settled with ${slides.length} slides at ${opened} ms`,
   });
   expect(opened, 'within 15 s').toBeLessThan(15_000);
-  expect(slides.length).toBe(85);
+  expect(slides.length).toBe(95);
 });
 
 test(title('decks.card.download'), async () => {

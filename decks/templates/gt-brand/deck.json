@@ -21,8 +21,16 @@
         "character",
         "voice",
         "inspirations",
+        "mood-tablet",
         "naming",
-        "mark"
+        "mark",
+        "speed-monogram",
+        "speed-lockup",
+        "speed-plate",
+        "speed-double-cut",
+        "speed-livery",
+        "speed-dithered",
+        "speed-ascii"
       ]
     },
     {
@@ -42,6 +50,7 @@
         "dither",
         "iso",
         "language-as-material",
+        "mood-johnson",
         "motion",
         "avoid"
       ]
@@ -86,6 +95,7 @@
         "blog-vision",
         "content-rule",
         "two-registers",
+        "mood-gloss",
         "off-the-site"
       ]
     },
@@ -1300,7 +1310,7 @@
       "scale": 1,
       "source": {
         "kind": "photo",
-        "origin": "File:1748 Bowen Mariner's Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg (local copy `scratchpad/photo/compass.jpg`, 1800 by 1140).",
+        "origin": "File:1748 Bowen Mariner’s Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg (local copy `scratchpad/photo/compass.jpg`, 1800 by 1140).",
         "artist": "Emanuel Bowen, 1748",
         "license": "public domain",
         "shareAlike": false
@@ -1547,6 +1557,106 @@
         }
       }
     },
+    "mood-gloss": {
+      "id": "mood-gloss",
+      "role": "mood",
+      "alt": "A page of a thirteenth-century Alexandreis with readers' glosses written between the verse lines and in a column beside them, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-gloss-light.jpg",
+        "dark": "assets/mood-gloss-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "https://commons.wikimedia.org/wiki/File:Alexandreis_with_gloss_-_in_Latin_-_DPLA_-_98b56ea1ebec780d88ec0bdfa6750159_(page_69).jpg",
+        "title": "Alexandreis with gloss, MS f Med. 23, fol. 31r",
+        "artist": "Walter of Châtillon; the manuscript of about 1250 at the Boston Public Library",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          1300,
+          3471,
+          5081,
+          5598
+        ],
+        "invert": true,
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 40,
+        "white": 178,
+        "gamma": 1,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Image: MS f Med. 23, Boston Public Library, public domain",
+      "inline": "two-color",
+      "ext": {
+        "provenance": {
+          "read": "2026-10-02",
+          "licence": "No Copyright - United States ({{NoC-US}}, rightsstatements.org), shown as public domain on Commons; contributed by the Boston Public Library through the DPLA",
+          "recipe": "P:scripts/mood-pictures.mjs gloss: page 69 at 6696 by 10057, box 1300, 3471, 5081, 5598, inverted"
+        }
+      }
+    },
+    "mood-johnson": {
+      "id": "mood-johnson",
+      "role": "mood",
+      "alt": "The page on the letter O from the grammar in Johnson's Dictionary of 1755, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-johnson-light.jpg",
+        "dark": "assets/mood-johnson-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "https://archive.org/details/b30451541_0001",
+        "title": "A Dictionary of the English Language, 1755, the grammar's page on the letter O",
+        "artist": "Samuel Johnson; scan by the Wellcome Library",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          230,
+          3540,
+          1830,
+          4440
+        ],
+        "invert": true,
+        "blur": 0.5,
+        "autocontrast": 0.5,
+        "black": 60,
+        "white": 230,
+        "gamma": 0.9,
+        "polarity": "light-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Image: Samuel Johnson, 1755, scanned by the Wellcome Collection, public domain",
+      "inline": "two-color",
+      "ext": {
+        "provenance": {
+          "read": "2026-10-02",
+          "licence": "Creative Commons Public Domain Mark 1.0, the Internet Archive item's rights field (contributor and sponsor Wellcome Library)",
+          "recipe": "P:scripts/mood-pictures.mjs johnson: leaf 51, box 230, 3540, 1830, 4440, inverted"
+        }
+      }
+    },
     "mood-lighthouse": {
       "id": "mood-lighthouse",
       "role": "mood",
@@ -1684,6 +1794,55 @@
           "placement": "after Values, where the Tower of Babel sat from round seven to round ten. Kevin: \"change the tower of babel to something else. maybe rosetta stone\".",
           "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required.",
           "artist": "Hans Hillewaert."
+        }
+      }
+    },
+    "mood-tablet": {
+      "id": "mood-tablet",
+      "role": "mood",
+      "alt": "A Sumerian clay tablet with an account of malt and barley pressed into it, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-tablet-light.jpg",
+        "dark": "assets/mood-tablet-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "https://commons.wikimedia.org/wiki/File:Cuneiform_tablet-_administrative_account_with_entries_concerning_malt_and_barley_groats_MET_DP293245.jpg",
+        "title": "Cuneiform tablet: administrative account with entries concerning malt and barley groats",
+        "artist": "The Metropolitan Museum of Art, photograph DP293245 of object 327385 (1988.433.3)",
+        "license": "CC0",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "blur": 0.8,
+        "autocontrast": 0.5,
+        "black": 60,
+        "white": 255,
+        "gamma": 1.8,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: The Metropolitan Museum of Art, Open Access, public domain",
+      "inline": "two-color",
+      "ext": {
+        "provenance": {
+          "read": "2026-10-02",
+          "licence": "CC0 on Commons ({{Cc-zero}}, the Met's own donation); the Met collection API reads isPublicDomain true for object 327385",
+          "recipe": "P:scripts/mood-pictures.mjs tablet: a subject crop on the studio ground (bright 150, saturation 0.12, fillHeight 0.62, centre 0.27, 0.47), so the crop box is not a fixed box"
         }
       }
     },
@@ -2625,6 +2784,24 @@
       },
       "inline": "resample-1280"
     },
+    "proto-marks-speed": {
+      "id": "proto-marks-speed",
+      "role": "capture",
+      "alt": "The presentation field of the marks page: the seven speed marks and the two kept marks together at one height, positive",
+      "twins": {
+        "light": "assets/proto-marks-speed-light.jpg",
+        "dark": "assets/proto-marks-speed-dark.jpg"
+      },
+      "size": [
+        2112,
+        1090
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "resample-1280"
+    },
     "proto-present": {
       "id": "proto-present",
       "role": "capture",
@@ -3254,7 +3431,7 @@
       "inline": "resample-1280"
     }
   },
-  "revision": 24,
+  "revision": 26,
   "createdAt": "2026-09-10T21:29:42.282Z",
-  "updatedAt": "2026-09-11T08:06:18.658Z"
+  "updatedAt": "2026-10-02T08:53:45.611Z"
 }

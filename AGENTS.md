@@ -611,7 +611,8 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   field that is `null` or `{ reason }` when an escape block was needed; `htmlBlocks` at the top
   level is the count. `scripts/lib/import-report.mjs` documents the other shapes it accepts.
 - `turboslide import --json` prints `{ slides, sections, htmlBlocks, ... }` on stdout (the
-  acceptance asserts 85, 8 and at most 4).
+  acceptance asserts 95, 8 and 7: the seven speed mark slides stay html blocks until the importer
+  maps an inline `<svg>` to a typed block).
 - `apps/studio` keeps a route that calls a server function returning
   `TURBOSLIDE_SERVER_ONLY_MARKER_7f3a` (today `src/server/health.ts` from `routes/index.tsx`);
   `scripts/check-client-bundle.mjs` fails when the marker is missing from `dist/server` or present

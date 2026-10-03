@@ -295,8 +295,11 @@ const steps = [
     cmd: `pnpm exec turboslide import ${PROTOTEMPLATE_DECK} --into gt-brand --json > .turboslide/import.json`,
     needs: 'prototemplate',
   },
+  // The Prototemplate deck of 2026-10-01 holds 95 slides in 8 sections; its seven speed mark
+  // slides import as html blocks until the importer maps an inline <svg> to a typed block
+  // (docs/gslides-parity/round1/build/b4.md request 6).
   {
-    cmd: `node -e "const r=require('./.turboslide/import.json'); if(r.slides!==85||r.sections!==8||r.htmlBlocks!==0) process.exit(1)"`,
+    cmd: `node -e "const r=require('./.turboslide/import.json'); if(r.slides!==95||r.sections!==8||r.htmlBlocks!==7) process.exit(1)"`,
     needs: 'prototemplate',
   },
   { cmd: 'pnpm exec turboslide validate decks/gt-brand' },
@@ -304,7 +307,8 @@ const steps = [
     cmd: 'pnpm exec turboslide render all --theme light,dark --scale 1 --out .turboslide/render --json',
   },
   {
-    cmd: `node -e "const r=require('./.turboslide/render/render.json'); if(r.length!==170||r.some(x=>x.pageErrors.length)) process.exit(1)"`,
+    // two renders per slide of decks/gt-brand, whose count step 7's import may change
+    cmd: `node -e "const n=require('./decks/gt-brand/deck.json').sections.reduce((a,s)=>a+s.slideIds.length,0); const r=require('./.turboslide/render/render.json'); if(r.length!==2*n||r.some(x=>x.pageErrors.length)) process.exit(1)"`,
   },
   {
     cmd: `node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render .turboslide/render --shoot ${PROTOTEMPLATE_DECK} --max-mismatch 0.005`,
@@ -312,7 +316,7 @@ const steps = [
   },
   { cmd: 'pnpm exec turboslide sheet all --cols 4 --thumb 480 --numbered --out .turboslide/sheet' },
   {
-    cmd: `node -e "const fs=require('fs'); for (const t of ['light','dark']) { fs.statSync('.turboslide/sheet/sheet-'+t+'.png'); const m=JSON.parse(fs.readFileSync('.turboslide/sheet/sheet-'+t+'.json')); if(m.cells.length!==85) process.exit(1) }"`,
+    cmd: `node -e "const fs=require('fs'); const n=require('./decks/gt-brand/deck.json').sections.reduce((a,s)=>a+s.slideIds.length,0); for (const t of ['light','dark']) { fs.statSync('.turboslide/sheet/sheet-'+t+'.png'); const m=JSON.parse(fs.readFileSync('.turboslide/sheet/sheet-'+t+'.json')); if(m.cells.length!==n) process.exit(1) }"`,
   },
   { cmd: 'pnpm exec turboslide lint all --json > .turboslide/lint.json' },
   { cmd: 'pnpm exec turboslide build --out .turboslide/brand-deck.html --budget 16' },

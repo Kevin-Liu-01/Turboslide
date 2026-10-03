@@ -493,11 +493,22 @@ describe('importDeck on a one-slide deck', () => {
   });
 });
 
+/** The speed mark slides of the Prototemplate deck of 2026-10-01 (slides 17 to 23). */
+const SPEED_MARK_SLIDES = [
+  'speed-monogram',
+  'speed-lockup',
+  'speed-plate',
+  'speed-double-cut',
+  'speed-livery',
+  'speed-dithered',
+  'speed-ascii',
+];
+
 describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
   const out = mkdtempSync(join(tmpdir(), 'turboslide-import-'));
   afterAll(() => rmSync(out, { recursive: true, force: true }));
 
-  it('imports 85 slides in 8 sections with at most 4 html blocks', () => {
+  it('imports 95 slides in 8 sections, with the seven speed mark slides as html blocks', () => {
     const report = importDeck({
       from: DECK,
       into: 'gt-brand',
@@ -505,11 +516,13 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
       skipAssets: true,
       now: () => '2026-09-10T00:00:00.000Z',
     });
-    expect(report.slides).toBe(85);
+    expect(report.slides).toBe(95);
     expect(report.sections).toBe(8);
-    // M5: the composite block retired the four escapes of M1 (slides 25, 67, 83 and 84)
-    expect(report.htmlBlocks).toBe(0);
-    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual([]);
+    // M5: the composite block retired the four escapes of M1 (slides 25, 67, 83 and 84). The deck
+    // of 2026-10-01 adds the seven speed mark slides, whose inline <svg> has no typed block yet
+    // (docs/gslides-parity/round1/build/b4.md request 6), so they are the html blocks.
+    expect(report.htmlBlocks).toBe(7);
+    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual(SPEED_MARK_SLIDES);
     expect(report.warnings).toEqual([]);
     // The four former escapes derive their title from their typed h2.
     const titles = Object.fromEntries(
@@ -530,7 +543,7 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
       sections: { slideIds: string[] }[];
       assets: Record<string, unknown>;
     };
-    expect(deck.sections.flatMap((s) => s.slideIds).length).toBe(85);
+    expect(deck.sections.flatMap((s) => s.slideIds).length).toBe(95);
     expect(Object.keys(deck.assets).length).toBeGreaterThan(100);
     expect(existsSync(join(out, 'gt-brand/slides/content-rule.json'))).toBe(true);
     expect(existsSync(join(out, 'gt-brand/import-ids.json'))).toBe(true);

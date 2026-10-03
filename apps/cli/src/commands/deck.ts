@@ -82,7 +82,7 @@ const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore
   deck follow <id> --from <studio> [--push] [--comments] [--once]
                                     mirror a hosted deck's records into decks/<id> (deck.follow)
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
-                                    decks/<id> from decks/templates/<from> (gt-brand: the GT brand deck, 85 slides; blank: one title slide with the starter pictures)
+                                    decks/<id> from decks/templates/<from> (gt-brand: the GT brand deck, 95 slides; blank: one title slide with the starter pictures)
   deck rename <name>                set the deck title (--deck, --base-revision, --author, --note, --json)
   deck set <path> <value> | deck set <path> --unset
                                     write one manifest field by pointer: /title, /theme, /defaults/appearance light|dark,

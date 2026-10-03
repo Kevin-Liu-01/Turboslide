@@ -247,7 +247,7 @@
     {
       "id": "decks.list.gt-brand-deck",
       "feature": "decks",
-      "interaction": "Click the GT brand deck card; a copy opens in the editor within 15 s with its 85 slides",
+      "interaction": "Click the GT brand deck card; a copy opens in the editor within 15 s with its 95 slides",
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-decks row 45"

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "speed-monogram",
+  "title": "The bar monogram",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "html",
+        "type": "html",
+        "css": ".ts-x-speed-monogram-html .split { gap: 44px; }\n.ts-x-speed-monogram-html .head .row { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: baseline; }\n.ts-x-speed-monogram-html .head .row p + p { margin-top: 0; }\n.ts-x-speed-monogram-html .body { justify-items: center; }\n.ts-x-speed-monogram-html .body svg { display: block; }\n.ts-x-speed-monogram-html .head .row { align-items: start; }\n.ts-x-speed-monogram-html .head > .cap { margin-top: 14px; }",
+        "html": "<div class=\"split\">\n        <div class=\"head\">\n          <h2>The bar monogram</h2>\n          <div class=\"row\">\n            <p>The mark follows the race-type register, taken from a motorsport lettering reference: wide letters, a forward slant, one horizontal cut through the letters, and speed bars that lead into the first letter. The file contains no font, so the mark holds at 16 px and reads in either polarity.</p>\n            <p>The G and the T are built from ten rectangles under a 12 degree skew. The G's stem is combed into three speed bars of different lengths. One 8-unit cut runs through both letters at mid height and splits the middle bar into two lines.</p>\n          </div>\n          <p class=\"cap\">Shown at 1100 px wide. The cap height is 120 units, the G's stem is 30 units and the cut is 8 units.</p>\n        </div>\n        <div class=\"body\">\n          <svg width=\"1100\" height=\"282\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-109.1 36 499.6 128\" fill=\"currentColor\" role=\"img\" aria-label=\"The bar monogram: GT with the G combed into speed bars and one cut through both letters\"><path d=\"M-8.5 40L21.5 40L9.6 96L-20.4 96ZM-22.1 104L7.9 104L-4 160L-34 160ZM-8.5 40L181.5 40L175.1 70L-14.9 70ZM-27.6 130L162.4 130L156 160L-34 160ZM137.9 104L167.9 104L156 160L126 160ZM77.9 104L167.9 104L162.4 130L72.4 130ZM-28.5 40L-6.5 40L-12.9 70L-34.9 70ZM-97.4 82L-15.4 82L-18.4 96L-100.4 96ZM-102.1 104L-20.1 104L-23.1 118L-105.1 118ZM-77.6 130L-25.6 130L-32 160L-84 160ZM216.5 40L386.5 40L380.1 70L210.1 70ZM274.5 40L308.5 40L296.6 96L262.6 96ZM260.9 104L294.9 104L283 160L249 160Z\"></path></svg>\n        </div>\n      </div>",
+        "note": "Escape: no block for <svg>. Source 17-speed-monogram.html; every scoped rule of the slide travels with the markup."
+      }
+    ]
+  }
+}

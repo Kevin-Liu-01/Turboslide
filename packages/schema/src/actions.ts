@@ -1224,7 +1224,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     input: z.strictObject({
       name: z.string().min(1).describe('The deck title; the id is its slug unless `id` is given'),
       from: slugSchema.describe(
-        "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder",
+        "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (95 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder",
       ),
       id: slugSchema
         .optional()

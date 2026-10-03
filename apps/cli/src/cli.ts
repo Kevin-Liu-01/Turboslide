@@ -61,7 +61,7 @@ Commands
   validate [dir]                    parse, migrate and normalize a deck; exit 2 on errors
   info                              title, theme, sections, counts, revision
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
-                                    decks/<id> from the GT brand template (85 slides) or as one title slide (deck.create)
+                                    decks/<id> from the GT brand template (95 slides) or as one title slide (deck.create)
   deck rename <name>                set the deck title (deck.rename)
   deck set <path> <value> [--unset] write /title, /theme or a /defaults field of the manifest (deck.set)
   deck list [--include-trashed]     every deck under decks/, newest first (deck.list)

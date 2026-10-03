@@ -10295,64 +10295,64 @@
       "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
       "id": "home.agents.rest",
-      "feature": "decks",
-      "interaction": "At first paint the agents band shows the transcript of the three recorded commands and answers in the panel's slots (14 at 1440, 22 at 390) with no line cut or wider than the panel, slide 5 written and three Agent rows; every counter reads n / 8",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 2,
-      "evidence": "judge-1 3, a-mid.png",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3)"
+      "interaction": "At the agents band's first paint: slide 5 as the run wrote it above the console; the console's resting screen is `turboslide version list` with the recorded answer (the save before the run and the run's three writes) in its slots at both widths (14 of 64 columns at 720 px and over, 22 of 44 under), no line cut or wider than the panel; Version history shows the run's three recorded Agent rows; every counter reads n / 9",
+      "evidence": "a-mid.png (avoided)",
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
     },
     {
-      "id": "home.agents.run",
       "feature": "decks",
-      "interaction": "Run Again cuts to the run's start (the banner screen, counters n / 7) and plays step 1; each press plays one step, from the press to the flag leaving, within 5 s with the fixture's name and with a 24 character name (the command at 24 ms a character, a JSON value whole, the answer, the ink ring travelling within 700 ms by transform, the change landing); the caption's figure equals `run.generated.ts`'s total rounded to the second; after step 3 every counter reads n / 8; focus stays on Run throughout",
       "driver": "core/home.spec.ts",
       "today": "broken",
-      "severity": 2,
-      "evidence": "judge-3 3 (ka2.mjs)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3). The 5 s and 24 ms bounds are interaction bounds, read at a one minute load under 24"
-    },
-    {
       "id": "home.agents.typed",
-      "feature": "decks",
-      "interaction": "`help` lists the five commands; `tailor --replace=Northwind=Initech` renames as Tailor does and prints the recording for the deck the page holds, and the spaced form `tailor --replace Northwind=Initech` prints the CLI's recorded refusal and renames nothing; a step out of order prints the CLI's recorded refusal; anything else prints \"This page runs 5 of the CLI's 180 commands.\" with 180 from `cli.json`; for the names `O'Neil & Co` and `\"Q\" $5` every printed command splits to the recording's argument list with the name replaced; Up recalls the last line",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 2,
-      "evidence": "judge-2 6 graft 3; try-b.json",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3). The typed tailor form is `--replace=<from>=<to>`: this CLI refuses `--replace <from>=<to>` (apps/cli/src/args.ts VALUED_FLAGS lacks replace; l1.md Q7, Q11), so the form changes as LANDING.md 2.4 rules for a refused form"
+      "interaction": "`help` lists the six commands the page runs; anything else prints \"This page runs 6 of the CLI's 180 commands.\" with 180 from `cli.json`; the chips' commands typed run as the chips do, `tailor --replace=<current name>=<name>` with any name up to 24 characters; `version list` prints the recorded table and one line per version made on the page; `version restore <n>` for a listed n restores that version as Agent, an unlisted n prints the CLI's recorded refusal; an unclosed quote and a name over 24 characters print their sentences; Up recalls the last line",
+      "evidence": "judge-2 6",
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
     },
     {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
       "id": "home.agents.transports",
-      "feature": "decks",
-      "interaction": "The CLI, MCP and HTTP tabs (tabs with tab panels, arrow keys) show each command as `turboslide ...`, as `tools/call` with the tool name of `mcp-tools.json` and `baseRevision`, and as `POST /api/actions/<id>` of `openapi.json`; the MCP and HTTP panels print no answer and end with \"Request only. The CLI tab shows the recorded answer.\"",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 1,
-      "evidence": "judge-2 6 graft 5; judge-3 6 graft 10",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3)"
+      "interaction": "The CLI, MCP and HTTP tabs (tabs with tab panels, a roving tabindex, the arrow keys) show each command the page ran as `turboslide ...`, as `tools/call` with the tool name of `mcp-tools.json`, the current name in its JSON values and `baseRevision`, and as `POST /api/actions/<id>` of `openapi.json`; the MCP and HTTP panels print no answer and end with \"Request only. The CLI tab shows the recorded answer.\"",
+      "evidence": "judge-2 6",
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
     },
     {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
       "id": "home.agents.history",
-      "feature": "decks",
-      "interaction": "Every change on the page adds one Version history row within 200 ms naming You or Agent with its Heroicon, the change in the words of section 4.4 and the time in \"6:45 PM\" form; an Undo takes its row away",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
       "severity": 1,
-      "evidence": "judge-1 3 (a-agents-done.png)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1 (section 4.4 is that note's); push 4 (L3). The 200 ms bound is an interaction bound, read at a one minute load under 24"
+      "interaction": "Every change on the page adds one Version history row within 200 ms naming You or Agent with its Heroicon, the change in words and the time in \"6:45 PM\" form, newest first in ten ruled rows of 44 px (five under 720 px) that move nothing outside the list; an Undo takes its row away",
+      "evidence": "judge-2 6",
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3). The 200 ms bound is an interaction bound, read at a one minute load under 24"
     },
     {
-      "id": "home.agents.recorded",
       "feature": "decks",
-      "interaction": "The three steps' printed commands and answers equal `run.generated.ts`, whose CLI version equals the banner's and whose fixture sha equals `apps/studio/home-deck`'s; every MCP and HTTP body equals `run.generated.ts` and validates against the tool's `inputSchema` and the operation's request body schema (`build-home-assets.ts --check`)",
       "driver": "core/home.spec.ts",
       "today": "broken",
+      "id": "home.agents.recorded",
       "severity": 2,
+      "interaction": "Every printed command and answer equals `chips.generated.ts`, recorded from the CLI on the fixture whose sha256 it names, with the chips recorded on the page deck at rest and after each other chip (the twelve ordered pairs) differing only in the revision and the finding count of a slide arranged by hand; every MCP and HTTP body validates against the tool's `inputSchema` and the operation's request body schema; `node scripts/home/run.ts --check` exits 0",
       "evidence": "judge-2 7 (no hand written JSON)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3)"
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
+    },
+    {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "id": "home.agents.chips",
+      "severity": 2,
+      "interaction": "Each of the four chips (Tailor for Initech, Turn the Title, Rewrite a Row, Skip This Slide) plays its step within 5 s from the press to the flag leaving, with the fixture's name and with a 24 character name: the command at 24 ms a character, a quoted value whole, the answer, the ink ring by transform within 700 ms to the changed block (the whole slide for a skip), the change landing; the change shows on slide 5 above and wherever the page draws it (the name everywhere, the turned title, the row, the skip in the show and the Present list); one Version history row; the chip keeps focus with `aria-disabled`; a second press toggles; the printed command and answer equal `chips.generated.ts` with only the name and the revision substituted",
+      "evidence": "strip-agents.jpg; agents-run.png",
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3); replaces home.agents.run. The 5 s, 24 ms and 700 ms bounds are interaction bounds, read at a one minute load under 24"
     },
     {
       "id": "home.present.show",

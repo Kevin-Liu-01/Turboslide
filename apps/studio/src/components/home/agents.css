@@ -1,0 +1,263 @@
+/* The agents band, the show, the seam and the loupe (docs/LANDING.md 2.9, 2.11, 2.12; 6.1). V3's
+   file. The first pass's rules for the console, Version history's rows, the ring, the flag, the
+   show and the seam stay in home.css until the split of 6.3 moves them here unchanged (v3.md R6);
+   this file holds what the second pass adds. Square corners, no shadow, no blur; blue only for the
+   visitor's focus. */
+
+/* ---- 2.9: two columns of 588 and 412 px with a 24 px gap ---- */
+.ts-agents-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 588fr) minmax(0, 412fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 40px;
+}
+
+.ts-agents-left,
+.ts-agents-right {
+  min-width: 0;
+}
+
+/* the slide above: slide 5 at 588 by 331, unframed, the box V2's scrubber view sits in (v2.md R11) */
+.ts-agents-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.ts-agents-stage > .ts-home-sheet {
+  position: relative;
+}
+
+/* the console 24 px under the slide: the tab row, 14 slots of 20 px, the input row (360 px) */
+.ts-agents-left > .ts-home-panel {
+  margin-top: 24px;
+}
+
+.ts-agents-left .ts-home-panel-screen {
+  height: calc(14 * 20px + 24px);
+  padding: 12px 20px;
+}
+
+/* the four chips: square text buttons in one row, 36 px tall, 8 px apart (2.9); a long customer
+   name in the first chip's label is cut with an ellipsis, so the row never wraps and the caption
+   under it never moves */
+.ts-agents-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ts-chip {
+  appearance: none;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 13px / 1 var(--pt-text);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ts-d-fast) var(--ts-ease-fade);
+}
+
+.ts-chip[data-chip='tailor'] {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ts-chip:hover {
+  background: var(--pt-hair-soft);
+}
+
+.ts-chip:active {
+  transform: scale(0.98);
+}
+
+.ts-chip[aria-disabled='true'] {
+  color: var(--pt-ink-2);
+  cursor: default;
+}
+
+.ts-chip:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-agents-left > .ts-agents-caption {
+  margin-top: 12px;
+}
+
+/* the right column: the label, the scrubber's row and ten ruled rows of 44 px reserved (440 px) */
+.ts-agents-right > .ts-label {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-agents-scrubber:empty {
+  display: none;
+}
+
+.ts-agents-right > .ts-home-history {
+  height: calc(10 * 44px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- A4 on playStep's clock: each rail from a zero window at its cross to the whole line, by a
+   variable the step writes each frame (0 to 1), so a paused step holds its frame and nothing runs
+   at rest (the first pass's ts-draw-* keyframes, as variables) ---- */
+.ts-sheet .frame[data-rails] .rule.top {
+  clip-path: inset(
+    0px calc((100% - 56px) * (1 - var(--ts-rail-top, 1))) 0px calc(56px * (1 - var(--ts-rail-top, 1)))
+  );
+}
+
+.ts-sheet .frame[data-rails]::before {
+  clip-path: inset(
+    calc(56px * (1 - var(--ts-rail-left, 1))) 0px calc((100% - 56px) * (1 - var(--ts-rail-left, 1))) 0px
+  );
+}
+
+.ts-sheet .frame[data-rails]::after {
+  clip-path: inset(
+    calc((100% - 56px) * (1 - var(--ts-rail-right, 1))) 0px calc(56px * (1 - var(--ts-rail-right, 1)))
+      0px
+  );
+}
+
+.ts-sheet .frame[data-rails] .rule.bottom {
+  clip-path: inset(
+    0px calc(56px * (1 - var(--ts-rail-bottom, 1))) 0px
+      calc((100% - 56px) * (1 - var(--ts-rail-bottom, 1)))
+  );
+}
+
+/* ---- under 720 px: one column (2.9 "Layout at 390") ---- */
+@media (max-width: 719px) {
+  .ts-agents-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    margin-top: 32px;
+  }
+
+  .ts-agents-left .ts-home-panel-screen {
+    height: calc(22 * 18px + 24px);
+    padding: 12px;
+  }
+
+  .ts-agents-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ts-chip {
+    height: 44px;
+    padding: 0 8px;
+  }
+
+  .ts-agents-right > .ts-home-history {
+    height: calc(5 * 44px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-chip {
+    transition: none;
+  }
+
+  .ts-chip:active {
+    transform: none;
+  }
+}
+
+/* the editor's skipped slide mark (packages/chrome/src/Filmstrip.css 89 to 110): the slide at 40
+   percent, the eye-slash glyph in a paper square with a hairline at the top right. V2's renumber
+   marks every thumbnail of a skipped slide (v2.md R12), the agents band the slide above; the square
+   follows the sheet's size (the sheet is the query container) */
+.ts-home-sheet[data-skipped] > [data-home-slides] {
+  opacity: 0.4;
+}
+
+.ts-home-skip {
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  border: 1px solid var(--pt-hair);
+  pointer-events: none;
+}
+
+.ts-home-skip > svg,
+.ts-home-skip > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--pt-ink-2);
+}
+
+@container (max-width: 120px) {
+  .ts-home-skip {
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .ts-home-skip > svg,
+  .ts-home-skip > .ts-icon {
+    width: 9px;
+    height: 9px;
+  }
+}
+
+@container (min-width: 480px) {
+  .ts-home-skip {
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .ts-home-skip > svg,
+  .ts-home-skip > .ts-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* slide 5 absent (version 1 restored, 2.9): the slide's place keeps its four crosses, the content
+   and the rails hidden (the first pass's run start, l3.md R3b) */
+[data-band='agents'] [data-agent-absent] .ts-stage > :not(.frame),
+[data-band='agents'] [data-agent-absent] .frame .rule {
+  visibility: hidden;
+}
+
+[data-band='agents'] [data-agent-absent] .frame::before,
+[data-band='agents'] [data-agent-absent] .frame::after {
+  visibility: hidden;
+}
+
+[data-band='agents'] [data-agent-absent] .ts-stage > .frame {
+  visibility: visible;
+}
+
+/* ---- 2.11: a skipped slide's row in the Present list says so in titanium ---- */
+.ts-slide-row-skip {
+  margin-left: auto;
+  padding-right: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--pt-titanium);
+}

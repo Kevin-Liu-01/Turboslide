@@ -1,111 +1,85 @@
 import { AGENTS, ANNOUNCE, HISTORY } from '../copy';
-import { HOME_DECK } from '../deck.generated';
-import type { HomeSlideId } from '../deck.generated';
-import { LIVE_SLIDE_HTML } from '../bands/live.generated';
-import {
-  NAME_MAX,
-  formatLines,
-  spacedJson,
-  splitWords,
-  substituteAnswer,
-  substituteName,
-} from '../panel-format';
-import type { PanelWidth } from '../panel-format';
-import { HOME_RUN } from '../run.generated';
-import type { PanelText, RunDeckState, RunStep, TypedRecording } from '../run.generated';
-import { renumber } from './filmstrip';
+import { HOME_CHIPS } from '../chips.generated';
+import type { ChipCommand, ChipId } from '../chips.generated';
+import { NAME_MAX, spacedJson, splitWords } from '../panel-format';
+import { historyTime } from './history';
+import { looksOf, paintNextSteps, withLooks } from './next-steps';
 import type { LiveContext } from './index';
-import { ease, finishBand, ms, play, reduced, sequence, slowFactor } from './motion';
-import type { AgentStep, HomeDeckState } from './state';
-import { applyCustomer } from './tailor';
+import { finishBand } from './motion';
+import type { HomeDeckState, HomeStore, Version } from './state';
+import { addEntry, clearScreen, playStep } from './step';
+import type { PlayableStep, Screen, StepHandle } from './step';
 
 /**
- * The agents band (docs/LANDING.md 2.4, 3.2 A1 to A8; rows home.agents.*). L3's file. The band's
- * markup is the run's end: the transcript of the three recorded commands in the panel, slide 5
- * written and three Agent rows in Version history. This module acts only on input:
- *
- * - Run Again cuts the band to the run's start (A8: slide 5 leaves the deck, the banner screen,
- *   the run's rows go, the slide's place keeps its four crosses) and plays step 1; each later press
- *   plays one step. A step types the command at the agent's constant 24 ms a character up to its
- *   value, pastes a JSON value whole, prints the answer a line at a time, then one beat later the
- *   ink ring travels to the block the command changed while the change lands under the ink flag
- *   "Agent"; the flag leaves 800 ms after the last landing. A press while a step plays finishes the
- *   step at its end state, and Run keeps focus with `aria-disabled`.
- * - The typed line runs `help`, `tailor --replace=<name>=<Name>`, `version list` and the three
- *   step forms, answered from the CLI's recordings in `run.generated.ts` for the deck the page
- *   holds; anything else answers with the refusal sentence. The one value the page substitutes is
- *   the customer's name, escaped for its place by `panel-format.ts`.
- * - The CLI, MCP and HTTP tabs are a tablist with a roving tabindex; the MCP and HTTP panels show
- *   the requests only, written here from the recording (the document carries the CLI screen alone).
- *
- * Every motion runs through `motion.ts` (the tokens are 0 ms under reduced motion, so each step
- * lands at once and the flag is cut after its 800 ms hold). Nothing here runs at rest.
+ * Agents run the same actions (docs/LANDING.md 2.9, 3.6 A1 to A6; rows home.agents.*). V3's file,
+ * the agents band's chunk: four chips run recorded commands on slide 5 above the console (2.9's
+ * table), each a toggle, through `live/step.ts`'s `playStep`; the console's CLI, MCP and HTTP tabs
+ * (a tablist with a roving tabindex); the typed line (`help`, the chips' commands with any customer
+ * name, `version list`, `version restore <n>`). Every change goes through the store as the agent's,
+ * so every band shows it and Version history writes its row. The answers are the CLI's, recorded on
+ * the page deck by `scripts/home/run.ts`; the page substitutes the customer's name and the page
+ * deck's revision, nothing else.
  */
+
+/** The page's words of 2.9 (V1's copy table); a recorded version's restore row reads its number. */
+const RESTORED_VERSION =
+  (HISTORY as unknown as { restoredVersion?: (n: number) => string }).restoredVersion ??
+  ((n: number): string => `Restored version ${n}`);
+const WORDS = {
+  chips: AGENTS.chips,
+  restored: HISTORY.restored,
+  restoredVersion: RESTORED_VERSION,
+  rewroteRow: HISTORY.rewroteRow,
+  skipped: HISTORY.slideSkipped,
+  unskipped: HISTORY.slideUnskipped,
+  changed: ANNOUNCE.slideChanged,
+};
+
+/* ---------------------------------------------------------------------------------------------
+ * The band */
 
 const TABS = ['cli', 'mcp', 'http'] as const;
 type Tab = (typeof TABS)[number];
-const WIDTHS: readonly PanelWidth[] = ['wide', 'narrow'];
+const CHIP_IDS: readonly ChipId[] = ['tailor', 'turn', 'row', 'skip'];
+const SLIDE5 = 'next-steps' as HomeDeckState['order'][number];
 
-/** The agent's constant typing clock and the answer's delay (LANDING.md 3.2 A1, A2): clocks, not tokens. */
-const CLOCK_MS = 24;
-const ANSWER_DELAY_MS = 200;
-const ANSWER_STAGGER_MS = 55;
-const ROW_STAGGER_MS = 55;
-const FLAG_HOLD_MS = 800;
-/** One frame between the last typed character and the pasted value (A1). */
-const PASTE_MS = 16;
-/** A3: 300 ms plus the distance over two, 300 to 700 ms. */
-const RING_MIN_MS = 300;
-const RING_MAX_MS = 700;
-
-const STEP_STATE: Readonly<Record<AgentStep, RunDeckState>> = {
-  0: 'absent',
-  1: 'placeholders',
-  2: 'titled',
-  3: 'filled',
-};
-
-/** One printed entry: its physical lines at both widths. */
-type Entry = PanelText;
-/** An entry on the page: its line elements at both widths. */
-type Line = Record<PanelWidth, HTMLElement[]>;
-
-function entryOf(line: string): Entry {
-  return {
-    wide: formatLines([line], 'wide', { overlong: 'break' }),
-    narrow: formatLines([line], 'narrow', { overlong: 'break' }),
-  };
+/** Whether the deck skips slide 5 (the store's `skipped`, V2's: a record of slide ids). */
+function skipsSlide5(state: HomeDeckState): boolean {
+  const skipped = state.skipped as unknown;
+  if (Array.isArray(skipped)) return skipped.includes(SLIDE5);
+  return (skipped as Readonly<Record<string, true>> | undefined)?.[SLIDE5] === true;
 }
 
-/** Substitutes the deck's current customer for the fixture's in a step's printed command. */
-function commandOf(step: RunStep, customer: string): string {
-  return substituteName(step.command, HOME_DECK.customer, customer);
+/** The deck with slide 5 skipped or shown again, in the store's shape. */
+function withSkip(state: HomeDeckState, on: boolean): HomeDeckState {
+  const skipped = state.skipped as unknown;
+  if (Array.isArray(skipped)) {
+    const rest = skipped.filter((id) => id !== SLIDE5);
+    return { ...state, skipped: (on ? [...rest, SLIDE5] : rest) as unknown as HomeDeckState['skipped'] };
+  }
+  const next = { ...(skipped as Record<string, true>) };
+  if (on) next[SLIDE5] = true;
+  else delete next[SLIDE5];
+  return { ...state, skipped: next as unknown as HomeDeckState['skipped'] };
 }
 
-function answerOf(step: RunStep, customer: string): string[] {
-  return step.answer.map((line) => substituteAnswer(line, HOME_DECK.customer, customer));
+/** Which way each chip goes next on the deck as it stands (2.9: a second press toggles). */
+function chipOn(state: HomeDeckState, chip: ChipId): boolean {
+  switch (chip) {
+    case 'tailor':
+      return state.customer !== HOME_CHIPS.chipCustomer;
+    case 'turn':
+      return !looksOf(state).turned;
+    case 'row':
+      return !looksOf(state).rewritten;
+    case 'skip':
+      return !skipsSlide5(state);
+  }
 }
 
-/** Replaces two names at once, so a recording made as A=B prints as C=D in one pass. */
-function substituteNames(text: string, pairs: ReadonlyArray<readonly [string, string]>): string {
-  const live = pairs.filter(([from]) => from !== '');
-  if (live.length === 0) return text;
-  const map = new Map(live);
-  const pattern = new RegExp(
-    [...map.keys()]
-      .sort((a, b) => b.length - a.length)
-      .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .join('|'),
-    'g',
-  );
-  return text.replace(pattern, (name) => map.get(name) ?? name);
-}
-
-/** The words a recorded command passes on, after `turboslide`, with the current customer. */
-function stepWords(step: RunStep, customer: string): string[] | null {
-  const split = splitWords(commandOf(step, customer));
-  if (!split.ok) return null;
-  return split.words[0] === 'turboslide' ? split.words.slice(1) : split.words;
+/** The page deck's revision: the recorded one and one for every version made on the page. */
+function revisionOf(store: HomeStore): number {
+  return HOME_CHIPS.restRevision + Math.max(0, store.versions().length - HOME_CHIPS.versions.length);
 }
 
 /** Two argument lists are one command when every word matches, a JSON value by its value. */
@@ -122,110 +96,57 @@ function sameWords(a: readonly string[], b: readonly string[]): boolean {
   });
 }
 
-/** Text nodes under an element, in document order. */
-function textNodes(el: Node): Text[] {
-  const out: Text[] = [];
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node !== null; node = walker.nextNode())
-    out.push(node as Text);
-  return out;
-}
-
-/** A rendered slide instance's markup as nodes: the root's children and its class. */
-function parseInstance(html: string): { className: string; nodes: Node[] } | null {
-  if (html === '') return null;
-  const template = document.createElement('template');
-  template.innerHTML = html;
-  const root =
-    template.content.querySelector<HTMLElement>('[data-home-slides]') ??
-    template.content.firstElementChild;
-  if (root === null) return null;
-  return { className: root.className, nodes: [...root.childNodes] };
-}
-
-/** Ends at once the renderer's own entrance fade (`.slide.is-on`, sheet.css `cut`), a motion 3.2 does not list. */
-export function settleEntrance(el: Element): void {
-  for (const a of el.getAnimations({ subtree: true }))
-    if (a instanceof CSSAnimation && a.animationName === 'cut') a.finish();
-}
-
-type Box = { x: number; y: number; w: number; h: number };
-
-function boxIn(el: Element, frame: Element): Box {
-  const a = el.getBoundingClientRect();
-  const f = frame.getBoundingClientRect();
-  return { x: a.left - f.left, y: a.top - f.top, w: a.width, h: a.height };
-}
-
-/** The agent's ring: four 1 px edges scaled along their length, so the line stays 1 px (A3). */
-function ringFrames(box: Box): { root: string; edges: [string, string, string, string] } {
-  const w = Math.max(1, Math.round(box.w));
-  const h = Math.max(1, Math.round(box.h));
-  return {
-    root: `translate(${Math.round(box.x)}px, ${Math.round(box.y)}px)`,
-    edges: [
-      `scaleX(${w})`,
-      `translate(0px, ${h - 1}px) scaleX(${w})`,
-      `scaleY(${h})`,
-      `translate(${w - 1}px, 0px) scaleY(${h})`,
-    ],
-  };
-}
-
-function insertAfter(
-  order: readonly HomeSlideId[],
-  after: HomeSlideId,
-  id: HomeSlideId,
-): HomeSlideId[] {
-  const at = order.indexOf(after);
-  const out = [...order];
-  out.splice(at < 0 ? out.length : at + 1, 0, id);
-  return out;
-}
+/** The ISO time of a version made on the page, as `version list` prints the CLI's. */
+const isoOf = (at: number): string => new Date(at).toISOString();
 
 export function startAgents(ctx: LiveContext): void {
   const { band, store } = ctx;
-  const run = band.querySelector<HTMLElement>('[data-agent-run]');
-  const stepLabel = band.querySelector<HTMLElement>('[data-step]');
-  const input = band.querySelector<HTMLInputElement>('[data-cmd]');
   const tablist = band.querySelector<HTMLElement>('[data-transports]');
-  const slide = band.querySelector<HTMLElement>('[data-home-slides][data-slide="next-steps"]');
-  if (run === null || stepLabel === null || tablist === null || slide === null) return;
-  const sheet = slide.parentElement ?? slide;
-  const restingClass = slide.className;
-  const restingNodes = [...slide.childNodes].map((node) => node.cloneNode(true));
+  const input = band.querySelector<HTMLInputElement>('[data-cmd]');
+  const slideOf = (): HTMLElement | null =>
+    band.querySelector<HTMLElement>(`[data-home-slides][data-slide="${SLIDE5}"]`);
+  const sheetOf = (): HTMLElement | null => {
+    const slide = slideOf();
+    return slide?.closest<HTMLElement>('.ts-home-sheet') ?? slide?.parentElement ?? null;
+  };
+  const chips = new Map<ChipId, HTMLButtonElement>();
+  for (const button of band.querySelectorAll<HTMLButtonElement>('[data-chip]')) {
+    const id = button.dataset['chip'] as ChipId;
+    if (CHIP_IDS.includes(id)) chips.set(id, button);
+  }
+  if (tablist === null) return;
 
   /* ---------- the tabs (A7: a cut) ---------- */
   const tabs = new Map<Tab, HTMLElement>();
   const panels = new Map<Tab, HTMLElement>();
-  const views = new Map<Tab, Record<PanelWidth, HTMLElement>>();
   for (const tab of tablist.querySelectorAll<HTMLElement>('[role="tab"]')) {
-    const key = (tab.dataset['transport'] ?? tab.textContent ?? '').trim().toLowerCase() as Tab;
+    const key = (tab.dataset['transport'] ?? '').trim().toLowerCase() as Tab;
     if (!TABS.includes(key)) continue;
     tabs.set(key, tab);
     const panelId = tab.getAttribute('aria-controls');
     const panel = panelId === null ? null : document.getElementById(panelId);
     if (panel !== null) panels.set(key, panel);
   }
-  /* the CLI panel's two views are the markup's; the MCP and HTTP panels are empty in the document
-     (l1.md Q5) and take two views of the same element and class here */
-  const cliPanel = panels.get('cli');
-  const cliWide = cliPanel?.querySelector<HTMLElement>('[data-panel-text="wide"]');
-  const cliNarrow = cliPanel?.querySelector<HTMLElement>('[data-panel-text="narrow"]');
-  if (cliWide == null || cliNarrow == null) return;
-  views.set('cli', { wide: cliWide, narrow: cliNarrow });
-  for (const key of ['mcp', 'http'] as const) {
+  /** each panel's two views; the document fills the CLI's (or leaves it for the chunk) */
+  const views = new Map<Tab, Screen>();
+  for (const key of TABS) {
     const panel = panels.get(key);
     if (panel === undefined) continue;
     let wide = panel.querySelector<HTMLElement>('[data-panel-text="wide"]');
     let narrow = panel.querySelector<HTMLElement>('[data-panel-text="narrow"]');
     if (wide === null || narrow === null) {
-      wide = cliWide.cloneNode(false) as HTMLElement;
-      narrow = cliNarrow.cloneNode(false) as HTMLElement;
+      wide = document.createElement('div');
+      wide.className = 'ts-home-panel-text is-wide';
+      wide.dataset['panelText'] = 'wide';
+      narrow = document.createElement('div');
+      narrow.className = 'ts-home-panel-text is-narrow';
+      narrow.dataset['panelText'] = 'narrow';
       panel.replaceChildren(wide, narrow);
     }
     views.set(key, { wide, narrow });
   }
+  const cli = views.get('cli');
+  if (cli === undefined) return;
   const select = (key: Tab, focus: boolean): void => {
     for (const [name, tab] of tabs) {
       const on = name === key;
@@ -246,8 +167,7 @@ export function startAgents(ctx: LiveContext): void {
     const current = order.findIndex((key) => tabs.get(key) === document.activeElement);
     if (current < 0) return;
     let next = current;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown')
-      next = (current + 1) % order.length;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (current + 1) % order.length;
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp')
       next = (current - 1 + order.length) % order.length;
     else if (event.key === 'Home') next = 0;
@@ -257,659 +177,426 @@ export function startAgents(ctx: LiveContext): void {
     select(order[next] as Tab, true);
   });
 
-  /* ---------- the panel's screens ---------- */
-  const linesOf = (texts: readonly string[]): HTMLElement[] =>
-    texts.map((text) => {
-      const el = document.createElement('span');
-      el.textContent = text;
-      return el;
-    });
-  /** Writes one entry at both widths and returns its line elements, by width. */
-  const add = (tab: Tab, entry: Entry): Line => {
-    const pair = views.get(tab);
-    const line: Line = { wide: [], narrow: [] };
-    if (pair === undefined) return line;
-    for (const width of WIDTHS) {
-      line[width] = linesOf(entry[width]);
-      pair[width].append(...line[width]);
-    }
-    return line;
-  };
-  /** Rewrites an entry in place (a command being typed), its lines replaced where they stand. */
-  const setEntry = (line: Line, entry: Entry): void => {
-    for (const width of WIDTHS) {
-      const old = line[width];
-      const next = linesOf(entry[width]);
-      const first = old[0];
-      if (first !== undefined) first.before(...next);
-      else views.get('cli')?.[width].append(...next);
-      for (const el of old) el.remove();
-      line[width] = next;
-    }
-  };
-  const clear = (tab: Tab): void => {
-    const pair = views.get(tab);
-    if (pair === undefined) return;
-    for (const width of WIDTHS) pair[width].replaceChildren();
-  };
-  const fadeIn = (line: Line, delayMs: number): void => {
-    for (const el of [...line.wide, ...line.narrow])
-      play(el, [{ opacity: 0 }, { opacity: 1 }], 'fast', 'fade', 'agents', delayMs);
-  };
-
-  /** The request a step sends, as the MCP and HTTP tabs print it (LANDING.md 2.4). */
-  const requestLine = (tab: 'mcp' | 'http', step: RunStep, customer: string): string => {
-    /* the name replaced as a value, so a name with a quote stays valid JSON */
-    const swap = (value: unknown): unknown =>
-      JSON.parse(
+  /* ---------- the requests on the MCP and HTTP tabs (2.9 "Panel content") ---------- */
+  type Sent = { mcp: string; http: string };
+  const sent: Sent[] = [];
+  /** The request of a recorded command with the page's names and revision in its JSON values. */
+  const requestOf = (
+    request: { mcp: ChipCommand['mcp']; http: ChipCommand['http'] },
+    names: readonly (readonly [string, string])[],
+    revision: number,
+    extra: Record<string, unknown> = {},
+  ): Sent => {
+    const swap = (value: Readonly<Record<string, unknown>>): Record<string, unknown> => {
+      const out = JSON.parse(
         JSON.stringify(value, (_key, v: unknown) =>
-          typeof v === 'string' ? v.split(HOME_DECK.customer).join(customer) : v,
+          typeof v === 'string' ? names.reduce((s, [from, to]) => (s === from ? to : s), v) : v,
         ),
-      );
-    return tab === 'mcp'
-      ? `tools/call ${step.mcp.name} ${spacedJson(swap(step.mcp.arguments))}`
-      : `${step.http.method} ${step.http.path} ${spacedJson(swap(step.http.body))}`;
+      ) as Record<string, unknown>;
+      if ('baseRevision' in out) out['baseRevision'] = revision;
+      return { ...out, ...extra };
+    };
+    return {
+      mcp: `tools/call ${request.mcp.name} ${spacedJson(swap(request.mcp.arguments))}`,
+      http: `${request.http.method} ${request.http.path} ${spacedJson(swap(request.http.body))}`,
+    };
   };
-  /** The MCP and HTTP panels: each played step's request, then the request only line. */
-  const paintRequests = (steps: number, customer: string): void => {
+  const paintRequests = (): void => {
     for (const tab of ['mcp', 'http'] as const) {
-      if (!views.has(tab)) continue;
-      clear(tab);
-      for (const step of HOME_RUN.steps.slice(0, steps))
-        add(tab, entryOf(requestLine(tab, step, customer)));
-      add(tab, entryOf(AGENTS.panel.requestOnly));
+      const view = views.get(tab);
+      if (view === undefined) continue;
+      clearScreen(view);
+      for (const request of sent.slice(-4)) addEntry(view, request[tab]);
+      addEntry(view, AGENTS.panel.requestOnly);
     }
   };
 
-  const stepEntries = (step: RunStep, customer: string): Entry[] => [
-    entryOf(`$ ${commandOf(step, customer)}`),
-    ...answerOf(step, customer).map((line) => entryOf(line)),
-  ];
-  /**
-   * The CLI screen of the run after `n` steps: the banner at the run's start and under step 1
-   * (7 slots and step 1's 3 or 4), then the transcript of the played steps alone.
-   */
-  const paintRunScreen = (n: number, customer: string, banner = n <= 1): void => {
-    clear('cli');
-    if (banner) add('cli', HOME_RUN.screens.banner);
-    for (const step of HOME_RUN.steps.slice(0, n))
-      for (const entry of stepEntries(step, customer)) add('cli', entry);
+  /* ---------- the console's screens ---------- */
+  /** `version list` as the CLI prints it: the recorded four, then one line per version made here. */
+  const versionLines = (): string[] => {
+    const all = store.versions();
+    const recorded = HOME_CHIPS.versions;
+    const lines = recorded.slice(0, Math.min(recorded.length, all.length)).map((v) =>
+      versionLine(v),
+    );
+    all.slice(recorded.length).forEach((v: Version, i) => {
+      lines.push(
+        versionLine({
+          n: v.n,
+          revision: HOME_CHIPS.restRevision + i + 1,
+          createdAt: isoOf(v.at),
+          author: v.author === 'agent' ? HOME_CHIPS.versionList.authorAgent : 'you',
+          what: v.words,
+        }),
+      );
+    });
+    return lines;
   };
-  /** Which screen the CLI panel holds: the run's, or one typed command and its answer. */
-  let screen: 'run' | 'typed' = 'run';
+  /** One typed command and its answer: the screen scrolls as a terminal does. */
+  const printTyped = (echo: string, answer: readonly string[]): void => {
+    select('cli', false);
+    addEntry(cli, echo);
+    for (const line of answer) addEntry(cli, line);
+    const first = answer[0];
+    if (first !== undefined) ctx.announce(first);
+  };
+  /* at rest: `version list` with its recorded answer (2.9), unless the document drew a screen */
+  if ((cli.wide?.childElementCount ?? 0) === 0) {
+    addEntry(cli, `$ ${HOME_CHIPS.versionList.command}`);
+    for (const line of versionLines()) addEntry(cli, line);
+  }
+  sent.push(requestOf(HOME_CHIPS.list, [], revisionOf(store)));
+  paintRequests();
 
-  /* ---------- the run's controls ---------- */
-  const stepsTotal = HOME_RUN.steps.length;
-  const paintControls = (state: HomeDeckState, playing: number | null): void => {
-    const shown = playing ?? state.agentStep;
-    stepLabel.textContent = shown === 0 ? '' : AGENTS.stepLabel(shown, stepsTotal);
-    run.textContent =
-      shown === 0 || shown >= stepsTotal ? AGENTS.run.again : AGENTS.run.step(shown + 1);
-    if (playing === null) run.removeAttribute('aria-disabled');
-    else run.setAttribute('aria-disabled', 'true');
+  /* ---------- the chips ---------- */
+  let playing: { chip: ChipId | null; handle: StepHandle } | null = null;
+  const paintChips = (state: HomeDeckState): void => {
+    for (const [chip, button] of chips) {
+      const on = chipOn(state, chip);
+      const label =
+        chip === 'tailor'
+          ? WORDS.chips.tailor(on ? HOME_CHIPS.chipCustomer : HOME_CHIPS.customer)
+          : chip === 'turn'
+            ? on
+              ? WORDS.chips.turn
+              : WORDS.chips.straighten
+            : chip === 'row'
+              ? on
+                ? WORDS.chips.row
+                : WORDS.chips.putBack
+              : on
+                ? WORDS.chips.skip
+                : WORDS.chips.unskip;
+      if (button.textContent !== label) button.textContent = label;
+      if (playing?.chip === chip) button.setAttribute('aria-disabled', 'true');
+      else button.removeAttribute('aria-disabled');
+    }
+  };
+  /** The slide's place in the deck, for the row's words. */
+  const placeOf = (state: HomeDeckState): number =>
+    state.order.indexOf(SLIDE5) + 1;
+  /** The command a chip runs on the deck as it stands, its answer and its change. */
+  const chipStep = (
+    chip: ChipId,
+    state: HomeDeckState,
+    words: string[] | null,
+  ): { step: PlayableStep; commit: (() => void) | null; request: Sent } | null => {
+    const on = chipOn(state, chip);
+    const rec = HOME_CHIPS.commands[chip][on ? 'on' : 'off'];
+    const revision = revisionOf(store);
+    const absent = !state.order.includes(SLIDE5);
+    /* the names: the recording's tailor names become the deck's (2.9 "Tailor for Initech") */
+    const from = state.customer;
+    const to = on ? HOME_CHIPS.chipCustomer : HOME_CHIPS.customer;
+    const names: (readonly [string, string])[] =
+      rec.names === null ? [] : [[rec.names.from, from] as const, [rec.names.to, to] as const];
+    let command = rec.command;
+    if (rec.names !== null)
+      command = `turboslide tailor --replace=${quoted(from)}=${quoted(words?.[1] ?? to)}`;
+    const target = words?.[1] ?? to;
+    let answer: readonly string[];
+    if (absent) {
+      const recorded = HOME_CHIPS.absent[chip];
+      answer = (on ? recorded.on : (recorded.off ?? recorded.on)).map((line) =>
+        line.replace(/revision \d+/, `revision ${revision + 1}`),
+      );
+    } else {
+      const freeform = state.canvas[SLIDE5] === true || chip === 'turn';
+      const lines = freeform && rec.answerFreeform !== null ? rec.answerFreeform : rec.answer;
+      answer = lines.map((line) => line.replace(/revision \d+/, `revision ${revision + 1}`));
+    }
+    const refused = absent && HOME_CHIPS.absent[chip].refused;
+    const request = requestOf(
+      rec,
+      rec.names === null ? [] : [[rec.names.from, from] as const, [rec.names.to, target] as const],
+      revision,
+    );
+    void names;
+    const typedChars = rec.names === null ? rec.typedChars : command.length;
+    const step: PlayableStep = {
+      command,
+      typedChars,
+      answer,
+      landing: refused ? { kind: 'cut' } : rec.landing,
+    };
+    if (refused) return { step, commit: null, request };
+    const n = placeOf(state);
+    const commit = (): void => {
+      switch (chip) {
+        case 'tailor':
+          store.commit({
+            band: 'agents',
+            author: 'agent',
+            words: HISTORY.tailored(target),
+            undo: null,
+            next: (s) => ({ ...s, customer: target }),
+          });
+          return;
+        case 'turn': {
+          const deg = on ? HOME_CHIPS.turnTo : 0;
+          store.commit({
+            band: 'agents',
+            author: 'agent',
+            words: HISTORY.turned('the title', n, deg),
+            undo: null,
+            slide: SLIDE5,
+            /* the CLI arranges the slide by hand in the same write, and it stays so (v3.md) */
+            next: (s) => ({ ...withLooks(s, { turned: on }), canvas: { ...s.canvas, [SLIDE5]: true } }),
+          });
+          return;
+        }
+        case 'row':
+          store.commit({
+            band: 'agents',
+            author: 'agent',
+            words: WORDS.rewroteRow(n),
+            undo: null,
+            slide: SLIDE5,
+            next: (s) => withLooks(s, { rewritten: on }),
+          });
+          return;
+        case 'skip':
+          store.commit({
+            band: 'agents',
+            author: 'agent',
+            words: on ? WORDS.skipped(n) : WORDS.unskipped(n),
+            undo: null,
+            slide: SLIDE5,
+            next: (s) => withSkip(s, on),
+          });
+      }
+    };
+    return { step, commit, request };
   };
 
-  /* ---------- the slide ---------- */
-  const frameOf = (): HTMLElement | null => slide.querySelector<HTMLElement>('.frame');
-  /**
-   * The slide in one of its four states. Absent is the run's start: the slide's place keeps the
-   * sheet's paper and its four crosses (the content hidden by home.css's `[data-agent-absent]`,
-   * the frame shown again inline with its rails and rules drawn in no colour), so step 1's rails
-   * draw out of crosses that stand (LANDING.md 3.2 A4; l3.md R3b).
-   */
-  const setSlide = (kind: RunDeckState): void => {
-    if (kind === 'absent') {
-      slide.setAttribute('data-agent-absent', '');
-      const frame = frameOf();
-      frame?.style.setProperty('visibility', 'visible');
-      frame?.style.setProperty('--hair', 'transparent');
+  /** What the ring travels to after a chip's change: the block it changed, or the whole slide. */
+  const changedOf = (chip: ChipId): HTMLElement | null => {
+    const slide = slideOf();
+    if (slide === null) return null;
+    if (chip === 'skip') return slide;
+    if (chip === 'row')
+      return (
+        slide.querySelector<HTMLElement>(`[data-run="rows/items/${HOME_CHIPS.row.index}/value"]`)
+          ?.parentElement ?? slide
+      );
+    return slide.querySelector<HTMLElement>('[data-block="h"]') ?? slide;
+  };
+  /** The row's value cell, where Rewrite a Row's words land at 24 ms (A5). */
+  const rowCell = (): HTMLElement | null =>
+    slideOf()?.querySelector<HTMLElement>(`[data-run="rows/items/${HOME_CHIPS.row.index}/value"]`) ?? null;
+
+  const run = (chip: ChipId | null, built: NonNullable<ReturnType<typeof chipStep>>, echoOnly = false): void => {
+    const sheet = sheetOf();
+    finishBand('agents');
+    select('cli', false);
+    if (sheet === null || echoOnly) {
+      printTyped(`$ ${built.step.command}`, built.step.answer);
+      built.commit?.();
       return;
     }
-    slide.removeAttribute('data-agent-absent');
-    const parsed =
-      kind === 'filled'
-        ? { className: restingClass, nodes: restingNodes.map((node) => node.cloneNode(true)) }
-        : parseInstance(
-            kind === 'placeholders'
-              ? LIVE_SLIDE_HTML.nextSteps.placeholders
-              : LIVE_SLIDE_HTML.nextSteps.titled,
-          );
-    if (parsed === null) return;
-    if (slide.className !== parsed.className) slide.className = parsed.className;
-    slide.replaceChildren(...parsed.nodes);
-    settleEntrance(slide);
-    /* the inserted markup spells the fixture's name and its place: the deck's current ones */
-    applyCustomer(slide, HOME_DECK.customer, store.get().customer);
-    renumber(ctx.root, store.get());
-  };
-  const targetOf = (step: RunStep): Element => {
-    const hash = step.target.indexOf('#');
-    if (hash < 0) return slide;
-    const block = step.target.slice(hash + 1);
-    return slide.querySelector(`[data-block="${block}"]`) ?? slide;
-  };
-  /** A4: the new slide's rails draw out of their crosses, CSS keyed on a class (l3.md R4). */
-  const drawRails = (slow: number): number => {
-    const frame = frameOf();
-    const line = ms('line');
-    if (frame === null || line === 0) return 0;
-    const length = line + 3 * 60 * slow;
-    frame.style.setProperty('--ts-slow', String(slow));
-    frame.classList.add('ts-home-draw');
-    const stop = (): void => {
-      clearTimeout(timer);
-      frame.classList.remove('ts-home-draw');
-      frame.style.removeProperty('--ts-slow');
-      drawn.done();
-    };
-    const drawn = sequence('agents', stop);
-    const timer = setTimeout(stop, length);
-    return length;
-  };
-
-  /* ---------- the ring and the flag ---------- */
-  let ring: HTMLElement | null = null;
-  let flag: HTMLElement | null = null;
-  let lastBox: Box | null = null;
-  const dropMarks = (): void => {
-    ring?.remove();
-    flag?.remove();
-    ring = null;
-    flag = null;
-  };
-  /* Web Animations this module starts outside `play` (the ring's length is a distance, not a
-     token); each commits its end and cancels, so document.getAnimations() is empty at rest */
-  const running = new Set<Animation>();
-  const track = (animation: Animation): void => {
-    running.add(animation);
-    const settle = (): void => {
-      if (!running.delete(animation)) return;
-      try {
-        animation.commitStyles();
-      } catch {
-        /* the element left the page */
-      }
-      animation.cancel();
-    };
-    animation.addEventListener('finish', settle);
-  };
-  const finishTracked = (): void => {
-    for (const animation of [...running]) animation.finish();
-  };
-  const placeRing = (to: Box, durationMs: number): void => {
-    if (ring === null) {
-      ring = document.createElement('div');
-      ring.className = 'ts-home-ring';
-      ring.setAttribute('aria-hidden', 'true');
-      ring.setAttribute('data-live-overlay', '');
-      /* over the slide, whose root is positioned at z-index 1 in its wrapper (home.css) */
-      ring.style.zIndex = '2';
-      for (let i = 0; i < 4; i += 1) ring.append(document.createElement('i'));
-      sheet.append(ring);
-    }
-    const from = lastBox ?? to;
-    const a = ringFrames(from);
-    const b = ringFrames(to);
-    const edges = [...ring.children] as HTMLElement[];
-    ring.style.transform = b.root;
-    edges.forEach((edge, i) => {
-      edge.style.transform = b.edges[i] as string;
+    const state = store.get();
+    const n = placeOf(state);
+    const handle = playStep({ terminal: cli, sheet }, built.step, {
+      band: 'agents',
+      track: true,
+      land: () => {
+        built.commit?.();
+        sent.push(built.request);
+        paintRequests();
+        ctx.announce(built.step.answer[0] ?? '');
+        if (built.commit === null) return null;
+        if (chip === 'row') return rowCell() ?? changedOf(chip);
+        return chip === null ? slideOf() : changedOf(chip);
+      },
+      onEnd: () => {
+        if (playing?.handle === handle) playing = null;
+        paintChips(store.get());
+        if (built.commit !== null && n > 0) ctx.announce(WORDS.changed(n));
+      },
     });
-    if (durationMs > 0 && lastBox !== null) {
-      const timing = { duration: durationMs, easing: ease('move') };
-      track(ring.animate([{ transform: a.root }, { transform: b.root }], timing));
-      edges.forEach((edge, i) =>
-        track(edge.animate([{ transform: a.edges[i] }, { transform: b.edges[i] }], timing)),
-      );
-    }
-    lastBox = to;
-  };
-  const showFlag = (at: Box): void => {
-    if (flag === null) {
-      flag = document.createElement('span');
-      flag.className = 'ts-home-flag';
-      flag.setAttribute('aria-hidden', 'true');
-      flag.setAttribute('data-live-overlay', '');
-      flag.style.zIndex = '2';
-      flag.textContent = AGENTS.author.agent;
-      sheet.append(flag);
-    }
-    const height = flag.offsetHeight || 20;
-    const above = at.y - height;
-    const x = Math.round(at.x);
-    const y = Math.round(above >= 0 ? above : at.y);
-    flag.style.transform = `translate(${x}px, ${y}px)`;
+    playing = { chip, handle };
+    paintChips(store.get());
   };
 
-  /* ---------- one step ---------- */
-  type Playing = { n: number; finish: () => void };
-  let playing: Playing | null = null;
-
-  const runStep = (step: RunStep, options: { typed: boolean }): void => {
-    const customer = store.get().customer;
-    const n = step.n;
-    const slow = slowFactor();
-    const still = reduced();
-    const command = commandOf(step, customer);
-    const answer = answerOf(step, customer);
-    /* A1: the words up to the value at 24 ms a character; a JSON value pastes whole */
-    const typedChars =
-      options.typed || still
-        ? 0
-        : substituteName(step.command.slice(0, step.typedChars), HOME_DECK.customer, customer)
-            .length;
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    const at = (delay: number, fn: () => void): void => {
-      if (delay <= 0) {
-        fn();
-        return;
-      }
-      const timer = setTimeout(() => {
-        timers.delete(timer);
-        fn();
-      }, delay);
-      timers.add(timer);
-    };
-    let ended = false;
-    let landed = false;
-    const handle = sequence('agents', () => end());
-    playing = { n, finish: () => end() };
-    screen = 'run';
-    paintControls(store.get(), n);
-
-    /* the screen: the banner while step 1 plays, the transcript of the steps before from step 2 */
-    paintRunScreen(n - 1, customer, n === 1);
-    const cmd = add('cli', entryOf(`$ ${typedChars === 0 ? command : ''}`));
-    if (typedChars === 0) paintRequests(n, customer);
-    for (let i = 1; i <= typedChars; i += 1)
-      at(i * CLOCK_MS * slow, () => setEntry(cmd, entryOf(`$ ${command.slice(0, i)}`)));
-    const typedEnd = typedChars * CLOCK_MS * slow;
-    /* the value, when the command has one, prints whole in the next frame, as a paste does */
-    if (typedChars > 0)
-      at(typedEnd + PASTE_MS * slow, () => {
-        if (typedChars < command.length) setEntry(cmd, entryOf(`$ ${command}`));
-        paintRequests(n, customer);
-      });
-
-    /* A2: the answer, 200 ms after A1, a line at a time */
-    const answerAt = still ? 0 : typedEnd + ANSWER_DELAY_MS * slow;
-    at(answerAt, () => {
-      answer.forEach((line, i) => {
-        const els = add('cli', entryOf(line));
-        if (!still) fadeIn(els, i * ANSWER_STAGGER_MS);
-      });
-    });
-    const answerLength =
-      answer.length === 0 || still
-        ? 0
-        : ms('fast') + (answer.length - 1) * ANSWER_STAGGER_MS * slow;
-
-    /* A3 to A5: one beat later the ring travels and the change lands under the flag */
-    const land = (animate: boolean): number => {
-      landed = true;
-      setSlide(STEP_STATE[n as AgentStep]);
-      const target = targetOf(step);
-      const box = boxIn(target, sheet);
-      const distance =
-        lastBox === null
-          ? 0
-          : Math.hypot(
-              box.x + box.w / 2 - (lastBox.x + lastBox.w / 2),
-              box.y + box.h / 2 - (lastBox.y + lastBox.h / 2),
-            );
-      const ringLength =
-        animate && lastBox !== null
-          ? Math.min(RING_MAX_MS, Math.max(RING_MIN_MS, RING_MIN_MS + distance / 2)) * slow
-          : 0;
-      placeRing(box, ringLength);
-      showFlag(box);
-      let landLength = 0;
-      if (animate && step.landing.kind === 'rails') {
-        landLength = drawRails(slow);
-      } else if (animate && step.landing.kind === 'words') {
-        landLength = typeWords(target, slow);
-      } else if (animate) {
-        const rows = [...target.children] as HTMLElement[];
-        rows.forEach((row, i) =>
-          play(
-            row,
-            [{ opacity: 0 }, { opacity: 1 }],
-            'state',
-            'fade',
-            'agents',
-            Math.min(i, 6) * ROW_STAGGER_MS,
-          ),
-        );
-        landLength =
-          rows.length === 0
-            ? 0
-            : ms('state') + (Math.min(rows.length, 7) - 1) * ROW_STAGGER_MS * slow;
-      }
-      store.commit({
-        band: 'agents',
-        author: 'agent',
-        words: step.history,
-        run: true,
-        undo: null,
-        next: (s) => ({
-          ...s,
-          agentStep: n as AgentStep,
-          order:
-            n === 1 && !s.order.includes('next-steps')
-              ? insertAfter(s.order as readonly HomeSlideId[], 'ships', 'next-steps')
-              : s.order,
-        }),
-      });
-      ctx.announce(
-        n === 1 ? ANNOUNCE.slideAdded(store.get().order.indexOf('next-steps') + 1) : step.history,
-      );
-      return Math.max(ringLength, landLength);
-    };
-    const landAt = still ? 0 : answerAt + answerLength + ms('beat');
-    at(landAt, () => {
-      const longest = land(!still);
-      /* the flag holds 800 ms after the last landing and leaves in 160 ms (cut when reduced) */
-      at(longest + FLAG_HOLD_MS * slow, () => {
-        const leaving = flag;
-        if (leaving !== null && !still && ms('state') > 0) {
-          play(leaving, [{ opacity: 1 }, { opacity: 0 }], 'state', 'fade', 'agents');
-          at(ms('state'), end);
-        } else end();
-      });
-    });
-
-    /* the step's end state: everything printed, the change set, the marks gone */
-    function end(): void {
-      if (ended) return;
-      ended = true;
-      for (const timer of timers) clearTimeout(timer);
-      timers.clear();
-      finishTracked();
-      const now = store.get().customer;
-      if (!landed) land(false);
-      setSlide(STEP_STATE[n as AgentStep]);
-      if (screen === 'run') paintRunScreen(n, now);
-      paintRequests(n, now);
-      dropMarks();
-      playing = null;
-      handle.done();
-      paintControls(store.get(), null);
-    }
-  };
-
-  /** A5 for step 2: the title's words land at 24 ms a character; returns the length in ms. */
-  const typeWords = (el: Element, slow: number): number => {
-    const nodes = textNodes(el).filter((node) => node.data.length > 0);
-    const total = nodes.reduce((sum, node) => sum + node.data.length, 0);
-    if (total === 0) return 0;
-    const parts = nodes.map((node) => {
-      const shown = document.createElement('span');
-      const rest = document.createElement('span');
-      rest.style.color = 'transparent';
-      rest.textContent = node.data;
-      node.replaceWith(shown, rest);
-      return { shown, rest, text: node.data };
-    });
-    const paint = (k: number): void => {
-      let left = k;
-      for (const part of parts) {
-        const take = Math.max(0, Math.min(part.text.length, left));
-        part.shown.textContent = part.text.slice(0, take);
-        part.rest.textContent = part.text.slice(take);
-        left -= take;
-      }
-    };
-    paint(0);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    for (let k = 1; k <= total; k += 1)
-      timers.push(setTimeout(() => paint(k), k * CLOCK_MS * slow));
-    const finish = (): void => {
-      for (const timer of timers) clearTimeout(timer);
-      paint(total);
-    };
-    const words = sequence('agents', finish);
-    timers.push(setTimeout(() => words.done(), total * CLOCK_MS * slow));
-    return total * CLOCK_MS * slow;
-  };
-
-  /* ---------- Run ---------- */
-  /* whether a step played when this press began: the page's input guard (motion.ts, the capture
-     phase on the document) finishes the step before the click arrives, and that press only
-     finishes it (LANDING.md 2.4); read on the window, which the capture phase reaches first */
+  /* the page's input guard (motion.ts) finishes a running step before a press reaches its chip, so
+     the press that lands it is read here first: it only finishes (2.9) */
   let pressedWhilePlaying = false;
   const notePress = (event: Event): void => {
-    if (event.target instanceof Node && run.contains(event.target))
+    if (event.target instanceof Element && event.target.closest('[data-chip]') !== null)
       pressedWhilePlaying = playing !== null;
   };
   window.addEventListener('pointerdown', notePress, true);
   window.addEventListener('keydown', notePress, true);
-  /** A8: the run's start, by a cut; the visitor's own rows stay. */
-  const cutToStart = (): void => {
-    finishBand('agents');
-    store.commit({
-      band: 'agents',
-      author: 'agent',
-      words: null,
-      undo: null,
-      next: (s) => ({
-        ...s,
-        agentStep: 0,
-        order: s.order.filter((id) => id !== 'next-steps'),
-        history: s.history.filter((row) => !row.run),
-      }),
+  for (const [chip, button] of chips)
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const finishing = playing !== null || pressedWhilePlaying;
+      pressedWhilePlaying = false;
+      if (finishing) {
+        playing?.handle.finish();
+        return;
+      }
+      const built = chipStep(chip, store.get(), null);
+      if (built !== null) run(chip, built);
     });
-    setSlide('absent');
-    lastBox = null;
-    screen = 'run';
-    paintRunScreen(0, store.get().customer);
-    paintRequests(0, store.get().customer);
-    paintControls(store.get(), null);
-  };
-  const press = (): void => {
-    const finishing = playing !== null || pressedWhilePlaying;
-    pressedWhilePlaying = false;
-    if (finishing) {
-      finishBand('agents');
-      playing?.finish();
-      return;
-    }
-    const state = store.get();
-    if (state.agentStep === 0 || state.agentStep >= stepsTotal) {
-      if (state.agentStep !== 0) cutToStart();
-      runStep(HOME_RUN.steps[0], { typed: false });
-      return;
-    }
-    runStep((HOME_RUN.steps as readonly RunStep[])[state.agentStep] as RunStep, { typed: false });
-  };
-  run.addEventListener('click', (event) => {
-    event.preventDefault();
-    press();
-  });
 
-  /* any other input on the band finishes its running sequence first (LANDING.md 3.5) */
+  /* any other input on the band finishes its running step first (3.8) */
   const interrupt = (event: Event): void => {
     if (playing === null) return;
-    if (event.target instanceof Node && run.contains(event.target)) return;
+    if (event.target instanceof Element && event.target.closest('[data-chip]') !== null) return;
     if (event instanceof KeyboardEvent && (event.key === 'Tab' || event.key === 'Shift')) return;
-    finishBand('agents');
+    playing.handle.finish();
   };
   band.addEventListener('pointerdown', interrupt, true);
   band.addEventListener('keydown', interrupt, true);
 
-  /* the deck changed elsewhere: the panel prints the current customer's name (LANDING.md 2.4) */
-  let shownCustomer = store.get().customer;
-  store.subscribe((state) => {
-    if (state.customer === shownCustomer || playing !== null) return;
-    shownCustomer = state.customer;
-    if (screen === 'run') paintRunScreen(state.agentStep, state.customer);
-    paintRequests(state.agentStep, state.customer);
-    if (state.agentStep > 0) setSlide(STEP_STATE[state.agentStep]);
+  /* ---------- the typed line (2.9 "The typed line") ---------- */
+  const recalled: string[] = [];
+  let recall = 0;
+  input?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const line = input.value;
+      input.value = '';
+      if (line.trim() === '') return;
+      recalled.push(line);
+      recall = recalled.length;
+      typedLine(line);
+    } else if (event.key === 'ArrowUp' && recalled.length > 0) {
+      event.preventDefault();
+      recall = Math.max(0, recall - 1);
+      input.value = recalled[recall] ?? '';
+    } else if (event.key === 'ArrowDown' && recalled.length > 0) {
+      event.preventDefault();
+      recall = Math.min(recalled.length, recall + 1);
+      input.value = recalled[recall] ?? '';
+    }
   });
 
-  /* ---------- the typed line ---------- */
-  if (input !== null) {
-    const recalled: string[] = [];
-    let recall = 0;
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const line = input.value;
-        input.value = '';
-        if (line.trim() === '') return;
-        recalled.push(line);
-        recall = recalled.length;
-        typedLine(line);
-      } else if (event.key === 'ArrowUp') {
-        if (recalled.length === 0) return;
-        event.preventDefault();
-        recall = Math.max(0, recall - 1);
-        input.value = recalled[recall] ?? '';
-      } else if (event.key === 'ArrowDown') {
-        if (recalled.length === 0) return;
-        event.preventDefault();
-        recall = Math.min(recalled.length, recall + 1);
-        input.value = recalled[recall] ?? '';
-      }
-    });
-  }
-
-  /** One typed command and its answer replace the screen (LANDING.md 2.4 "The panel's screens"). */
-  const printTyped = (echo: string, answer: readonly string[]): void => {
-    const still = reduced();
-    screen = 'typed';
-    select('cli', false);
-    clear('cli');
-    add('cli', entryOf(echo));
-    answer.forEach((line, i) => {
-      const els = add('cli', entryOf(line));
-      if (!still) fadeIn(els, ANSWER_DELAY_MS + i * ANSWER_STAGGER_MS);
-    });
-    const first = answer[0];
-    if (first !== undefined) ctx.announce(first);
-  };
-
-  const recording = (
-    form: TypedRecording['form'],
-    state: HomeDeckState | null,
-    match: (r: TypedRecording) => boolean = () => true,
-  ): TypedRecording | undefined =>
-    HOME_RUN.typed.find(
-      (r) =>
-        r.form === form && (state === null || r.state === STEP_STATE[state.agentStep]) && match(r),
-    );
-  /** A recording's printed lines with its names replaced by the page's (`version list` prints its table). */
-  const printed = (
-    rec: TypedRecording,
-    pairs: ReadonlyArray<readonly [string, string]>,
-  ): string[] => {
-    const lines = rec.form === 'version-list' ? [...rec.answer, ...rec.findings] : [...rec.answer];
-    return lines.map((text) => (rec.names === null ? text : substituteNames(text, pairs)));
-  };
-
   const typedLine = (line: string): void => {
+    if (playing !== null) playing.handle.finish();
     const trimmed = line.trim();
     const echo = /^turboslide(\s|$)/.test(trimmed) ? `$ ${trimmed}` : `$ turboslide ${trimmed}`;
     const split = splitWords(trimmed);
-    if (!split.ok) {
-      printTyped(echo, [AGENTS.panel.unclosedQuote]);
-      return;
-    }
+    if (!split.ok) return printTyped(echo, [AGENTS.panel.unclosedQuote]);
     const words = split.words[0] === 'turboslide' ? split.words.slice(1) : split.words;
     const state = store.get();
-    const refuse = (): void => printTyped(echo, [HOME_RUN.refusal]);
+    const refuse = (): void => printTyped(echo, [HOME_CHIPS.refusal]);
+    if (words.length === 0 || (words.length === 1 && ['help', '--help', '-h'].includes(words[0] as string)))
+      return printTyped(echo, HOME_CHIPS.help);
+    const revision = revisionOf(store);
 
-    if (
-      words.length === 0 ||
-      (words.length === 1 && ['help', '--help', '-h'].includes(words[0] as string))
-    ) {
-      printTyped(echo, HOME_RUN.help);
+    if (words[0] === 'version' && words[1] === 'list' && words.length === 2) {
+      sent.push(requestOf(HOME_CHIPS.list, [], revision));
+      paintRequests();
+      return printTyped(echo, versionLines());
+    }
+    if (words[0] === 'version' && words[1] === 'restore' && words.length === 3) {
+      const n = Number(words[2]);
+      const all = store.versions();
+      const version = Number.isInteger(n) ? all.find((v) => v.n === n) : undefined;
+      if (version === undefined) return printTyped(echo, HOME_CHIPS.restore.absent);
+      sent.push(requestOf(HOME_CHIPS.restore, [], revision, { n }));
+      paintRequests();
+      printTyped(echo, [`restored version ${n}: revision ${revision + 1}`]);
+      /* a recorded version has no time of its own: its row names its number (v2.md R11) */
+      store.restore(
+        n,
+        'agent',
+        version.recorded ? WORDS.restoredVersion(n) : WORDS.restored(historyTime(version.at)),
+        'agents',
+      );
       return;
     }
 
     if (words[0] === 'tailor') {
-      /* the CLI takes `--replace=<from>=<to>`; it refuses the spaced form whatever the deck holds,
-         so that answer is the one recording made of it (l1.md Q7) */
-      if (words.length === 3 && words[1] === '--replace') {
-        const rec = recording('tailor-spaced', null);
-        if (rec === undefined) refuse();
-        else printTyped(echo, printed(rec, []));
-        return;
-      }
       const pair =
         words.length === 2 && (words[1] as string).startsWith('--replace=')
           ? (words[1] as string).slice('--replace='.length)
           : null;
       const eq = pair === null ? -1 : pair.indexOf('=');
-      if (pair === null || eq <= 0 || eq === pair.length - 1) {
-        refuse();
-        return;
-      }
+      if (pair === null || eq <= 0 || eq === pair.length - 1) return refuse();
       const from = pair.slice(0, eq);
       const to = pair.slice(eq + 1);
-      if (to.length > NAME_MAX) {
-        printTyped(echo, [AGENTS.panel.longName]);
-        return;
-      }
-      const found = from === state.customer;
-      const rec = recording('tailor', state, (r) => r.nameFound === found);
-      if (rec === undefined) {
-        refuse();
-        return;
-      }
-      const names = rec.names;
-      printTyped(
-        echo,
-        printed(
-          rec,
-          names === null
-            ? []
-            : [
-                [names.from, from],
-                [names.to, to],
-              ],
-        ),
-      );
-      if (found && to !== from)
-        store.commit({
-          band: 'agents',
-          author: 'agent',
-          words: HISTORY.tailored(to),
-          undo: null,
-          next: (s) => ({ ...s, customer: to }),
-        });
-      return;
+      if (to.length > NAME_MAX) return printTyped(echo, [AGENTS.panel.longName]);
+      /* a name the deck does not hold: the CLI writes nothing and prints the revision it read */
+      if (from !== state.customer)
+        return printTyped(
+          echo,
+          HOME_CHIPS.tailorAbsent.map((l) => l.replace(/revision \d+/, `revision ${revision}`)),
+        );
+      if (to === from) return refuse();
+      const built = chipStep('tailor', state, ['tailor', to]);
+      if (built === null) return refuse();
+      /* the typed name is the agent's: the chip's step with the visitor's words */
+      return run('tailor', built);
     }
 
-    if (words.length === 2 && words[0] === 'version' && words[1] === 'list') {
-      const rec = recording('version-list', state);
-      if (rec === undefined) refuse();
-      else printTyped(echo, printed(rec, []));
-      return;
-    }
-
-    const k = HOME_RUN.steps.findIndex((step) => {
-      const expected = stepWords(step, state.customer);
-      return expected !== null && sameWords(words, expected);
-    });
-    if (k >= 0) {
-      const step = HOME_RUN.steps[k] as RunStep;
-      if (step.n === state.agentStep + 1) {
-        finishBand('agents');
-        runStep(step, { typed: true });
-        return;
+    for (const chip of CHIP_IDS) {
+      if (chip === 'tailor') continue;
+      for (const dir of ['on', 'off'] as const) {
+        const rec = HOME_CHIPS.commands[chip][dir];
+        if (!sameWords(words, rec.argv)) continue;
+        /* a command the deck is already in prints the CLI's answer and changes nothing new */
+        if ((dir === 'on') !== chipOn(state, chip)) {
+          const answer = rec.answer.map((l) => l.replace(/revision \d+/, `revision ${revision + 1}`));
+          return printTyped(echo, answer);
+        }
+        const built = chipStep(chip, state, null);
+        if (built !== null) return run(chip, built);
       }
-      const rec = recording('step', state, (r) => r.step === step.n);
-      if (rec === undefined) {
-        refuse();
-        return;
-      }
-      const names = rec.names;
-      printTyped(echo, printed(rec, names === null ? [] : [[names.from, state.customer]]));
-      return;
     }
     refuse();
   };
 
-  /* the MCP and HTTP panels hold the requests of the deck at rest from the start */
-  paintRequests(store.get().agentStep, store.get().customer);
+  /* the editor's skipped slide mark on the slide above (packages/chrome/src/Filmstrip.css 89 to
+     110): the slide at 40 percent and the glyph in a paper square at its top right; every other
+     slide 5 on the page is drawn by V2's paintSlides (v2.md) */
+  const paintSkipped = (state: HomeDeckState): void => {
+    const sheet = sheetOf();
+    if (sheet === null) return;
+    const skipped = skipsSlide5(state);
+    let mark = sheet.querySelector<HTMLElement>(':scope > .ts-home-skip');
+    if (skipped && mark === null) {
+      mark = document.createElement('span');
+      mark.className = 'ts-home-skip';
+      mark.setAttribute('aria-hidden', 'true');
+      mark.setAttribute('data-live-overlay', '');
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', HOME_CHIPS.skipGlyph.viewBox);
+      svg.setAttribute('fill', 'currentColor');
+      svg.innerHTML = HOME_CHIPS.skipGlyph.body;
+      mark.append(svg);
+      sheet.append(mark);
+    } else if (!skipped) mark?.remove();
+    sheet.toggleAttribute('data-skipped', skipped);
+    /* version 1 restored: slide 5 has left the deck, and its place keeps the sheet's crosses */
+    slideOf()?.toggleAttribute('data-agent-absent', !state.order.includes(SLIDE5));
+  };
+
+  /* every change: the chips' labels and slide 5's looks wherever slide 5 is drawn */
+  store.subscribe((state) => {
+    paintNextSteps(ctx.root, state);
+    paintSkipped(state);
+    paintChips(state);
+  });
+  paintNextSteps(ctx.root, store.get());
+  paintSkipped(store.get());
+  paintChips(store.get());
+}
+
+/** A name as a shell needs it in `--replace=<from>=<to>` (quoted when it holds a shell character). */
+function quoted(name: string): string {
+  return /^[\w.@%+,:/-]+$/.test(name) ? name : `'${name.replace(/'/g, "'\\''")}'`;
+}
+
+/** One version line as `version list` prints it (apps/cli/src/commands/version.ts `formatVersion`). */
+function versionLine(v: {
+  n: number;
+  revision: number;
+  createdAt: string;
+  author: string;
+  what: string;
+}): string {
+  return `${String(v.n).padStart(3)}  r${String(v.revision).padEnd(5)} ${v.createdAt}  ${v.author.padEnd(18)} ${v.what}`;
 }

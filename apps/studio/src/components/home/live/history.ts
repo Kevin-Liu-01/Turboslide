@@ -4,22 +4,24 @@ import { play } from './motion';
 import type { HistoryRow, HomeDeckState, StoreEvent } from './state';
 
 /**
- * Version history on /home (docs/LANDING.md 2.4 "Interaction", 3.2 A6; row home.agents.history).
- * L3's file. The band's markup holds the run's end at rest: three Agent rows whose time cell reads
- * "Recorded". From then on the list is the store's `history`, newest first, five rows at most
- * (the five ruled rows of 44 px the band reserves): every commit that adds a row draws it at the
- * top within the frame, entering on A6 (200 ms, an 8 px rise, the arrive curve); a merged nudge
- * burst rewrites its row in place; an undo or Run Again takes rows away by a cut. Existing rows
- * never animate (3.4). The row's grammar is the product's Version history: a Heroicon in the key
- * cell (`command-line` for Agent, `user-circle` for You), the author, the change in words and the
- * time in "6:45 PM" form, right aligned.
+ * Version history on /home (docs/LANDING.md 2.9 "Interaction", 3.6 A6; row home.agents.history).
+ * V3's file. The band's markup holds the run's end at rest: three Agent rows whose time cell reads
+ * "Recorded". From then on the list is the store's `history`, newest first, at most the rows the
+ * band reserves (ten ruled rows of 44 px at 720 px and over, five under): every commit that adds a
+ * row draws it at the top within the frame, entering on A6 (200 ms, an 8 px rise, the arrive
+ * curve); a merged nudge burst rewrites its row in place; an undo takes its row away by a cut.
+ * Existing rows never animate (3.7). The row's grammar is the product's Version history: a
+ * Heroicon in the key cell (`command-line` for Agent, `user-circle` for You), the author, the
+ * change in words and the time in "6:45 PM" form, right aligned.
  *
  * The row's cells are cloned from the markup's resting row, so the page's CSS draws a live row
  * exactly as the build drew the recorded ones; the icon is the resting row's icon element (a mask
  * of `icons.generated.css`) with the author's name, so the live module carries no icon path.
  */
 
-const VISIBLE = 5;
+/** The rows the list reserves (2.9 "Layout"): ten at 720 px and over, five under. */
+const visible = (): number =>
+  typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 719px)').matches ? 5 : 10;
 
 /** The key cell's Heroicon 20 solid per author (LANDING.md 2.4). */
 const ICONS: Readonly<Record<HistoryRow['author'], string>> = {
@@ -50,7 +52,7 @@ export function startHistory(ctx: LiveContext): void {
   /* the rows on the page by store id; the markup's rows are the store's resting rows, newest first */
   const shown = new Map<number, HTMLElement>();
   const newestFirst = (state: HomeDeckState): HistoryRow[] =>
-    [...state.history].reverse().slice(0, VISIBLE);
+    [...state.history].reverse().slice(0, visible());
   const atRest = newestFirst(ctx.store.get());
   if (atRest.length === resting.length)
     atRest.forEach((row, i) => {
@@ -114,4 +116,7 @@ export function startHistory(ctx: LiveContext): void {
   ctx.store.subscribe((state: HomeDeckState, event: StoreEvent) => {
     render(state, event.kind === 'commit' ? event.row : null);
   });
+  /* a change made before the band's chunk loaded (any band above can make one, v2.md R19): the
+     list draws the store's rows at once, the resting rows kept where they are the store's */
+  if (atRest.length !== resting.length) render(ctx.store.get(), null);
 }

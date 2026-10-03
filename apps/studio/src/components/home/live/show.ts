@@ -3,10 +3,12 @@ import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId } from '../deck.generated';
 import { homeAsset } from '../assets';
 import { LIVE_SLIDE_HTML } from '../bands/live.generated';
-import { settleEntrance } from './agents';
+import * as core from './index';
 import type { LiveContext } from './index';
 import { finishBand, play, reduced } from './motion';
-import type { HomeDeckState } from './state';
+import { paintNextSteps } from './next-steps';
+import { sourceOf as sourceKey } from './state';
+import type { HomeDeckState, HomeStore, SlideKey } from './state';
 import { applyCustomer, customerText } from './tailor';
 import { applyKit } from './theme';
 
@@ -28,6 +30,12 @@ import { applyKit } from './theme';
  * agent's slide), stripped of the editing hooks, and slide 7 from the live module's markup, whose
  * still is requested only when the show or the print first draws it.
  */
+
+/** Ends at once the renderer's own entrance fade (`.slide.is-on`, sheet.css `cut`), a motion 3.6 does not list. */
+export function settleEntrance(el: Element): void {
+  for (const a of el.getAnimations({ subtree: true }))
+    if (a instanceof CSSAnimation && a.animationName === 'cut') a.finish();
+}
 
 /** Marks a clone the show or the print made, so no band's hooks match it. */
 export const CLONE_ATTR = 'data-slide-clone';
@@ -251,244 +259,250 @@ function isTextField(el: Element | null): boolean {
   );
 }
 
-export function startShow(ctx: LiveContext): void {
-  const { band, root, store } = ctx;
-  const present = band.querySelector<HTMLElement>('button[data-present], [data-present] button');
-  const list = band.querySelector<HTMLElement>('[data-slide-list]');
-  const display = band.querySelector<HTMLElement>('[data-home-slides][data-instance="present"]');
-  if (present === null || list === null || display === null) return;
-  const heading = band.querySelector('h2');
-  display.setAttribute(DISPLAY_ATTR, '');
+/** The fixture's facts of a slide of the deck (a slide a menu row added reads its source's; New slide none). */
+function factsOf(state: HomeDeckState, key: SlideKey): { title: string; notes: string } {
+  const source = sourceKey(state, key);
+  const facts = source === 'blank' ? undefined : HOME_DECK.slides[source];
+  const typed = (state as HomeDeckState & { notes?: Readonly<Record<string, string>> }).notes?.[key];
+  return { title: facts?.title ?? '', notes: typed ?? facts?.notes ?? '' };
+}
 
-  /* ---------- the chosen slide and the list ---------- */
-  let chosen = (display.dataset['slide'] as HomeSlideId | undefined) ?? 'gets';
-  const rowsById = new Map<HomeSlideId, HTMLElement>();
-  for (const row of list.querySelectorAll<HTMLElement>('[data-slide-row]'))
-    rowsById.set(row.dataset['slideRow'] as HomeSlideId, row);
-  /** The list's own child that holds a row (the row itself, or its `li`). */
-  const itemOf = (row: HTMLElement): HTMLElement => {
-    let el: HTMLElement = row;
-    while (el.parentElement !== null && el.parentElement !== list) el = el.parentElement;
-    return el;
+/**
+ * A slide of the deck as the show and the print draw it: the core's fresh copy of the slide with
+ * the deck's state drawn on it (V2's `cloneSlide` and `paintSlide`, v2.md R4 answer), which holds a
+ * slide a menu row added and one whose band has not loaded; the page's own instance (`cloneSlide`
+ * below) when the core has no copy of it.
+ */
+export function showSlide(root: HTMLElement, state: HomeDeckState, key: SlideKey): HTMLElement {
+  const api = core as unknown as {
+    cloneSlide?: (key: SlideKey, state: HomeDeckState, instance: string) => HTMLElement | null;
+    paintSlide?: (root: HTMLElement, state: HomeDeckState) => void;
   };
-  const buttonOf = (row: HTMLElement): HTMLElement =>
-    row.matches('button') ? row : (row.querySelector<HTMLElement>('button') ?? row);
+  const fresh = api.cloneSlide?.(key, state, 'show') ?? null;
+  if (fresh === null || api.paintSlide === undefined)
+    return cloneSlide(root, state, key as HomeSlideId);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ts-home-sheet';
+  wrapper.setAttribute(CLONE_ATTR, key);
+  fresh.classList.remove('is-thumb');
+  fresh.setAttribute(CLONE_ATTR, key);
+  wrapper.append(fresh);
+  api.paintSlide(fresh, state);
+  paintNextSteps(fresh, state);
+  /* a picture's print box shows its still at full tone; its canvas is a band's motion, not the
+     show's (the first pass's clone rule; slide 8's pattern mounts its own, below) */
+  for (const box of fresh.querySelectorAll<HTMLElement>('[data-field]')) {
+    box.dataset['fieldState'] = 'still';
+    for (const canvas of box.querySelectorAll('canvas')) canvas.remove();
+    box.style.setProperty('content-visibility', 'visible');
+  }
+  for (const el of [...wrapper.querySelectorAll<HTMLElement>('*')])
+    for (const name of EDIT_ATTRS) el.removeAttribute(name);
+  for (const el of wrapper.querySelectorAll('[data-live-overlay], [data-live-spacer]')) el.remove();
+  for (const heading of wrapper.querySelectorAll('h1, h2, h3')) heading.setAttribute('role', 'none');
+  if (key === 'field') setFieldStill(fresh);
+  holdStills(wrapper);
+  return wrapper;
+}
 
-  const paintList = (state: HomeDeckState): void => {
-    if (!state.order.includes(chosen)) chosen = state.order[0] as HomeSlideId;
-    let before: Element | null = null;
-    for (const id of state.order as readonly HomeSlideId[]) {
-      const row = rowsById.get(id);
-      if (row === undefined) continue;
-      itemOf(row).hidden = false;
-      const cells = buttonOf(row).children;
-      const n = cells[0];
-      const title = cells[1];
-      if (n !== undefined) n.textContent = String(state.order.indexOf(id) + 1);
-      if (title !== undefined)
-        title.textContent = customerText(HOME_DECK.slides[id as HomeSlideId].title, state.customer);
-      const button = buttonOf(row);
-      if (id === chosen) button.setAttribute('aria-current', 'true');
-      else button.removeAttribute('aria-current');
-      const node = itemOf(row);
-      if (before === null) {
-        if (list.firstElementChild !== node) list.prepend(node);
-      } else if (before.nextElementSibling !== node) before.after(node);
-      before = node;
-    }
-    for (const [id, row] of rowsById) if (!state.order.includes(id)) itemOf(row).hidden = true;
+/** Whether the deck skips slide `id` (the store's `skipped`, V2's: a record of slide ids). */
+export function isSkipped(state: HomeDeckState, id: string): boolean {
+  const skipped = state.skipped as unknown;
+  if (Array.isArray(skipped)) return skipped.includes(id);
+  return (skipped as Readonly<Record<string, true>> | undefined)?.[id] === true;
+}
+
+/** The slides a show and a print draw: the deck's order without its skipped slides (2.11). */
+export function shownSlides(state: HomeDeckState): SlideKey[] {
+  return state.order.filter((id) => !isSkipped(state, id));
+}
+
+/** The page copy of 2.11 the copy table does not hold yet (v3.md R2), read from `copy.ts` first. */
+const SKIPPED_WORD = (PRESENT as unknown as { skipped?: string }).skipped ?? 'Skipped';
+
+/**
+ * V4's moving pattern on slide 8 (2.11, 2.13; v3.md R11): `window.tsHomePattern.mount` once the
+ * pattern chunk has loaded and motion is allowed, else nothing and the still frame shows.
+ */
+type PatternMount = { mount(slide: HTMLElement): { stop(): void } | null };
+function mountPattern(slide: HTMLElement): { stop(): void } | null {
+  if (reduced()) return null;
+  const hook = (window as unknown as { tsHomePattern?: PatternMount }).tsHomePattern;
+  try {
+    return hook?.mount(slide) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** A show open in a host: the Present band's, or a container another band asked for (`openShow`). */
+type ShowOptions = {
+  root: HTMLElement;
+  store: HomeStore;
+  /** the positioned element the show covers */
+  host: HTMLElement;
+  /** the slide it opens on (the next shown slide when that one is skipped) */
+  slide: SlideKey;
+  /** the box the slide moves from (P2), null for a cut */
+  from: DOMRect | null;
+  /** where the slide returns on Exit (P4), read at the close; null for a cut */
+  to: () => DOMRect | null;
+  /** the dialog's name */
+  labelledBy: string | null;
+  /** the element that takes focus back */
+  returnFocus: HTMLElement | null;
+  announce(text: string): void;
+  /** called once the show has left, with the slide it showed last */
+  onClosed(last: SlideKey): void;
+  /** fits the stage inside the host's height (a container smaller than the band) */
+  fit: boolean;
+};
+
+export type ShowHandle = { close(): void; readonly element: HTMLElement };
+
+/** Every open show, so a deck change repaints it (P3 by a cut). */
+const openShows = new Set<{ repaint(): void }>();
+
+function mountShow(options: ShowOptions): ShowHandle {
+  const { root, store, host } = options;
+  const show = document.createElement('div');
+  show.className = 'ts-home-show';
+  show.dataset['show'] = '';
+  show.setAttribute('role', 'dialog');
+  show.setAttribute('aria-modal', 'true');
+  /* the surround of a show is the product Slideshow's near black in both appearances
+     (Slideshow.css, --pt-panel-ink and --pt-panel-text; l3.md R25) */
+  show.style.setProperty('--pt-ink', 'var(--pt-panel-ink)');
+  show.style.setProperty('--pt-paper', 'var(--pt-panel-text)');
+  if (options.labelledBy !== null) show.setAttribute('aria-labelledby', options.labelledBy);
+  const ink = document.createElement('div');
+  ink.className = 'ts-home-show-ink';
+  ink.setAttribute('aria-hidden', 'true');
+  const stage = document.createElement('div');
+  stage.className = 'ts-home-show-stage';
+  stage.dataset['showStage'] = '';
+  stage.tabIndex = -1;
+  const bar = document.createElement('div');
+  bar.className = 'ts-home-show-bar';
+  const parts: Record<'count' | 'notes' | 'time', HTMLElement> = {
+    count: document.createElement('span'),
+    notes: document.createElement('span'),
+    time: document.createElement('span'),
   };
-
-  /** The chosen slide above the list, by a cut: its own markup until the visitor chooses a row. */
-  const restingSlide = display.dataset['slide'] as HomeSlideId;
-  const displayHost = display.parentElement ?? display;
-  let shownSheet: HTMLElement = display;
-  const paintDisplay = (state: HomeDeckState): void => {
-    if (chosen === restingSlide && shownSheet === display) return;
-    const clone = cloneSlide(root, state, chosen);
-    const sheet = clone.querySelector<HTMLElement>('[data-home-slides]');
-    /* the clone keeps its own instance (the hero's and the close's layout key on it) */
-    sheet?.setAttribute(DISPLAY_ATTR, '');
-    displayHost.replaceChildren(...clone.children);
-    settleEntrance(displayHost);
-    shownSheet = sheet ?? display;
-  };
-
-  list.addEventListener('click', (event) => {
-    const row = (event.target as Element).closest<HTMLElement>('[data-slide-row]');
-    const id = row?.dataset['slideRow'] as HomeSlideId | undefined;
-    if (id === undefined || id === chosen) return;
-    chosen = id;
-    const state = store.get();
-    paintDisplay(state);
-    paintList(state);
-  });
-  list.addEventListener('keydown', (event) => {
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-    const buttons = [...list.querySelectorAll<HTMLElement>('[data-slide-row]')]
-      .filter((row) => !row.hidden)
-      .map(buttonOf);
-    const at = buttons.indexOf(document.activeElement as HTMLElement);
-    if (at < 0) return;
-    event.preventDefault();
-    buttons[
-      Math.max(0, Math.min(buttons.length - 1, at + (event.key === 'ArrowDown' ? 1 : -1)))
-    ]?.focus();
-  });
-
-  /* ---------- the show ---------- */
-  let show: HTMLElement | null = null;
-  let stage: HTMLElement | null = null;
-  let current = 0;
-  let clock: ReturnType<typeof setInterval> | undefined;
-  let openedAt = 0;
-  let closing = false;
-  const parts: Partial<Record<'count' | 'notes' | 'time', HTMLElement>> = {};
-  const buttons: HTMLButtonElement[] = [];
-
-  const build = (): void => {
-    show = document.createElement('div');
-    show.className = 'ts-home-show';
-    show.dataset['show'] = '';
-    show.setAttribute('role', 'dialog');
-    show.setAttribute('aria-modal', 'true');
-    /* the surround of a show is the product Slideshow's near black in both appearances
-       (Slideshow.css, --pt-panel-ink and --pt-panel-text); home.css draws the show's ground and
-       bar in --pt-ink and --pt-paper, which the dark appearance swaps (l3.md R25) */
-    show.style.setProperty('--pt-ink', 'var(--pt-panel-ink)');
-    show.style.setProperty('--pt-paper', 'var(--pt-panel-text)');
-    if (heading !== null) {
-      if (heading.id === '') heading.id = 'ts-home-present-h';
-      show.setAttribute('aria-labelledby', heading.id);
-    }
-    const ink = document.createElement('div');
-    ink.className = 'ts-home-show-ink';
-    ink.setAttribute('aria-hidden', 'true');
-    stage = document.createElement('div');
-    stage.className = 'ts-home-show-stage';
-    stage.dataset['showStage'] = '';
-    stage.tabIndex = -1;
-    const bar = document.createElement('div');
-    bar.className = 'ts-home-show-bar';
-    for (const key of ['count', 'notes', 'time'] as const) {
-      const span = document.createElement('span');
-      span.className = `ts-home-show-${key}`;
-      parts[key] = span;
-    }
-    buttons.length = 0;
-    for (const [key, words] of [
+  for (const [key, el] of Object.entries(parts)) el.className = `ts-home-show-${key}`;
+  const buttons = (
+    [
       ['previous', PRESENT.show.previous],
       ['next', PRESENT.show.next],
       ['exit', PRESENT.show.exit],
-    ] as const) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = words;
-      button.dataset['showButton'] = key;
-      buttons.push(button);
-    }
-    bar.append(parts.count!, parts.notes!, parts.time!, ...buttons);
-    fitBar(bar);
-    show.append(ink, stage, bar);
-    show.addEventListener('keydown', onShowKey);
-    stage.addEventListener('click', () => go(current + 1));
-    buttons[0]?.addEventListener('click', () => go(current - 1));
-    buttons[1]?.addEventListener('click', () => go(current + 1));
-    buttons[2]?.addEventListener('click', () => close());
-    band.append(show);
-  };
+    ] as const
+  ).map(([key, words]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = words;
+    button.dataset['showButton'] = key;
+    return button;
+  });
+  bar.append(parts.count, parts.notes, parts.time, ...buttons);
+  fitBar(bar);
+  show.append(ink, stage, bar);
+  host.append(show);
+  if (options.fit) {
+    /* a host smaller than the band (the miniature's stage): the slide at the largest 16 by 9 that
+       leaves the bar its row */
+    const box = host.getBoundingClientRect();
+    const barHeight = bar.getBoundingClientRect().height || 56;
+    const width = Math.max(0, Math.min(box.width, ((box.height - barHeight) * 16) / 9));
+    stage.style.width = `${Math.floor(width)}px`;
+    bar.style.width = `${Math.floor(Math.max(width, Math.min(box.width, 320)))}px`;
+  }
 
-  const paintShow = (): void => {
-    if (stage === null) return;
+  let shown = shownSlides(store.get());
+  const startAt = (): number => {
+    const order = store.get().order as readonly string[];
+    const from = order.indexOf(options.slide);
+    for (let i = Math.max(0, from); i < order.length; i += 1) {
+      const at = shown.indexOf(order[i] as HomeSlideId);
+      if (at >= 0) return at;
+    }
+    return Math.max(0, shown.length - 1);
+  };
+  let current = startAt();
+  let pattern: { stop(): void } | null = null;
+  const openedAt = Date.now();
+  let closing = false;
+
+  const paint = (): void => {
     const state = store.get();
-    const id = state.order[current] as HomeSlideId;
-    const total = state.order.length;
-    stage.replaceChildren(cloneSlide(root, state, id));
+    shown = shownSlides(state);
+    current = Math.max(0, Math.min(current, shown.length - 1));
+    const id = shown[current];
+    pattern?.stop();
+    pattern = null;
+    if (id === undefined) {
+      stage.replaceChildren();
+      return;
+    }
+    const total = shown.length;
+    const clone = showSlide(root, state, id);
+    /* the show's counter counts the slides it shows, as Slideshow's does */
+    const sheet = clone.querySelector<HTMLElement>('[data-home-slides]');
+    if (sheet !== null) {
+      const counter = `${current + 1} / ${total}`;
+      sheet.setAttribute('data-counter', counter);
+      for (const el of sheet.querySelectorAll('[data-counter-text]')) el.textContent = counter;
+    }
+    stage.replaceChildren(clone);
     settleEntrance(stage);
+    if (id === 'pattern' && sheet !== null) pattern = mountPattern(sheet);
     stage.setAttribute('aria-label', PRESENT.stageName(current + 1, total));
-    if (parts.count) parts.count.textContent = PRESENT.counter(current + 1, total);
-    if (parts.notes)
-      parts.notes.textContent = customerText(HOME_DECK.slides[id as HomeSlideId].notes, state.customer);
+    parts.count.textContent = PRESENT.counter(current + 1, total);
+    parts.notes.textContent = customerText(factsOf(state, id).notes, state.customer);
   };
   const paintTime = (): void => {
-    const s = Math.floor((Date.now() - openedAt) / 1000);
-    if (parts.time)
-      parts.time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    const sec = Math.floor((Date.now() - openedAt) / 1000);
+    parts.time.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
   };
-
   /** P3: a cut to another slide, as Slideshow pages. */
   const go = (n: number): void => {
-    const total = store.get().order.length;
-    const next = Math.max(0, Math.min(total - 1, n));
-    if (next === current || show === null) return;
+    const next = Math.max(0, Math.min(shown.length - 1, n));
+    if (next === current || closing) return;
     current = next;
-    paintShow();
-    ctx.announce(ANNOUNCE.showCounter(current + 1, total));
+    paint();
+    options.announce(ANNOUNCE.showCounter(current + 1, shown.length));
   };
-
   const flip = (from: DOMRect, to: DOMRect): Keyframe => ({
     transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`,
     transformOrigin: '0 0',
   });
-
-  const open = (): void => {
-    if (show !== null || closing) return;
-    finishBand('present');
-    endHeroSequence();
-    const state = store.get();
-    current = Math.max(0, state.order.indexOf(chosen));
-    build();
-    paintShow();
-    openedAt = Date.now();
-    paintTime();
-    clock = setInterval(paintTime, 1000);
-    const from = displayHost.getBoundingClientRect();
-    displayHost.style.visibility = 'hidden';
-    const ink = show!.querySelector<HTMLElement>('.ts-home-show-ink')!;
-    /* P1 and P2 */
-    play(ink, [{ opacity: 0 }, { opacity: 1 }], 'ground', 'fade', 'present');
-    play(
-      stage!,
-      [flip(from, stage!.getBoundingClientRect()), { transform: 'none', transformOrigin: '0 0' }],
-      'beat',
-      'move',
-      'present',
-    );
-    stage!.focus({ preventScroll: true });
-    ctx.announce(ANNOUNCE.showCounter(current + 1, state.order.length));
-  };
+  const entry = { repaint: paint };
+  openShows.add(entry);
+  let clock = 0;
 
   const close = (): void => {
-    if (show === null || closing) return;
-    clearInterval(clock);
-    const leaving = show;
-    const leavingStage = stage!;
-    chosen = (store.get().order[current] as HomeSlideId | undefined) ?? chosen;
-    const state = store.get();
-    paintDisplay(state);
-    paintList(state);
+    if (closing || !show.isConnected) return;
+    closing = true;
+    window.clearInterval(clock);
+    openShows.delete(entry);
+    pattern?.stop();
+    pattern = null;
+    const last = shown[current] ?? options.slide;
+    options.onClosed(last);
     const done = (): void => {
-      leaving.remove();
-      displayHost.style.visibility = '';
-      show = null;
-      stage = null;
-      closing = false;
-      present.focus({ preventScroll: true });
+      show.remove();
+      options.returnFocus?.focus({ preventScroll: true });
     };
-    if (reduced()) {
+    const to = options.to();
+    if (reduced() || to === null) {
       done();
       return;
     }
-    closing = true;
     /* P4: the slide returns to its place over 400 ms while the ground clears over 300 ms */
-    const to = displayHost.getBoundingClientRect();
-    const from = leavingStage.getBoundingClientRect();
-    const ink = leaving.querySelector<HTMLElement>('.ts-home-show-ink')!;
+    const from = stage.getBoundingClientRect();
     play(ink, [{ opacity: 1 }, { opacity: 0 }], 'ground', 'fade', 'present');
-    for (const el of leaving.querySelectorAll<HTMLElement>('.ts-home-show-bar'))
-      el.style.visibility = 'hidden';
+    bar.style.visibility = 'hidden';
     const back = play(
-      leavingStage,
+      stage,
       [{ transform: 'none', transformOrigin: '0 0' }, flip(to, from)],
       'exit',
       'move',
@@ -498,9 +512,8 @@ export function startShow(ctx: LiveContext): void {
     else back.finished.then(done, done);
   };
 
-  function onShowKey(event: KeyboardEvent): void {
-    const target = event.target as Element;
-    const onButton = target.closest('button') !== null;
+  show.addEventListener('keydown', (event) => {
+    const onButton = (event.target as Element).closest('button') !== null;
     switch (event.key) {
       case 'ArrowRight':
       case 'ArrowDown':
@@ -521,7 +534,7 @@ export function startShow(ctx: LiveContext): void {
         return;
       case 'End':
         event.preventDefault();
-        go(store.get().order.length - 1);
+        go(shown.length - 1);
         return;
       case 'Escape':
         event.preventDefault();
@@ -536,26 +549,226 @@ export function startShow(ctx: LiveContext): void {
       case 'Tab': {
         /* the focus stays in the show: the stage, then Previous, Next and Exit, around */
         event.preventDefault();
-        const ring = buttons;
-        const at = ring.indexOf(document.activeElement as HTMLButtonElement);
+        const at = buttons.indexOf(document.activeElement as HTMLButtonElement);
         const next =
           at < 0
             ? event.shiftKey
-              ? ring.length - 1
+              ? buttons.length - 1
               : 0
-            : (at + (event.shiftKey ? -1 : 1) + ring.length) % ring.length;
-        ring[next]?.focus();
+            : (at + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+        buttons[next]?.focus();
         return;
       }
       default:
     }
-  }
+  });
+  stage.addEventListener('click', () => go(current + 1));
+  buttons[0]?.addEventListener('click', () => go(current - 1));
+  buttons[1]?.addEventListener('click', () => go(current + 1));
+  buttons[2]?.addEventListener('click', close);
 
-  present.addEventListener('click', open);
+  paint();
+  paintTime();
+  clock = window.setInterval(paintTime, 1000);
+  /* P1 and P2 */
+  play(ink, [{ opacity: 0 }, { opacity: 1 }], 'ground', 'fade', 'present');
+  if (options.from !== null)
+    play(
+      stage,
+      [flip(options.from, stage.getBoundingClientRect()), { transform: 'none', transformOrigin: '0 0' }],
+      'beat',
+      'move',
+      'present',
+    );
+  stage.focus({ preventScroll: true });
+  options.announce(ANNOUNCE.showCounter(current + 1, shown.length));
+  return { close, element: show };
+}
 
-  /* any new input on the band finishes its running motion at its end state first (LANDING.md 3.5) */
+/** The live context the Present band started with: `openShow` reads its root and store. */
+let presentContext: { root: HTMLElement; store: HomeStore } | null = null;
+
+/**
+ * Opens the show inside `container` on slide `slideId` (2.11; v2.md R13: the miniature's View >
+ * Slideshow and Cmd+Enter): the same show as Present's, sized to the container, focus on its stage;
+ * Escape and Exit close it by a cut and give focus back to the element that had it. Null when the
+ * live core has not started.
+ */
+export function openShow(container: HTMLElement, slideId: SlideKey): ShowHandle | null {
+  const ctx = presentContext ?? fallbackContext();
+  if (ctx === null) return null;
+  const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
+  const band = container.closest<HTMLElement>('[data-band]');
+  return mountShow({
+    root: ctx.root,
+    store: ctx.store,
+    host: container,
+    slide: slideId,
+    from: null,
+    to: () => null,
+    labelledBy: band?.querySelector('h2')?.id ?? null,
+    returnFocus,
+    announce: (text) => {
+      const region = band?.querySelector<HTMLElement>('[data-announce]');
+      if (region != null) region.textContent = text;
+    },
+    onClosed: () => undefined,
+    fit: true,
+  });
+}
+
+/** The store the core created, when the Present band has not started (V2's `homeStore`). */
+function fallbackContext(): { root: HTMLElement; store: HomeStore } | null {
+  const root = document.getElementById('top');
+  const api = core as unknown as { homeStore?: () => HomeStore | null };
+  const store = api.homeStore?.() ?? null;
+  return root === null || store === null ? null : { root, store };
+}
+
+export function startShow(ctx: LiveContext): void {
+  const { band, root, store } = ctx;
+  presentContext = { root, store };
+  const present = band.querySelector<HTMLElement>('button[data-present], [data-present] button');
+  const list = band.querySelector<HTMLElement>('[data-slide-list]');
+  const display = band.querySelector<HTMLElement>('[data-home-slides][data-instance="present"]');
+  if (present === null || list === null || display === null) return;
+  const heading = band.querySelector('h2');
+  if (heading !== null && heading.id === '') heading.id = 'ts-home-present-h';
+  display.setAttribute(DISPLAY_ATTR, '');
+
+  /* ---------- the chosen slide and the list ---------- */
+  let chosen: SlideKey = (display.dataset['slide'] as HomeSlideId | undefined) ?? 'gets';
+  const rowsById = new Map<HomeSlideId, HTMLElement>();
+  for (const row of list.querySelectorAll<HTMLElement>('[data-slide-row]'))
+    rowsById.set(row.dataset['slideRow'] as HomeSlideId, row);
+  /** The list's own child that holds a row (the row itself, or its `li`). */
+  const itemOf = (row: HTMLElement): HTMLElement => {
+    let el: HTMLElement = row;
+    while (el.parentElement !== null && el.parentElement !== list) el = el.parentElement;
+    return el;
+  };
+  const buttonOf = (row: HTMLElement): HTMLElement =>
+    row.matches('button') ? row : (row.querySelector<HTMLElement>('button') ?? row);
+
+  /** A row for a slide a menu row added, made from the list's first row (2.11: every slide is listed). */
+  const rowFor = (id: SlideKey): HTMLElement | undefined => {
+    const known = rowsById.get(id as HomeSlideId);
+    if (known !== undefined) return known;
+    const model = list.querySelector<HTMLElement>('[data-slide-row]');
+    if (model === null) return undefined;
+    const item = itemOf(model).cloneNode(true) as HTMLElement;
+    const row = (item.matches('[data-slide-row]') ? item : item.querySelector<HTMLElement>('[data-slide-row]'))!;
+    row.dataset['slideRow'] = id;
+    row.removeAttribute('aria-current');
+    list.append(item);
+    rowsById.set(id as HomeSlideId, row);
+    return row;
+  };
+
+  const paintList = (state: HomeDeckState): void => {
+    if (!state.order.includes(chosen)) chosen = state.order[0] as SlideKey;
+    let before: Element | null = null;
+    for (const id of state.order) {
+      const row = rowFor(id);
+      if (row === undefined) continue;
+      itemOf(row).hidden = false;
+      const button = buttonOf(row);
+      const cells = button.children;
+      const n = cells[0];
+      const title = cells[1];
+      if (n !== undefined) n.textContent = String(state.order.indexOf(id) + 1);
+      if (title !== undefined) title.textContent = customerText(factsOf(state, id).title, state.customer);
+      /* a skipped slide's row says so in titanium (2.11), as the editor's filmstrip marks it */
+      let mark = button.querySelector<HTMLElement>('.ts-slide-row-skip');
+      const skipped = isSkipped(state, id);
+      if (skipped && mark === null) {
+        mark = document.createElement('span');
+        mark.className = 'ts-slide-row-skip';
+        mark.textContent = SKIPPED_WORD;
+        button.append(mark);
+      } else if (!skipped) mark?.remove();
+      button.toggleAttribute('data-skipped', skipped);
+      if (id === chosen) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+      const node = itemOf(row);
+      if (before === null) {
+        if (list.firstElementChild !== node) list.prepend(node);
+      } else if (before.nextElementSibling !== node) before.after(node);
+      before = node;
+    }
+    for (const [id, row] of rowsById) if (!state.order.includes(id)) itemOf(row).hidden = true;
+  };
+
+  /** The chosen slide above the list, by a cut: its own markup until the visitor chooses a row. */
+  const restingSlide = display.dataset['slide'] as HomeSlideId;
+  const displayHost = display.parentElement ?? display;
+  let shownSheet: HTMLElement = display;
+  const paintDisplay = (state: HomeDeckState): void => {
+    if (chosen === restingSlide && shownSheet === display) return;
+    const clone = showSlide(root, state, chosen);
+    const sheet = clone.querySelector<HTMLElement>('[data-home-slides]');
+    /* the clone keeps its own instance (the hero's and the close's layout key on it) */
+    sheet?.setAttribute(DISPLAY_ATTR, '');
+    displayHost.replaceChildren(...clone.children);
+    settleEntrance(displayHost);
+    shownSheet = sheet ?? display;
+  };
+
+  list.addEventListener('click', (event) => {
+    const row = (event.target as Element).closest<HTMLElement>('[data-slide-row]');
+    const id = row?.dataset['slideRow'] as HomeSlideId | undefined;
+    if (id === undefined || id === chosen) return;
+    chosen = id;
+    const state = store.get();
+    paintDisplay(state);
+    paintList(state);
+  });
+  list.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    const rows = [...list.querySelectorAll<HTMLElement>('[data-slide-row]')]
+      .filter((row) => !itemOf(row).hidden)
+      .map(buttonOf);
+    const at = rows.indexOf(document.activeElement as HTMLElement);
+    if (at < 0) return;
+    event.preventDefault();
+    rows[Math.max(0, Math.min(rows.length - 1, at + (event.key === 'ArrowDown' ? 1 : -1)))]?.focus();
+  });
+
+  /* ---------- the show ---------- */
+  let open: ShowHandle | null = null;
+  const start = (): void => {
+    if (open !== null) return;
+    finishBand('present');
+    endHeroSequence();
+    const from = displayHost.getBoundingClientRect();
+    open = mountShow({
+      root,
+      store,
+      host: band,
+      slide: chosen,
+      from,
+      to: () => displayHost.getBoundingClientRect(),
+      labelledBy: heading?.id ?? null,
+      returnFocus: present,
+      announce: ctx.announce,
+      onClosed: (last) => {
+        chosen = last;
+        const state = store.get();
+        paintDisplay(state);
+        paintList(state);
+        displayHost.style.visibility = '';
+        open = null;
+      },
+      fit: false,
+    });
+    displayHost.style.visibility = 'hidden';
+  };
+  present.addEventListener('click', start);
+
+  /* any new input on the band finishes its running motion at its end state first (3.8) */
   const settle = (): void => {
-    if (show !== null) finishBand('present');
+    if (open !== null) finishBand('present');
   };
   band.addEventListener('pointerdown', settle, true);
   band.addEventListener('keydown', settle, true);
@@ -568,25 +781,24 @@ export function startShow(ctx: LiveContext): void {
     return r.height > 0 && seen >= r.height / 2;
   };
   document.addEventListener('keydown', (event) => {
-    if (show !== null) return;
+    if (open !== null || document.querySelector('[data-show]') !== null) return;
     const slideshow =
       (event.metaKey && !event.ctrlKey && !event.altKey && event.key === 'Enter') ||
       (event.ctrlKey && !event.metaKey && !event.altKey && event.key === 'F5');
     if (!slideshow || isTextField(document.activeElement)) return;
+    /* the miniature's own Cmd+Enter opens the show in its stage (V2's menus band) */
+    if (document.activeElement?.closest('[data-band="menus"]') != null) return;
     const focusedInBand = band.contains(document.activeElement);
     if (!focusedInBand && !halfInView()) return;
     event.preventDefault();
-    open();
+    start();
   });
 
-  /* the deck changed elsewhere: the list, the chosen slide and an open show follow it */
+  /* the deck changed elsewhere: the list, the chosen slide and every open show follow it */
   store.subscribe((state) => {
     paintList(state);
     if (shownSheet !== display) paintDisplay(state);
-    if (show !== null && !closing) {
-      current = Math.min(current, state.order.length - 1);
-      paintShow();
-    }
+    for (const each of openShows) each.repaint();
   });
   paintList(store.get());
 }

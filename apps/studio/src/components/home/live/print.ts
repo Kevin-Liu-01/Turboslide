@@ -1,8 +1,6 @@
 import { homeAsset } from '../assets';
-import type { HomeSlideId } from '../deck.generated';
-import { settleEntrance } from './agents';
 import type { LiveContext } from './index';
-import { appearance, cloneSlide, endHeroSequence, loadStill } from './show';
+import { appearance, endHeroSequence, loadStill, settleEntrance, showSlide, shownSlides } from './show';
 
 /**
  * Print This Deck (docs/LANDING.md 2.7, 5 "Print"; row home.present.print). L3's file. The button
@@ -47,8 +45,9 @@ export function startPrint(ctx: LiveContext): void {
   const fill = (): void => {
     endHeroSequence();
     const state = store.get();
-    /* one sheet a page: print.css sizes each child of the container to 16 by 9 inches */
-    deck.replaceChildren(...state.order.map((id) => cloneSlide(root, state, id as HomeSlideId)));
+    /* one sheet a page: print.css sizes each child of the container to 16 by 9 inches; skipped
+       slides are left out, as the product's print and downloads leave them (2.11) */
+    deck.replaceChildren(...shownSlides(state).map((id) => showSlide(root, state, id)));
     settleEntrance(deck);
   };
   const empty = (): void => {

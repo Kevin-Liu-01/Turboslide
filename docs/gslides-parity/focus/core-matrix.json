@@ -10563,6 +10563,16 @@
       "severity": 1,
       "evidence": "b-strip-hero-field.png",
       "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+    },
+    {
+      "id": "home.hero.run",
+      "feature": "decks",
+      "interaction": "With the stage half in view after H5 the loop starts within 500 ms and plays Restore and the three steps, each step's printed lines equal to the recordings at 44 columns, the frame cutting to slide 5 and its filmstrip and counters following, the playing tab carrying `aria-current=\"step\"` with its rule filling; a cycle's length equals the caption's figure within 1 s; after three cycles the store's history is unchanged; a step tab plays its step and stops the loop; a press in the frame stops it at rest; a chip on slide 5 stops it; under half in view it pauses within one frame",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "b-strip-hero-agent.png; b-strip-hero-step.png",
+      "note": "docs/LANDING.md 6.7 (second pass), V1#15"
     }
   ]
 }

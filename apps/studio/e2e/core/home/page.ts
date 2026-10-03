@@ -6,7 +6,9 @@ import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:z
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page, Request } from '@playwright/test';
 
+import { HOME_LOOP_FACTS } from '../../../src/components/home/deck.generated';
 import { FACTS_DATA } from '../../../src/components/home/facts-data';
+import { HOME_LOOP } from '../../../src/components/home/loop.generated';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { extraHTTPHeaders, title } from '../lib';
 
@@ -15,7 +17,7 @@ import { extraHTTPHeaders, title } from '../lib';
 // in section 2's order, the first screen's markup as its end state, the bands after `load`, the
 // h1 and the h2s, the hero's stage, the visit sentence, the numbers row, the features table, the
 // byte budgets, the live core and the band chunks, the shared costs and the LCP (the two measure
-// rows), the skip link and the contrast. Every observation is through the page and the network;
+// rows), the skip link and the contrast, and the hero's loop (V1#15). Every observation is through the page and the network;
 // nothing is read from disk but the facts and the recorded run the page itself is built from.
 //
 // The byte budgets are a build's (LANDING.md 4.4: "Bytes and counts are read on the preview (as
@@ -39,6 +41,7 @@ export const ROWS: readonly string[] = [
   'home.budget.shared',
   'home.budget.lcp',
   'home.a11y.skip-and-contrast',
+  'home.hero.run',
 ];
 
 const DESKTOP = { width: 1440, height: 900 } as const;
@@ -223,6 +226,428 @@ const brotli = (bytes: Buffer): number =>
 function measureLoad(): { load: number; read: boolean } {
   const load = Math.round((loadavg()[0] ?? 0) * 10) / 10;
   return { load, read: load < MEASURE_LOAD_LINE };
+}
+
+/* ---- home.hero.run (V1#15): the hero's loop L-H, read through the page ---- */
+
+const INTERACTION_LOAD_LINE = 24;
+
+type LoopSample = {
+  t: number;
+  step: string;
+  shown: string;
+  counter: string;
+  hidden: string;
+  running: boolean;
+  screen: string[];
+};
+
+/** Records the frame, the terminal and the tabs on every change, and each playing tab's rule. */
+async function record(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const w = window as unknown as {
+      __hero: {
+        log: unknown[];
+        rule: { t: number; step: string; p: number }[];
+        registeredAt: number;
+      };
+      tsHomeMotion?: { running(): string[]; registered(): string[] };
+    };
+    w.__hero = { log: [], rule: [], registeredAt: -1 };
+    let last = '';
+    const tick = (): void => {
+      const tab = document.querySelector<HTMLElement>('[data-hero-step][aria-current="step"]');
+      const step = tab?.dataset['heroStep'] ?? '';
+      const shown =
+        document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
+          'slide'
+        ] ?? '';
+      const counter = document.querySelector('[data-hero-counter]')?.textContent ?? '';
+      const hidden = [...document.querySelectorAll<HTMLElement>('[data-hero-thumb]')]
+        .filter((t) => t.hidden)
+        .map((t) => t.dataset['heroThumb'])
+        .join(',');
+      const running = (w.tsHomeMotion?.running() ?? []).includes('L-H');
+      if (w.__hero.registeredAt < 0 && (w.tsHomeMotion?.registered() ?? []).includes('L-H'))
+        w.__hero.registeredAt = performance.now();
+      const key = [step, shown, counter, hidden, running].join('|');
+      const now = performance.now();
+      if (key !== last) {
+        last = key;
+        w.__hero.log.push({
+          t: now,
+          step,
+          shown,
+          counter,
+          hidden,
+          running,
+          screen: [...document.querySelectorAll('[data-hero-screen] > *')].map(
+            (s) => s.textContent ?? '',
+          ),
+        });
+      }
+      if (tab)
+        w.__hero.rule.push({
+          t: now,
+          step,
+          p: parseFloat(tab.style.getPropertyValue('--ts-step-progress') || '0'),
+        });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+async function log(page: Page): Promise<{
+  log: LoopSample[];
+  rule: { t: number; step: string; p: number }[];
+  registeredAt: number;
+}> {
+  return page.evaluate(
+    () =>
+      (window as unknown as { __hero: never }).__hero as {
+        log: LoopSample[];
+        rule: { t: number; step: string; p: number }[];
+        registeredAt: number;
+      },
+  );
+}
+
+/** The terminal's text as one string: wrapped lines joined, their continuation indent dropped. */
+const unwrap = (lines: readonly string[]): string =>
+  lines.map((l, i) => (i > 0 && /^\s{2,}/.test(l) ? ` ${l.trim()}` : `\n${l}`)).join('');
+
+const flat = (text: string): string => text.replace(/\s+/g, ' ').trim();
+
+async function loopPage(
+  browser: Browser,
+  options: { reduced?: boolean } = {},
+): Promise<{ page: Page; close(): Promise<void> }> {
+  const context = await browser.newContext({
+    viewport: DESKTOP,
+    colorScheme: 'light',
+    reducedMotion: options.reduced ? 'reduce' : 'no-preference',
+  });
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('gt-theme', 'light');
+    } catch {
+      /* private mode */
+    }
+  });
+  const page = await context.newPage();
+  const response = await page.goto('/home');
+  expect(response?.status(), '/home answers 200').toBe(200);
+  await page.locator('main#top[data-hydrated]').waitFor({ timeout: 30_000 });
+  await page.locator('main#top[data-live="ready"]').waitFor({ timeout: 30_000 });
+  return { page, close: () => context.close() };
+}
+
+const STEP_IDS = ['restore', 'new', 'title', 'rows'] as const;
+
+async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: string[] }> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const load = Math.round((loadavg()[0] ?? 0) * 10) / 10;
+  const timed = load < INTERACTION_LOAD_LINE;
+  const time = (line: string, ok: boolean): void => {
+    if (timed) {
+      notes.push(line);
+      if (!ok) failures.push(line);
+    } else notes.push(`not read: load ${load}: ${line}`);
+  };
+
+  /* ---- three cycles at 1440 with the stage in view ---- */
+  {
+    const { page, close } = await loopPage(browser);
+    try {
+      await record(page);
+      const before = await page.evaluate(() => {
+        const s = (window as unknown as { tsHomeStore?: { versions(): unknown[] } }).tsHomeStore;
+        return s ? s.versions().length : -1;
+      });
+      const cycleMs = HOME_LOOP_FACTS.captionSeconds * 1000;
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __hero: { log: { step: string }[] } }).__hero.log.filter(
+            (s, i, all) => s.step === 'restore' && all[i - 1]?.step !== 'restore',
+          ).length >= 4,
+        undefined,
+        { timeout: cycleMs * 4 + 30_000, polling: 500 },
+      );
+      const { log: samples, rule, registeredAt } = await log(page);
+      const after = await page.evaluate(() => {
+        const s = (window as unknown as { tsHomeStore?: { versions(): unknown[] } }).tsHomeStore;
+        return s ? s.versions().length : -1;
+      });
+      const firstRun = samples.find((s) => s.running);
+      if (firstRun === undefined) failures.push('L-H never ran with the stage in view');
+      else if (registeredAt >= 0)
+        time(
+          `L-H ran ${Math.round(firstRun.t - registeredAt)} ms after it registered (line 500)`,
+          firstRun.t - registeredAt <= 500,
+        );
+      /* the steps in order: each start of a tab's aria-current */
+      const starts = samples.filter((s, i) => s.step !== '' && samples[i - 1]?.step !== s.step);
+      const order = starts.map((s) => s.step);
+      notes.push(`tabs ${order.join(' > ')}`);
+      const want = [...STEP_IDS, ...STEP_IDS, ...STEP_IDS, 'restore'];
+      if (order.slice(0, want.length).join(',') !== want.join(','))
+        failures.push(`the tabs played ${order.join(', ')}`);
+      const restores = starts.filter((s) => s.step === 'restore').map((s) => s.t);
+      for (let i = 1; i < restores.length; i += 1) {
+        const ms = (restores[i] ?? 0) - (restores[i - 1] ?? 0);
+        const first = i === 1 ? ' (the first, after the beat)' : '';
+        time(
+          `cycle ${i} ${Math.round(ms)} ms${first} against the caption's ${HOME_LOOP_FACTS.captionSeconds} s (within 1 s)`,
+          i === 1 || Math.abs(ms - cycleMs) <= 1000,
+        );
+      }
+      /* each step's printed lines: the screen as the step's tab lets go */
+      for (const id of STEP_IDS) {
+        const step = HOME_LOOP.steps.find((s) => s.id === id);
+        if (step === undefined) continue;
+        const end = samples.findIndex(
+          (s, i) => i > 0 && samples[i - 1]?.step === id && s.step !== id,
+        );
+        const at = samples[end];
+        if (at === undefined) {
+          failures.push(`${id}: never ended`);
+          continue;
+        }
+        const text = flat(unwrap(at.screen));
+        const wide = at.screen.filter((l) => l.length > 44);
+        if (wide.length > 0) failures.push(`${id}: ${wide.length} lines over 44 columns`);
+        if (!text.includes(flat(`$ ${step.command}`)))
+          failures.push(`${id}: the screen lacks "$ ${step.command}"`);
+        for (const line of step.answer)
+          if (!text.includes(flat(line))) failures.push(`${id}: the screen lacks "${line}"`);
+        if (at.screen.length > 22) failures.push(`${id}: ${at.screen.length} lines in 22 slots`);
+      }
+      /* the frame: Restore takes slide 5 out (n / 8), New Slide cuts to slide 5, the cycle's end
+         cuts back to slide 1 */
+      const restoreEnd = samples.find(
+        (s, i) => i > 0 && samples[i - 1]?.step === 'restore' && s.step !== 'restore',
+      );
+      if (
+        restoreEnd &&
+        !(restoreEnd.hidden.includes('next-steps') && restoreEnd.counter === '1 / 8')
+      )
+        failures.push(
+          `after Restore: hidden "${restoreEnd.hidden}", counter "${restoreEnd.counter}" (slide 5 out, 1 / 8)`,
+        );
+      const fiveShown = samples.find((s) => s.step === 'new' && s.shown === 'next-steps');
+      if (fiveShown === undefined) failures.push('the frame never cut to slide 5 during New Slide');
+      else if (fiveShown.counter !== '5 / 9')
+        failures.push(`slide 5 shown with the counter "${fiveShown.counter}"`);
+      const back = samples.find(
+        (s, i) =>
+          i > 0 && s.shown === 'title' && samples[i - 1]?.shown === 'next-steps' && s.step === '',
+      );
+      if (back === undefined) failures.push('the frame never cut back to slide 1');
+      else if (back.counter !== '1 / 9' || back.hidden !== '')
+        failures.push(`back on slide 1: counter "${back.counter}", hidden "${back.hidden}"`);
+      notes.push(
+        `frame: after Restore ${restoreEnd?.counter ?? '-'} hidden ${restoreEnd?.hidden || '-'}; slide 5 at ${fiveShown?.counter ?? '-'}; back ${back?.counter ?? '-'}`,
+      );
+      /* each tab's rule fills, linear, from 0 toward 1 */
+      for (const id of STEP_IDS) {
+        const ps = rule.filter((r) => r.step === id).map((r) => r.p);
+        const max = Math.max(0, ...ps);
+        notes.push(`${id} rule up to ${max.toFixed(2)} over ${ps.length} frames`);
+        if (max < 0.8) failures.push(`${id}: the rule filled to ${max.toFixed(2)}`);
+      }
+      notes.push(`versions ${before} before, ${after} after three cycles`);
+      if (before !== after) failures.push(`the store's versions went from ${before} to ${after}`);
+    } finally {
+      await close();
+    }
+  }
+
+  /* ---- under half in view the loop pauses; back in view it resumes ---- */
+  {
+    const { page, close } = await loopPage(browser);
+    try {
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { tsHomeMotion?: { running(): string[] } }).tsHomeMotion
+            ?.running()
+            .includes('L-H') === true,
+        undefined,
+        { timeout: 30_000 },
+      );
+      const paused = await page.evaluate(async () => {
+        const stage = document.querySelector('[data-hero-stage]') as HTMLElement;
+        const r = stage.getBoundingClientRect();
+        const m = (window as unknown as { tsHomeMotion: { running(): string[] } }).tsHomeMotion;
+        const t0 = performance.now();
+        window.scrollTo(0, window.scrollY + r.top + r.height * 0.6);
+        let frames = 0;
+        while (m.running().includes('L-H') && frames < 120) {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          frames += 1;
+        }
+        return { frames, ms: performance.now() - t0, still: m.running().includes('L-H') };
+      });
+      if (paused.still) failures.push('L-H kept running with the stage under half in view');
+      /* the scroll paints in the first frame, whose intersection callbacks run after it; the loop
+         is paused within one frame when the next frame's callback reads it paused */
+      time(
+        `under half in view L-H read paused at the ${paused.frames === 1 ? 'first' : paused.frames === 2 ? 'second' : `${paused.frames}th`} frame after the scroll, ${Math.round(paused.ms)} ms (within one frame of the scroll's frame)`,
+        paused.frames <= 2,
+      );
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const resumed = await page
+        .waitForFunction(
+          () =>
+            (window as unknown as { tsHomeMotion: { running(): string[] } }).tsHomeMotion
+              .running()
+              .includes('L-H'),
+          undefined,
+          { timeout: 5_000 },
+        )
+        .then(() => true)
+        .catch(() => false);
+      notes.push(`back in view L-H ${resumed ? 'resumed' : 'did not resume'}`);
+      if (!resumed) failures.push('L-H did not resume back in view');
+    } finally {
+      await close();
+    }
+  }
+
+  /* ---- a step tab plays its step and stops the loop ---- */
+  {
+    const { page, close } = await loopPage(browser);
+    try {
+      await record(page);
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { tsHomeMotion?: { running(): string[] } }).tsHomeMotion
+            ?.running()
+            .includes('L-H') === true,
+        undefined,
+        { timeout: 30_000 },
+      );
+      await page.locator('[data-hero-step="title"]').click();
+      await page.waitForTimeout(8000);
+      const { log: samples } = await log(page);
+      const clickAt = samples.findIndex((s) => s.step === 'title');
+      const after = samples.slice(clickAt + 1);
+      const others = after.filter((s) => s.step !== '' && s.step !== 'title');
+      const still = await page.evaluate(() =>
+        (window as unknown as { tsHomeMotion: { running(): string[] } }).tsHomeMotion
+          .running()
+          .includes('L-H'),
+      );
+      const shown = samples.at(-1);
+      notes.push(
+        `step tab: Set the Title played (${clickAt >= 0 ? 'yes' : 'no'}), then ${others.length} other steps; L-H running ${still}; the frame on ${shown?.shown} at ${shown?.counter}`,
+      );
+      if (clickAt < 0) failures.push('the Set the Title tab did not play its step');
+      if (others.length > 0 || still) failures.push('the loop went on after a step tab');
+    } finally {
+      await close();
+    }
+  }
+
+  /* ---- a press in the frame stops it at rest ---- */
+  {
+    const { page, close } = await loopPage(browser);
+    try {
+      await page.waitForFunction(
+        () => document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+        undefined,
+        { timeout: 40_000 },
+      );
+      const box = await page.locator('[data-hero-slide]').boundingBox();
+      if (box) await page.mouse.click(box.x + box.width - 40, box.y + 30);
+      await page.waitForTimeout(300);
+      const rest = await page.evaluate(() => ({
+        step: document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+        shown:
+          document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
+            'slide'
+          ] ?? '',
+        counter: document.querySelector('[data-hero-counter]')?.textContent ?? '',
+        screen: [...document.querySelectorAll('[data-hero-screen] > *')].map(
+          (s) => s.textContent ?? '',
+        ),
+      }));
+      await page.waitForTimeout(5000);
+      const later = await page.evaluate(
+        () => document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+      );
+      notes.push(
+        `press: the frame on ${rest.shown} at ${rest.counter}, ${rest.screen.length} lines, a tab playing ${rest.step}, then ${later}`,
+      );
+      if (rest.step || later) failures.push('a tab played after a press in the frame');
+      if (rest.shown !== 'title' || rest.counter !== '1 / 9')
+        failures.push(`after a press the frame is on ${rest.shown} at ${rest.counter}`);
+    } finally {
+      await close();
+    }
+  }
+
+  /* ---- a chip on slide 5 stops it ---- */
+  {
+    const { page, close } = await loopPage(browser);
+    try {
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { tsHomeMotion?: { running(): string[] } }).tsHomeMotion
+            ?.running()
+            .includes('L-H') === true,
+        undefined,
+        { timeout: 30_000 },
+      );
+      const chip = page.locator('[data-chip="turn"]');
+      await chip.scrollIntoViewIfNeeded({ timeout: 20_000 });
+      await chip.waitFor({ state: 'visible', timeout: 20_000 });
+      await chip.click({ timeout: 20_000 });
+      await page.waitForTimeout(5000);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(4000);
+      const still = await page.evaluate(() => ({
+        running: (window as unknown as { tsHomeMotion: { running(): string[] } }).tsHomeMotion
+          .running()
+          .includes('L-H'),
+        step: document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+      }));
+      notes.push(`chip: L-H running ${still.running}, a tab playing ${still.step} back in view`);
+      if (still.running || still.step) failures.push('the loop went on after a chip on slide 5');
+    } catch (error) {
+      failures.push(`chip: ${String(error).split('\n')[0]}`);
+    } finally {
+      await close();
+    }
+  }
+
+  /* ---- under reduced motion: never registered; a step tab lands its step at once ---- */
+  {
+    const { page, close } = await loopPage(browser, { reduced: true });
+    try {
+      await page.waitForTimeout(3000);
+      const registered = await page.evaluate(() =>
+        (
+          (
+            window as unknown as { tsHomeMotion?: { registered(): string[] } }
+          ).tsHomeMotion?.registered() ?? []
+        ).includes('L-H'),
+      );
+      await page.locator('[data-hero-step="new"]').click();
+      await page.waitForTimeout(400);
+      const shown = await page.evaluate(
+        () =>
+          document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
+            'slide'
+          ] ?? '',
+      );
+      notes.push(`reduced: L-H registered ${registered}; New Slide's tab shows ${shown} at once`);
+    } finally {
+      await close();
+    }
+  }
+  return { failures, notes };
 }
 
 export function rows(): void {
@@ -1449,6 +1874,13 @@ export function rows(): void {
         }
       }
     test.info().annotations.push({ type: 'a11y', description: notes.join(' | ') });
+    expect(failures).toEqual([]);
+  });
+
+  test(title('home.hero.run'), async ({ browser }) => {
+    test.setTimeout(400_000);
+    const { failures, notes } = await heroRun(browser);
+    test.info().annotations.push({ type: 'loop', description: notes.join(' | ') });
     expect(failures).toEqual([]);
   });
 }

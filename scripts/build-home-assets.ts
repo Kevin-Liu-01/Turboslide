@@ -2070,10 +2070,17 @@ function layoutOf(slide: Slide): string {
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 
+/** The hero loop's four commands (V3's recordings, chips.generated.ts \`HOME_LOOP\`). */
+const LOOP_COMMANDS = [
+  ['restore', 'turboslide version restore 1'],
+  ...STEPS.map((step) => [(['new', 'title', 'rows'] as const)[step.n - 1], step.command] as const),
+] as const;
+
 function deriveDeckFacts(
   page: DeckDoc,
   exportRec: RecordedExport | null,
   runSeconds: number,
+  loopMs: number,
 ): string {
   const order = page.deck.sections.flatMap((s) => s.slideIds) as SlideId[];
   const startOrder = loadFixture().deck.sections.flatMap((s) => s.slideIds) as SlideId[];
@@ -2131,6 +2138,14 @@ function deriveDeckFacts(
   };
   tailorWords.countRest = count(run.tailor.rest);
   const runFacts = { captionSeconds: runSeconds, steps: STEPS.length };
+  /* the hero's loop (2.2, V1#15): the step tabs' CLI words, the two words after `turboslide` in
+     each recorded command, and the caption's seconds, the cycle's length rounded */
+  const loopFacts = {
+    captionSeconds: Math.round(loopMs / 1000),
+    cli: Object.fromEntries(
+      LOOP_COMMANDS.map(([id, command]) => [id, command.split(' ').slice(1, 3).join(' ')]),
+    ),
+  };
   const exportFacts =
     exportRec === null
       ? { perfectWidth: 0, perfectHeight: 0 }
@@ -2223,6 +2238,9 @@ export const HOME_EXPORT_FACTS = ${JSON.stringify(exportFacts, null, 2)} as cons
 
 /** The run's figures the route prints (the caption's seconds, run.generated.ts \`captionSeconds\`). */
 export const HOME_RUN_FACTS = ${JSON.stringify(runFacts, null, 2)} as const;
+
+/** The hero's loop as the route prints it (2.2): each step tab's CLI words and the caption's seconds. */
+export const HOME_LOOP_FACTS = ${JSON.stringify(loopFacts, null, 2)} as const;
 `;
 }
 
@@ -2770,7 +2788,7 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
       path: `${HOME}/deck.generated.ts`,
       content: await formatTs(
         `${HOME}/deck.generated.ts`,
-        deriveDeckFacts(page, exportRec, Math.round(run.totalMs / 1000)),
+        deriveDeckFacts(page, exportRec, Math.round(run.totalMs / 1000), chips.loopMs),
       ),
     },
     {

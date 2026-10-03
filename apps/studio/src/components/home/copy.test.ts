@@ -85,7 +85,6 @@ function probeCall(fn: (...args: never[]) => unknown, path: string): string {
   if (path === 'export.rows.perfect.sentence') return call({ width: 3200, height: 1800 }, PROBE);
   if (path === 'canvas.log.pos') return call('lighthouse', 'h', { x: 612, y: 388, w: 520, h: 96 });
   if (path.startsWith('canvas.log.')) return call('lighthouse', 'h', 15);
-  if (path === 'tailor.kitStatus') return call('kestrel', 9);
   if (path === 'kits.status.kit') return call('globex', 9);
   if (path === 'kits.status.background') return call('#e6e0d2');
   if (path === 'kits.status.contrast') return call('#777777', 4.4);
@@ -569,13 +568,9 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
       `${HOME_RUN.tailorCounts.rest.places} places on ${HOME_RUN.tailorCounts.rest.slides} slides`,
     );
     expect(TAILOR.empty).toBe('Type a customer name first.');
-    expect(TAILOR.kitStatus('kestrel', 9)).toBe(
-      "Kestrel, an example customer's kit, set the colors of 9 slides.",
-    );
     expect(KITS.status.kit('globex', 9)).toBe(
       "Globex, an example customer's kit, set the colors of 9 slides.",
     );
-    expect(TAILOR.examplesKey).toBe('Example kits');
   });
 
   it('keeps the footer and the words of the history and the slides', () => {

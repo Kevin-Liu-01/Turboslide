@@ -145,12 +145,6 @@ export const HERO = {
     newPresentation: { label: 'New Presentation', href: '/new' },
     openDeck: { label: 'Open the Example Deck', deckId: 'gt-brand' },
   },
-  /** the caption under the stage until the loop's push (V1#15) */
-  caption: {
-    pointer: "Click the slide's title to select it. Click again to type.",
-    touchWide: "Tap the slide's title to select it, then drag it.",
-    touchNarrow: "Tap the slide's title to select it, then drag it.",
-  },
   undo: 'Undo',
   /** the editor frame and the agent's terminal (docs/LANDING.md 2.2 "Copy") */
   stage: {
@@ -316,20 +310,9 @@ export const TAILOR = {
   id: 'tailor',
   h2: 'One name on every slide',
   lead: "Tools > Tailor for a customer puts one name in every slide's text and notes. Undo puts every name back.",
-  examplesKey: 'Example kits',
   placeholder: 'Customer name',
   /** the page's own answer to an empty Apply (docs/LANDING.md 2.5) */
   empty: 'Type a customer name first.',
-  kits: {
-    gt: { name: 'GT', tip: "GT. The GT brand deck's own colors." },
-    kestrel: { name: 'Kestrel', tip: "Kestrel. An example customer's colors." },
-    fenwick: { name: 'Fenwick', tip: "Fenwick. An example customer's colors." },
-  },
-  /** the status after a kit change: GT is the deck's own kit, the others an example customer's */
-  kitStatus: (kit: 'gt' | 'kestrel' | 'fenwick', slides: number): string =>
-    kit === 'gt'
-      ? `The GT kit set the colors of ${slides} slides.`
-      : `${kit === 'kestrel' ? 'Kestrel' : 'Fenwick'}, an example customer's kit, set the colors of ${slides} slides.`,
   moveUp: 'Move Up',
   moveDown: 'Move Down',
   filmstripLabel: 'Slides 1 to 5',

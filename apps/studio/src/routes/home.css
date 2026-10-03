@@ -787,31 +787,67 @@ html:has(.ts-product) {
   white-space: pre;
 }
 
+/* the step tabs (V1#15): four across the content width, 8 px apart, each a 2 px ink rule on top
+   (the countdown, filled by `--ts-step-progress` while its step plays), its label and its CLI words */
+.ts-hero-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ts-hero-step {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 0 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--pt-ink);
+  cursor: pointer;
+}
+
+.ts-hero-step::before,
+.ts-hero-step::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.ts-hero-step::before {
+  background: var(--pt-hair);
+}
+
+.ts-hero-step::after {
+  background: var(--pt-ink);
+  transform: scaleX(var(--ts-step-progress, 0));
+  transform-origin: 0 0;
+}
+
+.ts-hero-step-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.ts-hero-step-cli {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--pt-titanium);
+}
+
 .ts-hero-caption-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   min-height: 40px;
-  margin-top: 16px;
-}
-
-.ts-hero-caption > span {
-  display: none;
-}
-
-.ts-hero-caption > .is-pointer {
-  display: inline;
-}
-
-@media (pointer: coarse) {
-  .ts-hero-caption > .is-pointer {
-    display: none;
-  }
-
-  .ts-hero-caption > .is-touch-wide {
-    display: inline;
-  }
+  margin-top: 8px;
 }
 
 /* ---- the numbers row (LANDING.md 2.3): four ruled cells, still on purpose ---- */
@@ -2074,14 +2110,14 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     height: 18px;
   }
 
-  @media (pointer: coarse) {
-    .ts-hero-caption > .is-touch-wide {
-      display: none;
-    }
+  /* the step tabs in two rows of two at 44 px */
+  .ts-hero-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 12px;
+  }
 
-    .ts-hero-caption > .is-touch-narrow {
-      display: inline;
-    }
+  .ts-hero-step {
+    min-height: 44px;
   }
 
   /* the numbers row: two by two, each cell 171 px, the figure at 24 px */

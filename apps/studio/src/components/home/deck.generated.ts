@@ -534,3 +534,14 @@ export const HOME_RUN_FACTS = {
   captionSeconds: 12,
   steps: 3,
 } as const;
+
+/** The hero's loop as the route prints it (2.2): each step tab's CLI words and the caption's seconds. */
+export const HOME_LOOP_FACTS = {
+  captionSeconds: 19,
+  cli: {
+    restore: 'version restore',
+    new: 'slide new',
+    title: 'block set',
+    rows: 'block set',
+  },
+} as const;

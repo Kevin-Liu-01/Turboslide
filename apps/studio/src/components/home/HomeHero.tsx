@@ -3,7 +3,7 @@ import { Fragment } from 'react';
 import { MARK_PATH, MARK_VIEWBOX } from '@turboslide/theme/brand';
 
 import { HERO } from './copy';
-import { HOME_DECK } from './deck.generated';
+import { HOME_DECK, HOME_LOOP_FACTS } from './deck.generated';
 import type { HomeSlideId } from './deck.generated';
 import { HomeLink } from './HomeLink';
 import { HomeSheet, ServerHtml } from './HomeSheet';
@@ -24,9 +24,11 @@ import type { HomeInstanceId } from './slides.generated';
  * with the Blue Marble printed through the 8 by 8 screen at 2 px cells (Kevin's answer 1) and its
  * title and subtitle as objects (the selection replica is V2's), the thumbnails with their block
  * attributes, so the show and the print can clone every slide from the page. The terminal is the
- * page's narrow panel holding the recorded run's transcript at 44 columns in 22 slots; the loop
- * that types in it, the step tabs and the caption are V1#15's. The server only stylesheet here
- * gives every field box on the page its still (`--ts-still`).
+ * page's narrow panel holding the recorded run's transcript at 44 columns in 22 slots. Under the
+ * stage the loop's four step tabs (each its label and its command's CLI words, `deck.generated.ts`
+ * `HOME_LOOP_FACTS`) and the caption with the loop's seconds; `live/stage.ts` plays the loop L-H on
+ * the frame and the terminal, the filmstrip and the tabs. The server only stylesheet here gives
+ * every field box on the page its still (`--ts-still`).
  */
 const THUMBS: readonly HomeSlideId[] = HOME_DECK.order;
 
@@ -160,11 +162,24 @@ export function HomeHero() {
             />
           </div>
         </div>
+        {/* the loop's four steps (V1#15): each tab's label and its command's CLI words, with a
+            2 px ink rule on top that fills across the step while it plays (live/stage.ts) */}
+        <div
+          className="ts-hero-steps"
+          role="group"
+          aria-label={HERO.stage.stepsLabel}
+          data-hero-steps
+        >
+          {HERO.stage.steps.map((step) => (
+            <button key={step.id} type="button" className="ts-hero-step" data-hero-step={step.id}>
+              <span className="ts-hero-step-label">{step.label}</span>
+              <span className="ts-hero-step-cli">{HOME_LOOP_FACTS.cli[step.id]}</span>
+            </button>
+          ))}
+        </div>
         <div className="ts-hero-caption-row">
           <p className="ts-caption ts-hero-caption" data-caption>
-            <span className="is-pointer">{HERO.caption.pointer}</span>
-            <span className="is-touch-wide">{HERO.caption.touchWide}</span>
-            <span className="is-touch-narrow">{HERO.caption.touchNarrow}</span>
+            {HERO.stage.caption(HOME_LOOP_FACTS.captionSeconds)}
           </p>
           <button type="button" className="ts-text-button" data-undo="hero">
             {HERO.undo}

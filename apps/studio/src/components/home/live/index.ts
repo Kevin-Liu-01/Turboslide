@@ -3,6 +3,7 @@ import { startCanvasField, startStrip } from './field';
 import { startHero } from './hero';
 import { hintInView } from './motion';
 import { startObjects } from './objects';
+import { startStage } from './stage';
 import { paintSlide, paintSlides } from './paint';
 import { createHomeStore, restState, sourceOf, UNDO_BANDS } from './state';
 import type { HomeDeckState, HomeStore, SlideKey, UndoBand } from './state';
@@ -59,6 +60,7 @@ export type BandModule = { start(ctx: LiveContext): void };
  */
 const REGISTRATIONS: readonly Registration[] = [
   { band: 'hero', start: (ctx) => void startObjects(ctx, 'hero') },
+  { band: 'hero', start: startStage },
   { band: 'hero', start: startHero },
   { band: 'field', start: startStrip },
 ];

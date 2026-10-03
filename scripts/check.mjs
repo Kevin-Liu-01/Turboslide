@@ -247,6 +247,9 @@ const INNER_HTML_ALLOW = [
   // the scrubber's view (V2#14): slide 5's earlier states, the renderer's output rendered at build
   // (bands/live.generated.ts), parsed in a template element
   'apps/studio/src/components/home/live/versions.ts',
+  // the hero's stage (V1#15): slide 5's recorded states, the renderer's output rendered at build
+  // (bands/live.generated.ts), parsed in a template element
+  'apps/studio/src/components/home/live/hero-stage.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

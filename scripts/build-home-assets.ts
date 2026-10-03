@@ -95,6 +95,7 @@ import type { PanelWidth } from '../apps/studio/src/components/home/panel-format
    slide 8's still frame; the entry calls them and writes what they return */
 import { deriveChips, recordChips } from './home/run.ts';
 import { deriveBoot } from './home/boot.ts';
+import { deriveMenus } from './home/menus.ts';
 import { derivePattern } from './home/pattern.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -2806,6 +2807,10 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
     {
       path: `${HOME}/pattern.generated.ts`,
       content: await formatTs(`${HOME}/pattern.generated.ts`, pattern.source),
+    },
+    {
+      path: `${HOME}/menus.generated.ts`,
+      content: await formatTs(`${HOME}/menus.generated.ts`, deriveMenus()),
     },
     {
       path: `${HOME}/facts-data.ts`,

@@ -14,6 +14,7 @@ import { HomeFeatures } from '../components/home/HomeFeatures';
 import { HomeField } from '../components/home/HomeField';
 import { HomeFooter } from '../components/home/HomeFooter';
 import { HomeHero } from '../components/home/HomeHero';
+import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
 import { HomeNumbers } from '../components/home/HomeNumbers';
 import { HomePresent } from '../components/home/HomePresent';
@@ -26,6 +27,7 @@ import '../components/home/icons.generated.css';
 import '../components/home/selection.css';
 import '../components/home/print.css';
 import './home.css';
+import '../components/home/editing.css';
 import '../components/home/motion.css';
 
 /**
@@ -121,6 +123,7 @@ function HomePage() {
       <HomeHero />
       <HomeNumbers />
       <HomeField />
+      <HomeMenus />
       <HomeCanvas />
       <HomeTailor />
       <HomeAgents />

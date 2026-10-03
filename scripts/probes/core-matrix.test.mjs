@@ -465,7 +465,7 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
     /* the next program's Round 1 push B3a#7 (docs/NEXT.md 4.1.5): three menu rows of the cuts */
     /* the next program's Round 1 push B3a#8 (docs/NEXT.md 4.1.5): chrome.words.no-process-words */
     /* the next program's rows (docs/NEXT.md), one term per push in the order of the comments above */
-    const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3 + 1 + 1;
+    const NEXT_ROWS = 1 + 1 + 1 + 3 + 1 + 4 + 3 + 1 + 1 - 1;
     /* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.5): decks.manifest.paper */
     /* the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.5): decks.list.ruled-rows */
     /* the next program's Round 1 push B2c#17 (docs/NEXT.md 4.1.5): two rows */
@@ -477,6 +477,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
     /* the next program's Round 1 push B3b#13 (docs/NEXT.md 4.1.5): the Share, Version history and presenter rows */
     /* the next program's Round 1 push B3b#14 (docs/NEXT.md 4.1.5): the phone editor row */
     /* the next program's Round 1 push B4a#5 (docs/NEXT.md 4.1.5): brand.template.blank-plain */
+    /* the Round 1 integrator's B3b#13 seam: share.name-prompt.first-share retired, since the Share
+       dialog asks no name (4.1.3 item 17), the last term */
     expect(CORE_MATRIX.length).toBe(
       565 +
         133 +

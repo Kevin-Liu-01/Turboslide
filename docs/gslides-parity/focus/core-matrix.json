@@ -4833,15 +4833,6 @@
       "note": "People round; docs/archive/rounds/PEOPLE.md 3.11"
     },
     {
-      "id": "share.name-prompt.first-share",
-      "feature": "share",
-      "interaction": "The first Share on a browser with no name asks \"Your name, shown to collaborators\"; the name shows on the presence chip in a second browser within 5 s",
-      "driver": "core/share.spec.ts",
-      "today": "not driven",
-      "evidence": "audit-seller 4",
-      "note": "The polish round ship step, third attempt (the integrator for B6): the owner opens the deck to Anyone with the link through the window API before the guest's first open (item 78; the guest was a stranger on a Restricted deck twice in the second ship attempt, B5's R23); the name prompt on the first Share is read as before"
-    },
-    {
       "id": "share.dialog.co-edit-from-copied-link",
       "feature": "share",
       "interaction": "On a deck created from /new, opened to Anyone with the link as an editor through the API (a new deck starts Restricted, docs/archive/rounds/POLISH.md 2.7 item 95), Share shows Anyone with the link, Editor; Copy link; a second browser context opens the copied address, gets the full toolbar, double clicks the body and types six words; the first browser reads them on the slide within 5 s",

@@ -53,7 +53,7 @@ export function ProfileDialog() {
       : date.toLocaleString([], {
           month: 'short',
           day: 'numeric',
-          hour: '2-digit',
+          hour: 'numeric',
           minute: '2-digit',
         });
   };

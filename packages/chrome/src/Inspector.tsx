@@ -562,7 +562,7 @@ export function Inspector({
         {lease ? (
           <p className="ts-insp-lease">
             Leased by {authorName(lease.holder)} until{' '}
-            {new Date(lease.until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {new Date(lease.until).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
           </p>
         ) : null}
 

@@ -115,7 +115,7 @@ function useElapsed(): {
 }
 
 function useClock(): string {
-  const read = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const read = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const [time, setTime] = useState(read);
   useEffect(() => {
     const timer = window.setInterval(() => setTime(read()), CLOCK_MS);

@@ -34,9 +34,6 @@ export type NamePromptDialogProps = {
   onDone?: (named: boolean) => void;
 };
 
-/** The title of the prompt the first Share raises (rank 4). */
-export const SHARE_NAME_PROMPT_TITLE = 'Your name, shown to collaborators';
-
 /**
  * The prompt's state and writes, shared by the dialog and the title row's plate: the field opens
  * empty unless the person chose a name (docs/archive/rounds/POLISH.md 2.6 item 63; audit-chrome item 10 read

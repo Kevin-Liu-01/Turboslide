@@ -10333,6 +10333,36 @@
       "severity": 2,
       "evidence": "judge-2 7 (no hand written JSON)",
       "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 4 (L3)"
+    },
+    {
+      "id": "home.present.show",
+      "feature": "decks",
+      "interaction": "Present, or Cmd+Enter (Ctrl+F5 off macOS) with the band half in view and no text field focused, opens the show on the slide chosen in the list within 800 ms with focus on the stage; keys page with a cut; Space and Enter go forward on the stage and press a focused Previous or Exit; the counter, notes and timer show; the slides carry the visitor's changes, slide 1 with the hero's Blue Marble and its credit (answer 1); Escape returns within 400 ms with focus on Present; S opens nothing",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-2 a-show-try.png",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3). The 800 ms and 400 ms bounds are interaction bounds, read at a one minute load under 24"
+    },
+    {
+      "id": "home.present.focus",
+      "feature": "decks",
+      "interaction": "On open focus is on the show's stage; Tab cycles among Previous, Next and Exit and never reaches the page behind",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-3 a-show.png",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3)"
+    },
+    {
+      "id": "home.present.print",
+      "feature": "decks",
+      "interaction": "Print This Deck and Cmd or Ctrl+P print the page deck as the visitor left it, one 16 by 9 page per slide (eight pages under print emulation); with the live module absent, the hero slide alone",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "print-deck.jpg",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3)"
     }
   ]
 }

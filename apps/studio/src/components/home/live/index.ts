@@ -3,6 +3,8 @@ import { startAgents } from './agents';
 import { renumber } from './filmstrip';
 import { startHistory } from './history';
 import { startObjects } from './objects';
+import { startPrint } from './print';
+import { startShow } from './show';
 import { createHomeStore, restState } from './state';
 import type { Band, HomeStore, UndoBand } from './state';
 import { startTailor } from './tailor';
@@ -38,6 +40,8 @@ const REGISTRATIONS: readonly Registration[] = [
   { band: 'tailor', start: startTailor },
   { band: 'agents', start: startHistory },
   { band: 'agents', start: startAgents },
+  { band: 'present', start: startShow },
+  { band: 'present', start: startPrint },
 ];
 
 const UNDO_BANDS: readonly UndoBand[] = ['hero', 'tailor', 'canvas'];

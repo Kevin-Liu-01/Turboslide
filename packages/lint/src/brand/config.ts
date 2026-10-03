@@ -15,7 +15,7 @@
  * lands in report mode (push 19) and turns to enforce in the round's last code push (push 20).
  */
 export type BrandLintMode = 'report' | 'enforce';
-export const BRAND_LINT_MODE: BrandLintMode = 'report';
+export const BRAND_LINT_MODE: BrandLintMode = 'enforce';
 
 /** The thirteen gt-ui rules of P:.oxlintrc.json 38 to 50, under their source names. */
 export type SourceRuleId =
@@ -269,10 +269,10 @@ export const CODE_SURFACES: readonly CodeSurface[] = [
 
 /**
  * The classes of a rail wrapper in TSX (gt-ui single-rail `.tc-rail`): a wrapper inside a wrapper
- * draws the column's pair twice. `ts-product-rail` is the /home column today; B2 names the class
- * of the 1104 px column (build/b5.md request 3).
+ * draws the column's pair twice. `ts-rails` is the element that draws the 1104 px column's pair
+ * on /home, /decks and Not found (`apps/studio/src/components/home/grammar.css`, B2a#15).
  */
-export const RAIL_WRAPPER_CLASSES: readonly string[] = ['tc-rail', 'ts-rail', 'ts-product-rail'];
+export const RAIL_WRAPPER_CLASSES: readonly string[] = ['tc-rail', 'ts-rail', 'ts-rails'];
 
 /**
  * The tree's button elements and the attribute that carries a visible label (gt-ui cta-title-case
@@ -310,4 +310,187 @@ export type Acceptance = {
   owner: string;
 };
 
-export const ACCEPTED: readonly Acceptance[] = [];
+/**
+ * The findings enforce mode accepts (B5b#20, 2026-10-02): the 22 the lint read on `next/round1`
+ * after every Round 1 lane's last commit, each from before Round 1 and outside every item of
+ * NEXT.md 4.1.3. No Round 1 commit added a finding (build/b5.md, the reading per commit). Each
+ * entry leaves this list in the push that fixes it; one left behind fails enforce mode as stale.
+ */
+export const ACCEPTED: readonly Acceptance[] = [
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/Toolbar.tsx',
+    match: 'Exit fullscreen',
+    reason:
+      'A sentence case button label in the /deck viewer toolbar, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/Toolbar.tsx',
+    match: 'Copy link',
+    reason:
+      'A sentence case button label in the /deck viewer toolbar, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/inspector/table.tsx',
+    match: 'Distribute rows',
+    reason:
+      'A sentence case button label in the table inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/inspector/table.tsx',
+    match: 'Distribute columns',
+    reason:
+      'A sentence case button label in the table inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/inspector/table.tsx',
+    match: 'Merge cells',
+    reason:
+      'A sentence case button label in the table inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/inspector/table.tsx',
+    match: 'Unmerge cells',
+    reason:
+      'A sentence case button label in the table inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/inspector/asset.tsx',
+    match: 'Add asset',
+    reason:
+      'A sentence case button label in the asset inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
+    owner: 'B3b',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'apps/studio/src/editor/EditorRoot.tsx',
+    match: 'Copy text',
+    reason:
+      'A sentence case button label in the editor root, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/ExportMenu.tsx',
+    match: 'Build and download',
+    reason:
+      'A sentence case button label in the Download menu, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/ExportMenu.tsx',
+    match: 'Download deck bundle',
+    reason:
+      'A sentence case button label in the Download menu, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/HistoryPanel.tsx',
+    match: 'Undo to here',
+    reason:
+      'A sentence case button label in the history panel, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/Inspector.tsx',
+    match: 'Add item',
+    reason:
+      'A sentence case button label in the inspector, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/SourceDrawer.tsx',
+    match: 'Copy as command',
+    reason:
+      'A sentence case button label in the source drawer, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/dialogs/ImportSlides.tsx',
+    match: 'Select a file from your device',
+    reason:
+      'A sentence case button label in the Import slides dialog, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/dialogs/Open.tsx',
+    match: 'Select a file from your device',
+    reason:
+      'A sentence case button label in the Open dialog, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/cta-title-case',
+    file: 'packages/chrome/src/dialogs/Publish.tsx',
+    match: 'Copy link',
+    reason:
+      'A sentence case button label in the Publish dialog, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'css/mono-outside-code',
+    file: 'apps/studio/src/styles.css',
+    match: '.ts-deck-id',
+    reason:
+      'No element renders .ts-deck-id, so the rule can go. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'css/mono-outside-code',
+    file: 'packages/chrome/src/ExportMenu.css',
+    match: '.ts-export-line',
+    reason:
+      'The export progress line is set in monospace. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'css/mono-outside-code',
+    file: 'packages/chrome/src/ExportReportCard.css',
+    match: '.ts-report-residual',
+    reason:
+      'The residual list of the export report is set in monospace. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'css/no-eyebrow',
+    file: 'packages/chrome/src/pickers/Pickers.css',
+    match: '.ts-picker-title',
+    reason:
+      'The picker titles are uppercase with 0.02 em tracking. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'css/no-eyebrow',
+    file: 'packages/viewer/src/present/PresentShortcuts.css',
+    match: '.ts-present-card h3',
+    reason:
+      'The headings of the presenter shortcut card are uppercase with 0.06 em tracking. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+  {
+    rule: 'gt-ui/no-smooth-scroll',
+    file: 'packages/viewer/standalone/runtime.ts',
+    match: 'smooth',
+    reason:
+      'The book view of the exported web page scrolls a page into view smoothly; B3b#10 removed the same in the studio. From before Round 1, outside every item; build/b5.md request 6.',
+    owner: 'the integrator',
+  },
+];

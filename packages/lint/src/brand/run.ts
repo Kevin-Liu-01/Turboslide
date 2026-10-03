@@ -125,7 +125,11 @@ export function isOverridden(file: string, rule: BrandRuleId): boolean {
   );
 }
 
-/** Splits findings into the accepted and the open ones, and names the acceptances nothing matched. */
+/**
+ * Splits findings into the accepted and the open ones, and names the acceptances nothing matched.
+ * An acceptance takes one finding, so a second finding of the same text in the same file (a new
+ * button with an old label) stays open.
+ */
 export function applyAcceptances(
   findings: readonly BrandFinding[],
   accepted: readonly Acceptance[],
@@ -135,7 +139,11 @@ export function applyAcceptances(
   const open: BrandFinding[] = [];
   for (const finding of findings) {
     const match = accepted.find(
-      (a) => a.rule === finding.rule && a.file === finding.file && finding.text.includes(a.match),
+      (a) =>
+        !used.has(a) &&
+        a.rule === finding.rule &&
+        a.file === finding.file &&
+        finding.text.includes(a.match),
     );
     if (match) {
       used.add(match);
@@ -190,7 +198,9 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
   }
   let pictures = 0;
   // the credits check reads the whole picture set; a run over named files skips it unless asked
-  if (rules.has('brand/credits') && (!options.files || options.rules?.has('brand/credits'))) {
+  const credited =
+    rules.has('brand/credits') && (!options.files || options.rules?.has('brand/credits') === true);
+  if (credited) {
     const pictureFiles = list(CREDITS.roots);
     if (ref)
       for (const [file, text] of readCommitFiles(root, ref, [CREDITS.record]))
@@ -202,9 +212,15 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
   const kept = findings.filter((f) => f.rule === 'brand/parse' || !isOverridden(f.file, f.rule));
   const broken = kept.filter((f) => f.rule === 'brand/parse');
   const judged = kept.filter((f) => f.rule !== 'brand/parse');
+  // a run narrowed by --files or --rules weighs only the acceptances it could have matched, so an
+  // acceptance in a file or rule it did not read is not stale
+  const readFiles = new Set(files);
+  const inScope = (options.accepted ?? ACCEPTED).filter(
+    (a) => rules.has(a.rule) && (a.rule === 'brand/credits' ? credited : readFiles.has(a.file)),
+  );
   const split =
     mode === 'enforce'
-      ? applyAcceptances(judged, options.accepted ?? ACCEPTED)
+      ? applyAcceptances(judged, inScope)
       : { accepted: [], open: judged, stale: [] };
   return {
     mode,

@@ -50,8 +50,8 @@
 // 18's one rail check (packages/lint/src/chrome.ts) fails the chrome lint. `--list` prints 33.
 // Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
-// Chrome for Testing once for the card compare when chromium-1217 is present and the fonts venv's
-// python once for the outlines, and prints why it skips either, build-4/b1.md R13), then
+// Chrome for Testing once for the card compare when chromium-1217 is present and prints why it
+// skips the compare otherwise, build-4/b1.md R13; Round 1's B1#2 retired the outline step), then
 // `node scripts/build-home-assets.ts --check` (the /home screenshots and facts-data.ts against
 // facts.json, b2.md R2), `node packages/schema/scripts/build-definitions.mjs --check` (the shape
 // table as one compact string and ids.ts, b4.md R3) and `node packages/native/scripts/check-record.mjs`

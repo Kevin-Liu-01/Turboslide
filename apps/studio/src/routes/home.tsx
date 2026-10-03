@@ -70,7 +70,24 @@ function HomePage() {
   /* the request's CSP nonce (SPEC-3 8.8), the way __root.tsx gives it to the boot scripts */
   const nonce = useRouter().options.ssr?.nonce;
   useMountEffect(() => {
-    root.current?.setAttribute('data-hydrated', '');
+    const main = root.current;
+    if (main === null) return;
+    main.setAttribute('data-hydrated', '');
+    /* the live module (LANDING.md 4.2, integrator.md 4.6): one chunk, imported after `load` and
+       one idle callback (capped at 1.5 s), never before `load` */
+    const idle = (fn: () => void): void => {
+      if (typeof window.requestIdleCallback === 'function')
+        window.requestIdleCallback(fn, { timeout: 1500 });
+      else window.setTimeout(fn, 0);
+    };
+    const go = (): void =>
+      idle(() => {
+        import('../components/home/live/index')
+          .then((live) => live.startLive(main))
+          .catch((error: unknown) => console.error('the live module did not load', error));
+      });
+    if (document.readyState === 'complete') go();
+    else window.addEventListener('load', go, { once: true });
   });
   return (
     <main ref={root} id="top" className="ts-product" data-page="home">

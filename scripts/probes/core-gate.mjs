@@ -114,7 +114,8 @@
 // `memoryReading` beside `tier`.
 // `--matrix <path>` also writes the merged summary (the rows by id with their result and reason,
 // the counts, the verdict and the `results` map) to that path, the ledger copy a ship note or the
-// verifier keeps under docs/gslides-parity/focus/verification/. `--report <dir>` runs no driver:
+// verifier keeps in its round's folder, docs/gslides-parity/<round>/verification/ (docs/NEXT.md
+// 5.3; the closed rounds' copies stay under focus/verification/). `--report <dir>` runs no driver:
 // it reads a finished run's core-walk.json and specs.json from that directory and renders the
 // merge, the table and the verdict again (the fix round's test of the gate's tail runs it on a
 // stub report; a ship note can re-render a ledger copy from it).

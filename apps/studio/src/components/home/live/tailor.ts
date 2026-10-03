@@ -6,7 +6,6 @@ import type { LiveContext } from './index';
 import { ms, play, reduced, sequence, slowFactor } from './motion';
 import { applyCustomer, customerText, markCustomer, noteCustomer } from './paint';
 import type { AgentStep, HomeDeckState, SlideKey } from './state';
-import { startTheme } from './theme';
 
 /**
  * Tools > Tailor for a customer on the page (docs/LANDING.md 2.5; the product's words are
@@ -100,7 +99,7 @@ function snackbar(ctx: LiveContext): Snackbar {
   };
 }
 
-/** Starts Tailor, the example kits and the filmstrip on the Tailor band. */
+/** Starts Tailor and the filmstrip on the Tailor band. */
 export function startTailor(ctx: LiveContext): void {
   const { band, root, store } = ctx;
   const field = band.querySelector<HTMLInputElement>('[data-tailor-to]');
@@ -249,7 +248,6 @@ export function startTailor(ctx: LiveContext): void {
     } else snack.hide();
   });
 
-  startTheme(ctx, snack);
   startFilmstrip(ctx, snack);
 }
 

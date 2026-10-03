@@ -106,8 +106,10 @@ export const TEXT_MIN_RATIO = 4.5;
 /**
  * The colours a typed background sets (2.8, a replica of the Brand kit's Background colour): the
  * text in the light or the dark ink, whichever reads higher; the captions in that appearance's
- * captions colour while it reads at 4.5:1, else the text; the hints by `readableHint`. `ratio` is
- * the text's contrast, which the kits band refuses under 4.5:1.
+ * captions colour while it reads at 4.5:1, else the text; the hints by `readableHint`, then the
+ * captions' colour where the hint reads under 4.5:1, because the slides set their counters and
+ * credits in it and every slide text reads 4.5:1 (LANDING.md 5 "Contrast"). `ratio` is the text's
+ * contrast, which the kits band refuses under 4.5:1.
  */
 export function backgroundColors(paper: string): { colors: KitColors; ratio: number } {
   const p = paper.toLowerCase();
@@ -116,8 +118,10 @@ export function backgroundColors(paper: string): { colors: KitColors; ratio: num
   const set = light >= dark ? SLIDE_TOKENS.light : SLIDE_TOKENS.dark;
   const ratio = Math.max(light, dark);
   const ink2 = contrastRatio(set.ink2, p) >= TEXT_MIN_RATIO ? set.ink2 : set.ink;
+  const hint = readableHint(p, set.ink, set.titanium);
+  const titanium = contrastRatio(hint, p) >= TEXT_MIN_RATIO ? hint : ink2;
   return {
-    colors: { paper: p, ink: set.ink, ink2, titanium: readableHint(p, set.ink, set.titanium) },
+    colors: { paper: p, ink: set.ink, ink2, titanium },
     ratio,
   };
 }

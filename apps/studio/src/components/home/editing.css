@@ -419,6 +419,64 @@
   --ts-kit-ink: #f4f1ea;
 }
 
+/* ---- the kits band (2.8): the top rows, the status line, the grid ---- */
+
+/* the h2 and the lead in the left 5 columns, the two ruled rows in the right 7 (2.8) */
+.ts-kits-top {
+  display: grid;
+  grid-template-columns: minmax(0, 412fr) minmax(0, 588fr);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+.ts-kits-rows .ts-row {
+  min-height: 48px;
+}
+
+.ts-kits-rows .ts-kit-color {
+  width: 160px;
+}
+
+.ts-kits-rows [data-undo='kits'] {
+  margin-left: auto;
+}
+
+.ts-kits-rows .ts-caption {
+  margin: 8px 0 0;
+}
+
+/* the status line holds its one line at rest, so a sentence shown after a press moves nothing */
+.ts-kit-status {
+  min-height: 20px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pt-ink-2);
+}
+
+[data-kit-grid] {
+  display: grid;
+  grid-template-columns: repeat(5, 192px);
+  gap: 16px;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-kit-thumb {
+  position: relative;
+}
+
+.ts-kit-thumb-n {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- under 720 px: one Menus key, the stage over a horizontal filmstrip (C's phone editor) ---- */
 
 @media (max-width: 719.98px) {
@@ -491,6 +549,21 @@
 
   .ts-mini-readout {
     display: none;
+  }
+
+  .ts-kits-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-kits-rows .ts-kit-color {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  [data-kit-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Locator, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { TAILOR as PRODUCT } from '@turboslide/chrome/panels/assist-strings';
 
@@ -8,23 +8,14 @@ import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { title } from '../lib';
 import { bandReady, openHome, played, recordAnimations } from './objects';
 
-// A lane module of core/home.spec.ts (docs/LANDING.md 2.5, 6.7; build/integrator.md "Landing,
-// day 0" 3, 4.9 and 5.1), L2's, push 3: Tailor, the example kits and the filmstrip. Every
-// observation is through the page; /home writes no store. The figures the count must equal are the
-// CLI's recorded answers (`run.generated.ts` `tailorCounts`), and the strings are the product's
-// (`assist-strings.ts` TAILOR) and the page's (`copy.ts` TAILOR).
+// A lane module of core/home.spec.ts (docs/LANDING.md 2.7, 6.7; build/integrator.md "Landing,
+// day 0" 3, 4.9 and 5.1), L2's push 3 and V2's push 12: Tailor and the filmstrip (the kits have
+// their own band and module, kits.ts, since V2#12). Every observation is through the page; /home
+// writes no store. The figures the count must equal are the CLI's recorded answers
+// (`run.generated.ts` `tailorCounts`), and the strings are the product's (`assist-strings.ts`
+// TAILOR) and the page's (`copy.ts` TAILOR).
 
-export const ROWS: readonly string[] = [
-  'home.tailor.apply',
-  'home.tailor.theme',
-  'home.tailor.filmstrip',
-];
-
-const SELECT = 'rgb(47, 92, 224)';
-const KITS = {
-  kestrel: { paper: '#f3efe6', ink: '#1f1b16', ink2: '#4d463c', titanium: '#6e665a' },
-  fenwick: { paper: '#0a1b38', ink: '#f4f1ea', ink2: '#c9cbd3', titanium: '#8d97ab' },
-} as const;
+export const ROWS: readonly string[] = ['home.tailor.apply', 'home.tailor.filmstrip'];
 
 /** The text of every slide on the page, joined; the Present list's titles with it. */
 const slidesText = (page: Page): Promise<string> =>
@@ -35,123 +26,6 @@ const slidesText = (page: Page): Promise<string> =>
   );
 
 const count = (text: string, word: string): number => text.split(word).length - 1;
-
-/** The six kit variables on every slide root and sheet of the page. */
-const kitVars = (page: Page) =>
-  page.evaluate(() =>
-    [...document.querySelectorAll<HTMLElement>('[data-home-slides]')].flatMap((root) =>
-      [root.querySelector<HTMLElement>('.ts-sheet') ?? root].map((el) => {
-        const cs = getComputedStyle(el);
-        const v = (n: string) => cs.getPropertyValue(n).trim().toLowerCase();
-        return {
-          slide: root.dataset['slide'] ?? '',
-          paper: v('--paper'),
-          ink: v('--ink'),
-          ink2: v('--ink-2'),
-          titanium: v('--titanium'),
-          blue: v('--blue'),
-          accent: v('--accent'),
-        };
-      }),
-    ),
-  );
-
-/** Every text box on the visible slides: its text's contrast on its ground, and what covers it. */
-const textContrast = (page: Page) =>
-  page.evaluate(() => {
-    const rgb = (c: string): [number, number, number] => {
-      const m = c.match(/\d+(\.\d+)?/g)?.map(Number) ?? [0, 0, 0];
-      return [m[0] ?? 0, m[1] ?? 0, m[2] ?? 0];
-    };
-    const hex = (h: string): [number, number, number] => {
-      if (h.startsWith('#')) {
-        const n = Number.parseInt(h.slice(1), 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-      }
-      return rgb(h);
-    };
-    const lum = ([r, g, b]: [number, number, number]) =>
-      [r, g, b]
-        .map((v) => v / 255)
-        .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-        .reduce((s, v, i) => s + v * ([0.2126, 0.7152, 0.0722][i] ?? 0), 0);
-    const ratio = (a: [number, number, number], b: [number, number, number]) => {
-      const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
-      return ((x ?? 0) + 0.05) / ((y ?? 0) + 0.05);
-    };
-    let worst = 99;
-    let covered = 0;
-    let read = 0;
-    for (const root of document.querySelectorAll<HTMLElement>('[data-home-slides]')) {
-      const r = root.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > innerHeight || r.width === 0) continue;
-      const ground = hex(
-        getComputedStyle(root.querySelector('.ts-sheet') ?? root)
-          .getPropertyValue('--paper')
-          .trim(),
-      );
-      // the old ground still drawn over this slide, if a kit change is clearing it
-      const veil = root.querySelector<HTMLCanvasElement>('canvas[data-live-overlay]');
-      const vr = veil?.getBoundingClientRect();
-      const cells = veil?.getContext('2d')?.getImageData(0, 0, veil.width, veil.height).data;
-      const opaque = (x: number, y: number): boolean => {
-        if (veil === null || vr === undefined || cells === undefined || vr.width === 0)
-          return false;
-        const cx = Math.floor(((x - vr.left) * veil.width) / vr.width);
-        const cy = Math.floor(((y - vr.top) * veil.height) / vr.height);
-        if (cx < 0 || cy < 0 || cx >= veil.width || cy >= veil.height) return false;
-        return (cells[(cy * veil.width + cx) * 4 + 3] ?? 0) > 0;
-      };
-      // every element on the slide that holds text of its own (most slides carry no data-block)
-      const seen = new Set<Element>();
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-      for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
-        const el = node.parentElement;
-        if (el === null || seen.has(el) || (node.textContent ?? '').trim() === '') continue;
-        seen.add(el);
-        if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
-        const b = el.getBoundingClientRect();
-        if (b.width === 0 || b.bottom < 0 || b.top > innerHeight) continue;
-        read += 1;
-        worst = Math.min(worst, ratio(rgb(getComputedStyle(el).color), ground));
-        const points = [
-          [b.left + b.width / 2, b.top + b.height / 2],
-          [b.left + b.width * 0.2, b.top + b.height / 2],
-          [b.left + b.width * 0.8, b.top + b.height / 2],
-        ];
-        if (points.some(([x, y]) => opaque(x ?? 0, y ?? 0))) covered += 1;
-      }
-    }
-    const veiled = document.querySelectorAll('[data-home-slides] canvas[data-live-overlay]').length;
-    return { worst, covered, read, veiled };
-  });
-
-type Sample = Awaited<ReturnType<typeof textContrast>>;
-
-/** Presses a kit's swatch and samples the visible slides every 40 ms for 600 ms (row home.tailor.theme). */
-async function sampleKit(page: Page, swatch: Locator): Promise<Sample[]> {
-  const samples: Sample[] = [];
-  const t0 = Date.now();
-  await swatch.click();
-  while (Date.now() - t0 < 600) {
-    samples.push(await textContrast(page));
-    await page.waitForTimeout(40);
-  }
-  return samples;
-}
-
-/** No text under 4.5:1 on its ground and none under the old ground, in every sample. */
-function expectReadable(samples: readonly Sample[], kit: string): void {
-  expect(
-    samples.some((s) => s.veiled > 0),
-    `${kit}: a sample during the clear`,
-  ).toBe(true);
-  for (const s of samples) {
-    expect(s.read, `${kit}: text read`).toBeGreaterThan(0);
-    expect(s.worst, `${kit}: text against its ground`).toBeGreaterThanOrEqual(4.5);
-    expect(s.covered, `${kit}: no text under the old ground`).toBe(0);
-  }
-}
 
 /**
  * The --pt-select pixels the page shows across a 6 px run centred on (x, y), read from a
@@ -239,12 +113,15 @@ export function rows(): void {
       await field.fill('Initech');
       await apply.click();
       await expect(snack).toHaveAttribute('data-on', '');
-      await band.locator('[data-kit="kestrel"]').click();
+      // the next change: slide 2 moved down in the band's filmstrip
+      const thumb = band.locator('[data-thumb="plan"]');
+      await thumb.focus();
+      await page.keyboard.press('ControlOrMeta+ArrowDown');
       await expect(snack.locator('[data-snackbar-text]')).not.toContainText('Initech');
       await page.keyboard.press('Escape');
       expect(await snack.getAttribute('data-on')).toBeNull();
-      // the band's Undo by the key with focus in the band (2.0): the kit, then the names
-      await band.locator('[data-kit="kestrel"]').focus();
+      // the band's Undo by the key with focus in the band (2.0): the move, then the names
+      await thumb.focus();
       await page.keyboard.press('ControlOrMeta+z');
       await page.keyboard.press('ControlOrMeta+z');
       await expect.poll(async () => count(await slidesText(page), 'Northwind')).toBe(names);
@@ -286,123 +163,6 @@ export function rows(): void {
           description:
             'the deck without slide 5: no Restore This Version on this tree (the scrubber is V2#14)',
         });
-    } finally {
-      await context.close();
-    }
-  });
-
-  test(title('home.tailor.theme'), async ({ browser }) => {
-    const { context, page } = await openHome(browser);
-    try {
-      const band = page.locator('[data-band="tailor"]');
-      await bandReady(page, 'tailor');
-      // at rest: no --pt-select, and the one colour outside paper and ink is Fenwick's swatch
-      const hues = await page.evaluate(() => {
-        const out = new Set<string>();
-        for (const el of document.querySelectorAll<HTMLElement>('body *')) {
-          if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
-          const cs = getComputedStyle(el);
-          const paints = [cs.backgroundColor];
-          if ([...el.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? '').trim()))
-            paints.push(cs.color);
-          if (parseFloat(cs.borderTopWidth) > 0) paints.push(cs.borderTopColor);
-          for (const p of paints) {
-            const m = p.match(/[\d.]+/g)?.map(Number) ?? [];
-            if (m.length < 3 || (m[3] !== undefined && m[3] === 0)) continue;
-            const [r = 0, g = 0, b = 0] = m;
-            if (Math.max(r, g, b) - Math.min(r, g, b) > 20)
-              out.add(
-                `${p} ${el.tagName.toLowerCase()}${el.dataset['kit'] ? `[data-kit=${el.dataset['kit']}]` : ''}`,
-              );
-          }
-        }
-        return [...out];
-      });
-      expect(hues.filter((h) => !h.startsWith('rgb(10, 27, 56)'))).toEqual([]);
-      expect(hues.join(' ')).not.toContain(SELECT);
-      await expect(band.getByText(TAILOR.examplesKey, { exact: true })).toBeVisible();
-      for (const kit of ['gt', 'kestrel', 'fenwick'] as const)
-        await expect(band.locator(`[data-kit="${kit}"]`)).toHaveAttribute(
-          'data-tip',
-          TAILOR.kits[kit].tip,
-        );
-
-      // Kestrel: the six variables on every slide within 500 ms; every 40 ms no text under 4.5:1
-      expectReadable(await sampleKit(page, band.locator('[data-kit="kestrel"]')), 'Kestrel');
-      for (const v of await kitVars(page))
-        expect(v, v.slide).toEqual({
-          slide: v.slide,
-          paper: KITS.kestrel.paper,
-          ink: KITS.kestrel.ink,
-          ink2: KITS.kestrel.ink2,
-          titanium: KITS.kestrel.titanium,
-          blue: KITS.kestrel.ink,
-          accent: KITS.kestrel.ink,
-        });
-      await expect(page.locator('main')).toHaveAttribute('data-page-kit', 'kestrel');
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('kestrel', 9));
-      expect(await band.locator('[data-kit="kestrel"]').getAttribute('aria-pressed')).toBe('true');
-
-      // the show then draws Kestrel (L3's show, push 5)
-      const present = page.locator('[data-present]');
-      await bandReady(page, 'present');
-      await present.click();
-      const shown = page.locator('[data-show-stage] [data-home-slides]').first();
-      const opened = await shown.waitFor({ timeout: 3000 }).then(
-        () => true,
-        () => false,
-      );
-      if (opened) {
-        const showPaper = await shown.evaluate((el) =>
-          getComputedStyle(el.querySelector('.ts-sheet') ?? el)
-            .getPropertyValue('--paper')
-            .trim()
-            .toLowerCase(),
-        );
-        expect(showPaper).toBe(KITS.kestrel.paper);
-        await page.keyboard.press('Escape');
-      } else
-        test.info().annotations.push({
-          type: 'not reached',
-          description:
-            'the show draws the kit: Present opened no show, so this tree has no live show (L3, push 5)',
-        });
-
-      // Fenwick: its four colours, the selection ring at 3:1 on its ground
-      await band.scrollIntoViewIfNeeded();
-      expectReadable(await sampleKit(page, band.locator('[data-kit="fenwick"]')), 'Fenwick');
-      for (const v of await kitVars(page)) {
-        expect(v.paper).toBe(KITS.fenwick.paper);
-        expect(v.ink).toBe(KITS.fenwick.ink);
-        expect(v.ink2).toBe(KITS.fenwick.ink2);
-        expect(v.titanium).toBe(KITS.fenwick.titanium);
-      }
-      const ring = await page.evaluate(() => {
-        const L = (h: number[]) =>
-          h
-            .map((v) => v / 255)
-            .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-            .reduce((s, v, i) => s + v * ([0.2126, 0.7152, 0.0722][i] ?? 0), 0);
-        const a = L([0x2f, 0x5c, 0xe0]);
-        const b = L([0x0a, 0x1b, 0x38]);
-        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-      });
-      expect(ring).toBeGreaterThanOrEqual(3);
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('fenwick', 9));
-
-      // GT restores the deck's own kit
-      await band.locator('[data-kit="gt"]').click();
-      await page.waitForTimeout(600);
-      const inline = await page.evaluate(() =>
-        [
-          ...document.querySelectorAll<HTMLElement>(
-            '[data-home-slides], [data-home-slides] .ts-sheet',
-          ),
-        ].some((el) => el.style.getPropertyValue('--paper') !== ''),
-      );
-      expect(inline).toBe(false);
-      expect(await page.locator('main').getAttribute('data-page-kit')).toBeNull();
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('gt', 9));
     } finally {
       await context.close();
     }

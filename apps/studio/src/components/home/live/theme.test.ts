@@ -84,7 +84,10 @@ describe('the example kits', () => {
     expect(ratio(sand.colors.ink2, '#e6e0d2')).toBeGreaterThanOrEqual(4.5);
     const brown = backgroundColors('#3d2b1f');
     expect(brown.colors.ink).toBe(TOKENS.dark.ink);
-    expect(ratio(brown.colors.titanium, '#3d2b1f')).toBeGreaterThanOrEqual(3);
+    // the hint reads 4.13:1 on it, so the counters and credits take the captions' colour
+    expect(ratio(SLIDE_TOKENS.dark.titanium, '#3d2b1f')).toBeLessThan(4.5);
+    expect(brown.colors.titanium).toBe(brown.colors.ink2);
+    expect(ratio(brown.colors.titanium, '#3d2b1f')).toBeGreaterThanOrEqual(4.5);
     expect(backgroundColors('#777777').ratio).toBeLessThan(4.5);
   });
 });

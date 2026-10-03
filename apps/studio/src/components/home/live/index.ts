@@ -83,6 +83,7 @@ registerBand('menus', () => import('./menus'));
 registerBand('canvas', async () => ({ start: (ctx) => void startObjects(ctx, 'canvas') }));
 registerBand('canvas', async () => ({ start: startCanvasField }));
 registerBand('tailor', () => import('./tailor'));
+registerBand('kits', () => import('./kits'));
 registerBand('agents', () => import('./history').then((m) => ({ start: m.startHistory })));
 registerBand('agents', () => import('./agents').then((m) => ({ start: m.startAgents })));
 registerBand('present', () => import('./show').then((m) => ({ start: m.startShow })));

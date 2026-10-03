@@ -1,6 +1,7 @@
 import { coverage } from './lib';
 import * as agents from './home/agents';
 import * as exportBand from './home/export';
+import * as kits from './home/kits';
 import * as menus from './home/menus';
 import * as motion from './home/motion';
 import * as objects from './home/objects';
@@ -38,7 +39,7 @@ import * as tailor from './home/tailor';
 //
 //   PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/home.spec.ts
 
-const MODULES = [page, objects, tailor, agents, present, exportBand, motion, menus] as const;
+const MODULES = [page, objects, tailor, agents, present, exportBand, motion, menus, kits] as const;
 
 for (const module of MODULES) module.rows();
 

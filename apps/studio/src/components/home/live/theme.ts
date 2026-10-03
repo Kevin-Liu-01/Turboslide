@@ -1,12 +1,9 @@
 import { bayer8 } from '@turboslide/effects/bayer';
 
-import { HISTORY, TAILOR } from '../copy';
-import type { LiveContext } from './index';
 import { ms, sequence, smoothstep } from './motion';
 import { applyKit, DERIVED_ALPHAS, KITS, kitProperties as propertiesOf } from './paint';
 import type { KitColors } from './paint';
-import type { HomeDeckState, KitId } from './state';
-import type { Snackbar } from './tailor';
+import type { KitId } from './state';
 
 /**
  * The example kits (docs/LANDING.md 2.8, a replica; integrator.md 3 with Kevin's answer 4). The
@@ -21,7 +18,7 @@ import type { Snackbar } from './tailor';
  * A change sets the words, the ground under every text box and the printed inks at once, and the
  * old ground outside the boxes clears in Bayer order over 500 ms on the tone curve (3.6 T3), so no
  * frame shows text under its kit's contrast. Under reduced motion it is a cut. `clearGround` is
- * the clear, which the kits band (`kits.ts`) and Tailor's first pass row (`startTheme`) run.
+ * the clear, which the kits band (`kits.ts`) and the miniature's Slide > Change theme run.
  */
 
 export { applyKit, DERIVED_ALPHAS, KITS };
@@ -31,10 +28,9 @@ export function kitProperties(kit: Exclude<KitId, 'gt'>): Record<string, string>
   return propertiesOf(KITS[kit]);
 }
 
-/** A swatch's kit: the first pass's Fenwick swatch is Globex (2.8, Kevin's pick of C's name). */
+/** A swatch's kit. */
 export function kitOfSwatch(el: HTMLElement): KitId {
-  const id = el.dataset['kit'];
-  return id === 'fenwick' ? 'globex' : ((id ?? 'gt') as KitId);
+  return (el.dataset['kit'] ?? 'gt') as KitId;
 }
 
 const inView = (el: Element): boolean => {
@@ -44,7 +40,8 @@ const inView = (el: Element): boolean => {
 
 /**
  * The box of every element on a slide that holds text of its own: a text box, a row's cell, the
- * counter, read from the text itself so a slide without block attributes is covered too.
+ * counter, read from the text itself so a slide without block attributes is covered too; and the
+ * box of every picture (a print, a field, an image, a drawing).
  */
 function textBoxes(root: HTMLElement): DOMRect[] {
   const boxes: DOMRect[] = [];
@@ -58,11 +55,18 @@ function textBoxes(root: HTMLElement): DOMRect[] {
     const box = el.getBoundingClientRect();
     if (box.width > 0 && box.height > 0) boxes.push(box);
   }
+  // a picture changes its inks at once with the words, so the old ground never hides a print
+  for (const el of root.querySelectorAll('.ts-home-print, [data-field], img, svg')) {
+    if (el.closest('[data-live-overlay]') !== null) continue;
+    if ((el.parentElement?.closest('svg') ?? null) !== null) continue;
+    const box = el.getBoundingClientRect();
+    if (box.width > 0 && box.height > 0) boxes.push(box);
+  }
   return boxes;
 }
 
 /**
- * The old ground over one slide, with a hole at every text box, cleared in Bayer order: a cell
+ * The old ground over one slide, with a hole at every text box and picture, cleared in Bayer order: a cell
  * goes when the tone curve passes its threshold (m + 0.5) / 64. Two screen pixels a cell.
  */
 function veil(
@@ -178,52 +182,3 @@ export function clearGround(root: HTMLElement, change: () => void, animate: bool
 
 /** The colours of a kit by id, null for GT. */
 export const colorsOfKit = (kit: KitId): KitColors | null => (kit === 'gt' ? null : KITS[kit]);
-
-/**
- * The first pass's kit row in the Tailor band (until `V2#12` moves the kits to their own band):
- * the three swatches, the status sentence in the snackbar's row.
- */
-export function startTheme(ctx: LiveContext, snack: Snackbar): void {
-  const { band, root, store } = ctx;
-  const swatches = [...band.querySelectorAll<HTMLElement>('[data-kit]')];
-  if (swatches.length === 0) return;
-  let shown: KitId = store.get().kit;
-
-  const paint = (kit: KitId): void => {
-    for (const s of swatches) s.setAttribute('aria-pressed', String(kitOfSwatch(s) === kit));
-    if (kit === 'gt') delete root.dataset['pageKit'];
-    else root.dataset['pageKit'] = kit;
-  };
-
-  for (const swatch of swatches)
-    swatch.addEventListener('click', () => {
-      const kit = kitOfSwatch(swatch);
-      if (kit === store.get().kit) return;
-      const id = swatch.dataset['kit'] as keyof typeof TAILOR.kits;
-      // the veils read the old ground first; the commit's paint sets the new kit under them
-      clearGround(
-        root,
-        () =>
-          store.commit({
-            band: 'tailor',
-            author: 'you',
-            words: HISTORY.kit(TAILOR.kits[id].name),
-            next: (s) => ({ ...s, kit }),
-            undo: (s) => s,
-          }),
-        true,
-      );
-    });
-
-  store.subscribe((state: HomeDeckState, event) => {
-    if (state.kit === shown) return;
-    shown = state.kit;
-    paint(state.kit);
-    if (event.kind === 'commit' && event.change.band === 'tailor') {
-      const swatch = swatches.find((s) => kitOfSwatch(s) === state.kit);
-      const id = (swatch?.dataset['kit'] ?? 'gt') as Parameters<typeof TAILOR.kitStatus>[0];
-      snack.show(TAILOR.kitStatus(id, state.order.length));
-    }
-  });
-  paint(shown);
-}

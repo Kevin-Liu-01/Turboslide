@@ -804,12 +804,41 @@ export function rows(): void {
           'the live module is read on a build (the node-server output or the preview): one request, at most 32 KB gzip and 112 KB decoded',
         );
       }
+      /* the live module is the one chunk after load that holds the overlay's class; a chunk it
+         imports that no script loaded before load comes with it (the build put the product's
+         panels/assist-strings, which the editor shares, in a chunk of its own) and counts in its
+         bytes; any other script after load fails the row (the integrator's ruling, 2026-10-03) */
+      const bodies = await Promise.all(
+        late.map(async (e) => {
+          const s = scripts.find((x) => x.url === e.name);
+          return {
+            name: e.name,
+            body: (await (await s?.req.response())?.body()) ?? Buffer.alloc(0),
+          };
+        }),
+      );
+      const lives = bodies.filter((b) => b.body.includes('ts-home-sel-layer'));
       expect(
-        late.map((e) => e.name),
-        'one request after load',
+        lives.map((b) => b.name),
+        'one live chunk after load',
       ).toHaveLength(1);
-      const live = scripts.find((s) => s.url === late[0]?.name);
-      const body = (await (await live?.req.response())?.body()) ?? Buffer.alloc(0);
+      const liveText = lives[0]?.body.toString('utf8') ?? '';
+      const imported = new Set(
+        [...liveText.matchAll(/from\s*["']\.\/([\w.-]+\.js)["']/g)].map((m) => m[1]),
+      );
+      const others = bodies.filter((b) => !b.body.includes('ts-home-sel-layer'));
+      const stray = others.filter(
+        (b) => !imported.has(new URL(b.name).pathname.split('/').pop() ?? ''),
+      );
+      expect(
+        stray.map((b) => b.name),
+        'no script after load but the live chunk and the chunks it imports',
+      ).toEqual([]);
+      const body = Buffer.concat([lives[0]?.body ?? Buffer.alloc(0), ...others.map((b) => b.body)]);
+      test.info().annotations.push({
+        type: 'requests',
+        description: bodies.map((b) => `${new URL(b.name).pathname} ${b.body.length} B`).join(', '),
+      });
       /* the integrator's ruling of 2026-10-03 (build/integrator.md "Landing, merge"; l2.md Q8, Q13,
          l3.md R16): the one chunk carries every band's live code, so its line is 32 KB gzip and
          112 KB decoded in place of LANDING.md 4.1's 15 KB and 48 KB */

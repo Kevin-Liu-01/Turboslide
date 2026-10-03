@@ -191,7 +191,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
 
   const startLift = (g: Lift): void => {
     g.on = true;
-    // the 2 px outline in --pt-select is selection.css's `.ts-thumb[data-lifted]`; the chosen
+    // the 2 px outline in --pt-select is selection.css's `.ts-home-thumb[data-lifted]`; the chosen
     // slide's ink edge and its Move row step aside while it is held (the drop chooses it again)
     g.thumb.removeAttribute('data-selected');
     g.thumb.setAttribute('data-lifted', '');

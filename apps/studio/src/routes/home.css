@@ -1008,13 +1008,13 @@ html:has(.ts-product) {
   flex: 1 1 auto;
 }
 
-.ts-kits {
+.ts-home-kits {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
 }
 
-.ts-kit {
+.ts-home-kit {
   appearance: none;
   display: inline-flex;
   align-items: center;
@@ -1029,13 +1029,13 @@ html:has(.ts-product) {
   cursor: pointer;
 }
 
-.ts-kit[aria-pressed='true'] {
+.ts-home-kit[aria-pressed='true'] {
   color: var(--pt-ink);
   font-weight: 500;
 }
 
 /* a kit's swatch: the kit's ground with a bar of its ink, 28 px square */
-.ts-kit-swatch {
+.ts-home-kit-swatch {
   position: relative;
   display: block;
   width: 28px;
@@ -1045,7 +1045,7 @@ html:has(.ts-product) {
   background: var(--ts-kit-paper);
 }
 
-.ts-kit-swatch > i {
+.ts-home-kit-swatch > i {
   position: absolute;
   left: 6px;
   right: 6px;
@@ -1054,23 +1054,23 @@ html:has(.ts-product) {
   background: var(--ts-kit-ink);
 }
 
-.ts-kit[aria-pressed='true'] .ts-kit-swatch {
+.ts-home-kit[aria-pressed='true'] .ts-home-kit-swatch {
   border-color: var(--pt-ink);
 }
 
 /* GT is the deck's own kit in the page's appearance; Kestrel and Fenwick are example customers'
    kits that fix their colours in both appearances (integrator.md 3) */
-.ts-kit[data-kit='gt'] {
+.ts-home-kit[data-kit='gt'] {
   --ts-kit-paper: var(--pt-paper);
   --ts-kit-ink: var(--pt-ink);
 }
 
-.ts-kit[data-kit='kestrel'] {
+.ts-home-kit[data-kit='kestrel'] {
   --ts-kit-paper: #f3efe6;
   --ts-kit-ink: #1f1b16;
 }
 
-.ts-kit[data-kit='fenwick'] {
+.ts-home-kit[data-kit='fenwick'] {
   --ts-kit-paper: #0a1b38;
   --ts-kit-ink: #f4f1ea;
 }
@@ -1083,7 +1083,7 @@ html:has(.ts-product) {
   margin-top: 32px;
 }
 
-.ts-filmstrip {
+.ts-home-filmstrip {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1092,14 +1092,14 @@ html:has(.ts-product) {
   gap: 8px;
 }
 
-.ts-thumb {
+.ts-home-thumb {
   position: relative;
   display: grid;
   grid-template-columns: 144px;
   cursor: pointer;
 }
 
-.ts-thumb-n {
+.ts-home-thumb-n {
   position: absolute;
   left: -22px;
   top: 0;
@@ -1109,24 +1109,24 @@ html:has(.ts-product) {
   font-variant-numeric: tabular-nums;
 }
 
-.ts-thumb[data-selected] .ts-home-sheet.is-thumb::after {
+.ts-home-thumb[data-selected] .ts-home-sheet.is-thumb::after {
   border: 2px solid var(--pt-ink);
 }
 
 /* Move Up and Move Down: a row reserved under each thumbnail, shown for the chosen one only, so
    showing them moves nothing (l2.md Q3) */
-.ts-thumb-moves {
+.ts-home-thumb-moves {
   display: flex;
   justify-content: space-between;
   height: 28px;
   visibility: hidden;
 }
 
-.ts-thumb[data-selected] .ts-thumb-moves {
+.ts-home-thumb[data-selected] .ts-home-thumb-moves {
   visibility: visible;
 }
 
-.ts-thumb-moves .ts-text-button {
+.ts-home-thumb-moves .ts-text-button {
   height: 28px;
   padding: 0 2px;
   font-size: 13px;
@@ -1136,7 +1136,7 @@ html:has(.ts-product) {
   min-width: 0;
 }
 
-.ts-snackbar {
+.ts-home-snackbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1146,11 +1146,11 @@ html:has(.ts-product) {
   color: var(--pt-ink);
 }
 
-.ts-snackbar > * {
+.ts-home-snackbar > * {
   visibility: hidden;
 }
 
-.ts-snackbar[data-on] > * {
+.ts-home-snackbar[data-on] > * {
   visibility: visible;
 }
 
@@ -1206,7 +1206,7 @@ html:has(.ts-product) {
   min-height: calc(576px + 56px);
 }
 
-.ts-slide-list {
+.ts-home-slide-list {
   list-style: none;
   margin: 16px 0 0;
   padding: 0;
@@ -2032,20 +2032,20 @@ html.ts-intro.ts-t0 [data-field='hero']:not([data-field-state]) > .ts-field-stil
     margin-top: 32px;
   }
 
-  .ts-filmstrip {
+  .ts-home-filmstrip {
     flex-direction: row;
     gap: 6px;
   }
 
-  .ts-thumb {
+  .ts-home-thumb {
     grid-template-columns: 80px;
   }
 
-  .ts-thumb-n {
+  .ts-home-thumb-n {
     display: none;
   }
 
-  .ts-thumb-moves {
+  .ts-home-thumb-moves {
     height: auto;
     flex-direction: column;
   }

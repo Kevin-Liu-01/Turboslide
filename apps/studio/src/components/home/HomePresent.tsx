@@ -35,7 +35,7 @@ export function HomePresent() {
         </BandHead>
         <div className="ts-present-slide">
           <HomeSheet instance="present" className="ts-present-sheet" />
-          <ol className="ts-slide-list" data-slide-list aria-label={PRESENT.listLabel}>
+          <ol className="ts-home-slide-list" data-slide-list aria-label={PRESENT.listLabel}>
             {HOME_DECK.order.map((id) => {
               const slide = HOME_DECK.slides[id];
               const chosen = id === CHOSEN;

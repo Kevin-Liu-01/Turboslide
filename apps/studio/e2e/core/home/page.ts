@@ -1,4 +1,6 @@
+import { spawnSync } from 'node:child_process';
 import { loadavg } from 'node:os';
+import { resolve } from 'node:path';
 import { brotliCompressSync, constants as zlibConstants } from 'node:zlib';
 
 import { expect, test } from '@playwright/test';
@@ -149,6 +151,42 @@ async function settledMedia(page: Page): Promise<void> {
     { timeout: 20_000 },
   );
   await page.waitForTimeout(300);
+}
+
+/* A cold load of /home in a node process of its own, through playwright-core, which the runner
+   does not instrument: the paths of the pictures the page requested by 1.5 s after hydration. */
+const COLD_LOAD = `
+const { chromium } = await import('playwright-core');
+const [width, height, scale] = JSON.parse(process.argv[1]);
+const oidc = process.env.VERCEL_OIDC_TOKEN;
+const browser = await chromium.launch();
+const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale,
+  colorScheme: 'light', extraHTTPHeaders: oidc ? { 'x-vercel-trusted-oidc-idp-token': oidc } : {} });
+await context.addInitScript(() => { try { localStorage.setItem('gt-theme', 'light'); } catch {} });
+const page = await context.newPage();
+await page.goto(new URL('/home', process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321').href);
+await page.locator('main#top[data-hydrated]').waitFor({ timeout: 30000 });
+await page.evaluate(() => document.fonts.ready);
+await page.waitForTimeout(1500);
+const pictures = await page.evaluate(() => performance.getEntriesByType('resource')
+  .filter((r) => r.initiatorType === 'img' || /\\.(png|jpe?g|webp|avif|gif)(\\?|$)/.test(r.name))
+  .map((r) => new URL(r.name).pathname));
+await browser.close();
+process.stdout.write(JSON.stringify(pictures));
+`;
+
+function coldPictures(size: { width: number; height: number }, scale: number): string[] {
+  const run = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', COLD_LOAD, JSON.stringify([size.width, size.height, scale])],
+    {
+      cwd: resolve(import.meta.dirname, '..', '..', '..', '..', '..'),
+      encoding: 'utf8',
+      timeout: 120_000,
+    },
+  );
+  if (run.status !== 0) throw new Error(`the cold load exited ${run.status}: ${run.stderr}`);
+  return JSON.parse(run.stdout) as string[];
 }
 
 const isDevServer = (page: Page): Promise<boolean> =>
@@ -584,17 +622,33 @@ export function rows(): void {
               .map((r) => new URL(r.name).pathname),
             scripts: resources
               .filter((r) => r.initiatorType === 'script' || /\.m?js(\?|$)/.test(r.name))
-              .map((r) => ({ url: r.name, decoded: r.decodedBodySize, transfer: r.transferSize })),
+              .map((r) => ({
+                url: r.name,
+                decoded: r.decodedBodySize,
+                transfer: r.transferSize,
+              })),
             styles: resources
               .filter((r) => /\.css(\?|$)/.test(r.name))
-              .map((r) => ({ url: r.name, decoded: r.decodedBodySize, transfer: r.transferSize })),
+              .map((r) => ({
+                url: r.name,
+                decoded: r.decodedBodySize,
+                transfer: r.transferSize,
+              })),
           };
         });
         const label = `${size.width} x${scale}`;
-        if (facts.pictures.length > 0)
+        /* the pictures before the first scroll, read in a browser the runner does not trace: its
+           trace (trace: 'retain-on-failure') snapshots the page by reading every element's
+           computed style, which resolves the canvas band's mask under content-visibility: auto
+           and requests its still (read on the preview 2026-10-03: with the trace, the still at
+           395 to 459 ms from the CSS; in a process of its own, none) */
+        const cold = coldPictures(size, scale);
+        if (cold.length > 0)
           failures.push(
-            `${label}: ${facts.pictures.length} pictures before the first scroll (${facts.pictures.join(', ')})`,
+            `${label}: ${cold.length} pictures before the first scroll (${cold.join(', ')})`,
           );
+        if (facts.pictures.length > cold.length)
+          notes.push(`${label}: under the runner's trace ${facts.pictures.join(', ')}`);
         /* the document: decoded and brotli */
         const doc = await request.get('/home', {
           headers: { ...extraHTTPHeaders, 'accept-encoding': 'identity' },
@@ -602,7 +656,7 @@ export function rows(): void {
         const docBytes = await doc.body();
         const docBr = brotli(docBytes);
         notes.push(
-          `${label}: document ${docBytes.length} B decoded, ${docBr} B brotli; pictures before the first scroll ${facts.pictures.length}`,
+          `${label}: document ${docBytes.length} B decoded, ${docBr} B brotli; pictures before the first scroll ${cold.length}`,
         );
         if (docBytes.length > 80_000)
           failures.push(`${label}: the document is ${docBytes.length} B decoded (line 80000)`);

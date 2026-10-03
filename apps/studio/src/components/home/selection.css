@@ -174,7 +174,7 @@
 }
 
 /* the lifted filmstrip slide's 2 px outline (docs/LANDING.md 2.5) and the Tailor highlight (T1) */
-.ts-thumb[data-lifted] .ts-home-sheet.is-thumb::after {
+.ts-home-thumb[data-lifted] .ts-home-sheet.is-thumb::after {
   border: 2px solid var(--pt-select);
 }
 

@@ -70,17 +70,17 @@ export function HomeTailor() {
           </div>
           <div className="ts-row">
             <span className="ts-row-key">{TAILOR.examplesKey}</span>
-            <span className="ts-kits" role="group" aria-label={TAILOR.examplesKey}>
+            <span className="ts-home-kits" role="group" aria-label={TAILOR.examplesKey}>
               {KITS.map((kit) => (
                 <button
                   key={kit.id}
                   type="button"
-                  className="ts-kit"
+                  className="ts-home-kit"
                   data-kit={kit.id}
                   aria-pressed={kit.pressed}
                   data-tip={TAILOR.kits[kit.id].tip}
                 >
-                  <span className="ts-kit-swatch" aria-hidden="true">
+                  <span className="ts-home-kit-swatch" aria-hidden="true">
                     <i />
                   </span>
                   {TAILOR.kits[kit.id].name}
@@ -91,21 +91,21 @@ export function HomeTailor() {
         </form>
       </div>
       <div className="ts-tailor-editor">
-        <ol className="ts-filmstrip" data-filmstrip aria-label={TAILOR.filmstripLabel}>
+        <ol className="ts-home-filmstrip" data-filmstrip aria-label={TAILOR.filmstripLabel}>
           {THUMBS.map(([instance, id]) => (
             <li
               key={id}
-              className="ts-thumb"
+              className="ts-home-thumb"
               data-thumb={id}
               tabIndex={0}
               aria-label={title(id)}
               {...(id === 'plan' ? { 'data-selected': '', 'aria-current': 'true' } : {})}
             >
-              <span className="ts-thumb-n" data-thumb-n aria-hidden="true">
+              <span className="ts-home-thumb-n" data-thumb-n aria-hidden="true">
                 {HOME_DECK.slides[id].n}
               </span>
               <HomeSheet instance={instance} />
-              <span className="ts-thumb-moves">
+              <span className="ts-home-thumb-moves">
                 <button type="button" className="ts-text-button" data-thumb-move="up" tabIndex={-1}>
                   {TAILOR.moveUp}
                 </button>
@@ -123,7 +123,7 @@ export function HomeTailor() {
         </ol>
         <div className="ts-tailor-stage" data-stage>
           <HomeSheet instance="tailor-stage" label={title('plan')} />
-          <div className="ts-snackbar" data-snackbar>
+          <div className="ts-home-snackbar" data-snackbar>
             <span data-snackbar-text aria-live="polite" />
             <button type="button" className="ts-text-button" data-snackbar-undo data-undo="tailor">
               {HOME_TAILOR_WORDS.undo}

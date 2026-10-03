@@ -281,7 +281,9 @@ describe('the committed GT template is the 95 slide import', () => {
     expect(record.sections.map((section) => section.slides)).toEqual(
       templateManifest.sections.map((section) => section.slideIds.length),
     );
-    expect(Object.keys(deckManifest.assets).every((id) => id in templateManifest.assets)).toBe(true);
+    expect(Object.keys(deckManifest.assets).every((id) => id in templateManifest.assets)).toBe(
+      true,
+    );
   });
 
   it('deck.create over the committed record yields 95 slides, every asset twin and the seven speed mark html blocks', () => {

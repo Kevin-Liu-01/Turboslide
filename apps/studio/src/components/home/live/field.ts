@@ -184,6 +184,9 @@ export function pixelsOf(url: string): Promise<ImageData | null> {
     found = (async () => {
       try {
         const image = new Image();
+        /* the CSS mask requests a still in CORS mode; the same mode here shares that request's
+           cache entry, so the page never fetches a still twice (home.budget.bytes-page) */
+        image.crossOrigin = 'anonymous';
         image.src = url;
         await image.decode();
         const canvas = document.createElement('canvas');

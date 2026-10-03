@@ -1,0 +1,494 @@
+diff --git a/apps/studio/src/editor/controller.tsx b/apps/studio/src/editor/controller.tsx
+index bbd96bba..58bc42d9 100644
+--- a/apps/studio/src/editor/controller.tsx
++++ b/apps/studio/src/editor/controller.tsx
+@@ -1606,7 +1606,14 @@ export function createEditorController(init: {
+     }
+   };
+ 
++  /* another author's entry in this tab's frame (room-client.ts onRemoteApplied), read by the
++     announce of the same entry: the session takes the point of each remote splice from it */
++  let remoteLocal: { opId: string; mutations: readonly Mutation[] } | null = null;
++
+   const announceRemoteText = (entry: Entry): void => {
++    const local =
++      remoteLocal !== null && remoteLocal.opId === entry.opId ? remoteLocal.mutations : null;
++    remoteLocal = null;
+     if (
+       room === null ||
+       entry.clientId === room.clientId() ||
+@@ -1637,7 +1644,26 @@ export function createEditorController(init: {
+       seen.add(key);
+       const text = readRunText(slide, mutation.blockId, pointer);
+       if (text === undefined) continue;
+-      announceTextChanged({ slideId: mutation.slideId, blockId: mutation.blockId, pointer, text });
++      /* the splices of this run as this tab placed them, so the session reads where the other
++         person's text landed rather than diffing two strings (the realtime round's fix round 2) */
++      const splices =
++        local === null
++          ? undefined
++          : local.flatMap((row) =>
++              row.op === 'text.splice' &&
++              row.slideId === mutation.slideId &&
++              row.blockId === mutation.blockId &&
++              row.path === mutation.path
++                ? [{ at: row.at, remove: row.remove, insert: row.insert }]
++                : [],
++            );
++      announceTextChanged({
++        slideId: mutation.slideId,
++        blockId: mutation.blockId,
++        pointer,
++        text,
++        ...(splices === undefined ? {} : { splices }),
++      });
+     }
+   };
+ 
+@@ -1926,6 +1952,9 @@ export function createEditorController(init: {
+           publish({ serverRevision: next.deck.revision });
+         }
+       },
++      onRemoteApplied: (entry, local) => {
++        remoteLocal = { opId: entry.opId, mutations: local };
++      },
+       onStatus: (status) => {
+         publish({
+           sync: status,
+diff --git a/packages/realtime/client/room-client.test.ts b/packages/realtime/client/room-client.test.ts
+index 1fd085c9..1300cc63 100644
+--- a/packages/realtime/client/room-client.test.ts
++++ b/packages/realtime/client/room-client.test.ts
+@@ -2907,3 +2907,58 @@ describe("the run rule's client half (build/r1.md R1-R2h; the row realtime.title
+     expect(advanceRunEnds(runEnds, [splice(3, 0, 'w')], true)).toBe(false);
+   });
+ });
++
++describe('a remote entry in the tab’s frame (onRemoteApplied; the realtime round’s fix round 2)', () => {
++  it('names where another author’s insert landed beside a pending op that declared no run, before the op event', async () => {
++    const h = harness();
++    const base = tabTransport(h.server, kevin);
++    let hold: Promise<void> | null = null;
++    let release: () => void = () => undefined;
++    const gated: RoomTransport = {
++      ...base,
++      async postOps(body) {
++        if (hold !== null) await hold;
++        return base.postOps(body);
++      },
++    };
++    const seen: { opId: string; local: readonly Mutation[] }[] = [];
++    const order: string[] = [];
++    const a = h.client(kevin, {
++      transport: gated,
++      transform: undefined,
++      onRemoteApplied: (entry, local) => {
++        seen.push({ opId: entry.opId, local });
++        order.push('applied');
++      },
++      onEvent: (event) => {
++        if (event.type === 'op') order.push('op');
++      },
++    });
++    const b = h.client(maya, { transform: undefined });
++    a.room.start();
++    b.room.start();
++    await until(() => a.room.status().connected && b.room.status().connected);
++    const start = textOf(a.room.document());
++    const end = start.length;
++    // A's " xa" waits on the wire with no run end to continue; B's " xb" lands at the same offset
++    hold = new Promise((resolve) => {
++      release = resolve;
++    });
++    a.room.apply([splice(end, 0, ' xa')], 'type', 'now');
++    b.room.apply([splice(end, 0, ' xb')], 'type', 'now');
++    await settled([b.room]);
++    await until(() => textOf(a.room.document()).includes(' xb'));
++    // the server puts B's word first, A's copy moves its pending op past it, and the hook names
++    // B's insert at the offset it holds in A's copy: before A's own " xa", not after it
++    expect(textOf(a.room.document())).toBe(`${start} xb xa`);
++    const remote = seen.at(-1)!;
++    expect(remote.local).toEqual([splice(end, 0, ' xb')]);
++    expect(order.slice(-2)).toEqual(['applied', 'op']);
++    release();
++    hold = null;
++    await settled([a.room, b.room]);
++    expect(textOf(h.server.document())).toBe(`${start} xb xa`);
++    await a.room.stop();
++    await b.room.stop();
++  });
++});
+diff --git a/packages/realtime/client/room-client.ts b/packages/realtime/client/room-client.ts
+index 576227c9..588d3917 100644
+--- a/packages/realtime/client/room-client.ts
++++ b/packages/realtime/client/room-client.ts
+@@ -406,6 +406,14 @@ export type RoomClientOptions = {
+   onStatus?: (status: SyncStatus) => void;
+   /** every event of the stream after the client applied it (presence, checkpoint, inbox, access) */
+   onEvent?: (event: RoomEvent) => void;
++  /**
++   * Another author's entry in this tab's frame, just before its `op` event: its mutations moved
++   * past the pending ops as the client placed them. A text session reads the point of a remote
++   * insertion from it rather than from a diff of two strings, which cannot tell an insertion
++   * before this person's own words from one after them when the two begin with the same
++   * characters (the realtime round's fix round 2, realtime.title.two-typers)
++   */
++  onRemoteApplied?: (entry: Entry, local: readonly Mutation[]) => void;
+   onReject?: (rejected: Rejected & { mutations?: Mutation[]; comment?: CommentOp }) => void;
+   /**
+    * The document at a revision the server named (a `resync`); null keeps the current one.
+@@ -1504,6 +1512,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
+         : [...new Set([...changed, ...folded.changed])],
+       'remote',
+     );
++    options.onRemoteApplied?.(entry, bridged);
+     options.onEvent?.({ type: 'op', entry });
+     persist();
+     emitStatus();
+diff --git a/packages/viewer/src/InlineText.tsx b/packages/viewer/src/InlineText.tsx
+index c09a87d7..ca0caf46 100644
+--- a/packages/viewer/src/InlineText.tsx
++++ b/packages/viewer/src/InlineText.tsx
+@@ -416,7 +416,7 @@ export function textBurstMutation(
+   const plainFrom = plainOf(base);
+   const plainTo = plainOf(to);
+   if (plainFrom !== plainTo) {
+-    const diff = textDiff(plainFrom, plainTo);
++    const diff = caretPlaced(plainFrom, plainTo, textDiff(plainFrom, plainTo), takeBurstCaret(key));
+     return [
+       {
+         op: 'text.splice',
+@@ -461,8 +461,16 @@ export type TextChangedDetail = {
+   pointer: string;
+   /** the markup the document holds now */
+   text: Markup;
++  /**
++   * The remote splices of this run in this tab's frame, in plain text offsets, when the route
++   * knows them (the controller's announce of another person's entry); absent for a re-send
++   */
++  splices?: ReadonlyArray<TextSplice>;
+ };
+ 
++/** One plain text splice of a run: `remove` characters at `at` replaced by `insert`. */
++export type TextSplice = { at: number; remove: number; insert: string };
++
+ /** The key of one run across the session and the burst: slide, block and pointer. */
+ export function runKey(slideId: string, blockId: string, pointer: string): string {
+   return `${slideId}:${blockId}/${pointer}`;
+@@ -732,6 +740,48 @@ export function handedText(key: string): Markup | undefined {
+ export function forgetAbsorbed(key: string): void {
+   absorbedBases.delete(key);
+   handedTexts.delete(key);
++  burstCarets.delete(key);
++}
++
++/* the collapsed caret of a run's session when it handed its last burst, per run (the realtime
++   round's fix round 2). A burst that inserted text ends at the caret, so the caret tells where the
++   insertion is when the diff could read it at several points: A typed " ta1" at the end of a
++   title while B's " t" landed there and the session kept A's keys before it; the diff of
++   "title t" to "title ta1 t" reads "a1 t" after B's " t", which stitched A's word to B's
++   " t" and let B's next "b1" land inside it (realtime.title.two-typers, " ta1" lost). Taken by
++   the burst's write (textBurstMutation), forgotten with the session */
++const burstCarets = new Map<string, number>();
++
++/** Notes the collapsed caret of a run's session as it hands a burst, or forgets it for a range. */
++export function noteBurstCaret(key: string, caret: number | null): void {
++  if (caret === null) burstCarets.delete(key);
++  else burstCarets.set(key, caret);
++}
++
++function takeBurstCaret(key: string): number | undefined {
++  const caret = burstCarets.get(key);
++  burstCarets.delete(key);
++  return caret;
++}
++
++/**
++ * A pure insertion the diff found, moved to end at the caret when the text it inserts there
++ * gives the same result: textDiff keeps the longest common prefix, so an insertion that begins
++ * with the characters after it, or ends with the ones before it, reads at several points and the
++ * diff takes the last. Any other change, or a caret no such insertion ends at, keeps the diff.
++ */
++export function caretPlaced(
++  from: string,
++  to: string,
++  diff: { start: number; end: number; text: string },
++  caret: number | undefined,
++): { start: number; end: number; text: string } {
++  if (caret === undefined || diff.end !== diff.start || diff.text === '') return diff;
++  const at = caret - diff.text.length;
++  if (at === diff.start || at < 0 || at > from.length) return diff;
++  const text = to.slice(at, caret);
++  if (from.slice(0, at) + text + from.slice(at) !== to) return diff;
++  return { start: at, end: at, text };
+ }
+ 
+ /** Tells every open inline session that a Text changed under it. */
+@@ -740,6 +790,23 @@ export function announceTextChanged(detail: TextChangedDetail): void {
+   window.dispatchEvent(new CustomEvent<TextChangedDetail>(TEXT_CHANGED_EVENT, { detail }));
+ }
+ 
++/**
++ * The remote change as one splice of the base (`start`, `end`, the inserted `text`), when the
++ * route named exactly one splice of the run and it turns the base into the document's text;
++ * null otherwise, and the caller diffs the two texts.
++ */
++function knownChange(
++  base: string,
++  remote: string,
++  splices: ReadonlyArray<TextSplice> | undefined,
++): { start: number; end: number; text: string } | null {
++  if (splices === undefined || splices.length !== 1) return null;
++  const { at, remove, insert } = splices[0]!;
++  if (at < 0 || remove < 0 || at + remove > base.length) return null;
++  if (base.slice(0, at) + insert + base.slice(at + remove) !== remote) return null;
++  return { start: at, end: at + remove, text: insert };
++}
++
+ /**
+  * The editable after a collaborator's change (SPEC-3 3.5): the document's new markup with this
+  * person's unflushed keystrokes re-applied at their shifted offset, and the caret moved by the
+@@ -752,13 +819,35 @@ export function absorbedText(
+   dom: Markup,
+   remote: Markup,
+   selection: [number, number] | null,
++  splices?: ReadonlyArray<TextSplice>,
+ ): { text: Markup; selection: [number, number] | null } {
+   const local = textDiff(plainOf(base), plainOf(dom));
+-  const change = textDiff(plainOf(base), plainOf(remote));
++  const plainBase = plainOf(base);
++  /* the remote change: the route's one splice when it turns the base into the document's text,
++     so its point is where the room placed it; else the diff of the two texts */
++  const known = knownChange(plainBase, plainOf(remote), splices);
++  const change = known ?? textDiff(plainBase, plainOf(remote));
+   const delta = change.text.length - (change.end - change.start);
+   const shift = (offset: number): number =>
+     change.start <= offset ? Math.max(change.start, offset + delta) : offset;
+   const untouched = local.text === '' && local.end === local.start;
++  /* the point of a pure insertion is certain when the route named it, or when its text does not
++     end with the character before it. textDiff keeps the longest common prefix, so an insertion
++     that ends with that character reads the same one character earlier, and the change may have
++     landed before this person's own handed text rather than after it: B handed " t", A's " t"
++     landed before it, and the diff of "title t" to "title t t" is " t" at the end of B's " t"
++     (the realtime round's fix round 2: realtime.title.two-typers lost " ta1" when B's caret and
++     its "b" stayed at 16, inside A's word, and B's "b1" landed there). The two rules below that
++     keep a caret or keystrokes before an insertion at their point take only an insertion whose
++     point is certain; any other insertion moves them past it */
++  const pinned =
++    known !== null ||
++    !(
++      change.text !== '' &&
++      change.end === change.start &&
++      change.start > 0 &&
++      change.text.charCodeAt(change.text.length - 1) === plainBase.charCodeAt(change.start - 1)
++    );
+   /* unflushed keystrokes that begin exactly where another person's pure insertion landed stay
+      before it, and the caret with them (the realtime round's fix round 2, build/r1.md R1-R2h; the
+      row realtime.title.two-typers). The room keeps the later arrival to the right of the text a
+@@ -767,6 +856,7 @@ export function absorbedText(
+      word: A's " ta" was handed, A's "3" still in the editable when B's " tb" landed at its end, and
+      the "3" moved past " tb" and cut A's word (" ta tb3") */
+   const keepsBefore =
++    pinned &&
+     local.text !== '' &&
+     local.end === local.start &&
+     change.text !== '' &&
+@@ -802,7 +892,7 @@ export function absorbedText(
+      past the change (A's caret at 20 read 26 once B's " bravo" landed at 20) */
+   const collapsed = selection !== null && selection[0] === selection[1];
+   const staysBefore = (offset: number): boolean =>
+-    collapsed && untouched && offset === change.start && change.end === change.start;
++    pinned && collapsed && untouched && offset === change.start && change.end === change.start;
+   const carry = (offset: number): number => {
+     if (staysBefore(offset)) return offset;
+     /* the keystrokes kept before the insertion: an offset up to their end stands, one past them
+@@ -1797,6 +1887,11 @@ export function InlineText({
+       return;
+     }
+     setHanded(text);
++    const key = keyOf();
++    if (key !== null) {
++      const range = currentRange();
++      noteBurstCaret(key, range !== null && range[0] === range[1] ? range[0] : null);
++    }
+     callbacks.current.onBurst?.(text);
+   };
+ 
+@@ -1883,7 +1978,7 @@ export function InlineText({
+    * against the document's text (textBurstMutation), so nothing lands twice and nothing is lost.
+    * The route announces every remote Text change through TEXT_CHANGED_EVENT.
+    */
+-  const absorbRemote = (remote: Markup) => {
++  const absorbRemote = (remote: Markup, splices?: ReadonlyArray<TextSplice>) => {
+     if (done.current) return;
+     const base = handed();
+     if (remote === base) {
+@@ -1893,7 +1988,7 @@ export function InlineText({
+     const dom = readText();
+     const wasParked = parked.current;
+     const selection = currentRange();
+-    const next = absorbedText(base, dom, remote, selection);
++    const next = absorbedText(base, dom, remote, selection, splices);
+     element.innerHTML = editableHtml(next.text, options.current.multiline);
+     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+       mark.contentEditable = 'false';
+@@ -1925,7 +2020,7 @@ export function InlineText({
+       return;
+     }
+     noteAbsorbed(runKey(detail.slideId, detail.blockId, detail.pointer), detail.text);
+-    absorbRemote(detail.text);
++    absorbRemote(detail.text, detail.splices);
+   };
+ 
+   const finish = (reason: InlineTextEndReason) => {
+@@ -1934,6 +2029,12 @@ export function InlineText({
+     window.clearTimeout(burstTimer.current);
+     burstTimer.current = 0;
+     const text = readText();
++    /* the final write diffs like a burst: the caret it ends at, read while the run is editable */
++    const key = keyOf();
++    if (key !== null) {
++      const range = currentRange();
++      noteBurstCaret(key, range !== null && range[0] === range[1] ? range[0] : null);
++    }
+     element.removeAttribute('contenteditable');
+     element.removeAttribute('spellcheck');
+     element.classList.remove('ts-editing');
+diff --git a/packages/viewer/src/__tests__/inline-text.test.ts b/packages/viewer/src/__tests__/inline-text.test.ts
+index 51046bdd..23f0b270 100644
+--- a/packages/viewer/src/__tests__/inline-text.test.ts
++++ b/packages/viewer/src/__tests__/inline-text.test.ts
+@@ -11,12 +11,14 @@ import {
+   blurVerdict,
+   CHROME_TRANSIENT_SELECTOR,
+   burstRewrite,
++  caretPlaced,
+   clickEntry,
+   entryCaret,
+   forgetAbsorbed,
+   handedText,
+   listAppendMutation,
+   noteAbsorbed,
++  noteBurstCaret,
+   noteHanded,
+   runKey,
+   listRemoveMutation,
+@@ -614,6 +616,61 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
+     });
+   });
+ 
++  it("moves the caret and the keystrokes past an insertion whose point is not certain (realtime.title.two-typers, ' ta1' lost)", () => {
++    // B handed " t" at the end of "Realtime title"; A's " t" and then " ta" landed before it, as
++    // the room placed them. The diff reads "a t" at 16, the end of B's " t", because its text
++    // ends with the " t" before 16; the caret and B's unflushed "b" follow B's own " t"
++    const base = 'Realtime title t';
++    expect(absorbedText(base, base, 'Realtime title t t', [16, 16])).toEqual({
++      text: 'Realtime title t t',
++      selection: [18, 18],
++    });
++    expect(absorbedText(base, 'Realtime title tb', 'Realtime title ta t', [17, 17])).toEqual({
++      text: 'Realtime title ta tb',
++      selection: [20, 20],
++    });
++    // an insertion whose text does not end with the character before its point keeps both rules
++    expect(absorbedText('Heading ta', 'Heading ta3', 'Heading ta tb', [11, 11])).toEqual({
++      text: 'Heading ta3 tb',
++      selection: [11, 11],
++    });
++    expect(
++      absorbedText('Alpha bravo', 'Alpha bravo', 'Alpha bravo charlie', [11, 11]).selection,
++    ).toEqual([11, 11]);
++  });
++
++  it('takes the point of the remote insertion from the splice the route names (realtime.title.two-typers, realtime.caret.offset-after-merge)', () => {
++    // the room placed A's " t" at 14, before B's handed " t": the splice says so, and B's caret
++    // and B's unflushed "b" follow B's own " t"
++    const base = 'Realtime title t';
++    const before = [{ at: 14, remove: 0, insert: ' t' }];
++    expect(absorbedText(base, base, 'Realtime title t t', [16, 16], before)).toEqual({
++      text: 'Realtime title t t',
++      selection: [18, 18],
++    });
++    expect(absorbedText(base, 'Realtime title tb', 'Realtime title t t', [17, 17], before)).toEqual(
++      {
++        text: 'Realtime title t tb',
++        selection: [19, 19],
++      },
++    );
++    // the room placed B's " cb1" at A's caret, after A's " ca1": the strings alone read it one
++    // character earlier (both words end in "1"), the splice keeps A's caret before B's word
++    const caret = 'Caret ca1';
++    const after = [{ at: 9, remove: 0, insert: ' cb1' }];
++    expect(absorbedText(caret, caret, 'Caret ca1 cb1', [9, 9]).selection).toEqual([13, 13]);
++    expect(absorbedText(caret, caret, 'Caret ca1 cb1', [9, 9], after).selection).toEqual([9, 9]);
++    expect(absorbedText(caret, 'Caret ca12', 'Caret ca1 cb1', [10, 10], after)).toEqual({
++      text: 'Caret ca12 cb1',
++      selection: [10, 10],
++    });
++    // a splice that does not turn the base into the document's text is not used: the diff reads
++    expect(
++      absorbedText(base, base, 'Realtime title t t', [16, 16], [{ at: 3, remove: 0, insert: 'x' }])
++        .selection,
++    ).toEqual([18, 18]);
++  });
++
+   it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
+     // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
+     const base = 'Every line of copy';
+@@ -661,6 +718,56 @@ describe('textBurstMutation diffs against the document when a collaborator moved
+   });
+ });
+ 
++describe("a burst's insertion ends at the session's caret (realtime.title.two-typers, ' ta1' stitched to B's ' t')", () => {
++  it('moves a pure insertion the diff can read at several points to the one that ends at the caret', () => {
++    // A typed " ta1" before B's " t", which landed at the same point: the diff reads "a1 t" after
++    // B's " t"; the caret after "ta1" says the insertion is " ta1" before it
++    const from = 'Realtime title t';
++    const to = 'Realtime title ta1 t';
++    const diff = textDiff(from, to);
++    expect(diff).toEqual({ start: 16, end: 16, text: 'a1 t' });
++    expect(caretPlaced(from, to, diff, 18)).toEqual({ start: 14, end: 14, text: ' ta1' });
++    // the caret at the diff's own end, no caret, a caret no such insertion ends at, and a change
++    // that is not a pure insertion keep the diff
++    expect(caretPlaced(from, to, diff, 20)).toEqual(diff);
++    expect(caretPlaced(from, to, diff, undefined)).toEqual(diff);
++    expect(caretPlaced(from, to, diff, 17)).toEqual(diff);
++    const removal = textDiff('abc', 'ac');
++    expect(caretPlaced('abc', 'ac', removal, 1)).toEqual(removal);
++    // typed after B's " t": the caret at the end keeps the diff's " t" after it
++    expect(caretPlaced('X t', 'X t t', textDiff('X t', 'X t t'), 5)).toEqual({
++      start: 3,
++      end: 3,
++      text: ' t',
++    });
++  });
++
++  it('writes the burst at the caret the session noted, once', () => {
++    const slide = structuredClone(workedDocument().slides['content-rule']!) as Slide;
++    const key = runKey('content-rule', 'p1', 'text');
++    forgetAbsorbed(key);
++    const from = 'Realtime title t';
++    const to = 'Realtime title ta1 t';
++    noteBurstCaret(key, 18);
++    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([
++      {
++        op: 'text.splice',
++        slideId: 'content-rule',
++        blockId: 'p1',
++        path: '/text',
++        at: 14,
++        remove: 0,
++        insert: ' ta1',
++      },
++    ]);
++    // the caret is taken by that burst; the next one without a caret diffs as before
++    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([
++      expect.objectContaining({ at: 16, insert: 'a1 t' }),
++    ]);
++    forgetAbsorbed(key);
++  });
++});
++
+ describe('the absorbed marker lives as long as its session (VERIFICATION.md C3-F8, b7.md FR3.8)', () => {
+   const key = runKey('content-rule', 'p1', 'text');
+   function p1(): { slide: Slide; before: string } {

@@ -14,9 +14,9 @@ import { useMountEffect } from '../components/useMountEffect';
 import { listTrashedDecks, removeStoredDeck, restoreStoredDeck } from '../server/decks';
 import { clearRestoringMarker, sessionMarkerStorage, writeRestoringMarker } from './-restoring';
 import type { DeckCard } from '../server/decks';
-import { Thumb, shortDate, useStreamedList } from './decks.index';
+import { Thumb, openFactsOf, shortDate, useStreamedList } from './decks.index';
 import { RouterLinkSlot } from './-link-slot';
-import { forgetDeckOpened, forgetTrashedMarker } from './-recent';
+import { forgetDeckOpened, forgetTrashedMarker, recordDeckOpened } from './-recent';
 
 import './decks.css';
 
@@ -117,6 +117,10 @@ function TrashPage() {
       /* no revision from the listing, which lags the store (docs/FOCUS.md rank 7); Delete forever
          below keeps its revision, since an irreversible action on a stale card should stop */
       await restoreStoredDeck({ deckId: card.id });
+      /* Move to trash took the deck out of this browser's Recent record (markDeckTrashed), and
+         since H2 an anonymous visitor's /decks lists that record alone, so the restored deck goes
+         back into it; a signed in owner's listing holds it either way */
+      recordDeckOpened(card.id, openFactsOf(card));
       snackbar.show(`Restored ${card.title}`);
       refresh();
     } catch (error) {

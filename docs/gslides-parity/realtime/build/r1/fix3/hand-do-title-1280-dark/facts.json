@@ -1,0 +1,341 @@
+{
+  "startedAt": "2026-10-03T22:23:42.739Z",
+  "baseA": "http://localhost:4471",
+  "baseB": "http://localhost:4481",
+  "width": 1280,
+  "appearance": "dark",
+  "sections": [
+    "join",
+    "title"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e5d31449c7850c84ec19bd16c416d6334c0ceb0b+r1fix3",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4471",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261003-cncu",
+  "slides": [
+    "title",
+    "split-1-479b",
+    "split-2-479b"
+  ],
+  "setup": {
+    "clients": {
+      "a": "9a61195b5839ff459c9b662baf1f479b",
+      "b": "d5781b00e7e6b270ba1e071a566bd407"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "8cb3ee10",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "8cb3ee10",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "dark",
+      "b": "dark"
+    },
+    "bJoin": {
+      "ready": 1791066235130,
+      "connectedAt": 1791066235134,
+      "navMs": 279
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791066235723,
+      "navMs": 198,
+      "bChipInAms": 56,
+      "aChipInBms": 57,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791066236078,
+      "navMs": 244,
+      "bChipInAms": 51,
+      "aChipInBms": 53,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791066236438,
+      "navMs": 255,
+      "bChipInAms": 59,
+      "aChipInBms": 60,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "8cb3ee10",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 1.9,
+  "title.cover": {
+    "id": "title-1-479b",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 7
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 11,
+      "bothMsAfterEscape": 130,
+      "a": "Two typers ta1 ua1 tb1 ub1",
+      "b": "Two typers ta1 ua1 tb1 ub1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 104,
+      "bothMsAfterEscape": 51,
+      "a": "Two typers ta1 ua1 tb1 ub1 tb2 ub2 ta2 ua2",
+      "b": "Two typers ta1 ua1 tb1 ub1 tb2 ub2 ta2 ua2",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 75,
+      "bothMsAfterEscape": 131,
+      "a": "Two typers ta1 ua1 tb1 ub1 tb2 ub2 ta2 ua2 tb3 ub3 ta3 ua3",
+      "b": "Two typers ta1 ua1 tb1 ub1 tb2 ub2 ta2 ua2 tb3 ub3 ta3 ua3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 13.9,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 21,
+      "revision": 15,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "8cb3ee10",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 21,
+      "revision": 15,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "8cb3ee10",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 26,
+        "messages": 108,
+        "opsFrames": 19,
+        "presenceFrames": 84,
+        "alarms": 12,
+        "checkpoints": 8,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 87,
+        "rowsWritten": 84,
+        "wakes": 1,
+        "requestUnits": 43.4
+      },
+      "total": {
+        "requests": 26,
+        "messages": 108,
+        "opsFrames": 19,
+        "presenceFrames": 84,
+        "alarms": 12,
+        "checkpoints": 8,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 86,
+        "rowsWritten": 84,
+        "wakes": 1,
+        "requestUnits": 43.4
+      },
+      "head": 21,
+      "covered": 17,
+      "revision": 15,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1791066224378,
+      "alarmAt": 1791066252036,
+      "databaseSize": 49152,
+      "colo": "SJC",
+      "object": "8cb3ee10"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261003-cncu",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "e5d31449c7850c84ec19bd16c416d6334c0ceb0b+r1fix3",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4471",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-03T22:24:11.387Z"
+}

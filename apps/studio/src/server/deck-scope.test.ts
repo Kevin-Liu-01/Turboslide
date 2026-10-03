@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import type { AccessRecord, AuthContext, LinkGrant } from '@turboslide/identity/access';
 import type { DeckHead } from '@turboslide/store/templates';
 
-import { listingScope, ownStanding, principalOf, scopeHeads } from './deck-scope';
+import { listingScope, ownStanding, ownedTrash, principalOf, scopeHeads } from './deck-scope';
 
 // The deck listing scoped to the viewer (docs/NEXT.md 3.2 H2): who lists what, and which decks a
 // principal's own listing keeps, read against records written the way the studio writes them.
@@ -272,5 +272,47 @@ describe('scopeHeads', () => {
     );
     expect(rows.map((r) => r.id)).toEqual(['deck-5']);
     expect(most).toBeLessThanOrEqual(8);
+  });
+});
+
+describe('the trash page (round1/build/ha.md request 1)', () => {
+  const trashed = (id: string): DeckHead => ({
+    ...head(id),
+    trashedAt: '2026-10-01T11:30:00.000Z',
+  });
+  const grant = {
+    principalId: ACCOUNT,
+    email: null,
+    role: 'editor' as const,
+    invitedBy: OTHER,
+    invitedAt: '2026-10-01T10:00:00.000Z',
+    acceptedAt: '2026-10-01T10:00:00.000Z',
+    expiresAt: null,
+  };
+  const records: Record<string, AccessRecord> = {
+    mine: record('mine', { owner: ANON }),
+    shared: record('shared', { grants: [grant] }),
+    theirs: record('theirs'),
+    live: record('live', { owner: ACCOUNT }),
+  };
+  const heads = [trashed('mine'), trashed('shared'), trashed('theirs'), head('live')];
+  const deps = { readRecord: async (id: string) => records[id] ?? null, now: () => NOW };
+
+  test('lists the trashed decks the caller owns, never a shared one, another’s or a live one', async () => {
+    const rows = await ownedTrash(heads, { kind: 'own', ctx: account, admin: false }, deps);
+    expect(rows.map((r) => r.id)).toEqual(['mine']);
+  });
+  test('an anonymous principal lists its own trashed deck', async () => {
+    const rows = await ownedTrash(heads, { kind: 'own', ctx: anonymous, admin: false }, deps);
+    expect(rows.map((r) => r.id)).toEqual(['mine']);
+  });
+  test('every trashed deck for a checkout, none for a browser or no identity', async () => {
+    expect((await ownedTrash(heads, { kind: 'every' }, deps)).map((r) => r.id)).toEqual([
+      'mine',
+      'shared',
+      'theirs',
+    ]);
+    expect(await ownedTrash(heads, { kind: 'browser' }, deps)).toEqual([]);
+    expect(await ownedTrash(heads, { kind: 'none' }, deps)).toEqual([]);
   });
 });

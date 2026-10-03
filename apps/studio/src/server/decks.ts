@@ -323,14 +323,44 @@ export const listHomeDecks = createServerFn({ method: 'GET' })
     return { cards: listed.map(cardOf), admin };
   });
 
-/** The decks in the trash, newest stamp first, for /decks/trash (gslides-parity SPEC 6.4). */
+/**
+ * The trash page's scope: the action's (`page: false`), so an anonymous visitor lists the trashed
+ * decks its own principal owns; the trash has no browser record to draw (round1/build/ha.md
+ * request 1, the same defect H2 closed for /decks).
+ */
+async function trashScope(): Promise<ListingScope> {
+  if (storeSelection().kind === 'file') return { kind: 'every' };
+  const [{ listingScope }, { requestIdentity }] = await Promise.all([
+    import('./deck-scope'),
+    import('./auth/identity'),
+  ]);
+  try {
+    const identity = await requestIdentity(getRequest());
+    return listingScope(
+      { kind: identity.kind, ctx: identity.ctx },
+      { fileStore: false, page: false },
+    );
+  } catch {
+    return { kind: 'none' };
+  }
+}
+
+/**
+ * The decks in the trash, newest stamp first, for /decks/trash (gslides-parity SPEC 6.4): the ones
+ * the viewer owns, every one for a checkout and the admin bearer (deck-scope.ts `ownedTrash`).
+ */
 export const listTrashedDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<DeckCard[]> => {
+    const scope = await trashScope();
+    if (scope.kind === 'browser' || scope.kind === 'none') return [];
+    const { ownedTrash, studioScopeDeps } = await import('./deck-scope');
     const heads = await (await ensureDecks()).list({ includeTrashed: true });
-    return heads
-      .filter((head) => head.trashedAt !== undefined)
-      .sort((a, b) => (b.trashedAt ?? '').localeCompare(a.trashedAt ?? ''))
-      .map(cardOf);
+    const kept = await ownedTrash(
+      heads,
+      scope,
+      scope.kind === 'every' ? { readRecord: async () => null } : await studioScopeDeps(),
+    );
+    return kept.sort((a, b) => (b.trashedAt ?? '').localeCompare(a.trashedAt ?? '')).map(cardOf);
   },
 );
 

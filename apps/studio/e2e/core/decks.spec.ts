@@ -2661,9 +2661,13 @@ test(title('decks.back.list-restored'), async () => {
 test(title('decks.card.thumbnail-or-plate'), async ({ browser }) => {
   test.setTimeout(150_000);
   await openEditor(page, deck);
+  /* a second context with this file's cookies and Recent record and a cold HTTP cache: since H2
+     (docs/NEXT.md 3.2) /decks lists a browser's own decks, so a context with no identity lists
+     none (round1/build/b2.md request 12) */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
+    storageState: await page.context().storageState(),
   });
   const p = await fresh.newPage();
   const renders: string[] = [];

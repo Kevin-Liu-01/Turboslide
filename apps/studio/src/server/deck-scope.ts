@@ -147,6 +147,28 @@ export async function scopeHeads(
 }
 
 /**
+ * The trashed heads a scope lists on `/decks/trash` (round1/build/ha.md request 1): every one for
+ * `every`; for `own`, the ones whose record makes the caller the owner, since only the owner
+ * restores or deletes a deck forever; nothing otherwise. The trash has no browser record to draw,
+ * so the trash page answers an anonymous visitor through its principal (`listingScope` with
+ * `page: false`), never `browser`.
+ */
+export async function ownedTrash(
+  heads: readonly DeckHead[],
+  scope: ListingScope,
+  deps: ScopeDeps,
+): Promise<DeckHead[]> {
+  const trashed = heads.filter((head) => head.trashedAt !== undefined);
+  if (scope.kind === 'every') return trashed;
+  const owned = new Set(
+    (await scopeHeads(trashed, scope, deps))
+      .filter((row) => row.role === 'owner')
+      .map((row) => row.id),
+  );
+  return trashed.filter((head) => owned.has(head.id));
+}
+
+/**
  * The studio's dependencies of `scopeHeads`: the access store's record (its cache) and the link
  * grants the principal's deck index carries (server/access.ts `linkGrantsFromIndex`, the second
  * place a link exchange writes them). Loaded late: access.ts imports the room and the store.

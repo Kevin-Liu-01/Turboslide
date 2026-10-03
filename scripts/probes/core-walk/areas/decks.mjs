@@ -484,6 +484,12 @@ export async function run(t) {
           ok: false,
           observed: `the setup copy failed: ${copy?.error ?? JSON.stringify(copy)}`,
         };
+      /* the copy opened once in this browser, as File > Make a copy opens it: since H2
+         (docs/NEXT.md 3.2) an anonymous visitor's pickers list this browser's Recent record and
+         nothing else from the store, and a copy made through the window API alone is in neither
+         (round1/build/b3b.md request 11) */
+      await t.reloadTo(`${BASE}/edit/${copyId}`);
+      await t.reloadTo(`${BASE}/edit/${t.deck.id}`);
       await t.clickCard(t.deck.titleSlide);
       const before = await t.slideOrder();
       /* everything after the copy runs inside one try, and the copy's trash and remove (with the

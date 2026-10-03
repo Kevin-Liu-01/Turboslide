@@ -506,7 +506,10 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         1 +
         2 +
         3 +
-        1,
+        1 +
+        /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
+           count reads the ones entered and the landing block below holds their order */
+        CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -515,6 +518,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
       'shaders.perf.editor-frame',
       /* the polish round (docs/archive/rounds/POLISH.md 3.5): the home page's load budget */
       'decks.home.load-budget',
+      /* the landing round (docs/LANDING.md 6.7): its measure rows entered so far, in push order */
+      ...CORE_MATRIX.filter((r) => areaOf(r.id) === 'home' && isMeasureRow(r)).map((r) => r.id),
     ]);
   });
 
@@ -903,6 +908,8 @@ describe('the vector round (docs/archive/rounds/VECTOR.md section 6)', () => {
       menus: 'chrome',
       gestures: 'arrange',
       people: 'share',
+      /* the landing round (docs/LANDING.md 6.7): the /home rows under the unparkable decks */
+      home: 'decks',
     });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
     /* the polish round adds two rows to the svg spec (docs/archive/rounds/POLISH.md 2.4, 2.5) */
@@ -1557,5 +1564,100 @@ describe('the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md section
       'setup.worker.health',
       'setup.do.two-instances',
     ]);
+  });
+});
+
+// The landing round (docs/LANDING.md 6.7; build/integrator.md "Landing, day 0" 5.1): the 37
+// `home.*` rows under the unparkable decks feature, one driver over the seven lane modules of
+// apps/studio/e2e/core/home/. Each push enters its own rows, so the file holds a prefix of the
+// push order at every push; the four measure rows carry `measure` and no severity.
+const LANDING_IDS = [
+  /* push 1 */
+  'home.page.order',
+  'home.page.markup-final',
+  'home.hero.type',
+  'home.parts.table',
+  'home.budget.bytes-first',
+  'home.budget.bytes-page',
+  'home.budget.shared',
+  'home.budget.lcp',
+  'home.a11y.skip-and-contrast',
+  /* push 2 */
+  'home.hero.select',
+  'home.hero.edit',
+  'home.canvas.gestures',
+  'home.canvas.log',
+  'home.objects.keyboard',
+  'home.budget.live-module',
+  /* push 3 */
+  'home.tailor.apply',
+  'home.tailor.theme',
+  'home.tailor.filmstrip',
+  /* push 4 */
+  'home.agents.rest',
+  'home.agents.run',
+  'home.agents.typed',
+  'home.agents.transports',
+  'home.agents.history',
+  'home.agents.recorded',
+  /* push 5 */
+  'home.present.show',
+  'home.present.focus',
+  'home.present.print',
+  /* push 6 */
+  'home.export.seam',
+  'home.export.figure',
+  /* push 7 */
+  'home.motion.hero',
+  'home.motion.in-view',
+  'home.motion.rest',
+  'home.motion.reduced',
+  'home.motion.hidden-tab',
+  'home.budget.frame',
+  'home.budget.main-thread',
+  'home.a11y.keyboard-walk',
+];
+const LANDING_MEASURE = [
+  'home.budget.shared',
+  'home.budget.lcp',
+  'home.budget.frame',
+  'home.budget.main-thread',
+];
+
+describe('the landing round', () => {
+  it('holds the home area under the unparkable decks feature with its one driver', () => {
+    expect(AREA_FEATURE.home).toBe('decks');
+    expect(UNPARKABLE_FEATURES).toContain('decks');
+    expect(isParkable('decks')).toBe(false);
+    expect(CORE_SPEC_DRIVERS).toContain('core/home.spec.ts');
+    expect(specPathOf('core/home.spec.ts')).toBe('apps/studio/e2e/core/home.spec.ts');
+    expect(rowsForDriver('home.spec.ts')).toEqual(rowsForDriver('core/home.spec.ts'));
+    expect(LANDING_IDS.length).toBe(37);
+    expect(new Set(LANDING_IDS).size).toBe(37);
+  });
+
+  it('enters the home rows as a prefix of the push order, each on the driver with its note', () => {
+    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home');
+    expect(home.map((row) => row.id)).toEqual(LANDING_IDS.slice(0, home.length));
+    expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(
+      home.map((row) => row.id),
+    );
+    for (const row of home) {
+      expect(row.feature, row.id).toBe('decks');
+      expect(row.driver, row.id).toBe('core/home.spec.ts');
+      expect(isCoreId(row.id), row.id).toBe(true);
+      expect(row.note, row.id).toMatch(
+        /^docs\/LANDING\.md 6\.7; bound fixed in docs\/gslides-parity\/landing\/build\/integrator\.md/,
+      );
+      if (LANDING_MEASURE.includes(row.id)) {
+        expect(isMeasureRow(row), row.id).toBe(true);
+        expect(row.today, row.id).toBe('not driven');
+        expect(row.severity, row.id).toBeUndefined();
+      } else {
+        expect(isMeasureRow(row), row.id).toBe(false);
+        expect(row.today, row.id).toBe('broken');
+        expect([1, 2], row.id).toContain(row.severity);
+      }
+    }
   });
 });

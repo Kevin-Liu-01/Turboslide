@@ -199,6 +199,9 @@ export const AREA_FEATURE = Object.freeze({
   /* the realtime round (docs/REALTIME.md section 2, 4.4): the Google sign in rows are the share
      feature's local rows (e2e/accounts.spec.ts), as the people round's account rows are */
   accounts: 'share',
+  /* the landing round (docs/LANDING.md 6.7; build/integrator.md "Landing, day 0" 5.1): the /home
+     rows are the decks feature's, which is unparkable, so a red landing row blocks the ship */
+  home: 'decks',
 });
 
 /**
@@ -285,6 +288,9 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
      row in the hosted agent surface's spec, which runs on every base like a core spec */
   'core/realtime.spec.ts',
   'e2e/agent-http.spec.ts',
+  /* the landing round (docs/LANDING.md 6.1, 6.7): the /home rows, one driver over the seven lane
+     modules of apps/studio/e2e/core/home/ */
+  'core/home.spec.ts',
 ]);
 
 /**

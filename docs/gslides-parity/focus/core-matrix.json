@@ -9101,12 +9101,12 @@
     {
       "id": "chrome.words.no-process-words",
       "feature": "chrome",
-      "interaction": "No label or tooltip in the default view contains a word of the extended forbidden list; the toolbar button, the Slide rows and the panel title all read \"Theme\"",
+      "interaction": "No label or tooltip in the default view contains a word of the extended forbidden list; the account tooltip reads \"You\"; the toolbar button, the Slide rows and the panel title all read \"Theme\"",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-clutter 57 to 68; audit-brand-surfaces 50",
-      "note": "docs/NEXT.md 4.1.3 items 21 and 22, push B3a#8; the menus with every submenu, the toolbar and the title row read with Tools > Advanced tools off. NEXT.md 4.1.5 also names \"the account tooltip reads You\": that word is drawn by presence/PresenceSlot.tsx, outside B3a's files, so the clause joins this row with the integrator's change (round1/build/b3a.md request 3)"
+      "note": "docs/NEXT.md 4.1.3 items 21 and 22, push B3a#8; the menus with every submenu, the toolbar and the title row read with Tools > Advanced tools off. The account tooltip clause joined with the integrator's B3a#8 seam (round1/build/b3a.md request 3): the own chip of a visitor with no typed name reads \"You\""
     },
     {
       "id": "chrome.menus.structure-sweep",

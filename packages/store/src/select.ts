@@ -26,9 +26,12 @@ export const STORE_VARIABLE = 'TURBOSLIDE_STORE';
 /** The variable that moves the overlay away from <tmpdir>/turboslide. */
 export const OVERLAY_VARIABLE = 'TURBOSLIDE_OVERLAY_DIR';
 
-/** The banner text the editor shows over a store whose edits do not persist. */
-export const NOT_PERSISTENT_NOTICE =
-  'Edits are kept on this server instance only and do not persist until a Blob store is connected';
+/** The banner sentence the editor shows a seller over a store whose edits do not persist. */
+export const NOT_PERSISTENT_NOTICE = 'Edits on this copy of Turboslide are lost when it restarts';
+
+/** The setup sentence the server logs once at start over that store, for whoever runs it. */
+export const NOT_PERSISTENT_SETUP =
+  'Edits are kept on this server instance only. Connect a Blob store to the Vercel project to keep them';
 
 export type Env = Readonly<Record<string, string | undefined>>;
 

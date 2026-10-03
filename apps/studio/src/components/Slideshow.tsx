@@ -109,13 +109,14 @@ const ICONS: PresentIcons = {
 const tip: PresentTip = (content) => tipProps(content);
 
 /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6; build/b1.md 2.5): the show's Options menu
-   mirrors View > Play shaders over the same per browser setting */
+   mirrors Tools > Preferences > Play animated patterns over the same per browser setting (the seller's
+   noun of docs/NEXT.md question 10, round1/build/b3a.md request 15) */
 const PLAY_SHADERS = {
-  label: 'Play shaders',
+  label: 'Play animated patterns',
   on: 'On',
   show: 'In the show only',
   off: 'Off',
-  doc: 'Whether the shaders on the slides move during the show',
+  doc: 'Whether the animated patterns on the slides move during the show',
 } as const;
 type PlayShaders = 'on' | 'show' | 'off';
 const isPlayShaders = (value: unknown): value is PlayShaders =>

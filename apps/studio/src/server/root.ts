@@ -12,7 +12,7 @@ import { hostingProviders, openHostedDecks } from '@turboslide/store/hosted';
 import type { SeedSource } from '@turboslide/store/seed';
 import { directorySeed, materializeSeed } from '@turboslide/store/seed';
 import type { StoreSelection } from '@turboslide/store/select';
-import { overlayRoot, selectStore } from '@turboslide/store/select';
+import { NOT_PERSISTENT_SETUP, overlayRoot, selectStore } from '@turboslide/store/select';
 import type { DeckStore } from '@turboslide/store/store';
 import type { CreateDeckInput, CreateDeckResult, DeckHead } from '@turboslide/store/templates';
 import { TEMPLATES_DIR } from '@turboslide/store/templates';
@@ -174,6 +174,7 @@ function runtime(): Runtime {
     process.env.TURBOSLIDE_DECKS_DIR ??= decks.decksDir;
     process.env.TURBOSLIDE_WORKER_DIR ??= join(decks.root, '.turboslide', 'worker');
     log(`${selection.kind} store (${selection.reason}); decks at ${decks.decksDir}`);
+    if (!selection.persistent) log(NOT_PERSISTENT_SETUP);
   }
   shared.__turboslideRuntime = {
     selection,

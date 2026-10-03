@@ -1620,7 +1620,9 @@ export async function run(t) {
               ),
             ]
               .filter(
-                (e) => e.getClientRects().length > 0 && /play shaders/i.test(e.textContent ?? ''),
+                (e) =>
+                  e.getClientRects().length > 0 &&
+                  /play (shaders|animated patterns)/i.test(e.textContent ?? ''),
               )
               .map((e) => ({
                 id: e.getAttribute('data-menu-item') ?? e.getAttribute('data-control'),
@@ -1653,7 +1655,7 @@ export async function run(t) {
           afterReload === afterOff &&
           optionRow !== null &&
           restored === default1,
-        observed: `rows ${labels.join(', ') || 'none'} (checked ${checked.join(', ') || 'none'}); describe().state.settings.playShaders ${JSON.stringify(default1)} -> Off ${JSON.stringify(afterOff)} -> after a reload ${JSON.stringify(afterReload)}; the show's Options menu ${optionRow ? `lists ${optionRow.id} "${optionRow.text}"` : 'lists no Play shaders row'}; the default back ${JSON.stringify(restored)}${r.switched ? '; with the switch on' : ''}`,
+        observed: `rows ${labels.join(', ') || 'none'} (checked ${checked.join(', ') || 'none'}); describe().state.settings.playShaders ${JSON.stringify(default1)} -> Off ${JSON.stringify(afterOff)} -> after a reload ${JSON.stringify(afterReload)}; the show's Options menu ${optionRow ? `lists ${optionRow.id} "${optionRow.text}"` : 'lists no Play animated patterns row'}; the default back ${JSON.stringify(restored)}${r.switched ? '; with the switch on' : ''}`,
       };
     },
   );

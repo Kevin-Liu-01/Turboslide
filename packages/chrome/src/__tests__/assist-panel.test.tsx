@@ -208,10 +208,18 @@ describe('AssistPanel', () => {
   it('names the restricted presentation in the first line and starts with the finder’s phrase', () => {
     mount({ restricted: true, initialPrompt: 'make it shorter' });
     expect(control('panel.assist.firstLine')?.textContent).toContain(
-      'including this restricted presentation',
+      'This presentation is restricted',
     );
     expect(control('panel.assist.firstLine')?.textContent).toBe(ASSIST.firstLineRestricted);
     expect((control('panel.assist.prompt') as HTMLTextAreaElement).value).toBe('make it shorter');
+  });
+});
+
+describe('the slide label', () => {
+  it('names an untitled slide by its number alone', () => {
+    expect(ASSIST.slideLabel(2, 'Slide 2')).toBe('Slide 2');
+    expect(ASSIST.slideLabel(2, '')).toBe('Slide 2');
+    expect(ASSIST.slideLabel(2, 'Pricing')).toBe('Slide 2: Pricing');
   });
 });
 

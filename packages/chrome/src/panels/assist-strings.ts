@@ -13,7 +13,7 @@ export const ASSIST = {
    */
   firstLine: 'Nothing is written to your slides until you accept',
   firstLineRestricted:
-    'Your slide text, including this restricted presentation’s, goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept',
+    'This presentation is restricted, and its slide text still goes to the model provider under General Translation’s account. Nothing is written to your slides until you accept',
   provider:
     'Your slide text is sent to the assistant’s model provider under General Translation’s account to write these suggestions',
   /** the panel on a deployment with no model (item 113): Tailor stays, the model starters and the composer leave */
@@ -48,7 +48,9 @@ export const ASSIST = {
   viewer: 'Commenters and editors can use the assistant',
   off: 'The assistant is off on this Turboslide',
   noSlide: 'Select a slide to ask about it',
-  slideLabel: (n: number, title: string) => `Slide ${n}: ${title}`,
+  /** "Slide 2: Pricing"; an untitled slide reads "Slide 2" alone, where it read "Slide 2: Slide 2" */
+  slideLabel: (n: number, title: string) =>
+    title.trim() === '' || title.trim() === `Slide ${n}` ? `Slide ${n}` : `Slide ${n}: ${title}`,
   failed: (reason: string) => `The assistant could not answer: ${reason}`,
 } as const;
 

@@ -74,10 +74,11 @@ the job's 300 s timeout.
 The overlay alone: `FileStore` over `/tmp/turboslide/decks/<id>`, `.turboslide/` beside it for the
 thumbnails, the worker's jobs and the HTTP scratch files (`root.ts` `stateDir()`; the worker's
 `TURBOSLIDE_DECKS_DIR` and `TURBOSLIDE_WORKER_DIR` are pointed at the overlay when unset). A new
-instance starts from the seed again, so the editor shows the banner "Edits are kept on this server
-instance only and do not persist until a Blob store is connected" (`.ts-banner[data-state="hosting"]`,
-`@turboslide/store/select` `NOT_PERSISTENT_NOTICE`) and the deck list repeats it. This is the mode
-the production URL runs in until a store is connected.
+instance starts from the seed again, so the editor shows the banner "Edits on this copy of
+Turboslide are lost when it restarts." (`.ts-banner[data-state="hosting"]`, `@turboslide/store/select`
+`NOT_PERSISTENT_NOTICE`), and the server logs the setup sentence `NOT_PERSISTENT_SETUP` once at
+start: "Edits are kept on this server instance only. Connect a Blob store to the Vercel project to
+keep them". This is the mode the production URL runs in until a store is connected.
 
 ### Room on the temp volume
 

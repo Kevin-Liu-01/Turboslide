@@ -2603,7 +2603,7 @@ function RejectCard({
 function HostingBanner({ notice, store }: { notice: string; store: string }) {
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="hosting" data-store={store}>
-      <span>{`${notice}; connect one to the Vercel project to keep them.`}</span>
+      <span>{`${notice}.`}</span>
     </div>
   );
 }

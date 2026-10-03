@@ -236,13 +236,17 @@ async function clearAll(page: Page): Promise<void> {
 }
 
 /**
- * The tmp store's notice ("Edits are kept on this server instance only ...") is a fact of the
+ * The tmp store's notice ("Edits on this copy of Turboslide are lost ...") is a fact of the
  * scratch store, not of the product; the status bar that carries it is hidden for the pictures.
  */
 async function hideStoreNotice(page: Page): Promise<void> {
   await page.evaluate(() => {
     for (const el of document.querySelectorAll<HTMLElement>('[role="status"], [role="alert"]')) {
-      if (/Edits are kept on this server instance/.test(el.textContent ?? '')) {
+      if (
+        /Edits on this copy of Turboslide are lost|Edits are kept on this server instance/.test(
+          el.textContent ?? '',
+        )
+      ) {
         el.style.display = 'none';
       }
     }
@@ -331,7 +335,7 @@ async function captureTheme(
     await editorReady(page);
     await sleep(800);
 
-    /* the tmp store's notice ("Edits are kept on this server instance only") is a fact of the
+    /* the tmp store's notice ("Edits on this copy of Turboslide are lost") is a fact of the
        scratch store, not of the product, so its toast is hidden for the pictures */
     await page.addStyleTag({
       content: '.pt-toast, [class*="ts-snackbar"], .pt-tip { display: none !important; }',

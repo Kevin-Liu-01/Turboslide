@@ -225,10 +225,14 @@ export function PresenceSlot() {
             aria-label={itemById('title.account').label}
             onClick={() => setAccount((open) => (open === null ? meRef.current : null))}
             {...tipProps({
+              /* "You" on the own chip of a visitor with no typed name (Round 1, docs/NEXT.md
+                 4.1.3 item 21), where it read the generated label; a typed name stays */
               name:
                 self === null
                   ? itemById('title.account').label
-                  : `${self.name ?? self.label} ${PRESENCE.you}`,
+                  : self.name === undefined
+                    ? PRESENCE.youName
+                    : `${self.name} ${PRESENCE.you}`,
               doc: itemById('title.account').doc ?? '',
             })}
           >

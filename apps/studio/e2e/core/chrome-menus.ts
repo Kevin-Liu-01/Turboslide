@@ -268,19 +268,22 @@ export function chromeMenus(person: () => { page: Page; deck: string }): string[
     await ctl(page, 'toolbar.theme')
       .click()
       .catch(() => undefined);
+    /* the own chip's tooltip name for this visitor, who typed no name */
+    const accountTip = await ctl(page, 'title.account').getAttribute('data-tip');
     test.info().annotations.push({
       type: 'words',
       description: `${texts.length} labels, tooltip names and tooltip sentences read over ${drawn.size} menu rows of ${menuIds.length} menus, the toolbar and the title row; hits ${hits.map((h) => `${h.where}: ${h.words.join(', ')} ("${h.text.slice(0, 60)}")`).join('; ') || 'none'}`,
     });
     test.info().annotations.push({
       type: 'theme',
-      description: `toolbar "${button}"; Slide rows ${themeRows.map((row) => `"${row.label}"`).join(', ') || 'none'}; panel title "${panelTitle}"`,
+      description: `toolbar "${button}"; Slide rows ${themeRows.map((row) => `"${row.label}"`).join(', ') || 'none'}; panel title "${panelTitle}"; the account tooltip "${accountTip}"`,
     });
     expect(drawn.size, 'the menus were read').toBeGreaterThan(150);
     expect(hits, 'no forbidden word in the default view').toEqual([]);
     expect(button).toBe('Theme');
     expect(themeRows.map((row) => row.label)).toEqual(['Change theme']);
     expect(panelTitle).toBe('Theme');
+    expect(accountTip, 'the account tooltip').toBe('You');
   });
 
   return [

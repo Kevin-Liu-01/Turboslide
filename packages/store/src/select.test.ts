@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BLOB_TOKEN_VARIABLE,
   NOT_PERSISTENT_NOTICE,
+  NOT_PERSISTENT_SETUP,
   STORE_KINDS,
   hasBlobToken,
   isStoreKind,
@@ -33,7 +34,8 @@ describe('selectStore', () => {
     expect(selection.persistent).toBe(false);
     expect(selection.blob).toBe(false);
     expect(selection.reason).toContain(BLOB_TOKEN_VARIABLE);
-    expect(NOT_PERSISTENT_NOTICE).toMatch(/do not persist until a Blob store is connected/);
+    expect(NOT_PERSISTENT_NOTICE).toMatch(/lost when it restarts/);
+    expect(NOT_PERSISTENT_SETUP).toMatch(/Connect a Blob store to the Vercel project/);
   });
 
   it('is blob on Vercel with a Blob token', () => {

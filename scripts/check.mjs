@@ -224,6 +224,9 @@ const INNER_HTML_ALLOW = [
   // build from the page deck (slides.generated.ts), into the server's markup only; the client
   // renders the same element empty and React leaves it as hydration found it
   'apps/studio/src/components/home/HomeSheet.tsx',
+  // the selection replica (L2#2): its overlay's fixed markup, and a text box's own markup read
+  // before an edit and written back by Escape on an empty box or by Undo, never typed text
+  'apps/studio/src/components/home/live/objects.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

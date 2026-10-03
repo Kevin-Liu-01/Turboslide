@@ -1111,6 +1111,12 @@ html:has(.ts-product) {
   text-overflow: clip;
 }
 
+/* the resting sentence, "Each gesture prints its CLI command.", in titanium until the first
+   gesture's line replaces it (LANDING.md 2.6; live/log.ts sets data-printed; l2.md Q5b) */
+.ts-command:not([data-printed]) {
+  color: var(--pt-titanium);
+}
+
 /* ---- Present (LANDING.md 2.7): the head in 5 of 12 columns, the slide and its list in 7; the
    band reserves the show's 1,024 by 576 stage and its 56 px bar ---- */
 .ts-band-present {

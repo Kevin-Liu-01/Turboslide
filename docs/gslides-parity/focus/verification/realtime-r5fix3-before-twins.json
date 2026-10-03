@@ -1,0 +1,97 @@
+{
+  "base": "http://localhost:4475",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "seedTwins": {
+    "overlay": null,
+    "decks": []
+  },
+  "startedAt": "2026-10-03T22:07:06.431Z",
+  "ms": 9577,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 9540,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r5fix3/gate-before-twins/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.list.gt-brand-deck"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 0,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "697e8892",
+  "origin": "http://localhost:4475",
+  "date": "2026-10-03",
+  "results": {
+    "decks.list.gt-brand-deck": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.list.gt-brand-deck",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the copy was refused with \"GT brand deck: The template names an assets folder that is missing: /Users/kevinliu/repos/Turboslide-realtime/.turboslide/r5fix3/overlay-memory/decks/gt-brand/assets\": the overlay holds none of the GT deck's twins. The node-server build drops them from its bundle an"
+    }
+  ]
+}

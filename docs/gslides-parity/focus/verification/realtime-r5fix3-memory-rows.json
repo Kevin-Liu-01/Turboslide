@@ -1,0 +1,112 @@
+{
+  "base": "http://localhost:4475",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "seedTwins": {
+    "overlay": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r5fix3/overlay-memory",
+    "decks": [
+      {
+        "deck": "gt-brand",
+        "placed": 202,
+        "present": 0,
+        "source": "/Users/kevinliu/repos/Turboslide-realtime/decks/gt-brand/assets"
+      }
+    ]
+  },
+  "startedAt": "2026-10-03T22:07:28.320Z",
+  "ms": 66501,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 66407,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/r5fix3/gate-memory-rows/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.list.gt-brand-deck",
+      "brand.appearance.default",
+      "images.insert.no-external-banner"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 3,
+  "passed": 3,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "697e8892",
+  "origin": "http://localhost:4475",
+  "date": "2026-10-03",
+  "results": {
+    "decks.list.gt-brand-deck": "passed",
+    "brand.appearance.default": "passed",
+    "images.insert.no-external-banner": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

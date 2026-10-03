@@ -1,0 +1,751 @@
+{
+  "generator": "scripts/build-home-assets.ts --run",
+  "fixtureSha256": "f8b65f43796ff04ddf64d83b53ec8c9feb864f72691336ff75fbe27212c93d5b",
+  "versionAnswer": {
+    "argv": [
+      "--version"
+    ],
+    "code": 0,
+    "stdout": [
+      " ███████████  Turboslide 2026.1001.3",
+      " ▀▀▀▀▀███▀▀▀  https://www.turboslide.com",
+      "▄▄▄▄▄ ███     193 actions, effects backend: wasm",
+      "▄▄▄▄ ▄▄▄",
+      "     ███",
+      "███ ███"
+    ],
+    "stderr": []
+  },
+  "steps": [
+    {
+      "n": 1,
+      "answer": {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "new rows slide next-steps after ships: revision 1"
+        ],
+        "stderr": []
+      },
+      "revisionBefore": 0,
+      "revisionAfter": 1
+    },
+    {
+      "n": 2,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "set h /text on next-steps: revision 2, 8 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "revisionBefore": 1,
+      "revisionAfter": 2
+    },
+    {
+      "n": 3,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items on next-steps: revision 3, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "revisionBefore": 2,
+      "revisionAfter": 3
+    }
+  ],
+  "typed": [
+    {
+      "form": "tailor",
+      "state": "absent",
+      "nameFound": true,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 1"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "absent",
+      "nameFound": false,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "0 replacements on 0 slides, 0 pictures swapped, 0 skipped; revision 0"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Initech",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "version-list",
+      "state": "absent",
+      "nameFound": null,
+      "step": null,
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "no versions yet"
+        ],
+        "stderr": []
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "absent",
+      "nameFound": null,
+      "step": 1,
+      "answer": {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 0,
+        "stdout": [
+          "new rows slide next-steps after ships: revision 1"
+        ],
+        "stderr": []
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "absent",
+      "nameFound": null,
+      "step": 2,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: mutation 0 (block.set): No slide \"next-steps\""
+        ]
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "step",
+      "state": "absent",
+      "nameFound": null,
+      "step": 3,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: mutation 0 (block.set): No slide \"next-steps\""
+        ]
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "placeholders",
+      "nameFound": true,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 2"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "placeholders",
+      "nameFound": false,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "0 replacements on 0 slides, 0 pictures swapped, 0 skipped; revision 1"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Initech",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "version-list",
+      "state": "placeholders",
+      "nameFound": null,
+      "step": null,
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert"
+        ],
+        "stderr": []
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "placeholders",
+      "nameFound": null,
+      "step": 1,
+      "answer": {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: Slide \"next-steps\" exists already"
+        ]
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "placeholders",
+      "nameFound": null,
+      "step": 2,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "set h /text on next-steps: revision 2, 8 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "step",
+      "state": "placeholders",
+      "nameFound": null,
+      "step": 3,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items on next-steps: revision 2, 2 finding(s)",
+          "  next-steps#h copy/empty-placeholder (1): Slide 5 has an empty title. Type the copy or remove the placeholder.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "titled",
+      "nameFound": true,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "7 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 3"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "titled",
+      "nameFound": false,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "0 replacements on 0 slides, 0 pictures swapped, 0 skipped; revision 2"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Initech",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "version-list",
+      "state": "titled",
+      "nameFound": null,
+      "step": null,
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert",
+          "  2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set"
+        ],
+        "stderr": []
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "titled",
+      "nameFound": null,
+      "step": 1,
+      "answer": {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: Slide \"next-steps\" exists already"
+        ]
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "titled",
+      "nameFound": null,
+      "step": 2,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "set h /text on next-steps: revision 3, 8 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty key. Type the copy or remove the placeholder.",
+          "  next-steps#rows copy/empty-placeholder (1): Slide 5 has an empty value. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "step",
+      "state": "titled",
+      "nameFound": null,
+      "step": 3,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items on next-steps: revision 3, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "filled",
+      "nameFound": true,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Northwind=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "8 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 4"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "tailor",
+      "state": "filled",
+      "nameFound": false,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace=Initech=Globex"
+        ],
+        "code": 0,
+        "stdout": [
+          "0 replacements on 0 slides, 0 pictures swapped, 0 skipped; revision 3"
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Initech",
+        "to": "Globex"
+      }
+    },
+    {
+      "form": "version-list",
+      "state": "filled",
+      "nameFound": null,
+      "step": null,
+      "answer": {
+        "argv": [
+          "version",
+          "list"
+        ],
+        "code": 0,
+        "stdout": [
+          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert",
+          "  2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set",
+          "  3  r3     2026-10-03T04:01:35.630Z  agent:landing      1 mutation(s): block.set"
+        ],
+        "stderr": []
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "filled",
+      "nameFound": null,
+      "step": 1,
+      "answer": {
+        "argv": [
+          "slide",
+          "new",
+          "--layout",
+          "rows",
+          "--after",
+          "ships",
+          "--id",
+          "next-steps"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: Slide \"next-steps\" exists already"
+        ]
+      },
+      "names": null
+    },
+    {
+      "form": "step",
+      "state": "filled",
+      "nameFound": null,
+      "step": 2,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#h",
+          "/text",
+          "Next steps with Northwind"
+        ],
+        "code": 0,
+        "stdout": [
+          "set h /text on next-steps: revision 4, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "step",
+      "state": "filled",
+      "nameFound": null,
+      "step": 3,
+      "answer": {
+        "argv": [
+          "block",
+          "set",
+          "next-steps#rows",
+          "/items",
+          "[\n{\"key\": \"Monday\", \"value\": \"Northwind sellers get the deck\"},\n{\"key\": \"Wednesday\", \"value\": \"Agents draft slides over MCP\"},\n{\"key\": \"Friday\", \"value\": \"The first call uses this deck\"}\n]"
+        ],
+        "code": 0,
+        "stdout": [
+          "set rows /items on next-steps: revision 4, 2 finding(s)",
+          "  next-steps#h copy/sentence-case (2): Sentence case: lowercase \"Northwind\" unless it is a proper noun. A proper noun goes on the list.",
+          "  next-steps#p1 copy/empty-placeholder (1): Slide 5 has an empty paragraph. Type the copy or remove the placeholder."
+        ],
+        "stderr": []
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Northwind"
+      }
+    },
+    {
+      "form": "tailor-spaced",
+      "state": "absent",
+      "nameFound": true,
+      "step": null,
+      "answer": {
+        "argv": [
+          "tailor",
+          "--replace",
+          "Northwind=Globex"
+        ],
+        "code": 2,
+        "stdout": [],
+        "stderr": [
+          "turboslide: tailor needs --replace, --skip or --logo",
+          "usage: turboslide tailor --replace <from>=<to> [--replace <from>=<to>] [--skip <slideId>] [--logo <assetId> [--logo-alt <word>]]",
+          "  --replace <from>=<to>   the customer name as the deck spells it, and the name that takes its place (up to 20)",
+          "  --skip <slideId>        a slide to skip (repeatable)",
+          "  --logo <assetId>        the asset every picture whose alt text names --logo-alt takes",
+          "  --logo-alt <word>       the word the pictures' alt text names (with --logo)"
+        ]
+      },
+      "names": {
+        "from": "Northwind",
+        "to": "Globex"
+      }
+    }
+  ],
+  "gestures": [
+    {
+      "argv": [
+        "slide",
+        "to-canvas",
+        "rosetta"
+      ],
+      "code": 0,
+      "stdout": [
+        "rosetta: arranged by hand (mood), 5 object(s)",
+        "  picture      picture    0,0 1600x900 z 0",
+        "  plate        box        1031.03125,602.734375 431.96875x168.265625 z 1",
+        "  h            heading    1057.03125,624.734375 379.96875x47.515625 z 2",
+        "  p1           paragraph  1057.03125,684.25 379.96875x33 z 3",
+        "  credit       credit     1057.03125,729.25 379.96875x21.75 z 4",
+        "revision 4, 2 finding(s)"
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "block",
+        "set",
+        "rosetta#h",
+        "/pos",
+        "{\"x\":612,\"y\":388,\"w\":520,\"h\":96}"
+      ],
+      "code": 0,
+      "stdout": [
+        "set h /pos on rosetta: revision 5, 2 finding(s)",
+        "  rosetta export/non-native (1): In native mode an image exports as a 2x raster.",
+        "  rosetta layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+      ],
+      "stderr": []
+    },
+    {
+      "argv": [
+        "block",
+        "rotate",
+        "rosetta#h",
+        "--to",
+        "15"
+      ],
+      "code": 0,
+      "stdout": [
+        "rotated h to 15 degrees on rosetta: revision 6, 2 finding(s)",
+        "  rosetta export/non-native (1): In native mode an image exports as a 2x raster.",
+        "  rosetta layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+      ],
+      "stderr": []
+    }
+  ],
+  "tailor": {
+    "start": {
+      "argv": [
+        "tailor",
+        "--replace=Northwind=Globex"
+      ],
+      "code": 0,
+      "stdout": [
+        "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 1"
+      ],
+      "stderr": []
+    },
+    "rest": {
+      "argv": [
+        "tailor",
+        "--replace=Northwind=Globex"
+      ],
+      "code": 0,
+      "stdout": [
+        "8 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 4"
+      ],
+      "stderr": []
+    }
+  }
+}

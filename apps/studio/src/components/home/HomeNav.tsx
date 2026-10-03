@@ -13,7 +13,9 @@ import { SignInButton } from './sign-in';
  * link to this page, then Sign In, Documentation, the appearance group and the one solid button.
  * GitHub moved to the footer. Sign In is drawn for an anonymous visitor once the deployment
  * answers that it offers a method (sign-in.tsx), in a slot drawn at its width from the first
- * paint, so its arrival moves nothing that was already drawn (the layout shift rows). The appearance group
+ * paint, so its arrival moves nothing that was already drawn (the layout shift rows). The skip
+ * link comes first in the Tab order and is shown on focus (docs/LANDING.md 2.1); it moves focus to
+ * the hero section. The appearance group
  * is a `role="group"` of two `aria-pressed` buttons, Light and Dark, that write `gt-theme`
  * through `applyTheme` (the key the boot script reads), never a toggle whose label has to be read
  * to know the state. The page is prerendered, so the server's markup cannot know the stored
@@ -45,6 +47,9 @@ export function HomeNav({ nonce }: { nonce?: string }) {
   );
   return (
     <header className="ts-product-nav ts-seam">
+      <a className="ts-skip" href="#hero" data-control="home.nav.skip">
+        {NAV.skip}
+      </a>
       <div className="ts-col ts-product-nav-row">
         <HomeLink
           href="/home"

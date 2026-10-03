@@ -55,6 +55,19 @@ describe('the facts copy', () => {
     expect(HOME_FACTS.licence).toBe('MIT');
   });
 
+  it("carries the parts table's three counts of the tree (docs/LANDING.md 2.9)", () => {
+    const facts = JSON.parse(readFileSync(join(ROOT, FACTS_PATH), 'utf8')) as {
+      shapePresets: { count: number };
+    };
+    const cli = JSON.parse(
+      readFileSync(join(ROOT, 'packages/agent/generated/cli.json'), 'utf8'),
+    ) as { actions: unknown[] };
+    expect(HOME_FACTS.shapes).toBe(facts.shapePresets.count);
+    expect(HOME_FACTS.cliCommands).toBe(cli.actions.length);
+    /* MENUS has ten entries and Extensions is parked (editor-shell-render.test.tsx 182 to 186) */
+    expect(HOME_FACTS.menus).toBe(9);
+  });
+
   it('prints a count with a thousands separator and never as words', () => {
     expect(formatCount(169)).toBe('169');
     expect(formatCount(2995)).toBe('2,995');

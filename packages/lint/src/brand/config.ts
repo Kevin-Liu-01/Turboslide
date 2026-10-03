@@ -170,9 +170,9 @@ export type CodeSurface = { file: string; selector: string; reason: string };
 export const CODE_SURFACES: readonly CodeSurface[] = [
   {
     file: 'apps/studio/src/routes/home.css',
-    selector: '.ts-product-cmd',
+    selector: '.ts-home-panel',
     reason:
-      'The /home command, the code on the #101010 panel (DECK-GRAMMAR.md:31; brand-c 88 item 13).',
+      'The /home agents panel, the one code surface on the page (SPEC-4 0.20; DECK-GRAMMAR.md:31): the #101010 panel with its CLI, MCP and HTTP screens and its input line (docs/LANDING.md 2.0 "Type", 2.4).',
   },
   {
     file: 'packages/chrome/src/EditHtmlPanel.css',

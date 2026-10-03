@@ -1,0 +1,70 @@
+/* Print This Deck (docs/LANDING.md 2.7; l3.md R7): one 16 by 9 page per slide of the visitor's
+   deck. The live module (L3's live/print.ts, push 5) fills `[data-print-deck]` on `beforeprint`
+   with the deck's slides in their current state and empties it on `afterprint`; while the
+   container is empty (no live module), the print is the hero slide alone. Nothing of the page's
+   chrome prints. */
+
+@page {
+  size: 16in 9in;
+  margin: 0;
+}
+
+.ts-print-deck {
+  display: none;
+}
+
+@media print {
+  html:has(.ts-product),
+  html:has(.ts-product) body {
+    margin: 0;
+    background: #ffffff;
+  }
+
+  .ts-product .ts-rails,
+  .ts-product .ts-skip,
+  .ts-product-nav,
+  .ts-product-footer,
+  .ts-product [data-band]:not([data-band='hero']),
+  .ts-product .ts-hatch,
+  .ts-product [data-band='hero'] > .ts-col > :not(.ts-hero-sheet) {
+    display: none;
+  }
+
+  .ts-product [data-band='hero'] {
+    padding: 0;
+    border: 0;
+  }
+
+  .ts-product [data-band='hero']::before,
+  .ts-product [data-band='hero']::after {
+    display: none;
+  }
+
+  .ts-product [data-band='hero'] > .ts-col {
+    width: 16in;
+    padding: 0;
+  }
+
+  .ts-product .ts-hero-sheet {
+    width: 16in;
+    margin: 0;
+  }
+
+  /* the visitor's deck, when the live module has filled the container */
+  .ts-product:has(.ts-print-deck:not(:empty)) > :not(.ts-print-deck) {
+    display: none;
+  }
+
+  .ts-print-deck:not(:empty) {
+    display: block;
+  }
+
+  .ts-print-deck > * {
+    position: relative;
+    width: 16in;
+    height: 9in;
+    overflow: hidden;
+    container-type: inline-size;
+    break-after: page;
+  }
+}

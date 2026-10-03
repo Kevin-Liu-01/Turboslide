@@ -249,3 +249,49 @@ function leadingSpaces(line: string): number {
   while (n < line.length && line[n] === ' ') n += 1;
   return n;
 }
+
+// ---------------------------------------------------------------------------------------------
+// The lines of a step (l3.md R2): the build composes the panel's screens with these, so the live
+// module prints a step with a substituted name exactly as `build-home-assets.ts --check` formatted
+// it. Each returns logical lines; the caller formats them with `formatScreen`.
+
+/** The closing line of the MCP and HTTP panels (copy.ts AGENTS.panel.requestOnly). */
+export const REQUEST_ONLY = 'Request only. The CLI tab shows the recorded answer.';
+
+/** JSON with a space after every colon and comma, so the panel can break it at spaces. */
+export function spacedJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(spacedJson).join(', ')}]`;
+  if (value !== null && typeof value === 'object')
+    return `{${Object.entries(value)
+      .map(([k, v]) => `${JSON.stringify(k)}: ${spacedJson(v)}`)
+      .join(', ')}}`;
+  return JSON.stringify(value);
+}
+
+/** What the three helpers read of a recorded step (run.generated.ts `RunStep`). */
+export type StepLines = {
+  command: string;
+  answer: readonly string[];
+  mcp: { name: string; arguments: Readonly<Record<string, unknown>> };
+  http: { path: string; body: Readonly<Record<string, unknown>> };
+};
+
+/** The CLI tab's lines of a step: the prompt and the command with the name, then the answer. */
+export function cliStepLines(step: StepLines, from: string, to: string): string[] {
+  return [
+    `$ ${substituteName(step.command, from, to)}`,
+    ...step.answer.map((l) => substituteAnswer(l, from, to)),
+  ];
+}
+
+/** The MCP tab's line of a step: the `tools/call` with the tool's name and its arguments. */
+export function mcpStepLines(step: StepLines, from: string, to: string): string[] {
+  return [
+    substituteAnswer(`tools/call ${step.mcp.name} ${spacedJson(step.mcp.arguments)}`, from, to),
+  ];
+}
+
+/** The HTTP tab's line of a step: the POST to the action's path with its body. */
+export function httpStepLines(step: StepLines, from: string, to: string): string[] {
+  return [substituteAnswer(`POST ${step.http.path} ${spacedJson(step.http.body)}`, from, to)];
+}

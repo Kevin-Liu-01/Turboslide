@@ -1,31 +1,28 @@
-/* The product page, /home (docs/archive/rounds/POLISH.md section 3; the round four notes of gslides-parity
-   SPEC-4 section 2 stand under it), on the deck's page grammar since Round 1 (docs/NEXT.md 4.1.2
-   and 4.1.3 item 9; Prototemplate deck/slides/29-ladder.html and 49-shell-numbers.html; brand-c
-   rules 3 to 6 and 13). One sheet for the navigation, the hero, the numbers row, the six sections
-   and the footer. Colours are the --pt- tokens of tokens.css alone (paper and ink); sizes are the
-   --ts- identity tokens brand.css puts on :root (the ladder, the 1104 px column, the 58 px
-   navigation bar, the 9 px cross) plus the spacing system of POLISH.md 3.4 (base unit 8 px:
-   section padding 112, h1 to lead 24, h2 to lead 16, lead to buttons 32, text block to picture
-   56, the two column gap 72, the lead measure 560). The line law (DESIGN.md 59, 177 to 188): one
-   rail on each side of the column, drawn once for the page (grammar.css .ts-rails); every band
-   ends in a full bleed seam with a cross where it meets each rail (grammar.css .ts-seam); the hatch strip
-   after the numbers row marks the change of topic; --pt-edge around a picture; nothing else is
-   drawn. The layout has one breakpoint, 1023 px; the hero type has its own at 720 px (brand.css).
-   Monospace sits only on the #101010 panel (DECK-GRAMMAR 31). Nothing animates apart from the
-   .pt-ib colour transitions tokens.css defines. */
+/* The landing, /home (docs/LANDING.md section 2, 2.0 "What every section shares", 3 and 5):
+   the band layouts at 1,024 px and over and under 720 px, the rendered slides' stage, and the
+   panel's one monospace rule. On the branch's grammar (grammar.css): the 1,104 px column with one
+   rail on each side drawn once by `.ts-rails`, a 40 px gutter (0 under 720 px, so the content is
+   358 px wide at 390), each band a `section[data-band]` closed by `.ts-seam` with its 9 px
+   crosses, the hatch strip once before "Turboslide today". Colours are the --pt- tokens of
+   tokens.css (paper and ink); `--pt-select` appears only while something is being worked on
+   (selection.css, the focus ring), never at rest. Inter only, weights 400 and 500. Square corners,
+   no shadow, gradient or blur, ruled rows and never boxed cards. Motion reads the tokens of
+   grammar.css; nothing here moves at rest. */
 
-/* the document scrolls with no smoothing, said explicitly (SPEC-4 0.23) */
+/* the document scrolls with no smoothing, said explicitly (SPEC-4 0.23; LANDING.md 3.4) */
 html:has(.ts-product) {
   scroll-behavior: auto;
 }
 
 .ts-product {
+  --ts-gutter: 40px;
   position: relative;
   display: block;
   min-width: 0;
   color: var(--pt-ink);
   background: var(--pt-paper);
-  font: var(--ts-body) / 1.6 var(--pt-text);
+  font: 16px / 1.6 var(--pt-text);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -38,94 +35,227 @@ html:has(.ts-product) {
   color: inherit;
 }
 
-/* ---- the ladder (slide 29): weight 500 on every heading, the h1 included ---- */
-.ts-product-h1,
-.ts-product-h2 {
+.ts-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.ts-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- the focus ring (LANDING.md 5 "Focus"): 2 px of the selection blue, 2 px out, on every
+   control; a focused slide object draws the editor's selection instead (selection.css) ---- */
+.ts-product :is(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-product .pt-ib:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-product [data-object]:focus-visible,
+.ts-product [data-band]:focus,
+.ts-product [data-band]:focus-visible {
+  outline: none;
+}
+
+/* ---- the skip link: the first Tab stop, shown on focus (LANDING.md 2.1) ---- */
+.ts-skip {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  z-index: 10;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--pt-ink);
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-ink);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.ts-skip:focus,
+.ts-skip:focus-visible {
+  transform: none;
+}
+
+/* ---- type (LANDING.md 2.0 "Type") ---- */
+.ts-h2 {
   margin: 0;
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
+  font-size: clamp(30px, 3.9vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -0.034em;
   text-wrap: balance;
   color: var(--pt-ink);
 }
 
-.ts-product-h1 {
-  max-width: 640px;
-  font-size: var(--ts-h1);
-  line-height: 1.04;
-  letter-spacing: -0.038em;
-}
-
-/* the section heading: the words alone, no icon before them (DECK-GRAMMAR 40) */
-.ts-product-h2 {
-  font-size: var(--ts-h2);
-  line-height: 1.18;
-  letter-spacing: -0.025em;
-}
-
-.ts-product-lead {
-  max-width: 560px;
-  font-size: var(--ts-lead);
+.ts-lead {
+  font-size: 19px;
   line-height: 1.55;
   color: var(--pt-ink-2);
 }
 
-.ts-product-h1 + .ts-product-lead {
-  margin-top: 24px;
+.ts-h2 + .ts-lead {
+  margin-top: 20px;
 }
 
-.ts-product-h2 + .ts-product-lead {
-  margin-top: 16px;
+.ts-caption {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
 }
 
-.ts-product-inline-link {
+.ts-label {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-strong {
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-inline-link {
   color: var(--pt-ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
-.ts-product-inline-link:focus-visible,
-.ts-product-link:focus-visible,
-.ts-product-lockup:focus-visible,
-.ts-product-foot-link:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+/* ---- buttons: square, 40 px (44 under 720), the ground on hover and a 0.98 press (B1, B2) ---- */
+.ts-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-/* the one monospace on the page (SPEC-4 0.20; DECK-GRAMMAR 31): the agents' command in white
-   monospace on the #101010 panel, the same panel in both appearances */
-.ts-product-cmd {
-  display: block;
+.ts-product .ts-button {
   box-sizing: border-box;
-  max-width: 480px;
-  margin: 24px 0 0;
-  padding: 14px 16px;
-  font-family: var(--pt-mono);
-  font-size: var(--ts-small);
-  line-height: 1.55;
-  color: var(--pt-panel-text);
+  height: 40px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 400;
+  text-decoration: none;
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+  border-radius: 0;
+  justify-content: center;
+  transition:
+    color var(--ts-d-fast) var(--ts-ease-fade),
+    background-color var(--ts-d-fast) var(--ts-ease-fade),
+    border-color var(--ts-d-fast) var(--ts-ease-fade),
+    transform var(--ts-d-fast) var(--ts-ease-fade);
+}
+
+.ts-product .ts-button.is-solid {
+  color: var(--pt-paper);
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-product .ts-button.is-solid:hover {
+  background: var(--pt-ink-2);
+  border-color: var(--pt-ink-2);
+}
+
+.ts-product .ts-button:active {
+  transform: scale(0.98);
+}
+
+.ts-text-button {
+  appearance: none;
+  height: 32px;
+  padding: 0 6px;
   border: 0;
-  background: var(--pt-panel-ink);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  border-radius: 0;
+  background: none;
+  font: 14px / 1 var(--pt-text);
+  color: var(--pt-ink-2);
+  cursor: pointer;
+  transition: background-color var(--ts-d-fast) var(--ts-ease-fade);
 }
 
-.ts-product-cmd code {
-  font: inherit;
+.ts-text-button:hover {
+  color: var(--pt-ink);
+  background: var(--pt-plate);
 }
 
-/* a text link under a lead: the section's one action */
-.ts-product-link {
-  display: inline-block;
-  margin-top: 24px;
+.ts-text-button[aria-disabled='true'] {
+  color: var(--pt-titanium);
+  cursor: default;
+  background: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-product .ts-button:active {
+    transform: none;
+  }
+}
+
+/* ---- ruled rows: a key, a value and an action, each row owning its line ---- */
+.ts-rows {
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: 15px;
+}
+
+.ts-row:last-child {
+  border-bottom-color: var(--pt-hair);
+}
+
+.ts-row-key {
+  flex: 0 0 120px;
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-row-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-row-link {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 14px;
   color: var(--pt-ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
-/* ---- the navigation: 58 px (--ts-nav-h) in the column, the seam under it ---- */
+/* ---- the navigation: 58 px in the column, the seam under it (unchanged from Round 1) ---- */
+.ts-product-nav {
+  position: relative;
+}
+
 .ts-product-nav-row {
   display: flex;
   align-items: center;
@@ -134,7 +264,7 @@ html:has(.ts-product) {
 }
 
 /* the lockup: the 24 px mark beside the 22 px word, half the cap between them less the T's
-   bearing (brand.css .ts-brand-lockup, B1's rule; docs/gslides-parity/round1/sheet.md) */
+   bearing (brand.css .ts-brand-lockup, B1's rule) */
 .ts-product-lockup {
   display: inline-flex;
   align-items: center;
@@ -174,10 +304,13 @@ html:has(.ts-product) {
   text-decoration: none;
 }
 
-/* Sign In (sign-in.tsx): the page is prerendered, so the button arrives after hydration once the
-   deployment answers; its slot is drawn at the button's width from the first paint, so the
-   arrival moves nothing (the layout shift row) and a deployment with no method leaves the slot
-   empty at the start of the right hand group; its words in ink, as Documentation's */
+.ts-product-nav-links .pt-ib {
+  font-size: 14px;
+  height: 36px;
+  color: var(--pt-ink);
+}
+
+/* Sign In arrives after hydration in a slot drawn at its width from the first paint (sign-in.tsx) */
 .ts-product-nav-signin {
   display: inline-flex;
   flex: 0 0 64px;
@@ -188,9 +321,14 @@ html:has(.ts-product) {
   color: var(--pt-ink);
 }
 
+.ts-product-nav .ts-product-nav-new {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
 /* the appearance group: two aria-pressed buttons; the pressed look comes from the data-theme
-   attribute the boot script stamps before first paint, so a prerendered page never shows a frame
-   with both buttons outlined or both pressed (HomeNav.tsx) */
+   attribute the boot script stamps before first paint (HomeNav.tsx) */
 .ts-product-appearance {
   display: inline-flex;
   align-items: center;
@@ -204,244 +342,1162 @@ html:has(.ts-product) {
   border-color: var(--pt-ink);
 }
 
-/* ---- the hero: the text and the facts rows, then the product (3.2 item 1) ---- */
-.ts-product-hero {
-  padding: 72px 0 112px;
+/* ---- the bands (LANDING.md 2.0 "The column") ---- */
+.ts-band {
+  padding: 80px 0;
 }
 
-.ts-product-hero-head {
-  display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: 72px;
-  align-items: end;
-}
-
-.ts-product-hero-text {
+.ts-band-head {
   min-width: 0;
 }
 
-.ts-product-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.ts-band-head.is-7 .ts-lead {
+  max-width: 640px;
+}
+
+.ts-band-head.is-5 {
+  max-width: 412px;
+}
+
+.ts-band-head > .ts-buttons {
   margin-top: 32px;
 }
 
-.ts-product-cta .pt-ib {
-  box-sizing: border-box;
-  height: 40px;
-  padding: 0 16px;
-  font-size: 14px;
-  text-decoration: none;
-  border-color: var(--pt-hair);
-  color: var(--pt-ink);
+/* ---- the rendered slides (LANDING.md 2.0 "Slides"): the renderer's 1,600 by 900 stage scaled
+   into its wrapper by --k, the wrapper's width over 1,600 px as a number (`tan(atan2())` turns a
+   ratio of lengths into a number), so one sheet unit is 1/1,600 of the wrapper; the wrapper is a
+   size container of the sheet's aspect, so nothing reflows when the sheet scales ---- */
+.ts-home-sheet {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  min-width: 0;
 }
 
-.ts-product-cta .pt-ib.is-solid {
-  color: var(--pt-paper);
-  border-color: var(--pt-ink);
+.ts-home-sheet > .ts-sheet[data-home-slides] {
+  --k: tan(atan2(100cqw, 1600px));
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  transform: scale(var(--k));
+  transform-origin: 0 0;
+  /* no sheet wider than a thumbnail draws a frame: its edge is its own rails (LANDING.md 2.0) */
+  border: 0;
+  box-shadow: none;
 }
 
-/* the facts rows (brand-c rule 5; DECK-GRAMMAR 36, 39 and 40): ruled key and value rows, each
-   row owning its line, a Heroicon in the key cell and nowhere else */
-.ts-product-facts {
+/* a thumbnail keeps the renderer's 1 px edge, the only edge that reads at that size */
+.ts-home-sheet.is-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--pt-edge);
+  pointer-events: none;
+}
+
+/* the page sets the sheet's appearance from its own (the build strips the sheet's data-theme):
+   sheet.css .ts-sheet[data-theme='dark'], restated under the page's dark appearance */
+:root[data-theme='dark'] .ts-sheet[data-home-slides],
+:root[data-theme='dark'] .ts-home-sheet-box {
+  color-scheme: dark;
+  --paper: #070707;
+  --ink: #f2f2f0;
+  --ink-2: #b9bcc3;
+  --titanium: #8a8f98;
+  --hair: rgba(242, 242, 240, 0.22);
+  --hair-soft: rgba(242, 242, 240, 0.1);
+  --plate: rgba(242, 242, 240, 0.05);
+  --cross: rgba(255, 255, 255, 0.34);
+  --edge: rgba(242, 242, 240, 0.55);
+  --thumb: rgba(242, 242, 240, 0.32);
+}
+
+/* the slides' hint colour (counters, credits, captions) takes the chrome's titanium on /home, 4.70:1
+   on paper, where the deck's #8a8f98 reads 3.27:1 (docs/LANDING.md 5 "Contrast"; a recorded
+   deviation from the theme's token); a kit's Hints still set it inline */
+.ts-sheet[data-home-slides],
+.ts-seam-editable {
+  --titanium: var(--pt-titanium);
+}
+
+/* the slides' headings outside the hero are divs (one h1 and one h2 per band on the page); they
+   keep sheet.css's heading look */
+.ts-sheet .ts-home-h1,
+.ts-sheet .ts-home-h2,
+.ts-sheet .ts-home-h3 {
   margin: 0;
-  border-top: 1px solid var(--pt-hair);
+  font-family: var(--display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  font-feature-settings: var(--display-features);
 }
 
-.ts-product-fact {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 24px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--pt-hair-soft);
-  font-size: var(--ts-small);
-  line-height: 1.55;
+.ts-sheet .ts-home-h1 {
+  font-size: 88px;
+  line-height: 1.02;
 }
 
-.ts-product-fact:last-child {
-  border-bottom-color: var(--pt-hair);
+.ts-sheet .ts-home-h2 {
+  font-size: 44px;
+  line-height: 1.1;
+  margin-bottom: 18px;
 }
 
-.ts-product-fact dt {
+/* a field box (l4.md M4): the still as the one masked child over the sheet's ink, one pixel per
+   cell scaled to the box with no smoothing; the live module's canvas over it, hidden until it
+   prints */
+.ts-home-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ts-field-still {
+  position: absolute;
+  inset: 0;
+  background: var(--ink, var(--pt-ink));
+  -webkit-mask-image: var(--ts-still);
+  mask-image: var(--ts-still);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+[data-field] > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  visibility: hidden;
+}
+
+[data-field][data-field-state='developing'] > canvas {
+  visibility: visible;
+}
+
+[data-field][data-field-state='developing'] > .ts-field-still {
+  visibility: hidden;
+}
+
+/* a picture slide's print sits where the renderer's picture sat (block-css.ts .mood-img); its
+   still is requested only when the print comes near the viewport (content-visibility: auto skips
+   the masked child's style until then) */
+.ts-sheet .slide .ts-home-print {
+  position: absolute;
+  inset: -57px;
+  z-index: -1;
+  width: 1600px;
+  height: 900px;
+  content-visibility: auto;
+  contain-intrinsic-size: 1600px 900px;
+}
+
+/* ---- the hero, slide 1 (LANDING.md 2.2) ---- */
+.ts-band-hero {
+  padding: 40px 0 40px;
+}
+
+.ts-band-hero:focus {
+  outline: none;
+}
+
+.ts-hero-sheet {
+  margin: 0;
+}
+
+/* the title box at (137, 150) and the subtitle at (137, 640) in sheet units: inside the slide's
+   content box, which starts at (137, 129) */
+[data-instance='hero'] .left-mid {
+  position: static;
+  transform: none;
+}
+
+[data-instance='hero'] .ts-home-obj {
+  position: absolute;
+  left: 0;
+}
+
+/* the clear zone: each box grounds 24 units of paper beyond itself, so type never sits on dither
+   and the zone moves with the box (integrator.md 2.2; l2.md Q2) */
+[data-instance='hero'] .ts-home-obj::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background: var(--paper);
+  pointer-events: none;
+}
+
+[data-instance='hero'] .ts-home-title {
+  top: 21px;
+}
+
+[data-instance='hero'] .ts-home-title h1 {
+  margin: 0;
+  font-size: 150px;
+  line-height: 0.98;
+  letter-spacing: -0.042em;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* three locked lines: inline spans broken by the markup's <br>, so the h1 is one text block (the
+   LCP element) whose name reads the sentence */
+[data-instance='hero'] .ts-home-title h1 {
+  white-space: nowrap;
+}
+
+[data-instance='hero'] .ts-home-sub {
+  top: 511px;
+}
+
+[data-instance='hero'] .ts-home-sub p {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+/* the bottom margin over the field: the mark, the credit and the counter each on a chip of paper */
+[data-instance='hero'] .wordmark::before,
+[data-instance='hero'] .counter::before,
+[data-instance='hero'] .ts-home-credit::before {
+  content: '';
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  background: var(--paper);
+}
+
+[data-instance='hero'] .ts-home-credit {
+  position: absolute;
+  left: 137px;
+  bottom: 22px;
+  z-index: 2;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--titanium);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ts-hero-credit {
+  display: none;
+}
+
+.ts-hero-caption-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  align-self: start;
-  min-height: 22px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--pt-ink);
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+  margin-top: 12px;
 }
 
-.ts-product-fact dd {
+.ts-hero-caption > span {
+  display: none;
+}
+
+.ts-hero-caption > .is-pointer {
+  display: inline;
+}
+
+@media (pointer: coarse) {
+  .ts-hero-caption > .is-pointer {
+    display: none;
+  }
+
+  .ts-hero-caption > .is-touch-wide {
+    display: inline;
+  }
+}
+
+.ts-hero-lead-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 4px;
+}
+
+.ts-hero-lead {
+  min-width: 0;
+}
+
+/* ---- the field strip (LANDING.md 2.3): 1,024 by 160 px, 512 by 80 cells ---- */
+.ts-strip {
+  padding: 24px 0;
+}
+
+.ts-strip-box {
+  position: relative;
+  height: 160px;
+}
+
+/* ---- Agents (LANDING.md 2.4): the panel 588 px and slide 5 412 px, 24 px apart ---- */
+.ts-agents {
+  display: grid;
+  grid-template-columns: minmax(0, 588fr) minmax(0, 412fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 32px;
+}
+
+/* the one monospace on the page (SPEC-4 0.20; DECK-GRAMMAR 31): the #101010 panel, the same in
+   both appearances; 14 px on 20 px lines with 20 px a side (64 columns), 12 px on 18 px with 12 px
+   a side under 720 px (44 columns); lines break only where panel-format.ts broke them */
+.ts-home-panel {
+  box-sizing: border-box;
+  color: var(--pt-panel-text);
+  background: var(--pt-panel-ink);
+  font-family: var(--pt-mono);
+}
+
+.ts-home-panel-tabs {
+  display: flex;
+  height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--pt-hair-on-ink);
+}
+
+.ts-home-panel-tab {
+  appearance: none;
+  height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 13px / 1 var(--pt-text);
+  color: rgba(255, 255, 255, 0.62);
+  cursor: pointer;
+}
+
+.ts-home-panel-tab[aria-selected='true'] {
+  color: var(--pt-panel-text);
+  box-shadow: inset 0 -1px 0 var(--pt-panel-text);
+}
+
+.ts-home-panel-screen {
+  box-sizing: border-box;
+  height: calc(14 * 20px + 32px);
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 20px;
+  overflow: hidden;
+}
+
+.ts-home-panel-screen[hidden] {
+  display: none;
+}
+
+.ts-home-panel-text > span {
+  display: block;
+  min-height: 20px;
+  white-space: pre;
+}
+
+.ts-home-panel-text.is-narrow {
+  display: none;
+}
+
+.ts-home-panel-input {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  height: 40px;
+  padding: 0 20px;
+  border-top: 1px solid var(--pt-hair-on-ink);
+  font-size: 14px;
+  cursor: text;
+}
+
+.ts-home-panel-prompt {
+  flex: 0 0 auto;
+  white-space: pre;
+}
+
+.ts-home-panel-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: var(--pt-panel-text);
+  outline: none;
+}
+
+.ts-home-panel-field::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ts-home-panel-input:focus-within {
+  outline: 2px solid var(--pt-select);
+  outline-offset: -2px;
+}
+
+.ts-agents-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.ts-home-step {
+  font-size: 13px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-agents-run > .ts-caption {
+  margin-top: 12px;
+}
+
+.ts-agents-slide > .ts-label {
+  margin-top: 24px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-home-history {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  min-height: calc(5 * 44px);
+}
+
+.ts-home-history-row {
+  display: grid;
+  grid-template-columns: 16px 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: 14px;
   color: var(--pt-ink-2);
 }
 
-/* the key cell's icon: 16 px, the text's colour, decorative */
-.ts-product-h2-icon {
-  flex: 0 0 auto;
+.ts-home-history-icon {
+  display: flex;
+  align-items: center;
   width: 16px;
   height: 16px;
-}
-
-/* a picture in its frame (the edge role) */
-.ts-product-shot {
-  margin: 0;
-  min-width: 0;
-  line-height: 0;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
-}
-
-.ts-product-shot-img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.ts-product-hero-shot {
-  margin-top: 56px;
-}
-
-/* the stored appearance shows one picture of the pair; the hidden one has no box and, being
-   lazy, no request (Shot.tsx) */
-.ts-product .ts-product-only-light {
-  display: block;
-}
-
-.ts-product .ts-product-only-dark {
-  display: none;
-}
-
-:root[data-theme='dark'] .ts-product .ts-product-only-light {
-  display: none;
-}
-
-:root[data-theme='dark'] .ts-product .ts-product-only-dark {
-  display: block;
-}
-
-/* ---- the numbers row (A's graft): three cells parted by hairlines, then the hatch strip ---- */
-.ts-product-numbers-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.ts-product-number {
-  min-width: 0;
-  padding: 32px var(--ts-gutter, 40px);
-}
-
-.ts-product-number + .ts-product-number {
-  border-left: 1px solid var(--pt-hair);
-}
-
-.ts-product-figure {
-  font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-  font-size: var(--ts-figure);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
   color: var(--pt-ink);
 }
 
-.ts-product-figure .ts-product-inline-link {
-  text-decoration-thickness: 1px;
-  text-underline-offset: 6px;
+.ts-home-history-author {
+  font-weight: 500;
+  color: var(--pt-ink);
 }
 
-.ts-product-number-sentence {
-  max-width: 300px;
-  margin-top: 8px;
-  font-size: var(--ts-small);
-  line-height: 1.55;
+.ts-home-history-time {
+  font-size: 13px;
   color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ---- the sections: the two column block of 3.4, a seam under each ---- */
-.ts-product-band {
-  padding: 112px 0;
+/* the agent's ring and flag (l3.md R3), created by the live module while a step plays */
+.ts-agents-sheet {
+  position: relative;
 }
 
-.ts-product-two {
+.ts-home-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.ts-home-ring > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  background: var(--pt-ink);
+  transform-origin: 0 0;
+}
+
+.ts-home-flag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 2px 6px;
+  font: 500 12px / 16px var(--pt-text);
+  color: var(--pt-paper);
+  background: var(--pt-ink);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* the run's start: the paper sheet with no rails, which step 1 draws (l3.md R3, R4) */
+[data-band='agents'] [data-agent-absent] > * {
+  visibility: hidden;
+}
+
+[data-band='agents'] [data-agent-absent] .frame {
+  visibility: hidden;
+}
+
+[data-band='agents'] .frame.ts-home-draw .rule.top {
+  transform-origin: 56px 50%;
+  animation: ts-draw-x calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive) 0ms both;
+}
+
+[data-band='agents'] .frame.ts-home-draw::before {
+  transform-origin: 50% 56px;
+  animation: ts-draw-y calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+    calc(60ms * var(--ts-slow, 1)) both;
+}
+
+[data-band='agents'] .frame.ts-home-draw::after {
+  transform-origin: 50% calc(100% - 56px);
+  animation: ts-draw-y calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+    calc(120ms * var(--ts-slow, 1)) both;
+}
+
+[data-band='agents'] .frame.ts-home-draw .rule.bottom {
+  transform-origin: calc(100% - 56px) 50%;
+  animation: ts-draw-x calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+    calc(180ms * var(--ts-slow, 1)) both;
+}
+
+/* ---- Tailor (LANDING.md 2.5): the head in 5 of 12 columns, the dialog in 7; under them the
+   filmstrip (144 px) and the stage (856 by 481) ---- */
+.ts-tailor-top {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 72px;
+  grid-template-columns: minmax(0, 412fr) minmax(0, 588fr);
+  gap: 24px;
   align-items: start;
 }
 
-.ts-product-text {
+.ts-tailor-dialog .ts-row {
+  min-height: 48px;
+}
+
+.ts-tailor-dialog .ts-row-key {
+  flex-basis: 112px;
+}
+
+.ts-field {
+  box-sizing: border-box;
+  width: 280px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  font: 15px / 1 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-field::placeholder {
+  color: var(--pt-ink-2);
+  opacity: 0.8;
+}
+
+.ts-field:focus-visible {
+  border-color: var(--pt-ink);
+}
+
+.ts-row-foot {
+  justify-content: space-between;
+}
+
+.ts-row-foot .ts-count {
+  flex: 1 1 auto;
+}
+
+.ts-kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.ts-kit {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 14px / 1 var(--pt-text);
+  color: var(--pt-ink-2);
+  cursor: pointer;
+}
+
+.ts-kit[aria-pressed='true'] {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+/* a kit's swatch: the kit's ground with a bar of its ink, 28 px square */
+.ts-kit-swatch {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--ts-kit-paper);
+}
+
+.ts-kit-swatch > i {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 12px;
+  height: 3px;
+  background: var(--ts-kit-ink);
+}
+
+.ts-kit[aria-pressed='true'] .ts-kit-swatch {
+  border-color: var(--pt-ink);
+}
+
+/* GT is the deck's own kit in the page's appearance; Kestrel and Fenwick are example customers'
+   kits that fix their colours in both appearances (integrator.md 3) */
+.ts-kit[data-kit='gt'] {
+  --ts-kit-paper: var(--pt-paper);
+  --ts-kit-ink: var(--pt-ink);
+}
+
+.ts-kit[data-kit='kestrel'] {
+  --ts-kit-paper: #f3efe6;
+  --ts-kit-ink: #1f1b16;
+}
+
+.ts-kit[data-kit='fenwick'] {
+  --ts-kit-paper: #0a1b38;
+  --ts-kit-ink: #f4f1ea;
+}
+
+.ts-tailor-editor {
+  display: grid;
+  grid-template-columns: 144px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 32px;
+}
+
+.ts-filmstrip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-thumb {
+  position: relative;
+  display: grid;
+  grid-template-columns: 144px;
+  cursor: pointer;
+}
+
+.ts-thumb-n {
+  position: absolute;
+  left: -22px;
+  top: 0;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-thumb[data-selected] .ts-home-sheet.is-thumb::after {
+  border: 2px solid var(--pt-ink);
+}
+
+/* Move Up and Move Down: a row reserved under each thumbnail, shown for the chosen one only, so
+   showing them moves nothing (l2.md Q3) */
+.ts-thumb-moves {
+  display: flex;
+  justify-content: space-between;
+  height: 28px;
+  visibility: hidden;
+}
+
+.ts-thumb[data-selected] .ts-thumb-moves {
+  visibility: visible;
+}
+
+.ts-thumb-moves .ts-text-button {
+  height: 28px;
+  padding: 0 2px;
+  font-size: 13px;
+}
+
+.ts-tailor-stage {
   min-width: 0;
 }
 
-/* ---- the diagrams (3.3 item 2; slide 33): 1 px strokes, 20 unit labels, square markers ---- */
-.ts-product-diagram {
+.ts-snackbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 40px;
+  font-size: 14px;
+  color: var(--pt-ink);
+}
+
+.ts-snackbar > * {
+  visibility: hidden;
+}
+
+.ts-snackbar[data-on] > * {
+  visibility: visible;
+}
+
+/* ---- the canvas (LANDING.md 2.6): slide 6 at the column's width, two ruled rows under it ---- */
+.ts-canvas-sheet {
+  margin-top: 32px;
+}
+
+.ts-canvas-rows {
+  margin-top: 24px;
+}
+
+.ts-canvas-rows .ts-row-key {
+  flex-basis: 120px;
+}
+
+.ts-canvas-rows .ts-strong {
+  flex: 0 0 auto;
+  margin-right: auto;
+}
+
+/* the Command row's line: generated text in a code element set in Inter (no second panel) */
+.ts-command {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: 14px / 20px var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* ---- Present (LANDING.md 2.7): the head in 5 of 12 columns, the slide and its list in 7; the
+   band reserves the show's 1,024 by 576 stage and its 56 px bar ---- */
+.ts-band-present {
+  position: relative;
+}
+
+.ts-present {
+  display: grid;
+  grid-template-columns: minmax(0, 412fr) minmax(0, 588fr);
+  gap: 24px;
+  align-items: start;
+  min-height: calc(576px + 56px);
+}
+
+.ts-slide-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-slide-row {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  border-radius: 0;
+  background: none;
+  font: 14px / 1 var(--pt-text);
+  color: var(--pt-ink-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-slide-row:hover {
+  background: var(--pt-plate);
+}
+
+.ts-slide-row-n {
+  flex: 0 0 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-slide-row[aria-current='true'] {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+/* the show (l3.md R6), created by the live module inside the band */
+.ts-home-show {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+}
+
+.ts-home-show-ink {
+  position: absolute;
+  inset: 0;
+  background: var(--pt-ink);
+}
+
+.ts-home-show-stage {
+  position: relative;
+  width: min(1024px, 100%);
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  outline: none;
+}
+
+.ts-home-show-stage:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-home-show-bar {
+  position: relative;
+  width: min(1024px, 100%);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--pt-paper);
+  font-size: 14px;
+}
+
+.ts-home-show-notes {
+  flex: 1;
+  min-width: 0;
+  color: color-mix(in srgb, var(--pt-paper) 72%, transparent);
+}
+
+.ts-home-show-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-home-show-bar button {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--pt-paper) 40%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pt-paper);
+  font: inherit;
+}
+
+/* ---- Export (LANDING.md 2.8): the two files at a seam, `--seam-cut` on a clip of the picture
+   layer, the handle a slider; three ruled rows ---- */
+.ts-seam-slide {
+  position: relative;
+  margin-top: 32px;
+}
+
+/* the labels over the slide's two upper corners, ink on paper chips (LANDING.md 2.8) */
+.ts-seam-labels {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 12px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 12px;
+  pointer-events: none;
+}
+
+.ts-seam-label {
+  padding: 4px 8px;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--pt-ink);
+  background: var(--pt-paper);
+}
+
+.ts-seam-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: ew-resize;
+}
+
+/* the Editable text side: the file's frames in sheet pixels, scaled as a sheet is */
+.ts-seam-editable {
+  --k: tan(atan2(100cqw, 1600px));
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  transform: scale(var(--k));
+  transform-origin: 0 0;
+  --paper: #ffffff;
+  --ink: #070707;
+  --hair: rgba(7, 7, 7, 0.18);
+  --cross: rgba(7, 7, 7, 0.38);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ts-home-editable > * {
+  position: absolute;
+}
+
+.ts-home-ed-pic {
+  display: block;
+  object-fit: fill;
+}
+
+.ts-home-ed-fill {
+  background: var(--paper);
+}
+
+.ts-home-ed-lines {
+  inset: 0;
+  width: 1600px;
+  height: 900px;
+  overflow: visible;
+}
+
+.ts-home-ed-lines .is-hair {
+  fill: var(--hair);
+}
+
+.ts-home-ed-lines .is-cross {
+  fill: var(--cross);
+}
+
+.ts-home-ed-frame {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: 'Inter', 'Inter Fallback', sans-serif;
+  color: var(--ink);
+  user-select: text;
+  outline: 1px solid var(--ink);
+  outline-offset: 0;
+  cursor: text;
+}
+
+.ts-home-ed-frame p {
+  margin: 0;
+  white-space: pre;
+}
+
+.ts-home-ed-frame p.is-muted {
+  color: var(--titanium);
+}
+
+.ts-seam-perfect {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc(100% - var(--seam-cut, 50%)) 0 0);
+}
+
+.ts-seam-perfect img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+}
+
+.ts-seam-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--seam-cut, 50%);
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--pt-ink);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.ts-seam-knob {
+  position: absolute;
+  left: -12px;
+  top: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  background: var(--pt-paper);
+}
+
+.ts-seam-handle:focus-visible {
+  outline: none;
+}
+
+.ts-seam-handle:focus-visible .ts-seam-knob {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-export-rows {
+  margin-top: 24px;
+}
+
+/* the stored appearance shows one picture of each pair; the hidden one has no box and, being
+   lazy, no request */
+.ts-product .ts-only-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-product .ts-only-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-product .ts-only-dark {
+  display: block;
+}
+
+/* the Editable text side follows the page's appearance as the file of that appearance draws it */
+:root[data-theme='dark'] .ts-seam-editable {
+  --paper: #070707;
+  --ink: #f2f2f0;
+  --hair: rgba(242, 242, 240, 0.22);
+  --cross: rgba(255, 255, 255, 0.34);
+}
+
+/* ---- Turboslide today (LANDING.md 2.9): eight ruled rows of 64 px ---- */
+.ts-parts {
+  margin: 24px 0 0;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-part {
+  display: grid;
+  grid-template-columns: 280px 400px minmax(0, 1fr);
+  align-items: center;
+  min-height: 60px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-part:last-child {
+  border-bottom-color: var(--pt-hair);
+}
+
+.ts-part-key {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 500;
   color: var(--pt-ink);
-  font-family: var(--pt-text);
 }
 
-.ts-product-diagram .dg-hair,
-.ts-product-diagram .dg-edge,
-.ts-product-diagram .dg-plate,
-.ts-product-diagram .dg-ink,
-.ts-product-diagram .dg-handle {
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  shape-rendering: crispEdges;
+/* a key cell's Heroicon: the text's colour through the icon's mask (icons.generated.css) */
+.ts-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: var(--pt-ink);
+  background: currentColor;
+  -webkit-mask: var(--ts-icon) center / contain no-repeat;
+  mask: var(--ts-icon) center / contain no-repeat;
 }
 
-.ts-product-diagram .dg-hair {
-  fill: none;
-  stroke: var(--pt-hair);
+.ts-part-where {
+  margin: 0;
+  font-size: 16px;
+  color: var(--pt-ink-2);
 }
 
-.ts-product-diagram .dg-edge {
-  fill: none;
-  stroke: var(--pt-edge);
+.ts-part-figure {
+  margin: 0;
+  justify-self: end;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--pt-ink);
 }
 
-.ts-product-diagram .dg-plate {
-  fill: var(--pt-plate);
-  stroke: var(--pt-hair);
+/* ---- the close (LANDING.md 2.10): slide 8, then the h2, the lead and the buttons on the axis ---- */
+.ts-close-text {
+  margin-top: 40px;
+  text-align: center;
 }
 
-/* the moved picture's outline and its rotation handle, ink on the plate */
-.ts-product-diagram .dg-ink {
-  stroke: var(--pt-ink);
+.ts-close-text .ts-lead {
+  max-width: 560px;
+  margin-inline: auto;
 }
 
-.ts-product-diagram line.dg-ink {
-  fill: none;
+.ts-close-text .ts-buttons {
+  justify-content: center;
+  margin-top: 32px;
 }
 
-.ts-product-diagram .dg-handle {
-  fill: var(--pt-paper);
-  stroke: var(--pt-ink);
+/* slide 8's mark, 469 units wide (300 px on the 1,024 px sheet) on the centre axis, its top at
+   150 units; the word 88 units under it; the signature between the bottom rules */
+[data-instance='close'] .center {
+  display: block;
 }
 
-/* the end of a flow: an 11 unit filled square in ink (Marker.tsx), never an arrowhead */
-.ts-product-diagram .dg-marker {
-  fill: var(--pt-ink);
-  shape-rendering: crispEdges;
+[data-instance='close'] .ts-home-mark {
+  position: absolute;
+  left: 50%;
+  top: 21px;
+  width: 469px;
+  height: auto;
+  margin-left: -234.5px;
+  overflow: visible;
+  color: var(--ink);
 }
 
-/* the labels at 20 units in ink-2 (DECK-GRAMMAR "Diagrams"): 18 px or more on screen where the
-   diagram takes the seven column slot of the column (555 px of its 612 units) */
-.ts-product-diagram .dg-label {
-  fill: var(--pt-ink-2);
-  font-size: 20px;
+[data-instance='close'] .center > .big {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 434px;
+  text-align: center;
 }
 
-/* ---- the footer (3.2 item 8): the lockup, six links in one row, the closing line ---- */
+[data-instance='close'] .center > .cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -105px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ---- the footer (LANDING.md 2.11, unchanged) ---- */
 .ts-product-footer {
-  padding: 56px 0 64px;
+  padding: 48px 0;
 }
 
 .ts-product-foot {
@@ -466,7 +1522,7 @@ html:has(.ts-product) {
 }
 
 .ts-product-foot-link {
-  font-size: var(--ts-small);
+  font-size: 14px;
   color: var(--pt-ink-2);
   text-decoration: none;
 }
@@ -480,7 +1536,7 @@ html:has(.ts-product) {
 .ts-product-foot-closing {
   flex-basis: 100%;
   margin-top: 16px;
-  font-size: var(--ts-small);
+  font-size: 14px;
   line-height: 1.55;
   color: var(--pt-ink-2);
 }
@@ -493,11 +1549,97 @@ html:has(.ts-product) {
   color: var(--pt-ink);
 }
 
-/* ---- the layout's one breakpoint (slide 49): under 1024 every row is one column ---- */
+/* the GT mark at the text's cap: 16 by 10, the mark's own 1213 by 771 */
+.ts-product-foot-company .ts-icon {
+  width: 16px;
+  height: 10px;
+  color: inherit;
+}
+
+/* ---- the hero's start pose and H1 (l4.md M3; LANDING.md 3.2): the boot script sets `ts-intro`
+   before the first paint and `ts-t0` at T0, never under reduced motion; the rails draw out of
+   their crosses; the field's still shows at T0 + 3.0 s unless the develop runs ---- */
+[data-band='hero'] .frame .rule.top {
+  transform-origin: 56px 50%;
+}
+
+[data-band='hero'] .frame::before {
+  transform-origin: 50% 56px;
+}
+
+[data-band='hero'] .frame::after {
+  transform-origin: 50% calc(100% - 56px);
+}
+
+[data-band='hero'] .frame .rule.bottom {
+  transform-origin: calc(100% - 56px) 50%;
+}
+
+html.ts-intro [data-band='hero'] .frame .rule {
+  transform: scaleX(0);
+}
+
+html.ts-intro [data-band='hero'] .frame::before,
+html.ts-intro [data-band='hero'] .frame::after {
+  transform: scaleY(0);
+}
+
+html.ts-intro.ts-t0 [data-band='hero'] .frame .rule.top {
+  animation: ts-draw-x var(--ts-d-line) var(--ts-ease-arrive) 0ms both;
+}
+
+html.ts-intro.ts-t0 [data-band='hero'] .frame::before {
+  animation: ts-draw-y var(--ts-d-line) var(--ts-ease-arrive) 60ms both;
+}
+
+html.ts-intro.ts-t0 [data-band='hero'] .frame::after {
+  animation: ts-draw-y var(--ts-d-line) var(--ts-ease-arrive) 120ms both;
+}
+
+html.ts-intro.ts-t0 [data-band='hero'] .frame .rule.bottom {
+  animation: ts-draw-x var(--ts-d-line) var(--ts-ease-arrive) 180ms both;
+}
+
+html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
+  visibility: hidden;
+}
+
+html.ts-intro.ts-t0 [data-field='hero']:not([data-field-state]) > .ts-field-still {
+  animation: ts-still-at 1ms 3000ms forwards;
+}
+
+@keyframes ts-draw-x {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes ts-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes ts-still-at {
+  to {
+    visibility: visible;
+  }
+}
+
+/* ---- between 720 and 1,023 px: the column narrows, the two column rows stay ---- */
 @media (max-width: 1023px) {
-  /* the navigation wraps to two rows: the lockup and the button, then the links, Sign In and the
-     group; Sign In comes after Documentation so its arrival moves nothing (the group is pushed to
-     the right by its own margin) */
+  .ts-band {
+    padding: 80px 0;
+  }
+
   .ts-product-nav-row {
     flex-wrap: wrap;
     gap: 0 12px;
@@ -529,81 +1671,355 @@ html:has(.ts-product) {
     margin: 0 0 0 auto;
   }
 
-  .ts-product-hero {
-    padding: 48px 0 72px;
+  .ts-part {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr) minmax(0, 2fr);
   }
 
-  .ts-product-hero-head {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
-  }
-
-  .ts-product-h1 + .ts-product-lead {
-    margin-top: 16px;
-  }
-
-  .ts-product-h2 + .ts-product-lead {
-    margin-top: 12px;
-  }
-
-  .ts-product-lead,
-  .ts-product-cmd {
-    max-width: none;
-  }
-
-  .ts-product-cta {
-    margin-top: 24px;
-  }
-
-  .ts-product-hero-shot {
-    margin-top: 32px;
-  }
-
-  .ts-product-numbers-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ts-product-number {
-    padding: 24px var(--ts-gutter, 40px);
-  }
-
-  .ts-product-number + .ts-product-number {
-    border-left: 0;
-    border-top: 1px solid var(--pt-hair);
-  }
-
-  .ts-product-band {
-    padding: 72px 0;
-  }
-
-  .ts-product-two {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
-  }
-
-  .ts-product-footer {
-    padding: 48px 0 56px;
+  .ts-hero-lead-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 }
 
-/* the narrow phone: the buttons full width, the diagram labels kept readable as the drawing
-   shrinks (24.4 units at 390 px is 13 px on screen) */
-@media (max-width: 720px) {
-  .ts-product-cta {
+/* ---- under 720 px (LANDING.md 2.2 to 2.10 "Layout at 390"): one column, the gutter 0, the
+   slides at 358 by 201 with the landing's reading floor (titles at least 17 px, body at least
+   12 px, credits at least 10 px), the panel at 44 columns ---- */
+@media (max-width: 719px) {
+  .ts-product {
+    --ts-gutter: 0px;
+  }
+
+  .ts-band {
+    padding: 64px 0;
+  }
+
+  .ts-lead {
+    font-size: 17px;
+  }
+
+  .ts-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    align-self: stretch;
+  }
+
+  .ts-product .ts-button {
+    height: 44px;
+    width: 100%;
+  }
+
+  .ts-product-foot-closing {
+    margin-top: 8px;
+  }
+
+  /* the hero: the h1 leaves the slide and sits above the sheet at 40 px, balanced in its three
+     lines; the sheet reserves its 120 px and a 24 px gap */
+  .ts-band-hero {
+    padding: 24px 0 40px;
+  }
+
+  .ts-hero-sheet {
+    margin-top: 144px;
+  }
+
+  [data-instance='hero'].ts-sheet.sheet {
+    overflow: visible;
+  }
+
+  [data-instance='hero'] .ts-home-title {
+    left: -137px;
+    top: calc(-129px - 144px / var(--k));
+    width: 1600px;
+  }
+
+  [data-instance='hero'] .ts-home-title::before {
+    display: none;
+  }
+
+  [data-instance='hero'] .ts-home-title h1 {
+    font-size: calc(40px / var(--k));
+    line-height: 1;
+    letter-spacing: -0.032em;
+  }
+
+  [data-instance='hero'] .ts-home-sub {
+    top: 171px;
+    width: 640px;
+  }
+
+  [data-instance='hero'] .ts-home-sub p {
+    font-size: calc(17px / var(--k));
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  [data-instance='hero'] .ts-home-credit {
+    display: none;
+  }
+
+  [data-instance='hero'] .wordmark,
+  [data-instance='hero'] .counter {
+    font-size: calc(10px / var(--k));
+  }
+
+  .ts-hero-credit {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--pt-ink-2);
+  }
+
+  @media (pointer: coarse) {
+    .ts-hero-caption > .is-touch-wide {
+      display: none;
+    }
+
+    .ts-hero-caption > .is-touch-narrow {
+      display: inline;
+    }
+  }
+
+  .ts-hero-caption-row {
+    margin-top: 12px;
+  }
+
+  .ts-hero-lead-row {
+    margin-top: 12px;
+  }
+
+  /* the reading floor on every slide but the thumbnails */
+  .ts-sheet[data-home-slides]:not(.is-thumb) .ts-home-h1 {
+    font-size: max(88px, calc(17px / var(--k)));
+  }
+
+  .ts-sheet[data-home-slides]:not(.is-thumb) .ts-home-h2,
+  .ts-sheet[data-home-slides]:not(.is-thumb) .mood-plate .title {
+    font-size: max(44px, calc(17px / var(--k)));
+  }
+
+  .ts-sheet[data-home-slides]:not(.is-thumb) .big {
+    font-size: max(72px, calc(17px / var(--k)));
+  }
+
+  .ts-sheet[data-home-slides]:not(.is-thumb) p,
+  .ts-sheet[data-home-slides]:not(.is-thumb) .rows {
+    font-size: max(20px, calc(12px / var(--k)));
+  }
+
+  .ts-sheet[data-home-slides]:not(.is-thumb) .lead {
+    font-size: max(26px, calc(12px / var(--k)));
+  }
+
+  .ts-sheet[data-home-slides]:not(.is-thumb) :is(.credit, .cap, .counter) {
+    font-size: max(15px, calc(10px / var(--k)));
+  }
+
+  .ts-strip {
+    padding: 24px 0;
+  }
+
+  .ts-strip-box {
+    height: 96px;
+  }
+
+  .ts-agents,
+  .ts-tailor-top,
+  .ts-present {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  /* the order of LANDING.md 2.4 at 390: slide 5, the panel, Run, the caption, Version history */
+  .ts-agents {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 32px;
+  }
+
+  .ts-agents-run,
+  .ts-agents-slide {
+    display: contents;
+  }
+
+  .ts-agents-sheet {
+    order: 1;
+    margin-bottom: 24px;
+  }
+
+  .ts-home-panel {
+    order: 2;
+  }
+
+  .ts-agents-controls {
+    order: 3;
+  }
+
+  .ts-agents-run > .ts-caption {
+    order: 4;
+  }
+
+  .ts-agents-slide > .ts-label {
+    order: 5;
+  }
+
+  .ts-home-history {
+    order: 6;
+  }
+
+  .ts-agents-controls .ts-button {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .ts-home-step {
+    flex: 0 0 auto;
+  }
+
+  .ts-home-panel-screen {
+    height: calc(22 * 18px + 24px);
+    padding: 12px;
+    font-size: min(12px, calc((100vw - 56px) / 26.5));
+    line-height: 18px;
+  }
+
+  .ts-home-panel-text > span {
+    min-height: 18px;
+  }
+
+  .ts-home-panel-text.is-wide {
+    display: none;
+  }
+
+  .ts-home-panel-text.is-narrow {
+    display: block;
+  }
+
+  .ts-home-panel-input {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .ts-home-panel-tabs {
+    padding: 0 4px;
+  }
+
+  .ts-tailor-dialog .ts-row {
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+
+  .ts-field {
+    width: 100%;
+    height: 44px;
+  }
+
+  .ts-row-foot .ts-button {
+    width: 100%;
+  }
+
+  .ts-tailor-editor {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .ts-filmstrip {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .ts-thumb {
+    grid-template-columns: 80px;
+  }
+
+  .ts-thumb-n {
+    display: none;
+  }
+
+  .ts-thumb-moves {
+    height: auto;
     flex-direction: column;
   }
 
-  .ts-product-cta .pt-ib {
-    width: 100%;
-    justify-content: center;
+  .ts-canvas-sheet,
+  .ts-seam-slide {
+    margin-top: 32px;
   }
 
-  .ts-product-fact {
-    grid-template-columns: 96px minmax(0, 1fr);
-    gap: 12px;
+  .ts-seam-labels {
+    position: static;
+    padding: 0 0 8px;
   }
 
-  .ts-product-diagram .dg-label {
-    font-size: clamp(20px, calc(37.4px - 3.33vw), 24.4px);
+  .ts-seam-label {
+    padding: 0;
+  }
+
+  .ts-command-row {
+    align-items: flex-start;
+    padding: 10px 0;
+  }
+
+  .ts-command {
+    min-height: 40px;
+    white-space: normal;
+    overflow-wrap: normal;
+  }
+
+  .ts-present {
+    min-height: 0;
+  }
+
+  .ts-slide-row {
+    height: 44px;
+  }
+
+  .ts-row {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 8px 0;
+  }
+
+  .ts-row-key {
+    flex-basis: 100%;
+  }
+
+  .ts-canvas-rows .ts-row-key,
+  .ts-tailor-dialog .ts-row-key {
+    flex-basis: auto;
+  }
+
+  .ts-row-link {
+    margin-left: 0;
+  }
+
+  .ts-part {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'key figure' 'where where';
+    padding: 12px 0;
+    row-gap: 4px;
+  }
+
+  .ts-part-key {
+    grid-area: key;
+  }
+
+  .ts-part-where {
+    grid-area: where;
+    font-size: 15px;
+  }
+
+  .ts-part-figure {
+    grid-area: figure;
+    font-size: 24px;
+  }
+
+  .ts-close-text {
+    margin-top: 32px;
   }
 }

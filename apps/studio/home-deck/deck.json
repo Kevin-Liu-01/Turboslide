@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "id": "turboslide-home",
+  "title": "Turboslide",
+  "theme": "gt-ink-paper",
+  "brand": {
+    "mark": {
+      "kind": "none"
+    }
+  },
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slideIds": [
+        "title",
+        "plan",
+        "gets",
+        "ships",
+        "rosetta",
+        "field",
+        "close"
+      ]
+    }
+  ],
+  "assets": {
+    "mood-earth": {
+      "id": "mood-earth",
+      "role": "mood",
+      "alt": "NASA's Blue Marble, the Earth with the Western Hemisphere in daylight, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-earth-light.jpg",
+        "dark": "assets/mood-earth-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Blue Marble Western Hemisphere.jpg (local copy `scratchpad/photo/earth-night.jpg`, 1800 by 1800).",
+        "artist": "NASA Earth Observatory, images by Reto Stöckli, based on data from NASA and NOAA; the Commons file is dated October 2, 2007",
+        "license": "public domain",
+        "shareAlike": false
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          49,
+          -7,
+          3279,
+          1809
+        ],
+        "channel": "r",
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 80,
+        "white": 210,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Image: NASA, Reto Stöckli, 2007, public domain",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0916,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 111,
+          "litUnder": 0,
+          "litInBand": 0
+        }
+      }
+    },
+    "mood-rosetta": {
+      "id": "mood-rosetta",
+      "role": "mood",
+      "alt": "The Rosetta Stone, its three scripts carved in rows, rendered as a two-tone dither",
+      "twins": {
+        "light": "assets/mood-rosetta-light.jpg",
+        "dark": "assets/mood-rosetta-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "photo",
+        "origin": "File:Rosetta Stone.JPG (local copy `scratchpad/photo/rosetta.jpg`, 1539 by 1800).",
+        "artist": "Hans Hillewaert",
+        "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required",
+        "shareAlike": true
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [
+          0,
+          300,
+          1539,
+          1166
+        ],
+        "blur": 0.6,
+        "autocontrast": 0.5,
+        "black": 140,
+        "white": 230,
+        "gamma": 0.9,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Photograph: Hans Hillewaert, CC BY-SA 4.0",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.0889,
+        "plateClear": {
+          "plate": [
+            851,
+            539,
+            612,
+            232
+          ],
+          "nearestLitPx": 0,
+          "litUnder": 6108,
+          "litInBand": 1697
+        }
+      }
+    },
+    "field": {
+      "id": "field",
+      "role": "mood",
+      "alt": "The opener field, a lit sphere printed in dots",
+      "twins": {
+        "light": "assets/field-light.png",
+        "dark": "assets/field-dark.png"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "credit": "Drawn in Turboslide",
+      "inline": "two-color"
+    }
+  },
+  "revision": 0,
+  "createdAt": "2026-10-02T00:00:00.000Z",
+  "updatedAt": "2026-10-02T00:00:00.000Z"
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "plan",
+  "kind": "content",
+  "template": "one-column",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h1",
+        "text": "Onboarding plan for Northwind"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "role": "lead",
+        "text": "Four weeks from the first call to the first deck."
+      }
+    ]
+  },
+  "notes": "Open with the goals Northwind named on the call."
+}

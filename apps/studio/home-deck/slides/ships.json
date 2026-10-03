@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "ships",
+  "kind": "statement",
+  "big": "The first Northwind deck ships in week one",
+  "measure": 22,
+  "notes": "Ask Northwind who presents the first deck."
+}

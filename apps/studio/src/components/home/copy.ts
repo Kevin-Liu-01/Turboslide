@@ -5,15 +5,17 @@ import { formatCount } from './facts';
 import { HOME_META } from './home-meta';
 
 /**
- * Every string of the /home page (docs/archive/rounds/POLISH.md section 3, on the page grammar of docs/NEXT.md
- * 4.1.2 and 4.1.3 item 9 since Round 1; the round four notes of gslides-parity SPEC-4 section 2
- * stand under it), in one module so `copy.test.ts` can lint them
- * all: sentence case headings with no comma and no trailing period, one thought per sentence
- * under 20 words, Title Case on buttons alone, no em dash, no exclamation mark, no semicolon, no
- * colon list, no metaphor word, no "X, not Y" pair, none of the five words of SPEC-4 0.26, none
- * of the report words of POLISH.md 3.1 and no file path outside the agents section's command
- * box. A string that carries a count of the tree is a function of `HomeFacts` (SPEC-4 0.25: a
- * literal count is a defect). The page holds about 200 words.
+ * Every string of the /home landing (docs/LANDING.md section 2 and 2.12; the key table of
+ * docs/gslides-parity/landing/build/integrator.md "Landing, day 0" 4.8), in one module so
+ * `copy.test.ts` can lint them all: sentence case headings with no comma (the h1's list comma
+ * aside) and no trailing period, Title Case buttons, every sentence under 20 words, no em dash,
+ * en dash, exclamation mark, semicolon or colon, no metaphor word and no "X, not Y" pair, none of
+ * the forbidden words, phrases or report words, no file path, and the page under 350 words at
+ * rest. A string that carries a count of the tree is a function of `HomeFacts` (SPEC-4 0.25).
+ *
+ * Three kinds of text sit here outside the page's word count, under the same rules: slide content
+ * the page draws (`SLIDES`), generated text (`CANVAS.log`, `HISTORY`, `ANNOUNCE`, the panel's
+ * lines) and the product's own strings, which the Tailor band reads from @turboslide/chrome.
  */
 export type Text = string | ((facts: HomeFacts) => string);
 
@@ -32,6 +34,7 @@ export const FORBIDDEN_WORDS: ReadonlyArray<string> = [
 export const FORBIDDEN_PHRASES: ReadonlyArray<string> = [
   'Slides clone',
   'Google Slides alternative',
+  'pixel for pixel',
 ];
 
 /** The report words of POLISH.md 3.1 that never appear on the page. */
@@ -60,19 +63,16 @@ export const HOME_PROPER_NOUNS: ReadonlyArray<string> = [
 ];
 
 /**
- * The copy paths the default view words rule of the menu model does not read: the head (a
- * sentence about the product, not a band), the agents section (it names the transports), the
- * license section ("Run it from a checkout" is plain English, and "run" is a menu model word) and
- * the numbers row (its actions figure names the transports). The path `licence` keeps the British
- * spelling of the ids (`home.licence.*`), which Round 1 keeps while the words read "license".
+ * The copy paths the default view words rule of the menu model does not read (docs/LANDING.md
+ * 2.12): the head, the agents band (it names the transports), the canvas band's generated
+ * command line, and the parts table (it names the CLI, MCP and HTTP surfaces).
  */
-export const DEFAULT_VIEW_EXEMPT: ReadonlyArray<string> = ['meta', 'agents', 'licence', 'numbers'];
+export const DEFAULT_VIEW_EXEMPT: ReadonlyArray<string> = ['meta', 'agents', 'canvas.log', 'parts'];
 
 export { HOME_META } from './home-meta';
 
 // ---------------------------------------------------------------------------------------------
-// The navigation (3.2 item 0; docs/NEXT.md 4.1.3 item 9: GitHub moves to the footer and Sign In
-// joins the bar)
+// The navigation (docs/LANDING.md 2.1)
 
 export type NavLink = {
   id: string;
@@ -82,6 +82,8 @@ export type NavLink = {
 };
 
 export const NAV = {
+  /** the first Tab stop, shown on focus; it moves focus to the hero */
+  skip: 'Skip to content',
   lockup: { word: 'Turboslide', name: 'Turboslide' },
   links: [
     {
@@ -102,167 +104,283 @@ export const NAV = {
 } as const;
 
 // ---------------------------------------------------------------------------------------------
-// The hero (3.2 item 1)
+// The hero, slide 1 (docs/LANDING.md 2.2)
 
-/** The pictures the capture writes (scripts/build-home-assets.ts --capture), one per appearance. */
-export type ShotKind = 'hero' | 'canvas' | 'menus';
+/** The h1 in its three hand set lines; joined by spaces it is the sentence of decks.home.seller-lead. */
+const H1_LINES = ['Build the pitch,', 'present it and', 'send the link'] as const;
 
 export const HERO = {
-  heading: 'Build the pitch, present it and send the link',
-  /** the one description of the product, shared with the head, the manifest, the card and the README */
-  lead: SITE.description,
+  h1Lines: H1_LINES,
+  heading: H1_LINES.join(' '),
+  /**
+   * The slide's subtitle, one true sentence per visit, each naming a band below: the editor, the
+   * Tailor band, the export band (answer 9). The boot script picks the next each visit; the
+   * markup holds the first. At most 50 characters each.
+   */
+  visit: [
+    'Turboslide is a slides editor in the browser.',
+    'Turboslide puts one customer name on every slide.',
+    'Turboslide downloads PDF and PowerPoint files.',
+  ],
+  caption: {
+    pointer: 'Click the title to select it. Click again to type.',
+    touchWide: 'Tap the title to select it, then drag it.',
+    touchNarrow: 'Tap the sentence on the slide to select it, then drag it.',
+  },
+  undo: 'Undo',
+  lead: "It has Google Slides' menus and shortcuts. No account is needed.",
   buttons: {
     newPresentation: { label: 'New Presentation', href: '/new' },
     openDeck: { label: 'Open the Example Deck', deckId: 'gt-brand' },
   },
-  picture: {
-    shot: 'hero' as ShotKind,
-    alt: 'The Turboslide editor with the example deck open on its Blue Marble slide.',
-  },
-  /** the facts rows beside the hero's text (brand-c rule 5): a key with its Heroicon, one sentence */
-  facts: [
-    {
-      id: 'menus',
-      icon: 'bars-3' as SectionIconName,
-      key: 'Menus',
-      value: "The menus go from File to Help in Google's order, with Google's shortcuts.",
-    },
-    {
-      id: 'present',
-      icon: 'play' as SectionIconName,
-      key: 'Present',
-      value: 'Presenter view opens in a second window with the timer and the notes.',
-    },
-    {
-      id: 'export',
-      icon: 'arrow-down-tray' as SectionIconName,
-      key: 'Export',
-      value: 'Downloads are PDF and PowerPoint files that match the screen.',
-    },
-  ],
+} as const;
+
+/** Slide content the page draws beside the renders (integrator.md 2.1, 2.2): words of the slides. */
+export const SLIDES = {
+  heroCredit: 'Image: NASA, Reto Stöckli, 2007, public domain',
+  heroFieldAlt: "The Blue Marble, NASA's photograph of the Earth",
+  rosettaAlt: 'The Rosetta Stone, a decree of 196 BC in three scripts',
+  fieldAlt: 'The opener field, a lit sphere printed in dots',
 } as const;
 
 // ---------------------------------------------------------------------------------------------
-// The numbers row (docs/NEXT.md 4.1.2, A's graft: three figures of packages/theme/brand/facts.json)
+// The bands (docs/LANDING.md 2.4 to 2.10)
 
-export const NUMBERS = {
-  label: 'Turboslide in three numbers',
-  cells: [
-    {
-      id: 'layouts',
-      figure: (facts: HomeFacts): string => `${formatCount(facts.layouts)} layouts`,
-      sentence: 'A new slide starts from one of these layouts.',
-    },
-    {
-      id: 'actions',
-      figure: (facts: HomeFacts): string => `${formatCount(facts.actions)} actions`,
-      sentence: 'Agents run the same actions as the editor over the CLI, MCP and HTTP.',
-    },
-    {
-      id: 'mismatch',
-      figure: (facts: HomeFacts): string => formatPercentFigure(facts.mismatchPercent),
-      sentence:
-        'The worst page of the example PowerPoint export differs from the screen by this share.',
-      /** the figure links to the export record */
-      href: `${GITHUB_FILE}/docs/pptx.md`,
-    },
-  ],
-} as const;
-
-// ---------------------------------------------------------------------------------------------
-// The sections (3.2 items 2 to 7)
-
-/**
- * The Heroicons of the page's key cells, by the sprite's names. Since Round 1 an icon sits only in
- * a key cell of the facts rows (DECK-GRAMMAR 40), never before a heading.
- */
+/** The Heroicons 20 solid of the page's key cells (DECK-GRAMMAR 40), never before a heading. */
 export type SectionIconName =
-  'cursor-arrow-rays' | 'bars-3' | 'play' | 'arrow-down-tray' | 'command-line' | 'document-text';
+  | 'bars-3'
+  | 'squares-2x2'
+  | 'cube'
+  | 'paint-brush'
+  | 'command-line'
+  | 'server'
+  | 'globe-alt'
+  | 'scale'
+  | 'user-circle';
+
+export const AGENTS = {
+  id: 'agents',
+  h2: 'Agents run the same actions',
+  lead: 'Every editor action is a command. Agents send commands over the CLI, MCP and HTTP.',
+  run: {
+    again: 'Run Again',
+    step: (n: number): string => `Run Step ${n}`,
+  },
+  stepLabel: (n: number, total: number): string => `${n} of ${total}`,
+  /** the figure is the build's sum of the three steps' scheduled lengths, rounded (run.generated.ts) */
+  caption: (seconds: number): string =>
+    `A staged run of three commands, ${seconds} seconds in all. The answers are recorded from the CLI.`,
+  historyLabel: 'Version history',
+  recorded: 'Recorded',
+  author: { agent: 'Agent', you: 'You' },
+  tabs: { cli: 'CLI', mcp: 'MCP', http: 'HTTP' },
+  tabsLabel: 'Transport',
+  panel: {
+    prompt: '$ turboslide',
+    placeholder: 'Type a command or help',
+    inputLabel: 'A command for the CLI',
+    refusal: (runs: number, total: number): string =>
+      `This page runs ${runs} of the CLI's ${total} commands.`,
+    requestOnly: 'Request only. The CLI tab shows the recorded answer.',
+    unclosedQuote: 'The line has an unclosed quote.',
+    longName: 'This page takes a name of up to 24 characters.',
+  },
+} as const;
+
+export const TAILOR = {
+  id: 'tailor',
+  h2: 'One customer on every slide',
+  lead: "Tools > Tailor for a customer puts one name in every slide's text and notes. Slide > Change theme sets the colors of every slide.",
+  examplesKey: 'Example kits',
+  placeholder: 'Customer name',
+  /** the page's own answer to an empty Apply (docs/LANDING.md 2.5) */
+  empty: 'Type a customer name first.',
+  kits: {
+    gt: { name: 'GT', tip: "GT. The GT brand deck's own colors." },
+    kestrel: { name: 'Kestrel', tip: "Kestrel. An example customer's colors." },
+    fenwick: { name: 'Fenwick', tip: "Fenwick. An example customer's colors." },
+  },
+  /** the status after a kit change: GT is the deck's own kit, the others an example customer's */
+  kitStatus: (kit: 'gt' | 'kestrel' | 'fenwick', slides: number): string =>
+    kit === 'gt'
+      ? `The GT kit set the colors of ${slides} slides.`
+      : `${kit === 'kestrel' ? 'Kestrel' : 'Fenwick'}, an example customer's kit, set the colors of ${slides} slides.`,
+  moveUp: 'Move Up',
+  moveDown: 'Move Down',
+  filmstripLabel: 'Slides 2 to 5',
+} as const;
 
 export const CANVAS = {
   id: 'canvas',
-  heading: 'Everything on a slide moves',
+  h2: 'Everything on a slide moves',
   lead: 'Drag, resize and rotate any object. The first drag turns the slide into a canvas. Undo puts the layout back.',
-  /** a diagram in the deck's grammar in place of the capture, which drew the blue selection ring */
-  diagram: {
-    label:
-      'A slide with one picture moved, resized and rotated, its first place drawn as a hairline.',
-    slide: 'Slide',
-    before: 'First place',
-    move: 'Drag',
-    resize: 'Resize',
-    rotate: 'Rotate',
+  layoutKey: 'Layout',
+  layout: { mood: 'Mood', canvas: 'Canvas' },
+  undo: 'Undo',
+  commandKey: 'Command',
+  commandRest: 'Each gesture prints its CLI command.',
+  /** generated text: the CLI form of a gesture, in a form of packages/agent/generated/cli.json */
+  log: {
+    toCanvas: (slide: string): string => `turboslide slide to-canvas ${slide}`,
+    pos: (
+      slide: string,
+      block: string,
+      box: { x: number; y: number; w: number; h: number },
+    ): string =>
+      `turboslide block set ${slide}#${block} /pos '${JSON.stringify({
+        x: Math.round(box.x),
+        y: Math.round(box.y),
+        w: Math.round(box.w),
+        h: Math.round(box.h),
+      })}'`,
+    rotate: (slide: string, block: string, degrees: number): string =>
+      `turboslide block rotate ${slide}#${block} --to ${Math.round(degrees)}`,
   },
-} as const;
-
-export const MENUS = {
-  id: 'menus',
-  heading: "The menus are Google's",
-  lead: "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's order. The shortcuts are Google's too. So are the right click menus.",
-  picture: { shot: 'menus' as ShotKind, alt: 'The menu bar with the Insert menu open.' },
 } as const;
 
 export const PRESENT = {
   id: 'present',
-  heading: 'Present from the browser',
-  lead: 'Slideshow starts on the current slide. Presenter view opens in a second window with the timer, the notes and the next slide. A present link opens the show for anyone.',
-  diagram: {
-    label:
-      'The editor, presenter view and a phone with the show, joined by the S key and a present link.',
-    editor: 'Editor',
-    presenter: 'Presenter view',
-    timer: 'Timer',
-    notes: 'Notes',
-    next: 'Next slide',
-    show: 'Show',
-    key: 'S',
-    link: 'present link',
-  },
+  h2: 'Present from the browser',
+  lead: 'This page is a deck with your changes. Present it here or print it.',
+  present: 'Present',
+  print: 'Print This Deck',
+  listLabel: 'The slides of this page',
+  show: { previous: 'Previous', next: 'Next', exit: 'Exit' },
+  counter: (n: number, total: number): string => `${n} / ${total}`,
+  stageName: (n: number, total: number): string => `Slide ${n} of ${total}`,
 } as const;
 
 export const EXPORT = {
   id: 'export',
-  heading: 'Export to PDF and PowerPoint',
-  lead: 'File > Download writes a PDF or a PowerPoint file. The PowerPoint file matches the screen pixel for pixel.',
-  diagram: {
-    label: 'A slide with a line to two files, pitch.pdf and pitch.pptx.',
-    slide: 'Slide',
-    pdf: 'pitch.pdf',
-    pptx: 'pitch.pptx',
+  h2: 'Export to PDF and PowerPoint',
+  lead: 'File > Download writes a PDF or a PowerPoint file.',
+  /** the Download dialog's own mode names (packages/chrome/src/ExportMenu.tsx 85) */
+  labels: { perfect: 'Perfect', editable: 'Editable text' },
+  rows: {
+    perfect: {
+      key: 'Perfect',
+      sentence: (size: { width: number; height: number }, facts: HomeFacts): string =>
+        `Each page is one picture, ${size.width} by ${size.height}. The worst GT deck page differs from its screenshot by ${formatPercentFigure(facts.mismatchPercent)}.`,
+      link: {
+        id: 'home.export.record',
+        label: 'Read the record',
+        href: `${GITHUB_FILE}/docs/pptx.md`,
+      },
+    },
+    editable: { key: 'Editable text', sentence: 'Text boxes stay text boxes.' },
+    pdf: { key: 'PDF', sentence: 'Text stays text.', link: 'Download the PDF' },
+  },
+  slider: (percent: number): string =>
+    `The Perfect file's picture fills ${Math.round(percent)} percent of the slide`,
+  sliderLabel: 'Where the two files meet',
+  perfectAlt: 'Slide 7 as the one picture the Perfect file holds',
+} as const;
+
+export type PartRow = {
+  id: string;
+  icon: SectionIconName;
+  key: string;
+  where: string;
+  figure: (facts: HomeFacts) => string;
+  /** the row's key links to this address in a new tab */
+  href?: string;
+};
+
+export const PARTS = {
+  id: 'parts',
+  h2: 'Turboslide today',
+  rows: [
+    {
+      id: 'menus',
+      icon: 'bars-3',
+      key: 'Menus',
+      where: 'File to Help',
+      figure: (f: HomeFacts) => formatCount(f.menus),
+    },
+    {
+      id: 'layouts',
+      icon: 'squares-2x2',
+      key: 'Layouts',
+      where: 'Slide > Apply layout',
+      figure: (f: HomeFacts) => formatCount(f.layouts),
+    },
+    {
+      id: 'shapes',
+      icon: 'cube',
+      key: 'PowerPoint shapes',
+      where: 'Insert > Shape',
+      figure: (f: HomeFacts) => formatCount(f.shapes),
+    },
+    {
+      id: 'patterns',
+      icon: 'paint-brush',
+      key: 'Animated patterns',
+      where: 'Insert > Animated pattern',
+      figure: (f: HomeFacts) => formatCount(f.materials),
+    },
+    {
+      id: 'cli',
+      icon: 'command-line',
+      key: 'CLI commands',
+      where: 'The CLI',
+      figure: (f: HomeFacts) => formatCount(f.cliCommands),
+    },
+    {
+      id: 'mcp',
+      icon: 'server',
+      key: 'MCP tools',
+      where: 'The MCP server',
+      figure: (f: HomeFacts) => formatCount(f.mcpTools),
+    },
+    {
+      id: 'http',
+      icon: 'globe-alt',
+      key: 'HTTP paths',
+      where: 'The HTTP API',
+      figure: (f: HomeFacts) => formatCount(f.httpPaths),
+    },
+    {
+      id: 'license',
+      icon: 'scale',
+      key: 'License',
+      where: 'GitHub',
+      figure: (f: HomeFacts) => f.licence,
+      href: REPOSITORY,
+    },
+  ] as ReadonlyArray<PartRow>,
+} as const;
+
+export const CLOSE = {
+  id: 'close',
+  h2: 'A new presentation needs no account',
+  lead: 'New Presentation opens a blank deck. The first edit saves it. Open the Example Deck opens the GT brand deck.',
+  buttons: {
+    newPresentation: { label: 'New Presentation', href: '/new' },
+    openDeck: { label: 'Open the Example Deck', deckId: 'gt-brand' },
   },
 } as const;
 
-export const AGENTS = {
-  id: 'agents',
-  anchor: 'agents',
-  heading: 'Agents run the same actions',
-  lead: (facts: HomeFacts): string =>
-    `Every editor action is a command. Agents run the same ${formatCount(facts.actions)} actions over the CLI, MCP and HTTP.`,
-  /** the one monospace on the page (SPEC-4 0.20) */
-  command: 'pnpm exec turboslide slide new --layout split --deck decks/pitch --json',
-  diagram: {
-    label: (facts: HomeFacts): string =>
-      `One table of ${formatCount(facts.actions)} actions, reached from the CLI, MCP, HTTP and the page, out to a deck.`,
-    table: (facts: HomeFacts): string => `${formatCount(facts.actions)} actions`,
-    sources: ['CLI', 'MCP', 'HTTP', 'The page'],
-    deck: 'Deck',
-  },
-  link: {
-    id: 'home.agents.docs',
-    label: 'Read the agent documentation',
-    href: `${REPOSITORY}/tree/main/skills`,
-  },
+/** Generated text: the words of a Version history row (integrator.md 4.4). */
+export const HISTORY = {
+  moved: (name: string, n: number): string => `Moved ${name} on slide ${n}`,
+  resized: (name: string, n: number): string => `Resized ${name} on slide ${n}`,
+  turned: (name: string, n: number, degrees: number): string =>
+    `Turned ${name} on slide ${n} to ${Math.round(degrees)} degrees`,
+  edited: (name: string, n: number): string => `Edited ${name} on slide ${n}`,
+  tailored: (name: string): string => `Tailored for ${name}`,
+  kit: (name: string): string => `Set the ${name} kit`,
+  slideMoved: (from: number, to: number): string => `Moved slide ${from} to place ${to}`,
 } as const;
 
-export const LICENCE = {
-  id: 'licence',
-  heading: 'Free under the MIT license',
-  lead: 'Run it from a checkout or deploy it to Vercel. The code is on GitHub.',
-  button: { id: 'home.licence.github', label: 'GitHub', href: REPOSITORY },
+/** Generated text: what the bands' polite live regions read (docs/LANDING.md 5 "Announcements"). */
+export const ANNOUNCE = {
+  slideAdded: (n: number): string => `Slide ${n} added`,
+  slideMoved: (from: number, to: number): string => `Slide ${from} moved to place ${to}`,
+  showCounter: (n: number, total: number): string => `Slide ${n} of ${total}`,
 } as const;
 
 // ---------------------------------------------------------------------------------------------
-// The footer (3.2 item 8)
+// The footer (docs/LANDING.md 2.11, unchanged)
 
 export type FooterLink = { id: string; label: string; href: string; external?: boolean };
 
@@ -296,22 +414,20 @@ export const HOME_COPY = {
   meta: { title: HOME_META.title, description: SITE.description },
   nav: NAV,
   hero: HERO,
-  numbers: NUMBERS,
+  slides: SLIDES,
+  agents: AGENTS,
+  tailor: TAILOR,
   canvas: CANVAS,
-  menus: MENUS,
   present: PRESENT,
   export: EXPORT,
-  agents: AGENTS,
-  licence: LICENCE,
+  parts: PARTS,
+  close: CLOSE,
+  history: HISTORY,
+  announce: ANNOUNCE,
   footer: FOOTER,
 } as const;
 
-/** A percent as the measured sentence prints it: the number and the word. */
-export function formatPercentWord(n: number): string {
-  return `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })} percent`;
-}
-
-/** A percent as the numbers row prints it: the number and the sign. */
+/** A percent as the export row prints it: the number and the sign. */
 export function formatPercentFigure(n: number): string {
   return `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })}%`;
 }

@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
+import { HOME_RUN } from './run.generated';
 import {
   BANNER_INDENT,
   CONTINUATION_INDENT,
   PANEL_WIDTHS,
   PanelOverflowError,
+  REQUEST_ONLY,
+  cliStepLines,
+  httpStepLines,
+  mcpStepLines,
+  spacedJson,
   escapeDoubleQuoted,
   escapeSingleQuotedJson,
   formatLines,
@@ -160,5 +166,27 @@ describe('substituteName', () => {
     expect(substituteAnswer('Tailored for Globex: 9 places on 4 slides', 'Globex', '"Q" $5')).toBe(
       'Tailored for "Q" $5: 9 places on 4 slides',
     );
+  });
+
+  it("composes the build's screens from the recorded steps (l3.md R2)", () => {
+    const wide = (lines: string[]) => formatScreen(lines, 'wide');
+    expect(
+      wide(HOME_RUN.steps.flatMap((step) => cliStepLines(step, 'Northwind', 'Northwind'))),
+    ).toEqual([...HOME_RUN.screens.transcript.wide]);
+    expect(
+      wide([
+        ...HOME_RUN.steps.flatMap((step) => mcpStepLines(step, 'Northwind', 'Northwind')),
+        REQUEST_ONLY,
+      ]),
+    ).toEqual([...HOME_RUN.screens.mcp.wide]);
+    expect(
+      wide([
+        ...HOME_RUN.steps.flatMap((step) => httpStepLines(step, 'Northwind', 'Northwind')),
+        REQUEST_ONLY,
+      ]),
+    ).toEqual([...HOME_RUN.screens.http.wide]);
+    expect(spacedJson({ a: [1, { b: 'c' }] })).toBe('{"a": [1, {"b": "c"}]}');
+    const renamed = cliStepLines(HOME_RUN.steps[1], 'Northwind', "O'Neil & Co");
+    expect(renamed[0]).toContain('"Next steps with O\'Neil & Co"');
   });
 });

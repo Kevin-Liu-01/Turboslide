@@ -4,10 +4,11 @@
     {
       "id": "decks.home.new-presentation",
       "feature": "decks",
-      "interaction": "On /home click the hero New Presentation button; the address is /new with a draft",
+      "interaction": "On /home click the hero New Presentation button; the address is /new with a draft; the close band's New Presentation reaches /new the same way",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 2"
+      "evidence": "audit-decks row 2",
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1)"
     },
     {
       "id": "decks.home.your-presentations",
@@ -4870,12 +4871,12 @@
     {
       "id": "decks.home.seller-lead",
       "feature": "decks",
-      "interaction": "/home's h1 reads \"Build the pitch, present it and send the link\"; the lead's first sentence names the editor (\"Turboslide is a slides editor in the browser\"); the second hero button reads Open the Example Deck and opens /deck/gt-brand",
+      "interaction": "/home's h1 reads \"Build the pitch, present it and send the link\" (the hero slide's title in three hand set lines); in a fresh context the hero slide's subtitle reads \"Turboslide is a slides editor in the browser.\"; the second hero button reads Open the Example Deck and opens /deck/gt-brand",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-home section 1 and items 1, 2, 12 (the h1 today ends \", in one place\" and the buttons are Start from a template and Open the GT Deck)",
       "severity": 2,
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
     },
     {
       "id": "decks.card.thumbnail-slide-1",
@@ -9607,32 +9608,32 @@
     {
       "id": "decks.home.pictures-three-widths",
       "feature": "decks",
-      "interaction": "`/home` at 1440, 1280 and 390 in both appearances: the section paddings of 3.4, the `h1` at weight 500, `align-items: start` on every two column block, 1 px `--pt-edge` picture frames, no element wider than the viewport, the page under 5,000 px at 1440 and 8,500 at 390; the verifier's pictures judged against 3.4",
+      "interaction": "`/home` at 1440, 1280 and 390 in both appearances: nothing wider than the viewport, every slide at the width of docs/LANDING.md section 2 (1,024, 856, 588, 412 and 144 px at 1440 and 1280; 358 and 80 px at 390) and 16 by 9, and the page under 7,500 px at 1440 and 1280 and 8,500 at 390 (Kevin's answer 5)",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 1, 2, 11, 13, 22",
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
     },
     {
       "id": "decks.home.copy-rules",
       "feature": "decks",
-      "interaction": "`copy.test.ts` passes with the rules of 3.1; the rendered page holds under 350 words, no semicolon, no comma in a heading, no \"Advanced tools\", no file path outside the command box",
+      "interaction": "`copy.test.ts` passes with the rules of docs/LANDING.md 2.12; the page's own copy outside the slides, the panel, Version history's rows and the product's strings holds under 350 words at rest, with no semicolon, no comma in a heading, no report word and no file path",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 4, 5, 14, 16, 19",
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.product-pictures",
       "feature": "decks",
-      "interaction": "The hero and the menus crop carry the Turboslide mark in the title row and no Extensions menu (`shots.test.ts`); the hero drawn at the column's 1024 px (0.71) and the crop at its slot (0.9 or more); the same picture in both appearances",
+      "interaction": "Every slide on `/home` is the `renderSlide` output of the page deck built from `apps/studio/home-deck` at the shipped commit (ten instances, no slide carrying its own appearance), and every picture is a file part or still in `assets.json` or an inlined still of `slides.generated.ts` (`build-home-assets.ts --check` exits 0)",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 3, 20, 24",
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The test no longer runs `shots.test.ts`. Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
     },
     {
       "id": "decks.home.links-and-card",
@@ -9647,43 +9648,43 @@
     {
       "id": "decks.home.load-budget",
       "feature": "decks",
-      "interaction": "Measure: first byte 150 ms, LCP 500 with the hero or the `h1`, ready 500, images before the first scroll 300 KB and after a full scroll 800 KB, the document under 60 KB, no long frame over 100 ms; JavaScript reported against 600 KB",
+      "interaction": "Measure, with docs/LANDING.md 4.1's lines: first byte 150 ms, LCP at most 400 ms cold on the h1, ready 500 ms, no picture before the first scroll, pictures after a full scroll at most 160 KB, the document reported against 60 KB decoded until audit item 13 lands (Kevin's answer 10; home.budget.bytes-first gates it at 80 KB), no long frame over 100 ms, JavaScript reported against 600 KB",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-home items 30, 31",
       "measure": true,
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.layout-shift",
       "feature": "decks",
-      "interaction": "CLS 0 at the three widths in both appearances over the load and a full scroll; the theme buttons' pressed state at 150 ms equals the hydrated state",
+      "interaction": "CLS 0 at 1440, 1280 and 390 in both appearances over the load, the hero sequence, a full scroll, every in view motion and each interaction's end state; the theme buttons' pressed state at 150 ms equals the hydrated state",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-collab item 20",
-      "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Each later push holds its own motions and interactions to this row. Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.grammar",
       "feature": "decks",
-      "interaction": "`/home` at 1440 draws one rail on each side at the 1104 px column, 9 px crosses where seams meet them, a 58 px navigation bar, no icon before a heading, no arrowhead, diagram labels of 18 px or more, the command on `#101010`",
+      "interaction": "`/home` at 1440 draws one rail on each side at the 1104 px column, 9 px crosses where seams meet them, a 58 px navigation bar, no icon before a heading, the one monospace on the one `#101010` panel, and no sheet wider than a thumbnail draws a frame (a thumbnail keeps its 1 px edge)",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-brand-surfaces 34 to 38",
-      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the rails drawn once by `.ts-rails`, a `.ts-seam` under every band with its two crosses, the diagrams end their flows in 11 unit square markers"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the rails drawn once by `.ts-rails`, a `.ts-seam` under every band with its two crosses, the diagrams end their flows in 11 unit square markers"
     },
     {
       "id": "decks.home.capture-plain",
       "feature": "decks",
-      "interaction": "The `/home` capture shows no selection ring, chip or handle",
+      "interaction": "No selection ring, chip, handle, caret or guide is drawn at rest: after a full scroll at 1440 and 390 in both appearances no element draws in the selection blue `#2f5ce0`, no selection overlay exists and nothing holds focus",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-brand-surfaces 38 (rank 13)",
-      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the canvas section draws a diagram in place of the selected picture's capture; the driver reads every shown capture's pixels for the selection blues"
+      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The captures and Shot.tsx leave; the row keeps the rule it protected and reads the page (Kevin's answer 3). Before: docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the canvas section draws a diagram in place of the selected picture's capture; the driver reads every shown capture's pixels for the selection blues"
     },
     {
       "id": "decks.home.copy",
@@ -10092,6 +10093,96 @@
       "evidence": "docs/CLOUDFLARE.md 2.3, 3.6.2 (the isolate's 128 MB shared by its objects; the fallback named there)",
       "manual": "the verifier's hand row on the preview (5.5): four browsers, a 20 MB deck made by the verifier's script and the Worker's logs; the gate records the reading given to it (--memory-reading <json>)",
       "note": "Cloudflare phase; docs/CLOUDFLARE.md 2.3; R5 (the ledger field); the verifier reads"
+    },
+    {
+      "id": "home.page.order",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances: the nav, the hero sheet, the field strip, then the bands of 2.4 to 2.10 in order, each with one h2, then the footer; one h1",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-current 4 items 1, 5; judge-2 6",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.page.markup-final",
+      "feature": "decks",
+      "interaction": "With script blocked, the paint at 1440 and 390 equals the hydrated page after every one shot motion finished, within 0.5 percent of pixels, the field and picture boxes included (their stills are in the markup or the band's request); no band shows an empty frame",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-1 3 (empty states); research-motion 4.1 rule 5; critic 4",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.hero.type",
+      "feature": "decks",
+      "interaction": "The h1 is the hero slide's title at 150 units (96 px ± 1 at a 1,024 px sheet), weight 500, -0.042 em, three lines \"Build the pitch,\" \"present it and\" \"send the link\"; under 720 px it sits above the sheet at 40 px; every h2 is 54 px at 1440 and 30 px at 390; visible text uses weights 400 and 500 only; no sheet wider than a thumbnail draws a frame, so each side of the column shows two vertical lines at every full width sheet",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-1 6, 7; type-b-h1.png",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.parts.table",
+      "feature": "decks",
+      "interaction": "\"Turboslide today\" draws eight ruled rows with a Heroicon solid in each key cell, the where cell and a figure equal to `facts-data.ts` (9, 22, 135, 17, 180, 169, 177, MIT on today's tree)",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "judge-1 7; judge-3 6 graft 6",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture requested before the first scroll; the document at most 80 KB decoded and 20 KB brotli (52 KB decoded once audit item 13 lands, answer 10), the hero's Blue Marble still inlined in it (answer 1); the page's CSS at most 14 KB brotli; the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides` in it; the page's own bytes at most 70 KB over the wire",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-current 6.1, 6.3",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "interaction": "After a full native scroll: the page's pictures at most 160 KB at ×1 and ×2 (slide 6's Rosetta Stone still at most 24 KB, its tone map at most 26 KB, slide 7's Perfect picture at most 60 KB, the Editable text picture part at most 32 KB, in the shown appearance), the page's own script at most 120 KB decoded, the page's own bytes at most 240 KB over the wire; nothing under `/home/` requested twice; no PDF and no slide 7 still requested",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-current 6.3",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.budget.shared",
+      "feature": "decks",
+      "interaction": "Report the shared entry chunk against 600 KB decoded, and the font against 120 KB with exactly one font request on `/home` (answer 7)",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "audit-performance items 1, 10",
+      "measure": true,
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.budget.lcp",
+      "feature": "decks",
+      "interaction": "The LCP element is the h1 and the hero's field is never the LCP element (answer 1); LCP at most 400 ms cold at 1440 ×1, ×2 and 390 on the preview, at most 200 ms warm; read at a load under 20",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "research-current 6.2",
+      "measure": true,
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+    },
+    {
+      "id": "home.a11y.skip-and-contrast",
+      "feature": "decks",
+      "interaction": "The skip link is the first Tab stop and moves focus to the hero; no text at rest falls under 4.5:1 (3:1 at 24 px and over) in either appearance",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "judge-3 2, 6",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
     }
   ]
 }

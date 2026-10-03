@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Build the pitch, present it and send the link",
+  "lead": "Turboslide is a slides editor in the browser.",
+  "notes": "Turboslide opens on a blank deck. No account is needed."
+}

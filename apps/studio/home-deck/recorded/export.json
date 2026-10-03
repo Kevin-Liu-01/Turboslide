@@ -1,0 +1,301 @@
+{
+  "generator": "scripts/build-home-assets.ts --export",
+  "fixtureSha256": "f8b65f43796ff04ddf64d83b53ec8c9feb864f72691336ff75fbe27212c93d5b",
+  "pageDeckSha256": "71d22b311b740c58caf8718981c32dad641de18a2ef48f7cae4a47a92aeadeba",
+  "assets": [
+    {
+      "role": "export-perfect",
+      "appearance": "light",
+      "variant": null,
+      "path": "/home/export-perfect-light-c073dff6a0.webp",
+      "bytes": 35338,
+      "sha256": "c073dff6a01f7669f8cf3b4c7879174fea1c57d0c1c749d944df1aea4cb21747",
+      "width": 3200,
+      "height": 1800,
+      "pixelsSha256": "2f462d4af1a2364fb0ed9742be90f962b9d14f8475879c04b50f995d30da6b69",
+      "partSha256": "3d4c0bbaf43c90dc22be783f403fa8cc68936445527a3228b3bb26678fb1d57e",
+      "pages": null
+    },
+    {
+      "role": "export-editable",
+      "appearance": "light",
+      "variant": null,
+      "path": "/home/export-editable-light-17811314bf.webp",
+      "bytes": 2500,
+      "sha256": "17811314bf0e85744093b08e710f0eabd75f21ed87936fb0ffa63736f58238db",
+      "width": 1600,
+      "height": 900,
+      "pixelsSha256": "bd381c46928f910925523301af2c534ee8cc854657a383365690f602e6a626a6",
+      "partSha256": "9a096637364f180880631dfc68bc1f5f2c603617b04dc9cd0347fc9829ce24e5",
+      "pages": null
+    },
+    {
+      "role": "export-editable",
+      "appearance": "light",
+      "variant": null,
+      "path": "/home/export-editable-light-01bf1d837d.webp",
+      "bytes": 392,
+      "sha256": "01bf1d837d2dde161fad42e6ab739017b77b98a6ca0f5bf30b172c957204f189",
+      "width": 84,
+      "height": 54,
+      "pixelsSha256": "c23609a5167479adb49a863a1547a0ffce9a2ca3a75a707f109b7a124a60433c",
+      "partSha256": "35a6782a2b9702283cb2c83286f01418536c37e61201c4f1faac6af9a6a21caf",
+      "pages": null
+    },
+    {
+      "role": "pdf",
+      "appearance": "light",
+      "variant": null,
+      "path": "/home/pdf-light-f534b1c8c4.pdf",
+      "bytes": 737337,
+      "sha256": "f534b1c8c412e1611aff27e5082c841219b13fdfe8e0bd70d37fc7af60cd954c",
+      "width": null,
+      "height": null,
+      "pixelsSha256": null,
+      "partSha256": null,
+      "pages": 8
+    },
+    {
+      "role": "export-perfect",
+      "appearance": "dark",
+      "variant": null,
+      "path": "/home/export-perfect-dark-56cf7b1dac.webp",
+      "bytes": 35294,
+      "sha256": "56cf7b1dac8f255c81098559a45e63034a34db514fa84f3ce81d9a878de66878",
+      "width": 3200,
+      "height": 1800,
+      "pixelsSha256": "1482026d836f2810960b74dd1f2ac008f5710d5a4f2e8a614cfadad03ac483a4",
+      "partSha256": "2649450cb09cfe9f214a905ec030cebddc7003037b8175c2119ab32814da3c34",
+      "pages": null
+    },
+    {
+      "role": "export-editable",
+      "appearance": "dark",
+      "variant": null,
+      "path": "/home/export-editable-dark-3bab7eaee3.webp",
+      "bytes": 2500,
+      "sha256": "3bab7eaee3489d7044962bdd6c9c9b1e182c956c5c9350200f2da603830bfdd9",
+      "width": 1600,
+      "height": 900,
+      "pixelsSha256": "69f7f3959057a84a388f5541d7c33b9c84268272b2bf878cf34ec680233a4b94",
+      "partSha256": "575999f142d1a49a5348f544d1fe88d80c9a46121a6f45a5a633e6403f061f64",
+      "pages": null
+    },
+    {
+      "role": "export-editable",
+      "appearance": "dark",
+      "variant": null,
+      "path": "/home/export-editable-dark-01bf1d837d.webp",
+      "bytes": 392,
+      "sha256": "01bf1d837d2dde161fad42e6ab739017b77b98a6ca0f5bf30b172c957204f189",
+      "width": 84,
+      "height": 54,
+      "pixelsSha256": "c23609a5167479adb49a863a1547a0ffce9a2ca3a75a707f109b7a124a60433c",
+      "partSha256": "35a6782a2b9702283cb2c83286f01418536c37e61201c4f1faac6af9a6a21caf",
+      "pages": null
+    },
+    {
+      "role": "pdf",
+      "appearance": "dark",
+      "variant": null,
+      "path": "/home/pdf-dark-44b868dce4.pdf",
+      "bytes": 737275,
+      "sha256": "44b868dce44e8479bdd69023be44ac6c3dc977b625626250075147b64d24d251",
+      "width": null,
+      "height": null,
+      "pixelsSha256": null,
+      "partSha256": null,
+      "pages": 8
+    }
+  ],
+  "editable": {
+    "frames": [
+      {
+        "x": 929,
+        "y": 591.91,
+        "w": 510.4,
+        "h": 47.52,
+        "paragraphs": [
+          {
+            "text": "The opener field",
+            "size": 44,
+            "tracking": -1.1,
+            "lineHeight": 47.52,
+            "muted": false
+          }
+        ]
+      },
+      {
+        "x": 929,
+        "y": 646.25,
+        "w": 510.4,
+        "h": 66,
+        "paragraphs": [
+          {
+            "text": "A lit sphere drawn from a formula and printed\nthrough an 8 by 8 screen at 2 px cells.",
+            "size": 22,
+            "tracking": 0,
+            "lineHeight": 33,
+            "muted": false
+          }
+        ]
+      },
+      {
+        "x": 929,
+        "y": 726.88,
+        "w": 510.4,
+        "h": 21.75,
+        "paragraphs": [
+          {
+            "text": "Drawn in Turboslide",
+            "size": 15,
+            "tracking": 0.15,
+            "lineHeight": 21.75,
+            "muted": true
+          }
+        ]
+      },
+      {
+        "x": 1480.78,
+        "y": 861.97,
+        "w": 49.62,
+        "h": 15.73,
+        "paragraphs": [
+          {
+            "text": "07 / 08",
+            "size": 13,
+            "tracking": 0.27,
+            "lineHeight": 15.73,
+            "muted": true
+          }
+        ]
+      }
+    ],
+    "pictures": [
+      {
+        "x": 0,
+        "y": 0,
+        "w": 1600,
+        "h": 900,
+        "index": 0
+      },
+      {
+        "x": 72,
+        "y": 864,
+        "w": 28,
+        "h": 18,
+        "index": 1
+      }
+    ],
+    "lines": [
+      {
+        "x": 56.5,
+        "y": 0,
+        "w": 0,
+        "h": 900,
+        "role": "hair"
+      },
+      {
+        "x": 1543.5,
+        "y": 0,
+        "w": 0,
+        "h": 900,
+        "role": "hair"
+      },
+      {
+        "x": 0,
+        "y": 56.5,
+        "w": 1600,
+        "h": 0,
+        "role": "hair"
+      },
+      {
+        "x": 0,
+        "y": 843.5,
+        "w": 1600,
+        "h": 0,
+        "role": "hair"
+      },
+      {
+        "x": 56.5,
+        "y": 51,
+        "w": 0,
+        "h": 11,
+        "role": "cross"
+      },
+      {
+        "x": 51,
+        "y": 56.5,
+        "w": 11,
+        "h": 0,
+        "role": "cross"
+      },
+      {
+        "x": 1543.5,
+        "y": 51,
+        "w": 0,
+        "h": 11,
+        "role": "cross"
+      },
+      {
+        "x": 1538,
+        "y": 56.5,
+        "w": 11,
+        "h": 0,
+        "role": "cross"
+      },
+      {
+        "x": 56.5,
+        "y": 838,
+        "w": 0,
+        "h": 11,
+        "role": "cross"
+      },
+      {
+        "x": 51,
+        "y": 843.5,
+        "w": 11,
+        "h": 0,
+        "role": "cross"
+      },
+      {
+        "x": 1543.5,
+        "y": 838,
+        "w": 0,
+        "h": 11,
+        "role": "cross"
+      },
+      {
+        "x": 1538,
+        "y": 843.5,
+        "w": 11,
+        "h": 0,
+        "role": "cross"
+      }
+    ],
+    "fills": [
+      {
+        "x": 66,
+        "y": 858,
+        "w": 40,
+        "h": 30
+      },
+      {
+        "x": 1474,
+        "y": 856,
+        "w": 60,
+        "h": 28
+      },
+      {
+        "x": 903,
+        "y": 569.73,
+        "w": 560,
+        "h": 201.27
+      }
+    ]
+  },
+  "perfectSize": {
+    "width": 3200,
+    "height": 1800
+  }
+}

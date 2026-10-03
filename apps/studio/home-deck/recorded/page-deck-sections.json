@@ -1,0 +1,16 @@
+[
+  {
+    "id": "deck",
+    "name": "Deck",
+    "slideIds": [
+      "title",
+      "plan",
+      "gets",
+      "ships",
+      "next-steps",
+      "rosetta",
+      "field",
+      "close"
+    ]
+  }
+]

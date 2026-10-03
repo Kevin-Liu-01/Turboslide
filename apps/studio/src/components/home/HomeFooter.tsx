@@ -1,4 +1,3 @@
-import { GtMark } from '@turboslide/chrome/GtMark';
 import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
 
 import { FOOTER, NAV } from './copy';
@@ -10,8 +9,8 @@ import { HomeLink } from './HomeLink';
  * scrolls the page to its top; audit-home item 10), six links in one row, GitHub among them since
  * Round 1 moved it out of the navigation, and the closing line: the one sentence that names
  * General Translation with the GT mark set inline before the name at the text's cap
- * (brand-judge-3 graft 2), then the sentence on Google Slides. No appearance control here, it is
- * in the navigation.
+ * (brand-judge-3 graft 2; drawn as a mask of `icons.generated.css`), then the sentence on Google
+ * Slides. No appearance control here, it is in the navigation.
  */
 export function HomeFooter() {
   return (
@@ -43,7 +42,8 @@ export function HomeFooter() {
         <p className="ts-product-foot-closing" data-control="home.foot.maker">
           {FOOTER.maker.before}{' '}
           <span className="ts-product-foot-company">
-            <GtMark width={16} height={10} />
+            {/* the mark as a mask of icons.generated.css, so its path is not in the document */}
+            <i className="ts-icon" data-icon="gt-mark" aria-hidden="true" />
             {FOOTER.maker.company}
           </span>
           {FOOTER.maker.after} {FOOTER.closing}

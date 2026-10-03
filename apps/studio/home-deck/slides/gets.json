@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "gets",
+  "kind": "content",
+  "template": "rows",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "What Northwind gets"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Three things on the first day.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "items": [
+          {
+            "key": "Name",
+            "value": "Their name on every slide"
+          },
+          {
+            "key": "Theme",
+            "value": "One theme for every deck"
+          },
+          {
+            "key": "Drafts",
+            "value": "Agents that draft the first slides"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": "Read the three rows aloud, then ask Northwind which one matters most."
+}

@@ -1,0 +1,208 @@
+/* The editor's selection, as the landing draws it (docs/LANDING.md 2.2, 2.6, 5 "Focus"): the 1 px
+   ring in --pt-select, eight square handles drawn 11 px inside a 24 px hit area (32 px for a
+   coarse pointer, SC 2.5.8), the rotation stem and its knob, the role chip in white on the
+   selection colour, and the snap guide, in the values of packages/chrome/src/Overlay.css (24 to
+   61, 104 to 150) and tokens.css (118 to 119). The live module (L2's live/objects.ts, push 2)
+   draws this overlay in screen pixels over a sheet, appended to main#top, so the ring stays 1 px
+   at every sheet scale; nothing of it exists at rest (decks.home.capture-plain), and the page
+   draws no blue before a press or a focus (Kevin's answer 3). The knob is the editor's rotation
+   handle drawn square (the page's "no radius"); the guide draws in the selection blue where the
+   editor draws its magenta --pt-guide, a recorded deviation (A risk 3). The classes are l2.md Q1's.
+   Under reduced motion nothing here moves; nothing here moves anyway (C2, C4: 0 ms). */
+
+.ts-home-sel-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ts-home-sel {
+  position: absolute;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.ts-home-sel[hidden],
+.ts-home-guide[hidden] {
+  display: none;
+}
+
+.ts-home-sel-ring {
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--pt-select);
+}
+
+.ts-home-sel-h {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ts-home-sel-h::before {
+  content: '';
+  position: absolute;
+  left: 6.5px;
+  top: 6.5px;
+  width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+  background: var(--pt-paper);
+}
+
+.ts-home-sel-h:hover::before,
+.ts-home-sel[data-active] .ts-home-sel-h[data-on]::before {
+  background: var(--pt-select);
+}
+
+.ts-home-sel-h[data-h='nw'] {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+
+.ts-home-sel-h[data-h='n'] {
+  left: 50%;
+  top: 0;
+  cursor: ns-resize;
+}
+
+.ts-home-sel-h[data-h='ne'] {
+  left: 100%;
+  top: 0;
+  cursor: nesw-resize;
+}
+
+.ts-home-sel-h[data-h='e'] {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+
+.ts-home-sel-h[data-h='se'] {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+
+.ts-home-sel-h[data-h='s'] {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+
+.ts-home-sel-h[data-h='sw'] {
+  left: 0;
+  top: 100%;
+  cursor: nesw-resize;
+}
+
+.ts-home-sel-h[data-h='w'] {
+  left: 0;
+  top: 50%;
+  cursor: ew-resize;
+}
+
+.ts-home-sel-stem {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 1px;
+  height: 13.5px;
+  margin-left: -0.5px;
+  background: var(--pt-select);
+}
+
+.ts-home-sel-knob {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ts-home-sel-knob::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+  background: var(--pt-paper);
+}
+
+.ts-home-sel-chip {
+  position: absolute;
+  left: -1px;
+  bottom: calc(100% + 8px);
+  height: 18px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+  font: 500 13px / 1 var(--pt-text, 'Inter', 'Inter Fallback', sans-serif);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-home-sel-chip:empty {
+  display: none;
+}
+
+.ts-home-sel[data-editing] .ts-home-sel-h,
+.ts-home-sel[data-editing] .ts-home-sel-stem,
+.ts-home-sel[data-editing] .ts-home-sel-knob {
+  display: none;
+}
+
+.ts-home-guide {
+  position: absolute;
+  background: var(--pt-select);
+  pointer-events: none;
+}
+
+/* the lifted filmstrip slide's 2 px outline (docs/LANDING.md 2.5) and the Tailor highlight (T1) */
+.ts-thumb[data-lifted] .ts-home-sheet.is-thumb::after {
+  border: 2px solid var(--pt-select);
+}
+
+.ts-home-lit {
+  background: color-mix(in srgb, var(--pt-select) 22%, transparent);
+}
+
+@media (pointer: coarse) {
+  .ts-home-sel-h,
+  .ts-home-sel-knob {
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+  }
+
+  .ts-home-sel-h::before {
+    left: 10.5px;
+    top: 10.5px;
+  }
+
+  .ts-home-sel-knob::before {
+    left: 10px;
+    top: 10px;
+  }
+}
+
+@media print {
+  .ts-home-sel-layer {
+    display: none;
+  }
+}

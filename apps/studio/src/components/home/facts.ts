@@ -6,15 +6,14 @@ import { FACTS_DATA } from './facts-data';
  * step count and the parity audit row count are written into `packages/theme/brand/facts.json` by
  * `scripts/build-brand.ts --facts` from the tree (B1's file and script) and `brand.test.ts`
  * asserts them against the tree, so a literal count in the page's copy is a defect and every count
- * flows through this module. The page does not import the facts file itself: it carries 141
- * measured rows the page never reads (about 120 KB of JavaScript, measured on the dev server), so
+ * flows through this module. Since the landing (docs/LANDING.md 2.9) the parts table also prints
+ * three counts in the form it names them: the PowerPoint shape presets (facts.json
+ * `shapePresets`, back on the page as "PowerPoint shapes" with Insert > Shape beside it), the
+ * menus (`visibleMenus(DEFAULT_MENU_CONTEXT)` of packages/chrome/src/menus/model.ts) and the
+ * CLI's commands (the length of packages/agent/generated/cli.json `actions`). The page does not
+ * import the facts file itself: it carries measured rows the page never reads, so
  * `scripts/build-home-assets.ts` copies the values the page needs into `facts-data.ts` with the
- * file's sha256 and `--check` fails when facts.json has moved on. The shape preset count the file
- * still carries is not a fact of this page since the focus round (docs/FOCUS.md section 4: the
- * presets drew as their bounding boxes, so the page states no count of them). The measured numbers
- * of the speed rows and the closing sentence do not come from here: they are quoted with their
- * document and date in `copy.ts` (`MEASURED`) and cross checked against the verifier's JSON by
- * `copy.test.ts`.
+ * file's sha256 and `--check` fails when facts.json or the tree has moved on.
  */
 export type HomeFacts = {
   actions: number;
@@ -25,21 +24,21 @@ export type HomeFacts = {
   checkSteps: number;
   /** every row of the parity audit, passed, failed or skipped */
   parityRows: number;
+  /** the PowerPoint shape presets of Insert > Shape (facts.json shapePresets) */
+  shapes: number;
+  /** the menus of the default view, File to Help (`visibleMenus(DEFAULT_MENU_CONTEXT)`) */
+  menus: number;
+  /** the CLI's commands, the length of packages/agent/generated/cli.json `actions` */
+  cliCommands: number;
   /** the worst decoded page mismatch of the Perfect export, in percent (the strip's fourth figure) */
   mismatchPercent: number;
   /** the licence's name (the strip's sixth figure) */
   licence: string;
 };
 
-export const COUNT_KEYS: ReadonlyArray<Exclude<keyof HomeFacts, 'mismatchPercent' | 'licence'>> = [
-  'actions',
-  'mcpTools',
-  'httpPaths',
-  'layouts',
-  'materials',
-  'checkSteps',
-  'parityRows',
-];
+export const COUNT_KEYS: ReadonlyArray<
+  Exclude<keyof HomeFacts, 'mismatchPercent' | 'licence' | 'menus' | 'cliCommands' | 'shapes'>
+> = ['actions', 'mcpTools', 'httpPaths', 'layouts', 'materials', 'checkSteps', 'parityRows'];
 
 /** The keys a facts file must carry as positive integers. */
 export const FACT_KEYS = COUNT_KEYS;
@@ -59,6 +58,9 @@ export const HOME_FACTS: HomeFacts = {
   materials: FACTS_DATA.materials,
   checkSteps: FACTS_DATA.checkSteps,
   parityRows: FACTS_DATA.parityRows,
+  shapes: FACTS_DATA.shapes,
+  menus: FACTS_DATA.menus,
+  cliCommands: FACTS_DATA.cliCommands,
   mismatchPercent: FACTS_DATA.mismatchPercent,
   licence: FACTS_DATA.licence,
 };

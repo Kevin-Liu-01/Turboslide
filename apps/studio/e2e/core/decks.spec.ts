@@ -150,6 +150,12 @@ test(title('decks.home.new-presentation'), async () => {
       for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
         rules.remove();
     });
+  /* the landing (docs/LANDING.md 2.10, 6.7): the close band's New Presentation reaches /new the
+     same way as the hero's; both are document navigations to /new */
+  const close = page.locator('[data-band="close"] a[href="/new"]', {
+    hasText: /New Presentation/i,
+  });
+  await expect(close, "the close band's New Presentation").toHaveCount(1);
   const hero = page.locator('main a[href="/new"]', { hasText: /New Presentation/i }).first();
   await hero.click();
   await page.waitForURL(/\/new/, { timeout: 20_000 });
@@ -158,6 +164,17 @@ test(title('decks.home.new-presentation'), async () => {
   const info = await invoke<{ id: string }>(page, 'deck.info');
   expect(s.revision).toBe(0);
   expect(info.id).toMatch(/^untitled-/);
+  await page.goto('/home');
+  if (OIDC)
+    await page.evaluate(() => {
+      for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
+        rules.remove();
+    });
+  await page.locator('[data-band="close"] a[href="/new"]').click();
+  await page.waitForURL(/\/new/, { timeout: 20_000 });
+  await waitEditor(page);
+  const second = await invoke<{ id: string }>(page, 'deck.info');
+  expect(second.id).toMatch(/^untitled-/);
 });
 
 test(title('decks.home.your-presentations'), async () => {
@@ -1335,28 +1352,45 @@ test(title('decks.recent.this-browser-sentence'), async () => {
   await expect(sentence).toContainText(/On another computer/);
 });
 
-test(title('decks.home.seller-lead'), async () => {
+test(title('decks.home.seller-lead'), async ({ browser }) => {
   test.setTimeout(90_000);
-  await page.goto('/home');
-  if (OIDC)
-    await page.evaluate(() => {
-      for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
-        rules.remove();
-    });
-  /* the redesigned page (docs/archive/rounds/POLISH.md 3.2 item 1): the h1, the lead's first sentence and the
-     second hero button */
-  const hero = await page.locator('main h1').first().textContent();
-  expect(hero?.trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
-  const lead = await page.locator('main .ts-product-lead, main p').first().textContent();
-  expect(lead?.trim(), "the lead's first sentence names the editor").toMatch(
-    /^Turboslide is a slides editor in the browser\./,
-  );
-  const deckButton = page.locator('main a[href="/deck/gt-brand"]').first();
-  await expect(deckButton, 'the second button opens the example deck').toHaveText(
-    'Open the Example Deck',
-  );
-  await deckButton.click();
-  await page.waitForURL(/\/deck\/gt-brand/, { timeout: 20_000 });
+  /* the landing (docs/LANDING.md 2.2, 6.7): the h1 is the hero slide's title in three hand set
+     lines, its text the standing sentence; in a fresh context (no visit recorded) the slide's
+     subtitle is the first visit sentence; the second hero button opens the GT brand deck */
+  const fresh = await browser.newContext({
+    extraHTTPHeaders,
+    viewport: { width: 1440, height: 900 },
+  });
+  try {
+    const p = await fresh.newPage();
+    await p.goto('/home');
+    await p.locator('main[data-hydrated]').waitFor({ timeout: 30_000 });
+    if (OIDC)
+      await p.evaluate(() => {
+        for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
+          rules.remove();
+      });
+    const h1 = await p.locator('main h1').first().textContent();
+    expect(h1?.replace(/\s+/g, ' ').trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
+    const lines = await p.locator('main h1 .ts-home-line').allTextContents();
+    expect(lines, 'three hand set lines').toEqual([
+      'Build the pitch,',
+      'present it and',
+      'send the link',
+    ]);
+    const subtitle = await p.locator('[data-object="title#lead"]').first().textContent();
+    expect(subtitle?.trim(), "the subtitle is the first visit's sentence").toBe(
+      'Turboslide is a slides editor in the browser.',
+    );
+    const deckButton = p.locator('[data-band="hero"] a[href="/deck/gt-brand"]').first();
+    await expect(deckButton, 'the second button opens the example deck').toHaveText(
+      'Open the Example Deck',
+    );
+    await deckButton.click();
+    await p.waitForURL(/\/deck\/gt-brand/, { timeout: 20_000 });
+  } finally {
+    await fresh.close();
+  }
 });
 
 test(title('decks.card.thumbnail-slide-1'), async () => {
@@ -1969,6 +2003,20 @@ async function homeScroll(p: Page): Promise<void> {
   }
   await p.waitForTimeout(400);
 }
+/** The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358. */
+const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
+  hero: [1024, 358],
+  agents: [412, 358],
+  'tailor-stage': [856, 358],
+  'tailor-thumb-plan': [144, 80],
+  'tailor-thumb-gets': [144, 80],
+  'tailor-thumb-ships': [144, 80],
+  'tailor-thumb-next-steps': [144, 80],
+  canvas: [1024, 358],
+  present: [588, 358],
+  close: [1024, 358],
+};
+
 test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
   test.setTimeout(300_000);
   const failures: string[] = [];
@@ -1978,91 +2026,67 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
       const { context: fresh, page: p } = await homeContext(browser, size, theme);
       try {
         await homeOpen(p);
-        const narrow = size.width === 390;
-        const facts = await p.evaluate((isNarrow) => {
-          const num = (v: string) => Math.round(parseFloat(v));
-          const pad = (sel: string) => {
-            const el = document.querySelector(sel);
-            if (!el) return null;
-            const cs = getComputedStyle(el);
-            return { top: num(cs.paddingTop), bottom: num(cs.paddingBottom) };
-          };
-          const bands = [...document.querySelectorAll('main [data-band]')].map((el) => ({
-            band: el.getAttribute('data-band') ?? '',
-            pad: (() => {
-              const cs = getComputedStyle(el);
-              return { top: num(cs.paddingTop), bottom: num(cs.paddingBottom) };
-            })(),
-          }));
-          const h1 = document.querySelector('main h1');
-          const twos = [...document.querySelectorAll('main .ts-product-two')].map((el) => {
-            const cs = getComputedStyle(el);
-            return { align: cs.alignItems, columns: cs.gridTemplateColumns, gap: cs.columnGap };
-          });
-          const frames = [...document.querySelectorAll('main figure')].map((el) => {
-            const cs = getComputedStyle(el);
-            return `${cs.borderTopWidth} ${cs.borderTopStyle}`;
-          });
-          const wide = [...document.querySelectorAll('main *')].filter(
-            (el) => el.getBoundingClientRect().right > innerWidth + 1,
-          ).length;
+        const narrow = size.width < 720;
+        const facts = await p.evaluate(() => {
+          const sheets = [...document.querySelectorAll<HTMLElement>('main [data-sheet]')].map(
+            (el) => {
+              const r = el.getBoundingClientRect();
+              return {
+                sheet: el.getAttribute('data-sheet') ?? '',
+                w: Math.round(r.width * 10) / 10,
+                h: Math.round(r.height * 10) / 10,
+              };
+            },
+          );
+          const seam = document.querySelector<HTMLElement>('[data-seam-root] .ts-seam-box');
+          const wide = [...document.querySelectorAll('main *')].filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1);
+          }).length;
           return {
-            hero: pad('[data-band="hero"]'),
-            bands,
-            h1Weight: h1 ? getComputedStyle(h1).fontWeight : null,
-            h1Size: h1 ? num(getComputedStyle(h1).fontSize) : null,
-            twos,
-            frames,
+            sheets,
+            seam: seam ? Math.round(seam.getBoundingClientRect().width) : null,
             wide,
             height: document.documentElement.scrollHeight,
             overflow: document.documentElement.scrollWidth > innerWidth,
-            narrow: isNarrow,
           };
-        }, narrow);
+        });
         const label = `${size.width} ${theme}`;
         notes.push(
-          `${label}: hero ${JSON.stringify(facts.hero)}, bands ${facts.bands.map((b) => `${b.band} ${b.pad.top}/${b.pad.bottom}`).join(', ')}, h1 ${facts.h1Weight} at ${facts.h1Size}px, two column ${facts.twos.map((t) => `${t.align} ${t.gap}`).join('; ')}, frames ${facts.frames.join(', ')}, height ${facts.height}, overflow ${facts.overflow}, wide ${facts.wide}`,
+          `${label}: height ${facts.height}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.w}`).join(', ')}, seam ${facts.seam}, wide ${facts.wide}`,
         );
-        const sectionPad = narrow ? 72 : 112;
-        /* Round 1 (docs/NEXT.md 4.1.3 item 9): the hero opens 72 px under the seam, 48 under 1024 */
-        const heroTop = narrow ? 48 : 72;
-        if (!facts.hero || facts.hero.top !== heroTop)
-          failures.push(`${label}: hero padding top ${facts.hero?.top} (3.4 says ${heroTop})`);
-        for (const b of facts.bands)
-          if (
-            b.band !== 'hero' &&
-            b.band !== 'footer' &&
-            (b.pad.top !== sectionPad || b.pad.bottom !== sectionPad)
-          )
-            failures.push(
-              `${label}: ${b.band} padding ${b.pad.top}/${b.pad.bottom} (3.4 says ${sectionPad})`,
-            );
-        if (facts.h1Weight !== '500') failures.push(`${label}: h1 weight ${facts.h1Weight}`);
-        if (facts.h1Size !== (narrow ? 40 : 59)) failures.push(`${label}: h1 size ${facts.h1Size}`);
-        if (!narrow)
-          for (const [i, two] of facts.twos.entries())
-            if (two.align !== 'start')
-              failures.push(`${label}: two column block ${i} align-items ${two.align}`);
-        if (facts.frames.length === 0 || facts.frames.some((f) => !/^1px solid/.test(f)))
-          failures.push(`${label}: picture frames ${facts.frames.join(', ') || 'none'}`);
+        for (const [sheet, [wideW, narrowW]] of Object.entries(HOME_SHEET_WIDTHS)) {
+          const found = facts.sheets.find((s) => s.sheet === sheet);
+          const want = narrow ? narrowW : wideW;
+          if (!found) failures.push(`${label}: no ${sheet} slide`);
+          else {
+            if (Math.abs(found.w - want) > 1.5)
+              failures.push(`${label}: ${sheet} is ${found.w} px wide (section 2 says ${want})`);
+            if (Math.abs(found.h - (found.w * 9) / 16) > 1.5)
+              failures.push(`${label}: ${sheet} is ${found.w} by ${found.h}, not 16 by 9`);
+          }
+        }
+        const seamWant = narrow ? 358 : 1024;
+        if (facts.seam === null || Math.abs(facts.seam - seamWant) > 1.5)
+          failures.push(
+            `${label}: the export slide is ${facts.seam} px wide (section 2 says ${seamWant})`,
+          );
         if (facts.overflow || facts.wide > 0)
           failures.push(`${label}: ${facts.wide} elements wider than the viewport`);
-        if (facts.height >= (narrow ? 8500 : 5000))
+        /* Kevin's answer 5: under 7,500 px at 1440 (and 1280), 8,500 at 390 */
+        if (facts.height >= (narrow ? 8500 : 7500))
           failures.push(`${label}: the page is ${facts.height} px tall`);
       } finally {
         await fresh.close();
       }
     }
   test.info().annotations.push({ type: 'home', description: notes.join(' | ') });
-  expect(
-    failures,
-    'the numbers of docs/archive/rounds/POLISH.md 3.4 at 1440, 1280 and 390 in both appearances',
-  ).toEqual([]);
+  expect(failures, 'the widths of docs/LANDING.md section 2 at 1440, 1280 and 390').toEqual([]);
 });
 
 test(title('decks.home.copy-rules'), async ({ browser }) => {
   test.setTimeout(240_000);
-  /* copy.test.ts with the rules of 3.1, run from the checkout beside the spec */
+  /* copy.test.ts with the rules of LANDING.md 2.12, run from the checkout beside the spec */
   const root = resolve(import.meta.dirname, '..', '..', '..', '..');
   const vitest = spawnSync(
     resolve(root, 'node_modules', '.bin', 'vitest'),
@@ -2087,24 +2111,21 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
     const copy = await p.evaluate(() => {
       const main = document.querySelector('main.ts-product, main') as HTMLElement;
       const headings = [...main.querySelectorAll('h1, h2')].map((h) =>
-        (h.textContent ?? '').trim(),
+        (h.textContent ?? '').replace(/\s+/g, ' ').trim(),
       );
+      /* the page's own copy: outside the slides, the panel, Version history's rows and the
+         Tailor dialog's product strings (LANDING.md 2.12) */
       const clone = main.cloneNode(true) as HTMLElement;
-      for (const el of clone.querySelectorAll('pre, script, style')) el.remove();
+      for (const el of clone.querySelectorAll(
+        'script, style, template, [data-home-slides], .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, .ts-hero-credit, .ts-sr, .ts-skip, [hidden]',
+      ))
+        el.remove();
       document.body.append(clone);
       const prose = clone.innerText;
       clone.remove();
-      return {
-        headings,
-        prose,
-        all: main.innerText,
-        code: main.querySelectorAll('pre code').length,
-      };
+      return { headings, prose };
     });
-    const words = copy.all.trim().split(/\s+/).filter(Boolean).length;
-    /* docs/archive/rounds/POLISH.md 3.1 against 3.7 (polish/build/b6.md, a note for the verifier): the h1 of
-       3.7 lists three verbs of one task with a list comma and the six h2s carry none, the read
-       copy.test.ts holds; a comma that opens a clause fails any heading */
+    const words = copy.prose.trim().split(/\s+/).filter(Boolean).length;
     const commaHeadings = copy.headings.filter(
       (h, index) =>
         h.includes(',') && (index > 0 || /,\s+(in|on|at|with|from|which|that)\b/.test(h)),
@@ -2113,14 +2134,15 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
     const paths = copy.prose.match(/\b[\w-]+\/[\w./-]+/g) ?? [];
     test.info().annotations.push({
       type: 'copy',
-      description: `${words} words; ${copy.headings.length} headings; semicolons ${(copy.prose.match(/;/g) ?? []).length}; report words ${report.join(', ') || 'none'}; paths ${paths.join(', ') || 'none'}; command boxes ${copy.code}`,
+      description: `${words} words of the page's own copy; ${copy.headings.length} headings; semicolons ${(copy.prose.match(/;/g) ?? []).length}; report words ${report.join(', ') || 'none'}; paths ${paths.join(', ') || 'none'}`,
     });
     expect(vitest.status, 'copy.test.ts passes').toBe(0);
     expect(words, 'under 350 words').toBeLessThan(350);
     expect(copy.prose, 'no semicolon').not.toContain(';');
     expect(commaHeadings, 'no comma in a heading').toEqual([]);
     expect(report, 'no report word').toEqual([]);
-    expect(paths, 'no file path outside the command box').toEqual([]);
+    expect(paths, 'no file path outside the panel').toEqual([]);
+    expect(copy.prose, 'never pixel for pixel').not.toMatch(/pixel for pixel/i);
   } finally {
     await fresh.close();
   }
@@ -2128,20 +2150,24 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
 
 test(title('decks.home.product-pictures'), async ({ browser }) => {
   test.setTimeout(240_000);
+  /* every slide on /home is the renderSlide output of the page deck built from
+     apps/studio/home-deck, and every picture a file part or a still in assets.json or an inlined
+     still of slides.generated.ts: build-home-assets.ts --check exits 0 (LANDING.md 6.7) */
   const root = resolve(import.meta.dirname, '..', '..', '..', '..');
-  const vitest = spawnSync(
-    resolve(root, 'node_modules', '.bin', 'vitest'),
-    ['run', 'apps/studio/src/components/home/shots.test.ts'],
-    { cwd: root, encoding: 'utf8', timeout: 180_000 },
-  );
-  const tail = `${vitest.stdout ?? ''}${vitest.stderr ?? ''}`
+  const check = spawnSync(process.execPath, ['scripts/build-home-assets.ts', '--check'], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: 180_000,
+  });
+  const tail = `${check.stdout ?? ''}${check.stderr ?? ''}`
+    .trim()
     .split('\n')
-    .filter((l) => /Tests|Test Files|FAIL/.test(l))
-    .slice(-4)
+    .slice(-2)
     .join(' | ');
-  test
-    .info()
-    .annotations.push({ type: 'shots.test.ts', description: `exit ${vitest.status}: ${tail}` });
+  test.info().annotations.push({
+    type: 'build-home-assets --check',
+    description: `exit ${check.status}: ${tail}`,
+  });
   const failures: string[] = [];
   const notes: string[] = [];
   for (const theme of ['dark', 'light'] as const) {
@@ -2152,57 +2178,42 @@ test(title('decks.home.product-pictures'), async ({ browser }) => {
     );
     try {
       await homeOpen(p);
-      const shots = await p.evaluate(() =>
-        [...document.querySelectorAll<HTMLImageElement>('main img[data-shot]')].map((img) => {
-          const r = img.getBoundingClientRect();
-          return {
-            shot: img.getAttribute('data-shot') ?? '',
-            width: Number(img.getAttribute('width')),
-            height: Number(img.getAttribute('height')),
-            drawn: Math.round(r.width),
-            shown: r.width > 0 && getComputedStyle(img).display !== 'none',
-            natural: img.naturalWidth,
-          };
-        }),
-      );
+      await homeScroll(p);
+      const facts = await p.evaluate(() => {
+        const roots = [...document.querySelectorAll<HTMLElement>('main [data-home-slides]')];
+        const pictures = [...document.querySelectorAll<HTMLImageElement>('main img')]
+          .filter((img) => img.getBoundingClientRect().width > 0)
+          .map((img) => img.getAttribute('src') ?? '');
+        const masks = [...document.querySelectorAll<HTMLElement>('main [data-field]')].map(
+          (el) =>
+            `${el.getAttribute('data-field')} ${getComputedStyle(el).getPropertyValue('--ts-still').slice(0, 40)}`,
+        );
+        return {
+          instances: roots.map(
+            (r) => `${r.getAttribute('data-instance')}=${r.getAttribute('data-slide')}`,
+          ),
+          themes: roots.filter((r) => r.hasAttribute('data-theme')).length,
+          pictures,
+          masks,
+        };
+      });
       notes.push(
-        `${theme}: ${shots.map((s) => `${s.shot} ${s.drawn}/${s.width}${s.shown ? '' : ' hidden'}`).join(', ')}`,
+        `${theme}: ${facts.instances.length} instances (${facts.instances.join(', ')}); pictures ${facts.pictures.join(', ')}; fields ${facts.masks.join('; ')}`,
       );
-      const shown = shots.filter((s) => s.shown);
-      /* Round 1 (docs/NEXT.md 4.1.3 item 9): the canvas crop left the page for a diagram */
-      for (const kind of ['hero', 'menus']) {
-        const own = shown.find((s) => s.shot.startsWith(`${kind}-`)) ?? null;
-        if (!own) {
-          failures.push(`${theme}: no ${kind} picture shown`);
-          continue;
-        }
-        const scale = own.width > 0 ? own.drawn / own.width : 0;
-        if (kind === 'hero' ? Math.abs(scale - 0.71) > 0.03 : scale < 0.9)
-          failures.push(`${theme}: ${own.shot} drawn at ${scale.toFixed(2)} of its size`);
-        if (!/-(dark|light)$/.test(own.shot) || !own.shot.endsWith(theme))
-          failures.push(`${theme}: the shown ${kind} picture is ${own.shot}`);
-      }
-      /* the same picture in both appearances: a dark and a light file of every capture, the same size */
-      for (const kind of ['hero', 'menus']) {
-        const pair = shots.filter((s) => s.shot === `${kind}-dark` || s.shot === `${kind}-light`);
-        if (
-          pair.length !== 2 ||
-          pair[0]!.width !== pair[1]!.width ||
-          pair[0]!.height !== pair[1]!.height
-        )
-          failures.push(
-            `${theme}: ${kind} pair ${pair.map((s) => `${s.shot} ${s.width}x${s.height}`).join(', ') || 'missing'}`,
-          );
-      }
+      if (facts.instances.length !== 10)
+        failures.push(`${theme}: ${facts.instances.length} slide instances, not 10`);
+      if (facts.themes > 0)
+        failures.push(`${theme}: ${facts.themes} slides carry their own data-theme`);
+      for (const src of facts.pictures)
+        if (!/^\/home\/[a-z-]+-[0-9a-f]{10}\.(webp|png|jpg)$/.test(src))
+          failures.push(`${theme}: the picture ${src} is not a hashed file of assets.json`);
+      if (facts.pictures.length === 0) failures.push(`${theme}: no picture shown`);
     } finally {
       await fresh.close();
     }
   }
   test.info().annotations.push({ type: 'pictures', description: notes.join(' | ') });
-  expect(
-    vitest.status,
-    'shots.test.ts passes (the mark in the title row crop, no Extensions menu)',
-  ).toBe(0);
+  expect(check.status, 'build-home-assets.ts --check exits 0').toBe(0);
   expect(failures).toEqual([]);
 });
 
@@ -2269,6 +2280,9 @@ test(title('decks.home.links-and-card'), async ({ browser, request }) => {
 
 test(title('decks.home.load-budget'), async ({ browser }) => {
   test.setTimeout(240_000);
+  /* a measure row (docs/LANDING.md 4.1, the budgets of the landing): its numbers are recorded
+     beside their lines; the document is reported against 60 KB until audit item 13 serves the
+     renderer's CSS as a file (Kevin's answer 10), and the gating lines are home.budget.* */
   const { context: fresh, page: p } = await homeContext(
     browser,
     { width: 1440, height: 900 },
@@ -2281,10 +2295,9 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
       const nav = performance.getEntriesByType('navigation')[0] as
         PerformanceNavigationTiming | undefined;
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      const bytesOf = (kind: RegExp) =>
-        resources
-          .filter((r) => kind.test(r.initiatorType) || kind.test(r.name))
-          .reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0);
+      const pictures = resources.filter(
+        (r) => r.initiatorType === 'img' || /\.(png|jpe?g|webp|avif|svg)(\?|$)/.test(r.name),
+      );
       const decodedJs = resources
         .filter((r) => r.initiatorType === 'script' || /\.m?js(\?|$)/.test(r.name))
         .reduce((n, r) => n + (r.decodedBodySize || 0), 0);
@@ -2292,20 +2305,19 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
         __loaf: number[];
         __lcp: { ms: number; element: string } | null;
       };
-      const lcp = w.__lcp?.ms ?? 0;
-      const lcpElement = w.__lcp?.element ?? '';
       return {
         ttfb: nav ? Math.round(nav.responseStart) : null,
-        documentBytes: nav ? nav.transferSize || nav.encodedBodySize : null,
-        images: bytesOf(/^img$|\.(png|jpe?g|webp|avif|svg)(\?|$)/),
+        documentBytes: nav ? nav.decodedBodySize || nav.transferSize : null,
+        pictures: pictures.reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0),
+        pictureCount: pictures.length,
         js: decodedJs,
-        lcp,
-        lcpElement,
+        lcp: w.__lcp?.ms ?? 0,
+        lcpElement: w.__lcp?.element ?? '',
         longFrames: w.__loaf.filter((d) => d > 100),
       };
     });
     await homeScroll(p);
-    await p.waitForTimeout(1000);
+    await p.waitForTimeout(1500);
     const after = await p.evaluate(() => {
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
       return resources
@@ -2315,23 +2327,22 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
         .reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0);
     });
     const lines = [
-      `first byte ${before.ttfb} ms (budget 150)`,
-      `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (budget 500, the hero picture or the h1)`,
-      `ready ${readyMs} ms (budget 500)`,
-      `images before the first scroll ${before.images} B (budget 300000)`,
-      `images after a full scroll ${after} B (budget 800000)`,
-      `document ${before.documentBytes} B (budget 60000)`,
+      `first byte ${before.ttfb} ms (line 150)`,
+      `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (line 400 cold, the h1)`,
+      `ready ${readyMs} ms (line 500)`,
+      `pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests (line 0)`,
+      `pictures after a full scroll ${after} B (line 160000)`,
+      `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)`,
       `long animation frames over 100 ms ${before.longFrames.length}`,
       `JavaScript decoded ${before.js} B (reported against 600000)`,
     ];
     for (const line of lines) test.info().annotations.push({ type: 'measure', description: line });
     expect(before.ttfb ?? 9999, lines[0]).toBeLessThanOrEqual(150);
-    expect(before.lcp, lines[1]).toBeLessThanOrEqual(500);
-    expect(/^(img|h1)/.test(before.lcpElement), lines[1]).toBe(true);
+    expect(before.lcp, lines[1]).toBeLessThanOrEqual(400);
+    expect(/^h1/.test(before.lcpElement), lines[1]).toBe(true);
     expect(readyMs, lines[2]).toBeLessThanOrEqual(500);
-    expect(before.images, lines[3]).toBeLessThanOrEqual(300_000);
-    expect(after, lines[4]).toBeLessThanOrEqual(800_000);
-    expect(before.documentBytes ?? 0, lines[5]).toBeLessThan(60_000);
+    expect(before.pictureCount, lines[3]).toBe(0);
+    expect(after, lines[4]).toBeLessThanOrEqual(160_000);
     expect(before.longFrames, lines[6]).toEqual([]);
   } finally {
     await fresh.close();
@@ -2340,6 +2351,9 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
 
 test(title('decks.home.layout-shift'), async ({ browser }) => {
   test.setTimeout(300_000);
+  /* CLS 0 at the three widths in both appearances over the load, a full scroll and the bands'
+     resting states (docs/LANDING.md 4.1; the hero sequence and the in view motions join with
+     their pushes, which hold this row) */
   const failures: string[] = [];
   const notes: string[] = [];
   for (const size of HOME_WIDTHS)
@@ -2347,8 +2361,9 @@ test(title('decks.home.layout-shift'), async ({ browser }) => {
       const { context: fresh, page: p } = await homeContext(browser, size, theme);
       try {
         await homeOpen(p);
-        await p.waitForTimeout(400);
+        await p.waitForTimeout(5000);
         await homeScroll(p);
+        await p.waitForTimeout(1000);
         const facts = await p.evaluate(() => {
           const w = window as unknown as { __cls: number[]; __pressedEarly: string | null };
           const pressed = [
@@ -2380,16 +2395,12 @@ test(title('decks.home.layout-shift'), async ({ browser }) => {
   expect(failures).toEqual([]);
 });
 
-// ---- the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.3 item 9, 4.1.5): /home on the deck's
-// page grammar (Prototemplate deck/slides/29, 33 and 49; DECK-GRAMMAR 14, 29, 31, 40)
+// ---- the landing's grammar (docs/LANDING.md 2.0; Round 1's B2a rule kept): the rails, the seams,
+// the 58 px bar, no icon before a heading, the one monospace on the #101010 panel, and no sheet
+// wider than a thumbnail drawing a frame
 
-/** The colours the old canvas capture drew its ring, chip and handle in, and the GT accent. */
-const SELECTION_BLUES: ReadonlyArray<readonly [number, number, number]> = [
-  [0x1a, 0x73, 0xe8],
-  [0x3d, 0x86, 0xf0],
-  [0x2f, 0x5c, 0xe0],
-  [0x86, 0xa8, 0xff],
-];
+/** The selection colour, which /home draws only while something is being worked on (answer 3). */
+const SELECTION_BLUE = 'rgb(47, 92, 224)';
 
 test(title('decks.home.grammar'), async ({ browser }) => {
   test.setTimeout(240_000);
@@ -2412,13 +2423,11 @@ test(title('decks.home.grammar'), async ({ browser }) => {
             return {
               left: Math.round(r.left),
               width: Math.round(r.width),
-              height: Math.round(r.height),
               borders: `${cs.borderLeftWidth} ${cs.borderLeftStyle} ${cs.borderRightWidth} ${cs.borderRightStyle}`,
             };
           },
         );
         const page = document.documentElement.scrollHeight;
-        /* a long vertical line drawn by another element on either side would be a second rail */
         const others = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
           .filter((el) => !el.classList.contains('ts-rails'))
           .filter((el) => {
@@ -2433,8 +2442,6 @@ test(title('decks.home.grammar'), async ({ browser }) => {
           (el) => {
             const r = el.getBoundingClientRect();
             const own = getComputedStyle(el);
-            /* the pseudo element's box is placed against the band's padding box (position:
-               relative); its arms sit 4 px into its 9 px square */
             const padBottom = r.bottom - parseFloat(own.borderBottomWidth);
             const one = (pseudo: '::before' | '::after') => {
               const cs = getComputedStyle(el, pseudo);
@@ -2444,15 +2451,10 @@ test(title('decks.home.grammar'), async ({ browser }) => {
                 h: num(cs.height),
                 x: Math.round(r.left + parseFloat(cs.left) + 4),
                 y: Math.round(top + 4),
-                content: cs.content,
               };
             };
             return {
-              band:
-                el.getAttribute('data-band') ??
-                el.getAttribute('data-strip') ??
-                el.className.split(' ')[0] ??
-                '',
+              band: el.getAttribute('data-band') ?? el.className.split(' ')[0] ?? '',
               seam: Math.round(r.bottom) - 1,
               before: one('::before'),
               after: one('::after'),
@@ -2467,68 +2469,52 @@ test(title('decks.home.grammar'), async ({ browser }) => {
             before: h.previousElementSibling?.tagName.toLowerCase() === 'svg',
           }),
         );
-        const diagrams = [...document.querySelectorAll<SVGSVGElement>('svg[data-diagram]')].map(
-          (svg) => {
-            const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
-            const chevrons = [...svg.querySelectorAll('polyline, polygon')].filter((el) => {
-              const pts = (el.getAttribute('points') ?? '')
-                .trim()
-                .split(/\s+/)
-                .map((pair) => pair.split(',').map(Number));
-              let length = 0;
-              for (let i = 1; i < pts.length; i += 1)
-                length += Math.hypot(
-                  (pts[i]?.[0] ?? 0) - (pts[i - 1]?.[0] ?? 0),
-                  (pts[i]?.[1] ?? 0) - (pts[i - 1]?.[1] ?? 0),
-                );
-              return el.tagName.toLowerCase() === 'polygon' || length < 30;
-            }).length;
-            const markers = [...svg.querySelectorAll<SVGRectElement>('rect.dg-marker')].filter(
-              (rect) => rect.width.baseVal.value === 11 && rect.height.baseVal.value === 11,
-            ).length;
-            const labels = [...svg.querySelectorAll<SVGTextElement>('text')].map((t) => ({
-              text: t.textContent ?? '',
-              px: Math.round(parseFloat(getComputedStyle(t).fontSize) * scale * 100) / 100,
-            }));
-            return {
-              name: svg.getAttribute('data-diagram') ?? '',
-              chevrons,
-              markers,
-              smallest: Math.min(...labels.map((l) => l.px)),
-              small: labels.filter((l) => l.px < 18).map((l) => `${l.text} ${l.px}`),
-            };
-          },
-        );
-        const pre = document.querySelector<HTMLElement>('main pre');
-        const cmd = pre
+        const panel = document.querySelector<HTMLElement>('.ts-home-panel');
+        const panelFacts = panel
           ? {
-              background: getComputedStyle(pre).backgroundColor,
-              color: getComputedStyle(pre).color,
-              font: getComputedStyle(pre).fontFamily,
+              background: getComputedStyle(panel).backgroundColor,
+              color: getComputedStyle(panel).color,
+              font: getComputedStyle(panel).fontFamily,
+              count: document.querySelectorAll('.ts-home-panel').length,
             }
           : null;
         const mono = [...document.querySelectorAll<HTMLElement>('main.ts-product *')].filter(
           (el) =>
-            el.closest('pre') === null &&
+            el.closest('.ts-home-panel') === null &&
+            el.closest('[data-home-slides]') === null &&
             /monospace|Menlo|Consolas|SF Mono/.test(getComputedStyle(el).fontFamily) &&
             (el.textContent ?? '').trim() !== '',
         ).length;
+        /* no sheet wider than a thumbnail draws a frame; a thumbnail keeps its 1 px edge */
+        const frames = [...document.querySelectorAll<HTMLElement>('main [data-sheet]')].map(
+          (el) => {
+            const sheet = el.querySelector<HTMLElement>('.ts-sheet');
+            const cs = sheet ? getComputedStyle(sheet) : null;
+            const after = getComputedStyle(el, '::after');
+            return {
+              sheet: el.getAttribute('data-sheet') ?? '',
+              thumb: el.classList.contains('is-thumb'),
+              border: cs ? parseFloat(cs.borderTopWidth) : -1,
+              shadow: cs ? cs.boxShadow : '',
+              edge: after.content !== 'none' ? parseFloat(after.borderTopWidth) : 0,
+            };
+          },
+        );
         return {
           rails,
           others,
           crosses,
           navHeight: nav ? Math.round(nav.getBoundingClientRect().height) : null,
           headings,
-          diagrams,
-          cmd,
+          panel: panelFacts,
           mono,
+          frames,
         };
       });
       const label = `1440 ${theme}`;
       notes.push(
-        `${label}: rails ${JSON.stringify(facts.rails)}, other long side lines ${facts.others}, seams ${facts.crosses.map((c) => `${c.band} y${c.seam} crosses ${c.before.w}x${c.before.h} at ${c.before.x},${c.before.y} and ${c.after.x},${c.after.y}`).join('; ')}, nav ${facts.navHeight} px, diagrams ${facts.diagrams.map((d) => `${d.name} chevrons ${d.chevrons} markers ${d.markers} smallest label ${d.smallest} px`).join('; ')}, command ${facts.cmd?.background} ${facts.cmd?.color}, monospace outside the panel ${facts.mono}`,
+        `${label}: rails ${JSON.stringify(facts.rails)}, other long side lines ${facts.others}, ${facts.crosses.length} seams, nav ${facts.navHeight} px, panel ${JSON.stringify(facts.panel)}, monospace outside the panel ${facts.mono}, frames ${facts.frames.map((f) => `${f.sheet} ${f.border}/${f.edge}`).join(', ')}`,
       );
-      /* one rail on each side at the 1104 px column, drawn once */
       if (facts.rails.length !== 1) failures.push(`${label}: ${facts.rails.length} rail elements`);
       const rail = facts.rails[0];
       if (rail !== undefined) {
@@ -2538,8 +2524,7 @@ test(title('decks.home.grammar'), async ({ browser }) => {
           failures.push(`${label}: the rails are ${rail.borders}`);
       }
       if (facts.others > 0) failures.push(`${label}: ${facts.others} more long vertical lines`);
-      /* a 9 px cross where each seam meets each rail */
-      if (facts.crosses.length < 8) failures.push(`${label}: ${facts.crosses.length} seams`);
+      if (facts.crosses.length < 9) failures.push(`${label}: ${facts.crosses.length} seams`);
       for (const c of facts.crosses)
         for (const [side, cross, x] of [
           ['left', c.before, 168],
@@ -2552,28 +2537,25 @@ test(title('decks.home.grammar'), async ({ browser }) => {
               `${label}: ${c.band} ${side} cross centred at ${cross.x},${cross.y}, the seam at ${x},${c.seam}`,
             );
         }
-      /* the 58 px navigation bar */
       if (facts.navHeight !== 58)
         failures.push(`${label}: the navigation is ${facts.navHeight} px`);
-      /* no icon before a heading */
       for (const h of facts.headings)
         if (h.svg > 0 || h.before) failures.push(`${label}: an icon at the heading "${h.text}"`);
-      /* no arrowhead, square markers, labels of 18 px or more */
-      if (facts.diagrams.length !== 4) failures.push(`${label}: ${facts.diagrams.length} diagrams`);
-      for (const d of facts.diagrams) {
-        if (d.chevrons > 0) failures.push(`${label}: ${d.name} draws ${d.chevrons} arrowheads`);
-        if (d.markers === 0) failures.push(`${label}: ${d.name} draws no square marker`);
-        if (d.small.length > 0)
-          failures.push(`${label}: ${d.name} labels under 18 px: ${d.small.join(', ')}`);
-      }
-      /* the command on #101010 in white monospace, and no monospace elsewhere */
-      if (facts.cmd?.background !== 'rgb(16, 16, 16)')
-        failures.push(`${label}: the command sits on ${facts.cmd?.background}`);
-      if (!/^rgba?\(255, 255, 255/.test(facts.cmd?.color ?? ''))
-        failures.push(`${label}: the command's text is ${facts.cmd?.color}`);
-      if (!/monospace|Menlo|Consolas/.test(facts.cmd?.font ?? ''))
-        failures.push(`${label}: the command is set in ${facts.cmd?.font}`);
+      if (facts.panel?.count !== 1) failures.push(`${label}: ${facts.panel?.count ?? 0} panels`);
+      if (facts.panel?.background !== 'rgb(16, 16, 16)')
+        failures.push(`${label}: the panel sits on ${facts.panel?.background}`);
+      if (!/monospace|Menlo|Consolas/.test(facts.panel?.font ?? ''))
+        failures.push(`${label}: the panel is set in ${facts.panel?.font}`);
       if (facts.mono > 0) failures.push(`${label}: ${facts.mono} monospace runs outside the panel`);
+      for (const f of facts.frames) {
+        if (f.border !== 0 || (f.shadow !== 'none' && f.shadow !== ''))
+          failures.push(
+            `${label}: the ${f.sheet} sheet draws a frame (${f.border} px, ${f.shadow})`,
+          );
+        if (f.thumb && f.edge !== 1)
+          failures.push(`${label}: the thumbnail ${f.sheet} has no 1 px edge`);
+        if (!f.thumb && f.edge !== 0) failures.push(`${label}: the ${f.sheet} sheet draws an edge`);
+      }
     } finally {
       await fresh.close();
     }
@@ -2584,67 +2566,61 @@ test(title('decks.home.grammar'), async ({ browser }) => {
 
 test(title('decks.home.capture-plain'), async ({ browser }) => {
   test.setTimeout(240_000);
+  /* no selection ring, chip, handle, caret or guide is drawn at rest (docs/LANDING.md 6.7): the
+     page, read itself, draws nothing in the selection colour and holds no overlay and no focused
+     text field after a full scroll (Kevin's answer 3: the blue only while something is worked on) */
   const failures: string[] = [];
   const notes: string[] = [];
   for (const theme of ['light', 'dark'] as const) {
-    const { context: fresh, page: p } = await homeContext(
-      browser,
+    for (const size of [
       { width: 1440, height: 900 },
-      theme,
-    );
-    try {
-      await homeOpen(p);
-      await homeScroll(p);
-      await p.waitForTimeout(600);
-      const shots = await p.evaluate(async (blues) => {
-        const out: { shot: string; pixels: number; blue: number; error?: string }[] = [];
-        for (const img of document.querySelectorAll<HTMLImageElement>('main img[data-shot]')) {
-          if (img.getBoundingClientRect().width === 0) continue;
-          const shot = img.getAttribute('data-shot') ?? '';
-          try {
-            if (!img.complete) await img.decode();
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (ctx === null) throw new Error('no 2d context');
-            ctx.drawImage(img, 0, 0);
-            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            let blue = 0;
-            for (let i = 0; i < data.length; i += 4) {
-              const r = data[i] ?? 0;
-              const g = data[i + 1] ?? 0;
-              const b = data[i + 2] ?? 0;
-              for (const [br, bg, bb] of blues)
-                if (Math.abs(r - br) + Math.abs(g - bg) + Math.abs(b - bb) < 60) {
-                  blue += 1;
-                  break;
-                }
-            }
-            out.push({ shot, pixels: data.length / 4, blue });
-          } catch (error) {
-            out.push({ shot, pixels: 0, blue: -1, error: String(error) });
+      { width: 390, height: 844 },
+    ]) {
+      const { context: fresh, page: p } = await homeContext(browser, size, theme);
+      try {
+        await homeOpen(p);
+        await homeScroll(p);
+        await p.waitForTimeout(600);
+        const facts = await p.evaluate((blue) => {
+          const blues: string[] = [];
+          for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+            const cs = getComputedStyle(el);
+            const hits = [
+              cs.color,
+              cs.backgroundColor,
+              parseFloat(cs.borderTopWidth) > 0 ? cs.borderTopColor : '',
+              parseFloat(cs.borderLeftWidth) > 0 ? cs.borderLeftColor : '',
+              cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 ? cs.outlineColor : '',
+            ];
+            if (hits.includes(blue) && el.getBoundingClientRect().width > 0)
+              blues.push(`${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}`);
           }
-        }
-        return out;
-      }, SELECTION_BLUES);
-      const label = `1440 ${theme}`;
-      notes.push(
-        `${label}: ${shots.map((s) => `${s.shot} ${s.blue} selection blue pixels of ${s.pixels}${s.error ? ` (${s.error})` : ''}`).join(', ')}`,
-      );
-      if (shots.length === 0) failures.push(`${label}: no capture shown`);
-      for (const s of shots) {
-        if (s.shot.startsWith('canvas-'))
-          failures.push(`${label}: the selected picture's capture ${s.shot} is on the page`);
-        if (s.blue < 0) failures.push(`${label}: ${s.shot} could not be read (${s.error})`);
-        else if (s.blue > 40)
-          failures.push(`${label}: ${s.shot} carries ${s.blue} pixels of selection blue`);
+          const active = document.activeElement;
+          return {
+            blues,
+            overlays: document.querySelectorAll(
+              '.ts-home-sel-layer, [data-live-overlay], .ts-home-guide, .ts-home-ring, .ts-home-flag',
+            ).length,
+            focused: active && active !== document.body ? active.tagName.toLowerCase() : 'none',
+          };
+        }, SELECTION_BLUE);
+        const label = `${size.width} ${theme}`;
+        notes.push(
+          `${label}: ${facts.blues.length} elements in the selection blue, ${facts.overlays} overlays, focus on ${facts.focused}`,
+        );
+        if (facts.blues.length > 0)
+          failures.push(
+            `${label}: the selection blue at rest on ${facts.blues.slice(0, 5).join(', ')}`,
+          );
+        if (facts.overlays > 0)
+          failures.push(`${label}: ${facts.overlays} selection overlays at rest`);
+        if (facts.focused !== 'none') failures.push(`${label}: focus at rest on ${facts.focused}`);
+      } finally {
+        await fresh.close();
       }
-    } finally {
-      await fresh.close();
     }
   }
-  test.info().annotations.push({ type: 'captures', description: notes.join(' | ') });
+  test.info().annotations.push({ type: 'rest', description: notes.join(' | ') });
   expect(failures).toEqual([]);
 });
 

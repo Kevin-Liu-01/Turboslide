@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "close",
+  "kind": "content",
+  "template": "big-number",
+  "layout": {
+    "type": "center"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "big",
+        "text": "Turboslide"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "role": "cap",
+        "text": "Made in Turboslide. Set in Inter.",
+        "marginTop": 14
+      }
+    ]
+  },
+  "notes": "New Presentation opens a blank deck."
+}

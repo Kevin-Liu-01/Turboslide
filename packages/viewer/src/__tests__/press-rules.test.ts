@@ -212,6 +212,121 @@ describe('objectPressPlan (A1 rules 1 and 2: one click selects, a press inside a
   });
 });
 
+describe('objectPressPlan, the second click (AMENDMENTS.md A2: a click on the selected text object opens it)', () => {
+  /* Kevin, 2026-10-02: "for textboxes, clicking it shouldnt go stragiht itno typing but once i
+     click again, i should be able to write" */
+  const text = { ...editing, text: true };
+
+  it('opens nothing on the first click: an unselected text box is selected and its drag armed', () => {
+    expect(objectPressPlan({ ...text, under: 't1', selected: [] })).toEqual({
+      action: 'press',
+      blockId: 't1',
+      select: true,
+      drag: true,
+    });
+    expect(objectPressPlan({ ...text, under: 't1', selected: ['t2'] })).toEqual({
+      action: 'press',
+      blockId: 't1',
+      select: true,
+      drag: true,
+    });
+  });
+
+  it('opens the text on the release of a press on the one selected text object, and still arms the drag', () => {
+    expect(objectPressPlan({ ...text, under: 't1', selected: ['t1'] })).toEqual({
+      action: 'press',
+      blockId: 't1',
+      select: false,
+      drag: true,
+      open: true,
+    });
+    /* the title and subtitle placeholders, grammar fields of the cover, follow the same rule */
+    for (const id of ['heading', 'lead']) {
+      const object = isObjectId(title, EMPTY_BOXES, id);
+      expect(objectPressPlan({ ...text, under: id, selected: [id], object })).toEqual({
+        action: 'press',
+        blockId: id,
+        select: false,
+        drag: true,
+        open: true,
+      });
+    }
+    /* an id the stage has not measured as an object has no chip to drag, and its release opens */
+    expect(
+      objectPressPlan({ ...text, under: 'ghost', selected: ['ghost'], object: false }),
+    ).toEqual({ action: 'press', blockId: 'ghost', select: false, drag: false, open: true });
+  });
+
+  it('opens nothing on an object whose double click is no text entry: a picture keeps crop on the double click', () => {
+    expect(objectPressPlan({ ...editing, under: 'pic', selected: ['pic'], text: false })).toEqual({
+      action: 'press',
+      blockId: 'pic',
+      select: false,
+      drag: true,
+    });
+  });
+
+  it('keeps a multiple selection whole and opens nothing on a press inside any member', () => {
+    for (const under of ['t1', 't2'] as const)
+      expect(objectPressPlan({ ...text, under, selected: ['t1', 't2'] })).toEqual({
+        action: 'press',
+        blockId: under,
+        select: false,
+        drag: true,
+      });
+  });
+
+  it('keeps the group rule: an unentered member selects its group, a group selected whole opens nothing, an entered member opens', () => {
+    expect(objectPressPlan({ ...text, under: 'g1', selected: ['g1'], grouped: true })).toEqual({
+      action: 'press',
+      blockId: 'g1',
+      select: true,
+      drag: true,
+    });
+    expect(
+      objectPressPlan({ ...text, under: 'g1', selected: ['g1', 'g2'], grouped: true }),
+    ).toEqual({ action: 'press', blockId: 'g1', select: false, drag: true });
+    /* the member the seller entered by a double click is a plain selected object (grouped false) */
+    expect(objectPressPlan({ ...text, under: 'g1', selected: ['g1'] })).toEqual({
+      action: 'press',
+      blockId: 'g1',
+      select: false,
+      drag: true,
+      open: true,
+    });
+  });
+
+  it('leaves the modifiers, the paint tool and Commenting and Viewing mode as they were', () => {
+    expect(objectPressPlan({ ...text, under: 't1', selected: ['t1'], modifier: true })).toEqual({
+      action: 'toggle',
+      blockId: 't1',
+    });
+    expect(objectPressPlan({ ...text, under: 't1', selected: ['t1'], paint: true })).toEqual({
+      action: 'paint',
+      blockId: 't1',
+    });
+    expect(objectPressPlan({ ...text, under: 't1', selected: ['t1'], editable: false })).toEqual({
+      action: 'press',
+      blockId: 't1',
+      select: false,
+      drag: false,
+    });
+  });
+
+  it("keeps the selected table's cell tap: a press in a cell places the caret and never opens", () => {
+    expect(
+      objectPressPlan({ ...text, under: 'tbl', selected: ['tbl'], cell: { row: 0, col: 1 } }),
+    ).toEqual({
+      action: 'press',
+      blockId: 'tbl',
+      select: false,
+      drag: false,
+      caret: { row: 0, col: 1 },
+      range: true,
+    });
+  });
+});
+
 describe('the chip the press arms (Editor armPress, chipHandleFor): the whole area is the drag surface', () => {
   it('covers the whole box of one selected text box, not its border alone', () => {
     const chip = handlesFor(free, boxes, { kind: 'block', blockId: 't1' }).find(

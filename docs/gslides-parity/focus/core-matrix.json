@@ -1205,6 +1205,15 @@
       "evidence": "docs/gslides-parity/focus/AMENDMENTS.md A1 (Kevin's screenshot of a two object selection); VERIFICATION.md pass 1 F4 and F5: at ec61c6b a click inside the box opens the session and a drag from inside selects text"
     },
     {
+      "id": "text.click.second-click-caret",
+      "feature": "text",
+      "interaction": "One click on a text box selects it with no caret; a second click on it, 900 ms later, opens the text with the caret at the click; typing writes there",
+      "driver": "probe --core",
+      "today": "works",
+      "evidence": "Kevin, 2026-10-02: \"for textboxes, clicking it shouldnt go stragiht itno typing but once i click again, i should be able to write\"; production on 2026-10-02: a slow second click (900 ms) on a new deck's selected title left it selected with no caret; docs/gslides-parity/focus/AMENDMENTS.md A2",
+      "note": "The second click hotfix: Selection.tsx objectPressPlan's open, Editor.tsx openOnSecondClick; the caret is read inside the clicked word, the click writes nothing (the revision before the first click and after the second agree) and the typed letter lands in that word. Driven in the text walk after text.textbox.drag-inside-moves; reads works since the hotfix's own gate run on a dev server"
+    },
+    {
       "id": "text.textbox.burst-reliability",
       "feature": "text",
       "interaction": "Insert three text boxes in a row and type into each; no refused write, no doubled word",

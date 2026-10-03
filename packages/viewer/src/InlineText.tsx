@@ -224,7 +224,14 @@ function walk(node: RunNode, flags: Flags, out: Run[]): void {
  */
 export function runsFromNode(node: RunNode, options: { multiline?: boolean } = {}): Run[] {
   const out: Run[] = [];
-  walk(node, {}, out);
+  /* the run element is the frame the renderer draws the Text in, never one of its marks: a list's
+     key, a figure's label and a quote's note are `<b data-run>` (render lists.ts, figures.ts), and
+     reading that tag as bold made a session that changed nothing write a bold mark over the whole
+     key when it ended (a double click or, since AMENDMENTS.md A2, a second click, then Escape);
+     the marks are the elements inside it */
+  if (node.nodeType === ELEMENT_NODE)
+    for (const child of Array.from(node.childNodes)) walk(child, {}, out);
+  else walk(node, {}, out);
   const merged = mergeRuns(out);
   if (options.multiline === true) return merged;
   return mergeRuns(merged.map((run) => ({ ...run, t: run.t.replace(/[\n\r]+/g, ' ') })));
@@ -541,7 +548,9 @@ export type ClickEntryInput = {
  * with text it opens the session with the caret at the double click; a line and an object without
  * a run take nothing. The verifier's F5-standing and F4 saw the single click session from both
  * sides: a Shift click at a second box's centre moved the session instead of adding the box, and
- * a caret was the common state of every right click.
+ * a caret was the common state of every right click. A second click on the one selected object
+ * (AMENDMENTS.md A2) is not a first click: where this function answers `text` for the double
+ * click, the release of that click opens the text at its point (Selection objectPressPlan `open`).
  */
 export function clickEntry(input: ClickEntryInput): ClickEntry {
   if (input.clicks === 1) return 'select';
@@ -552,21 +561,25 @@ export function clickEntry(input: ClickEntryInput): ClickEntry {
   return input.hasRun ? 'text' : 'none';
 }
 
-/** How a session is entered (A1 rules 3 and 4): the double click, a printable key, Enter. */
-export type SessionEntry = 'double-click' | 'typing' | 'enter';
+/**
+ * How a session is entered (A1 rules 3 and 4, AMENDMENTS.md A2): the double click, the second
+ * click on the selected object, a printable key, Enter.
+ */
+export type SessionEntry = 'double-click' | 'second-click' | 'typing' | 'enter';
 
 /**
- * Where the caret lands for each entry (A1 rules 3 and 4): the double click's point, so the caret
- * sits where the seller pointed; everything selected for a printable key, so the first character
- * replaces the text as in Google Slides; the end for Enter. A double click with no point (the
- * padding of the box, a synthetic entry) lands at the end.
+ * Where the caret lands for each entry (A1 rules 3 and 4, A2): the double click's point and the
+ * second click's release point, so the caret sits where the seller pointed; everything selected
+ * for a printable key, so the first character replaces the text as in Google Slides; the end for
+ * Enter. A click with no point on the run (the padding of the box, a synthetic entry) lands at
+ * the end.
  */
 export function entryCaret(
   entry: SessionEntry,
   point: { x: number; y: number } | null,
 ): CaretPlacement {
   if (entry === 'typing') return 'all';
-  if (entry === 'double-click' && point !== null) return point;
+  if ((entry === 'double-click' || entry === 'second-click') && point !== null) return point;
   return 'end';
 }
 

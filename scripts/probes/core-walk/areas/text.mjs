@@ -14,6 +14,8 @@ export const IDS = [
   'text.title.double-click-enters',
   'text.session.escape-twice',
   'text.textbox.drag-inside-moves',
+  /* the second click hotfix (AMENDMENTS.md A2, 2026-10-02) */
+  'text.click.second-click-caret',
   'text.context.inside-session',
   'text.caret.click-mid-word',
   'text.caret.home-end',
@@ -270,7 +272,10 @@ export async function run(t) {
         (x) => x,
         8000,
       );
-      // the title goes back to the sentence the caret rows expect, through the same rule
+      // the title goes back to the sentence the caret rows expect, through the same rule: Escape
+      // left the title selected, and a click on the selected title opens it (AMENDMENTS.md A2),
+      // so the selection is cleared first and the click is the first one again
+      await t.clearAll();
       await clickTitle();
       await t.typeHuman(TITLE);
       await t.sleep(300);
@@ -737,6 +742,68 @@ export async function run(t) {
           after.selected &&
           sameText(textAfter) === sameText(textBefore),
         observed: `after the click ${t.describeSelection(facts)}; drag ${t.posStr(moved.before)} -> ${t.posStr(moved.after)} (dx ${dx}, dy ${dy}); during the drag session ${moved.during.editing}, text selected "${moved.during.selection}", readout ${moved.during.readout ?? 'none'}; after ${t.describeSelection(after)}; text unchanged ${sameText(textAfter) === sameText(textBefore)}`,
+      };
+    },
+  );
+  await t.step(
+    'text.click.second-click-caret',
+    'one click on the text box (selected, no caret), then 900 ms later a second click on its third word, type a letter',
+    'the second click opens the text with the caret inside that word and the letter lands there; nothing is written by the click',
+    async () => {
+      await t.clearAll();
+      if (!boxA) return { ok: false, observed: 'no text box' };
+      const run = (await t.runsOfBlock(boxA.id))[0];
+      if (!run) return { ok: false, observed: `no run in ${boxA.id}` };
+      const before = await text(run);
+      const w = await t.wordRect(run, 2);
+      if (!w) return { ok: false, observed: `no third word in "${before}"` };
+      /* neither click writes: the revision is read once the earlier rows' writes are quiet */
+      const rev0 = await t.stableRevision();
+      const { facts } = await t.clickSelect(boxA.id);
+      /* the second click comes after the double click interval, so it is a click of its own */
+      await t.sleep(900);
+      await t.clickAt(w.x + w.w / 2, w.y + w.h / 2);
+      await t.sleep(250);
+      const on = await t.editing();
+      const caret = await t.caretFacts(run);
+      const sel = await t.selectionText();
+      const rev1 = (await t.state()).revision;
+      const start = before.indexOf(w.word);
+      const end = start + w.word.length;
+      const inWord =
+        start >= 0 && Boolean(caret?.inside) && caret.offset >= start && caret.offset <= end;
+      /* a build where the second click leaves the box selected would take the letter through the
+         printable key entry and replace the whole text, which the rows after this one need: the
+         row fails here on its own and the box is left as it was */
+      if (!on || !inWord) {
+        await t.clearAll();
+        return {
+          ok: false,
+          observed: `after the first click ${t.describeSelection(facts)}; the second click on "${w.word}" [${start}, ${end}]: session ${on}, caret offset ${caret?.offset}, selection "${sel}", revision ${rev0} -> ${rev1}; nothing typed`,
+        };
+      }
+      await t.typeHuman('Q');
+      await t.sleep(400);
+      const now = await text(run);
+      const at = now.indexOf('Q');
+      // the letter leaves again so the box reads as before for the rows after this one
+      await t.press('Backspace');
+      await t.sleep(300);
+      await t.press('Escape');
+      await t.settled();
+      const restored = await text(run);
+      return {
+        ok:
+          selectedNoCaret(facts) &&
+          on &&
+          inWord &&
+          sel === '' &&
+          rev1 === rev0 &&
+          at >= start &&
+          at <= end &&
+          now.length === before.length + 1 &&
+          restored === before,
+        observed: `after the first click ${t.describeSelection(facts)}; the second click on "${w.word}" [${start}, ${end}]: session ${on}, caret offset ${caret?.offset} inside the word ${inWord}, selection "${sel}", revision ${rev0} -> ${rev1}; typed Q: "${now}" (Q at ${at}); restored ${restored === before}`,
       };
     },
   );

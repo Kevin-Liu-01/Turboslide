@@ -189,6 +189,7 @@ import {
   listAppendMutation,
   listRemoveMutation,
   nextCellPointer,
+  placeCaret,
   plainOffsetOf,
   readRunText,
   runKey,
@@ -928,14 +929,20 @@ type ActiveGesture = {
   tableFloor?: number;
 };
 
+/** Where a press that never travelled came up: the client point and the element under it. */
+type PressRelease = { x: number; y: number; target: EventTarget | null };
+
 /** A press on a block's body that may become a drag; CSS pixels. */
 type Press = {
   blockId: string;
   clientX: number;
   clientY: number;
   alt: boolean;
-  /** what a pointer up without a move does after the press (a table cell's caret, a chart mark's cell) */
-  tap?: () => void;
+  /**
+   * what a pointer up without a move does after the press (a table cell's caret, a chart mark's
+   * cell, the second click's text session at the release point, AMENDMENTS.md A2)
+   */
+  tap?: (release: PressRelease) => void;
 };
 
 /** A run to edit once the slide re-rendered with it (a new list item, the next cell, a drawn text box). */
@@ -1327,6 +1334,18 @@ export function Editor({
   toolRef.current = tool;
   /* true while the selection came from a key that left a session (item 19): cleared by a press */
   const selectedByKey = useRef(false);
+  /* the click count of the press under way, from its mousedown (`detail`; 0 until it arrives, and
+     for a pointer that sends no mouse events): the second click's release opens nothing on the
+     second press of a double click, which is the double click's entry (AMENDMENTS.md A2) */
+  const pressClicks = useRef(0);
+  /* the session the last release opened (A2), until the next mousedown reads it: when that press
+     is the second of a double click, the double click is A1 rule 3's entry and finds the caret
+     the release placed, a shape's label then taking the word at the point (`word`) */
+  const secondClickOpen = useRef<{ blockId: string; pointer: string; word: boolean } | null>(null);
+  /* the double click whose first press opened the session (A2): onDoubleClickCapture keeps it the
+     entry of A1 rule 3, the caret the release placed, or the word at the point on a shape's label
+     or a diagram member's text (`word`) */
+  const entryAfterOpen = useRef<{ blockId: string; pointer: string; word: boolean } | null>(null);
   /* the linked run a single click landed on outside a session (item 20): the overlay draws its
      chip; a press elsewhere, a session or a selection of another block clears it */
   const [linkChip, setLinkChip] = useState<{
@@ -6261,7 +6280,7 @@ export function Editor({
     from: { blockId: string; anchor: CellAddress; session?: Editing },
     clientX: number,
     clientY: number,
-    tap?: () => void,
+    tap?: (release: PressRelease) => void,
   ) => {
     const { blockId, anchor, session } = from;
     const slideNow = slideRef.current;
@@ -6304,12 +6323,12 @@ export function Editor({
       if (cell === null) return;
       setRange({ blockId, anchor, focus: cell });
     };
-    const up = () => {
+    const up = (ev: PointerEvent) => {
       detach();
       if (live) window.getSelection()?.removeAllRanges();
       /* a press on the selected table that never travelled: the tap moves the caret to the
          pressed cell (docs/FEATURES.md 2.1); with a session the browser's own click placed it */
-      else if (session === undefined) tap?.();
+      else if (session === undefined) tap?.({ x: ev.clientX, y: ev.clientY, target: ev.target });
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
@@ -6440,7 +6459,9 @@ export function Editor({
   /**
    * A press on a block's body arms a drag: past DRAG_START_PX it becomes the chip's gesture; a
    * pointer up before that is a tap, which runs what the press named (a table cell's caret, a
-   * chart mark's cell) and nothing else.
+   * chart mark's cell, the second click's text session, AMENDMENTS.md A2) at the release point
+   * and nothing else. The press is disarmed before the tap runs, so a session the tap opens never
+   * finds a drag armed under it.
    */
   const armPress = (next: Press) => {
     press.current = next;
@@ -6457,12 +6478,12 @@ export function Editor({
       const chip = chipHandleFor(slideNow, boxesRef.current, p.blockId, ids);
       if (chip) beginGesture(chip, p.clientX, p.clientY, { duplicate: p.alt });
     };
-    const up = () => {
+    const up = (ev: PointerEvent) => {
       const p = press.current;
       press.current = null;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      p?.tap?.();
+      p?.tap?.({ x: ev.clientX, y: ev.clientY, target: ev.target });
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
@@ -6825,6 +6846,8 @@ export function Editor({
     const el = body.current;
     const slideNow = slideRef.current;
     selectedByKey.current = false;
+    /* the click count arrives with the mousedown that follows (onMouseDown) */
+    pressClicks.current = 0;
     if (linkChipRef.current !== null) setLinkChip(null);
     if (!el || !slideNow || e.button !== 0) return;
     /* a Shift or Cmd press adds to the selection and never starts the browser's own text
@@ -6920,8 +6943,10 @@ export function Editor({
        session, the ring, the handles and the chip; the press that follows arms the drag from
        anywhere inside the object's area, a text box and a placeholder included, and past
        DRAG_START_PX the move gesture takes the whole selection with it (armPress, chipHandleFor,
-       beginGesture). The double click is the entry into the text (onDoubleClick, InlineText
-       clickEntry), and so are a printable key and Enter (onKey). */
+       beginGesture). The entries into the text are the second click on the one selected text
+       object (AMENDMENTS.md A2: the plan's `open`, a pointer up without a move opens the text at
+       the release point, openOnSecondClick), the double click (onDoubleClick, InlineText
+       clickEntry), a printable key and Enter (onKey). */
     /* the cell of a table the press landed in (docs/FEATURES.md 2.1, the amended A1 for tables):
        a tap places the caret there, a move on the selected table selects a range from it */
     const pressedRun = id !== null ? resolveRun(e.target, el) : null;
@@ -6941,6 +6966,7 @@ export function Editor({
         groupEnteredRef.current !== id,
       object: id !== null && isObjectId(slideNow, boxesRef.current, id),
       cell: pressedCell,
+      text: id !== null && opensTextOnSecondClick(slideNow, el, id),
     });
     switch (plan.action) {
       case 'marquee':
@@ -6978,7 +7004,12 @@ export function Editor({
            rank 2; the pressed cell becomes the remembered cell of rank 4); on a bar, a point or a
            slice of the selected chart its cell in the Chart data grid with the value in the
            readout (rank 7); nothing elsewhere */
-        const tap = ((): (() => void) | undefined => {
+        const tap = ((): ((release: PressRelease) => void) | undefined => {
+          /* the second click on the one selected text object (A2): the release opens the text */
+          if (plan.open === true) {
+            const blockId = plan.blockId;
+            return (release) => openOnSecondClick(blockId, release);
+          }
           if (plan.caret !== undefined && pressedRun !== null) {
             const run = pressedRun;
             const cell = plan.caret;
@@ -7014,8 +7045,9 @@ export function Editor({
         /* Commenting and Viewing mode select the object for a comment's anchor and never drag
            (SPEC-3 5.3, 6.3): the plan's `drag` is false there; in Editing mode every measured
            object drags by its body, a picture, a shape, a material, a text box or a placeholder
-           alike, and the ring's handles keep their own gestures (Overlay) */
-        if (plan.drag)
+           alike, and the ring's handles keep their own gestures (Overlay); the second click's
+           press is armed even on an object with no chip, so its release can open the text (A2) */
+        if (plan.drag || plan.open === true)
           armPress({
             blockId: plan.blockId,
             clientX: e.clientX,
@@ -7023,7 +7055,8 @@ export function Editor({
             alt: e.altKey,
             ...(tap === undefined ? {} : { tap }),
           });
-        else if (tap !== undefined && editableRef.current) tap();
+        else if (tap !== undefined && editableRef.current)
+          tap({ x: e.clientX, y: e.clientY, target: e.target });
         return;
       }
     }
@@ -7057,6 +7090,109 @@ export function Editor({
       groupMember: block?.pos?.group !== undefined && groupEnteredRef.current !== id,
       hasRun: firstRunOf(el, id) !== null,
     } as const;
+  };
+
+  /**
+   * The double click's word rule (docs/POLISH.md 2.4 item 30): on a shape's label or a diagram
+   * member's text the double click selects the word at the point; a text box, a placeholder and a
+   * grammar field take the caret (A1 rule 3).
+   */
+  const wordSelectOn = (slideNow: Slide, id: string): boolean => {
+    const block = blockById(slideNow, id);
+    return block !== undefined && (!isTextBlockType(block.type) || isDiagramMember(block));
+  };
+
+  /**
+   * Whether a second click on the selected object opens its text (AMENDMENTS.md A2, Selection
+   * objectPressPlan `text`): the objects whose double click opens the text session (clickEntry
+   * `text`: a text box, a placeholder, a grammar field, a shape with a label), less a table and a
+   * chart, whose presses on the selected object keep their own taps (a cell's caret, a mark's
+   * readout). A picture's second click is no crop, a line's is nothing, and a group's member the
+   * seller has not entered stays the group's.
+   */
+  const opensTextOnSecondClick = (slideNow: Slide, el: HTMLElement, id: string): boolean => {
+    const type = blockById(slideNow, id)?.type;
+    if (type === 'table' || type === 'chart') return false;
+    return clickEntry(entryInputFor(slideNow, el, id, 2)) === 'text';
+  };
+
+  /**
+   * The release of a second click on the one selected text object (AMENDMENTS.md A2; Kevin,
+   * 2026-10-02): the text session opens with the caret at the release point, through the same
+   * `startEdit` the double click uses (the run under the pointer and the character nearest the
+   * point, InlineText placeCaret; an empty placeholder's start; the box's padding opens the first
+   * run at its end). armPress disarmed the press before this runs, nothing is written and the
+   * session draws the ring and the chip as every session does. The second press of a double click
+   * opens nothing here: the double click that follows is A1 rule 3's entry, so a fast double click
+   * on an unselected text object selects it and opens it once.
+   */
+  const openOnSecondClick = (blockId: string, release: PressRelease) => {
+    if (pressClicks.current >= 2) return;
+    const el = body.current;
+    const slideNow = slideRef.current;
+    if (!el || !slideNow || editingRef.current !== null || !editableRef.current) return;
+    if (paintRef.current || toolRef.current !== 'select') return;
+    /* the object is still the one selected object (a key or a remote write may have moved it) */
+    const ids = selectedIds(selectionRef.current, extraRef.current);
+    if (ids.length !== 1 || ids[0] !== blockId) return;
+    const under = resolveRun(release.target, el);
+    const run = under !== null && under.blockId === blockId ? under : firstRunOf(el, blockId);
+    if (!run || readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
+    const at = run === under ? { x: release.x, y: release.y } : null;
+    secondClickOpen.current = {
+      blockId: run.blockId,
+      pointer: run.pointer,
+      word: wordSelectOn(slideNow, blockId),
+    };
+    startEdit(run, entryCaret('second-click', at));
+  };
+
+  /**
+   * The mousedown after every pointer down on the stage: it carries the click count the second
+   * click's release reads (`pressClicks`). When it is the second press of a double click whose
+   * first press opened the session (A2), the double click stays A1 rule 3's entry: the default is
+   * prevented so the browser's word selection does not replace the caret the release placed, and
+   * the dblclick that follows is read by onDoubleClickCapture.
+   */
+  const onMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
+    pressClicks.current = e.detail;
+    const opened = secondClickOpen.current;
+    secondClickOpen.current = null;
+    entryAfterOpen.current = null;
+    if (opened === null || e.detail < 2 || e.button !== 0) return;
+    const current = editingRef.current;
+    if (
+      current === null ||
+      current.blockId !== opened.blockId ||
+      current.pointer !== opened.pointer
+    )
+      return;
+    if (!(e.target instanceof Node) || !current.element.contains(e.target)) return;
+    e.preventDefault();
+    entryAfterOpen.current = opened;
+  };
+
+  /**
+   * The dblclick of a double click whose first press opened the session (A2, onMouseDown): it is
+   * the entry of A1 rule 3, as on an unselected object, so the caret the release placed stays on
+   * a text box, a placeholder and a grammar field, and a shape's label or a diagram member's text
+   * takes the word at the point. It stops here, in the capture phase, so neither the session's
+   * own double click rule (InlineText's whole address selection) nor onDoubleClick reads it as a
+   * double click inside an open session.
+   */
+  const onDoubleClickCapture = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const entry = entryAfterOpen.current;
+    entryAfterOpen.current = null;
+    const current = editingRef.current;
+    if (
+      entry === null ||
+      current === null ||
+      current.blockId !== entry.blockId ||
+      current.pointer !== entry.pointer
+    )
+      return;
+    e.stopPropagation();
+    if (entry.word) placeCaret(current.element, { x: e.clientX, y: e.clientY, word: true });
   };
 
   /**
@@ -7112,8 +7248,7 @@ export function Editor({
           const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
           if (run && readRunText(slideNow, run.blockId, run.pointer) !== undefined) {
             const at = run === under ? { x: e.clientX, y: e.clientY } : null;
-            const wordSelect =
-              clicked !== undefined && (!isTextBlockType(clicked.type) || isDiagramMember(clicked));
+            const wordSelect = wordSelectOn(slideNow, id);
             startEdit(
               run,
               wordSelect && at !== null ? { ...at, word: true } : entryCaret('double-click', at),
@@ -7133,8 +7268,7 @@ export function Editor({
         const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
         if (!run || readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
         e.preventDefault();
-        const wordSelect =
-          clicked !== undefined && (!isTextBlockType(clicked.type) || isDiagramMember(clicked));
+        const wordSelect = wordSelectOn(slideNow, id);
         const at = run === under ? { x: e.clientX, y: e.clientY } : null;
         startEdit(
           run,
@@ -7789,6 +7923,8 @@ export function Editor({
               setHover(null);
             }}
             onPointerDown={onPointerDown}
+            onMouseDown={onMouseDown}
+            onDoubleClickCapture={onDoubleClickCapture}
             onDoubleClick={onDoubleClick}
             onClick={onClick}
             dangerouslySetInnerHTML={{ __html: shownHtml }}

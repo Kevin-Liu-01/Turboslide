@@ -144,6 +144,18 @@ describe('runsFromNode', () => {
     ]);
   });
 
+  it("reads no mark from the run element's own tag: a list key drawn as <b data-run> stays plain", () => {
+    /* render lists.ts draws a list's key as <b data-run>; a session that changed nothing wrote a
+       bold mark over the whole key when it ended (the canvas walk's resize write carried it) */
+    expect(runsFromNode(el('B', [text('/llms.txt')]))).toEqual([{ t: '/llms.txt' }]);
+    expect(textFromNode(el('B', [text('/llms.txt')]))).toBe('/llms.txt');
+    /* a mark inside the frame is still read */
+    expect(runsFromNode(el('B', [text('one '), el('I', [text('two')])]))).toEqual([
+      { t: 'one ' },
+      { t: 'two', i: true },
+    ]);
+  });
+
   it('skips the prompt of an empty placeholder (SPEC 5.4)', () => {
     const empty = el('H1', [el('SPAN', [text('Click to add title')], { 'data-prompt': '' })]);
     expect(textFromNode(empty)).toBe('');
@@ -866,6 +878,10 @@ describe('entryCaret (AMENDMENTS.md A1 rules 3 and 4)', () => {
   });
   it('Enter places the caret at the end', () => {
     expect(entryCaret('enter', null)).toBe('end');
+  });
+  it('the second click on the selected object places the caret at its release point, or at the end off the run (AMENDMENTS.md A2)', () => {
+    expect(entryCaret('second-click', { x: 300, y: 64 })).toEqual({ x: 300, y: 64 });
+    expect(entryCaret('second-click', null)).toBe('end');
   });
 });
 

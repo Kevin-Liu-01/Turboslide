@@ -304,6 +304,12 @@ export type PressPlan =
       drag: boolean;
       caret?: { row: number; col: number };
       range?: true;
+      /**
+       * the second click on the one selected text object (AMENDMENTS.md A2): a pointer up without
+       * a move opens its text with the caret at the release point; a move past the threshold is
+       * still the drag and opens nothing
+       */
+      open?: true;
     };
 
 /**
@@ -312,11 +318,12 @@ export type PressPlan =
  * object and shows the ring, the handles and the chip, and places no caret; a pointer down
  * anywhere inside a selected object arms the drag, so a move past the threshold moves it, and the
  * whole selection when several are selected; a click on an object inside a multiple selection
- * keeps the selection. A text object's session opens on a double click, Enter or a typed
- * character, never here, which is what lets a drag start inside the text (Kevin, 2026-09-16:
- * "when you click and drag in the selection area, it should drag, and double clicking is what
- * goes inside"; the verifier's F4 and F5 saw the old one click session claim the drag, the right
- * click and the Shift click). Commenting and Viewing mode select for a comment's anchor and never
+ * keeps the selection. A text object's session opens on a second click on the selected object
+ * (A2, below), a double click, Enter or a typed character, never on the first click, and the
+ * second click's press still drags on a move, which is what lets a drag start inside the text
+ * (Kevin, 2026-09-16: "when you click and drag in the selection area, it should drag, and double
+ * clicking is what goes inside"; the verifier's F4 and F5 saw the old one click session claim the
+ * drag, the right click and the Shift click). Commenting and Viewing mode select for a comment's anchor and never
  * drag (SPEC-3 5.3, 6.3). The paint tool and the modifiers keep their rules.
  *
  * The table's amendment (docs/FEATURES.md 2.1, 2.2 ranks 2 and 4; question 8 of its section 9
@@ -328,6 +335,18 @@ export type PressPlan =
  * table a press in a cell followed by a move selects a range from that cell and the table does
  * not move (its move surface is the ring band, the chip and the eight handles), and a click on
  * another cell moves the caret. A table in a multiple selection or in a group keeps A1 as written.
+ *
+ * The second click (AMENDMENTS.md A2, binding above A1 rule 3 for a click on a selected text
+ * object; Kevin, 2026-10-02: "for textboxes, clicking it shouldnt go stragiht itno typing but once
+ * i click again, i should be able to write"): a plain press on the one selected object, when that
+ * object is a text object (a text box, a placeholder or a grammar field such as the cover title
+ * and subtitle, a shape with a label), arms the drag as before and carries `open`, so a pointer up
+ * without a move, at any time after the first click, opens the text with the caret at the release
+ * point. The first click still only selects, a move past the threshold still moves the object,
+ * and a press inside a multiple selection, on a group the seller has not entered, on a table or a
+ * chart (`text` false) or in Commenting and Viewing mode opens nothing. The double click keeps
+ * A1 rule 3: its second press is the entry, so the Editor's release reads the click count and
+ * leaves that press to the double click (Editor openOnSecondClick).
  */
 export function objectPressPlan(input: {
   /** the object under the pointer (resolveObject), or null on the empty sheet */
@@ -346,6 +365,12 @@ export function objectPressPlan(input: {
   object: boolean;
   /** the cell of a table the press landed in (resolveRun, cellPointer); absent or null elsewhere */
   cell?: { row: number; col: number } | null;
+  /**
+   * the object opens a text session on its entry (AMENDMENTS.md A2): the double click's entry for
+   * it is its text (InlineText clickEntry 'text'), and it is not a table or a chart, whose presses
+   * on the selected object are their own (a cell's caret, a mark's readout)
+   */
+  text?: boolean;
 }): PressPlan {
   const { under } = input;
   if (under === null) return { action: 'marquee' };
@@ -369,11 +394,15 @@ export function objectPressPlan(input: {
     if (!held)
       return { action: 'press', blockId: under, select: true, drag: input.object, caret: cell };
   }
+  const select = !held || (input.grouped && input.selected.length === 1);
+  /* the second click on the one selected text object opens its text on the release (A2) */
+  const open = !select && !input.grouped && input.selected.length === 1 && input.text === true;
   return {
     action: 'press',
     blockId: under,
-    select: !held || (input.grouped && input.selected.length === 1),
+    select,
     drag: input.object,
+    ...(open ? { open: true as const } : {}),
   };
 }
 

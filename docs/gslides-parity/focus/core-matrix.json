@@ -10225,6 +10225,26 @@
       "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
+      "id": "home.menus.bar",
+      "feature": "decks",
+      "interaction": "The miniature's menu bar holds visibleMenus(DEFAULT_MENU_CONTEXT) in order with each menu's rows, rules, submenus and shortcuts equal to menus.generated.ts in the platform's form (a Mac and a Linux context); a menubar with a roving tabindex: Left and Right move between menus, Down, Enter or Space opens one, Up and Down move between rows, Right opens a submenu, Escape closes and returns focus to the title, and a pointer over another title opens it while one is open; at 390 one Menus key lists the nine menus and drills into one with a row back, rows 44 px; every row 2.5's table does not list is in titanium and sets \"This row runs in the editor.\" with its doc",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "direction-c strip-menus.jpg; strip-phone.jpg",
+      "note": "docs/LANDING.md 6.7 (second pass)"
+    },
+    {
+      "id": "home.menus.rows",
+      "feature": "decks",
+      "interaction": "Each row of 2.5's table, by pointer and by its shortcut with focus in the band, changes the page deck within 300 ms as the table says and the change shows in the hero frame, the filmstrips, the kits grid and the show; each adds its Version history row; Edit > Undo takes it back; an inserted text box or shape is the renderer's markup; a new slide is the blank layout; Delete slide renumbers every counter; Skip slide leaves the show; Download > PDF Document downloads the page's PDF",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "judge-3 c-menus-tailor.png; judge-2 7 (rows that only describe)",
+      "note": "docs/LANDING.md 6.7 (second pass)"
+    },
+    {
       "id": "home.budget.live-module",
       "feature": "decks",
       "interaction": "The live core and the chunks it imports at once: one request after `load` and one idle callback, never before, at most 64 KB decoded and 20 KB gzip; each band chunk at most 56 KB decoded and 16 KB gzip; no slide markup in the core",

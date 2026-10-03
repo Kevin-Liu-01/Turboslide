@@ -241,6 +241,9 @@ const INNER_HTML_ALLOW = [
   // (menus.generated.ts), parsed in a template element, and a text box's own markup read before
   // an edit and written back by an Undo; never typed text
   'apps/studio/src/components/home/live/paint.ts',
+  // the miniature editor (V2#11): the renderer's markup of a slide, a text box and two shapes,
+  // rendered at build (bands/deck.generated.ts, menus.generated.ts), parsed in a template element
+  'apps/studio/src/components/home/live/menus.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

@@ -79,6 +79,7 @@ export function registerBand(band: BandId, load: () => Promise<BandModule>): voi
    screen's code (4.1: the store, the motion system, the frame's selection, H5, the field printer,
    the loader): every band's own code is a chunk of its own, imported when the band nears, and the
    canvas band's two starts are the core's objects and field printer (6.4: V3 and V4 add theirs). */
+registerBand('menus', () => import('./menus'));
 registerBand('canvas', async () => ({ start: (ctx) => void startObjects(ctx, 'canvas') }));
 registerBand('canvas', async () => ({ start: startCanvasField }));
 registerBand('tailor', () => import('./tailor'));

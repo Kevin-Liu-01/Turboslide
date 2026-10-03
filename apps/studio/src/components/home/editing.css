@@ -1,0 +1,501 @@
+/* The editing instruments of /home (docs/LANDING.md 2.5 to 2.9; V2's file, 6.4): the miniature
+   editor of the menus band, the kits band's grid and the Version history scrubber. Imported by the
+   menus, kits and versions chunks (Vite loads it before the chunk runs, so an inserted instrument
+   paints styled) and by the route when V1 lists it. The grammar is the editor's: square corners,
+   ruled rows, paper plates with the frame weight's 1 px edge (packages/chrome/src/Menu.css), no
+   shadow or gradient; `--pt-select` only on what the visitor works on: an open menu row's ground,
+   the focus ring (LANDING.md 2.0 "Colour"). */
+
+/* ---- the miniature editor (2.5) ---- */
+
+/* the frame does not clip: a long menu (File at 390 px, 44 px rows) runs past its bottom edge over
+   the page, as the editor's menus run past the window's toolbar */
+.ts-mini-editor {
+  position: relative;
+  display: grid;
+  grid-template-rows: 40px 36px 500px 48px 40px;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 14px / 1 var(--pt-text);
+}
+
+.ts-mini-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  min-width: 0;
+}
+
+.ts-mini-mark {
+  flex: none;
+  width: 28px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.ts-mini-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-mini-count {
+  font-size: 13px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-mini-menubar {
+  display: flex;
+  align-items: stretch;
+  padding: 0 6px;
+  border-top: 1px solid var(--pt-hair);
+  border-bottom: 1px solid var(--pt-hair);
+  min-width: 0;
+}
+
+.ts-mini-menu,
+.ts-mini-menus-key {
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  height: 100%;
+  padding: 0 10px;
+  font: 14px / 1 var(--pt-text);
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.ts-mini-menu:hover,
+.ts-mini-menu.is-open,
+.ts-mini-menus-key[aria-expanded='true'] {
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+}
+
+.ts-mini-menu:focus-visible,
+.ts-mini-menus-key:focus-visible,
+.ts-mini-row:focus-visible,
+.ts-mini-thumb:focus-visible,
+.ts-mini-notes textarea:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: -2px;
+}
+
+.ts-mini-menus-key {
+  display: none;
+}
+
+.ts-mini-body {
+  display: grid;
+  grid-template-columns: 144px minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  background: var(--pt-plate);
+}
+
+.ts-mini-filmstrip {
+  margin: 0;
+  padding: 12px 12px 12px 8px;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: var(--pt-paper);
+  border-right: 1px solid var(--pt-hair);
+}
+
+.ts-mini-thumb {
+  display: grid;
+  grid-template-columns: 20px 96px;
+  align-items: start;
+  margin: 0 0 10px;
+  outline: none;
+  cursor: default;
+}
+
+.ts-mini-thumb-n {
+  padding-top: 2px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding-right: 6px;
+}
+
+.ts-mini-thumb .ts-home-sheet {
+  width: 96px;
+}
+
+.ts-mini-thumb[data-selected] .ts-home-sheet.is-thumb::after {
+  border: 2px solid var(--pt-ink);
+}
+
+.ts-mini-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 16px;
+}
+
+.ts-mini-sheet {
+  width: min(832px, 100%);
+}
+
+.ts-mini-notes {
+  display: block;
+  min-height: 0;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-mini-notes textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 0;
+  resize: none;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 14px / 1.4 var(--pt-text);
+}
+
+.ts-mini-notes textarea::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-mini-editor[data-notes-off] .ts-mini-notes textarea,
+.ts-mini-editor[data-strip-off] .ts-mini-filmstrip > * {
+  visibility: hidden;
+}
+
+.ts-mini-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  border-top: 1px solid var(--pt-hair);
+  font-size: 13px;
+  color: var(--pt-ink-2);
+  min-width: 0;
+}
+
+.ts-mini-status [data-mini-status] {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ts-mini-readout {
+  flex: none;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- the menu plates and the dialogs, inside the miniature's frame ---- */
+
+.ts-mini-plates {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.ts-mini-plates > * {
+  pointer-events: auto;
+}
+
+.ts-mini-plate {
+  position: absolute;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 220px;
+  max-width: 320px;
+  padding: 4px 0;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px / 1.3 var(--pt-text);
+}
+
+.ts-mini-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto 14px;
+  align-items: center;
+  column-gap: 10px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--pt-ink);
+  cursor: default;
+  user-select: none;
+  outline: none;
+}
+
+.ts-mini-row.is-off {
+  color: var(--pt-titanium);
+}
+
+.ts-mini-row-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-mini-row-key {
+  color: var(--pt-titanium);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+
+/* an open row of a run row reads the live selection's blue (2.0 "Colour"); a row the page does
+   not run takes the plate ground, as the editor's unavailable rows take none */
+.ts-mini-row.is-run:hover,
+.ts-mini-row.is-run:focus,
+.ts-mini-row.is-run.is-open {
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+}
+
+.ts-mini-row.is-run:hover .ts-mini-row-key,
+.ts-mini-row.is-run:focus .ts-mini-row-key,
+.ts-mini-row.is-run.is-open .ts-mini-row-key {
+  color: var(--pt-select-text);
+}
+
+.ts-mini-row.is-off:hover,
+.ts-mini-row.is-off:focus,
+.ts-mini-row.is-off.is-open {
+  background: var(--pt-plate);
+  color: var(--pt-ink-2);
+}
+
+.ts-mini-row.is-back {
+  grid-template-columns: minmax(0, 1fr);
+  color: var(--pt-ink);
+}
+
+.ts-mini-row.is-back:hover,
+.ts-mini-row.is-back:focus {
+  background: var(--pt-plate);
+}
+
+/* the check of a check row and a submenu's chevron, drawn with borders (no artwork copied) */
+.ts-mini-row-check > i {
+  display: block;
+  width: 5px;
+  height: 9px;
+  margin: -2px 0 0 5px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.ts-mini-chevron {
+  justify-self: end;
+  width: 6px;
+  height: 6px;
+  border: solid currentColor;
+  border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+  opacity: 0.7;
+}
+
+.ts-mini-rule {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--pt-hair-soft);
+}
+
+.ts-mini-dialog {
+  position: absolute;
+  left: 50%;
+  top: 96px;
+  box-sizing: border-box;
+  width: min(380px, calc(100% - 24px));
+  max-height: calc(100% - 120px);
+  overflow-y: auto;
+  transform: translateX(-50%);
+  padding: 20px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 14px / 1.45 var(--pt-text);
+}
+
+.ts-mini-dialog-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.ts-mini-dialog-lead,
+.ts-mini-dialog-from,
+.ts-mini-dialog-count {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-mini-dialog-from b {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+.ts-mini-dialog .ts-field {
+  width: 100%;
+  margin: 0 0 12px;
+}
+
+.ts-mini-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ts-mini-keys,
+.ts-mini-found {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-mini-keys li,
+.ts-mini-found li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 32px;
+  align-items: center;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: 13px;
+}
+
+.ts-mini-found li {
+  padding: 0 8px;
+  cursor: default;
+}
+
+.ts-mini-found li[aria-selected='true'] {
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+}
+
+.ts-mini-found li[aria-selected='true'] .ts-mini-key {
+  color: var(--pt-select-text);
+}
+
+.ts-mini-key {
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-mini-kits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 12px;
+}
+
+/* Globex fixes its colours in both appearances, as an example customer's kit (Kevin's answer 4) */
+.ts-home-kit[data-kit='globex'] {
+  --ts-kit-paper: #0a1b38;
+  --ts-kit-ink: #f4f1ea;
+}
+
+/* ---- under 720 px: one Menus key, the stage over a horizontal filmstrip (C's phone editor) ---- */
+
+@media (max-width: 719.98px) {
+  .ts-mini-editor {
+    grid-template-rows: 36px 44px auto 48px 40px;
+  }
+
+  .ts-mini-title {
+    padding: 0 12px;
+  }
+
+  .ts-mini-menu {
+    display: none;
+  }
+
+  .ts-mini-menus-key {
+    display: block;
+    padding: 0 12px;
+  }
+
+  .ts-mini-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 52px;
+  }
+
+  .ts-mini-stage {
+    padding: 0;
+    order: 0;
+  }
+
+  .ts-mini-sheet {
+    width: 100%;
+  }
+
+  .ts-mini-filmstrip {
+    order: 1;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-top: 1px solid var(--pt-hair);
+  }
+
+  .ts-mini-thumb {
+    grid-template-columns: 64px;
+    margin: 0;
+  }
+
+  .ts-mini-thumb-n {
+    display: none;
+  }
+
+  .ts-mini-thumb .ts-home-sheet {
+    width: 64px;
+  }
+
+  .ts-mini-row {
+    height: 44px;
+  }
+
+  .ts-mini-plate {
+    max-width: calc(100% - 16px);
+  }
+
+  .ts-mini-status {
+    padding: 0 12px;
+  }
+
+  .ts-mini-readout {
+    display: none;
+  }
+}
+
+@media print {
+  .ts-mini-plates {
+    display: none;
+  }
+}

@@ -113,7 +113,7 @@ Readings. The rows of pushes 10 to 14 were read on one server holding all five p
 | b3b-share | 20:07:09Z to 20:09:23Z, load 17.87 to 31.93 | `share.dialog.ruled-rows`, `share.name-prompt.empty-field`, `share.dialog.one-link`, `share.dialog.open` | 4 passed |
 | b3b-present | 20:34:23Z to 20:34:59Z, load 12.65 to 16.50 | `present.presenter.phone-head`, `present.presenter.sentence-case`, `present.presenter-view.arrow` | 3 passed |
 | b3b-chrome-neighbours | 20:35:00Z to 20:35:33Z, load 16.50 to 17.23 | `share.dialog.more-row`, `chrome.toolbar.fold-any-width`, `slides.layout.plate-four-columns` | 3 passed |
-| walk chrome, arrange | 20:35:33Z to 20:50:41Z, load 17.23 to 43.35 | the walk's `chrome` and `arrange` areas (`editor-walk-probe.mjs --core --only chrome,arrange`) | 122 passed, 9 failed, 1 not driven; read below |
+| walk chrome, arrange | 20:35:33Z to 20:50:41Z, load 17.23 to 43.35 | the walk's `chrome` and `arrange` areas (`editor-walk-probe.mjs --core --only chrome,arrange`) | 122 passed, 9 failed, 1 not driven; read under "The walk's failed rows" at the end |
 
 This push's readings: `chrome.selection.gt-blue` read the ring, the chip and the chip's text `rgb(47, 92, 224)`, `rgb(47, 92, 224)` and `rgb(255, 255, 255)` on a light deck and on a dark deck (the overlay's `data-theme` light, then dark; the overlay takes the deck's appearance, so these are the two appearances the ring is drawn in). The chrome read light both times: the test's stored `ts-chrome-appearance` did not turn it, and the dark chrome's token is the same `#2f5ce0` (`tokens.css`), which `chrome.stage.deck-appearance` reads in dark chrome. `chrome.scroll.no-smooth` read 581 elements on the editor, 468 on the book view (`/deck/<id>?mode=book`), 279 on `/home` and 232 on `/decks`, none computing `smooth`. In the walk, `arrange.selection-colour.light` and `.dark` passed on the one blue, and `chrome.cluster.gaps-heights` passed for the first time ("gaps 8, 8, 8, 8, 8, 8; inset 12 from Sign In; corners share 0px, split 8px"), with every other `chrome.*` row the walk reads passing.
 
@@ -180,3 +180,73 @@ Readings: in b3b-all-chrome the row read the layout and the nine rows and failed
 
 Request 8, to the integrator, the owner of `apps/studio/e2e/core/lib.ts`: since push 14 a page under 720 px draws no menu bar, so `teardown` (lib.ts 583) cannot open File there. A spec that drives the editor at a phone width and tears down with the same page fails its teardown unless it widens first, as `chrome-round1.ts` and `b3b-dialogs.ts` do. The fix in `lib.ts` is one line before the File click: `await page.setViewportSize({ width: 1440, height: 900 })` when the page's width is under 720, or the Menus key path (`toolbar.menus`, then `menu.menus.file`, then `menu.file.moveToTrash`).
 
+
+
+## After the cut (2026-10-02, 15:17 PDT)
+
+The app quit at 15:17 PDT while this lane waited for a load under 24 to take the after pictures of pushes 10 to 14. On resume at 15:26 PDT the six pushes were on the branch (2cbcada2, c08ee017, cabd481d, 53253fac, 2a0da406, 2108dad4). No server of mine listened on 4506 or 4516, no browser of mine ran, and neither `.turboslide/git.lock` nor `.turboslide/e2e.lock` was held. The waiting script of the cut attempt had not started its shoot. So the after pictures of pushes 10 to 14 were missing, and this note did not yet read the walk's failed rows. Both follow.
+
+### The walk's failed rows
+
+The walk of 20:35:33Z to 20:50:41Z (load 17.23 to 43.35; its arrange steps ran from 20:40Z to 20:44Z while the load rose) read 32 chrome rows, 3 menus rows, 16 of its 17 decks rows and 71 of 80 arrange rows green. One row was not driven: `arrange.group.tail-text-controls`, "not on this build", which the matrix and the last ship's parked list (`focus/ship-4300058d.json`) both record. The nine red rows and their readings:
+
+- `decks.file.import-slides-deck` (matrix: works): the copy `import-source-20261002-nuc6` was not offered by the Import slides picker within 65 s. Lane B3a's two gates read this row red with the same words on its own servers at 07:04 and 07:36 PDT (`.turboslide/b3a/gate7/core-walk.md`, `gate8/core-walk.md`), before pushes 10 to 14 existed. The picker lists `deck.list`, which H2 scopes to the viewer. The walk makes the copy by a setup write, so the copy may not list the viewer as its owner.
+- `arrange.clipboard.menu-copy-paste` (flaky): Edit > Copy and then Edit > Paste read 3 objects before and after.
+- `arrange.redo.after-undone-duplicate` (broken): Cmd+Shift+Z, Cmd+Y, the toolbar Redo and Edit > Redo did nothing, and Redo read `aria-disabled`.
+- `arrange.group.chords` (works): the group, the two nudges and the ungroup wrote (chip "Group", x 152 and 600 to 154 and 602, the group gone after the chord). Six Cmd+Z did not bring back the start.
+- `arrange.group.menu-regroup` (works): Group and Ungroup wrote. After Ungroup the three rows read disabled, and Regroup and Cmd+Z did nothing.
+- `arrange.distribute.horizontal`, `arrange.distribute.vertical` (works) and `arrange.context.rotate-distribute` (not driven): the step threw while reading the box of `a3`. At that point the walk's slide held two `A1` boxes and no `A3` (`runs/shots/076-arrange.distribute.horizontal-failed.png`), which is the state the failed undos above left.
+- `arrange.snap.guides-on-off` (works): with Snap to guides on, a1 landed at 152, which is where it started.
+
+Apart from the import row, each red row is an undo or redo that did nothing, or a step on the slide those failed undos left. The realtime round's verifier (pass 2, its finding R2-F1) records that undo waits for the checkpoint on the memory tier. It traces this to d700fe07, which is on this branch, and my server runs `TURBOSLIDE_REALTIME=memory`. The last ship's gate on a blob tier preview read these rows green. No file of pushes 9 to 14 touches the history, the selection model, the group and distribute commands or the key map. The files are the title row, the stylesheets, the filmstrip's scroll, its phone layout and its card appearance, the stage's appearance, the marks, Share, Version history, the presenter's phone head and the Menus key.
+
+Two more readings settle it:
+
+- The rerun. `walk-arrange2` (`--only arrange`, 02:39:47Z to 02:50:16Z on 2026-10-03, load 23.78 to 35.00) read the same nine rows red with the same words. It read 87 rows green and left the same row not driven. The failures repeat exactly, so they are not timing under load.
+- The tree without Round 1. Another agent's arrange walk on main's tree (commit `deac61a1`, which holds none of this branch's Round 1 commits apart from H6), on its own server on 4534 with `TURBOSLIDE_REALTIME=memory`, at 01:06:33Z on 2026-10-03, read the same eight arrange rows red with the same readings, word for word (its `gate-base-arrange/core-walk.md` in this session's scratch folder `realtime/second-click-verify/`). The same run read `decks.file.import-slides-deck` green.
+
+So the eight arrange rows are red on the memory tier before this round. They are not a regression of pushes 9 to 14, and they are for the realtime round's R2-F1 owner. The import row is different: it passes on main's tree and fails on this branch. It was already red in B3a's gate 7, which started at 06:43 PDT, before any B3b commit. No file of pushes 9 to 14 touches the Import slides picker or `deck.list`. H2 is on this branch and not on main, and it scopes `deck.list`, which the picker lists. So H2 is the first place to look (request 11).
+
+### The after pictures of pushes 10 to 14
+
+Taken with `build/b3b/shoot.mjs` (label `after14`) on my server on 4506, which served the tree at `2108dad4` with the config without the watcher (02:37:41Z to 02:39:47Z on 2026-10-03; the load was 19.48 at the start and read 23.40 to 26.44 during the run, `.turboslide/round1/b3b/shoot-after14.jsonl`). The run made one deck from `/new` and removed it at the end by its id (`untitled-20261003-cend`: remove 200, then the editor 404). I looked at each picture beside its before picture:
+
+- `after14-editor-1440-dark.png` against `before-editor-1440-dark.png` (push 11): the workspace is the dark chrome's plate, where it was white. The light slide draws white on the stage, and the filmstrip draws its cards white, where they were black.
+- `after14-titlerow-{1440,390}-{light,dark}.png` (pushes 10 and 12): the Turboslide speed mark, "Last edit just now" alone, Assist as a word with no sparkle, Slideshow with its word before the play glyph and its 8 px corner, Share square, and Sign In as text. At 390 the row is 390 px wide, the name is 138 px, and Slideshow, Share and More are 32 px keys (`shoot-after14.jsonl`: Slideshow 270 to 302, Share 310 to 342, More 350 to 382).
+- `after14-select-{1440,390}-{light,dark}.png` (push 10): the ring, the handles and the "Text box" chip are `#2f5ce0` with white words, on the light deck in light and dark chrome. There is no before picture of the selection. `chrome.selection.gt-blue` read the colours.
+- `after14-share-{1440,390}-{light,dark}.png` against `before-share-*` (push 13): the owner row and More are ruled rows with no frame, and Done is square. "General access" stays as the section's heading, as in Google Slides' dialog; item 17 does not name it.
+- `after14-versions-{1440,390}-{light,dark}.png` against `before-versions-*` (push 13): the rule under "Only show named versions" runs the panel's width, and the times read "7:38 PM", where they read "01:49 AM".
+- `after14-present-390-{light,dark}.png` against `before-present-390-*` (push 13): "No slideshow window is open" sits on its own line under Timer, Pause and Reset, where the two overlapped.
+- `after14-view-{1440,390}-{light,dark}.png` against `before-view-*` (pushes 11 and 12): the sidebar head draws the Turboslide mark, where it drew the GT monogram. The light slide and its cards draw white in dark chrome. Present is square. Slide, Grid and Book keep 6 px, the segmented control exception of NEXT.md 4.1.2.
+- `after14-palette-1440-{light,dark}.png` (push 12): Search the menus with "assist" typed lists Assist with the document glyph and no sparkle.
+- `after14-more-390-{light,dark}.png` (pushes 9 and 14): More lists Assist, Show all comments, Show side panel, Collaborators, Presenter view, Start from beginning and Sign in.
+- `after14-editor-390-{light,dark}.png` (push 14): the Menus key heads the tool row, the sheet sits in its 16:10 box, the filmstrip's cards run in one row under it, and the notes fill the rest.
+- `after14-menus-390-{light,dark}.png` (push 14) showed a defect. Insert's submenu was clamped to the left margin at the parent row's height, so it covered the Insert row and every row under it. The plate read File, Edit, View, Image, Text box, and nothing showed which menu was open. The seam below fixes it.
+
+The local notice "Edits are kept on this server instance only" in the 390 pictures is the tmp store's notice on a local server. A deployment does not draw it.
+
+### B3b#14 seam: a submenu on a phone drops under its row
+
+- `packages/chrome/src/Menu.tsx` (a file no lane owns, as in request 4): `placeMenu` gives a submenu with no room on either side of its row, in a viewport under 720 px, the position under its row, indented 16 px. The row that opened it stays in view, and a submenu of a submenu steps in again. At 720 px and up nothing changes, and the clamp keeps every plate 8 px inside the viewport as before.
+- `packages/chrome/src/menus/__tests__/menu-component.test.tsx`: one new test reads the drop at 390, the left flip where the row has room, and a 1024 px window that keeps the old clamp. The menu tests read 20 passed, and the chrome suite 922 passed and 2 todo in 98 files (19:51 PDT, load 35.53).
+- `apps/studio/e2e/core/chrome-round1.ts`: the driver of `chrome.phone.menus-key` also reads the open submenu's box against the Insert row: its top at or under the row's bottom, and its right edge inside 390. The row's words in the matrix are unchanged.
+
+Readings on a fresh server on 4506 (the config without the watcher, started 02:52:33Z):
+
+| Run | UTC and load | Rows | Result |
+| --- | --- | --- | --- |
+| b3b-seam14 | 02:57:33Z to 02:58:15Z, load 23.09 to 27.48 | `chrome.phone.menus-key`, `chrome.title-row.phone`, before the driver read the drop | 2 passed |
+| b3b-seam14b | 03:04:34Z to 03:05:01Z, load 14.14 to 16.03 | the same two rows with the drop read | 2 passed; the drop read the row's bottom 199, the submenu's top 199, left 25 and right 245 |
+
+Pictures: `seam14-menus-390-{light,dark}.png` (03:03:15Z to 03:04:14Z, load 22.13 to 15.94; deck `untitled-20261003-kyl9` removed by its id) against `after14-menus-390-*`. File, Edit, View and Insert stay in view. Insert is lit, and its rows hang under it from x 25.
+
+### Clean up
+
+- The decks my rows left on my local store when their teardowns timed out on the phone width (b3b-all-chrome and b3b-all-chrome2, before the teardown hooks widened the page) were trashed and deleted forever by their ids through the local action surface at 03:05Z: `untitled-20261002-06lo`, `-5x5i`, `-efom`, `-hw0t`, `-ljvx`, `-nwjw`, `-ohfm`, `-q7en`, `-qnyx`, `-sajf` and `-wt1t`. Each read remove 200 and then `deck.info` 404. The walks' decks (`untitled-20261002-nuc6`, `untitled-20261003-dn1k`) read 404. No deck was made on a deployment.
+- The servers on 4506 are stopped. Nothing listens on 4506 or 4516, and no lock of mine is held.
+
+### Requests added after the cut
+
+9. To the integrator, the files no lane owns: the presenter's clock reads "07:39 PM" (`packages/viewer/src/present/PresenterConsole.tsx` 118, `hour: '2-digit'`). The lease time in `packages/chrome/src/Inspector.tsx` 565 and the profile dialog's time in `dialogs/Profile.tsx` 56 use the same two digit hour. Item 17 named Version history alone, which reads "7:38 PM" since push 13. `hour: 'numeric'` at the three sites would make every time in the product read the same way.
+10. To the realtime round's R2-F1 owner and the integrator: eight arrange rows read red on the memory tier, on main's tree and on this branch: `arrange.group.chords`, `arrange.group.menu-regroup`, `arrange.distribute.horizontal`, `arrange.distribute.vertical` and `arrange.snap.guides-on-off` (the matrix says works), `arrange.clipboard.menu-copy-paste` (flaky), `arrange.redo.after-undone-duplicate` (broken) and `arrange.context.rotate-distribute` (not driven). A gate on a local memory tier server reads them red until the undo fix lands.
+11. To H2's owner and the walk's owner: `decks.file.import-slides-deck` reads red on this branch on every local server (B3a's gates 7 and 8 and both of my walks), and green on main's tree in the same tier. The copy made by the walk's setup write is not offered by the Import slides picker within 65 s. H2 scopes `deck.list`, which the picker lists, so either the copy needs the viewer as its owner or the picker needs the copy in its scope.

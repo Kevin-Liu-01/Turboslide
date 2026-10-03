@@ -457,6 +457,36 @@ describe('placeMenu', () => {
     ).toBe(1084);
   });
 
+  it('drops a submenu under its row on a phone when neither side has room (docs/NEXT.md 4.1.3 item 18)', () => {
+    const phone = { width: 390, height: 844 };
+    /* the Menus key's Insert row at 390: the plate runs 8 to 228, the submenu is 220 wide */
+    expect(
+      placeMenu({
+        anchor: { left: 9, top: 172, right: 227, bottom: 200 },
+        size,
+        viewport: phone,
+        placement: 'right',
+      }),
+    ).toEqual({ left: 25, top: 200, maxHeight: 828 });
+    /* a row with room on its left still flips there, and a desktop window keeps the clamp */
+    expect(
+      placeMenu({
+        anchor: { left: 240, top: 172, right: 380, bottom: 200 },
+        size,
+        viewport: phone,
+        placement: 'right',
+      }),
+    ).toEqual({ left: 24, top: 168, maxHeight: 828 });
+    expect(
+      placeMenu({
+        anchor: { left: 300, top: 172, right: 600, bottom: 200 },
+        size: { width: 640, height: 300 },
+        viewport: { width: 1024, height: 768 },
+        placement: 'right',
+      }),
+    ).toEqual({ left: 8, top: 168, maxHeight: 752 });
+  });
+
   it('opens a context menu at the pointer and flips left and up at the edges', () => {
     expect(
       placeMenu({

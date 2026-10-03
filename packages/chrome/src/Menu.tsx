@@ -114,6 +114,12 @@ const SUBMENU_OVERLAP = 4;
 /** The gap under a bar title. */
 const BELOW_GAP = 2;
 
+/** The phone editor's width (PhoneEditor.css's one breakpoint): under it a submenu with no room on either side drops under its row. */
+const PHONE_WIDTH = 720;
+
+/** How far a dropped submenu is indented from its row's left edge. */
+const SUBMENU_INDENT = 16;
+
 export type Rect = { left: number; top: number; right: number; bottom: number };
 export type Size = { width: number; height: number };
 
@@ -127,8 +133,9 @@ export type MenuAlign = 'start' | 'end';
  * bar (right aligned with `align: 'end'`, so a plate under a control at the row's right edge meets
  * that edge rather than the viewport clamp, docs/RETURN.md 4.1), moving above when the viewport
  * ends first; to the right of the parent row for a submenu, flipping to its left when the right
- * edge is out; at the pointer for a context menu, flipping left and up when it would overflow.
- * Every result is clamped 8 px inside both edges.
+ * edge is out, and under its row on a phone when neither side has room; at the pointer for a
+ * context menu, flipping left and up when it would overflow. Every result is clamped 8 px inside
+ * both edges.
  */
 export function placeMenu(input: {
   anchor: Rect;
@@ -156,6 +163,13 @@ export function placeMenu(input: {
     top = anchor.top - SUBMENU_OVERLAP;
     if (left + size.width > viewport.width - VIEWPORT_MARGIN) {
       left = anchor.left - size.width + SUBMENU_OVERLAP;
+      /* On a phone neither side has room, and the clamp below laid the submenu over its own row
+         (the Menus key's Insert row at 390 was hidden under Insert's rows, docs/NEXT.md 4.1.3 item
+         18). The submenu drops under its row, indented, so the row that opened it stays in view. */
+      if (left < VIEWPORT_MARGIN && viewport.width < PHONE_WIDTH) {
+        left = anchor.left + SUBMENU_INDENT;
+        top = anchor.bottom;
+      }
     }
   } else {
     left = anchor.left;

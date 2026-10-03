@@ -739,11 +739,20 @@ export function chromeRound1(): string[] {
       .waitFor({ timeout: 5000 })
       .then(() => true)
       .catch(() => false);
+    /* the submenu drops under its row, so the Insert row stays in view (Menu.tsx placeMenu) */
+    const drop = await page.evaluate(() => {
+      const row = document.querySelector('#ts-menu-menus [data-menu-item="menus.insert"]');
+      const sub = document.querySelector('[role="menu"].is-sub');
+      if (!row || !sub) return null;
+      const r = row.getBoundingClientRect();
+      const s = sub.getBoundingClientRect();
+      return { rowBottom: r.bottom, rowLeft: r.left, subTop: s.top, subLeft: s.left, subRight: s.right };
+    });
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
     test.info().annotations.push({
       type: 'phone editor',
-      description: JSON.stringify({ layout, rows, insert }),
+      description: JSON.stringify({ layout, rows, insert, drop }),
     });
     expect(layout.viewport).toBe(390);
     expect(layout.scrollW, 'nothing crosses the viewport').toBeLessThanOrEqual(390);
@@ -761,6 +770,11 @@ export function chromeRound1(): string[] {
       'menus.help',
     ]);
     expect(insert, 'a menu row opens that menu').toBe(true);
+    expect(drop, 'the open submenu is drawn').not.toBeNull();
+    expect(
+      drop!.subTop >= drop!.rowBottom - 1 && drop!.subRight <= 390,
+      `the submenu sits under its row and inside the viewport (${JSON.stringify(drop)})`,
+    ).toBe(true);
     expect(layout.stage && layout.filmstrip, 'the sheet and the filmstrip are drawn').toBeTruthy();
     expect(
       layout.filmstrip!.y >= layout.stage!.bottom - 1,

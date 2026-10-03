@@ -788,15 +788,26 @@ html:has(.ts-product) {
   min-height: calc(5 * 44px);
 }
 
+/* every row exactly 44 px whatever its author or its words (two lines of 18 px at most), so a row
+   entering never moves the bands below (l2.md Q12, l3.md R28; decks.home.layout-shift) */
 .ts-home-history-row {
   display: grid;
   grid-template-columns: 16px 52px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
+  box-sizing: border-box;
+  height: 44px;
   border-bottom: 1px solid var(--pt-hair-soft);
   font-size: 14px;
+  line-height: 18px;
   color: var(--pt-ink-2);
+}
+
+.ts-home-history-words {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .ts-home-history-icon {
@@ -823,8 +834,10 @@ html:has(.ts-product) {
   position: relative;
 }
 
+/* the ring and the flag paint above the slide, whose root sits at z-index 1 (l3.md R21) */
 .ts-home-ring {
   position: absolute;
+  z-index: 2;
   left: 0;
   top: 0;
   width: 0;
@@ -845,6 +858,7 @@ html:has(.ts-product) {
 
 .ts-home-flag {
   position: absolute;
+  z-index: 2;
   left: 0;
   top: 0;
   padding: 2px 6px;
@@ -864,27 +878,67 @@ html:has(.ts-product) {
   visibility: hidden;
 }
 
+/* A4 draws each line out of its cross by a clip-path inset, never a scale: the slide is scaled to
+   412 / 1,600, so a hairline is 0.26 device px at 1x and a composited scale of it paints nothing
+   (l4.md M17) */
 [data-band='agents'] .frame.ts-home-draw .rule.top {
-  transform-origin: 56px 50%;
-  animation: ts-draw-x calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive) 0ms both;
+  animation: ts-draw-top calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive) 0ms both;
 }
 
 [data-band='agents'] .frame.ts-home-draw::before {
-  transform-origin: 50% 56px;
-  animation: ts-draw-y calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+  animation: ts-draw-left calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
     calc(60ms * var(--ts-slow, 1)) both;
 }
 
 [data-band='agents'] .frame.ts-home-draw::after {
-  transform-origin: 50% calc(100% - 56px);
-  animation: ts-draw-y calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+  animation: ts-draw-right calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
     calc(120ms * var(--ts-slow, 1)) both;
 }
 
 [data-band='agents'] .frame.ts-home-draw .rule.bottom {
-  transform-origin: calc(100% - 56px) 50%;
-  animation: ts-draw-x calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
+  animation: ts-draw-bottom calc(var(--ts-d-line) * var(--ts-slow, 1)) var(--ts-ease-arrive)
     calc(180ms * var(--ts-slow, 1)) both;
+}
+
+/* each line from a zero window at its cross to the whole line (the 56 px are sheet pixels) */
+@keyframes ts-draw-top {
+  from {
+    clip-path: inset(0px calc(100% - 56px) 0px 56px);
+  }
+
+  to {
+    clip-path: inset(0px);
+  }
+}
+
+@keyframes ts-draw-left {
+  from {
+    clip-path: inset(56px 0px calc(100% - 56px) 0px);
+  }
+
+  to {
+    clip-path: inset(0px);
+  }
+}
+
+@keyframes ts-draw-right {
+  from {
+    clip-path: inset(calc(100% - 56px) 0px 56px 0px);
+  }
+
+  to {
+    clip-path: inset(0px);
+  }
+}
+
+@keyframes ts-draw-bottom {
+  from {
+    clip-path: inset(0px 56px 0px calc(100% - 56px));
+  }
+
+  to {
+    clip-path: inset(0px);
+  }
 }
 
 /* ---- Tailor (LANDING.md 2.5): the head in 5 of 12 columns, the dialog in 7; under them the

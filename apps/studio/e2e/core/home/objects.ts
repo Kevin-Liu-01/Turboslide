@@ -801,7 +801,7 @@ export function rows(): void {
             'a dev server serves the live module as separate unbundled modules; its one request and its bytes exist as shipped on a build only (the node-server output of scripts/check.mjs or the preview)',
         });
         throw new Error(
-          'the live module is read on a build (the node-server output or the preview): one request, at most 15 KB gzip and 48 KB decoded',
+          'the live module is read on a build (the node-server output or the preview): one request, at most 32 KB gzip and 112 KB decoded',
         );
       }
       expect(
@@ -810,10 +810,16 @@ export function rows(): void {
       ).toHaveLength(1);
       const live = scripts.find((s) => s.url === late[0]?.name);
       const body = (await (await live?.req.response())?.body()) ?? Buffer.alloc(0);
-      expect(body.length, 'at most 48 KB decoded').toBeLessThanOrEqual(48 * 1024);
-      expect(gzipSync(body, { level: 9 }).length, 'at most 15 KB gzip').toBeLessThanOrEqual(
-        15 * 1024,
-      );
+      /* the integrator's ruling of 2026-10-03 (build/integrator.md "Landing, merge"; l2.md Q8, Q13,
+         l3.md R16): the one chunk carries every band's live code, so its line is 32 KB gzip and
+         112 KB decoded in place of LANDING.md 4.1's 15 KB and 48 KB */
+      const gzip = gzipSync(body, { level: 9 }).length;
+      test.info().annotations.push({
+        type: 'measure',
+        description: `the live module: ${body.length} B decoded, ${gzip} B gzip (lines 114688 and 32768)`,
+      });
+      expect(body.length, 'at most 112 KB decoded').toBeLessThanOrEqual(112 * 1024);
+      expect(gzip, 'at most 32 KB gzip').toBeLessThanOrEqual(32 * 1024);
       const text = body.toString('utf8');
       expect(text, 'the live module').toContain('ts-home-sel-layer');
       expect(text, 'no slide markup but slide 7 and slide 5').not.toMatch(

@@ -10147,7 +10147,7 @@
     {
       "id": "home.budget.bytes-page",
       "feature": "decks",
-      "interaction": "After a full native scroll: the page's pictures at most 160 KB at ×1 and ×2 (slide 6's Rosetta Stone still at most 24 KB, its tone map at most 26 KB, slide 7's Perfect picture at most 60 KB, the Editable text picture part at most 32 KB, in the shown appearance), the page's own script at most 120 KB decoded, the page's own bytes at most 240 KB over the wire; nothing under `/home/` requested twice; no PDF and no slide 7 still requested",
+      "interaction": "After a full native scroll: the page's pictures at most 160 KB at ×1 and ×2 (slide 6's Rosetta Stone still at most 24 KB, its tone map at most 26 KB, slide 7's Perfect picture at most 60 KB, the Editable text picture part at most 32 KB, in the shown appearance), the page's own script (the route chunk and the live module) at most 150 KB decoded (the integrator's ruling of 2026-10-03, with the live module's line), the page's own bytes at most 240 KB over the wire; nothing under `/home/` requested twice; no PDF and no slide 7 still requested",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
@@ -10237,7 +10237,7 @@
     {
       "id": "home.budget.live-module",
       "feature": "decks",
-      "interaction": "The live module is one request of at most 15 KB gzip and 48 KB decoded, made after load and one idle callback and never before load; it carries slide 7's HTML (the opener field's slide, answer 1) and slide 5's earlier states, and no other slide markup",
+      "interaction": "The live module is one request of at most 32 KB gzip and 112 KB decoded (the integrator's ruling of 2026-10-03 in place of 15 KB and 48 KB: the one chunk carries every band's live code), made after load and one idle callback and never before load; it carries slide 7's HTML (the opener field's slide, answer 1) and slide 5's earlier states, and no other slide markup",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,

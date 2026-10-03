@@ -674,6 +674,9 @@ export function rows(): void {
         await page.waitForTimeout(1500);
         const facts = await page.evaluate(() => {
           const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+          const nav = performance.getEntriesByType('navigation')[0] as
+            PerformanceNavigationTiming | undefined;
+          const loadEnd = nav?.loadEventEnd ?? 0;
           const home = resources.filter((r) => new URL(r.name).pathname.startsWith('/home/'));
           return {
             home: home.map((r) => ({
@@ -682,7 +685,12 @@ export function rows(): void {
             })),
             scripts: resources
               .filter((r) => r.initiatorType === 'script' || /\.m?js(\?|$)/.test(r.name))
-              .map((r) => ({ url: r.name, decoded: r.decodedBodySize })),
+              .map((r) => ({
+                url: r.name,
+                decoded: r.decodedBodySize,
+                /* requested after the load event: the live module's chunk is among these */
+                late: loadEnd > 0 && r.startTime >= loadEnd,
+              })),
           };
         });
         const label = `1440 x${scale}`;
@@ -710,18 +718,28 @@ export function rows(): void {
           );
           continue;
         }
-        const own = facts.scripts.filter((s) => /\/home(-live)?-[\w-]+\.js(\?|$)/.test(s.url));
-        const ownDecoded = own.reduce((n, s) => n + s.decoded, 0);
+        /* the page's own script: the route chunk and the live module's chunk, which the build
+           names after live/index.ts and which is known by its overlay's class */
+        const own: { url: string; decoded: number }[] = [];
         let ownBr = 0;
-        for (const s of own)
-          ownBr += brotli(await (await request.get(s.url, { headers: extraHTTPHeaders })).body());
+        for (const s of facts.scripts) {
+          const route = /\/home(-live)?-[\w-]+\.js(\?|$)/.test(s.url);
+          if (!route && !s.late) continue;
+          const body = await (await request.get(s.url, { headers: extraHTTPHeaders })).body();
+          if (!route && !body.includes('ts-home-sel-layer')) continue;
+          own.push(s);
+          ownBr += brotli(body);
+        }
+        const ownDecoded = own.reduce((n, s) => n + s.decoded, 0);
         const doc = await (await request.get('/home', { headers: extraHTTPHeaders })).body();
         const wire = brotli(doc) + ownBr + total;
         notes.push(
           `${label}: own script ${ownDecoded} B decoded; own bytes over the wire about ${wire} B`,
         );
-        if (ownDecoded > 120_000)
-          failures.push(`${label}: the page's own script is ${ownDecoded} B decoded`);
+        /* 150 KB decoded: the route chunk's 70 KB and the live module's 112 KB lines are gated on
+           their own (the integrator's ruling of 2026-10-03, build/integrator.md "Landing, merge") */
+        if (ownDecoded > 150_000)
+          failures.push(`${label}: the page's own script is ${ownDecoded} B decoded (line 150000)`);
         if (wire > 240_000)
           failures.push(`${label}: the page's own bytes are ${wire} B over the wire`);
       } finally {

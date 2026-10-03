@@ -227,6 +227,9 @@ const INNER_HTML_ALLOW = [
   // the selection replica (L2#2): its overlay's fixed markup, and a text box's own markup read
   // before an edit and written back by Escape on an empty box or by Undo, never typed text
   'apps/studio/src/components/home/live/objects.ts',
+  // the agents band (L3#4): slide 5's states, the renderer's output rendered at build
+  // (live-slides.generated.ts), parsed in a template element
+  'apps/studio/src/components/home/live/agents.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

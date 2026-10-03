@@ -1126,21 +1126,41 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         pictureSrc = picture.src;
       }
 
-      // The frame (SPEC 2.1; head:39-49): two rails, two rules, four crosses.
+      // The frame (SPEC 2.1; head:39-49): two rails, two rules, four crosses, each kept where the
+      // stage draws it, so a kit that turns a part off (render/theme-css.ts: the rails are
+      // `.frame::before` and `::after`, then `.frame .rule` and `.frame .cross`) exports none of
+      // it. A stage without a `.frame` keeps every part, as before.
       const hair = rootStyle.getPropertyValue('--hair').trim();
       const cross = rootStyle.getPropertyValue('--cross').trim();
-      const frameRules: SceneRule[] = [
-        { box: [56, 0, 1, H], color: hair, width: 1, role: 'frame' },
-        { box: [W - 57, 0, 1, H], color: hair, width: 1, role: 'frame' },
-        { box: [0, 56, W, 1], color: hair, width: 1, role: 'frame' },
-        { box: [0, H - 57, W, 1], color: hair, width: 1, role: 'frame' },
+      const frameEl = stage.querySelector('.frame');
+      const framePart = (el: Element | null | undefined, pseudo?: '::before' | '::after') => {
+        if (frameEl === null) return true;
+        if (el === null || el === undefined) return false;
+        const c = getComputedStyle(el, pseudo);
+        if (c.display === 'none' || c.visibility === 'hidden') return false;
+        return pseudo === undefined || c.content !== 'none';
+      };
+      const frameBoxes: Box[] = [
+        ...(framePart(frameEl, '::before') ? [[56, 0, 1, H] as Box] : []),
+        ...(framePart(frameEl, '::after') ? [[W - 57, 0, 1, H] as Box] : []),
+        ...(framePart(frameEl?.querySelector('.rule.top')) ? [[0, 56, W, 1] as Box] : []),
+        ...(framePart(frameEl?.querySelector('.rule.bottom')) ? [[0, H - 57, W, 1] as Box] : []),
       ];
-      const crosses: Box[] = [
-        [51, 51, 11, 11],
-        [W - 62, 51, 11, 11],
-        [51, H - 62, 11, 11],
-        [W - 62, H - 62, 11, 11],
+      const frameRules: SceneRule[] = frameBoxes.map((box) => ({
+        box,
+        color: hair,
+        width: 1,
+        role: 'frame',
+      }));
+      const crossBoxes: Array<[string, Box]> = [
+        ['tl', [51, 51, 11, 11]],
+        ['tr', [W - 62, 51, 11, 11]],
+        ['bl', [51, H - 62, 11, 11]],
+        ['br', [W - 62, H - 62, 11, 11]],
       ];
+      const crosses: Box[] = crossBoxes
+        .filter(([corner]) => framePart(frameEl?.querySelector(`.cross.${corner}`)))
+        .map(([, box]) => box);
 
       // Wordmark and counter from the stage.
       const wordmarkSvg = stage.querySelector<SVGElement>('.wordmark svg');

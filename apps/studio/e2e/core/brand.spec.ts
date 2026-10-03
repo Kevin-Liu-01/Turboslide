@@ -490,6 +490,192 @@ test(title('brand.template.blank-no-gt-mark'), async () => {
   expect(objects.none, 'no GT wordmark or mark in the PowerPoint').toEqual([]);
 });
 
+/**
+ * What the editor draws of the GT frame on the current slide: the rails (`.frame::before` and
+ * `::after`), the rules and the crosses as drawn boxes on the stage and in the filmstrip's cards,
+ * and the stage's counter words. A part is drawn when it computes a display other than none and
+ * has a box.
+ */
+async function frameDrawnInEditor(p: Page): Promise<{
+  stage: { rails: number; rules: number; crosses: number };
+  cards: { rails: number; rules: number; crosses: number };
+  counter: string;
+}> {
+  return p.evaluate(() => {
+    const shown = (el: Element, pseudo?: string) => {
+      const cs = getComputedStyle(el, pseudo);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      if (pseudo !== undefined) return cs.content !== 'none' && parseFloat(cs.width) > 0;
+      const box = el.getBoundingClientRect();
+      return box.width > 0 && box.height > 0;
+    };
+    const parts = (roots: Element[]) => {
+      let rails = 0;
+      let rules = 0;
+      let crosses = 0;
+      for (const root of roots)
+        for (const frame of root.querySelectorAll('.frame')) {
+          if (shown(frame, '::before')) rails += 1;
+          if (shown(frame, '::after')) rails += 1;
+          rules += [...frame.querySelectorAll('.rule')].filter((el) => shown(el)).length;
+          crosses += [...frame.querySelectorAll('.cross')].filter((el) => shown(el)).length;
+        }
+      return { rails, rules, crosses };
+    };
+    const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+    const cards = [...document.querySelectorAll('[data-control^="filmstrip.slide."]')];
+    const counter = [...(stage?.querySelectorAll('.counter') ?? [])]
+      .filter((el) => shown(el))
+      .map((el) => el.textContent?.trim() ?? '')
+      .join(' ')
+      .trim();
+    return { stage: parts(stage === null ? [] : [stage]), cards: parts(cards), counter };
+  });
+}
+/** The PowerPoint's frame lines, crosses and counter runs: the masters' and every slide's objects. */
+function pptxFrameObjects(bytes: Buffer): { frame: string[]; counter: string[] } {
+  const frame: string[] = [];
+  const counter: string[] = [];
+  for (const [name, read] of zipEntries(bytes)) {
+    if (!/^ppt\/(slides|slideMasters|slideLayouts)\/[^/]+\.xml$/.test(name)) continue;
+    const xml = read();
+    for (const m of xml.matchAll(/name="([^"]*)"/g)) {
+      const value = m[1] ?? '';
+      if (/(?:^|#|\/)(?:frame|cross)\/\d/.test(value)) frame.push(`${name}: ${value}`);
+    }
+    for (const m of xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)) {
+      const text = (m[1] ?? '').trim();
+      if (/^\d{2} \/ \d{2}$/.test(text)) counter.push(`${name}: ${text}`);
+    }
+  }
+  return { frame, counter };
+}
+/** The text show operators of a PDF's page streams: a drawn counter is one more run per page. */
+function pdfTextRuns(bytes: Buffer): number {
+  return (pdfStreams(bytes).match(/(?:^|\s)(?:Tj|TJ)(?=\s|$)/gm) ?? []).length;
+}
+
+/*
+ * docs/NEXT.md 4.1.3 item 23 (brand-judge-2 178): a deck from /new, the Blank template, with a
+ * second slide, and its slide is plain: no rail, rule or cross of the GT frame and no counter on
+ * the stage or in the filmstrip on either slide, and none in the PDF or the native PowerPoint.
+ * The control proves the reads can see them: the kit's frame and counter turned on for a moment
+ * draw them in the editor, add filled paths and text runs to the PDF and frame objects and
+ * counter runs to the PowerPoint; the record goes back to off. The row makes its own deck in its
+ * own context: its four downloads and the four of `brand.template.blank-no-gt-mark` would pass
+ * an anonymous person's five exports a day (server/ratelimit.ts `exportsPerDay`) on one identity.
+ */
+test(title('brand.template.blank-plain'), async ({ browser }) => {
+  test.setTimeout(480_000);
+  const own = await ownerContext(browser);
+  const ownScratch = new Scratch();
+  try {
+    await blankPlainRow(own.page, ownScratch);
+  } finally {
+    await teardownAll(own.page, ownScratch).catch(() => undefined);
+    await own.context.close();
+  }
+});
+
+async function blankPlainRow(page: Page, ownScratch: Scratch): Promise<void> {
+  const deck = await newDeck(page, ownScratch, 'Blank plain deck');
+  await addSlide(page);
+  await openEditor(page, deck);
+  const kit = await record(page);
+  const slides = await slideOrder(page);
+  const drawn: { slide: string; read: Awaited<ReturnType<typeof frameDrawnInEditor>> }[] = [];
+  for (const slide of slides) {
+    await clickCard(page, slide);
+    await page.waitForTimeout(500);
+    drawn.push({ slide, read: await frameDrawnInEditor(page) });
+  }
+  const pdfPlain = await downloadAs(page, 'pdf');
+  const pptxPlain = await downloadAs(page, 'pptx');
+  /* the control: the GT frame and the counter on, read, then off again */
+  const s1 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/frame',
+    value: { rails: true, rules: true, crosses: true },
+    baseRevision: s1.revision,
+  });
+  const s2 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/counter',
+    value: { show: true },
+    baseRevision: s2.revision,
+  });
+  await settled(page);
+  await clickCard(page, slides[1] ?? slides[0]!);
+  await page.waitForTimeout(500);
+  const controlDrawn = await frameDrawnInEditor(page);
+  let pdfFramed: Buffer | null = null;
+  let pptxFramed: Buffer | null = null;
+  try {
+    pdfFramed = await downloadAs(page, 'pdf');
+    pptxFramed = await downloadAs(page, 'pptx');
+  } finally {
+    const s3 = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/frame',
+      value: { rails: false, rules: false, crosses: false },
+      baseRevision: s3.revision,
+    }).catch(() => undefined);
+    const s4 = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/counter',
+      value: { show: false },
+      baseRevision: s4.revision,
+    }).catch(() => undefined);
+    await settled(page);
+  }
+  const pdf = {
+    fills: { plain: pdfFills(pdfPlain), framed: pdfFills(pdfFramed) },
+    text: { plain: pdfTextRuns(pdfPlain), framed: pdfTextRuns(pdfFramed) },
+  };
+  const pptx = { plain: pptxFrameObjects(pptxPlain), framed: pptxFrameObjects(pptxFramed) };
+  test.info().annotations.push({
+    type: 'blank-plain',
+    description: `record ${JSON.stringify(kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${JSON.stringify(d.read.stage)}, cards ${JSON.stringify(d.read.cards)}, counter "${d.read.counter}"`).join('; ')}; with the frame and the counter on: stage ${JSON.stringify(controlDrawn.stage)}, counter "${controlDrawn.counter}"; PDF fills ${pdf.fills.plain} against ${pdf.fills.framed}, text runs ${pdf.text.plain} against ${pdf.text.framed}; PowerPoint frame objects ${pptx.plain.frame.length} against ${pptx.framed.frame.length} (${pptx.plain.frame.slice(0, 4).join(', ') || 'none'}), counter runs ${pptx.plain.counter.length} against ${pptx.framed.counter.length} (${pptx.plain.counter.slice(0, 2).join(', ') || 'none'})`,
+  });
+  expect(kit?.['frame'], 'the record turns the frame off').toEqual({
+    rails: false,
+    rules: false,
+    crosses: false,
+  });
+  expect(kit?.['counter'], 'the record turns the counter off').toEqual({ show: false });
+  for (const d of drawn) {
+    expect(d.read.stage, `no rail, rule or cross on the stage of ${d.slide}`).toEqual({
+      rails: 0,
+      rules: 0,
+      crosses: 0,
+    });
+    expect(d.read.cards, `no rail, rule or cross in the filmstrip with ${d.slide} open`).toEqual({
+      rails: 0,
+      rules: 0,
+      crosses: 0,
+    });
+    expect(d.read.counter, `no counter on ${d.slide}`).toBe('');
+  }
+  expect(controlDrawn.stage.rails, 'the control: the rails draw').toBe(2);
+  expect(controlDrawn.stage.crosses, 'the control: the crosses draw').toBe(4);
+  expect(controlDrawn.counter, 'the control: the counter draws').toMatch(/\d+ \/ \d+/);
+  expect(pdf.fills.framed, 'the control: the frame adds filled paths to the PDF').toBeGreaterThan(
+    pdf.fills.plain,
+  );
+  expect(pdf.text.framed, 'the control: the counter adds text runs to the PDF').toBeGreaterThan(
+    pdf.text.plain,
+  );
+  expect(pptx.framed.frame.length, 'the control: the frame is in the PowerPoint').toBeGreaterThan(
+    0,
+  );
+  expect(
+    pptx.framed.counter.length,
+    'the control: the counter is in the PowerPoint',
+  ).toBeGreaterThan(0);
+  expect(pptx.plain.frame, 'no frame line or cross in the PowerPoint').toEqual([]);
+  expect(pptx.plain.counter, 'no counter in the PowerPoint').toEqual([]);
+}
+
 test(title('templates.save.as-template'), async () => {
   test.setTimeout(180_000);
   if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
@@ -1454,6 +1640,8 @@ test(title('brand.panel.words-match-sheet'), async () => {
 coverage(import.meta.filename, [
   /* docs/NEXT.md 3.2 H6 */
   'brand.template.blank-no-gt-mark',
+  /* docs/NEXT.md 4.1.3 item 23 */
+  'brand.template.blank-plain',
   'templates.save.as-template',
   'templates.save.same-name-replaces',
   'templates.card.rename-and-delete',

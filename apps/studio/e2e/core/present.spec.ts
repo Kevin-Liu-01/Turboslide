@@ -919,6 +919,37 @@ test(title('brand.frame.toggles'), async () => {
   );
   if (!actions.includes('brand.set'))
     test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
+  const frameDrawn = (p: Page, root: string) =>
+    p.evaluate((r) => {
+      const stage = document.querySelector(`${r} .ts-stage`) ?? document.querySelector('.ts-stage');
+      const drawn = (sel: string) =>
+        [...(stage?.querySelectorAll(sel) ?? [])].filter((el) => {
+          const cs = getComputedStyle(el);
+          const box = el.getBoundingClientRect();
+          return (
+            cs.display !== 'none' &&
+            cs.visibility !== 'hidden' &&
+            parseFloat(cs.opacity) > 0 &&
+            box.width > 0 &&
+            box.height > 0
+          );
+        }).length;
+      return {
+        rules: drawn('.frame .rule'),
+        crosses: drawn('.frame .cross'),
+        rails: drawn('.rail, .frame .rail, [data-rail]'),
+      };
+    }, root);
+  /* a deck from Blank draws no frame since Round 1's B4a (docs/NEXT.md 4.1.3 item 23), so the
+     frame goes on first and each toggle below turns a drawn part off */
+  const s0 = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: '/frame',
+    value: { rails: true, rules: true, crosses: true },
+    baseRevision: s0.revision,
+  });
+  await settled(page);
+  const framed = await frameDrawn(page, '.ts-stagewrap.ts-editor');
   /* the three toggles through the panel where it is on the build, each row with its sentence */
   await menuPath(page, 'slide', 'slide.changeTheme');
   const panel = await ctl(page, 'panel.brand')
@@ -957,27 +988,6 @@ test(title('brand.frame.toggles'), async () => {
     });
     await settled(page);
   }
-  const frameDrawn = (p: Page, root: string) =>
-    p.evaluate((r) => {
-      const stage = document.querySelector(`${r} .ts-stage`) ?? document.querySelector('.ts-stage');
-      const drawn = (sel: string) =>
-        [...(stage?.querySelectorAll(sel) ?? [])].filter((el) => {
-          const cs = getComputedStyle(el);
-          const box = el.getBoundingClientRect();
-          return (
-            cs.display !== 'none' &&
-            cs.visibility !== 'hidden' &&
-            parseFloat(cs.opacity) > 0 &&
-            box.width > 0 &&
-            box.height > 0
-          );
-        }).length;
-      return {
-        rules: drawn('.frame .rule'),
-        crosses: drawn('.frame .cross'),
-        rails: drawn('.rail, .frame .rail, [data-rail]'),
-      };
-    }, root);
   const editor = await frameDrawn(page, '.ts-stagewrap.ts-editor');
   await startShow();
   const inShow = await frameDrawn(page, '.ts-stagewrap.is-present');
@@ -999,7 +1009,7 @@ test(title('brand.frame.toggles'), async () => {
   await settled(page);
   test.info().annotations.push({
     type: 'frame',
-    description: `sentences ${JSON.stringify(sentences)}; editor ${JSON.stringify(editor)}; show ${JSON.stringify(inShow)}; presenter ${JSON.stringify(inPresenter)}`,
+    description: `sentences ${JSON.stringify(sentences)}; the frame on first ${JSON.stringify(framed)}; editor ${JSON.stringify(editor)}; show ${JSON.stringify(inShow)}; presenter ${JSON.stringify(inPresenter)}`,
   });
   if (panel) {
     expect(sentences[0], 'the Rails row carries its sentence').toMatch(
@@ -1008,6 +1018,10 @@ test(title('brand.frame.toggles'), async () => {
     expect(sentences[1], 'the Rules row').toMatch(/Rules: the thin lines that frame the slide/);
     expect(sentences[2], 'the Crosses row').toMatch(/Crosses: the small marks at the frame/);
   }
+  expect(
+    framed.rules + framed.crosses,
+    'the control: the frame on draws its rules and crosses',
+  ).toBeGreaterThan(0);
   for (const [name, f] of [
     ['the editor', editor],
     ['the show', inShow],

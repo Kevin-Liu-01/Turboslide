@@ -713,6 +713,11 @@ export async function run(t) {
     },
   );
 
+  await t.setup(
+    'the slide numbers on',
+    'brand.set /counter/show through the window API when the kit has them off (a deck from Blank, docs/NEXT.md 4.1.3 item 23), so the next row reads the counter on the ground',
+    async () => ({ ok: true, observed: await t.counterOn() }),
+  );
   await t.step(
     'brand.background.enter-keeps-open',
     'Slide > Change background, type #0b3d91, Enter, Done; then Add to theme',

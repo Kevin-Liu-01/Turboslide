@@ -1349,6 +1349,11 @@ export async function run(t) {
     const order = await t.trimTo(4, [T]);
     return { ok: order.length <= 4, observed: `${order.length} slides` };
   });
+  await t.setup(
+    'the slide numbers on',
+    'brand.set /counter/show through the window API when the kit has them off (a deck from Blank, docs/NEXT.md 4.1.3 item 23)',
+    async () => ({ ok: true, observed: await t.counterOn() }),
+  );
   await t.step(
     'slides.counter.footer-and-cards',
     'read the footer counter and the card numbers after a click, New slide, Delete and a drag',

@@ -3,7 +3,7 @@
 // brand.get, one Undo (the reducer's inverse) takes one field back, a reset removes the record or
 // one field and writes no revision when there is nothing to remove, and font.list answers the 26
 // rows with a licence each. The temp deck is created from the repository's blank template.
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -42,6 +42,11 @@ describe('the brand kit actions over a deck folder', () => {
     symlinkSync(join(REPO_DECKS, 'templates', 'blank'), join(decksDir, 'templates', 'blank'));
     const created = createDeck(decksDir, { name: 'Acme pitch', from: 'blank' });
     deckDir = created.dir;
+    /* the blank template carries a record since Round 1 (H6 turns the GT mark off, B4a the frame
+       and the counter); these tests read a deck without one, so the temp copy drops it */
+    const record = manifest();
+    delete record.brand;
+    writeFileSync(join(deckDir, 'deck.json'), `${JSON.stringify(record, null, 2)}\n`);
     const store = openFileStore({ dir: deckDir });
     const deps: StoreActionDeps = { store, lint: lintLists() };
     dispatcher = createDispatcher();

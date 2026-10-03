@@ -9,6 +9,14 @@
     },
     "footer": {
       "logo": "none"
+    },
+    "counter": {
+      "show": false
+    },
+    "frame": {
+      "rails": false,
+      "rules": false,
+      "crosses": false
     }
   },
   "sections": [

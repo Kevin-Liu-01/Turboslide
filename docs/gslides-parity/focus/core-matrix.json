@@ -8535,12 +8535,12 @@
     {
       "id": "images.insert.no-external-banner",
       "feature": "images",
-      "interaction": "Upload, By URL, paste and an svg paste each land with no external write banner within 10 s; an agent's write over HTTP shows \"This presentation changed elsewhere\"",
+      "interaction": "Upload, By URL, paste and an svg paste each land with no external write banner within 10 s; an agent's write over HTTP draws the agent banner within 15 s (\"Assistant changed slide N\" with Undo, as `realtime.agent.write-announced`) and no external write banner",
       "driver": "core/images.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-media item 3; audit-objects item 5",
-      "note": "Polish round; docs/POLISH.md 2.5 item 35; B5's `controller.tsx` hunk by B4's request; the words B5's"
+      "note": "Polish round; docs/POLISH.md 2.5 item 35; B5's `controller.tsx` hunk by B4's request; the words B5's. The realtime round, R5 fix 3 (VERIFICATION.md realtime pass 3 P3-2): the agent's write enters the room's order with an agent author on every tier (docs/REALTIME.md 3.3), so the fifth check reads the agent banner and not the polish round's \"This presentation changed elsewhere\", which stays the banner of a write the tab cannot replay"
     },
     {
       "id": "shaders.frame.large-png-lands",

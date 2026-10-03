@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, request, test } from '@playwright/test';
 import type { BrowserContext, Page } from '@playwright/test';
 
 import {
@@ -841,6 +841,28 @@ async function externalBanner(p: Page): Promise<string | null> {
   });
 }
 
+/**
+ * The agent banner as drawn (controller.tsx announceAgentWrite: "Assistant changed slide N" with
+ * Undo in the shell's snackbar), with its action's label and the time since `since`, or null.
+ */
+async function agentSnackbar(
+  p: Page,
+  since: number,
+): Promise<{ sentence: string; action: string; ms: number } | null> {
+  const read = await p.evaluate(() => {
+    const bar = document.querySelector('[data-control="snackbar"]');
+    if (bar === null || bar.getClientRects().length === 0) return null;
+    const words = (el: Element | null) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    return {
+      text: words(bar.querySelector('.ts-snackbar-text')),
+      label: words(bar.querySelector('[data-control="snackbar.action"]')),
+    };
+  });
+  if (read === null || !/\bAssistant changed (slide \d+|this presentation)/.test(read.text))
+    return null;
+  return { sentence: read.text.slice(0, 160), action: read.label, ms: Date.now() - since };
+}
+
 test(title('images.insert.no-external-banner'), async () => {
   test.setTimeout(240_000);
   if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
@@ -902,39 +924,67 @@ test(title('images.insert.no-external-banner'), async () => {
     await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 20, y: 20 } });
     await pasteText(page, { 'text/plain': svgFixture().toString('utf8') });
   });
-  /* an agent's write over HTTP: the banner reads This presentation changed elsewhere */
-  const headers = agentHeaders(origin);
-  let agentBanner: string | null = null;
+  /* an agent's write over HTTP draws the agent banner and not the external write banner (the
+     realtime round fix 3, VERIFICATION.md pass 3 P3-2): since docs/REALTIME.md 3.3 an agent's
+     write enters the room's order with an agent author on every tier, and the tab names it in
+     the snackbar with Undo (controller.tsx announceAgentWrite), the banner the row
+     realtime.agent.write-announced requires. The polish round's words ("This presentation changed
+     elsewhere") are the banner of a write the tab cannot replay (a restore, a hole in the log).
+     The request carries no browser cookie, so on localhost the caller is the checkout agent and
+     on a deployment the bearer, never the seller's own anonymous principal */
+  const headers = agentHeaders(origin, { 'x-turboslide-author': 'agent:images-row' });
   if (headers !== null) {
     const s = await settled(page);
-    const res = await page.request.post(
-      `${origin}/api/actions/block.insert?deck=${encodeURIComponent(deck)}`,
-      {
-        headers,
-        data: {
-          slideId,
-          slot: 'main',
-          block: {
-            id: 'agent-text',
-            type: 'text',
-            text: 'From the agent',
-            pos: { x: 100, y: 700, w: 400, h: 60 },
+    const api = await request.newContext();
+    let status = 0;
+    let answered = '';
+    const written = Date.now();
+    try {
+      const res = await api.post(
+        `${origin}/api/actions/block.insert?deck=${encodeURIComponent(deck)}`,
+        {
+          headers,
+          data: {
+            slideId,
+            slot: 'main',
+            block: {
+              id: 'agent-text',
+              type: 'text',
+              text: 'From the agent',
+              pos: { x: 100, y: 700, w: 400, h: 60 },
+            },
+            baseRevision: s.revision,
           },
-          baseRevision: s.revision,
+          timeout: 60_000,
+          maxRedirects: 0,
         },
-        timeout: 60_000,
-      },
-    );
+      );
+      status = res.status();
+      answered = (await res.text().catch(() => '')).slice(0, 160);
+    } finally {
+      await api.dispose().catch(() => undefined);
+    }
+    let agent: { sentence: string; action: string; ms: number } | null = null;
+    let external: string | null = null;
     const until = Date.now() + 15_000;
-    while (Date.now() < until && agentBanner === null) {
-      agentBanner = await externalBanner(page);
-      if (agentBanner === null) await page.waitForTimeout(500);
+    while (Date.now() < until && agent === null) {
+      agent = await agentSnackbar(page, written);
+      external ??= await externalBanner(page);
+      if (agent === null) await page.waitForTimeout(100);
+    }
+    /* the external write banner stays away for the agent's write once the agent banner is drawn */
+    for (let i = 0; i < 6 && external === null; i += 1) {
+      external = await externalBanner(page);
+      if (external === null) await page.waitForTimeout(500);
     }
     notes.push(
-      `the agent's write answered ${res.status()}: ${agentBanner === null ? 'no banner within 15 s' : `"${agentBanner}"`}`,
+      `the agent's write answered ${status}: ${agent === null ? 'no agent banner within 15 s' : `the agent banner "${agent.sentence}" with ${agent.action === '' ? 'no action' : agent.action} at ${agent.ms} ms`}; ${external === null ? 'no external write banner' : `the external write banner "${external}"`}`,
     );
-    if (agentBanner === null || !/This presentation changed elsewhere/.test(agentBanner))
-      failures.push(`the agent's write: ${agentBanner ?? 'no banner'}`);
+    if (status !== 200) failures.push(`the agent's write answered ${status} (${answered})`);
+    if (agent === null) failures.push("the agent's write: no agent banner within 15 s");
+    else if (agent.action !== 'Undo')
+      failures.push(`the agent banner "${agent.sentence}" has no Undo`);
+    if (external !== null) failures.push(`the agent's write: the external banner "${external}"`);
   } else notes.push("the agent's write: no bearer for this origin");
   test.info().annotations.push({ type: 'banner', description: notes.join(' | ') });
   expect(failures).toEqual([]);

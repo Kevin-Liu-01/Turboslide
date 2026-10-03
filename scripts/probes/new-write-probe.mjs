@@ -31,7 +31,8 @@
 //   node scripts/probes/new-write-probe.mjs [--base http://localhost:4351]
 import { createRequire } from 'node:module';
 
-const require = createRequire('/Users/kevinliu/repos/Turboslide/package.json');
+// the checkout's own playwright-core, whichever worktree runs the probe (round1/build/b6.md request 9)
+const require = createRequire(import.meta.url);
 const { chromium } = require('playwright-core');
 
 const argv = process.argv.slice(2);

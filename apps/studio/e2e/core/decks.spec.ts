@@ -2114,10 +2114,11 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
         (h.textContent ?? '').replace(/\s+/g, ' ').trim(),
       );
       /* the page's own copy: outside the slides, the panel, Version history's rows and the
-         Tailor dialog's product strings (LANDING.md 2.12) */
+         Tailor dialog's product strings (LANDING.md 2.12); the export band's Editable text side
+         is slide 7 as the PowerPoint file holds it, so it counts as a slide */
       const clone = main.cloneNode(true) as HTMLElement;
       for (const el of clone.querySelectorAll(
-        'script, style, template, [data-home-slides], .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, .ts-hero-credit, .ts-sr, .ts-skip, [hidden]',
+        'script, style, template, [data-home-slides], .ts-seam-editable, .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, .ts-hero-credit, .ts-sr, .ts-skip, [hidden]',
       ))
         el.remove();
       document.body.append(clone);
@@ -2494,6 +2495,8 @@ test(title('decks.home.grammar'), async ({ browser }) => {
             return {
               sheet: el.getAttribute('data-sheet') ?? '',
               thumb: el.classList.contains('is-thumb'),
+              /* the chosen thumbnail (the stage's slide) draws a 2 px ink edge in place of the 1 px */
+              chosen: el.closest('[data-selected]') !== null,
               border: cs ? parseFloat(cs.borderTopWidth) : -1,
               shadow: cs ? cs.boxShadow : '',
               edge: after.content !== 'none' ? parseFloat(after.borderTopWidth) : 0,
@@ -2552,8 +2555,8 @@ test(title('decks.home.grammar'), async ({ browser }) => {
           failures.push(
             `${label}: the ${f.sheet} sheet draws a frame (${f.border} px, ${f.shadow})`,
           );
-        if (f.thumb && f.edge !== 1)
-          failures.push(`${label}: the thumbnail ${f.sheet} has no 1 px edge`);
+        if (f.thumb && f.edge !== (f.chosen ? 2 : 1))
+          failures.push(`${label}: the thumbnail ${f.sheet} has no ${f.chosen ? 2 : 1} px edge`);
         if (!f.thumb && f.edge !== 0) failures.push(`${label}: the ${f.sheet} sheet draws an edge`);
       }
     } finally {

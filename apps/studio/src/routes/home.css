@@ -212,7 +212,7 @@ html:has(.ts-product) {
 }
 
 /* ---- ruled rows: a key, a value and an action, each row owning its line ---- */
-.ts-rows {
+.ts-home-rows {
   border-top: 1px solid var(--pt-hair);
 }
 
@@ -389,11 +389,21 @@ html:has(.ts-product) {
   box-shadow: none;
 }
 
-/* a thumbnail keeps the renderer's 1 px edge, the only edge that reads at that size */
+/* every slide on the page paints its end state in its first frame: the renderer's 140 ms entrance
+   fade (sheet.css, `.ts-sheet .slide.is-on`) is the editor's slide change, which the page's motion
+   table does not list, and it would fade the h1 in before the LCP (LANDING.md 3.4; l4.md M15,
+   l3.md R20) */
+.ts-sheet.ts-home-slide .slide.is-on {
+  animation: none;
+}
+
+/* a thumbnail keeps the renderer's 1 px edge, the only edge that reads at that size; it paints
+   above the slide, which sits at z-index 1 (l2.md Q11) */
 .ts-home-sheet.is-thumb::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 2;
   border: 1px solid var(--pt-edge);
   pointer-events: none;
 }
@@ -635,11 +645,11 @@ html:has(.ts-product) {
 }
 
 /* ---- the field strip (LANDING.md 2.3): 1,024 by 160 px, 512 by 80 cells ---- */
-.ts-strip {
+.ts-home-strip {
   padding: 24px 0;
 }
 
-.ts-strip-box {
+.ts-home-strip-box {
   position: relative;
   height: 160px;
 }
@@ -1074,8 +1084,10 @@ html:has(.ts-product) {
   margin-top: 32px;
 }
 
+/* 16 px under the slide: with the 24 px the page measured 7,500 px at 1440, the ceiling of Kevin's
+   answer 5 (decks.home.pictures-three-widths reads it under 7,500) */
 .ts-canvas-rows {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 .ts-canvas-rows .ts-row-key {
@@ -1362,7 +1374,7 @@ html:has(.ts-product) {
 }
 
 .ts-export-rows {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 /* the stored appearance shows one picture of each pair; the hidden one has no box and, being
@@ -1816,11 +1828,11 @@ html.ts-intro.ts-t0 [data-field='hero']:not([data-field-state]) > .ts-field-stil
     font-size: max(15px, calc(10px / var(--k)));
   }
 
-  .ts-strip {
+  .ts-home-strip {
     padding: 24px 0;
   }
 
-  .ts-strip-box {
+  .ts-home-strip-box {
     height: 96px;
   }
 

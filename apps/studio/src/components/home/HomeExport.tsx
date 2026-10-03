@@ -74,7 +74,7 @@ export function HomeExport() {
           </div>
         </div>
       </div>
-      <div className="ts-rows ts-export-rows">
+      <div className="ts-home-rows ts-export-rows">
         <div className="ts-row">
           <span className="ts-row-key">{EXPORT.rows.perfect.key}</span>
           <span className="ts-row-value">{EXPORT.rows.perfect.sentence(size, HOME_FACTS)}</span>

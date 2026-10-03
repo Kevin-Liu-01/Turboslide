@@ -8,9 +8,9 @@
  */
 export function HomeField() {
   return (
-    <div className="ts-strip ts-seam" data-band="field" aria-hidden="true">
+    <div className="ts-home-strip ts-seam" data-band="field" aria-hidden="true">
       <div className="ts-col">
-        <div className="ts-strip-box ts-home-field" data-field="strip">
+        <div className="ts-home-strip-box ts-home-field" data-field="strip">
           <i className="ts-field-still" />
           <canvas aria-hidden="true" />
         </div>

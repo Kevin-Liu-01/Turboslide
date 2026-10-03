@@ -34,7 +34,7 @@ export function HomeTailor() {
       <div className="ts-tailor-top">
         <BandHead id="tailor" heading={TAILOR.h2} lead={TAILOR.lead} span={5} />
         <form
-          className="ts-rows ts-tailor-dialog"
+          className="ts-home-rows ts-tailor-dialog"
           data-tailor
           autoComplete="off"
           noValidate

@@ -16,7 +16,7 @@ export function HomeCanvas() {
     <HomeSection id="canvas">
       <BandHead id="canvas" heading={CANVAS.h2} lead={CANVAS.lead} span={7} />
       <HomeSheet instance="canvas" className="ts-canvas-sheet" />
-      <div className="ts-rows ts-canvas-rows">
+      <div className="ts-home-rows ts-canvas-rows">
         <div className="ts-row">
           <span className="ts-row-key">{CANVAS.layoutKey}</span>
           <span className="ts-row-value ts-strong" data-layout-row>

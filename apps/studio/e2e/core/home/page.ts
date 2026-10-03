@@ -482,10 +482,15 @@ export function rows(): void {
         [...document.querySelectorAll<HTMLElement>('[data-band="parts"] [data-part]')].map(
           (row) => {
             const cs = getComputedStyle(row);
+            /* the Heroicon is a mask of icons.generated.css over the text's colour (SectionIcon) */
+            const icon = row.querySelector<HTMLElement>('.ts-part-key .ts-icon');
+            const ics = icon ? getComputedStyle(icon) : null;
+            const masked = ics !== null && /url\(/.test(ics.maskImage || ics.webkitMaskImage);
             return {
               id: row.getAttribute('data-part') ?? '',
-              icon: row.querySelector('.ts-part-key svg')?.getAttribute('data-icon') ?? '',
-              fill: row.querySelector('.ts-part-key svg')?.getAttribute('fill') ?? '',
+              icon: icon?.getAttribute('data-icon') ?? '',
+              fill:
+                ics !== null && masked && ics.backgroundColor === ics.color ? 'currentColor' : '',
               key: (row.querySelector('.ts-part-key')?.textContent ?? '').trim(),
               where: (row.querySelector('.ts-part-where')?.textContent ?? '').trim(),
               figure: (row.querySelector('.ts-part-figure')?.textContent ?? '').trim(),

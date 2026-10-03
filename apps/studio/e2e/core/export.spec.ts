@@ -2762,18 +2762,33 @@ test(title('shaders.export.missing-frame-row'), async () => {
   await openEditor(page, owner.deck);
   await clickCard(page, made.slide);
   await openPdf(page);
-  /* the recipe change with the dialog open, so OK follows it within 800 ms */
+  /* the recipe change with the dialog open, so OK follows it within 800 ms. The window API
+     answers block.set at the room's acknowledgement, which the memory tier gives at its
+     checkpoint idle, so awaiting the answer put OK 2,039 and 11,881 ms after the change (the
+     realtime round's pass 3). OK follows the change on the local document, and the answer is
+     awaited after the file */
   const s = await state(page);
   const block = (await shaderBlocks(page, made.slide)).find((o) => o.id === made.block) ?? null;
   const anchor = ((block?.block['anchor'] as number | undefined) ?? 5500) === 5500 ? 7000 : 5500;
   const changed = Date.now();
-  await invoke(page, 'block.set', {
+  const setting = invoke(page, 'block.set', {
     slideId: made.slide,
     blockId: made.block,
     path: '/anchor',
     value: anchor,
     baseRevision: s.revision,
   });
+  setting.catch(() => undefined);
+  await expect
+    .poll(
+      async () => {
+        const now = await state(page);
+        return now.revision > s.revision || (now.sync?.pending ?? now.pending ?? 0) > 0;
+      },
+      { timeout: 5000, intervals: [50] },
+    )
+    .toBe(true)
+    .catch(() => undefined);
   const rows: string[] = [];
   let stop = false;
   const watching = (async () => {
@@ -2793,13 +2808,20 @@ test(title('shaders.export.missing-frame-row'), async () => {
       await page.waitForTimeout(150);
     }
   })();
-  const gapBefore = Date.now() - changed;
-  const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click(), 150_000);
-  const gap = gapBefore;
+  let gap = -1;
+  const pdf = await download(
+    page,
+    async () => {
+      gap = Date.now() - changed;
+      await ctl(page, 'dialog.download.ok').click();
+    },
+    150_000,
+  );
   await page.waitForTimeout(600);
   stop = true;
   await watching;
   await closeDialogs(page);
+  await setting;
   const frame = await waitFrame(page, made.slide, made.block, { timeout: 10_000 });
   test.info().annotations.push({
     type: 'report',
@@ -3145,6 +3167,48 @@ test(title('export.details.seller-card'), async () => {
   );
 });
 
+/**
+ * The string fields of a server function's payload by key, at any depth. The serializer writes
+ * an object as `{t: 10, p: {k: [keys], v: [values]}}` and a string as `{t: 1, s}`; a string that
+ * holds JSON (the actions' payload) is read once more as plain JSON.
+ */
+function serverFnFields(body: string): Map<string, string> {
+  const fields = new Map<string, string>();
+  const walk = (node: unknown): void => {
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (node === null || typeof node !== 'object') return;
+    const record = node as Record<string, unknown>;
+    const p = record['p'] as { k?: unknown; v?: unknown } | undefined;
+    const keys: unknown = p?.k;
+    const values: unknown = p?.v;
+    if (record['t'] === 10 && Array.isArray(keys) && Array.isArray(values)) {
+      keys.forEach((key: unknown, i: number) => {
+        const value = values[i] as { t?: unknown; s?: unknown } | undefined;
+        if (typeof key === 'string' && value?.t === 1 && typeof value.s === 'string')
+          fields.set(key, value.s);
+      });
+      return values.forEach(walk);
+    }
+    if (record['t'] === 1 && typeof record['s'] === 'string') {
+      try {
+        return walk(JSON.parse(record['s']));
+      } catch {
+        return;
+      }
+    }
+    for (const [key, value] of Object.entries(record)) {
+      if (typeof value === 'string') fields.set(key, value);
+      else walk(value);
+    }
+  };
+  try {
+    walk(JSON.parse(body));
+  } catch {
+    /* not JSON: no fields */
+  }
+  return fields;
+}
+
 test(title('export.refusal.sentence-and-retry'), async () => {
   test.setTimeout(240_000);
   /* docs/POLISH.md item 82 has two halves. The retry is the function's: the export's blob put
@@ -3158,23 +3222,34 @@ test(title('export.refusal.sentence-and-retry'), async () => {
      arriving on this build before it reads the refusal. */
   const { page, deck } = await plainDeck(2);
   await openEditor(page, deck);
+  /* OK is clicked once it draws: `isVisible` answers at once and ignores its timeout, so on a
+     loaded machine it read the dialog before it drew and the plain export never started (the
+     realtime round's pass 3: false 300 ms after the click, then the 120 s wait for a file). The
+     wait runs beside the download helper, because a remembered choice runs direct with no
+     dialog and its refusal is a snackbar the helper reads from the first moment */
   const startExport = async () => {
     await menuPath(page, 'file', 'file.download', 'file.download.pptx');
     const ok = ctl(page, 'dialog.download.ok');
-    if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+    void ok
+      .waitFor({ state: 'visible', timeout: 10_000 })
+      .then(() => ok.click())
+      .catch(() => undefined);
   };
   const arrived = await download(page, startExport, 120_000).catch((error: unknown) => ({
     error: error instanceof Error ? error.message : String(error),
   }));
   await closeDialogs(page).catch(() => undefined);
   /* the export call: a server function POST whose payload carries the deck and the format (the
-     ids in the address are the build's, so the request is matched by its body) */
+     ids in the address are the build's, so the request is matched by its body). The payload is
+     the serializer's, an object's keys in `p.k` and its values in `p.v`, never the text
+     `"format":"pptx"`, so the fields are read from the decoded payload (the realtime round's
+     pass 3 read the export call `{deckId, input: {format: 'pptx'}}` pass unrefused) */
   let refusedCalls = 0;
   const isExportCall = (route: import('@playwright/test').Route) => {
     const request = route.request();
     if (request.method() !== 'POST' || !request.url().includes('/_serverFn/')) return false;
-    const body = request.postData() ?? '';
-    return body.includes(deck) && /"format"\s*:\s*"pptx"/.test(body);
+    const fields = serverFnFields(request.postData() ?? '');
+    return fields.get('deckId') === deck && fields.get('format') === 'pptx';
   };
   const upstream = 'Vercel Blob: Too many requests please lower the number of requests';
   await page.route(
@@ -3192,13 +3267,26 @@ test(title('export.refusal.sentence-and-retry'), async () => {
   const refused = await download(page, startExport, 60_000).catch((error: unknown) => ({
     error: error instanceof Error ? error.message : String(error),
   }));
-  const dialogWords = await page
-    .locator('[data-control="dialog.download.pptx"]')
-    .first()
-    .textContent()
-    .catch(() => null);
-  const snackbar = await snackbarText(page);
-  const words = `${dialogWords ?? ''} | ${snackbar ?? ''}`.replace(/\s+/g, ' ').trim();
+  /* the dialog's and the snackbar's words read together and at once: the direct path closes
+     the dialog, and the snackbar had left before the separate reads of the last run */
+  const readWords = () =>
+    page
+      .evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            '[data-control="dialog.download.pptx"], [data-control="snackbar"]',
+          ),
+        ]
+          .map((el) => el.textContent ?? '')
+          .join(' | '),
+      )
+      .catch(() => '');
+  let words = await readWords();
+  for (let i = 0; i < 25 && !/could not be made/.test(words); i += 1) {
+    await page.waitForTimeout(200);
+    words = await readWords();
+  }
+  words = words.replace(/\s+/g, ' ').trim();
   await page.unroute((url) => url.pathname.includes('/_serverFn/')).catch(() => undefined);
   await closeDialogs(page).catch(() => undefined);
   test.info().annotations.push({

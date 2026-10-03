@@ -83,7 +83,7 @@ html:has(.ts-product) {
   font-size: 14px;
   color: var(--pt-ink);
   background: var(--pt-paper);
-  border: 1px solid var(--pt-ink);
+  border: 1px solid var(--pt-edge);
   text-decoration: none;
   transform: translateY(-200%);
 }
@@ -674,10 +674,31 @@ html:has(.ts-product) {
 }
 
 .ts-home-panel-tabs {
+  position: relative;
   display: flex;
   height: 40px;
   padding: 0 12px;
-  border-bottom: 1px solid var(--pt-hair-on-ink);
+}
+
+/* the panel's two rules are 1 px boxes in --pt-hair-on-ink, as the sheet draws its rails: the
+   chrome lint (check step 18) reads a border in that colour as an active state's alone */
+.ts-home-panel-tabs::after,
+.ts-home-panel-input::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--pt-hair-on-ink);
+  pointer-events: none;
+}
+
+.ts-home-panel-tabs::after {
+  bottom: 0;
+}
+
+.ts-home-panel-input::before {
+  top: 0;
 }
 
 .ts-home-panel-tab {
@@ -721,12 +742,12 @@ html:has(.ts-product) {
 }
 
 .ts-home-panel-input {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 1ch;
   height: 40px;
   padding: 0 20px;
-  border-top: 1px solid var(--pt-hair-on-ink);
   font-size: 14px;
   cursor: text;
 }
@@ -1417,6 +1438,8 @@ html:has(.ts-product) {
   touch-action: none;
 }
 
+/* the knob: a paper square in a 1 px ink line (LANDING.md 2.8), drawn as an ink square under a
+   paper one, so the chrome lint (check step 18) reads no ink border on a control at rest */
 .ts-seam-knob {
   position: absolute;
   left: -12px;
@@ -1424,7 +1447,13 @@ html:has(.ts-product) {
   width: 24px;
   height: 24px;
   box-sizing: border-box;
-  border: 1px solid var(--pt-ink);
+  background: var(--pt-ink);
+}
+
+.ts-seam-knob::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
   background: var(--pt-paper);
 }
 

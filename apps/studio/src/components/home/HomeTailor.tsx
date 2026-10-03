@@ -99,7 +99,7 @@ export function HomeTailor() {
               data-thumb={id}
               tabIndex={0}
               aria-label={title(id)}
-              {...(id === 'plan' ? { 'data-selected': '' } : {})}
+              {...(id === 'plan' ? { 'data-selected': '', 'aria-current': 'true' } : {})}
             >
               <span className="ts-thumb-n" data-thumb-n aria-hidden="true">
                 {HOME_DECK.slides[id].n}

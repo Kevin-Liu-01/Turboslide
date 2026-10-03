@@ -349,6 +349,13 @@ html:has(.ts-product) {
   border-color: var(--pt-ink);
 }
 
+/* Light, Dark and Pause Motion are 32 px text buttons (2.1, B's b-1440-light-first.png); Pause
+   Motion's hairline, its two words and its absence under reduced motion are motion.css's */
+.ts-product-appearance .pt-ib,
+.ts-product-nav-links .ts-motion-toggle {
+  height: 32px;
+}
+
 /* ---- the bands (LANDING.md 2.0 "The column"): 96 px above and below at 1,024 px and over, 80
    between 720 and 1,023, 64 under 720 ---- */
 .ts-band {
@@ -1938,11 +1945,17 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     gap: 0 12px;
   }
 
-  .ts-product-nav-new {
+  /* the first row: the lockup, then Sign In and New Presentation at the right */
+  .ts-product-nav-signin {
     order: 2;
     margin-left: auto;
   }
 
+  .ts-product-nav-new {
+    order: 2;
+  }
+
+  /* the second row: Documentation, then the Light and Dark pair and Pause Motion at the right */
   .ts-product-nav-links {
     order: 3;
     flex-basis: 100%;
@@ -1954,14 +1967,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     order: 1;
   }
 
-  .ts-product-nav-signin {
-    order: 2;
-    justify-content: flex-start;
-  }
-
   .ts-product-appearance {
     order: 3;
     margin: 0 0 0 auto;
+  }
+
+  .ts-product-nav-links .ts-motion-toggle {
+    order: 4;
   }
 
   .ts-features thead th:first-child {
@@ -1985,6 +1997,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 @media (max-width: 719px) {
   .ts-product {
     --ts-gutter: 0px;
+  }
+
+  /* the second row wraps Pause Motion to a row of its own where the three do not fit (320 px) */
+  .ts-product-nav-links {
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 
   .ts-band {
@@ -2389,5 +2407,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-close-text {
     margin-top: 32px;
+  }
+}
+
+/* ---- under 400 px the lockup shows the mark alone, named "Turboslide" by its link (2.1), so the
+   first row holds the mark, Sign In and New Presentation and nothing is wider than 320 px ---- */
+@media (max-width: 399px) {
+  .ts-product-lockup-word {
+    display: none;
   }
 }

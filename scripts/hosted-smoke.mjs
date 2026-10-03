@@ -9,9 +9,9 @@
 // Checks, in order: `/` is a 307 to /new carrying X-Robots-Tag: noindex (gslides-parity SPEC 6.1);
 // /new is a 200 SSR shell (the route is ssr: false, so the document, the theme boot script and a
 // script tag) with the noindex meta; /deck/<deck> is a 200 page whose payload carries no `notes`
-// key (SPEC 6.6, R10 C3 item 1); /edit/<deck> is a 200 SSR shell; /decks is a 200 list naming the
-// deck; /decks/trash is a 200 page; /print/<deck> and /present/<deck> are 200 pages (SPEC 6.8,
-// 9.3); one asset twin of the deck (the first twin in decks/<deck>/deck.json of this checkout, or
+// key (SPEC 6.6, R10 C3 item 1); /edit/<deck> is a 200 SSR shell; /decks is a 200 page that
+// lists no deck to a cookieless stranger (H2); /decks/trash is a 200 page; /print/<deck> and
+// /present/<deck> are 200 pages (SPEC 6.8, 9.3); one asset twin of the deck (the first twin in decks/<deck>/deck.json of this checkout, or
 // --asset <file>) is a 200 image or a 302 to one; /api/agent answers 401 or 200 (401 is the bearer
 // rule off localhost without a token, SPEC 11). Exit code 1 when any row fails. Redirects are not
 // followed, so the table shows what the server said. Nothing here needs the repository except the
@@ -427,10 +427,17 @@ function checks(deck, asset) {
       detail: shellDetail,
     },
     {
+      // since H2 (docs/NEXT.md 3.2) /decks lists a visitor's own and shared decks: a request with
+      // no cookie is a stranger, whose page lists no deck of the store and draws no caption
+      // claiming every presentation (the row decks.list.own-and-shared reads the browser's half)
       name: '/decks',
       path: '/decks',
-      expect: 'a 200 list naming the deck',
-      pass: (r) => r.status === 200 && r.text.includes(`data-deck="${deck}"`),
+      expect: 'a 200 page that lists no deck to a stranger',
+      pass: (r) =>
+        r.status === 200 &&
+        r.text.includes('data-control="home.') &&
+        !r.text.includes('data-deck="') &&
+        !/Every presentation on this Turboslide/.test(r.text),
       detail: (r) => `${r.text.split('data-deck="').length - 1} card(s)`,
     },
     {

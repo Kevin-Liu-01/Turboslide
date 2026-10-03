@@ -111,8 +111,11 @@ describe('the inlined stills and the slide markup', () => {
         .raw()
         .toBuffer({ resolveWithObject: true });
       expect([info.width, info.height]).toEqual([still.cols, still.rows]);
-      /* ink opaque, paper transparent, nothing between */
-      for (let i = 3; i < data.length; i += 4) expect(data[i] === 0 || data[i] === 255).toBe(true);
+      /* ink opaque, paper transparent, nothing between (one count, not one expect a pixel: the
+         per pixel form took over 5 s for the 214,908 cells at a load of 50 to 90) */
+      let between = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] !== 0 && data[i] !== 255) between += 1;
+      expect(between).toBe(0);
       expect(HOME_STILLS_CSS).toContain(still.ink);
     }
     /* the whole of the inlined stills stays a small part of the document (LANDING.md 4.1) */

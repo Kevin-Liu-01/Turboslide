@@ -37,7 +37,9 @@ const SURFACES: ReadonlyArray<{ name: string; path: string; ready: string }> = [
     path: '/deck/no-such-deck-buttons-rule',
     ready: '[data-control="access.page"]',
   },
-  { name: 'the refused page', path: '/edit/..%2f', ready: '[data-control="refused"]' },
+  /* an id the store refuses as a slug draws the refused page on every server; `..%2f` does on vite
+     dev alone, since the node-server build resolves the dots before the route */
+  { name: 'the refused page', path: '/edit/Not_A_Slug', ready: '[data-control="refused"]' },
 ];
 
 export type ButtonFacts = {

@@ -1,9 +1,9 @@
-import { HOME_DECK } from "../deck.generated";
-import { renumber } from "./filmstrip";
-import { startObjects } from "./objects";
-import { createHomeStore, restState } from "./state";
-import type { Band, HomeStore, UndoBand } from "./state";
-import { startTailor } from "./tailor";
+import { HOME_DECK } from '../deck.generated';
+import { renumber } from './filmstrip';
+import { startObjects } from './objects';
+import { createHomeStore, restState } from './state';
+import type { Band, HomeStore, UndoBand } from './state';
+import { startTailor } from './tailor';
 
 /**
  * The live module's entry (docs/LANDING.md 4.2, 6.1; integrator.md 4.6): the route imports it after
@@ -25,29 +25,29 @@ export type LiveContext = {
 };
 
 export type Registration = {
-  band: "hero" | "field" | Band | "close";
+  band: 'hero' | 'field' | Band | 'close';
   start(ctx: LiveContext): void;
 };
 
 /** In push order: hero and canvas (2), tailor (3), agents and history (4), present (5), export (6), fields, mark and motion (7). */
 const REGISTRATIONS: readonly Registration[] = [
-  { band: "hero", start: (ctx) => startObjects(ctx, "hero") },
-  { band: "canvas", start: (ctx) => startObjects(ctx, "canvas") },
-  { band: "tailor", start: startTailor },
+  { band: 'hero', start: (ctx) => startObjects(ctx, 'hero') },
+  { band: 'canvas', start: (ctx) => startObjects(ctx, 'canvas') },
+  { band: 'tailor', start: startTailor },
 ];
 
-const UNDO_BANDS: readonly UndoBand[] = ["hero", "tailor", "canvas"];
+const UNDO_BANDS: readonly UndoBand[] = ['hero', 'tailor', 'canvas'];
 
 const isTextField = (t: EventTarget | null): boolean =>
   t instanceof HTMLElement &&
-  (t.isContentEditable || t.tagName === "INPUT" || t.tagName === "TEXTAREA");
+  (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
 
 /** The band's live region; the text is cleared first so a repeated sentence is read again. */
 function announcer(band: HTMLElement): (text: string) => void {
-  const region = band.querySelector<HTMLElement>("[data-announce]");
+  const region = band.querySelector<HTMLElement>('[data-announce]');
   return (text) => {
     if (region === null) return;
-    region.textContent = "";
+    region.textContent = '';
     window.setTimeout(() => {
       region.textContent = text;
     }, 30);
@@ -62,31 +62,25 @@ function announcer(band: HTMLElement): (text: string) => void {
  */
 function wireUndo(root: HTMLElement, store: HomeStore): void {
   const buttons = UNDO_BANDS.flatMap((band) =>
-    [...root.querySelectorAll<HTMLButtonElement>(`[data-undo="${band}"]`)].map(
-      (b) => ({ band, b }),
-    ),
+    [...root.querySelectorAll<HTMLButtonElement>(`[data-undo="${band}"]`)].map((b) => ({
+      band,
+      b,
+    })),
   );
   const paint = (): void => {
     for (const { band, b } of buttons) {
       b.disabled = false;
-      b.setAttribute("aria-disabled", String(!store.canUndo(band)));
+      b.setAttribute('aria-disabled', String(!store.canUndo(band)));
     }
   };
   for (const { band, b } of buttons)
-    b.addEventListener("click", () => {
+    b.addEventListener('click', () => {
       store.undo(band);
     });
-  root.addEventListener("keydown", (e) => {
-    if (
-      !(e.metaKey || e.ctrlKey) ||
-      e.shiftKey ||
-      e.altKey ||
-      e.key.toLowerCase() !== "z"
-    )
-      return;
+  root.addEventListener('keydown', (e) => {
+    if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== 'z') return;
     if (isTextField(e.target)) return;
-    const band = (e.target as Element).closest<HTMLElement>("[data-band]")
-      ?.dataset["band"];
+    const band = (e.target as Element).closest<HTMLElement>('[data-band]')?.dataset['band'];
     if (!UNDO_BANDS.includes(band as UndoBand)) return;
     e.preventDefault();
     store.undo(band as UndoBand);
@@ -101,24 +95,24 @@ function wireUndo(root: HTMLElement, store: HomeStore): void {
  * does not carry `run.generated.ts` for three sentences (l2.md Q9).
  */
 const restRows = (root: HTMLElement): string[] =>
-  [...root.querySelectorAll<HTMLElement>("[data-history-row]")]
-    .map((row) => row.children[2]?.textContent?.trim() ?? "")
-    .filter((words) => words !== "")
+  [...root.querySelectorAll<HTMLElement>('[data-history-row]')]
+    .map((row) => row.children[2]?.textContent?.trim() ?? '')
+    .filter((words) => words !== '')
     .reverse();
 
 /** Creates the store, starts every registration whose band is on the page and marks ready. */
 export function startLive(root: HTMLElement): void {
   // The bands are React's until hydration commits (`main[data-hydrated]`, home.tsx): a write to
   // them before it would be thrown away with a tree React regenerates on a mismatch
-  if (!root.hasAttribute("data-hydrated")) {
+  if (!root.hasAttribute('data-hydrated')) {
     const wait = new MutationObserver(() => {
-      if (!root.hasAttribute("data-hydrated")) return;
+      if (!root.hasAttribute('data-hydrated')) return;
       wait.disconnect();
       startLive(root);
     });
     wait.observe(root, {
       attributes: true,
-      attributeFilter: ["data-hydrated"],
+      attributeFilter: ['data-hydrated'],
     });
     return;
   }
@@ -127,9 +121,7 @@ export function startLive(root: HTMLElement): void {
   // every counter on the page and the filmstrip follow the deck's order, whichever band moved it
   store.subscribe((state) => renumber(root, state));
   for (const registration of REGISTRATIONS) {
-    const band = root.querySelector<HTMLElement>(
-      `[data-band="${registration.band}"]`,
-    );
+    const band = root.querySelector<HTMLElement>(`[data-band="${registration.band}"]`);
     if (band === null) continue;
     try {
       registration.start({ root, band, store, announce: announcer(band) });
@@ -137,5 +129,5 @@ export function startLive(root: HTMLElement): void {
       console.error(`the ${registration.band} band did not start`, error);
     }
   }
-  root.dataset["live"] = "ready";
+  root.dataset['live'] = 'ready';
 }

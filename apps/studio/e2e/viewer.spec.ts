@@ -311,12 +311,16 @@ test('the grid mounts clones for the tiles near the viewport alone, and the home
   if (total > 40) expect(counts.near).toBeLessThan(total);
   expect(renders).toEqual([]);
   /* the capture path stays for the home cards: /decks asks the render route for the first slide
-     of a deck at its revision and gets a picture (a render on the first visit, a cache hit after) */
+     of a deck at its revision and gets a picture (a render on the first visit, a cache hit after);
+     a card asks 320 px wide and, since B2b#16, a ruled row's 64 by 36 frame asks 160 */
   await page.goto('/decks');
   await expect(page.locator('.pt-viewer, [data-hydrated]').first()).toBeAttached();
   await expect
-    .poll(() => renders.some((row) => /[?&]w=320&r=\d+/.test(row.url) && row.status === 200), {
-      timeout: 90_000,
-    })
+    .poll(
+      () => renders.some((row) => /[?&]w=(160|320)&r=\d+/.test(row.url) && row.status === 200),
+      {
+        timeout: 90_000,
+      },
+    )
     .toBe(true);
 });

@@ -244,7 +244,7 @@ function PrintPage() {
         </Link>
         <span className="ts-print-title">
           {/* the Turboslide mark at 20 px before the title (gslides-parity SPEC-4 1.10); the GT mark stays the theme's, on the sheet */}
-          <TurboslideMark size={20} />
+          <TurboslideMark size={24} />
           <span>{payload.deck.title}</span>
         </span>
         <label className="ts-print-layout">

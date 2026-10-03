@@ -51,8 +51,8 @@
   border: 1px solid transparent;
 }
 
-/* the Turboslide mark at --ts-mark (gslides-parity SPEC-4 1.8, 1.10): the solid form, 24 px, so
-   the 16 unit path lands on integer edges at 1.5 px per unit */
+/* the Turboslide mark at --ts-mark: the 24 px placement of docs/brand.md section 3, the vector
+   at a 16 px cap with its horizontal edges on whole rows */
 .ts-title-home .ts-mark {
   width: var(--ts-mark, 24px);
   height: var(--ts-mark, 24px);

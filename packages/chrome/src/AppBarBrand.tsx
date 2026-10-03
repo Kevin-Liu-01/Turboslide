@@ -72,7 +72,7 @@ export function AppBarBrand({
         data-control="appbar.home"
         {...tipProps(APP_BAR_BRAND.home)}
       >
-        <TurboslideMark size={16} aria-hidden="true" />
+        <TurboslideMark size={24} aria-hidden="true" />
       </SlotLink>
       <SlotLink
         link={linkComponent}

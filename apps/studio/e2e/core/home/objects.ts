@@ -579,6 +579,19 @@ export function rows(): void {
       const g3 = await geom(page, H);
       expect(Math.hypot(g3.cx - g2.cx, g3.cy - g2.cy)).toBeGreaterThan(200);
       expect(await layoutWord()).toContain('Canvas');
+      // the moved text keeps its paper ground: the slide's paper in the box and around it
+      const ground = await page.locator(H).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        const probe = document.createElement('i');
+        probe.style.color = cs.getPropertyValue('--paper');
+        el.append(probe);
+        const paper = getComputedStyle(probe).color;
+        probe.remove();
+        return { paper, bg: cs.backgroundColor, outline: cs.outlineColor, width: cs.outlineWidth };
+      });
+      expect(ground.bg).toBe(ground.paper);
+      expect(ground.outline).toBe(ground.paper);
+      expect(Number.parseFloat(ground.width)).toBeGreaterThan(0);
 
       // Undo three times returns every object, and the row reads Mood
       const undo = band.locator('[data-undo="canvas"]');

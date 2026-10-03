@@ -5,7 +5,7 @@ import type { LiveContext } from './index';
 import { createLog } from './log';
 import type { CommandLog } from './log';
 import { ease, finishBand, reduced, sequence, slowFactor } from './motion';
-import { CLEAR_ZONE, noteResting, roleOf, sheetLayout, textOf, typesIn, UNITS } from './paint';
+import { noteResting, paperGround, roleOf, sheetLayout, textOf, typesIn, UNITS } from './paint';
 import type { LayoutItem } from './paint';
 import type { HomeDeckState, ObjectKey, SlideKey, StoreEvent } from './state';
 
@@ -781,12 +781,7 @@ export function createObjects(
     if (moves.length === 0 || reduced() || typeof Element.prototype.animate !== 'function') return;
     const dist = Math.max(...moves.map((m) => m.dist));
     const duration = Math.min(RETURN_MAX_MS, RETURN_BASE_MS + dist / 2) * slowFactor();
-    const ground = (it: LayoutItem, on: boolean): void => {
-      if (root.querySelector('.ts-home-print, [data-field]') === null) return;
-      if (it.el.classList.contains('mood-plate')) return;
-      if (on) it.el.style.outline = `${CLEAR_ZONE}px solid var(--paper)`;
-      else it.el.style.removeProperty('outline');
-    };
+    const ground = (it: LayoutItem, on: boolean): void => paperGround(root, it.el, on);
     const animations = moves.map((m) =>
       m.it.el.animate([{ transform: m.from }, { transform: m.to }], {
         duration,

@@ -10177,52 +10177,52 @@
     {
       "id": "home.hero.select",
       "feature": "decks",
-      "interaction": "A click or Tab on the hero title draws the 1 px ring in #2f5ce0, eight square handles, the stem, the knob and the chip \"Title\" within 50 ms; no blue is drawn on the page before it (answer 3)",
+      "interaction": "A click or Tab on the hero frame's slide 1 title draws the 1 px ring in #2f5ce0, eight square handles, the stem, the knob and the chip \"Title\" within 50 ms, and any slide the frame's filmstrip shows takes the same selection; no blue is drawn before it",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "direction-a hero-edit.png; research-product 5.1",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+      "evidence": "direction-a hero-edit.png",
+      "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
       "id": "home.hero.edit",
       "feature": "decks",
-      "interaction": "Dragging the title 160 px follows the pointer within one frame and snaps within 6 px of the centre line with a 1 px guide in #2f5ce0 (answer 3); a second click or Enter types at the pointer; Escape ends; Undo restores the words and then the place, the return on the move curve within 700 ms by transform; on touch the first tap only selects; on release the field prints again with the clear zone under the title's new place in one frame (answer 1)",
+      "interaction": "Dragging the frame's title 100 px follows the pointer within one frame and snaps within 6 px of a centre line with a 1 px guide; a second click or Enter types; Escape ends; the hero's Undo puts the words back and then returns the title on the move curve within 700 ms by transform; the change adds its Version history row; on touch the first tap only selects; a press stops the loop for good",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "direction-a probe/drive-result.json; judge-1 3 (Undo by left and top)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+      "evidence": "direction-a hero-edit.png",
+      "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
       "id": "home.canvas.gestures",
       "feature": "decks",
-      "interaction": "On slide 6, the Rosetta Stone (answer 1): resize by the east handle with the opposite edge fixed at any rotation; Shift turns in 15 degree steps with the angle in the chip; a drag off the plate turns the Layout row to Canvas; Undo three times returns every object and the row reads Mood",
+      "interaction": "On slide 6, the Louisbourg lighthouse (lighthouse#h, #p1, #credit, #plate): resize by the east handle with the opposite edge fixed at any rotation; Shift turns in 15 degree steps with the angle in the chip; a drag off the plate turns the Layout row to Canvas and the moved text keeps its paper ground; Undo three times returns every object and the row reads Mood",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "direction-a canvas-edit.png",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+      "evidence": "direction-a canvas-edit.png; direction-b b-strip-canvas-gestures.png",
+      "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
       "id": "home.canvas.log",
       "feature": "decks",
-      "interaction": "Each gesture's end prints, within 450 ms, one line on the band's Command row (Inter, in a code element; no second #101010 panel) in a form of cli.json: turboslide slide to-canvas rosetta before the first, then turboslide block set rosetta#<block> /pos '<json>' or turboslide block rotate rosetta#<block> --to <degrees> with <block> from canvasBlock (answer 1) and the gesture's values in whole slide units; no line breaks inside a token at 390; the live region reads it",
+      "interaction": "Each gesture's end prints, within 450 ms, one line on the band's Command row (Inter, in a code element; no #101010 panel in the band) in a form of cli.json: turboslide slide to-canvas lighthouse before the first, then turboslide block set lighthouse#<block> /pos '<json>' or turboslide block rotate lighthouse#<block> --to <degrees> with <block> from canvasBlock and the gesture's values in whole slide units; no line breaks inside a token at 390; the live region reads it",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "b-strip-canvas-gestures.png; judge-1 7; judge-2 6; judge-3 6 graft 2",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+      "evidence": "direction-a canvas-edit.png; direction-b b-strip-canvas-gestures.png",
+      "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
       "id": "home.objects.keyboard",
       "feature": "decks",
-      "interaction": "Tab reaches each object of slides 1 and 6; arrows nudge 1 unit and Shift 10 (packages/viewer/src/keys.ts 164, 165), nudges within 700 ms are one undo step; Option or Alt with Left or Right turns 15 degrees and with Shift 1 degree; Enter edits; Escape returns focus to the object; [, ] and S do nothing",
+      "interaction": "Tab reaches each object of the hero frame's shown slide, the miniature's stage and the lighthouse in reading order; arrows nudge 1 unit and Shift 10 (packages/viewer/src/keys.ts 164, 165), nudges within 700 ms are one undo step; Option or Alt with Left or Right turns 15 degrees and with Shift 1 degree; Enter edits; Escape returns focus to the object; [, ] and S do nothing",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "judge-3 3 (ka.mjs); critic 2 (Google's keys)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
+      "note": "docs/LANDING.md 6.7 (second pass)"
     },
     {
       "id": "home.budget.live-module",

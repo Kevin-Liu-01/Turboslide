@@ -409,6 +409,22 @@ const layouts = new WeakMap<HTMLElement, SheetLayout>();
 const dithered = (root: HTMLElement): boolean =>
   root.querySelector('.ts-home-print, [data-field]') !== null;
 
+/**
+ * A moved text box's paper on a dithered slide (integrator.md 2.2, LANDING.md 2.6 "the moved text
+ * keeps its paper ground"): the box's own ground and a clear zone of `CLEAR_ZONE` px around it, so
+ * its type never reads over the print. A plate draws its own.
+ */
+export function paperGround(root: HTMLElement, el: HTMLElement, on: boolean): void {
+  if (!dithered(root) || el.classList.contains('mood-plate')) return;
+  if (on) {
+    el.style.outline = `${CLEAR_ZONE}px solid var(--paper)`;
+    el.style.backgroundColor = 'var(--paper)';
+  } else {
+    el.style.removeProperty('outline');
+    el.style.removeProperty('background-color');
+  }
+}
+
 /** The layout of a slide root, made once per root. */
 export function sheetLayout(root: HTMLElement): SheetLayout {
   const known = layouts.get(root);
@@ -447,11 +463,7 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
     return list;
   };
   const scale = (): number => root.getBoundingClientRect().width / UNITS;
-  const ground = (it: LayoutItem, on: boolean): void => {
-    if (!dithered(root) || it.el.classList.contains('mood-plate')) return;
-    if (on) it.el.style.outline = `${CLEAR_ZONE}px solid var(--paper)`;
-    else it.el.style.removeProperty('outline');
-  };
+  const ground = (it: LayoutItem, on: boolean): void => paperGround(root, it.el, on);
   /** frees one item in place (it was laid out with its spacer's room) */
   const freeOne = (
     it: LayoutItem,

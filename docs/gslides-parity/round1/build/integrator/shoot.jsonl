@@ -1,0 +1,69 @@
+{"at":"2026-10-03T11:37:49.574Z","load":17.83203125,"start":"https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app","oidc":true}
+{"at":"2026-10-03T11:37:50.007Z","load":17.83203125,"card":200,"bytes":173321,"type":"image/png"}
+{"at":"2026-10-03T11:38:24.157Z","load":15.1337890625,"created":"untitled-20261003-c5er"}
+{"at":"2026-10-03T11:38:34.091Z","load":14.34423828125,"shot":"home-1440-light.jpg","bytes":108421,"quality":72}
+{"at":"2026-10-03T11:38:36.894Z","load":14.34423828125,"shot":"decks-1440-light.jpg","bytes":48894,"quality":72}
+{"at":"2026-10-03T11:38:39.572Z","load":14.396484375,"shot":"notfound-1440-light.jpg","bytes":118858,"quality":72}
+{"at":"2026-10-03T11:38:42.396Z","load":14.396484375,"shot":"refused-1440-light.jpg","bytes":23537,"quality":72}
+{"at":"2026-10-03T11:38:44.292Z","load":13.9638671875,"shot":"editor-1440-light.jpg","bytes":41347,"quality":72}
+{"at":"2026-10-03T11:38:52.292Z","load":13.32568359375,"step":"select","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-03T11:38:53.080Z","load":12.73876953125,"shot":"menus-1440-light.jpg","bytes":48369,"quality":72}
+{"at":"2026-10-03T11:38:53.843Z","load":12.73876953125,"signin":"no visible Sign In at 1440"}
+{"at":"2026-10-03T11:38:56.170Z","load":12.73876953125,"shot":"share-1440-light.jpg","bytes":52490,"quality":72}
+{"at":"2026-10-03T11:38:58.498Z","load":12.27880859375,"shot":"versions-1440-light.jpg","bytes":48731,"quality":72}
+{"at":"2026-10-03T11:39:02.833Z","load":12.01611328125,"shot":"present-1440-light.jpg","bytes":28843,"quality":72}
+{"at":"2026-10-03T11:39:06.230Z","load":12.01611328125,"shot":"view-1440-light.jpg","bytes":34599,"quality":72}
+{"at":"2026-10-03T11:39:09.270Z","load":11.6142578125,"access":404}
+{"at":"2026-10-03T11:39:09.288Z","load":11.6142578125,"shot":"access-1440-light.jpg","bytes":29701,"quality":72}
+{"at":"2026-10-03T11:39:12.189Z","load":11.6142578125,"shot":"home-390-light.jpg","bytes":43388,"quality":72}
+{"at":"2026-10-03T11:39:15.005Z","load":11.48486328125,"shot":"decks-390-light.jpg","bytes":26364,"quality":72}
+{"at":"2026-10-03T11:39:17.721Z","load":11.60595703125,"shot":"notfound-390-light.jpg","bytes":48163,"quality":72}
+{"at":"2026-10-03T11:39:20.393Z","load":11.60595703125,"shot":"refused-390-light.jpg","bytes":17901,"quality":72}
+{"at":"2026-10-03T11:39:22.273Z","load":11.60595703125,"shot":"editor-390-light.jpg","bytes":14351,"quality":72}
+{"at":"2026-10-03T11:39:30.274Z","load":10.81103515625,"step":"select","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-03T11:39:31.525Z","load":10.81103515625,"shot":"menus-390-light.jpg","bytes":20528,"quality":72}
+{"at":"2026-10-03T11:39:32.284Z","load":10.81103515625,"signin":"no visible Sign In at 390"}
+{"at":"2026-10-03T11:39:34.600Z","load":10.34521484375,"shot":"share-390-light.jpg","bytes":23605,"quality":72}
+{"at":"2026-10-03T11:39:36.895Z","load":10.34521484375,"shot":"versions-390-light.jpg","bytes":20419,"quality":72}
+{"at":"2026-10-03T11:39:41.609Z","load":10.3173828125,"shot":"present-390-light.jpg","bytes":15709,"quality":72}
+{"at":"2026-10-03T11:39:44.924Z","load":9.89111328125,"shot":"view-390-light.jpg","bytes":23565,"quality":72}
+{"at":"2026-10-03T11:39:48.004Z","load":9.6591796875,"access":404}
+{"at":"2026-10-03T11:39:48.018Z","load":9.6591796875,"shot":"access-390-light.jpg","bytes":21939,"quality":72}
+{"at":"2026-10-03T11:39:50.870Z","load":9.6591796875,"shot":"home-1440-dark.jpg","bytes":106587,"quality":72}
+{"at":"2026-10-03T11:39:53.662Z","load":9.28564453125,"shot":"decks-1440-dark.jpg","bytes":49491,"quality":72}
+{"at":"2026-10-03T11:39:56.362Z","load":9.28564453125,"shot":"notfound-1440-dark.jpg","bytes":118423,"quality":72}
+{"at":"2026-10-03T11:39:59.104Z","load":9.7431640625,"shot":"refused-1440-dark.jpg","bytes":23311,"quality":72}
+{"at":"2026-10-03T11:40:00.905Z","load":9.7431640625,"shot":"editor-1440-dark.jpg","bytes":41964,"quality":72}
+{"at":"2026-10-03T11:40:08.908Z","load":9.8017578125,"step":"select","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-03T11:40:09.728Z","load":9.8017578125,"shot":"menus-1440-dark.jpg","bytes":48862,"quality":72}
+{"at":"2026-10-03T11:40:10.491Z","load":9.8017578125,"signin":"no visible Sign In at 1440"}
+{"at":"2026-10-03T11:40:12.821Z","load":10.2978515625,"shot":"share-1440-dark.jpg","bytes":52683,"quality":72}
+{"at":"2026-10-03T11:40:15.149Z","load":10.2978515625,"shot":"versions-1440-dark.jpg","bytes":47600,"quality":72}
+{"at":"2026-10-03T11:40:19.696Z","load":10.43408203125,"shot":"present-1440-dark.jpg","bytes":29269,"quality":72}
+{"at":"2026-10-03T11:40:23.075Z","load":9.99853515625,"shot":"view-1440-dark.jpg","bytes":35136,"quality":72}
+{"at":"2026-10-03T11:40:26.413Z","load":9.99853515625,"access":404}
+{"at":"2026-10-03T11:40:26.429Z","load":9.99853515625,"shot":"access-1440-dark.jpg","bytes":29351,"quality":72}
+{"at":"2026-10-03T11:40:29.322Z","load":9.91845703125,"shot":"home-390-dark.jpg","bytes":42593,"quality":72}
+{"at":"2026-10-03T11:40:32.196Z","load":9.91845703125,"shot":"decks-390-dark.jpg","bytes":26525,"quality":72}
+{"at":"2026-10-03T11:40:34.851Z","load":9.9248046875,"shot":"notfound-390-dark.jpg","bytes":47830,"quality":72}
+{"at":"2026-10-03T11:40:37.509Z","load":9.9248046875,"shot":"refused-390-dark.jpg","bytes":17652,"quality":72}
+{"at":"2026-10-03T11:40:39.332Z","load":10.0107421875,"shot":"editor-390-dark.jpg","bytes":15032,"quality":72}
+{"at":"2026-10-03T11:40:47.334Z","load":9.76953125,"step":"select","error":"TimeoutError: locator.click: Timeout 8000ms exceeded."}
+{"at":"2026-10-03T11:40:48.604Z","load":9.54736328125,"shot":"menus-390-dark.jpg","bytes":20510,"quality":72}
+{"at":"2026-10-03T11:40:49.363Z","load":9.54736328125,"signin":"no visible Sign In at 390"}
+{"at":"2026-10-03T11:40:51.685Z","load":9.54736328125,"shot":"share-390-dark.jpg","bytes":23588,"quality":72}
+{"at":"2026-10-03T11:40:53.984Z","load":9.58349609375,"shot":"versions-390-dark.jpg","bytes":20538,"quality":72}
+{"at":"2026-10-03T11:40:58.401Z","load":9.45654296875,"shot":"present-390-dark.jpg","bytes":15953,"quality":72}
+{"at":"2026-10-03T11:41:01.738Z","load":9.45654296875,"shot":"view-390-dark.jpg","bytes":23344,"quality":72}
+{"at":"2026-10-03T11:41:04.829Z","load":9.33984375,"access":404}
+{"at":"2026-10-03T11:41:04.847Z","load":9.33984375,"shot":"access-390-dark.jpg","bytes":21631,"quality":72}
+{"at":"2026-10-03T11:41:08.027Z","load":8.912109375,"teardown":"untitled-20261003-c5er","removed":401,"after":200}
+{"at":"2026-10-03T11:41:08.048Z","load":8.912109375,"end":"https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app"}
+{"at":"2026-10-03T14:53:37.680Z","load":14.66357421875,"start":"https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app","oidc":true}
+{"at":"2026-10-03T14:54:19.532Z","load":13.49560546875,"created":"untitled-20261003-hkxi"}
+{"at":"2026-10-03T14:54:31.748Z","load":12.81005859375,"shot":"select-1440-light.jpg","bytes":43991,"quality":72}
+{"at":"2026-10-03T14:54:37.468Z","load":12.5849609375,"shot":"select-390-light.jpg","bytes":15710,"quality":72}
+{"at":"2026-10-03T14:54:43.052Z","load":12.8583984375,"shot":"select-1440-dark.jpg","bytes":45717,"quality":72}
+{"at":"2026-10-03T14:54:48.891Z","load":13.5107421875,"shot":"select-390-dark.jpg","bytes":16919,"quality":72}
+{"at":"2026-10-03T14:54:52.070Z","load":13.5107421875,"teardown":"untitled-20261003-hkxi","info":200,"trashed":200,"removed":200,"after":404}
+{"at":"2026-10-03T14:54:52.088Z","load":13.5107421875,"end":"https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app"}

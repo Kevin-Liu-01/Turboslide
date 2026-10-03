@@ -1,0 +1,443 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-03T14:52:49.228Z",
+  "ms": 12801,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 1,
+    "ms": 12787,
+    "report": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/int/local-accounts/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 17,
+  "passed": 4,
+  "failed": 3,
+  "notDriven": 10,
+  "manual": [
+    "accounts.google-roundtrip"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [
+    "accounts.google-roundtrip"
+  ],
+  "commit": "1c821bbf",
+  "origin": "http://localhost:4510",
+  "date": "2026-10-03",
+  "results": {
+    "people.verified-badge": "failed",
+    "people.versions-author-account": "not driven",
+    "people.labels-disambiguated": "not driven",
+    "share.dialog.grant-email-line": "not driven",
+    "people.avatar-upload": "not driven",
+    "people.avatar-cap-refusal": "not driven",
+    "people.avatar-rotation": "not driven",
+    "people.avatar-fallback-plate": "not driven",
+    "people.avatar-link-visitor": "not driven",
+    "people.avatar-metadata-stripped": "not driven",
+    "accounts.google-button": "passed",
+    "accounts.google-error-sentence": "passed",
+    "accounts.google-leaves": "passed",
+    "accounts.email-hidden-without-mail": "passed",
+    "accounts.decks-list-scoped": "failed",
+    "accounts.sign-out-clean": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "people.verified-badge",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "people.versions-author-account",
+        "feature": "versions",
+        "result": "not driven"
+      },
+      {
+        "id": "people.labels-disambiguated",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "share.dialog.grant-email-line",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-upload",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-cap-refusal",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-rotation",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-fallback-plate",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-link-visitor",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "people.avatar-metadata-stripped",
+        "feature": "share",
+        "result": "not driven"
+      },
+      {
+        "id": "accounts.decks-list-scoped",
+        "feature": "share",
+        "result": "failed"
+      },
+      {
+        "id": "accounts.sign-out-clean",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": [
+      {
+        "id": "accounts.google-roundtrip",
+        "feature": "share",
+        "reason": "no identity database on this base"
+      }
+    ]
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "people.avatar-upload",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-rotation",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "result": "not driven"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "result": "not driven"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "result": "not driven"
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "result": "not driven"
+    },
+    {
+      "id": "accounts.decks-list-scoped",
+      "feature": "share",
+      "result": "failed"
+    },
+    {
+      "id": "accounts.sign-out-clean",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TypeError: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "skipped"
+    },
+    {
+      "id": "accounts.decks-list-scoped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TypeError: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "accounts.sign-out-clean",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "TypeError: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "accounts.google-button",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-leaves",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-error-sentence",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.email-hidden-without-mail",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-roundtrip",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no identity database on this base"
+    }
+  ]
+}

@@ -1,0 +1,921 @@
+{
+  "base": "http://localhost:4520",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-03T15:15:20.038Z",
+  "ms": 363278,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 363261,
+    "json": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/int/local-rerun-dev-slides/core-walk.json",
+    "deckId": "untitled-20261003-n2qw",
+    "steps": 107
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "slides"
+    ],
+    "costRows": null
+  },
+  "rows": 83,
+  "passed": 82,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "e1ad28d4",
+  "origin": "http://localhost:4520",
+  "date": "2026-10-03",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "slides.new.toolbar": "passed",
+    "slides.new.arrow-layout": "passed",
+    "slides.new.menu": "passed",
+    "slides.new.ctrl-m-card": "passed",
+    "slides.new.ctrl-m-canvas": "passed",
+    "slides.new.context": "passed",
+    "slides.new.undo": "passed",
+    "slides.duplicate.context": "passed",
+    "slides.duplicate.menu": "passed",
+    "slides.duplicate.cmd-d": "passed",
+    "slides.duplicate.undo-toolbar": "passed",
+    "slides.duplicate.undo-redo-keys": "passed",
+    "slides.duplicate.two-selected-cmd-d": "passed",
+    "slides.duplicate.two-selected-menu": "passed",
+    "slides.delete.key": "passed",
+    "slides.delete.undo-snackbar": "passed",
+    "slides.delete.context": "passed",
+    "slides.delete.undo-cmd-z": "passed",
+    "slides.delete.menu-undo-redo": "passed",
+    "slides.delete.two-selected-key-undo": "passed",
+    "slides.delete.two-selected-menu": "passed",
+    "slides.delete.two-selected-edit-menu": "passed",
+    "slides.delete.canvas-focus-undo": "passed",
+    "slides.delete.undo-redo-saved": "passed",
+    "slides.select.click": "passed",
+    "slides.select.arrows-shift": "passed",
+    "slides.select.shift-cmd-click": "passed",
+    "slides.select.cmd-click-toggle": "passed",
+    "slides.reorder.drag-above": "passed",
+    "slides.reorder.drag-below": "passed",
+    "slides.reorder.cmd-up-down": "passed",
+    "slides.reorder.menu-to-end-undo": "passed",
+    "slides.reorder.undo-drag": "passed",
+    "slides.reorder.two-selected-drag": "passed",
+    "slides.skip.context": "passed",
+    "slides.skip.context-two": "passed",
+    "slides.skip.menu-unskip": "passed",
+    "slides.skip.menu-two": "passed",
+    "slides.layout.picker-open-escape": "passed",
+    "slides.layout.apply.title": "passed",
+    "slides.layout.apply.opener": "passed",
+    "slides.layout.apply.split": "passed",
+    "slides.layout.apply.cols": "passed",
+    "slides.layout.apply.title-only": "passed",
+    "slides.layout.apply.one-column": "passed",
+    "slides.layout.apply.statement": "passed",
+    "slides.layout.apply.section-description": "passed",
+    "slides.layout.apply.mood": "passed",
+    "slides.layout.apply.big-number": "passed",
+    "slides.layout.apply.blank": "passed",
+    "slides.layout.apply.rows": "passed",
+    "slides.layout.apply.plain": "passed",
+    "slides.layout.apply.table": "passed",
+    "slides.layout.apply.figure": "passed",
+    "slides.layout.apply.pair": "passed",
+    "slides.layout.apply.tiles": "passed",
+    "slides.layout.apply.details": "passed",
+    "slides.layout.apply.board": "passed",
+    "slides.layout.apply.matrix": "passed",
+    "slides.layout.apply.closing": "passed",
+    "slides.layout.reopen-ring": "passed",
+    "slides.layout.context-apply": "passed",
+    "slides.layout.menu-apply-undo": "passed",
+    "slides.layout.fresh-slide-two-picks-no-carry": "passed",
+    "slides.layout.typed-title-round-trip": "passed",
+    "slides.layout.snackbar-counts-typed-only": "passed",
+    "slides.layout.undo-typed": "passed",
+    "slides.notes.type": "passed",
+    "slides.notes.per-slide": "passed",
+    "slides.notes.resize-handle": "passed",
+    "slides.notes.reload": "passed",
+    "slides.counter.footer-and-cards": "passed",
+    "slides.hash.click-and-reload": "passed",
+    "slides.reorder.menu-up-down-beginning": "passed",
+    "slides.reorder.cmd-shift-up-down": "passed",
+    "slides.notes.view-menu-toggle": "passed",
+    "slides.context.empty-canvas": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "slides.numbers.apply": "passed",
+    "slides.layout.title-and-body-single": "passed",
+    "slides.layout.subtitle-prompt": "passed",
+    "slides.layout.new-slide-inherits": "passed",
+    "slides.layout.tile-sentences": "passed",
+    "slides.import.none-preselected": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "slides.import.none-preselected",
+        "feature": "slides",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "slides.import.none-preselected",
+      "feature": "slides",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "slides.new.toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.arrow-layout",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-card",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.ctrl-m-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.new.undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-toolbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.undo-redo-keys",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-cmd-d",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.duplicate.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.key",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-snackbar",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-cmd-z",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.menu-undo-redo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-key-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.two-selected-edit-menu",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.canvas-focus-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.delete.undo-redo-saved",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.arrows-shift",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.shift-cmd-click",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.select.cmd-click-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-above",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.drag-below",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.menu-to-end-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.undo-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.two-selected-drag",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.context-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-unskip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.skip.menu-two",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.picker-open-escape",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.opener",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.split",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.cols",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.title-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.one-column",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.statement",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.section-description",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.mood",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.big-number",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.blank",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.rows",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.plain",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.table",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.figure",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.pair",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.tiles",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.details",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.board",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.matrix",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.apply.closing",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.reopen-ring",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.context-apply",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.menu-apply-undo",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.fresh-slide-two-picks-no-carry",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.typed-title-round-trip",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.snackbar-counts-typed-only",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.undo-typed",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.type",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.per-slide",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.resize-handle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.counter.footer-and-cards",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.hash.click-and-reload",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.menu-up-down-beginning",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.reorder.cmd-shift-up-down",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.notes.view-menu-toggle",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.context.empty-canvas",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.numbers.apply",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.title-and-body-single",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.subtitle-prompt",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.new-slide-inherits",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.tile-sentences",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.import.none-preselected",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "File > Import slides, the General Translation brand deck; click three; Shift click a range; None, three, Import: source import-source-musjgzu6, a copy of the brand deck this principal made (the brand deck is not listed for it); list settled after 1254 ms, the copy offered after 1414 ms; 95 tiles; preselected 0; after three clicks 3, button \"Import 3 slides\"; after the Shift click 8 (8 expected); after None 0; landed 0; the copy answers 404"
+    }
+  ]
+}

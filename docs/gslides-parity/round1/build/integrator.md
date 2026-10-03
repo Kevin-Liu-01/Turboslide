@@ -3,9 +3,10 @@
 The integrator of Round 1 (docs/NEXT.md 4.1, the quick win hotfixes of 3.2 and the round's 21
 pushes of 4.1.6), in the worktree `/Users/kevinliu/repos/Turboslide-next` on `next/round1`. Ports
 4510 and 4520. The branch was cut from `realtime/round` at `e8b20fec` with `origin/main`
-(`cc06189b`) merged in as `f3e9cd86`; it now holds 49 commits past that merge.
+(`cc06189b`) merged in as `f3e9cd86`. The first attempt left 49 commits past that merge, the
+second added nine (this note's two commits among them).
 
-Two attempts wrote this note. The first ran from 2026-10-03 03:00Z to 05:35Z: it answered the
+Two attempts wrote this note. The first ran from about 2026-10-03 03:20Z to 05:35Z: it answered the
 lanes' requests, made the 15 integrator commits of section 2, ran the chain's steps 1 to 12, 19,
 28 to 30 and 33, deployed the round's one preview and read the hosted smoke on it. It ended when
 the app was quit, with no note written. The second attempt started at 05:47Z from the first's
@@ -167,7 +168,7 @@ matrix and tested before the commit).
 | `7d960104` | B4b#6 seam | the store's template test formatted (check step 19) |
 | `f6829d70` | H2 seam | the hosted smoke's /decks row reads that a cookieless stranger is listed no deck (the preview's smoke) |
 
-The second attempt's commits, each answering a red of its whole matrix run (section 4.2):
+The second attempt's commits, each answering a red of its runs (sections 3 and 4.2):
 
 | Commit | Push | What it does |
 | --- | --- | --- |
@@ -176,6 +177,9 @@ The second attempt's commits, each answering a red of its whole matrix run (sect
 | `addedf48` | B2c#17 seam | `chrome.buttons.one-rule` opens the refused page with an id every server refuses |
 | `1c821bbf` | B3b#13 seam | `share.dialog.you-label` names its second browser through Change name as well |
 | `e1ad28d4` | B3b#13 seam | the accounts spec names a second browser through Change name when Share asks no name |
+| `717aabe9` | B6c#21 seam | this note's first version, the run ledgers and the pictures |
+| `adf1fd75` | B2b#16 seam | the viewer spec reads a ruled row's 160 px capture as the home page's capture (check step 17) |
+| `6b417c80` | B3b#14 seam | the chrome lint opens the editor's menus through the Menus key at a phone width (check step 18) |
 
 ### 3. The chain
 
@@ -200,30 +204,31 @@ and the seed deck is restored from git after the segment that ran it.
 | 10 | renders in both themes | first, 04:57Z, load 21.4; second, 16:02:14Z to 16:04:19Z, load 21.62 to 12.25 | ok, 22.7 s |
 | 11 | two renders per slide | first, 04:57Z; second, 16:04:19Z | ok (190 renders for the imported 95 slides; red on the old 170 pin) |
 | 12 | `compare-to-shoot.mjs` against the Prototemplate shoot | first, 04:57Z to 04:58Z, load 21.5 to 25.7; second, 16:04:19Z to 16:05:26Z, load 12.25 to 30.92 | ok, 66.3 s: 190 pairs, 0 over budget, worst 0.408 percent (`fixed-points`), mean 0.017; the speed mark slides read 0.001 to 0.002 percent as html blocks |
-| 13 | the contact sheet | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 14 | one cell per slide | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 15 | `turboslide lint all` | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 16 | `turboslide build --budget 16` | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 17 | `viewer.spec.ts` on the chain's dev server | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 18 | the chrome lint on six routes | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
+| 13 | the contact sheet | second, 20:30:09Z to 20:30:16Z, load 23.70 to 23.89 | ok, 6.2 s |
+| 14 | one cell per slide | second, 20:30:16Z | ok (95 cells for the imported 95 slides; skipped on the realtime round's 85 pin) |
+| 15 | `turboslide lint all` | second, 18:05:57Z to 18:07:50Z (opens no browser: the rendered layer reads step 10's records), load 58 to 66 | red as standing: 221 findings, 1 at severity 3: `asset/credit-on-plate` on `mood-dictionary` of the live Prototemplate deck that step 7 imports in place. That slide now pictures the 1897 page with the credit "Image: Oxford University Press, 1897, scanned by the Internet Archive, public domain", and the rule checks the plate against `OPENERS.md` 255, which still names Cullen328's Compact OED photograph. B4's licence read found no licence stated on the 1897 page's source, so the committed `decks/gt-brand` and the GT template keep the Compact OED (b4.md request 11, Kevin's) |
+| 16 | `turboslide build --budget 16` | second, 18:07:50Z to 18:08:01Z, load 66 | ok, 10.6 s: 14.79 MiB of the 16 MiB budget, 95 slides |
+| 17 | `viewer.spec.ts` on the chain's dev server | second, 20:35:32Z to 20:37:49Z, load 23.41 to 22.11 | red, 7 of 8: "the home cards keep their captures" waited for a 320 px render on /decks, and a ruled row asks 160 px since B2b#16; driver fixed in `adf1fd75`. Read again at `adf1fd75`, 21:45:19Z to 21:46:02Z, load 10.99 to 20.05: ok, 8 of 8 in 23.4 s |
+| 18 | the chrome lint on six routes | second, 20:37:49Z to 20:39:59Z, load 22.11 to 38.83 | red: /deck/gt-brand's 24 audits passed with 0 findings; /edit stopped at 390 px, where the editorMenu state clicked the hidden menu bar (the Menus key since B3b#14); fixed in `6b417c80`. Read again at `6b417c80`, 21:46:02Z to 21:47:40Z, load 20.05 to 23.65: red on a real finding, the /deck audits clean, the /edit audits 18 with 2 that find: at 390 in the editorPanel state, in both themes, the Menus key's focus outline sits 0.5 px off the key's box at y 48 and 79 ("junction gap 0.5"); the step stops there, so /new, /decks, /home and Not found were not audited in this run (B5b's own run read them with 0 failing, b5.md) |
 | 19 | prettier and the README ledger | first, 04:38Z, load 34.7, on `7d960104`'s tree | ok, 64.1 s (H5's one ignore line; red on the realtime round) |
-| 20 | the parity audit | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 21 | fifteen e2e specs | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 22 | the native and flatten exports | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 23 | the fonts build | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 24 | the canvas fidelity of three decks | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 25 | the render worker's container | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 26 | nine e2e specs (accounts, share, security and more) | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
-| 27 | the layout shift audit on 4344 | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
+| 20 | the parity audit | second, 21:09:00Z to 21:29:58Z, load 19.63 to 16.86 | red as standing (red before the round): the audit's own count 2,703 passed, 102 failed, 380 skipped. Some of its expectations predate Round 1's words and cuts (File > New > "Presentation" where the row reads "New presentation", a panel titled "Brand kit" where it reads "Theme", the Logo dialog from Insert); others are the toolbar and shortcut reads of the realtime round's list. The step rewrites the tracked `docs/gslides-parity/verification-3/parity-audit.json` (last committed 2026-09-15); its output was kept as `.turboslide/round1/int/parity-audit-step20.json` and the tracked file restored from git |
+| 21 | fifteen e2e specs on the chain's dev server | second, 21:45:19Z to 22:03:39Z at `6b417c80`, load 10.99 at the start (after the hook's reruns of 17 and 18) to 20.09 | red: 35 passed, 23 failed, 14 did not run. The realtime round named this step red before the round, with no count to compare. Eight of the 23 read a word, a count or a control that changed: `hygiene.spec` and `landing.spec` wait for "Not saved yet" (B3b#9 shows one status phrase), `present.spec` for the Options menu's stubs behind Tools > Advanced tools (B3a#7), `objects.spec` meets two `insert.shape` items in strict mode (B3b#14's Menus key); and, by a push this note did not trace, `home.spec` reads "Delete Copy of Home beta forever?" without "This cannot be undone", `filmstrip.spec` counts 22 layouts against 21, and `deck-transfer.spec` reads "Fixture deck.zip" and, from a home card's Download, "Fixture deck.pptx" where it wants `fixture-r<n>.zip`. The other 15 (canvas, charts, export-batch, gslides-actions twice, filmstrip twice, present twice, tables, ten-tasks three times, text-editing, text-styles) are not attributed: no reading of this step on the base tree exists, and none was taken (section 6) |
+| 22 | the native and flatten exports | second, 20:32:20Z to 20:33:32Z, load 23.84 to 34.12 | ok, 72.1 s: both exports valid, the flatten report perfect |
+| 23 | the fonts build | second, 18:08:01Z | skip: no fonts venv at `.turboslide/venv` (standing) |
+| 24 | the canvas fidelity of three decks | second, 20:30:16Z to 20:32:20Z, load 23.89 to 23.84 | red, 123.9 s: 191 slides converted, 382 pairs, 28 over the 0.5 percent budget. The 28 are the seven speed mark slides of the imported `decks/gt-brand` and of the committed GT template, in both themes: speed-plate 18.58, speed-lockup 17.26, speed-monogram 13.63, speed-livery 13.57, speed-dithered 13.39, speed-ascii 8.6 and speed-double-cut 3.91 percent. They are html blocks (deviation 1): converting one to a canvas does not keep the drawing in place, b4.md requests 17 and 6. NEXT.md 4.1.3 item 24 records the same slides 13 to 18 percent off before the import. Every other pair is within budget (mean 0.934 percent) |
+| 25 | the render worker's container | second, 18:08:01Z | skip: no Docker daemon (standing) |
+| 26 | nine e2e specs (accounts, share, security and more) | second, 21:29:59Z to 21:45:19Z, load 16.86 to 10.99 | red as standing: 52 passed, 12 failed, 2 skipped. Eleven are the realtime round's eleven of this step (the accounts spec's share link, cors and chrome surface tests, `people.versions-author-account`, `share.dialog.grant-email-line`, and one each in comments, dither, presence, security, share and versions-by-author). The twelfth is `accounts.decks-list-scoped`: on the chain's file store H2 lists the whole store to every caller by design, so B's /decks reads four more decks; the row reads the tmp store and passed there (4.3) |
+| 27 | the layout shift audit on 4344 | second, 18:08:01Z | skip: no preview answers on 4344 (standing; this note started no server on another lane's port) |
 | 28 | the dependency audit | first, 04:38Z | ok: 2 advisories at high or above, both accepted in `scripts/audit-allow.json`, none expired |
 | 29 | the brand build, home assets, definitions and native record | first, 04:38Z | ok: the mark's paths match their rectangles; 32 files match the manifest; 8 files of 4 pictures; the Linux addon pending as recorded |
 | 30 | the Vercel build and `check-vercel-output.mjs` | first, 04:40Z, load 30.7 | ok, 30.3 s: 40 of 40 assertions; the functions at 155.9 MB of the 250 MB cap |
 | 31 | the node-server build and its perf budget | second, 11:41:08Z to 11:45:06Z at `f6829d70`, load 8.91 to 21.07 | red as standing: the build ok; 105 of 148 budgets met. The 43 red: 32 js size rows (the largest chunk 1,156 KB against 586 KB on every route), 5 DOM counts (`/deck/gt-brand` 2,560, `/edit/gt-brand` 2,108, the filmstrip with 87 cards 2,818, each against 1,500) and 6 timings read as the load rose past 20 (the warm first byte of `/edit` 50 ms and `/present` 52 ms against 40, the new slide's painted card 20 ms against 16, its acknowledgement 2,040 ms against 250, the capture 2,045 ms against 2,000, the next `/decks` card 1,988 ms against 1,500), void under NEXT.md 4.0's load rule. The realtime round read the same 32 js rows and the DOM counts |
-| 32 | the core gate on the chain's dev server | not run yet | waiting since 16:05Z for a one minute load under 24 (it read 30 to 73) |
+| 32 | the core gate on the chain's dev server | not run | left to the ship: about 3 hours at a load under 24, which the machine did not hold from 16:05Z to 20:30Z. The whole matrix on the node-server build (4.2) is the run of record; the realtime round read this step at 1,069 rows, 900 passed |
 | 33 | the brand lint | first, 04:38Z | ok: enforce mode, 0 open, 22 accepted, 0 stale |
 
 Checks outside the chain, at `f6829d70` (second attempt, 05:50Z to 06:20Z), with `tsc -b` exit 0 and
-prettier clean again after each of the second attempt's five commits:
+prettier clean again after each of the second attempt's commits (and at `6b417c80`: vitest of
+`apps/studio/src/routes`, `packages/headless` and `docs/readme`, 17 files, 93 passed):
 
 - `node_modules/.bin/tsc -b`: exit 0.
 - vitest of the packages the last three commits changed: `scripts/hosting-check.test.mjs` and the
@@ -551,7 +556,10 @@ unless it says so.
   has no blank template, still draws the GT mark (hb.md request 5).
 - The importer, a later round: an inline `<svg>` as a typed block (b4.md request 6, which also
   closes request 17); a layout property overridden by a later rule keeps its first value, and
-  `justify-content: start` on a grid of auto tracks is dropped (b4.md request 19).
+  `justify-content: start` on a grid of auto tracks is dropped (b4.md request 19). Until then the
+  GT template's seven speed mark slides convert to a canvas 3.9 to 18.6 percent off their render
+  (check step 24), so a seller's first canvas write on one of them moves the drawing over its
+  text. B4b ships with this, as NEXT.md 4.1.3 item 24 expected.
 - The owner of `editor/refusal.ts`: the refused page shows the store's own words, for example
   "deckId must be a slug." (b2.md).
 - The owner of `decks.trash.tsx`: its layout predates the round's grammar (b2.md request 11).
@@ -581,11 +589,22 @@ From this note's runs:
   readings, the two rows on three runs (the throwaway box lands with no text), section 4.2.
 - B3b's next round, `PresenterConsole.css`: at 390 the presenter page's Next slide card runs past
   the viewport's right edge.
+- B3b's next round, `PhoneEditor.css`: at 390 the Menus key's focus outline sits 0.5 px off the
+  key's box (check step 18, two line law findings per theme in the editorPanel state).
 - The viewer's owner: at 390 the /deck view's keyboard hint covers the deck's title at first
   paint, and its facts table names the revision ("r3"), a process word.
-- The accounts spec's owner: a second accounts run on the same server within the mail window meets
-  the per-address code limit (429) on every row that signs in, since the spec signs in with fixed
-  addresses; a run of record needs a fresh identity database (section 4.3).
+- Round 3 (auth) and the accounts spec's owner: the tmp store counts as hosted, so
+  `TURBOSLIDE_AUTH_RATE_LIMIT=off` does not turn off the library's limit of 10 sign in mails per
+  IP per hour, and one run of the accounts spec signs in more than ten times from 127.0.0.1. Its
+  last rows meet 429 (section 4.3). A run of record needs a fresh server, or the switch honoured
+  on a checkout's tmp store.
+- The ship step, with B2 and B3 (check step 21, outside the core matrix): 23 of the fifteen specs'
+  tests failed and 14 did not run. Eight read a changed word, count or control (section 3's row);
+  their drivers follow the product before the ship. The other 15 need a reading of
+  the step on the base tree (`f3e9cd86`) to say whether Round 1 caused them; this note took none.
+- The accounts spec's owner (HA's rows): `accounts.decks-list-scoped` runs in check step 26 on the
+  chain's file store, where H2 lists the whole store to every caller, so it reads red there; it
+  should skip on a file store the way the spec's seeded deck rows skip on a tmp store.
 - The gate's owner: on a tmp store a relative `TURBOSLIDE_AUTH_DB` resolves under the overlay's
   `.turboslide`, so a gate run must name that path (the first accounts run read the checkout's
   file and found no code). `core-gate.mjs` could derive it from `TURBOSLIDE_OVERLAY_DIR`.
@@ -629,13 +648,24 @@ From this note's runs:
 10. The first attempt ended without a note. This note was written by the second attempt from the
     first attempt's commits, its scratch logs (`r1int/` in the session scratchpad) and its draft
     of section 1.
+11. The load rule was applied to Playwright runs, gates and picture batches. The chain's steps that
+    open no browser (8, 9, 11, 14, 15, 16 and the three that skip) ran at any load, with the load
+    beside each.
+12. Check step 32 was not run (section 3's row). The narrowed reruns of section 4.2 and the clean
+    accounts runs ran from hooks inside the sequence's waits (`r1int/hooks/`), each started at a
+    load under 24.
+13. Two clean ups were done by hand: the seed deck at 22:05Z, after the sequence's own `git
+    checkout` left the chain's import in place, and three node servers of the pair, which closed
+    their listener on SIGTERM and stayed alive until SIGKILL at 22:10Z.
+14. The interim commit `717aabe9` carried this note with the chain steps then waiting; the last
+    commit writes their readings.
 
 ### 8. The ship order
 
 The order NEXT.md asks for: the hotfixes in 3.3's order, then the 21 pushes of 4.1.6. Each push
 lists every commit that belongs to it, the push's own commit first and its seams after in branch
-order. The last commit of a push is the sha the guard deploys. This note's own commit is docs and
-rides the last push.
+order. The last commit of a push is the sha the guard deploys. This note's own commits are docs and
+ride the last push.
 
 | Order | Push | Commits |
 | --- | --- | --- |
@@ -661,19 +691,19 @@ rides the last push.
 | 20 | 11, B3b the stage's appearance | `cabd481d` |
 | 21 | 12, B3b the marks in the chrome | `53253fac` |
 | 22 | 13, B3b the dialogs and panels | `2a0da406`, `df2d52a8`, `c206823c`, `1c821bbf`, `e1ad28d4` |
-| 23 | 14, B3b the phone editor | `2108dad4`, `d05fc4b0`, `e8fdee8c` |
+| 23 | 14, B3b the phone editor | `2108dad4`, `d05fc4b0`, `e8fdee8c`, `6b417c80` |
 | 24 | 15, B2a /home | `3263728a`, `5b2af959` |
-| 25 | 16, B2b /decks | `24cc125e` |
+| 25 | 16, B2b /decks | `24cc125e`, `adf1fd75` |
 | 26 | 17, B2c the error pages | `247fe081`, `addedf48` |
 | 27 | 18, B2d the deck's card | `c9380a14` |
 | 28 | 19, B5a the brand lint in report mode | `db7f7ecc` |
 | 29 | 20, B5b the brand lint in enforce mode | `e4d98663` |
-| 30 | 21, B6c the round specifications moved | `f20cf8ac`, `84e2dee5`, then this note's commit |
+| 30 | 21, B6c the round specifications moved | `f20cf8ac`, `84e2dee5`, then this note's commits (`717aabe9` and the last) |
 
 The branch does not hold that order: each lane committed when its work was ready. I simulated the
 picks onto `f3e9cd86` with `git merge-tree --write-tree --merge-base=<commit>^` (no worktree, no
 branch and no ref moved; the simulation's commits are dangling objects). The tool and the orders
-are in the session scratchpad (`r1int/ship/simulate.mjs`, `order1.txt`, `orderH.txt`).
+are in the session scratchpad (`r1int/ship/simulate.mjs`, `order1.txt`, `orderI.txt`).
 
 - NEXT.md's order (the first attempt's 49 commits): 23 of 49 picks are clean. The rest conflict
   in 11 shared files: the matrix total line of `scripts/probes/core-matrix.test.mjs` (every push
@@ -684,8 +714,9 @@ are in the session scratchpad (`r1int/ship/simulate.mjs`, `order1.txt`, `orderH.
 - The hotfixes alone in 3.3's order (H2, H3 and H4 before H5 to H10, the rest in branch order):
   H2 conflicts only on the matrix total line, because H5 to H10 entered their rows' terms before
   it on the branch; H3 and H4 then follow from H2's tree.
-- The order below: 54 of 54 picks clean, and the last tree equals HEAD's tree. It keeps the
-  branch's order of the pushes and moves each seam next to its push where the pick stays clean.
+- The order below: every pick clean (57 of 57 at `6b417c80`), and the last tree equals HEAD's
+  tree. It keeps the branch's order of the pushes and moves each seam next to its push where the
+  pick stays clean.
 
 The order that applies without a conflict (33 pushes):
 
@@ -707,7 +738,7 @@ The order that applies without a conflict (33 pushes):
 | 14 | B3a#7 | `d85c7964`, `5bd0d5a9` | |
 | 15 | B1#2 | `bfc3888a`, `3274a686` | |
 | 16 | B1#3 | `a34b2ee9` | |
-| 17 | B2b#16 | `24cc125e` | |
+| 17 | B2b#16 | `24cc125e`, `adf1fd75` | |
 | 18 | B2c#17 | `247fe081`, `addedf48` | |
 | 19 | B2d#18 | `c9380a14` | |
 | 20 | B3a#8 | `9b70d0ae`, `7976a38e` | |
@@ -716,14 +747,14 @@ The order that applies without a conflict (33 pushes):
 | 23 | B3b#11 | `cabd481d` | |
 | 24 | B3b#12 | `53253fac` | |
 | 25 | B3b#13 | `2a0da406` | its driver seams ride push 31 (they conflict earlier) |
-| 26 | B3b#14 | `2108dad4`, `d05fc4b0`, `e8fdee8c` | |
+| 26 | B3b#14 | `2108dad4`, `d05fc4b0`, `e8fdee8c`, `6b417c80` | |
 | 27 | B5b#20 | `1adbc355`, `e4d98663` | `1adbc355` is a B4b seam in the deck linter |
 | 28 | B6c#21 | `f20cf8ac`, `84e2dee5` | 810 paths, mechanical |
 | 29 | B4a#5 | `33b3aa98` | |
 | 30 | B3a#8 seam | `21d484bb` | it conflicts when moved before B6c#21 or B4a#5 |
 | 31 | B3b#13 seam | `df2d52a8`, `c206823c`, `1c821bbf`, `e1ad28d4` | the same |
 | 32 | B2a#15 seam | `5b2af959` | the /home pictures of the round's chrome |
-| 33 | B4b#6 | `a904ef00`, `204226cf`, `c17fd8bf`, `0bebf711`, `7d960104`, then this note's commit | `a904ef00` must precede `c17fd8bf` (b4.md request 2 holds B4b's ship) |
+| 33 | B4b#6 | `a904ef00`, `204226cf`, `c17fd8bf`, `0bebf711`, `7d960104`, then this note's commits (`717aabe9` and the last) | `a904ef00` must precede `c17fd8bf` (b4.md request 2 holds B4b's ship) |
 
 Two things differ from NEXT.md. H2 ships seventh rather than first, and B4a and B4b ship after B6c,
 where 4.1.6 puts them fifth and sixth. 4.1.6 gives one reason for its order: push 4 follows push 2

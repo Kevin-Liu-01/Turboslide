@@ -382,11 +382,17 @@ test(title('decks.list.gt-brand-deck'), async () => {
   await gotoDecks();
   const t = Date.now();
   const id = await openGtBrandCopy(page, 30_000);
+  const addressed = Date.now() - t;
   scratch.add(id);
   await waitEditor(page);
   expect(id).not.toBe('gt-brand');
   const slides = await slideOrder(page);
-  expect(Date.now() - t, 'within 15 s').toBeLessThan(15_000);
+  const opened = Date.now() - t;
+  test.info().annotations.push({
+    type: 'copy',
+    description: `the copy ${id}: its editor address ${addressed} ms after the click, the editor settled with ${slides.length} slides at ${opened} ms`,
+  });
+  expect(opened, 'within 15 s').toBeLessThan(15_000);
   expect(slides.length).toBe(85);
 });
 

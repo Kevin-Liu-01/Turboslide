@@ -572,8 +572,9 @@
 /* ---- under 720 px: one Menus key, the stage over a horizontal filmstrip (C's phone editor) ---- */
 
 @media (max-width: 719.98px) {
+  /* the status row holds two lines, so the longest sentence reads whole at 390 */
   .ts-mini-editor {
-    grid-template-rows: 36px 44px auto 48px 40px;
+    grid-template-rows: 36px 44px auto 48px 56px;
   }
 
   .ts-mini-title {
@@ -594,9 +595,12 @@
     grid-template-rows: auto 52px;
   }
 
+  /* the stage keeps the slide's height before the chunk fills it, so the reserved box is its
+     final size from the document on (4.2) */
   .ts-mini-stage {
     padding: 0;
     order: 0;
+    aspect-ratio: 16 / 9;
   }
 
   .ts-mini-sheet {
@@ -637,6 +641,14 @@
 
   .ts-mini-status {
     padding: 0 12px;
+  }
+
+  .ts-mini-status [data-mini-status] {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    line-height: 18px;
   }
 
   .ts-mini-readout {

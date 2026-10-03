@@ -10,7 +10,7 @@ import {
   runCoverage,
 } from './logo-coverage.mjs';
 
-// The logo coverage list of a ship (docs/FEATURES.md 4.1): the judge's 146 names, the names file,
+// The logo coverage list of a ship (docs/archive/rounds/FEATURES.md 4.1): the judge's 146 names, the names file,
 // the match rule (title, slug or alias, case folded, a hyphen as a space), the counts and the file,
 // and a run over a fake search route.
 

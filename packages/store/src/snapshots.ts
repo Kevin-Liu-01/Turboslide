@@ -31,7 +31,7 @@ export const SNAPSHOT_GRACE_MS = 5 * 60_000;
 
 /**
  * The prune runs on every this many records the deck's log gains and once when the deck's last
- * stream on an instance closes, instead of after every commit (docs/SYNC.md 3.6, 4.4 rank 6;
+ * stream on an instance closes, instead of after every commit (docs/archive/rounds/SYNC.md 3.6, 4.4 rank 6;
  * audit-costs item 14): the one `list` of the write path leaves the hot path, and the retention
  * set of SNAPSHOT_KEEP_RECORDS bounds what waits between two prunes at about seventy snapshots.
  * Counted on the record number, which every instance agrees on, so two instances never prune

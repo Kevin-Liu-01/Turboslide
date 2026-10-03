@@ -282,7 +282,7 @@ describe('capabilitiesForRole (SPEC-3 6.2)', () => {
 });
 
 describe('the kill switches (SPEC-3 8.12)', () => {
-  it('lists the thirteen flags (the twelve of 8.12 and the assistant switch of docs/PRODUCT.md 6.3) with realtime off and every other on when Redis is unreachable', () => {
+  it('lists the thirteen flags (the twelve of 8.12 and the assistant switch of docs/archive/rounds/PRODUCT.md 6.3) with realtime off and every other on when Redis is unreachable', () => {
     expect(FLAG_NAMES).toHaveLength(13);
     expect(FLAG_DEFAULTS.realtime).toBe(false);
     for (const name of FLAG_NAMES)

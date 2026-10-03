@@ -105,7 +105,7 @@ export type HandleKind =
 
 /**
  * How the overlay draws a handle: `v` a vertical rule through the hit box, `h` a horizontal one
- * (a table's row seam, docs/OBJECTS.md 3.3 item 4), `square` an 11 px square, `area` an
+ * (a table's row seam, docs/archive/rounds/OBJECTS.md 3.3 item 4), `square` an 11 px square, `area` an
  * invisible region with a cursor, `chip` the selection chip itself, `ring` the 12 px rotation
  * ring joined to the selection by a 1 px line.
  */
@@ -312,7 +312,7 @@ function canvasHandles(
   const rows = placedOf(slide, ids, boxes);
   /* one object: its own box, so the eight squares and the rotation ring sit on the object's
      corners and top edge inside the overlay's turning layer, which turns them with the ring about
-     the box's centre (docs/OBJECTS.md 2.4; measured on the objects round's server: the union of a
+     the box's centre (docs/archive/rounds/OBJECTS.md 2.4; measured on the objects round's server: the union of a
      rotated object's bounding box put the squares on the bounding box's corners, turned a second
      time, 500 px from the centre of a 680 by 320 rectangle); several objects: the union of their
      rotated bounding boxes (SPEC-2 0.107), which the overlay never turns */
@@ -1057,7 +1057,7 @@ export function lineEndMutations(
   if (site) connect[which] = { block: site.blockId, site: site.site };
   else delete connect[which];
   const normalized = Object.keys(connect).length === 0 ? undefined : connect;
-  /* the axis an attached end asks for travels with the attachment (docs/POLISH.md 2.4 item 33;
+  /* the axis an attached end asks for travels with the attachment (docs/archive/rounds/POLISH.md 2.4 item 33;
      polish/build/b3.md request 2b): a connector into a top or bottom site leaves it vertically */
   const byId = new Map(canvasObjects(slide).map((each) => [each.id, each] as const));
   const fields = connectorFieldsBetween(
@@ -1077,7 +1077,7 @@ export function lineEndMutations(
 }
 
 /**
- * A table's resize stops at the content box (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6
+ * A table's resize stops at the content box (docs/archive/rounds/POLISH.md 2.2 item 11; polish/build/b2.md R6
  * (b); the row `tables.polish.seams-snap-grid`): the dragged edges never cross the content box
  * outward, so the columns stay on the slide, the way item 9 keeps the edge "+" inside it. An
  * edge that started outside the box is left where the drag puts it, so a table already past
@@ -1463,7 +1463,7 @@ export function actionForMutations(
   if (slideId === undefined)
     throw new RangeError('actionForMutations: the first mutation names no slide');
   for (const mutation of mutations) {
-    /* the brand kit's slots may ride with the slide's mutations (the features round, docs/FEATURES.md
+    /* the brand kit's slots may ride with the slide's mutations (the features round, docs/archive/rounds/FEATURES.md
        4.4: a logo placed and set as the kit's mark and footer in one write, one Undo); the store's
        slide.update admits the same writes (store-actions.ts checkSlideMutations) */
     if (
@@ -1508,7 +1508,7 @@ export const TOOL_DEFAULT_SIZE: Readonly<
 
 /**
  * The default box of one tool: TOOL_DEFAULT_SIZE by kind, except a table, whose height is its
- * rows' natural height (docs/OBJECTS.md 3.3 item 3; build/b2.md request 1g: `tableBoxHeight`,
+ * rows' natural height (docs/archive/rounds/OBJECTS.md 3.3 item 3; build/b2.md request 1g: `tableBoxHeight`,
  * 163 for three rows at 20 px, 271 for five), so the placed table's box fits its rows.
  */
 export function toolDefaultSize(tool: Exclude<EditorTool, 'select'>): [number, number] {
@@ -1750,7 +1750,7 @@ export function toolInsertMutation(
 }
 
 /**
- * The one `block.insert` a draw previews and commits (docs/OBJECTS.md 2.4): the press builds the
+ * The one `block.insert` a draw previews and commits (docs/archive/rounds/OBJECTS.md 2.4): the press builds the
  * same mutation the release will commit, so the sheet draws the object itself from the pointer
  * down, at the tool's default box while the pointer has not travelled DRAW_MIN_PX and at the
  * drawn box after (`drawnBox` decides both; `dragged` is its verdict), with the same id for the

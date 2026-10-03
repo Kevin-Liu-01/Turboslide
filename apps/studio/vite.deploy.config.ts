@@ -113,13 +113,13 @@ const SEED_IGNORE = [
 // function and `new URL('../calibration/calibration.json', import.meta.url)` names a file that
 // is not in the bundle.
 const PACKAGES_DIR = `${REPO}packages`;
-// The font catalog of the product round (docs/PRODUCT.md 4.2, 5.1; SPEC-5-amendments A5):
+// The font catalog of the product round (docs/archive/rounds/PRODUCT.md 4.2, 5.1; SPEC-5-amendments A5):
 // `fonts/assets/<id>/*` carries the 26 open families beside their LICENSE files once B5a's port
 // lands them (99 files, about 14.4 MB), so the export function names a catalog face in the
 // PowerPoint's `a:latin typeface` and embeds its subset in the PDF; on a tree without the
 // folders the glob matches nothing and the group is the 6.1 MB it was. The group's size after
 // the port is measured on the first preview deploy and recorded in build/b7.md, never typed here.
-// The shader gallery's stills of the features round's ship two (docs/FEATURES.md 5.4;
+// The shader gallery's stills of the features round's ship two (docs/archive/rounds/FEATURES.md 5.4;
 // `packages/materials/previews/*`, about 600 KB of webp once B5's `build-shader-previews.mjs`
 // commits them) join the group so a server route that serves a still from the workspace finds the
 // file in the function; on a tree without the folder the glob matches nothing.
@@ -137,7 +137,7 @@ const PACKAGES_PATTERN =
 // inert (docs/gslides-parity/sync/audit-costs.md item 19; docs/HOSTING-MOVE.md section 9).
 const HEAVY = { maxDuration: 800 } as const;
 
-// The assist route (docs/PRODUCT.md 6.3): its own function directory with a 60 s duration, so a
+// The assist route (docs/archive/rounds/PRODUCT.md 6.3): its own function directory with a 60 s duration, so a
 // WAF rule (firewall/rules.json R22) and a duration can name it; a model call
 // at low effort answers in about ten seconds and the route's own deadline is under the minute.
 const ASSIST = { maxDuration: 60 } as const;
@@ -151,7 +151,7 @@ const ASSIST = { maxDuration: 60 } as const;
 // it as an optional dependency too (measured without that: "nf3: could not resolve `traceInclude`
 // entry "@sparticuz/chromium" from any root" and no node_modules/@sparticuz in the function;
 // traceOpts.traceIncludeRoots is overwritten by Nitro's own root list and does not help).
-// @paper-design/shaders joined in the features round's ship two fix round (docs/FEATURES.md 5.5,
+// @paper-design/shaders joined in the features round's ship two fix round (docs/archive/rounds/FEATURES.md 5.5,
 // 5.8; VERIFICATION.md pass 1 F2): the hosted capture serves Paper's dist to its browser and
 // reads the noise texture out of it, so `packages/materials/src/capture.ts` `paperDistDir`
 // resolves the package at run time (`createRequire(import.meta.url).resolve`), while the server

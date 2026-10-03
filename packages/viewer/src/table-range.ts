@@ -1,4 +1,4 @@
-// A range of table cells (docs/RETURN.md 2.4, "a drag over cells to select a range"; the matrix
+// A range of table cells (docs/archive/rounds/RETURN.md 2.4, "a drag over cells to select a range"; the matrix
 // rows tables.cells.merge-unmerge and tables.tail.merge-unmerge-buttons; VERIFICATION.md return
 // round pass 1 finding R1-F6). Google Slides selects the cells between two cells of one table by a
 // Shift click on the second cell or by a drag from the first cell into another, and Merge cells,
@@ -122,7 +122,7 @@ export function cellRunPointer(cell: CellAddress): string {
   return `rows/${cell.row}/cells/${cell.col}`;
 }
 
-/** The four ways the caret leaves a cell at its text edges (docs/FEATURES.md 2.2 rank 5). */
+/** The four ways the caret leaves a cell at its text edges (docs/archive/rounds/FEATURES.md 2.2 rank 5). */
 export type CellDirection = 'left' | 'right' | 'up' | 'down';
 
 /** The anchor of the merged cell a position belongs to, else the position itself. */
@@ -132,7 +132,7 @@ function anchorOf(block: TableBlock, cell: CellAddress): CellAddress {
 }
 
 /**
- * The cell the caret crosses into from `cell` (docs/FEATURES.md 2.2 rank 5; audit-objects 6:
+ * The cell the caret crosses into from `cell` (docs/archive/rounds/FEATURES.md 2.2 rank 5; audit-objects 6:
  * Google, Notion, Pitch and Keynote all leave a cell with the arrows): Left and Right walk the
  * drawn cells in reading order, so Right from the last cell of a row lands on the next row's
  * first cell and Left from a row's first cell on the row above's last; Up and Down take the cell

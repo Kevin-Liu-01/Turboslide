@@ -1,4 +1,4 @@
-// The tailoring pass from the shell (docs/POLISH.md item 119; the action table's `deck.tailor`
+// The tailoring pass from the shell (docs/archive/rounds/POLISH.md item 119; the action table's `deck.tailor`
 // usage): `turboslide tailor --replace <from>=<to> [--replace ...] --skip <slideId> --logo
 // <assetId> --logo-alt <replaceAlt>` runs the same `deckTailor` the editor's Tools > Tailor for a
 // customer runs, one write labelled "Tailor for <name>", and prints the counts.

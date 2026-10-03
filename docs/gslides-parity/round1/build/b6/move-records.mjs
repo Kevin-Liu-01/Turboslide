@@ -9,11 +9,14 @@
 //
 //   node docs/gslides-parity/round1/build/b6/move-records.mjs --set status            (dry run)
 //   node docs/gslides-parity/round1/build/b6/move-records.mjs --set status --write    (move, rewrite)
+//   ... --set rounds,status       both sets in one pass (push 21 takes the status citations left
+//                                 in other lanes' files and in the parity files it moves)
 //   ... --only docs/,AGENTS.md   rewrite only paths under these prefixes (a lane's own files)
 //   ... --skip README.md          leave these paths out of the rewrite
 //
 // The scope is every tracked text file outside the evidence folder (docs/gslides-parity/** is a
-// record of its day and keeps the paths it was written with), docs/NEXT.md (the plan, which names
+// record of its day and keeps the paths it was written with) apart from its three live files (the
+// matrix, the FOCUS.md prose and its renderer; render docs/FOCUS.md again after a run), docs/NEXT.md (the plan, which names
 // the files it moves) and the generated contracts (packages/agent/generated/**, docs/grammar.md,
 // which `generate:contracts` writes from the rewritten sources). A citation is the old path
 // preceded by the start of a line or a character that cannot end a path, so a rewrite never
@@ -74,7 +77,7 @@ const PARITY = [
 ];
 
 /** [old path, new path] pairs, repository relative. */
-const MOVES = {
+const SETS = {
   status: [
     ...STATUS.map((name) => [`docs/${name}`, `docs/archive/status/${name}`]),
     ['scripts/editor-depth-drive.mjs', 'docs/archive/status/editor-depth-drive.mjs'],
@@ -83,15 +86,29 @@ const MOVES = {
     ...ROUNDS.map((name) => [`docs/${name}.md`, `docs/archive/rounds/${name}.md`]),
     ...PARITY.map((name) => [`docs/gslides-parity/${name}`, `docs/archive/gslides-parity/${name}`]),
   ],
-}[SET];
-if (!MOVES) throw new Error('--set status or --set rounds');
+};
+/* --set rounds,status takes both sets in one pass, so a parity file the rounds set moves out of the
+   evidence folder also has its status citations rewritten (a second run would read the tracked
+   list at the old paths, which are out of scope, until the move is staged) */
+const MOVES = (SET ?? '').split(',').flatMap((name) => {
+  if (!SETS[name]) throw new Error('--set status, --set rounds or --set rounds,status');
+  return SETS[name];
+});
 
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /* the old path, not inside a longer path: no path character before it, none that continues a name after it */
-const PATTERNS = MOVES.map(([from, to]) => [
-  new RegExp(`(?<![\\w/.-])${escape(from)}(?![\\w-])`, 'g'),
-  to,
-  from,
+/* the same path as a regular expression literal writes it (docs\/POLISH\.md), in the tests that
+   select matrix rows by their notes */
+const asRegexSource = (s) => s.replace(/[/.]/g, (c) => `\\${c}`);
+const PATTERNS = MOVES.flatMap(([from, to]) => [
+  [new RegExp(`(?<![\\w/.-])${escape(from)}(?![\\w-])`, 'g'), to, from],
+  /* a regular expression literal opens with a slash, so only an escaped slash (\/) before the
+     path makes it part of a longer one */
+  [
+    new RegExp(`(?<![\\w.-])(?<!\\\\/)${escape(asRegexSource(from))}(?![\\w-])`, 'g'),
+    asRegexSource(to),
+    from,
+  ],
 ]);
 
 const TEXT = /\.(md|mdx|mjs|cjs|js|jsx|ts|tsx|mts|json|jsonc|yaml|yml|css|html|txt|sh|toml)$/i;
@@ -101,9 +118,22 @@ const tracked = execFileSync('git', ['-C', ROOT, 'ls-files', '-z'], {
 })
   .split('\0')
   .filter(Boolean);
+/* three live files of the evidence folder: the matrix (its notes are asserted by
+   scripts/probes/core-matrix.test.mjs), the prose docs/FOCUS.md is rendered from, and the renderer */
+const LIVE = new Set([
+  'docs/gslides-parity/focus/core-matrix.json',
+  'docs/gslides-parity/focus/focus-body.md',
+  'docs/gslides-parity/focus/render-focus.mjs',
+]);
+/* two kinds of file keep the paths they were written with: the decks (deck data; a template's
+   description is lane B4's, whose import patches wait for the integrator) and the firewall rules,
+   whose descriptions are the live rules' text on Vercel, capped at 256 characters by its API (R22
+   would read 264) */
+const KEPT = (path) => path.startsWith('decks/') || path === 'firewall/rules.json';
 const inScope = (path) =>
   TEXT.test(path) &&
-  !path.startsWith('docs/gslides-parity/') &&
+  !KEPT(path) &&
+  (!path.startsWith('docs/gslides-parity/') || LIVE.has(path)) &&
   path !== 'docs/NEXT.md' &&
   path !== 'docs/grammar.md' &&
   !path.startsWith('packages/agent/generated/') &&

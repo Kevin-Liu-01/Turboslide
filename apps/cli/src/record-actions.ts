@@ -485,7 +485,7 @@ async function setBackgroundMaterial(
 ) {
   if (deps.captureMaterial === undefined) {
     throw new TypeError(
-      'slide.setBackgroundMaterial captures a frame through material.capture, which this transport does not carry (docs/gslides-parity/SPEC-3.md 10.5)',
+      'slide.setBackgroundMaterial captures a frame through material.capture, which this transport does not carry (docs/archive/gslides-parity/SPEC-3.md 10.5)',
     );
   }
   const frame = await deps.captureMaterial(

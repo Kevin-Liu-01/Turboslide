@@ -1,4 +1,4 @@
-// The catalog families a deck uses (gslides-parity SPEC-5-amendments A5 item 3; docs/PRODUCT.md
+// The catalog families a deck uses (gslides-parity SPEC-5-amendments A5 item 3; docs/archive/rounds/PRODUCT.md
 // 4.2), from the schema alone: every `typography.family` of every block of the given slides (the
 // blocks a composite's cells hold included) and every role of the brand kit's fonts, in FONT_IDS order,
 // never the theme's default face (Inter is the base stylesheet's). The editor page runs this on
@@ -25,7 +25,7 @@ export function blockFamilies(block: Block, out: Set<FontId>): void {
  * The catalog faces a deck uses, in FONT_IDS order: every `typography.family` of every block of
  * the given slides, every face a fixed kind's field carries of its own (the cover's heading and
  * lead, a statement's big line; build/field-fonts.md 2) and every role of the brand kit's `fonts`
- * (docs/PRODUCT.md 4.1). The theme's default face (Inter) is never in the answer because the base
+ * (docs/archive/rounds/PRODUCT.md 4.1). The theme's default face (Inter) is never in the answer because the base
  * stylesheet always carries it.
  */
 export function usedFontIds(deck: Pick<Deck, 'brand'>, slides: Iterable<Slide>): FontId[] {

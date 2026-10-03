@@ -1,4 +1,4 @@
-// The table block's markup after the polish round (docs/POLISH.md 2.1 items 1 and 3, 2.2 item 10;
+// The table block's markup after the polish round (docs/archive/rounds/POLISH.md 2.1 items 1 and 3, 2.2 item 10;
 // section 5.5): no prompt markup in a cell, the header row's `has-text` class, and a cell's own
 // alignment read before its column's. The older contract stays pinned in __tests__/table.test.ts.
 import { describe, expect, it } from 'vitest';

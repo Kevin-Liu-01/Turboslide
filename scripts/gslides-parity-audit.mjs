@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The Google Slides parity audit (docs/gslides-parity/SPEC.md 14.4; MILESTONES.md "Verifier").
+// The Google Slides parity audit (docs/archive/gslides-parity/SPEC.md 14.4; MILESTONES.md "Verifier").
 //
 //   node scripts/gslides-parity-audit.mjs [--base <origin>] [--out <json>] [--report]
 //                                         [--read-only-deck gt-brand] [--quick] [--keep-deck]
@@ -34,7 +34,7 @@
 //   7. The default view's text and tooltip names contain none of the words of SPEC 12 outside
 //      Tools > Advanced and the Agent access dialog, on /new, /edit and /decks.
 //   8. `scripts/tooltip-audit.mjs --strict` on the same pages.
-//   9. Round two (docs/gslides-parity/SPEC-2.md sections 4, 5, 6.1 and 9; MILESTONES-2 "Verifier"):
+//   9. Round two (docs/archive/gslides-parity/SPEC-2.md sections 4, 5, 6.1 and 9; MILESTONES-2 "Verifier"):
 //      every row section 4.1 flips to Now runs with its observer (the rotate, flip, group,
 //      ungroup, regroup, align, Center on page, mark, capitalization, indent, spacing, list,
 //      line end, dash, chart kind and guide writes are verified on the document after the write
@@ -146,7 +146,7 @@ const ONLY_EFFECTS = value('effects') ? new Set(value('effects').split(',')) : n
 const PHASES = value('phases') ? new Set(value('phases').split(',')) : null;
 const phase = (name) => PHASES === null || PHASES.has(name);
 /*
- * Round three (docs/gslides-parity/SPEC-3.md 16.2; MILESTONES-3 "Verifier"): the title row's two
+ * Round three (docs/archive/gslides-parity/SPEC-3.md 16.2; MILESTONES-3 "Verifier"): the title row's two
  * plate menus (the roster behind the +N chip and the own chip's menu, 4.5 and 7.5) render their
  * rows with data-menu-item only while open, so the audit opens them from their openers; every row
  * of the model gains a presence test (a row a role cannot use is absent by id, never disabled,
@@ -257,7 +257,7 @@ async function readPlateRows(page, plate) {
   );
 }
 /**
- * The rows docs/gslides-parity/VERIFICATION.md section 9 records as deviations from Google: their
+ * The rows docs/archive/gslides-parity/VERIFICATION.md section 9 records as deviations from Google: their
  * effect is not run and the row is reported as skipped with the finding, so the exit code speaks
  * for the rows the round claims and the record names the rest. Remove a row here when it lands.
  * Round one's two rows (Border color and Border weight) landed in round two as the anchored
@@ -995,7 +995,7 @@ async function walkMenus(page, ctx, tag) {
       });
       continue;
     }
-    /* the return round (docs/RETURN.md 4.3; the matrix row chrome.cluster.gaps-heights): the
+    /* the return round (docs/archive/rounds/RETURN.md 4.3; the matrix row chrome.cluster.gaps-heights): the
        roster's opener is not drawn while nobody else is present (PresenceSlot.tsx is-empty), so a
        page alone in the room has no roster to open; the rows are read where another person is */
     const alone =
@@ -1006,7 +1006,7 @@ async function walkMenus(page, ctx, tag) {
         id: parentId,
         menu: 'title',
         check: 'plate menu opens',
-        evidence: `${plate.opener} is hidden while nobody else is present (docs/RETURN.md 4.3); the roster's rows are read on a page with another person`,
+        evidence: `${plate.opener} is hidden while nobody else is present (docs/archive/rounds/RETURN.md 4.3); the roster's rows are read on a page with another person`,
       });
       continue;
     }
@@ -3627,7 +3627,7 @@ async function checkFormatSections(page, type, tag) {
   const ids = shown.map((s) => s.id);
   const missing = (FORMAT_SECTIONS_FOR[type] ?? []).filter((id) => !ids.includes(id));
   const extra = (FORMAT_SECTIONS_NOT_FOR[type] ?? []).filter((id) => ids.includes(id));
-  /* the return round (docs/RETURN.md 2.7; build/b5.md request 4): the Chart data section is the
+  /* the return round (docs/archive/rounds/RETURN.md 2.7; build/b5.md request 4): the Chart data section is the
      first thing the panel shows for a chart, the other sections keep SPEC-2 section 5's order */
   const orderedIds = type === 'chart' && ids[0] === 'chart' ? ids.slice(1) : ids;
   const order = orderedIds.map((id) => FORMAT_SECTION_ORDER.indexOf(id));

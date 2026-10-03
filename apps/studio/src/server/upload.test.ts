@@ -15,7 +15,7 @@ import {
   verifyUploadToken,
 } from './upload';
 
-// The presigned upload's refusals in the seller's words (the product round, docs/PRODUCT.md
+// The presigned upload's refusals in the seller's words (the product round, docs/archive/rounds/PRODUCT.md
 // section 2 rank 10; research 07 rule 22): every refusal the route answers carries one of three
 // sentences under `reason`, beside the API's own line, and never a code or an action id.
 
@@ -72,7 +72,7 @@ describe('the seller’s reason of a refused upload', () => {
   });
 
   it('names the two svg sentences of the vector round and the cap the sanitizer runs under; notSvg is gone', () => {
-    // docs/VECTOR.md 4.2, 4.7: the sanitizer's words for an upload, whole sentences with a capital
+    // docs/archive/rounds/VECTOR.md 4.2, 4.7: the sanitizer's words for an upload, whole sentences with a capital
     expect(SVG_UPLOAD_MAX_BYTES).toBe(2 * 1024 * 1024);
     expect(UPLOAD_REASONS.svgTooLarge(SVG_UPLOAD_MAX_BYTES)).toBe('The SVG file is over 2 MB');
     expect(UPLOAD_REASONS.svgBroken).toBe('This SVG file could not be read');

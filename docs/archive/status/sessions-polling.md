@@ -13,7 +13,7 @@ The files read in full: `apps/studio/src/components/useStudioSession.ts` and its
 `packages/realtime/client/room-client.ts`, the parts of `apps/studio/src/server/{room,actions}.ts`,
 `apps/studio/src/routes/mcp.ts`, `apps/studio/src/editor/{controller.tsx,shell-bridge.tsx,EditorRoot.tsx}`
 and `packages/agent/src/window/{adapter,ready,registry}.ts` that touch sessions, and the
-specifications named inline (`docs/spec/SPEC.md` 7.3 and 7.4, `docs/gslides-parity/SPEC-3.md` 3.3,
+specifications named inline (`docs/spec/SPEC.md` 7.3 and 7.4, `docs/archive/gslides-parity/SPEC-3.md` 3.3,
 3.10, 8.2 and 11.3, `SPEC-4.md` 0.37, 0.42, 3.8 and 4.4, `SPEC-5.md` 0.49, `docs/hosting.md` 6, 9
 and 11, `docs/security.md`).
 
@@ -65,17 +65,17 @@ HEAD:apps/studio/src/components/useStudioSession.ts` has `POLL_MS = 20_000` at l
 The working tree raises the cadence and adds a test. Both changes are uncommitted at the time of
 writing (`git status` shows the hook modified and `useStudioSession.test.ts` untracked):
 
-| Constant                     | File and line                                          | Value      |
-| ---------------------------- | ------------------------------------------------------ | ---------- |
-| `POLL_MS`                    | `apps/studio/src/components/useStudioSession.ts:31`    | 25,000     |
-| `RETRY_MS`                   | `useStudioSession.ts:32`                               | 2,000      |
-| `EMPTY_ANSWER_PAUSE_MS`      | `useStudioSession.ts:50`                               | 6,000      |
-| `POLL_DEFAULT_MS`            | `apps/studio/src/server/sessions.ts:156`               | 20,000     |
-| `POLL_MAX_MS`                | `apps/studio/src/server/sessions.ts:157`               | 25,000     |
-| `DEFAULT_STALE_MS`           | `packages/agent/src/http/sessions.ts:88`               | 45,000     |
-| `DEFAULT_COMMAND_TIMEOUT_MS` | `packages/agent/src/http/sessions.ts:89`               | 15,000     |
-| `SESSION_BINDING_TTL_MS`     | `apps/studio/src/server/sessions.ts:48`                | 90,000     |
-| Idle budget                  | `docs/gslides-parity/SPEC-4.md` 4.4 (lines 395 to 397) | 4 per 60 s |
+| Constant                     | File and line                                                  | Value      |
+| ---------------------------- | -------------------------------------------------------------- | ---------- |
+| `POLL_MS`                    | `apps/studio/src/components/useStudioSession.ts:31`            | 25,000     |
+| `RETRY_MS`                   | `useStudioSession.ts:32`                                       | 2,000      |
+| `EMPTY_ANSWER_PAUSE_MS`      | `useStudioSession.ts:50`                                       | 6,000      |
+| `POLL_DEFAULT_MS`            | `apps/studio/src/server/sessions.ts:156`                       | 20,000     |
+| `POLL_MAX_MS`                | `apps/studio/src/server/sessions.ts:157`                       | 25,000     |
+| `DEFAULT_STALE_MS`           | `packages/agent/src/http/sessions.ts:88`                       | 45,000     |
+| `DEFAULT_COMMAND_TIMEOUT_MS` | `packages/agent/src/http/sessions.ts:89`                       | 15,000     |
+| `SESSION_BINDING_TTL_MS`     | `apps/studio/src/server/sessions.ts:48`                        | 90,000     |
+| Idle budget                  | `docs/archive/gslides-parity/SPEC-4.md` 4.4 (lines 395 to 397) | 4 per 60 s |
 
 The server clamps the caller's `timeoutMs` to `POLL_MAX_MS` in the poll validator
 (`sessions.ts` line 249), so a hook value above 25 s would only be cut back; the test pins the
@@ -166,7 +166,7 @@ MCP attach flow assumes any open tab answers. The files answer as follows.
   an active owner, `activeStudio()` (`packages/agent/src/window/ready.ts` lines 17 to 23) returns
   it, and `view.goto` runs there without a paint.
 - The MCP contract (`docs/spec/SPEC.md` 7.3; `packages/agent/src/generate/manifest.ts` line 66;
-  `packages/mcp/src/http.ts` lines 5 to 7; `docs/gslides-parity/SPEC-3.md` 3.10, the `/mcp` row at
+  `packages/mcp/src/http.ts` lines 5 to 7; `docs/archive/gslides-parity/SPEC-3.md` 3.10, the `/mcp` row at
   line 329) says `deck_goto_slide` is listed "when a studio page (/edit or /deck) is attached to
   the deck and runs in that page". Attached means registered and polling; no text requires the
   page to be visible.
@@ -272,7 +272,7 @@ The exact change, not made here:
    before the next poll. Pin the error backoff of section 1.5 in the same file.
 3. The registry's sweep (`packages/agent/src/http/sessions.ts` lines 288 to 296) and
    `DEFAULT_STALE_MS` stay as they are. Option a needs no server change.
-4. `docs/gslides-parity/SPEC-4.md` 3.8 and the manifest sentence at
+4. `docs/archive/gslides-parity/SPEC-4.md` 3.8 and the manifest sentence at
    `packages/agent/src/generate/manifest.ts` line 66 should say that a page attaches while it is
    visible, so the 404 for a background tab is documented behaviour.
 
@@ -537,7 +537,7 @@ principalId)`, `packages/agent/src/http/sessions.ts` lines 58 to 65) is unused: 
    82), dedupes by id, runs them through the existing invoke and answer code (lines 116 to 139),
    and lengthens the poll to the heartbeat while the stream is connected (section 3.7).
 8. Documents: `docs/hosting.md` section 9 lists the two new key prefixes and the bus channel;
-   `docs/gslides-parity/SPEC-4.md` 3.8 and this document record the cadence; `SPEC-5.md` line 631
+   `docs/archive/gslides-parity/SPEC-4.md` 3.8 and this document record the cadence; `SPEC-5.md` line 631
    and `SPEC-3.md` section 17 are corrected for the WebSocket beta.
 9. Ship behind the `realtime` kill switch (`packages/realtime/src/keys.ts` lines 32 to 45): when
    `realtime` reads as off the bus is memory and the poll carries every command, which is today's
@@ -643,7 +643,7 @@ presence path as the largest remaining row until it, too, is addressed.
 
 ## 5. What shipped in the sync and costs round
 
-Written 2026-09-21 by the round's integrator from the tree as merged (`docs/SYNC.md` 3.10 and question 3; `docs/gslides-parity/sync/build/b5.md`). Option a of 2.2 shipped with the detach refinement, and three more rules beside it. The files: `apps/studio/src/components/useStudioSession.ts` (the loop is `startStudioSession(deps)` over injected dependencies; the hook wires the browser to it), `apps/studio/src/server/sessions.ts`, `packages/agent/src/http/sessions.ts`, `DeckViewer.tsx`, `PresenterPage.tsx` and the three route validators of `/deck`, `/present` and `/embed`.
+Written 2026-09-21 by the round's integrator from the tree as merged (`docs/archive/rounds/SYNC.md` 3.10 and question 3; `docs/gslides-parity/sync/build/b5.md`). Option a of 2.2 shipped with the detach refinement, and three more rules beside it. The files: `apps/studio/src/components/useStudioSession.ts` (the loop is `startStudioSession(deps)` over injected dependencies; the hook wires the browser to it), `apps/studio/src/server/sessions.ts`, `packages/agent/src/http/sessions.ts`, `DeckViewer.tsx`, `PresenterPage.tsx` and the three route validators of `/deck`, `/present` and `/embed`.
 
 1. No session on a viewer or show page unless the address carries `agent=1`. `/deck/<id>`, `/present/<id>` and `/embed/<id>` attach a studio session only when opened with `?agent=1` (`AGENT_SEARCH_KEY`; the `?screen=1` redirect carries the flag); the window API is registered on every viewer page as before. The editor at `/edit/<id>` attaches as before. An agent that wants `deck_goto_slide` to reach a viewer or a show opens the page with the flag and keeps it visible; `apps/cli/e2e/mcp-http.mjs` opens `/deck/<id>?agent=1` for that reason.
 2. No poll while hidden, a detach after 10 s. The loop issues no poll while `document.visibilityState` is `hidden` or the document is a prerender; after `HIDDEN_DETACH_MS` (10,000 ms) hidden it detaches, and when the page is shown again it re-attaches under the same session id. A page that loads hidden attaches when it is first shown. So a background tab's `deck_goto_slide` answers the 404 of 2.4 item 4 until the tab is shown; that is the documented behaviour.
@@ -651,4 +651,4 @@ Written 2026-09-21 by the round's integrator from the tree as merged (`docs/SYNC
 4. The measured cost on the memory tier (b5.md section 5): a show page makes 0 function requests in 3 minutes after the load; an idle editor tab 3 function requests a minute, every one the poll every 20 s and never held; a hidden editor tab (a synthetic `visibilitychange`, since a covered tab reads `visible` under Playwright) one detach and no poll. The rows of record are `cost.show.calls`, `cost.editor-idle.calls` and `cost.editor-hidden.calls` in `docs/gslides-parity/focus/core-matrix.json`, driven by `scripts/probes/sync-cost-probe.mjs`; the idle ceiling of SPEC-4 4.4 (four `_serverFn` responses a minute) reads 6 since the poll is unheld (`window-api.spec.ts`, `scripts/perf-budget.mjs`).
 5. Left for the round after (b5.md R7): a closed tab's session lingers until the 45 s sweep (`DEFAULT_STALE_MS`) and takes the next `deck_goto_slide`, which then waits the 30 s command timeout; a `pagehide` beacon to the detach function or `DEFAULT_STALE_MS` at 35 s would close it. A tab on the older deployment through a deploy keeps asking a 25 s hold, is clamped to 0 and paces itself with its own 6 s pause (about 10 polls a minute of a few milliseconds each) until it reloads.
 
-The push channel of section 3 did not ship: the command frame needs a cross instance channel the blob tier lacks (`docs/SYNC.md` section 7), and the unheld poll takes most of the money the storm cost.
+The push channel of section 3 did not ship: the command frame needs a cross instance channel the blob tier lacks (`docs/archive/rounds/SYNC.md` section 7), and the unheld poll takes most of the money the storm cost.

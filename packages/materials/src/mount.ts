@@ -32,7 +32,7 @@ export type MountOptions = {
   /** WebGL context attributes; the capture page asks for preserveDrawingBuffer. */
   contextAttributes?: WebGLContextAttributes;
   /**
-   * The deck's shader palette (docs/FEATURES.md 5.7): the palette presets of the entry are
+   * The deck's shader palette (docs/archive/rounds/FEATURES.md 5.7): the palette presets of the entry are
    * computed from it, so a kit's colours reach the live mount; the legacy palette when absent.
    */
   palette?: ShaderPalette;

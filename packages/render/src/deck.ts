@@ -71,7 +71,7 @@ export function slideCounter(deck: Deck, slide: Slide, n: number, total: number)
      round 3 R2): the paper chips of a full-picture slide read the same function, so a counter
      drawn has its chip and a counter hidden has none */
   if (n < 1 || total < 1 || !counterShownOn(deck, slide)) return '';
-  /* the kit's format (docs/PRODUCT.md 4.1 Slide numbers): `01 / 85`, `01` or `Slide 1` */
+  /* the kit's format (docs/archive/rounds/PRODUCT.md 4.1 Slide numbers): `01 / 85`, `01` or `Slide 1` */
   return counterText(n, total, deckCounterFormat(deck));
 }
 
@@ -138,7 +138,7 @@ export function renderDeck(deck: Deck, slides: Slide[], options: RenderDeckOptio
     sprite: bundle.sprite,
     present: present !== false,
     stageId: 'stage',
-    /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.4): the footer logo, text and format */
+    /* the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the footer logo, text and format */
     titleSlide: firstSlide?.kind === 'title',
     band: frameBandOf(
       deck,

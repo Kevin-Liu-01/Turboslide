@@ -4,7 +4,7 @@
 // drives both, so a chip in the title row and the PNG `turboslide account me --avatar-png` writes
 // show one mark; marks-render.test.ts asserts it over a thousand random specs.
 //
-// Geometry, in CSS pixels at 1x (11 6.1; docs/PEOPLE.md 3.4): the chip is a square of `size`;
+// Geometry, in CSS pixels at 1x (11 6.1; docs/archive/rounds/PEOPLE.md 3.4): the chip is a square of `size`;
 // the ring is its 1 px border at pixel 0; pixel 1 is a paper gap on every side; the field (the
 // plate) starts at pixel 2 and is `size - 4` wide (20 at 24, 12 at 16, 10 at 14, 8 at 12), so no
 // cell, picture edge or stripe touches the ring. The Bayer field has 2 px cells aligned to the
@@ -120,7 +120,7 @@ export function glyphInk(glyph: MarkGlyph, u: number, v: number): boolean {
   }
 }
 
-/** The field's first pixel and its extent: the ring at 0, a paper gap at 1, the field from 2 (docs/PEOPLE.md 3.4). */
+/** The field's first pixel and its extent: the ring at 0, a paper gap at 1, the field from 2 (docs/archive/rounds/PEOPLE.md 3.4). */
 export const MARK_FIELD_ORIGIN = 2;
 
 export function plateOf(size: number): { origin: number; extent: number } {

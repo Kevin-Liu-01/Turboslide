@@ -14,7 +14,7 @@ import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { AuthContext } from './authorize';
 
 /**
- * The templates' server side (docs/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, ported from the
+ * The templates' server side (docs/archive/rounds/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, ported from the
  * round five branch's server/templates.ts and re pointed at the product round's index): the
  * gallery rows with a rendered cover per template for /decks/templates and the /decks strip,
  * `createFromTemplate` (deck.create over any id of the index through the store's collection, the
@@ -40,14 +40,14 @@ export type TemplateCard = Omit<TemplateIndexEntry, 'brand'> & {
   coverHtml: string | null;
   /** the appearance the cover is drawn in and a deck made from the template opens in */
   coverAppearance: Appearance;
-  /** true when the template carries a brand kit record (docs/PRODUCT.md 4.1) */
+  /** true when the template carries a brand kit record (docs/archive/rounds/PRODUCT.md 4.1) */
   hasKit: boolean;
   /** true on the template new presentations start from */
   isDefault: boolean;
 };
 
 export type TemplateGallery = {
-  /** the templates saved on this deployment, the default first (docs/PRODUCT.md 4.3) */
+  /** the templates saved on this deployment, the default first (docs/archive/rounds/PRODUCT.md 4.3) */
   organisation: TemplateCard[];
   /** Turboslide's own templates: Blank this round */
   turboslide: TemplateCard[];
@@ -91,7 +91,7 @@ function optionalSentence(value: unknown, name: string): string | undefined {
  * The gate of a template write that names no deck (rename, delete, use for new presentations):
  * the read only switch, and an agent token carrying the admin scope; a person editing on this
  * deployment passes, because the marketer's lock is the template itself and a role that gates it
- * comes with sign in (docs/PRODUCT.md 4.1 "Who can change the kit").
+ * comes with sign in (docs/archive/rounds/PRODUCT.md 4.1 "Who can change the kit").
  */
 async function requireTemplateWriter(action: string): Promise<AuthContext> {
   const { identityLabel, requestContext } = await import('./authorize');
@@ -178,7 +178,7 @@ const readDefaultKitFn = createServerFn({ method: 'GET' }).handler(async (): Pro
 });
 
 /**
- * What the deployment's default kit is named and looks like (docs/PRODUCT.md 4.1 "The deployment
+ * What the deployment's default kit is named and looks like (docs/archive/rounds/PRODUCT.md 4.1 "The deployment
  * default"; B5a's `DefaultKit` with the template it comes from): the template /new and the Blank
  * card start from, the kit's name for "Reset to <name>", the appearance a new presentation opens
  * in and the kit record itself. The request to the integrator in build/b5b.md has `readDraftDeck`

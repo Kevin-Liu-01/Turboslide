@@ -1,4 +1,4 @@
-// The logo index snapshot bundled with the deployment (docs/FEATURES.md 4.2; build/hotfix.md
+// The logo index snapshot bundled with the deployment (docs/archive/rounds/FEATURES.md 4.2; build/hotfix.md
 // section 9): the copy of `system/logo-index.json` that never passes through the public store's
 // edge, so a cold instance answers the picker while the edge refuses the pathname for the minutes
 // after a write of it (every refresh opens that window; before this a cold instance with no disk

@@ -17,7 +17,7 @@ import {
 } from '../Gestures';
 import type { EditorTool } from '../Gestures';
 
-// The draw's draft (docs/OBJECTS.md 2.4; the objects round, B1): the press builds the same
+// The draw's draft (docs/archive/rounds/OBJECTS.md 2.4; the objects round, B1): the press builds the same
 // block.insert the release commits, at the tool's default box while the pointer has not
 // travelled DRAW_MIN_PX and at the drawn box after, so the sheet draws a shape as it grows from
 // the press point, a table or a chart whole from the pointer down, and a connector snapped to the
@@ -153,7 +153,7 @@ describe('drawDraftMutation', () => {
     if (table.type !== 'table') throw new Error('table');
     expect(table.rows).toHaveLength(3);
     expect(table.columns).toHaveLength(3);
-    /* the placed table's box fits its rows (docs/OBJECTS.md 3.3 item 3; build/b2.md request 1g):
+    /* the placed table's box fits its rows (docs/archive/rounds/OBJECTS.md 3.3 item 3; build/b2.md request 1g):
        three rows at 20 px with the hairline, 163, never the 320 of TOOL_DEFAULT_SIZE */
     expect(table.pos).toEqual({ x: 300, y: 300, w: 960, h: tableBoxHeight(3), z: 2 });
     expect(tableBoxHeight(3)).toBe(163);

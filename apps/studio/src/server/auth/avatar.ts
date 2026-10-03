@@ -1,5 +1,5 @@
 // The picture avatar (gslides-parity SPEC-3 0.22, 7.6; research 03 I4; report 10 F43;
-// docs/PEOPLE.md 4.2, 4.3, 4.6): a signed in principal's upload runs through sharp once and only
+// docs/archive/rounds/PEOPLE.md 4.2, 4.3, 4.6): a signed in principal's upload runs through sharp once and only
 // the derived files are kept. The browser crops a square and resizes it to 256 px WebP before the
 // request leaves (PEOPLE.md 4.1), so the request is capped at 512 KB before any decode. The bytes
 // are sniffed (JPEG, PNG, WebP or GIF by their magic numbers; SVG and HEIF refused before any

@@ -1007,7 +1007,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               lines.push(segment);
             }
           } else {
-            // the vector round (docs/VECTOR.md 2.3; vector/build/b2.md request 4): a preset of
+            // the vector round (docs/archive/rounds/VECTOR.md 2.3; vector/build/b2.md request 4): a preset of
             // several paths may open with one that has no stroke (the can's body) or no fill (the
             // arc), so the fill is read from the first geometry path that has one and the stroke
             // from the first that has one, the shade overlay (data-shade) skipped

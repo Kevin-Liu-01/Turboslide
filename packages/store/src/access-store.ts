@@ -41,11 +41,11 @@ export type StoredAccess = { record: AccessRecord; etag: string };
 
 /**
  * The general access a deck created from `/new` starts with: Restricted, and Viewer for the link
- * once the seller turns link sharing on, on every deployment (the polish round, docs/POLISH.md
+ * once the seller turns link sharing on, on every deployment (the polish round, docs/archive/rounds/POLISH.md
  * item 78; SPEC-3 6.1). The product round had made a deck on a deployment with anonymous
  * principals start as Anyone with the link, Editor, so a copied address edited at once, and the
  * dialog's sentence asked the seller to pick Viewer before sending it to a customer
- * (docs/PRODUCT.md question 10); the polish audit read that as the first Share on a minute old
+ * (docs/archive/rounds/PRODUCT.md question 10); the polish audit read that as the first Share on a minute old
  * deck already editable by anyone and an instruction in the dialog (audit-pages item 4). Google's
  * new file is Restricted and its link defaults to Viewer; the seller picks Editor for a
  * colleague. The studio's `recordNewDeck` (server/access.ts) takes the answer from here; a
@@ -84,7 +84,7 @@ export function mintedGeneralLink(
 /**
  * The same minting with the token beside the link, for the one moment the plaintext exists: the
  * creation of a deck hands it to the page that created it, so the Share dialog's field holds the
- * address at its first open instead of a placeholder (b7.md FR1; docs/PRODUCT.md section 2 rank
+ * address at its first open instead of a placeholder (b7.md FR1; docs/archive/rounds/PRODUCT.md section 2 rank
  * 3). The record keeps the hash alone.
  */
 export function mintedGeneralLinkWithToken(
@@ -598,20 +598,20 @@ export type DeckIndex = {
   /** a deck whose owner asked this principal to take it over (SPEC-3 6.5) */
   pendingOwnership?: string[];
   /**
-   * The display name the principal typed (docs/PRODUCT.md section 2 rank 4; b1.md R17): the
+   * The display name the principal typed (docs/archive/rounds/PRODUCT.md section 2 rank 4; b1.md R17): the
    * principal record of the blob tier lives in one instance's file store, so the name rides the
    * index every instance reads, the way the link grants do.
    */
   name?: string;
   /**
-   * The avatar choice of the builder's Initials, Glyph and Dither tabs (docs/PEOPLE.md 3.13), on
+   * The avatar choice of the builder's Initials, Glyph and Dither tabs (docs/archive/rounds/PEOPLE.md 3.13), on
    * the index for the same reason as the name; a picture choice is never carried here, because it
    * needs an account, which needs the database. Absent when the choice is a picture or none.
    */
   avatar?: IndexAvatarChoice;
 };
 
-/** The non picture avatar choice as the index carries it (docs/PEOPLE.md 3.13). */
+/** The non picture avatar choice as the index carries it (docs/archive/rounds/PEOPLE.md 3.13). */
 export type IndexAvatarChoice = {
   variant: 'initials' | 'glyph' | 'dither';
   initials?: string;
@@ -766,7 +766,7 @@ export const indexUpdates = {
     return (index) => (index.name === name ? null : { ...index, name });
   },
   /**
-   * the non picture avatar choice (docs/PEOPLE.md 3.13); `null` clears it (a picture chosen, which
+   * the non picture avatar choice (docs/archive/rounds/PEOPLE.md 3.13); `null` clears it (a picture chosen, which
    * the index never carries); null when the index carries the same choice already
    */
   avatar(choice: IndexAvatarChoice | null): (index: DeckIndex) => DeckIndex | null {

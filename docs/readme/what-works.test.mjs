@@ -75,7 +75,7 @@ describe('renderSection', () => {
       const rows = CORE_MATRIX.filter((r) => r.feature === f.key);
       /* a manual row (ruling (3)) left not driven holds nothing; it is listed as walked by hand.
          A measurement row (PRODUCT.md 8.2) holds nothing either; it is listed as measured */
-      /* a local row (docs/PEOPLE.md 6.2) is absent from the matrix's own reading and listed apart */
+      /* a local row (docs/archive/rounds/PEOPLE.md 6.2) is absent from the matrix's own reading and listed apart */
       const red = rows.filter(
         (r) =>
           results[r.id] !== 'passed' &&
@@ -101,7 +101,7 @@ describe('renderSection', () => {
     );
     /* the measurement rows of PRODUCT.md 8.2 hold nothing; a red one is listed as measured */
     const measuredRed = CORE_MATRIX.filter((r) => isMeasureRow(r) && results[r.id] !== 'passed');
-    /* the local rows of docs/PEOPLE.md 6.2 are left out of the matrix's own reading and listed apart */
+    /* the local rows of docs/archive/rounds/PEOPLE.md 6.2 are left out of the matrix's own reading and listed apart */
     const local = localRows().filter((r) => results[r.id] === undefined);
     expect(holding).toBe(
       t.broken +

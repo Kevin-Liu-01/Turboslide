@@ -141,7 +141,7 @@
   }
 }
 
-/* a line kind's hit area is its stroke (docs/POLISH.md 2.4 item 24; polish/build/b3.md request
+/* a line kind's hit area is its stroke (docs/archive/rounds/POLISH.md 2.4 item 24; polish/build/b3.md request
    1): the wrapper takes no press, the svg's own hit path does, so a press inside a connector's
    box lands on the shape under it or the sheet */
 .ts-stagewrap .free:has(> svg.shape.is-line) {

@@ -49,7 +49,7 @@ export type Caller = {
   admin?: boolean;
   kind: 'anonymous' | 'account' | 'agent' | 'local';
   /**
-   * the anonymous ids the alias table links to a signed in caller (docs/PEOPLE.md 3.6;
+   * the anonymous ids the alias table links to a signed in caller (docs/archive/rounds/PEOPLE.md 3.6;
    * `Principal.aliases`); absent when none. A record owned by, granted to or requested by one of
    * them is the caller's own (the people round's fix round, b1.md R1); every write still names
    * `principalId`, so the account writes as itself.
@@ -302,7 +302,7 @@ export async function shareSetGeneralAccess(
       require(next, deps.caller, now, 'share', 'share.setGeneralAccess');
       const role = input.role ?? 'viewer';
       if (input.mode === 'restricted') {
-        // Restricted means no link opens the presentation (docs/POLISH.md item 96; Google's
+        // Restricted means no link opens the presentation (docs/archive/rounds/POLISH.md item 96; Google's
         // Restricted): every live link is revoked with the mode, the people's grants stay
         next.generalAccess = { mode: 'restricted', role };
         for (const existing of next.links) if (linkIsLive(existing, now)) existing.revokedAt = now;
@@ -311,7 +311,7 @@ export async function shareSetGeneralAccess(
       next.generalAccess = { mode: 'link', role };
       // the general access link: one live link, minted once; a later call with a role alone
       // rewrites the live link's role and keeps its token, so the address a seller already sent
-      // keeps opening (the polish round, docs/POLISH.md item 79: picking Commenter then Editor
+      // keeps opening (the polish round, docs/archive/rounds/POLISH.md item 79: picking Commenter then Editor
       // minted a new address and the one already sent answered 404); rotation stays the Rotate
       // row's job (share.rotateLink) and share.stop revokes
       const live = next.links.find(

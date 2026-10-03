@@ -505,7 +505,7 @@ describe('the proven read (pass 2)', () => {
     ]);
   });
 
-  it('the avatar choice rides the index beside the name and clears with null (docs/PEOPLE.md 3.13)', () => {
+  it('the avatar choice rides the index beside the name and clears with null (docs/archive/rounds/PEOPLE.md 3.13)', () => {
     const base = emptyDeckIndex();
     const glyph = indexUpdates.avatar({ variant: 'glyph', salt: 7 })(base);
     expect(glyph?.avatar).toEqual({ variant: 'glyph', salt: 7 });

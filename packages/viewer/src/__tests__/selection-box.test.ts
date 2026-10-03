@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { selectionRingBox } from '../selection-box';
 import { TEXT_RING_OUTSET } from '../text-ring';
 
-// The ring box of a selected object (docs/OBJECTS.md 2.4, the rotated ring): a single object
+// The ring box of a selected object (docs/archive/rounds/OBJECTS.md 2.4, the rotated ring): a single object
 // with `pos` takes its `pos` box, so a rotated object's ring is its own box turned by the overlay
 // and never the measured bounding box turned a second time (audit a1-rectangle-rotate-17-up+400:
 // a 1000 by 1000 ring around a 680 by 320 rectangle at 45 degrees); an object without `pos` keeps

@@ -1,4 +1,4 @@
-// The text tail's Font control (docs/PRODUCT.md 3.4, 4.2, 8.3): the first control of the text,
+// The text tail's Font control (docs/archive/rounds/PRODUCT.md 3.4, 4.2, 8.3): the first control of the text,
 // shape and table tails is the Font dropdown while the catalog is in the default view, and the
 // read only family with the same tooltip and no chevron when `fonts` is parked by the ship's
 // rule; a `chrome.toolbar.fold-any-width` reading accepts either drawing.

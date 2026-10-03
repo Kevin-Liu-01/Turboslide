@@ -102,7 +102,7 @@ export type EditorAvatar = {
 /**
  * A person as the route shows one (gslides-parity SPEC-3 7.8; the chrome's IdentityView): the
  * caller's own identity on `identity`, and every principal the page names on `identities`
- * (docs/PEOPLE.md 3.8), resolved through the room's resolver (the alias table, the account
+ * (docs/archive/rounds/PEOPLE.md 3.8), resolved through the room's resolver (the alias table, the account
  * profiles), with the mark the chrome draws and the address when the reader may see it.
  */
 export type EditorIdentity = {
@@ -114,7 +114,7 @@ export type EditorIdentity = {
   email?: string;
   /** the mark (`self` on the own identity; the 64 px picture URL on it when the choice is a picture) */
   mark?: MarkSpec;
-  /** the own identity's choice (docs/PEOPLE.md 3.11), so the builder starts from it; absent on `identities` */
+  /** the own identity's choice (docs/archive/rounds/PEOPLE.md 3.11), so the builder starts from it; absent on `identities` */
   avatar?: EditorAvatar;
   runId?: string;
   /** a deleted account (SPEC-3 7.4): no badge beside "Deleted account" */
@@ -141,7 +141,7 @@ export function ownIdentityOf(resolved: ResolvedIdentity): EditorIdentity {
 }
 
 /**
- * The principal ids a payload names (docs/PEOPLE.md 3.8): the trimmed log's authors, the comment
+ * The principal ids a payload names (docs/archive/rounds/PEOPLE.md 3.8): the trimmed log's authors, the comment
  * authors when the reader may read comments, the record's owner, pending owner, grants and
  * requests. Pure; the order is the order of first appearance the label suffix reads.
  */
@@ -224,7 +224,7 @@ export type EditorDeck = {
   /** every record the store holds, counted before the trim; absent on a draft */
   versionCount?: number;
   /**
-   * The origins of the records above the caller's `since` (docs/SYNC.md 3.2): present when the
+   * The origins of the records above the caller's `since` (docs/archive/rounds/SYNC.md 3.2): present when the
    * read carried `since` (the room client's resync), oldest first, at most RESYNC_ORIGINS_MAX
    * records considered; the client acknowledges every pending op named here at its `seq`
    */
@@ -233,13 +233,13 @@ export type EditorDeck = {
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
   /**
-   * What the assistant can do on this deployment (docs/POLISH.md item 113; server/assist.ts
+   * What the assistant can do on this deployment (docs/archive/rounds/POLISH.md item 113; server/assist.ts
    * assistMode): the panel draws Tailor and one sentence when it is not set up, the starters
    * and the composer when a model answers
    */
   assistMode?: 'fixture' | 'off' | 'model' | 'unconfigured';
   /**
-   * The deployment's default kit (docs/PRODUCT.md 4.1, 4.3): the template new presentations start
+   * The deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1, 4.3): the template new presentations start
    * from, its name for "Reset to <name>", the appearance a new presentation opens in and the kit
    * record; the Brand kit panel reads it through the shell's input
    */
@@ -254,7 +254,7 @@ export type EditorDeck = {
   room?: EditorRoom;
   identity?: EditorIdentity;
   /**
-   * The people the page names, keyed by principal id (docs/PEOPLE.md 3.8): the version authors,
+   * The people the page names, keyed by principal id (docs/archive/rounds/PEOPLE.md 3.8): the version authors,
    * the comment authors, the owner, the pending owner and the grants, resolved once at load; the
    * controller merges the map under the roster and the caller for the version rows, the comment
    * cards and the Share dialog. Absent on a draft, which names nobody yet.
@@ -282,7 +282,7 @@ export const EDITOR_VERSIONS_KEPT = 50;
 export const RESYNC_ORIGINS_MAX = REPLAY_MAX_ENTRIES;
 
 /**
- * A record above the resync read's `since` that names its origin (docs/SYNC.md 3.2): the seq
+ * A record above the resync read's `since` that names its origin (docs/archive/rounds/SYNC.md 3.2): the seq
  * its admission made (the revision on the blob tier), the client id and the op ids it folded,
  * mutations stripped. The room client drops every pending op named here as acknowledged at
  * `seq` before it re-folds the rest on the fresh document.
@@ -420,7 +420,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       typeof parsed.atLeast === 'number' && Number.isInteger(parsed.atLeast) && parsed.atLeast > 0
         ? parsed.atLeast
         : undefined;
-    // the tab's position before a resync (docs/SYNC.md 3.2): a non negative integer, else absent;
+    // the tab's position before a resync (docs/archive/rounds/SYNC.md 3.2): a non negative integer, else absent;
     // a hand parsed optional, so a deployment without it and one with it read the same input
     const since =
       typeof parsed.since === 'number' && Number.isInteger(parsed.since) && parsed.since >= 0
@@ -443,7 +443,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     const room = await import('./room');
     const access = await import('./access');
     const auth = await import('./auth/identity');
-    /* the caller's index read past this instance's cache (docs/PEOPLE.md 6.4): a reload's payload
+    /* the caller's index read past this instance's cache (docs/archive/rounds/PEOPLE.md 6.4): a reload's payload
        carries the name and the choice written on another instance at once */
     const identity = await timed('identity', () =>
       room.requestIdentity(getRequest(), { freshIndex: true }),
@@ -454,7 +454,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     );
     if (!decision.ok) return JSON.stringify(null);
     /* an invitation by email binds to the account whose verified address it names at that
-       account's first read of the deck (docs/PEOPLE.md 3.10; SPEC-3 6.5; access.ts
+       account's first read of the deck (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5; access.ts
        bindEmailGrants says why here and not at sign in): the decision above admitted the invitee
        through the address, and the record the payload carries below names them from now on */
     if (identity.kind === 'signedIn' && identity.ctx.principal !== null) {
@@ -481,13 +481,13 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         timed('leases', () => deckRoom.store.leases()),
       ]);
     } catch (error) {
-      /* a deck deleted forever a moment ago (docs/POLISH.md item 98; audit-tables item 20): the
+      /* a deck deleted forever a moment ago (docs/archive/rounds/POLISH.md item 98; audit-tables item 20): the
          listing still names it while the index catches up and the read meets no files; the
          address answers 404, never 500 */
       if (isGoneDeck(error)) return JSON.stringify(null);
       throw error;
     }
-    // the resync read's answer (docs/SYNC.md 3.2): the origins of the records above the tab's
+    // the resync read's answer (docs/archive/rounds/SYNC.md 3.2): the origins of the records above the tab's
     // old position, off the mirror the reads above synced (no store call of its own), so the
     // client drops every pending op a record already names instead of re-folding it
     const origins =
@@ -496,7 +496,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         : originsSince(await timed('records', () => deckRoom.store.records()), data.since);
     const record = await timed('access-record', () => access.effectiveAccess(data.deckId));
     const standing = access.standingOf(decision, record);
-    // the caller as the room resolves it (docs/PEOPLE.md 3.6): the account behind a session or
+    // the caller as the room resolves it (docs/archive/rounds/PEOPLE.md 3.6): the account behind a session or
     // an aliased cookie, else the record's name or label
     const resolved = await timed('resolve', () => room.resolveRequestIdentity(identity));
     const selection = room.realtimeSelection();
@@ -550,7 +550,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       leases,
       hosting: hostingFacts(),
       assistMode: (await import('./assist')).assistMode(),
-      /* the deployment's default kit (docs/PRODUCT.md 4.1): the name Reset reads, the default logo;
+      /* the deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1): the name Reset reads, the default logo;
          the store's template index is pulled first so a default set on another instance holds */
       defaultKit: await timed('templates', () => defaultKitOfCollection()),
       room: { seq: live.seq, tier: selection.tier, notice: selection.notice, ...roomExtra },
@@ -570,7 +570,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       },
     };
     const shaped = shapeByRole(result, standing.capabilities);
-    /* the people the page names, resolved once (docs/PEOPLE.md 3.8): the shaped log's authors (a
+    /* the people the page names, resolved once (docs/archive/rounds/PEOPLE.md 3.8): the shaped log's authors (a
        role without history names none), the comment authors for a role with readComments, the
        record's people; the address for the owner and a grant holder (SPEC-3 4.8), a role word for
        a verified person read by a link visitor without the owner's switch (0.12; 4.5) */
@@ -606,7 +606,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
   });
 
 /**
- * Which of the given op ids the deck's records already hold (docs/POLISH.md item 109): the
+ * Which of the given op ids the deck's records already hold (docs/archive/rounds/POLISH.md item 109): the
  * recovered writes plate offers a saved queue of an earlier tab only for the ops no record
  * names, so a write the server acknowledged but the tab never persisted as acknowledged (a
  * reload right after the answer) is never offered again. A caller without the read right, or a
@@ -656,7 +656,7 @@ export async function readEditorDeck(input: {
   /** a revision the caller knows the store reached; the answer is at or above it on the blob tier */
   atLeast?: number;
   /**
-   * the tab's stream position before a resync (docs/SYNC.md 3.2): the answer then carries
+   * the tab's stream position before a resync (docs/archive/rounds/SYNC.md 3.2): the answer then carries
    * `origins`, the records above it that name the ops they folded, so the client acknowledges
    * a pending op whose first attempt committed instead of sending it again
    */
@@ -666,7 +666,7 @@ export async function readEditorDeck(input: {
 }
 
 /**
- * The template a draft is cut from (SPEC 6.1; docs/PRODUCT.md 4.3): the deployment's default
+ * The template a draft is cut from (SPEC 6.1; docs/archive/rounds/PRODUCT.md 4.3): the deployment's default
  * (decks/templates/default.json, written by Use for new presentations), `blank` when none is set;
  * the first write's `createStoredDeck` copies the same folder.
  */
@@ -679,7 +679,7 @@ async function draftTemplateId(): Promise<string> {
 }
 
 /**
- * The deployment's default kit for the editor payload (docs/PRODUCT.md 4.1): the store's template
+ * The deployment's default kit for the editor payload (docs/archive/rounds/PRODUCT.md 4.1): the store's template
  * index is pulled first so a default template set on another instance of the deployment (Use for
  * new presentations, b7.md FR2) names the kit the Reset row and the default logo read.
  */
@@ -693,7 +693,7 @@ async function defaultKitOfCollection(): Promise<DefaultKit> {
 const FIRST_SAVE_LOG_MS = 1000;
 
 const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Promise<string> => {
-  /* the person the draft belongs to (docs/PEOPLE.md 3.11; production 1 and 2): the same identity
+  /* the person the draft belongs to (docs/archive/rounds/PEOPLE.md 3.11; production 1 and 2): the same identity
      the editor boot carries, so the own chip, the account menu and the name prompt on the first
      edit read the person and not the page's default author; the sign in facts beside it so the
      Sign in row exists on /new where the deployment offers one */
@@ -721,7 +721,7 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
   while (await hasStoredDeck(deckId)) deckId = newDraftDeckId(now);
   const stamp = now.toISOString();
   const defaultKit = readDefaultKit(decks.decksDir);
-  /* the appearance a new presentation opens in (docs/PRODUCT.md 4.1, section 1's decision;
+  /* the appearance a new presentation opens in (docs/archive/rounds/PRODUCT.md 4.1, section 1's decision;
      build/b5.md R8): the template's own when its manifest names one, else its kit's, light on
      General Translation's deployment; a stored deck keeps whatever it has */
   const defaults =

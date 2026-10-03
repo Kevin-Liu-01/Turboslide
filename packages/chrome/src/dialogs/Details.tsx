@@ -29,7 +29,7 @@ export function DetailsDialog() {
     { key: DIALOGS.details.created, value: formatWhen(deck.createdAt), control: 'created' },
     {
       key: DIALOGS.details.lastEdit,
-      /* the time alone (docs/POLISH.md 2.6 item 73; audit-chrome item 35: "(change 8)" is a
+      /* the time alone (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item 35: "(change 8)" is a
          revision number no seller has); Version history counts the changes */
       value: formatWhen(deck.updatedAt),
       control: 'lastEdit',

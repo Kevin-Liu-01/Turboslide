@@ -4,7 +4,7 @@ import { DEFAULT_MENU_CONTEXT, presentControls } from '../menus/model';
 import type { MenuContext } from '../menus/model';
 import { TOOLBAR_TAILS, TOOLBAR_TAIL_END, tailEditable, tailFor } from '../menus/toolbar-tails';
 
-// The tail reads the mode (docs/POLISH.md 2.6 item 58; 5.5 `toolbar-tail.test.ts`): the write
+// The tail reads the mode (docs/archive/rounds/POLISH.md 2.6 item 58; 5.5 `toolbar-tail.test.ts`): the write
 // controls draw for a caller with the write capability in Editing mode alone; a reader on the
 // editor route and Commenting or Viewing mode get none.
 describe('tailEditable', () => {
@@ -39,7 +39,7 @@ describe('tailEditable', () => {
   });
 });
 
-// The table tail's Merge and Unmerge draw only with something to merge (docs/POLISH.md 2.6 item
+// The table tail's Merge and Unmerge draw only with something to merge (docs/archive/rounds/POLISH.md 2.6 item
 // 74; audit-chrome item 45), and Select draws the plain arrow while the pointer toggle keeps the
 // rays (item 72; audit-chrome item 9).
 describe('the tail controls of the polish round', () => {

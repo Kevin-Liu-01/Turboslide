@@ -51,7 +51,7 @@ import {
   snackbarText,
 } from './lib';
 
-// The shader library's spec rows (docs/FEATURES.md 5.5, 5.6, 5.8, 7.1 `shaders.*` with the driver
+// The shader library's spec rows (docs/archive/rounds/FEATURES.md 5.5, 5.6, 5.8, 7.1 `shaders.*` with the driver
 // core/shaders.spec.ts): the frame's automatic capture and its record, the frame at the box's
 // aspect against the viewer's still, the storage rule (a repeated recipe reuses its asset, a
 // block keeps one frame), one capturer across two browser contexts, the hidden tab and the
@@ -65,7 +65,7 @@ import {
 // Liquid metal), else through `shader.insert`, else through `block.insert` of a material block
 // (the matrix's `setup` for these rows; lib.ts `ensureShader` records which). A control that is
 // not on the build skips with its id and lane, which the gate reads as not driven with that
-// reason (docs/PRODUCT.md 8.1); a control that exists is judged. Two rows read the mount at
+// reason (docs/archive/rounds/PRODUCT.md 8.1); a control that exists is judged. Two rows read the mount at
 // rest: a context with `reducedMotion: 'reduce'` (5.6's speed 0), never a paused animation guessed
 // from two clips. No environment variable is read here but PLAYWRIGHT_BASE_URL, VERCEL_OIDC_TOKEN
 // and, for the bearer on a deployment, TURBOSLIDE_TOKEN (never printed).
@@ -80,11 +80,12 @@ let slideId = '';
 let browserRef: Browser;
 /** The shader block of the file and the way it landed (a setup, never a driven step). */
 let shader: { id: string; how: string } | null = null;
-const SECTION_LANE = 'not on this build: formatOptions.shader (docs/FEATURES.md 5.3, B5)';
+const SECTION_LANE =
+  'not on this build: formatOptions.shader (docs/archive/rounds/FEATURES.md 5.3, B5)';
 /* Amplitude, not Strength: Strength maps to no uniform of liquid metal, the featured entry, so its
    slider is disabled by design (controls.ts controlApplies; build/integrator.md, the findings) */
 const STRENGTH_LANE =
-  'not on this build: formatOptions.shader.amplitude (docs/FEATURES.md 5.3, B5)';
+  'not on this build: formatOptions.shader.amplitude (docs/archive/rounds/FEATURES.md 5.3, B5)';
 /* the frame key as the schema spells it, `sha256:` then 64 hex (packages/schema/src/actions.ts shader.frame) */
 const KEY = /^(sha256:)?[0-9a-f]{64}$/;
 /** Four sample points across a picture, away from its edges. */
@@ -648,7 +649,7 @@ test(title('shaders.agent.list-insert-set-render'), async () => {
   if (list.status() === 404 || /unknown action|no such action|not a known action/i.test(listBody))
     test.skip(
       true,
-      `not on this build: shader.list on the HTTP transport (docs/FEATURES.md 5.8, B5 with B7); ${list.status()} ${listBody.slice(0, 120)}`,
+      `not on this build: shader.list on the HTTP transport (docs/archive/rounds/FEATURES.md 5.8, B5 with B7); ${list.status()} ${listBody.slice(0, 120)}`,
     );
   test.info().annotations.push({
     type: 'list',
@@ -765,7 +766,7 @@ test(title('shaders.library.glyph-engines-render'), async () => {
   if (present.length < want.length)
     test.skip(
       true,
-      `not on this build: dialog.shader.engine.glyph (docs/FEATURES.md 5.2 item 2, B5, P1); the catalog lists ${present.join(', ') || 'none'} of ${want.join(', ')}`,
+      `not on this build: dialog.shader.engine.glyph (docs/archive/rounds/FEATURES.md 5.2 item 2, B5, P1); the catalog lists ${present.join(', ') || 'none'} of ${want.join(', ')}`,
     );
   const facts: string[] = [];
   for (const materialId of want) {
@@ -861,14 +862,14 @@ async function showCanvases(
     await p.waitForTimeout(250);
   }
 }
-/* the P1 item the two show rows measure (docs/FEATURES.md 5.2 item 4, 5.6): the show's
+/* the P1 item the two show rows measure (docs/archive/rounds/FEATURES.md 5.2 item 4, 5.6): the show's
    ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and the Shader section's Play in the
    show control land as one commit, and the section draws Play in the show only when the item is
    on the build (7.1 `shaders.panel.section-groups`), so the control's presence is the item's; a
    build without it draws the frame in the show and the rows read not driven with the reason,
    never a red row on a layer no lane built (the fix round of ship two, finding 5) */
 const SHOW_LANE =
-  "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land";
+  "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/archive/rounds/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land";
 /** True when the Shader section draws Play in the show, the P1 item's own control. */
 async function showLayerBuilt(p: Page, id: string): Promise<boolean> {
   if (!(await openShaderSection(p, id))) return false;
@@ -889,7 +890,10 @@ test(title('shaders.show.plays-when-on'), async () => {
   const id = shader!.id;
   const rows = await playShaderRows(page);
   if (rows === null)
-    test.skip(true, 'not on this build: tools.preferences.playShaders (docs/FEATURES.md 5.6, P1)');
+    test.skip(
+      true,
+      'not on this build: tools.preferences.playShaders (docs/archive/rounds/FEATURES.md 5.6, P1)',
+    );
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await setPlayShaders(page, /^on$/i);
   /* the block's Play in the show through the section's control */
@@ -949,7 +953,10 @@ test(title('shaders.show.frame-when-off'), async () => {
   const id = shader!.id;
   const rows = await playShaderRows(page);
   if (rows === null)
-    test.skip(true, 'not on this build: tools.preferences.playShaders (docs/FEATURES.md 5.6, P1)');
+    test.skip(
+      true,
+      'not on this build: tools.preferences.playShaders (docs/archive/rounds/FEATURES.md 5.6, P1)',
+    );
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await setPlayShaders(page, /^off$/i);
@@ -994,7 +1001,7 @@ test(title('shaders.show.frame-when-off'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.5 items 36, 47 and 48, 5.1 `shaders.*`): a large frame lands
+// the polish round (docs/archive/rounds/POLISH.md 2.5 items 36, 47 and 48, 5.1 `shaders.*`): a large frame lands
 // or a sentence says it did not, the gallery's and the section's words, and the insert on a blank
 // slide.
 
@@ -1191,7 +1198,8 @@ test(title('shaders.gallery.words-and-head'), async () => {
   await openEditor(page, deck);
   await clickCard(page, slideId);
   const gallery = await openShaderGallery(page);
-  if (!gallery.open) test.skip(true, 'not on this build: insert.shader (docs/FEATURES.md 5.10)');
+  if (!gallery.open)
+    test.skip(true, 'not on this build: insert.shader (docs/archive/rounds/FEATURES.md 5.10)');
   const tips = await page.evaluate(() => {
     const cards = [
       ...document.querySelectorAll(
@@ -1315,7 +1323,7 @@ test(title('shaders.insert.free-rectangle'), async () => {
   test.setTimeout(240_000);
   await openEditor(page, deck);
   /* an empty slide: Blank applied through the layout plate, which drops the placeholders
-     (docs/POLISH.md 2.3 item 13, `slides.layout.blank-empty`). A `slide.set` of `/layout` alone
+     (docs/archive/rounds/POLISH.md 2.3 item 13, `slides.layout.blank-empty`). A `slide.set` of `/layout` alone
      left the fresh slide's title and body prompts, which count for a material (B4's R4 in
      place-insert.ts: a shader covers a prompt), so the ship's run of record read the strip
      between them, 137,218 1326 by 237, twice on both slides (the polish fix round 3, B6) */
@@ -1375,7 +1383,7 @@ coverage(import.meta.filename, [
   'shaders.library.glyph-engines-render',
   'shaders.show.plays-when-on',
   'shaders.show.frame-when-off',
-  /* the polish round (docs/POLISH.md 2.5 items 36, 47 and 48) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 items 36, 47 and 48) */
   'shaders.frame.large-png-lands',
   'shaders.gallery.words-and-head',
   'shaders.insert.free-rectangle',

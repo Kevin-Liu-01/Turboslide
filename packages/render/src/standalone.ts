@@ -153,7 +153,7 @@ export function renderStandalone(
       : counterText(1, total, deckCounterFormat(deck)),
     sprite: build.bundle.sprite,
     stageId: 'stage',
-    /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.5): the footer logo travels inline as its twin's data URI */
+    /* the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1, 4.5): the footer logo travels inline as its twin's data URI */
     titleSlide: firstSlide?.kind === 'title',
     band: frameBandOf(deck, theme, bandAssetResolver(deck, assetSrc)),
   });

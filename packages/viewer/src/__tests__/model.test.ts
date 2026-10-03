@@ -6,7 +6,7 @@ import { LINE_KINDS, LINE_KIND_LABELS } from '@turboslide/schema/shapes';
 import { blockDisplayName } from '../Selection';
 import { pad2, trimTitle } from '../model';
 
-// The chip's name for a line shape (docs/OBJECTS.md 4.2 item 5, the row `lines.chip.kind-name`;
+// The chip's name for a line shape (docs/archive/rounds/OBJECTS.md 4.2 item 5, the row `lines.chip.kind-name`;
 // 6.4 names this file for `blockDisplayName`, which lives in Selection.tsx beside the selection
 // model): each of the seven line kinds reads Google's word for the tool that drew it, a closed
 // preset stays Shape, and the deck model's small helpers hold their shape.

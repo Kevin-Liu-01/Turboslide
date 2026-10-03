@@ -1,4 +1,4 @@
-// The eleven common controls of the Shader section (docs/FEATURES.md 5.2, 5.3; audit-shaders 5),
+// The eleven common controls of the Shader section (docs/archive/rounds/FEATURES.md 5.2, 5.3; audit-shaders 5),
 // ported from Glyphfield's one settings record (`glyphfield/src/lib/liveMaterials.ts`
 // `LiveMaterialSettings`, `agentCatalog.ts` `AGENT_SHADER_LIBRARY.controls` for the published
 // ranges, `paperShaderControls.ts` `paperControlOverrides` for the mapping onto each Paper family;
@@ -33,7 +33,7 @@ export type ShaderControlSpec = {
   name: MaterialControlName;
   /** The word the seller reads. */
   label: string;
-  /** The one sentence of the tooltip (docs/FEATURES.md 5.3). */
+  /** The one sentence of the tooltip (docs/archive/rounds/FEATURES.md 5.3). */
   sentence: string;
   /** The group the Shader section draws it in (Glyphfield's names). */
   group: 'Form' | 'Light and texture' | 'Orientation' | 'Motion';
@@ -305,7 +305,7 @@ function keysOf(entry: MaterialEntry, group: ReadonlyArray<string>): string[] {
 }
 
 /**
- * The mapping of the eleven controls onto one entry's uniforms (docs/FEATURES.md 5.2). Brightness
+ * The mapping of the eleven controls onto one entry's uniforms (docs/archive/rounds/FEATURES.md 5.2). Brightness
  * names the entry's colour uniforms when it has no `u_brightness`, so the control has an effect on
  * every shader; Speed maps to no uniform (the mount's speed).
  */

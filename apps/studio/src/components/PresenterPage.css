@@ -1,5 +1,5 @@
 /* The presenter window's page (PresenterPage.tsx). The Audience tools tab is a Later stub with
-   no service behind it (docs/POLISH.md item 98; audit-pages item 41): hidden here until it does
+   no service behind it (docs/archive/rounds/POLISH.md item 98; audit-pages item 41): hidden here until it does
    something; the console's own file drops it on the integrator's request (build/b5.md R7). */
 .ts-presenter [data-control='presenter.tab.audience'] {
   display: none;

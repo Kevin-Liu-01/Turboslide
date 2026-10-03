@@ -1,4 +1,4 @@
-// The logo readers of the export (docs/FEATURES.md 4.8; audit-logos 18): the `logo` kind is a 3x
+// The logo readers of the export (docs/archive/rounds/FEATURES.md 4.8; audit-logos 18): the `logo` kind is a 3x
 // kind under the auto policy, a picture or shot block whose asset carries `role: 'logo'` is read
 // from the document (composites' cells included, a missing asset is not a logo), and the kit's
 // picture logo is read from the brand record; the two kit names the builder overlays in the

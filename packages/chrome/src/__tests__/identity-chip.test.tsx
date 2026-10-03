@@ -13,7 +13,7 @@ import {
   trustWordOf,
 } from '../presence/IdentityChip';
 
-// The identity chip of the people round (docs/PEOPLE.md 3.4, 3.7, 4.4; 6.5
+// The identity chip of the people round (docs/archive/rounds/PEOPLE.md 3.4, 3.7, 4.4; 6.5
 // identity-chip.test.tsx): the badge for a verified account and not for a deleted one, the
 // picture's srcset and decoding, the fallback to the initials field when the picture fails, and
 // the field at size - 4 at every chip size, 8 px at the outline row's 12.

@@ -62,12 +62,12 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     expect(byId('toolbar.bulletedList')?.arrow).toBe('format.bulletsNumbering.bulleted');
     expect(byId('toolbar.numberedList')?.arrow).toBe('format.bulletsNumbering.numbered');
     expect(byId('toolbar.borderDash')?.op).toBe('borderDash');
-    /* the Font dropdown (docs/PRODUCT.md 4.2): live, in Google's position, no longer disabled */
+    /* the Font dropdown (docs/archive/rounds/PRODUCT.md 4.2): live, in Google's position, no longer disabled */
     expect(byId('toolbar.font')?.dropdown).toBe(true);
     expect(byId('toolbar.font')?.enabled).toBeUndefined();
   });
 
-  it('word art: the shape tail’s fill and border controls before the text controls, each live, and the text tail unchanged (docs/OBJECTS.md 4.2 item 4)', () => {
+  it('word art: the shape tail’s fill and border controls before the text controls, each live, and the text tail unchanged (docs/archive/rounds/OBJECTS.md 4.2 item 4)', () => {
     expect(tailLabels('wordart')).toEqual(TEXT_LABELS);
     const byId = (control: string) =>
       TOOLBAR_TAILS.wordart.find((each) => each.control === control);
@@ -117,9 +117,9 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
         control,
       ).toBeUndefined();
     /* cycle 2 of the focus round parked the tail whole with Insert > Shape (docs/FOCUS.md section
-       4 under ruling (1), build/b3.md R14); the return round brought it back (docs/RETURN.md 2.2,
+       4 under ruling (1), build/b3.md R14); the return round brought it back (docs/archive/rounds/RETURN.md 2.2,
        3.2) with Change shape flagged beside the galleries (2.9); the vector round returns Change
-       shape too (docs/VECTOR.md 2.6, item S7), so no control of the tail carries the flag and
+       shape too (docs/archive/rounds/VECTOR.md 2.6, item S7), so no control of the tail carries the flag and
        Change shape leads it with the divider */
     for (const control of TOOLBAR_TAILS.shape)
       expect(control.advanced, control.control).toBeUndefined();
@@ -201,7 +201,7 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     ]);
     for (const control of TOOLBAR_TAILS.line) expect(control.status, control.control).toBe('now');
     /* cycle 2 parked the tail whole with Insert > Line (docs/FOCUS.md section 4 under ruling (1),
-       build/b3.md R14); the return round brought it back (docs/RETURN.md 2.3, 3.2): no control
+       build/b3.md R14); the return round brought it back (docs/archive/rounds/RETURN.md 2.3, 3.2): no control
        carries the flag */
     for (const control of TOOLBAR_TAILS.line)
       expect(control.advanced, control.control).toBeUndefined();
@@ -270,7 +270,7 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
     /* the Insert shape and Insert line dropdowns open the categories and kinds of SPEC-2 4.1;
        cycle 2 of the focus round parked both buttons with their menus (docs/FOCUS.md section 4
        under ruling (1), build/b3.md R14) and the return round brought them back to the default
-       view (docs/RETURN.md 2.2, 2.3, 3.2) */
+       view (docs/archive/rounds/RETURN.md 2.2, 2.3, 3.2) */
     const insertShape = TOOLBAR_TAILS.default.find(
       (control) => control.control === 'toolbar.insertShape',
     );

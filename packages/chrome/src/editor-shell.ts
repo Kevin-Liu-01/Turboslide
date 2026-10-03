@@ -159,7 +159,7 @@ export type EditorHandle = {
   regroup?: () => void;
   cropMode?: () => void;
   exitCrop?: () => void;
-  /** whether a crop is open on the stage, so a bare Enter finishes it and is otherwise the focused button's (docs/RETURN.md 4.1; return/build/b1.md R1) */
+  /** whether a crop is open on the stage, so a bare Enter finishes it and is otherwise the focused button's (docs/archive/rounds/RETURN.md 4.1; return/build/b1.md R1) */
   cropOpen?: () => boolean;
   mask?: (shape: string | null) => void;
   /** inserts text at the caret, or into a new text box when nothing is being edited */
@@ -168,7 +168,7 @@ export type EditorHandle = {
   wordArt?: (text: string) => void;
   /** runs a table plan from `table-tools.ts` */
   tableCommand?: (plan: { action: MenuActionId; input: Record<string, unknown> }) => void;
-  /** selects the table block with no session and sets its cell range, so a head click selects a whole row or column (docs/OBJECTS.md 3.3 item 4; objects/build/b5.md R2) */
+  /** selects the table block with no session and sets its cell range, so a head click selects a whole row or column (docs/archive/rounds/OBJECTS.md 3.3 item 4; objects/build/b5.md R2) */
   selectCells?: (
     blockId: string,
     cells: { r0: number; c0: number; r1: number; c1: number },
@@ -210,7 +210,7 @@ export type EditorHandle = {
   ditherPreview?: (blockId: string, dither: PictureDitherLike | null) => void;
   /** View > Mode: Editing, Commenting or Viewing (5.3, 6.3); the gates live in the editor */
   setMode?: (mode: EditorMode) => void;
-  /* the product round (docs/PRODUCT.md section 2 rank 10, section 5; B2) */
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 10, section 5; B2) */
   /** places an asset the document holds as a picture (Image by URL), or swaps a block's picture with its box kept */
   insertPictureAsset?: (
     asset: { id: string; size?: [number, number] },
@@ -218,7 +218,7 @@ export type EditorHandle = {
   ) => void;
   /** Add a caption on the selected picture: writes the caption field and opens it; false with no picture selected */
   addCaption?: () => boolean;
-  /* the polish round fix round 3 (docs/POLISH.md 2.3 item 18; B5's R19 to B1): the toolbar's
+  /* the polish round fix round 3 (docs/archive/rounds/POLISH.md 2.3 item 18; B5's R19 to B1): the toolbar's
      Paint format button reads pressed while the brush is armed, from the stage's own store */
   /** true while Paint format is armed (the snapshot the button reads) */
   paintArmed?: () => boolean;
@@ -265,17 +265,17 @@ export type IdentityView = {
   mark?: MarkSpecLike;
   /** an agent's run id, shown as "Agent · <runId>" (4.7) */
   runId?: string;
-  /** the account was deleted (7.4): the name reads "Deleted account" and no badge is drawn (docs/PEOPLE.md 3.7) */
+  /** the account was deleted (7.4): the name reads "Deleted account" and no badge is drawn (docs/archive/rounds/PEOPLE.md 3.7) */
   deleted?: boolean;
   /**
-   * the account (`usr_<id>`) an aliased anonymous id renders as (7.4; docs/PEOPLE.md 3.17): the
+   * the account (`usr_<id>`) an aliased anonymous id renders as (7.4; docs/archive/rounds/PEOPLE.md 3.17): the
    * two ids are one person to the label suffix and to the version panel's You (build/b5.md R9)
    */
   accountId?: string;
 };
 
 /**
- * The avatar choice as the shell reads it (SPEC-3 7.6; docs/PEOPLE.md 3.11, 4.1): the
+ * The avatar choice as the shell reads it (SPEC-3 7.6; docs/archive/rounds/PEOPLE.md 3.11, 4.1): the
  * `account.me` answer's `avatar`, the salt a number as the server stores it, the picture as its
  * 64 px URL and never the key.
  */
@@ -289,7 +289,7 @@ export type AvatarChoiceView = {
   url?: string;
 };
 
-/** What the builder hands to `account.setAvatar` (docs/PEOPLE.md 4.1): the picture as a data URL the browser encoded. */
+/** What the builder hands to `account.setAvatar` (docs/archive/rounds/PEOPLE.md 4.1): the picture as a data URL the browser encoded. */
 export type AvatarChoiceInput = {
   variant: 'initials' | 'glyph' | 'dither' | 'picture';
   initials?: string;
@@ -563,7 +563,7 @@ export type EditorAccount = {
   googleAvailable?: boolean;
   sessions?: readonly SessionView[];
   tokens?: readonly TokenView[];
-  /** the avatar choice on the principal record (7.6): the builder starts from it (docs/PEOPLE.md 3.11) */
+  /** the avatar choice on the principal record (7.6): the builder starts from it (docs/archive/rounds/PEOPLE.md 3.11) */
   avatar?: AvatarChoiceView;
   /** the name prompt fires on the first edit, comment or lease (0.18); the route says when */
   namePrompt?: { open: boolean; prefilled: string };
@@ -585,7 +585,7 @@ export type EditorAccount = {
   revokeToken?: (tokenId: string) => Promise<unknown>;
   /** Delete account (7.4); refused while other people hold grants on decks the caller owns */
   deleteAccount?: () => Promise<unknown>;
-  /** the 64 px URL of the picture avatar, when one is set; the chip and the head derive the other sizes (docs/PEOPLE.md 4.4) */
+  /** the 64 px URL of the picture avatar, when one is set; the chip and the head derive the other sizes (docs/archive/rounds/PEOPLE.md 4.4) */
   pictureUrl?: string;
 };
 
@@ -761,7 +761,7 @@ export type EditorShellInput = {
    */
   onSettingsChange?: (settings: ShellSettings) => void;
   /**
-   * The deployment's default kit (docs/PRODUCT.md 4.1, 4.3): the name every Reset reads and the
+   * The deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1, 4.3): the name every Reset reads and the
    * default logo; the blank template's `brand` fields when no default template names another.
    */
   defaultKit?: DefaultKit;
@@ -796,7 +796,7 @@ export type EditorShellInput = {
   /** deck.list, for Open and Import slides; the dispatcher's `deck.list` when absent */
   listDecks?: () => Promise<ReadonlyArray<DeckHeadRow>>;
   /**
-   * This browser's own decks (the Recent mirror, docs/POLISH.md item 75), drawn by Open and
+   * This browser's own decks (the Recent mirror, docs/archive/rounds/POLISH.md item 75), drawn by Open and
    * Import slides the moment they open, before `listDecks` answers; the listing replaces them
    * when it lands, with any of them it does not hold folded in above it. Absent: the dialogs wait
    * for the listing as before (B5's R29 to B1, landed by the ship step's third attempt).
@@ -820,7 +820,7 @@ export type EditorShellInput = {
   tokenRequired?: boolean;
   /**
    * What the deployment's assistant can do (apps/studio/src/server/assist.ts `assistMode`; the
-   * polish round, docs/POLISH.md 2.9 item 113): `model` or `fixture` answer asks, `unconfigured`
+   * polish round, docs/archive/rounds/POLISH.md 2.9 item 113): `model` or `fixture` answer asks, `unconfigured`
    * has no key and `off` is the kill switch. The panel offers only what the mode can do and the
    * finder offers no Ask row without a model; absent reads as `model`, today's behaviour.
    */
@@ -941,7 +941,7 @@ export const PANEL_IDS = [
   'inbox',
   'activity',
   'editHtml',
-  /* the product round (docs/PRODUCT.md 6.1): the Assist panel */
+  /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the Assist panel */
   'assist',
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
@@ -950,7 +950,7 @@ export type PanelId = (typeof PANEL_IDS)[number];
 export function panelIdOfTitle(title: string): PanelId | null {
   switch (title) {
     case 'Themes':
-    /* the product round (docs/PRODUCT.md 4.1): the Themes panel is the Brand kit panel; the id
+    /* the product round (docs/archive/rounds/PRODUCT.md 4.1): the Themes panel is the Brand kit panel; the id
        stays `themes` so the toolbar's Theme toggle and the stored panel keep working */
     case 'Brand kit':
       return 'themes';
@@ -1003,7 +1003,7 @@ export const DIALOG_IDS = [
   /* the Insert pickers (SPEC 2.4): the symbol picker and the material list; the table size grid
      is a plate inside the Insert menu (SPEC-2 0.26) */
   'insertIcon',
-  /* the features round, ship two (docs/FEATURES.md 5.4): the Shader gallery, where the Material
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): the Shader gallery, where the Material
      list was (build/b1.md R2) */
   'shaderGallery',
   /* round two (SPEC-2 0.49): Slide > Change background, Custom spacing, Insert > Special characters */
@@ -1021,12 +1021,12 @@ export const DIALOG_IDS = [
   'requestAccess',
   /* Forget this browser asks first (7.4, ACCOUNT.forgetConfirm); the route's `account.forget` runs on Forget */
   'forgetBrowser',
-  /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5): Download options, Save
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 8, 4.3, section 5): Download options, Save
      as template and Tailor for a customer */
   'downloadOptions',
   'saveAsTemplate',
   'tailor',
-  /* the features round (docs/FEATURES.md 4.3): the Logo picker */
+  /* the features round (docs/archive/rounds/FEATURES.md 4.3): the Logo picker */
   'logo',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
@@ -1046,14 +1046,14 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'publish';
     case 'Download':
       return itemId === 'file.download.pdf' ? 'downloadPdf' : 'download';
-    /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5) */
+    /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 8, 4.3, section 5) */
     case 'Download options':
       return 'downloadOptions';
     case 'Save as template':
       return 'saveAsTemplate';
     case 'Tailor for a customer':
       return 'tailor';
-    /* the features round (docs/FEATURES.md 4.3) */
+    /* the features round (docs/archive/rounds/FEATURES.md 4.3) */
     case 'Logo':
       return 'logo';
     case 'Slide numbers':
@@ -1166,7 +1166,7 @@ export function selectionGroup(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The kept cell pointer (docs/RETURN.md 2.4 fixes 2 and 3, section 6: B2 writes it, B5 reads it)
+// The kept cell pointer (docs/archive/rounds/RETURN.md 2.4 fixes 2 and 3, section 6: B2 writes it, B5 reads it)
 
 /**
  * The table cell a selection last named, per table, so the Format > Table rows, the Align rows
@@ -1233,7 +1233,7 @@ export function tailKindOf(
 ): TailKind {
   /* a fixed kind's field (the cover title's heading and lead, a statement's big line) is an
      object to the tail as it is to the menus: one click on the cover title swaps the toolbar to
-     the text tail (docs/RETURN.md 2.14 item 1; audit-formatting row 10 read the default tail) */
+     the text tail (docs/archive/rounds/RETURN.md 2.14 item 1; audit-formatting row 10 read the default tail) */
   const block = objectOf(slide, selection?.blockId);
   if (block === undefined) return selection?.text ? 'text' : 'default';
   /* SPEC-2 4.2: a group selection takes the group tail whatever its members are */
@@ -1249,7 +1249,7 @@ export function tailKindOf(
   if (family === 'image') return 'image';
   if (family === 'line') return 'line';
   if (family === 'chart') return 'chart';
-  /* the features round, ship two (docs/FEATURES.md 5.3): a shader's tail is Format options */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): a shader's tail is Format options */
   if (block.type === 'material') return 'material';
   return 'other';
 }
@@ -1367,7 +1367,7 @@ export function imageEditedOf(block: Block | undefined): boolean {
 }
 
 /**
- * True when the picture's asset draws a vector (docs/VECTOR.md 4.1, 4.4): `vectorOf` answers its
+ * True when the picture's asset draws a vector (docs/archive/rounds/VECTOR.md 4.1, 4.4): `vectorOf` answers its
  * file. The one place the chrome reads the asset, so the Crop image row, the toolbar's Crop button
  * and the viewer's refusal agree on what an svg picture is (vector/build/b1.md R2, b3.md R2).
  */
@@ -1453,18 +1453,18 @@ export function buildMenuContext(
       block?.type === 'table' ||
       /* a closed shape with a label: its runs take the marks; a shape with no text has nothing
          for Format > Text to act on, so the rows read disabled instead of refusing after the
-         menu enabled them (docs/POLISH.md 2.3 item 17; audit-chrome item 4, rows 161 to 165) */
+         menu enabled them (docs/archive/rounds/POLISH.md 2.3 item 17; audit-chrome item 4, rows 161 to 165) */
       (block?.type === 'shape' && !isLineKind(block.shape) && block.text !== undefined),
     listItem,
     /* every Format > Table row is enabled while a table is selected, by a cell session, by the
        kept cell after it, or by one click, and acts on the kept cell or cell 1,1 (RETURN.md 2.4
        fix 2: Google enables the rows "when the cursor is in a table") */
     tableCell: block?.type === 'table',
-    /* the objects round (docs/OBJECTS.md 3.3 item 4): the Header row check reads the first row */
+    /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 4): the Header row check reads the first row */
     ...(block?.type === 'table'
       ? { tableHeader: (block as TableBlock).rows[0]?.header === true }
       : {}),
-    /* the polish round (docs/POLISH.md 2.6 item 74): the Tabular figures check row reads the block */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74): the Tabular figures check row reads the block */
     tabularFigures:
       (block as { typography?: { numerals?: string } } | undefined)?.typography?.numerals ===
       'tabular',
@@ -1487,7 +1487,7 @@ export function buildMenuContext(
       : {}),
     ...(picked?.range === undefined ? {} : { range: picked.range }),
     imageEdited: picked?.imageEdited ?? imageEditedOf(block),
-    /* the vector round (docs/VECTOR.md 4.4): an svg picture refuses the crop with the sentence */
+    /* the vector round (docs/archive/rounds/VECTOR.md 4.4): an svg picture refuses the crop with the sentence */
     ...(vectorPictureOf(input.document.deck, block) ? { vector: true } : {}),
     outlined: picked?.outlined ?? (block?.type === 'text' && block.outline !== undefined),
     ...(listLevel === undefined ? {} : { listLevel }),
@@ -1605,7 +1605,7 @@ function currentSlide(facts: ActionFacts): Slide | undefined {
 }
 
 /**
- * The marks under the caret or the selection (docs/PRODUCT.md 3.1, the pressed cell of the shell
+ * The marks under the caret or the selection (docs/archive/rounds/PRODUCT.md 3.1, the pressed cell of the shell
  * button; audit-interface 14): the editor's own report when the selection carries one (the
  * InlineText's caret info, which names `b` beside the schema's marks), else the marks of the
  * selected range read from the block's text, so Bold, Italic and Underline light after Cmd+B,
@@ -1656,7 +1656,7 @@ export function factsOf(
 // ---------------------------------------------------------------------------------------------
 // The Insert menu (SPEC 2.4; SPEC-2 1.6, 6.2): what a row does before its write
 
-/** The picker an Insert row opens before its block.insert: the symbols, the shader gallery (docs/FEATURES.md 5.4). */
+/** The picker an Insert row opens before its block.insert: the symbols, the shader gallery (docs/archive/rounds/FEATURES.md 5.4). */
 export type InsertPicker = 'icon' | 'shader';
 
 /**
@@ -1754,7 +1754,7 @@ const PATH_POINTS: Readonly<Record<'curve' | 'polyline' | 'scribble', [number, n
 
 /**
  * Word art's block (SPEC-2 0.14, 6.2): 88 px with a 1.5 px ink outline, centred, at the regular
- * weight as the Editor's own bar inserts it (docs/POLISH.md 2.4 item 34: the tail's B reads
+ * weight as the Editor's own bar inserts it (docs/archive/rounds/POLISH.md 2.4 item 34: the tail's B reads
  * unpressed at the insert and one press bolds the letters).
  */
 export function wordArtBlock(id: BlockId, text: string): Block {
@@ -1840,7 +1840,7 @@ export const INSERT_SIZES: Readonly<Record<string, [number, number]>> = {
   icon: [48, 48],
   shot: [480, 272],
   picture: [480, 272],
-  /* a shader takes the content box, the largest free rectangle under a title (docs/POLISH.md 2.5
+  /* a shader takes the content box, the largest free rectangle under a title (docs/archive/rounds/POLISH.md 2.5
      item 48; polish/build/b4.md R7); placeInsert takes the smaller of this and the room */
   material: [1326, 642],
   heading: [800, 56],
@@ -1878,7 +1878,7 @@ export function insertBlockPlan(
 
 /** The default table the Table row inserts when its grid is not on hand: 3 columns by 3 rows with a header row. */
 export const DEFAULT_TABLE_SIZE = { columns: 3, rows: 3 } as const;
-/** The inserted table's width in sheet px (INSERT_SIZES.table's); its height comes from its rows (docs/OBJECTS.md 3.3 item 3). */
+/** The inserted table's width in sheet px (INSERT_SIZES.table's); its height comes from its rows (docs/archive/rounds/OBJECTS.md 3.3 item 3). */
 export const TABLE_INSERT_WIDTH = 960;
 
 function block(facts: ActionFacts): Block | undefined {
@@ -1973,7 +1973,7 @@ export function stepLadder(size: number, direction: 1 | -1): number {
 
 /**
  * Google's spacing names on the theme's leading steps (SPEC 2.5). Every row writes the value its
- * label names: 1.15 writes 1.15, a step of TYPE_LEADING and of LINE_SPACING_PRESETS (docs/RETURN.md
+ * label names: 1.15 writes 1.15, a step of TYPE_LEADING and of LINE_SPACING_PRESETS (docs/archive/rounds/RETURN.md
  * 2.14 item 4; audit-formatting row 48 read 1.2 under the label 1.15).
  */
 export const SPACING_STEPS: ReadonlyArray<{ label: string; leading: number }> = [
@@ -2085,7 +2085,7 @@ function markOf(item: MenuItem): 'i' | 'u' | 's' | 'sup' | 'sub' | null {
 /**
  * The range a text write covers: the caret's while a session is open (`selection.text`), else
  * the whole Text at the path. A range the route kept from a session that ended is not a
- * selection: the polish round's chrome audit (docs/POLISH.md 2.3 item 17; audit-chrome item 4)
+ * selection: the polish round's chrome audit (docs/archive/rounds/POLISH.md 2.3 item 17; audit-chrome item 4)
  * read Italic, Underline, Strikethrough, Superscript and Subscript writing nothing on a text box
  * selected by one click, because the collapsed caret of the last session was still the range.
  */
@@ -2098,7 +2098,7 @@ function rangeOf(target: Block, path: string, facts: ActionFacts): [number, numb
 /**
  * True when the target is a fixed kind's field the menus see as a block (`pseudoBlockOf`: the
  * cover title's heading and lead, a statement's big line) and not a block of the slide yet. The
- * first format write on it converts the slide to a canvas the way the Align rows do (docs/RETURN.md
+ * first format write on it converts the slide to a canvas the way the Align rows do (docs/archive/rounds/RETURN.md
  * 2.14 item 1, FOCUS.md 2.5): the plan carries the reducer's own mutations in one `slide.update`,
  * because the store's text actions look the block up before they write and would refuse it, and
  * the studio's commit puts the measured conversion in front of them (apps/studio/src/editor/
@@ -2166,11 +2166,11 @@ export function hasClearableMarks(text: string, range: readonly [number, number]
   });
 }
 
-/** The sentence for a mark on a table whose selected cells hold no text (docs/FEATURES.md 2.2 rank 8). */
+/** The sentence for a mark on a table whose selected cells hold no text (docs/archive/rounds/FEATURES.md 2.2 rank 8). */
 const TYPE_INTO_CELL = 'Type into a cell first';
 
 /**
- * The cells of a table a text write covers (docs/FEATURES.md 2.2 rank 8; audit-objects 7): the
+ * The cells of a table a text write covers (docs/archive/rounds/FEATURES.md 2.2 rank 8; audit-objects 7): the
  * range's drawn cells when the selection carries one, the caret's cell when it carries a cell and
  * no range, else every drawn cell of a table selected by one click; each with the whole plain
  * range of its text. Cells with no text are left out (a mark on no character writes nothing).
@@ -2213,7 +2213,7 @@ function textIsBold(text: string): boolean {
 
 /**
  * One `slide.update` of `text.mark` mutations writing a mark, a bold run or a colour into every
- * selected cell of a table (docs/FEATURES.md 2.2 rank 8; audit-objects 7: Cmd+B wrote
+ * selected cell of a table (docs/archive/rounds/FEATURES.md 2.2 rank 8; audit-objects 7: Cmd+B wrote
  * `/typography` on the table block, the schema refused it and the card "A change was not
  * applied" opened over the toolbar). A mark is cleared when every cell already carries it whole
  * and set otherwise; a colour is set as given and cleared with null. One commit, one Cmd+Z.
@@ -2252,7 +2252,7 @@ export function tableMarksPlan(
 
 /**
  * One `slide.update` of one `text.mark` writing or clearing the bold run over the caret's range
- * or the whole Text of the selected block (docs/POLISH.md 2.3 item 12): the reducer's own edit,
+ * or the whole Text of the selected block (docs/archive/rounds/POLISH.md 2.3 item 12): the reducer's own edit,
  * since `text.style` carries the five span marks and the colours but not `b`. Cleared when every
  * run with a character in the range is bold already, set otherwise. One commit, one Cmd+Z.
  */
@@ -2292,7 +2292,7 @@ export function boldPlan(
  * One `text.style` toggling a mark, or setting a colour, over the caret's range or the whole
  * Text (SPEC-2 4.1): the toggle reads the range's current marks (the route's, else the Text's).
  * On a table with a range, or selected by one click with no cell, the write goes into every
- * selected cell (`tableMarksPlan`, docs/FEATURES.md 2.2 rank 8); a caret in one cell keeps the
+ * selected cell (`tableMarksPlan`, docs/archive/rounds/FEATURES.md 2.2 rank 8); a caret in one cell keeps the
  * cell's own path.
  */
 export function textStylePlan(
@@ -2369,7 +2369,7 @@ export function listPlan(
 ): ActionPlan | ActionRefusal {
   const target = block(facts);
   if (target === undefined) return { refused: SELECT_TEXT };
-  /* a heading takes a list too (docs/POLISH.md 2.3 item 18; audit-chrome item 17: the title
+  /* a heading takes a list too (docs/archive/rounds/POLISH.md 2.3 item 18; audit-chrome item 17: the title
      placeholder's Bulleted list answered "Select a paragraph or a text box first" from an enabled
      button); the store's `listBlockFrom` converts it as it converts a paragraph */
   if (
@@ -2508,7 +2508,7 @@ export function shapePickPlan(
         slideId: facts.slideId,
         blockIds: shapes.map((each) => each.id),
         kind: shape,
-        /* the old preset's adjust values leave with it, as the inspector's plate writes (docs/VECTOR.md 2.6) */
+        /* the old preset's adjust values leave with it, as the inspector's plate writes (docs/archive/rounds/VECTOR.md 2.6) */
         adjust: null,
         baseRevision: facts.revision,
       },
@@ -2629,7 +2629,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
   switch (item.id) {
     case 'insert.newSlide':
     case 'slide.newSlide': {
-      /* the product round (docs/PRODUCT.md section 2 rank 2; research 07 rule 12): after the
+      /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 2; research 07 rule 12): after the
          title slide New slide is Title and body, after any other slide it inherits the current
          slide's layout; the arrow's last pick (`facts.lastLayout`) rings the arrow's plate and
          no longer takes precedence here (build/b3.md R2). The title slide is read by the kind it
@@ -2756,7 +2756,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       );
     }
     case 'insert.table':
-      /* the objects round (docs/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits its rows
+      /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits its rows
          (163 for three rows at 20 px, the rule under each row included), the width the table's 960 */
       return insertBlockPlan(
         facts,
@@ -2782,7 +2782,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'insert.icon':
       return insertBlockPlan(facts, 'icon', (id) => CATALOG.icon.make(id), item.label);
     case 'insert.shader':
-      /* the features round, ship two (docs/FEATURES.md 5.2, 5.4; build/b5/integrator-hunks.md R4):
+      /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.2, 5.4; build/b5/integrator-hunks.md R4):
          the row opens the gallery (PICKER_OF), so this branch is the palette's and the window API's
          direct insert of the featured entry in its featured preset, placed by the controller in the
          largest free rectangle (place-insert.ts) */
@@ -2961,10 +2961,10 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.text.bold': {
       if (target === undefined) return { refused: SELECT_TEXT };
       /* a table has no typography field: Bold writes the bold run into every selected cell's
-         text (docs/FEATURES.md 2.2 rank 8; audit-objects 7) */
+         text (docs/archive/rounds/FEATURES.md 2.2 rank 8; audit-objects 7) */
       if (target.type === 'table')
         return tableMarksPlan(facts, target as TableBlock, { mark: 'b' }, 'Bold');
-      /* the polish round (docs/POLISH.md 2.3 item 12; audit-text item 1): Bold is the inline
+      /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 12; audit-text item 1): Bold is the inline
          bold run, as Cmd+B writes it, over the selected range or the whole text of a block
          selected by one click; the block's weight 500 override read as nothing bold. Word art
          takes the same mark (item 34): its letters draw at 700 inside the outlined paragraph,
@@ -3034,7 +3034,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       };
     }
     case 'format.text.tabularFigures': {
-      /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 40): the row toggles the
+      /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 40): the row toggles the
          block's numerals; the panel's Text section keeps its own control */
       if (target === undefined) return { refused: SELECT_TEXT };
       if (target.type === 'table') return { refused: 'Tabular figures apply to a text block' };
@@ -3057,7 +3057,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
         );
       if (target.type === 'table') {
         /* a table's text size is its `size` ladder (blocks/table.ts TABLE_SIZES, 20 down to 15,
-           every cell at once; docs/FEATURES.md 2.2 rank 8): the step walks that ladder and says
+           every cell at once; docs/archive/rounds/FEATURES.md 2.2 rank 8): the step walks that ladder and says
            so at its ends, where the TYPE_LADDER's 22 was refused by the schema before */
         const ladder = [...TABLE_SIZES].sort((a, b) => a - b);
         const current = (target as TableBlock).size ?? 20;
@@ -3094,7 +3094,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
         const cells = facts.selection?.cells;
         const cell = facts.selection?.cell;
         /* a range that is not whole columns, or the caret's cell, writes the cells' own alignment
-           (docs/POLISH.md 2.2 item 10; polish/build/b2.md R5; audit-tables item 14: Center on
+           (docs/archive/rounds/POLISH.md 2.2 item 10; polish/build/b2.md R5; audit-tables item 14: Center on
            the header cells centred every cell below); a column head's range and a table selected
            by one click keep writing the column */
         const table = target as TableBlock;
@@ -3113,7 +3113,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
             item.label,
           );
         /* the range's columns, the caret's column, or every column of a table selected by one
-           click (docs/FEATURES.md 2.2 rank 8, `tables.range.size-color`) */
+           click (docs/archive/rounds/FEATURES.md 2.2 rank 8, `tables.range.size-color`) */
         const covers = (index: number): boolean =>
           cells !== undefined
             ? index >= Math.min(cells.c0, cells.c1) && index <= Math.max(cells.c0, cells.c1)
@@ -3173,7 +3173,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
     case 'format.spacing.1_5':
     case 'format.spacing.double': {
       if (target === undefined) return { refused: SELECT_TEXT };
-      /* no typography field on a `plain` list block (C2-F1, C2-R16) or on a table (docs/POLISH.md
+      /* no typography field on a `plain` list block (C2-F1, C2-R16) or on a table (docs/archive/rounds/POLISH.md
          2.6 item 54; audit-chrome item 2: the `/typography` write on a table was applied by the
          client, refused by the schema and Redo printed the validator's path) */
       if (target.type === 'plain' || target.type === 'table') return { refused: SPACING_ON_LIST };
@@ -3292,7 +3292,7 @@ export function menuActionPlan(item: MenuItem, facts: ActionFacts): ActionPlan |
       if (target === undefined) return { refused: SELECT_BLOCK };
       /* with a range selected in a session the marks of that range alone go, as Google's Clear
          formatting acts on the selection; on a selected box every override and every mark of
-         every Text of the block goes (docs/RETURN.md 2.14 item 5: the button left an italic
+         every Text of the block goes (docs/archive/rounds/RETURN.md 2.14 item 5: the button left an italic
          word with the sentence "Nothing to clear", audit-formatting row 60) */
       const range = facts.selection?.range;
       const caretPath = range === undefined ? null : textPathOf(target, facts.selection);
@@ -3447,9 +3447,9 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   /* the focus round (docs/FOCUS.md 3.1): Tools > Advanced tools, remembered the same way; when a
      preferences record lands the setting follows the principal and this copy is the fallback */
   'advancedTools',
-  /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection */
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection */
   'linkDetection',
-  /* the features round, ship two (docs/FEATURES.md 5.6): View > Play shaders, per browser */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): View > Play shaders, per browser */
   'playShaders',
 ];
 
@@ -3486,9 +3486,9 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   showChanges: false,
   /* docs/FOCUS.md 3.1: the parked set is hidden until the person asks for it */
   advancedTools: false,
-  /* docs/PRODUCT.md section 2 rank 9: a typed address becomes a link unless the seller turns it off */
+  /* docs/archive/rounds/PRODUCT.md section 2 rank 9: a typed address becomes a link unless the seller turns it off */
   linkDetection: true,
-  /* docs/FEATURES.md 5.6, question 5's default: shaders hold their frame while editing and move in the show */
+  /* docs/archive/rounds/FEATURES.md 5.6, question 5's default: shaders hold their frame while editing and move in the show */
   playShaders: 'show',
 };
 

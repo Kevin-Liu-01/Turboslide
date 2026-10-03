@@ -17,7 +17,7 @@ import { tipProps } from '../Tooltip';
 import './Pickers.css';
 
 /**
- * The colour plate (gslides-parity SPEC 3.2 rows 8, 9, 17; SPEC-2 0.27, 4.2; docs/PRODUCT.md
+ * The colour plate (gslides-parity SPEC 3.2 rows 8, 9, 17; SPEC-2 0.27, 4.2; docs/archive/rounds/PRODUCT.md
  * 4.1): the brand kit's six colours first (Text, Background, Captions, Hints, Primary, Accent,
  * each writing its token so the colour follows the kit; the role's name and hex in the tooltip,
  * the token id on its second line for agents), the theme tokens second, then None and the Custom

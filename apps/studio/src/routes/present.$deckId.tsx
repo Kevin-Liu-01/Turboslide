@@ -23,7 +23,7 @@ import { AccessPage } from './-access-page';
 // `notFoundComponent` is the You need access page (VERIFICATION-3 finding 53; the round four
 // ruling 3): the loader answers null for a missing and a restricted deck alike.
 //
-// `?agent=1` (docs/SYNC.md 3.10): the console attaches a studio session only when its address
+// `?agent=1` (docs/archive/rounds/SYNC.md 3.10): the console attaches a studio session only when its address
 // carries the flag, as /deck does, so a presenter's own window costs no function request after
 // its load; the audience window follows the console over the BroadcastChannel either way.
 

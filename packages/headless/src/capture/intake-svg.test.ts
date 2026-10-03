@@ -1,4 +1,4 @@
-// The hosted svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.1, 4.2, 6.3): under the svg
+// The hosted svg branch (docs/archive/rounds/FEATURES.md 4.7; docs/archive/rounds/VECTOR.md 4.1, 4.2, 6.3): under the svg
 // raster policy an uploaded svg is sanitized by the host's parser before sharp reads it, the
 // sanitized file is the asset's vector, and sharp rasterizes one PNG twin at 3x of the svg fitted
 // inside 800 by 450; the record is `kind: 'svg'` at the svg's intrinsic size and scale 3, with
@@ -64,7 +64,7 @@ describe('svgRasterSize and rasterizeSvg', () => {
   });
 });
 
-describe('addAsset with an svg (docs/VECTOR.md 4.1, 4.2)', () => {
+describe('addAsset with an svg (docs/archive/rounds/VECTOR.md 4.1, 4.2)', () => {
   test('hosted with the sanitizer: the asset of 4.1 with the vector file, the twin at 3x inside 800 by 450, the drop recorded', async () => {
     const dataUrl = `data:image/svg+xml;base64,${Buffer.from(WIDE).toString('base64')}`;
     const result = await addAsset(

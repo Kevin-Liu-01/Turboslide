@@ -1,5 +1,5 @@
 // The blob tier's admission against this instance's mirror (docs/FOCUS.md rank 3; audit-slides
-// rows 93, 95 and 96; docs/SYNC.md 3.3, invariant 2): every entry is transformed past the
+// rows 93, 95 and 96; docs/archive/rounds/SYNC.md 3.3, invariant 2): every entry is transformed past the
 // records between its base and the mirror's revision before the reducer judges it, so a
 // candidate the reducer refuses against a mirror at or above the base is the reducer's answer
 // and the loser reads its sentence (the sync round fix round, VERIFICATION.md sync pass 1 F2).
@@ -79,7 +79,7 @@ describe('blobRefusal', () => {
     ).toEqual({ kind: 'resync' });
   });
 
-  it("keeps the reducer's sentence for a candidate judged at the base or past it, since the entry was transformed past what landed (docs/SYNC.md invariant 2; the sync round fix round, F2)", () => {
+  it("keeps the reducer's sentence for a candidate judged at the base or past it, since the entry was transformed past what landed (docs/archive/rounds/SYNC.md invariant 2; the sync round fix round, F2)", () => {
     const gone = { opId: 'c:1', reason: 'invalid' as const, message: 'No slide "split-5"' };
     // the slide was deleted by the record between the base and the head: the loser's card
     expect(blobRefusal(15, 16, gone)).toEqual({ kind: 'reject', rejected: gone });
@@ -153,7 +153,7 @@ describe('liveAtLeast', () => {
   });
 });
 
-describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F24; the sync round, docs/SYNC.md 3.2)', () => {
+describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F24; the sync round, docs/archive/rounds/SYNC.md 3.2)', () => {
   type Room = Parameters<typeof admitOnBlob>[0];
   type Input = Parameters<typeof admitOnBlob>[1];
 
@@ -255,7 +255,7 @@ describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F2
     expect(notes).toEqual(['Brand kit: Primary', undefined]);
   });
 
-  it('answers a resent op id from the record above its base that names it, with one entry per op id at that seq, and appends nothing twice (docs/SYNC.md 3.2)', async () => {
+  it('answers a resent op id from the record above its base that names it, with one entry per op id at that seq, and appends nothing twice (docs/archive/rounds/SYNC.md 3.2)', async () => {
     // the first attempt committed as revision 8 on some instance and its answer was lost; the
     // record's origin names the tab and its two op ids, so this instance, at 8, answers from it
     const record = covering(8, 'c1', ['c1:1', 'c1:2'], [splice(0, 0, 'qr')]);
@@ -488,7 +488,7 @@ describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F2
     expect(storeRefusalOf(null)).toBeNull();
   });
 
-  it('spells the blank deck title the reducer follows the heading from as the store and the chrome spell it (docs/SYNC.md 3.4)', () => {
+  it('spells the blank deck title the reducer follows the heading from as the store and the chrome spell it (docs/archive/rounds/SYNC.md 3.4)', () => {
     expect(UNTITLED_DECK_TITLE).toBe(DEFAULT_BLANK_TITLE);
     expect(UNTITLED_DECK_TITLE).toBe(TITLE_ROW.untitled);
   });
@@ -692,7 +692,7 @@ describe('the append that meets a store moved under it (the stream fix round two
     if (!busy.ok) expect(busy).toMatchObject({ status: 503, code: 'store_busy' });
   });
 
-  it("answers the reducer's sentence when the entries do not place against the head the sync brought, so the loser reads why (docs/SYNC.md invariant 2; the sync round fix round, F2)", async () => {
+  it("answers the reducer's sentence when the entries do not place against the head the sync brought, so the loser reads why (docs/archive/rounds/SYNC.md invariant 2; the sync round fix round, F2)", async () => {
     // the head deleted the slide the tab's splice names: transformed past the record under the
     // head, the splice is judged against the document without its slide, and the refusal is the
     // reducer's answer to the write, not a resync (blobRefusal; row sync.structural.concurrent)
@@ -734,7 +734,7 @@ describe('the append that meets a store moved under it (the stream fix round two
   });
 });
 
-describe('the server transforms before it places, on the blob tier too (the sync round, docs/SYNC.md 3.3, 3.2; invariants 2 and 3)', () => {
+describe('the server transforms before it places, on the blob tier too (the sync round, docs/archive/rounds/SYNC.md 3.3, 3.2; invariants 2 and 3)', () => {
   type Room = Parameters<typeof admitOnBlob>[0];
   type Input = Parameters<typeof admitOnBlob>[1];
   const documentAt = (revision: number): DeckDocument => {
@@ -1058,7 +1058,7 @@ describe('the server transforms before it places, on the blob tier too (the sync
     ]);
   });
 
-  it("delivers a viewer's stream every op with the notes stripped, as a commenter's (docs/SYNC.md 3.7, invariant 6)", () => {
+  it("delivers a viewer's stream every op with the notes stripped, as a commenter's (docs/archive/rounds/SYNC.md 3.7, invariant 6)", () => {
     const reader = { role: 'viewer' as const, via: 'link', showNames: false, readComments: false };
     const entry: Entry = landed(8, [
       { op: 'slide.set', slideId: 'content-rule', path: '/notes', value: 'private' },

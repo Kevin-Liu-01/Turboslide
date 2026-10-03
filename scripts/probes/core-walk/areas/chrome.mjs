@@ -1,4 +1,4 @@
-// The chrome (docs/RETURN.md section 4, section 5 `chrome.*` with the driver `probe --core`):
+// The chrome (docs/archive/rounds/RETURN.md section 4, section 5 `chrome.*` with the driver `probe --core`):
 // the Slideshow split button read from pixels (one box, the divider, no notch), its hover, its
 // click, the chevron's menu and its alignment, Enter, Space, ArrowDown and Tab, its ARIA, its
 // collapse at 900 px; the nine seams read from a 1x screenshot in both appearances at 1440 and
@@ -6,7 +6,7 @@
 // toggle. The pixel reads are the toolkit's port of audit-chrome.mjs (RETURN.md 4.4): a computed
 // style can ask for a token the pixels never show (audit-chrome row 9), so these rows read the
 // screenshot. The chrome feature is unparkable (RETURN.md rule 2): a red row here blocks the ship.
-// The vector round (docs/VECTOR.md section 3, 6.1) adds the `menus.*` rows, the chrome's too: the
+// The vector round (docs/archive/rounds/VECTOR.md section 3, 6.1) adds the `menus.*` rows, the chrome's too: the
 // icons of the Insert and Format rows read from the menu bar and the right click menus with the
 // switch on, and the one family rule over every menu and the toolbar dropdowns.
 
@@ -27,7 +27,7 @@ export const IDS = [
   'chrome.separators.toolbar-dividers',
   'chrome.cluster.gaps-heights',
   'chrome.comments-glyph.toggle',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'chrome.bottom-bar.removed',
   'chrome.menu.no-tooltip-with-submenu',
   'chrome.menu.escape-focus-stage',
@@ -45,7 +45,7 @@ export const IDS = [
   'chrome.select.one-rule',
   'chrome.check.draws-check',
   'chrome.toolbar.bold-follows-selection',
-  /* the vector round (docs/VECTOR.md 3, 6.1): the icons on the visual rows, the chrome's rows */
+  /* the vector round (docs/archive/rounds/VECTOR.md 3, 6.1): the icons on the visual rows, the chrome's rows */
   'menus.icons.insert-rows',
   'menus.icons.format-rows',
   'menus.icons.one-family',
@@ -88,7 +88,7 @@ export async function run(t) {
         row: read('.ts-title-row'),
         presence: read('[data-control="title.presence"]'),
         more: read('[data-control="presence.more"]'),
-        /* the product round's two slots (docs/PRODUCT.md 6.1, section 2 rank 25): Assist before the comments glyph, the side panel toggle after it */
+        /* the product round's two slots (docs/archive/rounds/PRODUCT.md 6.1, section 2 rank 25): Assist before the comments glyph, the side panel toggle after it */
         assistSlot: read('[data-control="title.assist.slot"]'),
         commentsSlot: read('[data-control="title.comments.slot"]'),
         comments: read('[data-control="title.comments"]'),
@@ -771,7 +771,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 3, 8.1 `chrome.*` with the driver
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 3, 8.1 `chrome.*` with the driver
  * `probe --core`): the bottom bar gone and the side panel toggle in the title row, no tooltip
  * over an open submenu, Escape returning focus to the stage, the presence tooltip and the save
  * words, the titanium contrast on light chrome, the disabled token in both appearances, the field
@@ -1547,7 +1547,7 @@ async function productRound(t) {
       };
     },
   );
-  // ---- the vector round (docs/VECTOR.md section 3, 6.1): the icons on the visual rows, read
+  // ---- the vector round (docs/archive/rounds/VECTOR.md section 3, 6.1): the icons on the visual rows, read
   // from the menu bar, the right click menus and the toolbar dropdowns with the switch on
   /**
    * The icon of every visible menu row under a root selector: the svg inside `.ts-menu-ic` with
@@ -1764,7 +1764,7 @@ async function productRound(t) {
   if (iconsOn) t.deck.advanced = true;
   await t.step(
     'menus.icons.insert-rows',
-    'open the Insert menu with the switch on and read every row of docs/VECTOR.md 3.2, the submenus hovered',
+    'open the Insert menu with the switch on and read every row of docs/archive/rounds/VECTOR.md 3.2, the submenus hovered',
     'each row holds an svg with a non empty path in its .ts-menu-ic',
     async () => {
       const insert = await readMenu('insert');

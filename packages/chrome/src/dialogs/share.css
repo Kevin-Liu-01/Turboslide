@@ -1,4 +1,4 @@
-/* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5; docs/PRODUCT.md section
+/* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5; docs/archive/rounds/PRODUCT.md section
    2 rank 3): two stages at a fixed width of 520. The seller's stage first: the General access
    select with the role select beside it, one sentence under them naming what the chosen access
    does on this deployment, the address in a read only field with the one Copy link, the Open as
@@ -182,7 +182,7 @@
 }
 
 .ts-share-row.is-link {
-  /* the words in one column and the buttons in the other (docs/POLISH.md item 96): the name on
+  /* the words in one column and the buttons in the other (docs/archive/rounds/POLISH.md item 96): the name on
      the first line, the role and the dates on the second, nothing cut */
   grid-template-columns: minmax(0, 1fr) auto;
   height: auto;
@@ -203,7 +203,7 @@
 }
 
 /* the name column: the name (with the badge or the guest word after it) and, for a sharer, the
-   address as a second line inside the 40 px row (docs/PEOPLE.md 3.10) */
+   address as a second line inside the 40 px row (docs/archive/rounds/PEOPLE.md 3.10) */
 .ts-share-row-who {
   display: flex;
   flex-direction: column;

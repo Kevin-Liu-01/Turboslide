@@ -9,7 +9,7 @@ export const SLIDE_TEXT_FIELDS: ReadonlySet<string> = new Set(['/heading', '/lea
  * The Text one typing burst writes, or null for any other write. A burst on a block's run is a
  * `text.splice`, and since the sync and costs round so is a burst on a title or statement
  * slide's field: it travels as `text.splice { blockId: <the field>, path: '/heading' | '/lead' |
- * '/big' }` (docs/SYNC.md 3.4; InlineText textBurstMutation), so it takes the splice key
+ * '/big' }` (docs/archive/rounds/SYNC.md 3.4; InlineText textBurstMutation), so it takes the splice key
  * `<slideId>/<field><path>` and the bursts of one word fold into one Cmd Z as a block's do. The
  * `slide.set` form below is the whole value write of a field (a markup change with no flag
  * behind it, the Escape commit, an agent's write), which keys by the field the same way; before
@@ -20,7 +20,7 @@ export const SLIDE_TEXT_FIELDS: ReadonlySet<string> = new Set(['/heading', '/lea
 export function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
   /* a rename appended to a burst is read past, never as the burst's own key, so the bursts of one
      word still fold into one Cmd Z. Since the sync and costs round the reducer derives the deck
-     title from a heading burst itself (schema reduce.ts followTitle; docs/SYNC.md 3.4) and the
+     title from a heading burst itself (schema reduce.ts followTitle; docs/archive/rounds/SYNC.md 3.4) and the
      controller appends no `deck.set /title` to a text run; the branch stays for the whole value
      writes the rename still rides (auto-title.ts) */
   const last = mutations[mutations.length - 1];
@@ -34,7 +34,7 @@ export function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
     // splice's key, so a burst that grows its box stays in the typing group and one Cmd Z removes
     // the letters and the growth together
     // Shrink text on overflow steps `typography.size` down the ladder beside the splice the same
-    // way (docs/PRODUCT.md section 5; build/b2.md R7), so one Cmd Z removes the letters and the
+    // way (docs/archive/rounds/PRODUCT.md section 5; build/b2.md R7), so one Cmd Z removes the letters and the
     // step together
     const second = mutations[1];
     if (

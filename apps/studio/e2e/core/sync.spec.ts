@@ -26,7 +26,7 @@ import {
   waitEditor,
 } from './lib';
 
-// The two browser spec of the sync and costs round (docs/SYNC.md 6.1, the rows whose driver is
+// The two browser spec of the sync and costs round (docs/archive/rounds/SYNC.md 6.1, the rows whose driver is
 // core/sync.spec.ts; 6.2 the runs): A and B are two browsers of one person (B carries A's cookies,
 // the ordering audit's run 2), C is a fresh context with no cookie of A's, a viewer once the deck's
 // general access is Anyone with the link, Viewer (the row's setup through the window API). Every
@@ -232,7 +232,7 @@ async function headingOf(p: Page): Promise<string> {
   const slide = await slideJson(p, first);
   /* the cover's heading is the title slide's field, or the heading block of the cover once a
      write converted it to a canvas (the placeholder shrink's size write rides a title's last
-     burst when the words wrap, docs/POLISH.md 2.3 item 21; the block is the one the grammar
+     burst when the words wrap, docs/archive/rounds/POLISH.md 2.3 item 21; the block is the one the grammar
      record's main slot names second, as the reducer's deckTitleSource reads it). The field alone
      read "" for every round after the first on a title that wrapped (VERIFICATION.md "Polish
      round, pass 1" finding 1, the collab audit's concurrent rounds 2 and 3) */
@@ -407,11 +407,12 @@ function wireOf(p: Page, who: string, sink: WireRow[]): void {
 /** How the title travelled on the wire: the whole value (`slide.set`), a text run (`text.splice`), or nothing yet. */
 function titleShape(wire: WireRow[]): string {
   const ops = new Set(wire.flatMap((w) => w.mutations.map((m) => m.op)));
-  if (ops.has('text.splice')) return 'text.splice (the field as a text run, docs/SYNC.md 3.4)';
+  if (ops.has('text.splice'))
+    return 'text.splice (the field as a text run, docs/archive/rounds/SYNC.md 3.4)';
   if (ops.has('slide.set')) return 'slide.set (the whole value, audit-ordering item 1)';
   return `none of slide.set or text.splice (${[...ops].join(', ') || 'no ops POST'})`;
 }
-/** The bound of a word's arrival in the second browser by the realtime tier (docs/SYNC.md 6.1). */
+/** The bound of a word's arrival in the second browser by the realtime tier (docs/archive/rounds/SYNC.md 6.1). */
 const serialBound = (tier: string): number => (tier === 'blob' ? 5000 : 1000);
 /**
  * The bound of two concurrent words agreeing in both browsers by the tier (the matrix row
@@ -439,9 +440,9 @@ async function countSlides(p: Page, want: number, timeout: number): Promise<numb
  */
 function slidesSentence(read: number, written: number, write: string): string {
   if (read > written)
-    return `${read} slides read for ${written} after one ${write}: a write admitted twice (the blob tier's admission class, docs/SYNC.md 3.2)`;
+    return `${read} slides read for ${written} after one ${write}: a write admitted twice (the blob tier's admission class, docs/archive/rounds/SYNC.md 3.2)`;
   if (read < written)
-    return `${read} slides read for ${written} after one ${write}: the write has not landed on this tab (the blob tier's lag, docs/SYNC.md 3.2)`;
+    return `${read} slides read for ${written} after one ${write}: the write has not landed on this tab (the blob tier's lag, docs/archive/rounds/SYNC.md 3.2)`;
   return `${read} slides read for ${written} after one ${write}`;
 }
 
@@ -865,7 +866,7 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
     /* one slide.new written after the first slide, so the deck reads two; three is the blob
        tier's admission class (the verifier's pass 1 on the objects round, finding 8: this row read
        3 for 2 on the preview, a write acknowledged late, resent and admitted a second time by an
-       instance behind the store, docs/SYNC.md 3.2), named here so the gate's table carries it */
+       instance behind the store, docs/archive/rounds/SYNC.md 3.2), named here so the gate's table carries it */
     const slidesRead = await countSlides(A, 2, 15_000);
     expect(slidesRead, slidesSentence(slidesRead, 2, 'slide.new')).toBe(2);
     const second = (await slideOrder(A)).find((id) => id !== first)!;
@@ -934,7 +935,7 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
       .then(() => true)
       .catch(() => false);
     /* the reconnect, the resend and the refusal: the memory tier answers within a second or two,
-       the blob tier within its pulse. The loser reads one snackbar sentence (docs/POLISH.md item
+       the blob tier within its pulse. The loser reads one snackbar sentence (docs/archive/rounds/POLISH.md item
        102: a structural refusal is one sentence with no id and no JSON; the card stays for typed
        text), never a card: the sync fix round 3 read the sentence 206 ms after the reconnect on
        the enforce preview of 2026-09-30 (the ship step's third attempt landed the sync owner's R1) */
@@ -964,9 +965,10 @@ test(title('sync.structural.concurrent'), async ({ browser }) => {
       description: `slide gone in both within 5 s ${gone} (${Date.now() - deleteAt} ms); A's snackbar ${sentenceShown ? `"${sentence.slice(0, 160)}"` : 'none'}; card ${cardShown ? 'shown' : 'none'}`,
     });
     expect(gone, 'both browsers show the slide gone within 5 s').toBe(true);
-    expect(sentenceShown, 'the loser reads one snackbar sentence (docs/POLISH.md item 102)').toBe(
-      true,
-    );
+    expect(
+      sentenceShown,
+      'the loser reads one snackbar sentence (docs/archive/rounds/POLISH.md item 102)',
+    ).toBe(true);
     expect(sentence, 'no id and no JSON in the sentence').not.toMatch(/split-|\{|"/);
     expect(cardShown, 'no card for a structural refusal').toBe(false);
   } finally {
@@ -1054,7 +1056,7 @@ test(title('sync.viewer.live-updates'), async ({ browser }) => {
     const role = (await facts(C)).access?.role ?? null;
     /* under shadow authorization (production today, and a dev server) every visitor reads owner,
        so C is never on the viewer floor and the row's claim (a viewer's stream carries the ops,
-       docs/SYNC.md 3.7) cannot be driven: not driven with the reason, never passed; the enforce
+       docs/archive/rounds/SYNC.md 3.7) cannot be driven: not driven with the reason, never passed; the enforce
        preview is where C is a viewer (6.2) */
     test.skip(
       role === 'owner',
@@ -1295,7 +1297,7 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
     const after = versions.filter((v) => v.revision > revisionBefore);
     const withOrigin = after.filter((v) => v.origin !== undefined);
     /* the blob tier commits one record per POST with edits (blob.ts append) and answers a POST
-       whose op ids a record already names from that record with no commit (docs/SYNC.md 3.2), so
+       whose op ids a record already names from that record with no commit (docs/archive/rounds/SYNC.md 3.2), so
        the records above revisionBefore are the POSTs answered 200 with an op id outside the
        dropped POST's, plus the dropped POST's own; one more is a pure resend admitted twice.
        Recorded for the ledger, not asserted: a resend that also carries fresh ops folds them into
@@ -1308,7 +1310,7 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
     );
     const recordsLine =
       tier === 'blob'
-        ? `records above ${revisionBefore}: ${after.length} for ${freshPosts.length + 1} POSTs committed (${freshPosts.length} answered 200 with an op id outside the dropped POST's, plus the dropped one)${after.length > freshPosts.length + 1 ? '; one more than the POSTs: a resend admitted twice (the admission class, docs/SYNC.md 3.2)' : ''}`
+        ? `records above ${revisionBefore}: ${after.length} for ${freshPosts.length + 1} POSTs committed (${freshPosts.length} answered 200 with an op id outside the dropped POST's, plus the dropped one)${after.length > freshPosts.length + 1 ? '; one more than the POSTs: a resend admitted twice (the admission class, docs/archive/rounds/SYNC.md 3.2)' : ''}`
         : `records above ${revisionBefore}: ${after.length} (the memory tier's checkpointer writes them, not one per POST)`;
     test.info().annotations.push({
       type: 'measure',
@@ -1317,11 +1319,11 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
     expect(droppedStatus, 'the dropped POST was committed by the server').toBe(200);
     expect(
       countIn(a, ' once'),
-      `A reads the word once (${countIn(a, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/SYNC.md 3.2)`,
+      `A reads the word once (${countIn(a, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/archive/rounds/SYNC.md 3.2)`,
     ).toBe(1);
     expect(
       countIn(b, ' once'),
-      `B reads the word once (${countIn(b, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/SYNC.md 3.2)`,
+      `B reads the word once (${countIn(b, ' once')}; twice is the resend admitted twice, the blob tier's admission class, docs/archive/rounds/SYNC.md 3.2)`,
     ).toBe(1);
     expect(a).toBe(b);
     /* the record's origin cannot be read through version.list on any tier: the store's toVersion
@@ -1332,7 +1334,7 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
     if (withOrigin.length === 0)
       test.skip(
         true,
-        `not on this build: version.list answers no origin (packages/store/src/versions.ts toVersion drops the record's origin on every tier; docs/SYNC.md 3.2 names it on the record, the sync owner's); the word landed once in both browsers; ${recordsLine}`,
+        `not on this build: version.list answers no origin (packages/store/src/versions.ts toVersion drops the record's origin on every tier; docs/archive/rounds/SYNC.md 3.2 names it on the record, the sync owner's); the word landed once in both browsers; ${recordsLine}`,
       );
     const naming = withOrigin.filter((v) =>
       v.origin!.opIds.some((id) => droppedOpIds.includes(id)),
@@ -1346,7 +1348,7 @@ test(title('sync.resend.idempotent'), async ({ browser }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.8 items 99, 100, 102, 108 and 109, 5.1 `sync.*`): two slides
+// the polish round (docs/archive/rounds/POLISH.md 2.8 items 99, 100, 102, 108 and 109, 5.1 `sync.*`): two slides
 // added within half a second both survive, the save words answer the save queue alone, a refused
 // change is one sentence below the toolbar, a failed write never rolls the stage back, and no
 // recovered writes plate for a write the server holds.
@@ -1644,7 +1646,7 @@ test(title('sync.write.5xx-keeps-document'), async ({ browser }) => {
     const after = await slideJson(A, first);
     const afterText = JSON.stringify(after);
     /* the Bold write landed when the document differs from the one before the chord: on word art
-       the chord turns the weight either way (docs/POLISH.md 2.4 item 31 is B3's row for which) */
+       the chord turns the weight either way (docs/archive/rounds/POLISH.md 2.4 item 31 is B3's row for which) */
     const bold =
       /"weight":(?:[6-9]00)|\{[^}]*\bb\b[^}]*\}/.test(afterText) || afterText !== beforeText;
     await A.reload();
@@ -1711,7 +1713,7 @@ coverage(import.meta.filename, [
   'sync.reload.same-document',
   'sync.undo.after-remote',
   'sync.resend.idempotent',
-  /* the polish round (docs/POLISH.md 2.8) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.8) */
   'sync.slide.concurrent-add-both-kept',
   'sync.title-row.save-words-truthful',
   'sync.reject.sentence-below-toolbar',

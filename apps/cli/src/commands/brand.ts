@@ -1,4 +1,4 @@
-// The brand kit commands (docs/PRODUCT.md 4.1; B5a): `turboslide brand get`, `turboslide brand set
+// The brand kit commands (docs/archive/rounds/PRODUCT.md 4.1; B5a): `turboslide brand get`, `turboslide brand set
 // <path> <value>` (a JSON value or a bare string; `--unset` removes the field) and `turboslide brand
 // reset [path]`, each the CLI transport of brand.get, brand.set and brand.reset over the checkout's
 // deck folder (brand-actions.ts), so the CLI, the MCP server, the HTTP route and the editor run

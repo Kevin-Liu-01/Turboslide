@@ -42,7 +42,7 @@ import './Overlay.css';
  * `role="group"` and the chip "Group"; the readouts (the size while a resize is down, the angle
  * while a rotation is down, the inch position while a guide drags); crop mode's dimmed picture
  * and black handles with its chip sentence; the connection sites of the shape under a line end;
- * the deck's guides (DeckGuides.tsx) and the rulers (Rulers.tsx). A selected table (docs/OBJECTS.md
+ * the deck's guides (DeckGuides.tsx) and the rulers (Rulers.tsx). A selected table (docs/archive/rounds/OBJECTS.md
  * 3.3 items 1 and 4) keeps its own ring at the table's box while a cell is open, with the cell ring
  * inside it, the row and column heads, the edge "+" affordances and the row seams (TableOverlay.tsx;
  * the seams are B2's handles drawn here as `h` rules). Every control carries the
@@ -64,7 +64,7 @@ const CHIP_H = 18;
 const CHIP_GAP = 2;
 /**
  * The chip's clearance above the ring: the corner handle's half height plus a gap, so the chip
- * never covers the nw handle (docs/POLISH.md 2.6 item 62; audit-media item 14 read "Image" over
+ * never covers the nw handle (docs/archive/rounds/POLISH.md 2.6 item 62; audit-media item 14 read "Image" over
  * the handle and the rotate stem on a picture under 161 px and on every logo).
  */
 const CHIP_CLEAR = Math.ceil(HANDLE_SQUARE / 2) + 4;
@@ -115,7 +115,7 @@ function readoutStyle(box: Box, k: number): CSSProperties {
   };
 }
 
-/** The height of a bar button under the ring and its gap (the Edit data button, docs/FEATURES.md 2.2 rank 7). */
+/** The height of a bar button under the ring and its gap (the Edit data button, docs/archive/rounds/FEATURES.md 2.2 rank 7). */
 const BAR_H = 22;
 const BAR_GAP = 6;
 
@@ -160,7 +160,7 @@ export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | '
 
 /**
  * A vertical edge handle is placed by its center and never thinner than its minimum hit width; a
- * horizontal one (a table's row seam, docs/OBJECTS.md 3.3 item 4; the shape `h` is B1's request
+ * horizontal one (a table's row seam, docs/archive/rounds/OBJECTS.md 3.3 item 4; the shape `h` is B1's request
  * R3 in objects/build/b5.md, read as a string until the union carries it) the same way on its axis.
  */
 function handleStyle(handle: Handle, k: number): CSSProperties {
@@ -236,8 +236,8 @@ const RESIZE_NAMES: Record<string, string> = {
 export function handleDoc(handle: Handle): string {
   switch (handle.kind) {
     case 'col-seam':
-      /* the layout's column seam, or a table's (docs/RETURN.md 2.4 fix 5; table-seam.ts carries the
-         block); a table's row seam is the same kind on the y axis (docs/OBJECTS.md 3.3 item 4) */
+      /* the layout's column seam, or a table's (docs/archive/rounds/RETURN.md 2.4 fix 5; table-seam.ts carries the
+         block); a table's row seam is the same kind on the y axis (docs/archive/rounds/OBJECTS.md 3.3 item 4) */
       if (handle.blockId !== undefined && handle.axis === 'y')
         return 'Drag to resize the row. The rows below move and the table grows. Up and Down step 1 px, Shift 10 px.';
       return handle.blockId !== undefined
@@ -414,7 +414,7 @@ export function Overlay({ view }: OverlayProps) {
      when the overlay is mounted under it; the viewer's own overlay (a test, the twin stage) has
      no shell and draws none */
   const shell = useContext(EditorShellContext);
-  /* the chart's numbers from the stage (docs/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT):
+  /* the chart's numbers from the stage (docs/archive/rounds/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT):
      a double click on a chart, Enter on it or a click on one of its marks asks for Format options
      on the Chart data section; the section itself makes the cell active (inspector/chart.tsx) */
   const openPanel = shell?.openPanel;
@@ -432,12 +432,12 @@ export function Overlay({ view }: OverlayProps) {
   const chipHandle = view.handles.find((handle) => handle.shape === 'chip');
   const drawn = view.handles.filter((handle) => handle.shape !== 'chip');
   /* a selected line kind is its two end handles and its chip, no ring and no frame edge strips
-     (docs/POLISH.md 2.4 item 28; polish/build/b3.md request 3): the line end handles exist for a
+     (docs/archive/rounds/POLISH.md 2.4 item 28; polish/build/b3.md request 3): the line end handles exist for a
      line kind alone, so their presence says which selection this is */
   const lineEnds = view.handles.filter((handle) => handle.kind === 'line-end');
   const lineSelected = view.count === 1 && lineEnds.length > 0 && !view.crop;
   /* a table with a cell open keeps its chip and ring band as its move surface while `editing`
-     is true (docs/FEATURES.md 2.1; the view's `tableFrame`) */
+     is true (docs/archive/rounds/FEATURES.md 2.1; the view's `tableFrame`) */
   const frameLive = !view.editing || view.tableFrame;
   /* the Edit data button under the selected chart (rank 7), unless the ship parked it
      (parked-controls.ts: `bar.chart.editData`, hidden while Tools > Advanced tools is off) */
@@ -483,7 +483,7 @@ export function Overlay({ view }: OverlayProps) {
         ? CANVAS.objects(view.count)
         : view.chip;
   /* a table with a cell open or a range active keeps its own ring at the table's box, the chip
-     above it and the frame edges on it (docs/OBJECTS.md 3.2, 3.3 item 1: Kevin's screenshot read
+     above it and the frame edges on it (docs/archive/rounds/OBJECTS.md 3.2, 3.3 item 1: Kevin's screenshot read
      the cell's box as the only ring); the cell's ring is drawn inside by TableOverlay */
   const tableId =
     view.tableFrame && view.count === 1 && view.selection !== null ? view.selection.blockId : null;
@@ -563,7 +563,7 @@ export function Overlay({ view }: OverlayProps) {
       ? CANVAS.rotation(Math.round(view.rotation))
       : view.sizeReadout !== null
         ? view.valueReadout !== null
-          ? /* a word art's letter size beside its box while the resize is down (docs/FEATURES.md 2.3 item 8) */
+          ? /* a word art's letter size beside its box while the resize is down (docs/archive/rounds/FEATURES.md 2.3 item 8) */
             `${CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))} · ${view.valueReadout}`
           : CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))
         : view.widthReadout !== null
@@ -609,7 +609,7 @@ export function Overlay({ view }: OverlayProps) {
       {/* crop mode (SPEC-2 6.1 row 19): the picture at its full extent, dimmed outside the frame */}
       {view.crop ? (
         <>
-          {/* the dim covers the cut part alone (docs/POLISH.md 2.5 item 50; polish/build/b4.md
+          {/* the dim covers the cut part alone (docs/archive/rounds/POLISH.md 2.5 item 50; polish/build/b4.md
               R8): four strips between the picture's full box and the frame, the kept part as drawn */}
           {cropDimStrips(view.crop.full, view.crop.frame, k).map((strip, index) => (
             <div key={`dim:${index}`} className="ts-crop-dim" style={strip} aria-hidden="true" />
@@ -657,7 +657,7 @@ export function Overlay({ view }: OverlayProps) {
           />
         )
       ) : null}
-      {/* the table's own controls (docs/OBJECTS.md 3.3 items 1 and 4): the cell ring, the heads
+      {/* the table's own controls (docs/archive/rounds/OBJECTS.md 3.3 items 1 and 4): the cell ring, the heads
           and the edge "+", whenever one table is selected and no crop is open */}
       {tableControlsId !== null && tableControlsBox !== null && !view.crop ? (
         <TableOverlay view={view} tableBox={tableControlsBox} blockId={tableControlsId} />
@@ -693,7 +693,7 @@ export function Overlay({ view }: OverlayProps) {
           </span>
         )
       ) : null}
-      {/* the link chip of a linked run clicked once outside a session (docs/POLISH.md 2.3 item
+      {/* the link chip of a linked run clicked once outside a session (docs/archive/rounds/POLISH.md 2.3 item
           20): the address with Open, Copy, Change and Remove under the run's box; its presses
           stay its own so the stage neither clears the selection nor starts a drag */}
       {view.linkChip !== null && !view.editing ? (
@@ -769,7 +769,7 @@ export function Overlay({ view }: OverlayProps) {
           {readout}
         </span>
       ) : null}
-      {/* the Edit data button under the selected chart (docs/FEATURES.md 2.2 rank 7; audit
+      {/* the Edit data button under the selected chart (docs/archive/rounds/FEATURES.md 2.2 rank 7; audit
           objects 17: the numbers were four clicks away): Format options opens on the Chart data
           section, the grid's first value cell active */}
       {editData !== null && ringBox && shell !== null ? (

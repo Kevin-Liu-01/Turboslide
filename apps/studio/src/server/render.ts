@@ -34,7 +34,7 @@ export type { Deck, Slide } from '@turboslide/schema/deck';
  * the `?w=` variant of the render route can refuse an unsigned request in enforce mode (report 04
  * F6). The grant carries the deck and the caller's role; the width and revision stay in the URL.
  *
- * The return round (docs/RETURN.md 2.19): every picture url answered here carries a render grant
+ * The return round (docs/archive/rounds/RETURN.md 2.19): every picture url answered here carries a render grant
  * (tokens.ts `signRenderGrant`, 10 minutes, the one picture's own parameters), so the tab File >
  * Download > JPEG image or PNG image opens on the route is served without the bearer and as an
  * attachment; before it the tab answered 401 "bearer token required" on production

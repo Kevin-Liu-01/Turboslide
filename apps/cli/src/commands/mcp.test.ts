@@ -1,5 +1,5 @@
 // The stdio MCP server's tool list and the two tools the verification found missing
-// (docs/gslides-parity/VERIFICATION.md, findings 1 and 12): `turboslide mcp` serves deck_set and
+// (docs/archive/gslides-parity/VERIFICATION.md, findings 1 and 12): `turboslide mcp` serves deck_set and
 // deck_import_slides beside the other parity tools, deck_import_slides copies a slide with its
 // assets from a sibling deck under the same decks/ folder the way `slide import` does, and
 // deck_set writes /defaults/appearance on a deck that has no `defaults` yet (the blank template).
@@ -216,7 +216,7 @@ describe('turboslide mcp serves the parity actions over the deck folder', () => 
       });
       expect(missing.isError).toBe(true);
 
-      // a deck from the blank template opens in the deployment kit's appearance (docs/PRODUCT.md
+      // a deck from the blank template opens in the deployment kit's appearance (docs/archive/rounds/PRODUCT.md
       // 4.1; the store's createDeck writes defaults.appearance from the template's kit, light on
       // General Translation's deployment), so the manifest carries that one field before any write
       expect(manifest().defaults).toEqual({ appearance: 'light' });

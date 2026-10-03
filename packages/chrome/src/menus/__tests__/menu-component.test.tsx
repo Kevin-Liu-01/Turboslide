@@ -145,7 +145,7 @@ describe('Menu rows', () => {
     expect(row('edit.paste').getAttribute('aria-disabled')).toBe('true');
     expect(document.querySelector('[data-menu-item="edit.gone"]')).toBeNull();
     expect(document.querySelectorAll('[role="separator"]')).toHaveLength(1);
-    /* no mnemonic mark on macOS, where the platform has no Alt mnemonics (docs/PRODUCT.md 3.1.1;
+    /* no mnemonic mark on macOS, where the platform has no Alt mnemonics (docs/archive/rounds/PRODUCT.md 3.1.1;
        audit-interface 18): the label is plain text */
     expect(row('edit.undo').querySelector('u.ts-menu-ak')).toBeNull();
     expect(row('edit.undo').querySelector('.ts-menu-label')?.textContent).toBe('Undo');
@@ -184,7 +184,7 @@ describe('Menu rows', () => {
     expect(row('edit.undo').getAttribute('aria-keyshortcuts')).toBe('Control+Z');
   });
 
-  it('draws no plate over a Later row or a disabled row, and keeps their names as data-tip for the audit (docs/POLISH.md 2.6 item 61)', () => {
+  it('draws no plate over a Later row or a disabled row, and keeps their names as data-tip for the audit (docs/archive/rounds/POLISH.md 2.6 item 61)', () => {
     /* audit-chrome item 21: a disabled row's plate covered the rows under it; the stub clause
        and the disabled reason stay in the model (tooltipDoc) for the finder and the palette */
     render(<Harness />);
@@ -342,7 +342,7 @@ describe('Menu pointer', () => {
     render(<Harness autoFocus={false} />);
     expect(document.activeElement).toBe(menu());
     /* an enter in the list's first moments with no pointer movement is the browser's own for a
-       list that opened under the pointer and lights nothing (docs/POLISH.md 2.6 item 74); the
+       list that opened under the pointer and lights nothing (docs/archive/rounds/POLISH.md 2.6 item 74); the
        person's entry comes after them */
     fireEvent.pointerEnter(row('edit.more'), { pointerType: 'mouse' });
     act(() => {
@@ -404,7 +404,7 @@ describe('placeMenu', () => {
     ).toBe(498);
   });
 
-  it('hangs a plate under the right edge of its anchor with the end alignment, so the Slideshow options meet the control instead of the viewport clamp (docs/RETURN.md 4.1)', () => {
+  it('hangs a plate under the right edge of its anchor with the end alignment, so the Slideshow options meet the control instead of the viewport clamp (docs/archive/rounds/RETURN.md 4.1)', () => {
     /* the split button at 1440: the wrapper 1209 to 1342, the menu 220 wide; the plate's right
        edge lands on 1342 (left 1122) and its top at the control's bottom plus the 2 px gap */
     expect(

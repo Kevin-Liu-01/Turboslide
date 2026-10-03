@@ -1,4 +1,4 @@
-// The logo picker's pure rules (docs/FEATURES.md 4.2 to 4.6, 4.11; audit-logos 5, 6, 12, 17): the
+// The logo picker's pure rules (docs/archive/rounds/FEATURES.md 4.2 to 4.6, 4.11; audit-logos 5, 6, 12, 17): the
 // row shape the cached index holds and `logo.search` answers, the ranking over title, slug,
 // aliases and categories, the licence classes with the seller's sentence for each recorded string,
 // the appearance rule that picks a variant for a light or a dark deck, the Mono decision, the kit's

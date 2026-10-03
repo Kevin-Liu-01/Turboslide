@@ -5,7 +5,7 @@
 // whose zod schemas kept zod's 99 KB in the entry) and the chrome's strings there. Here it is
 // reached from the controller alone and travels with the editor's chunk.
 //
-// The return round (docs/RETURN.md 2.18, `decks.name.follows-heading`): the name followed the
+// The return round (docs/archive/rounds/RETURN.md 2.18, `decks.name.follows-heading`): the name followed the
 // heading once, on the first committed burst, so a slow typist's deck was named "Chrom" or "P"
 // in the title row, Details, the Share dialog and every file name (audit-chrome row 2,
 // audit-surface row 5). The name now follows the heading until the deck is renamed by hand: a
@@ -14,13 +14,13 @@
 // this session. A name typed by hand differs from all three, so it stays; Google Docs names an
 // untitled document from its first line the same way and stops once the name is edited.
 //
-// The product round (docs/PRODUCT.md 6.1 "Outside writes"; audit-assist 7): the rule follows a
+// The product round (docs/archive/rounds/PRODUCT.md 6.1 "Outside writes"; audit-assist 7): the rule follows a
 // write to the first title whoever wrote it. The controller runs this same function over the
 // document before a remote agent's op and commits the rename it answers (controller.tsx
 // `announceAgentWrite`), so the deck's name and the tab title no longer diverge from the slide
 // after an assistant or an agent over HTTP renamed the customer on the cover.
 //
-// The sync and costs round (docs/SYNC.md 3.4; build/b2.md R3): a heading burst is a text run
+// The sync and costs round (docs/archive/rounds/SYNC.md 3.4; build/b2.md R3): a heading burst is a text run
 // (`text.splice` on the field) and the reducer derives the title from it (schema reduce.ts
 // `followTitle`: the title follows the heading while it still reads the blank deck's title or
 // the heading's previous text, a `deck.set /title` that made them differ wins until a set makes

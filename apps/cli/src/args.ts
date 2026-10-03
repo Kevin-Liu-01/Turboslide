@@ -35,7 +35,7 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'section',
   'after',
   'to',
-  // the logo commands (docs/FEATURES.md 4.11; commands/logo.ts): `--host` reads as `--to`, the
+  // the logo commands (docs/archive/rounds/FEATURES.md 4.11; commands/logo.ts): `--host` reads as `--to`, the
   // search's limit and collection, the insert's variant, slide and block
   'host',
   'limit',
@@ -122,7 +122,7 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   // `text replace --slides`
   'name',
   'slides',
-  // the parity round two (docs/gslides-parity/SPEC-2.md section 3): the canvas, text, table,
+  // the parity round two (docs/archive/gslides-parity/SPEC-2.md section 3): the canvas, text, table,
   // shape, line, chart and diagram commands
   'group',
   'by',
@@ -137,7 +137,7 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'blur',
   'range',
   'highlight',
-  /* the polish round (docs/POLISH.md 2.3 item 16): text style --size <px> */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 16): text style --size <px> */
   'size',
   'marker',
   'items',
@@ -148,7 +148,7 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'count',
   'total',
   'adjust',
-  // the parity round three (docs/gslides-parity/SPEC-3.md section 12): the comment, share,
+  // the parity round three (docs/archive/gslides-parity/SPEC-3.md section 12): the comment, share,
   // notification, account, presence, dither and background commands
   'principal',
   'editors-can-share',
@@ -188,7 +188,7 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'right',
   'top',
   'bottom',
-  // the parity round three (docs/gslides-parity/SPEC-3.md section 12): comments, sharing, the
+  // the parity round three (docs/archive/gslides-parity/SPEC-3.md section 12): comments, sharing, the
   // inbox, accounts, admin, presence, the dither and the background commands
   'mention',
   'assign',

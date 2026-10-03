@@ -1,4 +1,4 @@
-// The Font dropdown's pure rules (gslides-parity SPEC-5-amendments A5 item 4; docs/PRODUCT.md 4.2;
+// The Font dropdown's pure rules (gslides-parity SPEC-5-amendments A5 item 4; docs/archive/rounds/PRODUCT.md 4.2;
 // ported from round five and re pointed at the brand kit): the rows the dropdown lists (the
 // kit's two faces under Brand, the families this presentation uses, then the catalog by Google's
 // four categories), the search over names, the family a selected block carries, the families a
@@ -48,7 +48,7 @@ export const FONT_PICKER = {
   searchDoc: 'Type part of a family name',
   brand: 'Brand',
   inThisPresentation: 'In this presentation',
-  /* the features round (docs/FEATURES.md 3.5, P1): the Recent group and its foot row */
+  /* the features round (docs/archive/rounds/FEATURES.md 3.5, P1): the Recent group and its foot row */
   recent: 'Recent',
   clearRecent: 'Clear recent',
   clearRecentDoc: 'Forgets the faces this browser picked lately',
@@ -210,7 +210,7 @@ export function usedFamilies(document: DeckDocument): FontId[] {
 }
 
 /**
- * The kit's faces (docs/PRODUCT.md 4.2, "the kit's two faces first under Brand"): the display
+ * The kit's faces (docs/archive/rounds/PRODUCT.md 4.2, "the kit's two faces first under Brand"): the display
  * and text roles, the theme's face for a role the kit leaves silent, in that order and without
  * repeats, so the Brand group always names what the presentation's headings and body draw in.
  */
@@ -222,7 +222,7 @@ export function brandFamilies(kit: BrandKit | undefined): FontId[] {
 
 /**
  * The rows the query matches, case folded; every row for an empty query. The features round
- * (docs/FEATURES.md 3.5, audit-fonts 11, row `fonts.picker.search-category`): the query matches
+ * (docs/archive/rounds/FEATURES.md 3.5, audit-fonts 11, row `fonts.picker.search-category`): the query matches
  * the name, the category's label ("mono" lists the monospace families, "serif" the serifs and,
  * as a word inside it, the sans serifs) and the id ("dm-sans"), so a seller who types the kind
  * of face and not a name finds it.
@@ -245,11 +245,11 @@ export type FontGroup = {
 };
 
 /**
- * The picker's groups (docs/PRODUCT.md 4.2): the kit's faces under Brand, the families this
- * presentation uses, the faces this browser picked lately (docs/FEATURES.md 3.5, P1; audit-fonts
+ * The picker's groups (docs/archive/rounds/PRODUCT.md 4.2): the kit's faces under Brand, the families this
+ * presentation uses, the faces this browser picked lately (docs/archive/rounds/FEATURES.md 3.5, P1; audit-fonts
  * 10) then the catalog by category in Google's order (Sans serif, Serif, Display, Monospace). A
  * used or recent family stays in its category too, so the catalog reads whole; a Brand face is
- * listed once, under Brand alone (docs/POLISH.md item 49; audit-media item 20: Inter twice). Every
+ * listed once, under Brand alone (docs/archive/rounds/POLISH.md item 49; audit-media item 20: Inter twice). Every
  * group filters by the query; empty groups are dropped.
  */
 export function groupRows(
@@ -282,7 +282,7 @@ export function groupRows(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Recent, per browser (docs/FEATURES.md 3.5, P1; audit-fonts 10; question 6 of section 9)
+// Recent, per browser (docs/archive/rounds/FEATURES.md 3.5, P1; audit-fonts 10; question 6 of section 9)
 
 /** The `localStorage` key of the faces this browser picked lately. */
 export const FONTS_RECENT_STORAGE = 'turboslide.fonts.recent';
@@ -374,7 +374,7 @@ const DIRECTORIES: Readonly<Record<FontId, string>> = {
   'ibm-plex-sans': 'ofl/ibmplexsans',
   'ibm-plex-mono': 'ofl/ibmplexmono',
   'fira-code': 'ofl/firacode',
-  /* the features round's eight families (docs/FEATURES.md 3.2; B2's catalog rows) */
+  /* the features round's eight families (docs/archive/rounds/FEATURES.md 3.2; B2's catalog rows) */
   geist: 'ofl/geist',
   'geist-mono': 'ofl/geistmono',
   'instrument-sans': 'ofl/instrumentsans',
@@ -386,7 +386,7 @@ const DIRECTORIES: Readonly<Record<FontId, string>> = {
 };
 
 /**
- * The Inter release the bundled files come from (docs/FEATURES.md 3.1 items 1 and 2; audit-fonts
+ * The Inter release the bundled files come from (docs/archive/rounds/FEATURES.md 3.1 items 1 and 2; audit-fonts
  * 4 and 5): rsms/inter tags the release `v4.1` while the font's internal version reads 4.001, and
  * the `v4.001` tag does not exist, so the licence link a marketer clicks from More fonts answered
  * 404 (B2's row `fonts.links.license-v4-1`, the one line in this file by B2's request).

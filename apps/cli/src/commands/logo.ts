@@ -1,4 +1,4 @@
-// The logo commands (docs/FEATURES.md 4.11; build/b6.md R11): `turboslide logo search <query>`,
+// The logo commands (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R11): `turboslide logo search <query>`,
 // `turboslide logo insert <slug>` and `turboslide logo refresh`, the CLI transport of logo.search,
 // logo.insert and logo.refresh (packages/schema/src/actions.ts), so the CLI, the MCP server, the
 // HTTP route and the editor run one implementation (apps/studio/src/server/logos.ts). The index

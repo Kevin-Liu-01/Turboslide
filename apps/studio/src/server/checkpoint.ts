@@ -149,7 +149,7 @@ export type CommitWriteResult =
 /**
  * One coalesced Write through the store at the store's current revision, with `ops` and `force`
  * (the lease skip, never a bypass of the manifest condition) and, when asked, the write's origin
- * (`{ clientId, opIds }`, docs/SYNC.md 3.2), so the resync read's `origins` answer the tab on the
+ * (`{ clientId, opIds }`, docs/archive/rounds/SYNC.md 3.2), so the resync read's `origins` answer the tab on the
  * do tier (docs/CLOUDFLARE.md 3.5, T1 finding 9). A conflict is answered as one, not retried: the
  * caller decides (the checkpointer re-bases, the checkpoint route tells the object).
  */

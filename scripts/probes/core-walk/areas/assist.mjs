@@ -1,4 +1,4 @@
-// The assist, the probe's rows (docs/PRODUCT.md sections 5 and 6, 8.1 `assist.*` with the driver
+// The assist, the probe's rows (docs/archive/rounds/PRODUCT.md sections 5 and 6, 8.1 `assist.*` with the driver
 // `probe --core`): the Assist button in the title row with Cmd+J and Tools > Assist, the panel's
 // first line and the three starter cards, Tools > Tailor for a customer with one undo, deck.tailor
 // over HTTP, an outside agent write's snackbar with Undo, Search the menus with a seller's words

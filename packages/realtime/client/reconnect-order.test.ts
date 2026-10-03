@@ -1,4 +1,4 @@
-// The reconnect's order after the browser's `online` event (docs/SYNC.md 3.7; the polish round's
+// The reconnect's order after the browser's `online` event (docs/archive/rounds/SYNC.md 3.7; the polish round's
 // sync fix round 3): the stream reopens at once, its replay lands first, then the resend goes at
 // the caught up base with the pending ops transformed past what landed while the browser was
 // off, so the resend carries the shifted offset (the row sync.block.offline-replay-converges).
@@ -118,7 +118,7 @@ const refusedOpen = {
   retryAfterMs: 60_000,
 };
 
-describe('the reconnect after the browser’s online event (docs/SYNC.md 3.7)', () => {
+describe('the reconnect after the browser’s online event (docs/archive/rounds/SYNC.md 3.7)', () => {
   afterEach(() => {
     delete (globalThis as { window?: unknown }).window;
   });
@@ -190,7 +190,7 @@ describe('the reconnect after the browser’s online event (docs/SYNC.md 3.7)', 
     await until(() => room.status().pending === 0, 3000);
     const admitted = posts.find((row) => row.ok);
     expect(admitted).toBeDefined();
-    // the resend went on the base the tab had, and the server transformed it (docs/SYNC.md 3.3)
+    // the resend went on the base the tab had, and the server transformed it (docs/archive/rounds/SYNC.md 3.3)
     expect(admitted!.base).toBe(head - 3);
     expect(admitted!.at).toBe(0);
     expect(textOf(server.document())).toBe(`E3 E2 E1 k${original}`);

@@ -1,6 +1,6 @@
 {
   "generator": "scripts/build-brand.ts --facts",
-  "writtenAt": "2026-09-29",
+  "writtenAt": "2026-10-03",
   "actions": {
     "count": 193,
     "source": "packages/schema/src/actions.ts ACTION_IDS; packages/agent/generated/manifest.json actionCount"
@@ -26,7 +26,7 @@
     "source": "packages/materials/src/catalog.ts MATERIAL_IDS"
   },
   "checkSteps": {
-    "count": 32,
+    "count": 33,
     "source": "node scripts/check.mjs --list"
   },
   "parityRows": {
@@ -44,7 +44,7 @@
   },
   "export": {
     "worstPageMismatchPercent": 0.003,
-    "source": "docs/HOSTED-STATUS.md (the flatten export of the 85 slide GT deck: perfect true, worst decoded mismatch 0.003 percent, horizon, 194 of 5,760,000 px); README.md \"Perfect PPTX\""
+    "source": "docs/archive/status/HOSTED-STATUS.md (the flatten export of the 85 slide GT deck: perfect true, worst decoded mismatch 0.003 percent, horizon, 194 of 5,760,000 px); README.md \"Perfect PPTX\""
   },
   "measured": {
     "source": "docs/gslides-parity/verification-4/perf-budget-production-ship-2026-09-14.json",

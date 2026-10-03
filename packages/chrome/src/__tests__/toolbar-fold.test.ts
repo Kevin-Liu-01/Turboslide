@@ -14,7 +14,7 @@ import {
   selectedRunSize,
 } from '../ToolbarTail';
 
-// The toolbar's fold (docs/PRODUCT.md 3.4; the row chrome.toolbar.fold-any-width): the tail folds
+// The toolbar's fold (docs/archive/rounds/PRODUCT.md 3.4; the row chrome.toolbar.fold-any-width): the tail folds
 // what does not fit into More at any width, in the order Clear formatting, the indent pair, the
 // list buttons, Highlight color, then the fill and border group, then the rest from the right end;
 // Format options never folds. And the pressed predicates (3.1; chrome.toolbar.bold-follows-selection):
@@ -88,7 +88,7 @@ describe('selectionMarks', () => {
     selection,
   });
 
-  it('answers nothing with no selection and the editor’s report while a session is open; a report kept from a session that ended is not read (docs/POLISH.md 2.3 item 17)', () => {
+  it('answers nothing with no selection and the editor’s report while a session is open; a report kept from a session that ended is not read (docs/archive/rounds/POLISH.md 2.3 item 17)', () => {
     expect(selectionMarks(factsOf(input(null)))).toBeUndefined();
     const facts = factsOf(
       input({ blockId: 'x', text: true, marks: { i: true, b: true } as never } as never),
@@ -99,7 +99,7 @@ describe('selectionMarks', () => {
   });
 });
 
-describe("selectedRunSize (docs/POLISH.md 2.3 item 16; the polish round's fix round)", () => {
+describe("selectedRunSize (docs/archive/rounds/POLISH.md 2.3 item 16; the polish round's fix round)", () => {
   const sized: Block = { id: 'z', type: 'text', text: '[Acme]{z:22} renews in Q3' };
 
   it("reads the size mark of the selected range before the block's size", () => {

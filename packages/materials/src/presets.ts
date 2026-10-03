@@ -1,5 +1,5 @@
 // The palette presets (SPEC 5.4 "brand palette presets"; MILESTONES M5 item 3; the features
-// round's ship two, docs/FEATURES.md 5.7). Every entry gets six palette presets, one per role of
+// round's ship two, docs/archive/rounds/FEATURES.md 5.7). Every entry gets six palette presets, one per role of
 // the brand kit taken as the ground: `paper-ink` (the Background ground with Text figures, "Ink on
 // paper", the light twin's look), `ink-paper` (the Text ground with light figures, "Paper on ink",
 // the dark twin's look), `brand-blue` (the Primary ground, "Primary", the polarity of the Blog and
@@ -43,7 +43,7 @@ export type PaletteRoles = {
 };
 
 /**
- * The six kit colours a shader draws from (docs/FEATURES.md 5.7), plus `figure`, the light colour
+ * The six kit colours a shader draws from (docs/archive/rounds/FEATURES.md 5.7), plus `figure`, the light colour
  * the figures take on a dark ground: the dark theme's paper on the legacy palette, the kit's
  * Background on a kit. The seven values are what the frame key hashes.
  */
@@ -359,7 +359,7 @@ export const EXTRA_PRESETS: Readonly<Record<string, MaterialPreset[]>> = {
 };
 
 /**
- * A recorded preset whose palette uniforms follow the kit (docs/FEATURES.md 5.7): the gem smoke
+ * A recorded preset whose palette uniforms follow the kit (docs/archive/rounds/FEATURES.md 5.7): the gem smoke
  * `brand-blue` keeps its geometry and takes the Primary ground and the Background and Accent
  * smoke from the palette handed in, so a kit change re colours the opener's recipe too.
  */

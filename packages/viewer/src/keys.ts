@@ -121,7 +121,7 @@ export type EditorKeyContext = {
    * Tools > Advanced tools (docs/FOCUS.md section 3): false while the switch is off. In the focus
    * round the chords of the parked rows the stage also binds (Group and Ungroup, Paint format's
    * copy and paste) matched nothing while it was off; the return round put those rows back in the
-   * default view (docs/RETURN.md 2.11, 2.12: `toolbar.paintFormat`, `arrange.group`,
+   * default view (docs/archive/rounds/RETURN.md 2.11, 2.12: `toolbar.paintFormat`, `arrange.group`,
    * `arrange.ungroup` lost their flag), so no stage chord reads the switch today
    * (`formatting.paint-format.chords`, `arrange.group.chords`; return/build/b4.md request 4). The
    * field stays for the next parked chord; the chrome's key table still drops every parked row
@@ -190,7 +190,7 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
   if (meta && alt && !otherMod) {
     const low = key.toLowerCase();
     /* Paint format's copy and paste (toolbar.paintFormat) and Group and Ungroup are default view
-       rows since the return round (docs/RETURN.md 2.11, 2.12), so their chords stand whatever the
+       rows since the return round (docs/archive/rounds/RETURN.md 2.11, 2.12), so their chords stand whatever the
        switch says; the rotate aliases below belong to no menu row */
     if (low === 'c') return ctx.selected ? { type: 'paintCopy' } : null;
     if (low === 'v') return ctx.selected ? { type: 'paintPaste' } : null;

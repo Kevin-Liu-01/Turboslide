@@ -13775,7 +13775,7 @@
       "post": {
         "operationId": "font.list",
         "summary": "Fonts",
-        "description": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).",
+        "description": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2).",
         "tags": [
           "render"
         ],
@@ -23769,9 +23769,9 @@
               "label": "Brand kit",
               "control": "json",
               "group": "Slide",
-              "help": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent."
+              "help": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The default kit when absent."
             },
-            "description": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent.",
+            "description": "The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The default kit when absent.",
             "type": "object",
             "properties": {
               "name": {
@@ -26881,9 +26881,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -27183,9 +27183,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -27998,9 +27998,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -28970,9 +28970,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -29636,9 +29636,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -30870,9 +30870,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -38648,9 +38648,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -39915,9 +39915,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -40303,9 +40303,9 @@
                     "vertical-horizontal"
                   ],
                   "group": "Block",
-                  "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33)."
+                  "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33)."
                 },
-                "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).",
+                "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33).",
                 "type": "string",
                 "enum": [
                   "horizontal",
@@ -41286,9 +41286,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -50431,7 +50431,7 @@
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "id": {
-            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)",
+            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -56944,7 +56944,7 @@
             "type": "boolean"
           },
           "svgVector": {
-            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
+            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
             "type": "boolean"
           },
           "baseline": {

@@ -2,7 +2,7 @@ import type { ModelClient, PromptSlide } from './assist';
 import { plainText } from '@turboslide/schema/text';
 
 /**
- * The fixture mode of docs/PRODUCT.md 6.3 (`TURBOSLIDE_ASSIST=fixture`, judge-design addition 7):
+ * The fixture mode of docs/archive/rounds/PRODUCT.md 6.3 (`TURBOSLIDE_ASSIST=fixture`, judge-design addition 7):
  * a canned answer per intent, built from the prompt's own slides so the card that comes out is
  * valid for any deck, with a real signature from the server. The preview's two gate runs drive
  * the panel, the card, Accept, Undo and the mark against it without a model call; production

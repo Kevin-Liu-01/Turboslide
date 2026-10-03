@@ -31,7 +31,7 @@ import './table.css';
 
 /**
  * The Table section of Format options (gslides-parity SPEC-2 section 5 "Table", 2.7; R11 A5, A6;
- * R05 A6; docs/OBJECTS.md 3.3 item 6): the words a seller reads, each property once, in this
+ * R05 A6; docs/archive/rounds/OBJECTS.md 3.3 item 6): the words a seller reads, each property once, in this
  * order: Header row (a check), Border (the table's rules: weight with Google's Transparent as
  * None, dash, colour), Rows (one Height field for the selected row or range, Distribute rows),
  * Columns (Distribute columns), Cell (the caret's cell or the range: Fill, Border), Merge (Merge
@@ -88,7 +88,7 @@ export function tableFormatSlot(props: TableSlotLikeProps): ReactNode {
   );
 }
 
-/** The sentences under the disabled merge buttons (docs/OBJECTS.md 3.3 item 6). */
+/** The sentences under the disabled merge buttons (docs/archive/rounds/OBJECTS.md 3.3 item 6). */
 export const MERGE_NEEDS_CELLS = 'Select two cells or more to merge';
 export const UNMERGE_NEEDS_MERGED = 'Select a merged cell to unmerge';
 
@@ -174,7 +174,7 @@ export function TableSection({
   const multi = range !== null && isMultiCell(block, range);
   const merged = isMergedAnchor(block, cell);
   const cellStyle = cell === undefined ? {} : cellStyleAt(block, cell);
-  /* the Height field's draft while it is typed (docs/FEATURES.md 2.2 rank 13) */
+  /* the Height field's draft while it is typed (docs/archive/rounds/FEATURES.md 2.2 rank 13) */
   const [heightDraft, setHeightDraft] = useState<string | null>(null);
   /* the rows the Height field reads and writes: the range's rows, else the caret's row, else
      every row of a table selected by one click */

@@ -13,7 +13,7 @@ import {
   viewOfRow,
 } from './own-identity';
 
-// The caller's own identity as EditorRoot hands it to the chrome (docs/PEOPLE.md 3.11, 4.1,
+// The caller's own identity as EditorRoot hands it to the chrome (docs/archive/rounds/PEOPLE.md 3.11, 4.1,
 // 4.4; the rows people.own-chip-follows-name and people.own-chip-follows-avatar): the payload
 // under the roster's own row under the last answer while the row still holds the state it held
 // when the answer arrived; the answer parsed defensively; the 64 px picture URL from the choice

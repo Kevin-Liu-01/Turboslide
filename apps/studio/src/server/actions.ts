@@ -396,12 +396,12 @@ function registerWorkerActions(dispatcher: Dispatcher, deckId: string, store: Fi
  * `turboslide mcp` over stdio run in their own process with the checkout policy. A fetch the
  * pinned lookup refuses (a name resolving to a private address) is one `ssrf.refused` line.
  *
- * The svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2): the hosted intake always carries
+ * The svg branch (docs/archive/rounds/FEATURES.md 4.7; docs/archive/rounds/VECTOR.md 4.2): the hosted intake always carries
  * the logo route's own parser (logo-sanitize.ts, an allowlist over elements and attributes) under
  * the upload's 2 MB cap with the upload's two sentences (upload.ts `SVG_UPLOAD_MAX_BYTES`,
  * `SVG_UPLOAD_WORDS`); the intake sanitizes an svg before sharp reads it, keeps the sanitized
  * file as the asset's vector and rasterizes a PNG twin (packages/headless intake.ts). The
- * features round's `TURBOSLIDE_SVG_RASTER` is unread since the vector round (docs/VECTOR.md 4.7).
+ * features round's `TURBOSLIDE_SVG_RASTER` is unread since the vector round (docs/archive/rounds/VECTOR.md 4.7).
  */
 function setStudioIntakePolicy(): void {
   setIntakePolicy({
@@ -444,7 +444,7 @@ const ASSET_ACTION_IDS = [
 ] as const;
 
 /**
- * The shader library's ids the materials package registers (docs/FEATURES.md 5.8; B5's
+ * The shader library's ids the materials package registers (docs/archive/rounds/FEATURES.md 5.8; B5's
  * `registerAssetActions`): the catalog with thumbnails and the control ranges, the insert, the
  * block write, the client capture's frame write, the hosted capture, the PNG render for an agent,
  * and the kit's background slot (P1). Written as strings and filtered through `isActionId` (the
@@ -473,7 +473,7 @@ const FRAME_WRITE_IDS: ReadonlyArray<ActionId> = (
 ).filter(isActionId);
 
 /**
- * The ids whose handler launches the hosted capture browser (docs/FEATURES.md 5.5; audit-shaders
+ * The ids whose handler launches the hosted capture browser (docs/archive/rounds/FEATURES.md 5.5; audit-shaders
  * 1): each runs under `boundedCapture`, through the render worker's local queue, and answers
  * `RenderError` with the one sentence after 30 s or on a browser failure.
  */
@@ -540,7 +540,7 @@ function assetDispatcherLoader(
         allowPaths: false,
         hosted: isHosted(),
         readUpload,
-        // the largest free rectangle for an agent's shader.insert (docs/FEATURES.md section 1,
+        // the largest free rectangle for an agent's shader.insert (docs/archive/rounds/FEATURES.md section 1,
         // the placement decision; build/b5.md R5, the studio half): the same rule the gallery's
         // insert follows in the controller (place-insert.ts's `material` kind)
         placeInsert: (slide: Slide, size: readonly [number, number]) =>
@@ -558,7 +558,7 @@ function assetDispatcherLoader(
 }
 
 /**
- * The logo picker's ids (docs/FEATURES.md 4.11; build/b6.md R3, R4): `logo.search` over the
+ * The logo picker's ids (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R3, R4): `logo.search` over the
  * server's index, `logo.insert` (the fetch, the sanitizer, the sharp raster and the asset write)
  * and `logo.refresh`. B6's `logos.ts` imports sharp and the store client at its top, so it loads
  * on the first call the way the materials package does above, and never enters the graph of the
@@ -588,7 +588,7 @@ function registerLogoActionsLazily(
 
 /**
  * Registers the asset ids over the lazily loaded materials dispatcher, and the shader ids once
- * the action table names them. A capture id runs under the 30 s bound (docs/FEATURES.md 5.5).
+ * the action table names them. A capture id runs under the 30 s bound (docs/archive/rounds/FEATURES.md 5.5).
  */
 function registerAssetActionsLazily(
   dispatcher: Dispatcher,
@@ -607,7 +607,7 @@ function registerAssetActionsLazily(
       const upload = (input as { upload?: unknown } | null)?.upload;
       if ((id === 'asset.add' || (id as string) === 'shader.frame') && typeof upload === 'string')
         deleteUpload(upload);
-      // the orphan prune behind a frame write's response (docs/FEATURES.md 5.5), once a minute
+      // the orphan prune behind a frame write's response (docs/archive/rounds/FEATURES.md 5.5), once a minute
       if (FRAME_WRITE_IDS.includes(id)) scheduleFramePrune(frames);
       return output;
     });
@@ -736,7 +736,7 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
     kind: identity.kind === 'account' ? 'account' : agentish ? 'agent' : 'anonymous',
     ...(identity.account?.email !== undefined ? { email: identity.account.email } : {}),
     ...(admin ? { admin: true } : {}),
-    /* the anonymous ids the alias table linked to the account (docs/PEOPLE.md 3.6): a deck made
+    /* the anonymous ids the alias table linked to the account (docs/archive/rounds/PEOPLE.md 3.6): a deck made
        before the sign in stays the account's own at the share records too (b1.md R1) */
     ...(identity.ctx.principal?.aliases !== undefined && identity.ctx.principal.aliases.length > 0
       ? { aliases: identity.ctx.principal.aliases }
@@ -885,7 +885,7 @@ function registerRecordActionsFor(
     addAsset: async (request, ctx, baseRevision) =>
       (await (await assets()).dispatch('asset.add', { ...request, baseRevision }, ctx)) as Asset,
     captureMaterial: async (request, ctx, baseRevision) => {
-      // the hosted capture under its 30 s bound and its one sentence (docs/FEATURES.md 5.5)
+      // the hosted capture under its 30 s bound and its one sentence (docs/archive/rounds/FEATURES.md 5.5)
       const captured = await boundedHostedCapture(deckId, 'material.capture', async () =>
         (await assets()).dispatch(
           'material.capture',
@@ -968,7 +968,7 @@ function registerHostedDeckActions(
     return made;
   };
   // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
-  // the instance's overlay the folder handler wrote to (docs/EDITOR-DEPTH-STATUS.md section 10)
+  // the instance's overlay the folder handler wrote to (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10)
   dispatcher.register('deck.create', async (input) =>
     record(await decks.create(input as CreateDeckInput)),
   );
@@ -1002,7 +1002,7 @@ function registerHostedDeckActions(
 }
 
 /**
- * The template actions of the product round (docs/PRODUCT.md 4.3; build/b5b.md R3) over the
+ * The template actions of the product round (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md R3) over the
  * collection's decks folder: the two reads, Save as template and Replace under the deck's copy
  * right with its revision checked, and the three deckless writes (Rename, Delete, Use for new
  * presentations), which an agent token reaches with the admin scope alone; a person's session is
@@ -1315,7 +1315,7 @@ export async function deckDispatcher(
     diagrams: makeDiagram,
   };
   registerStoreActions(dispatcher, storeDeps);
-  // the brand kit's four ids over the same store (docs/PRODUCT.md 4.1; build/b5.md R3)
+  // the brand kit's four ids over the same store (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R3)
   registerBrandActions(dispatcher, storeDeps);
   // deck.create makes a sibling under decks/; deck.rename writes this deck's title
   registerDeckActions(dispatcher, { ...storeDeps, decksDir: join(repoRoot(), 'decks') });
@@ -1336,18 +1336,18 @@ export async function deckDispatcher(
     creatorContextOf(request, facts),
     listingScopeOf(request, facts),
   );
-  // the templates of the product round over the collection's folder (docs/PRODUCT.md 4.3)
+  // the templates of the product round over the collection's folder (docs/archive/rounds/PRODUCT.md 4.3)
   registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));
-  // the assistant's two actions on this deck (docs/PRODUCT.md 6.2; build/b6.md R3): the route
+  // the assistant's two actions on this deck (docs/archive/rounds/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
   registerAssistActions(dispatcher, { store: liveStore, deckId });
-  // the logo picker's three actions over this deck (docs/FEATURES.md 4.11; build/b6.md R4), so
+  // the logo picker's three actions over this deck (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R4), so
   // /api/actions/logo.search, deck_logo_search and the window transport answer them
   registerLogoActionsLazily(dispatcher, deckId, liveStore);
   registerSlideImport(dispatcher, deckId, storeDeps, store.dir, liveStore, decks);
   const assets = assetDispatcherLoader(dispatcher, deckId, store, liveStore);
   registerRecordActionsFor(dispatcher, deckId, store, liveStore, storeDeps, facts, assets);
-  // the store's view of the deck for the HTTP and MCP transports (docs/SYNC.md 6.3, 3.6; the sync
+  // the store's view of the deck for the HTTP and MCP transports (docs/archive/rounds/SYNC.md 6.3, 3.6; the sync
   // round, build/b3.md R2): `sync.status` with `storeCalls` replaces the CLI's placeholder the
   // record actions register above, and `deck.info` gains `counts.records` and `counts.holes`
   registerStoreStatusActions(dispatcher, {
@@ -1362,7 +1362,7 @@ export async function deckDispatcher(
     registerRoomCommentHandlers(dispatcher, request, deckId);
     registerNotificationHandlers(dispatcher, request, deckId);
     // the picture files go to the public store on the blob tier and to the state folder
-    // elsewhere (docs/PEOPLE.md 4.3; AUDIT.md defect 12), one selection for the writer, the
+    // elsewhere (docs/archive/rounds/PEOPLE.md 4.3; AUDIT.md defect 12), one selection for the writer, the
     // route and the janitor
     registerAccountActions(dispatcher, {
       facts: accountFactsFor(request, deckId),

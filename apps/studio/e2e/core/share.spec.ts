@@ -47,7 +47,7 @@ import { shareChromeRows } from './b3b-dialogs';
 // second browser, the view and present links leaving skipped slides and notes out, a comment
 // reaching the second browser, and a restore on a deck two browsers wrote into. The owner is one
 // context; every other person is a fresh context with no cookie of the owner's. The return round
-// (docs/RETURN.md section 5) adds the roster's Go to slide, the second browser's live pointer and
+// (docs/archive/rounds/RETURN.md section 5) adds the roster's Go to slide, the second browser's live pointer and
 // the notification that arrives from a second browser's mention. The realtime round
 // (docs/REALTIME.md section 2) adds two rows of the realtime feature at the end: the share link
 // opened on every instance within a second of its mint, and the departed guest's name stable
@@ -87,7 +87,7 @@ async function openShare(p: Page = page): Promise<void> {
   await ctl(p, 'share.open').click();
   await skipNamePrompt(p);
   await ctl(p, 'dialog.share').waitFor({ timeout: 10_000 });
-  /* the product round's dialog opens on one link (docs/PRODUCT.md section 2 rank 3); the View,
+  /* the product round's dialog opens on one link (docs/archive/rounds/PRODUCT.md section 2 rank 3); the View,
      Present and Edit rows these files read sit behind its More row (Share.tsx LINK_ROWS) */
   const rows = ctl(p, 'dialog.share.rows');
   if ((await rows.count()) === 0) {
@@ -98,7 +98,7 @@ async function openShare(p: Page = page): Promise<void> {
     }
   }
 }
-/** The first Share on a browser with no display name asks for one once (docs/PRODUCT.md section 2 rank 4): Skip passes it. */
+/** The first Share on a browser with no display name asks for one once (docs/archive/rounds/PRODUCT.md section 2 rank 4): Skip passes it. */
 async function skipNamePrompt(p: Page): Promise<void> {
   const skip = ctl(p, 'dialog.namePrompt.skip');
   const there = await skip
@@ -226,7 +226,7 @@ async function copyRow(id: string): Promise<string> {
       return m ? m[0].replace(/\\\//g, '/') : null;
     })
     .catch(() => null);
-  /* the polish round's dialog opens Restricted on a new deck (docs/POLISH.md 2.7 item 77) and
+  /* the polish round's dialog opens Restricted on a new deck (docs/archive/rounds/POLISH.md 2.7 item 77) and
      draws the link rows under "Anyone with the link" alone, so the mode is switched first when
      the row's copy is not drawn; a row still absent after that fails the row with its reason
      instead of waiting out the test */
@@ -453,7 +453,7 @@ async function authorizeMode(p: Page, id: string): Promise<string> {
   return body.authorize ?? body.mode ?? `unknown (${res.status()})`;
 }
 /**
- * Anyone with the link on the deck through the window API (docs/POLISH.md 2.7 item 95, B5: a
+ * Anyone with the link on the deck through the window API (docs/archive/rounds/POLISH.md 2.7 item 95, B5: a
  * new deck starts Restricted with no link, so the rows that read the View, Present and Edit
  * links set the general access first, as an owner does in the Share dialog).
  */
@@ -1019,7 +1019,7 @@ test(title('versions.restore'), async ({ browser }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the return round's rows (docs/RETURN.md 2.16, 2.17, section 5)
+// the return round's rows (docs/archive/rounds/RETURN.md 2.16, 2.17, section 5)
 
 /** Turns Tools > Advanced tools on in a page when a menubar row is absent; answers whether it did. */
 async function reachMenuRow(p: Page, menuId: string, ...rowIds: string[]): Promise<boolean> {
@@ -1358,7 +1358,7 @@ async function invokeOn(p: Page, action: string, input: unknown): Promise<unknow
 }
 
 // ---------------------------------------------------------------------------------------------
-// the product round's rows (docs/PRODUCT.md section 2 ranks 3 and 4, 4.1, 4.5, 6.1, 8.1): the
+// the product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 3 and 4, 4.1, 4.5, 6.1, 8.1): the
 // Share dialog's one link with the access sentence, the slideshow checkbox, the You label and a
 // second browser's display name, the first Share's name prompt, the co edit from the copied
 // address, a kit change reaching a second browser, the kit on the view link and in the show, and
@@ -1406,7 +1406,8 @@ async function shareStage(p: Page) {
     };
   });
 }
-const notBuiltShare = 'not on this build: dialog.share.address (docs/PRODUCT.md 7.1, B1)';
+const notBuiltShare =
+  'not on this build: dialog.share.address (docs/archive/rounds/PRODUCT.md 7.1, B1)';
 
 test(title('share.dialog.one-link'), async () => {
   test.setTimeout(120_000);
@@ -1447,7 +1448,7 @@ test(title('share.dialog.slideshow-checkbox'), async () => {
       true,
       stage.address === null
         ? notBuiltShare
-        : 'not on this build: dialog.share.slideshow (docs/PRODUCT.md 7.1, B1)',
+        : 'not on this build: dialog.share.slideshow (docs/archive/rounds/PRODUCT.md 7.1, B1)',
     );
   }
   const before = await ctl(page, 'dialog.share.address').inputValue();
@@ -1521,7 +1522,7 @@ test(title('share.dialog.you-label'), async ({ browser }) => {
     if (!named)
       test.skip(
         true,
-        'not on this build: dialog.namePrompt on the first Share (docs/PRODUCT.md 7.1, B1)',
+        'not on this build: dialog.namePrompt on the first Share (docs/archive/rounds/PRODUCT.md 7.1, B1)',
       );
     await settled(second);
     /* the owner's roster: the presence chips and the Share dialog */
@@ -1556,7 +1557,7 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
   const guest = await otherContext(browser);
   try {
     const own = await newDeck(fresh.page, freshScratch, 'Name prompt deck');
-    /* a new deck is Restricted (docs/POLISH.md item 78), so the guest below is a stranger on it
+    /* a new deck is Restricted (docs/archive/rounds/POLISH.md item 78), so the guest below is a stranger on it
        under enforce and its editor never came up on the polish round's enforce preview (six opens
        over 126 s, twice; B5's R23 to B6, landed by the ship step's third attempt): the owner opens
        the deck to Anyone with the link first, through the window API, which asks no name */
@@ -1571,7 +1572,7 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
       await closeShare(fresh.page).catch(() => undefined);
       test.skip(
         true,
-        'not on this build: the first Share opened no dialog.namePrompt (docs/PRODUCT.md 7.1, B1)',
+        'not on this build: the first Share opened no dialog.namePrompt (docs/archive/rounds/PRODUCT.md 7.1, B1)',
       );
     }
     const words = await prompt.textContent();
@@ -1587,7 +1588,7 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
       await ctl(fresh.page, 'share.open').click();
     await ctl(fresh.page, 'dialog.share').waitFor({ timeout: 10_000 });
     await expect(ctl(fresh.page, 'dialog.share.loading')).toHaveCount(0, { timeout: 10_000 });
-    /* the address the field holds at the first open (docs/PRODUCT.md section 2 rank 3, the ship
+    /* the address the field holds at the first open (docs/archive/rounds/PRODUCT.md section 2 rank 3, the ship
        step's FR1) read empty in this flow on the enforce previews of the product round's ship
        (the placeholder, "Copy link creates the address"), so the guest took the /edit fallback
        below and met a fresh deck's 404 on another instance, and read no chip for 35 s. The guest
@@ -1625,7 +1626,7 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
        `/edit/<id>` 404 eight seconds after the first write, three times on one enforce preview;
        the deck store reads the public store's edge, ship.md section 10), and a guest on the not
        found page has no roster. The guest opens the link again every 2 s until the editor is up,
-       inside the second browser bound of docs/PRODUCT.md 8.2; the tries are annotated */
+       inside the second browser bound of docs/archive/rounds/PRODUCT.md 8.2; the tries are annotated */
     let tries = 0;
     for (;;) {
       tries += 1;
@@ -1658,7 +1659,7 @@ test(title('share.name-prompt.first-share'), async ({ browser }) => {
               .join(' | '),
           ),
         {
-          /* the second browser bound of docs/PRODUCT.md 8.2, as collab.presence-chips and
+          /* the second browser bound of docs/archive/rounds/PRODUCT.md 8.2, as collab.presence-chips and
              versions.restore read it: on the blob tier the guest's instance learns the owner's
              presence through the presence store (PRESENCE_POLL_MS 5 s on the guest's side,
              PRESENCE_PUSH_SPACING_MS 5 s on the owner's after the name is set), so a guest that
@@ -1718,7 +1719,7 @@ test(title('share.dialog.co-edit-from-copied-link'), async ({ browser }) => {
       'the full toolbar: the second browser edits',
     ).toHaveAttribute('data-edit-mode', 'editing');
     /* the full toolbar: New slide is in the bar with nothing selected; Bold is a text tail
-       control, drawn with the caret in text (docs/PRODUCT.md 3.4), so it is read after the typing */
+       control, drawn with the caret in text (docs/archive/rounds/PRODUCT.md 3.4), so it is read after the typing */
     await expect(ctl(second, 'toolbar.newSlide')).toBeAttached();
     const slide = (await slideOrder(second))[0]!;
     await clickCard(second, slide);
@@ -1769,7 +1770,7 @@ test(title('brand.colors.collab-rerender'), async ({ browser }) => {
   test.setTimeout(180_000);
   await openEditor(page, deck);
   if (!(await actionIds(page)).includes('brand.set'))
-    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+    test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
   const { context: other, page: second } = await secondEditor(browser);
   try {
     const before = await sheetBlue(second);
@@ -1820,7 +1821,7 @@ test(title('brand.surfaces.viewer-and-show'), async ({ browser }) => {
   test.setTimeout(180_000);
   await openEditor(page, deck);
   if (!(await actionIds(page)).includes('brand.set'))
-    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+    test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
   /* the kit as setup writes: a primary colour, a display face and a picture logo */
   const s = await settled(page);
   const appearance = s.theme === 'dark' ? 'dark' : 'light';
@@ -1909,7 +1910,8 @@ test(title('assist.viewer.disabled'), async ({ browser }) => {
   const entry = await ctl(page, 'title.assist')
     .isVisible()
     .catch(() => false);
-  if (!entry) test.skip(true, 'not on this build: title.assist (docs/PRODUCT.md 7.1, B6)');
+  if (!entry)
+    test.skip(true, 'not on this build: title.assist (docs/archive/rounds/PRODUCT.md 7.1, B6)');
   links = await readLinks();
   const { context: other, page: visitor } = await otherContext(browser);
   try {
@@ -1944,13 +1946,13 @@ test(title('assist.viewer.disabled'), async ({ browser }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8 items 103,
+// the polish round (docs/archive/rounds/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8 items 103,
 // 104, 110 and 112, 5.1 `chrome.tail.reads-mode`, `share.*` and `collab.*`): the tail reads the
 // mode, the name prompt opens empty and never mid gesture, a new deck is Restricted and a link
 // defaults to Viewer, a role change keeps the address, the Restricted state and the More section,
 // Follow for anonymous editors, a joiner's chip within two seconds, and the session's small words.
 
-/** The write controls of the toolbar a reader must not get (docs/POLISH.md 2.6 item 58). */
+/** The write controls of the toolbar a reader must not get (docs/archive/rounds/POLISH.md 2.6 item 58). */
 const WRITE_CONTROLS = [
   'toolbar.insertImage',
   'toolbar.insertShape',
@@ -2069,7 +2071,7 @@ test(title('share.name-prompt.empty-field'), async ({ browser }) => {
       await closeShare(fp).catch(() => undefined);
       test.skip(
         true,
-        'not on this build: the first Share opened no dialog.namePrompt (docs/PRODUCT.md 7.1, B1)',
+        'not on this build: the first Share opened no dialog.namePrompt (docs/archive/rounds/PRODUCT.md 7.1, B1)',
       );
     }
     const field = ctl(fp, 'dialog.namePrompt.name');
@@ -2565,7 +2567,7 @@ test(title('collab.polish.session-sweep'), async ({ browser }) => {
   expect(failures).toEqual([]);
 });
 
-// the people round's rows (docs/PEOPLE.md 3.7, 3.9, 3.10, 3.15, 6.1): the chip tooltip's trust
+// the people round's rows (docs/archive/rounds/PEOPLE.md 3.7, 3.9, 3.10, 3.15, 6.1): the chip tooltip's trust
 // sentence, the departed guest's comment, the resolved owner row and the caret's hue. Two
 // anonymous browsers, on the memory tier and on a deployment alike; the account and picture rows
 // are e2e/accounts.spec.ts on a node server with an identity database (6.2). B1 owns the room's
@@ -2604,7 +2606,7 @@ async function tipOf(
     };
   });
 }
-/** Names the second browser through the first Share's prompt (docs/PRODUCT.md rank 4); false when no prompt came. */
+/** Names the second browser through the first Share's prompt (docs/archive/rounds/PRODUCT.md rank 4); false when no prompt came. */
 async function nameSecond(p: Page, name: string): Promise<boolean> {
   let named = await setDisplayName(p, name);
   if (!named) {
@@ -2629,7 +2631,7 @@ async function advancedToolsOn(p: Page): Promise<boolean> {
   );
 }
 /**
- * Names this browser through the account menu's Change name (docs/PEOPLE.md 3.11): the own chip
+ * Names this browser through the account menu's Change name (docs/archive/rounds/PEOPLE.md 3.11): the own chip
  * with the switch off, else with Tools > Advanced tools turned on through the product while
  * `title.account` is parked (3.14) and off again after. The route is recorded for the ledger.
  */
@@ -3228,7 +3230,7 @@ coverage(import.meta.filename, [
   'collab.roster.go-to-slide',
   'view.live-pointers.second-browser',
   'inbox.notification-arrives',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'share.dialog.one-link',
   'share.dialog.slideshow-checkbox',
   'share.dialog.you-label',
@@ -3237,7 +3239,7 @@ coverage(import.meta.filename, [
   'brand.colors.collab-rerender',
   'brand.surfaces.viewer-and-show',
   'assist.viewer.disabled',
-  /* the polish round (docs/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 items 58 and 63, 2.7 items 78, 79 and 96, 2.8) */
   'chrome.tail.reads-mode',
   'share.name-prompt.empty-field',
   'share.dialog.new-deck-restricted-viewer',
@@ -3247,7 +3249,7 @@ coverage(import.meta.filename, [
   'collab.follow.anonymous-editor',
   'collab.presence.join-within-2s',
   'collab.polish.session-sweep',
-  /* the people round (docs/PEOPLE.md 6.1) */
+  /* the people round (docs/archive/rounds/PEOPLE.md 6.1) */
   'people.chip-tooltip-trust',
   'people.comment-departed-guest',
   'share.dialog.owner-resolved',

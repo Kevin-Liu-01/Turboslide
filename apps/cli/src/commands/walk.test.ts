@@ -1,4 +1,4 @@
-// The agent parity walk of the Google Slides parity round two (docs/gslides-parity/MILESTONES-2.md
+// The agent parity walk of the Google Slides parity round two (docs/archive/gslides-parity/MILESTONES-2.md
 // B1 acceptance): every new action of SPEC-2 section 3 through `turboslide <command> --json` on a
 // temp copy of the fixture deck decks/fixture/gslides, the deck validating after each write. The
 // slides here are canvas slides already, so no command opens a browser; the conversion itself is
@@ -455,7 +455,7 @@ describe('the agent parity walk over the fixture deck', () => {
   test('diagram insert lands one group of labelled shapes and attached lines through the bound templates', async () => {
     // B5's templates are bound as deps.diagrams at merge 2 (SPEC-2 2.8.3); the fixture's diagram
     // slide already holds a process diagram, so a second one lands beside it with its own group tag.
-    // Since the features round a step is one shape carrying its label (docs/FEATURES.md 2.2 rank
+    // Since the features round a step is one shape carrying its label (docs/archive/rounds/FEATURES.md 2.2 rank
     // 9) and the connectors bind to the freed ids of the second diagram's steps (build/b3.md R8)
     const r = await run([
       'diagram',

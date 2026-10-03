@@ -31,7 +31,7 @@ import { tipProps } from '../Tooltip';
 import './ShaderGallery.css';
 
 /**
- * The Shader gallery (docs/FEATURES.md 5.4; audit-shaders 3 and 14): one picker for Insert >
+ * The Shader gallery (docs/archive/rounds/FEATURES.md 5.4; audit-shaders 3 and 14): one picker for Insert >
  * Shader and Change background > Shader > Choose. A grid of 320 by 200 stills, one card per
  * catalog entry with its presets as a row of small tiles under the name; a search field over the
  * name, the description and the engine; five category chips (Fluid, Light, Metal, Gradient,

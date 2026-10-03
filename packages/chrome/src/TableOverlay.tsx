@@ -32,7 +32,7 @@ import { tipProps } from './Tooltip';
 import './TableOverlay.css';
 
 /**
- * The table's own controls in the overlay (docs/OBJECTS.md 3.3 items 1 and 4; docs/FEATURES.md
+ * The table's own controls in the overlay (docs/archive/rounds/OBJECTS.md 3.3 items 1 and 4; docs/archive/rounds/FEATURES.md
  * 2.3 items 1 and 2; Google resizes by its gridlines and selects rows and columns by their bands,
  * the "+" is Notion's and Pitch's): drawn from the measured cell boxes (`boxes.runs`, keyed
  * `<block>/rows/<r>/cells/<c>`) whenever one table is selected, a cell open or not.
@@ -44,7 +44,7 @@ import './TableOverlay.css';
  *   every row (`.head.row.<r>`); a click selects the whole column or row as a range through the
  *   editor's `selectCells` (build/b5.md R2) and hands the focus to the stage root, so Delete,
  *   Backspace, the arrows and Cmd+B act on the range and no focus box stays beside the table
- *   (docs/POLISH.md 2.2 item 7; the row `tables.heads.keys-act-on-range`); a keyboard user who
+ *   (docs/archive/rounds/POLISH.md 2.2 item 7; the row `tables.heads.keys-act-on-range`); a keyboard user who
  *   tabs onto a head sees the band's own plate, never the browser's ring (TableOverlay.css). A
  *   right click opens the head's menu: on a row head
  *   the Header row check (`format.table.headerRow`, writing `rows[0].header`), Insert row above and
@@ -56,7 +56,7 @@ import './TableOverlay.css';
  *   itself; one click inserts a column right of the last one (a row under the last) in one commit
  *   that also grows the table's box by the new column's width (the last row's height), so every
  *   other column keeps its width (the row `tables.edge.add-row-column`), and never past the
- *   content box (`edgeInsert`, docs/POLISH.md 2.2 item 9: the column takes the room left and
+ *   content box (`edgeInsert`, docs/archive/rounds/POLISH.md 2.2 item 9: the column takes the room left and
  *   then an equal share of the table's width; the row grows the box down, then up); without the
  *   shell's `commit` the click falls back to the `table.insertColumns` plan. The circle sits ADD_GAP off
  *   the edge, so it never covers the seam under the last row, the frame edge strip or a resize
@@ -211,7 +211,7 @@ function sameBox(a: Box, b: Box): boolean {
   return a.every((v, i) => Math.abs(v - (b[i] ?? Number.NaN)) < 0.5);
 }
 
-/** The editor handle with the range API the heads call (build/b5.md R2) and the stage's focus (docs/POLISH.md 2.2 item 7). */
+/** The editor handle with the range API the heads call (build/b5.md R2) and the stage's focus (docs/archive/rounds/POLISH.md 2.2 item 7). */
 type HeadEditor = NonNullable<EditorShellState['input']['editor']> & {
   selectCells?: (
     blockId: string,
@@ -220,7 +220,7 @@ type HeadEditor = NonNullable<EditorShellState['input']['editor']> & {
   focus?: () => void;
 };
 
-/** The id the parked set names for a table control (the family of docs/FEATURES.md 7.2: `handle.table.<part>`). */
+/** The id the parked set names for a table control (the family of docs/archive/rounds/FEATURES.md 7.2: `handle.table.<part>`). */
 export const parkedFamily = (part: string): string => `handle.table.${part}`;
 
 /** The row ids of a head's menu, in order; the Header row check leads a row head's. */

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { slideLinkDestination } from '../slideLinks';
 
-// A slide link clicked in the show (docs/PRODUCT.md section 2 rank 19): the four positions
+// A slide link clicked in the show (docs/archive/rounds/PRODUCT.md section 2 rank 19): the four positions
 // resolve against the play list and the current slide, a slide id against the list, a URL to none.
 
 const play = [{ id: 'title' }, { id: 'agenda' }, { id: 'pricing' }, { id: 'closing' }];

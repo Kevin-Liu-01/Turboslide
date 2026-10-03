@@ -1,4 +1,4 @@
-// The shaders of a scene without a browser (docs/FEATURES.md 5.5): the document's material
+// The shaders of a scene without a browser (docs/archive/rounds/FEATURES.md 5.5): the document's material
 // blocks with their frame files and the two readings, the pending list over scenes, and the
 // PowerPoint builder's frame picture (`ts:<slide>#<block>`, the frame's own bytes at the box, the
 // recipe in descr) read back out of the written package.
@@ -262,7 +262,7 @@ describe('the frame picture in a PowerPoint (pptx/build.ts addShaderFrames)', ()
     const placed = addShaderFrames(slideOut, scene, 'ts:s1', residual);
     expect(placed.map((s) => s.blockId)).toEqual(['fresh']);
     expect([...residual]).toEqual([
-      "shader: s1#fresh travels as its frame (3200 by 1800) at the block's box with the recipe in descr (docs/FEATURES.md 5.5)",
+      "shader: s1#fresh travels as its frame (3200 by 1800) at the block's box with the recipe in descr (docs/archive/rounds/FEATURES.md 5.5)",
     ]);
     const raw = (await pptx.write({ outputType: 'nodebuffer' })) as Buffer;
     const zip = await openPackage(new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength));

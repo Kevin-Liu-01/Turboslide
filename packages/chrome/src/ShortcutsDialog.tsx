@@ -21,7 +21,7 @@ import './ShortcutsDialog.css';
  * route keeps the card. Since the focus round (docs/FOCUS.md 3.1) the dialog takes the menu
  * context and lists a binding only while its row is present: a parked row and a Later stub leave
  * the list with Tools > Advanced tools off and return with it on. The product round
- * (docs/PRODUCT.md section 2 rank 31; audit-seller 33): one row per action, its chords joined
+ * (docs/archive/rounds/PRODUCT.md section 2 rank 31; audit-seller 33): one row per action, its chords joined
  * (Redo listed once), and Common actions lead with New slide, Undo, Redo, Copy, Paste, Slideshow
  * and Search the menus, in that order. The `?` key opens the dialog as Cmd+/ does (useEditorKeys).
  */
@@ -92,7 +92,7 @@ export function shortcutRows(
      so Redo reads once with both its chords */
   const byId = new Map<string, ShortcutRow>();
   for (const binding of table) {
-    /* one row per chord (docs/POLISH.md 2.6 item 73; audit-chrome item 52): the toolbar's Paint
+    /* one row per chord (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item 52): the toolbar's Paint
        format prints both chords at once while Copy formatting and Paste formatting print one
        each, so the toolbar's row is left out of the page */
     if (binding.id === 'toolbar.paintFormat') continue;

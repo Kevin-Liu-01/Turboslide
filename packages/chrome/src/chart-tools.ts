@@ -66,11 +66,11 @@ export const CHART_FULL_SERIES = `A chart has at most ${CHART_MAX_SERIES} series
 export const CHART_FULL_CATEGORIES = `A chart has at most ${CHART_MAX_CATEGORIES} categories`;
 export const CHART_LAST_SERIES = 'A chart keeps at least one series';
 export const CHART_LAST_CATEGORY = 'A chart keeps at least one category';
-/** 4.2 item 1 of docs/OBJECTS.md: the sentence the refused Add series of a pie reads (Google's pie takes one series). */
+/** 4.2 item 1 of docs/archive/rounds/OBJECTS.md: the sentence the refused Add series of a pie reads (Google's pie takes one series). */
 export const CHART_PIE_ONE_SERIES = 'A pie chart draws one series; change the chart type for more';
 
 /**
- * Why Add series is refused on a chart, or null when a series can be added (docs/OBJECTS.md 4.2
+ * Why Add series is refused on a chart, or null when a series can be added (docs/archive/rounds/OBJECTS.md 4.2
  * item 1; SPEC-2 2.8.1): a pie draws one series, and every kind stops at the cap. The grid's
  * button and the series header's menu row read it as their `aria-disabled` sentence, so the
  * control stays in the tab order with its tooltip and no write is attempted.

@@ -1,4 +1,4 @@
-// The preset branch of renderShape (docs/VECTOR.md 2.3, 6.3): a multi path preset renders one
+// The preset branch of renderShape (docs/archive/rounds/VECTOR.md 2.3, 6.3): a multi path preset renders one
 // `<path>` per geometry path with the fill modes and the stroke flags, the shade overlays over the
 // block's fill, `data-adjust` as written, and the label layer at the ECMA text rectangle.
 import { describe, expect, it } from 'vitest';
@@ -110,7 +110,7 @@ describe('a preset on the sheet', () => {
     expect(rounded).toContain('<rect x="0.5" y="0.5" width="239" height="159" rx="8" ry="8"');
     const line = renderBlock(shape({ shape: 'line' }), context());
     expect(line).toContain('<line ');
-    /* the only path of a line is its hit path (the polish round, docs/POLISH.md item 24) */
+    /* the only path of a line is its hit path (the polish round, docs/archive/rounds/POLISH.md item 24) */
     expect(paths(line)).toHaveLength(1);
     expect(paths(line)[0]).toContain('class="hit"');
   });

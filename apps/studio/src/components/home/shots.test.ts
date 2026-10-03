@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { fallbackSrcOf, shotOf, srcsetOf } from './Shot';
 import { SHOTS_MANIFEST } from './shots';
 
-// The pictures of the /home page (docs/POLISH.md 3.3 item 1, 3.5): the manifest
+// The pictures of the /home page (docs/archive/rounds/POLISH.md 3.3 item 1, 3.5): the manifest
 // scripts/build-home-assets.ts --capture writes holds the product's own render of the hero, the
 // canvas crop and the menus crop in both appearances, each with a 2x and a 1x candidate under
 // apps/studio/public/home, and the module twin the page imports equals the JSON. The chrome

@@ -9,7 +9,7 @@ import { TableSection, tableFormatSlot } from '../inspector/table';
 import { forbiddenWordsIn } from '../menus/strings';
 
 // The Table section (gslides-parity SPEC-2 section 5 "Table", 2.7, 11.5 table-section.test;
-// docs/OBJECTS.md 3.3 item 6, the row tables.panel.section-words): the groups in the spec's
+// docs/archive/rounds/OBJECTS.md 3.3 item 6, the row tables.panel.section-words): the groups in the spec's
 // order with each property once; the header row toggle; the table border weight with None for
 // Google's Transparent, dash and colour as one block.set /border; one Height field writing
 // /rows; Distribute rows and columns as table.distribute; the selected cell's fill and border as
@@ -113,7 +113,7 @@ describe('TableSection', () => {
     expect((dispatch.mock.calls[3]?.[1] as { value: unknown }).value).toEqual({ weight: 1 });
   });
 
-  it('shows one Height field for the selected rows and writes the typed height on them, an empty field clearing it (docs/FEATURES.md 2.2 rank 13)', () => {
+  it('shows one Height field for the selected rows and writes the typed height on them, an empty field clearing it (docs/archive/rounds/FEATURES.md 2.2 rank 13)', () => {
     /* the caret's row: row 2 carries 56 */
     const { dispatch } = mount({ cell: { row: 1, column: 0 } });
     const field = control('height') as HTMLInputElement;
@@ -299,7 +299,7 @@ describe('TableSection', () => {
     });
   });
 
-  it('reads Header row, Border, Rows, Columns, Cell, Merge in that order, each property once, and no insert or delete control (docs/OBJECTS.md 3.3 item 6)', () => {
+  it('reads Header row, Border, Rows, Columns, Cell, Merge in that order, each property once, and no insert or delete control (docs/archive/rounds/OBJECTS.md 3.3 item 6)', () => {
     mount({ cell: { row: 1, column: 1 } });
     const root = document.querySelector('[data-control="formatOptions.table"]') as HTMLElement;
     expect(

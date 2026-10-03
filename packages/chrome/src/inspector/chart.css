@@ -57,7 +57,7 @@
 
 /* the Chart type segments size to their labels: the shared small Seg (Seg.css) is the sidebar's
    two icon squares at a fixed 28 px, which clipped "Column" at 37 px (audit-objects row 114;
-   docs/RETURN.md 2.5); the inspector's enum Segs take the same text sizing (seg.css) */
+   docs/archive/rounds/RETURN.md 2.5); the inspector's enum Segs take the same text sizing (seg.css) */
 .ts-chart-kind.pt-seg.is-small .pt-ib {
   width: auto;
   padding: 0 8px;
@@ -65,7 +65,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* the grid sized to the 320 px panel (the polish round, docs/POLISH.md item 26; audit-objects
+/* the grid sized to the 320 px panel (the polish round, docs/archive/rounds/POLISH.md item 26; audit-objects
    item 4: the second series sat past the panel's edge behind a scrollbar nobody could see): 12 px
    type, a 20 px corner, a category column of 80 px and value columns of 84 px, so two series fit
    the panel whole (268 of 271 px); a third overflows sideways under a scrollbar that is drawn.
@@ -169,7 +169,7 @@
   white-space: nowrap;
 }
 
-/* the series swatch at 16 px in the grid and in the swatch row, always drawn (docs/FEATURES.md
+/* the series swatch at 16 px in the grid and in the swatch row, always drawn (docs/archive/rounds/FEATURES.md
    2.2 rank 12; audit-objects 21; the fix round: the grid's read 14 by 14 against the row's 16) */
 .ts-chartgrid-swatch,
 .ts-chart-swatch {
@@ -215,7 +215,7 @@
 }
 
 /* the remove control is drawn while its row is hovered, anywhere along the row for a category
-   and on the header itself for a series, and on its own focus (the polish round, docs/POLISH.md
+   and on the header itself for a series, and on its own focus (the polish round, docs/archive/rounds/POLISH.md
    item 26; the fix round: drawn on the header's own hover alone, a pointer over a value cell of
    the row never showed it). Drawn on the active line without a hover, as the objects round had
    it, it covered the name's last character in the panel's narrow columns; the right click
@@ -307,7 +307,7 @@
   padding: 0 4px;
 }
 
-/* a menu row refused with its reason (docs/OBJECTS.md 4.2 item 1: Add series on a pie): in the
+/* a menu row refused with its reason (docs/archive/rounds/OBJECTS.md 4.2 item 1: Add series on a pie): in the
    tab order with its tooltip, drawn as a disabled row, no write on the click */
 .ts-chartgrid-menu-row[aria-disabled='true'] {
   color: var(--pt-ink-2);

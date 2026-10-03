@@ -18,7 +18,7 @@ import './upload.css';
 
 /**
  * The words on the Import button: the count of the picked slides, as Google's "Import slides"
- * reads its count (docs/PRODUCT.md section 8.1 `slides.import.none-preselected`; audit-brand 19).
+ * reads its count (docs/archive/rounds/PRODUCT.md section 8.1 `slides.import.none-preselected`; audit-brand 19).
  */
 export function importButtonLabel(picked: number, fallback: string): string {
   if (picked === 0) return fallback;
@@ -56,7 +56,7 @@ export function togglePick(
  * of this studio (deck.list) or a bundle upload; step 2 lists its slides with All, None, Back and
  * Import slides. One `slide.import` copies the chosen slides with fresh ids and their assets
  * after the current slide. Keep original theme is omitted: one theme. Nothing is picked when the
- * list opens (the product round, docs/PRODUCT.md `slides.import.none-preselected`; audit-brand 19
+ * list opens (the product round, docs/archive/rounds/PRODUCT.md `slides.import.none-preselected`; audit-brand 19
  * measured 84 slides coming over after one click on a tile meant to pick one); the button counts
  * the picks and a Shift click picks a range.
  */
@@ -64,7 +64,7 @@ export function ImportSlidesDialog() {
   const shell = useEditorShell();
   const { input } = shell;
   const [tab, setTab] = useState<'presentations' | 'upload'>('presentations');
-  /* this browser's own decks first (docs/POLISH.md item 75), never the deck imported into; the
+  /* this browser's own decks first (docs/archive/rounds/POLISH.md item 75), never the deck imported into; the
      store's listing replaces them when it lands and the list is marked busy until then */
   const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(() =>
     recentRowsOf(input.recentDecks, input.deckId),
@@ -82,7 +82,7 @@ export function ImportSlidesDialog() {
   const tiles = useRef<HTMLDivElement>(null);
   const [gate] = useState<PictureGate>(() => pictureGate());
 
-  /* the Upload tab is a drop zone with a button (docs/POLISH.md item 88): a dropped or picked
+  /* the Upload tab is a drop zone with a button (docs/archive/rounds/POLISH.md item 88): a dropped or picked
      bundle is uploaded and its slides listed next */
   const takeFile = (file: File | null | undefined) => {
     if (!file) return;

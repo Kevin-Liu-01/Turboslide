@@ -1,4 +1,4 @@
-// The polish round's chrome rows (docs/POLISH.md 2.6, 2.3 item 13, 2.8 item 107, 5.1 `chrome.*`,
+// The polish round's chrome rows (docs/archive/rounds/POLISH.md 2.6, 2.3 item 13, 2.8 item 107, 5.1 `chrome.*`,
 // `formatting.*`, `help.*`, `menus.*`, `comments.*` and `slides.*` with the driver `probe --core`;
 // B6 the drivers, B1 the fixes with the integrator's model.ts rows and B5's hunks): Format
 // options by kind, every plate inside the viewport, a refused write's sentence, the handle
@@ -195,7 +195,7 @@ export async function run(t) {
       const ok = rectOk && lineOk;
       return {
         ok,
-        observed: `rectangle: sections ${rect?.sections.map((s) => s.head || s.id).join(', ')}; labels ${rect?.labels.join(' | ')}; Shape sections ${shapeSections}. line: labels ${line?.labels.join(' | ')}; segments past the panel ${line?.wide.length ?? '?'}${(line?.wide.length ?? 0) > 0 ? ` (${line.wide.join(' | ')})` : ''}${ok ? '' : ` (docs/POLISH.md 2.6 item 52, ${LANE} with B3's blocks.ts)`}`,
+        observed: `rectangle: sections ${rect?.sections.map((s) => s.head || s.id).join(', ')}; labels ${rect?.labels.join(' | ')}; Shape sections ${shapeSections}. line: labels ${line?.labels.join(' | ')}; segments past the panel ${line?.wide.length ?? '?'}${(line?.wide.length ?? 0) > 0 ? ` (${line.wide.join(' | ')})` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 52, ${LANE} with B3's blocks.ts)`}`,
       };
     },
   );
@@ -296,7 +296,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 53, ${LANE})`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 53, ${LANE})`}`,
       };
     },
   );
@@ -326,7 +326,7 @@ export async function run(t) {
       const ok = !pointer && (snack === null || /[a-z]/.test(snack));
       return {
         ok,
-        observed: `snackbar ${snack === null ? 'none' : `"${snack}"`}; field reads ${field}${ok ? '' : ` (docs/POLISH.md 2.6 item 59, B5's EditorShell.tsx by ${LANE}'s request)`}`,
+        observed: `snackbar ${snack === null ? 'none' : `"${snack}"`}; field reads ${field}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 59, B5's EditorShell.tsx by ${LANE}'s request)`}`,
       };
     },
   );
@@ -363,7 +363,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 60, ${LANE} with B2's table-seam.ts)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 60, ${LANE} with B2's table-seam.ts)`}`,
       };
     },
   );
@@ -408,7 +408,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 62, ${LANE}'s Overlay.tsx by B4's request)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 62, ${LANE}'s Overlay.tsx by B4's request)`}`,
       };
     },
   );
@@ -461,7 +461,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 64, B5's Open.tsx and ImportSlides.tsx with ${LANE}'s Dialog.css)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 64, B5's Open.tsx and ImportSlides.tsx with ${LANE}'s Dialog.css)`}`,
       };
     },
   );
@@ -518,7 +518,7 @@ export async function run(t) {
       const ok = returned && trapped === true;
       return {
         ok,
-        observed: `after Escape on Details the focus is ${active} (the File button ${returned}); the Logo dialog ${trapped === null ? 'did not open' : `kept ${8 - leaks} of 8 Tabs inside`}${ok ? '' : ` (docs/POLISH.md 2.6 item 65, ${LANE})`}`,
+        observed: `after Escape on Details the focus is ${active} (the File button ${returned}); the Logo dialog ${trapped === null ? 'did not open' : `kept ${8 - leaks} of 8 Tabs inside`}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 65, ${LANE})`}`,
       };
     },
   );
@@ -552,7 +552,7 @@ export async function run(t) {
       const ok = listOpen && !listAfterOne && menuAfterOne && !menuAfterTwo;
       return {
         ok,
-        observed: `list open ${listOpen}; after one Escape list ${listAfterOne}, menu ${menuAfterOne}; after two menu ${menuAfterTwo}${ok ? '' : ` (docs/POLISH.md 2.6 item 68, ${LANE})`}`,
+        observed: `list open ${listOpen}; after one Escape list ${listAfterOne}, menu ${menuAfterOne}; after two menu ${menuAfterTwo}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 68, ${LANE})`}`,
       };
     },
   );
@@ -587,7 +587,7 @@ export async function run(t) {
           : read.select.html !== read.pointer.html);
       return {
         ok: differ,
-        observed: `Select ${read.select ? (read.select.href ?? `${read.select.html.length} chars`) : 'not drawn'}; pointer toggle ${read.pointer ? (read.pointer.href ?? `${read.pointer.html.length} chars`) : 'not drawn'}; differ ${differ}${differ ? '' : ` (docs/POLISH.md 2.6 item 72, the integrator's model.ts 2767 with ${LANE}'s icons.tsx)`}`,
+        observed: `Select ${read.select ? (read.select.href ?? `${read.select.html.length} chars`) : 'not drawn'}; pointer toggle ${read.pointer ? (read.pointer.href ?? `${read.pointer.html.length} chars`) : 'not drawn'}; differ ${differ}${differ ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 72, the integrator's model.ts 2767 with ${LANE}'s icons.tsx)`}`,
       };
     },
   );
@@ -746,7 +746,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 73, ${LANE} with B5's files by request)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 73, ${LANE} with B5's files by request)`}`,
       };
     },
   );
@@ -898,7 +898,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 74, ${LANE} with the integrator's model.ts rows)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 74, ${LANE} with the integrator's model.ts rows)`}`,
       };
     },
   );
@@ -936,7 +936,7 @@ export async function run(t) {
       const ok = (cellsWritten || refusedSentence) && !blockLeading && !redoPath;
       return {
         ok,
-        observed: `after Double: ${after === before ? 'nothing written' : cellsWritten ? 'the cells carry leading' : blockLeading ? 'the block carries typography.leading (no schema for it)' : 'written elsewhere'}${snack1 ? `, snackbar "${snack1}"` : ''}; after Redo ${snack2 ? `snackbar "${snack2}"` : 'no snackbar'}${ok ? '' : ` (docs/POLISH.md 2.6 item 54, ${LANE} with B5's controller.tsx hunk)`}`,
+        observed: `after Double: ${after === before ? 'nothing written' : cellsWritten ? 'the cells carry leading' : blockLeading ? 'the block carries typography.leading (no schema for it)' : 'written elsewhere'}${snack1 ? `, snackbar "${snack1}"` : ''}; after Redo ${snack2 ? `snackbar "${snack2}"` : 'no snackbar'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 54, ${LANE} with B5's controller.tsx hunk)`}`,
       };
     },
   );
@@ -987,7 +987,7 @@ export async function run(t) {
       const ok = items.length > 0 && two !== null && weight === 2;
       return {
         ok,
-        observed: `list ${items.length > 0 ? items.map((i) => i.text).join(', ') : 'did not open'}; frame.weight after 2 px ${weight}${stroke !== null ? ` (strokeWidth ${stroke} written instead)` : ''}${ok ? '' : ` (docs/POLISH.md 2.6 item 69, B5's EditorShell.tsx by ${LANE}'s request)`}`,
+        observed: `list ${items.length > 0 ? items.map((i) => i.text).join(', ') : 'did not open'}; frame.weight after 2 px ${weight}${stroke !== null ? ` (strokeWidth ${stroke} written instead)` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 69, B5's EditorShell.tsx by ${LANE}'s request)`}`,
       };
     },
   );
@@ -1046,7 +1046,7 @@ export async function run(t) {
       const ok = one && plain;
       return {
         ok,
-        observed: `${findings.length} findings; about empty cells ${tableFindings.length}${tableFindings.length > 0 ? ` ("${tableFindings[0].slice(0, 90)}")` : ''}; parenthesis or SPEC ${!plain}${ok ? '' : ` (docs/POLISH.md 2.6 item 55, ${LANE})`}`,
+        observed: `${findings.length} findings; about empty cells ${tableFindings.length}${tableFindings.length > 0 ? ` ("${tableFindings[0].slice(0, 90)}")` : ''}; parenthesis or SPEC ${!plain}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 55, ${LANE})`}`,
       };
     },
   );
@@ -1120,7 +1120,7 @@ export async function run(t) {
         widths.size === 1;
       return {
         ok,
-        observed: `${read.length} tiles; with an img ${read.filter((r) => r.img).length}; ellipsised ${read.filter((r) => r.ellipsis).length}; widths ${[...widths].join(', ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 56, ${LANE})`}`,
+        observed: `${read.length} tiles; with an img ${read.filter((r) => r.img).length}; ellipsised ${read.filter((r) => r.ellipsis).length}; widths ${[...widths].join(', ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 56, ${LANE})`}`,
       };
     },
   );
@@ -1247,7 +1247,7 @@ export async function run(t) {
       const ok = total > 0 && missing.length === 0;
       return {
         ok,
-        observed: `${total} rows read; without a glyph ${missing.length}${missing.length > 0 ? ` (${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ', …' : ''})` : ''}${ok ? '' : ` (docs/POLISH.md 2.6 item 57, the integrator's model.ts with ${LANE}'s glyph list and B5's decks.index.tsx and Slideshow.tsx)`}`,
+        observed: `${total} rows read; without a glyph ${missing.length}${missing.length > 0 ? ` (${missing.slice(0, 40).join(', ')}${missing.length > 40 ? ', …' : ''})` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 57, the integrator's model.ts with ${LANE}'s glyph list and B5's decks.index.tsx and Slideshow.tsx)`}`,
       };
     },
   );
@@ -1286,7 +1286,7 @@ export async function run(t) {
       const ok = disabledOk && near;
       return {
         ok,
-        observed: `Insert > Comment with nothing selected ${comment ? (comment.disabled ? 'disabled' : 'enabled') : 'not listed'}; card ${card ? `${r1(card.x)},${r1(card.y)} ${r1(card.w)}x${r1(card.h)}` : 'none'} ${gap ? `${r1(gap.dx)}/${r1(gap.dy)} px from the ring` : ''}${ok ? '' : ` (docs/POLISH.md 2.6 item 66, the integrator's model.ts 3398 with B5's CommentCard.tsx)`}`,
+        observed: `Insert > Comment with nothing selected ${comment ? (comment.disabled ? 'disabled' : 'enabled') : 'not listed'}; card ${card ? `${r1(card.x)},${r1(card.y)} ${r1(card.w)}x${r1(card.h)}` : 'none'} ${gap ? `${r1(gap.dx)}/${r1(gap.dy)} px from the ring` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 66, the integrator's model.ts 3398 with B5's CommentCard.tsx)`}`,
       };
     },
   );
@@ -1354,7 +1354,7 @@ export async function run(t) {
       await t.clickCard(S);
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.3 item 13, ${LANE})`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 13, ${LANE})`}`,
       };
     },
   );
@@ -1439,7 +1439,7 @@ export async function run(t) {
       await t.clickCard(S);
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.8 item 107, B5's Filmstrip.tsx)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.8 item 107, B5's Filmstrip.tsx)`}`,
       };
     },
   );
@@ -1524,7 +1524,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 61, ${LANE} with B5's decks.index.tsx and TitleRow.tsx)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 61, ${LANE} with B5's decks.index.tsx and TitleRow.tsx)`}`,
       };
     },
   );

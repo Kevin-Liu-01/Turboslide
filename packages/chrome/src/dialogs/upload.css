@@ -1,4 +1,4 @@
-/* The upload zone of File > Open and Import slides (docs/POLISH.md item 88; audit-pages item 16):
+/* The upload zone of File > Open and Import slides (docs/archive/rounds/POLISH.md item 88; audit-pages item 16):
    the native "Choose File No file chosen" control is hidden behind a button, and the zone takes a
    dropped file. A hairline box on the paper, the sentence, the button, the picked file's name. */
 .ts-upload-zone {

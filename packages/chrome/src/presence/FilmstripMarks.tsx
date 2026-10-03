@@ -15,7 +15,7 @@ import { participantsOnSlide } from './presence-model';
  * figures, with the live stripe and the halo over a picture thumbnail; in outline density one
  * 12 px chip in the marks span where the round one lease dot was, with a `+N` numeral. The count
  * chip sits to the left of the thumbnail in tabular figures with a two digit width, present at
- * zero as an empty box. The outline chip is a real 12 px size with an 8 px field (docs/PEOPLE.md
+ * zero as an empty box. The outline chip is a real 12 px size with an 8 px field (docs/archive/rounds/PEOPLE.md
  * 3.4), not a 14 px chip scaled by a rule. Every mark is absolute inside the frame, so the card's
  * `contain-intrinsic-size` is unchanged. Without the editor shell (the view route) nothing draws.
  * The marks paint above the thumbnail since the realtime round (Filmstrip.css `.ts-card-marks`

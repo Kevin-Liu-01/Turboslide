@@ -43,7 +43,7 @@ describe('originsSince', () => {
     ...(opIds === undefined ? {} : { origin: { clientId: `tab-${n % 2}`, opIds } }),
   });
 
-  it('answers the origins of the records above since, oldest first, mutations stripped, and skips a record without one (docs/SYNC.md 3.2)', () => {
+  it('answers the origins of the records above since, oldest first, mutations stripped, and skips a record without one (docs/archive/rounds/SYNC.md 3.2)', () => {
     const log = [record(1, ['a1']), record(2), record(3, ['c1', 'c2']), record(4, ['d1'])];
     expect(originsSince(log, 1)).toEqual([
       { seq: 3, n: 3, clientId: 'tab-1', opIds: ['c1', 'c2'] },

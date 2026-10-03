@@ -13,7 +13,7 @@ import {
 } from '../table-fit';
 import type { TableFacts } from '../table-fit';
 
-// The table's rows as the stage draws them (docs/OBJECTS.md 3.3 items 3 and 4): the arithmetic
+// The table's rows as the stage draws them (docs/archive/rounds/OBJECTS.md 3.3 items 3 and 4): the arithmetic
 // over the stage's readings, the two heights the seam drag and the autofit read from it, the
 // `pos.h` write, and the DOM reader over a hand built stage in both forms.
 

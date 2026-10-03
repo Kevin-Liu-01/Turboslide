@@ -88,7 +88,7 @@ export const IDS = [
   'text.title.apply-layout-after-format',
   'text.fontsize.type-one-undo',
   'text.format-options.field-one-undo',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'text.link.detect-url',
   'text.link.detect-email',
   'text.select.double-click-address',
@@ -181,7 +181,7 @@ export async function run(t) {
       leading: blk.leading ?? ty.leading ?? null,
       weight,
       indent: blk.indent ?? ty.indent ?? null,
-      /* the polish round (docs/POLISH.md 2.3 item 12): Bold is the inline bold run, the whole text
+      /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 12): Bold is the inline bold run, the whole text
          grouped in one *…* (schema text.ts), never the block's weight 500 override */
       bold:
         (weight !== null && Number(weight) >= 500) ||
@@ -504,7 +504,7 @@ export async function run(t) {
     'Enter on the single line title, then Escape',
     'Enter breaks the line and keeps the session; Escape ends it with the words kept',
     async () => {
-      /* the polish round (docs/POLISH.md 2.3 item 19): a heading takes paragraph breaks, so Enter
+      /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 19): a heading takes paragraph breaks, so Enter
          in the title makes a line as Google's title placeholder does; the session ends on Escape */
       const before = await text(HEAD);
       await t.press('Enter');
@@ -1393,7 +1393,7 @@ export async function run(t) {
         await t.openRun(run);
         const before = await text(run);
         const sel = await t.selectWord(run, 1);
-        /* the link popover of the product round (docs/PRODUCT.md section 2 rank 19; build/b2.md R6):
+        /* the link popover of the product round (docs/archive/rounds/PRODUCT.md section 2 rank 19; build/b2.md R6):
            its URL field is popover.link.url; the older ids stay for a build before it */
         const field = page
           .locator(
@@ -1716,7 +1716,7 @@ export async function run(t) {
         box && sheet
           ? box.x + box.w <= sheet.x + sheet.w + 1 && box.y + box.h <= sheet.y + sheet.h + 1
           : false;
-      /* the title placeholder shrinks on overflow since the polish round (docs/POLISH.md 2.3
+      /* the title placeholder shrinks on overflow since the polish round (docs/archive/rounds/POLISH.md 2.3
          item 21, `text-fit.ts` `shrinkMutation`), so a long title fits by wrapping, by stepping
          down the ladder, or both: the read is that it fits inside the sheet with no split word
          and no overlap, and that it wrapped or shrank from the size it drew at before the words
@@ -2201,7 +2201,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's rows (docs/RETURN.md 2.14 items 1 and 3, section 5): the cover title
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.14 items 1 and 3, section 5): the cover title
   // takes the toolbar's tail and every text control on one click; a typed field is one undo step
   /** The cover title as drawn: weight, align and size of its run, and the stored typography where a block exists. */
   const titleFacts = async () => {
@@ -2210,7 +2210,7 @@ export async function run(t) {
       const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-run="${r}"]`);
       if (!el) return null;
       const cs = getComputedStyle(el);
-      /* the polish round (docs/POLISH.md 2.3 item 12): Bold is the inline bold run, so the run's
+      /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 12): Bold is the inline bold run, so the run's
          own bold child is read beside the block's weight */
       const boldRun = [...el.querySelectorAll('b, strong, [data-mark~="b"]')].some(
         (child) =>
@@ -2487,7 +2487,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 2 ranks 9, 18 and 19, section 3.2, section 5,
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 9, 18 and 19, section 3.2, section 5,
  * 8.1): link detection on a space and on Enter, the double click on an address, Shift+Home on a
  * line, the link popover with Apply and Remove, the Format options padding grid and the remembered
  * section, Shrink text on overflow and Find and replace counting while typing. B2 owns the text
@@ -2642,7 +2642,7 @@ async function productRound(t) {
       const run = (await t.runsOfBlock('line-box'))[0];
       const info = await t.runInfo(run);
       await t.openRun(run);
-      /* End reaches the end of the visual line since the product round (docs/PRODUCT.md section 2
+      /* End reaches the end of the visual line since the product round (docs/archive/rounds/PRODUCT.md section 2
          rank 18), so the caret goes to the end of the text first (Cmd+Down on macOS) */
       await t.press('Meta+ArrowDown');
       await t.press('End');

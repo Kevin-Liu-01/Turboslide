@@ -81,7 +81,7 @@ describe('the Recent cookie', () => {
   });
 });
 
-// The trashed marker (docs/PRODUCT.md section 2 ranks 15 and 16; the rows decks.recent.drops-trashed
+// The trashed marker (docs/archive/rounds/PRODUCT.md section 2 ranks 15 and 16; the rows decks.recent.drops-trashed
 // and decks.trash.editor-undo-snackbar): the editor writes it before it leaves for /decks, the home
 // page takes it once, young and well formed, with the facts Undo restores the Recent entry from.
 describe('the trashed marker', () => {

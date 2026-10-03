@@ -40,7 +40,7 @@ export type PartUpload = { from: string; to: string };
  * `sheets/<theme>/`, the rasters under `rasters/<theme>/` (their names carry the slide number,
  * the slide id, the raster id and the scale, unique within a theme), the picture under
  * `pictures/<theme>/` whether it is a regenerated two-tone twin or the deck's own twin file, and
- * the vector file of an svg picture under `vectors/<theme>/` (docs/VECTOR.md 4.6), so a merge on
+ * the vector file of an svg picture under `vectors/<theme>/` (docs/archive/rounds/VECTOR.md 4.6), so a merge on
  * another instance than the batch's finds it.
  */
 export function relocateScene(scene: Scene): { scene: Scene; uploads: PartUpload[] } {

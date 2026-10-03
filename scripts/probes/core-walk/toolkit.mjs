@@ -10,20 +10,20 @@
 // an area module reads `t.press('Escape')` instead of `press(page, 'Escape')`. The extra helpers
 // at the end (the context menu, the snackbar, the sheet points, the insert tools, the object
 // selection, the window API setup writes) are shared by the area modules under ./areas/. The
-// return round (docs/RETURN.md 4.4, section 5) added the pixel reader of audit-chrome.mjs (the PNG
+// return round (docs/archive/rounds/RETURN.md 4.4, section 5) added the pixel reader of audit-chrome.mjs (the PNG
 // decoder, the runs along a column or a row, the nine seams and the split button's seam), the
 // Advanced tools switch helpers (a parked row is reached with the switch on and the switch is put
-// back), the appearance reads and the screenshot as bytes. The product round (docs/PRODUCT.md
+// back), the appearance reads and the screenshot as bytes. The product round (docs/archive/rounds/PRODUCT.md
 // section 8) added the not built reading (a row of a control a lane has not landed is not driven
 // with the control's id, never failed and never passed), the agent surface calls (the actions
 // API with the deployment's bearer read from ~/.config/turboslide/hosts.json or TURBOSLIDE_TOKEN,
 // never printed; none on localhost, whose surface is open to the checkout holder), the tooltip
 // read, the sheet's custom properties and a zip reader for the export rows. The objects round
-// (docs/OBJECTS.md 2.6, 6.1) added the frame capture (`frameFacts`, `captureDrag` and the sheet
+// (docs/archive/rounds/OBJECTS.md 2.6, 6.1) added the frame capture (`frameFacts`, `captureDrag` and the sheet
 // and handle drags over it: a drag in steps with the object's own box on the sheet and the ring's
 // box read after every step, in sheet px) and the pure frame comparison exported at the end
 // (`compareFrame`, `boxCorners`, `cornersDistance`, `readoutsOf`), which the gestures area's
-// rows read at the tenth step of a 12 step drag. The polish round (docs/POLISH.md 5.1) added the
+// rows read at the tenth step of a 12 step drag. The polish round (docs/archive/rounds/POLISH.md 5.1) added the
 // pixel and box reads (`pixelAt`, `sampleBox`, `boxesOf`, `boxIntersects`, `boxInside`,
 // `boxGap`), so a row is judged from what the frame draws.
 import { existsSync, readFileSync } from 'node:fs';
@@ -94,7 +94,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     t[name] = PAGE_FIRST.includes(name) ? (...args) => fn(page, ...args) : fn;
   }
   const { sleep, rand } = lib;
-  /* the first Share on a browser with no display name asks for one once (docs/PRODUCT.md section
+  /* the first Share on a browser with no display name asks for one once (docs/archive/rounds/PRODUCT.md section
      2 rank 4; build/b1.md R5): a click on share.open passes the prompt with Skip, so every share
      row reads the dialog it asked for */
   const clickControlBase = t.clickControl;
@@ -150,7 +150,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    */
   t.stalls = [];
   /**
-   * The prompts the walk closed on its own (docs/PEOPLE.md 6.1): the name prompt of the first
+   * The prompts the walk closed on its own (docs/archive/rounds/PEOPLE.md 6.1): the name prompt of the first
    * edit, recorded once with the deck, the area and the step it interrupted, so the people row
    * that claims it fires can read the record after the decks area typed the walk's title.
    */
@@ -361,7 +361,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       else await t.press('Escape').catch(() => undefined);
       await sleep(200);
       /* the prompt fired on the first edit (SPEC-3 0.18): recorded for the people row
-         `people.own-chip-follows-name` (docs/PEOPLE.md 6.1), which reads it after the walk's
+         `people.own-chip-follows-name` (docs/archive/rounds/PEOPLE.md 6.1), which reads it after the walk's
          title was typed in the decks area and never sees the prompt itself */
       t.prompts.namePrompt ??= {
         at: new Date().toISOString(),
@@ -677,7 +677,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
   /**
    * Clicks a layout tile of the open plate (`layout.<purpose>.<layout>`), opening the GT layouts
-   * disclosure row first when the tile sits behind it (docs/PRODUCT.md 3.4, section 2 rank 24: the
+   * disclosure row first when the tile sits behind it (docs/archive/rounds/PRODUCT.md 3.4, section 2 rank 24: the
    * ten GT layouts are a collapsed group under Google's eleven, remembered per browser).
    */
   t.pickLayout = async (control) => {
@@ -1535,7 +1535,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.boxRect = t.rectOf;
 
   // ---------------------------------------------------------------------------------------------
-  // the Advanced tools switch (docs/FOCUS.md 3.1; docs/RETURN.md section 5): a returning row is
+  // the Advanced tools switch (docs/FOCUS.md 3.1; docs/archive/rounds/RETURN.md section 5): a returning row is
   // driven with the switch off once its flag is gone and with the switch on while it is parked
 
   /** Whether Tools > Advanced tools is on, read from the shell's settings. */
@@ -1583,7 +1583,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     }
   };
   /**
-   * Reaches a menubar row for a returning feature (docs/RETURN.md section 5): the row is looked
+   * Reaches a menubar row for a returning feature (docs/archive/rounds/RETURN.md section 5): the row is looked
    * for in the default view first; when it is absent the switch is turned on (the row is still
    * parked on this build) and looked for again. Answers `{ present, switched }`; `t.deck.advanced`
    * remembers that the walk turned the switch on so an area's end can turn it off again.
@@ -1626,7 +1626,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
 
   // ---------------------------------------------------------------------------------------------
-  // the appearance (docs/RETURN.md 2.13, the light appearance rows of section 5)
+  // the appearance (docs/archive/rounds/RETURN.md 2.13, the light appearance rows of section 5)
 
   /** The chrome's theme (`data-theme` on the root) and the deck's appearance from deck.info. */
   t.appearance = async () => {
@@ -1713,7 +1713,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
 
   // ---------------------------------------------------------------------------------------------
-  // the pixel reading (docs/RETURN.md 4.4): a screenshot's bytes and the seams read from them
+  // the pixel reading (docs/archive/rounds/RETURN.md 4.4): a screenshot's bytes and the seams read from them
 
   /** A 1x screenshot of the page as a PNG buffer, decoded (`{ width, height, pixel(x, y) }`). */
   t.shotPixels = async (clip) => {
@@ -1753,7 +1753,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.runsAlongColumn = runsAlongColumn;
   t.contrastRgb = contrast;
   t.hexOf = hex;
-  // the polish round (docs/POLISH.md 5.1): every row is written so a screenshot judges it. Two
+  // the polish round (docs/archive/rounds/POLISH.md 5.1): every row is written so a screenshot judges it. Two
   // reads join the frame capture: a pixel of a shot at a viewport point (`pixelAt`) and the boxes
   // of every element a selector matches (`boxesOf`), so a row reads "the ring's bottom edge is
   // within 1 px of the last rule" or "the chip's box intersects no handle's box" from what is
@@ -1814,7 +1814,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.boxGap = boxGap;
 
   // ---------------------------------------------------------------------------------------------
-  // the product round (docs/PRODUCT.md section 8): the not built reading, the agent surface, the
+  // the product round (docs/archive/rounds/PRODUCT.md section 8): the not built reading, the agent surface, the
   // tooltips, the sheet's tokens and the zip reader
 
   /**
@@ -1824,7 +1824,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    */
   t.notBuilt = (control, lane, more = '') => ({
     ok: null,
-    observed: `not on this build: ${control} (docs/PRODUCT.md 7.1, ${lane})${more ? `; ${more}` : ''}`,
+    observed: `not on this build: ${control} (docs/archive/rounds/PRODUCT.md 7.1, ${lane})${more ? `; ${more}` : ''}`,
   });
   /** True when the control is drawn on the page now. */
   t.onBuild = (control) => t.visible(control);
@@ -2004,7 +2004,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
 
   // ---------------------------------------------------------------------------------------------
-  // the objects round (docs/OBJECTS.md 2.6, 6.1 `gestures.*`; B4): the frame capture. A drag in
+  // the objects round (docs/archive/rounds/OBJECTS.md 2.6, 6.1 `gestures.*`; B4): the frame capture. A drag in
   // steps with the facts of the sheet and the overlay read after every step: the object's own box
   // on the sheet (the `.free` wrapper, its layout box and angle, the inner element, the svg's
   // drawn attributes, the text's font and line count, the picture and its crop frame, the table's
@@ -2119,7 +2119,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
           };
         }
         /* a line's ends: the first path of the block's svg, its start and end points in sheet px
-           (a connector's end sits on its shape's site, docs/OBJECTS.md 2.3 item 4) */
+           (a connector's end sits on its shape's site, docs/archive/rounds/OBJECTS.md 2.3 item 4) */
         const endsOf = (root) => {
           const s = root
             ? root.tagName.toLowerCase() === 'svg'
@@ -2162,7 +2162,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
           text = {
             /* a computed length inside the sheet is a layout px, which is a sheet px (the stage
                scales the 1600 px sheet by a transform), so no division by k: the word art rows
-               read 176 px drawn for a stored 176 (docs/OBJECTS.md 4.1) */
+               read 176 px drawn for a stored 176 (docs/archive/rounds/OBJECTS.md 4.1) */
             fontSize: r1(parseFloat(getComputedStyle(para).fontSize)),
             lines: lines.size,
             box: box(para),
@@ -2267,7 +2267,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     return file;
   };
   /**
-   * A drag in `steps` steps with the facts after every step (docs/OBJECTS.md 2.2's script): the
+   * A drag in `steps` steps with the facts after every step (docs/archive/rounds/OBJECTS.md 2.2's script): the
    * pointer arrives at `from` in 6 steps, `before` runs, the frame `before` is read, the keys are
    * held, the pointer presses and the frame `down` is read after `settle` ms, then each step's
    * frame `step<n>` after `settle` ms, and the release is read at `up+0` (no wait), `up+40`,
@@ -2344,7 +2344,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
   /** The facts of the frame tagged `tag` in a capture, or null. */
   t.frameAt = (capture, tag) => capture?.frames?.find((f) => f.tag === tag)?.facts ?? null;
-  /** The last gesture's frame record from the window API (`describe().state.gesture`, docs/OBJECTS.md 2.4), or null on a build without it. */
+  /** The last gesture's frame record from the window API (`describe().state.gesture`, docs/archive/rounds/OBJECTS.md 2.4), or null on a build without it. */
   t.gestureState = () =>
     page
       .evaluate(() => window.turboslide?.studio?.describe?.()?.state?.gesture ?? null)
@@ -2363,7 +2363,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
 }
 
 // -----------------------------------------------------------------------------------------------
-// the objects round (docs/OBJECTS.md 2.6, 6.4): the frame comparison, pure, pinned by
+// the objects round (docs/archive/rounds/OBJECTS.md 2.6, 6.4): the frame comparison, pure, pinned by
 // toolkit.test.mjs. A frame passes when the object's own box on the sheet equals the ring's box
 // within the tolerance once the ring's outset is removed (text-ring.ts: a text block's ring sits
 // 10 sheet px outside its box on every side; every other ring sits on the box).
@@ -2442,7 +2442,7 @@ export function readoutsOf(capture, pattern) {
 
 // -----------------------------------------------------------------------------------------------
 // the pixel reader, ported from docs/gslides-parity/return/audit-chrome/audit-chrome.mjs (the
-// return round, docs/RETURN.md 4.4): `chrome.split.one-box` and `chrome.separators.once` pass
+// return round, docs/archive/rounds/RETURN.md 4.4): `chrome.split.one-box` and `chrome.separators.once` pass
 // only when read from pixels, because audit-chrome row 9 found the computed style asking for one
 // token while the pixels showed ink on ink.
 
@@ -2592,7 +2592,7 @@ export function thinRuns(runs, max = 4) {
 }
 
 // -----------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 5.1): the pixel and box reads, pure, pinned by toolkit.test.mjs
+// the polish round (docs/archive/rounds/POLISH.md 5.1): the pixel and box reads, pure, pinned by toolkit.test.mjs
 
 /** The colour of a decoded shot at a point, `{ rgb, hex }`, or null outside it. */
 export function pixelAt(img, x, y) {
@@ -2678,7 +2678,7 @@ export const boundaryPoints = (page) =>
     const toolbar = rect('.ts-toolbar');
     const sb = rect('.pt-viewer.is-editor > .pt-sb');
     /* the head anywhere under the filmstrip column: the product round's overlay filmstrip
-       wraps it (docs/PRODUCT.md section 2 rank 25) */
+       wraps it (docs/archive/rounds/PRODUCT.md section 2 rank 25) */
     const sbHead = rect('.pt-viewer.is-editor > .pt-sb .pt-sb-head');
     const notesSlot = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot');
     const notes = rect('.pt-viewer.is-editor > .pt-main > .ts-notes-slot > .ts-notes');
@@ -2770,8 +2770,8 @@ export const boundaryPoints = (page) =>
   });
 
 /**
- * The nine seams of docs/RETURN.md 4.4 in the order the row reads them: the two seams along the
- * bottom bar left with the bar in the product round (docs/PRODUCT.md section 2 rank 25; b1 R6).
+ * The nine seams of docs/archive/rounds/RETURN.md 4.4 in the order the row reads them: the two seams along the
+ * bottom bar left with the bar in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25; b1 R6).
  */
 export const SEAM_NAMES = Object.freeze([
   'title -> menu bar',

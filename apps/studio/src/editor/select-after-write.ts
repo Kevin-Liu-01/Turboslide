@@ -21,7 +21,7 @@ export function keepsPlace(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The origin of a dispatch and the selection after an insert (the product round, docs/PRODUCT.md
+// The origin of a dispatch and the selection after an insert (the product round, docs/archive/rounds/PRODUCT.md
 // section 2 rank 1; build/b3.md)
 
 /**

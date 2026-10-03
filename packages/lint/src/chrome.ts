@@ -11,8 +11,8 @@
 //   2. junctions: two owners drawing the same seam (gap under 1 px), reported apart because the
 //      fix is different (one owner keeps the line, the other drops its side);
 //   3. border roles: every visible border in chrome draws --pt-hair, --pt-hair-soft, --pt-edge or,
-//      since the product round (docs/PRODUCT.md 3.1), --pt-field, the boundary of a field;
-//      --pt-ink only on an element in an active state, and since the return round (docs/RETURN.md
+//      since the product round (docs/archive/rounds/PRODUCT.md 3.1), --pt-field, the boundary of a field;
+//      --pt-ink only on an element in an active state, and since the return round (docs/archive/rounds/RETURN.md
 //      4.1 rule 3) --pt-hair-on-ink, the hairline over a solid ink ground, there too; outlines are
 //      rings in the three roles, ink or paper; since round four (gslides-parity round four, the orchestrator's ruling 1)
 //      the canvas selection surfaces named by `select` may draw --pt-select and the snap guides
@@ -192,12 +192,12 @@ export const SHELL_CHROME: ChromeScope = {
        document declares neither, so the role reads as absent there */
     select: ['--pt-select'],
     guide: ['--pt-guide'],
-    /* the return round (docs/RETURN.md 4.1 rule 3): the hairline drawn over a solid ink ground
+    /* the return round (docs/archive/rounds/RETURN.md 4.1 rule 3): the hairline drawn over a solid ink ground
        where --pt-hair is ink on ink (the Slideshow split button's divider); a role of its own,
        since a role reads one value and --pt-hair already fills `hair`; accepted as a border on
        an element near an active state, the rule --pt-ink has */
     hairOnInk: ['--pt-hair-on-ink'],
-    /* the product round (docs/PRODUCT.md 3.1, the field row): the boundary of a field, a select
+    /* the product round (docs/archive/rounds/PRODUCT.md 3.1, the field row): the boundary of a field, a select
        and a textarea at 3:1 or better, a border role beside the three hairlines */
     field: ['--pt-field'],
   },
@@ -217,7 +217,7 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
     '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate, .ts-product, .ts-notfound',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
   /* .ts-title-slideshow is the one solid call to action of the title row: its wrapper owns the
-     ink outline of the two halves inside it (docs/RETURN.md 4.1; return/build/b1.md R10) */
+     ink outline of the two halves inside it (docs/archive/rounds/RETURN.md 4.1; return/build/b1.md R10) */
   active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"], .ts-chip.is-self, .ts-title-slideshow`,
   lint: '.ts-lint-box',
   /* the canvas selection surfaces of Overlay.css and Marquee.css (ruling 1) */
@@ -432,7 +432,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       )
     : null;
   /* the stage wrapper and the overlay layer carry the sheet's own appearance as their data-theme
-     since the polish round (docs/POLISH.md 2.5 item 49; packages/chrome/src/tokens.css): an
+     since the polish round (docs/archive/rounds/POLISH.md 2.5 item 49; packages/chrome/src/tokens.css): an
      element under such a scope draws that appearance's tokens, so its colours are matched
      against the tokens read from the scope, not the root's */
   const scopeRoles = new Map<Element, Record<string, number[] | null>>();

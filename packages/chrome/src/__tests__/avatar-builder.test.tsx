@@ -27,7 +27,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
-// The avatar builder's Picture tab (docs/PEOPLE.md 4.1; the rows people.avatar-upload,
+// The avatar builder's Picture tab (docs/archive/rounds/PEOPLE.md 4.1; the rows people.avatar-upload,
 // people.avatar-cap-refusal, people.avatar-anonymous-refused, people.own-chip-follows-avatar):
 // the file decoded through createImageBitmap and drawn in the box, the square under the box
 // moved by a pointer drag and encoded at 256 px as WebP, the data URL handed to setAvatar; a

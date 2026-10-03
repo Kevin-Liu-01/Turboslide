@@ -6,13 +6,13 @@
 // the caller derived from its request, else the production address.
 
 /**
- * The one description of the product (docs/POLISH.md 3.6): the /home hero's lead, reused by the
+ * The one description of the product (docs/archive/rounds/POLISH.md 3.6): the /home hero's lead, reused by the
  * head, the manifest, the card and the README so the four never drift.
  */
 const DESCRIPTION =
   "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.";
 
-/** The card's alt text (SPEC-4 1.6; docs/POLISH.md 3.6; docs/NEXT.md 4.1.3 item 4). */
+/** The card's alt text (SPEC-4 1.6; docs/archive/rounds/POLISH.md 3.6; docs/NEXT.md 4.1.3 item 4). */
 const IMAGE_ALT =
   "The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither";
 
@@ -128,7 +128,7 @@ export const SITE = {
   name: 'Turboslide',
   description: DESCRIPTION,
   imageAlt: IMAGE_ALT,
-  /** the hosted studio (docs/hosting.md; docs/POLISH.md section 0 item 3: the domain) */
+  /** the hosted studio (docs/hosting.md; docs/archive/rounds/POLISH.md section 0 item 3: the domain) */
   productionOrigin: 'https://www.turboslide.com',
   repository: 'https://github.com/Kevin-Liu-01/Turboslide',
   /**

@@ -1,4 +1,4 @@
-// The polish round's table rows (docs/POLISH.md 2.1, 2.2, 5.1 `tables.*` with the driver
+// The polish round's table rows (docs/archive/rounds/POLISH.md 2.1, 2.2, 5.1 `tables.*` with the driver
 // `probe --core`; B6 the drivers, B2 the fixes): Kevin's screenshot judged from the frame (no
 // prompt in a cell, the ring on the rows while a cell is typed into), the caret moving on a click,
 // the tail's size ladder on a table, the box never shorter than its rows, the keys after a head
@@ -28,7 +28,7 @@ export const IDS = [
 const LANE = 'B2';
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const r1 = (n) => (typeof n === 'number' ? Math.round(n * 10) / 10 : n);
-/** The content box of a slide (docs/POLISH.md 2.2 item 9): 137,129 sized 1326 by 642. */
+/** The content box of a slide (docs/archive/rounds/POLISH.md 2.2 item 9): 137,129 sized 1326 by 642. */
 const CONTENT = { x: 137, y: 129, w: 1326, h: 642 };
 const CONTENT_RIGHT = CONTENT.x + CONTENT.w;
 const CONTENT_BOTTOM = CONTENT.y + CONTENT.h;
@@ -277,7 +277,7 @@ export async function run(t) {
       await t.clickCard(S);
       return {
         ok,
-        observed: `${facts.join(' | ')}${ok ? '' : ` (docs/POLISH.md 2.1 item 1, ${LANE})`}`,
+        observed: `${facts.join(' | ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.1 item 1, ${LANE})`}`,
       };
     },
   );
@@ -327,7 +327,7 @@ export async function run(t) {
       const ok = reads > 0 && worst <= 2 && worstWrap <= 2 && stored !== null && stored <= 2;
       return {
         ok,
-        observed: `${keys} keys, ${reads} frame reads; worst ring to last rule ${r1(worst)} px; worst wrapper to rows ${r1(worstWrap)} px; after Escape pos.h ${pos?.h} against ${drawn} drawn (${stored === null ? 'unread' : `${r1(stored)} px`})${ok ? '' : ` (docs/POLISH.md 2.1 item 2, ${LANE} with B1's Editor.tsx hunk)`}`,
+        observed: `${keys} keys, ${reads} frame reads; worst ring to last rule ${r1(worst)} px; worst wrapper to rows ${r1(worstWrap)} px; after Escape pos.h ${pos?.h} against ${drawn} drawn (${stored === null ? 'unread' : `${r1(stored)} px`})${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.1 item 2, ${LANE} with B1's Editor.tsx hunk)`}`,
       };
     },
   );
@@ -377,7 +377,7 @@ export async function run(t) {
       const ok = moved && c22 === 'One' && c33 === 'Two';
       return {
         ok,
-        observed: `session at 100 ms ${at100 ? `${at100.row + 1},${at100.column + 1}` : 'none'} (at 400 ms ${settledCell ? `${settledCell.row + 1},${settledCell.column + 1}` : 'none'}); cell 2,2 "${c22}", cell 3,3 "${c33}"${ok ? '' : ` (docs/POLISH.md 2.2 item 4, B1's Editor.tsx hunk by ${LANE}'s request)`}`,
+        observed: `session at 100 ms ${at100 ? `${at100.row + 1},${at100.column + 1}` : 'none'} (at 400 ms ${settledCell ? `${settledCell.row + 1},${settledCell.column + 1}` : 'none'}); cell 2,2 "${c22}", cell 3,3 "${c33}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 4, B1's Editor.tsx hunk by ${LANE}'s request)`}`,
       };
     },
   );
@@ -435,7 +435,7 @@ export async function run(t) {
       await t.press('Escape', 2);
       return {
         ok,
-        observed: `range ${ranged}; field ${start} -> ${sizes.join(' -> ')} (stored size ${written}); back at ${atTop}; "+" aria-disabled ${plusDisabled}${plusTip ? ` "${plusTip}"` : ''}; snackbar ${snackbar === null ? 'none' : `"${snackbar}"`}${ok ? '' : ` (docs/POLISH.md 2.2 item 5, B1's ToolbarTail.tsx by ${LANE}'s request)`}`,
+        observed: `range ${ranged}; field ${start} -> ${sizes.join(' -> ')} (stored size ${written}); back at ${atTop}; "+" aria-disabled ${plusDisabled}${plusTip ? ` "${plusTip}"` : ''}; snackbar ${snackbar === null ? 'none' : `"${snackbar}"`}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 5, B1's ToolbarTail.tsx by ${LANE}'s request)`}`,
       };
     },
   );
@@ -573,7 +573,7 @@ export async function run(t) {
       await undoOnce();
       return {
         ok,
-        observed: `${r.obj.id} ${t.posStr(r.obj.pos)}; rows drawn ${drawn} px (fits ${fits}); top at 218 ${atTop}; size words "${r.words}"${ok ? '' : ` (docs/POLISH.md 2.2 item 6, ${LANE})`}`,
+        observed: `${r.obj.id} ${t.posStr(r.obj.pos)}; rows drawn ${drawn} px (fits ${fits}); top at 218 ${atTop}; size words "${r.words}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 6, ${LANE})`}`,
       };
     },
   );
@@ -604,7 +604,7 @@ export async function run(t) {
       }
       return {
         ok,
-        observed: `${out.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.2 item 8, ${LANE})`}`,
+        observed: `${out.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 8, ${LANE})`}`,
       };
     },
   );
@@ -699,7 +699,7 @@ export async function run(t) {
       await t.press('Escape', 2);
       return {
         ok,
-        observed: `after the head click the focus is ${active}; head outline ${outlineStyle ? `${outlineStyle['outline-style']} ${outlineStyle['outline-width']}` : 'unread'}; band pixels ${sample ? `${sample.distinct} colours, dominant ${sample.dominant?.hex} ${sample.dominant?.share}` : 'unread'}; Delete emptied row 2 ${rowEmpty} (${JSON.stringify(emptied)}); Cmd+B marked ${marked}${ok ? '' : ` (docs/POLISH.md 2.2 item 7, ${LANE})`}`,
+        observed: `after the head click the focus is ${active}; head outline ${outlineStyle ? `${outlineStyle['outline-style']} ${outlineStyle['outline-width']}` : 'unread'}; band pixels ${sample ? `${sample.distinct} colours, dominant ${sample.dominant?.hex} ${sample.dominant?.share}` : 'unread'}; Delete emptied row 2 ${rowEmpty} (${JSON.stringify(emptied)}); Cmd+B marked ${marked}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 7, ${LANE})`}`,
       };
     },
   );
@@ -771,7 +771,7 @@ export async function run(t) {
       await t.press('Escape', 2);
       return {
         ok,
-        observed: `${t.posStr(p0)} -> first "+" ${t.posStr(p1)} (right edge ${p1 ? r1(p1.x + p1.w) : '?'} against ${CONTENT_RIGHT}) -> second "+" ${t.posStr(p2)} (${cols} columns); bottom "+" ${t.posStr(p3)} (bottom edge ${p3 ? r1(p3.y + p3.h) : '?'} against ${CONTENT_BOTTOM})${ok ? '' : ` (docs/POLISH.md 2.2 item 9, ${LANE})`}`,
+        observed: `${t.posStr(p0)} -> first "+" ${t.posStr(p1)} (right edge ${p1 ? r1(p1.x + p1.w) : '?'} against ${CONTENT_RIGHT}) -> second "+" ${t.posStr(p2)} (${cols} columns); bottom "+" ${t.posStr(p3)} (bottom edge ${p3 ? r1(p3.y + p3.h) : '?'} against ${CONTENT_BOTTOM})${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 9, ${LANE})`}`,
       };
     },
   );
@@ -824,7 +824,7 @@ export async function run(t) {
         restored[0] !== 'center';
       return {
         ok,
-        observed: `header cells ${headAlign.join(', ')}; body cells ${bodyAlign.join(', ')} with x ${bodyBefore.map(r1).join(', ')} -> ${bodyAfter.map(r1).join(', ')} (kept ${bodyKept}); columns[].align written ${columnsWritten}; after Cmd+Z ${restored[0]}${ok ? '' : ` (docs/POLISH.md 2.2 item 10, ${LANE} with B1's editor-shell.ts hunk)`}`,
+        observed: `header cells ${headAlign.join(', ')}; body cells ${bodyAlign.join(', ')} with x ${bodyBefore.map(r1).join(', ')} -> ${bodyAfter.map(r1).join(', ')} (kept ${bodyKept}); columns[].align written ${columnsWritten}; after Cmd+Z ${restored[0]}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 10, ${LANE} with B1's editor-shell.ts hunk)`}`,
       };
     },
   );
@@ -863,7 +863,7 @@ export async function run(t) {
       const ok = frameOk && cellOk;
       return {
         ok,
-        observed: `the ring's menu: ${frameRows.join(', ') || 'none'}; the cell's menu: ${cellRows.join(', ') || 'none'}${ok ? '' : ` (docs/POLISH.md 2.6 item 71, B1's Editor.tsx 6784 with the integrator's CONTEXT_MENUS table target)`}`,
+        observed: `the ring's menu: ${frameRows.join(', ') || 'none'}; the cell's menu: ${cellRows.join(', ') || 'none'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 71, B1's Editor.tsx 6784 with the integrator's CONTEXT_MENUS table target)`}`,
       };
     },
   );
@@ -951,7 +951,7 @@ export async function run(t) {
       const ok = seamOk && snapOk && plateOk;
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.2 item 11, ${LANE} with B1's hunks)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.2 item 11, ${LANE} with B1's hunks)`}`,
       };
     },
   );

@@ -2,7 +2,7 @@
 // 2024-11-16 (the font's own name table reads "Version 4.001;git-9221beed3"; the release tag is
 // v4.1), with opsz 14 to 32 and wght 100 to 900, decoded by the scaffold from
 // Prototemplate/deck/fonts/deck-fonts.css (pptx report section 4.10), and its italic companion
-// InterVariable-Italic from the same release (gslides-parity SPEC-2 7.1; docs/FEATURES.md 3.1
+// InterVariable-Italic from the same release (gslides-parity SPEC-2 7.1; docs/archive/rounds/FEATURES.md 3.1
 // item 1 replaced the 4.0 italic with the 4.1 file), so the sheet renders true italics for the
 // mark span rule. The static export instances and fonts.json come from scripts/build-fonts.py.
 // License: SIL OFL 1.1, see THIRD_PARTY_NOTICES.md.
@@ -30,7 +30,7 @@ export const INTER = {
 
 /**
  * The italic companion (gslides-parity SPEC-2 7.1): the rsms/inter 4.1 release asset
- * `web/InterVariable-Italic.woff2` (docs/FEATURES.md 3.1 item 1; audit-fonts 4: the file this
+ * `web/InterVariable-Italic.woff2` (docs/archive/rounds/FEATURES.md 3.1 item 1; audit-fonts 4: the file this
  * replaced was the 4.0 release's, "Version 4.000;git-a52131595", 380,904 bytes).
  */
 export const INTER_ITALIC = {
@@ -75,7 +75,7 @@ export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";
 export const INTER_FALLBACK = {
   family: 'Inter Fallback',
   local: 'Arial',
-  /** the second `local()` source for a machine without Arial (docs/FEATURES.md 3.1 item 3): metric compatible with Arial */
+  /** the second `local()` source for a machine without Arial (docs/archive/rounds/FEATURES.md 3.1 item 3): metric compatible with Arial */
   localSecond: 'Liberation Sans',
   sizeAdjust: '107.4724%',
   ascentOverride: '90.1394%',
@@ -84,7 +84,7 @@ export const INTER_FALLBACK = {
 } as const;
 
 /**
- * The stack with the fallback face in place (docs/FEATURES.md 3.1 item 3): the sheet's
+ * The stack with the fallback face in place (docs/archive/rounds/FEATURES.md 3.1 item 3): the sheet's
  * `--display` and `--text` (sheet.css, tokens.ts FONTS), the chrome's `--pt-display` and
  * `--pt-text` (tokens.css) and the identity's initials (marks-render.ts) all read this order, so
  * a first paint takes Inter's metrics before the woff2 arrives and nothing moves when it does.

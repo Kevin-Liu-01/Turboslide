@@ -1,6 +1,6 @@
-// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/RETURN.md section 5;
-// docs/PRODUCT.md section 8; docs/VECTOR.md section 6 for the svg feature and the menus area;
-// docs/OBJECTS.md section 6 for the gestures area, whose rows are the arrange feature's), for
+// Type declarations for core-matrix.mjs (docs/FOCUS.md section 6; docs/archive/rounds/RETURN.md section 5;
+// docs/archive/rounds/PRODUCT.md section 8; docs/archive/rounds/VECTOR.md section 6 for the svg feature and the menus area;
+// docs/archive/rounds/OBJECTS.md section 6 for the gestures area, whose rows are the arrange feature's), for
 // the TypeScript callers: the core specs under apps/studio/e2e/core/ through
 // apps/studio/e2e/core/matrix.ts. The module itself is plain Node; the declarations describe what
 // it exports and nothing more.
@@ -65,7 +65,7 @@ export type CoreSpecDriver =
   | 'core/realtime.spec.ts'
   | 'e2e/agent-http.spec.ts';
 
-/** The cost probe of docs/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
+/** The cost probe of docs/archive/rounds/SYNC.md 6.3 (scripts/probes/sync-cost-probe.mjs), run by the gate. */
 export type CostProbeDriver = 'cost-probe';
 
 /**
@@ -76,7 +76,7 @@ export type CostProbeDriver = 'cost-probe';
 export type GateDriver = 'core-gate';
 
 /**
- * The local spec of docs/PEOPLE.md 6.2: apps/studio/e2e/accounts.spec.ts on a node server with an
+ * The local spec of docs/archive/rounds/PEOPLE.md 6.2: apps/studio/e2e/accounts.spec.ts on a node server with an
  * identity database, run by the gate's `--only accounts` and never by a deployment run.
  */
 export type LocalSpecDriver = 'e2e/accounts.spec.ts';
@@ -105,15 +105,15 @@ export type CoreRow = {
   /** a window API write made before the driven steps and never counted as one */
   readonly setup?: string;
   /**
-   * docs/RETURN.md section 1 rule 2: the data-control ids this row alone guards. A red row with
+   * docs/archive/rounds/RETURN.md section 1 rule 2: the data-control ids this row alone guards. A red row with
    * `parks` keeps those ids behind the Advanced tools switch for the ship and neither parks its
    * feature nor blocks the ship.
    */
   readonly parks?: readonly string[];
   /**
-   * docs/PRODUCT.md 8.2: a measurement row records its number (the seconds per slide of a large
+   * docs/archive/rounds/PRODUCT.md 8.2: a measurement row records its number (the seconds per slide of a large
    * deck export) in the run and never holds the ship; a red one is written into the ship note by
-   * id with its mechanism. On a cost row (docs/SYNC.md 6.1) the counts are recorded beside the
+   * id with its mechanism. On a cost row (docs/archive/rounds/SYNC.md 6.1) the counts are recorded beside the
    * ceiling and the row holds the ship only over its ceiling on the preview.
    */
   readonly measure?: true;
@@ -133,9 +133,9 @@ export type ParkedList = {
 
 export const CORE_MATRIX_PATH: string;
 export const CORE_FEATURES: readonly CoreFeature[];
-/** The areas that are not feature names: `collab` is share's, `menus` chrome's, `gestures` (the objects round, docs/OBJECTS.md 6.1) arrange's, `people` and `accounts` share's. */
+/** The areas that are not feature names: `collab` is share's, `menus` chrome's, `gestures` (the objects round, docs/archive/rounds/OBJECTS.md 6.1) arrange's, `people` and `accounts` share's. */
 export const AREA_FEATURE: Readonly<Record<string, CoreFeature>>;
-/** The rows whose feature is not their id's area (docs/FEATURES.md 7.1): the export and URL intake rows of the logos area, the export rows and the View row of the shaders area. */
+/** The rows whose feature is not their id's area (docs/archive/rounds/FEATURES.md 7.1): the export and URL intake rows of the logos area, the export rows and the View row of the shaders area. */
 export const ROW_FEATURE: Readonly<Record<string, CoreFeature>>;
 export const CORE_STATES: readonly CoreState[];
 export const RUN_RESULTS: readonly RunResult[];
@@ -159,7 +159,7 @@ export function gateRows(): CoreRow[];
 export const CORE_SPEC_DRIVERS: readonly CoreSpecDriver[];
 /** The file of a spec driver under apps/studio/e2e/ (`core/<area>.spec.ts` under core/, `e2e/<name>.spec.ts` at the root). */
 export function specPathOf(driver: string): string;
-/** The local spec drivers of docs/PEOPLE.md 6.2 (the accounts spec on a node server with an identity database). */
+/** The local spec drivers of docs/archive/rounds/PEOPLE.md 6.2 (the accounts spec on a node server with an identity database). */
 export const LOCAL_SPEC_DRIVERS: readonly LocalSpecDriver[];
 /** The reason a local row absent from a run's results carries: "no identity database on this base". */
 export const LOCAL_ABSENT_REASON: string;
@@ -168,7 +168,7 @@ export const CORE_ID_PATTERN: RegExp;
 export const CONTROL_ID_PATTERN: RegExp;
 /** The sources `parks` ids are validated against (model.ts, toolbar-tails.ts, TitleRow.tsx, the panels and pages of PRODUCT.md 7.1). */
 export const CONTROL_SOURCE_PATHS: readonly string[];
-/** The control ids docs/PRODUCT.md 7.1 declares before the lanes' files exist; a `parks` id here is known. */
+/** The control ids docs/archive/rounds/PRODUCT.md 7.1 declares before the lanes' files exist; a `parks` id here is known. */
 export const DECLARED_CONTROL_IDS: readonly string[];
 /** The features a red row cannot park: a red row of one blocks the ship unless it carries `parks`. */
 export const UNPARKABLE_FEATURES: readonly CoreFeature[];
@@ -185,7 +185,7 @@ export function isCoreId(id: string): boolean;
 export function isManualRow(row: CoreRow | undefined): boolean;
 /** True for a measurement row (PRODUCT.md 8.2): red parks nothing and fails no ship; the ship note carries it. */
 export function isMeasureRow(row: CoreRow | undefined): boolean;
-/** True for a row of the cost probe (docs/SYNC.md 6.1, 6.3). */
+/** True for a row of the cost probe (docs/archive/rounds/SYNC.md 6.1, 6.3). */
 export function isCostRow(row: CoreRow | undefined): boolean;
 /** True for a feature a red row can park. */
 export function isParkable(feature: string): boolean;
@@ -198,9 +198,9 @@ export function rowsForFeature(feature: CoreFeature): CoreRow[];
 /** The rows of a driver: `probe --core`, `cost-probe`, `core-gate` or a `core/<area>.spec.ts` file name, `core/` optional. */
 export function rowsForDriver(driver: string): CoreRow[];
 export function probeRows(): CoreRow[];
-/** The rows the cost probe drives (docs/SYNC.md 6.3). */
+/** The rows the cost probe drives (docs/archive/rounds/SYNC.md 6.3). */
 export function costRows(): CoreRow[];
-/** True for a local row (docs/PEOPLE.md 6.2): its driver is one of LOCAL_SPEC_DRIVERS. */
+/** True for a local row (docs/archive/rounds/PEOPLE.md 6.2): its driver is one of LOCAL_SPEC_DRIVERS. */
 export function isLocalRow(row: CoreRow | undefined): boolean;
 /** The local rows, in the file's order. */
 export function localRows(): CoreRow[];
@@ -232,7 +232,7 @@ export function shipVerdict(
 };
 /** The committed parked list of a ship, `ship-<commit>.json` (6.2); an unparkable feature is refused. */
 export function readParkedList(path: string): ParkedList;
-/** B1's module packages/chrome/src/parked-controls.ts, whose set `--emit-parked` writes (docs/FEATURES.md 7.2). */
+/** B1's module packages/chrome/src/parked-controls.ts, whose set `--emit-parked` writes (docs/archive/rounds/FEATURES.md 7.2). */
 export const PARKED_CONTROLS_PATH: string;
 export const PARKED_BEGIN: string;
 export const PARKED_END: string;

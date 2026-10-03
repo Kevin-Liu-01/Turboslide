@@ -1,4 +1,4 @@
-// The frame capturer's scheduling rule (docs/FEATURES.md 5.5; judge-design additions 3 and 6):
+// The frame capturer's scheduling rule (docs/archive/rounds/FEATURES.md 5.5; judge-design additions 3 and 6):
 // a commit that touches a shader block schedules its capture 800 ms after the last change and
 // one capture per block however many commits land inside the rest; a kit colour write schedules
 // every shader on the deck; a fresh frame by key captures nothing; the write goes up with the
@@ -360,7 +360,7 @@ describe('the capturer', () => {
       };
     };
 
-  it('takes the presigned path for a frame over the cap, and the hosted job when the page has no upload path (docs/POLISH.md item 36)', async () => {
+  it('takes the presigned path for a frame over the cap, and the hosted job when the page has no upload path (docs/archive/rounds/POLISH.md item 36)', async () => {
     const doc = documentWith([shader('shader')]);
     const c = clock();
     const writes: ShaderFrameWrite[] = [];
@@ -503,7 +503,7 @@ describe('the capturer', () => {
     capturer2.dispose();
   });
 
-  it('gives the capture the cap, so a PNG over it comes back as a WebP inside the write, a PNG over it with no WebP takes the presigned path, and a WebP still over it asks the hosted job (docs/POLISH.md item 36)', async () => {
+  it('gives the capture the cap, so a PNG over it comes back as a WebP inside the write, a PNG over it with no WebP takes the presigned path, and a WebP still over it asks the hosted job (docs/archive/rounds/POLISH.md item 36)', async () => {
     const doc = documentWith([shader('shader')]);
     const c = clock();
     /* the fake pixel path: a 6 byte PNG, and a 2 byte WebP when the capture is given a cap under 6 */

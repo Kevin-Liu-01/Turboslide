@@ -14,7 +14,7 @@ const HANDLES: ReadonlyArray<readonly [number, number]> = [
 ];
 
 /**
- * The canvas (docs/POLISH.md 3.2 item 2; docs/NEXT.md 4.1.3 item 9): a slide frame with one
+ * The canvas (docs/archive/rounds/POLISH.md 3.2 item 2; docs/NEXT.md 4.1.3 item 9): a slide frame with one
  * picture moved from its first place, drawn as a hairline, to a new place, larger and turned by
  * 8 degrees, with its eight handles and the rotation handle in ink, and the drag drawn as one
  * 1 px line that ends in an 11 unit square marker (no arrowheads, slide 33). The selection is ink

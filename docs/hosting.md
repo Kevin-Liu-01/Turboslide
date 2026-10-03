@@ -676,7 +676,7 @@ Every route below runs on the file, tmp and Blob backends through the same serve
 
 ## 9. Redis, the realtime tier (Google Slides parity round three)
 
-The multiplayer room of `docs/gslides-parity/SPEC-3.md` section 2.3 needs a store that every
+The multiplayer room of `docs/archive/gslides-parity/SPEC-3.md` section 2.3 needs a store that every
 function instance shares and that can fan out: Vercel Blob allows about 15 one slide commits per
 second across a deployment and cannot push a change to another instance, so the room runs on Redis
 over the Redis protocol (`ioredis`; the REST API cannot block on `XREAD`). `@turboslide/realtime/select`
@@ -1053,7 +1053,7 @@ its output:
 
 ## 12. Round four: the CDN rules, the thumbnail cache, the seed twins and the native addon
 
-The Google Slides parity round four (`docs/gslides-parity/SPEC-4.md` sections 0.13, 0.31, 0.35,
+The Google Slides parity round four (`docs/archive/gslides-parity/SPEC-4.md` sections 0.13, 0.31, 0.35,
 0.38, 0.43, 0.45, 1.6, 3.6, 3.11; `docs/performance.md` is the plan's record) changes what the
 deployment serves from the CDN and what the function carries. Written on 2026-09-14 after merge 1
 of that round; each item names its state on that tree and the builder key of `MILESTONES-4.md`

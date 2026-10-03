@@ -44,7 +44,7 @@ export async function run(t) {
       };
     },
   );
-  /* the PDF row starts its download at once (docs/PRODUCT.md section 2 rank 8), so the dialog's way
+  /* the PDF row starts its download at once (docs/archive/rounds/PRODUCT.md section 2 rank 8), so the dialog's way
      in is Download options with the PDF type picked; its control then reads dialog.download.pdf */
   const openPdf = async () => {
     await t.menuPath('file', 'file.download', 'file.download.more', 'file.download.options');
@@ -135,7 +135,7 @@ export async function run(t) {
     'File > Download > Download options (the PowerPoint row starts its download at once, rank 8)',
     'Perfect selected, or Editable text when the deck holds a table or a chart (rank 8); both radios present',
     async () => {
-      /* rank 8 (docs/PRODUCT.md section 2): Editable text is preselected when the deck holds a
+      /* rank 8 (docs/archive/rounds/PRODUCT.md section 2): Editable text is preselected when the deck holds a
          table or a chart, since Perfect writes both as pictures; Perfect otherwise. The walk's
          deck holds both by the time the export rows run */
       let holds = false;

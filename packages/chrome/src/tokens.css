@@ -15,7 +15,7 @@
    Imported once, from the studio's root route. Every other file under
    packages/chrome/src imports only its own sheet. */
 
-/* The overlay layer carries the sheet's own appearance as its data-theme (docs/POLISH.md 2.5
+/* The overlay layer carries the sheet's own appearance as its data-theme (docs/archive/rounds/POLISH.md 2.5
    item 49; the integrator's merge): the chrome that sits over the sheet (the selection ring and
    chip, the table's seams and heads, the guides, the marquee, the readouts) reads the sheet's
    tokens, so a dark presentation under a light chrome keeps its contrast. The stage wrapper left
@@ -28,7 +28,7 @@
   --pt-paper: #ffffff;
   --pt-ink: #070707;
   --pt-ink-2: #3a3d44;
-  /* The product round (docs/PRODUCT.md 3.1; audit-interface 3): the secondary text of light chrome
+  /* The product round (docs/archive/rounds/PRODUCT.md 3.1; audit-interface 3): the secondary text of light chrome
      (the save words, the menu keys, the filmstrip numbers, the field labels, the version meta, the
      empty state sentences) reads at 4.70:1 on paper and 4.29:1 on ink; #8a8f98 was 3.25:1, under
      the 4.5:1 of WCAG 2.2 SC 1.4.3. The dark remap keeps #8a8f98, which is 6.20:1 there. */
@@ -43,7 +43,7 @@
   --pt-field: rgba(7, 7, 7, 0.44);
   --pt-hair: rgba(7, 7, 7, 0.18);
   --pt-hair-soft: rgba(7, 7, 7, 0.09);
-  /* The return round (docs/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over
+  /* The return round (docs/archive/rounds/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over
      the solid ink of the Slideshow split button, where --pt-hair (ink at .18) is ink on ink and
      invisible. Each is a paper tint over ink with no colour (RETURN.md 1 rule 6). Composites over
      the ink of each appearance: the hairline #474747 on #070707 (2.17:1) light and #b5b5b3 on
@@ -79,14 +79,14 @@
   --pt-menu-h: 28px;
   --pt-tool-h: 40px;
   --pt-notes-h: 64px;
-  /* The bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25; audit-interface
+  /* The bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25; audit-interface
      35): the side panel toggle moved into the title row's right cluster and the stage gained the
      32 px. The token stays at 0 so the snackbar, the floating name prompt and the edit route's
      banner, which clear the bar by this height, sit at the window's edge. */
   --pt-status-h: 0px;
   /* a menu plate's minimum width; Menu.css sizes the plate to its longest label up to 320 px (3.1.1) */
   --pt-menu-w: 220px;
-  /* the one control height of the title row's right cluster (docs/RETURN.md 4.3): Share, the
+  /* the one control height of the title row's right cluster (docs/archive/rounds/RETURN.md 4.3): Share, the
      Slideshow split button and the comments glyph; the presence chips are 24 px centred in it */
   --pt-ctl-h: 32px;
   /* the sidebar in outline density; ViewerShell.css widens it to 256px for thumbnails, the
@@ -128,7 +128,7 @@
      (PreviewLayer.css reads it with a 6px fallback). Every other box in the
      shell stays square. */
   --pt-radius: 6px;
-  /* 'Inter Fallback' second (docs/FEATURES.md 3.1 item 3): inter.css's metric matched local
+  /* 'Inter Fallback' second (docs/archive/rounds/FEATURES.md 3.1 item 3): inter.css's metric matched local
      Arial, so the chrome's first paint holds Inter's line boxes until the woff2 lands */
   --pt-display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
   --pt-text: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
@@ -317,7 +317,7 @@ body[data-shell] {
   flex: 0 0 auto;
 }
 
-/* hover (docs/PRODUCT.md 3.1, the shell button row): the plate ground under the hairline frame and
+/* hover (docs/archive/rounds/PRODUCT.md 3.1, the shell button row): the plate ground under the hairline frame and
    ink text, so a pointer resting on a button reads (the frame alone was 1.51:1 on light) */
 .pt-ib:hover {
   color: var(--pt-ink);

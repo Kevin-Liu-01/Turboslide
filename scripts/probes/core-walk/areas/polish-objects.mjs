@@ -1,4 +1,4 @@
-// The polish round's object rows (docs/POLISH.md 2.4, 2.6 item 67, 5.1 `lines.*`, `shapes.*`,
+// The polish round's object rows (docs/archive/rounds/POLISH.md 2.4, 2.6 item 67, 5.1 `lines.*`, `shapes.*`,
 // `charts.*`, `arrange.*`, `diagrams.*` and `wordart.*` with the driver `probe --core`; B6 the
 // drivers, B3 the fixes with B1's hunks): a line's hit area is its stroke, the cloud callout draws
 // closed, the chart data grid shows every series, a dragged connector detaches, a selected line
@@ -155,7 +155,7 @@ export async function run(t) {
       const ok = Boolean(bMoved && followed && cornerB && strokeC);
       return {
         ok,
-        observed: `B ${t.posStr(bBefore)} -> ${t.posStr(bAfter)} (moved ${Boolean(bMoved)}; during: editing ${moved.during?.editing}); connector ${t.posStr(cBefore)} -> ${t.posStr(cAfter)} (followed ${Boolean(followed)}); corner click selects B ${cornerB} (${cornerCtrls.filter((c) => c.endsWith('.move')).join(', ') || 'no move handle'}); a click 3 px from the stroke selects the connector ${strokeC}${ok ? '' : ` (docs/POLISH.md 2.4 item 24, ${LANE} with B1's hunks)`}`,
+        observed: `B ${t.posStr(bBefore)} -> ${t.posStr(bAfter)} (moved ${Boolean(bMoved)}; during: editing ${moved.during?.editing}); connector ${t.posStr(cBefore)} -> ${t.posStr(cAfter)} (followed ${Boolean(followed)}); corner click selects B ${cornerB} (${cornerCtrls.filter((c) => c.endsWith('.move')).join(', ') || 'no move handle'}); a click 3 px from the stroke selects the connector ${strokeC}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 24, ${LANE} with B1's hunks)`}`,
       };
     },
   );
@@ -198,7 +198,7 @@ export async function run(t) {
         (connect === null || connect === undefined) && moved && !same(moved, before) && stayed;
       return {
         ok,
-        observed: `connector ${t.posStr(before)} -> ${t.posStr(moved)}; connect after the release ${JSON.stringify(connect ?? null)}; A moved by 60, the connector ${stayed ? 'stayed' : `moved to ${t.posStr(cAfter)}`}${ok ? '' : ` (docs/POLISH.md 2.4 item 27, ${LANE} with B1's Editor.tsx hunk)`}`,
+        observed: `connector ${t.posStr(before)} -> ${t.posStr(moved)}; connect after the release ${JSON.stringify(connect ?? null)}; A moved by 60, the connector ${stayed ? 'stayed' : `moved to ${t.posStr(cAfter)}`}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 27, ${LANE} with B1's Editor.tsx hunk)`}`,
       };
     },
   );
@@ -257,7 +257,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.4 item 28, B1's Overlay.tsx by ${LANE}'s request)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 28, B1's Overlay.tsx by ${LANE}'s request)`}`,
       };
     },
   );
@@ -344,7 +344,7 @@ export async function run(t) {
       await t.clickCard(S);
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.4 item 33, ${LANE})`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 33, ${LANE})`}`,
       };
     },
   );
@@ -442,7 +442,7 @@ export async function run(t) {
       }
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.4 item 25, ${LANE})`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 25, ${LANE})`}`,
       };
     },
   );
@@ -541,7 +541,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `panel ${two ? `${r1(two.panel.x)} to ${r1(two.panel.right)}` : 'none'}; heads ${two ? two.heads.map((h) => `"${h.text}"${h.clipped ? ' (clipped)' : ''} to ${r1(h.right)}`).join(', ') : 'none'}; value cells inside ${inside}; third series: ${third ? `${third.heads.length} heads, scrollbar ${third.scroll} (grid ${third.gridScrollWidth} in ${third.gridClientWidth})` : 'no Add series control'}${ok ? '' : ` (docs/POLISH.md 2.4 item 26, ${LANE})`}`,
+        observed: `panel ${two ? `${r1(two.panel.x)} to ${r1(two.panel.right)}` : 'none'}; heads ${two ? two.heads.map((h) => `"${h.text}"${h.clipped ? ' (clipped)' : ''} to ${r1(h.right)}`).join(', ') : 'none'}; value cells inside ${inside}; third series: ${third ? `${third.heads.length} heads, scrollbar ${third.scroll} (grid ${third.gridScrollWidth} in ${third.gridClientWidth})` : 'no Add series control'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 26, ${LANE})`}`,
       };
     },
   );
@@ -619,7 +619,7 @@ export async function run(t) {
         (legendTint === null || legendTint === 0);
       return {
         ok,
-        observed: `after three Shift clicks: ${count} selected, getSelection "${selText}", tinted pixels ${tinted}; after the chart double click: getSelection "${chartSel ?? 'no chart'}", legend tinted pixels ${legendTint ?? 'unread'}${ok ? '' : ` (docs/POLISH.md 2.4 item 29, B1's Editor.tsx hunks by ${LANE}'s request)`}`,
+        observed: `after three Shift clicks: ${count} selected, getSelection "${selText}", tinted pixels ${tinted}; after the chart double click: getSelection "${chartSel ?? 'no chart'}", legend tinted pixels ${legendTint ?? 'unread'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 29, B1's Editor.tsx hunks by ${LANE}'s request)`}`,
       };
     },
   );
@@ -726,7 +726,7 @@ export async function run(t) {
       const ok = selected.trim() === '2' && drawnLabel === 'Step  plus' && caretOk;
       return {
         ok,
-        observed: `double click selected "${selected}"; the label reads "${drawnLabel}"${nbsp ? ' (the kept space stored as U+00A0)' : ''}; the text box after a double click 2 px into "caret" (selection "${caretSel}") and "X" typed reads "${caretText}"${ok ? '' : ` (docs/POLISH.md 2.4 item 30, B1's Selection.tsx by ${LANE}'s request; question 5)`}`,
+        observed: `double click selected "${selected}"; the label reads "${drawnLabel}"${nbsp ? ' (the kept space stored as U+00A0)' : ''}; the text box after a double click 2 px into "caret" (selection "${caretSel}") and "X" typed reads "${caretText}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 30, B1's Selection.tsx by ${LANE}'s request; question 5)`}`,
       };
     },
   );
@@ -792,7 +792,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.6 item 67, ${LANE})`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 67, ${LANE})`}`,
       };
     },
   );
@@ -819,7 +819,7 @@ export async function run(t) {
       await t.sleep(300);
       const chip = await t.chip();
       const pressed = (await t.attr('[data-control="toolbar.bold"]', 'aria-pressed')) === 'true';
-      /* Bold is the run mark (docs/POLISH.md 2.3 item 12): one press wraps the letters in `b`
+      /* Bold is the run mark (docs/archive/rounds/POLISH.md 2.3 item 12): one press wraps the letters in `b`
          elements at 700 while the paragraph's own weight stays 400 by design, so the letters'
          weight is the marks' when they cover the text, else the paragraph's (B1's fix round
          request to B6) */
@@ -870,7 +870,7 @@ export async function run(t) {
         chipArmed === null;
       return {
         ok,
-        observed: `chip "${chip}"; B pressed at insert ${pressed}; weight ${weight0} -> ${weight1} after one press (bolder ${bolded}); ring before arming ${ringBefore ? 'drawn' : 'none'}, after arming the elbow tool ring ${ringArmed ? 'still drawn' : 'gone'}, chip ${chipArmed ? `"${chipArmed}"` : 'gone'}${ok ? '' : ` (docs/POLISH.md 2.4 item 34, ${LANE} with B1's Editor.tsx hunks)`}`,
+        observed: `chip "${chip}"; B pressed at insert ${pressed}; weight ${weight0} -> ${weight1} after one press (bolder ${bolded}); ring before arming ${ringBefore ? 'drawn' : 'none'}, after arming the elbow tool ring ${ringArmed ? 'still drawn' : 'gone'}, chip ${chipArmed ? `"${chipArmed}"` : 'gone'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.4 item 34, ${LANE} with B1's Editor.tsx hunks)`}`,
       };
     },
   );

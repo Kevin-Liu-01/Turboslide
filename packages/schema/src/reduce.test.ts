@@ -252,7 +252,7 @@ describe('inverse mutations', () => {
     },
     {
       /* a field under an object the block does not carry yet creates the object (the font rows'
-         agent write, docs/PRODUCT.md 4.2); the inverse removes it whole */
+         agent write, docs/archive/rounds/PRODUCT.md 4.2); the inverse removes it whole */
       name: 'block.set creates the parent object',
       mutations: [
         {
@@ -693,7 +693,7 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
         },
       ]),
     );
-    /* docs/POLISH.md 2.3 item 19: Enter in a heading breaks the line */
+    /* docs/archive/rounds/POLISH.md 2.3 item 19: Enter in a heading breaks the line */
     expect(refused.ok).toBe(true);
     const cr = applyWrite(
       document,
@@ -712,7 +712,7 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
   });
 });
 
-describe('the text mutations and their inverses (the return round, docs/RETURN.md 2.14 items 2 and 5)', () => {
+describe('the text mutations and their inverses (the return round, docs/archive/rounds/RETURN.md 2.14 items 2 and 5)', () => {
   const p1 = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
   const MARKED =
     'One [italic]{i} word and a *bold* [red]{c:red} one, [lit]{h:amber} [link](https://x.y).';
@@ -1208,7 +1208,7 @@ describe('the undo of a text session against a document a collaborator moved (VE
   });
 });
 
-describe('the slide fields as text runs (the sync round, docs/SYNC.md 3.4)', () => {
+describe('the slide fields as text runs (the sync round, docs/archive/rounds/SYNC.md 3.4)', () => {
   const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
   const lead = { slideId: 'title', blockId: 'lead', path: '/lead' } as const;
   const big = { slideId: 'thesis', blockId: 'big', path: '/big' } as const;

@@ -4,7 +4,7 @@
 // pictures for their regenerated 2x or 3x twins, measure the scene on the 1x page, and shoot what
 // the mode needs: the whole sheet at 2x for flatten (plus the kit's picture logos at 3x, the
 // features round), the raster elements at 2x (3x for icons, marks, logos and svg pictures, SPEC
-// 8.6, docs/FEATURES.md 4.8 and docs/VECTOR.md 4.6) with alpha for native. A picture whose asset
+// 8.6, docs/archive/rounds/FEATURES.md 4.8 and docs/archive/rounds/VECTOR.md 4.6) with alpha for native. A picture whose asset
 // is a vector (an svg upload, a logo with its sanitized source) also carries the vector file's
 // path on its raster (`svg`), which the PowerPoint builder writes as `asvg:svgBlip` beside the
 // PNG blip. The geometry comes from the 1x page because the verify
@@ -16,7 +16,7 @@
 // close killed chrome-headless-shell on every hosted native export (docs/hosting-chromium.md
 // section 3b). Nothing here knows about pptxgenjs; the scenes and the PNG paths are the contract
 // the PPTX builder reads. Since the features round's ship two every scene carries its shaders
-// (scene/shaders.ts, docs/FEATURES.md 5.5): each material block's recipe, its frame file under the
+// (scene/shaders.ts, docs/archive/rounds/FEATURES.md 5.5): each material block's recipe, its frame file under the
 // deck's `assets/` and the frame's box measured on the 1x page, so the builder draws the frame
 // itself at the block's box and the report names a frame that was missing.
 import { existsSync } from 'node:fs';
@@ -72,10 +72,10 @@ export type RasterScalePolicy = 'auto' | 2 | 3;
 
 /**
  * The raster kinds `auto` shoots at 3x: small glyphs whose edges matter under zoom, and since the
- * features round a logo (docs/FEATURES.md 4.8; audit-logos 18): a picture block whose asset
+ * features round a logo (docs/archive/rounds/FEATURES.md 4.8; audit-logos 18): a picture block whose asset
  * carries `role: 'logo'` is shot at 3x, so the stored twins' 3x pixels reach the file (a 132 by 84
  * title slot gives 396 by 252, the footer's 28 by 18 gives 84 by 54). Since the vector round an
- * svg picture too (docs/VECTOR.md 4.6): its shot is the PNG fallback beside the `asvg:svgBlip`,
+ * svg picture too (docs/archive/rounds/VECTOR.md 4.6): its shot is the PNG fallback beside the `asvg:svgBlip`,
  * so a viewer without SVG support draws it as sharp as a logo. The kinds `logo` and `svg` are
  * this module's reading of the document (`logoBlockIds`, `vectorFilesOf`), not `data-raster`
  * values the sheet carries.
@@ -87,7 +87,7 @@ export { KIT_LOGO_BLOCK_IDS, kitHasPictureLogo, logoBlockIds };
 
 /**
  * The vector file for the theme of every block of a slide whose asset answers `vectorOf` (schema
- * assets.ts, docs/VECTOR.md 4.1: an svg picture's `vector`, a ship one logo's untinted source),
+ * assets.ts, docs/archive/rounds/VECTOR.md 4.1: an svg picture's `vector`, a ship one logo's untinted source),
  * by block id, as absolute paths under the deck directory (VECTOR.md 4.6): the picture and shot
  * blocks (composites' cells included) and, under the two kit names the extractor gives the brand
  * kit's picture logos (kit-logos.ts), the kit's mark and footer assets. A block naming an asset
@@ -418,7 +418,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
         slideIds: ids,
         numbering: play,
         title: `${deck.title} (${theme})`,
-        // the catalog faces the deck uses ride inside the slides as data URIs (docs/PRODUCT.md
+        // the catalog faces the deck uses ride inside the slides as data URIs (docs/archive/rounds/PRODUCT.md
         // 4.2, the export capture fix of VERIFICATION-5 finding 5): the headless page draws the
         // face, so the Editable text export names it in a:latin typeface and the PDF embeds the
         // subset; a deck set in Inter alone emits nothing here
@@ -433,7 +433,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
     renderer = launched.renderer;
     const policy = options.rasterScale ?? 'auto';
     const pictureScale = options.pictureScale ?? 2;
-    // the kit's picture logos (docs/FEATURES.md 4.8): a flatten export of such a deck opens the
+    // the kit's picture logos (docs/archive/rounds/FEATURES.md 4.8): a flatten export of such a deck opens the
     // 3x page too, for the two logo rasters alone; a deck under the GT mark keeps its two pages
     const kitLogo = kitHasPictureLogo(deck);
     try {
@@ -540,7 +540,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             // the picture and shot blocks whose asset is a logo: shot as the `logo` kind, 3x (4.8)
             const logoBlocks = logoBlockIds(slide, deck);
             // the blocks and kit logos whose asset is a vector: the file for the theme rides on
-            // the raster and the shot is the `svg` kind, 3x (docs/VECTOR.md 4.6)
+            // the raster and the shot is the `svg` kind, 3x (docs/archive/rounds/VECTOR.md 4.6)
             const vectors = vectorFilesOf(slide, deck, theme, options.deckDir);
 
             const scene = enrichScene(
@@ -673,7 +673,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             }
             const errors = measurePage.takeErrors();
             scene.warnings.push(...errors.pageErrors.map((e) => `page error: ${e}`));
-            // the slide's shaders with their frame boxes off the 1x page (docs/FEATURES.md 5.5)
+            // the slide's shaders with their frame boxes off the 1x page (docs/archive/rounds/FEATURES.md 5.5)
             const shaded: ShaderScene = scene;
             const shaders = await measureShaderBoxes(
               measurePage.page,

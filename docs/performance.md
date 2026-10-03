@@ -1,6 +1,6 @@
 # Performance
 
-The record of round four's performance plan (`docs/gslides-parity/SPEC-4.md` sections 3 and 4, the
+The record of round four's performance plan (`docs/archive/gslides-parity/SPEC-4.md` sections 3 and 4, the
 binding changes and the budgets; `docs/gslides-parity/design-4/performance-plan.md`, the plan, "PP"
 below; `research-4/03-performance-techniques.md` and `04-performance-baseline.md`, the facts). It
 holds the speed story with the tense each row may be written in, the budget tables with the
@@ -338,11 +338,11 @@ byte and the function directory sizes (reported this round); the round three `di
 patterns (`bayer4`, `blue64`, `random`, strength) in the crate so the wasm worker covers them;
 splitting the base function's Chromium package (Nitro's `traceDeps` is one list per deployment);
 React's `<ViewTransition>` once the router and React agree on who starts a transition; and
-everything `docs/gslides-parity/SPEC-3.md` section 17 lists.
+everything `docs/archive/gslides-parity/SPEC-3.md` section 17 lists.
 
 ## 9. Sources
 
-- `docs/gslides-parity/SPEC-4.md` sections 0.26 to 0.47, 3 and 4; `MILESTONES-4.md`; the
+- `docs/archive/gslides-parity/SPEC-4.md` sections 0.26 to 0.47, 3 and 4; `MILESTONES-4.md`; the
   orchestrator's rulings recorded in `build-4/integrator.md` section 7 item 8.
 - `docs/gslides-parity/design-4/performance-plan.md` sections 4, 7, 8 and 9.
 - `docs/gslides-parity/research-4/04-performance-baseline.md` (R04, 2026-09-13) through the

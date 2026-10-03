@@ -1,4 +1,4 @@
-// The frames of one live gesture (docs/OBJECTS.md 2.4, the cadence and the budget): the stage
+// The frames of one live gesture (docs/archive/rounds/OBJECTS.md 2.4, the cadence and the budget): the stage
 // renders the draft document at most once per animation frame, and this module is the pure
 // record of what those renders cost and the rule that degrades the render when the budget is
 // missed. The Editor keeps one record per gesture (a move, a resize, a rotation, a seam drag, a

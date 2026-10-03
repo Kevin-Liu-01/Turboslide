@@ -18,7 +18,7 @@
  * from arrow-uturn-left on under their Heroicons names, copied from heroicons optimized/20/solid
  * on 2026-09-12; the theme sprite gains the same symbols through packages/theme add-icon when
  * the schema's ICON_NAMES takes them (a request to the integrator, docs/gslides-parity/build/b3.md).
- * The vector round (docs/VECTOR.md 3.1, 3.4) adds two kinds of glyph for the Insert and Format
+ * The vector round (docs/archive/rounds/VECTOR.md 3.1, 3.4) adds two kinds of glyph for the Insert and Format
  * rows that name a visual thing: three more Heroicons (arrow-long-right, chat-bubble-left,
  * chart-pie, copied from heroicons 2.2.0 optimized/20/solid on 2026-09-24) and, where Heroicons
  * has no symbol, a glyph drawn from the thing itself in the same weight: the three named shapes
@@ -105,7 +105,7 @@ export type IconName =
   | 'bars-3-center-left'
   | 'bars-3'
   | 'bars-3-bottom-right'
-  /* the vector round (docs/VECTOR.md 3.3): Format > Align & indent > Left, under its Heroicon
+  /* the vector round (docs/archive/rounds/VECTOR.md 3.3): Format > Align & indent > Left, under its Heroicon
      name; the same paths draw `sidebar` and `text` */
   | 'bars-3-bottom-left'
   | 'bars-2'
@@ -157,11 +157,11 @@ export type IconName =
   /* round three (gslides-parity SPEC-3 4.2, 5.5): the inbox plate and Notification settings */
   | 'bell'
   | 'inbox'
-  /* the vector round (docs/VECTOR.md 3.2, 3.3): the Arrows, Callouts and Pie rows */
+  /* the vector round (docs/archive/rounds/VECTOR.md 3.2, 3.3): the Arrows, Callouts and Pie rows */
   | 'arrow-long-right'
   | 'chat-bubble-left'
   | 'chart-pie'
-  /* the vector round (docs/VECTOR.md 3.1): the glyphs drawn from the thing itself */
+  /* the vector round (docs/archive/rounds/VECTOR.md 3.1): the glyphs drawn from the thing itself */
   | 'shape-rect'
   | 'shape-round-rect'
   | 'shape-ellipse'
@@ -182,7 +182,7 @@ export type IconName =
   | 'line-end'
   | 'mask'
   | 'shadow'
-  /* the polish round (docs/POLISH.md 2.6 items 57 and 72; polish/build/b1.md R1, R2): the glyphs
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 items 57 and 72; polish/build/b1.md R1, R2): the glyphs
      of the menu rows that had none, copied from heroicons 2.2.0 optimized/20/solid on 2026-09-28,
      and the plain arrow of the Select tool, drawn at the pointer's own shape */
   | 'arrow-down-on-square'
@@ -202,7 +202,7 @@ export type IconName =
  * entry with `stroke` draws `fill="none" stroke="currentColor"` at `width` (1.5 when absent, the
  * shape picker's weight) with round caps and joins and `dash` as its `stroke-dasharray`;
  * `translate` moves the path on the 20 grid (the shape glyphs are `shapePath(id, 16, 12)` at
- * (2, 4), docs/VECTOR.md 3.1).
+ * (2, 4), docs/archive/rounds/VECTOR.md 3.1).
  */
 export type IconPath = {
   d: string;
@@ -983,7 +983,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       evenodd: true,
     },
   ],
-  /* the vector round (docs/VECTOR.md 3.2, 3.3): three more Heroicons, copied verbatim from
+  /* the vector round (docs/archive/rounds/VECTOR.md 3.2, 3.3): three more Heroicons, copied verbatim from
      heroicons 2.2.0 optimized/20/solid on 2026-09-24 (Insert > Shape > Arrows and Callouts,
      Insert > Chart > Pie) */
   'arrow-long-right': [
@@ -1006,7 +1006,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M8.003 4.07C8.55 3.994 9 4.449 9 5v5a1 1 0 0 0 1 1h5c.552 0 1.008.45.93.997A7.001 7.001 0 0 1 2 11a7.002 7.002 0 0 1 6.003-6.93Z',
     },
   ],
-  /* the vector round (docs/VECTOR.md 3.1): the glyphs drawn from the thing itself. The three
+  /* the vector round (docs/archive/rounds/VECTOR.md 3.1): the glyphs drawn from the thing itself. The three
      shapes are the schema's own `shapePath` at 16 by 12, filled, moved to (2, 4): the outline the
      shape picker strokes at 48 by 36, so the row and the plate draw one geometry. The line kinds
      are their own paths, stroked at the picker's weight; the arrow heads are
@@ -1050,7 +1050,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
      stroke stops at the head's base */
   'line-start': [{ d: 'M7,10 H18', stroke: true }, { d: 'M2,10 L7,12.5 L7,7.5 Z' }],
   'line-end': [{ d: 'M2,10 H13', stroke: true }, { d: 'M18,10 L13,7.5 L13,12.5 Z' }],
-  /* the polish round's menu glyphs (docs/POLISH.md 2.6 item 57), Heroicons 20 solid verbatim */
+  /* the polish round's menu glyphs (docs/archive/rounds/POLISH.md 2.6 item 57), Heroicons 20 solid verbatim */
   'arrow-down-on-square': [
     {
       d: 'M13.75 7h-3v5.296l1.943-2.048a.75.75 0 0 1 1.114 1.004l-3.25 3.5a.75.75 0 0 1-1.114 0l-3.25-3.5a.75.75 0 1 1 1.114-1.004l1.943 2.048V7h1.5V1.75a.75.75 0 0 0-1.5 0V7h-3A2.25 2.25 0 0 0 4 9.25v7.5A2.25 2.25 0 0 0 6.25 19h7.5A2.25 2.25 0 0 0 16 16.75v-7.5A2.25 2.25 0 0 0 13.75 7Z',
@@ -1107,7 +1107,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M6.28 5.22a.75.75 0 0 0-1.06 1.06l7.22 7.22H6.75a.75.75 0 0 0 0 1.5h7.5a.747.747 0 0 0 .75-.75v-7.5a.75.75 0 0 0-1.5 0v5.69L6.28 5.22Z',
     },
   ],
-  /* the Select tool's plain arrow (docs/POLISH.md 2.6 item 72): the pointer's own shape, drawn
+  /* the Select tool's plain arrow (docs/archive/rounds/POLISH.md 2.6 item 72): the pointer's own shape, drawn
      filled at the weight of the Heroicons glyphs, so it differs from Show my pointer's rays */
   'cursor-arrow': [{ d: 'M5 2.5 L5 15.5 L8.4 12.6 L10.8 17.6 L13.1 16.5 L10.7 11.6 L15.2 11.3 Z' }],
   /* Mask image: a stroked square holding a filled ellipse */
@@ -1134,7 +1134,7 @@ export function iconPaths(name: IconName): readonly IconPath[] {
 /**
  * A glyph on the 20-unit grid, 16px by default. Size it from CSS on the parent (`.pt-ib svg`) or
  * with size. A filled entry takes the svg's `fill="currentColor"`; a stroked entry (the drawn line
- * glyphs of docs/VECTOR.md 3.1) draws its outline in the same colour at its width.
+ * glyphs of docs/archive/rounds/VECTOR.md 3.1) draws its outline in the same colour at its width.
  */
 export function Icon({ name, size = 16 }: IconProps) {
   return (

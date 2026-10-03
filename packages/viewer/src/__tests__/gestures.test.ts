@@ -838,7 +838,7 @@ describe('draw tools', () => {
   });
 });
 
-describe('clampTableResize (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6 b)', () => {
+describe('clampTableResize (docs/archive/rounds/POLISH.md 2.2 item 11; polish/build/b2.md R6 b)', () => {
   const start = [320, 420, 960, 162] as const;
 
   it('stops the dragged right and bottom edges at the content box', () => {

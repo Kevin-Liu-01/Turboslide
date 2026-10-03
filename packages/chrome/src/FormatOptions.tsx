@@ -117,7 +117,7 @@ export type FormatOptionsProps = {
   assetUrl?: (path: string) => string;
   /** the Layout section's Change button */
   onChangeLayout?: (anchor: HTMLElement) => void;
-  /** the Shader section's Change: opens the gallery for the selected block (docs/FEATURES.md 5.3) */
+  /** the Shader section's Change: opens the gallery for the selected block (docs/archive/rounds/FEATURES.md 5.3) */
   onChangeShader?: (anchor: HTMLElement) => void;
   onClose: () => void;
   busy?: boolean;
@@ -141,7 +141,7 @@ function routeSlide(spec: ControlSpec): FormatSectionId | null {
 }
 
 /**
- * The collapsed sections this browser remembers (docs/PRODUCT.md 3.2; audit-interface 15): the
+ * The collapsed sections this browser remembers (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 15): the
  * panel reopens with the set a seller left, beside the shell's own `ts-editor-settings` key,
  * which keeps a fixed list of settings (editor-shell.ts readStoredSettings). A read that throws
  * (a private window, no storage) answers an empty set.
@@ -188,7 +188,7 @@ function storeCollapsed(closed: ReadonlySet<FormatSectionId>): void {
 }
 
 /**
- * The sections shown collapsed when the panel opens (docs/PRODUCT.md 3.2): from a menu row that
+ * The sections shown collapsed when the panel opens (docs/archive/rounds/PRODUCT.md 3.2): from a menu row that
  * names a section (Format > Text fitting) that section alone is open; from the toolbar and on a
  * reopen the remembered set stands. Pure over the ids the panel draws.
  */
@@ -323,7 +323,7 @@ export function FormatOptions({
       ?.querySelector<HTMLElement>(`[data-section="${openSection}"]`);
     if (el !== null && el !== undefined && typeof el.scrollIntoView === 'function')
       el.scrollIntoView({ block: 'start' });
-    /* a section that marks a field with `data-autofocus` (the Alt text description, docs/POLISH.md
+    /* a section that marks a field with `data-autofocus` (the Alt text description, docs/archive/rounds/POLISH.md
        2.5 item 45; polish/build/b4.md R3) takes the focus there, else its head */
     const marked = el?.querySelector<HTMLElement>('[data-autofocus]');
     (marked ?? el?.querySelector<HTMLElement>('.ts-panel-section-head'))?.focus();
@@ -589,7 +589,7 @@ export function FormatOptions({
           // the integrator at merge 2 for b5.md request 7)
           return selected !== undefined && !many && hasDither(selected);
         case 'shadow':
-          /* Drop shadow draws in the default view (docs/POLISH.md 2.5 item 41; polish/build/b4.md
+          /* Drop shadow draws in the default view (docs/archive/rounds/POLISH.md 2.5 item 41; polish/build/b4.md
              R5) for every block whose schema carries the field, and not on a table or a chart,
              where Google has none */
           if (!many && (selected?.type === 'table' || selected?.type === 'chart')) return false;
@@ -599,7 +599,7 @@ export function FormatOptions({
         case 'chart':
           return selected?.type === 'chart' && !many;
         case 'shader':
-          /* the features round, ship two (docs/FEATURES.md 5.3): one shader block's one home, and
+          /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): one shader block's one home, and
              the covering picture of a placed shader ground (the fix round; inspector/shader.tsx) */
           return !many && (selected?.type === 'material' || isShaderGround(selected, deck));
         case 'line':
@@ -624,9 +624,9 @@ export function FormatOptions({
       }
     },
   );
-  /* a chart's data is what a seller opens the panel for (docs/RETURN.md 2.5: "the round makes the
+  /* a chart's data is what a seller opens the panel for (docs/archive/rounds/RETURN.md 2.5: "the round makes the
      grid the first thing the panel shows for a chart"), and so is a table's Table section
-     (docs/FEATURES.md 2.2 rank 13; audit-objects 22: it sat last, out of view at 900 px): the
+     (docs/archive/rounds/FEATURES.md 2.2 rank 13; audit-objects 22: it sat last, out of view at 900 px): the
      leading section comes first; the sort is stable, so every other section keeps its order
      (return/build/b5.md request 4) */
   const sectionsShown = sectionsInOrderFor(sectionsFiltered, selected);
@@ -645,7 +645,7 @@ export function FormatOptions({
   };
   /* the generated rows of a chart and a table (the kind again, the categories and series as JSON,
      a second Title and Legend; the table's rows and columns as JSON) repeat what the Chart data
-     and Table sections draw as controls (docs/FEATURES.md 2.2 rank 11; audit-objects 16): they
+     and Table sections draw as controls (docs/archive/rounds/FEATURES.md 2.2 rank 11; audit-objects 16): they
      stay behind Tools > Advanced tools for an agent's reading and never draw beside the section */
   const renderGeneratedAdvanced = (id: FormatSectionId) =>
     advancedTools ? renderGenerated(id) : null;
@@ -837,7 +837,7 @@ export function FormatOptions({
                 </Section>
               );
             case 'shader':
-              /* the features round, ship two (docs/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
+              /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
                  the Shader section over the selected material block, or over the covering picture
                  of a placed shader ground (the fix round, b5.md R13); the generated rows of the
                  block stay behind Advanced tools as the chart's do, a ground's picture rows are

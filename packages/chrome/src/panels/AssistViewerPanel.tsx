@@ -5,7 +5,7 @@ import { ASSIST } from './assist-strings';
 import './Assist.css';
 
 /**
- * The Assist panel a view link visitor sees (docs/PRODUCT.md 6.3; the row
+ * The Assist panel a view link visitor sees (docs/archive/rounds/PRODUCT.md 6.3; the row
  * `assist.viewer.disabled`): the same title and the one sentence, "Commenters and editors can use
  * the assistant", and nothing to type into, because a viewer cannot write and the assistant only
  * writes. The viewer page's Assist button toggles it where the editor's opens the working panel

@@ -147,7 +147,7 @@ const settled = async (rooms: ReturnType<typeof createRoomClient>[]): Promise<vo
 };
 
 /**
- * The wire is cut for the client (docs/POLISH.md item 100): a failed POST or a 5xx reads as a
+ * The wire is cut for the client (docs/archive/rounds/POLISH.md item 100): a failed POST or a 5xx reads as a
  * write the client is sending again (`resending`) while the browser has no word on the network,
  * and as Offline when the browser says so (`navigator.onLine`, the events); in Node there is no
  * navigator, so the tests read either.
@@ -1890,13 +1890,13 @@ describe('the roster keeps its join order across presence posts (the stream fix 
 });
 
 // ---------------------------------------------------------------------------------------------
-// The sync and costs round (docs/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11; 6.4's named
+// The sync and costs round (docs/archive/rounds/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11; 6.4's named
 // tests for B2): acknowledgement by id from an echo's `covers`, the byte match as the fallback
 // for a record without an origin, the undo inverse past a remote insert, the own echo skipped
 // and a second tab of the same person read as remote, the resync read's origins dropping the
 // pending ops they name, and the heartbeat's two cadences.
 
-describe('the sync and costs round: acknowledgement by id, undo past remote entries, the resync origins and the heartbeat (docs/SYNC.md 3.2, 3.10, 3.11)', () => {
+describe('the sync and costs round: acknowledgement by id, undo past remote entries, the resync origins and the heartbeat (docs/archive/rounds/SYNC.md 3.2, 3.10, 3.11)', () => {
   const TAB_A = 'c'.repeat(32);
   const TAB_A2 = 'd'.repeat(32);
   const TAB_B = 'e'.repeat(32);

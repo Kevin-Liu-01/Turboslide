@@ -6,7 +6,7 @@ import { Link, createFileRoute, redirect } from '@tanstack/react-router';
 // `X-Robots-Tag: noindex` because the address it points at renders an editor; on the server the
 // answer is the 307, and a client side visit runs the same beforeLoad and navigates. Before this
 // round `/` opened the newest deck on the shared store, which on production was a drive's test
-// deck (docs/EDITOR-DEPTH-STATUS.md section 10).
+// deck (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10).
 export const Route = createFileRoute('/')({
   beforeLoad: () => {
     throw redirect({

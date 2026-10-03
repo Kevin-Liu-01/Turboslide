@@ -40,7 +40,7 @@ import './PresenterPage.css';
  * slideshow window over BroadcastChannel('turboslide:<deckId>') with localStorage as the fallback:
  * the audience reports its slide and follows the console's goto, so arrow keys in either window
  * move both. The console is a window API owner too (`presenter`, with view.goto and view.present)
- * and, when its address carries `?agent=1` (docs/SYNC.md 3.10), attaches to the studio's session
+ * and, when its address carries `?agent=1` (docs/archive/rounds/SYNC.md 3.10), attaches to the studio's session
  * registry, so `deck_goto_slide` over /mcp lands here when this is the page attached, and the
  * audience window follows over the channel; without the flag the console makes no function
  * request after its load.
@@ -107,7 +107,7 @@ export function PresenterPage({
   agent = false,
 }: {
   payload: EditorDeck;
-  /** ?agent=1 from the route: the console attaches a studio session (docs/SYNC.md 3.10) */
+  /** ?agent=1 from the route: the console attaches a studio session (docs/archive/rounds/SYNC.md 3.10) */
   agent?: boolean;
 }) {
   const { deckId, document } = payload;

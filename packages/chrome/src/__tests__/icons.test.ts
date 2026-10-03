@@ -8,7 +8,7 @@ import { shapePath } from '@turboslide/schema/shapes';
 import { ICON_NAMES, Icon, iconPaths } from '../icons';
 import type { IconName } from '../icons';
 
-// The icon table of the vector round (docs/VECTOR.md 3.1, 3.4; the three assertions of 6.3):
+// The icon table of the vector round (docs/archive/rounds/VECTOR.md 3.1, 3.4; the three assertions of 6.3):
 // every name has paths, every name the theme sprite also draws carries the sprite's `d` strings
 // (the promise of icons.tsx's header: the chrome and the sheet draw one glyph per name), and every
 // drawn glyph is non empty. The one family rule (`menus.icons.one-family`) is pinned on the

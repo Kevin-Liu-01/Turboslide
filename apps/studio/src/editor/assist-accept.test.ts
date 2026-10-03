@@ -1,4 +1,4 @@
-// The pure half of Accept (docs/PRODUCT.md 6.1, 6.2): the re base, the marks and the clearing of
+// The pure half of Accept (docs/archive/rounds/PRODUCT.md 6.1, 6.2): the re base, the marks and the clearing of
 // a mark by the seller's next edit, shared by the page's commit and the server's write.
 import { describe, expect, it } from 'vitest';
 

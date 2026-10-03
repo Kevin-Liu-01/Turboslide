@@ -219,7 +219,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
          keys and the Find and replace chord still work */
       if (inField && !(event.altKey && event.ctrlKey) && !(event.metaKey && event.shiftKey)) return;
 
-      /* `?` opens the Keyboard shortcuts dialog as Cmd+/ does (docs/PRODUCT.md 3.1.1;
+      /* `?` opens the Keyboard shortcuts dialog as Cmd+/ does (docs/archive/rounds/PRODUCT.md 3.1.1;
          audit-interface 25): the snackbar that named the Help menu left */
       if (event.key === '?' && !modifier && !inField && !inCanvasText && !h.overlayOpen()) {
         const shortcuts = findItem('help.keyboardShortcuts');

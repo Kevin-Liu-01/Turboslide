@@ -1,4 +1,4 @@
-// The polish round's picture rows (docs/POLISH.md 2.5, 5.1 `images.*` with the driver
+// The polish round's picture rows (docs/archive/rounds/POLISH.md 2.5, 5.1 `images.*` with the driver
 // `probe --core`; B6 the drivers, B4 the fixes with B1's hunks): the picture's panel in the
 // seller's words, Drop shadow for a picture, the mask picker inside the panel, a caption that
 // grows the box, a border colour that draws at once with the heavier weights, Alt text opening
@@ -137,7 +137,7 @@ export async function run(t) {
       const ok = bad.length === 0 && titleCase.length === 0 && w.captions === 1 && border;
       return {
         ok,
-        observed: `${w.sections.length} sections (${w.sections.map((s) => s.head || s.id).join(', ')}); ${w.labels.length} labels; developer words ${bad.length > 0 ? bad.join(' | ') : 'none'}; Title Case labels ${titleCase.length > 0 ? titleCase.join(' | ') : 'none'}; Caption fields ${w.captions}; Border label ${border}${ok ? '' : ` (docs/POLISH.md 2.5 item 40, ${LANE}; format-sections.ts by request to B1)`}`,
+        observed: `${w.sections.length} sections (${w.sections.map((s) => s.head || s.id).join(', ')}); ${w.labels.length} labels; developer words ${bad.length > 0 ? bad.join(' | ') : 'none'}; Title Case labels ${titleCase.length > 0 ? titleCase.join(' | ') : 'none'}; Caption fields ${w.captions}; Border label ${border}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 40, ${LANE}; format-sections.ts by request to B1)`}`,
       };
     },
   );
@@ -218,7 +218,7 @@ export async function run(t) {
       if (stored !== null) await undoOnce();
       return {
         ok,
-        observed: `distance field ${wrote ? 'set to 8' : 'not found'}; block.shadow ${JSON.stringify(stored)}; drawn ${JSON.stringify(drawn)}${ok ? '' : ` (docs/POLISH.md 2.5 item 41, ${LANE})`}`,
+        observed: `distance field ${wrote ? 'set to 8' : 'not found'}; block.shadow ${JSON.stringify(stored)}; drawn ${JSON.stringify(drawn)}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 41, ${LANE})`}`,
       };
     },
   );
@@ -292,7 +292,7 @@ export async function run(t) {
       const ok = read.tiles > 0 && read.outside === 0 && sentence && Boolean(stillMounted);
       return {
         ok,
-        observed: `${read.tiles} tiles, ${read.perRow} per row, ${read.outside} outside the panel (picker ${r1(read.pickerWidth)} in a ${r1(read.panelWidth)} panel); group labels ${read.titles.map((s) => `"${s}"`).join(', ') || 'none'}${shouting.length > 0 ? ` (in capitals: ${shouting.join(', ')})` : ''}; sections ${before?.sections.length ?? '?'} -> ${read.sections}${ok ? '' : ` (docs/POLISH.md 2.5 item 42, B3's ShapePicker.tsx and B1's Pickers.css by ${LANE}'s request)`}`,
+        observed: `${read.tiles} tiles, ${read.perRow} per row, ${read.outside} outside the panel (picker ${r1(read.pickerWidth)} in a ${r1(read.panelWidth)} panel); group labels ${read.titles.map((s) => `"${s}"`).join(', ') || 'none'}${shouting.length > 0 ? ` (in capitals: ${shouting.join(', ')})` : ''}; sections ${before?.sections.length ?? '?'} -> ${read.sections}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 42, B3's ShapePicker.tsx and B1's Pickers.css by ${LANE}'s request)`}`,
       };
     },
   );
@@ -367,7 +367,7 @@ export async function run(t) {
       await undoOnce();
       return {
         ok,
-        observed: `caption stored ${stored}; pos.h ${pos0?.h} -> ${pos1?.h} (grew ${grew}); img ${img0} -> ${img1} sheet px; chip ${chip ? `at y ${r1(chip.y)} against the picture's top ${r1(pos1?.y)}` : 'none'}${ok ? '' : ` (docs/POLISH.md 2.5 item 43, ${LANE} with B1's Editor.tsx hunk)`}`,
+        observed: `caption stored ${stored}; pos.h ${pos0?.h} -> ${pos1?.h} (grew ${grew}); img ${img0} -> ${img1} sheet px; chip ${chip ? `at y ${r1(chip.y)} against the picture's top ${r1(pos1?.y)}` : 'none'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 43, ${LANE} with B1's Editor.tsx hunk)`}`,
       };
     },
   );
@@ -472,7 +472,7 @@ export async function run(t) {
       await undoOnce();
       return {
         ok,
-        observed: `after ink: frame ${JSON.stringify(frame1)}, drawn ${drawn1.width} px ${drawn1.how} ${drawn1.color ?? ''}; weight list ${items.map((i) => i.text).join(', ') || 'none'} (3, 4, 8, 12 present: ${listed.join(', ') || 'none'}); after 8: frame ${JSON.stringify(frame8)}, drawn ${drawn8 ? `${drawn8.width} px ${drawn8.how}` : 'unread'}${ok ? '' : ` (docs/POLISH.md 2.5 item 44, B1's toolbar-tails.ts and editor-shell.ts by ${LANE}'s request)`}`,
+        observed: `after ink: frame ${JSON.stringify(frame1)}, drawn ${drawn1.width} px ${drawn1.how} ${drawn1.color ?? ''}; weight list ${items.map((i) => i.text).join(', ') || 'none'} (3, 4, 8, 12 present: ${listed.join(', ') || 'none'}); after 8: frame ${JSON.stringify(frame8)}, drawn ${drawn8 ? `${drawn8.width} px ${drawn8.how}` : 'unread'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 44, B1's toolbar-tails.ts and editor-shell.ts by ${LANE}'s request)`}`,
       };
     },
   );
@@ -516,7 +516,7 @@ export async function run(t) {
       const ok = facts.field && facts.focused && emptyOk;
       return {
         ok,
-        observed: `description field ${facts.field}; focus on ${facts.active}; value "${facts.value}"${facts.value === 'core walk picture' ? " (the setup's declared alt, not a file name)" : ''}${ok ? '' : ` (docs/POLISH.md 2.5 item 45, ${LANE} with B1's Editor.tsx hunk)`}`,
+        observed: `description field ${facts.field}; focus on ${facts.active}; value "${facts.value}"${facts.value === 'core walk picture' ? " (the setup's declared alt, not a file name)" : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 45, ${LANE} with B1's Editor.tsx hunk)`}`,
       };
     },
   );
@@ -586,7 +586,7 @@ export async function run(t) {
       const ok = dimmed && chip === 'Crop';
       return {
         ok,
-        observed: `frame ${frame ? `${r1(frame.w)} wide` : 'none'} in a full ${full ? `${r1(full.w)}` : 'none'}; cut part mean ${cut ? cut.mean.join(',') : 'unread'} (luminance ${cutL === null ? '?' : r1(cutL)}), kept part mean ${kept ? kept.mean.join(',') : 'unread'} (luminance ${keptL === null ? '?' : r1(keptL)}); chip "${chip}"${ok ? '' : ` (docs/POLISH.md 2.5 item 50, B1's Overlay.css and Overlay.tsx by ${LANE}'s request)`}`,
+        observed: `frame ${frame ? `${r1(frame.w)} wide` : 'none'} in a full ${full ? `${r1(full.w)}` : 'none'}; cut part mean ${cut ? cut.mean.join(',') : 'unread'} (luminance ${cutL === null ? '?' : r1(cutL)}), kept part mean ${kept ? kept.mean.join(',') : 'unread'} (luminance ${keptL === null ? '?' : r1(keptL)}); chip "${chip}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.5 item 50, B1's Overlay.css and Overlay.tsx by ${LANE}'s request)`}`,
       };
     },
   );

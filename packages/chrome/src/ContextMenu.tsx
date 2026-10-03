@@ -63,7 +63,7 @@ export type ContextMenuProps = {
   /**
    * how the menu was opened: a right click opens it with no row lit, as Google's does, and the
    * arrows walk the rows from the top; Shift F10 or the Menu key lights the first row for the
-   * keyboard (docs/POLISH.md 2.6 item 74; audit-chrome item 48). Pointer unless said.
+   * keyboard (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 48). Pointer unless said.
    */
   openedBy?: 'pointer' | 'keyboard';
 };
@@ -116,7 +116,7 @@ export function contextMenuLabel(target: ContextTarget): string {
       return 'Chart menu';
     case 'guide':
       return 'Guide menu';
-    /* the polish round (docs/POLISH.md 2.6 item 71): the table's frame is the object's menu */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 71): the table's frame is the object's menu */
     case 'table':
       return 'Object menu';
   }

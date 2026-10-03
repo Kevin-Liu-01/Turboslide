@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The cost probe (docs/SYNC.md 6.3; the drivers lane of the sync and costs round): the driver
+// The cost probe (docs/archive/rounds/SYNC.md 6.3; the drivers lane of the sync and costs round): the driver
 // `cost-probe` of the matrix rows `cost.*` and `sync.pull.no-listing`. One page state per process
 // for three minutes at human speed, in the shape of docs/gslides-parity/sync/audit-costs/measure.mjs:
 // a scratch deck made from /new through the product with its title typed, then the state; every
@@ -10,7 +10,7 @@
 // operation per `instance` is kept and the instances that answered are recorded (the counters are
 // per instance and a deployment routes each request to whichever instance is warm); the counts
 // are written beside the row's ceiling to the run's JSON, and the process exits 1 on a row over
-// its ceiling. The ceilings are the rows' (core-matrix.json, docs/SYNC.md 6.1: about 1.5 times the
+// its ceiling. The ceilings are the rows' (core-matrix.json, docs/archive/rounds/SYNC.md 6.1: about 1.5 times the
 // model's expected count after the fix and under today's measured count, question 4's default).
 //
 //   node scripts/probes/sync-cost-probe.mjs --base <origin> --row <id> --out <json>
@@ -58,7 +58,7 @@
 // The realtime round (docs/REALTIME.md section 2, 5.1 R5): the row `cost.redis.commands` reads
 // `INFO commandstats` on the deployment's Redis before and after an editing window and an idle
 // window of `--minutes` each (`--idle-minutes` sets the idle window apart) and counts the editor
-// hour as docs/SYNC.md 4.3 does, 12 editing minutes and 48 idle minutes, from the two rates
+// hour as docs/archive/rounds/SYNC.md 4.3 does, 12 editing minutes and 48 idle minutes, from the two rates
 // (`--minutes 12 --idle-minutes 48` drives the literal hour). The Redis URL comes from `--redis-url`,
 // else TURBOSLIDE_PROBE_REDIS_URL or REDIS_URL in the environment a wrapper set, and is never
 // printed (the JSON names its source, the host and the database number alone); without one, or
@@ -184,7 +184,7 @@ const SELF = fileURLToPath(import.meta.url);
 const USAGE =
   'usage: node scripts/probes/sync-cost-probe.mjs --base <origin> (--row <id> [--group <ids>] | --all [--rows <ids>]) --out <json> [--minutes 3] [--idle-minutes <n>] [--tier redis|blob|memory|do] [--redis-url <url>] [--room-host <host>] [--dashboard <json>] [--shots <dir>]';
 
-/** The ceilings of docs/SYNC.md 6.1 by row, as the interaction texts give them. */
+/** The ceilings of docs/archive/rounds/SYNC.md 6.1 by row, as the interaction texts give them. */
 export const CEILINGS = Object.freeze({
   'cost.editor-idle.calls': { functionPerMinute: 12, simplePerMinute: 40, advancedPerMinute: 11 },
   'cost.editor-hidden.calls': { functionPerMinute: 8, polls: 0 },
@@ -196,7 +196,7 @@ export const CEILINGS = Object.freeze({
   'cost.two-tabs-idle.calls': { list: 0, advancedPerMinute: 30 },
   'cost.show.calls': { functionRequests: 0, storeCalls: 0 },
   /* the pull's own listing: `storeCalls.lists.versions` (the pull reads records by number,
-     docs/SYNC.md 3.5); the deck's other listings inside the window (the prune's `snapshots/`, a
+     docs/archive/rounds/SYNC.md 3.5); the deck's other listings inside the window (the prune's `snapshots/`, a
      first open's `assets/`, the card render's `thumbs/`) are recorded beside it and never judged
      here (the sync and costs round's ship; VERIFICATION.md pass 2 F2 read `list` 1 from those) */
   'sync.pull.no-listing': { listVersions: 0, commits: 10 },
@@ -236,7 +236,7 @@ export const TIER_CEILINGS = Object.freeze({
   redis: Object.freeze({
     'cost.editor-idle.calls': { simplePerMinute: 10, advancedPerMinute: 2 },
     /* the Cloudflare phase (docs/CLOUDFLARE.md 2.2): the redis editing column restated from the
-       counters, 12 records at 5 advanced and 2 to 3 simple each (docs/SYNC.md 4.2's count;
+       counters, 12 records at 5 advanced and 2 to 3 simple each (docs/archive/rounds/SYNC.md 4.2's count;
        docs/REALTIME.md section 2 wrote 12 advanced for 12 records) */
     'cost.editor-editing.calls': { simplePerMinute: 40, advancedPerMinute: 65 },
     'cost.two-tabs-idle.calls': { advancedPerMinute: 2 },
@@ -307,7 +307,7 @@ export function commandDelta(before, after) {
 }
 
 /**
- * The editor hour from an editing window and an idle window (docs/SYNC.md 4.3: 12 editing
+ * The editor hour from an editing window and an idle window (docs/archive/rounds/SYNC.md 4.3: 12 editing
  * minutes and 48 idle minutes), each a command count over its minutes; the rates and the hour.
  */
 export function editorHour(editing, idle) {
@@ -444,7 +444,7 @@ export function counterHour(editing, idle, field) {
 /** The fractions of the window at which the five storeCalls samples are read. */
 export const SAMPLE_FRACTIONS = Object.freeze([1 / 3, 1 / 2, 2 / 3, 5 / 6, 1]);
 
-/** The counters' sliding window (docs/SYNC.md 6.3; blob-store.ts STORE_CALLS_WINDOW_MS). */
+/** The counters' sliding window (docs/archive/rounds/SYNC.md 6.3; blob-store.ts STORE_CALLS_WINDOW_MS). */
 export const STORE_WINDOW_MS = 60_000;
 /** The settle before a window: the counters read every SETTLE_EVERY_MS, for at most SETTLE_MAX_MS. */
 export const SETTLE_EVERY_MS = 10_000;
@@ -453,7 +453,7 @@ export const SETTLE_MAX_MS = 150_000;
 // ---------------------------------------------------------------------------------------------
 // the pure judgement, exported for the unit test (sync-cost-probe.test.mjs)
 
-/** simple is head plus get, advanced put plus list; del is free (docs/SYNC.md 4.2). */
+/** simple is head plus get, advanced put plus list; del is free (docs/archive/rounds/SYNC.md 4.2). */
 export function classifyStoreCalls(max) {
   const n = (k) => Number(max?.[k] ?? 0);
   const lists =
@@ -533,7 +533,7 @@ export function quietFor(id, storeCalls, own) {
 }
 
 /**
- * Judges one row from its counts (docs/SYNC.md 6.1). `counts` carries `functionPerMinute`,
+ * Judges one row from its counts (docs/archive/rounds/SYNC.md 6.1). `counts` carries `functionPerMinute`,
  * `functionRequests`, `polls`, `commits`, `landed`, `connected`, `mutual`, `failedRequests`, the
  * folded store calls (`store`, null when the counters were not read), `firstSampleStore` with the
  * probe's `own` reads inside that sample's window, `ownMax` (the most of them in any window
@@ -784,7 +784,7 @@ export function judgeRow(id, counts, where) {
         if (s.list > ceiling.list) over.push(`store list ${s.list}, ceiling none`);
       }
       if (ceiling.listVersions !== undefined) {
-        /* the pull row: judged on the pull's own listing, `lists.versions` (docs/SYNC.md 3.5);
+        /* the pull row: judged on the pull's own listing, `lists.versions` (docs/archive/rounds/SYNC.md 3.5);
            the deck's other listings inside the window are recorded by folder and never judged */
         if (s.lists) {
           const versions = Number(s.lists.versions ?? 0);
@@ -835,7 +835,7 @@ export function judgeRow(id, counts, where) {
       measures.push(storeNote);
     } else if (where === 'absent') {
       storeNote =
-        'sync.status carries no storeCalls on this build (docs/SYNC.md 6.3, B3): the store half is not driven';
+        'sync.status carries no storeCalls on this build (docs/archive/rounds/SYNC.md 6.3, B3): the store half is not driven';
     } else {
       storeNote = `no bearer for sync.status on ${BASE} (TURBOSLIDE_TOKEN or the hosts.json row): the store half is not driven`;
     }

@@ -134,7 +134,7 @@ describe('requireFlag and setFlag', () => {
   });
 });
 
-describe('the assist switch (docs/PRODUCT.md 6.3, 6.4; build/b7.md Product round)', () => {
+describe('the assist switch (docs/archive/rounds/PRODUCT.md 6.3, 6.4; build/b7.md Product round)', () => {
   it('is known to this server beside the schema’s twelve, on by default, with its meaning and its sentence', async () => {
     expect(STUDIO_FLAG_NAMES).toContain('assist');
     expect(STUDIO_FLAG_DEFAULTS.assist).toBe(true);
@@ -177,7 +177,7 @@ describe('the assist switch (docs/PRODUCT.md 6.3, 6.4; build/b7.md Product round
   });
 });
 
-// The two deployment variables of the features round (docs/FEATURES.md 4.7, 4.9; build/b6.md R5):
+// The two deployment variables of the features round (docs/archive/rounds/FEATURES.md 4.7, 4.9; build/b6.md R5):
 // read from the environment given, never from the flag reader, with the values the preview sets.
 describe('the features round variables', () => {
   it('reads TURBOSLIDE_LOGO_UPSTREAM as network, fixture or down', () => {
@@ -197,7 +197,7 @@ describe('the features round variables', () => {
     }
   });
 
-  it('no longer reads TURBOSLIDE_SVG_RASTER: the svg branch runs by default (docs/VECTOR.md 4.7)', async () => {
+  it('no longer reads TURBOSLIDE_SVG_RASTER: the svg branch runs by default (docs/archive/rounds/VECTOR.md 4.7)', async () => {
     const flags = (await import('./flags')) as Record<string, unknown>;
     expect(flags['SVG_RASTER_ENV']).toBeUndefined();
     expect(flags['svgRasterOn']).toBeUndefined();

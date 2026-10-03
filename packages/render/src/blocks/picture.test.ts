@@ -1,4 +1,4 @@
-// The svg picture on the sheet (docs/VECTOR.md 4.4, 6.3): a vector asset renders its svg file as
+// The svg picture on the sheet (docs/archive/rounds/VECTOR.md 4.4, 6.3): a vector asset renders its svg file as
 // the image's `src` at `object-fit: contain`, with `data-light` and `data-dark` for a tinted logo
 // and none for an upload; a ship one logo's untinted source draws the same way; a shot block of
 // the asset takes the svg through the resolver too; a raster picture renders as before.
@@ -101,7 +101,7 @@ function pictureImg(html: string, blockId: string): string {
   return rest.slice(start, rest.indexOf('>', start) + 1);
 }
 
-describe('the svg picture (docs/VECTOR.md 4.4)', () => {
+describe('the svg picture (docs/archive/rounds/VECTOR.md 4.4)', () => {
   it('draws an upload’s vector file at object-fit contain with no twin attributes', () => {
     const html = renderSlide(deck, canvas([picture('p', 'diagram')]), options('light')).html;
     const img = pictureImg(html, 'p');

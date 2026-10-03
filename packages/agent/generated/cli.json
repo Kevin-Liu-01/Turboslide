@@ -988,7 +988,7 @@
           "flag": "--id",
           "type": "string",
           "required": false,
-          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)"
+          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)"
         },
         {
           "key": "baseRevision",
@@ -4099,7 +4099,7 @@
           "flag": "--svg-vector",
           "type": "boolean",
           "required": false,
-          "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects"
+          "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects"
         },
         {
           "key": "baseline",

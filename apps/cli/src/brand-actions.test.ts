@@ -1,4 +1,4 @@
-// brand.get, brand.set and brand.reset over a deck folder (docs/PRODUCT.md 4.1, 8.3): the record
+// brand.get, brand.set and brand.reset over a deck folder (docs/archive/rounds/PRODUCT.md 4.1, 8.3): the record
 // is created at the shallowest missing ancestor, validated before the commit, read back by
 // brand.get, one Undo (the reducer's inverse) takes one field back, a reset removes the record or
 // one field and writes no revision when there is nothing to remove, and font.list answers the 26

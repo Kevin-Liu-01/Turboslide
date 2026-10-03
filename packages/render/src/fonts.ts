@@ -1,5 +1,5 @@
 // The @font-face emission for the catalog faces a deck uses (gslides-parity SPEC-5-amendments
-// A5 item 3; docs/PRODUCT.md 4.2; ported from round five's fonts.ts). A deck names a face by id
+// A5 item 3; docs/archive/rounds/PRODUCT.md 4.2; ported from round five's fonts.ts). A deck names a face by id
 // on a block's `typography.family` or on the brand kit's font roles (`brand.fonts`); the renderer
 // emits one @font-face group per used family (one rule per file: the upright and, where the
 // family ships one, the italic) and nothing for a family nobody uses, so a deck set in Inter alone
@@ -30,7 +30,7 @@ import { usedFontIds } from '@turboslide/fonts/used';
 // the schema only half lives in @turboslide/fonts/used so the editor page decides whether the
 // sheet needs the faces without loading the catalog's file table
 export { blockFamilies, usedFontIds } from '@turboslide/fonts/used';
-// the tabular figures flag per face (docs/FEATURES.md 3.1 item 4): the chrome's Tabular figures
+// the tabular figures flag per face (docs/archive/rounds/FEATURES.md 3.1 item 4): the chrome's Tabular figures
 // row reads it through this package, the chrome depending on the renderer and not on the fonts
 // package (the rule fontRows below states)
 export { hasTabularFigures } from '@turboslide/fonts/summary';
@@ -99,7 +99,7 @@ export function deckFontsCss(
 }
 
 /**
- * The catalog's rows as `font.list` answers them (docs/PRODUCT.md 4.2), for the chrome's Font
+ * The catalog's rows as `font.list` answers them (docs/archive/rounds/PRODUCT.md 4.2), for the chrome's Font
  * dropdown: the chrome depends on this package and not on the fonts package, and the light table
  * behind the rows weighs a few kilobytes, so the dropdown lists the faces without a fetch.
  */

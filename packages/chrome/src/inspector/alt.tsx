@@ -13,7 +13,7 @@ import type { SectionWrite } from './fields';
  * action writes the block's own `alt`, or the asset's description on a block that shows an asset
  * (two pictures of one asset share one description), and its output names where it went.
  *
- * The focus (docs/POLISH.md 2.5 item 45; the polish round's fix round 2, the row
+ * The focus (docs/archive/rounds/POLISH.md 2.5 item 45; the polish round's fix round 2, the row
  * `images.alt.focused-empty`): the panel focuses the field marked `data-autofocus` when a row
  * opens it at this section (FormatOptions.tsx), a call that does nothing while the field is not
  * drawn or not enabled yet. The section hands the focus to its own field once the field is drawn
@@ -106,7 +106,7 @@ export function AltTextSection({ block, asset, write }: AltTextSectionProps) {
   return (
     <label className="ts-fo-alt">
       <span className="ts-fo-field-label">{words.description}</span>
-      {/* the field the panel focuses when a row opens it on this section (docs/POLISH.md item 45;
+      {/* the field the panel focuses when a row opens it on this section (docs/archive/rounds/POLISH.md item 45;
           FormatOptions.tsx reads data-autofocus, build/b4.md R3), so the seller types at once */}
       <textarea
         ref={field}

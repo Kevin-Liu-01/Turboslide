@@ -8,7 +8,7 @@
    surface stays monochrome. Motion is opacity and transform only; the reduced motion block at
    the end goes still. */
 
-/* ---- the identity chip (11 6.1; docs/PEOPLE.md 3.4): the 1 px ring, a 1 px paper gap inside it
+/* ---- the identity chip (11 6.1; docs/archive/rounds/PEOPLE.md 3.4): the 1 px ring, a 1 px paper gap inside it
    (the padding), then the field drawn at size - 4 by IdentityChip, so no cell, picture edge or
    stripe touches the ring ---- */
 .ts-chip {
@@ -71,7 +71,7 @@
   pointer-events: none;
 }
 
-/* the verified badge after a name on the text surfaces (docs/PEOPLE.md 3.7): the 14 px check
+/* the verified badge after a name on the text surfaces (docs/archive/rounds/PEOPLE.md 3.7): the 14 px check
    badge in --pt-ink-2, never in a hue; its accessible word is "signed in" */
 .ts-trust-mark {
   display: inline-flex;
@@ -199,7 +199,7 @@
 }
 
 /* with nobody else present the chip keeps its track and draws nothing, like the empty chip slots
-   (docs/RETURN.md 4.3; return/audit-chrome.md row 25 read an empty 32 by 24 box); from the first
+   (docs/archive/rounds/RETURN.md 4.3; return/audit-chrome.md row 25 read an empty 32 by 24 box); from the first
    other person it draws a people glyph and opens the roster, and `+N` once a fifth joins
    (PresenceSlot.tsx; return/build/b4.md request 6) */
 .ts-presence-more.is-empty {
@@ -220,7 +220,7 @@
   text-align: left;
 }
 
-/* the rule between the +N chip and the own chip: a vertical divider inside a row (docs/RETURN.md
+/* the rule between the +N chip and the own chip: a vertical divider inside a row (docs/archive/rounds/RETURN.md
    4.2 item 2), --pt-hair, 1 px wide, 24 px tall beside the 24 px chips, in its own 1 px track with
    the 8 px and 7 px tracks around it as its air */
 .ts-presence-rule {

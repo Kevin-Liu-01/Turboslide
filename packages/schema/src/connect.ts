@@ -9,7 +9,7 @@
 // references; a connector alone drops them. A connector moved by its own body detaches from the
 // targets that stayed (`detachMovedConnectors`), and an elbow or curved connector takes the axis
 // it leaves and arrives along from the sites its ends sit on (`connectorAxis`; the polish round,
-// docs/POLISH.md items 27 and 33), the S when both sites face one axis and the L when they do
+// docs/archive/rounds/POLISH.md items 27 and 33), the S when both sites face one axis and the L when they do
 // not. Pure over the document; the editor's gesture end, the Size &
 // rotation fields, block.align, block.distribute, block.rotate, block.flip and the store action
 // handlers of block.set /pos call it.
@@ -80,7 +80,7 @@ function axisOfAngle(angle: number): ConnectorLegAxis {
 
 /**
  * The axis a connector leaves and arrives along, from the sites its ends sit on (the polish round,
- * docs/POLISH.md item 33; audit-objects item 16: the curve from A's bottom site ran along A's
+ * docs/archive/rounds/POLISH.md item 33; audit-objects item 16: the curve from A's bottom site ran along A's
  * bottom edge). Each attached end takes the axis its site faces and a loose end takes the other's.
  * Two ends on one axis give the S of `bentConnector3`, horizontal or vertical; ends on different
  * axes give the L of `bentConnector2`, named as the leaving axis then the arriving one (the fix
@@ -395,7 +395,7 @@ export function followConnectors(slide: Slide, movedIds: ReadonlyArray<BlockId>)
 
 /**
  * The `block.set /connect` mutations that detach a connector moved by its body from every target
- * that did not move with it (the polish round, docs/POLISH.md item 27; audit-objects item 7: the
+ * that did not move with it (the polish round, docs/archive/rounds/POLISH.md item 27; audit-objects item 7: the
  * moved connector drew dangling and snapped back on the target's next move). Google detaches
  * both ends of a dragged connector; a selection moved as one keeps the attachments between its
  * members, since the ends still lie on their sites. The editor's free-move gesture and the arrow

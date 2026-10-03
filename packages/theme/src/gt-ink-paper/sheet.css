@@ -22,17 +22,17 @@
   /* --edge and --thumb are viewer chrome tokens (head:178-179); the sheet mat and the frames use them */
   --edge: rgba(7, 7, 7, 0.62);
   --thumb: rgba(7, 7, 7, 0.32);
-  /* the brand kit's key colours (docs/PRODUCT.md 4.1): --blue is GT blue, the Primary role
+  /* the brand kit's key colours (docs/archive/rounds/PRODUCT.md 4.1): --blue is GT blue, the Primary role
      (links, the key colour of charts and highlights; the schema's `blue` colour reads it),
      --accent the second colour, the same value until a kit sets it apart */
   --blue: #2f5ce0;
   --accent: #2f5ce0;
-  /* the metric matched fallback face second in both stacks (docs/FEATURES.md 3.1 item 3;
+  /* the metric matched fallback face second in both stacks (docs/archive/rounds/FEATURES.md 3.1 item 3;
      audit-fonts 6): 'Inter Fallback' is inter.css's local Arial with size-adjust and the three
      overrides, so a first paint holds Inter's line boxes until the woff2 lands */
   --display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
   --text: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
-  /* the display features beside the display face (docs/FEATURES.md 3.1 item 5; audit-fonts 7):
+  /* the display features beside the display face (docs/archive/rounds/FEATURES.md 3.1 item 5; audit-fonts 7):
      cv11 and ss01 are Inter's alternates (docs/brand.md section 3) and 17 catalog families carry
      an ss01 of their own with another meaning, so a brand kit that sets another display face
      writes `normal` here (packages/render theme-css.ts) and a block in another family writes
@@ -160,7 +160,7 @@
   display: block;
 }
 
-/* the brand kit's layer (docs/PRODUCT.md 4.1, 4.4; render slide.ts renderKitLayer): the frame
+/* the brand kit's layer (docs/archive/rounds/PRODUCT.md 4.1, 4.4; render slide.ts renderKitLayer): the frame
    band's logo and text and a corner logo, drawn from the kit record inside every slide in sheet
    coordinates (the layer sits at the sheet origin the way .freeform-sheet does), so every surface
    that renders slides carries them and nothing on the sheet selects or drags them; the stage's
@@ -224,7 +224,7 @@
   max-width: 120px;
   object-fit: contain;
 }
-/* the footer text draws on the title slide too (docs/POLISH.md 2.5 item 49, B4's request R13 in
+/* the footer text draws on the title slide too (docs/archive/rounds/POLISH.md 2.5 item 49, B4's request R13 in
    polish/build/b4.md, with the integrator's I3 in render/stage.ts bandForSlide: the brand panel's
    sentence says every slide, and the sheet no longer hides it while is-title-slide is on) */
 .ts-sheet .ts-kit-footer {
@@ -884,14 +884,14 @@
    rule under every row, the header row at display weight 500 with an ink rule under it,
    text-align per column, a plate fill per column, the vertical alignment through align-items, the
    .rows size ladder (packages/render blocks/table.ts). The cells take tabular figures (the rule
-   below; docs/FEATURES.md 3.1 item 4, audit-fonts 2: a column of amounts did not align, "1111"
+   below; docs/archive/rounds/FEATURES.md 3.1 item 4, audit-fonts 2: a column of amounts did not align, "1111"
    34.81 px against "0000" 56.01 px at 22 px). The parity fix round had kept them proportional
    because a PPTX run carries no OpenType feature, so the a:tbl of the Editable text export draws
    proportional digits and a tabular "1" in a right aligned cell measured 4 to 6 px outside the
    3 px cell budget (focus b2.md); that export difference stands and is recorded in
    docs/gslides-parity/features/build/b2.md, the sheet's alignment wins. */
 .ts-sheet .table {
-  /* one grid of rows (docs/OBJECTS.md 3.3 item 3): the renderer writes the row tracks inline as
+  /* one grid of rows (docs/archive/rounds/OBJECTS.md 3.3 item 3): the renderer writes the row tracks inline as
      minmax(<track>px, auto), a floor per row from the ladder or the row's set height, so a row
      grows with its text and a positioned table's slack stretches every row alike (block-css.ts
      `.free > .table`); the classic form's rows are the items of this one column, the grid form
@@ -912,7 +912,7 @@
   align-items: var(--table-valign, start);
   border-bottom: var(--table-rule, 1px) solid var(--hair);
 }
-/* the header row's display weight and ink rule draw only once the row holds text (docs/POLISH.md
+/* the header row's display weight and ink rule draw only once the row holds text (docs/archive/rounds/POLISH.md
    2.1 item 3; Google draws equal borders on every row and a header is styling the seller adds):
    the renderer marks such a row `has-text` (packages/render blocks/table.ts), and on the editor's
    stage, whose markup is frozen while a cell is edited, the first character typed into an open
@@ -925,7 +925,7 @@
   letter-spacing: -0.01em;
   border-bottom-color: var(--ink);
 }
-/* a table cell draws no prompt (docs/POLISH.md 2.1 item 1, Kevin's screenshot: "Type to add
+/* a table cell draws no prompt (docs/archive/rounds/POLISH.md 2.1 item 1, Kevin's screenshot: "Type to add
    text" wrapped in a narrow cell, grew the row and ran the guide grid past the ring); the cell
    ring and the caret say where typing goes. The stage no longer appends one; a prompt that
    reaches a cell by any other path takes no room */
@@ -937,7 +937,7 @@
   min-width: 0;
   padding: 12px 16px;
   overflow-wrap: anywhere;
-  /* a cell fills its row's track in both forms (docs/OBJECTS.md 3.2, 3.3 item 1: the cell ring
+  /* a cell fills its row's track in both forms (docs/archive/rounds/OBJECTS.md 3.2, 3.3 item 1: the cell ring
      is the cell's grid area, the full row height): the fill covers the row, as Google's does
      and as the a:tbl the export writes, and the vertical alignment moves to the content */
   align-self: stretch;
@@ -962,7 +962,7 @@
   font-size: 15px;
 }
 
-/* Tabular figures where numbers align (docs/FEATURES.md 3.1 item 4; audit-fonts 2): every table
+/* Tabular figures where numbers align (docs/archive/rounds/FEATURES.md 3.1 item 4; audit-fonts 2): every table
    cell (the block's .td spans and an imported block's td and th), the chart's value axis, category
    and value labels, and the status board's state and address cells; running text stays
    proportional. A block's Tabular figures row writes the same declaration inline

@@ -449,7 +449,7 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       'plate',
       'edge',
     ] as const) {
-      /* the chrome's light titanium reads #6f747d since the product round (docs/PRODUCT.md 3.1:
+      /* the chrome's light titanium reads #6f747d since the product round (docs/archive/rounds/PRODUCT.md 3.1:
          4.7 to 1 on paper for the save words, the menu keys and the filmstrip numbers); the
          sheet's titanium of tokens.ts is the deck grammar's and stays */
       if (name === 'titanium') expect(light[`pt-${name}`]).toBe('#6f747d');
@@ -461,12 +461,12 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
     }
     /* the dark remap gains exactly the names below and nothing else that is not a colour of
        tokens.ts: the two of round four (the selection colour and the guide), and the three of the
-       return round (docs/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over the
+       return round (docs/archive/rounds/RETURN.md 4.1, 4.2 item 3): the line and the two grounds drawn over the
        solid ink of the Slideshow split button, each a paper tint over ink with no colour */
     expect(
       Object.keys(dark).filter((name) => !TOKENS.dark[name.slice(3) as keyof typeof TOKENS.dark]),
     ).toEqual([
-      /* the product round's two state tokens (docs/PRODUCT.md 3.1): the disabled ink and the field boundary */
+      /* the product round's two state tokens (docs/archive/rounds/PRODUCT.md 3.1): the disabled ink and the field boundary */
       'pt-disabled',
       'pt-field',
       'pt-hair-on-ink',
@@ -500,12 +500,12 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
 
 describe('site.ts (SPEC-4 1.4, 1.6)', () => {
   it('states the description, the alt text and the manifest with start_url /home and one purpose per icon', () => {
-    /* the polish round (docs/POLISH.md 3.6): the hero's lead, shared by the head, the manifest and the card */
+    /* the polish round (docs/archive/rounds/POLISH.md 3.6): the hero's lead, shared by the head, the manifest and the card */
     expect(SITE.description).toBe(
       "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
     );
     expect(SITE.description).not.toMatch(/—|!/);
-    /* the card of docs/POLISH.md 3.6: the lead's first sentence and the address on the plate */
+    /* the card of docs/archive/rounds/POLISH.md 3.6: the lead's first sentence and the address on the plate */
     expect(SITE.imageAlt).toBe(
       "The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither",
     );
@@ -526,7 +526,7 @@ describe('site.ts (SPEC-4 1.4, 1.6)', () => {
     const before = process.env.TURBOSLIDE_PUBLIC_ORIGIN;
     delete process.env.TURBOSLIDE_PUBLIC_ORIGIN;
     try {
-      /* docs/POLISH.md section 0 item 3: the production origin is the domain */
+      /* docs/archive/rounds/POLISH.md section 0 item 3: the production origin is the domain */
       expect(SITE.productionOrigin).toBe('https://www.turboslide.com');
       expect(SITE.origin()).toBe('https://www.turboslide.com');
       expect(SITE.origin('https://preview.example.com/')).toBe('https://preview.example.com');
@@ -705,7 +705,7 @@ describe('facts.json (SPEC-4 0.25)', () => {
     expect(facts.licence).toEqual({ name: 'MIT', source: 'LICENSE' });
     expect(readFileSync(`${REPO}/LICENSE`, 'utf8').startsWith('MIT License')).toBe(true);
     expect(facts.export.worstPageMismatchPercent).toBe(0.003);
-    expect(facts.export.source).toContain('docs/HOSTED-STATUS.md');
+    expect(facts.export.source).toContain('docs/archive/status/HOSTED-STATUS.md');
     expect(facts.parityRows.total).toBe(
       facts.parityRows.pass + facts.parityRows.fail + facts.parityRows.skip,
     );
@@ -714,7 +714,7 @@ describe('facts.json (SPEC-4 0.25)', () => {
     expect(facts.measured.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(facts.measured.profile).toBe('deployment');
     /* the numbers were measured on the deployment that served main when the domain was two
-       ship rounds behind it (docs/POLISH.md section 0); either origin is the production build's */
+       ship rounds behind it (docs/archive/rounds/POLISH.md section 0); either origin is the production build's */
     expect([SITE.productionOrigin, 'https://turboslide.vercel.app']).toContain(facts.measured.base);
     expect(existsSync(`${REPO}/${facts.measured.source}`)).toBe(true);
     expect(facts.measured.rows.length).toBeGreaterThan(50);

@@ -9,7 +9,7 @@ export const IDS = [
   'help.keyboard-shortcuts',
   'help.search-the-menus',
   'help.check-slides',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'help.shortcuts.no-duplicates',
   'help.shortcuts.question-key',
 ];
@@ -215,7 +215,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 2 rank 31, 3.1.1, 8.1): the Keyboard shortcuts
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 2 rank 31, 3.1.1, 8.1): the Keyboard shortcuts
  * dialog lists Redo once and its Common actions begin with New slide; Shift+/ opens it with no
  * snackbar. B1 owns the dialog and the key.
  */

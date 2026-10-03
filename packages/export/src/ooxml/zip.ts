@@ -49,7 +49,7 @@ export function slideNumber(path: string): number {
 
 /**
  * True for a part that is already compressed data and is stored rather than deflated. An svg
- * media part (docs/VECTOR.md 4.6) is text and deflates by about three quarters, so it is the one
+ * media part (docs/archive/rounds/VECTOR.md 4.6) is text and deflates by about three quarters, so it is the one
  * media part that is deflated.
  */
 export function isStoredPart(path: string): boolean {

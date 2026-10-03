@@ -1,4 +1,4 @@
-/* The You need access page's sign in region (docs/POLISH.md item 98; audit-pages item 35): the
+/* The You need access page's sign in region (docs/archive/rounds/POLISH.md item 98; audit-pages item 35): the
    route's own sentence carries the sign in path with its link in ink (-access-page.tsx), so the
    chrome's question "Invited by email? …" (YouNeedAccess.tsx `ACCESS_PAGE.invited`) stays hidden
    until it leaves the chrome (build/b5.md R8); two sentences that say one thing read as a page

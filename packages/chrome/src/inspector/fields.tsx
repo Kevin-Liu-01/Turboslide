@@ -59,7 +59,7 @@ export function NumberField({
   const [draft, setDraft] = useState<string | null>(null);
   /* the draft as the handlers read it: Enter commits and blurs in one event, and the blur's
      commit read the draft of the render its handler was bound in, so one typed width made two
-     writes and two history entries and the first Cmd+Z restored nothing (docs/RETURN.md 2.14
+     writes and two history entries and the first Cmd+Z restored nothing (docs/archive/rounds/RETURN.md 2.14
      item 3; audit-formatting rows 13, 64 to 66). The ref is cleared before the write */
   const draftRef = useRef<string | null>(null);
   const clamp = (n: number) => Math.min(max ?? Infinity, Math.max(min ?? -Infinity, n));

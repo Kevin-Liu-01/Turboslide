@@ -8,7 +8,7 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { ASSISTANT_NAME } from '@turboslide/store/store';
 
 /**
- * The pure half of Accept (docs/PRODUCT.md 6.1, 6.2, 6.4), shared by the seller's page (the
+ * The pure half of Accept (docs/archive/rounds/PRODUCT.md 6.1, 6.2, 6.4), shared by the seller's page (the
  * controller's `acceptAssist`, which commits the plan through the editor's own commit so it is
  * one undo step on the seller's stack) and the server (`server/assist.ts`, after the signature
  * check the page cannot make): the card's rows re based on the document as it stands, the

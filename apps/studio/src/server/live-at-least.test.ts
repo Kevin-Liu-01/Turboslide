@@ -6,7 +6,7 @@ import { freeformDocument } from '@turboslide/schema/fixtures';
 import { LIVE_AT_LEAST_ATTEMPTS, LIVE_AT_LEAST_PAUSE_MS, liveAtLeast } from './room';
 import type { Room } from './room';
 
-// The restore's resync bound on the blob tier (the product round, docs/PRODUCT.md 8.2 the
+// The restore's resync bound on the blob tier (the product round, docs/archive/rounds/PRODUCT.md 8.2 the
 // recorded classes; RETURN ship.md section 5 `versions.undo-restore`): a reader that names the
 // revision it learned from a write's answer gets a document at or above it once the mirror
 // catches up, inside about three seconds, and the bound costs the request's own syncs alone.

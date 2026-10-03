@@ -9,7 +9,7 @@ import './YouNeedAccess.css';
 
 /**
  * The You need access page (gslides-parity SPEC-3 6.5, 6.8, 9.3; research 09 4.4, 8.5;
- * docs/PRODUCT.md 3.3): one page for a restricted and a missing deck (HTTP 404), server rendered.
+ * docs/archive/rounds/PRODUCT.md 3.3): one page for a restricted and a missing deck (HTTP 404), server rendered.
  * "This presentation is not available to you, or does not exist.", then the links a stranger can
  * use (Your presentations, New presentation) above the request form, and the form only where the
  * deployment has someone to ask (`requestForm`; under `TURBOSLIDE_AUTHORIZE=shadow` with anonymous

@@ -35,7 +35,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
-// The Shader gallery (docs/FEATURES.md 5.4; the rows shaders.insert.gallery-thumbnails and the P1
+// The Shader gallery (docs/archive/rounds/FEATURES.md 5.4; the rows shaders.insert.gallery-thumbnails and the P1
 // shaders.insert.gallery-hover-live of 7.1): the dialog titled Shader with the black and white
 // sentence under the title; one card per available catalog entry in the catalog's gallery order,
 // each with its still (B5's `@turboslide/materials/previews` file; a plate with no text when the

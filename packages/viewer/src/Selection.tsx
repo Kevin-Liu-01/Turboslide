@@ -291,7 +291,7 @@ export type PressPlan =
    * a plain press: `select` when the object joins the selection alone (it was not selected, or a
    * group member the seller has not entered stands in for its group), and `drag` when the press
    * arms the move gesture, which a move past its threshold turns into the drag of the whole
-   * selection. On a table the press names the cell it landed in (docs/FEATURES.md 2.1, the
+   * selection. On a table the press names the cell it landed in (docs/archive/rounds/FEATURES.md 2.1, the
    * amended A1 for tables alone): `caret` is the cell a pointer up without a move opens with the
    * caret at the click point, and `range` says a move past the threshold selects the cells from
    * that cell instead of moving the table, because the table is already the one selected object
@@ -326,7 +326,7 @@ export type PressPlan =
  * drag, the right click and the Shift click). Commenting and Viewing mode select for a comment's anchor and never
  * drag (SPEC-3 5.3, 6.3). The paint tool and the modifiers keep their rules.
  *
- * The table's amendment (docs/FEATURES.md 2.1, 2.2 ranks 2 and 4; question 8 of its section 9
+ * The table's amendment (docs/archive/rounds/FEATURES.md 2.1, 2.2 ranks 2 and 4; question 8 of its section 9
  * records the alternative): rules 1 and 3 of A1 are amended for tables alone. A pointer down in a
  * cell of an unselected table followed by a move past the threshold still drags the table (rule
  * 2, decided at the threshold before any caret); a pointer up without a move selects the table
@@ -421,7 +421,7 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
   pair: 'Images',
   tiles: 'Image grid',
   details: 'Detail grid',
-  /* the features round, ship two (docs/FEATURES.md 5.1): a shader block reads Shader */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.1): a shader block reads Shader */
   material: 'Shader',
   table: 'Table',
   rows: 'List',
@@ -452,7 +452,7 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
 /**
  * The name the chip and the accessible label use for a block: its type in Google's words (SPEC
  * 13.7), never its id. `assets` is the deck's asset table: a picture whose asset carries the
- * `logo` role reads Logo (docs/FEATURES.md 4.4; the features round's build/b6.md R6, the row
+ * `logo` role reads Logo (docs/archive/rounds/FEATURES.md 4.4; the features round's build/b6.md R6, the row
  * `logos.insert.logo-size` reads the chip); without the table the picture reads Image.
  */
 export function blockDisplayName(
@@ -460,7 +460,7 @@ export function blockDisplayName(
   blockId: string,
   assets?: Readonly<Record<string, { role?: string } | undefined>>,
 ): string {
-  /* a block the assistant wrote reads Assistant until the seller edits it (docs/PRODUCT.md 6.1; build/b6.md R6) */
+  /* a block the assistant wrote reads Assistant until the seller edits it (docs/archive/rounds/PRODUCT.md 6.1; build/b6.md R6) */
   const marked = blockById(slide, blockId);
   if (marked !== undefined && assistMark(marked.ext) !== undefined) return 'Assistant';
   if (
@@ -470,10 +470,10 @@ export function blockDisplayName(
     assets[marked.asset]?.role === 'logo'
   )
     return 'Logo';
-  /* a line shape reads its kind, as Google's chip does (docs/OBJECTS.md 4.2 item 5): Line, Arrow,
+  /* a line shape reads its kind, as Google's chip does (docs/archive/rounds/OBJECTS.md 4.2 item 5): Line, Arrow,
      Elbow connector, Curved connector, Curve, Polyline, Scribble; a closed preset stays Shape */
   if (marked?.type === 'shape' && isLineKind(marked.shape)) return LINE_KIND_LABELS[marked.shape];
-  /* a text block with an outline is word art (docs/POLISH.md 2.4 item 34; polish/build/b3.md
+  /* a text block with an outline is word art (docs/archive/rounds/POLISH.md 2.4 item 34; polish/build/b3.md
      request 6): the chip and the menus name it so; a text box without one stays Text box */
   if (marked?.type === 'text' && marked.outline !== undefined) return 'Word art';
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
@@ -519,7 +519,7 @@ export function blockFamily(type: string | undefined): BlockFamily {
 }
 
 /**
- * True for a member of a diagram's group (docs/POLISH.md 2.4 item 30): `diagram.insert` tags
+ * True for a member of a diagram's group (docs/archive/rounds/POLISH.md 2.4 item 30): `diagram.insert` tags
  * the members with the diagram kind's own id (`process`, `process-2`; store-actions.ts
  * `diagramInsert` through `freeId`), while a group made by hand is tagged `group`. The double
  * click on such a member's text selects the word at the point, as on a shape's label.

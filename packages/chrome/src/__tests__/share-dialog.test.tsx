@@ -150,7 +150,7 @@ async function flush(): Promise<void> {
   });
 }
 
-/** Opens the second stage of the dialog (docs/PRODUCT.md section 2 rank 3): the More row. */
+/** Opens the second stage of the dialog (docs/archive/rounds/PRODUCT.md section 2 rank 3): the More row. */
 function openMore(): void {
   const more = document.querySelector('[data-control="dialog.share.more"]');
   if (more === null) throw new Error('no More row');
@@ -455,7 +455,7 @@ describe('ShareDialog', () => {
     const { state, say } = host(
       baseInput({
         dispatch: dispatch as unknown as EditorShellInput['dispatch'],
-        /* the links table is drawn under Anyone with the link alone (docs/POLISH.md item 96):
+        /* the links table is drawn under Anyone with the link alone (docs/archive/rounds/POLISH.md item 96):
            under Restricted no link opens the presentation */
         access: restricted({ generalAccess: { mode: 'link' as const, role: 'viewer' as const } }),
         role: 'owner',
@@ -986,7 +986,7 @@ describe('ShareDialog', () => {
   });
 });
 
-// The product round (docs/PRODUCT.md section 2 ranks 3 and 4; the rows share.dialog.one-link,
+// The product round (docs/archive/rounds/PRODUCT.md section 2 ranks 3 and 4; the rows share.dialog.one-link,
 // share.dialog.slideshow-checkbox, share.dialog.more-row and share.dialog.you-label): the first
 // stage holds the access select, its sentence, one address field with one Copy link and the show
 // checkbox; the rest sits behind More; the own row reads You.
@@ -1007,7 +1007,7 @@ describe('the two stages of the Share dialog (product round)', () => {
   });
 
   it('names what each access does in one sentence, with no instruction after it', () => {
-    /* docs/POLISH.md items 78 and 96: one statement per access, the same on every deployment */
+    /* docs/archive/rounds/POLISH.md items 78 and 96: one statement per access, the same on every deployment */
     expect(accessSentence('link', 'editor', 'shadow')).toBe(
       'Anyone with the link can open and edit this presentation',
     );

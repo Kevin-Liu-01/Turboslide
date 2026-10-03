@@ -12,7 +12,7 @@ import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
 import { hideTooltip } from '../Tooltip';
 
-// The toolbar's Paint format button reads pressed while the stage's brush is armed (docs/POLISH.md
+// The toolbar's Paint format button reads pressed while the stage's brush is armed (docs/archive/rounds/POLISH.md
 // 2.3 item 18; the polish round fix round 3, B5's R19): the head follows the stage handle's
 // `subscribePaint` and `paintArmed` as a store, so an arm on the title placeholder, whose write
 // path has no block, shows on the button the moment the stage tells it; a shell without a stage
@@ -135,7 +135,7 @@ afterEach(async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
 });
 
-describe('the Paint format button and the brush (docs/POLISH.md 2.3 item 18)', () => {
+describe('the Paint format button and the brush (docs/archive/rounds/POLISH.md 2.3 item 18)', () => {
   it('reads pressed while the stage says the brush is armed, and not pressed once it disarms', () => {
     const stage = brush();
     const { container } = render(<Harness input={input({ editor: stage.editor })} />);

@@ -1,4 +1,4 @@
-// The shaders of a slide as the exporters read them (docs/FEATURES.md 5.5, the exporters;
+// The shaders of a slide as the exporters read them (docs/archive/rounds/FEATURES.md 5.5, the exporters;
 // audit-shaders 9): each material block with its recipe, the frame asset the block names, the
 // frame file under the deck's `assets/` and whether the frame is missing or stale by the reading
 // this package can make without the materials package (a frame captured before the features round

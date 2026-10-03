@@ -47,7 +47,7 @@
   min-width: 18px;
 }
 
-/* The Tabular figures row (docs/FEATURES.md 3.1 item 4): the label stacks its sentence under the
+/* The Tabular figures row (docs/archive/rounds/FEATURES.md 3.1 item 4): the label stacks its sentence under the
    word in 11px titanium, so the row reads as a seller's sentence and not a typographer's term;
    the check row at the right is the check control's own (check.css). A disabled row (a face
    without tnum) keeps the sentence, which then names the reason. */

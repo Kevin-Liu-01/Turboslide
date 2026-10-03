@@ -3,7 +3,7 @@
 // its ECMA-376 `prstGeom` name and the names of its adjust guides, read from the committed
 // definitions file (shapes/definitions.ts, generated from presetShapeDefinitions.xml). The
 // geometry (`shapePath`, `textInset`, `sites`, `shapeGeometry`) is evaluated by the interpreter
-// in shapes/geometry.ts from the same file (docs/VECTOR.md 2.1, 2.2; SPEC-2 0.57), so the sheet,
+// in shapes/geometry.ts from the same file (docs/archive/rounds/VECTOR.md 2.1, 2.2; SPEC-2 0.57), so the sheet,
 // the picker's glyphs, the Perfect export and PowerPoint draw one shape: every preset answers its
 // own path list, its ECMA text rectangle and its own connection sites, and `rect` alone keeps the
 // eight sites of a rectangle (its four then the corners) so a stored `connect.site` keeps its
@@ -416,7 +416,7 @@ function boxGeometry(w: number, h: number): Geometry {
 }
 
 /**
- * The whole geometry of a shape at a size with its adjust values (docs/VECTOR.md 2.2): the
+ * The whole geometry of a shape at a size with its adjust values (docs/archive/rounds/VECTOR.md 2.2): the
  * preset's evaluated definition, with `rect` alone keeping eight sites (the four of its ECMA list,
  * whose order matches `rectSites`, then the four corners appended), so a stored `connect.site` on
  * a rectangle keeps its meaning; a line kind and an unknown kind answer the box's geometry.
@@ -458,7 +458,7 @@ export function shapePath(
  * right arrow's is the shaft), the whole box for a line kind or an unknown kind. The `.shape-text`
  * layer sits here; the Editable PPTX export subtracts this rectangle from the measured insets so
  * PowerPoint, which applies the preset's own rectangle, does not inset the text twice
- * (docs/VECTOR.md 2.3, 2.5).
+ * (docs/archive/rounds/VECTOR.md 2.3, 2.5).
  */
 export function textInset(
   kind: string,

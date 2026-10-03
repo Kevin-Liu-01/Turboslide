@@ -95,7 +95,7 @@ export type InspectorProps = {
 
 /**
  * The material block fields the Format options Shader section edits (blocks/material.ts
- * MaterialRecipe; the features round, ship two, docs/FEATURES.md 5.3): round one's Material
+ * MaterialRecipe; the features round, ship two, docs/archive/rounds/FEATURES.md 5.3): round one's Material
  * section left this panel with the round, so the Block section keeps the rest alone.
  */
 const MATERIAL_RECIPE_PATHS = new Set([

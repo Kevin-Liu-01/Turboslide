@@ -33,10 +33,10 @@ import {
  * fifth person joins) opens the roster (4.5), whose row for each person offers Follow (4.4), Stop
  * while they are followed, or Go to slide where Follow is refused; the own chip opens the own
  * chip's menu (7.5). The row's width never changes when a person joins or leaves. The slot itself
- * carries a tooltip naming who is in the presentation now (docs/PRODUCT.md section 2 rank 30;
+ * carries a tooltip naming who is in the presentation now (docs/archive/rounds/PRODUCT.md section 2 rank 30;
  * audit-seller 32).
  *
- * The polish round (docs/POLISH.md item 104; the row collab.follow.anonymous-editor): before it a
+ * The polish round (docs/archive/rounds/POLISH.md item 104; the row collab.follow.anonymous-editor): before it a
  * chip's click followed the person at once and a second click stopped, with no word on screen,
  * and the roster row's click toggled the same state, so a seller who clicked a chip to see who it
  * was started following, and a click on the roster row after a chip click stopped a follow just
@@ -96,7 +96,7 @@ export function PresenceSlot() {
   const presence = input.presence ?? EMPTY;
   const viewer = viewerFactsOf(input.access, presence);
   const { shown, more } = slotChips(presence.others);
-  /* the own chip reads what others see (docs/PEOPLE.md 3.11): one source with the roster's own
+  /* the own chip reads what others see (docs/archive/rounds/PEOPLE.md 3.11): one source with the roster's own
      row, the account head, the Profile head, the version rows and the Share dialog */
   const self = meOf({ account: input.account, presence });
   const [roster, setRoster] = useState<HTMLElement | null>(null);
@@ -158,9 +158,9 @@ export function PresenceSlot() {
               name: following
                 ? PRESENCE.following(participant.name ?? participant.label)
                 : chipTipOf(participant, viewer, n),
-              /* the trust sentence first (docs/PEOPLE.md 3.7), then what a click does: the chip's
+              /* the trust sentence first (docs/archive/rounds/PEOPLE.md 3.7), then what a click does: the chip's
                  click is the one time jump; Follow is in the list while its row is offered
-                 (docs/POLISH.md item 104) */
+                 (docs/archive/rounds/POLISH.md item 104) */
               doc: chipTipDocOf(
                 participant,
                 viewer,
@@ -183,7 +183,7 @@ export function PresenceSlot() {
         );
       })}
       {/* the roster's opener: `+N` once a fifth person joins, a people glyph while the chips fit,
-          and nothing drawn while nobody else is present (docs/RETURN.md 4.3: no empty box). The
+          and nothing drawn while nobody else is present (docs/archive/rounds/RETURN.md 4.3: no empty box). The
           roster (Go to slide with the person's slide and role) needs an opener from the first other
           person, which the empty box was before the rule hid it (return/build/b4.md request 6,
           collab.roster.go-to-slide) */}

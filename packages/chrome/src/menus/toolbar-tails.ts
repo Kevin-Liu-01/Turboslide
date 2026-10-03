@@ -24,7 +24,7 @@ import { TOOLBAR_TAIL_DEFAULT, evaluate, shortcut } from './model.ts';
  *
  * The focus round (docs/FOCUS.md 3.3) parks a control with `advanced: true`: it leaves the tail
  * while Tools > Advanced tools is off (`presentControls` in ToolbarTail.tsx) and draws as before
- * with it on. The return round (docs/RETURN.md 3.2) brings back Highlight color on the text tail,
+ * with it on. The return round (docs/archive/rounds/RETURN.md 3.2) brings back Highlight color on the text tail,
  * the shape, line, table, chart and group tails whole and the pointer toggle of the tail end with
  * the live pointers; what stays parked is the text tail's fill and border controls (question 8 of
  * RETURN.md section 9), Change shape on the shape tail (with the galleries, 2.9), the image tail's
@@ -34,7 +34,7 @@ import { TOOLBAR_TAIL_DEFAULT, evaluate, shortcut } from './model.ts';
 export type TailKind =
   | 'default'
   | 'text'
-  /** a text block with an outline (docs/OBJECTS.md 4.2 item 4): the shape tail's fill and border controls lead the text tail */
+  /** a text block with an outline (docs/archive/rounds/OBJECTS.md 4.2 item 4): the shape tail's fill and border controls lead the text tail */
   | 'wordart'
   | 'shape'
   | 'image'
@@ -42,7 +42,7 @@ export type TailKind =
   | 'table'
   | 'chart'
   | 'group'
-  /* the features round, ship two (docs/FEATURES.md 5.3): a shader block's tail */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): a shader block's tail */
   | 'material'
   | 'other';
 
@@ -84,7 +84,7 @@ export type TailControl = ToolbarControl & {
 };
 
 /**
- * The Font dropdown (docs/PRODUCT.md 3.4, 4.2): the catalog behind the control. `FONTS_PARKED`
+ * The Font dropdown (docs/archive/rounds/PRODUCT.md 3.4, 4.2): the catalog behind the control. `FONTS_PARKED`
  * is the ship's switch for the `fonts` feature (8.2, the parks rule): with it false the control is
  * the dropdown; with it true the tail draws the family as a read only value with the same
  * tooltip and no chevron, and `chrome.toolbar.fold-any-width` accepts either drawing.
@@ -116,7 +116,7 @@ export const WORDART_TAKES_DASH: boolean = ((): boolean => {
  * Fill, border colour, border weight and border dash, the first four of every object tail (R02
  * 4.2). On a text block the fill needs a box; the border colour and weight need a box or word art
  * (an outlined text block writes its outline, SPEC-2 0.62); the dash needs a box. On word art
- * (docs/OBJECTS.md 4.2 item 4; ship one P1 item 10) the four apply to the letters and their
+ * (docs/archive/rounds/OBJECTS.md 4.2 item 4; ship one P1 item 10) the four apply to the letters and their
  * outline: Fill color writes `color`, Border color `outline.color`, Border weight `outline.width`
  * and Border dash `outline.dash` once the schema carries it.
  */
@@ -198,7 +198,7 @@ const MERGE_CONTROLS: TailControl[] = [
     status: 'now',
     item: 'format.table.mergeCells',
     /* drawn only with a cell range to merge, as Google's table toolbar offers Merge cells for a
-       range alone (docs/POLISH.md 2.6 item 74; audit-chrome item 45: Merge and Unmerge with
+       range alone (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 45: Merge and Unmerge with
        nothing to merge) */
     when: 'cellRangeSelected',
     enabled: 'cellRangeSelected',
@@ -227,7 +227,7 @@ const MERGE_CONTROLS: TailControl[] = [
  * `menu-model.test.ts` asserts both states through the `parked` argument.
  */
 /**
- * True when the toolbar's tail draws its write controls (docs/POLISH.md 2.6 item 58; audit-pages
+ * True when the toolbar's tail draws its write controls (docs/archive/rounds/POLISH.md 2.6 item 58; audit-pages
  * item 6, audit-chrome item 27): the caller holds the write capability and the mode is Editing.
  * A reader at /edit and Commenting mode get no tail control, since every tail control writes;
  * the tail's end (the pointer toggle, Hide the menus) and the head's view controls stay.
@@ -305,7 +305,7 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       dropdown: true,
       doc: 'Ink or muted on headings and paragraphs; the theme colors on selected text, text boxes and boxes',
     },
-    /* Highlight color: parked by docs/FOCUS.md 3.3, returned by docs/RETURN.md 2.11 (it marks the
+    /* Highlight color: parked by docs/FOCUS.md 3.3, returned by docs/archive/rounds/RETURN.md 2.11 (it marks the
        selected word alone, audit-formatting row 28) */
     {
       control: 'toolbar.highlightColor',
@@ -420,7 +420,7 @@ const FORMAT_OPTIONS: TailControl = {
 const TEXT_TAIL: TailControl[] = [...fillAndBorder('text'), ...textControls(), FORMAT_OPTIONS];
 
 /**
- * Word art (docs/OBJECTS.md 4.2 item 4; docs/FEATURES.md 2.3 item 10; the row
+ * Word art (docs/archive/rounds/OBJECTS.md 4.2 item 4; docs/archive/rounds/FEATURES.md 2.3 item 10; the row
  * wordart.tail.fill-outline): a text block with an outline takes the shape tail's first four
  * controls before the text controls, each a plate the seller reads as on a shape, so the letters'
  * colour and their outline are one click away; ToolbarTail.tsx picks this kind for an outlined
@@ -437,9 +437,9 @@ const WORDART_TAIL: TailControl[] = [
  * Google's picker lives for a mask, the nearest place for a shape) and the text controls apply,
  * because a shape holds text now. Parked whole in cycle 2 of the focus round with Insert > Shape
  * (docs/FOCUS.md section 4 under ruling (1); build/b3.md R14) and returned with it in the return
- * round (docs/RETURN.md 2.2, 3.2): Fill color, Border color, Border weight, Border dash, the text
+ * round (docs/archive/rounds/RETURN.md 2.2, 3.2): Fill color, Border color, Border weight, Border dash, the text
  * controls, Format options, in Google's order. Change shape was parked with the galleries (2.9)
- * until the geometry interpreter drew the presets; the vector round (docs/VECTOR.md 2.6, item S7)
+ * until the geometry interpreter drew the presets; the vector round (docs/archive/rounds/VECTOR.md 2.6, item S7)
  * returns it to the default view, where it leads the tail and carries the divider, and its plate
  * draws every preset's own outline.
  */
@@ -467,7 +467,7 @@ const SHAPE_TAIL: TailControl[] = [
 
 /**
  * 3.4 with SPEC-2 4.2: an image selected; Border color, Border weight, Border dash and Reset image
- * apply. The frame controls returned to the default view in the product round (docs/PRODUCT.md
+ * apply. The frame controls returned to the default view in the product round (docs/archive/rounds/PRODUCT.md
  * section 5, the row images.border.drawn: a seller sets a picture border from the tail, where
  * Google keeps it); Dither stays parked (docs/FOCUS.md 3.3); Crop image keeps its button and loses
  * its Mask arrow with the parked row.
@@ -554,7 +554,7 @@ const IMAGE_TAIL: TailControl[] = [
  * 3.5 with SPEC-2 4.2: a line or arrow selected; Line dash applies and the ends list ten
  * decorations. Parked whole in cycle 2 of the focus round with Insert > Line (docs/FOCUS.md
  * section 4 under ruling (1); build/b3.md R14) and returned with it in the return round
- * (docs/RETURN.md 2.3, 3.2): Line color, Line weight, Line dash, Line start, Line end, Format options.
+ * (docs/archive/rounds/RETURN.md 2.3, 3.2): Line color, Line weight, Line dash, Line start, Line end, Format options.
  */
 const LINE_TAIL: TailControl[] = [
   {
@@ -607,7 +607,7 @@ const LINE_TAIL: TailControl[] = [
 
 /**
  * 3.6 with SPEC-2 4.2: a table cell selected; the merge buttons follow Fill color. Parked whole by
- * docs/FOCUS.md 3.3, returned with the tables by docs/RETURN.md 2.4 and 3.2; the fill and border
+ * docs/FOCUS.md 3.3, returned with the tables by docs/archive/rounds/RETURN.md 2.4 and 3.2; the fill and border
  * controls and the merge buttons carry their own matrix rows with `parks`, so a red one keeps that
  * control parked alone (RETURN.md 2.4, the ship fallback).
  */
@@ -620,7 +620,7 @@ const TABLE_TAIL: TailControl[] = [
 
 /**
  * SPEC-2 4.2: a chart selected; every control is a Turboslide addition (Google edits charts in
- * Sheets). Parked whole by docs/FOCUS.md 3.3, returned with the charts by docs/RETURN.md 2.5 and 3.2.
+ * Sheets). Parked whole by docs/FOCUS.md 3.3, returned with the charts by docs/archive/rounds/RETURN.md 2.5 and 3.2.
  */
 const CHART_TAIL: TailControl[] = [
   {
@@ -667,11 +667,11 @@ const CHART_TAIL: TailControl[] = [
   FORMAT_OPTIONS,
 ];
 
-/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole by docs/FOCUS.md 3.3, returned with Group and Ungroup by docs/RETURN.md 2.12. */
+/** SPEC-2 4.2: a group selected; the object controls that apply to every member at once. Parked whole by docs/FOCUS.md 3.3, returned with Group and Ungroup by docs/archive/rounds/RETURN.md 2.12. */
 const GROUP_TAIL: TailControl[] = [...fillAndBorder('group'), FORMAT_OPTIONS];
 
 /**
- * The features round, ship two (docs/FEATURES.md 5.3, 5.10): a shader is an object in the default
+ * The features round, ship two (docs/archive/rounds/FEATURES.md 5.3, 5.10): a shader is an object in the default
  * view whose one home is the Shader section of Format options, so its tail carries Format options
  * as a chart's and a table's do; the other tail below stays parked for the icons and the rest.
  */
@@ -696,7 +696,7 @@ const OTHER_TAIL: TailControl[] = parkedTail([
 export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>>> = {
   default: TOOLBAR_TAIL_DEFAULT.map((control) =>
     /* Select draws the plain arrow (icons.tsx `cursor-arrow`) and the pointer toggle keeps the
-       rays (docs/POLISH.md 2.6 item 72; audit-chrome item 9: both drew cursor-arrow-rays) */
+       rays (docs/archive/rounds/POLISH.md 2.6 item 72; audit-chrome item 9: both drew cursor-arrow-rays) */
     control.control === 'toolbar.select'
       ? { ...control, op: 'select' as const, icon: 'cursor-arrow' as const }
       : control,
@@ -725,7 +725,7 @@ export const HIDE_MENUS_CONTROL = 'toolbar.hideMenus';
  */
 export const TOOLBAR_TAIL_END: ReadonlyArray<TailControl> = [
   /* the pointer toggle: parked with Live pointers by docs/FOCUS.md 3.3, returned with them by
-     docs/RETURN.md 2.16 (its row view.live-pointers.toggles parks the two View rows if red); View
+     docs/archive/rounds/RETURN.md 2.16 (its row view.live-pointers.toggles parks the two View rows if red); View
      only is role driven */
   {
     control: 'toolbar.pointer',

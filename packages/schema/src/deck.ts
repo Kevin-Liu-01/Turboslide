@@ -24,7 +24,7 @@ import { typographyObjectSchema } from './typography.ts';
 
 export const SCHEMA_VERSION = 1;
 
-/** The appearance a new deck opens in when the deployment's kit is silent (docs/PRODUCT.md section 1, question 1): one line to flip. */
+/** The appearance a new deck opens in when the deployment's kit is silent (docs/archive/rounds/PRODUCT.md section 1, question 1): one line to flip. */
 export { DEFAULT_APPEARANCE } from './brand.ts';
 
 /** The one theme; a second theme is additive (SPEC 2.1, open question 6). */
@@ -49,7 +49,7 @@ export const LAYOUT_IDS = [
   'mood',
   'big-number',
   'blank',
-  /* the product round (docs/PRODUCT.md section 2 rank 2): the 4/8 head kept as its own layout,
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 2): the 4/8 head kept as its own layout,
      the first GT layout after Blank (build/b3.md R1) */
   'subtitle-body',
   'rows',
@@ -104,7 +104,7 @@ export type Deck = {
    */
   guides?: DeckGuides;
   /**
-   * The brand kit (docs/PRODUCT.md 4.1): the six colour roles, the two faces, the logo and footer
+   * The brand kit (docs/archive/rounds/PRODUCT.md 4.1): the six colour roles, the two faces, the logo and footer
    * slots, the counter, the frame toggles and the words that never translate, every field optional
    * with a defined meaning when absent. Written by `brand.set` and `brand.reset` alone (the
    * `deck.set` action's pointer regex stays closed to it); a deck without a record reads the
@@ -138,7 +138,7 @@ export type SlideBase = {
    */
   skip?: true;
   /**
-   * Slide numbers > Apply to selected (gslides-parity SPEC 7.2.4; docs/RETURN.md section 5
+   * Slide numbers > Apply to selected (gslides-parity SPEC 7.2.4; docs/archive/rounds/RETURN.md section 5
    * `slides.numbers.apply`): this slide's number on or off whatever the deck's counter mode says;
    * absent, the slide follows the deck.
    */
@@ -560,7 +560,7 @@ export const titleSlideSchema = z.strictObject({
   ...slideBase,
   kind: z.literal('title'),
   mark: markSizeSchema,
-  /* the title placeholder takes paragraph breaks too since the polish round (docs/POLISH.md 2.3 item 19) */
+  /* the title placeholder takes paragraph breaks too since the polish round (docs/archive/rounds/POLISH.md 2.3 item 19) */
   heading: annotate(multilineTextSchema, { label: 'Heading', control: 'textarea', group: 'Text' }),
   /* the subtitle placeholder takes paragraph breaks like Google's, so Enter in it makes a line
      rather than ending the session (build-4/hotfix-4.md cause W4); a one line lead is one
@@ -662,7 +662,7 @@ export const deckSchema = z.strictObject({
     label: 'Brand kit',
     control: 'json',
     group: 'Slide',
-    help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/PRODUCT.md 4.1). The default kit when absent.',
+    help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The default kit when absent.',
   }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,
@@ -672,7 +672,7 @@ export const deckSchema = z.strictObject({
 
 /**
  * The appearance a deck defaults to (gslides-parity SPEC 7.2.3): the Themes tiles' choice, else
- * the kit's default appearance (docs/PRODUCT.md 4.1, the appearance a deck created from a template
+ * the kit's default appearance (docs/archive/rounds/PRODUCT.md 4.1, the appearance a deck created from a template
  * opens in), else dark, the value every deck stored before the kit existed opens in. A new deck
  * takes the deployment kit's appearance (DEFAULT_APPEARANCE when the kit is silent) at creation.
  */
@@ -682,7 +682,7 @@ export function deckAppearance(deck: Deck): Appearance {
 
 /**
  * The counter mode a deck defaults to (gslides-parity SPEC 7.2.4): the kit's Slide numbers
- * (docs/PRODUCT.md 4.1: `show` and `skipTitle`) when the record names either, else the
+ * (docs/archive/rounds/PRODUCT.md 4.1: `show` and `skipTitle`) when the record names either, else the
  * `defaults.counter` the Slide numbers dialog wrote before the kit, else on.
  */
 export function deckCounter(deck: Deck): CounterMode {
@@ -694,7 +694,7 @@ export function deckCounter(deck: Deck): CounterMode {
   return deck.defaults?.counter ?? 'on';
 }
 
-/** The counter's format (docs/PRODUCT.md 4.1): `n / N` when the kit names none, today's `01 / 85`. */
+/** The counter's format (docs/archive/rounds/PRODUCT.md 4.1): `n / N` when the kit names none, today's `01 / 85`. */
 export function deckCounterFormat(deck: Pick<Deck, 'brand'>): CounterFormat {
   return deck.brand?.counter?.format ?? 'n / N';
 }

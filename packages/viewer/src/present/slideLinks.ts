@@ -1,4 +1,4 @@
-// A click on a slide link in the show (docs/PRODUCT.md section 2 rank 19; gslides-parity SPEC
+// A click on a slide link in the show (docs/archive/rounds/PRODUCT.md section 2 rank 19; gslides-parity SPEC
 // 7.2.8): a run or block link whose address is `#s/<id>`, `#next`, `#previous`, `#first` or
 // `#last` moves the show to that slide instead of leaving the page or advancing. The `#s/<id>`
 // form already reaches the shell through the hash (chrome/ViewerShell.tsx onHash); the four

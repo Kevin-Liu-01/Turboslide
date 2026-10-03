@@ -41,7 +41,7 @@ export type ViewerSlide = {
   skip?: boolean;
   /**
    * whether the frame draws this slide's counter under the deck's Slide numbers and the slide's own
-   * word (render/deck.ts slideCounter; docs/RETURN.md section 5 slides.numbers.apply); true when absent
+   * word (render/deck.ts slideCounter; docs/archive/rounds/RETURN.md section 5 slides.numbers.apply); true when absent
    */
   counter?: boolean;
   /** the layout the slide was made from (gslides-parity SPEC 7.2.2), for the Apply layout check */
@@ -59,7 +59,7 @@ export type ViewerDeck = {
   slides: readonly ViewerSlide[];
   /** the deck id that was actually served when the requested one was missing (the studio's fixture fallback) */
   fallback?: string;
-  /** the brand kit's frame band (docs/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format; the GT band when absent */
+  /** the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format; the GT band when absent */
   band?: FrameBand;
 };
 

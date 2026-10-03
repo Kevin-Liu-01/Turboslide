@@ -52,7 +52,7 @@ import type { SectionWrite } from './fields';
 import './shader.css';
 
 /**
- * The Shader section of Format options (docs/FEATURES.md 5.3; audit-shaders 4, 5, 7, 8, 19): one
+ * The Shader section of Format options (docs/archive/rounds/FEATURES.md 5.3; audit-shaders 4, 5, 7, 8, 19): one
  * home for a shader block's recipe, in the panel's grammar (a label, a slider with a number field,
  * groups in Glyphfield's order). The groups: Shader (the thumbnail, the name, Change, which opens
  * the gallery); Preset (the entry's presets as tiles in sentence case, the current one pressed;
@@ -96,7 +96,7 @@ export type ShaderSectionProps = {
 };
 
 /**
- * The words of the section (docs/FEATURES.md 5.3; the group names are Glyphfield's). The seller's
+ * The words of the section (docs/archive/rounds/FEATURES.md 5.3; the group names are Glyphfield's). The seller's
  * noun is "Animated pattern" (docs/NEXT.md question 10's default; round1/build/b3a.md request 4):
  * the section title and the tooltips name it, never "shader".
  */
@@ -592,7 +592,7 @@ function AdvancedGroup({
 }
 
 /**
- * The head of the section (docs/POLISH.md item 47; audit-media item 18): the still, then the name
+ * The head of the section (docs/archive/rounds/POLISH.md item 47; audit-media item 18): the still, then the name
  * and Change on one line with a gap between them, then the still line in the note's size. The
  * still line's class is the section's own: the gallery's `.ts-shader-frame` is a 16:10 plate, and
  * the line drew as a large grey box while it shared the name.

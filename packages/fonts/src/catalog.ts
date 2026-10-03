@@ -101,7 +101,7 @@ export const FONT_SOURCES: readonly FontSource[] = [
     take: { kind: 'static', weights: [300, 400, 500, 600, 700] },
   },
   { id: 'fira-code', directory: 'ofl/firacode', take: { kind: 'variable' } },
-  /* the features round's eight (docs/FEATURES.md 3.2; audit-fonts 3 and 8, candidates.md): every
+  /* the features round's eight (docs/archive/rounds/FEATURES.md 3.2; audit-fonts 3 and 8, candidates.md): every
      one a variable file, OFL 1.1 with no Reserved Font Name at GOOGLE_FONTS_COMMIT */
   { id: 'geist', directory: 'ofl/geist', take: { kind: 'variable' } },
   { id: 'geist-mono', directory: 'ofl/geistmono', take: { kind: 'variable' } },
@@ -128,7 +128,7 @@ export type CatalogFont = {
   reservedFontName: string | null;
   files: CatalogFile[];
   source: FontSource;
-  /** the licence text's address, the link More fonts carries (docs/PRODUCT.md 4.2) */
+  /** the licence text's address, the link More fonts carries (docs/archive/rounds/PRODUCT.md 4.2) */
   licenceUrl: string;
 };
 

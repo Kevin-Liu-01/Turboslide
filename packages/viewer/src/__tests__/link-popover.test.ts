@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { lineBoundaryKey, popoverLink, popoverSlideOf, SLIDE_LINK_POSITIONS } from '../InlineText';
 
-// The link popover's pure rules (docs/PRODUCT.md section 2 rank 19) and the line boundary keys
+// The link popover's pure rules (docs/archive/rounds/PRODUCT.md section 2 rank 19) and the line boundary keys
 // (rank 18): what the two controls write, what an existing link preselects, which keys the
 // session moves to the visual line's ends itself.
 

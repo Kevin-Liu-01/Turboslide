@@ -11,7 +11,7 @@ import { PanelButton } from '../inspector/fields';
 import { PANELS, SNACKBARS } from '../menus/strings';
 
 /**
- * Use on every slide (docs/PRODUCT.md 4.1, 4.4; audit-brand 2): a selected picture becomes the
+ * Use on every slide (docs/archive/rounds/PRODUCT.md 4.1, 4.4; audit-brand 2): a selected picture becomes the
  * brand kit's logo, on the title slide's slot and in the footer of every slide, as one commit of
  * the kit writes (`/mark`, `/footer/logo`, `/footer/assetId`), removing nothing from the slide;
  * the snackbar reads "Your logo is on every slide" with Undo, and New slide and the exports carry
@@ -32,7 +32,7 @@ export function useOnEverySlidePlan(
 }
 
 /**
- * The same plan over an asset id (docs/FEATURES.md 4.4; the logo picker's "Use as this
+ * The same plan over an asset id (docs/archive/rounds/FEATURES.md 4.4; the logo picker's "Use as this
  * presentation's logo on every slide" and the Brand kit's Find a logo reuse it): the kit's
  * `/mark`, `/footer/logo` and `/footer/assetId` as three writes of one commit. The asset need not
  * be in the document yet when the caller commits the record in the same write (the logo insert

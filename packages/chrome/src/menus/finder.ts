@@ -18,7 +18,7 @@ import {
  * component and runs the chosen item's effect. Relative imports carry the `.ts` extension so the
  * parity audit script can load this module under Node.
  *
- * The product round (docs/PRODUCT.md 6.1 "Search the menus"; audit-assist 8): a row's words are
+ * The product round (docs/archive/rounds/PRODUCT.md 6.1 "Search the menus"; audit-assist 8): a row's words are
  * its menu path, Google's label, its doc sentence and the seller's words of `SELLER_TERMS`, so
  * "hide slide" lists Skip slide, "rename the customer" lists Find and replace and Tailor for a
  * customer, "logo" lists Replace image, and "bigger text" lists Increase font size. A row may
@@ -46,7 +46,7 @@ export type FinderRow = {
 export const PATH_SEPARATOR = ' › ';
 
 /**
- * The seller's words per row id (docs/PRODUCT.md 6.1): what the seller audit typed and got
+ * The seller's words per row id (docs/archive/rounds/PRODUCT.md 6.1): what the seller audit typed and got
  * "Nothing matches" for, in the seller's vocabulary, never the product's internal nouns.
  */
 export const SELLER_TERMS: Readonly<Record<string, ReadonlyArray<string>>> = {
@@ -141,7 +141,7 @@ export function finderRows(ctx: MenuContext): FinderRow[] {
         .toLowerCase(),
     });
   };
-  /* the ten menus' rows first and the title row's last (docs/POLISH.md 2.6 item 73; audit-chrome
+  /* the ten menus' rows first and the title row's last (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome
      item 42: an empty query began with Turboslide home, Rename and Document status under
      "Menus"); `allItems` walks the title row first */
   const titleIds = new Set(walkItems(TITLE_ROW_ITEMS).map((item) => item.id));

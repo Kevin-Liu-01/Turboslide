@@ -16,9 +16,9 @@ import {
   tableSeamXs,
 } from '../table-seam';
 
-// The column seam handles of a selected table (docs/RETURN.md 2.4 fix 5): where they sit, what
+// The column seam handles of a selected table (docs/archive/rounds/RETURN.md 2.4 fix 5): where they sit, what
 // they are named, and the /columns write a drag of them stands for; and the row seam handles of
-// the objects round (docs/OBJECTS.md 3.3 item 4): one under every row, the /rows and /pos/h
+// the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 4): one under every row, the /rows and /pos/h
 // writes a drag of them stands for, the floor at the row's natural height, and the one gesture
 // reader of both axes.
 

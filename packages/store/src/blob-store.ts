@@ -11,7 +11,7 @@
 // store talks to Blob through the small BlobClient below, so the tests run it against an
 // in-memory fake (blob-fake.ts) and the studio against @vercel/blob (blob-vercel.ts).
 //
-// The sync and costs round (docs/SYNC.md 3.2, 3.5, 3.6, 6.3): the head is read, never listed (a
+// The sync and costs round (docs/archive/rounds/SYNC.md 3.2, 3.5, 3.6, 6.3): the head is read, never listed (a
 // pull walks the records by number, proves the document from the snapshot the manifest's etag
 // names and reads the comments sidecar through its index head; `list` runs in the prune, the
 // removal and the listing page alone); a record names its origin and a write whose op ids a
@@ -624,7 +624,7 @@ export const CLAIMS_CHECKED = 4;
 
 /**
  * How many missing record numbers in a row the pull's walk reads past while the records it
- * found sit below the proven manifest's revision (docs/SYNC.md 3.6, the hole's second rule): a
+ * found sit below the proven manifest's revision (docs/archive/rounds/SYNC.md 3.6, the hole's second rule): a
  * hole in the log is one or two numbers wide (a claim released under a commit that landed late,
  * a record a store lost), never a run of them, so a longer run of misses under the manifest's
  * revision is a log the manifest got ahead of (a commit whose record put failed) and the walk
@@ -637,7 +637,7 @@ export const RECORD_WALK_BATCH = 8;
 export const RECORD_WALK_MAX = 10_000;
 /**
  * The most record origins one store instance holds in memory for the records it committed
- * without storing their origin (docs/SYNC.md 3.2, deployment N): the bound of invariant 3, the
+ * without storing their origin (docs/archive/rounds/SYNC.md 3.2, deployment N): the bound of invariant 3, the
  * replay's 2,000 entries (`REPLAY_MAX_ENTRIES`, realtime/protocol.ts), spelled here so this
  * package takes no realtime dependency; the oldest number leaves first.
  */
@@ -698,7 +698,7 @@ export const BLOB_LISTING_READ_TIMEOUT_MS = 4_000;
 export const LISTING_PHANTOM_TTL_MS = 5 * 60_000;
 
 // ---------------------------------------------------------------------------------------------
-// The fresh deck index (the product round, docs/PRODUCT.md 8.2 the recorded classes; RETURN
+// The fresh deck index (the product round, docs/archive/rounds/PRODUCT.md 8.2 the recorded classes; RETURN
 // VERIFICATION R2-F2, ship.md section 5 `decks.card.make-a-copy`): a deck made or copied on one
 // instance listed on another only once `folders('decks/')` showed its folder, up to a minute,
 // so a `/decks` load inside that minute on another instance showed no card for the copy a
@@ -836,7 +836,7 @@ export function isBlobTimeoutError(error: unknown): error is BlobTimeoutError {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The store call counters (docs/SYNC.md 6.3, the call counting harness)
+// The store call counters (docs/archive/rounds/SYNC.md 6.3, the call counting harness)
 
 /** The sliding window the counters cover. */
 export const STORE_CALLS_WINDOW_MS = 60_000;
@@ -850,14 +850,14 @@ export const STORE_CALL_OPS: readonly StoreCallOp[] = ['head', 'get', 'put', 'li
  * What `sync.status.storeCalls` answers for one deck: the calls of each operation this instance
  * made under the deck's prefix inside the last `windowMs`, and the id of the instance that
  * answered, so a probe that samples a deployment can tell two answering instances apart (the
- * counters are per instance and the platform routes to whichever is warm; docs/SYNC.md 6.3).
+ * counters are per instance and the platform routes to whichever is warm; docs/archive/rounds/SYNC.md 6.3).
  */
 export type StoreCalls = Record<StoreCallOp, number> & {
   windowMs: number;
   instance: string;
   /**
    * the `list` calls by the folder they listed under the deck (the sync and costs round's ship):
-   * the pull reads records by number and never lists `versions` (docs/SYNC.md 3.5, the row
+   * the pull reads records by number and never lists `versions` (docs/archive/rounds/SYNC.md 3.5, the row
    * `sync.pull.no-listing`); the prune lists `snapshots`, a deck's first open on an instance
    * `assets`, the card render `thumbs`, the removal `presence` and the deck itself, so a probe
    * that counts the deck's listings can name each one
@@ -1038,7 +1038,7 @@ function callSignal(deadline: AbortSignal, own: AbortSignal | undefined): AbortS
  * left one such chain behind it, and the instance stayed slow long after whatever had stalled
  * it (the enforce preview's "Saving..." for eight minutes, the ops route's `BlobTimeoutError ...
  * head deck.json within 20 s` lines). A client wrapped once is not wrapped again. Every call it
- * bounds is counted under the deck the pathname names (`noteStoreCall`; docs/SYNC.md 6.3), which
+ * bounds is counted under the deck the pathname names (`noteStoreCall`; docs/archive/rounds/SYNC.md 6.3), which
  * is what `sync.status.storeCalls` reads.
  */
 export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines = {}): BlobClient {
@@ -1168,7 +1168,7 @@ export type BlobStoreOptions = {
    */
   degradedReads?: boolean;
   /**
-   * Whether a committed write's record stores the write's `origin` (docs/SYNC.md 3.2); the
+   * Whether a committed write's record stores the write's `origin` (docs/archive/rounds/SYNC.md 3.2); the
    * deployment constant `RECORD_ORIGIN_WRITES` (versions.ts) by default, which deployment N
    * ships as false and N plus 1 as true. The origin check on a write runs whatever this reads.
    */
@@ -1219,7 +1219,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
   /**
    * The origins of the records this instance committed while the record's bytes store none
-   * (docs/SYNC.md 3.2: deployment N ships `writeOrigin` off, N plus 1 writes the field), by
+   * (docs/archive/rounds/SYNC.md 3.2: deployment N ships `writeOrigin` off, N plus 1 writes the field), by
    * record number. `records()` and the write path's origin check read the log with these merged
    * in, so the resend of a POST whose first attempt committed here is answered with its record on
    * this instance, as the memory of the last 512 admitted op ids did before the round (room.ts,
@@ -1277,7 +1277,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     const manifest = readManifest(dir);
     const before = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
     // the head the caller read a moment ago serves as the pull's, so a moved pulse costs one
-    // manifest head and not two (docs/SYNC.md 4.5); a head that moves between the two calls
+    // manifest head and not two (docs/archive/rounds/SYNC.md 4.5); a head that moves between the two calls
     // is caught by the caller's own check or the next tick
     const deckHead = knownHead === undefined ? await client.head(`${prefix}deck.json`) : knownHead;
     const next: Manifest = { files: {} };
@@ -1314,7 +1314,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     };
     // 1. the records the mirror holds keep their rows: a record never changes, so the bytes
     // this instance proved once are the store's, and no call is made for them (the listing of
-    // the prefix that used to open every pull is gone: docs/SYNC.md 3.5, invariant 7; the
+    // the prefix that used to open every pull is gone: docs/archive/rounds/SYNC.md 3.5, invariant 7; the
     // listing lagged the store by up to a minute and cost one advanced operation per thousand
     // files under the prefix, and the walk below read the same records by number anyway)
     for (const relative of localDocuments(dir)) {
@@ -1342,7 +1342,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         ? snapshot
         : null;
     /**
-     * 1c. The records by number from the mirror's last one (docs/SYNC.md 3.5, 3.6): each is a
+     * 1c. The records by number from the mirror's last one (docs/archive/rounds/SYNC.md 3.5, 3.6): each is a
      * head and a get, RECORD_WALK_BATCH at a time once the walk has found records in a row (a
      * cold mirror of a long log), one at a time at the log's head (a warm mirror learning of one
      * commit pays one hit and one miss). A missing number is not the end of the log: the walk
@@ -1396,7 +1396,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     };
     await walkRecords(provenSnapshot?.deck.revision ?? null);
     /**
-     * 1d. The comments sidecar (SPEC-3 2.2), through its index head (docs/SYNC.md 3.5): the
+     * 1d. The comments sidecar (SPEC-3 2.2), through its index head (docs/archive/rounds/SYNC.md 3.5): the
      * index is the sidecar's commit point (comments-store.ts), so an index at the version the
      * mirror holds means every thread file is current too and nothing else is read; a moved
      * index is pulled proven with the thread files it names whose etag rows changed
@@ -1612,7 +1612,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   };
 
   /**
-   * The leases file is an overwritten path and is read proven (docs/SYNC.md 3.5, invariant 8;
+   * The leases file is an overwritten path and is read proven (docs/archive/rounds/SYNC.md 3.5, invariant 8;
    * audit-costs items 4 and 13): the head's version first, the body accepted only when its md5
    * is that version, else the immutable copy `pushLeases` stores under it (`putWithCopy`). A
    * plain `get` read the public host, which serves an overwritten object for up to thirty days,
@@ -1812,7 +1812,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           if (current.version === head.version) throw new StaleMirrorError(deckId);
           return conflictFromStore();
         }
-        // the origin check (docs/SYNC.md 3.2, invariant 3), here where the mirror is proven: a
+        // the origin check (docs/archive/rounds/SYNC.md 3.2, invariant 3), here where the mirror is proven: a
         // write whose op ids a record above its base already names is the resend of a POST whose
         // first attempt committed and whose answer was lost (on this instance or another, since
         // the record travels), so it is answered with that record and nothing is claimed or put.
@@ -1909,7 +1909,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             const ours = quotedMd5(new Uint8Array(readFileSync(pathOf('deck.json'))));
             const landed = await client.head(`${prefix}deck.json`).catch(() => null);
             if (landed === null || landed.version !== ours) {
-              // the hole's first rule (docs/SYNC.md 3.6): the put may still land after this
+              // the hole's first rule (docs/archive/rounds/SYNC.md 3.6): the put may still land after this
               // answer, so the record stays in the store as the claim it is. Released, a commit
               // that landed late named a revision with no record, which every reader's walk
               // stopped at for good; kept, a put that never lands is a claim another writer
@@ -1956,7 +1956,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           await putPulse(client, deckId, 'deck', { now: clock });
           // retention runs behind the answer on every SNAPSHOT_PRUNE_EVERY records the log gains
           // and at the deck's last stream's close (the channel calls `pruneSnapshots`), never on
-          // every commit (docs/SYNC.md 3.6; the one `list` of the write path leaves the hot path)
+          // every commit (docs/archive/rounds/SYNC.md 3.6; the one `list` of the write path leaves the hot path)
           if (pruneDue(entry.n)) void pruneSnapshots(key).catch(() => undefined);
           return { ...outcome, entry };
         } catch (error) {
@@ -2055,7 +2055,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       await requirePresent();
       // the held origins ride the records this instance committed without the field, so the
       // channel's entries carry `covers` and the resync read's `origins` on this instance
-      // (docs/SYNC.md 3.2) on deployment N as they will everywhere on N plus 1
+      // (docs/archive/rounds/SYNC.md 3.2) on deployment N as they will everywhere on N plus 1
       return withHeldOrigins(await file.records());
     },
 
@@ -2843,7 +2843,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       // the copy takes the assets folder whole, so every twin of the source must be on disk
       await overlay.ensureAssets(input.id);
       await source.pullAssets();
-      // Copy comments (docs/POLISH.md item 98): the source's sidecar on disk first, so copyDeck
+      // Copy comments (docs/archive/rounds/POLISH.md item 98): the source's sidecar on disk first, so copyDeck
       // copies the threads this instance may never have pulled
       if (input.copyComments === true) await pullSidecar(c, input.id, join(decksDir, input.id));
       if (baseRevision !== undefined) checkRevision(decksDir, input.id, baseRevision);

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The gallery's stills (docs/FEATURES.md 5.4; audit-shaders 3): one 320 by 200 webp per material
+// The gallery's stills (docs/archive/rounds/FEATURES.md 5.4; audit-shaders 3): one 320 by 200 webp per material
 // and one 96 by 60 tile per preset under packages/materials/previews/, rendered once per catalog
 // change and committed, the way Glyphfield ships public/shader-previews/. Every still is the
 // material at anchor 5500 in the legacy palette (the default kit's build in black and white, the

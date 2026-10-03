@@ -46,7 +46,7 @@ let page: Page;
 let deck = '';
 
 /** Parked rows named by section 3.2 to 3.4, one per surface the row leaves. */
-/* the rows that keep the switch after the return round (docs/RETURN.md section 8 and its
+/* the rows that keep the switch after the return round (docs/archive/rounds/RETURN.md section 8 and its
    section 2 questions 6 and 7): Insert > Table, Chart, Diagram and Word art, Arrange > Group and
    Distribute, File > Details, Superscript, Paint format, Theme and Rotate returned to the default
    view (RETURN.md sections 2 and 3), so the lists name what is still parked */
@@ -60,7 +60,7 @@ const PARKED_MENU_ROWS = [
 ];
 /* no toolbar button keeps the switch after the return round (RETURN.md 3.2) */
 const PARKED_TOOLBAR: string[] = [];
-/* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5, b2 R1 b) */
+/* Alt text returned to the default view in the product round (docs/archive/rounds/PRODUCT.md section 5, b2 R1 b) */
 const PARKED_CONTEXT_ROWS = ['format.dropShadow'];
 
 test.beforeAll(async ({ browser }) => {
@@ -394,7 +394,7 @@ test(title('surface.parked-shortcut-unbound'), async () => {
     }
   };
   await closePanel();
-  /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5, b2
+  /* Alt text returned to the default view in the product round (docs/archive/rounds/PRODUCT.md section 5, b2
      R1 b): the chord opens Format options with the switch off as well */
   await selectBlock(page, 'g1');
   await page.keyboard.press('Meta+Alt+y');
@@ -526,7 +526,7 @@ test(title('surface.parked-block-core-rows'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md section 0 and 2.8 item 106, 5.1 `surface.*`): the build's
+// the polish round (docs/archive/rounds/POLISH.md section 0 and 2.8 item 106, 5.1 `surface.*`): the build's
 // commit on the gate's origin, and the skeleton as the editor's frame.
 
 test(title('surface.domain.build-commit'), async () => {
@@ -692,7 +692,7 @@ coverage(import.meta.filename, [
   'surface.parked-blocks-render',
   'surface.parked-shortcut-unbound',
   'surface.parked-block-core-rows',
-  /* the polish round (docs/POLISH.md section 0, 2.8 item 106) */
+  /* the polish round (docs/archive/rounds/POLISH.md section 0, 2.8 item 106) */
   'surface.domain.build-commit',
   'surface.skeleton.matches-editor',
 ]);

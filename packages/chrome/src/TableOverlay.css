@@ -1,4 +1,4 @@
-/* The table's own controls, the part of their look this lane owns (docs/POLISH.md 2.2 item 7;
+/* The table's own controls, the part of their look this lane owns (docs/archive/rounds/POLISH.md 2.2 item 7;
    TableOverlay.tsx). The layer, the cell ring, the head bands and the "+" circles are drawn by
    Overlay.css beside the other overlay parts; the rules here refine the head band's keyboard
    focus. A click on a head hands the focus to the stage root, so the band never keeps a focus

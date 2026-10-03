@@ -18,7 +18,7 @@ import { cardControl, markChangedWords, rowControl, rowTexts } from './assist-mo
 import './Assist.css';
 
 /**
- * The Assist panel (docs/PRODUCT.md 6.1; audit-assist 2, 3, 4, 10): the right panel's frame with
+ * The Assist panel (docs/archive/rounds/PRODUCT.md 6.1; audit-assist 2, 3, 4, 10): the right panel's frame with
  * the first line naming where the text goes, three starter cards when a slide is selected (Tailor
  * for a customer opens the deterministic dialog of section 5 and calls no model; Make it shorter
  * and Write speaker notes call `assist.propose`), a `role="log"` region of asks, cards and
@@ -42,7 +42,7 @@ export type AssistPanelProps = {
   /** the phrase Search the menus handed over ("Ask the assistant: <phrase>") */
   initialPrompt?: string;
   /**
-   * What the deployment's assistant can do (docs/POLISH.md 2.9 item 113): with `unconfigured` or
+   * What the deployment's assistant can do (docs/archive/rounds/POLISH.md 2.9 item 113): with `unconfigured` or
    * `off` the panel draws Tailor for a customer and one sentence, no model starter and no
    * composer; `model` and `fixture` draw the starters and the box, which stay after every answer.
    * Absent reads as `model`.
@@ -91,7 +91,7 @@ export function AssistPanel({
   const log = useRef<HTMLUListElement>(null);
   const box = useRef<HTMLTextAreaElement>(null);
 
-  /* the box takes the focus once the panel is on screen (docs/POLISH.md 2.9 item 118; audit-assist
+  /* the box takes the focus once the panel is on screen (docs/archive/rounds/POLISH.md 2.9 item 118; audit-assist
      item 17: Enter after the Ask row sent nothing because the focus stayed on the body): after a
      tick, since the panel's frame places itself before its fields can take focus */
   useEffect(() => {
@@ -409,7 +409,7 @@ export function AssistPanel({
             {off}
           </p>
         ) : null}
-        {/* the starters stay after every answer (docs/POLISH.md 2.9 item 113; VERIFICATION.md
+        {/* the starters stay after every answer (docs/archive/rounds/POLISH.md 2.9 item 113; VERIFICATION.md
             "Polish round, pass 1" finding 13: after Make it shorter the panel drew none until it
             was reopened), at the bottom of the log area (item 118) */}
         {slide !== undefined ? starters : null}

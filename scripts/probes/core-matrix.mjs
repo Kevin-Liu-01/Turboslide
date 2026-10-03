@@ -14,41 +14,41 @@
 // the probe or one of the seven spec files; `setup` names a window API write that is never a
 // driven step. The two ship helpers at the end compute rule 4 of section 1 and the exit rule of
 // 6.2 from a run's results, so the parked list is computed and never typed. The return round
-// (docs/RETURN.md section 1 rule 2 and section 5) added the features tables, charts, diagrams,
+// (docs/archive/rounds/RETURN.md section 1 rule 2 and section 5) added the features tables, charts, diagrams,
 // wordart, formatting, chrome, view and inbox, the list of unparkable features (a red row of one
 // blocks the ship), the `parks` field (the data-control ids a row alone guards, validated against
 // the menu model's sources) and the `parkedRows` half of the parked list beside `parkedFeatures`.
-// The product round (docs/PRODUCT.md section 8) added the features brand, fonts, templates and
+// The product round (docs/archive/rounds/PRODUCT.md section 8) added the features brand, fonts, templates and
 // assist (each parkable), the three spec drivers chrome, brand and assist, the panel and page
 // sources the `parks` ids are read from (7.1), the declared ids of PRODUCT.md 7.1 for a control a
 // lane has not landed yet, and the `measure` field (8.2): a measurement row records its seconds
 // per slide in the run and never holds the ship, so a red one is written into the ship note by
 // id with its mechanism and neither parks its feature nor blocks. The sync and costs round
-// (docs/SYNC.md section 6) added the two unparkable features `sync` and `cost`, the spec driver
+// (docs/archive/rounds/SYNC.md section 6) added the two unparkable features `sync` and `cost`, the spec driver
 // `core/sync.spec.ts` (two browsers with one person's cookies and a third as a stranger) and the
 // driver `cost-probe` (scripts/probes/sync-cost-probe.mjs: one page state per process for three
 // minutes, every request the page made and `sync.status.storeCalls` sampled, the counts beside
 // the ceiling in the run's JSON); a cost row carries `measure: true` in SYNC.md 6.1's sense (its
 // counts are recorded and the row holds the ship only over its ceiling on the preview). The features
-// round, ship one (docs/FEATURES.md section 7) added the parkable feature `logos`, the spec driver
+// round, ship one (docs/archive/rounds/FEATURES.md section 7) added the parkable feature `logos`, the spec driver
 // `core/logos.spec.ts`, the dialog, overlay and panel files whose control ids `parks` may name
 // (`CONTROL_SOURCE_PATHS`), the ids FEATURES.md declares before the lanes' files exist
 // (`DECLARED_CONTROL_IDS`), `ROW_FEATURE` (a row whose id area is a new feature while its measurement
 // belongs to an unparkable one carries that feature, so a red export or intake row blocks the ship
 // instead of parking the picker) and the `--emit-parked` step, which writes the set of
 // packages/chrome/src/parked-controls.ts (B1's module, 7.2) from a ship's `parkedRows`. Ship two
-// (docs/FEATURES.md section 5, 7.1) added the parkable feature `shaders`, the spec driver
+// (docs/archive/rounds/FEATURES.md section 5, 7.1) added the parkable feature `shaders`, the spec driver
 // `core/shaders.spec.ts`, the shaders area's export rows under `export` and its View row under
 // `view` (ROW_FEATURE), the Background dialog among the control sources and the ids FEATURES.md
 // 5.3 to 5.6 declare for the gallery, the Shader section and the View row before the lanes' files
 // hold them. The
-// vector round (docs/VECTOR.md section 6) added the parkable feature `svg` (the SVG pictures:
+// vector round (docs/archive/rounds/VECTOR.md section 6) added the parkable feature `svg` (the SVG pictures:
 // the intake, the sheet, the copy, the sanitizer), the area `menus` whose rows belong to the
 // unparkable `chrome` (the icons on the visual rows, 3.2 to 3.4), the spec driver
 // `core/svg.spec.ts`, the six control ids of VECTOR.md 4.8 the svg rows' `parks` name before the
 // lanes' files hold them (`intake.svg.*`, `picture.svg.copy`, `export.svg.vector`), and retired
 // the row `logos.intake.svg-sentence` with its sentence (4.7), so ROW_FEATURE keeps the two
-// logos rows whose measurement belongs to export and images. The objects round (docs/OBJECTS.md
+// logos rows whose measurement belongs to export and images. The objects round (docs/archive/rounds/OBJECTS.md
 // section 6) added the area `gestures` whose rows belong to the unparkable `arrange` (the live
 // gestures: the draw as it grows, the click placement, the rings and the handles on the object
 // at every frame, the rotated ring, the connector during a move, the frame cadence and its
@@ -56,7 +56,7 @@
 // new control id: the table handles of 3.3 item 4 and the word art tail of 4.2 item 4 keep the
 // ids the features round declared below (`handle.table.row`, `.add.column`, `.add.row`,
 // `.head.column`, `.head.row`, `toolbar.wordart.outline`), read as `handle.<block>.<part>`
-// families where the overlay templates them. The people round (docs/PEOPLE.md section 6) added
+// families where the overlay templates them. The people round (docs/archive/rounds/PEOPLE.md section 6) added
 // the area `people` whose rows belong to the unparkable `share` (how a person is drawn: the chip
 // geometry, the two renderers' agreement, the own chip, the tooltip sentences, the pictures), two
 // rows of that area that belong to `comments` and `versions` (ROW_FEATURE), the local spec driver
@@ -66,7 +66,7 @@
 // row present in the results is judged like any row, 6.2), the builder and the version panel among
 // the control sources, and the ids PEOPLE.md 5.2 declares before the lanes' files hold them.
 //
-// The polish round (docs/POLISH.md section 5) added 130 rows on 2026-09-28 (the acceptance rows of
+// The polish round (docs/archive/rounds/POLISH.md section 5) added 130 rows on 2026-09-28 (the acceptance rows of
 // 5.1, every one written so a person's screenshot judges it: a pixel read of the frame, a box read
 // of the DOM through the walk toolkit's `pixelAt` and `boxesOf`, or a spec assertion on the file an
 // export wrote), replaced `tables.cells.prompt-hovered-only` with `tables.cells.no-prompt`, rewrote
@@ -114,7 +114,7 @@
 //     [--out packages/chrome/src/parked-controls.ts] [--check]
 //       writes (or with --check compares) the PARKED_CONTROLS set of the module between its two
 //       markers from the ship's parkedRows: the union of their `parks`, sorted; an empty set on a
-//       preview built before the runs (docs/FEATURES.md 7.2)
+//       preview built before the runs (docs/archive/rounds/FEATURES.md 7.2)
 //
 // Node only, no dependency. Type declarations for the TypeScript callers are in core-matrix.d.mts.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -127,7 +127,7 @@ export const CORE_MATRIX_PATH = fileURLToPath(
 
 /**
  * The section 2 features in the order of the document, plus the switch (section 3), plus the
- * return round's features (docs/RETURN.md section 5): the documents (tables, charts, diagrams,
+ * return round's features (docs/archive/rounds/RETURN.md section 5): the documents (tables, charts, diagrams,
  * word art), the text and paragraph formatting rows, the chrome (the title row's split button,
  * the separators and the right cluster), the View menu rows and the inbox.
  */
@@ -153,21 +153,21 @@ export const CORE_FEATURES = Object.freeze([
   'chrome',
   'view',
   'inbox',
-  /* the product round (docs/PRODUCT.md 8.1): the brand kit, the font catalog, the templates and the assist */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1): the brand kit, the font catalog, the templates and the assist */
   'brand',
   'fonts',
   'templates',
   'assist',
-  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  /* the sync and costs round (docs/archive/rounds/SYNC.md 6.1): the write path's order and the calls per state */
   'sync',
   'cost',
-  /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker over thesvg.org, parkable */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 4.12): the logo picker over thesvg.org, parkable */
   'logos',
-  /* the features round, ship two (docs/FEATURES.md 5.10): the shader library, parkable; Insert >
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.10): the shader library, parkable; Insert >
      Shader is in the default view on the ship's branch and the run's parked list moves it behind
      Tools > Advanced tools if its rows are red */
   'shaders',
-  /* the vector round (docs/VECTOR.md 6.1): the SVG pictures, parkable; its rows park the six
+  /* the vector round (docs/archive/rounds/VECTOR.md 6.1): the SVG pictures, parkable; its rows park the six
      control ids of 4.8 and never the feature whole */
   'svg',
   /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier;
@@ -183,17 +183,17 @@ export const CORE_FEATURES = Object.freeze([
 /**
  * An id's first part that is not a feature name, with the feature its rows belong to: the
  * `collab` rows are the share feature's, the `menus` rows of the vector round (the icons on the
- * visual rows, docs/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable, and the
- * `gestures` rows of the objects round (the live gestures, docs/OBJECTS.md section 2 and 6.1) are
+ * visual rows, docs/archive/rounds/VECTOR.md 6.1) are the chrome's, so an icon row is unparkable, and the
+ * `gestures` rows of the objects round (the live gestures, docs/archive/rounds/OBJECTS.md section 2 and 6.1) are
  * the arrange feature's, so a red gesture row fails the ship.
  */
 export const AREA_FEATURE = Object.freeze({
   collab: 'share',
   menus: 'chrome',
-  /* the objects round (docs/OBJECTS.md 6.1): the live gesture rows are the arrange feature's,
+  /* the objects round (docs/archive/rounds/OBJECTS.md 6.1): the live gesture rows are the arrange feature's,
      which is unparkable, so a red gesture row fails the ship */
   gestures: 'arrange',
-  /* the people round (docs/PEOPLE.md 6.1): how a person is drawn is the share feature's, which
+  /* the people round (docs/archive/rounds/PEOPLE.md 6.1): how a person is drawn is the share feature's, which
      is unparkable, so a red people row blocks the ship unless it carries `parks` */
   people: 'share',
   /* the realtime round (docs/REALTIME.md section 2, 4.4): the Google sign in rows are the share
@@ -202,7 +202,7 @@ export const AREA_FEATURE = Object.freeze({
 });
 
 /**
- * The rows whose feature is not their id's area (docs/FEATURES.md 7.1): a row of a new feature's
+ * The rows whose feature is not their id's area (docs/archive/rounds/FEATURES.md 7.1): a row of a new feature's
  * area whose measurement belongs to an unparkable feature carries that feature, so a red one blocks
  * the ship instead of parking the new feature. The export row of the logos area is the exporters'
  * (B7, `export`), the two intake rows are the upload's (`images`). Ship two adds the shaders area's
@@ -212,7 +212,7 @@ export const AREA_FEATURE = Object.freeze({
  */
 export const ROW_FEATURE = Object.freeze({
   'logos.export.pdf-pptx-crisp': 'export',
-  /* `logos.intake.svg-sentence` left with its sentence in the vector round (docs/VECTOR.md 4.7);
+  /* `logos.intake.svg-sentence` left with its sentence in the vector round (docs/archive/rounds/VECTOR.md 4.7);
      `svg.import.upload` measures the upload under the parkable feature `svg` */
   'logos.intake.url-sentence': 'images',
   'shaders.export.pdf-frame': 'export',
@@ -220,7 +220,7 @@ export const ROW_FEATURE = Object.freeze({
   'shaders.export.html-frame': 'export',
   'shaders.export.missing-frame-row': 'export',
   'shaders.view.play-setting': 'view',
-  /* the people round (docs/PEOPLE.md 6.1): the departed guest's comment is the comments feature's
+  /* the people round (docs/archive/rounds/PEOPLE.md 6.1): the departed guest's comment is the comments feature's
      and the aliased author of the version rows the versions feature's; both unparkable */
   'people.comment-departed-guest': 'comments',
   'people.versions-author-account': 'versions',
@@ -236,7 +236,7 @@ export const RUN_RESULTS = Object.freeze(['passed', 'failed', 'not driven']);
 export const PROBE_DRIVER = 'probe --core';
 
 /**
- * The cost probe (docs/SYNC.md 6.3): scripts/probes/sync-cost-probe.mjs, run by the gate. It drives
+ * The cost probe (docs/archive/rounds/SYNC.md 6.3): scripts/probes/sync-cost-probe.mjs, run by the gate. It drives
  * one page state per process for three minutes at human speed, records every request the page
  * made, samples `sync.status.storeCalls` five times and writes the counts beside the ceiling.
  */
@@ -261,23 +261,23 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   'core/share.spec.ts',
   'core/export.spec.ts',
   'core/surface.spec.ts',
-  /* the return round (docs/RETURN.md section 5): the clipboard paste into the chart grid */
+  /* the return round (docs/archive/rounds/RETURN.md section 5): the clipboard paste into the chart grid */
   'core/documents.spec.ts',
-  /* the product round (docs/PRODUCT.md 8.1): the viewport rows at 1440 and 1280, the kit and the
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1): the viewport rows at 1440 and 1280, the kit and the
      catalog's file chooser, network and window API rows, the assist panel against the fixture */
   'core/chrome.spec.ts',
   'core/brand.spec.ts',
   'core/assist.spec.ts',
-  /* the sync and costs round (docs/SYNC.md 6.1): the two browser spec of the ordering rows */
+  /* the sync and costs round (docs/archive/rounds/SYNC.md 6.1): the two browser spec of the ordering rows */
   'core/sync.spec.ts',
-  /* the features round, ship one (docs/FEATURES.md 7.1): the bearer rows, the network rows, the
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 7.1): the bearer rows, the network rows, the
      fixture upstream rows and the two browser rows of the logo picker */
   'core/logos.spec.ts',
-  /* the features round, ship two (docs/FEATURES.md 7.1): the frame rows (the second tab and the
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 7.1): the frame rows (the second tab and the
      second context), the reduced motion context, the WebGL rows, the measurement row and the
      agent transports of the shader library */
   'core/shaders.spec.ts',
-  /* the vector round (docs/VECTOR.md 6.1): the svg intake by the chooser, a paste, a drop and a
+  /* the vector round (docs/archive/rounds/VECTOR.md 6.1): the svg intake by the chooser, a paste, a drop and a
      URL, the sheet at two zooms, the picture gestures, the copy and the sanitizer rows */
   'core/svg.spec.ts',
   /* the realtime round (docs/REALTIME.md section 2, 5.1 R5): the two browser spec of the
@@ -300,7 +300,7 @@ export function specPathOf(driver) {
 }
 
 /**
- * The local spec drivers (docs/PEOPLE.md 6.1, 6.2): a Playwright spec under apps/studio/e2e/ that
+ * The local spec drivers (docs/archive/rounds/PEOPLE.md 6.1, 6.2): a Playwright spec under apps/studio/e2e/ that
  * runs on a node server with an identity database (`TURBOSLIDE_AUTH_DB`, `TURBOSLIDE_MAIL=capture`)
  * and never on a deployment, which has no account, no session and no picture. The gate runs it
  * with `--only accounts` and judges its rows alone; in any other run a local row is absent from
@@ -323,7 +323,7 @@ export const CORE_DRIVERS = Object.freeze([
  * `--tier`; a run on that tier judges the feature's rows like any rows of an unparkable feature,
  * and a run on any other tier (or one that names none) lists them apart under `tierRows` with
  * `tierAbsentReason`, never counted as passed, never "no step" and never a reason to park, the
- * shape of the local rows (docs/PEOPLE.md 6.2). The matrix's own reading (`today`) keeps them
+ * shape of the local rows (docs/archive/rounds/PEOPLE.md 6.2). The matrix's own reading (`today`) keeps them
  * as the audits left them.
  */
 export const TIER_FEATURES = Object.freeze({ setup: 'do' });
@@ -357,7 +357,7 @@ export const LOCAL_ABSENT_REASON = 'no identity database on this base';
 export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,3}$/;
 
 /**
- * The features that cannot be parked (docs/RETURN.md section 1 rule 2): a feature already in the
+ * The features that cannot be parked (docs/archive/rounds/RETURN.md section 1 rule 2): a feature already in the
  * default view with no flag to hide it. A failed or not driven row of one of them blocks the ship
  * unless the row carries `parks` (below). `surface` (the switch), `chrome` (the title row's split
  * button, separators and right cluster; nothing hides them) and every core feature of FOCUS.md
@@ -367,7 +367,7 @@ export const CORE_ID_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*){1,
 export const UNPARKABLE_FEATURES = Object.freeze([
   'surface',
   'chrome',
-  /* the sync and costs round (docs/SYNC.md 6.1): every row of both holds the ship, except that a
+  /* the sync and costs round (docs/archive/rounds/SYNC.md 6.1): every row of both holds the ship, except that a
      cost row marked measure records its counts and holds it only over its ceiling on the preview */
   'sync',
   'cost',
@@ -414,7 +414,7 @@ const ROW_KEYS = new Set([
 ]);
 
 /**
- * The sources the `parks` ids are validated against (docs/RETURN.md section 5: "validated against
+ * The sources the `parks` ids are validated against (docs/archive/rounds/RETURN.md section 5: "validated against
  * model.ts"): the menu model, the toolbar tails and the title row, read as text; an id is known
  * when it appears as a string literal in one of them. A plain Node module cannot import the
  * TypeScript model, so the check is the literal's presence, which catches a typo and a row that
@@ -425,7 +425,7 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/menus/model.ts',
     '../../packages/chrome/src/menus/toolbar-tails.ts',
     '../../packages/chrome/src/TitleRow.tsx',
-    /* the product round (docs/PRODUCT.md 7.1): a `parks` id may name a panel or a page control */
+    /* the product round (docs/archive/rounds/PRODUCT.md 7.1): a `parks` id may name a panel or a page control */
     '../../packages/chrome/src/ThemesPanel.tsx',
     '../../packages/chrome/src/FontPicker.tsx',
     '../../packages/chrome/src/panels/Assist.tsx',
@@ -433,7 +433,7 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/dialogs/SaveAsTemplate.tsx',
     '../../apps/studio/src/routes/decks.index.tsx',
     '../../apps/studio/src/routes/decks.templates.tsx',
-    /* the features round (docs/FEATURES.md section 6, B4's row): the logo dialog, the shader gallery
+    /* the features round (docs/archive/rounds/FEATURES.md section 6, B4's row): the logo dialog, the shader gallery
        and section, the overlay's handles and bars, the Tabular figures row and B1's parked set */
     '../../packages/chrome/src/dialogs/Logo.tsx',
     '../../packages/chrome/src/dialogs/ShaderGallery.tsx',
@@ -441,10 +441,10 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
     '../../packages/chrome/src/inspector/typography.tsx',
     '../../packages/chrome/src/Overlay.tsx',
     '../../packages/chrome/src/parked-controls.ts',
-    /* the features round, ship two (docs/FEATURES.md 5.4, 5.10): the Background dialog's Shader row
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4, 5.10): the Background dialog's Shader row
        and its P1 Add to theme row */
     '../../packages/chrome/src/dialogs/Background.tsx',
-    /* the people round (docs/PEOPLE.md 5.2): the avatar builder's Picture panel and file input,
+    /* the people round (docs/archive/rounds/PEOPLE.md 5.2): the avatar builder's Picture panel and file input,
        and the version panel's More menu row */
     '../../packages/chrome/src/dialogs/AvatarBuilder.tsx',
     '../../packages/chrome/src/VersionsPanel.tsx',
@@ -452,7 +452,7 @@ export const CONTROL_SOURCE_PATHS = Object.freeze(
 );
 
 /**
- * The control ids docs/PRODUCT.md 7.1 declares before the lanes' files exist (the product round):
+ * The control ids docs/archive/rounds/PRODUCT.md 7.1 declares before the lanes' files exist (the product round):
  * every new control has its id in that table before a driver is written, and a `parks` id in this
  * list is known while the file that will hold it is not on the tree yet, so the matrix validates
  * on the tree the lanes start from. Two ids here are templated in their source and never appear
@@ -492,7 +492,7 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'dialog.tailor',
   /* the pictures (B2): the templated By URL row */
   'format.image.replaceImage.byUrl',
-  /* the features round, ship one (docs/FEATURES.md 2.2, 2.3, 3.1, 4.3 to 4.11, 4.12): the ids the
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2, 2.3, 3.1, 4.3 to 4.11, 4.12): the ids the
      rows' `parks` name before the lanes' files hold them. The menu rows land in model.ts by request
      (B1 `insert.image.logo`; B6 `format.image.replaceImage.logo`, templated as
      `${prefix}.logo` by `replaceImageItems`); the dialog controls in dialogs/Logo.tsx (B1), the
@@ -524,7 +524,7 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'toolbar.group.text',
   'toolbar.wordart.outline',
   'formatOptions.typography.numerals',
-  /* the features round, ship two (docs/FEATURES.md 5.3 to 5.6, 5.10): the ids the shaders rows'
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3 to 5.6, 5.10): the ids the shaders rows'
      `parks` name before the lanes' files hold them. The Insert row lands in model.ts by request
      (B1 `insert.shader`, the `insert.material` row renamed and unflagged) and the P1 View row with
      its setting (B1 `view.playShaders`); the Shader row of the Background dialog and its P1 Add to
@@ -547,7 +547,7 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'formatOptions.shader.play',
   'formatOptions.shader.frame.scrubber',
   'formatOptions.shader.frame.capture',
-  /* the vector round (docs/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
+  /* the vector round (docs/archive/rounds/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
      it acts through `isParked` of parked-controls.ts (the chooser's accept list and the client
      sniff, the paste and drop handlers, the URL path, the copy handler, the Download dialog); the
      viewer's files hold them once B3 and B1 land, and the ids are known here from day 0 */
@@ -557,11 +557,11 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'intake.svg.url',
   'picture.svg.copy',
   'export.svg.vector',
-  /* the polish round (docs/POLISH.md 2.5 item 41, 5.1): the picture's Drop shadow section, B4's
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 41, 5.1): the picture's Drop shadow section, B4's
      in inspector/shadow.tsx by request to B1's format-sections.ts; the row
      `images.panel.drop-shadow` parks it alone until the section is on the build */
   'formatOptions.picture.shadow',
-  /* the people round (docs/PEOPLE.md 5.2): the Picture panel is templated in AvatarBuilder.tsx
+  /* the people round (docs/archive/rounds/PEOPLE.md 5.2): the Picture panel is templated in AvatarBuilder.tsx
      (`dialog.avatarBuilder.panel.${tab}`) and never one literal; the More menu's Restore row
      (B2, VersionsPanel.tsx MORE_ITEMS), the three sentences of the Picture panel (B3) and the
      grant row's email line (B2, the family `dialog.share.row.<i>.email`) are declared before the
@@ -597,7 +597,7 @@ export const CONTROL_ID_PATTERN = /^[a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+$/;
 
 /**
  * True when the id appears as a string literal in one of the control sources, or is one of the
- * ids docs/PRODUCT.md 7.1 declares (`DECLARED_CONTROL_IDS`) for a control whose file a lane has
+ * ids docs/archive/rounds/PRODUCT.md 7.1 declares (`DECLARED_CONTROL_IDS`) for a control whose file a lane has
  * not landed yet.
  */
 export function isKnownControl(id) {
@@ -620,14 +620,14 @@ export function isManualRow(row) {
 }
 
 /**
- * A measurement row (docs/PRODUCT.md 8.2): `measure: true` on a row whose claim is a number the
+ * A measurement row (docs/archive/rounds/PRODUCT.md 8.2): `measure: true` on a row whose claim is a number the
  * run records (the seconds per slide of the large deck exports). It runs in the second preview
  * run and the production run, its measurement is written into the run's JSON (the gate collects a
  * spec's `measure` annotations), and it never holds the ship: a red measurement row is written
  * into the ship note by id with its mechanism and neither parks its feature nor blocks. A row
  * nobody drives is still "no step" and fails the run.
  *
- * The cost rows of the sync and costs round (docs/SYNC.md 6.1) carry the field in a narrower
+ * The cost rows of the sync and costs round (docs/archive/rounds/SYNC.md 6.1) carry the field in a narrower
  * sense: their counts are recorded beside their ceilings, and a cost row over its ceiling on the
  * preview holds the ship (6.2). The verdict helpers below keep the PRODUCT.md rule for every
  * measurement row (recorded, never counted), so the ship step reads a red cost row from `measured`
@@ -638,7 +638,7 @@ export function isMeasureRow(row) {
   return row?.measure === true;
 }
 
-/** A row of the cost probe (docs/SYNC.md 6.1, 6.3): its driver is `cost-probe`. */
+/** A row of the cost probe (docs/archive/rounds/SYNC.md 6.1, 6.3): its driver is `cost-probe`. */
 export function isCostRow(row) {
   return row?.driver === COST_PROBE_DRIVER;
 }
@@ -779,7 +779,7 @@ export function gateRows() {
   return rowsForDriver(GATE_DRIVER);
 }
 
-/** True for a local row (docs/PEOPLE.md 6.2): its driver is one of `LOCAL_SPEC_DRIVERS`. */
+/** True for a local row (docs/archive/rounds/PEOPLE.md 6.2): its driver is one of `LOCAL_SPEC_DRIVERS`. */
 export function isLocalRow(row) {
   return LOCAL_SPEC_DRIVERS.includes(row?.driver);
 }
@@ -794,7 +794,7 @@ export function probeRows() {
   return rowsForDriver(PROBE_DRIVER);
 }
 
-/** The rows the cost probe drives (docs/SYNC.md 6.3). */
+/** The rows the cost probe drives (docs/archive/rounds/SYNC.md 6.3). */
 export function costRows() {
   return rowsForDriver(COST_PROBE_DRIVER);
 }
@@ -807,13 +807,13 @@ export function tally(rows = CORE_MATRIX) {
 }
 
 /**
- * Rule 4 of section 1, with docs/RETURN.md section 1 rule 2, over a run: `results` maps every core
+ * Rule 4 of section 1, with docs/archive/rounds/RETURN.md section 1 rule 2, over a run: `results` maps every core
  * id to `passed`, `failed` or `not driven` (an id the run did not record is `not driven`). Returns
  * the features that would be parked at a ship on this run (`parked`), the rows whose own controls
  * would stay parked (`parkedRows`, each `{ id, parks, result }`: a red row carrying `parks` parks
  * those ids alone, never its feature), the rows of an unparkable feature that would block the ship
  * (`blocking`), the red measurement rows recorded for the ship note (`measured`, PRODUCT.md 8.2;
- * they park nothing and block nothing), the local rows the run did not record (`local`, docs/PEOPLE.md
+ * they park nothing and block nothing), the local rows the run did not record (`local`, docs/archive/rounds/PEOPLE.md
  * 6.2: a row the accounts spec drives on a node server with an identity database, listed apart
  * with the reason, never counted as passed and never a reason to park; a local row the run did
  * record is judged like any row) and the red rows by feature, so the ship note renders the list
@@ -892,7 +892,7 @@ function checkParkedList(parkedFeatures, parkedRows, where) {
 }
 
 /**
- * The committed parked list of a ship (6.2; docs/RETURN.md section 1 rule 2):
+ * The committed parked list of a ship (6.2; docs/archive/rounds/RETURN.md section 1 rule 2):
  * `docs/gslides-parity/focus/ship-<commit>.json` with `{ "commit": "<sha>", "parkedFeatures":
  * [...], "parkedRows": [{ "id", "parks" }] }` (`parkedRows` optional; rendered from a run, never
  * typed). Returns the list, checked against the feature names and the matrix; an unparkable
@@ -920,7 +920,7 @@ export function readParkedList(path) {
  * feature cannot be listed. `parked` is the array of features (the focus round's form) or the
  * object `readParkedList` returns. Returns `ok`, the ids that fail it with their result, the
  * red measurement rows (`measured`) the verdict recorded and did not count, and the local rows
- * the run did not record (`local`, docs/PEOPLE.md 6.2: the accounts run's, never counted as
+ * the run did not record (`local`, docs/archive/rounds/PEOPLE.md 6.2: the accounts run's, never counted as
  * passed and never a failure here; a local row the run did record is judged like any row).
  * `rows` narrows the rule to one driver's rows.
  */
@@ -952,7 +952,7 @@ export function shipVerdict(results, parked = [], rows = CORE_MATRIX) {
 }
 
 // -----------------------------------------------------------------------------------------------
-// the parked set of packages/chrome/src/parked-controls.ts (docs/FEATURES.md 7.2)
+// the parked set of packages/chrome/src/parked-controls.ts (docs/archive/rounds/FEATURES.md 7.2)
 
 /** B1's module, whose set this generator writes between the two markers. */
 export const PARKED_CONTROLS_PATH = fileURLToPath(
@@ -1014,7 +1014,7 @@ export function emitParked(listPath, { out = PARKED_CONTROLS_PATH, check = false
   const controls = parkedControlsOf(list);
   if (!existsSync(out))
     throw new Error(
-      `${out} does not exist; packages/chrome/src/parked-controls.ts is B1's module (docs/FEATURES.md 7.2) and the generator writes its set between the markers only`,
+      `${out} does not exist; packages/chrome/src/parked-controls.ts is B1's module (docs/archive/rounds/FEATURES.md 7.2) and the generator writes its set between the markers only`,
     );
   const source = readFileSync(out, 'utf8');
   const next = spliceParkedSet(source, renderParkedSet(controls, list.commit));

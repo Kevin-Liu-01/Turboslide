@@ -255,7 +255,7 @@ export function registerDeckActions(
   dispatcher.register('deck.remove', (input) =>
     deckRemove(deps.decksDir, input as DeckIdInput & { confirm: true }),
   );
-  /* the templates of the product round over the same folder (docs/PRODUCT.md 4.3; build/b5b.md
+  /* the templates of the product round over the same folder (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md
      R3): the two reads, Save as template and Replace with the source deck's revision checked, and
      the three deckless writes; a checkout's holder is its owner, so no scope check here */
   dispatcher.register('template.list', () => ({

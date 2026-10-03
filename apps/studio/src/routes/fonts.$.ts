@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { serveFonts } from '../server/fonts';
 
 /**
- * GET /fonts/* (gslides-parity SPEC-5-amendments A5 items 3 and 4; docs/PRODUCT.md 4.2; ported
+ * GET /fonts/* (gslides-parity SPEC-5-amendments A5 items 3 and 4; docs/archive/rounds/PRODUCT.md 4.2; ported
  * from the round five branch at the product round's merge, build/b5.md R7): the catalog's faces
  * for the editor, the viewer and the picker. Two forms, both under the catalog's version so a
  * refetch at another commit is another URL and the answers cache as immutable:

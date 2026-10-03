@@ -3,11 +3,11 @@
    and the chrome lint key on it) and becomes a five row, three column grid when .is-editor is
    set: the title row (44), the menu bar (28), the toolbar (40) and the body (the filmstrip
    column, the canvas column with the notes pane under the stage, the right panel column). The
-   bottom bar of the parity rounds left in the product round (docs/PRODUCT.md section 2 rank 25;
+   bottom bar of the parity rounds left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25;
    audit-interface 35): its one control, the side panel toggle, sits in the title row's right
    cluster and the stage keeps the 32 px. Compact mode (Ctrl+Shift+F) zeroes the menu bar and
    toolbar rows; present mode zeroes every row but the body and closes every column but the
-   canvas. Lines (SPEC 1.2; docs/RETURN.md 4.2, one --pt-hair line per boundary drawn once): the
+   canvas. Lines (SPEC 1.2; docs/archive/rounds/RETURN.md 4.2, one --pt-hair line per boundary drawn once): the
    title row and the toolbar draw their bottom edges, the filmstrip its right edge (Sidebar.css),
    the right panel its left edge (Panel.css), the notes pane draws its own top edge with the
    handle on it (NotesPane.css) and its slot draws none; the menu bar, the canvas and the body
@@ -46,7 +46,7 @@
   display: none;
 }
 
-/* View > Mode > Viewing (docs/RETURN.md 2.14 item 6; the matrix row view.mode.viewing-hides-toolbar):
+/* View > Mode > Viewing (docs/archive/rounds/RETURN.md 2.14 item 6; the matrix row view.mode.viewing-hides-toolbar):
    the toolbar row leaves as Google's does, and Commenting and Editing keep it. EditorShell.tsx
    stamps the root's data-edit-mode (SPEC-3 5.3) and draws no toolbar in Viewing; the row height
    goes to zero here so the body moves up and --ts-top-h (the overlay filmstrip's offset) follows. */
@@ -100,7 +100,7 @@
 
 /* the notes pane slot: the pane's own height comes from B4's NotesPane. The slot draws no line:
    the pane `.ts-notes` draws the one --pt-hair divider with the handle on it (NotesPane.css), and
-   the slot's own border-top drew a second line 1 px above it, a 2 px seam (docs/RETURN.md 4.2
+   the slot's own border-top drew a second line 1 px above it, a 2 px seam (docs/archive/rounds/RETURN.md 4.2
    item 1; return/audit-chrome.md row 7) */
 .pt-viewer.is-editor > .pt-main > .ts-notes-slot {
   grid-row: 2;
@@ -157,7 +157,7 @@
   padding: 8px 8px 12px;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  /* a plate that floats over the stage takes the frame weight (docs/PRODUCT.md 3.1) */
+  /* a plate that floats over the stage takes the frame weight (docs/archive/rounds/PRODUCT.md 3.1) */
   border: 1px solid var(--pt-edge);
   max-height: calc(100vh - 16px);
   overflow-y: auto;

@@ -24,7 +24,7 @@ import { filterPalette } from './palette-data';
  * palette. Enter runs the item's effect through the shell. The rows' tooltips carry the label,
  * the sentence and the key, never an action id or a pointer (SPEC 12).
  *
- * The product round (docs/PRODUCT.md 6.1; audit-assist 8): the empty state gains the row "Ask the
+ * The product round (docs/archive/rounds/PRODUCT.md 6.1; audit-assist 8): the empty state gains the row "Ask the
  * assistant: <phrase>" (`finder.assist.ask`, drawn as `palette.finder.assist.ask`) when a phrase
  * matches nothing; Enter opens the Assist panel with the phrase in the box through `onAsk`. The
  * row is present while the Assist entry is (`title.assist` in the model and drawn for the
@@ -43,7 +43,7 @@ export type ToolFinderProps = {
   /** opens the Assist panel with the phrase; without it the empty state stays "Nothing matches" */
   onAsk?: (phrase: string) => void;
   /**
-   * The assistant's mode (docs/POLISH.md 2.9 item 113): the Ask row is offered with `model` or
+   * The assistant's mode (docs/archive/rounds/POLISH.md 2.9 item 113): the Ask row is offered with `model` or
    * `fixture` alone, since an unconfigured or switched off assistant answers every ask with one
    * sentence. Absent reads as `model`.
    */
@@ -122,7 +122,7 @@ export function toolFinderEntries(
 }
 
 /**
- * The Ask row for a phrase that matches nothing (docs/PRODUCT.md 6.1): one entry whose words are
+ * The Ask row for a phrase that matches nothing (docs/archive/rounds/PRODUCT.md 6.1): one entry whose words are
  * the phrase itself, so the filter keeps it while every other row is gone; null while the phrase
  * matches a row, is empty, or the assist is absent.
  */

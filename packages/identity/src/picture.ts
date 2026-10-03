@@ -1,4 +1,4 @@
-// The picture avatar's URLs (docs/PEOPLE.md 4.4; gslides-parity SPEC-3 7.6): one file per size
+// The picture avatar's URLs (docs/archive/rounds/PEOPLE.md 4.4; gslides-parity SPEC-3 7.6): one file per size
 // under the choice's folder, `<base>/<digest>-<size>.webp`, the base being the public store's
 // folder hosted and the studio's avatar route on a checkout. The 64 px URL is the one a
 // `MarkSpec` carries (`pictureUrl`); the chip's `srcset`, the Profile head and the builder's

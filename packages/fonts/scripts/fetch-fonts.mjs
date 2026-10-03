@@ -12,7 +12,7 @@
 // The check chain never runs this: the assets and the generated table are committed, and
 // catalog.test.ts compares the files with the table.
 //
-// The features round (docs/FEATURES.md 3.1 items 2 and 4; 3.2): every family records `features`
+// The features round (docs/archive/rounds/FEATURES.md 3.1 items 2 and 4; 3.2): every family records `features`
 // (the GSUB feature tags of its upright file) and `tnum` (whether the face has tabular figures,
 // so the Tabular figures row of Format options can say "This face has no tabular figures"); a
 // `--only` run reads the two from the committed woff2 files of the families it does not fetch,
@@ -164,7 +164,7 @@ function familyFeatures(facts) {
 }
 
 /**
- * The licence link More fonts carries answers 200 (docs/FEATURES.md 3.1 item 2): GitHub's blob
+ * The licence link More fonts carries answers 200 (docs/archive/rounds/FEATURES.md 3.1 item 2): GitHub's blob
  * page for the family's OFL.txt at the pinned commit, or Inter's release licence. A miss is a
  * failure of the run, listed at the end, and never stops the files being written.
  */
@@ -416,7 +416,7 @@ export type CatalogFamilyFacts = {
   copyright: string;
   /** the variable axes of the upright file, tag to [min, max]; null for a static family */
   axes: Record<string, [number, number]> | null;
-  /** the GSUB feature tags of the upright file, sorted (docs/FEATURES.md 3.1 item 4) */
+  /** the GSUB feature tags of the upright file, sorted (docs/archive/rounds/FEATURES.md 3.1 item 4) */
   features: string[];
   /** true when the face has tabular figures (\`tnum\`), so the Tabular figures row is enabled for it */
   tnum: boolean;

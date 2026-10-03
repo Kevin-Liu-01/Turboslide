@@ -4,7 +4,7 @@ import { SectionIcon } from './SectionIcon';
 import { HERO_SIZES, Shot } from './Shot';
 
 /**
- * The hero (docs/POLISH.md 3.2 item 1; the page grammar of docs/NEXT.md 4.1.2): in the 1104 px
+ * The hero (docs/archive/rounds/POLISH.md 3.2 item 1; the page grammar of docs/NEXT.md 4.1.2): in the 1104 px
  * column, the page's `h1` at the ladder's hero size (3.7rem, 2.5rem under 720 px, weight 500,
  * -0.038em), the one lead and two buttons (New Presentation as a document navigation, Open the
  * Example Deck as a router `Link` to the viewer) on the left, and on the right the facts rows of

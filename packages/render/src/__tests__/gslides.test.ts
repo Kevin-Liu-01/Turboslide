@@ -330,7 +330,7 @@ describe('the counter modes and the play list (SPEC 7.2.1, 7.2.4)', () => {
     expect(rendered[1]?.rendered.html).toContain('data-counter="02 / 02"');
   });
 
-  it("reads the slide's own counter word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/RETURN.md slides.numbers.apply)", () => {
+  it("reads the slide's own counter word first (Slide numbers > Apply to selected, SPEC 7.2.4; docs/archive/rounds/RETURN.md slides.numbers.apply)", () => {
     const off: Deck = { ...base, defaults: { counter: 'off' } };
     const skipTitle: Deck = { ...base, defaults: { counter: 'skip-title' } };
     /* off on a numbered deck blanks the one slide; on under an off deck numbers it */

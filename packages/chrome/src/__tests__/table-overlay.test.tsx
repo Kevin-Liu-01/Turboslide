@@ -42,7 +42,7 @@ vi.mock('../parked-controls', async (importOriginal) => {
   };
 });
 
-// The table's own controls in the overlay (docs/OBJECTS.md 3.3 items 1 and 4; the rows
+// The table's own controls in the overlay (docs/archive/rounds/OBJECTS.md 3.3 items 1 and 4; the rows
 // tables.cell.ring-on-cell, tables.heads.select-row-column, tables.heads.header-toggle,
 // tables.edge.add-row-column): the grid areas read from the measured cells, the cell ring on the
 // open cell's grid area, the head bands with their ids and tooltips, the head's click selecting
@@ -318,7 +318,7 @@ describe('the heads', () => {
     expect(selectCells).toHaveBeenLastCalledWith('t', { r0: 1, c0: 0, r1: 1, c1: 2 });
   });
 
-  it('a click hands the focus to the stage root after the range, so the keys act on the range (docs/POLISH.md 2.2 item 7)', () => {
+  it('a click hands the focus to the stage root after the range, so the keys act on the range (docs/archive/rounds/POLISH.md 2.2 item 7)', () => {
     const calls: string[] = [];
     const selectCells = vi.fn(() => calls.push('select'));
     const focus = vi.fn(() => calls.push('focus'));
@@ -458,7 +458,7 @@ describe('the "+" at the edges', () => {
     ];
     expect(label).toBe('Add a column');
     expect(mutations.map((mutation) => mutation.path)).toEqual(['/columns', '/rows', '/pos']);
-    /* the box grows to the content box's right edge (1463) and no further (docs/POLISH.md 2.2
+    /* the box grows to the content box's right edge (1463) and no further (docs/archive/rounds/POLISH.md 2.2
        item 9): 183 of the last column's 320, the audit's table ended at the sheet's edge */
     expect((mutations[2]?.value as { w: number }).w).toBe(1143);
     expect((mutations[0]?.value as { width: number }[]).map((column) => column.width)).toEqual([

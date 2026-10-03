@@ -37,7 +37,7 @@ export const IDS = [
   'images.context.image',
   'images.options.menu-row',
   'images.background.hex-field',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'images.caption.add',
   'images.options.picture-sections-only',
   'images.transparency.slider',
@@ -64,7 +64,7 @@ export async function run(t) {
     'click the toolbar Image button',
     'the menu lists Upload from computer',
     async () => {
-      /* the button itself opens the file chooser since the product round (docs/PRODUCT.md section
+      /* the button itself opens the file chooser since the product round (docs/archive/rounds/PRODUCT.md section
          2 rank 17, b2 R4); the sources sit under its arrow */
       const arrow = await t.has('[data-control="toolbar.insertImage.arrow"]');
       await t.clickControl(arrow ? 'toolbar.insertImage.arrow' : 'toolbar.insertImage');
@@ -1053,7 +1053,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 2 rank 10, section 5, 8.1): Add a caption from
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 2 rank 10, section 5, 8.1): Add a caption from
  * the picture's menu, Format options scoped to a picture, the Transparency slider and the picture
  * border read from a 2x screenshot. B2 owns the picture routes and the panel.
  */

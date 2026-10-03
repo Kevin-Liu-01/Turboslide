@@ -879,14 +879,14 @@ export function parsePaletteQuery(query: string): PaletteQuery {
   return { group: null, needle: trimmed.trim().toLowerCase() };
 }
 
-/** A needle this long or longer never matches as a subsequence (docs/PRODUCT.md 6.1). */
+/** A needle this long or longer never matches as a subsequence (docs/archive/rounds/PRODUCT.md 6.1). */
 export const SUBSEQUENCE_MAX_NEEDLE = 3;
 
 /**
  * How well a needle matches a haystack: 4 for a prefix of the whole text, 3 for a prefix of a
  * word, 2 for a substring, 1 for a subsequence in order (`ctr` in `content-rule`), 0 for none.
  * The subsequence score holds for needles of three characters or fewer: a seller's "logo"
- * answered "Long dash dot" through it (audit-assist 8; docs/PRODUCT.md 6.1), so a needle of four
+ * answered "Long dash dot" through it (audit-assist 8; docs/archive/rounds/PRODUCT.md 6.1), so a needle of four
  * characters or more matches only as a prefix or a substring of the row's words.
  */
 export function matchScore(needle: string, haystack: string): number {
@@ -925,7 +925,7 @@ export function filterPalette(
   });
   /* two menu rows with one label and one score list the shallower path first (Insert › Logo
      before Insert › Image › Logo and Format › Image › Replace image › Logo; the features round,
-     docs/FEATURES.md 4.3): a menu row's `meta` is its path, one ' › ' per level */
+     docs/archive/rounds/FEATURES.md 4.3): a menu row's `meta` is its path, one ' › ' per level */
   const depth = (entry: PaletteEntry) => (entry.meta ?? '').split('›').length;
   return PALETTE_GROUPS.flatMap((meta) => {
     const rows = scored

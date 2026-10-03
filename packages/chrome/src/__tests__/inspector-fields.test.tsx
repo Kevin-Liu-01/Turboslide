@@ -64,7 +64,7 @@ describe('SliderField', () => {
   });
 });
 
-// One history entry per typed value (docs/RETURN.md 2.14 item 3; audit-formatting rows 12, 13,
+// One history entry per typed value (docs/archive/rounds/RETURN.md 2.14 item 3; audit-formatting rows 12, 13,
 // 64 to 66): Enter commits and blurs the field in one event, and the blur's commit ran again on
 // the draft of the render its handler was bound in, so a typed width made two writes and the
 // first Cmd+Z restored nothing.

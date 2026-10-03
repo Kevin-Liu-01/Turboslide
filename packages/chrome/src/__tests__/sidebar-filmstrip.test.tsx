@@ -332,7 +332,7 @@ describe('the filmstrip', () => {
       'Move slide',
       'Comment',
     ]);
-    /* Change theme returned in the return round (docs/RETURN.md 2.13); the Later row stays out */
+    /* Change theme returned in the return round (docs/archive/rounds/RETURN.md 2.13); the Later row stays out */
     expect(document.querySelector('[data-menu-item="slide.changeTheme"]')).not.toBeNull();
     expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
     fireEvent.keyDown(menu!, { key: 'Escape' });

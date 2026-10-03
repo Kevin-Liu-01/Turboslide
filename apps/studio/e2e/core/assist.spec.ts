@@ -25,7 +25,7 @@ import {
   snackbarText,
 } from './lib';
 
-// The assist panel, the spec rows (docs/PRODUCT.md section 6, 8.1 `assist.rewrite.card-accept-
+// The assist panel, the spec rows (docs/archive/rounds/PRODUCT.md section 6, 8.1 `assist.rewrite.card-accept-
 // undo`, `assist.notes.draft`, `assist.free-ask.fallback-sentence`, `assist.mark.chip-and-history`
 // and `assist.quota.429` with the driver core/assist.spec.ts): the two model cards, the fallback
 // sentence, the Assistant mark with its history row, and the quota. On the preview the route
@@ -88,7 +88,8 @@ async function openPanel(): Promise<void> {
       .catch(() => false);
     if (!entry) await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
   }
-  if (!entry) test.skip(true, 'not on this build: title.assist (docs/PRODUCT.md 7.1, B6)');
+  if (!entry)
+    test.skip(true, 'not on this build: title.assist (docs/archive/rounds/PRODUCT.md 7.1, B6)');
   await ctl(page, 'title.assist').click();
   await ctl(page, 'panel.assist').waitFor({ timeout: 8000 });
 }
@@ -225,7 +226,7 @@ test(title('assist.free-ask.fallback-sentence'), async () => {
   await page.keyboard.type('add a video', { delay: 40 });
   await page.keyboard.press('Enter');
   /* the fallback is a sentence line of the panel's log (Assist.tsx `panel.assist.sentence`,
-     ASSIST_SENTENCES.fallback), never a card with Accept (docs/PRODUCT.md 6.1) */
+     ASSIST_SENTENCES.fallback), never a card with Accept (docs/archive/rounds/PRODUCT.md 6.1) */
   const sentences = () =>
     page.evaluate(() =>
       [
@@ -378,7 +379,7 @@ test(title('assist.quota.429'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.9 items 113, 116, 117, 118 and 120, 5.1 `assist.*`): the
+// the polish round (docs/archive/rounds/POLISH.md 2.9 items 113, 116, 117, 118 and 120, 5.1 `assist.*`): the
 // panel offers what the deployment can do, one Tailor pass, an agent's write named by what
 // changed, the panel's words and layout, and the agent surface's small words.
 
@@ -487,7 +488,7 @@ test(title('assist.tailor.one-pass'), async () => {
     switched = true;
     if (!(await reach())) {
       await menuPath(page, 'tools', 'tools.advancedTools').catch(() => undefined);
-      test.skip(true, 'not on this build: tools.tailor (docs/PRODUCT.md 7.1)');
+      test.skip(true, 'not on this build: tools.tailor (docs/archive/rounds/PRODUCT.md 7.1)');
     }
   }
   await ctl(page, 'dialog.tailor').waitFor({ timeout: 8000 });
@@ -696,7 +697,7 @@ test(title('assist.panel.words-and-layout'), async () => {
   if (mode !== 'model')
     test.skip(
       true,
-      `the panel runs ${mode} on this deployment: the composer rows are the model panel's (docs/POLISH.md 2.9 item 113)`,
+      `the panel runs ${mode} on this deployment: the composer rows are the model panel's (docs/archive/rounds/POLISH.md 2.9 item 113)`,
     );
   expect(
     facts.providerLines.filter((l) => facts.promptTop !== null && l.top < facts.promptTop),
@@ -826,7 +827,7 @@ coverage(import.meta.filename, [
   'assist.free-ask.fallback-sentence',
   'assist.mark.chip-and-history',
   'assist.quota.429',
-  /* the polish round (docs/POLISH.md 2.9) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.9) */
   'assist.panel.mode-aware',
   'assist.tailor.one-pass',
   'assist.snackbar.names-change',

@@ -161,7 +161,7 @@ describe('the free rectangles', () => {
   });
 });
 
-describe('placeInsert (docs/PRODUCT.md section 2 rank 1)', () => {
+describe('placeInsert (docs/archive/rounds/PRODUCT.md section 2 rank 1)', () => {
   it('lands the first table at the top of an empty body, centred across it, at its default size', () => {
     const placed = placeInsert(titleAndBody(), 'table', [960, 320]);
     expect(placed.how).toBe('free');
@@ -171,7 +171,7 @@ describe('placeInsert (docs/PRODUCT.md section 2 rank 1)', () => {
   });
 
   it('lands a shader under the head band, free of the title and of the body prompt (shaders.insert.selected-free-rectangle)', () => {
-    /* the features round, ship two (docs/FEATURES.md 5.4; build/b5/integrator-hunks.md R5): 480 by
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4; build/b5/integrator-hunks.md R5): 480 by
        272 under the head band; the polish round fix round 2 (B4's R4) counts the empty body prompt
        for a shader too, so the box lands in the strip under it and shrinks to that strip's height */
     const slide = titleAndBody([], { title: 'A title', body: '' });
@@ -301,7 +301,7 @@ describe('wantsPlacement', () => {
   it('is the chrome insert of a table, a chart or a shader with a box on top of the stack', () => {
     expect(wantsPlacement({ slot: 'main', block: { type: 'chart', pos } })).toBe(true);
     expect(wantsPlacement({ slot: 'main', block: { type: 'table', pos } })).toBe(true);
-    /* the features round, ship two (docs/FEATURES.md 5.4): the gallery's insert */
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): the gallery's insert */
     expect(wantsPlacement({ slot: 'main', block: { type: 'material', pos } })).toBe(true);
   });
   it('leaves an insert with its own place, stack position or kind alone', () => {
@@ -315,7 +315,7 @@ describe('wantsPlacement', () => {
   });
 });
 
-/* The polish round (docs/POLISH.md 2.2 items 6 and 8; section 5.5): a table's box is never
+/* The polish round (docs/archive/rounds/POLISH.md 2.2 items 6 and 8; section 5.5): a table's box is never
    shorter than its rows, and every insert of a kind lands by one rule. */
 describe('placeInsert, the polish round', () => {
   it('lands 1 by 1, 1 by 2 and 3 by 3 at the same top of the body (tables.insert.one-placement-rule)', () => {

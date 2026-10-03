@@ -3,7 +3,7 @@
    would vanish (SPEC 2.2, the help card's rule); rows inside it are ruled in --pt-hair-soft and
    the actions row draws --pt-hair above itself. 13 px Inter, 24 px padding, radius 0, no shadow;
    the scrim fades over the toast duration and the card rises 8 px over the enter duration; off
-   under reduced motion. The product round (docs/PRODUCT.md 3.1): every field is ruled in
+   under reduced motion. The product round (docs/archive/rounds/PRODUCT.md 3.1): every field is ruled in
    --pt-field (3:1), every control's focus ring is the one inset ring of tokens.css, the X takes
    the plate ground on hover, a checked box draws a check and not a dash, and every select is the
    one select of tokens.css. Colors are tokens only. */
@@ -325,7 +325,7 @@
 }
 
 /* a list that waits for its rows keeps the height its rows will take, so the card never grows
-   when they arrive (docs/POLISH.md 2.6 item 64; audit-chrome item 11: Open and Import slides
+   when they arrive (docs/archive/rounds/POLISH.md 2.6 item 64; audit-chrome item 11: Open and Import slides
    opened short with "Loading…" and jumped); the frame rows are the home page's */
 .ts-dialog-list.is-loading {
   min-height: 240px;
@@ -642,15 +642,15 @@
   }
 }
 
-/* the Find and replace count line ("1 of 2", docs/PRODUCT.md section 5): a status line in ink-2 */
+/* the Find and replace count line ("1 of 2", docs/archive/rounds/PRODUCT.md section 5): a status line in ink-2 */
 .ts-dialog-count {
   margin: -4px 0 8px;
   color: var(--pt-ink-2);
   font-size: 12.5px;
 }
 
-/* Tailor for a customer's Find the logo slot (dialogs/Tailor.tsx; docs/FEATURES.md 4.5): the
-   two halves of the mark side by side at 48 px (docs/POLISH.md 2.9 item 116: the stacked pair
+/* Tailor for a customer's Find the logo slot (dialogs/Tailor.tsx; docs/archive/rounds/FEATURES.md 4.5): the
+   two halves of the mark side by side at 48 px (docs/archive/rounds/POLISH.md 2.9 item 116: the stacked pair
    stood 170 px tall beside a floating button), the button under them, the stored sentence last */
 .ts-tailor-find {
   display: grid;
@@ -674,7 +674,7 @@
   grid-column: 1 / -1;
 }
 
-/* a grid of picture tiles (the Background dialog's pictures, docs/POLISH.md 2.6 item 56): three
+/* a grid of picture tiles (the Background dialog's pictures, docs/archive/rounds/POLISH.md 2.6 item 56): three
    across, the picture at 16 by 9 in a hairline, the name on one line with an ellipsis */
 .ts-dialog-tiles {
   display: grid;

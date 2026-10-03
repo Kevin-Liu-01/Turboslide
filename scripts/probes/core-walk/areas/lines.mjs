@@ -24,7 +24,7 @@ export const IDS = [
   'lines.connector.re-end',
   'lines.insert.arrow-head',
   'lines.tail.line-start-end-menu',
-  /* the objects round (docs/OBJECTS.md 4.2 item 5): the chip names the line kind */
+  /* the objects round (docs/archive/rounds/OBJECTS.md 4.2 item 5): the chip names the line kind */
   'lines.chip.kind-name',
 ];
 
@@ -379,7 +379,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's rows (docs/RETURN.md 2.3, section 5): the connectors between two
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.3, section 5): the connectors between two
   // rectangles placed as setup, the arrow head and the Line start and Line end menu rows
   const A = { id: 'con-a', pos: { x: 200, y: 600, w: 240, h: 160 } };
   const B = { id: 'con-b', pos: { x: 900, y: 600, w: 240, h: 160 } };
@@ -544,7 +544,7 @@ export async function run(t) {
       const ok = read.every((r) => r.ok);
       return {
         ok,
-        observed: `${read.map((r) => `${r.name}: chip ${r.chip === null ? (r.reason ?? 'none') : `"${r.chip}"`} (${r.expected})`).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 5, B3: blockDisplayName)'}`,
+        observed: `${read.map((r) => `${r.name}: chip ${r.chip === null ? (r.reason ?? 'none') : `"${r.chip}"`} (${r.expected})`).join('; ')}${ok ? '' : ' (docs/archive/rounds/OBJECTS.md 4.2 item 5, B3: blockDisplayName)'}`,
       };
     },
   );

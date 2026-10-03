@@ -1,4 +1,4 @@
-// How a person is drawn, the probe's rows (docs/PEOPLE.md 6.1, the area `people` under the
+// How a person is drawn, the probe's rows (docs/archive/rounds/PEOPLE.md 6.1, the area `people` under the
 // share feature with the driver `probe --core`): the chip's field 2 px inside its edge on every
 // chip the one browser can reach (the own chip, the account head, the roster's own row, the
 // builder's strip, a 16 px version row, a comment card's chip) with the live stripe and the
@@ -594,7 +594,7 @@ export async function run(t) {
       if (!opened)
         return {
           ok: false,
-          observed: `own chip ${drawn.chip}, rule ${drawn.rule}, roster own row ${ownRowBefore ?? 'none'} (roster ${roster ?? 'did not open'}); prompt of the first edit ${prompt ? `closed at ${prompt.at} in ${prompt.area}` : 'never seen'}; the account menu could not open with the switch off (title.account is parked, docs/PEOPLE.md 3.14)`,
+          observed: `own chip ${drawn.chip}, rule ${drawn.rule}, roster own row ${ownRowBefore ?? 'none'} (roster ${roster ?? 'did not open'}); prompt of the first edit ${prompt ? `closed at ${prompt.at} in ${prompt.area}` : 'never seen'}; the account menu could not open with the switch off (title.account is parked, docs/archive/rounds/PEOPLE.md 3.14)`,
         };
       const rowsBefore = await page.evaluate(() =>
         [...document.querySelectorAll('#ts-menu-account [role="menuitem"]')].map((el) =>
@@ -682,7 +682,7 @@ export async function run(t) {
       const applied = await applyVariant('glyph', 2000);
       const before = { variant: applied.variant ?? (await ownVariant()), ms: applied.ms };
       /* the reload: on a deployment the read may land on an instance that has not seen the choice
-         for up to 5 s (docs/PEOPLE.md 6.4), so the bound is 10 s and the instance is named */
+         for up to 5 s (docs/archive/rounds/PEOPLE.md 6.4), so the bound is 10 s and the instance is named */
       await t.reloadTo(page.url());
       await t.settled();
       const t1 = Date.now();

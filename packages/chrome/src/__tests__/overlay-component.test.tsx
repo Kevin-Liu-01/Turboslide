@@ -101,7 +101,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     rotation: null,
     sizeReadout: null,
     widthReadout: null,
-    /* the features round (docs/FEATURES.md 2.1, 2.2 rank 7) */
+    /* the features round (docs/archive/rounds/FEATURES.md 2.1, 2.2 rank 7) */
     tableFrame: false,
     editData: null,
     valueReadout: null,
@@ -283,7 +283,7 @@ describe('Overlay on a freeform slide', () => {
     expect(container.querySelector<HTMLElement>('.ts-crop-full')?.style.width).toBe('250px');
     expect(container.querySelector('.ts-crop-frame')).not.toBeNull();
     expect(container.querySelectorAll('.ts-handle[data-kind="crop-edge"]')).toHaveLength(8);
-    /* the chip is one word since the polish round (docs/POLISH.md 2.5 item 50); the sentence
+    /* the chip is one word since the polish round (docs/archive/rounds/POLISH.md 2.5 item 50); the sentence
        stays the handles' tooltip; the dim covers the cut part alone as strips beside the frame */
     expect(container.querySelector('.ts-select-chip.is-crop')?.textContent).toBe('Crop');
     expect(container.querySelectorAll('.ts-crop-dim').length).toBeGreaterThan(0);
@@ -412,7 +412,7 @@ describe('Overlay on a freeform slide', () => {
   });
 });
 
-describe('the table frame and the Edit data button (docs/FEATURES.md 2.1, 2.2 rank 7)', () => {
+describe('the table frame and the Edit data button (docs/archive/rounds/FEATURES.md 2.1, 2.2 rank 7)', () => {
   it('keeps the chip and the frame edges as the move surface while a table cell is open', () => {
     render(<Overlay view={viewOf({ editing: true, tableFrame: true })} />);
     const chip = document.querySelector('.ts-select-chip') as HTMLElement;

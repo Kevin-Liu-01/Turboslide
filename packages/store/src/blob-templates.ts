@@ -1,4 +1,4 @@
-// The saved templates on the blob tier (the product round fix round; docs/PRODUCT.md 4.3;
+// The saved templates on the blob tier (the product round fix round; docs/archive/rounds/PRODUCT.md 4.3;
 // VERIFICATION.md "Product round, pass 1" finding 2; build/b5b.md R6): File > Save as template
 // writes a folder under the instance's overlay (templates.ts saveTemplate), and until this module
 // that folder lived on one function instance, so the gallery on another listed `blank` and
@@ -13,7 +13,7 @@
 // the local `templates.json` rebuilt from the folders). Turboslide's own templates (no
 // `organisation` flag on their record) are the seed's on every instance and never travel.
 //
-// The budget (docs/sessions-polling.md): no timer. A pull is one head per call and reads bodies
+// The budget (docs/archive/status/sessions-polling.md): no timer. A pull is one head per call and reads bodies
 // only when the index moved; a push is one put per file plus the index. The gallery, the /decks
 // strip, `template.list`, the default kit read and `deck.create` from a template each pull once.
 import {

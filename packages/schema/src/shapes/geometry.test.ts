@@ -1,4 +1,4 @@
-// The geometry interpreter (docs/VECTOR.md 2.1, 6.3): the seventeen formula operations, the built
+// The geometry interpreter (docs/archive/rounds/VECTOR.md 2.1, 6.3): the seventeen formula operations, the built
 // in guides, the arc conversion, the path space scaling, every preset at three sizes, and a
 // sample of the presets against their ECMA path evaluated by hand here.
 import { describe, expect, it } from 'vitest';
@@ -195,7 +195,7 @@ describe('the path space', () => {
   });
 });
 
-describe('the arcs in a scaled path space (the polish round, docs/POLISH.md item 25)', () => {
+describe('the arcs in a scaled path space (the polish round, docs/archive/rounds/POLISH.md item 25)', () => {
   /** One SVG arc command with its start point, as the path string wrote it. */
   type Arc = {
     x1: number;
@@ -302,7 +302,7 @@ describe('the arcs in a scaled path space (the polish round, docs/POLISH.md item
         );
         /* the arcs and the file's numbers round to the half pixel, which a short crease's centre
            magnifies: within 4 px of the puff's centre (measured 2.65 at worst over these boxes;
-           24 to 31 px with the conversion in the scaled space, docs/POLISH.md item 25) */
+           24 to 31 px with the conversion in the scaled space, docs/archive/rounds/POLISH.md item 25) */
         expect(nearest, `${w}x${h} crease at ${crease.x1},${crease.y1}`).toBeLessThanOrEqual(4);
         /* and the crease itself lies inside the box, never past the cloud's right edge */
         expect(crease.x2, `${w}x${h}`).toBeLessThanOrEqual(w + 1);

@@ -76,7 +76,7 @@ export const KEY_SCOPE_FOR_ACCOUNT =
 export const AVATAR_SWEEP_ACTION = 'admin.avatar.sweep';
 
 /**
- * The person an account action changes (docs/PEOPLE.md 4.7): the anonymous or account principal
+ * The person an account action changes (docs/archive/rounds/PEOPLE.md 4.7): the anonymous or account principal
  * of the request, or the owner of an API key with the write scope, so `turboslide account
  * avatar --picture` and `account name` through `turboslide login`'s key act on the owner's own
  * record. A checkout's holder, the bootstrap bearer and a refused bearer have no subject.

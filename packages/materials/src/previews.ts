@@ -1,4 +1,4 @@
-// The gallery's stills (docs/FEATURES.md 5.4; audit-shaders 3): one 320 by 200 webp per material
+// The gallery's stills (docs/archive/rounds/FEATURES.md 5.4; audit-shaders 3): one 320 by 200 webp per material
 // and one small tile per preset under packages/materials/previews/, rendered once per catalog
 // change by `node scripts/build-shader-previews.mjs` at anchor 5500 in the legacy palette (the
 // default kit's build in black and white, the gallery's one sentence says so) and committed, the

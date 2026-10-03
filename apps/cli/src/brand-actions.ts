@@ -1,4 +1,4 @@
-// The brand kit's handlers (docs/PRODUCT.md 4.1; B5a): brand.get, brand.set and brand.reset over a
+// The brand kit's handlers (docs/archive/rounds/PRODUCT.md 4.1; B5a): brand.get, brand.set and brand.reset over a
 // deck store, and font.list, on every transport through one dispatcher registration
 // (`registerBrandActions`), the way registerStoreActions registers the store actions. Every write
 // is one `deck.set` mutation under `/brand` (the reducer's DECK_SET_ROOTS gains the root; the

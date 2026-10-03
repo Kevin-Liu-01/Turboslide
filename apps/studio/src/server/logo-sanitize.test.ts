@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { sanitizeLogoSvg } from './logo-sanitize';
 
-// The sanitizer's rules of the polish round (docs/POLISH.md item 32; audit-objects item 15): a
+// The sanitizer's rules of the polish round (docs/archive/rounds/POLISH.md item 32; audit-objects item 15): a
 // wordmark set in type keeps its words and its font attributes, while scripts, event attributes,
-// links and external references leave as before (docs/FEATURES.md 4.7). logos.test.ts pins the
+// links and external references leave as before (docs/archive/rounds/FEATURES.md 4.7). logos.test.ts pins the
 // rest of the walk with fixtures.
 
 const ROOT = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">';

@@ -35,7 +35,7 @@ export type ReportInput = {
 export const SUBSTITUTING_VIEWERS = ['Keynote', 'PowerPoint for the web', 'Google Slides'];
 
 // ---------------------------------------------------------------------------------------------
-// The shader frame row (docs/FEATURES.md 5.5, the exporters; audit-shaders 9)
+// The shader frame row (docs/archive/rounds/FEATURES.md 5.5, the exporters; audit-shaders 9)
 
 /**
  * The prefix of the report's one shader row, in the residual's own convention (`renderer:`,

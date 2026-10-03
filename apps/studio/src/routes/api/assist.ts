@@ -17,7 +17,7 @@ import {
 } from '../../server/room';
 import { openDeckStore } from '../../server/root';
 
-// POST /api/assist?deck=<id> (docs/PRODUCT.md 6.3, judge-design rejection 11 and addition 6): the
+// POST /api/assist?deck=<id> (docs/archive/rounds/PRODUCT.md 6.3, judge-design rejection 11 and addition 6): the
 // assist's own route beside the render, export and bundle routes, so a WAF rule (R22) and a
 // function duration can name it; not a `createServerFn`, because TanStack Start posts every server
 // function to `/_serverFn/<id>` and firewall rule R1 counts them as one path. The body is one JSON

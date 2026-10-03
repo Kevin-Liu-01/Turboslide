@@ -96,7 +96,7 @@ export async function run(t) {
         ok:
           /^untitled-/.test(info.id) &&
           s.revision === 0 &&
-          /* the untouched draft shows no save words until the first edit (docs/PRODUCT.md section 2
+          /* the untouched draft shows no save words until the first edit (docs/archive/rounds/PRODUCT.md section 2
              rank 30; the cell keeps its width): empty, or the phrase on a build before the rule */
           (words === '' || words === 'Not saved yet') &&
           prompts > 0 &&
@@ -417,7 +417,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's rows (docs/RETURN.md 2.17, section 5)
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.17, section 5)
   await t.step(
     'decks.file.open-list-search',
     'File > Open; read the list; type in the search; clear it',

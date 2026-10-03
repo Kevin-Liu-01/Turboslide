@@ -1,11 +1,11 @@
-// A cell session under a table whose grid changed (docs/RETURN.md 2.4; measured in
+// A cell session under a table whose grid changed (docs/archive/rounds/RETURN.md 2.4; measured in
 // docs/gslides-parity/return/build/b5.md section 7): a session names its cell by position
 // (`rows/<r>/cells/<c>`), so when Format > Table or the cell menu adds or removes a row or a column
 // while the session is parked, the same pointer names another cell. The Editor ends the session on
 // such a change and lets its last write follow the cell that moved, found by the text the session
 // last saw in the document one step along the change; a cell that is gone gets no write.
 //
-// The second half is a spreadsheet's rows on the clipboard (docs/FEATURES.md 2.3 item 5;
+// The second half is a spreadsheet's rows on the clipboard (docs/archive/rounds/FEATURES.md 2.3 item 5;
 // audit-objects 12): the tab separated text read as a grid, the table block a paste with no
 // session makes from it and the box it takes, and a table's rows and columns after the grid was
 // pasted into one of its cells. Pure, pinned by table-session.test.ts.
@@ -60,7 +60,7 @@ export function movedCellPointer(
 }
 
 // ---------------------------------------------------------------------------------------------
-// A spreadsheet's rows pasted (docs/FEATURES.md 2.3 item 5; audit-objects 12)
+// A spreadsheet's rows pasted (docs/archive/rounds/FEATURES.md 2.3 item 5; audit-objects 12)
 
 /** The cells of a paste as plain strings, one array per row, every row as wide as the widest. */
 export type PastedGrid = string[][];
@@ -164,7 +164,7 @@ const PASTED_TABLE_MAX_W = 1440;
 const PASTED_TABLE_MAX_H = 800;
 
 /**
- * The box a pasted table takes, sized to its rows (docs/FEATURES.md 2.3 item 5 "sized to the
+ * The box a pasted table takes, sized to its rows (docs/archive/rounds/FEATURES.md 2.3 item 5 "sized to the
  * rows"): 240 px a column and 64 px a row, never narrower than two columns or shorter than two
  * rows, never past the sheet's margins; the Editor centres it like an insert.
  */
@@ -175,7 +175,7 @@ export function pastedTableSize(rows: number, columns: number): [number, number]
 }
 
 /**
- * The table's fields after a grid was pasted into the cell `at` (docs/FEATURES.md 2.3 item 5
+ * The table's fields after a grid was pasted into the cell `at` (docs/archive/rounds/FEATURES.md 2.3 item 5
  * "spreads the columns and rows from that cell"): the cells fill right and down from there, the
  * rows and columns the grid needs are added at the bottom and the right edge through
  * applyTableCommand (sized columns share the width, merged cells and cell styles stand), never

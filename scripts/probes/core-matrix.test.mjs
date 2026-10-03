@@ -56,7 +56,7 @@ import {
   tierRows,
 } from './core-matrix.mjs';
 
-// The core matrix module (docs/FOCUS.md section 6; the integrator's day 0; docs/RETURN.md section 5
+// The core matrix module (docs/FOCUS.md section 6; the integrator's day 0; docs/archive/rounds/RETURN.md section 5
 // for the return round): the committed file loads and every row keeps the id scheme, the lookups the
 // probe and the core specs use answer from the file, and the two ship helpers compute rule 4 of
 // section 1, RETURN.md's rule 2 (the unparkable features, the `parks` rows) and the exit rule of 6.2.
@@ -93,7 +93,7 @@ describe('the committed matrix', () => {
       probeRows().length +
         costRows().length +
         CORE_SPEC_DRIVERS.reduce((n, d) => n + rowsForDriver(d).length, 0) +
-        /* the people round (docs/PEOPLE.md 6.2): the local rows of the accounts spec */
+        /* the people round (docs/archive/rounds/PEOPLE.md 6.2): the local rows of the accounts spec */
         localRows().length +
         /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the gate's own rows */
         gateRows().length,
@@ -114,12 +114,12 @@ describe('the committed matrix', () => {
       'formatting',
       'view',
       'inbox',
-      /* the product round's four features (docs/PRODUCT.md 8.1), each parkable */
+      /* the product round's four features (docs/archive/rounds/PRODUCT.md 8.1), each parkable */
       'brand',
       'fonts',
       'templates',
       'assist',
-      /* the features round, ship one (docs/FEATURES.md 4.12): the logo picker, parkable */
+      /* the features round, ship one (docs/archive/rounds/FEATURES.md 4.12): the logo picker, parkable */
       'logos',
     ])
       expect(isParkable(feature), feature).toBe(true);
@@ -246,7 +246,7 @@ describe('the ship helpers of 6.2', () => {
     ]);
     /* an id the run never recorded is not driven, never passed */
     const partial = { [text]: 'passed' };
-    /* a parkable feature whose every row carries parks (svg, docs/VECTOR.md 6.1) parks its
+    /* a parkable feature whose every row carries parks (svg, docs/archive/rounds/VECTOR.md 6.1) parks its
        controls and never the feature whole */
     expect(parkedFeaturesOf(partial).parked).toEqual(
       CORE_FEATURES.filter(
@@ -428,7 +428,7 @@ describe('the ship helpers of 6.2', () => {
   });
 });
 
-describe('the product round (docs/PRODUCT.md section 8)', () => {
+describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
   const good = {
     id: 'export.download.large-deck-pdf',
     feature: 'export',
@@ -444,12 +444,12 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
       expect(rowsForFeature(feature).length, feature).toBeGreaterThan(0);
     for (const driver of ['core/chrome.spec.ts', 'core/brand.spec.ts', 'core/assist.spec.ts'])
       expect(rowsForDriver(driver).length, driver).toBeGreaterThan(0);
-    /* the features round's ship two added 29 rows; the vector round (docs/VECTOR.md 6.1) added 43
-       rows and retired logos.intake.svg-sentence; the objects round (docs/OBJECTS.md 6.1) added 33 rows
+    /* the features round's ship two added 29 rows; the vector round (docs/archive/rounds/VECTOR.md 6.1) added 43
+       rows and retired logos.intake.svg-sentence; the objects round (docs/archive/rounds/OBJECTS.md 6.1) added 33 rows
        and carried five; the field fonts hotfix (build/field-fonts.md 4) added one */
-    /* the polish round (docs/POLISH.md 5.1): 130 rows added and one replaced; its fix round added
+    /* the polish round (docs/archive/rounds/POLISH.md 5.1): 130 rows added and one replaced; its fix round added
        text.title.second-session-survives-reload (VERIFICATION.md "Polish round, pass 1" finding 1);
-       the people round (docs/PEOPLE.md 6.1) added 21 rows: eleven on every origin and ten local */
+       the people round (docs/archive/rounds/PEOPLE.md 6.1) added 21 rows: eleven on every origin and ten local */
     /* the next program's hotfix H6 (docs/NEXT.md 3.2): brand.template.blank-no-gt-mark */
     /* the second click hotfix (docs/gslides-parity/focus/AMENDMENTS.md A2, 2026-10-02):
        text.click.second-click-caret */
@@ -508,9 +508,9 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
-      /* the features round, ship two (docs/FEATURES.md 7.2): the editor's longest animation frame */
+      /* the features round, ship two (docs/archive/rounds/FEATURES.md 7.2): the editor's longest animation frame */
       'shaders.perf.editor-frame',
-      /* the polish round (docs/POLISH.md 3.5): the home page's load budget */
+      /* the polish round (docs/archive/rounds/POLISH.md 3.5): the home page's load budget */
       'decks.home.load-budget',
     ]);
   });
@@ -551,10 +551,10 @@ describe('the product round (docs/PRODUCT.md section 8)', () => {
   });
 });
 
-describe('the sync and costs round (docs/SYNC.md section 6)', () => {
+describe('the sync and costs round (docs/archive/rounds/SYNC.md section 6)', () => {
   it('holds the 16 rows under the two unparkable features, the sync spec and the cost probe', () => {
     /* ten spec rows and the pull row of the cost probe under sync; the five cost rows under cost */
-    /* the polish round adds five sync rows (docs/POLISH.md 2.8) */
+    /* the polish round adds five sync rows (docs/archive/rounds/POLISH.md 2.8) */
     expect(rowsForFeature('sync').length).toBe(11 + 5);
     /* the realtime round adds the Redis command row (docs/REALTIME.md section 2); its Cloudflare
        phase the six rows per Cloudflare product (docs/CLOUDFLARE.md 2.2) */
@@ -618,7 +618,7 @@ describe('the sync and costs round (docs/SYNC.md section 6)', () => {
   });
 });
 
-describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
+describe('the features round, ship one (docs/archive/rounds/FEATURES.md section 7)', () => {
   const ship = CORE_MATRIX.filter((row) => /^Ship one P[01];/.test(row.note ?? ''));
 
   it('holds the logos feature, the logos spec and the 71 added rows with their tiers', () => {
@@ -626,15 +626,15 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
     expect(isParkable('logos')).toBe(true);
     expect(CORE_SPEC_DRIVERS).toContain('core/logos.spec.ts');
     /* the vector round added logos.export.svgblip to the spec and the feature, and retired the
-       P1 row logos.intake.svg-sentence with its sentence (docs/VECTOR.md 4.7) */
-    /* the polish round adds four rows to the logos spec (docs/POLISH.md 2.5) */
+       P1 row logos.intake.svg-sentence with its sentence (docs/archive/rounds/VECTOR.md 4.7) */
+    /* the polish round adds four rows to the logos spec (docs/archive/rounds/POLISH.md 2.5) */
     expect(rowsForDriver('core/logos.spec.ts').length).toBe(8 + 4);
-    /* the polish round replaced the P1 probe row tables.cells.prompt-hovered-only (docs/POLISH.md 2.1 item 1) */
+    /* the polish round replaced the P1 probe row tables.cells.prompt-hovered-only (docs/archive/rounds/POLISH.md 2.1 item 1) */
     expect(ship.length).toBe(69);
     expect(ship.filter((row) => row.note.startsWith('Ship one P0')).length).toBe(50);
     expect(ship.filter((row) => row.note.startsWith('Ship one P1')).length).toBe(19);
     expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(53);
-    /* the polish round adds two dialog rows (docs/POLISH.md 2.5 items 39 and 46), broken today and
+    /* the polish round adds two dialog rows (docs/archive/rounds/POLISH.md 2.5 items 39 and 46), broken today and
        parking nothing, so a jank dialog parks the picker whole */
     expect(rowsForFeature('logos').length).toBe(23 + 2);
     /* the vector round's logos.export.svgblip is the feature's 23rd row and not ship one's */
@@ -655,7 +655,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
       'shaders.export.html-frame': 'export',
       'shaders.export.missing-frame-row': 'export',
       'shaders.view.play-setting': 'view',
-      /* the people round (docs/PEOPLE.md 6.1): two rows of the people area under comments and versions */
+      /* the people round (docs/archive/rounds/PEOPLE.md 6.1): two rows of the people area under comments and versions */
       'people.comment-departed-guest': 'comments',
       'people.versions-author-account': 'versions',
     });
@@ -764,7 +764,7 @@ describe('the features round, ship one (docs/FEATURES.md section 7)', () => {
   });
 });
 
-describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () => {
+describe('the features round, ship two (docs/archive/rounds/FEATURES.md section 5, 7.1)', () => {
   const ship = CORE_MATRIX.filter((row) => /^Ship two P[01];/.test(row.note ?? ''));
   const measure = CORE_MATRIX.find((row) => row.id === 'shaders.perf.editor-frame');
 
@@ -772,7 +772,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(CORE_FEATURES).toContain('shaders');
     expect(isParkable('shaders')).toBe(true);
     expect(CORE_SPEC_DRIVERS).toContain('core/shaders.spec.ts');
-    /* the polish round adds three rows to the shaders spec (docs/POLISH.md 2.5) */
+    /* the polish round adds three rows to the shaders spec (docs/archive/rounds/POLISH.md 2.5) */
     expect(rowsForDriver('core/shaders.spec.ts').length).toBe(10 + 3);
     expect(ship.length).toBe(29);
     expect(ship.filter((row) => row.note.startsWith('Ship two P0')).length).toBe(22);
@@ -780,7 +780,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(ship.filter((row) => row.driver === PROBE_DRIVER).length).toBe(14);
     /* the shaders feature holds the 24 rows whose area and feature agree; the export rows and the
        View row count under their own features */
-    /* the polish round adds three shaders rows (docs/POLISH.md 2.5 items 36, 47, 48) */
+    /* the polish round adds three shaders rows (docs/archive/rounds/POLISH.md 2.5 items 36, 47, 48) */
     expect(rowsForFeature('shaders').length).toBe(24 + 3);
     expect(ship.filter((row) => row.feature === 'export').length).toBe(4);
     expect(ship.filter((row) => row.feature === 'view').length).toBe(1);
@@ -788,7 +788,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
     expect(ship.filter((row) => row.today === 'not driven').length).toBe(18);
     /* every shaders row but the agent row carries parks (5.10); the export rows carry none and
        block the ship, the measurement row carries none and never holds it */
-    /* the polish round's three shaders rows (docs/POLISH.md 2.5) carry none: a red one parks the library */
+    /* the polish round's three shaders rows (docs/archive/rounds/POLISH.md 2.5) carry none: a red one parks the library */
     for (const row of ship.filter((r) => r.feature === 'shaders'))
       if (
         row.id !== 'shaders.agent.list-insert-set-render' &&
@@ -878,7 +878,7 @@ describe('the features round, ship two (docs/FEATURES.md section 5, 7.1)', () =>
   });
 });
 
-describe('the vector round (docs/VECTOR.md section 6)', () => {
+describe('the vector round (docs/archive/rounds/VECTOR.md section 6)', () => {
   const vector = CORE_MATRIX.filter((row) => /^Vector round;/.test(row.note ?? ''));
   const good = {
     id: 'menus.icons.insert-rows',
@@ -892,7 +892,7 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
   it('holds the svg feature, the menus area under chrome, the svg spec and the 43 added rows', () => {
     expect(CORE_FEATURES).toContain('svg');
     expect(isParkable('svg')).toBe(true);
-    /* the people round (docs/PEOPLE.md 6.1) added the people area under share */
+    /* the people round (docs/archive/rounds/PEOPLE.md 6.1) added the people area under share */
     expect(AREA_FEATURE).toEqual({
       /* the realtime round (docs/REALTIME.md 4.4): the Google sign in rows are the share feature's */
       accounts: 'share',
@@ -902,13 +902,13 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
       people: 'share',
     });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
-    /* the polish round adds two rows to the svg spec (docs/POLISH.md 2.4, 2.5) */
+    /* the polish round adds two rows to the svg spec (docs/archive/rounds/POLISH.md 2.4, 2.5) */
     expect(rowsForDriver('core/svg.spec.ts').length).toBe(12 + 2);
     expect(rowsForDriver('svg.spec.ts')).toEqual(rowsForDriver('core/svg.spec.ts'));
     /* 43 rows added and the named rows row extended, so 44 carry the note */
     expect(vector.length).toBe(44);
     expect(vector.filter((row) => row.id === 'shapes.insert.named-rows').length).toBe(1);
-    /* the polish round adds two svg rows (docs/POLISH.md 2.4 item 32, 2.5 item 50) */
+    /* the polish round adds two svg rows (docs/archive/rounds/POLISH.md 2.4 item 32, 2.5 item 50) */
     expect(rowsForFeature('svg').length).toBe(16 + 2);
     /* 23 shapes rows added plus the extended named rows row */
     expect(vector.filter((row) => row.feature === 'shapes').length).toBe(24);
@@ -916,7 +916,7 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
       'menus.icons.insert-rows',
       'menus.icons.format-rows',
       'menus.icons.one-family',
-      /* the polish round (docs/POLISH.md 2.6 item 57): a glyph on every row */
+      /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 57): a glyph on every row */
       'menus.rows.icon-on-every-row',
     ]);
     for (const row of CORE_MATRIX.filter((row) => areaOf(row.id) === 'menus'))
@@ -1022,12 +1022,12 @@ describe('the vector round (docs/VECTOR.md section 6)', () => {
   });
 });
 
-// The objects round (docs/OBJECTS.md section 6, 6.1): the gestures area whose rows are the arrange
+// The objects round (docs/archive/rounds/OBJECTS.md section 6, 6.1): the gestures area whose rows are the arrange
 // feature's (unparkable), the 33 rows added and the five carried, each carrying the round in its
 // note; the frame rows' setup writes; the carried tables rows keep their parks.
-describe('the objects round (docs/OBJECTS.md section 6)', () => {
+describe('the objects round (docs/archive/rounds/OBJECTS.md section 6)', () => {
   const objects = CORE_MATRIX.filter((row) =>
-    /Objects round; docs\/OBJECTS\.md/.test(row.note ?? ''),
+    /Objects round; docs\/archive\/rounds\/OBJECTS\.md/.test(row.note ?? ''),
   );
 
   it('maps the gestures area to arrange, which cannot be parked', () => {
@@ -1083,7 +1083,7 @@ describe('the objects round (docs/OBJECTS.md section 6)', () => {
       'tables.edge.add-row-column',
       'tables.heads.select-row-column',
       /* the polish round replaced tables.cells.prompt-hovered-only with tables.cells.no-prompt
-         (docs/POLISH.md 2.1 item 1); the new row keeps the objects round in its note */
+         (docs/archive/rounds/POLISH.md 2.1 item 1); the new row keeps the objects round in its note */
       'tables.cells.no-prompt',
       'wordart.tail.fill-outline',
     ])
@@ -1104,8 +1104,10 @@ describe('the objects round (docs/OBJECTS.md section 6)', () => {
   });
 });
 
-describe('the polish round (docs/POLISH.md section 5)', () => {
-  const polish = CORE_MATRIX.filter((row) => /Polish round; docs\/POLISH\.md/.test(row.note ?? ''));
+describe('the polish round (docs/archive/rounds/POLISH.md section 5)', () => {
+  const polish = CORE_MATRIX.filter((row) =>
+    /Polish round; docs\/archive\/rounds\/POLISH\.md/.test(row.note ?? ''),
+  );
 
   it('holds the 130 rows of 5.1 with the round, the item and the lane in their notes', () => {
     /* 130 new rows plus the six carried rows whose notes gained the round */
@@ -1128,7 +1130,9 @@ describe('the polish round (docs/POLISH.md section 5)', () => {
     expect(coreRow('tables.cells.no-prompt').driver).toBe(PROBE_DRIVER);
     /* every new row names its item or the home page's section */
     for (const row of polish)
-      expect(row.note, row.id).toMatch(/docs\/POLISH\.md (?:2\.\d+ item \d+|3\.\d|5\.1|section 0)/);
+      expect(row.note, row.id).toMatch(
+        /docs\/archive\/rounds\/POLISH\.md (?:2\.\d+ item \d+|3\.\d|5\.1|section 0)/,
+      );
     /* a broken row carries its item's severity; a not driven row none */
     for (const row of polish) {
       if (row.today === 'broken' || row.today === 'flaky')
@@ -1167,7 +1171,7 @@ describe('the polish round (docs/POLISH.md section 5)', () => {
   });
 });
 
-describe('the people round (docs/PEOPLE.md section 6)', () => {
+describe('the people round (docs/archive/rounds/PEOPLE.md section 6)', () => {
   /* the 21 added rows; the two carried rows (versions.panel.author-you, share.dialog.you-label)
      name the round in their note too and are read apart below */
   const carried = ['versions.panel.author-you', 'share.dialog.you-label'];
@@ -1230,9 +1234,11 @@ describe('the people round (docs/PEOPLE.md section 6)', () => {
         expect(row.parks, row.id).toBeUndefined();
     /* the two carried rows name the round */
     expect(coreRow('versions.panel.author-you').note).toContain(
-      'People round; docs/PEOPLE.md 3.11',
+      'People round; docs/archive/rounds/PEOPLE.md 3.11',
     );
-    expect(coreRow('share.dialog.you-label').note).toContain('People round; docs/PEOPLE.md 3.11');
+    expect(coreRow('share.dialog.you-label').note).toContain(
+      'People round; docs/archive/rounds/PEOPLE.md 3.11',
+    );
     /* the declared ids of PEOPLE.md 5.2 are known before the lanes' files hold them */
     for (const id of [
       'dialog.avatarBuilder.panel.picture',

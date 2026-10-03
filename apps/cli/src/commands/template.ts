@@ -1,4 +1,4 @@
-// The template commands (docs/PRODUCT.md 4.3; build/b5b.md R3): `turboslide template list`,
+// The template commands (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md R3): `turboslide template list`,
 // `template slides <id>`, `template create <deckId> <name> [--sentence <s>]`, `template update <id>
 // <deckId> [--sentence <s>]`, `template rename <id> <name>`, `template delete <id> --confirm` and
 // `template default <id>`, each the CLI transport of one template.* action over the checkout's

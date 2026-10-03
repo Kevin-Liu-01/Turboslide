@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The performance budget check of round four (docs/gslides-parity/SPEC-4.md section 4: the
+// The performance budget check of round four (docs/archive/gslides-parity/SPEC-4.md section 4: the
 // budgets are 4.1 to 4.7 and the check is 4.8; the design is
 // docs/gslides-parity/design-4/performance-plan.md sections 8 and 9 with the copy beside it, moved
 // here by the integrator on day 0 with the root lookup, the stream pattern of 4.4 and the rows of
@@ -206,7 +206,7 @@ const BUDGETS = {
     },
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
     // the unheld 20 s session poll of the sync and costs round lands up to 4 times in a 60 s
-    // window plus the editor's two own calls (docs/SYNC.md 6.1 cost.editor-idle.calls supersedes
+    // window plus the editor's two own calls (docs/archive/rounds/SYNC.md 6.1 cost.editor-idle.calls supersedes
     // SPEC-4 4.4's four)
     idle: { serverFnPerMinute: 6, eventsPerMinute: 2 },
     twins: { refetched: 0 },
@@ -224,7 +224,7 @@ const BUDGETS = {
   },
   deployment: {
     routes: {
-      /* the polish round (docs/POLISH.md 3.5): the remade page's rows */
+      /* the polish round (docs/archive/rounds/POLISH.md 3.5): the remade page's rows */
       '/home': {
         cold: {
           ttfb: 150,
@@ -290,7 +290,7 @@ const BUDGETS = {
     },
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
     // the unheld 20 s session poll of the sync and costs round lands up to 4 times in a 60 s
-    // window plus the editor's two own calls (docs/SYNC.md 6.1 cost.editor-idle.calls supersedes
+    // window plus the editor's two own calls (docs/archive/rounds/SYNC.md 6.1 cost.editor-idle.calls supersedes
     // SPEC-4 4.4's four)
     idle: { serverFnPerMinute: 6, eventsPerMinute: 2 },
     twins: { refetched: 0 },
@@ -538,7 +538,7 @@ function assertFlag(check, name, ok, asserted) {
   );
 }
 
-/** SPEC-4 2.3, 0.47 and docs/POLISH.md 3.5: the LCP element of /home is the hero picture (a /home/ image since the polish round), the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
+/** SPEC-4 2.3, 0.47 and docs/archive/rounds/POLISH.md 3.5: the LCP element of /home is the hero picture (a /home/ image since the polish round), the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
 function lcpIsPlateOrTwin(el, url) {
   if (typeof url === 'string' && /\/brand\//.test(url)) return true;
   if (typeof url === 'string' && /\/home\//.test(url) && /^IMG(?:\.|$)/.test(el ?? '')) return true;

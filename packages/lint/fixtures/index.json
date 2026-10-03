@@ -25,7 +25,8 @@
     "slides": [],
     "tests": [
       "packages/lint/src/lint.test.ts",
-      "packages/lint/src/rendered/rules.test.ts"
+      "packages/lint/src/rendered/rules.test.ts",
+      "packages/lint/src/static/speed-marks.test.ts"
     ]
   },
   "type/svg-label-min": {
@@ -34,7 +35,8 @@
       "bad-escape"
     ],
     "tests": [
-      "packages/lint/src/lint.test.ts"
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/speed-marks.test.ts"
     ]
   },
   "type/weight-cap": {
@@ -85,7 +87,8 @@
       "bad-escape"
     ],
     "tests": [
-      "packages/lint/src/lint.test.ts"
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/speed-marks.test.ts"
     ]
   },
   "color/semantic-icons-only": {
@@ -159,7 +162,8 @@
       "bad-escape"
     ],
     "tests": [
-      "packages/lint/src/lint.test.ts"
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/speed-marks.test.ts"
     ]
   },
   "dia/fit-slot": {

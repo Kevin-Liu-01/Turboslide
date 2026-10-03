@@ -10,7 +10,7 @@ export type ThemeName = 'light' | 'dark';
 
 /**
  * The nine sheet tokens of DECK-GRAMMAR.md:28 plus --thumb, which the viewer's scrollbars use,
- * plus the brand kit's two key colours (docs/PRODUCT.md 4.1): --blue, GT blue, the kit's Primary
+ * plus the brand kit's two key colours (docs/archive/rounds/PRODUCT.md 4.1): --blue, GT blue, the kit's Primary
  * role (links, the key colour of charts and highlights; the schema's `blue` colour reads it), and
  * --accent, the kit's second colour, the same value until a kit sets it apart.
  */
@@ -153,7 +153,7 @@ export const CROSS = { size: 11, offset: 51 } as const;
 export const WORDMARK = { left: 72, bottom: 18, height: 18 } as const;
 export const COUNTER = { right: 72, bottom: 22, fontSize: 13 } as const;
 /**
- * The brand kit's slots (docs/PRODUCT.md 4.1, 4.4): the title slide's logo box and the footer's
+ * The brand kit's slots (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the title slide's logo box and the footer's
  * logo box the kit fits a picture into, and the inset of a slot moved to a corner (the frame's
  * cross offset plus the rail's inner margin, so a corner logo sits inside the rules).
  */
@@ -236,7 +236,7 @@ export type LadderStep = keyof typeof LADDER;
  * Display faces: weight 500, tracking -0.025em, balance and the cv11 and ss01 alternates
  * (head:58). The sheet reads the features through `--display-features` on its root
  * (`DISPLAY_FEATURES_TOKEN`), which holds `features` for Inter and `normal` when a brand kit sets
- * another display face (docs/FEATURES.md 3.1 item 5; packages/render theme-css.ts writes it).
+ * another display face (docs/archive/rounds/FEATURES.md 3.1 item 5; packages/render theme-css.ts writes it).
  */
 export const DISPLAY = { weight: 500, tracking: '-0.025em', features: "'cv11', 'ss01'" } as const;
 
@@ -273,7 +273,7 @@ export const MOTION = { cut: 140 } as const;
 
 /**
  * Font stacks (head:21-26), with the metric matched fallback face second in the two Inter stacks
- * (docs/FEATURES.md 3.1 item 3; inter.css declares 'Inter Fallback' as local Arial with
+ * (docs/archive/rounds/FEATURES.md 3.1 item 3; inter.css declares 'Inter Fallback' as local Arial with
  * size-adjust and the overrides, so the first paint holds Inter's line boxes).
  */
 export const FONTS = {

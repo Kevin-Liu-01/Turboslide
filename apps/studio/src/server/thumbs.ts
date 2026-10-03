@@ -126,7 +126,7 @@ export type ThumbResult = {
   /**
    * `bytes` carries the PNG; `stored` names the Blob URL the route redirects to; `pending` is a
    * capture nothing holds yet whose render runs behind the response (the route answers 204 and
-   * the card keeps its plate, docs/POLISH.md items 90 and 111)
+   * the card keeps its plate, docs/archive/rounds/POLISH.md items 90 and 111)
    */
   kind: 'bytes' | 'stored' | 'pending';
   /** the PNG bytes, on their own ArrayBuffer so they can be a Response body */
@@ -389,7 +389,7 @@ export async function getThumbnail(
     /**
      * On the blob tier, a request that names a stamp (`r`, the home cards) and finds nothing
      * stored for the slide answers `pending` and renders behind the response instead of running
-     * Chromium inside the request (docs/POLISH.md items 90 and 111): a listing of cards whose
+     * Chromium inside the request (docs/archive/rounds/POLISH.md items 90 and 111): a listing of cards whose
      * decks never had a capture queued one render per card per load, and the cards stayed plates
      * while the renders ran. The next view of the card reads the stored copy. A request without a
      * stamp (the Import slides dialog's pictures) and a checkout with no store render now.
@@ -496,7 +496,7 @@ export async function getThumbnail(
     // 2b. a stamp named that is not the slide's content stamp (the home cards name the deck's
     // revision, `r=<revision>`, decks.index.tsx) and not stored under that name: the copy the
     // capture on save stored under the slide's current content stamp is the same pixels for this
-    // revision, so it answers as fresh (the product round, docs/PRODUCT.md 3.6; the row
+    // revision, so it answers as fresh (the product round, docs/archive/rounds/PRODUCT.md 3.6; the row
     // decks.card.thumbnail-slide-1: before this every card whose revision named no stored copy
     // rendered in Chromium on the request, and the cards stayed plates while the renders queued)
     if (named !== null && named !== current) {

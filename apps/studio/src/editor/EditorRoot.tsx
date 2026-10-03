@@ -159,7 +159,7 @@ let deckListCache: { at: number; rows: Promise<Awaited<ReturnType<typeof listDec
  * seconds after the menu has its rows at once. A listing that fails is not kept.
  */
 /**
- * This browser's Recent mirror as the dialogs' rows (docs/POLISH.md item 75): the mirror's facts
+ * This browser's Recent mirror as the dialogs' rows (docs/archive/rounds/POLISH.md item 75): the mirror's facts
  * stand in for the head's (one section when the slide count is known, the open's time as the
  * update's), so a deck made a moment ago is in File > Open and Import slides before the blob
  * tier's listing holds it.
@@ -379,7 +379,7 @@ function toShellSelection(
     ...(facts.group !== undefined ? { group: facts.group } : {}),
     ...(facts.marks !== undefined ? { marks: facts.marks } : {}),
     ...(facts.range !== undefined ? { range: facts.range } : {}),
-    /* the cell range of the selected table (viewer table-range.ts; docs/RETURN.md 2.4): the
+    /* the cell range of the selected table (viewer table-range.ts; docs/archive/rounds/RETURN.md 2.4): the
        Merge cells rows and the table plans read it as `cells` */
     ...(facts.cells !== undefined ? { cells: facts.cells } : {}),
     ...(facts.listLevel !== undefined ? { listLevel: facts.listLevel } : {}),
@@ -473,8 +473,8 @@ async function uploadBundleFile(file: File): Promise<{ id: string }> {
 function pickPicture(svg: boolean, onFile: (file: File) => void): void {
   const input = document.createElement('input');
   input.type = 'file';
-  /* the four raster types the hosted intake accepts (docs/FEATURES.md 4.7, 4.5; audit-logos 4)
-     and, since the vector round, svg (docs/VECTOR.md 4.2, 4.3 item 1): the intake sanitizes it and
+  /* the four raster types the hosted intake accepts (docs/archive/rounds/FEATURES.md 4.7, 4.5; audit-logos 4)
+     and, since the vector round, svg (docs/archive/rounds/VECTOR.md 4.2, 4.3 item 1): the intake sanitizes it and
      keeps the file as vector; the type is left out while intake.svg.upload is parked (4.8) */
   input.accept = svg
     ? 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg'
@@ -573,7 +573,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     if (typeof document === 'undefined') return;
     const next = `${deckTitle}, editor, Turboslide`;
     if (document.title !== next) document.title = next;
-    /* the mirror's card reads the new name too (docs/POLISH.md item 76): a rename in the title
+    /* the mirror's card reads the new name too (docs/archive/rounds/POLISH.md item 76): a rename in the title
        field or through File > Rename reaches /decks before the listing catches up */
     if (!draft) updateDeckFacts(snap.deckId, { title: deckTitle });
   }, [deckTitle, draft, snap.deckId]);
@@ -725,7 +725,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const selection =
     snap.selection && snap.selection.slideId === snap.activeSlide ? snap.selection : null;
 
-  /* the refusal card's gate (docs/FEATURES.md 2.2 rank 8; audit-objects 7): a write the room
+  /* the refusal card's gate (docs/archive/rounds/FEATURES.md 2.2 rank 8; audit-objects 7): a write the room
      refused as invalid with no typed text behind it came from a chrome control (Bold on a table
      wrote `/typography` and the schema refused it), and the seller reads one sentence in the
      snackbar instead of the card with the schema's pointer; the card stays for a conflict and for
@@ -743,7 +743,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     }
   }, [refusedByControl, controller]);
 
-  /* the save words answer the save queue alone (docs/POLISH.md item 100; SPEC-3 3.6): Saving…
+  /* the save words answer the save queue alone (docs/archive/rounds/POLISH.md item 100; SPEC-3 3.6): Saving…
      while anything is pending or retained, the retry word while the client is sending a write
      again after a failed POST or a 5xx, Offline from the browser's own word; a reject notice is
      the card's or the snackbar's and never touches the save state (audit-collab item 3: the row
@@ -903,14 +903,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     [rosterRows, snap.ownClientIds, ownClientId],
   );
   /* the last answer of Change name or Change avatar, with the own row's key at the moment it
-     arrived; read by the account block below (docs/PEOPLE.md 3.11; own-identity.ts) */
+     arrived; read by the account block below (docs/archive/rounds/PEOPLE.md 3.11; own-identity.ts) */
   const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
   /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
   const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
   const ownRowRef = useRef<PresenceParticipant | null>(null);
   ownRowRef.current = ownRow;
   /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
-     the merged map (docs/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
+     the merged map (docs/archive/rounds/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
      map's text replaces the row's own, the row's live facts stay */
   const suffixed = controller.identities();
   const withText = (row: PresenceParticipant): PresenceParticipant => {
@@ -956,7 +956,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         }
       : {}),
   };
-  /* the caller as every own surface reads it (docs/PEOPLE.md 3.11): the payload's identity with
+  /* the caller as every own surface reads it (docs/archive/rounds/PEOPLE.md 3.11): the payload's identity with
      the server's mark and choice (write.ts EditorIdentity, build/b3.md R1), under the roster's
      own row while the room holds one, under the answer of Change name or Change avatar until the
      room's own row moves past the state it held when the answer arrived */
@@ -970,7 +970,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      back to the stale row) */
   const overlay = me !== null && !rowReflects(me.facts, ownRow) ? me.facts : null;
   const principal = ownPrincipalOf(payloadIdentity, ownRow, overlay);
-  /* the builder starts from the choice (docs/PEOPLE.md 3.11): the last answer's, else the room's
+  /* the builder starts from the choice (docs/archive/rounds/PEOPLE.md 3.11): the last answer's, else the room's
      own row's variant when it differs from the payload's (after a reload within the room's 5 s
      identity cache the payload carries the old choice on the blob tier while the row already draws
      the new mark; the integrator's preview readings of people.own-chip-follows-avatar), else the
@@ -997,7 +997,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const pictureUrl = ownPictureUrlOf(avatarChoice, principal.mark);
   /* the answer of a write is the newest fact: written back into the account and the room asked
      to re-read the identity, so the own chip changes with no reload and the other browsers'
-     chips inside the matrix's 5 s (b1.md R18; docs/PEOPLE.md 3.11) */
+     chips inside the matrix's 5 s (b1.md R18; docs/archive/rounds/PEOPLE.md 3.11) */
   const takeAnswer = (answer: unknown): unknown => {
     const facts = meAnswerFacts(answer);
     setMe({ facts, rosterKey: rosterKeyOf(ownRowRef.current) });
@@ -1035,12 +1035,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     namePrompt: {
       open: snap.namePrompt,
       /* a name the person chose alone, never the generated label or the fallback author
-         "studio" (B1's R13, docs/POLISH.md item 63): the prompt opens empty otherwise */
+         "studio" (B1's R13, docs/archive/rounds/POLISH.md item 63): the prompt opens empty otherwise */
       prefilled: payload.identity?.name ?? '',
     },
     onNamePrompt: (open) => controller.promptName(open),
     setName: (name) => controller.invoke('account.setName', { name }).then(takeAnswer),
-    /* the picture travels as the data URL the builder encoded (docs/PEOPLE.md 4.1); the salt as
+    /* the picture travels as the data URL the builder encoded (docs/archive/rounds/PEOPLE.md 4.1); the salt as
        the number the server stores */
     setAvatar: (choice) =>
       controller
@@ -1100,7 +1100,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   useEffect(() => {
     if (me !== null && rowReflects(me.facts, ownRow)) setMe(null);
   }, [me, ownRow]);
-  /* the resolved identities of the stored surfaces (docs/PEOPLE.md 3.8, 3.10, 3.17; build/b3.md
+  /* the resolved identities of the stored surfaces (docs/archive/rounds/PEOPLE.md 3.8, 3.10, 3.17; build/b3.md
      R2, R3): the payload's map for the Share dialog's people; for the version rows and the
      roster the controller's merged and disambiguated map (controller.identities(), cached per
      roster, threads and versions and read here on every snapshot), with the payload's map under
@@ -1137,7 +1137,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   /* the address of a bound grant's holder as the payload resolved it (the view carries it for a
      sharer alone): a bound grant names a principal and no address (the schema names one or the
      other, never both; server/access.ts bindEmailGrants), so the Share row's line under the name
-     reads it here (docs/PEOPLE.md 3.10) */
+     reads it here (docs/archive/rounds/PEOPLE.md 3.10) */
   const inviteeEmailOf = (principalId: string | null): { email?: string } => {
     const email = principalId === null ? undefined : payloadIdentities?.[principalId]?.email;
     return email === undefined ? {} : { email };
@@ -1682,7 +1682,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         revision: props.revision,
         dispatch: props.dispatch,
         selection: props.selection,
-        /* the objects round (docs/OBJECTS.md 3.3 item 6; objects/build/b5.md R8): the table's measured
+        /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 6; objects/build/b5.md R8): the table's measured
            height, so Distribute rows shares the drawn box rather than clearing the heights */
         ...(props.boxHeight === undefined ? {} : { boxHeight: props.boxHeight }),
         busy: props.busy,
@@ -1713,12 +1713,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       state: status,
       draft,
       lastEditAt: deck.updatedAt,
-      /* an agent's write reads Assistant on the title row (docs/PRODUCT.md 6.1; build/b6.md R8) */
+      /* an agent's write reads Assistant on the title row (docs/archive/rounds/PRODUCT.md 6.1; build/b6.md R8) */
       ...(snap.versions.length > 0
         ? { lastEditBy: authorDisplay(snap.versions[snap.versions.length - 1]?.author ?? author) }
         : {}),
     },
-    /* the deployment's default kit for the Brand kit panel (docs/PRODUCT.md 4.1; build/b5.md R4) */
+    /* the deployment's default kit for the Brand kit panel (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R4) */
     ...(payload.defaultKit === undefined ? {} : { defaultKit: payload.defaultKit }),
     clipboard,
     toggles: {
@@ -1739,7 +1739,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     presence,
     sync,
     account,
-    /* the version rows and the comment authors the route resolved (docs/PEOPLE.md 3.8) */
+    /* the version rows and the comment authors the route resolved (docs/archive/rounds/PEOPLE.md 3.8) */
     identities,
     ...(comments !== undefined ? { comments } : {}),
     inbox,
@@ -1843,7 +1843,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       onClearRun: controller.clearArtifact,
       onShowReport: () => setReportOpen(true),
     },
-    /* the store's listing with this browser's own decks folded in above it (docs/POLISH.md item
+    /* the store's listing with this browser's own decks folded in above it (docs/archive/rounds/POLISH.md item
        75): a deck made a moment ago is in File > Open and Import slides before the blob tier's
        listing holds it; the mirror's facts stand in for the head's. The listing is one call per
        DECK_LIST_TTL_MS, shared by the File menu's warm up (EditorShell.tsx) and the dialog that
@@ -1899,7 +1899,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     },
   };
 
-  /* a reader keeps the editor's filmstrip without its writes (docs/POLISH.md 2.6 item 58;
+  /* a reader keeps the editor's filmstrip without its writes (docs/archive/rounds/POLISH.md 2.6 item 58;
      polish/build/b5.md R11): the cards follow the stage, the drag, the drop and the menu are off */
   const sidebarEdit: SidebarEdit | undefined = editing
     ? {
@@ -2149,11 +2149,11 @@ function EditorStage({
         <StageEditor
           document={snap.document}
           slideId={slide.id}
-          /* the sheet draws the presentation's own appearance whatever the chrome's (docs/POLISH.md
+          /* the sheet draws the presentation's own appearance whatever the chrome's (docs/archive/rounds/POLISH.md
              2.5 item 49; polish/build/b4.md R18: the Brand kit's Dark tile changes the slides and
              leaves the chrome light, as Google's theme does); the chrome's theme is the chrome's */
           theme={deckAppearance(snap.document.deck)}
-          /* Tools > Preferences > Link detection reaches the stage (docs/POLISH.md item 114) */
+          /* Tools > Preferences > Link detection reaches the stage (docs/archive/rounds/POLISH.md item 114) */
           linkDetection={editorShell.settings.linkDetection !== false}
           assetBase={ASSET_BASE(snap.deckId)}
           stageSize={stageSize}
@@ -2162,9 +2162,9 @@ function EditorStage({
           present={shell.present}
           narrow={shell.narrow}
           dispatch={controller.invoke}
-          /* the parked ways in of the vector round (docs/VECTOR.md 4.8): a parked way is off */
+          /* the parked ways in of the vector round (docs/archive/rounds/VECTOR.md 4.8): a parked way is off */
           parked={(id) => isParked(id, editorShell.settings)}
-          /* the objects round (docs/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
+          /* the objects round (docs/archive/rounds/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
              frame record reaches describe().state.gesture through the controller */
           onGesture={(report) => controller.setGestureRecord(report)}
           /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
@@ -2243,7 +2243,7 @@ function EditorStage({
           slide={slide}
           index={Math.max(0, shell.index)}
           total={shell.total}
-          /* a show's sheet sits above the bar's row on a short viewport (docs/POLISH.md item 98) */
+          /* a show's sheet sits above the bar's row on a short viewport (docs/archive/rounds/POLISH.md item 98) */
           stageSize={shell.present ? showStageSize(stageSize) : stageSize}
           mode={shell.mode}
           present={shell.present}
@@ -2482,17 +2482,17 @@ export function changeWords(mutations: ReadonlyArray<{ op: string }>): string {
   return [...seen].join(', ') || 'Change';
 }
 
-/** The one sentence a refused write from a chrome control says (docs/FEATURES.md 2.2 rank 8). */
+/** The one sentence a refused write from a chrome control says (docs/archive/rounds/FEATURES.md 2.2 rank 8). */
 const CONTROL_REFUSED = 'The change could not be applied to this object';
 
 /**
- * True for a reject notice the refusal card never shows (docs/FEATURES.md 2.2 rank 8): the room
+ * True for a reject notice the refusal card never shows (docs/archive/rounds/FEATURES.md 2.2 rank 8): the room
  * refused the write as invalid (the schema, not a conflict), no typed text rides on it, and every
  * object the write named is still on the document, so the write came from a chrome control on an
  * object the seller can see and the snackbar's sentence is enough. A stale write, a locked deck,
  * every notice carrying text, and a write whose slide or block is gone (the loser of a structural
- * race, docs/SYNC.md: a collaborator deleted the slide under the move) keep the card and its Copy
- * text. Since docs/POLISH.md item 102 the controller's `onReject` says a structural refusal as one
+ * race, docs/archive/rounds/SYNC.md: a collaborator deleted the slide under the move) keep the card and its Copy
+ * text. Since docs/archive/rounds/POLISH.md item 102 the controller's `onReject` says a structural refusal as one
  * snackbar sentence (editor/refused-write.ts) before the notice reaches `rejects`, so this gate
  * meets typed notices alone and `sync.structural.concurrent` reads the sentence, not a card (the
  * sync owner's fix round 3, R2).
@@ -2617,7 +2617,7 @@ function ExternalRevisionBanner({
 }) {
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="external">
-      {/* one sentence, no revision number (docs/POLISH.md item 35; B1's R20; audit-chrome 38) */}
+      {/* one sentence, no revision number (docs/archive/rounds/POLISH.md item 35; B1's R20; audit-chrome 38) */}
       <span>
         {`This presentation changed elsewhere${external.author ? `, by ${authorDisplay(external.author)}` : ''}${external.note ? `: ${external.note}` : ''}`}
       </span>

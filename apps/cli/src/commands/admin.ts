@@ -146,7 +146,7 @@ export async function admin(ctx: CommandContext): Promise<number> {
       return 0;
     }
     case 'avatar-sweep': {
-      /* the people round's janitor (docs/PEOPLE.md 4.6; build/b4.md R3): the orphans under u/ by
+      /* the people round's janitor (docs/archive/rounds/PEOPLE.md 4.6; build/b4.md R3): the orphans under u/ by
          key, listed on a dry run and removed on a run; refused without an identity database */
       const dryRun = flagBoolean(ctx.args, 'dry-run');
       const result = await runDeckAction<{

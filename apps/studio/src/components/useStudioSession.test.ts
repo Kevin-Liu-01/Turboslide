@@ -22,8 +22,8 @@ import {
 import type { SessionLoopDeps } from './useStudioSession';
 
 /**
- * The session poll of the sync and costs round (docs/SYNC.md 3.10 and 6.4; audit-costs item 1;
- * docs/sessions-polling.md 2.2 option a): a viewer page attaches only when its address carries
+ * The session poll of the sync and costs round (docs/archive/rounds/SYNC.md 3.10 and 6.4; audit-costs item 1;
+ * docs/archive/status/sessions-polling.md 2.2 option a): a viewer page attaches only when its address carries
  * `agent=1`; a hidden tab issues no poll and detaches after 10 s hidden; an empty answer pauses
  * the loop 20 s; the poll is not held on the server. The cadence's earlier budget (SPEC-4 4.4,
  * four `_serverFn` responses in a 60 s window with the poll held 25 s) is superseded by the cost

@@ -118,7 +118,7 @@ describe('markSpec', () => {
   });
 });
 
-describe('one person, one mark (docs/PEOPLE.md 6.1 people.versions-author-account)', () => {
+describe('one person, one mark (docs/archive/rounds/PEOPLE.md 6.1 people.versions-author-account)', () => {
   test('an aliased anonymous id hashes the account it renders as, so its field equals the account own', () => {
     const account = identity({
       principalId: 'usr_01JKEVINLIU',

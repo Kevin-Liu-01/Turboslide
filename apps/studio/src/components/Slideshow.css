@@ -29,7 +29,7 @@
 
 /* the snackbar inside the show takes the bar's tokens (PresentToolbar.css): the surround of a
    show is the same near black in both appearances, and the chrome's ink plate is paper in dark
-   chrome, which painted a light block above the bar (docs/PRODUCT.md section 2 rank 23;
+   chrome, which painted a light block above the bar (docs/archive/rounds/PRODUCT.md section 2 rank 23;
    audit-seller 25); an off snackbar paints nothing at all */
 .ts-slideshow .ts-snackbar {
   bottom: 64px;
@@ -43,7 +43,7 @@
   visibility: hidden;
 }
 
-/* no dead control on the bar (docs/POLISH.md item 93): the Captions button leaves until
+/* no dead control on the bar (docs/archive/rounds/POLISH.md item 93): the Captions button leaves until
    captions exist; the toolbar's own file drops it on the integrator's request (build/b5.md R4) */
 .ts-slideshow [data-control='present.captions'] {
   display: none;
@@ -89,6 +89,6 @@
   color: inherit;
 }
 
-/* the bar clears the sheet on a short viewport (docs/POLISH.md item 98; audit-pages item 44):
+/* the bar clears the sheet on a short viewport (docs/archive/rounds/POLISH.md item 98; audit-pages item 44):
    show-stage.ts takes the bar's row off the stage box the sheet fits, since the shell measures
    the box's clientHeight and a padding rule here would leave the fit as it was */

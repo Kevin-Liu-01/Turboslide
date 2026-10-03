@@ -54,14 +54,14 @@ export type SyncExportInput = {
   includeSkipped?: boolean;
   /** Carry the speaker notes (gslides-parity SPEC 7.2.13). */
   includeNotes?: boolean;
-  /** The svgBlip switch of docs/VECTOR.md 4.6; false writes the PNG blip alone. */
+  /** The svgBlip switch of docs/archive/rounds/VECTOR.md 4.6; false writes the PNG blip alone. */
   svgVector?: boolean;
 };
 
 export type SyncExportFile = {
   /**
    * The name the download saves as: the deck's title with the marks of plan.ts `exportFileName`
-   * (the product round, docs/PRODUCT.md section 2 rank 7; before it the exporter's own
+   * (the product round, docs/archive/rounds/PRODUCT.md section 2 rank 7; before it the exporter's own
    * `<deck id>-<theme>.pptx`).
    */
   name: string;
@@ -95,7 +95,7 @@ export type SyncExportResult = {
   log: string[];
 };
 
-/** The response body cap of a Vercel function (docs/hosting-diagnosis.md section 4). */
+/** The response body cap of a Vercel function (docs/archive/status/hosting-diagnosis.md section 4). */
 export const VERCEL_BODY_CAP = Math.floor(4.5 * 1024 * 1024);
 
 /** Default 13 minutes: under the Pro maximum duration of 800 s with room for the answer. */
@@ -204,7 +204,7 @@ export const STORE_RETRY_MS = 1500;
 const STORE_RETRY_CAP_MS = 4000;
 
 /**
- * One put with one retry on a busy store (docs/POLISH.md item 82): the store's concurrency limit
+ * One put with one retry on a busy store (docs/archive/rounds/POLISH.md item 82): the store's concurrency limit
  * answers 429 while several people export at once, and the SDK's own retry loop is off
  * (blob-vercel.ts), so the file was refused after one try and the seller read "Vercel Blob: Too
  * many requests". The second try waits the seconds the refusal names, capped, then the refusal

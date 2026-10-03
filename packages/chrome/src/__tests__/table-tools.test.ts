@@ -285,13 +285,13 @@ describe('tableCommandOfItem', () => {
     expect(tableCommandOfItem('format.table.distributeColumns')).toBe('distributeColumns');
     expect(tableCommandOfItem('format.table.mergeCells')).toBe('merge');
     expect(tableCommandOfItem('format.table.unmergeCells')).toBe('unmerge');
-    /* the row head's check row (docs/OBJECTS.md 3.3 item 4; build/b5.md R1) */
+    /* the row head's check row (docs/archive/rounds/OBJECTS.md 3.3 item 4; build/b5.md R1) */
     expect(tableCommandOfItem('format.table.headerRow')).toBe('toggleHeader');
     expect(tableCommandOfItem('format.table.deleteTable')).toBeNull();
   });
 });
 
-// The table's own controls of the objects round (docs/OBJECTS.md 3.3 items 4 and 6; 6.4
+// The table's own controls of the objects round (docs/archive/rounds/OBJECTS.md 3.3 items 4 and 6; 6.4
 // table-tools.test.ts): the header toggle as one /rows write, the range a row or column head
 // names, and the one commit of the edge "+" that keeps every other width.
 
@@ -350,7 +350,7 @@ describe('edgeInsert', () => {
     expect(out!.box).toBe('grown');
   });
 
-  it('grows the box only to the content box’s right edge, the new column as wide as that room (docs/POLISH.md 2.2 item 9)', () => {
+  it('grows the box only to the content box’s right edge, the new column as wide as that room (docs/archive/rounds/POLISH.md 2.2 item 9)', () => {
     const block = emptyTable('e', 3, 3);
     expect(CONTENT_EDGES).toEqual({ top: 129, right: 1463, bottom: 771 });
     const out = edgeInsert(block, pos, 'column', 320, 960);
@@ -446,7 +446,7 @@ describe('edgeInsert', () => {
   });
 });
 
-/* The cells' own alignment (docs/POLISH.md 2.2 item 10; the row tables.range.align-cells-only):
+/* The cells' own alignment (docs/archive/rounds/POLISH.md 2.2 item 10; the row tables.range.align-cells-only):
    the `cells` write the alignment rows make on a range or a session, and the range that keeps
    writing the column. */
 describe('cellsWithAlign and rangeIsWholeColumns', () => {

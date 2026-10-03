@@ -27,7 +27,7 @@
 // and only on a change that travels (a join, a leave, a slide change, the identity fields, the
 // presenting flag) or when a row's expiry needs a refresh; a heartbeat alone moves the clock and
 // nothing else, and is pushed once the row's remaining life is under half, by the heartbeat that
-// finds it so: with the client at 10 s between heartbeats when the tab is quiet (docs/SYNC.md
+// finds it so: with the client at 10 s between heartbeats when the tab is quiet (docs/archive/rounds/SYNC.md
 // 3.10) that is every 20 s, three pushes and nine puts a minute for an idle tab (SYNC.md 4.5,
 // the row `cost.editor-idle.calls`). The timer a deferred heartbeat arms fires at
 // PRESENCE_REFRESH_TIMER_MS of life left, after the heartbeat that would carry the refresh: it
@@ -74,7 +74,7 @@ export const PRESENCE_FILE = 'presence.json';
 export const PRESENCE_POLL_MS = 5000;
 /** The floor between two pushes of one deck from one instance (the budget: a change alone, 5 s apart at least). */
 export const PRESENCE_PUSH_SPACING_MS = 5000;
-/** The most a shared row lives without a refresh; the client posts a heartbeat every 5 s while active and every 10 s when quiet (docs/SYNC.md 3.10). */
+/** The most a shared row lives without a refresh; the client posts a heartbeat every 5 s while active and every 10 s when quiet (docs/archive/rounds/SYNC.md 3.10). */
 export const PRESENCE_SHARED_TTL_MS = 30_000;
 /**
  * The remaining life at which the timer a deferred heartbeat armed pushes the row when no later
@@ -792,7 +792,7 @@ export function sharedPresence<T extends PresenceRow>(
           scheduleAt(deckId, d, nextRefreshAt(d, t));
           return;
         }
-        // a new row the record does not hold (a join) pushes at once (docs/POLISH.md item 110:
+        // a new row the record does not hold (a join) pushes at once (docs/archive/rounds/POLISH.md item 110:
         // a joiner's chip took 2.5 to 10 s); the spacing floor holds the refreshes and the
         // changes of a row the record already carries
         if (d.lastPushAt + spacing > t && !joinPending(d, t)) {

@@ -137,7 +137,7 @@
 
 /* the builder: the tabs, the strip (two rows of 24, 32, 64 and 128), the 292 px panel that holds
    the Picture tab's 256 px crop box, and the error row, in one fixed box; the dialog's own
-   max-height scrolls the body on a short screen (docs/PEOPLE.md 4.1; build/b3.md) */
+   max-height scrolls the body on a short screen (docs/archive/rounds/PEOPLE.md 4.1; build/b3.md) */
 .ts-avatar-builder {
   height: 800px;
 }
@@ -275,7 +275,7 @@
   overflow: hidden;
 }
 
-/* the Picture tab (docs/PEOPLE.md 4.1): the 256 px crop box on the left, the control and the
+/* the Picture tab (docs/archive/rounds/PEOPLE.md 4.1): the 256 px crop box on the left, the control and the
    three sentences on the right, inside the 320 px panel */
 .ts-avatar-picture {
   display: grid;

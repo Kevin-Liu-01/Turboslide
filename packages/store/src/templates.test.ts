@@ -212,7 +212,7 @@ describe('templates and deck heads', () => {
     expect(blank.record.id).toBe('blank');
     expect(blank.record.assets).toBe('assets');
     expect(() => parseTemplateRecord({ schemaVersion: 2 }, 'x')).toThrow(/schemaVersion/);
-    // the product round widened the id to any slug (docs/PRODUCT.md 4.3): a name with spaces or
+    // the product round widened the id to any slug (docs/archive/rounds/PRODUCT.md 4.3): a name with spaces or
     // the templates folder's own name are the two things a template id cannot be
     expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'Not A Slug' }, 'x')).toThrow(
       /id must/,

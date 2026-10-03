@@ -112,7 +112,7 @@ describe('names, trust and follow (4.4, 4.8, 0.12)', () => {
     );
     expect(canFollow({ ...verified, role: 'viewer', slideId: firstSlide }, undefined)).toBe(false);
     expect(canFollow({ ...verified, slideId: undefined }, undefined)).toBe(false);
-    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104) */
+    /* an anonymous editor with a slide open can be followed (docs/archive/rounds/POLISH.md item 104) */
     expect(canFollow(person('a', { slideId: firstSlide }), undefined)).toBe(true);
     expect(canFollow(person('a', { role: 'viewer', slideId: firstSlide }), undefined)).toBe(false);
     expect(canFollow(person('a', { slideId: undefined }), undefined)).toBe(false);
@@ -216,7 +216,7 @@ describe('the collaborator announcements (4.9)', () => {
   });
 });
 
-describe('the mark grid (11 6.1, 3.3; docs/PEOPLE.md 3.4, 3.5)', () => {
+describe('the mark grid (11 6.1, 3.3; docs/archive/rounds/PEOPLE.md 3.4, 3.5)', () => {
   const guest = {
     principalId: 'anon_x',
     label: 'Titanium 471',
@@ -277,7 +277,7 @@ describe('the mark grid (11 6.1, 3.3; docs/PEOPLE.md 3.4, 3.5)', () => {
   });
 });
 
-describe('the trust word, the badge, the tooltip sentence and the own identity (docs/PEOPLE.md 3.7, 3.11)', () => {
+describe('the trust word, the badge, the tooltip sentence and the own identity (docs/archive/rounds/PEOPLE.md 3.7, 3.11)', () => {
   const verified = person('v', {
     principalId: 'usr_1',
     name: 'Ada Lovelace',
@@ -344,7 +344,7 @@ describe('the trust word, the badge, the tooltip sentence and the own identity (
       verified,
     );
     /* the editor builds the anonymous principal from the roster's own row under the last answer
-       (docs/PEOPLE.md 3.11), so it is the fresher reading and the own chip follows the answer */
+       (docs/archive/rounds/PEOPLE.md 3.11), so it is the fresher reading and the own chip follows the answer */
     expect(meOf({ account: { principal: payload, signedIn: false }, presence: { self } })).toBe(
       payload,
     );

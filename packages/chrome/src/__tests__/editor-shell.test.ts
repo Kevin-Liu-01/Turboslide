@@ -530,7 +530,7 @@ describe('menuActionPlan', () => {
     expect(plan.selectSlide).toBe('result');
   });
 
-  it('New slide after a Title slide is Title and body, and after any other slide it inherits that slide; the arrow’s last pick never wins (docs/PRODUCT.md section 2 rank 2)', () => {
+  it('New slide after a Title slide is Title and body, and after any other slide it inherits that slide; the arrow’s last pick never wins (docs/archive/rounds/PRODUCT.md section 2 rank 2)', () => {
     const title = Object.values(document.slides).find((slide) => slide.kind === 'title');
     if (title !== undefined) {
       const plan = menuActionPlan(itemById('insert.newSlide'), facts(title.id));
@@ -627,7 +627,7 @@ describe('menuActionPlan', () => {
     if (!('refused' in up)) expect(up.action).toBe('slide.move');
   });
 
-  it('Bold writes the bold run over the whole text of a block selected by one click, clears it when every run is bold, marks a session range alone, and refuses with nothing selected (docs/POLISH.md 2.3 item 12)', () => {
+  it('Bold writes the bold run over the whole text of a block selected by one click, clears it when every run is bold, marks a session range alone, and refuses with nothing selected (docs/archive/rounds/POLISH.md 2.3 item 12)', () => {
     const slide = document.slides[RULE] as Slide;
     const heading = firstBlockOf(slide, 'heading') as Block;
     const text = 'text' in heading && typeof heading.text === 'string' ? heading.text : '';
@@ -687,7 +687,7 @@ describe('menuActionPlan', () => {
     });
   });
 
-  it('the five mark rows take the whole text of a block selected by one click and a shape without a label is not a text block (docs/POLISH.md 2.3 item 17)', () => {
+  it('the five mark rows take the whole text of a block selected by one click and a shape without a label is not a text block (docs/archive/rounds/POLISH.md 2.3 item 17)', () => {
     const slide = document.slides[RULE] as Slide;
     const heading = firstBlockOf(slide, 'heading') as Block;
     const text = 'text' in heading && typeof heading.text === 'string' ? heading.text : '';
@@ -750,7 +750,7 @@ describe('menuActionPlan', () => {
     });
   });
 
-  it('Center on a cell range writes the cells, a whole column range and a table selected by one click write the columns (docs/POLISH.md 2.2 item 10)', () => {
+  it('Center on a cell range writes the cells, a whole column range and a table selected by one click write the columns (docs/archive/rounds/POLISH.md 2.2 item 10)', () => {
     const tableSlide: Slide = {
       schemaVersion: 1,
       id: 'tbl4',
@@ -804,7 +804,7 @@ describe('menuActionPlan', () => {
     });
   });
 
-  it('the spacing rows refuse on a table with a sentence instead of writing /typography (docs/POLISH.md 2.6 item 54)', () => {
+  it('the spacing rows refuse on a table with a sentence instead of writing /typography (docs/archive/rounds/POLISH.md 2.6 item 54)', () => {
     const tableSlide: Slide = {
       schemaVersion: 1,
       id: 'tbl3',
@@ -842,7 +842,7 @@ describe('menuActionPlan', () => {
     }
   });
 
-  it('Bulleted list and Increase indent take a heading (docs/POLISH.md 2.3 item 18)', () => {
+  it('Bulleted list and Increase indent take a heading (docs/archive/rounds/POLISH.md 2.3 item 18)', () => {
     const slide = document.slides[RULE] as Slide;
     const heading = firstBlockOf(slide, 'heading') as Block;
     const list = menuActionPlan(
@@ -904,7 +904,7 @@ describe('menuActionPlan', () => {
     expect(stepPlainSize(20, -1)).toBe(20);
   });
 
-  it('the alignments and the line spacings refuse on a list block instead of writing /typography (C2-F1, b7 C2-R16); Bold marks the item (docs/POLISH.md 2.3 item 12)', () => {
+  it('the alignments and the line spacings refuse on a list block instead of writing /typography (C2-F1, b7 C2-R16); Bold marks the item (docs/archive/rounds/POLISH.md 2.3 item 12)', () => {
     /* a `plain` block has no typography field, so the `/typography` write these plans made was
        refused by the server's schema check and the title row read "Couldn't save, retrying"
        (VERIFICATION C2-F1: `text.format-menu.size-increase` and every text row after it while the
@@ -932,7 +932,7 @@ describe('menuActionPlan', () => {
       expect(plan, id).toEqual({ refused: sentence });
     }
     /* the same rows on a text block keep their write: the alignments and spacings /typography,
-       Bold the inline run (docs/POLISH.md 2.3 item 12) */
+       Bold the inline run (docs/archive/rounds/POLISH.md 2.3 item 12) */
     const heading = firstBlockOf(slide, 'heading') as Block;
     const bold = menuActionPlan(itemById('format.text.bold'), facts(RULE, { blockId: heading.id }));
     expect(bold).toMatchObject({ action: 'slide.update', label: 'Bold' });
@@ -1048,7 +1048,7 @@ describe('menuActionPlan', () => {
     });
   });
 
-  it('Bold, Italic, a colour and Align on a table write every selected cell in one slide.update (docs/FEATURES.md 2.2 rank 8)', () => {
+  it('Bold, Italic, a colour and Align on a table write every selected cell in one slide.update (docs/archive/rounds/FEATURES.md 2.2 rank 8)', () => {
     const table: Slide = {
       schemaVersion: 1,
       id: 'tbl2',
@@ -1260,7 +1260,7 @@ describe('the Insert menu', () => {
       /* Insert > Table is a hover grid inside the menu (SPEC-2 0.26); run as a command it plans the default table */
       'insert.table': null,
       'insert.icon': { kind: 'picker', picker: 'icon' },
-      /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader opens the gallery */
+      /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): Insert > Shader opens the gallery */
       'insert.shader': { kind: 'picker', picker: 'shader' },
       'insert.image.upload': { kind: 'upload' },
       'insert.newSlide': null,
@@ -1336,7 +1336,7 @@ describe('the Insert menu', () => {
       expect(block.columns).toHaveLength(DEFAULT_TABLE_SIZE.columns);
       expect(block.rows).toHaveLength(DEFAULT_TABLE_SIZE.rows);
       expect(block.rows[0]?.header).toBe(true);
-      /* the objects round (docs/OBJECTS.md 3.3 item 3): the box fits its rows, 163 for three at 20 px */
+      /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 3): the box fits its rows, 163 for three at 20 px */
       expect([block.pos?.w, block.pos?.h]).toEqual([960, tableBoxHeight(DEFAULT_TABLE_SIZE.rows)]);
       expect(block.pos?.h).toBe(163);
     }
@@ -1367,7 +1367,7 @@ describe('the Insert menu', () => {
       type: 'shape',
       shape: 'polyline',
     });
-    /* the regular weight (docs/POLISH.md 2.4 item 34): the tail's B reads unpressed at the insert */
+    /* the regular weight (docs/archive/rounds/POLISH.md 2.4 item 34): the tail's B reads unpressed at the insert */
     const wordArt = drawToolBlock({ kind: 'wordArt', text: 'Hi' }, 'w');
     expect(wordArt).toMatchObject({
       type: 'text',
@@ -1501,7 +1501,7 @@ describe('the retired letters, the ladder and the stored settings', () => {
     expect(readStoredSettings(written).advancedTools).toBe(true);
     expect(readStoredSettings(writeStoredSettings(DEFAULT_SETTINGS)).advancedTools).toBe(false);
   });
-  it('keeps View > Play shaders at In the show only by default and remembers it per browser (docs/FEATURES.md 5.6, question 5)', () => {
+  it('keeps View > Play shaders at In the show only by default and remembers it per browser (docs/archive/rounds/FEATURES.md 5.6, question 5)', () => {
     expect(DEFAULT_SETTINGS.playShaders).toBe('show');
     expect(STORED_SETTINGS).toContain('playShaders');
     const written = writeStoredSettings({ ...DEFAULT_SETTINGS, playShaders: 'off' });
@@ -1968,7 +1968,7 @@ describe('the round two plans (SPEC-2 sections 3, 4, 6)', () => {
   });
 });
 
-describe("word art's Bold (docs/POLISH.md 2.4 item 34; the polish round's fix round)", () => {
+describe("word art's Bold (docs/archive/rounds/POLISH.md 2.4 item 34; the polish round's fix round)", () => {
   const wordArt: Block = {
     id: 'wa',
     type: 'text',

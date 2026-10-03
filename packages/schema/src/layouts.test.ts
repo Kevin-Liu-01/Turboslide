@@ -101,7 +101,7 @@ describe('LAYOUTS', () => {
     expect(LAYOUTS.slice(0, 11).every((entry) => entry.google)).toBe(true);
     expect(LAYOUTS.slice(11).every((entry) => !entry.google)).toBe(true);
     // the product round's Title, subtitle and body is the first GT layout once its id is in
-    // LAYOUT_IDS (docs/PRODUCT.md section 2 rank 2; build/b3.md R1)
+    // LAYOUT_IDS (docs/archive/rounds/PRODUCT.md section 2 rank 2; build/b3.md R1)
     const gtLabels = LAYOUTS.slice(11).map((entry) => entry.label);
     expect(gtLabels).toEqual([
       ...(SUBTITLE_BODY ? ['Title, subtitle and body'] : []),
@@ -124,7 +124,7 @@ describe('LAYOUTS', () => {
     for (const entry of LAYOUTS) {
       expect(ICON_NAMES, `${entry.id} icon`).toContain(entry.icon);
       expect(entry.doc.endsWith('.'), `${entry.id} doc`).toBe(true);
-      // the seller sentence (docs/PRODUCT.md rank 24): the name, a colon, the contents; "your
+      // the seller sentence (docs/archive/rounds/PRODUCT.md rank 24): the name, a colon, the contents; "your
       // logo" and never "your mark"; no trailing period, as the spec's shapes are written
       expect(entry.sentence.startsWith(`${entry.label}: `), `${entry.id} sentence`).toBe(true);
       expect(entry.sentence.endsWith('.'), `${entry.id} sentence period`).toBe(false);
@@ -177,7 +177,7 @@ describe('LAYOUTS', () => {
     }
   });
 
-  it('makes Title and body one title over one body, and keeps the 4/8 head as Title, subtitle and body (docs/PRODUCT.md rank 2)', () => {
+  it('makes Title and body one title over one body, and keeps the 4/8 head as Title, subtitle and body (docs/archive/rounds/PRODUCT.md rank 2)', () => {
     const split = layoutEntry('split').make('x', blankDeck, 'deck');
     expect(split?.kind === 'content' && split.layout).toMatchObject({
       type: 'split',
@@ -357,7 +357,7 @@ describe('promptFor', () => {
     ).toBe(PROMPTS.text);
   });
 
-  it('prompts the head paragraph of a two column head with the subtitle word (docs/PRODUCT.md rank 2)', () => {
+  it('prompts the head paragraph of a two column head with the subtitle word (docs/archive/rounds/PRODUCT.md rank 2)', () => {
     const p1 = { id: 'p1', type: 'paragraph' as const, text: '' };
     // the renderer passes the kind and the template alone
     expect(

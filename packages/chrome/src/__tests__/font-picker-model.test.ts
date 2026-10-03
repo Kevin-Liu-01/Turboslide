@@ -20,7 +20,7 @@ import {
 } from '../font-picker-model';
 import type { FontRow } from '../font-picker-model';
 
-// The Font dropdown's pure rules of the features round (docs/FEATURES.md 3.1 item 2 and 3.5;
+// The Font dropdown's pure rules of the features round (docs/archive/rounds/FEATURES.md 3.1 item 2 and 3.5;
 // audit-fonts 5, 10, 11): the Inter licence link names the v4.1 tag; the search matches the name,
 // the category label and the id; the Recent group lists at most five faces after Used, newest
 // first, per browser, and Clear recent empties the store.
@@ -131,7 +131,7 @@ describe('filterRows', () => {
 });
 
 describe('the Brand group', () => {
-  it('lists a Brand face once, under Brand alone (docs/POLISH.md item 49)', () => {
+  it('lists a Brand face once, under Brand alone (docs/archive/rounds/POLISH.md item 49)', () => {
     const groups = groupRows(ROWS, [], '', ['inter']);
     const brand = groups.find((group) => group.id === 'brand');
     expect(brand?.rows.map((row) => row.id)).toEqual(['inter']);

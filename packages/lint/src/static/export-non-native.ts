@@ -48,7 +48,7 @@ export function classifyBlock(block: Block): BlockExportClass {
 }
 
 /**
- * The plain name of a block type in the listing's sentence, with its plural (docs/POLISH.md 2.6
+ * The plain name of a block type in the listing's sentence, with its plural (docs/archive/rounds/POLISH.md 2.6
  * item 55: Check slides names the object in plain words, never by its id and never in a
  * parenthesis; the words are the chip's, viewer Selection.tsx DISPLAY_NAMES). A type outside the
  * table reads as its own name.

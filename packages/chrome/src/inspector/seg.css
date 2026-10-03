@@ -40,7 +40,7 @@
 }
 
 /* a row holding a segmented control wraps the control under its label when the options are wider
-   than the room beside it (docs/POLISH.md 2.6 item 52; audit-chrome item 7 read "izontalOrientation"
+   than the room beside it (docs/archive/rounds/POLISH.md 2.6 item 52; audit-chrome item 7 read "izontalOrientation"
    with the segment drawn over its own label): the row flexes and the field takes the rest */
 .ts-insp-row:has(> .ts-insp-field > .ts-ctl-seg) {
   display: flex;

@@ -14,7 +14,7 @@ import { tipProps } from '../Tooltip';
 
 import './TableGrid.css';
 
-/** The rows the content box holds at the insert's 20 px text (docs/POLISH.md 2.2 item 6; polish/build/b2.md R9): past it the caption says so. */
+/** The rows the content box holds at the insert's 20 px text (docs/archive/rounds/POLISH.md 2.2 item 6; polish/build/b2.md R9): past it the caption says so. */
 const ROWS_THAT_FIT = tableRowsThatFit(CONTENT_BOX[3], 20);
 
 /**

@@ -110,7 +110,7 @@ function field(document: DeckDocument, slideId: string, blockId: string): HTMLEl
   return control;
 }
 
-/* the pointer's own arrival at the control: since the polish round (docs/POLISH.md 2.6 item 61,
+/* the pointer's own arrival at the control: since the polish round (docs/archive/rounds/POLISH.md 2.6 item 61,
    Tooltip.tsx) a hover draws a plate only when the pointer moved to a new point within the rest
    window, so the move precedes the enter, at a fresh point each time */
 let pointerStep = 0;

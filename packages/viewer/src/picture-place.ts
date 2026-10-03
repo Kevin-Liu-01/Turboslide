@@ -1,4 +1,4 @@
-// Where a picked picture lands and what a refused upload says (docs/PRODUCT.md section 2 rank
+// Where a picked picture lands and what a refused upload says (docs/archive/rounds/PRODUCT.md section 2 rank
 // 10, section 5 "Pictures"; audit-seller 10, 14, 22; audit-brand 12; audit-gaps 1). Pure: the
 // Editor's insertPicture and the Image by URL dialog call these, picture-place.test.ts pins them.
 import { CAPTION_ROW_HEIGHT } from '@turboslide/render/block-css';
@@ -15,16 +15,16 @@ export const PICTURE_MARGIN = 40;
 
 /**
  * A picture whose longer side is under this many pixels keeps its natural size at the insert
- * (docs/POLISH.md item 51; audit-media item 26: one 180 px icon landed at 94, 119 and 161 sheet
+ * (docs/archive/rounds/POLISH.md item 51; audit-media item 26: one 180 px icon landed at 94, 119 and 161 sheet
  * px depending on the free rectangle). Google inserts a picture at its natural size scaled down
  * to fit, never scaled up; a larger picture still takes the largest box its area gives it.
  */
 export const NATURAL_SIZE_LIMIT = 600;
 
-/** The height a caption row adds under a free picture (docs/POLISH.md item 43), the renderer's number, here for the editor's caption session. */
+/** The height a caption row adds under a free picture (docs/archive/rounds/POLISH.md item 43), the renderer's number, here for the editor's caption session. */
 export { CAPTION_ROW_HEIGHT };
 
-/** The sheet's box in sheet px: a dropped picture is clamped inside it (docs/POLISH.md item 50). */
+/** The sheet's box in sheet px: a dropped picture is clamped inside it (docs/archive/rounds/POLISH.md item 50). */
 const SHEET_BOX: Box = [0, 0, 1600, SHEET_HEIGHT];
 
 /**
@@ -42,7 +42,7 @@ export function clampBoxToSheet(box: Box): Box {
 }
 
 /**
- * The box a replaced picture takes (docs/POLISH.md item 37; audit-media item 4: Replace image
+ * The box a replaced picture takes (docs/archive/rounds/POLISH.md item 37; audit-media item 4: Replace image
  * squeezed a wordmark into the old box): the old box's centre and area are kept and the sides are
  * refit to the new picture's aspect, so nothing is stretched. A size that is unknown or degenerate
  * keeps the box as it is. The result is moved inside the sheet and rounded to whole sheet px, at
@@ -288,7 +288,7 @@ export type PictureKind = 'png' | 'jpeg' | 'gif' | 'webp' | 'svg' | 'avif' | 'bm
  * any upload and no placeholder is drawn (audit-brand 12; the gaps audit's replace with a broken
  * PNG went silent). SVG is read as text starting with `<`: a BOM, white space, an XML declaration
  * and any number of comments may stand before `<svg` inside the 512 bytes the intake reads
- * (docs/POLISH.md item 50; audit-media item 22: the product's own icon.svg opens with a comment
+ * (docs/archive/rounds/POLISH.md item 50; audit-media item 22: the product's own icon.svg opens with a comment
  * over 256 characters and was refused as "not a picture").
  */
 export function sniffPictureKind(bytes: Uint8Array): PictureKind | null {
@@ -361,7 +361,7 @@ export type UploadFailure =
   'not-a-picture' | 'too-large' | 'did-not-finish' | 'svg-too-large' | 'svg-broken';
 
 /**
- * The sanitizer's two sentences for an svg the intake refuses (docs/VECTOR.md 4.2; the same words
+ * The sanitizer's two sentences for an svg the intake refuses (docs/archive/rounds/VECTOR.md 4.2; the same words
  * as the studio's `UPLOAD_REASONS.svgTooLarge` and `svgBroken`, which the viewer cannot import):
  * whole sentences with their own capital after the colon, so the snackbar never reads a raster
  * sentence for an svg.
@@ -369,7 +369,7 @@ export type UploadFailure =
 export const SVG_TOO_LARGE_SENTENCE = 'The SVG file is over 2 MB';
 export const SVG_BROKEN_SENTENCE = 'This SVG file could not be read';
 
-/** The sentence of a crop asked for on an svg picture (docs/VECTOR.md 4.4): the toolbar's Crop, the menu row and the double click all read it. */
+/** The sentence of a crop asked for on an svg picture (docs/archive/rounds/VECTOR.md 4.4): the toolbar's Crop, the menu row and the double click all read it. */
 export const SVG_CROP_SENTENCE = 'An SVG picture cannot be cropped. Resize it instead';
 
 /** The one sentence of a refused upload, with its reason (rank 10; the snackbar `snackbar.upload.failed`). */
@@ -389,7 +389,7 @@ export function uploadFailureSentence(reason: UploadFailure, maxMb: number): str
 
 /**
  * The reason a server refusal or a failed call stands for, read from its message: the sanitizer's
- * two svg sentences first (docs/VECTOR.md 4.2), then a decode or format refusal as "not a
+ * two svg sentences first (docs/archive/rounds/VECTOR.md 4.2), then a decode or format refusal as "not a
  * picture", a size or body refusal as "too large", anything else (a timeout, a network error, a
  * stale base) as "did not finish".
  */

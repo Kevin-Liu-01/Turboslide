@@ -105,7 +105,7 @@ export function ShellBridge({
   const theme = deckAppearance(controller.getSnapshot().document.deck);
   controller.attachShell(shell);
   api.current = editorShell;
-  /* the editor shell's snackbar with one action (docs/PRODUCT.md 6.1; build/b6.md R10): the
+  /* the editor shell's snackbar with one action (docs/archive/rounds/PRODUCT.md 6.1; build/b6.md R10): the
      outside write's Undo and the assist accept's reach the seller through it */
   controller.attachEditorShell(editorShell);
   const [editorEl, setEditorEl] = useState<HTMLElement | null>(null);

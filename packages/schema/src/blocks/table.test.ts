@@ -82,7 +82,7 @@ describe('the table block', () => {
     expect(tableBlockSchema.safeParse(table).success).toBe(false);
     const slide = slideWith(emptyTable('t', 2, 2));
     const heading = slide.slots.headLeft?.[0];
-    /* docs/POLISH.md 2.3 item 19: a heading takes paragraph breaks, so Enter breaks the line */
+    /* docs/archive/rounds/POLISH.md 2.3 item 19: a heading takes paragraph breaks, so Enter breaks the line */
     if (heading?.type === 'heading') heading.text = 'Two\nlines';
     expect(validateSlide(slide).ok).toBe(true);
     if (heading?.type === 'heading') heading.text = 'Two\rlines';
@@ -197,7 +197,7 @@ describe('the table block', () => {
   });
 });
 
-describe('column widths through the column commands (docs/RETURN.md 2.4 fix 4)', () => {
+describe('column widths through the column commands (docs/archive/rounds/RETURN.md 2.4 fix 4)', () => {
   const sized = (): ReturnType<typeof emptyTable> => {
     const table = emptyTable('t', 3, 2);
     table.columns = [{ width: 240 }, { width: 480 }, { width: 240 }];
@@ -278,7 +278,7 @@ describe('columnShares, the grid template’s rule as numbers', () => {
   });
 });
 
-describe('columnsAfterSeamDrag, the column seam handle (docs/RETURN.md 2.4 fix 5)', () => {
+describe('columnsAfterSeamDrag, the column seam handle (docs/archive/rounds/RETURN.md 2.4 fix 5)', () => {
   it('widens the left column by the drag and narrows its neighbour, sizing every column', () => {
     const out = columnsAfterSeamDrag([{}, {}, {}], 960, 0, 80);
     expect(out).not.toBeNull();
@@ -311,7 +311,7 @@ describe('columnsAfterSeamDrag, the column seam handle (docs/RETURN.md 2.4 fix 5
   });
 });
 
-// The rows and the box (docs/OBJECTS.md 3.3 item 3): the empty row's height at each size of the
+// The rows and the box (docs/archive/rounds/OBJECTS.md 3.3 item 3): the empty row's height at each size of the
 // ladder, a set height as the track's floor, the table's box from its rows, the `pos.h` written
 // up when the rows are taller, and the rows after a seam under one of them moved (item 4).
 describe('the rows and the box', () => {
@@ -438,7 +438,7 @@ describe('the rows and the box', () => {
   });
 });
 
-// The polish round (docs/POLISH.md 2.2 items 6 and 10; section 5.5): the insert's box is the rows'
+// The polish round (docs/archive/rounds/POLISH.md 2.2 items 6 and 10; section 5.5): the insert's box is the rows'
 // floor at every size of the ladder, the rows a room holds, and a cell's own alignment.
 describe('the polish round', () => {
   it('sizes the insert’s box as the empty table’s floor at every ladder size, so the box is never shorter than its rows', () => {

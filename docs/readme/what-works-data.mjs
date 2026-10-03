@@ -4,15 +4,15 @@
 // paragraph appears only while every row of that feature passes; the count of rows that hold a
 // feature back is computed, never typed. Every paragraph below is the text of FOCUS.md section 7
 // verbatim (`what-works.test.mjs` asserts it), so the specification and the README cannot drift.
-// The return round (docs/RETURN.md section 7) added the paragraphs of the features that return:
+// The return round (docs/archive/rounds/RETURN.md section 7) added the paragraphs of the features that return:
 // tables, charts, diagrams, word art, formatting, the chrome, the View menu and the notifications;
-// each is shown only while every row of its feature passes. The product round (docs/PRODUCT.md
+// each is shown only while every row of its feature passes. The product round (docs/archive/rounds/PRODUCT.md
 // section 8) added the brand kit, the fonts, the templates and the assist the same way, and the sync
-// and costs round (docs/SYNC.md 6.1) the two unparkable features sync and cost, the features
-// round, ship one (docs/FEATURES.md section 4, 7.1) the logo picker and ship two (section 5) the
-// shader library, and the vector round (docs/VECTOR.md section 4, 6.1) the SVG pictures. The objects
-// round (docs/OBJECTS.md section 2, 6.1) added the live gestures' sentence to the arrange paragraph,
-// whose rows the `gestures` area carries. The polish round (docs/POLISH.md section 5) added rows to
+// and costs round (docs/archive/rounds/SYNC.md 6.1) the two unparkable features sync and cost, the features
+// round, ship one (docs/archive/rounds/FEATURES.md section 4, 7.1) the logo picker and ship two (section 5) the
+// shader library, and the vector round (docs/archive/rounds/VECTOR.md section 4, 6.1) the SVG pictures. The objects
+// round (docs/archive/rounds/OBJECTS.md section 2, 6.1) added the live gestures' sentence to the arrange paragraph,
+// whose rows the `gestures` area carries. The polish round (docs/archive/rounds/POLISH.md section 5) added rows to
 // the features below and no paragraph: a feature's paragraph is held by its new rows like any
 // other until they pass on production. Node only; no dependency.
 
@@ -255,7 +255,7 @@ export const FEATURES = [
       '**Notifications.** The bell in the title row lists the replies and mentions on a shared deck, and Tools > Notification settings keeps the level a seller picks.',
     shots: [],
   },
-  /* the product round (docs/PRODUCT.md sections 4, 6 and 8.1): the four new features, each shown
+  /* the product round (docs/archive/rounds/PRODUCT.md sections 4, 6 and 8.1): the four new features, each shown
      only while every row of its feature passes */
   {
     key: 'brand',
@@ -285,7 +285,7 @@ export const FEATURES = [
       "**Assist.** The Assist button in the title row (Cmd+J) opens a panel with three starter cards: Tailor for a customer (rename the customer, swap the logo and skip slides in one step, with one Undo), Make it shorter and Write speaker notes. A card shows the before and after; nothing changes until it is accepted, and Accept is one undo step. Search the menus understands a seller's words and offers Ask the assistant when nothing matches.",
     shots: [],
   },
-  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  /* the sync and costs round (docs/archive/rounds/SYNC.md 6.1): the write path's order and the calls per state */
   {
     key: 'sync',
     heading: 'Sync',
@@ -325,7 +325,7 @@ export const FEATURES = [
       "**Logos.** Insert > Logo searches the brand marks of thesvg.org by company name and places the mark on the slide at a logo size, stored on the presentation as its own picture with the brand's licence words; your own brand kit's logo comes first, the tiles show every mark on paper and on ink, and a check puts the mark on the title slide and in every footer. Replace image > Logo swaps a customer's logo and keeps its box, and Tailor for a customer finds the new customer's logo. The picker answers from a daily refreshed index while thesvg.org is down.",
     shots: [],
   },
-  /* the features round, ship two (docs/FEATURES.md section 5, 7.1): the shader library */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md section 5, 7.1): the shader library */
   {
     key: 'shaders',
     heading: 'Shaders',
@@ -333,7 +333,7 @@ export const FEATURES = [
       "**Shaders.** Insert > Shader opens a gallery of the shader library with a black and white thumbnail per shader and its presets; one click places the shader on the slide, selected, where it moves and resizes like a picture. Format options shows the shader's controls as sliders with a number field each: Strength, Detail, Frequency, Amplitude, Density, Brightness, Grain, Rotation, Center and Speed, with the presets as tiles and the brand kit's six colours as its palette. A still of the shader is captured in the editor 800 ms after the last change and is what the show, the view link, the PDF, the PowerPoint files and the web page carry; Change background places a shader as the slide's ground or says in one sentence why it could not. Every shader action is also on the CLI, MCP and HTTP transports.",
     shots: [],
   },
-  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures, shown only while every
+  /* the vector round (docs/archive/rounds/VECTOR.md section 4, 6.1): the SVG pictures, shown only while every
      row of the feature passes */
   {
     key: 'svg',

@@ -1,4 +1,4 @@
-// The brand kit, the probe's rows (docs/PRODUCT.md 4.1, 4.4, 8.1 `brand.*` with the driver
+// The brand kit, the probe's rows (docs/archive/rounds/PRODUCT.md 4.1, 4.4, 8.1 `brand.*` with the driver
 // `probe --core`): the Brand kit panel from Slide > Change theme, the toolbar Theme button and
 // Slide > Edit theme, Use on every slide on a picture, Logo > Remove, the Primary colour typed
 // with its live preview and one revision, the colour plate's kit row and its one container id,
@@ -29,7 +29,7 @@ export const IDS = [
   'brand.reset.default-kit',
   'brand.layout.tiles-in-kit',
   'brand.agent.set-get',
-  /* the features round, ship one (docs/FEATURES.md 2.3 item 4, P1 of B3): the kit's six roles lead every object plate */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 4, P1 of B3): the kit's six roles lead every object plate */
   'brand.objects.kit-colours-first',
 ];
 
@@ -1212,12 +1212,12 @@ export async function run(t) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.3 item 4, P1 of B3; the row
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 4, P1 of B3; the row
  * `brand.objects.kit-colours-first`): the table's fill plate, the chart's series swatches and the
  * tail's plate list the kit's six roles first with the role's name and hex in the tooltip, and a
  * new chart's first two series are Primary and Accent. The table and the chart are the earlier
  * areas' inserts on their slides; a plate without kit swatches reads not built with the id of its
- * first swatch (docs/PRODUCT.md 8.1).
+ * first swatch (docs/archive/rounds/PRODUCT.md 8.1).
  */
 async function featuresRound(t) {
   const { page } = t;
@@ -1319,7 +1319,7 @@ async function featuresRound(t) {
           await t.press('Escape');
           if (seriesKit.length === 0) {
             /* the same rule as the fill plate above: a plate with no kit role is the item not
-               built (docs/PRODUCT.md 8.1; the P1 item of FEATURES.md 2.3 item 4 moves whole) */
+               built (docs/archive/rounds/PRODUCT.md 8.1; the P1 item of FEATURES.md 2.3 item 4 moves whole) */
             await t.clearAll();
             return t.notBuilt(
               'formatOptions.chart.swatches.primary',

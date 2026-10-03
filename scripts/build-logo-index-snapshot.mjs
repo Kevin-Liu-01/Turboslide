@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The bundled logo index snapshot (docs/FEATURES.md 4.2; build/hotfix.md section 9). Writes
+// The bundled logo index snapshot (docs/archive/rounds/FEATURES.md 4.2; build/hotfix.md section 9). Writes
 // apps/studio/src/server/logo-index.snapshot.json, the copy of the logo index the deployment
 // carries in its function bundle so a cold instance answers the picker while the public store's
 // edge refuses `system/logo-index.json` for the minutes after a write of it (the window every

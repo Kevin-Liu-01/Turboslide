@@ -23,7 +23,7 @@ import { chromeMenus } from './chrome-menus';
 import { chromePages } from './chrome-pages';
 import { chromeRound1 } from './chrome-round1';
 
-// The chrome at two viewports, the spec rows (docs/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
+// The chrome at two viewports, the spec rows (docs/archive/rounds/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
 // plate-four-columns`, `share.dialog.more-row` and `chrome.toolbar.fold-any-width` with the driver
 // core/chrome.spec.ts): the Apply layout plate at 1280 by 800, the Share dialog's height at 900
 // and its scroll at 800, and the toolbar tail folding into More at both widths. Two contexts, one
@@ -131,7 +131,7 @@ test(title('slides.layout.plate-four-columns'), async () => {
 /** The Share dialog's geometry and what its first stage shows. */
 async function shareFacts(page: Page) {
   await ctl(page, 'share.open').click();
-  /* the first Share on a fresh browser asks for a display name once (docs/PRODUCT.md section 2 rank 4) */
+  /* the first Share on a fresh browser asks for a display name once (docs/archive/rounds/PRODUCT.md section 2 rank 4) */
   const skip = ctl(page, 'dialog.namePrompt.skip');
   if (
     await skip
@@ -332,7 +332,7 @@ test(title('chrome.toolbar.fold-any-width'), async () => {
 
 /**
  * Insert > Image > Logo on a page (the switch on when the row is parked); answers whether the
- * dialog is drawn (the features round, docs/FEATURES.md 4.3; the one Logo row since Round 1,
+ * dialog is drawn (the features round, docs/archive/rounds/FEATURES.md 4.3; the one Logo row since Round 1,
  * docs/NEXT.md 4.1.3 item 20).
  */
 async function openLogoDialog(page: Page): Promise<{ open: boolean; switched: boolean }> {
@@ -432,7 +432,8 @@ test(title('logos.picker.chrome-1280'), async () => {
   const { page, deck } = laptop;
   await openEditor(page, deck);
   const opened = await openLogoDialog(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open)
+    test.skip(true, 'not on this build: insert.image.logo (docs/archive/rounds/FEATURES.md 4.3)');
   await ctl(page, 'dialog.logo.search').click();
   await page.keyboard.type('figma', { delay: 60 });
   await expect
@@ -488,7 +489,7 @@ test(title('logos.picker.chrome-1280'), async () => {
 });
 
 /**
- * The features round, ship two (docs/FEATURES.md 5.3; the row `shaders.panel.section-groups`): the
+ * The features round, ship two (docs/archive/rounds/FEATURES.md 5.3; the row `shaders.panel.section-groups`): the
  * Shader section's groups in order at both viewports with no field past the panel. The block lands
  * through Insert > Shader when the gallery is on the build, else through the window API (lib.ts
  * `ensureShader`, the matrix's setup); the groups are read by their headings inside
@@ -541,7 +542,7 @@ test(title('shaders.panel.section-groups'), async () => {
     const slideId = (await state(page)).slideId;
     const made = await ensureShader(page, slideId);
     if (!(await openShaderSection(page, made.id))) {
-      skipped = 'not on this build: formatOptions.shader (docs/FEATURES.md 5.3, B5)';
+      skipped = 'not on this build: formatOptions.shader (docs/archive/rounds/FEATURES.md 5.3, B5)';
       break;
     }
     const headings = await shaderGroupHeadings(page);
@@ -579,8 +580,8 @@ coverage(import.meta.filename, [
   'slides.layout.plate-four-columns',
   'share.dialog.more-row',
   'chrome.toolbar.fold-any-width',
-  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 7.1) */
   'logos.picker.chrome-1280',
-  /* the features round, ship two (docs/FEATURES.md 7.1) */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 7.1) */
   'shaders.panel.section-groups',
 ]);

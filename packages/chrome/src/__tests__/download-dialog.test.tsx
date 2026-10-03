@@ -128,7 +128,7 @@ function mount(
   return { view, dispatch, control, state, say };
 }
 
-// The product round (docs/PRODUCT.md section 2 ranks 7, 8 and 11; the rows export.download.
+// The product round (docs/archive/rounds/PRODUCT.md section 2 ranks 7, 8 and 11; the rows export.download.
 // pdf-direct, pptx-direct, options-dialog, mode-sentence and named-after-title): the PDF row and
 // the PowerPoint row of a deck without a table or a chart start the download at once with no
 // dialog, the snackbar carrying the progress and the saved name; a deck with a table opens the
@@ -143,7 +143,7 @@ describe('the one click downloads (product round)', () => {
     expect(id).toBe('export.run');
     expect(input.format).toBe('pdf');
     expect(input).not.toHaveProperty('includeNotes');
-    /* no estimate (docs/POLISH.md item 87) */
+    /* no estimate (docs/archive/rounds/POLISH.md item 87) */
     expect(say.mock.calls[0]?.[0]).toBe('Preparing your PDF');
     await act(async () => {
       await Promise.resolve();
@@ -237,7 +237,7 @@ describe('DownloadDialog and the speaker notes (docs/FOCUS.md rank 24)', () => {
   });
 });
 
-// The dialog closes itself when the file is saved (docs/PRODUCT.md section 2 rank 8) and the
+// The dialog closes itself when the file is saved (docs/archive/rounds/PRODUCT.md section 2 rank 8) and the
 // snackbar names the file with Details; cycle 2's Escape rule (VERIFICATION.md F-shapes-export,
 // build/b3.md R19) stays the Dialog component's and is covered by dialog.test.tsx.
 describe('DownloadDialog after a run completes', () => {
@@ -255,7 +255,7 @@ describe('DownloadDialog after a run completes', () => {
   });
 });
 
-// The vector round (docs/VECTOR.md 4.6, 6.2; vector/build/b1.md R6): an svg picture exports as
+// The vector round (docs/archive/rounds/VECTOR.md 4.6, 6.2; vector/build/b1.md R6): an svg picture exports as
 // vector by the header's default, so the dialog sends no `svgVector` key; the parked control
 // `export.svg.vector` alone selects the PNG blip with `svgVector: false`.
 describe('the svg vector flag of export.run', () => {

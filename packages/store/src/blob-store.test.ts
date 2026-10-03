@@ -1,4 +1,4 @@
-// The store call counters of the sync and costs round (docs/SYNC.md 6.3, the call counting
+// The store call counters of the sync and costs round (docs/archive/rounds/SYNC.md 6.3, the call counting
 // harness): `boundedBlobClient` counts every call it bounds by deck prefix and operation over a
 // sliding 60 s window, per process, and `sync.status.storeCalls` reads the counts with the
 // instance id. Pure over an injected clock; the fake client records the same calls beside.

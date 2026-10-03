@@ -9,7 +9,7 @@ import { assignAccessKeys } from '../menus/keys.ts';
 import type { MenuContext, MenuItem } from '../menus/model.ts';
 import { CONTEXT_MENUS, DEFAULT_MENU_CONTEXT, MENUS, itemById, walkItems } from '../menus/model.ts';
 
-// The menu rows of the polish round (docs/POLISH.md 2.6 items 57 and 61; 5.5 `menu.test.tsx`):
+// The menu rows of the polish round (docs/archive/rounds/POLISH.md 2.6 items 57 and 61; 5.5 `menu.test.tsx`):
 // no tooltip on a disabled row or a submenu row (audit-chrome item 21: the plate covered the
 // rows under it), every glyph B1 named for the integrator's `icon:` fields exists in the icon
 // table, and a glyph on every row of the ten menus and the eight right click menus once the

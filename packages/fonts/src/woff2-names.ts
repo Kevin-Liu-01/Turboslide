@@ -1,4 +1,4 @@
-// A reader of the tables a test or a fetch needs from a woff2 file (docs/FEATURES.md 3.1 items 1
+// A reader of the tables a test or a fetch needs from a woff2 file (docs/archive/rounds/FEATURES.md 3.1 items 1
 // and 4; ported from the audit's `docs/gslides-parity/features/audit-fonts/woff2-names.mjs`): the
 // table directory with its variable length sizes, one brotli stream over every table, then the
 // `name` table's Windows strings, the `head` table's units per em and the GSUB feature tags. The

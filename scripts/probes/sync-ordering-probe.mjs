@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The ordering probe (docs/SYNC.md 6.1; audit-ordering item 8): the ordering audit's run 2, run 3
+// The ordering probe (docs/archive/rounds/SYNC.md 6.1; audit-ordering item 8): the ordering audit's run 2, run 3
 // and run 4 probes (docs/gslides-parity/sync/audit-ordering/run{2,3,4}-ordering-probe.mjs) folded
 // into one script, with the tier's bounds and every number written to one JSON. Two browsers of one
 // person at human speed (A on /new, B with A's cookies on /edit/<id>, the audit's run 2), a third
@@ -28,7 +28,7 @@
 // anomalies of the audit's vocabulary (lost-write, reorder, duplicate, latency-over-bound,
 // divergence, viewer-stale, open-sessions-diverge, repair-splice, offline-lost) are counted, so a
 // run's JSON reads beside the audit's runs. The bounds are the tier's (`--tier memory|blob`,
-// docs/SYNC.md 6.1: a word within 1 s on the memory tier and 5 s on the blob tier; 5 s for the
+// docs/archive/rounds/SYNC.md 6.1: a word within 1 s on the memory tier and 5 s on the blob tier; 5 s for the
 // concurrent title; 3 s for the block on the memory tier and 5 s on the blob tier, the serial
 // row's split, since the blob tier's propagation read 1.3 s mean and 2.9 s max on the verifier's
 // pass 1; 10 s after a reconnect, 5 s for a reload). The tier is read from the page
@@ -94,7 +94,7 @@ mkdirSync(OUT, { recursive: true });
 const OIDC = process.env.VERCEL_OIDC_TOKEN;
 const extraHTTPHeaders = OIDC ? { 'x-vercel-trusted-oidc-idp-token': OIDC } : {};
 
-/** The bounds of docs/SYNC.md 6.1 by tier, in ms. */
+/** The bounds of docs/archive/rounds/SYNC.md 6.1 by tier, in ms. */
 export const BOUNDS = Object.freeze({
   memory: {
     serialWord: 1000,

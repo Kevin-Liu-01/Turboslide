@@ -21,7 +21,7 @@ import { hideTooltip } from '../Tooltip';
 
 const SETTINGS: ShellSettings = { ...DEFAULT_SETTINGS, advancedTools: true };
 
-// The Background dialog's Shader row (docs/FEATURES.md 5.4, 5.5; audit-shaders 1, 3, 13, 19; the
+// The Background dialog's Shader row (docs/archive/rounds/FEATURES.md 5.4, 5.5; audit-shaders 1, 3, 13, 19; the
 // row shaders.background.place-answers): Choose opens the gallery's grid inside the dialog, a card
 // or a preset tile picks the shader and the button reads its words, Place is one
 // `slide.setBackgroundMaterial` at the catalog's anchor with the dither, the button reads

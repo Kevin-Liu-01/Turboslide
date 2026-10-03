@@ -35,7 +35,7 @@ import {
   zipEntries,
 } from './lib';
 
-// The brand kit and the templates, the spec rows (docs/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
+// The brand kit and the templates, the spec rows (docs/archive/rounds/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
 // `brand.logo.replace-every-slide` and `fonts.budget.no-load-before-ready` with the driver
 // core/brand.spec.ts): the rows the walk probe cannot drive in one tab: the file chooser of the
 // kit's Logo > Replace, the network (no catalog woff2 before the ready mark), the window API's
@@ -522,7 +522,10 @@ test(title('templates.save.as-template'), async () => {
     await settled(page);
   }
   if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
-    test.skip(true, 'not on this build: file.saveAsTemplate (docs/PRODUCT.md 7.1, B5b)');
+    test.skip(
+      true,
+      'not on this build: file.saveAsTemplate (docs/archive/rounds/PRODUCT.md 7.1, B5b)',
+    );
   await saveAsTemplate();
   await gotoGallery();
   const card = await savedCard();
@@ -551,7 +554,10 @@ test(title('templates.save.same-name-replaces'), async () => {
   test.setTimeout(180_000);
   if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
-    test.skip(true, 'not on this build: file.saveAsTemplate (docs/PRODUCT.md 7.1, B5b)');
+    test.skip(
+      true,
+      'not on this build: file.saveAsTemplate (docs/archive/rounds/PRODUCT.md 7.1, B5b)',
+    );
   if (savedSlug === null) await saveAsTemplate();
   await gotoGallery();
   const before = await savedCard();
@@ -571,12 +577,15 @@ test(title('templates.card.rename-and-delete'), async () => {
   if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
-    test.skip(true, 'not on this build: templates.page (docs/PRODUCT.md 7.1, B5b)');
+    test.skip(true, 'not on this build: templates.page (docs/archive/rounds/PRODUCT.md 7.1, B5b)');
   if (savedSlug === null) {
     /* the File menu is the editor's: the gallery page has none to reach a row in */
     await openEditor(page, deck);
     if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
-      test.skip(true, 'not on this build: file.saveAsTemplate (docs/PRODUCT.md 7.1, B5b)');
+      test.skip(
+        true,
+        'not on this build: file.saveAsTemplate (docs/archive/rounds/PRODUCT.md 7.1, B5b)',
+      );
     await saveAsTemplate();
     await gotoGallery();
     savedSlug = (await savedCard())?.slug ?? null;
@@ -614,12 +623,15 @@ test(title('templates.default.use-for-new'), async () => {
   if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
-    test.skip(true, 'not on this build: templates.page (docs/PRODUCT.md 7.1, B5b)');
+    test.skip(true, 'not on this build: templates.page (docs/archive/rounds/PRODUCT.md 7.1, B5b)');
   if (savedSlug === null) {
     /* the File menu is the editor's: the gallery page has none to reach a row in */
     await openEditor(page, deck);
     if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
-      test.skip(true, 'not on this build: file.saveAsTemplate (docs/PRODUCT.md 7.1, B5b)');
+      test.skip(
+        true,
+        'not on this build: file.saveAsTemplate (docs/archive/rounds/PRODUCT.md 7.1, B5b)',
+      );
     await saveAsTemplate();
     await gotoGallery();
     savedSlug = (await savedCard())?.slug ?? null;
@@ -686,7 +698,7 @@ test(title('templates.deck.read-only'), async () => {
     );
   })();
   if (!actions.includes('template.list'))
-    test.skip(true, 'not on this build: template.list (docs/PRODUCT.md 4.3, B5b)');
+    test.skip(true, 'not on this build: template.list (docs/archive/rounds/PRODUCT.md 4.3, B5b)');
   /* the template's own editor address: a template is a deck under decks/templates */
   let opened = false;
   for (const address of ['/edit/templates/blank', '/edit/blank']) {
@@ -728,7 +740,7 @@ test(title('brand.logo.replace-every-slide'), async () => {
   if (panel !== 'brand')
     test.skip(
       true,
-      `not on this build: panel.brand (docs/PRODUCT.md 7.1, B5a); Slide > Change theme opened ${panel === 'themes' ? 'the Themes panel' : 'no panel'}`,
+      `not on this build: panel.brand (docs/archive/rounds/PRODUCT.md 7.1, B5a); Slide > Change theme opened ${panel === 'themes' ? 'the Themes panel' : 'no panel'}`,
     );
   const chooser = page.waitForEvent('filechooser', { timeout: 10_000 });
   await ctl(page, 'panel.brand.logo.replace').click();
@@ -843,10 +855,10 @@ test(title('fonts.budget.no-load-before-ready'), async ({ browser }) => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the features round, ship one (docs/FEATURES.md 3.1, 3.5, 7.1): the Inter 4.1 italic, the P1
+// the features round, ship one (docs/archive/rounds/FEATURES.md 3.1, 3.5, 7.1): the Inter 4.1 italic, the P1
 // specimen rows and Recent group of the Font dropdown, and the italic preload on /edit alone
 
-/** The sha256 of the Inter 4.1 italic (docs/FEATURES.md 3.1 item 1; `INTER_ITALIC.sha256` in packages/fonts/src/inter.ts). */
+/** The sha256 of the Inter 4.1 italic (docs/archive/rounds/FEATURES.md 3.1 item 1; `INTER_ITALIC.sha256` in packages/fonts/src/inter.ts). */
 const INTER_ITALIC_SHA256 = 'e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a';
 const INTER_ITALIC_BYTES = 387_976;
 const INTER_ITALIC_VERSION = 'Version 4.001;git-9221beed3';
@@ -1095,7 +1107,7 @@ async function openFontDropdown(
   return shown ? 'live' : 'closed';
 }
 const NOT_LIVE = (s: string) =>
-  `not on this build: toolbar.font is ${s} (docs/PRODUCT.md 4.2, B5a; docs/FEATURES.md 3.5)`;
+  `not on this build: toolbar.font is ${s} (docs/archive/rounds/PRODUCT.md 4.2, B5a; docs/archive/rounds/FEATURES.md 3.5)`;
 
 test(title('fonts.picker.specimen-rows'), async () => {
   test.setTimeout(180_000);
@@ -1151,7 +1163,7 @@ test(title('fonts.picker.specimen-rows'), async () => {
     await page.keyboard.press('Escape');
     test.skip(
       true,
-      'not on this build: the specimen rows of the Font dropdown (docs/FEATURES.md 3.5, P1, B1 with B2)',
+      'not on this build: the specimen rows of the Font dropdown (docs/archive/rounds/FEATURES.md 3.5, P1, B1 with B2)',
     );
   }
   expect(scrolled, 'scrolling the list loads no woff2').toBe(0);
@@ -1208,7 +1220,10 @@ test(title('fonts.picker.recent-group'), async ({ browser }) => {
   test.info().annotations.push({ type: 'recent', description: JSON.stringify(facts) });
   if (!facts.groups.includes('recent')) {
     await page.keyboard.press('Escape');
-    test.skip(true, 'not on this build: toolbar.font.group.recent (docs/FEATURES.md 3.5, P1, B1)');
+    test.skip(
+      true,
+      'not on this build: toolbar.font.group.recent (docs/archive/rounds/FEATURES.md 3.5, P1, B1)',
+    );
   }
   expect(facts.rows.slice().sort(), 'Recent lists the two picks').toEqual(['lora', 'roboto']);
   expect(facts.groups.indexOf('recent'), 'Recent after Used').toBeGreaterThan(
@@ -1270,7 +1285,7 @@ test(title('fonts.preload.italic-on-edit-only'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.5 item 49, 5.1 `brand.panel.words-match-sheet`): the Brand
+// the polish round (docs/archive/rounds/POLISH.md 2.5 item 49, 5.1 `brand.panel.words-match-sheet`): the Brand
 // kit's words match the sheet.
 
 test(title('brand.panel.words-match-sheet'), async () => {
@@ -1288,7 +1303,7 @@ test(title('brand.panel.words-match-sheet'), async () => {
   if (panel !== 'brand')
     test.skip(
       true,
-      `not on this build: panel.brand (docs/PRODUCT.md 7.1); Slide > Change theme opened ${panel === 'themes' ? 'the Themes panel' : 'no panel'}`,
+      `not on this build: panel.brand (docs/archive/rounds/PRODUCT.md 7.1); Slide > Change theme opened ${panel === 'themes' ? 'the Themes panel' : 'no panel'}`,
     );
   const notes: string[] = [];
   const failures: string[] = [];
@@ -1446,11 +1461,11 @@ coverage(import.meta.filename, [
   'templates.deck.read-only',
   'brand.logo.replace-every-slide',
   'fonts.budget.no-load-before-ready',
-  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 7.1) */
   'fonts.inter.italic-release',
   'fonts.picker.specimen-rows',
   'fonts.picker.recent-group',
   'fonts.preload.italic-on-edit-only',
-  /* the polish round (docs/POLISH.md 2.5 item 49) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 49) */
   'brand.panel.words-match-sheet',
 ]);

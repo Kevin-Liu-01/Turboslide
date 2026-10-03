@@ -1,5 +1,5 @@
 /* first, before any module that parses with zod: the browser's jitless flag (packages/schema/src/
-   errors.ts; docs/POLISH.md item 112, the CSP reports zod's JIT posted on every page) */
+   errors.ts; docs/archive/rounds/POLISH.md item 112, the CSP reports zod's JIT posted on every page) */
 import '@turboslide/schema/errors';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { HeadContent, Link, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
@@ -27,7 +27,7 @@ import { RouterLinkSlot } from './-link-slot';
 // The document shell (SPEC 3.4): the theme boot script runs in the head before
 // first paint (gt-theme then gt-deck-theme; since the product round a first
 // visit with neither key follows the operating system's prefers-color-scheme,
-// docs/PRODUCT.md 3.1.1, and the stored choice wins afterwards); the chrome
+// docs/archive/rounds/PRODUCT.md 3.1.1, and the stored choice wins afterwards); the chrome
 // tokens (--pt-), the identity tokens (--ts-, gslides-parity SPEC-4 0.8), the
 // sheet theme (.ts-sheet), the stage rules, the renderer's block CSS and the
 // one face (Inter) load once for every route. The head carries the icon set,
@@ -49,14 +49,14 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The routes that preload the Inter italic beside the upright (docs/FEATURES.md 3.1, the P1 fonts
+ * The routes that preload the Inter italic beside the upright (docs/archive/rounds/FEATURES.md 3.1, the P1 fonts
  * item, row `fonts.preload.italic-on-edit-only`): the editor, where Cmd+I is likely. Every other
  * route carries one font preload and the italic loads on first use through `font-display: swap`.
  */
 const ITALIC_PRELOAD_ROUTES: ReadonlySet<string> = new Set(['/edit/$deckId']);
 
 /**
- * The theme boot script of the product round (docs/PRODUCT.md 3.1.1; audit-interface 12): the
+ * The theme boot script of the product round (docs/archive/rounds/PRODUCT.md 3.1.1; audit-interface 12): the
  * stored `gt-theme`, then the deck's older `gt-deck-theme`, then on a first visit the operating
  * system's appearance through `prefers-color-scheme`, dark only when the system says dark, so a
  * seller on a light office display opens a light home page and a light editor the way Google
@@ -134,7 +134,7 @@ export const Route = createRootRoute({
         { rel: 'manifest', href: SITE.icons.manifest },
         /* the upright starts with the HTML on every route (SPEC-3 9.2 G1): the request no longer
            waits for the stylesheet, and the metric matched fallback face of inter.css covers the
-           swap; the italic is prefetched on the editor alone (docs/FEATURES.md 3.1, the fonts P1
+           swap; the italic is prefetched on the editor alone (docs/archive/rounds/FEATURES.md 3.1, the fonts P1
            item; audit-fonts 12: /decks, /deck and /present painted none and downloaded it): a
            prefetch warms the cache at low priority without the browser's warning a preload draws
            on every editor load whose deck draws no italic within seconds, and the face loads
@@ -172,7 +172,7 @@ export const Route = createRootRoute({
 });
 
 /**
- * Not found (gslides-parity SPEC-4 1.10; docs/PRODUCT.md 3.6; docs/NEXT.md 4.1.3 item 11): the page
+ * Not found (gslides-parity SPEC-4 1.10; docs/archive/rounds/PRODUCT.md 3.6; docs/NEXT.md 4.1.3 item 11): the page
  * frame (components/home/PageFrame.tsx: the 1104 px column, its rails and the 58 px bar with the
  * lockup), the heading, two full sentences and three `.pt-ib` buttons at 40 px with Title Case
  * labels (DECK-GRAMMAR 22, which Round 1 takes over the clutter audit's sentence case), all

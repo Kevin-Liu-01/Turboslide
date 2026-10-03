@@ -72,7 +72,7 @@ import {
   registerLogoActions,
 } from './logos';
 
-// The logo picker's server (docs/FEATURES.md 7.3, the B6 test in apps/studio): the sanitizer's
+// The logo picker's server (docs/archive/rounds/FEATURES.md 7.3, the B6 test in apps/studio): the sanitizer's
 // fixtures, one per rule of 4.7; the index builder over the ten mark fixture upstream (the variant
 // paths read from the manifest alone, a 404 marked unavailable, a dropped slug taken down with its
 // cached file, a failed upstream keeping the previous file with `lastError`, the budget stop with
@@ -168,7 +168,7 @@ describe('the sanitizer (4.7)', () => {
     const kept = sanitizeLogoSvg(
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z" fill="#000"/><text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text></svg>`,
     );
-    /* the polish round keeps the words (docs/POLISH.md item 32; audit-objects item 15) */
+    /* the polish round keeps the words (docs/archive/rounds/POLISH.md item 32; audit-objects item 15) */
     expect(kept.svg).toContain(
       '<text x="2" y="20" font-family="Inter" font-weight="600">Acme<tspan dx="2">Corp</tspan></text>',
     );
@@ -261,7 +261,7 @@ describe('the sanitizer (4.7)', () => {
     }
   });
 
-  it('keeps an image whose href is a raster data URI and drops every other image (docs/VECTOR.md 4.2)', () => {
+  it('keeps an image whose href is a raster data URI and drops every other image (docs/archive/rounds/VECTOR.md 4.2)', () => {
     /* a 1 by 1 PNG, the way Figma's Copy as SVG embeds a raster fill */
     const png =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -946,7 +946,7 @@ describe('the insert (4.4, 4.11)', () => {
     expect(asset.source.tint).toBeUndefined();
     expect(asset.sourceFile).toMatch(/^assets\/figma\.source\.[0-9a-f]{8}\.svg$/);
     expect('neutral' in asset.twins).toBe(true);
-    /* the vector round (docs/VECTOR.md 4.1): the insert writes the svg kind and the vector file */
+    /* the vector round (docs/archive/rounds/VECTOR.md 4.1): the insert writes the svg kind and the vector file */
     expect(asset.kind).toBe('svg');
     expect(asset.vector).toEqual({ neutral: asset.sourceFile });
     /* 3x of a 108 by 160 symbol */
@@ -997,7 +997,7 @@ describe('the insert (4.4, 4.11)', () => {
     /* the deck is dark, so the source carries the dark appearance's text colour */
     expect(source).toContain('fill="#f2f2f0"');
     expect(source).not.toContain('#070707');
-    /* the vector round (docs/VECTOR.md 4.1): the two tinted svg files, one per appearance */
+    /* the vector round (docs/archive/rounds/VECTOR.md 4.1): the two tinted svg files, one per appearance */
     expect(asset.kind).toBe('svg');
     if (asset.vector === undefined || !('light' in asset.vector))
       throw new Error('two vector files');

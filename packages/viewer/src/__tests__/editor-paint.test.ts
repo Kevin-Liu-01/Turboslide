@@ -11,7 +11,7 @@ import { paintMutations } from '../clipboard';
 import { Editor } from '../Editor';
 import type { EditorHandle } from '../Editor';
 
-// Paint format on the title placeholder (docs/POLISH.md 2.3 item 18; the polish round fix round
+// Paint format on the title placeholder (docs/archive/rounds/POLISH.md 2.3 item 18; the polish round fix round
 // 3, B5's R19; the walk row `text.tail.heading-takes-list-indent`): the cover's heading is a field
 // object with no block, so the brush reads its drawn typography from the stage; the handle's
 // `subscribePaint` tells the toolbar's Paint format button as the brush arms and disarms, so the
@@ -124,7 +124,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('Paint format on the title placeholder (docs/POLISH.md 2.3 item 18)', () => {
+describe('Paint format on the title placeholder (docs/archive/rounds/POLISH.md 2.3 item 18)', () => {
   it('arms from the drawn typography of the selected heading and tells the subscriber as it arms and disarms', () => {
     drawHeadingAt('88px', '500', 'start');
     mounted = mount(documentOf(cover), { selection: { kind: 'block', blockId: 'heading' } });

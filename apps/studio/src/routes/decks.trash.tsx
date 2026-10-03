@@ -48,7 +48,7 @@ import './decks.css';
  * the card back with the error sentence in the snackbar. Before this round the page awaited the
  * invalidation under a busy state, which was the list call's 1 to 8 s (R04 section 8).
  *
- * The product round (docs/PRODUCT.md 3.3, 3.6; audit-interface 21, 29): the confirm is the chrome's
+ * The product round (docs/archive/rounds/PRODUCT.md 3.3, 3.6; audit-interface 21, 29): the confirm is the chrome's
  * one Dialog (DeleteForeverDialog: the 18 px title, the lead "This cannot be undone.", Delete
  * forever focused), the card's Restore and Delete forever are 32 px with Delete forever in ink and
  * its glyph, and Empty trash is the page's one solid button, since it is the page's act.

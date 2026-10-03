@@ -14,7 +14,7 @@ import {
   replaceRosterRow,
 } from './identity-index';
 
-// The people round's index (docs/PEOPLE.md 3.8, 3.9, 3.15, 3.16, 3.17; 6.5): the payload's
+// The people round's index (docs/archive/rounds/PEOPLE.md 3.8, 3.9, 3.15, 3.16, 3.17; 6.5): the payload's
 // resolved people under the roster and the caller, the label suffix in order of first appearance
 // across the log, the comments and the roster, the hue slot moved to the chrome's base, the roster
 // replaced in place. Pure functions over hand built records.

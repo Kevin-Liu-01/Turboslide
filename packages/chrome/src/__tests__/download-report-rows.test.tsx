@@ -13,7 +13,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
-// The Download dialog's report rows (the features round, ship two, docs/FEATURES.md 5.5; the row
+// The Download dialog's report rows (the features round, ship two, docs/archive/rounds/FEATURES.md 5.5; the row
 // shaders.export.missing-frame-row, B7's; build/b1.md R6): the route's `progress.rows` name what
 // the export waited for, the dialog draws each as `dialog.download.report.<id>` while the run is
 // in flight, and the direct path says each row once through the snackbar. The rows' content is

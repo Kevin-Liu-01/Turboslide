@@ -1,4 +1,4 @@
-// Word art (docs/RETURN.md 2.7, section 5 `wordart.*` with the driver `probe --core`): the
+// Word art (docs/archive/rounds/RETURN.md 2.7, section 5 `wordart.*` with the driver `probe --core`): the
 // entry bar and Enter, the text edited in place with its outline kept, and the light
 // appearance with the show. The PDF row is core/export.spec.ts. Insert > Word art is reached in
 // the default view, or with Tools > Advanced tools on while the row is still parked.
@@ -8,7 +8,7 @@ export const IDS = [
   'wordart.insert',
   'wordart.edit',
   'wordart.light-appearance',
-  /* the features round, ship one (docs/FEATURES.md 2.3 items 8 and 10, P1): the letters scale
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 items 8 and 10, P1): the letters scale
      with the box and the tail carries Fill color and the outline controls */
   'wordart.resize.scales-letters',
   'wordart.tail.fill-outline',
@@ -74,7 +74,7 @@ export async function run(t) {
           obj.type === 'text' &&
           b?.text === 'Big words' &&
           b?.typography?.size === 88 &&
-          /* the regular weight at insert since the polish round (docs/POLISH.md 2.4 item 34): B then makes it bold */
+          /* the regular weight at insert since the polish round (docs/archive/rounds/POLISH.md 2.4 item 34): B then makes it bold */
           (b?.typography?.weight === undefined || b?.typography?.weight === 400) &&
           b?.typography?.align === 'center' &&
           b?.outline?.color === 'ink' &&
@@ -178,7 +178,7 @@ export async function run(t) {
       };
     },
   );
-  /* the features round, ship one (docs/FEATURES.md 2.3 items 8 and 10, both P1 of B3): a se
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 items 8 and 10, both P1 of B3): a se
      handle drag from the 800 by 120 box to about 1027 by 205 scales the letters with the box, and
      the tail lists Fill color and the outline controls; a control not on the build reads not built */
   await t.step(
@@ -232,7 +232,7 @@ export async function run(t) {
     },
   );
 
-  /* the objects round (docs/OBJECTS.md 4.2 item 4, ship one P1 item 10): the four shape
+  /* the objects round (docs/archive/rounds/OBJECTS.md 4.2 item 4, ship one P1 item 10): the four shape
      controls before the text controls, each written and drawn on the letters; a tail without
      them reads not built with the parked id */
   await t.step(
@@ -258,7 +258,7 @@ export async function run(t) {
         return t.notBuilt(
           'toolbar.wordart.outline',
           'B5',
-          `the word art's tail is the text tail with none of Fill color, Border color, Border weight, Border dash (docs/OBJECTS.md 4.2 item 4); tail ${tail.filter((c) => !/^toolbar\.(head|search|newSlide|undo|redo|print|paintFormat|zoom|tail|end|pointer|hideMenus)/.test(c)).join(', ')}`,
+          `the word art's tail is the text tail with none of Fill color, Border color, Border weight, Border dash (docs/archive/rounds/OBJECTS.md 4.2 item 4); tail ${tail.filter((c) => !/^toolbar\.(head|search|newSlide|undo|redo|print|paintFormat|zoom|tail|end|pointer|hideMenus)/.test(c)).join(', ')}`,
         );
       /* the four controls sit before the text controls (the font, the size, the marks) */
       const firstText = tail.findIndex((c) =>
@@ -270,7 +270,7 @@ export async function run(t) {
       const pick = async (control, test) => {
         if (!tail.includes(control)) return { pick: null, options: [] };
         /* a control drawn aria-disabled says why in its tooltip and is read, never opened: Border
-           dash while the text schema takes no dash (build/b5.md R6, R10; docs/OBJECTS.md section 7) */
+           dash while the text schema takes no dash (build/b5.md R6, R10; docs/archive/rounds/OBJECTS.md section 7) */
         const refused = await page.evaluate(
           (c) =>
             document.querySelector(`[data-control="${c}"]`)?.getAttribute('aria-disabled') ===
@@ -396,7 +396,7 @@ export async function run(t) {
         );
       return {
         ok,
-        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; before the text controls ${before}; ${results.map((r) => (r.disabled ? `${r.name}: disabled, "${r.sentence ?? ''}"` : `${r.name}: pick ${r.pick ?? 'none'}, wrote ${r.wrote} (${r.value})${r.drawn === null ? '' : `, drawn ${r.drawn}`}`)).join('; ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 4, B5)'}`,
+        observed: `tail controls ${want.filter((c) => tail.includes(c)).join(', ') || 'none'}; missing ${missing.join(', ') || 'none'}; before the text controls ${before}; ${results.map((r) => (r.disabled ? `${r.name}: disabled, "${r.sentence ?? ''}"` : `${r.name}: pick ${r.pick ?? 'none'}, wrote ${r.wrote} (${r.value})${r.drawn === null ? '' : `, drawn ${r.drawn}`}`)).join('; ')}${ok ? '' : ' (docs/archive/rounds/OBJECTS.md 4.2 item 4, B5)'}`,
       };
     },
   );

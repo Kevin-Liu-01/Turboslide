@@ -240,7 +240,7 @@ describe('the hosted degraded tier (VERIFICATION-3 finding 17)', () => {
   });
 });
 
-describe('the assist quotas (docs/PRODUCT.md 6.3, 8.3)', () => {
+describe('the assist quotas (docs/archive/rounds/PRODUCT.md 6.3, 8.3)', () => {
   const ctx = (identity: string, deckId: string): QuotaContext => ({
     identity,
     tier: 'anonymous',

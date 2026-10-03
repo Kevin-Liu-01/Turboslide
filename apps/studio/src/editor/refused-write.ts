@@ -1,9 +1,9 @@
-// A refused write's one sentence (docs/POLISH.md item 102; audit-collab item 7). A structural
+// A refused write's one sentence (docs/archive/rounds/POLISH.md item 102; audit-collab item 7). A structural
 // refusal (a slide add, a move, a delete, a resize: nothing typed to keep) is one snackbar
 // sentence named by what the write was, with no id and no JSON; the card stays for typed text
 // alone, whose words a seller would otherwise lose. The sentence is the one every path says: the
 // room client's `onReject` and `onUnplaceable`, the local refusal of a gesture whose slide a
-// collaborator deleted first (the loser of docs/SYNC.md 6.1 `sync.structural.concurrent`), and
+// collaborator deleted first (the loser of docs/archive/rounds/SYNC.md 6.1 `sync.structural.concurrent`), and
 // the error the write's caller is thrown, which the chrome's dispatch says in the same snackbar.
 // Before this the caller's error carried the room's own words ("The room answered 409", the
 // reducer's "No slide …" with its id) and said them over the sentence: the row

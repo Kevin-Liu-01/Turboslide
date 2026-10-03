@@ -37,7 +37,7 @@ import {
 } from './sync-cost-probe.mjs';
 import { costRows } from './core-matrix.mjs';
 
-// The cost probe's judgement (docs/SYNC.md 6.1, 6.3), without a browser: every cost row has a
+// The cost probe's judgement (docs/archive/rounds/SYNC.md 6.1, 6.3), without a browser: every cost row has a
 // ceiling, the samples fold to a maximum per operation per instance, simple and advanced are
 // counted as the pricing page counts them, a row over its ceiling fails, a deployment run without
 // the counters is not driven with the reason, a localhost run asserts the function requests alone,

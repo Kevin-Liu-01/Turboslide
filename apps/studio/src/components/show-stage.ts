@@ -9,7 +9,7 @@ import type { StageSize } from '@turboslide/chrome/shell-context';
 export const SHOW_BAR_ROW = 56;
 
 /**
- * The stage box the sheet fits while a show is up (docs/POLISH.md item 98; audit-pages item
+ * The stage box the sheet fits while a show is up (docs/archive/rounds/POLISH.md item 98; audit-pages item
  * 44). The shell measures the whole stage and the present fit has no pad, so on a short viewport
  * the letterbox under the sheet is thinner than the bar's row and the bar sits half in the black
  * and half over the sheet's footer mark and bottom hairline (1280 by 800: 40 px of letterbox

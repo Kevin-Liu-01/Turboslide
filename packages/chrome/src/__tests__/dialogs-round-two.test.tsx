@@ -127,7 +127,7 @@ describe('BackgroundDialog', () => {
     noTitles();
   });
 
-  it('Enter in the hex field previews the typed colour and keeps the dialog open; Done writes it (docs/PRODUCT.md 4.1, brand.background.enter-keeps-open)', async () => {
+  it('Enter in the hex field previews the typed colour and keeps the dialog open; Done writes it (docs/archive/rounds/PRODUCT.md 4.1, brand.background.enter-keeps-open)', async () => {
     /* the focus round wrote and closed on Enter (F-hex-field, b1 R21); the product round makes
        Enter the preview so a seller judges the ground before it lands (audit-brand 17) */
     dispatch.mockClear();

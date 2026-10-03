@@ -36,7 +36,7 @@ import './share.css';
 
 /**
  * The Share dialog (gslides-parity SPEC-3 0.16, 6.5, 9.3; research 09 3.6, 8.5; docs/FOCUS.md 2.7
- * and section 5 rank 1; docs/PRODUCT.md section 2 rank 3): two stages at a fixed width of 520.
+ * and section 5 rank 1; docs/archive/rounds/PRODUCT.md section 2 rank 3): two stages at a fixed width of 520.
  *
  * The seller's stage first: the General access select (Restricted, Anyone with the link) with the
  * role select beside it (Viewer, Commenter, Editor), one sentence under them that states what the
@@ -211,7 +211,7 @@ export function accessSentence(
 ): string {
   if (mode === 'open') return LEGACY_SENTENCE;
   if (mode === 'link') {
-    /* one statement, no instruction after it (docs/POLISH.md item 78) */
+    /* one statement, no instruction after it (docs/archive/rounds/POLISH.md item 78) */
     if (role === 'editor') return 'Anyone with the link can open and edit this presentation';
     if (role === 'commenter') return 'Anyone with the link can open it and leave comments';
     return 'Anyone with the link can open it and cannot change it';
@@ -219,7 +219,7 @@ export function accessSentence(
   return RESTRICTED_SENTENCE;
 }
 
-/** The sentence under Restricted (docs/POLISH.md item 96): no link opens the presentation. */
+/** The sentence under Restricted (docs/archive/rounds/POLISH.md item 96): no link opens the presentation. */
 export const RESTRICTED_SENTENCE = 'Only you can open this presentation';
 
 /** `Sep 28, 2026`: the product's date form for a link's Created and Expires (item 96). */
@@ -281,7 +281,7 @@ export type FetchedAccess = {
 };
 
 /**
- * The view of a principal the record names (docs/PEOPLE.md 3.10): the resolved view of the page's
+ * The view of a principal the record names (docs/archive/rounds/PEOPLE.md 3.10): the resolved view of the page's
  * `identities` map (the name, the trust, the mark and, for a sharer, the address), else the
  * least a reader can be told from the id alone until the route's answer carries the map: the
  * generated label and the trust the id's prefix gives.
@@ -308,7 +308,7 @@ export function accessViewOfRecord(
     signedIn: boolean;
     via?: EditorAccess['via'] | null;
     now?: number;
-    /** the resolved people of the page payload, by principal id (docs/PEOPLE.md 3.8, 3.10) */
+    /** the resolved people of the page payload, by principal id (docs/archive/rounds/PEOPLE.md 3.8, 3.10) */
     identities?: Readonly<Record<string, IdentityView>>;
   } = {
     signedIn: false,
@@ -572,7 +572,7 @@ export function ShareDialog() {
      share.dialog.ruled-rows; audit-brand-surfaces rank 21: the dialog opened with a prompt the
      reader did not ask for) */
   const account = input.account;
-  /* the one own identity every surface reads (docs/PEOPLE.md 3.11) */
+  /* the one own identity every surface reads (docs/archive/rounds/PEOPLE.md 3.11) */
   const me = meOf({ account, presence: input.presence }) ?? undefined;
   /** The name a row shows (rank 4): You for this browser's own principal. */
   const personName = (identity: IdentityView): string =>
@@ -1356,7 +1356,7 @@ export function ShareDialog() {
             </section>
           ) : null}
 
-          {/* one links table (docs/POLISH.md item 96; docs/FOCUS.md 2.7): the plain addresses of
+          {/* one links table (docs/archive/rounds/POLISH.md item 96; docs/FOCUS.md 2.7): the plain addresses of
               a legacy deck, else every live link once, the general link first, then the View,
               Present and Edit rows with Copy, Rotate and Revoke on a minted link and Copy link on
               one not minted yet; nothing under Restricted, where no link opens the presentation */}
@@ -1653,7 +1653,7 @@ function RequestRow({
 }
 
 /**
- * The word after a person's name on a Share row (docs/PEOPLE.md 3.7, 3.10): the badge for a
+ * The word after a person's name on a Share row (docs/archive/rounds/PEOPLE.md 3.7, 3.10): the badge for a
  * signed in account, " · guest" for a typed name, nothing for a label.
  */
 function PersonTrust({ identity }: { identity: IdentityView }) {
@@ -1677,7 +1677,7 @@ function GrantRow({
   onTransfer,
 }: {
   grant: AccessGrantView;
-  /** the row's place in the list, for the email line's control id (docs/PEOPLE.md 5.2) */
+  /** the row's place in the list, for the email line's control id (docs/archive/rounds/PEOPLE.md 5.2) */
   index: number;
   /** the name the row shows: You for this browser (rank 4), else the person's name or address */
   name?: string;
@@ -1706,7 +1706,7 @@ function GrantRow({
         <span className="ts-chip is-blank" />
       )}
       {/* the name, the badge or the guest word after it, and for a sharer the address as an 11 px
-          line under the name in place of the title attribute it was (docs/PEOPLE.md 3.10) */}
+          line under the name in place of the title attribute it was (docs/archive/rounds/PEOPLE.md 3.10) */}
       <span className="ts-share-row-who">
         <span className="ts-share-row-name">
           {name ?? who(grant)}

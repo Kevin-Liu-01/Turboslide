@@ -9,7 +9,7 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import { FormatOptions } from '../FormatOptions';
 import { hideTooltip } from '../Tooltip';
 
-// The caption field of a shot in Image options (docs/PRODUCT.md section 2 rank 10; docs/POLISH.md
+// The caption field of a shot in Image options (docs/archive/rounds/PRODUCT.md section 2 rank 10; docs/archive/rounds/POLISH.md
 // item 43): the prompt as its placeholder, one write for Enter followed by the blur it causes, the
 // caption removed when the field is emptied. A caption added to a free picture grows its box by
 // the caption row in the same write and an emptied caption gives the row back, so the photograph

@@ -120,7 +120,7 @@ describe('renderMarkBits', () => {
       expect(bits.bits[i * 24]).toBe(1);
       expect(bits.bits[i * 24 + 23]).toBe(1);
     }
-    // pixel 1 is paper on every side (docs/PEOPLE.md 3.4): no cell touches the ring
+    // pixel 1 is paper on every side (docs/archive/rounds/PEOPLE.md 3.4): no cell touches the ring
     for (let i = 1; i < 23; i += 1) {
       expect(bits.bits[1 * 24 + i]).toBe(0);
       expect(bits.bits[22 * 24 + i]).toBe(0);

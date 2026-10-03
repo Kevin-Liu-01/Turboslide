@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "InterVariable woff2 and its @font-face CSS (SPEC 2.1); the static export instances under export/ with fonts.json, cut by scripts/build-fonts.py (SPEC 8.4); the font catalog of gslides-parity SPEC-5-amendments A5 (docs/PRODUCT.md 4.2) with its woff2 assets under assets/<id>/, fetched once by scripts/fetch-fonts.mjs.",
+  "description": "InterVariable woff2 and its @font-face CSS (SPEC 2.1); the static export instances under export/ with fonts.json, cut by scripts/build-fonts.py (SPEC 8.4); the font catalog of gslides-parity SPEC-5-amendments A5 (docs/archive/rounds/PRODUCT.md 4.2) with its woff2 assets under assets/<id>/, fetched once by scripts/fetch-fonts.mjs.",
   "scripts": {
     "test": "vitest run"
   },

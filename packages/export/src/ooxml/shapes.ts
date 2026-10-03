@@ -5,7 +5,7 @@
 // columns of a text box as `numCol` and `spcCol` on its `a:bodyPr`, and an attached connector
 // rewritten from the `p:sp` pptxgenjs wrote to a `p:cxnSp` whose `p:nvCxnSpPr` carries `a:stCxn`
 // and `a:endCxn` with the target shape's id and connection site, so PowerPoint keeps the
-// attachment and moves the connector with the shape. Since the vector round (docs/VECTOR.md 2.5)
+// attachment and moves the connector with the shape. Since the vector round (docs/archive/rounds/VECTOR.md 2.5)
 // an end is attached only when its site index is one the target's preset lists: a rectangle
 // offers eight sites in the product (the ECMA four then four corners) and the file has an index
 // for the first four alone, so an end on a corner is dropped and the connector keeps its drawn

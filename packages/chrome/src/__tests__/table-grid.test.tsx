@@ -62,7 +62,7 @@ describe('TableGrid', () => {
     fireEvent.keyDown(grid(), { key: 'Enter' });
     expect(onPick).toHaveBeenLastCalledWith(2, 1);
     fireEvent.keyDown(grid(), { key: 'End' });
-    /* docs/POLISH.md 2.2 item 6 (polish/build/b2.md R9): past the rows the slide holds at the
+    /* docs/archive/rounds/POLISH.md 2.2 item 6 (polish/build/b2.md R9): past the rows the slide holds at the
        insert's 20 px the caption says how many fit */
     expect(caption()).toBe(`${TABLE_MAX_COLUMNS} x ${TABLE_MAX_ROWS}, 11 rows fit the slide`);
     fireEvent.keyDown(grid(), { key: 'ArrowRight' });

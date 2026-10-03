@@ -190,7 +190,7 @@ const ImportSlidesDialog = lazyDialog(() =>
 const InsertIconDialog = lazyDialog(() =>
   import('./dialogs/InsertIcon').then((m) => m.InsertIconDialog),
 );
-/* the features round, ship two (docs/FEATURES.md 5.4; build/b1.md R2): the Shader gallery */
+/* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4; build/b1.md R2): the Shader gallery */
 const ShaderGalleryDialog = lazyDialog(() =>
   import('./dialogs/ShaderGallery').then((m) => m.ShaderGalleryDialog),
 );
@@ -224,12 +224,12 @@ const EditHtmlPanel = lazyDialog(() => import('./EditHtmlPanel').then((m) => m.E
 const ShortcutsDialog = lazyDialog(() =>
   import('./ShortcutsDialog').then((m) => m.ShortcutsDialog),
 );
-/* the product round (docs/PRODUCT.md 4.3, section 5): Save as template and Tailor for a customer */
+/* the product round (docs/archive/rounds/PRODUCT.md 4.3, section 5): Save as template and Tailor for a customer */
 const SaveAsTemplateDialog = lazyDialog(() =>
   import('./dialogs/SaveAsTemplate').then((m) => m.SaveAsTemplateDialog),
 );
 const TailorDialog = lazyDialog(() => import('./dialogs/Tailor').then((m) => m.TailorDialog));
-/* the features round (docs/FEATURES.md 4.3): the Logo picker over thesvg.org */
+/* the features round (docs/archive/rounds/FEATURES.md 4.3): the Logo picker over thesvg.org */
 const LogoDialog = lazyDialog(() => import('./dialogs/Logo').then((m) => m.LogoDialog));
 
 const LAZY_DIALOGS = [
@@ -291,7 +291,7 @@ function readAppearance(): 'light' | 'dark' | 'match' {
   const saved = load(APPEARANCE_STORAGE);
   if (saved === 'light' || saved === 'dark' || saved === 'match') return saved;
   /* nothing chosen: a stored gt-theme is the reader's (or a test's) explicit choice, else light
-     (B4's R18, docs/POLISH.md item 49: with Match the Brand kit's Dark tile turned the chrome
+     (B4's R18, docs/archive/rounds/POLISH.md item 49: with Match the Brand kit's Dark tile turned the chrome
      dark along with the slides, where Google's theme changes the slides alone) */
   const theme = load('gt-theme');
   return theme === 'light' || theme === 'dark' ? theme : 'light';
@@ -301,7 +301,7 @@ function readAppearance(): 'light' | 'dark' | 'match' {
 const TRASHED_MARKER_KEY = 'turboslide:trashed';
 
 /**
- * Writes the trashed marker for /decks (docs/PRODUCT.md section 2 ranks 15 and 16): the deck's id
+ * Writes the trashed marker for /decks (docs/archive/rounds/PRODUCT.md section 2 ranks 15 and 16): the deck's id
  * and title with the facts its card draws, so the Undo on the home page restores the deck and its
  * Recent entry. A refused storage leaves the seller with the listing, which no longer holds the
  * deck.
@@ -327,7 +327,7 @@ function writeTrashedMarker(input: EditorShellInput): void {
   }
 }
 
-/** The block types whose Insert > Link goes to the text popover; every other block takes the whole block Link dialog (docs/PRODUCT.md section 2 rank 19). */
+/** The block types whose Insert > Link goes to the text popover; every other block takes the whole block Link dialog (docs/archive/rounds/PRODUCT.md section 2 rank 19). */
 const TEXT_LINK_TYPES: ReadonlySet<string> = new Set([
   'heading',
   'paragraph',
@@ -340,7 +340,7 @@ const TEXT_LINK_TYPES: ReadonlySet<string> = new Set([
   'table',
 ]);
 
-/** The snackbar's text for a refused write (docs/POLISH.md item 59; error-text.ts): a sentence, never a pointer. */
+/** The snackbar's text for a refused write (docs/archive/rounds/POLISH.md item 59; error-text.ts): a sentence, never a pointer. */
 function errorText(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (isValidatorRefusal(message)) {
@@ -357,7 +357,7 @@ function pictureKindOf(input: { format?: string }): 'jpg' | 'png' {
 
 /**
  * The window event Move to trash raises when the trash write is refused after the page has left
- * for /decks (docs/POLISH.md item 81); the home page shows the sentence and keeps the card
+ * for /decks (docs/archive/rounds/POLISH.md item 81); the home page shows the sentence and keeps the card
  * (apps/studio/src/routes/-recent.ts TRASH_REFUSED_EVENT spells the same name).
  */
 const TRASH_REFUSED_EVENT = 'turboslide:trash-refused';
@@ -385,7 +385,7 @@ export function EditorShell({
   const [layoutGrid, setLayoutGrid] = useState<LayoutGridRequest | null>(null);
   const [menuOpen, setMenuOpen] = useState<MenuId | null>(null);
   /* the File menu's open warms the store's listing the Open and Import slides dialogs draw
-     (EditorRoot listDecks keeps the one call for a while; docs/POLISH.md item 75): the rows are
+     (EditorRoot listDecks keeps the one call for a while; docs/archive/rounds/POLISH.md item 75): the rows are
      there when the dialog opens instead of the listing's seconds later */
   const listDecksRef = useRef(input.listDecks);
   listDecksRef.current = input.listDecks;
@@ -402,7 +402,7 @@ export function EditorShell({
   }, [menuOpen]);
   const [compact, setCompactState] = useState(false);
   const [toolFinderOpen, setToolFinderOpen] = useState(false);
-  /* the phrase Search the menus hands the Assist panel ("Ask the assistant: <phrase>", docs/PRODUCT.md 6.1) */
+  /* the phrase Search the menus hands the Assist panel ("Ask the assistant: <phrase>", docs/archive/rounds/PRODUCT.md 6.1) */
   const [assistPrompt, setAssistPrompt] = useState<string | undefined>(undefined);
   const [paletteOpen, setPaletteOpen] = useState(false);
   /* the groups the palette opens with: every group, or the actions section alone from Tools >
@@ -490,7 +490,7 @@ export function EditorShell({
   }, [mode, stageRef]);
 
   /* the name prompt fires when the route says so (SPEC-3 0.18): never on open, on the first write.
-     It is the title row's plate (TitleRow.tsx, NamePrompt.tsx NamePromptPlate; docs/POLISH.md 2.8
+     It is the title row's plate (TitleRow.tsx, NamePrompt.tsx NamePromptPlate; docs/archive/rounds/POLISH.md 2.8
      item 103), not the shell's dialog, so the keys, the menu bar and the caret of the person typing
      stay live while it waits (VERIFICATION-3 finding 8) and nothing stands over the sheet; a real
      dialog covers it while open. The floating card at the bottom right it replaced stood over the
@@ -733,7 +733,7 @@ export function EditorShell({
         return result;
       };
       if (plan.action === 'deck.trash') {
-        /* Move to trash leaves at once (docs/POLISH.md item 81): the marker /decks reads on
+        /* Move to trash leaves at once (docs/archive/rounds/POLISH.md item 81): the marker /decks reads on
            landing is written and the page navigates before the write answers (the blob tier
            took 12 s to answer it, and the editor stood for those seconds); the trash stamp lands
            behind the page, and a refusal reaches the list as its snackbar through the window
@@ -775,7 +775,7 @@ export function EditorShell({
           }
           if (plan.action === 'render.slide') {
             /* the picture's address carries a ten minute grant the render route takes for the
-               bearer and answers as an attachment (server/tokens.ts signRenderGrant; docs/RETURN.md
+               bearer and answers as an attachment (server/tokens.ts signRenderGrant; docs/archive/rounds/RETURN.md
                2.19). A popup opened after a 6 to 27 s render sits outside the click's transient
                activation and Chromium can block it (return/build/b7.md B7-R2), and an anchor's
                download request is the browser's, not the page's: it carries none of the page's
@@ -925,7 +925,7 @@ export function EditorShell({
           runPlan(item);
           return;
         case 'link': {
-          /* one link popover for the text case (docs/PRODUCT.md section 2 rank 19): a run being
+          /* one link popover for the text case (docs/archive/rounds/PRODUCT.md section 2 rank 19): a run being
              edited or a selected block that carries text opens the stage's popover; a block with
              no text (a picture, a shape with none) takes the Link dialog for the whole block */
           const slideNow = current.document.slides[current.slideId];
@@ -944,12 +944,12 @@ export function EditorShell({
           return;
         }
         case 'toggleSidePanel':
-          /* the title row's toggle (docs/PRODUCT.md section 2 rank 25): the last panel back, or the open one closed */
+          /* the title row's toggle (docs/archive/rounds/PRODUCT.md section 2 rank 25): the last panel back, or the open one closed */
           if (panel === null) reopenPanel();
           else closePanel();
           return;
         case 'useOnEverySlide': {
-          /* the picture as the kit's logo on the title slide and in every footer (docs/PRODUCT.md 4.4) */
+          /* the picture as the kit's logo on the title slide and in every footer (docs/archive/rounds/PRODUCT.md 4.4) */
           const slideNow = current.document.slides[current.slideId];
           const block = slideNow ? selectedBlock(slideNow, current.selection) : undefined;
           if (block === undefined) {
@@ -978,7 +978,7 @@ export function EditorShell({
           return;
         }
         case 'fontPicker': {
-          /* Format > Text > Font opens the toolbar's dropdown (docs/PRODUCT.md 4.2); a control
+          /* Format > Text > Font opens the toolbar's dropdown (docs/archive/rounds/PRODUCT.md 4.2); a control
              folded into More opens More first */
           const control = document.querySelector<HTMLElement>('[data-control="toolbar.font"]');
           if (control !== null && control.offsetParent !== null) {
@@ -1053,7 +1053,7 @@ export function EditorShell({
         case 'borderColorPicker':
         case 'borderWeightPicker': {
           /* from the Format menu the row carries no anchor: the list opens on the toolbar's
-             own button (B1's R15, docs/POLISH.md item 69) */
+             own button (B1's R15, docs/archive/rounds/POLISH.md item 69) */
           const at =
             anchor ??
             (typeof document === 'undefined'
@@ -1162,7 +1162,7 @@ export function EditorShell({
           current.comments?.onDisplay?.(display);
           /* View > Comments > Show all comments opens the Comments panel its sentence promises
              and Hide comments closes it; Expand and Minimize change the markers alone
-             (docs/RETURN.md 2.16; audit-surface row 53; the matrix row view.comments.show-all-panel) */
+             (docs/archive/rounds/RETURN.md 2.16; audit-surface row 53; the matrix row view.comments.show-all-panel) */
           if (display === 'all') openPanel('comments');
           else if (display === 'hidden' && panel === 'comments') closePanel();
           return;
@@ -1314,7 +1314,7 @@ export function EditorShell({
         case 'dialog': {
           const id = dialogIdOf(effect.title, item.id);
           /* the Logo picker takes the same picture target, so Replace image > Logo swaps the
-             selected picture's asset and keeps its box (docs/FEATURES.md 4.4) */
+             selected picture's asset and keeps its box (docs/archive/rounds/FEATURES.md 4.4) */
           if (id === 'imageByUrl' || id === 'fromThisPresentation' || id === 'logo') {
             const current = inputRef.current;
             openDialog({
@@ -1470,7 +1470,7 @@ export function EditorShell({
   const pickTableSize = useCallback(
     (columns: number, rows: number) => {
       setMenuOpen(null);
-      /* the objects round (docs/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits the
+      /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 3; objects/build/b2.md 4a): the box fits the
          picked rows (163 for three at 20 px, 271 for five), the width the table's 960 */
       runBuilt(
         insertBlockPlan(facts(), 'table', (id) => emptyTable(id, columns, rows), 'Table', {
@@ -1762,7 +1762,7 @@ export function EditorShell({
              to answer true whenever the editor exposed `exitCrop`, which the stage's handle always
              does, so the key table prevented the default of every bare Enter and the focused
              Slideshow half, the chevron and every other title row button lost their Enter
-             activation (docs/RETURN.md 4.1; return-drive rows 7 to 12 read defaultPrevented true).
+             activation (docs/archive/rounds/RETURN.md 4.1; return-drive rows 7 to 12 read defaultPrevented true).
              The stage's handle says whether a crop is open (`cropOpen`, Editor.tsx; return/build/b1.md
              R1 and R4); a handle without it is read through the overlay's `.ts-crop-frame`, drawn
              only while a crop is open (Overlay.tsx). With no crop the key is left to the focused
@@ -1938,7 +1938,7 @@ export function EditorShell({
       ? undefined
       : input.presence.others.find((each) => each.clientId === input.presence?.following);
   /* a press on the stage or the filmstrip stops the follow (gslides-parity SPEC-3 4.4;
-     docs/POLISH.md item 104: "your own edit or click stops it"): the roster row and the plate's Stop
+     docs/archive/rounds/POLISH.md item 104: "your own edit or click stops it"): the roster row and the plate's Stop
      are the words, this is the gesture. Own writes stop it in the controller; a click that writes
      nothing (the sheet's ground, a card) stopped nothing before, so the followed person's next
      move took the stage back from under the seller. The listener runs in the capture phase on the
@@ -2003,7 +2003,7 @@ export function EditorShell({
             onChangeLayout={(anchor) =>
               openLayoutGrid({ purpose: 'apply', anchor, returnFocusTo: anchor })
             }
-            /* the features round, ship two (docs/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
+            /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3; build/b5/integrator-hunks.md R3):
                the Shader section's Change opens the gallery for the selected block */
             onChangeShader={() => openDialog('shaderGallery')}
             onClose={closePanel}
@@ -2022,7 +2022,7 @@ export function EditorShell({
               dispatch={input.dispatch}
               history
               identities={input.identities}
-              /* this browser's own principal through the one reader of docs/PEOPLE.md 3.11
+              /* this browser's own principal through the one reader of docs/archive/rounds/PEOPLE.md 3.11
                  (presence-model.ts meOf; build/b2.md request 2): the account when signed in, else
                  the roster's own row, else the payload's principal, so the panel's You, the Share
                  dialog's You, the own chip and the two heads read one source */
@@ -2175,7 +2175,7 @@ export function EditorShell({
             onClose={closePanel}
           />
         );
-      /* the product round (docs/PRODUCT.md 6.1): the assistant's panel; Accept commits through the
+      /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the assistant's panel; Accept commits through the
          editor's own dispatch, one undo step */
       case 'assist':
         return (
@@ -2215,14 +2215,14 @@ export function EditorShell({
         return <DownloadDialog.Component format="pptx" />;
       case 'downloadPdf':
         return <DownloadDialog.Component format="pdf" />;
-      /* the product round (docs/PRODUCT.md section 2 rank 8, 4.3, section 5) */
+      /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 8, 4.3, section 5) */
       case 'downloadOptions':
         return <DownloadDialog.Component format="pptx" options />;
       case 'saveAsTemplate':
         return <SaveAsTemplateDialog.Component />;
       case 'tailor':
         return <TailorDialog.Component />;
-      /* the features round (docs/FEATURES.md 4.3) */
+      /* the features round (docs/archive/rounds/FEATURES.md 4.3) */
       case 'logo':
         return <LogoDialog.Component target={dialog.target} />;
       case 'slideNumbers':
@@ -2338,7 +2338,7 @@ export function EditorShell({
       : block?.type === 'shape'
         ? [0, 1, 1.5, 2, 3, 4]
         : block?.type === 'shot' || block?.type === 'picture'
-          ? /* Google's list for a picture (docs/POLISH.md 2.5 item 44), the tail's list */
+          ? /* Google's list for a picture (docs/archive/rounds/POLISH.md 2.5 item 44), the tail's list */
             [0, ...SHOT_FRAME_WEIGHTS]
           : [0, 1, 1.5, 2];
     const currentWeight = outlined
@@ -2375,7 +2375,7 @@ export function EditorShell({
             });
             return;
           }
-          /* a picture's frame, as the tail writes it (docs/POLISH.md 2.6 item 69: the menu's
+          /* a picture's frame, as the tail writes it (docs/archive/rounds/POLISH.md 2.6 item 69: the menu's
              row opens the same list; the merged tree's gate read a pick that wrote nothing) */
           if (block.type === 'shot' || block.type === 'picture') {
             const frame = { ...(block.frame ?? {}) } as Record<string, unknown>;
@@ -2423,7 +2423,7 @@ export function EditorShell({
       <TitleRow compact={compact} onShowMenus={() => setCompact(false)} />
       <MenuBar />
       {/* View > Mode > Viewing draws no toolbar, as Google's does; Commenting and Editing keep it
-          (docs/RETURN.md 2.14 item 6; EditorShell.css zeroes the row from the root's data-edit-mode).
+          (docs/archive/rounds/RETURN.md 2.14 item 6; EditorShell.css zeroes the row from the root's data-edit-mode).
           A viewer, whose route is always Viewing, keeps the tail's end alone: the View only button
           of SPEC-3 6.3 is the viewer's way to ask for edit access, and the parity audit's roles
           check reads it (the return round's integration; build/integrator.md section 2) */}
@@ -2494,7 +2494,7 @@ export function EditorShell({
       <div className="ts-rpanel">
         <Suspense fallback={null}>{panelNode}</Suspense>
       </div>
-      {/* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25): its side
+      {/* the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25): its side
           panel toggle sits in the title row's right cluster (TitleRow.tsx `title.sidePanel`) */}
       {layoutPlate}
       {anchoredNode}
@@ -2514,7 +2514,7 @@ export function EditorShell({
           pickLayout(layout, 'new');
         }}
         onAsk={(phrase) => {
-          /* "Ask the assistant: <phrase>" opens the panel with the words in the box (docs/PRODUCT.md 6.1) */
+          /* "Ask the assistant: <phrase>" opens the panel with the words in the box (docs/archive/rounds/PRODUCT.md 6.1) */
           setAssistPrompt(phrase);
           setToolFinderOpen(false);
           openPanel('assist');

@@ -258,7 +258,7 @@ export type SceneRaster = SceneObject & {
    */
   clip?: true;
   /**
-   * The absolute path of the asset's vector file for the theme (docs/VECTOR.md 4.6), when the
+   * The absolute path of the asset's vector file for the theme (docs/archive/rounds/VECTOR.md 4.6), when the
    * block's asset is an svg picture or a vector logo: the PowerPoint builder writes it as
    * `asvg:svgBlip` beside the PNG blip of `file`, which stays the fallback every viewer reads.
    */

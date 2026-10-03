@@ -1,9 +1,9 @@
-// No snackbar names an action id or an asset id (docs/PRODUCT.md section 2 rank 14; section 8.3's
+// No snackbar names an action id or an asset id (docs/archive/rounds/PRODUCT.md section 2 rank 14; section 8.3's
 // named unit test for B3; research 07 rule 22: a reason a seller reads is a sentence, never a code
 // or an id). The seller audit read `asset.add: product-shot` after a picture upload (audit-seller
 // 14); this test reads every `say(` call of the controller's source and refuses an interpolation
 // of an action id, an asset id, a deck id, a block id or a template id, and a literal of the
-// `<group>.<action>:` shape. The features round (docs/FEATURES.md 7.3, B3 extended) reads the table,
+// `<group>.<action>:` shape. The features round (docs/archive/rounds/FEATURES.md 7.3, B3 extended) reads the table,
 // chart and logo paths the same way: the editor's `notice(` calls (packages/viewer/src/Editor.tsx,
 // the table marks, the arrows, the logo placement) and the Logo dialog's `setError(` calls
 // (packages/chrome/src/dialogs/Logo.tsx).
@@ -97,7 +97,7 @@ describe('no snackbar names an action id or an asset id (PRODUCT.md rank 14, 8.3
   });
 });
 
-describe('the table, chart and logo paths say no id either (docs/FEATURES.md 7.3)', () => {
+describe('the table, chart and logo paths say no id either (docs/archive/rounds/FEATURES.md 7.3)', () => {
   for (const { file, call } of OTHER_SOURCES) {
     const calls = sayCalls(readFileSync(file, 'utf8'), call);
     const name = file.slice(file.lastIndexOf('/') + 1);

@@ -81,7 +81,7 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
     dither !== undefined;
   // a trimmed, masked or dithered picture sits in the `.shot-crop` frame
   const framed = block.trim !== undefined || block.mask !== undefined || dither !== undefined;
-  // a vector asset (docs/VECTOR.md 4.4, `vectorOf`) shows whole at the box's aspect: contain
+  // a vector asset (docs/archive/rounds/VECTOR.md 4.4, `vectorOf`) shows whole at the box's aspect: contain
   // inline, as picture.ts writes it, since the canvas rule of a shot is fill (block-css.ts)
   const shotAsset = ctx.asset?.(block.asset);
   const vector = shotAsset !== undefined && vectorOf(shotAsset) !== undefined;

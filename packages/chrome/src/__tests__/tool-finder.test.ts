@@ -27,7 +27,7 @@ describe('finderRows', () => {
   const rows = finderRows(ADVANCED);
   const plain = finderRows(DEFAULT_MENU_CONTEXT);
 
-  it('lists every command of the model outside the omitted ones and the plain containers, the menus first and the title row last (docs/POLISH.md 2.6 item 73)', () => {
+  it('lists every command of the model outside the omitted ones and the plain containers, the menus first and the title row last (docs/archive/rounds/POLISH.md 2.6 item 73)', () => {
     const all = allItems()
       .filter(isFinderItem)
       .filter((item) => isPresent(item, ADVANCED));
@@ -88,7 +88,7 @@ describe('toolFinderEntries', () => {
     let ran: string | null = null;
     let picked: string | null = null;
     /* the run is asserted with the switch on; the default list is asserted without a parked row
-       below (Special characters, a chosen departure of docs/RETURN.md section 8; File > Details
+       below (Special characters, a chosen departure of docs/archive/rounds/RETURN.md section 8; File > Details
        returned to the default view, RETURN.md 2.17) */
     const entries = toolFinderEntries(
       document,
@@ -138,7 +138,7 @@ describe('toolFinderEntries', () => {
   });
 });
 
-describe('the seller’s words and the Ask row (docs/PRODUCT.md 6.1; audit-assist 8)', () => {
+describe('the seller’s words and the Ask row (docs/archive/rounds/PRODUCT.md 6.1; audit-assist 8)', () => {
   it('lists Skip slide for "hide slide", Find and replace for "rename the customer" and Replace image for "logo"', () => {
     const entries = toolFinderEntries(
       document,
@@ -181,7 +181,7 @@ describe('the seller’s words and the Ask row (docs/PRODUCT.md 6.1; audit-assis
     /* an empty phrase or no handler never does */
     expect(askEntry(entries, '', DEFAULT_MENU_CONTEXT, ask)).toBeNull();
     expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, undefined)).toBeNull();
-    /* no Ask row without a model (docs/POLISH.md 2.9 item 113) */
+    /* no Ask row without a model (docs/archive/rounds/POLISH.md 2.9 item 113) */
     expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask, 'unconfigured')).toBeNull();
     expect(askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask, 'off')).toBeNull();
     const row = askEntry(entries, 'add a video', DEFAULT_MENU_CONTEXT, ask);

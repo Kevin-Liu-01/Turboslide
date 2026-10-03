@@ -101,7 +101,7 @@ type Flags = {
   sub?: true;
   color?: Color;
   hl?: Color;
-  /** the run's own size in px (docs/POLISH.md 2.3 item 16) */
+  /** the run's own size in px (docs/archive/rounds/POLISH.md 2.3 item 16) */
   size?: number;
 };
 
@@ -202,7 +202,7 @@ function walk(node: RunNode, flags: Flags, out: Run[]): void {
       const parsed = colorFromCss(background);
       if (parsed !== null) next.hl = parsed;
     }
-    /* a run's own size (docs/POLISH.md 2.3 item 16): the renderer draws it as an inline font size
+    /* a run's own size (docs/archive/rounds/POLISH.md 2.3 item 16): the renderer draws it as an inline font size
        on the span, and the walk reads it back so a session keeps it */
     const fontSize = /(?:^|;)\s*font-size\s*:\s*(\d+)px/i.exec(styleAttr)?.[1];
     if (fontSize !== undefined && name === 'SPAN') next.size = Number(fontSize);
@@ -378,7 +378,7 @@ export function textDiff(from: string, to: string): { start: number; end: number
  * disagreed in their marks (VERIFICATION.md "Product round, pass 1" finding 5). A markup change
  * with no flag behind it (a canonical form the reducer will settle) is the whole value write of
  * 0.4. The text of a title or statement slide is a field and travels as a text run too since the
- * sync round (docs/SYNC.md 3.4; audit-ordering item 1): `blockId` names the field and `path` is
+ * sync round (docs/archive/rounds/SYNC.md 3.4; audit-ordering item 1): `blockId` names the field and `path` is
  * the field's own pointer (`slideFieldPath`, schema mutations.ts), so two people typing into one
  * cover are transformed past each other on both sides instead of the last whole value winning,
  * and the deck's title follows the heading in the reducer instead of riding every burst. Empty
@@ -513,7 +513,7 @@ export function sessionPressVerdict(input: {
   insideRun: boolean;
   under: string | null;
   blockId: string;
-  /** the press landed on another run of the edited block (another cell of the table): the session ends and the press opens that cell (docs/POLISH.md 2.2 item 4) */
+  /** the press landed on another run of the edited block (another cell of the table): the session ends and the press opens that cell (docs/archive/rounds/POLISH.md 2.2 item 4) */
   otherRun?: boolean;
 }): SessionPressVerdict {
   if (input.insideRun) return 'caret';
@@ -621,7 +621,7 @@ export function sessionContextTarget(input: {
  * shell's `text.style` fell back to the whole text ("[Renewal terms apply]{i}", audit-text row
  * 28). Parked, the session keeps its range and the Italic marks the word. A field anywhere (the
  * font size box, a dialog's input) still ends the session. The menu bar parked no session in the
- * focus round, so a Format > Text row on a selected word marked the whole box (docs/RETURN.md 2.14
+ * focus round, so a Format > Text row on a selected word marked the whole box (docs/archive/rounds/RETURN.md 2.14
  * item 2; audit-formatting rows 20, 29, 31: "[Onboarding plan for Acme in three phases]{sup}" for
  * a double clicked "Acme"); the rule the toolbar had reaches the menus, so the Format rows act on
  * the parked range like the buttons and the chords, and the Align and spacing lists of the tails
@@ -635,7 +635,7 @@ export const CHROME_TRANSIENT_SELECTOR =
 
 /**
  * A chrome field that acts on the session's range and hands the focus back when it is done (the
- * toolbar's size field: docs/POLISH.md 2.3 item 16): the session parks while it holds the focus
+ * toolbar's size field: docs/archive/rounds/POLISH.md 2.3 item 16): the session parks while it holds the focus
  * instead of ending, so the typed value lands on the selected run as a mark, and the run takes
  * the focus and its range back when the field blurs (Enter or Escape). Marked by the field itself.
  */
@@ -1433,7 +1433,7 @@ export function editableHtml(text: Markup, multiline: boolean): string {
 /** Where the caret lands on mount: at the client point of the click, at the start, at the end, or over everything. */
 /**
  * Where a session's caret lands: a point (the caret there; with `word` the word at the point is
- * selected, so typing replaces it, docs/POLISH.md 2.4 item 30), the start, the end, or everything.
+ * selected, so typing replaces it, docs/archive/rounds/POLISH.md 2.4 item 30), the start, the end, or everything.
  */
 export type CaretPlacement = { x: number; y: number; word?: boolean } | 'start' | 'end' | 'all';
 
@@ -1536,7 +1536,7 @@ function plainOf(text: Markup): string {
     .join('\n');
 }
 
-/** The four arrows as the direction a cell session leaves in (docs/FEATURES.md 2.2 rank 5). */
+/** The four arrows as the direction a cell session leaves in (docs/archive/rounds/FEATURES.md 2.2 rank 5). */
 export type CellArrow = 'left' | 'right' | 'up' | 'down';
 
 /** The plain offsets of the selection and the text's length, for the edge tests below. */
@@ -1579,7 +1579,7 @@ function caretRect(): DOMRect | null {
 }
 
 /**
- * Whether an arrow pressed in a cell leaves it (docs/FEATURES.md 2.2 rank 5; audit-objects 6:
+ * Whether an arrow pressed in a cell leaves it (docs/archive/rounds/FEATURES.md 2.2 rank 5; audit-objects 6:
  * Google, Notion, Pitch and Keynote all cross cells with the arrows). A plain arrow crosses from a
  * collapsed caret at the text's edge: Right when the caret is at the text's end, Left when it is
  * at the start, Up when it sits on the first visual line and Down when it sits on the last, read
@@ -1634,7 +1634,7 @@ export type InlineTextEndReason =
   /** Enter on an empty list item: the item leaves the list (SPEC-2 6.2 Lists) */
   | 'list-leave'
   /**
-   * an arrow at a cell's text edge (docs/FEATURES.md 2.2 rank 5, `cellArrows`): the Editor opens
+   * an arrow at a cell's text edge (docs/archive/rounds/FEATURES.md 2.2 rank 5, `cellArrows`): the Editor opens
    * the adjacent cell with the caret at the matching edge; with Shift (`range-*`) it selects the
    * cells from this one to the adjacent one instead
    */
@@ -1663,7 +1663,7 @@ export const SLIDE_LINK_POSITIONS: ReadonlyArray<{ value: SlideLinkKeyword; labe
 ];
 
 /**
- * The link the popover writes from its two controls (docs/PRODUCT.md section 2 rank 19): a slide
+ * The link the popover writes from its two controls (docs/archive/rounds/PRODUCT.md section 2 rank 19): a slide
  * picked in Slides in this presentation wins as a slide link (`#s/<id>`, `#next`); else the URL
  * field's address completed the way `normalizeLinkInput` does; an empty field with no slide is no
  * link (null), which the Apply button reads as Remove. Pure, so link-popover.test.ts pins it.
@@ -1685,7 +1685,7 @@ export function popoverSlideOf(link: string | null): string {
 
 /**
  * True when the extended selection of a Home or End key should stop at the visual line and not
- * the document (docs/PRODUCT.md section 2 rank 18; audit-seller 18): on macOS the browser reads
+ * the document (docs/archive/rounds/PRODUCT.md section 2 rank 18; audit-seller 18): on macOS the browser reads
  * Home as the start of the whole editable, so Shift+Home took three lines where Google Slides and
  * every text field take the line. The session moves the selection to the line boundary itself
  * through `Selection.modify` for the four keys.
@@ -1706,7 +1706,7 @@ export type InlineTextProps = {
   element: HTMLElement;
   /** the run's box in sheet pixels, for the link popover's place */
   box: Box;
-  /** the edited block's box in sheet px, when the run's box is smaller (a padded text box): the link bar sits under it (docs/POLISH.md 2.6 item 70) */
+  /** the edited block's box in sheet px, when the run's box is smaller (a padded text box): the link bar sits under it (docs/archive/rounds/POLISH.md 2.6 item 70) */
   blockBox?: Box | null;
   /** the stage scale */
   k: number;
@@ -1717,13 +1717,13 @@ export type InlineTextProps = {
   /** open the link popover once the session is up (Cmd K on a selected block) */
   autoLink?: boolean;
   /**
-   * the run is a table cell (docs/FEATURES.md 2.2 rank 5): an arrow at the text's edge ends the
+   * the run is a table cell (docs/archive/rounds/FEATURES.md 2.2 rank 5): an arrow at the text's edge ends the
    * session with its `arrow-*` reason (`range-*` with Shift) so the Editor crosses into the
    * adjacent cell; off for every other run, where the arrows stay the browser's
    */
   cellArrows?: boolean;
   /**
-   * the deck's slides in order, for the popover's Slides in this presentation select (docs/PRODUCT.md
+   * the deck's slides in order, for the popover's Slides in this presentation select (docs/archive/rounds/PRODUCT.md
    * section 2 rank 19); the popover offers the four positions alone when absent
    */
   slideTargets?: ReadonlyArray<SlideTarget>;
@@ -1742,7 +1742,7 @@ export type InlineTextProps = {
   /**
    * the clipboard's plain text before the session inserts it: true when the Editor took the
    * whole paste itself (a spreadsheet's rows into a table cell spread over the grid,
-   * docs/FEATURES.md 2.3 item 5) and the session inserts nothing; the session may have ended
+   * docs/archive/rounds/FEATURES.md 2.3 item 5) and the session inserts nothing; the session may have ended
    * inside the call
    */
   onPaste?: (text: string) => boolean;
@@ -1827,7 +1827,7 @@ export function InlineText({
   /* the range carries a link already: the popover shows Remove */
   const [linkExisting, setLinkExisting] = useState(false);
   /* the chip under a linked word the caret sits in: its address, with Change and Remove
-     (docs/PRODUCT.md section 2 rank 19) */
+     (docs/archive/rounds/PRODUCT.md section 2 rank 19) */
   const [chipHref, setChipHref] = useState<string | null>(null);
   const linkOpenRef = useRef(false);
   linkOpenRef.current = linkOpen;
@@ -2194,7 +2194,7 @@ export function InlineText({
   };
 
   /**
-   * Link detection (docs/PRODUCT.md section 2 rank 9; Google's Tools > Preferences > Link
+   * Link detection (docs/archive/rounds/PRODUCT.md section 2 rank 9; Google's Tools > Preferences > Link
    * detection): the token typed before the caret becomes a link as the space or the Enter lands,
    * when it reads as a web or mail address (marks.ts detectLinkBefore) and carries no link yet.
    * The typed letters go first as their own burst, then the link travels as a marks only write
@@ -2333,7 +2333,7 @@ export function InlineText({
     if (runKeyNow !== null) noteSessionCaret(runKeyNow, writeCaret);
     // the prompt of an empty placeholder is not content: it leaves for the session (SPEC 5.4); a
     // caption keeps its wording as the open field's placeholder while the field is empty, since
-    // Add a caption opens the field at once (docs/PRODUCT.md section 2 rank 10; Editor.css)
+    // Add a caption opens the field at once (docs/archive/rounds/PRODUCT.md section 2 rank 10; Editor.css)
     const prompts = [...element.querySelectorAll<HTMLElement>('[data-prompt]')];
     if (element.tagName === 'FIGCAPTION' && prompts[0] !== undefined)
       element.dataset.placeholder = prompts[0].textContent ?? '';
@@ -2396,7 +2396,7 @@ export function InlineText({
           e.key === 'ArrowUp' ||
           e.key === 'ArrowDown')
       ) {
-        /* an arrow at the cell's text edge leaves the cell (docs/FEATURES.md 2.2 rank 5): the
+        /* an arrow at the cell's text edge leaves the cell (docs/archive/rounds/FEATURES.md 2.2 rank 5): the
            Editor opens the adjacent cell at the matching edge, or with Shift selects the cells
            between; anywhere else the arrow moves the caret as the browser does */
         const arrow = e.key.slice(5).toLowerCase() as CellArrow;
@@ -2410,7 +2410,7 @@ export function InlineText({
         e.preventDefault();
         e.stopPropagation();
         /* Tab in a list item raises its level wherever the caret sits, Shift Tab lowers it
-           (SPEC-2 6.2; docs/POLISH.md 2.3 item 15): Google nests the item from any caret
+           (SPEC-2 6.2; docs/archive/rounds/POLISH.md 2.3 item 15): Google nests the item from any caret
            position, and a Tab after "Two" that ended the session left the next words after "One" */
         if (callbacks.current.onListLevel?.(e.shiftKey ? -1 : 1) === true) return;
         finish(e.shiftKey ? 'shift-tab' : 'tab');
@@ -2573,7 +2573,7 @@ export function InlineText({
      * picked and its plate unmounted) or came back to the button or title a closing plate returns
      * it to (Escape on a menu): the parked session takes the focus back with its range on the next
      * tick, so the next keystroke lands in the text as after a toolbar button's click and as Google
-     * Slides continues at the caret after a Format menu pick (docs/RETURN.md 2.14 item 2). Nothing
+     * Slides continues at the caret after a Format menu pick (docs/archive/rounds/RETURN.md 2.14 item 2). Nothing
      * moves while a plate or menu is still open, while a pointer button is down (the press that
      * opens one), when a field or a dialog took the focus, or when the pick armed a draw tool or
      * Paint format on the stage (`data-tool`, `data-paint`): the press that places the box must
@@ -2663,7 +2663,7 @@ export function InlineText({
       // pointer and a space elsewhere (SPEC 4.2; gslides-parity SPEC 7.4)
       e.preventDefault();
       const raw = e.clipboardData?.getData('text/plain') ?? '';
-      /* the Editor takes a spreadsheet's rows whole (a table cell, docs/FEATURES.md 2.3 item 5)
+      /* the Editor takes a spreadsheet's rows whole (a table cell, docs/archive/rounds/FEATURES.md 2.3 item 5)
          and may end this session doing so; the event goes no further, or the stage's own paste
          listener would read the same rows against a stage with no session and make a table */
       if (callbacks.current.onPaste?.(raw) === true) {
@@ -2710,7 +2710,7 @@ export function InlineText({
   }, [element]);
 
   /**
-   * The popover's write (docs/FOCUS.md rank 2; docs/PRODUCT.md section 2 rank 19): the link goes
+   * The popover's write (docs/FOCUS.md rank 2; docs/archive/rounds/PRODUCT.md section 2 rank 19): the link goes
    * on the run model over the range `openLink` captured (a link mark through `linkRange`), the
    * editable is rewritten from the canonical runs with that range selected again, and the next
    * burst carries it as `text.mark` of the range in plain offsets, which the store resolves
@@ -2780,7 +2780,7 @@ export function InlineText({
     }, 0);
   };
 
-  /* under the selection's box and inside the viewport (docs/POLISH.md 2.6 item 70; audit-chrome
+  /* under the selection's box and inside the viewport (docs/archive/rounds/POLISH.md 2.6 item 70; audit-chrome
      item 22 read the bar at the page's corner): above the box only when the viewport ends first */
   const place = (height: number, width = 560) => {
     const stage = element.closest('.ts-stagewrap')?.getBoundingClientRect();

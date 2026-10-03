@@ -16,7 +16,7 @@ export type EditorWriter = {
 };
 
 /**
- * The label a component shows for an author: "Assistant" for an agent (docs/PRODUCT.md 6.1; the
+ * The label a component shows for an author: "Assistant" for an agent (docs/archive/rounds/PRODUCT.md 6.1; the
  * run id stays in a tooltip through `authorRunId`), the name for a person. Before the product
  * round this read `agent:<runId>`, the developer's word, on every seller surface (audit-assist 15).
  */

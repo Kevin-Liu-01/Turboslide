@@ -134,7 +134,7 @@ const noAuth = {
 };
 
 describe('the export job record', () => {
-  it('is written with its immutable copy first and read through the proof, so a stale body never answers (docs/SYNC.md 3.5, invariant 8)', async () => {
+  it('is written with its immutable copy first and read through the proof, so a stale body never answers (docs/archive/rounds/SYNC.md 3.5, invariant 8)', async () => {
     const { client, fake } = stored();
     const queued = queuedExportJob(JOB, 'q4-review', 'pptx', NOW);
     expect(await writeExportJob(client, queued)).toBe(true);
@@ -274,7 +274,7 @@ describe('the export job record', () => {
     await writeExportJob(client, queuedExportJob(old, 'q4-review', 'pptx', NOW));
     await writeExportJob(client, queuedExportJob(fresh, 'q4-review', 'pptx', NOW));
     // both uploads read three days old on this fake: both go, with the immutable copy each
-    // write stored beside its record (docs/SYNC.md 3.5; the copies age with their records)
+    // write stored beside its record (docs/archive/rounds/SYNC.md 3.5; the copies age with their records)
     expect(await pruneExportJobs(client, now)).toBe(4);
     expect(await readExportJob(client, old)).toBeNull();
     expect(await readExportJob(client, fresh)).toBeNull();
@@ -562,7 +562,7 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
   });
 });
 
-describe('the file names and the progress of the product round (docs/PRODUCT.md section 2 ranks 7, 8 and 21)', () => {
+describe('the file names and the progress of the product round (docs/archive/rounds/PRODUCT.md section 2 ranks 7, 8 and 21)', () => {
   it('reads where a PowerPoint export is off the worker’s own log lines, and the PDF’s count alone', () => {
     expect(progressOfLog([])).toBeNull();
     expect(progressOfLog(['turboslide export pptx --deck x'])).toBeNull();

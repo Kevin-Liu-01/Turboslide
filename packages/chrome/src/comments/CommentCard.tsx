@@ -176,7 +176,7 @@ function CommentRow({
         <IdentityChip identity={comment.author} size={24} />
         <span className="ts-comment-who">
           <span className="ts-comment-name">{nameOf(comment.author)}</span>
-          {/* the badge for a verified author, the guest word for a typed name (docs/PEOPLE.md 3.7) */}
+          {/* the badge for a verified author, the guest word for a typed name (docs/archive/rounds/PEOPLE.md 3.7) */}
           {trustMarkOf(comment.author) !== null ? (
             <TrustMark identity={comment.author} className="ts-comment-badge" />
           ) : trust !== null ? (
@@ -445,7 +445,7 @@ export function CommentCard({
     if (!thread) return;
     if (resolved) run(comments.reopen?.(thread.id)?.then(() => setSettled('open')));
     else {
-      /* a resolve closes the card and says so with Undo (docs/POLISH.md item 98; audit-pages
+      /* a resolve closes the card and says so with Undo (docs/archive/rounds/POLISH.md item 98; audit-pages
          item 42: the tick turned into an arrow and the card stayed open with no word) */
       const settle =
         assigned && comments.done ? comments.done(thread.id) : comments.resolve?.(thread.id);

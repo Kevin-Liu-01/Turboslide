@@ -12,7 +12,7 @@ import { VersionsPanel } from '../VersionsPanel';
 // integrator's fixer, cycle 3 stream fix round two, check step 26): the two delete rows of a
 // version's More menu are Later stubs, so the panel draws them only in a context where Tools >
 // Advanced tools is on. `file.versionHistory.showChanges` was parked with `advanced: true`,
-// returned in the return round (docs/RETURN.md 2.17) and re-parked from that round's runs: its row
+// returned in the return round (docs/archive/rounds/RETURN.md 2.17) and re-parked from that round's runs: its row
 // versions.show-changes-marks carries `parks` and read 0 change marks on the memory tier and on the
 // enforce preview (return/build/integrator.md section 6), so the Show changes row is drawn with the
 // switch on alone. Every other row of the panel is the same in both.
@@ -71,7 +71,7 @@ describe('the Version history panel under Tools > Advanced tools', () => {
     expect(control('versionHistory.showChanges.row')).toBeNull();
     expect(control('versionHistory.namedOnly'), 'Only named is not parked').not.toBeNull();
     openMore(1);
-    /* Restore this version leads the menu since the people round (docs/PEOPLE.md 3.19) */
+    /* Restore this version leads the menu since the people round (docs/archive/rounds/PEOPLE.md 3.19) */
     expect(menuRows()).toEqual(['version.restore', 'version.name', 'version.copy']);
   });
 
@@ -101,7 +101,7 @@ describe('the Version history panel under Tools > Advanced tools', () => {
     mount(undefined);
     expect(control('versionHistory.showChanges')).toBeNull();
     openMore(1);
-    /* Restore this version leads the menu since the people round (docs/PEOPLE.md 3.19) */
+    /* Restore this version leads the menu since the people round (docs/archive/rounds/PEOPLE.md 3.19) */
     expect(menuRows()).toEqual(['version.restore', 'version.name', 'version.copy']);
   });
 });

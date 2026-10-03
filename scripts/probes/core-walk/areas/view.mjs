@@ -1,4 +1,4 @@
-// The View menu rows (docs/RETURN.md 2.16, section 5 `view.*` with the driver `probe --core`):
+// The View menu rows (docs/archive/rounds/RETURN.md 2.16, section 5 `view.*` with the driver `probe --core`):
 // Appearance (under Tools > Preferences since Round 1, docs/NEXT.md 4.1.3 item 20), Show filmstrip, the three modes and the toolbar in Viewing, Full screen, the Hide
 // the menus chevron, the Live pointers toggles, the Comments radios, Show all comments and the
 // four display modes on a deck with two comments. The second browser's pointer is
@@ -49,7 +49,7 @@ export async function run(t) {
       if (!r.present)
         return { ok: false, observed: 'Tools > Preferences > Appearance is not reachable' };
       /* the presentation's own appearance is the stage's data-theme since the polish round
-         (docs/POLISH.md 2.5 item 49: the sheet keeps it whatever the chrome's theme); the
+         (docs/archive/rounds/POLISH.md 2.5 item 49: the sheet keeps it whatever the chrome's theme); the
          describe state's theme is the chrome's */
       const deck =
         (await page.evaluate(

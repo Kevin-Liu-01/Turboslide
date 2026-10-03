@@ -1,4 +1,4 @@
-// The pure rules of stage-rules.ts (the return round, docs/RETURN.md section 6, B3 objects): the
+// The pure rules of stage-rules.ts (the return round, docs/archive/rounds/RETURN.md section 6, B3 objects): the
 // guide a press at a crossing drags, who owns a Tab, and the draw readout.
 import { describe, expect, it } from 'vitest';
 

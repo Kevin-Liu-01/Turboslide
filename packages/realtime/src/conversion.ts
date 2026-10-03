@@ -7,7 +7,7 @@
 // `transformEntry` calls them and re-exports them.
 //
 // A cover's title is a slide field while the slide is a title slide: its text ops name the field
-// (`blockId` `heading`, `path` `/heading`, docs/SYNC.md 3.4). When the title wraps, each tab's
+// (`blockId` `heading`, `path` `/heading`, docs/archive/rounds/SYNC.md 3.4). When the title wraps, each tab's
 // Escape writes the shrunk size, and the size write converts the cover to a canvas first
 // (apps/studio convert-first.ts): the entry is `slide.replace` with the tab's own copy of the
 // cover as a canvas, then the tab's unsent words retargeted to the canvas's `heading` block

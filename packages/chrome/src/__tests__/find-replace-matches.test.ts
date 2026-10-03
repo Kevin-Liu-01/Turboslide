@@ -7,7 +7,7 @@ import { slideOrder } from '@turboslide/schema/deck';
 import { deckMatches } from '../dialogs/FindReplace';
 import { openingCollapsed, readCollapsedSections, writeCollapsedSections } from '../FormatOptions';
 
-// Find and replace's match list (docs/PRODUCT.md section 5; audit-gaps 21) and the Format options
+// Find and replace's match list (docs/archive/rounds/PRODUCT.md section 5; audit-gaps 21) and the Format options
 // panel's remembered sections (PRODUCT.md 3.2; audit-interface 15). Pure over the document.
 
 describe('deckMatches', () => {

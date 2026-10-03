@@ -1,4 +1,4 @@
-// The frame assets' prune (docs/FEATURES.md 5.5, 7.3): `pruneFrameAssets` removes an unreferenced
+// The frame assets' prune (docs/archive/rounds/FEATURES.md 5.5, 7.3): `pruneFrameAssets` removes an unreferenced
 // material asset older than the grace and keeps a referenced one, a younger one and every non
 // material asset; the frame asset id is `frame-<16 hex of frameKey>`; the superseded frame rule
 // names the block's previous frame when nothing else holds it.

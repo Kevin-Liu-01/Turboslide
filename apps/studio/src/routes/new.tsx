@@ -71,7 +71,7 @@ import { installHashGuard } from './-hash-guard';
 /** The author of a browser session when ?author= is absent (editor/EditorRoot.tsx DEFAULT_AUTHOR). */
 const DEFAULT_AUTHOR = 'studio';
 
-/** The skeleton of a one slide draft (docs/PRODUCT.md 3.5): one filmstrip frame, the paper plate. */
+/** The skeleton of a one slide draft (docs/archive/rounds/PRODUCT.md 3.5): one filmstrip frame, the paper plate. */
 function NewSkeleton() {
   return <EditorSkeleton frames={1} />;
 }
@@ -81,7 +81,7 @@ export const Route = createFileRoute('/new')({
   validateSearch: validateEditSearch,
   // first paint carries the editor's rows and columns while the loader answers (SPEC-3 9.2 E1);
   // under 'data-only' the skeleton is the server's markup for the route (SPEC-4 0.34); one frame
-  // for the one slide draft (docs/PRODUCT.md 3.5; audit-interface 30)
+  // for the one slide draft (docs/archive/rounds/PRODUCT.md 3.5; audit-interface 30)
   pendingComponent: NewSkeleton,
   pendingMs: 0,
   pendingMinMs: 0,

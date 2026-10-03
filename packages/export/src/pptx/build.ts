@@ -8,11 +8,11 @@
 // travels in the encoding the page raster policy picks (page-raster.ts) and its decoded mismatch
 // is the report's `page.fraction`. The pptxgenjs buffer then goes through the OOXML post-process:
 // the repair-risk strip (kern, empty ext lists), the shape rewrites, the vector of every svg
-// picture and logo (`asvg:svgBlip` beside the PNG blip, docs/VECTOR.md 4.6, unless `svgVector` is
+// picture and logo (`asvg:svgBlip` beside the PNG blip, docs/archive/rounds/VECTOR.md 4.6, unless `svgVector` is
 // false), row groups, the slide name and the hidden title placeholder per slide, the content
 // types clean, the app.xml titles, embedded fonts (native mode under `embedFonts` only), stored
 // media, and the package validation the report fails on. Since the features round's ship two a
-// shader block's frame travels as its own picture in both modes (docs/FEATURES.md 5.5;
+// shader block's frame travels as its own picture in both modes (docs/archive/rounds/FEATURES.md 5.5;
 // audit-shaders 9): the frame file (the long side 3200) at the block's box, named
 // `ts:<slide>#<block>` with the recipe in `descr`, over the sheet raster in Perfect the way the
 // kit's picture logos sit, over the block's own 2x raster in Editable text; a shader whose frame
@@ -104,7 +104,7 @@ export type BuildOptions = {
   tableFallback?: ReadonlySet<string>;
   /**
    * Write the vector of every svg picture and logo as `asvg:svgBlip` beside its PNG blip
-   * (docs/VECTOR.md 4.6); on by default. `false` writes the PNG blip alone, which the parked
+   * (docs/archive/rounds/VECTOR.md 4.6); on by default. `false` writes the PNG blip alone, which the parked
    * control `export.svg.vector` selects.
    */
   svgVector?: boolean;
@@ -134,7 +134,7 @@ export type RoundTwoCounts = {
   avLst: number;
   /** Shapes and text boxes whose block's alt text was written as `descr` (SPEC-2 2.5.6). */
   altTexts: number;
-  /** Pictures carrying `asvg:svgBlip` beside their PNG blip (docs/VECTOR.md 4.6). */
+  /** Pictures carrying `asvg:svgBlip` beside their PNG blip (docs/archive/rounds/VECTOR.md 4.6). */
   svgBlips: number;
 };
 
@@ -410,14 +410,14 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         );
       }
       // the brand kit's picture logos over the sheet raster at their boxes, the 3x shots the
-      // extractor took of them (docs/FEATURES.md 4.8, row logos.export.pdf-pptx-crisp): the sheet
+      // extractor took of them (docs/archive/rounds/FEATURES.md 4.8, row logos.export.pdf-pptx-crisp): the sheet
       // raster draws them at 2x, and this object is the crisp one under zoom, the way the GT
       // wordmark's PNG sits on the master over the same pixels; nothing on a deck under the GT mark
       for (const raster of scene.rasters) {
         if (!KIT_LOGO_BLOCK_IDS.has(raster.blockId) || raster.file === undefined) continue;
         if (existsSync(raster.file) && addRaster(slide, raster, namePrefix)) noteVector(raster);
       }
-      // the shader frames over the sheet raster at their boxes (docs/FEATURES.md 5.5): the sheet
+      // the shader frames over the sheet raster at their boxes (docs/archive/rounds/FEATURES.md 5.5): the sheet
       // draws them at 2x, and this object is the frame's own pixels, the long side 3200
       addShaderFrames(slide, scene, namePrefix, residual);
       // a linked block is an invisible hit target over its box, above the cover (SPEC 7.2.7)
@@ -640,7 +640,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           noteVector(raster);
         else warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
       }
-      // the shader frames over the blocks' own rasters (docs/FEATURES.md 5.5): the picture the
+      // the shader frames over the blocks' own rasters (docs/archive/rounds/FEATURES.md 5.5): the picture the
       // verifier reads as `ts:<slide>#<block>`, the long side 3200, the recipe in descr
       addShaderFrames(slide, scene, namePrefix, residual);
 
@@ -743,11 +743,11 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     );
   if (droppedEnds > 0)
     residual.add(
-      `connectors: ${droppedEnds} attachment end(s) left unattached: the site index has no connection site on the target's preset (a rectangle's corner sites; docs/VECTOR.md 2.5); the connector keeps its drawn ends`,
+      `connectors: ${droppedEnds} attachment end(s) left unattached: the site index has no connection site on the target's preset (a rectangle's corner sites; docs/archive/rounds/VECTOR.md 2.5); the connector keeps its drawn ends`,
     );
   if (counts.svgBlips > 0)
     residual.add(
-      `svg: ${counts.svgBlips} picture(s) carry asvg:svgBlip beside the PNG blip (docs/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback`,
+      `svg: ${counts.svgBlips} picture(s) carry asvg:svgBlip beside the PNG blip (docs/archive/rounds/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback`,
     );
   if (vectorsLeftOut > 0)
     residual.add(`svg: ${vectorsLeftOut} vector picture(s) travel as PNG alone (svgVector false)`);
@@ -843,7 +843,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
 
 /** The families a font set names for the deck's ladder, for the report when nothing was rendered. */
 /**
- * The shader frames of a scene as pictures at their boxes (docs/FEATURES.md 5.5): the frame file
+ * The shader frames of a scene as pictures at their boxes (docs/archive/rounds/FEATURES.md 5.5): the frame file
  * itself, the long side 3200, named `ts:<slide>#<block>` (no rid suffix: the verifier and the row
  * read the block's name), the recipe as the picture's `descr`, opaque. A shader with no frame on
  * disk or no measured box is left to the sheet or the block raster and the report's row.
@@ -872,7 +872,7 @@ export function addShaderFrames(
     placed.push(shader);
     const size = shader.size === undefined ? '' : ` (${shader.size[0]} by ${shader.size[1]})`;
     residual.add(
-      `shader: ${scene.slideId}#${shader.blockId} travels as its frame${size} at the block's box with the recipe in descr${shader.stale ? '; the frame predates its recipe and is drawn as it is' : ''} (docs/FEATURES.md 5.5)`,
+      `shader: ${scene.slideId}#${shader.blockId} travels as its frame${size} at the block's box with the recipe in descr${shader.stale ? '; the frame predates its recipe and is drawn as it is' : ''} (docs/archive/rounds/FEATURES.md 5.5)`,
     );
   }
   return placed;

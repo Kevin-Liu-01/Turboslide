@@ -10,7 +10,7 @@ import { markChangedWords } from '../panels/assist-model';
 import { ASSIST } from '../panels/assist-strings';
 import { hideTooltip } from '../Tooltip';
 
-// The Assist panel (docs/PRODUCT.md 6.1): the first line, the three starters with a slide
+// The Assist panel (docs/archive/rounds/PRODUCT.md 6.1): the first line, the three starters with a slide
 // selected, a card with the before and after and its three buttons, Accept through the dispatch
 // with the snackbar's Undo, the fallback sentence, the viewer's disabled sentence and the kill
 // switch's sentence. The dispatch is the shell's; the controller's handlers are asserted in
@@ -85,7 +85,7 @@ describe('AssistPanel', () => {
     const { dispatch, onTailor } = mount();
     expect(control('panel.assist')).not.toBeNull();
     expect(control('panel.assist.firstLine')?.textContent).toBe(ASSIST.firstLine);
-    /* the note sits after the composer (docs/POLISH.md 2.9 item 118) */
+    /* the note sits after the composer (docs/archive/rounds/POLISH.md 2.9 item 118) */
     const composer = control('panel.assist.prompt')?.closest('.ts-assist-composer');
     expect(composer?.nextElementSibling?.getAttribute('data-control')).toBe(
       'panel.assist.firstLine',
@@ -115,7 +115,7 @@ describe('AssistPanel', () => {
     });
     expect(control('panel.assist.card.1')).not.toBeNull();
     expect(control('panel.assist.card.1')?.textContent).toContain(CARD.sentence);
-    /* the starters stay after the answer, after the log (docs/POLISH.md 2.9 items 113 and 118;
+    /* the starters stay after the answer, after the log (docs/archive/rounds/POLISH.md 2.9 items 113 and 118;
        VERIFICATION.md "Polish round, pass 1" finding 13) */
     for (const id of ['tailor', 'shorter', 'notes'])
       expect(control(`panel.assist.starter.${id}`)).not.toBeNull();
@@ -185,12 +185,12 @@ describe('AssistPanel', () => {
     expect(control('panel.assist.off')?.textContent).toBe(
       'The assistant is off on this Turboslide',
     );
-    /* the polish round (docs/POLISH.md 2.9 item 113): the panel is not one sentence afterwards */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.9 item 113): the panel is not one sentence afterwards */
     expect(control('panel.assist.starter.shorter')).not.toBeNull();
     expect(control('panel.assist.prompt')).not.toBeNull();
   });
 
-  it('on a deployment with no model draws Tailor for a customer and one sentence, no model starter and no composer (docs/POLISH.md 2.9 item 113)', () => {
+  it('on a deployment with no model draws Tailor for a customer and one sentence, no model starter and no composer (docs/archive/rounds/POLISH.md 2.9 item 113)', () => {
     const { onTailor } = mount({ mode: 'unconfigured' });
     expect(control('panel.assist.unconfigured')?.textContent).toBe(ASSIST.unconfigured);
     expect(control('panel.assist.starter.tailor')).not.toBeNull();

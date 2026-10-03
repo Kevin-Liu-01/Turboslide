@@ -31,10 +31,10 @@ import './VersionsPanel.css';
  * grouped by day, newest first, and inside a day by a 15 minute window whose row shows up to four
  * author marks and the change count and expands to its records; a named record stands alone. Each
  * record carries its author's 16 px mark and trust word, or the verified badge after an account's
- * name (docs/PEOPLE.md 3.7; the round one `studio` author collapses into "Earlier edits"); "Only
+ * name (docs/archive/rounds/PEOPLE.md 3.7; the round one `studio` author collapses into "Earlier edits"); "Only
  * show named versions", "Name current version", "Restore this version" per version (the first row
  * of the version's More menu, and a button drawn on the row's hover and focus alone so the meta
- * line keeps its column, docs/PEOPLE.md 3.19), and the More menu with "Name this version", "Make
+ * line keeps its column, docs/archive/rounds/PEOPLE.md 3.19), and the More menu with "Name this version", "Make
  * a copy" (at that version, through `deck.copy { atVersion }`) and the two delete rows as disabled
  * stubs with their clause; the 40 named versions cap with a sentence naming the oldest. "Show
  * changes" is the
@@ -54,11 +54,11 @@ export type VersionsPanelProps = {
   history?: boolean;
   /** Make a copy at a version: opens the Make a copy dialog */
   onMakeCopy?: (version: Version) => void;
-  /** Name current version opens the chrome's dialog (docs/POLISH.md item 91); the inline field without it */
+  /** Name current version opens the chrome's dialog (docs/archive/rounds/POLISH.md item 91); the inline field without it */
   onNameCurrent?: () => void;
   /** the resolved identities of the records' authors, by principal id (SPEC-3 7.8) */
   identities?: Readonly<Record<string, IdentityView>>;
-  /** this browser's own identity: its rows read You (docs/PRODUCT.md 3.2; audit-interface 31) */
+  /** this browser's own identity: its rows read You (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 31) */
   me?: IdentityView;
   /** Show changes (SPEC-3 5.7): the checkbox's state and the selected version */
   showChanges?: boolean;
@@ -138,7 +138,7 @@ export function groupByDay(
 }
 
 const MORE_ITEMS: ReadonlyArray<MenuItem> = [
-  /* Restore first (docs/PEOPLE.md 2.2 default 9): the row's button is drawn on hover and focus
+  /* Restore first (docs/archive/rounds/PEOPLE.md 2.2 default 9): the row's button is drawn on hover and focus
      alone, so the menu is where a keyboard reader finds it; absent on the current version */
   {
     id: 'version.restore',
@@ -183,9 +183,9 @@ export function VersionsPanel({
 }: VersionsPanelProps) {
   /* the author's name: You for this browser's own records, the display name otherwise (3.2); an
      agent author with a name of its own reads it (the assistant's accept writes as "Assistant",
-     docs/PRODUCT.md 6.1), where the presence chips word an agent by its run (nameOf) */
+     docs/archive/rounds/PRODUCT.md 6.1), where the presence chips word an agent by its run (nameOf) */
   const authorWord = (identity: IdentityView): string => {
-    /* the reader's own row by either of their ids (docs/PEOPLE.md 3.17; build/b5.md R9): a
+    /* the reader's own row by either of their ids (docs/archive/rounds/PEOPLE.md 3.17; build/b5.md R9): a
        record written before the sign in carries the anonymous id, which the payload's view
        resolves to the account (accountId), and the reader may be either id */
     if (
@@ -207,7 +207,7 @@ export function VersionsPanel({
   const [more, setMore] = useState<{ version: Version; anchor: HTMLElement } | null>(null);
   const [naming, setNaming] = useState<{ version: Version; value: string } | null>(null);
   /* the windows the seller opened, and the ones the seller folded: the newest window is open by
-     default (docs/POLISH.md item 91; the polish round's verifier read a collapsed group with a
+     default (docs/archive/rounds/POLISH.md item 91; the polish round's verifier read a collapsed group with a
      chevron where Google shows the versions open), the older ones fold until clicked */
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [closed, setClosed] = useState<Set<string>>(new Set());
@@ -367,9 +367,9 @@ export function VersionsPanel({
               {trust !== null && authorWord(identity) !== 'You' ? ` · ${trust}` : ''}
             </span>
             <TrustMark identity={identity} />
-            {/* a named row's meta carries its time and author (docs/POLISH.md item 91); the count
+            {/* a named row's meta carries its time and author (docs/archive/rounds/POLISH.md item 91); the count
                 stays on the rows every edit writes, and a row with no edits reads named
-                (docs/PEOPLE.md 3.11) */}
+                (docs/archive/rounds/PEOPLE.md 3.11) */}
             {version.mutations.length === 0
               ? ' · named'
               : version.note === ''

@@ -283,7 +283,7 @@ export function colorFromCss(css: string): Color | null {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Link detection and the address word (docs/PRODUCT.md section 2 rank 9; audit-seller 9)
+// Link detection and the address word (docs/archive/rounds/PRODUCT.md section 2 rank 9; audit-seller 9)
 
 /** The characters a web or mail address may hold once it is typed as one token. */
 const ADDRESS_CHAR = /[\p{L}\p{N}_\-.@:/+%~#?&=]/u;

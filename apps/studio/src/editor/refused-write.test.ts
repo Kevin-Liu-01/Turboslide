@@ -1,4 +1,4 @@
-// A refused write's one sentence (docs/POLISH.md item 102; the row sync.reject.sentence-below-
+// A refused write's one sentence (docs/archive/rounds/POLISH.md item 102; the row sync.reject.sentence-below-
 // toolbar and the loser of sync.structural.concurrent): a structural write reads one snackbar
 // sentence named by what it was, with no id, and the same sentence is what the write's caller is
 // thrown, so the chrome's dispatch says nothing else over it; typed text keeps the room's own

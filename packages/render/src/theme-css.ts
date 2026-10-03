@@ -1,4 +1,4 @@
-// The brand kit's override stylesheet (docs/PRODUCT.md 4.1; ported from round five's theme-css.ts
+// The brand kit's override stylesheet (docs/archive/rounds/PRODUCT.md 4.1; ported from round five's theme-css.ts
 // and re pointed at `deck.brand`): `themeCss(deck, options)` turns the record into one stylesheet
 // scoped to the sheet root that redefines the tokens the six colour roles name, the two font
 // stacks, the frame's rails, rules and crosses, and the stage's own wordmark where the
@@ -53,7 +53,7 @@ const PAPER_DERIVED_TOKENS = ['plate'] as const;
 /**
  * The CSS font stack of a catalog face: its name first, then the base sheet's fallbacks for its
  * category. One definition for the kit path here and the block path (`--ts-font-<id>`, fonts.ts):
- * `@turboslide/fonts/summary` `fontFamilyStack` (docs/FEATURES.md 3.5; audit-fonts 16, two stacks
+ * `@turboslide/fonts/summary` `fontFamilyStack` (docs/archive/rounds/FEATURES.md 3.5; audit-fonts 16, two stacks
  * for one face fell back to different faces before it loaded).
  */
 export function fontStack(id: FontId): string {
@@ -61,7 +61,7 @@ export function fontStack(id: FontId): string {
 }
 
 /**
- * The value of `--display-features` for a display face (docs/FEATURES.md 3.1 item 5): Inter's
+ * The value of `--display-features` for a display face (docs/archive/rounds/FEATURES.md 3.1 item 5): Inter's
  * cv11 and ss01, and `normal` for every other family, whose own ss01 means something else.
  */
 export function displayFeatures(display: FontId): string {
@@ -115,7 +115,7 @@ function colourRules(kit: BrandKit, appearance: ThemeName): Rule[] {
     const value = map[role];
     if (value !== undefined) tokens.push(`--${KIT_COLOR_TOKENS[role]}: ${value}`);
   }
-  // Accent defaults to Primary (docs/PRODUCT.md 4.1): a kit that sets the key colour and not the
+  // Accent defaults to Primary (docs/archive/rounds/PRODUCT.md 4.1): a kit that sets the key colour and not the
   // second one keeps the two together, as the base theme does
   if (map.primary !== undefined && map.accent === undefined)
     tokens.push(`--accent: ${map.primary}`);

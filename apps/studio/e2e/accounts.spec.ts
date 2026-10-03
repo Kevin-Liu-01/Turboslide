@@ -51,7 +51,7 @@ import { coreTitle, isCoreId } from './core/matrix';
 // src/server/auth/. The spec works on a scratch copy of decks/fixture under decks/e2e-accounts
 // and removes what it creates; the identity database and the mail it captures are the server's.
 //
-// The people round (docs/PEOPLE.md 6.1, 6.2): the ten local rows of the matrix, each a test
+// The people round (docs/archive/rounds/PEOPLE.md 6.1, 6.2): the ten local rows of the matrix, each a test
 // titled by `coreTitle(id)` the way the core specs are, so the gate's `--only accounts` run maps
 // the report back to the rows and judges them alone. They run on a node server with an identity
 // database and captured mail (`TURBOSLIDE_AUTH_DB`, `TURBOSLIDE_MAIL=capture`; the tmp store with
@@ -75,7 +75,7 @@ const STATE_DIR = join(ROOT, '.turboslide');
 const AUTH_DB_RELATIVE = process.env.TURBOSLIDE_AUTH_DB ?? '.turboslide/auth.sqlite';
 const AUTH_DB = AUTH_DB_RELATIVE.startsWith('/') ? AUTH_DB_RELATIVE : join(ROOT, AUTH_DB_RELATIVE);
 /**
- * The server's state folder (docs/PEOPLE.md 6.2): the overlay's `.turboslide` on a tmp store
+ * The server's state folder (docs/archive/rounds/PEOPLE.md 6.2): the overlay's `.turboslide` on a tmp store
  * (`TURBOSLIDE_OVERLAY_DIR`, the round's dev server environment), else the checkout's on the file
  * store; the picture files live under `users/u/<key>/` and the seeded principals under
  * `principals/`. A tmp server started without the variable keeps its overlay under the system's
@@ -493,7 +493,7 @@ test.describe('the chrome surfaces of section 7 (B6 days 3 to 6, B2 day 4)', () 
 });
 
 // ---------------------------------------------------------------------------------------------
-// the people round's local rows (docs/PEOPLE.md 6.1, 6.2)
+// the people round's local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2)
 
 type PeopleRow = {
   clientId: string;
@@ -601,7 +601,7 @@ async function withSwitchOn<T>(p: Page, fn: () => Promise<T>): Promise<T> {
 }
 /**
  * Runs `fn` with the own chip's menu open: the chip with the switch off, else with Tools >
- * Advanced tools turned on through the product while `title.account` is parked (docs/PEOPLE.md
+ * Advanced tools turned on through the product while `title.account` is parked (docs/archive/rounds/PEOPLE.md
  * 3.14) and off again after. Answers fn's value and the route, or null when no route drew the chip.
  */
 async function withOwnMenu<T>(
@@ -631,7 +631,7 @@ async function withOwnMenu<T>(
     if (switched) await setAdvancedTools(p, false);
   }
 }
-/** Names this browser through the account menu's Change name (docs/PEOPLE.md 3.11). */
+/** Names this browser through the account menu's Change name (docs/archive/rounds/PEOPLE.md 3.11). */
 async function nameSelf(p: Page, name: string): Promise<{ named: boolean; route: string }> {
   const done = await withOwnMenu(p, async (menu) => {
     await menu.locator('[data-control="account.changeName"]').first().click();
@@ -688,7 +688,7 @@ async function openShare(p: Page): Promise<void> {
   });
 }
 /**
- * The dialog's second stage (docs/PRODUCT.md section 2 rank 3): the Add people section and the
+ * The dialog's second stage (docs/archive/rounds/PRODUCT.md section 2 rank 3): the Add people section and the
  * Permissions gear sit behind the More row (Share.tsx `more`), so a driver opens it first; the
  * mode and link role selects and the people rows are on the first stage.
  */
@@ -707,7 +707,7 @@ async function closeShare(p: Page): Promise<void> {
   else await ctl(p, 'dialog.share.close').click();
   await expect(ctl(p, 'dialog.share')).toHaveCount(0, { timeout: 5000 });
 }
-/** Names a second browser through the first Share's prompt (docs/PRODUCT.md rank 4); false when no prompt came. */
+/** Names a second browser through the first Share's prompt (docs/archive/rounds/PRODUCT.md rank 4); false when no prompt came. */
 async function nameByPrompt(p: Page, name: string): Promise<boolean> {
   let named = await setDisplayName(p, name);
   if (!named) {
@@ -1113,7 +1113,7 @@ async function closeSecond(other: BrowserContext | null, p: Page | null): Promis
   }
 }
 
-test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () => {
+test.describe('the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2)', () => {
   /* every action of these rows is bounded: a click on a control the tree does not draw fails in
      15 s with the control's name, never at the test's own timeout (the first local run held the
      invite field's click for 240 s behind the dialog's More row) */
@@ -1929,7 +1929,7 @@ test.describe('the people round: the local rows (docs/PEOPLE.md 6.1, 6.2)', () =
       expect(facts.initials).toBe(initial);
       expect(facts.label ?? '').not.toContain(NAME_A);
       expect(tip?.name ?? '').toMatch(new RegExp(`^${word} · slide \\d+$`));
-      /* the plate is not A's: it is keyed by the role word (docs/PEOPLE.md 3.27, default 6), so
+      /* the plate is not A's: it is keyed by the role word (docs/archive/rounds/PEOPLE.md 3.27, default 6), so
          its letters are the role's and never A's; its Bayer field is two bits of a hash and may
          coincide with A's initials field one time in four (the ninth local run of the
          integrator), so the letters and the field are read together */

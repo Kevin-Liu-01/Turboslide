@@ -12,7 +12,7 @@ import { cn } from '../lib/cn';
 import { tipProps } from '../Tooltip';
 
 /**
- * More fonts (gslides-parity SPEC-5-amendments A5 item 4; docs/PRODUCT.md 4.2; ported from round
+ * More fonts (gslides-parity SPEC-5-amendments A5 item 4; docs/archive/rounds/PRODUCT.md 4.2; ported from round
  * five): Google's dialog form. The left column searches the catalog and filters it by category,
  * every face drawn in itself with its licence line under the name, "SIL Open Font License 1.1"
  * or "Apache License 2.0", linked to the licence text; a click picks it. The right column, "In

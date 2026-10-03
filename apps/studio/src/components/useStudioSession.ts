@@ -28,7 +28,7 @@ import type { AnswerSessionInput, AttachSessionInput } from '../server/sessions'
  * owner changes (the Edit | View seg fires the ready event); it detaches on unmount, and a page
  * that stops polling is swept by the server after 45 s.
  *
- * The sync and costs round (docs/SYNC.md 3.10; audit-costs item 1; docs/sessions-polling.md 2.2
+ * The sync and costs round (docs/archive/rounds/SYNC.md 3.10; audit-costs item 1; docs/archive/status/sessions-polling.md 2.2
  * option a) changed three things about the poll, which was 88 percent of production's provisioned
  * memory bill as a 25 s hold on every editor, viewer and show tab:
  *
@@ -78,7 +78,7 @@ const READY_TIMEOUT_MS = 30_000;
 export const AGENT_SEARCH_KEY = 'agent';
 
 /**
- * Whether the address asks the page to attach a studio session (docs/SYNC.md 3.10, open question
+ * Whether the address asks the page to attach a studio session (docs/archive/rounds/SYNC.md 3.10, open question
  * 3's default): `?agent=1` on /deck, /present and /embed. The route validators call this and the
  * viewer routes pass the answer as the hook's `enabled`, so a seller's show costs no function
  * request after its load and `deck_goto_slide` reaches a viewer tab only when it was opened for

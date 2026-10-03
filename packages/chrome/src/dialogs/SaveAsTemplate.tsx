@@ -11,7 +11,7 @@ import { useMountEffect } from '../lib/useMountEffect';
 import { tipProps } from '../Tooltip';
 
 /**
- * File > Save as template (docs/PRODUCT.md 4.3; audit-brand 13; judge-seller addition 4): a name
+ * File > Save as template (docs/archive/rounds/PRODUCT.md 4.3; audit-brand 13; judge-seller addition 4): a name
  * prefilled with the deck's title and selected, one sentence for the gallery card, the cover slide
  * as a live clone in the deck's appearance, Save and Cancel. One `template.create { deckId, name,
  * sentence, baseRevision }` writes decks/templates/<slug of the name> from the deck with its

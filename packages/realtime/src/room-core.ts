@@ -93,7 +93,7 @@ function slideBytes(slide: Slide): number {
 /**
  * The whole Text rewrites a text op cannot survive (SPEC-3 3.5): a set of its own pointer, its
  * block's removal, its slide's replacement, and a `slide.set` of the slide field the op names
- * (docs/SYNC.md 3.4: the heading, the lead and the big text are text runs whose whole value
+ * (docs/archive/rounds/SYNC.md 3.4: the heading, the lead and the big text are text runs whose whole value
  * write is `slide.set /heading` and the like; it rewrites that field's ops alone).
  */
 function rewritesText(against: Mutation, op: Mutation): boolean {
@@ -402,7 +402,7 @@ export function roleWord(role: Role): string {
   }
 }
 
-/** The mark of a role word (docs/PEOPLE.md 3.27): a plate keyed by the role, never the person's, the room's hue kept. */
+/** The mark of a role word (docs/archive/rounds/PEOPLE.md 3.27): a plate keyed by the role, never the person's, the room's hue kept. */
 export function roleMark(role: Role, hueSlot: HueSlot | null): MarkSpec {
   const word = roleWord(role);
   const synthetic: ResolvedIdentity = {
@@ -432,7 +432,7 @@ export type ViewerFacts = {
 /**
  * What the reader's projection takes from its host (docs/CLOUDFLARE.md 3.3): the address of a
  * verified person the host resolved lately, for the entry a grant holder or the owner reads
- * (docs/PEOPLE.md 3.7). On the function it is the instance's email memory (room.ts
+ * (docs/archive/rounds/PEOPLE.md 3.7). On the function it is the instance's email memory (room.ts
  * `rememberedEmail`); in the object it is the ticket's `email` claim; a host with neither
  * answers nothing and the entry carries no address.
  */
@@ -452,7 +452,7 @@ export function rosterEntryForReader(
   deps: ReaderDeps = NO_READER_MEMORY,
 ): RosterEntry {
   const byLink = reader.via === 'link' || reader.via === 'open';
-  /* the address is never the shared entry's (docs/PEOPLE.md 3.7): whatever a stored entry
+  /* the address is never the shared entry's (docs/archive/rounds/PEOPLE.md 3.7): whatever a stored entry
      carries is dropped and the reader's own view decides below */
   const { email: _email, ...bare } = entry;
   if (!byLink || reader.showNames) {
@@ -462,13 +462,13 @@ export function rosterEntryForReader(
         : undefined;
     return email === undefined ? bare : { ...bare, email };
   }
-  /* a generated label, a typed name and an agent's name pass through (b1.md R16; docs/PRODUCT.md
+  /* a generated label, a typed name and an agent's name pass through (b1.md R16; docs/archive/rounds/PRODUCT.md
      section 2 rank 4: the typed name is what the presence chips show to collaborators, and the
      prompt's own words are "Your name, shown to collaborators"); the role word stays for a
      verified account's name while the owner's switch is off (SPEC-3 0.12) */
   if (bare.trust === 'label' || bare.trust === 'guest' || bare.trust === 'agent') return bare;
   const word = roleWord(bare.role);
-  /* the whole mark is the role's (docs/PEOPLE.md 3.27; default 6): a plate keyed by the role
+  /* the whole mark is the role's (docs/archive/rounds/PEOPLE.md 3.27; default 6): a plate keyed by the role
      word, no picture, no glyph seed of the person's, the hue kept because it is the room's grant
      and not the person's, so a visitor who later gains a grant cannot pair the plates */
   const slot = bare.hueSlot + 1;
@@ -501,7 +501,7 @@ export function stripNotes(entry: Entry): Entry | null {
 /**
  * The events one stream forwards (SPEC-3 3.3, report 10 F25): an owner and an editor receive
  * every operation; a commenter and a viewer receive operations with the notes stripped
- * (docs/SYNC.md 3.7, invariant 6: before the sync round a viewer received checkpoints alone, so
+ * (docs/archive/rounds/SYNC.md 3.7, invariant 6: before the sync round a viewer received checkpoints alone, so
  * its revision climbed while its document stood still and it read nothing without a reload,
  * audit-ordering item 2); everyone receives checkpoints, presence and the deck level notices;
  * comment entries only a reader with `readComments`.

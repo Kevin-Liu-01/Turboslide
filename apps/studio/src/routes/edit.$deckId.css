@@ -26,7 +26,7 @@
 .ts-conflict {
   position: fixed;
   left: 50%;
-  /* below the toolbar (docs/POLISH.md item 102): the title row, the menu bar and the toolbar
+  /* below the toolbar (docs/archive/rounds/POLISH.md item 102): the title row, the menu bar and the toolbar
      rows (EditorShell.css), then 16 px, so the card covers no control */
   top: calc(44px + 28px + 40px + 16px);
   transform: translateX(-50%);

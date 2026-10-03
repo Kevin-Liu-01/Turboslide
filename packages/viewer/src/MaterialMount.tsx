@@ -26,7 +26,7 @@ import { MATERIAL_PLAY_EVENT } from './dither';
  * export. The Material section's Play (`setMaterialPlay` in dither.ts) names one block whose
  * shader plays undithered for a look; any new body (an edit) stops it.
  *
- * The features round, ship two (docs/FEATURES.md 5.6; audit-shaders 15, 17): one live mount per
+ * The features round, ship two (docs/archive/rounds/FEATURES.md 5.6; audit-shaders 15, 17): one live mount per
  * stage. With `selected` handed in, the selected shader block plays and every other shader block
  * shows its frame until selected; with no shader selected, the first block with no frame yet
  * mounts at speed 0 so its plate is not empty (the label is gone, 5.5), and every other frameless
@@ -67,7 +67,7 @@ export type MaterialMountProps = {
   speed?: number;
   onError?: (error: unknown) => void;
   /**
-   * The selected block ids (docs/FEATURES.md 5.6): a selected shader plays, an unselected one with
+   * The selected block ids (docs/archive/rounds/FEATURES.md 5.6): a selected shader plays, an unselected one with
    * a frame shows the frame and mounts nothing, an unselected one without a frame mounts a still.
    * Absent, every root mounts (the behaviour before the round).
    */

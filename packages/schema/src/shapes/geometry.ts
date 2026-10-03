@@ -1,4 +1,4 @@
-// The geometry interpreter (docs/VECTOR.md 2.1; gslides-parity SPEC-2 0.57): the ECMA-376 preset
+// The geometry interpreter (docs/archive/rounds/VECTOR.md 2.1; gslides-parity SPEC-2 0.57): the ECMA-376 preset
 // definitions the tree carries (definitions.ts, generated from presetShapeDefinitions.xml)
 // evaluated at a box's size with a block's adjust values, so every preset draws its own outline
 // on the sheet, in the picker's glyph grids, in the PowerPoint and in the PDF. Pure over the
@@ -32,7 +32,7 @@ export type GeometryPath = { d: string; fill: GeometryFill; stroke: boolean };
 
 /**
  * An adjust handle evaluated at a size: its position in the box's space, the guides it moves and
- * the bounds of each, as numbers; answered and recorded, not drawn (docs/VECTOR.md section 7).
+ * the bounds of each, as numbers; answered and recorded, not drawn (docs/archive/rounds/VECTOR.md section 7).
  */
 export type AdjustHandlePoint = {
   kind: 'xy' | 'polar';
@@ -281,7 +281,7 @@ function parametric(theta: number, rx: number, ry: number): number {
  * The conversion runs in the path's space, with the radii as the file wrote them, because the
  * angles are defined there: a path with its own `w` and `h` is scaled into the box by `sx` and
  * `sy`, and a parametric angle survives that scaling while a geometric one does not (the polish
- * round, docs/POLISH.md item 25: the cloud callout's crease arcs and its closing arc drew about
+ * round, docs/archive/rounds/POLISH.md item 25: the cloud callout's crease arcs and its closing arc drew about
  * the wrong centres in every box that was not square). The centre is the current point less
  * (rx cos t₀, ry sin t₀) in the box's space, with rx = wR sx and ry = hR sy, and the end point is
  * the centre plus the same at the parametric angle of the geometric end angle `stAng + swAng`,

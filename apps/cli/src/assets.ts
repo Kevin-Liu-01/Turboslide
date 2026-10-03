@@ -118,7 +118,7 @@ export async function inlineAssetFile(
 
 /**
  * Every twin of every asset as a data URI, keyed by the twin path renderStandalone looks up, and
- * since the vector round the vector file of an svg asset beside them (docs/VECTOR.md 4.6: the
+ * since the vector round the vector file of an svg asset beside them (docs/archive/rounds/VECTOR.md 4.6: the
  * standalone page's `<img src>` is the vector file the resolver writes, inlined as image/svg+xml).
  */
 export async function inlineAssets(

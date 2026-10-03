@@ -79,7 +79,7 @@ export type ExportPptxOptions = {
   pictureScale?: PictureScale;
   /** Skip the JPEG candidate of the flatten page raster policy. */
   noJpeg?: boolean;
-  /** Write the svgBlip beside the PNG blip of every svg picture (docs/VECTOR.md 4.6); default true. */
+  /** Write the svgBlip beside the PNG blip of every svg picture (docs/archive/rounds/VECTOR.md 4.6); default true. */
   svgVector?: boolean;
   /** Write `<deckId>-both.zip` when both themes are exported; default true. */
   zip?: boolean;

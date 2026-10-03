@@ -54,7 +54,7 @@ describe('export/non-native (SPEC 7.7; MILESTONES M2 item 7)', () => {
     const contentRule = bySlide.get('content-rule');
     expect(contentRule?.evidence.text).toBe('list');
     expect(contentRule?.evidence.measured).toEqual({ rasterBlocks: 0, partialBlocks: 1 });
-    /* the sentence names the block in plain words with no id and no parenthesis (docs/POLISH.md
+    /* the sentence names the block in plain words with no id and no parenthesis (docs/archive/rounds/POLISH.md
        2.6 item 55) */
     expect(contentRule?.proposal).toContain("the list's icons and GT mark");
     expect(contentRule?.proposal).not.toMatch(/[()]/);

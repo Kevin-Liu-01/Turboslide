@@ -341,7 +341,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
     expect(control('formatOptions.picture.reset').getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('draws no parked section with the switch off: Dither leaves; Drop shadow stays since the polish round (docs/POLISH.md 2.5 item 41); Shape returned with the shapes and Alt text in the product round (docs/FOCUS.md 3.2; docs/RETURN.md 2.2, 2.15; PRODUCT.md section 5)', () => {
+  it('draws no parked section with the switch off: Dither leaves; Drop shadow stays since the polish round (docs/archive/rounds/POLISH.md 2.5 item 41); Shape returned with the shapes and Alt text in the product round (docs/FOCUS.md 3.2; docs/archive/rounds/RETURN.md 2.2, 2.15; PRODUCT.md section 5)', () => {
     panel('s');
     const sections = [...document.querySelectorAll('[data-section]')].map((el) =>
       el.getAttribute('data-section'),
@@ -373,7 +373,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
   });
 });
 
-describe('the chart and the table sections (docs/FEATURES.md 2.2 ranks 11 and 13)', () => {
+describe('the chart and the table sections (docs/archive/rounds/FEATURES.md 2.2 ranks 11 and 13)', () => {
   const chartSlide: ContentSlide = {
     ...canvas,
     id: 'charts',

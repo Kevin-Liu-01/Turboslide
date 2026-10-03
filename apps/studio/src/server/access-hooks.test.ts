@@ -71,7 +71,7 @@ function instance(
   };
 }
 
-describe('bindEmailGrants (docs/PEOPLE.md 3.10; SPEC-3 6.5)', () => {
+describe('bindEmailGrants (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5)', () => {
   const invite = (record: AccessRecord, email: string): AccessRecord => ({
     ...record,
     revision: record.revision + 1,

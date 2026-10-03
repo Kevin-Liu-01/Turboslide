@@ -11,7 +11,7 @@
 // Background dialog's Choose image both produce this block; the chips of a picture kind are drawn
 // by the slide over this object when it covers the sheet at the bottom of the stack (slide.ts).
 // The image is the raster the exporter reads (kind `shot`, SPEC-2 1.5). An svg asset
-// (docs/VECTOR.md 4.4, `vectorOf`) draws its vector file, which the resolver answers as the
+// (docs/archive/rounds/VECTOR.md 4.4, `vectorOf`) draws its vector file, which the resolver answers as the
 // image's `src`, with `object-fit: contain` inline so the picture shows whole at the box's
 // aspect and stays vector at every zoom; every picture gesture but crop applies unchanged.
 import { vectorOf } from '@turboslide/schema/assets';

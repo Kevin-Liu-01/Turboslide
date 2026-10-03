@@ -18,7 +18,7 @@ import type { MarkSize } from './mark-svg';
 import './presence.css';
 
 /**
- * The identity chip (gslides-parity SPEC-3 4.1, 4.2, 7.8; research 11 6.1; docs/PEOPLE.md 3.4,
+ * The identity chip (gslides-parity SPEC-3 4.1, 4.2, 7.8; research 11 6.1; docs/archive/rounds/PEOPLE.md 3.4,
  * 3.7, 4.4): one monochrome mark per principal at 24, 16, 14 or 12 px, a 1 px `--pt-edge` ring
  * (`--pt-ink` for the own chip), a 1 px paper gap inside it, then the field: the package raster's
  * cells through `mark-svg.ts`, the initials in ink, or the uploaded picture when the variant is
@@ -84,7 +84,7 @@ export function markOf(
   });
 }
 
-/** The name a chip shows: the typed or account name, else the label (7.8); the "(2)" suffix of a colliding label travels in them (docs/PEOPLE.md 3.17). */
+/** The name a chip shows: the typed or account name, else the label (7.8); the "(2)" suffix of a colliding label travels in them (docs/archive/rounds/PEOPLE.md 3.17). */
 export function nameOf(identity: IdentityView): string {
   if (identity.trust === 'agent')
     return identity.runId === undefined
@@ -93,11 +93,11 @@ export function nameOf(identity: IdentityView): string {
   return identity.name ?? identity.label;
 }
 
-/** What the trust helpers read: the trust state and, once the shell carries it, the deleted flag (docs/PEOPLE.md 3.7). */
+/** What the trust helpers read: the trust state and, once the shell carries it, the deleted flag (docs/archive/rounds/PEOPLE.md 3.7). */
 export type TrustFacts = Pick<IdentityView, 'trust'> & { deleted?: boolean };
 
 /**
- * The trust word beside a name (15; docs/PEOPLE.md 2.2 default 3): "guest" for a typed name,
+ * The trust word beside a name (15; docs/archive/rounds/PEOPLE.md 2.2 default 3): "guest" for a typed name,
  * "signed in" for a verified account (the accessible word; the text surfaces draw the badge in
  * its place), nothing for a label, an agent or a deleted account.
  */
@@ -107,14 +107,14 @@ export function trustWordOf(identity: TrustFacts): string | null {
   return null;
 }
 
-/** The glyph after a verified account's name (docs/PEOPLE.md 3.7): the 14 px check badge, never for a deleted account, never in a hue. */
+/** The glyph after a verified account's name (docs/archive/rounds/PEOPLE.md 3.7): the 14 px check badge, never for a deleted account, never in a hue. */
 export function trustMarkOf(identity: TrustFacts): 'check-badge' | null {
   return identity.trust === 'verified' && identity.deleted !== true ? 'check-badge' : null;
 }
 
 /**
  * The verified badge as the text surfaces draw it after a name: 14 px, `--pt-ink-2`, with the
- * accessible word "signed in" (research 11 5.2; docs/PEOPLE.md 3.7). Draws nothing for anyone
+ * accessible word "signed in" (research 11 5.2; docs/archive/rounds/PEOPLE.md 3.7). Draws nothing for anyone
  * `trustMarkOf` answers null for, so a surface can render it unconditionally after the name.
  */
 export function TrustMark({ identity, className }: { identity: TrustFacts; className?: string }) {
@@ -145,7 +145,7 @@ export function hueHexOf(slot: number | null | undefined): string | null {
 }
 
 /**
- * The picture files a chip loads (docs/PEOPLE.md 4.4): the file named at 2x and the file half its
+ * The picture files a chip loads (docs/archive/rounds/PEOPLE.md 4.4): the file named at 2x and the file half its
  * size at 1x through `srcset` (32 and 64 for a chip, 64 and 128 for the Profile head), both
  * derived by the store's path grammar through `pictureUrlAt` of `packages/identity`; a URL of
  * another shape loads as given with no `srcset`.

@@ -1,5 +1,5 @@
 /**
- * The words of the Assist panel and the Tailor dialog (docs/PRODUCT.md 6.1, 6.3, 6.4, section 5):
+ * The words of the Assist panel and the Tailor dialog (docs/archive/rounds/PRODUCT.md 6.1, 6.3, 6.4, section 5):
  * sentence case, plain technical English, no rule ids, no em dashes. The card's sentence is the
  * model's; every other word a seller reads here is the product's. They sit in this lane's folder
  * (build/b6.md R7); the integrator may move them under `menus/strings.ts` at the merge.
@@ -7,7 +7,7 @@
 export const ASSIST = {
   title: 'Assist',
   /**
-   * The one line under the composer (docs/POLISH.md 2.9 item 118; audit-assist item 8: four
+   * The one line under the composer (docs/archive/rounds/POLISH.md 2.9 item 118; audit-assist item 8: four
    * lines of provider words stood above every control). The provider sentence is the Assist
    * button's tooltip and the Help dialog's (6.3 "Privacy words").
    */
@@ -81,7 +81,7 @@ export const TAILOR = {
   done: (to: string) => `Tailored for ${to}`,
   doneNoName: 'Tailored',
   undo: 'Undo',
-  /** the snackbar after Apply (docs/POLISH.md 2.9 item 116): the counts the pass made */
+  /** the snackbar after Apply (docs/archive/rounds/POLISH.md 2.9 item 116): the counts the pass made */
   result: (to: string, places: number, slides: number, skipped: number) => {
     const head = to === '' ? 'Tailored' : `Tailored for ${to}`;
     const parts: string[] = [];

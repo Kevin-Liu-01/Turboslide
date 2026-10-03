@@ -75,7 +75,7 @@ export type MigrationOptions = {
 
 /**
  * True for the paths that stay on the public store: the twins under a deck, the keyed twins, the
- * produced exports and bundles, and the picture avatars under `u/<avatarKey>/` (docs/PEOPLE.md
+ * produced exports and bundles, and the picture avatars under `u/<avatarKey>/` (docs/archive/rounds/PEOPLE.md
  * 4.3), which an `<img>` loads by URL. Nothing under `u/` is ever swept by a deck cleanup.
  */
 export function isPublicPath(pathname: string): boolean {

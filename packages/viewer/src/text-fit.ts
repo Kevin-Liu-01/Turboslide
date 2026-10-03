@@ -131,7 +131,7 @@ export function growMutation(
 
 /**
  * The `typography.size` write that steps a `shrink` text box down the ladder when its text needs
- * more than the box (docs/PRODUCT.md section 5 "Autofit"; Google's Shrink text on overflow):
+ * more than the box (docs/archive/rounds/PRODUCT.md section 5 "Autofit"; Google's Shrink text on overflow):
  * `fontSize` is the size the text draws at now (the block's own, else the computed size the live
  * stage reads), `stepDown` the ladder's next smaller size or undefined at the bottom. Null when
  * the text fits, when the block is not a shrink block, or when the ladder has no smaller step.

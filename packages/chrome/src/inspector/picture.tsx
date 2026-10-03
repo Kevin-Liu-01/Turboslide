@@ -16,7 +16,7 @@ import { ColorRow, Note, PanelButton, SelectField, SliderField, ToggleRow } from
 import type { SectionWrite } from './fields';
 
 /**
- * Image options and Adjustments (gslides-parity SPEC-2 0.17, 2.5, section 5; R05 B11; docs/POLISH.md
+ * Image options and Adjustments (gslides-parity SPEC-2 0.17, 2.5, section 5; R05 B11; docs/archive/rounds/POLISH.md
  * item 40): the picture's panel in the seller's words. The name of the picture (its file's name as
  * the asset's id reads it), Replace image, Use on every slide, Crop image, Reset image, a labelled
  * Crop anchor (Top or Centre while no trim is set), Mask (a shape picker and None), the Caption
@@ -44,7 +44,7 @@ export function pictureNameOfAsset(
   return words === '' ? fallback : words[0]?.toUpperCase() + words.slice(1);
 }
 /**
- * The caption of a shot (docs/PRODUCT.md section 2 rank 10; the right click row Add a caption
+ * The caption of a shot (docs/archive/rounds/PRODUCT.md section 2 rank 10; the right click row Add a caption
  * writes the same field): a text field with the prompt "Add a caption", committed on Enter and on
  * blur as one `block.set /caption`; an emptied field removes the caption, so the figure draws no
  * figcaption. A picture object (the covering `picture` block) carries no caption.
@@ -61,7 +61,7 @@ function CaptionField({
   const [draft, setDraft] = useState<string | null>(null);
   /* the draft as the handlers read it: Enter commits and blurs in one event, and the blur's
      commit would read the draft of the render its handler was bound in and write the caption a
-     second time (the fields.tsx NumberField rule, docs/RETURN.md 2.14 item 3) */
+     second time (the fields.tsx NumberField rule, docs/archive/rounds/RETURN.md 2.14 item 3) */
   const draftRef = useRef<string | null>(null);
   const tip = tipProps({
     name: 'Caption',
@@ -169,7 +169,7 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
     for (const key of Object.keys(next)) if (next[key] === undefined) delete next[key];
     set('/frame', Object.keys(next).length === 0 ? undefined : next);
   };
-  /* Border weight None on a shot takes the hairline too (docs/POLISH.md item 38): a picture
+  /* Border weight None on a shot takes the hairline too (docs/archive/rounds/POLISH.md item 38): a picture
      inserted before the round, which draws sheet.css's hairline, loses it here */
   const setWeight = (weight: number) => {
     const next: Record<string, unknown> = { ...frame };
@@ -248,7 +248,7 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
           disabled={write.busy}
           doc="Another picture in the same box"
         />
-        {/* the picture as the kit's logo on every slide (docs/PRODUCT.md 4.4; build/b5.md 0.4) */}
+        {/* the picture as the kit's logo on every slide (docs/archive/rounds/PRODUCT.md 4.4; build/b5.md 0.4) */}
         <UseOnEverySlideButton block={block} />
         <PanelButton
           label={words.crop}
@@ -317,7 +317,7 @@ export function PictureSection({ block, write, uploadPicture, say }: PictureSect
           ) : null}
         </div>
         {maskOpen ? (
-          /* seven tiles per row fit the 320 px panel (docs/POLISH.md item 42; the plate's grid is
+          /* seven tiles per row fit the 320 px panel (docs/archive/rounds/POLISH.md item 42; the plate's grid is
              eight wide and clipped its last column here) */
           <ShapePicker
             onPick={mask}

@@ -1,4 +1,4 @@
-// The logos an export shoots at 3x (docs/FEATURES.md 4.8; audit-logos 18), read from the document
+// The logos an export shoots at 3x (docs/archive/rounds/FEATURES.md 4.8; audit-logos 18), read from the document
 // and not from the sheet: the brand kit's picture logos, which the sheet draws outside any block,
 // and the picture and shot blocks whose asset carries `role: 'logo'`. Schema imports alone, so the
 // PowerPoint builder and the report read these names without the extractor's browser graph.
@@ -7,7 +7,7 @@ import type { Deck, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 
 /**
- * The block ids the extractor gives the brand kit's picture logos (docs/PRODUCT.md 4.1, 4.4): the
+ * The block ids the extractor gives the brand kit's picture logos (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the
  * footer's `.wordmark.is-picture img` and the title slide's `img.mark-picture[data-slot="mark"]`.
  * `tagRasterElements` tags `svg.mark` and `.wordmark svg` (the GT mark) and nothing of a picture
  * logo, so a deck whose kit carried a company's mark exported an Editable text file without it;

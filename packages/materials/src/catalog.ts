@@ -5,7 +5,7 @@
 // kind, default, range and options, read from @paper-design/shaders 0.0.78's uniform docs and
 // the React wrapper's Default presets. The entry shape every transport reads (material.list) is
 // MaterialCatalogEntry in the schema package; the extra fields here drive paper.ts and mount.ts.
-// The features round's ship two (docs/FEATURES.md 5.2, 5.4, 5.7) adds the gallery's five
+// The features round's ship two (docs/archive/rounds/FEATURES.md 5.2, 5.4, 5.7) adds the gallery's five
 // categories (Glyphfield's `shaderLab.ts`: Fluid, Light, Metal, Gradient, Graphic), the featured
 // order the gallery lists first, the still entries whose frame has no time, the featured preset an
 // insert lands (the diamond for liquid metal, never `ink-paper`) and `entryWithPalette`, the entry
@@ -20,7 +20,7 @@ import type { PaletteRoles, ShaderPalette } from './presets.ts';
 import { LEGACY_SHADER_PALETTE, presetsFor } from './presets.ts';
 import { PROTO_MATERIALS } from './proto.ts';
 
-/** The gallery's five chips (docs/FEATURES.md 5.4; Glyphfield's `shaderLab.ts` categories). */
+/** The gallery's five chips (docs/archive/rounds/FEATURES.md 5.4; Glyphfield's `shaderLab.ts` categories). */
 export const SHADER_CATEGORIES = [
   { id: 'fluid', label: 'Fluid' },
   { id: 'light', label: 'Light' },
@@ -593,7 +593,7 @@ export function materialEntry(id: string): MaterialEntry | undefined {
 }
 
 /**
- * The entry with its palette presets computed from a deck's shader palette (docs/FEATURES.md 5.7):
+ * The entry with its palette presets computed from a deck's shader palette (docs/archive/rounds/FEATURES.md 5.7):
  * the same entry when the palette is the legacy one, so a deck without a kit record reads the
  * static catalog and today's pixels.
  */

@@ -45,7 +45,7 @@ import {
 // Undo, the GT brand deck copy, the trash page with Restore and Delete forever (Cancel, the
 // button, Enter), Back and Forward, the You need access pages, Not found, File > Make a copy with
 // Remove speaker notes, and the card's Download. One context for the file (one principal); every
-// deck it makes is torn down at the end. The return round (docs/RETURN.md section 5) adds File >
+// deck it makes is torn down at the end. The return round (docs/archive/rounds/RETURN.md section 5) adds File >
 // New > From template gallery, File > Open > Upload with a bundle, File > Import slides > Upload
 // with a bundle, and Help > Help Turboslide improve; a row still parked on this build is reached
 // with Tools > Advanced tools on and the switch goes back after it. The deck an upload makes (the
@@ -184,7 +184,7 @@ test(title('decks.list.read'), async () => {
   await gotoDecks();
   await expect(ctl(page, 'home.blank')).toContainText('Blank presentation');
   await expect(ctl(page, 'home.template.gt-brand')).toContainText('GT brand deck');
-  /* the polish round (docs/POLISH.md 2.7 item 75, B5): the Recent row is gone; this browser's
+  /* the polish round (docs/archive/rounds/POLISH.md 2.7 item 75, B5): the Recent row is gone; this browser's
      decks are the first cards with the line "Opened just now" */
   /* Round 1 (docs/NEXT.md 4.1.3 item 10): the ruled rows are the default view */
   const listed = page.locator('[data-control="home.rows"], [data-control="home.cards"]').first();
@@ -402,7 +402,7 @@ test(title('decks.list.gt-brand-deck'), async () => {
 test(title('decks.card.download'), async () => {
   test.setTimeout(90_000);
   await gotoDecks();
-  /* the card's Download is the PowerPoint since docs/POLISH.md item 85 (routes/decks.index.tsx:
+  /* the card's Download is the PowerPoint since docs/archive/rounds/POLISH.md item 85 (routes/decks.index.tsx:
      the same export path as File > Download, saved from the page's own fetch, so a preview behind
      Vercel Authentication answers it too); the bundle is File > Download > Turboslide bundle
      (`bundleBytes`, `export.zip.bundle`). The row reads the file the card gives within 30 s: a
@@ -432,7 +432,7 @@ test(title('decks.file.make-a-copy'), async () => {
       timeout: 10_000,
     })
     .toContain('A note the copy leaves out.');
-  /* the polish round (docs/POLISH.md 2.6 item 74): Make a copy draws as its one visible row
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74): Make a copy draws as its one visible row
      while Selected slides is parked, the row keeping its own id */
   await menuPath(page, 'file', 'file.makeCopy.entire');
   await ctl(page, 'dialog.makeCopy').waitFor({ timeout: 8000 });
@@ -483,7 +483,7 @@ test(title('decks.file.make-a-copy'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the return round's rows (docs/RETURN.md 2.17, section 5)
+// the return round's rows (docs/archive/rounds/RETURN.md 2.17, section 5)
 
 /** Turns Tools > Advanced tools on when a menubar row is absent; answers whether it switched. */
 async function reachMenuRow(p: Page, menuId: string, ...rowIds: string[]): Promise<boolean> {
@@ -517,7 +517,7 @@ async function switchOff(p: Page): Promise<void> {
 
 /**
  * The deck's bundle (the product's own transfer file), downloaded from the deck's editor through
- * File > Download > More formats > Turboslide bundle, the way `export.zip.bundle` reads it. Since docs/POLISH.md
+ * File > Download > More formats > Turboslide bundle, the way `export.zip.bundle` reads it. Since docs/archive/rounds/POLISH.md
  * item 85 the card's Download is the PowerPoint, a PK file with no `manifest.json`, which the
  * upload rows read as "Not a deck bundle" twice in the polish round's run of record (B5's R21 to
  * B6, landed by the ship step's third attempt). The bundle row sits behind Advanced tools on
@@ -746,7 +746,7 @@ test(title('decks.file.template-gallery'), async () => {
   const opened = context.waitForEvent('page', { timeout: 20_000 });
   await menuPath(page, 'file', 'file.new', 'file.new.templateGallery');
   const tab = await opened;
-  /* the product round's gallery page (docs/PRODUCT.md section 5, B5b): /decks/templates with
+  /* the product round's gallery page (docs/archive/rounds/PRODUCT.md section 5, B5b): /decks/templates with
      the Blank card and the organisation's brand deck; the old /decks#templates address redirects */
   await tab.waitForURL(/\/decks\/templates/, { timeout: 20_000 });
   await tab.waitForSelector('[data-control="templates.page"]', { timeout: 30_000 });
@@ -1245,7 +1245,7 @@ test(title('decks.trash.delete-forever-button'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the product round's rows (docs/PRODUCT.md section 2 ranks 4, 15, 16, 20, 22 and 26, sections
+// the product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 4, 15, 16, 20, 22 and 26, sections
 // 3.3, 3.5, 3.6 and 4.3, 8.1): the Recent row and the trash snackbar, the /home lead, the cards,
 // the trash page, the skeleton, the access and Not found pages, the template gallery and the
 // strip, the chrome's first visit appearance and the deck's default appearance. B1 owns the pages,
@@ -1327,7 +1327,10 @@ test(title('decks.recent.this-browser-sentence'), async () => {
   await gotoDecks();
   const sentence = ctl(page, 'home.recent.sentence');
   if ((await sentence.count()) === 0)
-    test.skip(true, 'not on this build: home.recent.sentence (docs/PRODUCT.md 7.1, B1)');
+    test.skip(
+      true,
+      'not on this build: home.recent.sentence (docs/archive/rounds/PRODUCT.md 7.1, B1)',
+    );
   await expect(sentence).toContainText(/this browser/);
   await expect(sentence).toContainText(/On another computer/);
 });
@@ -1340,7 +1343,7 @@ test(title('decks.home.seller-lead'), async () => {
       for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
         rules.remove();
     });
-  /* the redesigned page (docs/POLISH.md 3.2 item 1): the h1, the lead's first sentence and the
+  /* the redesigned page (docs/archive/rounds/POLISH.md 3.2 item 1): the h1, the lead's first sentence and the
      second hero button */
   const hero = await page.locator('main h1').first().textContent();
   expect(hero?.trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
@@ -1417,7 +1420,7 @@ test(title('decks.card.edited-relative-time'), async () => {
   }, deck);
   expect(facts.when, 'the card carries a when line').not.toBeNull();
   /* "Edited yesterday at 14:02" or "2:02 PM" in the browser's locale from the store; a deck this
-     browser opened reads "Opened 2 hours ago" instead (docs/PRODUCT.md 3.6, decks.index.tsx
+     browser opened reads "Opened 2 hours ago" instead (docs/archive/rounds/PRODUCT.md 3.6, decks.index.tsx
      whenLine), and this file's browser opened the deck */
   expect(facts.when!, 'reads Edited <relative day> at <locale time>, or Opened <ago>').toMatch(
     /^(Edited .+ at \d{1,2}:\d{2}( ?[AP]M)?|Opened .+)/,
@@ -1479,7 +1482,7 @@ test(title('decks.trash.button-heights'), async () => {
   expect(facts.remove, 'Delete forever is 32 px').toBe(32);
   expect(facts.removeColor, 'Delete forever is in ink').toBe(ink);
   expect(facts.removeGlyph, 'with its glyph').toBe(true);
-  /* docs/POLISH.md 2.7 item 97: Empty trash is a text button like Restore and Delete forever
+  /* docs/archive/rounds/POLISH.md 2.7 item 97: Empty trash is a text button like Restore and Delete forever
      (`is-solid` dropped by B5; `decks.trash.empty-not-primary` reads the same control), so the
      page draws no solid button. The ship's run of record read `solid []` twice against the row's
      older words (the polish fix round 3, B6) */
@@ -1662,7 +1665,7 @@ test(title('templates.gallery.page'), async () => {
   if (!res || res.status() >= 400 || (await pageCtl.count()) === 0)
     test.skip(
       true,
-      `not on this build: templates.page (docs/PRODUCT.md 7.1, B5b); /decks/templates answered ${res?.status() ?? 'nothing'}`,
+      `not on this build: templates.page (docs/archive/rounds/PRODUCT.md 7.1, B5b); /decks/templates answered ${res?.status() ?? 'nothing'}`,
     );
   await page.waitForTimeout(600);
   const facts = await page.evaluate(() => {
@@ -1846,7 +1849,7 @@ test(title('brand.appearance.default'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.7 and section 3, 5.1 `decks.*` with the driver
+// the polish round (docs/archive/rounds/POLISH.md 2.7 and section 3, 5.1 `decks.*` with the driver
 // core/decks.spec.ts): the home page remade, judged from the DOM's boxes at three widths in both
 // appearances, its copy against 3.1, its pictures, its links and its card, its load and its
 // layout shift (a measure row); and the list and the trash: the Recent row keeping this
@@ -2053,7 +2056,7 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
   test.info().annotations.push({ type: 'home', description: notes.join(' | ') });
   expect(
     failures,
-    'the numbers of docs/POLISH.md 3.4 at 1440, 1280 and 390 in both appearances',
+    'the numbers of docs/archive/rounds/POLISH.md 3.4 at 1440, 1280 and 390 in both appearances',
   ).toEqual([]);
 });
 
@@ -2099,7 +2102,7 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
       };
     });
     const words = copy.all.trim().split(/\s+/).filter(Boolean).length;
-    /* docs/POLISH.md 3.1 against 3.7 (polish/build/b6.md, a note for the verifier): the h1 of
+    /* docs/archive/rounds/POLISH.md 3.1 against 3.7 (polish/build/b6.md, a note for the verifier): the h1 of
        3.7 lists three verbs of one task with a list comma and the six h2s carry none, the read
        copy.test.ts holds; a comma that opens a clause fails any heading */
     const commaHeadings = copy.headings.filter(
@@ -2872,7 +2875,7 @@ test(title('decks.og.deck-card'), async () => {
   expect(monoAddress, "the card's address is not set in monospace").toBe(false);
 });
 
-// ---- the list and the trash (docs/POLISH.md 2.7)
+// ---- the list and the trash (docs/archive/rounds/POLISH.md 2.7)
 
 /** The cards of a deck on /decks, with the line under each title. */
 async function cardsOf(
@@ -3302,7 +3305,7 @@ test(title('decks.trash.empty-not-primary'), async () => {
 test(title('decks.thumbnail.never-502'), async ({ browser }) => {
   test.setTimeout(150_000);
   /* the fresh context is the owner's browser once more (the file's cookies copied in): a new deck
-     is Restricted (docs/POLISH.md item 78), so a stranger's context met the access page on the
+     is Restricted (docs/archive/rounds/POLISH.md item 78), so a stranger's context met the access page on the
      enforce preview and never the editor (the polish round's run of record, twice; B5's R22 to
      B6, landed by the ship step's third attempt). The cold `/decks` and the 60 s idle are the
      row's own reading; the context is fresh for its cache, not for its identity. */
@@ -3721,7 +3724,7 @@ coverage(import.meta.filename, [
   'decks.file.open-upload-bundle',
   'decks.file.import-slides-bundle',
   'help.improve-link',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'decks.recent.drops-trashed',
   'decks.trash.editor-undo-snackbar',
   'decks.recent.this-browser-sentence',
@@ -3738,7 +3741,7 @@ coverage(import.meta.filename, [
   'templates.gallery.strip-and-link',
   'chrome.appearance.first-visit-follows-os',
   'brand.appearance.default',
-  /* the polish round (docs/POLISH.md 2.7, section 3, 5.1) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.7, section 3, 5.1) */
   'decks.home.pictures-three-widths',
   'decks.home.copy-rules',
   'decks.home.product-pictures',

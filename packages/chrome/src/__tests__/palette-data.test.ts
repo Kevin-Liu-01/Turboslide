@@ -160,7 +160,7 @@ describe('buildPaletteEntries', () => {
     const rows = entries.filter((entry) => entry.group === 'versions');
     expect(rows).toHaveLength(10);
     expect(rows[0]?.title).toBe('Before the copy pass');
-    /* an agent author reads Assistant on every seller surface (docs/PRODUCT.md 6.1; audit-assist 15) */
+    /* an agent author reads Assistant on every seller surface (docs/archive/rounds/PRODUCT.md 6.1; audit-assist 15) */
     expect(rows[0]?.meta).toBe('Assistant · r411');
     expect(rows[1]?.title).toBe('Version 11');
     expect(rows[0]?.run).toEqual({
@@ -216,8 +216,8 @@ describe('presentPaletteEntries', () => {
     }
     /* the default view's Insert group: the entries whose menu row is core (docs/FOCUS.md 2.3,
        2.4), the five shape and line entries, the table, the chart and the diagram that returned
-       with their rows in the return round (docs/RETURN.md 2.2 to 2.6) and the Shader of the
-       features round's ship two (docs/FEATURES.md 5.4), then the 21 New slide rows; the Box, Rule
+       with their rows in the return round (docs/archive/rounds/RETURN.md 2.2 to 2.6) and the Shader of the
+       features round's ship two (docs/archive/rounds/FEATURES.md 5.4), then the 21 New slide rows; the Box, Rule
        and Icon entries and the grammar blocks stand behind the switch */
     const insert = off.filter((entry) => entry.group === 'insert');
     expect(insert.filter((entry) => entry.insert === 'primitive').map((entry) => entry.id)).toEqual(
@@ -258,7 +258,7 @@ describe('presentPaletteEntries', () => {
     expect(byId.get('insert:block:dia')?.row).toBe('insert.diagram');
     expect(byId.get('insert:block:icon')?.row).toBe('insert.icon');
     expect(byId.get('insert:block:icon')?.advanced).toBe(true);
-    /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader, in the default view */
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): Insert > Shader, in the default view */
     expect(byId.get('insert:block:material')?.row).toBe('insert.shader');
     expect(byId.get('insert:block:material')?.advanced).toBeUndefined();
     expect(byId.get('insert:block:rule')?.row).toBe('insert.line.rule');
@@ -284,7 +284,7 @@ describe('parsePaletteQuery and matchScore', () => {
     expect(matchScore('xyz', 'content-rule')).toBe(0);
   });
 
-  it('drops the subsequence score for a needle of four characters or more (docs/PRODUCT.md 6.1)', () => {
+  it('drops the subsequence score for a needle of four characters or more (docs/archive/rounds/PRODUCT.md 6.1)', () => {
     /* "logo" answered "Long dash dot" on production through the subsequence (audit-assist 8) */
     expect(matchScore('cntrl', 'content-rule')).toBe(0);
     expect(matchScore('logo', 'long dash dot')).toBe(0);
@@ -327,7 +327,7 @@ describe('filterPalette', () => {
 
   it('matches fuzzily over titles and ids and orders the best match first', () => {
     /* a three character needle still matches as a subsequence; longer ones need the words
-       themselves (docs/PRODUCT.md 6.1; audit-assist 8) */
+       themselves (docs/archive/rounds/PRODUCT.md 6.1; audit-assist 8) */
     const groups = filterPalette(entries, 'ctr');
     const slides = groups.find((group) => group.group.id === 'slides');
     expect(slides?.rows.some((row) => row.preview === 'content-rule')).toBe(true);

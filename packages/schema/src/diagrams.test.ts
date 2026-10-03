@@ -107,7 +107,7 @@ describe('DIAGRAM_TEMPLATES', () => {
           /* ids are unique so diagram.insert frees them one by one */
           expect(new Set(blocks.map((block) => block.id)).size).toBe(blocks.length);
           /* the labelled nodes: one label per node, centred, middle aligned; a step's label is
-             the shape's own text (docs/FEATURES.md 2.2 rank 9), a timeline's a text block under
+             the shape's own text (docs/archive/rounds/FEATURES.md 2.2 rank 9), a timeline's a text block under
              its dot; no node is a shape and a text block over the same box */
           const texts = blocks.filter(
             (block): block is TextBlock | ShapeBlock =>
@@ -141,7 +141,7 @@ describe('DIAGRAM_TEMPLATES', () => {
               const target = ids.get(end?.block ?? '');
               expect(target?.type).toBe('shape');
               expect(end?.site).toBeGreaterThanOrEqual(0);
-              /* the vector round (docs/VECTOR.md 2.2): the preset's own sites, a rounded
+              /* the vector round (docs/archive/rounds/VECTOR.md 2.2): the preset's own sites, a rounded
                  rectangle's ECMA four, so the count is the target's */
               expect(end?.site).toBeLessThan(target === undefined ? 0 : siteCount(target));
             }
@@ -204,7 +204,7 @@ describe('DIAGRAM_TEMPLATES', () => {
     );
     expect(steps).toHaveLength(4);
     expect(steps.map((step) => step.fill)).toEqual(['plate', 'plate', 'plate', 'plate']);
-    /* the step is one object: its label is the shape's own text (docs/FEATURES.md 2.2 rank 9) */
+    /* the step is one object: its label is the shape's own text (docs/archive/rounds/FEATURES.md 2.2 rank 9) */
     expect(steps.map((step) => step.text)).toEqual(['Step 1', 'Step 2', 'Step 3', 'Step 4']);
     expect(blocks.filter((block) => block.type === 'text')).toHaveLength(0);
   });
@@ -254,7 +254,7 @@ describe('DIAGRAM_TEMPLATES', () => {
 });
 
 // A member duplicated alone stays in its group; a group copied whole takes a fresh tag
-// (docs/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`; the store's
+// (docs/archive/rounds/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`; the store's
 // `blockDuplicate` reads the answer).
 describe('groupsKeptOnDuplicate', () => {
   const process = makeDiagram('process', 3, 'outline', BOX, 'dia');

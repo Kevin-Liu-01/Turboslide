@@ -1,4 +1,4 @@
-// The @font-face emission for the catalog faces a deck uses (docs/PRODUCT.md 4.2; SPEC-5-amendments
+// The @font-face emission for the catalog faces a deck uses (docs/archive/rounds/PRODUCT.md 4.2; SPEC-5-amendments
 // A5 item 3): nothing for a deck set in Inter alone, one group per used family in FONT_IDS order
 // with `font-display: swap`, the `--ts-font-<id>` rule on the sheet root, and the `src` from the
 // caller's resolver (the fonts route by default, a data URI for a self contained document).
@@ -41,7 +41,7 @@ describe('fontsCss', () => {
     );
     expect(css.indexOf("'Roboto'")).toBeLessThan(css.indexOf("'Lora'"));
     expect(css).toContain('font-display: swap;');
-    // one stack per face for the block path and the kit path (docs/FEATURES.md 3.5; audit-fonts
+    // one stack per face for the block path and the kit path (docs/archive/rounds/FEATURES.md 3.5; audit-fonts
     // 16): the name, then the base sheet's fallbacks for the category
     expect(css).toContain("--ts-font-roboto: 'Roboto', 'Helvetica Neue', Arial, sans-serif;");
     expect(css).toContain("--ts-font-lora: 'Lora', Georgia, 'Times New Roman', serif;");

@@ -49,7 +49,7 @@ import { FORMAT as FORMAT_WORDS, STUB_PREFIX, stubClause } from './strings.ts';
  * section 8 item 3), and Edit > Paste stays enabled whatever this page copied, as Google's does
  * (`canPaste`; VERIFICATION.md F-slides-paste).
  *
- * The return round (docs/RETURN.md sections 2 and 3) takes the flag off every row the return
+ * The return round (docs/archive/rounds/RETURN.md sections 2 and 3) takes the flag off every row the return
  * audits measured working or nearly working, so it is in the default view again and its matrix
  * rows measure it there: the shapes with their three named rows, the lines with the two
  * connectors, the tables, the charts, the diagrams, the word art, superscript, subscript,
@@ -281,10 +281,10 @@ export type MenuSetting =
      parked rows, controls and palette entries; off by default, kept per browser with the other
      stored settings (`STORED_SETTINGS` in editor-shell.ts) */
   | 'advancedTools'
-  /* the product round (docs/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection,
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 9): Tools > Preferences > Link detection,
      the one preference row; on by default, kept per browser; the Editor reads it as `linkDetection` */
   | 'linkDetection'
-  /* the features round, ship two (docs/FEATURES.md 5.6): Play shaders, On, In the show only or
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): Play shaders, On, In the show only or
      Off, per browser; under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
   | 'playShaders';
 
@@ -320,7 +320,7 @@ export type MenuClientHandler =
   | 'copyLink'
   | 'goToClient'
   | 'accountMenu'
-  /* the product round (docs/PRODUCT.md sections 2, 4.1, 4.4, 7.1): the title row's side panel
+  /* the product round (docs/archive/rounds/PRODUCT.md sections 2, 4.1, 4.4, 7.1): the title row's side panel
      toggle, Add a caption on a picture, Use on every slide, the Font row that opens the toolbar's
      dropdown */
   | 'toggleSidePanel'
@@ -400,7 +400,7 @@ export type MenuPredicate =
   | 'cellRangeSelected'
   | 'mergedCellSelected'
   | 'imageEdited'
-  /** a picture whose asset is a raster: crop applies (docs/VECTOR.md 4.4) */
+  /** a picture whose asset is a raster: crop applies (docs/archive/rounds/VECTOR.md 4.4) */
   | 'rasterPictureSelected'
   | 'chartSelected'
   | 'runSelected'
@@ -431,12 +431,12 @@ export type MenuPredicate =
   | 'follow'
   /**
    * The comment capability while the mode allows it (Viewing mode hides the comment controls,
-   * 5.3), with something to comment on: an object, a text range or a slide card (docs/POLISH.md
+   * 5.3), with something to comment on: an object, a text range or a slide card (docs/archive/rounds/POLISH.md
    * 2.6 item 66; audit-chrome item 12: the row was enabled with nothing selected)
    */
   | 'canComment'
   /**
-   * The write capability in Editing mode (docs/POLISH.md 2.6 item 58): the toolbar's write
+   * The write capability in Editing mode (docs/archive/rounds/POLISH.md 2.6 item 58): the toolbar's write
    * controls draw for an editor alone; a reader at /edit and Commenting mode keep the view
    * controls, the comment button and Slideshow
    */
@@ -453,7 +453,7 @@ export type MenuPredicate =
 
 /**
  * A check row's state: a stored setting (with a value for a radio group), or, since the objects
- * round (docs/OBJECTS.md 3.3 item 4; objects/build/b5.md R1), a fact of the selection the context
+ * round (docs/archive/rounds/OBJECTS.md 3.3 item 4; objects/build/b5.md R1), a fact of the selection the context
  * carries (the Header row row reads the selected table's first row).
  */
 export type MenuCheck =
@@ -488,7 +488,7 @@ export type MenuItem = {
   doc?: string;
   /**
    * The seller's own words for Search the menus beyond the label, the path and the doc (the
-   * features round, docs/FEATURES.md 4.3 and 3.1 item 4; finder.ts `sellerTermsOf` reads them
+   * features round, docs/archive/rounds/FEATURES.md 4.3 and 3.1 item 4; finder.ts `sellerTermsOf` reads them
    * after the finder's own table)
    */
   terms?: ReadonlyArray<string>;
@@ -699,9 +699,9 @@ function replaceImageItems(prefix: string): MenuItem[] {
       icon: 'arrow-up-tray',
     }),
     /* docs/FOCUS.md 3.2 parked By URL and From this presentation with the Insert rows; By URL
-       returned in the product round (docs/PRODUCT.md section 5) */
+       returned in the product round (docs/archive/rounds/PRODUCT.md section 5) */
     now(`${prefix}.byUrl`, 'By URL', dialog('Image by URL'), { icon: 'link' }),
-    /* the features round (docs/FEATURES.md 4.4; build/b6.md R1): Replace image > Logo swaps the
+    /* the features round (docs/archive/rounds/FEATURES.md 4.4; build/b6.md R1): Replace image > Logo swaps the
        picture's asset for a mark of thesvg.org and keeps the box */
     now(`${prefix}.logo`, 'Logo', dialog('Logo'), {
       turboslide: true,
@@ -815,13 +815,13 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
         /* back in the default view at the features round's ship one: the matrix row
            collab.roster.go-to-slide (whose `parks` names this id) read green in both preview runs
            of record and on production at the sync round's ship, so it leaves the parked list
-           (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`; docs/FEATURES.md 7.2). It was
-           re-parked at the return round's ship when the row read red in both runs (docs/RETURN.md
+           (docs/gslides-parity/focus/ship-f1afe1e.json `leaves`; docs/archive/rounds/FEATURES.md 7.2). It was
+           re-parked at the return round's ship when the row read red in both runs (docs/archive/rounds/RETURN.md
            section 1 rule 2; VERIFICATION.md R2-F1). */
         doc: 'A one time jump to the slide that person has open',
       }),
       later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),
-      /* the people round (docs/PEOPLE.md 3.14, default 2): the roster's own row is in the default
+      /* the people round (docs/archive/rounds/PEOPLE.md 3.14, default 2): the roster's own row is in the default
          view with the own chip; the row `people.own-chip-follows-name` parks it again on a red */
       now('title.presence.me', 'You', client('accountMenu'), {
         turboslide: true,
@@ -834,7 +834,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
       doc: 'Who has this presentation open; a chip jumps to that person’s slide and the list offers Follow',
     },
   ),
-  /* the product round (docs/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini.
+  /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the assistant's entry, where Google draws Ask Gemini.
      Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 49, 98): the one way into the panel, Tools >
      Assist having left, and tailoring is Tools > Tailor for a customer alone (the panel's tailoring
      starter opens that dialog), so the doc no longer names it */
@@ -849,7 +849,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
     when: 'readComments',
     doc: 'Every comment on this presentation, with the ones for you first',
   }),
-  /* the product round (docs/PRODUCT.md section 2 rank 25): the side panel toggle the bottom bar
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25): the side panel toggle the bottom bar
      held, now in the title row's right cluster (TitleRow.tsx draws it) */
   now('title.sidePanel', 'Show side panel', client('toggleSidePanel'), {
     turboslide: true,
@@ -905,7 +905,7 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   }),
   /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear. Parked whole
      in the focus round (docs/FOCUS.md 3.2); in the default view since the people round
-     (docs/PEOPLE.md 3.14, default 2: the own chip, its hair rule and the roster's "(you)" row
+     (docs/archive/rounds/PEOPLE.md 3.14, default 2: the own chip, its hair rule and the roster's "(you)" row
      are drawn with Advanced tools off), the row `people.own-chip-follows-name` parking it again
      on a red. The Sessions row is an account's (accounts 8): an anonymous person is not offered
      a list that answers []. */
@@ -965,7 +965,7 @@ const FILE: Menu = {
         /* the row File draws first while the template gallery is parked (audit-clutter 83, 113) */
         collapsedLabel: 'New presentation',
       }),
-      /* parked with the templates feature at the product round's ship (docs/PRODUCT.md 8.2; the
+      /* parked with the templates feature at the product round's ship (docs/archive/rounds/PRODUCT.md 8.2; the
          parks rule of the ship step): templates.card.rename-and-delete and
          templates.default.use-for-new read red twice on the enforce preview of record, the
          gallery on another instance keeping a renamed, deleted or default template for the
@@ -976,7 +976,7 @@ const FILE: Menu = {
         advanced: true,
       }),
     ]),
-    /* the polish round (docs/POLISH.md 2.6 item 73; audit-chrome item 31): no ellipsis */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item 31): no ellipsis */
     now('file.open', 'Open', dialog('Open'), {
       google: 'Open…',
       key: shortcut('Cmd+O'),
@@ -998,7 +998,7 @@ const FILE: Menu = {
       ],
       { when: 'copy' },
     ),
-    /* the product round (docs/PRODUCT.md 4.3): the deck as a template of this deployment, listed
+    /* the product round (docs/archive/rounds/PRODUCT.md 4.3): the deck as a template of this deployment, listed
        under Your organisation in the gallery; the same name replaces and keeps the slug */
     now('file.saveAsTemplate', 'Save as template', dialog('Save as template'), {
       when: 'copy',
@@ -1042,7 +1042,7 @@ const FILE: Menu = {
           doc: 'One slide per page',
         }),
         /* docs/FOCUS.md 3.2 parked the text, picture, web page and bundle downloads. The return
-           round returns the pictures (with the signed render url of docs/RETURN.md 2.19, since the
+           round returns the pictures (with the signed render url of docs/archive/rounds/RETURN.md 2.19, since the
            tab answered 401 on production, audit-export rows 22, 23) and the bundle (2.17); the
            fix round returns the web page once its cancelled downloads had a named mechanism (the
            built file stored on the blob backend, server/download.ts builtFileLink; 2.17), with the
@@ -1086,8 +1086,8 @@ const FILE: Menu = {
               turboslide: true,
               doc: 'The file Open and Import slides read',
             }),
-            /* the product round (docs/PRODUCT.md section 2 rank 8): the format rows start their
-               download at once; this row opens the whole dialog. The polish round (docs/POLISH.md
+            /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 8): the format rows start their
+               download at once; this row opens the whole dialog. The polish round (docs/archive/rounds/POLISH.md
                2.6 item 73; audit-chrome item 33) lists it last, after a divider */
             now('file.download.options', 'Download options', dialog('Download options'), {
               turboslide: true,
@@ -1127,7 +1127,7 @@ const FILE: Menu = {
         }),
         /* SPEC-3 5.7, 13.2: the panel's checkbox at its bottom, Google's position; 0.45, 13.3: the
            two delete rows of a version's More menu, present and disabled with their clause */
-        /* re-parked from the return round's runs (docs/RETURN.md section 1 rule 2; the row
+        /* re-parked from the return round's runs (docs/archive/rounds/RETURN.md section 1 rule 2; the row
            versions.show-changes-marks carries this id in `parks` and read 0 change marks for a
            heading edit and an added box on the memory tier and on the enforce preview;
            return/build/integrator.md section 6) */
@@ -1248,7 +1248,7 @@ const VIEW: Menu = {
       'The GT theme is edited in the repository; Slide > Edit theme is the Later stub',
     ),
     /* docs/FOCUS.md 3.2 kept Slideshow, Zoom and Show speaker notes in the default view and
-       parked the rest; the return round (docs/RETURN.md 2.16, 2.17) returns the rulers, the
+       parked the rest; the return round (docs/archive/rounds/RETURN.md 2.16, 2.17) returns the rulers, the
        guides, the snapping, the comment display, the live pointers, the filmstrip toggle, the
        modes, Full screen and the appearance, and the grid and the sections stay parked (section 8) */
     now('view.gridView', 'Grid view', toggle('gridView'), {
@@ -1350,7 +1350,7 @@ const VIEW: Menu = {
     ),
     /* SPEC-3 4.4, 4.6, 13.1: Google's two rows; the own pointer is off by default and needs the
        editor role, the collaborators' pointers are on by default for everyone. Parked by the
-       return round's integration (docs/RETURN.md section 1 rule 2) while the editor reported no
+       return round's integration (docs/archive/rounds/RETURN.md section 1 rule 2) while the editor reported no
        pointer to the room; back in the default view since the realtime round (docs/REALTIME.md 2
        row realtime.pointer.second-browser, 5.2; build/r3.md request 2): the stage publishes the
        pointer and the overlay draws the others' from real frames. The second row's id is
@@ -1426,7 +1426,7 @@ const INSERT: Menu = {
           icon: 'arrow-up-tray',
           doc: 'Pictures up to 25 MB',
         }),
-        /* the features round (docs/FEATURES.md 4.3; build/b1.md R1): the Logo picker in the submenu */
+        /* the features round (docs/archive/rounds/FEATURES.md 4.3; build/b1.md R1): the Logo picker in the submenu */
         now('insert.image.logo', 'Logo', dialog('Logo'), {
           turboslide: true,
           icon: 'tag',
@@ -1442,7 +1442,7 @@ const INSERT: Menu = {
         omit('insert.image.camera', 'Camera', GOOGLE_SERVICE),
         /* docs/FOCUS.md 3.2 parked By URL (three stacked defects, audit-images rows 2 to 4) and
            From this presentation; Upload from computer is the core route. The product round
-           returns By URL with its three defects fixed (docs/PRODUCT.md section 5; build/b2.md 1.12) */
+           returns By URL with its three defects fixed (docs/archive/rounds/PRODUCT.md section 5; build/b2.md 1.12) */
         now('insert.image.byUrl', 'By URL', dialog('Image by URL'), { icon: 'link' }),
         now(
           'insert.image.fromThisPresentation',
@@ -1453,7 +1453,7 @@ const INSERT: Menu = {
       ],
       { icon: 'photo' },
     ),
-    /* the features round (docs/FEATURES.md 4.3) drew Insert > Logo at the top level as well; Round 1
+    /* the features round (docs/archive/rounds/FEATURES.md 4.3) drew Insert > Logo at the top level as well; Round 1
        (docs/NEXT.md 4.1.3 item 20; audit-clutter 47, 96) keeps the one row, Insert > Image > Logo,
        which carries the finder terms, so Search the menus "logo" still answers Logo */
     now('insert.textBox', 'Text box', action('block.insert'), {
@@ -1473,10 +1473,10 @@ const INSERT: Menu = {
        `shapes.*` row passes on the enforce preview and on production; VERIFICATION.md
        F-shapes-export and section 8 item 3; build/b3.md R14): the whole of Insert > Shape leaves
        the default view for this ship. The rows stay, flagged, and return whole under FOCUS.md
-       section 8 once the rows pass; nothing here is deleted. The return round (docs/RETURN.md
+       section 8 once the rows pass; nothing here is deleted. The return round (docs/archive/rounds/RETURN.md
        2.2) returns Insert > Shape with its three named rows; All shapes, Arrows, Callouts and
        Equation stay parked until the geometry interpreter draws their presets (2.9). The vector
-       round (docs/VECTOR.md 2.6, 3.2; vector/build/b1.md R1): the three named rows hoist out of
+       round (docs/archive/rounds/VECTOR.md 2.6, 3.2; vector/build/b1.md R1): the three named rows hoist out of
        the Shapes container with their glyph icons, and Shapes (Google's row, once All shapes),
        Arrows, Callouts and Equation follow them in the default view as glyph grids now that the
        geometry interpreter draws every preset. */
@@ -1530,7 +1530,7 @@ const INSERT: Menu = {
       },
     ),
     /* docs/FOCUS.md 2.2, 3.2 parked tables and charts until their own audit; audit-objects of
-       the return round measured both and they return (docs/RETURN.md 2.4, 2.5) */
+       the return round measured both and they return (docs/archive/rounds/RETURN.md 2.4, 2.5) */
     sub(
       'insert.chart',
       'Chart',
@@ -1570,7 +1570,7 @@ const INSERT: Menu = {
        last rule (a `lines.*` row not passing on the enforce preview parks Line and Arrow with the
        shapes; VERIFICATION.md section 8 item 3, build/b3.md R14): the whole of Insert > Line leaves
        the default view for this ship and returns whole under section 8 once its rows pass. The
-       return round (docs/RETURN.md 2.3) returns Line, Arrow and the two connectors; Rule, Curve,
+       return round (docs/archive/rounds/RETURN.md 2.3) returns Line, Arrow and the two connectors; Rule, Curve,
        Polyline and Scribble stay parked as chosen departures (RETURN.md section 8). */
     sub(
       'insert.line',
@@ -1659,7 +1659,7 @@ const INSERT: Menu = {
       dividerBefore: true,
       doc: 'One of the theme’s icons',
     }),
-    /* the features round, ship two (docs/FEATURES.md 5.4; build/b1.md R1): Insert > Shader in the
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4; build/b1.md R1): Insert > Shader in the
        default view, the Material row renamed and unflagged; the gallery is dialogs/ShaderGallery.tsx */
     /* Round 1 (docs/NEXT.md 4.1.3 item 21, question 10's default): the seller's noun for a shader */
     now('insert.shader', 'Animated pattern', action('block.insert'), {
@@ -1703,7 +1703,7 @@ const FORMAT: Menu = {
           doc: 'Strikes through the selected text, or a whole list item',
         }),
         /* docs/FOCUS.md 3.2 parked superscript, subscript and capitalization; the return round
-           returns them (docs/RETURN.md 2.11) */
+           returns them (docs/archive/rounds/RETURN.md 2.11) */
         now('format.text.superscript', 'Superscript', action('text.style', { mark: 'sup' }), {
           key: shortcut('Cmd+.'),
           enabled: 'textBlockSelected',
@@ -1713,17 +1713,17 @@ const FORMAT: Menu = {
           enabled: 'textBlockSelected',
           doc: 'Your browser may take this key; the Format menu has the item',
         }),
-        /* the product round (docs/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
+        /* the product round (docs/archive/rounds/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
         now('format.text.font', 'Font', client('fontPicker'), {
           turboslide: true,
           enabled: 'textBlockSelected',
           dividerBefore: true,
           doc: 'The face of the selected text; More fonts lists every face with its license',
         }),
-        /* the features round (docs/FEATURES.md 3.1 item 4; build/b2.md R1): the Tabular figures row
+        /* the features round (docs/archive/rounds/FEATURES.md 3.1 item 4; build/b2.md R1): the Tabular figures row
            opens Format options at its Text section, and the finder terms list it for a seller who
            never heard the word */
-        /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 40): a check row that
+        /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 40): a check row that
            toggles the block's numerals instead of opening the panel */
         now('format.text.tabularFigures', 'Tabular figures', action('block.set'), {
           turboslide: true,
@@ -1745,7 +1745,7 @@ const FORMAT: Menu = {
               enabled: 'textBlockSelected',
             }),
           ],
-          /* docs/POLISH.md 2.6 item 74 (audit-chrome item 32): the row reads disabled with its two grey rows */
+          /* docs/archive/rounds/POLISH.md 2.6 item 74 (audit-chrome item 32): the row reads disabled with its two grey rows */
           { dividerBefore: true, enabled: 'textBlockSelected' },
         ),
         sub(
@@ -1910,7 +1910,7 @@ const FORMAT: Menu = {
       ),
     ]),
     /* the Table rows: parked by docs/FOCUS.md 2.2, 3.2, returned with the tables by
-       docs/RETURN.md 2.4 (enabled with a cell session or a selected table, fix 2 there) */
+       docs/archive/rounds/RETURN.md 2.4 (enabled with a cell session or a selected table, fix 2 there) */
     sub(
       'format.table',
       'Table',
@@ -1944,7 +1944,7 @@ const FORMAT: Menu = {
         now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
           enabled: 'tableCellSelected',
         }),
-        /* the objects round (docs/OBJECTS.md 3.3 items 4 and 6; objects/build/b5.md R1): the Header
+        /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 items 4 and 6; objects/build/b5.md R1): the Header
            row check, drawn checked from the selected table's rows[0].header and written by
            table-tools.ts's toggleHeader; the row head's own menu (TableOverlay.tsx) lists it first */
         now('format.table.headerRow', 'Header row', action('block.set'), {
@@ -1960,7 +1960,7 @@ const FORMAT: Menu = {
            "Return round fix round") gives Merge cells its range, the mechanism the integration's
            re-park named (return/build/integrator.md section 6). The rows tables.cells.merge-unmerge
            and tables.tail.merge-unmerge-buttons keep these ids in `parks`, so a red run re-parks
-           the two rows alone (docs/RETURN.md 2.4, section 1 rule 2) */
+           the two rows alone (docs/archive/rounds/RETURN.md 2.4, section 1 rule 2) */
         now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
           enabled: 'cellRangeSelected',
           disabledReason: 'Select two or more cells first',
@@ -1977,7 +1977,7 @@ const FORMAT: Menu = {
       'format.image',
       'Image',
       [
-        /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so an svg picture
+        /* the vector round (docs/archive/rounds/VECTOR.md 4.4): crop has no vector meaning, so an svg picture
            disables the row with the one sentence; with nothing selected the row keeps its doc */
         now('format.image.cropImage', 'Crop image', client('cropMode'), {
           enabled: 'rasterPictureSelected',
@@ -1998,7 +1998,7 @@ const FORMAT: Menu = {
           replaceImageItems('format.image.replaceImage'),
           { icon: 'arrow-path', enabled: 'imageSelected' },
         ),
-        /* the product round (docs/PRODUCT.md section 2 rank 10): the caption under a picture */
+        /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 10): the caption under a picture */
         now('format.image.addCaption', 'Add a caption', client('addCaption'), {
           icon: 'bars-2',
           enabled: 'imageSelected',
@@ -2010,7 +2010,7 @@ const FORMAT: Menu = {
           disabledReason: 'The picture is not cropped, masked or adjusted',
           icon: 'arrow-uturn-left',
         }),
-        /* the product round (docs/PRODUCT.md 4.4): the picture as the kit's logo on every slide */
+        /* the product round (docs/archive/rounds/PRODUCT.md 4.4): the picture as the kit's logo on every slide */
         now('format.image.useOnEverySlide', 'Use on every slide', client('useOnEverySlide'), {
           icon: 'slide',
           enabled: 'imageSelected',
@@ -2036,7 +2036,7 @@ const FORMAT: Menu = {
        the row and write the block's border, or a word art block's outline. Cycle 2: the submenu
        is the shapes and lines feature's (docs/FOCUS.md 2.6) and leaves the default view with it
        under ruling (1) (build/b3.md R14); it returned with the two features in the return round
-       (docs/RETURN.md 2.2, 2.3, 3.3). */
+       (docs/archive/rounds/RETURN.md 2.2, 2.3, 3.3). */
     sub(
       'format.bordersLines',
       'Borders & lines',
@@ -2083,15 +2083,15 @@ const FORMAT: Menu = {
     }),
     /* 4.3: on the right-click menus and in Search the menus; Format options carries the sections */
     /* docs/FOCUS.md 3.2, 3.4 parked Alt text, Drop shadow, Change shape, Edit data, Edit HTML and
-       Chart type. Edit data and Chart type returned with the charts (docs/RETURN.md 2.5); Alt text
+       Chart type. Edit data and Chart type returned with the charts (docs/archive/rounds/RETURN.md 2.5); Alt text
        and Drop shadow wait for Kevin's answers to questions 6 and 7 of RETURN.md section 9;
        Change shape stays with the galleries (2.9) and Edit HTML with the html block; Text fitting
        stays in the default view */
     now('format.altText', 'Alt text', panel('Format options'), {
       key: shortcut('Cmd+Option+Y'),
-      /* the product round returns Alt text to the default view (docs/PRODUCT.md section 5;
-         docs/RETURN.md question 6's default); the polish round draws it on the Format menu too
-         (docs/POLISH.md 2.6 item 74; audit-chrome item 39: Google lists it there) */
+      /* the product round returns Alt text to the default view (docs/archive/rounds/PRODUCT.md section 5;
+         docs/archive/rounds/RETURN.md question 6's default); the polish round draws it on the Format menu too
+         (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 39: Google lists it there) */
       enabled: 'blockSelected',
       doc: 'The description a screen reader reads',
     }),
@@ -2230,7 +2230,7 @@ const SLIDE: Menu = {
       },
     ),
     later('slide.transition', 'Transition', STILL_SLIDES),
-    /* the product round (docs/PRODUCT.md 4.1) drew Edit theme and Change theme as two rows that open
+    /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme and Change theme as two rows that open
        one panel. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 50, 99) keeps Change theme;
        Google's Edit theme stays in its position as an omitted row, so the parity record holds it */
     omit(
@@ -2239,7 +2239,7 @@ const SLIDE: Menu = {
       'Slide > Change theme and the toolbar Theme button open the one panel that edits the theme',
     ),
     /* docs/FOCUS.md 3.2 parked Change theme; it returns as the appearance switch between the GT
-       light and dark appearances (docs/RETURN.md 2.13), the Appearance section of the Brand kit
+       light and dark appearances (docs/archive/rounds/RETURN.md 2.13), the Appearance section of the Brand kit
        panel, which holds the deck's colours, faces, logo, footer, slide numbers and frame */
     now('slide.changeTheme', 'Change theme', panel('Brand kit'), {
       icon: 'swatch',
@@ -2465,7 +2465,7 @@ const TOOLS: Menu = {
       advanced: true,
       doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
     }),
-    /* the product round (docs/PRODUCT.md section 2 rank 9): link detection as you type; text fitting
+    /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 9): link detection as you type; text fitting
        is set per text box in Format options. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 83,
        101, 102): the browser's preferences in one submenu, so Tools opens on a named group and the
        collapse rule of `visibleItems` no longer draws a lone toggle without its group's name. View >
@@ -2476,7 +2476,7 @@ const TOOLS: Menu = {
         turboslide: true,
         doc: 'A web or mail address becomes a link when you type a space or Enter after it',
       }),
-      /* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md R1): three radios over one
+      /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6; build/b1.md R1): three radios over one
          per browser setting; the editor mount and the show read it, reduced motion forces Off */
       sub(
         'tools.preferences.playShaders',
@@ -2517,7 +2517,7 @@ const TOOLS: Menu = {
         {
           turboslide: true,
           icon: 'swatch',
-          /* docs/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
+          /* docs/archive/rounds/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
           doc: 'Light or dark chrome. Match follows the presentation’s own appearance',
         },
       ),
@@ -2573,7 +2573,7 @@ const TOOLS: Menu = {
         }),
       ],
     }),
-    /* the product round (docs/PRODUCT.md sections 5 and 6): the deterministic tailoring pass beside
+    /* the product round (docs/archive/rounds/PRODUCT.md sections 5 and 6): the deterministic tailoring pass beside
        Check slides. Tools > Assist left in Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 48,
        97): the title row's Assist and Cmd+J open the panel */
     now('tools.tailor', 'Tailor for a customer', dialog('Tailor for a customer'), {
@@ -2599,7 +2599,7 @@ const TOOLS: Menu = {
     parked(
       sub(
         'tools.advanced',
-        /* docs/POLISH.md 2.9 item 120 (audit-assist item 30): the submenu under Advanced tools is
+        /* docs/archive/rounds/POLISH.md 2.9 item 120 (audit-assist item 30): the submenu under Advanced tools is
            the developer's, so it says so instead of repeating the switch's word */
         'Developer',
         [
@@ -2762,7 +2762,7 @@ export const MENUS: ReadonlyArray<Menu> = [
 ];
 
 /**
- * A glyph on every menu row (docs/POLISH.md 2.6 item 57; audit-chrome item 25; polish/build/b1.md
+ * A glyph on every menu row (docs/archive/rounds/POLISH.md 2.6 item 57; audit-chrome item 25; polish/build/b1.md
  * R1 names the glyphs, Heroicons 20 solid from icons.tsx). A row that names its own icon keeps
  * it; the rest read this table by id, a family by its prefix (the dash, line start and line end
  * rows). The right click menus resolve through the same items, so every target's rows carry a
@@ -3054,7 +3054,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     status: 'now',
     item: 'file.print',
   },
-  /* Paint format: parked by docs/FOCUS.md 3.3, returned by docs/RETURN.md 2.11 and 3.2 (it
+  /* Paint format: parked by docs/FOCUS.md 3.3, returned by docs/archive/rounds/RETURN.md 2.11 and 3.2 (it
      copies the weight, the colour and the size, audit-formatting row 61) */
   {
     control: 'toolbar.paintFormat',
@@ -3081,7 +3081,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
   {
     control: 'toolbar.select',
     label: 'Select',
-    /* docs/POLISH.md 2.6 item 72: the plain arrow; the pointer toggle keeps the rays */
+    /* docs/archive/rounds/POLISH.md 2.6 item 72: the plain arrow; the pointer toggle keeps the rays */
     icon: 'cursor-arrow',
     status: 'now',
     dividerBefore: true,
@@ -3106,7 +3106,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
   },
   /* cycle 2: the two buttons left the default view with Insert > Shape and Insert > Line under
      ruling (1) (docs/FOCUS.md section 4, build/b3.md R14); they returned with their rows in the
-     return round (docs/RETURN.md 2.2, 2.3, 3.2) */
+     return round (docs/archive/rounds/RETURN.md 2.2, 2.3, 3.2) */
   {
     control: 'toolbar.insertShape',
     label: 'Insert shape',
@@ -3158,7 +3158,7 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     when: 'canEdit',
   },
   /* docs/FOCUS.md 3.3 parked Theme, Transition (Later) and Hide the menus; Theme returned with
-     Change theme (docs/RETURN.md 2.13) and the Hide the menus chevron returns if its row
+     Change theme (docs/archive/rounds/RETURN.md 2.13) and the Hide the menus chevron returns if its row
      view.hide-menus-chevron passes (RETURN.md 3.2; a red row parks the chevron alone through the
      row's parks); Transition stays a Later stub */
   {
@@ -3204,7 +3204,7 @@ export type ContextTarget =
   | 'chart'
   | 'cellRange'
   | 'guide'
-  /* the polish round (docs/POLISH.md 2.6 item 71): a right click on a table's ring or padding is
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 71): a right click on a table's ring or padding is
      the object's menu; a cell inside keeps the cell menu */
   | 'table';
 
@@ -3253,7 +3253,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'slide.newSlide',
     'slide.duplicateSlide',
-    /* docs/POLISH.md 2.6 item 73 (audit-chrome item 49): "Delete slide" on the card as on the sheet */
+    /* docs/archive/rounds/POLISH.md 2.6 item 73 (audit-chrome item 49): "Delete slide" on the card as on the sheet */
     'slide.deleteSlide',
     'slide.skipSlide',
     DIVIDER,
@@ -3300,7 +3300,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'insert.comment',
   ],
-  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 50): Google's seventeen rows
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 50): Google's seventeen rows
      for one picture. Add a caption and Use on every slide stay under Format > Image; Group draws
      with two objects, as Google's does; Reset image and Image options stay, Google's rows
      (the matrix row images.context.image reads them) */
@@ -3500,9 +3500,9 @@ export type MenuContext = {
     textBlock: boolean;
     listItem: boolean;
     tableCell: boolean;
-    /** the selected table's first row is its header row (`rows[0].header`), read by the Header row check (docs/OBJECTS.md 3.3 item 4) */
+    /** the selected table's first row is its header row (`rows[0].header`), read by the Header row check (docs/archive/rounds/OBJECTS.md 3.3 item 4) */
     tableHeader?: boolean;
-    /** the selected block's typography reads tabular numerals (the Tabular figures check row; docs/POLISH.md 2.6 item 74) */
+    /** the selected block's typography reads tabular numerals (the Tabular figures check row; docs/archive/rounds/POLISH.md 2.6 item 74) */
     tabularFigures?: boolean;
     /** the selected run or block carries a link */
     linked: boolean;
@@ -3531,7 +3531,7 @@ export type MenuContext = {
     range?: [number, number];
     /** the selected picture is cropped, masked or adjusted */
     imageEdited?: boolean;
-    /** the selected picture draws a vector (svg) asset (docs/VECTOR.md 4.4): crop is refused with the sentence */
+    /** the selected picture draws a vector (svg) asset (docs/archive/rounds/VECTOR.md 4.4): crop is refused with the sentence */
     vector?: boolean;
     /** the selected text block carries an outline (word art) */
     outlined?: boolean;
@@ -3950,7 +3950,7 @@ export function visibleItems(
           !isEmptyContainer(item, { contextOnly: options.contextOnly, ctx }))),
   );
   if (ctx === undefined || options.collapseSingles !== true) return present;
-  /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 30): a plain submenu whose
+  /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 30): a plain submenu whose
      visible rows number one draws as that row (Make a copy with Selected slides parked,
      Preferences, Accessibility settings); the ids stay, so the finder and the drivers read the
      row by its own id. The menus ask for it (Menu.tsx); the title row's chips and the surfaces

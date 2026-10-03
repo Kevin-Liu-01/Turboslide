@@ -82,7 +82,7 @@ describe('the block catalog', () => {
     expect(isMultilineType('paragraph', '/text')).toBe(true);
     expect(isMultilineType('box', '/text')).toBe(true);
     // a title's heading and a statement's big are headings, multiline since the polish round
-    // (docs/POLISH.md 2.3 item 19): Enter breaks the line, as Google's title placeholder does
+    // (docs/archive/rounds/POLISH.md 2.3 item 19): Enter breaks the line, as Google's title placeholder does
     expect(isMultilineType('heading', '/text')).toBe(true);
     // an unknown type or a pointer the type does not take is not multiline
     expect(isMultilineType('mark', '/text')).toBe(false);

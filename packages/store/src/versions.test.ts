@@ -64,7 +64,7 @@ describe('version records', () => {
     expect(versionRecordSchema.parse(record(1, 412, 413))).not.toHaveProperty('ops');
   });
 
-  it('tolerate the origin a later deployment writes and parse a record without one as before (docs/SYNC.md 3.2)', () => {
+  it('tolerate the origin a later deployment writes and parse a record without one as before (docs/archive/rounds/SYNC.md 3.2)', () => {
     const origin = { clientId: 'tab-a', opIds: ['op-1', 'op-2'] };
     const row = { ...record(1, 412, 413), origin };
     expect(versionRecordSchema.parse(row)).toEqual(row);
@@ -89,7 +89,7 @@ describe('version records', () => {
     expect(typeof RECORD_ORIGIN_WRITES).toBe('boolean');
   });
 
-  it('count the holes of a log and find the record that names a resent op (docs/SYNC.md 3.2, 3.6)', () => {
+  it('count the holes of a log and find the record that names a resent op (docs/archive/rounds/SYNC.md 3.2, 3.6)', () => {
     const contiguous = [record(1, 412, 413), record(2, 413, 414), record(3, 414, 415)];
     expect(logHoles(contiguous)).toBe(0);
     expect(logHoles([])).toBe(0);

@@ -1,4 +1,4 @@
-// The table's rows as the stage draws them (docs/OBJECTS.md 3.3 items 3 and 4): what the row
+// The table's rows as the stage draws them (docs/archive/rounds/OBJECTS.md 3.3 items 3 and 4): what the row
 // seam drag and the table's autofit read. A positioned table fills its box and its rows share
 // the box's height (block-css.ts `.free > .table`), so the block's fields say nothing about the
 // height a row draws at; the stage does. `readTableRows` reads, per row, the pitch drawn (the

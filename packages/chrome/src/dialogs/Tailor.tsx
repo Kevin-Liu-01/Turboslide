@@ -17,7 +17,7 @@ import { countMatches, slideStrings } from './FindReplace';
 import { LogoMarkPair, insertLogo, kitGrounds, searchLogos } from './Logo';
 
 /**
- * Tools > Tailor for a customer (docs/PRODUCT.md section 5; audit-gaps 16; research 07): the
+ * Tools > Tailor for a customer (docs/archive/rounds/PRODUCT.md section 5; audit-gaps 16; research 07): the
  * tailoring pass as one dialog with three steps on one card. The customer name (Replace "Acme"
  * with "Globex", counted live as "4 places on 3 slides" over the same texts Find and replace
  * reads), the logo (Replace the pictures named after the old customer with a file you choose;
@@ -29,7 +29,7 @@ import { LogoMarkPair, insertLogo, kitGrounds, searchLogos } from './Logo';
  * picture is added with `asset.add` first (its own record, as every upload), then named in the
  * pass, so the text, the skips and the swaps stay one undo step.
  *
- * The features round (docs/FEATURES.md 4.5; audit-logos 3): the Logo step gains "Find the <To>
+ * The features round (docs/archive/rounds/FEATURES.md 4.5; audit-logos 3): the Logo step gains "Find the <To>
  * logo" (`dialog.tailor.logo.find`) beside the chooser, drawn once the To field names a brand the
  * server's cache knows by title or alias, showing the mark on paper and on ink (the Logo dialog's
  * pair); a click stores the mark through `logo.insert` and the stored asset feeds `deck.tailor`'s
@@ -59,7 +59,7 @@ export function tailorCounts(
   return { places, slides };
 }
 
-/** The four raster types the hosted intake accepts (docs/FEATURES.md 4.5; audit-logos 4). */
+/** The four raster types the hosted intake accepts (docs/archive/rounds/FEATURES.md 4.5; audit-logos 4). */
 const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 /** How long the To field rests before the cache is asked whether it knows the name. */
@@ -166,7 +166,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
   });
 
   const order = useMemo(() => slideOrder(input.document.deck), [input.document]);
-  /* the count is frozen while the write is in flight (docs/POLISH.md 2.9 item 116): the live
+  /* the count is frozen while the write is in flight (docs/archive/rounds/POLISH.md 2.9 item 116): the live
      memo recomputed from the document as the replacements landed and read "Not found in the
      text" while the dialog still stood */
   const liveCounts = useMemo(() => tailorCounts(input.document, from), [input.document, from]);
@@ -236,7 +236,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
   };
 
   /**
-   * Apply is one pass (docs/POLISH.md 2.9 item 116; audit-assist item 11): the dialog closes as
+   * Apply is one pass (docs/archive/rounds/POLISH.md 2.9 item 116; audit-assist item 11): the dialog closes as
    * the pass is sent and the snackbar carries the result, the counts with Undo, or the refusal's
    * sentence, so the seller never watches the counts change under a dialog that stays. A chosen
    * file is uploaded first with the dialog reading "Adding the picture", since the asset must

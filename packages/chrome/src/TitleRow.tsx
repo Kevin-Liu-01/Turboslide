@@ -39,13 +39,13 @@ import './TitleRow.css';
  * loaded. Right, in fixed slots that exist from the first paint (0.43): the presence slot (184 px:
  * four chips, the `+N` chip drawn empty, a hair rule, the own chip), the Show all comments glyph
  * (a toggle), the inbox plate (a glyph and a two digit count, present at zero; its slot collapses
- * while the plate is parked, docs/RETURN.md 4.3), the Slideshow split button as one control (the
+ * while the plate is parked, docs/archive/rounds/RETURN.md 4.3), the Slideshow split button as one control (the
  * one solid button of the row, RETURN.md 4.1), Share with a 6 px dot when an access request is
  * pending. No star, folder, Meet, Record or Gemini (SPEC 2.0). In compact mode a Show the menus
  * chevron sits at the far right. The row's width never changes when a person joins or a count
  * moves (05 rule 4). New in Turboslide (no Prototemplate source).
  *
- * The product round (docs/PRODUCT.md section 2 ranks 25 and 30, section 3.6): the side panel
+ * The product round (docs/archive/rounds/PRODUCT.md section 2 ranks 25 and 30, section 3.6): the side panel
  * toggle the bottom bar held sits beside the comments glyph (`title.sidePanel`, the bar itself
  * left and the stage gained its 32 px); the save words stay hidden on a fresh draft until the
  * first edit, so a seller never reads Not saved yet before typing; the presence slot carries a
@@ -247,7 +247,7 @@ function SaveState() {
      (VERIFICATION-3 finding 26: the clock slot moved 158 px left after hydration) */
   const offline = shell.input.sync?.offline === true;
   /* the stream is down and the client is reopening it (C3-F1; R46): Reconnecting once every
-     write is acknowledged and the stream has been down for a few seconds (docs/POLISH.md item
+     write is acknowledged and the stream has been down for a few seconds (docs/archive/rounds/POLISH.md item
      100: a busy store on a connected tab shows no word, its pulse backs off silently; a stream
      that reopens within the grace shows none either) */
   const streamDown = shell.input.sync?.streamDown === true;
@@ -268,7 +268,7 @@ function SaveState() {
   if (!isPresent(item, shell.menuContext)) return null;
   const busy = save.state === 'saving' || save.state === 'unsaved';
   const icon = busy ? 'cloud-arrow-up' : 'cloud';
-  /* a fresh draft that nothing has written yet (docs/PRODUCT.md section 2 rank 30; audit-seller
+  /* a fresh draft that nothing has written yet (docs/archive/rounds/PRODUCT.md section 2 rank 30; audit-seller
      32): the cell keeps its width so the clock never moves, and its words wait for the first edit */
   const untouched = save.draft === true && save.state === 'saved' && !offline && !reconnecting;
   return (
@@ -334,7 +334,7 @@ function LastEdit() {
         menuItem={item.id}
         onClick={() => shell.runItem(item)}
       />
-      {/* the words beside the clock from 1280 px up (docs/POLISH.md item 92): a seller read
+      {/* the words beside the clock from 1280 px up (docs/archive/rounds/POLISH.md item 92): a seller read
           them in the tooltip alone. A click on the words opens Version history as the clock does
           (Google's "Last edit was 2 minutes ago" is the link): the polish round's fix round read
           a click on the words opening nothing */}
@@ -356,7 +356,7 @@ function LastEdit() {
 export const SLIDESHOW_MENU_ID = 'ts-menu-slideshow';
 
 /**
- * The Slideshow split button as one control (docs/RETURN.md 4.1; return/audit-chrome.md 5a): a
+ * The Slideshow split button as one control (docs/archive/rounds/RETURN.md 4.1; return/audit-chrome.md 5a): a
  * `group` labelled Slideshow around two buttons. The label half presents from the current slide
  * and ArrowDown on it opens the options menu with the first row focused, as on the chevron; the
  * chevron half is the menu button of the ARIA pattern (`aria-haspopup`, `aria-expanded`, and
@@ -715,10 +715,10 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
   const homePath = home.effect?.kind === 'route' ? home.effect.path : '/decks';
   const pending = shell.input.access?.requests?.length ?? 0;
   const commentsPresent = isPresent(comments, shell.menuContext);
-  /* the assistant's entry (docs/PRODUCT.md 6.1): drawn for a writer, where Google draws Ask Gemini */
+  /* the assistant's entry (docs/archive/rounds/PRODUCT.md 6.1): drawn for a writer, where Google draws Ask Gemini */
   const assist = itemById('title.assist');
   const assistPresent = isPresent(assist, shell.menuContext);
-  /* the tooltip names the key as the toolbar's do ("Assist, Cmd J"; docs/PRODUCT.md 6.1; pass 2
+  /* the tooltip names the key as the toolbar's do ("Assist, Cmd J"; docs/archive/rounds/PRODUCT.md 6.1; pass 2
      finding 13): tipOf reads the parenthesised chord off the title */
   const assistKey = tooltipKey(assist.key, shell.platform);
   return (
@@ -738,7 +738,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         <SaveState />
       </div>
       <div className="ts-title-r">
-        {/* the name prompt the route opens on the first write or at the join (docs/POLISH.md 2.8
+        {/* the name prompt the route opens on the first write or at the join (docs/archive/rounds/POLISH.md 2.8
             item 103): a plate that floats under the row's right end (TitleRow.css, NEXT.md 4.1.3
             item 13), never over the sheet and never inside the row, so the deck name keeps its
             width while it shows; a dialog a person opened covers it while open */}
@@ -747,7 +747,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         ) : null}
         {/* SPEC-3 0.43: five fixed slots from the first paint, left to right */}
         <PresenceSlot />
-        {/* the Assist button (docs/PRODUCT.md 6.1): the word alone, a toggle of the Assist panel
+        {/* the Assist button (docs/archive/rounds/PRODUCT.md 6.1): the word alone, a toggle of the Assist panel
             like the comments glyph; absent for a reader. No sparkle (NEXT.md 4.1.3 item 16;
             P:deck/slides/39-avoid.html 12: robot and sparkle iconography is not used for AI) */}
         <span className="ts-title-slot ts-title-assist-slot" data-control="title.assist.slot">
@@ -768,7 +768,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
           ) : null}
         </span>
         <span className="ts-title-slot ts-title-comments-slot" data-control="title.comments.slot">
-          {/* the glyph is a toggle (docs/RETURN.md 4.3; audit-chrome row 24): the first click opens
+          {/* the glyph is a toggle (docs/archive/rounds/RETURN.md 4.3; audit-chrome row 24): the first click opens
               the Comments panel with aria-pressed true, the second closes it, as Google's icon does */}
           {commentsPresent ? (
             <ToolButton
@@ -786,7 +786,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
             />
           ) : null}
         </span>
-        {/* the side panel toggle (docs/PRODUCT.md section 2 rank 25): reopens the last right
+        {/* the side panel toggle (docs/archive/rounds/PRODUCT.md section 2 rank 25): reopens the last right
             panel or closes the open one; the bottom bar that held it left */}
         <span className="ts-title-slot ts-title-panel-slot" data-control="title.sidePanel.slot">
           <ToolButton
@@ -806,7 +806,7 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
         </span>
         {/* docs/FOCUS.md 3.2 parks title.inbox: the plate is drawn only while Tools > Advanced tools
             is on. The slot carries `is-empty` while the plate is absent and TitleRow.css collapses
-            it (docs/RETURN.md 4.3, 2.16), so the parked plate leaves no 60 px hole; the slot keeps
+            it (docs/archive/rounds/RETURN.md 4.3, 2.16), so the parked plate leaves no 60 px hole; the slot keeps
             its width whenever the plate is present (SPEC-3 4.2, 9.2) */}
         <span
           className={cn(

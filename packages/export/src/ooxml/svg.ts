@@ -1,4 +1,4 @@
-// The vector picture of the OOXML post-process (docs/VECTOR.md 4.6): a `p:pic` pptxgenjs wrote
+// The vector picture of the OOXML post-process (docs/archive/rounds/VECTOR.md 4.6): a `p:pic` pptxgenjs wrote
 // from a PNG (the fallback every viewer reads) gains, inside its `a:blip`, the extension
 // PowerPoint 2016 and later read for a vector, `<a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">`
 // holding `<asvg:svgBlip r:embed="rIdN"/>`, a relationship of the image type from the slide's rels

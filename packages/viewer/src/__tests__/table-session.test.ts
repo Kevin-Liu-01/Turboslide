@@ -13,9 +13,9 @@ import {
   tableWithPastedGrid,
 } from '../table-session';
 
-// The cell a parked session's pointer names after the grid changed under it (docs/RETURN.md 2.4;
+// The cell a parked session's pointer names after the grid changed under it (docs/archive/rounds/RETURN.md 2.4;
 // build/b5.md section 7: Insert row above duplicated the cell's text into the new row), and a
-// spreadsheet's rows on the clipboard (docs/FEATURES.md 2.3 item 5; audit-objects 12).
+// spreadsheet's rows on the clipboard (docs/archive/rounds/FEATURES.md 2.3 item 5; audit-objects 12).
 
 function table(rows: string[][]): TableBlock {
   const t = emptyTable('tbl', rows[0]?.length ?? 1, rows.length);

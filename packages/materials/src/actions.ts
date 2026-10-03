@@ -17,7 +17,7 @@
 // at the back of a slide with its dither in one write; `asset.add --replace-source` attaches a
 // continuous source to an existing asset so its committed twins can be re-toned.
 //
-// The features round's ship two (docs/FEATURES.md 5.5, 5.8; audit-shaders 18): the `shader.*`
+// The features round's ship two (docs/archive/rounds/FEATURES.md 5.5, 5.8; audit-shaders 18): the `shader.*`
 // actions with `material.list` and `material.capture` kept as aliases. `shader.list` is the
 // catalog with the gallery's categories, the featured order, the preview files and the common
 // control ranges; `shader.insert` lands a block with its featured preset and its controls resolved
@@ -138,7 +138,7 @@ export type AssetActionDeps = {
    */
   dispatch?: (id: ActionId, input: unknown, ctx: ActionContext) => Promise<unknown>;
   /**
-   * Where a shader an agent inserts lands (docs/FEATURES.md section 1, the placement decision;
+   * Where a shader an agent inserts lands (docs/archive/rounds/FEATURES.md section 1, the placement decision;
    * `shader.insert`): the largest free rectangle of the body slot through the product round's
    * helper (apps/studio/src/editor/place-insert.ts, bound by the studio), else the sheet's centre.
    */
@@ -831,7 +831,7 @@ export function backgroundFrameBlockOf(
 }
 
 /**
- * Change background > Shader > Place with the frame the editor drew (docs/FEATURES.md 5.5's client
+ * Change background > Shader > Place with the frame the editor drew (docs/archive/rounds/FEATURES.md 5.5's client
  * pixel path; the polish round's fix round 2 for `shaders.background.place-answers`: the hosted
  * render in the function's Chromium answered after 17 s on the run of record and not within 65 s
  * on its rerun). The bytes are checked as a frame of the sheet's aspect (3200 by 1800), stored
@@ -859,7 +859,7 @@ export async function placeClientBackgroundFrame(
   const wanted = frameSizeFor(materialAspectOf(block));
   if (size[0] !== wanted[0] || size[1] !== wanted[1])
     throw new RangeError(
-      `a shader ground's frame is ${wanted[0]} by ${wanted[1]} (docs/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
+      `a shader ground's frame is ${wanted[0]} by ${wanted[1]} (docs/archive/rounds/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
     );
   const assetId = frameAssetId(frameKey);
   const relative = `assets/${assetId}@2x.png`;
@@ -867,7 +867,7 @@ export async function placeClientBackgroundFrame(
   try {
     put = await deps.store.putAsset(relative, png, 'image/png');
   } catch (error) {
-    // the first writer's file stands for a repeated key (commitFrame's rule; docs/FEATURES.md 5.5)
+    // the first writer's file stands for a repeated key (commitFrame's rule; docs/archive/rounds/FEATURES.md 5.5)
     if (!(error instanceof AssetExistsError) && !isBlobExistsError(error)) throw error;
     put = { relative, existed: true };
   }
@@ -902,7 +902,7 @@ export async function placeClientBackgroundFrame(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The shader library (docs/FEATURES.md 5.5, 5.8); the pure writes are shader-writes.ts (browser safe)
+// The shader library (docs/archive/rounds/FEATURES.md 5.5, 5.8); the pure writes are shader-writes.ts (browser safe)
 
 export {
   SHADER_INSERT_SIZE,
@@ -1084,7 +1084,7 @@ export function pngSize(bytes: Uint8Array): [number, number] {
 /**
  * The frame's bytes as the PNG the twin is written from: a PNG as it came; a WebP decoded and
  * written as a lossless PNG at the same size (the client's fallback for a PNG over the function's
- * body cap, viewer shader-frame.ts and docs/POLISH.md item 36, so the stored twin, the exports and
+ * body cap, viewer shader-frame.ts and docs/archive/rounds/POLISH.md item 36, so the stored twin, the exports and
  * the card read one format as before). Anything else is refused as a frame.
  */
 export async function frameBytesAsPng(bytes: Uint8Array): Promise<Uint8Array> {
@@ -1176,7 +1176,7 @@ export async function commitFrame(
   const wanted = frameSizeFor(materialAspectOf(block));
   if (Math.max(size[0], size[1]) !== wanted[0] && Math.max(size[0], size[1]) !== wanted[1])
     throw new RangeError(
-      `a shader frame has the long side 3200 (docs/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
+      `a shader frame has the long side 3200 (docs/archive/rounds/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
     );
   const assetId = frameAssetId(frameKey);
   const relative = `assets/${assetId}@2x.png`;
@@ -1186,7 +1186,7 @@ export async function commitFrame(
   } catch (error) {
     /* two clients rendering one key with different pixels (a renderer's rounding) resolve to one
        asset: the first writer's file stands and this write records it and points the block at it
-       (docs/FEATURES.md 5.5: "a BlobExistsError on the put is success"; build/b7.md R2) */
+       (docs/archive/rounds/FEATURES.md 5.5: "a BlobExistsError on the put is success"; build/b7.md R2) */
     if (!(error instanceof AssetExistsError) && !isBlobExistsError(error)) throw error;
     put = { relative, existed: true };
   }

@@ -14,7 +14,7 @@ import { useSnackbar } from '../Snackbar';
 import { SLIDESHOW_MENU_ID } from '../TitleRow';
 import { hideTooltip } from '../Tooltip';
 
-// The title row's right cluster of the return round (docs/RETURN.md 4.1, 4.3; build/b1.md
+// The title row's right cluster of the return round (docs/archive/rounds/RETURN.md 4.1, 4.3; build/b1.md
 // "Return round"): the Slideshow split button as one control (the group, the two halves, the
 // ARIA of a split button with aria-controls only while the menu is mounted, ArrowDown on the label
 // opening the options with focus returning to the half that opened them, the menu anchored to the
@@ -114,7 +114,7 @@ afterEach(() => {
   document.querySelector('.ts-crop-frame')?.remove();
 });
 
-describe('the Slideshow split button as one control (docs/RETURN.md 4.1)', () => {
+describe('the Slideshow split button as one control (docs/archive/rounds/RETURN.md 4.1)', () => {
   it('is a group labelled Slideshow around the label half and the chevron half, with the ARIA of a split button', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const split = control(container, 'present.split');
@@ -222,7 +222,7 @@ describe('the Slideshow split button as one control (docs/RETURN.md 4.1)', () =>
   });
 });
 
-describe('the right cluster (docs/RETURN.md 4.3)', () => {
+describe('the right cluster (docs/archive/rounds/RETURN.md 4.3)', () => {
   it('the comments glyph toggles the Comments panel with aria-pressed', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const glyph = control(container, 'title.comments');
@@ -267,7 +267,7 @@ describe('the right cluster (docs/RETURN.md 4.3)', () => {
   });
 });
 
-describe('View > Mode > Viewing (docs/RETURN.md 2.14 item 6)', () => {
+describe('View > Mode > Viewing (docs/archive/rounds/RETURN.md 2.14 item 6)', () => {
   it('draws no toolbar in Viewing and the toolbar in Editing and Commenting', () => {
     const viewing = render(<Harness input={input({ mode: 'viewing' })} shell={shellState()} />);
     expect(viewing.container.querySelector('.pt-viewer')?.getAttribute('data-edit-mode')).toBe(

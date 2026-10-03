@@ -55,7 +55,7 @@ import {
 // trash, Delete forever, a 404 on /edit/<id>) and closes B's context the way a tab closes (a
 // navigation to about:blank first, so the leave beacon lands). A row whose control a lane has
 // not landed (Follow in the default view, the View rows) is not driven with the control's id,
-// never passed (docs/PRODUCT.md 8.1); a bound missed is a failed row with its measured
+// never passed (docs/archive/rounds/PRODUCT.md 8.1); a bound missed is a failed row with its measured
 // milliseconds in the reason. Retries stay 0, one worker, 1440 by 900.
 //
 // The Cloudflare phase (docs/CLOUDFLARE.md 2.1, 2.3, 5.4): on the `do` tier the two origins are
@@ -514,7 +514,7 @@ async function drawingsOf(p: Page, clientId: string): Promise<Drawings> {
 }
 
 /**
- * The instance that answers an origin's `sync.status` (`storeCalls.instance`, docs/SYNC.md 6.3;
+ * The instance that answers an origin's `sync.status` (`storeCalls.instance`, docs/archive/rounds/SYNC.md 6.3;
  * build/r1.md R1-R5c), or the reason it could not be read. Through the spec's own request
  * context with the bearer where one exists (none on localhost).
  */

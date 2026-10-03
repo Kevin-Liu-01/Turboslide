@@ -44,7 +44,7 @@ import './Menu.css';
  * to the right of its parent row for a submenu (to the left when the viewport ends), at the
  * pointer for a context menu. New in Turboslide (no Prototemplate source).
  *
- * The product round (docs/PRODUCT.md 3.1.1): the access key underline draws on Windows and Linux
+ * The product round (docs/archive/rounds/PRODUCT.md 3.1.1): the access key underline draws on Windows and Linux
  * while Alt is held and never on macOS, where the platform has no Alt mnemonics and the
  * underlines read as links (audit-interface 18); a row whose submenu or grid is open schedules no
  * tooltip and the one that was up leaves when the submenu opens, so the plate of Insert > Table
@@ -75,7 +75,7 @@ export type MenuProps = {
   /**
    * For `below`: the plate's left edge on the anchor's left (`start`, the bar's titles), or its
    * right edge on the anchor's right (`end`: the Slideshow split button's options menu hangs
-   * under the control's right edge, docs/RETURN.md 4.1, instead of clamping at the viewport).
+   * under the control's right edge, docs/archive/rounds/RETURN.md 4.1, instead of clamping at the viewport).
    */
   align?: MenuAlign;
   /** a row without a submenu was activated; the menu closes after this */
@@ -131,7 +131,7 @@ export type MenuAlign = 'start' | 'end';
 /**
  * Where the plate goes so it stays inside the viewport: below the anchor and left aligned for the
  * bar (right aligned with `align: 'end'`, so a plate under a control at the row's right edge meets
- * that edge rather than the viewport clamp, docs/RETURN.md 4.1), moving above when the viewport
+ * that edge rather than the viewport clamp, docs/archive/rounds/RETURN.md 4.1), moving above when the viewport
  * ends first; to the right of the parent row for a submenu, flipping to its left when the right
  * edge is out, and under its row on a phone when neither side has room; at the pointer for a
  * context menu, flipping left and up when it would overflow. Every result is clamped 8 px inside
@@ -311,7 +311,7 @@ function MenuList({
   const typed = useRef({ buffer: '', at: 0 });
   /* a list that opens under a resting pointer (a right click menu at the pointer) gets the
      browser's own enter for the row under it, with no movement of the pointer; that enter lights
-     no row (docs/POLISH.md 2.6 item 74; audit-chrome item 48). The roving focus follows the
+     no row (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 48). The roving focus follows the
      pointer once it has moved, or after the first moments of the list, when an enter is a real entry */
   const mountedAt = useRef(Date.now());
   const pointerMoved = useRef(false);
@@ -606,7 +606,7 @@ function MenuList({
               : 'menuitemcheckbox';
         const doc = tooltipDoc(item, context);
         /* a row draws a plate only when it is enabled, leads nowhere else and has a sentence to
-           say (docs/POLISH.md 2.6 item 61; audit-chrome item 21: a disabled row's plate covered
+           say (docs/archive/rounds/POLISH.md 2.6 item 61; audit-chrome item 21: a disabled row's plate covered
            the rows under it, a submenu row's the submenu, a row without a doc repeated its name);
            `data-tip` stays on every row for the tooltip audit */
         const quiet = !rowEnabled || submenu || doc === undefined;
@@ -671,7 +671,7 @@ function MenuList({
             >
               <span className="ts-menu-ic" aria-hidden="true">
                 {checked === true ? (
-                  /* the check as the sprite's check glyph (docs/POLISH.md 2.6 item 57: a glyph on
+                  /* the check as the sprite's check glyph (docs/archive/rounds/POLISH.md 2.6 item 57: a glyph on
                      every row, a checked row included) */
                   <span className="ts-menu-check">
                     <Icon name="check" />

@@ -164,7 +164,7 @@ async function style(ctx: CommandContext): Promise<number> {
     if (value !== undefined) marks[key] = value;
     else if (flagBoolean(ctx.args, `no-${key}`)) marks[key] = null;
   }
-  /* the polish round (docs/POLISH.md 2.3 item 16): the range's size in pixels, --no-size clears it */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 16): the range's size in pixels, --no-size clears it */
   const size = flagString(ctx.args, 'size');
   if (size !== undefined) {
     const px = Number(size);

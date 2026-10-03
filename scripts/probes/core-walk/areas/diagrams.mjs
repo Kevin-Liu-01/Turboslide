@@ -1,4 +1,4 @@
-// Diagrams (docs/RETURN.md 2.6, section 5 `diagrams.*` with the driver `probe --core`): the
+// Diagrams (docs/archive/rounds/RETURN.md 2.6, section 5 `diagrams.*` with the driver `probe --core`): the
 // Diagram panel with its six types, the Steps stepper and the three styles, the Process diagram
 // that lands as one group and moves as one, a label edited inside the group, the light
 // appearance, the show and the reload. Insert > Diagram is reached in the default view, or with
@@ -13,13 +13,13 @@ export const IDS = [
   'diagrams.light-appearance',
   'diagrams.present',
   'diagrams.reload',
-  /* the features round, ship one (docs/FEATURES.md 2.2 ranks 6 and 9): a double click opens a
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2 ranks 6 and 9): a double click opens a
      label, Tab moves between labels, a step is one shape with its label; driven by
      `featuresRound` below */
   'diagrams.label.double-click-opens',
   'diagrams.label.tab-next',
   'diagrams.step.one-object',
-  /* the objects round (docs/OBJECTS.md 4.2 item 3): a member duplicated and removed alone */
+  /* the objects round (docs/archive/rounds/OBJECTS.md 4.2 item 3): a member duplicated and removed alone */
   'diagrams.member.duplicate-delete',
 ];
 
@@ -42,7 +42,7 @@ export async function run(t) {
   const members = async () => (await t.objectsOf(S)).filter((o) => o.pos?.group !== undefined);
   /**
    * The diagram's shape: the boxes, the labels (a separate text member on the return round's
-   * templates, the box's own text since docs/FEATURES.md 2.2 rank 9 made a step one object), the
+   * templates, the box's own text since docs/archive/rounds/FEATURES.md 2.2 rank 9 made a step one object), the
    * lines and the groups. The rows accept either form and record which they met.
    */
   const isBox = (o) => o.type === 'shape' && o.block.shape !== 'line';
@@ -248,7 +248,7 @@ export async function run(t) {
         if (path) {
           const cs = getComputedStyle(path);
           (svg.getAttribute('data-shape') === 'line' ? out.lines : out.strokes).push(cs.stroke);
-          /* a step's own label (docs/FEATURES.md 2.2 rank 9): the shape's text layer */
+          /* a step's own label (docs/archive/rounds/FEATURES.md 2.2 rank 9): the shape's text layer */
           const own = (el.closest('.free') ?? el).querySelector('.shape-text, [data-run]');
           if (own && (own.textContent ?? '').trim() !== '')
             out.texts.push(getComputedStyle(own).color);
@@ -268,7 +268,7 @@ export async function run(t) {
       const drawn = ids.filter(
         (id) => sheet?.querySelector(`[data-block="${id}"]`) !== null,
       ).length;
-      /* the labels: a separate text member or the box's own text (docs/FEATURES.md 2.2 rank 9) */
+      /* the labels: a separate text member or the box's own text (docs/archive/rounds/FEATURES.md 2.2 rank 9) */
       const labels = sheet
         ? ids.filter((id) => {
             const el = sheet.querySelector(`[data-block="${id}"]`);
@@ -369,7 +369,7 @@ export async function run(t) {
 }
 
 /**
- * The objects round (docs/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`): a
+ * The objects round (docs/archive/rounds/OBJECTS.md 4.2 item 3, the row `diagrams.member.duplicate-delete`): a
  * double click enters a member and Escape returns to the member selected inside the group; Cmd+D
  * there duplicates the member inside the group offset by 16 px, Delete removes the member alone
  * and detaches its connectors, and Cmd+D with the group selected duplicates the group as today.
@@ -460,7 +460,7 @@ async function objectsRound(t, S, h) {
       const ok = memberSelected && copyOk && deleteOk && groupOk;
       return {
         ok,
-        observed: `${n0} members (${boxes.length} steps, ${links.length} links); the double click: session ${entered.editing}, chip "${entered.chip}"; Escape: chip "${member.chip}", session ${member.editing}, the member's handles ${member.handles.includes(`handle.${step2.id}.move`)}; Cmd+D: ${copies.length} new member(s)${copy ? ` ${copy.id} in group ${copy.pos.group} at +${copy.pos.x - step2.pos.x},+${copy.pos.y - step2.pos.y}` : ''} (chip "${copyChip}"), members ${after.length}; Delete: members ${removed.length}, the others kept ${keptOthers}, links ${removed.filter(isLink).length}; the group's Cmd+D (chip "${facts.chip}"): ${doubled.length} members in ${groups.size} group(s)${ok ? '' : ` (docs/OBJECTS.md 4.2 item 3, ${LANE} with B1)`}`,
+        observed: `${n0} members (${boxes.length} steps, ${links.length} links); the double click: session ${entered.editing}, chip "${entered.chip}"; Escape: chip "${member.chip}", session ${member.editing}, the member's handles ${member.handles.includes(`handle.${step2.id}.move`)}; Cmd+D: ${copies.length} new member(s)${copy ? ` ${copy.id} in group ${copy.pos.group} at +${copy.pos.x - step2.pos.x},+${copy.pos.y - step2.pos.y}` : ''} (chip "${copyChip}"), members ${after.length}; Delete: members ${removed.length}, the others kept ${keptOthers}, links ${removed.filter(isLink).length}; the group's Cmd+D (chip "${facts.chip}"): ${doubled.length} members in ${groups.size} group(s)${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 4.2 item 3, ${LANE} with B1)`}`,
       };
     },
   );
@@ -468,7 +468,7 @@ async function objectsRound(t, S, h) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.2 ranks 6 and 9; the rows
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.2 ranks 6 and 9; the rows
  * `diagrams.label.double-click-opens`, `diagrams.label.tab-next` and `diagrams.step.one-object`):
  * a double click on a step opens its label at once, Tab moves between the labels of the group and
  * Enter on the group opens the first, and a process diagram of three steps is three shapes with
@@ -531,7 +531,7 @@ async function featuresRound(t, S, h) {
       if (open1) {
         /* the label's end by a select all and ArrowRight: End stops at the visual line's end, and
            a rounded rectangle's label wraps earlier since it sits in its ECMA text rectangle
-           (docs/VECTOR.md 2.3; the five step process' "Step 1 plus" is two lines at 22 px) */
+           (docs/archive/rounds/VECTOR.md 2.3; the five step process' "Step 1 plus" is two lines at 22 px) */
         await t.press('Meta+a');
         await t.press('ArrowRight');
         await t.typeHuman(' a');

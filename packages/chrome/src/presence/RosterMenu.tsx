@@ -114,10 +114,10 @@ export function RosterMenu({
           ? (participant.name ?? participant.label)
           : displayNameFor(participant, viewer);
         /* the word after the name: " · guest" for a typed name; a verified account draws the
-           badge in its place and keeps "signed in" as the accessible word (docs/PEOPLE.md 3.7) */
+           badge in its place and keeps "signed in" as the accessible word (docs/archive/rounds/PEOPLE.md 3.7) */
         const trust = trustMarkOf(participant) === null ? trustWordFor(participant) : null;
         const following = presence.following === participant.clientId;
-        /* Follow while its row is offered (docs/POLISH.md item 104: an anonymous editor can be
+        /* Follow while its row is offered (docs/archive/rounds/POLISH.md item 104: an anonymous editor can be
            followed; the realtime round returned the row to the default view); where Follow is
            refused the row is a one time jump, in word and in click, never a hidden control */
         const follow = !self && showFollowWord && canFollow(participant, capabilities);

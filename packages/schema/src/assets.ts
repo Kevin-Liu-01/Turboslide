@@ -1,7 +1,7 @@
 // Assets carry role, twins, provenance, treatment and metrics (SPEC 4.2 "Assets"). Twins are
 // relative paths under assets/; the two-tone treatment records the OPENERS.md pipeline as data
 // (report 03 section 11 item 15), and metrics record the plate clearance that used to be counted
-// by hand (item 16). The vector round (docs/VECTOR.md 4.1) adds the svg asset: `kind: 'svg'` with
+// by hand (item 16). The vector round (docs/archive/rounds/VECTOR.md 4.1) adds the svg asset: `kind: 'svg'` with
 // its sanitized source under `vector` beside the PNG `twins`, read through `vectorOf`, which also
 // answers a ship one logo's untinted `sourceFile` so the decks already stored draw their logos as
 // vector without a migration.
@@ -38,21 +38,21 @@ export type AssetSource =
       uniforms: Record<string, number | number[] | string>;
       /**
        * The frame's pixels: 3200 by 1800 for the 16:9 box, and since the features round's ship two
-       * the box's own aspect with the long side 3200 (docs/FEATURES.md 5.5: 3200 by 800 for a 4:1
+       * the box's own aspect with the long side 3200 (docs/archive/rounds/FEATURES.md 5.5: 3200 by 800 for a 4:1
        * band, 1800 by 3200 for a 9:16 box).
        */
       size: [number, number];
       timeMs: number;
       /**
        * Where the frame was rendered: the hosted job's Metal or SwiftShader, or `client`, the
-       * editor's own WebGL (docs/FEATURES.md 5.5); `renderer` names the GPU string either way.
+       * editor's own WebGL (docs/archive/rounds/FEATURES.md 5.5); `renderer` names the GPU string either way.
        */
       backend: 'angle-metal' | 'swiftshader' | 'client';
       renderer: string;
       /** The capture's own identity: sha256 over materialId, uniforms, size, timeMs and backend. */
       recipeKey: string;
       /**
-       * What decides staleness (docs/FEATURES.md 5.5): sha256 over the material, the preset, the
+       * What decides staleness (docs/archive/rounds/FEATURES.md 5.5): sha256 over the material, the preset, the
        * resolved uniforms, the anchor, the six kit colours and the box's aspect, without the pixel
        * size and the backend, so a client frame and a hosted frame of one recipe share it. Absent
        * on a frame captured before the features round, which is stale by that absence.
@@ -82,13 +82,13 @@ export type AssetSource =
 
 /**
  * An uploaded, pasted, dropped or fetched file (the intake's default record). `sanitized` records
- * the elements the svg sanitizer dropped from an svg asset (docs/VECTOR.md 4.2), in document
+ * the elements the svg sanitizer dropped from an svg asset (docs/archive/rounds/VECTOR.md 4.2), in document
  * order, once each; absent for a raster and for an svg nothing left.
  */
 export type FileAssetSource = { kind: 'file'; sanitized?: { removed: string[] } };
 
 /**
- * A company mark from a logo source (docs/FEATURES.md 4.4; audit-logos 2): the provider and the
+ * A company mark from a logo source (docs/archive/rounds/FEATURES.md 4.4; audit-logos 2): the provider and the
  * mark's slug and variant as the source names them, the title, the licence string as recorded on
  * the day of the insert, the brand's site and guidelines, when it was fetched and the digest of the
  * sanitized file; `sanitized` records the elements the sanitizer dropped (4.7), `tint` the kit's
@@ -165,7 +165,7 @@ export type Asset = {
   role: AssetRole;
   alt: string;
   /**
-   * `svg` for a vector picture (docs/VECTOR.md 4.1): `vector` names its sanitized source file and
+   * `svg` for a vector picture (docs/archive/rounds/VECTOR.md 4.1): `vector` names its sanitized source file and
    * `twins` the PNG twin at 3x for the surfaces that cannot take a vector (the deck cards, the
    * render route's thumbnails, the PowerPoint's fallback blip). Absent for every raster asset.
    */
@@ -373,7 +373,7 @@ export const assetSchema = z.strictObject({
     snap: ASSET_ROLES,
     group: 'Asset',
   }),
-  /* the polish round (docs/POLISH.md 2.5 item 45): a description may start empty, as Google's does */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 45): a description may start empty, as Google's does */
   alt: annotate(z.string(), { label: 'Alt text', control: 'textarea', group: 'Asset' }),
   kind: z.literal('svg').optional(),
   vector: assetTwinsSchema.optional(),
@@ -433,7 +433,7 @@ export function assetTwin(asset: Asset, theme: 'light' | 'dark'): string {
 }
 
 /**
- * The vector files an asset draws as (docs/VECTOR.md 4.1): `vector` when the record carries it,
+ * The vector files an asset draws as (docs/archive/rounds/VECTOR.md 4.1): `vector` when the record carries it,
  * and for a ship one logo asset (`role: 'logo'`, a `sourceFile` ending in `.svg`, no tint) the
  * untinted `sourceFile` as one neutral file, so the decks already on production draw their logos
  * as vector without a migration. A tinted logo of ship one has no tinted svg on disk and answers

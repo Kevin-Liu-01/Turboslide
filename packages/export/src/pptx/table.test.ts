@@ -96,7 +96,7 @@ describe('a table cell', () => {
   });
 });
 
-describe('normalisedColumnWidths (docs/RETURN.md 2.4 fix 4)', () => {
+describe('normalisedColumnWidths (docs/archive/rounds/RETURN.md 2.4 fix 4)', () => {
   it('writes the measured widths when they fill the box', () => {
     expect(
       normalisedColumnWidths({

@@ -2,7 +2,7 @@
 // crosses (head:39-49), the wordmark (head:52-53, 463) and the counter (head:51, 464). A slide never
 // draws these. The sprite is emitted once per stage so `<use href="#gt-mark">` and the icons resolve.
 //
-// The brand kit's frame band (docs/PRODUCT.md 4.1, 4.4; B5a): the wordmark is the footer's logo
+// The brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1, 4.4; B5a): the wordmark is the footer's logo
 // slot and the counter the footer's right, both drawn from the kit record when the deck carries
 // one. `frameBandOf(deck, ...)` reads the record into one value, `FrameBand`, that the stage here,
 // the viewer's Frame (packages/viewer/src/Frame.tsx) and the export masters render the same way:
@@ -108,10 +108,10 @@ export type BandAssetResolver = (
 
 /**
  * The band's resolver over a deck's assets: the vector file of the appearance when the asset
- * draws one (docs/VECTOR.md 4.4, `assetVector`), else the twin path (the neutral twin when the
+ * draws one (docs/archive/rounds/VECTOR.md 4.4, `assetVector`), else the twin path (the neutral twin when the
  * asset has one), through the caller's URL rule, the renderer's `assetSrc` or its `assetBase`
  * prefix. One helper, so the editor, the viewer, the print page, the standalone file and the
- * export capture resolve the footer logo the same way (docs/PRODUCT.md 4.1, 4.4).
+ * export capture resolve the footer logo the same way (docs/archive/rounds/PRODUCT.md 4.1, 4.4).
  */
 export function bandAssetResolver(
   deck: Pick<Deck, 'assets'>,
@@ -193,7 +193,7 @@ export function frameBandHtml(band: FrameBand): string {
   let logo = '';
   /* the class ts-kit-wordmark is the one the viewer's Frame gives the band: the theme sheet hides
      `.wordmark:not(.ts-kit-wordmark)` whenever the kit draws the footer (theme-css.ts), so without
-     it the export's document and the print document drew no footer logo (docs/FEATURES.md 4.8;
+     it the export's document and the print document drew no footer logo (docs/archive/rounds/FEATURES.md 4.8;
      build/b7.md R1) */
   if (band.logo.kind === 'default')
     logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)}" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>`;
@@ -207,7 +207,7 @@ export function frameBandHtml(band: FrameBand): string {
 }
 
 /**
- * The band a surface draws on one slide: the footer text is left off a title slide (docs/PRODUCT.md
+ * The band a surface draws on one slide: the footer text is left off a title slide (docs/archive/rounds/PRODUCT.md
  * 4.4: "every slide but the title"); the logo and the counter format stay. The show's stage keeps
  * the text in its markup and hides it through `is-title-slide` (renderStage, runtime.ts).
  */
@@ -215,15 +215,15 @@ export function bandForSlide(
   band: FrameBand,
   _slide: { kind?: string } | null | undefined,
 ): FrameBand {
-  /* the polish round (docs/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
-     on the title slide too, as the Brand kit panel's sentence says; docs/PRODUCT.md 4.4's "every
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
+     on the title slide too, as the Brand kit panel's sentence says; docs/archive/rounds/PRODUCT.md 4.4's "every
      slide but the title" is superseded */
   return band;
 }
 
 export type StageOptions = {
   theme: Theme;
-  /** the slide on the stage is a title slide: the band's footer text is hidden (docs/PRODUCT.md 4.4) */
+  /** the slide on the stage is a title slide: the band's footer text is hidden (docs/archive/rounds/PRODUCT.md 4.4) */
   titleSlide?: boolean;
   /** The counter text, or none for a stage without a counter. */
   counter?: string;

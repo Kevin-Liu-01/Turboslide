@@ -1,4 +1,4 @@
-// The font catalog, the probe's rows (docs/PRODUCT.md 4.2, 8.1 `fonts.*` with the driver
+// The font catalog, the probe's rows (docs/archive/rounds/PRODUCT.md 4.2, 8.1 `fonts.*` with the driver
 // `probe --core`): the Font dropdown on the text tail with its search field, the brand and used
 // groups and the catalog by category, a face applied to a run and undone, the search, the Format
 // > Text > Font row, More fonts with a licence line per family, the face after a reload and in
@@ -21,7 +21,7 @@ export const IDS = [
   'fonts.more-fonts.licence',
   'fonts.face.reload-and-show',
   'fonts.agent.font-list',
-  /* the features round, ship one (docs/FEATURES.md 3.1, 3.2, 3.5): the v4.1 licence link, the
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 3.1, 3.2, 3.5): the v4.1 licence link, the
      fallback face in the stack, the display features gated on Inter, Geist and the six families,
      the P1 category search and the table taking a family; driven by `featuresRound` below */
   'fonts.links.licence-v4-1',
@@ -66,7 +66,7 @@ export const FONT_IDS = [
   'ibm-plex-mono',
   'fira-code',
 ];
-/** The eight families of the features round (docs/FEATURES.md 3.2), on top of the product round's 26. */
+/** The eight families of the features round (docs/archive/rounds/FEATURES.md 3.2), on top of the product round's 26. */
 export const FEATURES_FONT_IDS = [
   'geist',
   'geist-mono',
@@ -473,7 +473,7 @@ export async function run(t) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 3.1 items 2, 3 and 5, 3.2, 3.5; the rows
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 3.1 items 2, 3 and 5, 3.2, 3.5; the rows
  * `fonts.links.licence-v4-1` to `fonts.table.takes-family`): the v4.1 licence link in More fonts,
  * 'Inter Fallback' second in the sheet's stack, the display features on Inter alone, Geist and
  * Geist Mono and the six families in the dropdown, the P1 search over the category and a table
@@ -821,7 +821,7 @@ async function featuresRound(t, h) {
         'schibsted-grotesk': 'sans',
         /* Google's METADATA.pb categories at the pinned commit, the catalog's rule since the product
            round (build/b2.md 1.6, R3): Bricolage Grotesque is sans and Fraunces serif, not the
-           Display group docs/FEATURES.md 3.2 wrote them under */
+           Display group docs/archive/rounds/FEATURES.md 3.2 wrote them under */
         'bricolage-grotesque': 'sans',
         fraunces: 'serif',
         newsreader: 'serif',

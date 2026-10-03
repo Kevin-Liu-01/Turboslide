@@ -26,7 +26,7 @@ import {
 import { shrinkMutation } from '../text-fit';
 
 // Where a new picture lands, what a refused upload says and the shrink step of a text box
-// (docs/PRODUCT.md section 2 rank 10, section 5 "Pictures" and "Autofit").
+// (docs/archive/rounds/PRODUCT.md section 2 rank 10, section 5 "Pictures" and "Autofit").
 
 describe('pictureInsertBox', () => {
   it('centres the picture in the body slot at the largest size that keeps the 40 px margin', () => {
@@ -51,7 +51,7 @@ describe('pictureInsertBox', () => {
     expect(pictureInsertBox([0, 0], [100, 100, 800, 450], 0)).toEqual([100, 100, 800, 450]);
   });
 
-  it('keeps the natural size of a picture under the limit whatever the area (docs/POLISH.md item 51)', () => {
+  it('keeps the natural size of a picture under the limit whatever the area (docs/archive/rounds/POLISH.md item 51)', () => {
     // the same 180 px icon in the whole body and in a strip beside a table
     const whole = pictureInsertBox([180, 180]);
     expect([whole[2], whole[3]]).toEqual([180, 180]);
@@ -80,7 +80,7 @@ describe('pictureInsertBox', () => {
   });
 });
 
-describe('the box of a dropped or replaced picture (docs/POLISH.md items 37 and 50)', () => {
+describe('the box of a dropped or replaced picture (docs/archive/rounds/POLISH.md items 37 and 50)', () => {
   it('moves a dropped box inside the sheet and cuts one larger than the sheet to its edge', () => {
     expect(clampBoxToSheet([1096, 696, 480, 240])).toEqual([1096, 660, 480, 240]);
     expect(clampBoxToSheet([1400, 100, 480, 240])).toEqual([1120, 100, 480, 240]);
@@ -278,7 +278,7 @@ describe('sniffPictureKind', () => {
     expect(sniffPictureKind(new TextEncoder().encode('<html><body>no</body></html>'))).toBeNull();
   });
 
-  it('reads an SVG past a comment over 256 characters and past several comments (docs/POLISH.md item 50)', () => {
+  it('reads an SVG past a comment over 256 characters and past several comments (docs/archive/rounds/POLISH.md item 50)', () => {
     const long = `<!-- ${'The product mark. '.repeat(20)} -->`;
     expect(long.length).toBeGreaterThan(256);
     const svg = `${long}\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M0 0h8v8z"/></svg>`;
@@ -320,7 +320,7 @@ describe('the failure sentence', () => {
     );
   });
 
-  it('reads the sanitizer’s two svg sentences whole and never as a raster reason (docs/VECTOR.md 4.2)', () => {
+  it('reads the sanitizer’s two svg sentences whole and never as a raster reason (docs/archive/rounds/VECTOR.md 4.2)', () => {
     expect(SVG_TOO_LARGE_SENTENCE).toBe('The SVG file is over 2 MB');
     expect(SVG_BROKEN_SENTENCE).toBe('This SVG file could not be read');
     /* the server's line carries the sentence with the action's prefix; "over 2 MB" must not read as the 25 MB refusal */
@@ -334,7 +334,7 @@ describe('the failure sentence', () => {
     expect(uploadFailureSentence('svg-broken', 25)).toBe(
       'The picture could not be uploaded: This SVG file could not be read',
     );
-    /* the features round's sentence and reason are gone with the flag (docs/VECTOR.md 4.7) */
+    /* the features round's sentence and reason are gone with the flag (docs/archive/rounds/VECTOR.md 4.7) */
     expect(
       uploadFailureOf(new Error('svg is not accepted here; send png, jpeg, webp or gif')),
     ).not.toMatch(/^svg-/);

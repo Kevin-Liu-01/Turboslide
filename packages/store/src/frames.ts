@@ -1,4 +1,4 @@
-// The frame assets of the shader library (docs/FEATURES.md 5.5, the storage rule; judge-design
+// The frame assets of the shader library (docs/archive/rounds/FEATURES.md 5.5, the storage rule; judge-design
 // addition 6). A shader block's resting still is an asset named by its frame key
 // (`frame-<the first 16 hex of the key>`), so a repeated recipe reuses the asset and two clients
 // capturing one key resolve to one record. A superseded frame of the same block is removed by

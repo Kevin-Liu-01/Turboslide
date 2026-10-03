@@ -32,7 +32,7 @@ describe('spliceText (SPEC-3 3.1)', () => {
     expect(spliceText(MARKED, 22, 0, 'ever')).toBe(
       'Every *post* states [what](https://x.y)ever was built.',
     );
-    // typing at the end of a link continues the sentence, never the link (docs/PRODUCT.md
+    // typing at the end of a link continues the sentence, never the link (docs/archive/rounds/PRODUCT.md
     // section 2 rank 9; the link detection's space and the words after it stay plain)
     expect(spliceText('Visit [acme.com](https://acme.com)', 14, 0, ' today')).toBe(
       'Visit [acme.com](https://acme.com) today',

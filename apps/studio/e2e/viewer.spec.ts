@@ -34,7 +34,7 @@ test('the deck opens in the system appearance on its first slide with the sheet 
   page,
 }) => {
   await openDeck(page);
-  /* a fresh context follows the system's appearance since the product round (docs/PRODUCT.md
+  /* a fresh context follows the system's appearance since the product round (docs/archive/rounds/PRODUCT.md
      3.1, chrome.appearance.first-visit-follows-os); the headless browser's is light */
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   const shell = page.locator('.pt-viewer:not(.ts-skeleton)');

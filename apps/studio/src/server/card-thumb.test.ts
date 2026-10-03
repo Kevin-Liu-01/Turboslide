@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { CARD_THUMB_FLOOR_MS, CARD_THUMB_SETTLE_MS, createCardThumbScheduler } from './card-thumb';
 import type { CardThumbClock } from './card-thumb';
 
-// The card's capture on save (the product round, docs/PRODUCT.md 3.6; the row
+// The card's capture on save (the product round, docs/archive/rounds/PRODUCT.md 3.6; the row
 // decks.card.thumbnail-slide-1): one render per deck once its writes settle, floored so a typing
 // burst renders once, never a timer that polls. Pure over a fake clock.
 
@@ -52,7 +52,7 @@ describe('the card thumbnail scheduler', () => {
     clock.advance(CARD_THUMB_SETTLE_MS);
     expect(runs).toEqual([`q4-review@${CARD_THUMB_SETTLE_MS}`]);
     expect(scheduler.pending()).toEqual([]);
-    // the settle is the rest of docs/SYNC.md 3.10: a seller mid edit is not rendered every few
+    // the settle is the rest of docs/archive/rounds/SYNC.md 3.10: a seller mid edit is not rendered every few
     // seconds, and the row's bound is the flush at the stream's close (the test below)
     expect(CARD_THUMB_SETTLE_MS).toBe(30_000);
     expect(CARD_THUMB_SETTLE_MS).toBeGreaterThan(CARD_THUMB_FLOOR_MS);
@@ -93,7 +93,7 @@ describe('the card thumbnail scheduler', () => {
     const clock = fakeClock();
     const runs: number[] = [];
     // a settle under the floor, so the floor is what holds the second render (the module's
-    // settle is above its floor since docs/SYNC.md 3.10; the flush test reads the floor there)
+    // settle is above its floor since docs/archive/rounds/SYNC.md 3.10; the flush test reads the floor there)
     const settleMs = 2_000;
     const scheduler = createCardThumbScheduler(async () => void runs.push(clock.now()), {
       clock,

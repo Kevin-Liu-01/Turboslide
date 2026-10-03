@@ -63,7 +63,7 @@ export type HostingFacts = {
 };
 
 /**
- * The saved templates across instances (the product round fix round; docs/PRODUCT.md 4.3;
+ * The saved templates across instances (the product round fix round; docs/archive/rounds/PRODUCT.md 4.3;
  * blob-templates.ts): `pull` brings the store's saved templates and the deployment default into
  * this instance's folder before a read of the index (one head when nothing moved), `push` sends
  * one saved template folder, or its removal, and the index after a write on this instance

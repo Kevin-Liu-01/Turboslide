@@ -96,7 +96,7 @@
   font-size: 12px;
 }
 
-/* The product round (docs/PRODUCT.md 3.2; audit-interface 15): the panel's labels read at 12.5 px
+/* The product round (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 15): the panel's labels read at 12.5 px
    in ink-2, and the unit of a number field sits inside the field as a suffix: one hairline box
    holds the input and the unit, the input itself draws no border. */
 .ts-fo .ts-fo-field-label {

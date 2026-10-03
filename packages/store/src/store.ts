@@ -29,7 +29,7 @@ export type WriteOptions = {
 };
 
 /**
- * Who made a write and which client ops it folded (docs/SYNC.md 3.2, invariant 3): the room's
+ * Who made a write and which client ops it folded (docs/archive/rounds/SYNC.md 3.2, invariant 3): the room's
  * client id and the op ids of the batch a POST carried. A record that names its origin lets any
  * instance answer a resend of the same ops with the seq the first admission made instead of
  * committing them a second time; a write from the CLI or an agent's strict write carries none.
@@ -38,7 +38,7 @@ export type WriteOptions = {
  */
 export type WriteOrigin = { clientId: string; opIds: string[] };
 
-/** A Write with the optional origin the room's channel attaches (docs/SYNC.md 3.2). */
+/** A Write with the optional origin the room's channel attaches (docs/archive/rounds/SYNC.md 3.2). */
 export type StoreWrite = Write & { origin?: WriteOrigin };
 
 /**
@@ -51,7 +51,7 @@ export type VersionRecord = Version & {
   baseRevision: number;
   inverse: Mutation[];
   /**
-   * The write's origin (docs/SYNC.md 3.2): the client id and the op ids of the batch this record
+   * The write's origin (docs/archive/rounds/SYNC.md 3.2): the client id and the op ids of the batch this record
    * committed. Optional, so every record written before the round and every record of a write
    * made outside the room parses as before; the parser tolerates it one deployment before the
    * writer stores it (`versions.ts` RECORD_ORIGIN_WRITES).
@@ -142,7 +142,7 @@ export type WriteOutcome =
       warnings: string[];
       /**
        * Set when the write was not committed because a record above its base already names one
-       * of its `origin.opIds` (docs/SYNC.md 3.2, invariant 3): the resend of a POST whose first
+       * of its `origin.opIds` (docs/archive/rounds/SYNC.md 3.2, invariant 3): the resend of a POST whose first
        * attempt landed. `entry` and `revision` are that record's, `document` is the current one,
        * `changed` is empty; nothing was claimed or put. The channel answers the client one entry
        * per op id at the record's seq.
@@ -190,7 +190,7 @@ export type DeckStore = {
    * Applies a Write atomically: a stale baseRevision returns the current document, a mutation
    * that throws or a result that fails validation returns `invalid`, and a committed write bumps
    * the revision, writes the touched files and appends a version log entry. A write that names
-   * its origin (docs/SYNC.md 3.2) is answered with the record of its first admission when the
+   * its origin (docs/archive/rounds/SYNC.md 3.2) is answered with the record of its first admission when the
    * log above its base holds one (`WriteOutcome.replayed`).
    */
   write: (write: StoreWrite, options?: WriteOptions) => Promise<WriteOutcome>;
@@ -236,7 +236,7 @@ export function authorLabel(author: Author): string {
 }
 
 /**
- * The assistant's author name (docs/PRODUCT.md 6.1 "The mark"; audit-assist 15): every write the
+ * The assistant's author name (docs/archive/rounds/PRODUCT.md 6.1 "The mark"; audit-assist 15): every write the
  * assist makes carries `{ kind: 'agent', name: 'Assistant', runId }`, and every seller surface
  * reads an agent author as "Assistant" through `authorDisplay`; the run id stays for the
  * developer surfaces (`authorLabel`: the CLI, the lease notices, Change history's tooltip).

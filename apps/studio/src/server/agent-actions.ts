@@ -129,7 +129,7 @@ export const SERVER_SIDE_WINDOW_ACTIONS_PENDING: ReadonlyArray<string> = (
 ).filter((id) => !isActionId(id));
 
 /**
- * The product round (docs/PRODUCT.md 4.3; build/b5b.md R3): the template ids. A template is a
+ * The product round (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md R3): the template ids. A template is a
  * folder under the collection's decks/templates, so every one of them needs the store and runs
  * through runDeckAction; the studio dispatcher registers them over the collection (actions.ts
  * registerTemplateActions), the three deckless writes refusing an agent token without the admin
@@ -146,7 +146,7 @@ export const SERVER_SIDE_WINDOW_ACTIONS_P1 = [
 ] as const satisfies readonly ActionId[];
 
 /**
- * The features round, ship one (docs/FEATURES.md 4.11; build/b6.md R3): the logo picker's read
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R3): the logo picker's read
  * and its two writes. `logo.search` reads the server's index (the store's `system/logo-index.json`),
  * `logo.insert` fetches, sanitizes and rasterizes a mark with sharp and writes the asset, and
  * `logo.refresh` is the index route as an action; every one needs Node and the store, so the
@@ -165,7 +165,7 @@ export const SERVER_SIDE_WINDOW_ACTIONS_F1: ReadonlyArray<ActionId> = (
 ).filter(isActionId);
 
 /**
- * The features round, ship two (docs/FEATURES.md 5.5, 5.8; B5's handlers, B7's registration): the
+ * The features round, ship two (docs/archive/rounds/FEATURES.md 5.5, 5.8; B5's handlers, B7's registration): the
  * shader library's ids. `shader.list` reads the catalog with its thumbnails and control ranges,
  * `shader.insert` and `shader.set` write the block through the materials package (the page's
  * dispatcher carries no materials handler), `shader.frame` is the client capture's write (the
@@ -244,10 +244,10 @@ export const DRAFT_CREATING_ACTIONS: ReadonlyArray<ActionId> = [
   'slide.setBackgroundPicture',
   'slide.setBackgroundMaterial',
   'slide.import',
-  // the logo picker's write (docs/FEATURES.md 4.11): a customer's mark can be the first thing a
+  // the logo picker's write (docs/archive/rounds/FEATURES.md 4.11): a customer's mark can be the first thing a
   // seller puts on a new presentation, so it creates the draft's deck as asset.add does
   ...SERVER_SIDE_WINDOW_ACTIONS_F1.filter((id) => id === 'logo.insert'),
-  // the shader library's writes (docs/FEATURES.md 5.8): a shader inserted on a fresh draft, its
+  // the shader library's writes (docs/archive/rounds/FEATURES.md 5.8): a shader inserted on a fresh draft, its
   // frame and its background slot write the deck the same way
   ...SERVER_SIDE_WINDOW_ACTIONS_F2.filter((id) => SHADER_DRAFT_CREATING_IDS.has(id)),
 ];
@@ -406,7 +406,7 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
   });
 
 // ---------------------------------------------------------------------------------------------
-// The store status handlers (docs/SYNC.md 6.3, the call counting harness; 3.6, the log's holes)
+// The store status handlers (docs/archive/rounds/SYNC.md 6.3, the call counting harness; 3.6, the log's holes)
 
 /** What the two handlers read: the deck, its store and the realtime tier the deployment runs. */
 export type StoreStatusDeps = {
@@ -468,9 +468,9 @@ export function outputAccepts(id: ActionId, path: readonly string[]): boolean {
  * with `storeCalls`, the calls this instance made to the
  * Blob store under the deck's prefix in the last minute by operation and the instance id
  * (`boundedBlobClient`'s counters, packages/store/src/blob-store.ts); the cost probe of
- * docs/SYNC.md 6.3 samples it through `/api/actions/sync.status` with the bearer. `deck.info`
+ * docs/archive/rounds/SYNC.md 6.3 samples it through `/api/actions/sync.status` with the bearer. `deck.info`
  * gains `counts.records`, the version records the log holds, and `counts.holes`, the record
- * numbers missing between its first and last (docs/SYNC.md 3.6, the hole's second rule;
+ * numbers missing between its first and last (docs/archive/rounds/SYNC.md 3.6, the hole's second rule;
  * versions.ts `logHoles`), beside the reader's own counts. Called after `registerReadActions`
  * and the record actions; the imports run inside the handlers so the client stub of this module
  * (the edit route imports it) pulls no store graph.

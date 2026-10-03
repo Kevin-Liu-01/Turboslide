@@ -1291,7 +1291,7 @@ function bindingOfItem(
 export const ITEM_GROUPS: Readonly<Record<string, ShortcutGroup>> = {
   'insert.comment': 'Comments',
   'view.comments.hide': 'Comments',
-  /* Google's page opens Common actions with New slide (docs/PRODUCT.md section 2 rank 31) */
+  /* Google's page opens Common actions with New slide (docs/archive/rounds/PRODUCT.md section 2 rank 31) */
   'slide.newSlide': 'Common actions',
 };
 
@@ -1395,7 +1395,7 @@ export const TURBOSLIDE_ONLY_KEYS: ReadonlyArray<string> = [
   'key.rotateRight15Alias',
   'key.comment.exitEsc',
   'key.roster',
-  /* the product round (docs/PRODUCT.md 6.1): the assistant's Cmd+J, where Google has no chord */
+  /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the assistant's Cmd+J, where Google has no chord */
   'title.assist',
 ];
 

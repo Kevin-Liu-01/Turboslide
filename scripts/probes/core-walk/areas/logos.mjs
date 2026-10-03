@@ -1,4 +1,4 @@
-// The logo picker over thesvg.org, the probe's rows (docs/FEATURES.md section 4, 7.1 `logos.*`
+// The logo picker over thesvg.org, the probe's rows (docs/archive/rounds/FEATURES.md section 4, 7.1 `logos.*`
 // with the driver `probe --core`, and the images row `logos.intake.url-sentence`): Insert > Logo
 // in the default view and in the Image submenu with Search the menus, the search at human speed
 // with the first tile preselected, the tiles drawn on paper and on ink, the Your brand group, the
@@ -13,7 +13,7 @@
 // routes, with the menu rows `insert.image.logo` and `format.image.replaceImage.logo` in
 // `model.ts` (FEATURES.md section 6; the top level `insert.logo` left in Round 1, docs/NEXT.md 4.1.3
 // item 20). A row whose control is not on the build reads not driven with the control's id and its
-// lane (docs/PRODUCT.md 8.1); the dialog is reached through Insert > Image alone, so while the menu
+// lane (docs/archive/rounds/PRODUCT.md 8.1); the dialog is reached through Insert > Image alone, so while the menu
 // row is absent every dialog row reads not built on `insert.image.logo`. The search reaches thesvg.org's index on the deployment (the cache
 // of 4.2); a search that answers nothing is recorded with the foot's failure sentence.
 
@@ -582,7 +582,7 @@ export async function run(t) {
       if (!o2.open) return o2.why;
       const second = await tiles();
       const brand = second.filter((x) => x.group === 'brand');
-      /* docs/POLISH.md 2.5 item 46: Your brand holds the kit's logo alone and a deck's role logo
+      /* docs/archive/rounds/POLISH.md 2.5 item 46: Your brand holds the kit's logo alone and a deck's role logo
          assets list under Recent, so the asset tile is read there (any group but brand); the
          ship's run of record read the tile under Recent and the older rule "under Your brand"
          twice (the polish fix round 3, B6) */
@@ -906,9 +906,9 @@ export async function run(t) {
       if (!o.open) return o.why;
       /* Stripe has a mono and no light and dark pair, so the appearance rule reaches the tint;
          GitHub, the row's first example, carries its own light file, which the rule prefers to a
-         tint (docs/FEATURES.md 4.3; build/b6.md section 5) */
+         tint (docs/archive/rounds/FEATURES.md 4.3; build/b6.md section 5) */
       await closeLogo();
-      /* the mono is asked for, the way the P1 Mono control (docs/FEATURES.md 4.11) and an agent
+      /* the mono is asked for, the way the P1 Mono control (docs/archive/rounds/FEATURES.md 4.11) and an agent
          ask: the ten mark fixture holds no mark whose default fails on ink and whose mono may be
          tinted without a pair of its own (Stripe's default reads on ink, so the appearance rule
          picks it), and the tint is the server's on any variant asked for */
@@ -1277,7 +1277,7 @@ export async function run(t) {
   await t.step(
     'logos.replace-image.row',
     'a picture placed through the window API; right click it; Replace image > Logo; Figma',
-    "the asset swaps; the box keeps its centre and area and refits to the mark's aspect (docs/POLISH.md 2.5 item 37)",
+    "the asset swaps; the box keeps its centre and area and refits to the mark's aspect (docs/archive/rounds/POLISH.md 2.5 item 37)",
     async () => {
       await t.clickCard(L);
       await t.clearAll();
@@ -1347,7 +1347,7 @@ export async function run(t) {
         )
         .catch(async () => (await t.objectsOf(L)).find((o) => o.id === id) ?? null);
       const rev1 = (await t.state()).revision;
-      /* docs/POLISH.md 2.5 item 37 (the polish round): the replacing branch keeps the box's
+      /* docs/archive/rounds/POLISH.md 2.5 item 37 (the polish round): the replacing branch keeps the box's
          centre and area and refits the box to the new picture's aspect, the mechanism the fixed
          `images.replace.keeps-aspect` reads, so "the box stays" is its centre and its area, and
          the box's aspect is the mark's (the verifier's pass 2 finding 6: the row's words predated

@@ -6,7 +6,7 @@
 // Ink is measured past a cut on the line from the region's background to the block's ink color
 // (budgets.ts INK_CUT, one third of the way; the ink color is the farther of the recorded text
 // color and the reference's farthest color inside the block's box), not at a fixed distance from
-// the background. Measured on the deck's native export (M2 review, docs/M2-STATUS.md): the
+// the background. Measured on the deck's native export (M2 review, docs/archive/status/M2-STATUS.md): the
 // lightest hairlines of a diagram sit about 45 channel units from the paper and LibreOffice
 // resamples the 2x raster so they land on two rows at half that, so a fixed tolerance of 40
 // counted them in the reference and not in the page and reported dy 33 on a block that was within

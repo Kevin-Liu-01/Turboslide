@@ -154,8 +154,8 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   No other port, no second server on one checkout.
 - Only the studio builder, the integrator and the verifier start it, and they stop it when done.
   Everyone else works without a server.
-- The written exception for the Google Slides parity round two (`docs/gslides-parity/SPEC-2.md`
-  0.43, `docs/gslides-parity/MILESTONES-2.md`): a builder whose row names a port runs their own
+- The written exception for the Google Slides parity round two (`docs/archive/gslides-parity/SPEC-2.md`
+  0.43, `docs/archive/gslides-parity/MILESTONES-2.md`): a builder whose row names a port runs their own
   server as `TURBOSLIDE_STORE=tmp node_modules/.bin/vite dev --port <port>` from `apps/studio`,
   always with the tmp store so no spec writes `decks/`, stops it before returning, and never
   touches 4321, 3005 or another builder's port. Playwright runs against that server with
@@ -170,8 +170,8 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
 - The dev server is never a build step. Anything the product needs in production is a server
   route or a server function, not a Vite plugin hook.
 
-- The written exception for the Google Slides parity round three (`docs/gslides-parity/SPEC-3.md`,
-  `docs/gslides-parity/MILESTONES-3.md`): the round two form stands with two additions. The
+- The written exception for the Google Slides parity round three (`docs/archive/gslides-parity/SPEC-3.md`,
+  `docs/archive/gslides-parity/MILESTONES-3.md`): the round two form stands with two additions. The
   channel is fixed to `memory` so no spec needs a service, and a tmp store refuses to mint an
   export token without `TURBOSLIDE_DOWNLOAD_SECRET` (SPEC-3 8.10, `apps/studio/src/server/tokens.ts`),
   so every builder's server that exports sets it to an obviously fake value of 16 bytes or more.
@@ -194,8 +194,8 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   `vite preview` of a production build on 4344, so B5 may run `node_modules/.bin/vite build` inside
   `apps/studio` for that row alone. Nobody else builds; the integrator builds everything else.
 
-- The written exception for the Google Slides parity round four (`docs/gslides-parity/SPEC-4.md`,
-  `docs/gslides-parity/MILESTONES-4.md`): the round three form stands with one more variable.
+- The written exception for the Google Slides parity round four (`docs/archive/gslides-parity/SPEC-4.md`,
+  `docs/archive/gslides-parity/MILESTONES-4.md`): the round three form stands with one more variable.
   Round three's identity runtime refuses every request without `TURBOSLIDE_SESSION_SECRET`
   (`apps/studio/src/server/auth/secret.ts`; a tmp store has no state folder to mint it from and
   the server answers 500 on every route), so a builder's server sets both secrets to obviously
@@ -415,12 +415,12 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
 - Nothing is claimed done until the acceptance commands exit 0 and the report files named in the
   milestone plan exist. A claim about a deck names the revision.
 
-- Round three: ownership is the "Owns" lists of `docs/gslides-parity/MILESTONES-3.md`; a change
+- Round three: ownership is the "Owns" lists of `docs/archive/gslides-parity/MILESTONES-3.md`; a change
   needed in another builder's file is a request in `docs/gslides-parity/build-3/<key>.md` and the
   integrator makes it or reassigns it. `pnpm generate:contracts` is run by B1 and the integrator
   only; `pnpm install`, `pnpm build` and `vite build` are the integrator's (the one exception is
   the B5 row under the dev server rules). Nothing is committed until the ship step.
-- Round four: ownership is the "Owns" lists of `docs/gslides-parity/MILESTONES-4.md` with the day 0
+- Round four: ownership is the "Owns" lists of `docs/archive/gslides-parity/MILESTONES-4.md` with the day 0
   amendments of `docs/gslides-parity/build-4/integrator.md` section 3; a request goes in
   `docs/gslides-parity/build-4/<key>.md` and the integrator makes it. From merge 1
   `apps/studio/src/editor/controller.tsx` is B4's, and `editor/EditorRoot.tsx`,
@@ -453,7 +453,7 @@ fonts venv (`.turboslide/venv`) and step 25 without Docker, and starts and stops
 the steps that need it with `TURBOSLIDE_EXPORT_BATCH=3`, the batch size `export-batch.spec.ts`
 drives. Step 21's spec list carries the round two specs (`canvas.spec.ts`, `objects.spec.ts`,
 `text-styles.spec.ts`, `tables.spec.ts`, `charts.spec.ts`, `hygiene.spec.ts`,
-`export-batch.spec.ts`). `docs/gslides-parity/BUILD-STATUS-2.md` records the merge 2 run.
+`export-batch.spec.ts`). `docs/archive/gslides-parity/BUILD-STATUS-2.md` records the merge 2 run.
 
 The M4 lines beyond `pnpm check` are the skills and coverage vitest files
 (`packages/agent/src/__tests__/{skills,coverage}.test.ts`), `apps/studio/e2e/agent-http.spec.ts`
@@ -506,7 +506,7 @@ tree steps 4 to 19 passed (step 3 fails as written on the uncommitted generated 
 by regeneration and diff; step 5 timed out twice on the material capture test while other
 worktrees' servers loaded the machine and passed alone and on the rerun).
 
-Round three's lines (`docs/gslides-parity/SPEC-3.md` 16.1; `docs/gslides-parity/BUILD-STATUS-3.md`):
+Round three's lines (`docs/archive/gslides-parity/SPEC-3.md` 16.1; `docs/archive/gslides-parity/BUILD-STATUS-3.md`):
 `pnpm check` is 28 steps; step 26 runs the eight two browser specs of the round against the
 runner's server on the memory channel with `TURBOSLIDE_AUTH_DB=.turboslide/auth.sqlite`,
 `TURBOSLIDE_MAIL=capture`, `TURBOSLIDE_LOCAL_OPEN=1` and `TURBOSLIDE_AUTH_RATE_LIMIT=off`, step 27
@@ -526,7 +526,7 @@ uncommitted generated files and passes by regeneration, step 19 fails on the oth
 untracked documents alone, and the remaining steps are recorded step by step in
 `docs/gslides-parity/build-3/integrator.md` section 15.
 
-Round four's lines (`docs/gslides-parity/SPEC-4.md` 6.1 and 0.46; `docs/gslides-parity/BUILD-STATUS-4.md`):
+Round four's lines (`docs/archive/gslides-parity/SPEC-4.md` 6.1 and 0.46; `docs/archive/gslides-parity/BUILD-STATUS-4.md`):
 `pnpm check` is 31 steps. Step 29 is the generated files check: `node scripts/build-brand.ts
 --check` (the icon set, the twins and the card against `apps/studio/public/brand-manifest.json`
 by bytes, rebuilt and compared, plus the facts of SPEC-4 6.4; it launches Chrome for Testing once
@@ -873,17 +873,17 @@ code (`SPEC 5.1`) is checked against `docs/spec/SPEC.md`.
 
 ## The rounds since 2026-09-19
 
-Each round after the focus round has its own specification under `docs/` and its evidence under `docs/gslides-parity/<round>/`. The binding documents are `docs/FOCUS.md` (the core set, the matrix and the ship gate of section 6.2), `docs/REALTIME.md` with `docs/CLOUDFLARE.md` (the realtime round) and `docs/NEXT.md` (the next program). A closed round's specification is a record. At the end of Round 1 the closed specifications move to `docs/archive/rounds/` (`docs/NEXT.md` 5.2 item 4). In Round 1 the lanes and the files each lane owns are `docs/NEXT.md` 4.1.6, and a lane writes its requests in `docs/gslides-parity/round1/build/<key>.md`. The index of every document is `docs/README.md`.
+Each round after the focus round has its own specification and keeps its evidence under `docs/gslides-parity/<round>/`. The binding documents are `docs/FOCUS.md` (the core set, the matrix and the ship gate of section 6.2), `docs/REALTIME.md` with `docs/CLOUDFLARE.md` (the realtime round) and `docs/NEXT.md` (the next program). A closed round's specification is a record. The last push of Round 1 moved the closed specifications to `docs/archive/rounds/` (`docs/NEXT.md` 5.2 item 4). In Round 1 the lanes and the files each lane owns are `docs/NEXT.md` 4.1.6, and a lane writes its requests in `docs/gslides-parity/round1/build/<key>.md`. The index of every document is `docs/README.md`.
 
 | Round            | Specification                            | First committed | Shipped (`docs/updates.md`)               | Evidence                   |
 | ---------------- | ---------------------------------------- | --------------- | ----------------------------------------- | -------------------------- |
-| return           | `docs/RETURN.md`                         | 2026-09-18      | 2026-09-19                                | `return/`                  |
-| product          | `docs/PRODUCT.md`                        | 2026-09-19      | 2026-09-21                                | `product/`                 |
-| features         | `docs/FEATURES.md`                       | 2026-09-21      | ship one 2026-09-23, ship two 2026-09-26  | `features/`                |
-| sync and costs   | `docs/SYNC.md`                           | 2026-09-21      | 2026-09-22                                | `sync/`                    |
-| vector           | `docs/VECTOR.md`                         | 2026-09-25      | 2026-09-25                                | `vector/`                  |
-| objects          | `docs/OBJECTS.md`                        | 2026-09-26      | 2026-09-27                                | `objects/`                 |
-| polish           | `docs/POLISH.md`                         | 2026-09-28      | 2026-10-01                                | `polish/`                  |
-| people           | `docs/PEOPLE.md`                         | 2026-09-29      | 2026-09-30                                | `people/`                  |
+| return           | `docs/archive/rounds/RETURN.md`          | 2026-09-18      | 2026-09-19                                | `return/`                  |
+| product          | `docs/archive/rounds/PRODUCT.md`         | 2026-09-19      | 2026-09-21                                | `product/`                 |
+| features         | `docs/archive/rounds/FEATURES.md`        | 2026-09-21      | ship one 2026-09-23, ship two 2026-09-26  | `features/`                |
+| sync and costs   | `docs/archive/rounds/SYNC.md`            | 2026-09-21      | 2026-09-22                                | `sync/`                    |
+| vector           | `docs/archive/rounds/VECTOR.md`          | 2026-09-25      | 2026-09-25                                | `vector/`                  |
+| objects          | `docs/archive/rounds/OBJECTS.md`         | 2026-09-26      | 2026-09-27                                | `objects/`                 |
+| polish           | `docs/archive/rounds/POLISH.md`          | 2026-09-28      | 2026-10-01                                | `polish/`                  |
+| people           | `docs/archive/rounds/PEOPLE.md`          | 2026-09-29      | 2026-09-30                                | `people/`                  |
 | realtime         | `docs/REALTIME.md`, `docs/CLOUDFLARE.md` | 2026-10-01      | shipping lane by lane from its own branch | `realtime/`, `cloudflare/` |
 | the next program | `docs/NEXT.md`                           | 2026-10-01      | Round 1 is building on `next/round1`      | `next/`, `round1/`         |

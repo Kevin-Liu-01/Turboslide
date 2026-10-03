@@ -58,7 +58,7 @@
 // `deck.create`, moved to the trash and deleted forever, so the row leaves the store as it found
 // it (the row writes; pass it against a preview or a store you own).
 //
-// The polish round (docs/POLISH.md section 0 item 2, 3.7; polish/build/b7.md request 2): two rows
+// The polish round (docs/archive/rounds/POLISH.md section 0 item 2, 3.7; polish/build/b7.md request 2): two rows
 // that read the build a domain serves, so the table stops reading green on a stale deployment
 // (audit-chrome section 0 and item 1: www.turboslide.com served a bundle from ship one with every
 // other row passing). `build commit` reads `/api/agent`'s `instance.commit` (B5's stamp, section 0
@@ -342,7 +342,7 @@ const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
 const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
 /**
- * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/POLISH.md section 3,
+ * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/archive/rounds/POLISH.md section 3,
  * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead's second
  * sentence as React escapes it (the apostrophe is `&#x27;`), the Speculation Rules script.
  */
@@ -467,7 +467,7 @@ function checks(deck, asset) {
       detail: (r) => `${r.bytes} chars`,
     },
     {
-      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the polish round's page (docs/POLISH.md 3.7):
+      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the polish round's page (docs/archive/rounds/POLISH.md 3.7):
       // the product page's root, the hero lead's sentence as React serialises it (the apostrophe
       // is &#x27;), the Speculation Rules script, indexable
       name: '/home',
@@ -846,7 +846,7 @@ async function backendRow(base, headers, timeoutMs) {
 }
 
 /**
- * The build's commit as `/api/agent` reports it (docs/POLISH.md section 0 items 1 and 2; row
+ * The build's commit as `/api/agent` reports it (docs/archive/rounds/POLISH.md section 0 items 1 and 2; row
  * `surface.domain.build-commit`): the row fails when the instance block names no commit (a build
  * before the stamp, the stale domain's) and, with `--sha`, when the commit named is not the one
  * served. Off localhost the block needs the bearer; a 401 without one is a skip, never a pass.
@@ -877,7 +877,7 @@ async function commitRow(base, headers, timeoutMs, sha) {
       name: 'build commit',
       expect:
         wanted === null
-          ? 'instance.commit on /api/agent (the stamp of docs/POLISH.md section 0 item 1)'
+          ? 'instance.commit on /api/agent (the stamp of docs/archive/rounds/POLISH.md section 0 item 1)'
           : `instance.commit on /api/agent equal to ${wanted}`,
       detail: () =>
         commit === null
@@ -889,7 +889,7 @@ async function commitRow(base, headers, timeoutMs, sha) {
   };
 }
 
-/** The marks of the one row only the current build draws: Tools > Preferences > Play shaders (docs/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20). */
+/** The marks of the one row only the current build draws: Tools > Preferences > Play shaders (docs/archive/rounds/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20). */
 const PLAY_SHADERS_MARKS = ['tools.preferences.playShaders', 'Play animated patterns'];
 /** The module graph walk's bounds: modules fetched and bytes read before the row gives up. */
 const GRAPH_MODULES = 400;
@@ -1131,7 +1131,7 @@ async function main() {
   results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs)));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
-  // the polish round's build rows (docs/POLISH.md section 0 item 2): the client's Play shaders row
+  // the polish round's build rows (docs/archive/rounds/POLISH.md section 0 item 2): the client's Play shaders row
   // without a bearer, the build's commit with it (or on localhost without one)
   results.push(await playShadersRow(base, args.timeoutMs));
   const commit = await commitRow(base, headers, args.timeoutMs, args.sha);

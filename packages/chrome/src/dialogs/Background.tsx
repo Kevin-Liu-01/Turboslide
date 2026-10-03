@@ -54,7 +54,7 @@ import '../inspector/dither.css';
  * canvas first; a covering picture already there shows as a fixed 96 by 54 thumbnail with its
  * alt, Remove and a Format options link that opens the panel at Dither; Reset to theme removes the
  * slide's color; Add to theme writes the brand kit's Background role for the deck's appearance
- * (`brand.set /colors/<appearance>/background`, docs/PRODUCT.md 4.1; audit-brand 17), so every
+ * (`brand.set /colors/<appearance>/background`, docs/archive/rounds/PRODUCT.md 4.1; audit-brand 17), so every
  * slide follows and the wordmark and counter recompute against the coloured ground. Enter in the
  * hex field previews on the sheet and keeps the dialog open, as Google's field does; Done applies
  * (the row `brand.background.enter-keeps-open`). The preview is the editor handle's when it
@@ -66,7 +66,7 @@ import '../inspector/dither.css';
  * remembered for the picture the next Choose inserts through one `slide.setBackgroundPicture`
  * call on a canvas slide; beside it the Photograph and Neutral chips switch the three numbers, the
  * selected one read by equality (0.36, never stored). A Shader row (the features round, ship two,
- * docs/FEATURES.md 5.4 and 5.5; audit-shaders 1, 3, 13, 19): Choose opens the Shader gallery's
+ * docs/archive/rounds/FEATURES.md 5.4 and 5.5; audit-shaders 1, 3, 13, 19): Choose opens the Shader gallery's
  * grid inside the dialog (`ShaderGalleryGrid`, compact), a card or a preset tile picks the shader
  * and the Choose button reads its words ("Liquid metal, Diamond"); a Dither toggle beside it; Place
  * runs `slide.setBackgroundMaterial` at the catalog's default anchor with the same preset rule and
@@ -101,7 +101,7 @@ function schemaTakesFrame(): boolean {
 }
 
 /**
- * Place's client pixel path (docs/FEATURES.md 5.5; the polish round's fix round 2 for
+ * Place's client pixel path (docs/archive/rounds/FEATURES.md 5.5; the polish round's fix round 2 for
  * `shaders.background.place-answers`): the ground's frame drawn in this browser's WebGL at the
  * sheet's aspect, the same path a block's frame takes, so the function stores the bytes instead
  * of launching Chromium (the walk's Place waited 17 s and then past 65 s for the hosted render).
@@ -139,7 +139,7 @@ export function BackgroundDialog() {
   const shell = useEditorShell();
   const { input, settings } = shell;
   /* the Shader row and its field are a dialog control, hidden through parked-controls.ts when the
-     ship's list names `dialog.background.shader` (docs/FEATURES.md 7.2: the features round, ship two
+     ship's list names `dialog.background.shader` (docs/archive/rounds/FEATURES.md 7.2: the features round, ship two
      parked it on `shaders.background.place-answers`, the hosted capture past the row's 5 s); the
      switch still shows it, and a placed ground's words and options link go with the field */
   const shaderParked = isParked('dialog.background.shader', settings);
@@ -262,7 +262,7 @@ export function BackgroundDialog() {
   const done = () => apply(color);
 
   /**
-   * Add to theme (docs/PRODUCT.md 4.1; audit-brand 17): the brand kit's Background role for the
+   * Add to theme (docs/archive/rounds/PRODUCT.md 4.1; audit-brand 17): the brand kit's Background role for the
    * deck's appearance, one commit, so every slide follows and Version history lists "Brand kit:
    * Background"; a theme token becomes its hex for the kit. Without the editor's commit the older
    * deck default (`deck.setBackground`) is written.
@@ -576,7 +576,7 @@ export function BackgroundDialog() {
               event.preventDefault();
               const value = hex.trim().startsWith('#') ? hex.trim() : `#${hex.trim()}`;
               /* Enter previews the typed colour on the sheet and keeps the dialog open; Done
-                 applies it (docs/PRODUCT.md 4.1 and 8.1 `brand.background.enter-keeps-open`;
+                 applies it (docs/archive/rounds/PRODUCT.md 4.1 and 8.1 `brand.background.enter-keeps-open`;
                  audit-brand 17: Enter applied and closed before, so a seller could not judge the
                  ground before it landed). The key stops here so the Dialog's Enter does not run Done */
               event.stopPropagation();
@@ -713,7 +713,7 @@ export function BackgroundDialog() {
             : ''}
         </p>
         {pictures.length > 0 ? (
-          /* the deck's pictures as thumbnails (docs/POLISH.md 2.6 item 56; audit-chrome item 6:
+          /* the deck's pictures as thumbnails (docs/archive/rounds/POLISH.md 2.6 item 56; audit-chrome item 6:
              a list box of clipped text rows of two widths, no thumbnails, no ellipsis): a grid of
              tiles, each the picture at 16 by 9 with its name ellipsised at one width */
           <div

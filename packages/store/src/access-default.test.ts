@@ -16,7 +16,7 @@ import {
   newHostedDeckRecord,
 } from './access-store.ts';
 
-// The general access a deck created from `/new` starts with (the polish round, docs/POLISH.md
+// The general access a deck created from `/new` starts with (the polish round, docs/archive/rounds/POLISH.md
 // item 78; the row share.dialog.new-deck-restricted-viewer): Restricted on every deployment, and
 // Viewer for the link once link sharing is on; the product round's Anyone with the link, Editor
 // on an anonymous deployment is gone. The minted general link keeps its shape for the dialog's

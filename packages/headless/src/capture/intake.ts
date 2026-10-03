@@ -8,7 +8,7 @@
 // fields (title, artist, license, share-alike, source URL) become the photo provenance record,
 // and the credit line the plate needs is composed the way the deck writes it ("Photograph: Hans
 // Hillewaert, CC BY-SA 4.0"). The store write is the caller's. The hosted svg branch
-// (docs/FEATURES.md 4.7; docs/VECTOR.md 4.1, 4.2): under the svg raster policy, which every
+// (docs/archive/rounds/FEATURES.md 4.7; docs/archive/rounds/VECTOR.md 4.1, 4.2): under the svg raster policy, which every
 // deployment carries, an svg is sanitized by the host's parser before sharp reads a byte of it,
 // the sanitized file is kept as the asset's vector (what the sheet, the PDF and the web page
 // draw), and sharp rasterizes it into one PNG twin at 3x of the svg fitted inside an 800 by 450
@@ -95,7 +95,7 @@ export type AssetIntakeOptions = {
   reencode?: boolean;
   /** Names the twins by their content digest (`assets/<id>.<sha8>.<ext>`), so nothing is ever overwritten hosted. */
   digestNames?: boolean;
-  /** The hosted svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2); the process policy when absent (shared.ts `svgRasterPolicy`). */
+  /** The hosted svg branch (docs/archive/rounds/FEATURES.md 4.7; docs/archive/rounds/VECTOR.md 4.2); the process policy when absent (shared.ts `svgRasterPolicy`). */
   svgRaster?: SvgRasterPolicy | false;
 };
 
@@ -184,7 +184,7 @@ export function assetDigest(bytes: Uint8Array): string {
 }
 
 /**
- * The box an svg's PNG twin is rasterized for (docs/VECTOR.md 4.2), in sheet px, and the twin's
+ * The box an svg's PNG twin is rasterized for (docs/archive/rounds/VECTOR.md 4.2), in sheet px, and the twin's
  * scale: half the sheet, so a picture up to half the sheet has a 3x twin and a full sheet one a
  * 1.5x twin (the features round's 264 by 168 fitted a logo alone).
  */
@@ -314,7 +314,7 @@ export async function addAsset(
       maxBytes,
     });
   }
-  // the hosted svg branch (docs/VECTOR.md 4.2) sanitizes first, so sharp reads the sanitized
+  // the hosted svg branch (docs/archive/rounds/VECTOR.md 4.2) sanitizes first, so sharp reads the sanitized
   // text and never a byte of the file as it came, and a broken or oversized file answers the
   // sanitizer's sentence before anything decodes it; a checkout keeps the bytes as they came
   const hosted = options.hosted ?? intakePolicy().hosted;
@@ -394,7 +394,7 @@ export async function addAsset(
     return { asset, files, metrics: result.metrics, warnings };
   }
 
-  // the hosted svg branch (docs/VECTOR.md 4.1, 4.2; docs/FEATURES.md 4.7): the sanitized file is
+  // the hosted svg branch (docs/archive/rounds/VECTOR.md 4.1, 4.2; docs/archive/rounds/FEATURES.md 4.7): the sanitized file is
   // the asset's vector (`assets/<id>.<digest>.svg`), the PNG twin is sharp's raster at 3x of the
   // svg fitted inside SVG_RASTER_BOX, `size` is the svg's intrinsic size in sheet px and the
   // record is `kind: 'svg'` at scale 3; the elements the sanitizer dropped are recorded on a file

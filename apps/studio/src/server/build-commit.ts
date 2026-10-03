@@ -1,4 +1,4 @@
-// The commit a build was made from (docs/POLISH.md section 0 item 1; the row
+// The commit a build was made from (docs/archive/rounds/POLISH.md section 0 item 1; the row
 // `surface.domain.build-commit` and the hosted smoke's "build commit" row). Two sources: the
 // platform's VERCEL_GIT_COMMIT_SHA on a git deployment, and the stamp a CLI deploy or
 // scripts/check.mjs passes as TURBOSLIDE_BUILD_COMMIT. Each is read as a candidate and the first

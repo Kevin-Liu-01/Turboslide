@@ -144,7 +144,7 @@ it onto the wasm module is the studio builder's change, and the parity test is w
 
 ## What runs where
 
-Rewritten on 2026-09-14 for the Google Slides parity round four (`docs/gslides-parity/SPEC-4.md`
+Rewritten on 2026-09-14 for the Google Slides parity round four (`docs/archive/gslides-parity/SPEC-4.md`
 0.38, 3.9) against the working tree after that round's merge 1; the preview's `describeBackends()`
 record that SPEC-4 asks for is not yet taken (the round's builder B4 lands the addon on day 5 and
 the verifier's preview run records it), so the hosted rows below say what the tree does today and
@@ -281,7 +281,7 @@ time including the JPEG decodes.
 
 ## Round four: the committed outputs and the CI rebuild rule
 
-The Google Slides parity round four (SPEC-4 0.38, 3.9; `docs/gslides-parity/MILESTONES-4.md` B4
+The Google Slides parity round four (SPEC-4 0.38, 3.9; `docs/archive/gslides-parity/MILESTONES-4.md` B4
 item 6) puts the crate into the deployment and the browser without a cargo step on Vercel:
 
 - Two outputs are committed as build products, the way `packages/agent/generated` is: the wasm

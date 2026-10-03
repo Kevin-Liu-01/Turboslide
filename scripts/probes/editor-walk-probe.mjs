@@ -2068,7 +2068,7 @@ try {
     await settled(page);
     addKind('an icon (Insert > Icon)', obj, how);
   }
-  // a shader (the features round, ship two, docs/FEATURES.md 5.4: Insert > Shader opens the gallery)
+  // a shader (the features round, ship two, docs/archive/rounds/FEATURES.md 5.4: Insert > Shader opens the gallery)
   {
     const before = (await objectsOf(page, TITLE_SLIDE)).map((o) => o.id);
     let how = 'menu Insert > Shader';

@@ -1,4 +1,4 @@
-// Formatting, the text and paragraph rows (docs/RETURN.md 2.11 to 2.13, section 5
+// Formatting, the text and paragraph rows (docs/archive/rounds/RETURN.md 2.11 to 2.13, section 5
 // `formatting.*` with the driver `probe --core`): superscript and subscript by chord, by the
 // Format menu and by the right click menu, capitalization, Justified by menu, chord and the
 // toolbar, the paragraph spacing rows and the Custom spacing dialog, the 1.15 row's value,
@@ -33,9 +33,9 @@ export const IDS = [
   'formatting.theme.toolbar-button',
   'formatting.theme.import-hidden',
   'formatting.persistence',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'formatting.alt-text.write-undo',
-  /* the features round, ship one (docs/FEATURES.md 3.1 item 4): the Tabular figures row */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 3.1 item 4): the Tabular figures row */
   'formatting.numerals.tabular-row',
 ];
 
@@ -870,7 +870,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's row (docs/PRODUCT.md section 5, RETURN.md question 6, 8.1): Alt text in
+ * The product round's row (docs/archive/rounds/PRODUCT.md section 5, RETURN.md question 6, 8.1): Alt text in
  * Format options returns to the default view; the description is written, undone and carried into
  * the Editable text PowerPoint's `descr`. The row carries `parks: ['format.altText']`, so a red
  * reading parks the section alone.
@@ -926,7 +926,7 @@ async function productRound(t) {
       let descr = null;
       if (pptx.bytes) {
         let entries = t.zipEntries(pptx.bytes);
-        /* the export answers a bundle since the product round (docs/PRODUCT.md section 2 rank 7:
+        /* the export answers a bundle since the product round (docs/archive/rounds/PRODUCT.md section 2 rank 7:
            the light and the dark Editable text files and the report zip); the light file is read */
         const inner =
           [...entries.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
@@ -958,7 +958,7 @@ async function productRound(t) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 3.1 item 4; the row
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 3.1 item 4; the row
  * `formatting.numerals.tabular-row`): the Tabular figures row of Format options > Text with its
  * sentence, writing `typography.numerals: 'tabular'`, enabled on a face with `tnum` and disabled
  * with its sentence on one without, and found by Search the menus under a seller's words. Three

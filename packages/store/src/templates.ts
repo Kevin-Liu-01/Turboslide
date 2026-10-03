@@ -17,7 +17,7 @@
 // written at the store level and never through deck.set) and removeDeck (Delete forever). Each
 // backend of hosted.ts wraps them for its own folder.
 //
-// The product round (docs/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, ported from the round five
+// The product round (docs/archive/rounds/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, ported from the round five
 // branch and re pointed) adds the template index and the template writes. The index is
 // `decks/templates/templates.json`, one row per template folder (`TemplateIndexEntry`), what the
 // gallery page, the /decks strip and `template.list` read; a template is one folder and one index
@@ -90,7 +90,7 @@ export type TemplateArchetype = {
   source?: string;
 };
 
-/** The index of the templates, `decks/templates/templates.json` (docs/PRODUCT.md 4.3). */
+/** The index of the templates, `decks/templates/templates.json` (docs/archive/rounds/PRODUCT.md 4.3). */
 export const TEMPLATE_INDEX_FILE = 'templates.json';
 
 /** The deployment default, `decks/templates/default.json` (`{ "template": "<id>" }`); absent means `blank`. */
@@ -108,7 +108,7 @@ export const TURBOSLIDE_TEMPLATE_FIXED =
   "Turboslide's templates cannot be changed. Save a new template instead";
 
 /**
- * decks/templates/<id>/template.json. The product round (docs/PRODUCT.md 4.3; SPEC-5 4.1) widens
+ * decks/templates/<id>/template.json. The product round (docs/archive/rounds/PRODUCT.md 4.3; SPEC-5 4.1) widens
  * the id from the two built ins to any template folder and adds, all optional, the gallery's
  * category, Google's use case words, the cover slide, the slide count, the appearance a deck made
  * from it opens in, the organisation flag of a template saved on this deployment and the brand
@@ -133,7 +133,7 @@ export type TemplateRecord = {
   appearance?: Appearance;
   /** set on a template saved on this deployment (Your organisation in the gallery) */
   organisation?: true;
-  /** the brand kit record (docs/PRODUCT.md 4.1 `Deck.brand`, B5a's `BrandKit`) the deck carried when it was saved */
+  /** the brand kit record (docs/archive/rounds/PRODUCT.md 4.1 `Deck.brand`, B5a's `BrandKit`) the deck carried when it was saved */
   brand?: BrandKit;
   /** the manifest file, relative to the template directory */
   deck: string;
@@ -149,7 +149,7 @@ export type Template = { record: TemplateRecord; dir: string };
 
 export type CreateDeckInput = {
   name: string;
-  /** a built in id or any id of the template index (docs/PRODUCT.md 4.3) */
+  /** a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3) */
   from: DeckTemplateId | string;
   /** the deck id; the slug of the name when absent */
   id?: string;
@@ -315,7 +315,7 @@ export function listTemplates(decksDir: string): Template[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The template index (docs/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, 4.3)
+// The template index (docs/archive/rounds/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1, 4.3)
 
 /** The template's manifest as raw JSON, or null when the record names a file that is missing. */
 function readTemplateManifest(template: Template): Record<string, unknown> | null {
@@ -352,7 +352,7 @@ export function templateCover(template: Template): string | undefined {
 
 /**
  * The appearance a deck made from the template opens in: the record's field, else the brand
- * kit's `appearance` (docs/PRODUCT.md 4.1), else the manifest's `defaults.appearance`; undefined
+ * kit's `appearance` (docs/archive/rounds/PRODUCT.md 4.1), else the manifest's `defaults.appearance`; undefined
  * leaves the theme's rule to the reader (`deckAppearance`).
  */
 export function templateAppearance(template: Template): Appearance | undefined {
@@ -491,7 +491,7 @@ export function templateEntry(decksDir: string, id: string): TemplateIndexEntry 
 }
 
 // ---------------------------------------------------------------------------------------------
-// The deployment default (docs/PRODUCT.md 4.1 "The deployment default", 4.3)
+// The deployment default (docs/archive/rounds/PRODUCT.md 4.1 "The deployment default", 4.3)
 
 /** The deployment default's record shape, `decks/templates/default.json`. */
 type DefaultTemplateRecord = { template: string };
@@ -532,7 +532,7 @@ export function setDefaultTemplate(
   return { default: id, name: templateEntry(decksDir, id)?.name ?? id };
 }
 
-/** What the deployment's default kit is named and looks like: read wherever docs/PRODUCT.md 4.1 says "the deployment's default kit". */
+/** What the deployment's default kit is named and looks like: read wherever docs/archive/rounds/PRODUCT.md 4.1 says "the deployment's default kit". */
 export type DefaultKit = KitDefaults & {
   /** the template id new presentations start from */
   template: string;
@@ -638,7 +638,7 @@ export function templateSlides(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The writes: Save as template, Replace, Rename, Delete (docs/PRODUCT.md 4.3)
+// The writes: Save as template, Replace, Rename, Delete (docs/archive/rounds/PRODUCT.md 4.3)
 
 export type SaveTemplateInput = {
   /** the deck to save */
@@ -999,7 +999,7 @@ export function createDeck(
     copySlides(join(template.dir, record.slides), join(dir, 'slides'));
     cpSync(assetsDir, join(dir, 'assets'), { recursive: true, dereference: true });
     const base = manifest as Deck;
-    // B5a's R8 (docs/PRODUCT.md 4.1, section 1's decision): a template whose manifest names no
+    // B5a's R8 (docs/archive/rounds/PRODUCT.md 4.1, section 1's decision): a template whose manifest names no
     // appearance opens in the one its record names (templateAppearance: the record's, its kit's),
     // else the deployment's DEFAULT_APPEARANCE, so /new opens light on General Translation's
     // deployment and the brand deck, whose record says dark, opens dark
@@ -1125,7 +1125,7 @@ export type CopyDeckInput = {
   /** leave the speaker notes out of the copy */
   removeNotes?: boolean;
   /**
-   * carry the comment threads (the polish round, docs/POLISH.md item 98): the sidecar's index
+   * carry the comment threads (the polish round, docs/archive/rounds/POLISH.md item 98): the sidecar's index
    * and thread files copied under the new id; off, the copy starts with no comments, Google's
    * default
    */
@@ -1273,7 +1273,7 @@ const COMMENTS_FOLDER = 'comments';
 
 /**
  * Copies the comments sidecar of a deck under the copy's id (Make a copy with Copy comments,
- * docs/POLISH.md item 98): every JSON file of `comments/` whose `deckId` names the source is
+ * docs/archive/rounds/POLISH.md item 98): every JSON file of `comments/` whose `deckId` names the source is
  * rewritten to the copy's id, the rest of each file kept as it is (the thread ids, the authors
  * and the times stay, as Google's copy keeps them). A source with no sidecar copies nothing.
  */

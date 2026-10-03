@@ -34,7 +34,7 @@ type InstanceFacts = {
   node: string;
   platform: string;
   /**
-   * The commit this build was made from (docs/POLISH.md section 0 item 1): the platform's
+   * The commit this build was made from (docs/archive/rounds/POLISH.md section 0 item 1): the platform's
    * VERCEL_GIT_COMMIT_SHA when it names a sha, else the stamp scripts/check.mjs and the
    * production guard pass as TURBOSLIDE_BUILD_COMMIT, else null (server/build-commit.ts); a
    * probe and a person read which commit a domain serves

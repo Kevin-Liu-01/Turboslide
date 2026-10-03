@@ -22,7 +22,7 @@ import '../components/home/grammar.css';
 import './home.css';
 
 /**
- * The product page, /home (docs/POLISH.md section 3; the round four notes of gslides-parity
+ * The product page, /home (docs/archive/rounds/POLISH.md section 3; the round four notes of gslides-parity
  * SPEC-4 section 2, 0.42, 0.43 stand under it), on the deck's page grammar since Round 1
  * (docs/NEXT.md 4.1.2 and 4.1.3 item 9): the 1104 px column with one rail on each side drawn
  * once (`.ts-rails`), the 58 px navigation, the hero with its facts rows and the product's own

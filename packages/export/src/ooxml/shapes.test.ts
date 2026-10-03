@@ -1,4 +1,4 @@
-// The connector bound of the vector round (docs/VECTOR.md 2.5, 6.3): `toConnector` attaches an
+// The connector bound of the vector round (docs/archive/rounds/VECTOR.md 2.5, 6.3): `toConnector` attaches an
 // end only when its site index is one the target's preset lists in the file. A rectangle offers
 // eight sites in the product (the ECMA four then four corners, schema shapes.ts `rectSites`) and
 // the file indexes the first four alone, so an end on a corner is dropped and named; a hexagon's

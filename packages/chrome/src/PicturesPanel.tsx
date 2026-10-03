@@ -14,7 +14,7 @@ import { Panel } from './Panel';
  * and Dither sections as a right panel, for the pictures the selected block or the slide
  * references and the two-tone treatment with its live preview. An advanced surface: its words are
  * the grammar's. The Material section left this panel in the features round's ship two
- * (docs/FEATURES.md 5.3; audit-shaders 19): a shader's recipe has one home, the Shader section of
+ * (docs/archive/rounds/FEATURES.md 5.3; audit-shaders 19): a shader's recipe has one home, the Shader section of
  * Format options (inspector/shader.tsx).
  */
 export type PicturesPanelProps = {

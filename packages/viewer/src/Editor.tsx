@@ -32,7 +32,7 @@ import type {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
-/* the words of the hovered empty cell's prompt (docs/OBJECTS.md 3.3 item 7; objects/build/b2.md
+/* the words of the hovered empty cell's prompt (docs/archive/rounds/OBJECTS.md 3.3 item 7; objects/build/b2.md
    request 1f, b1.md request 3): one click places the caret now, so the prompt says what to do next */
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
@@ -421,13 +421,13 @@ export type EditorOverlayView = {
    * the selection ring's box: one selected object's `pos` box (the shown document's, so a
    * gesture's draft drives it at every frame and the overlay turns it with the object; selection-
    * box.ts), the measured box of an object without `pos`, the table's box while one of its cells
-   * is open or active (docs/OBJECTS.md 3.3 item 1), the run's box of a text session
+   * is open or active (docs/archive/rounds/OBJECTS.md 3.3 item 1), the run's box of a text session
    */
   selectionBox: Box | null;
   /** the selected object's position, so the ring and the handles rotate and flip with it (SPEC-2 1.5) */
   selectionPos: Position | null;
   /**
-   * the cell ring inside a table's ring (docs/OBJECTS.md 3.3 item 1): the open or active cell's
+   * the cell ring inside a table's ring (docs/archive/rounds/OBJECTS.md 3.3 item 1): the open or active cell's
    * measured grid area, or the union of the active range; null with no cell in play. The
    * overlay draws it as `.ts-cell-ring`; optional so a view built elsewhere (a chrome test)
    * stands without it
@@ -460,12 +460,12 @@ export type EditorOverlayView = {
   /** the member names of a group, for the ring's accessible name */
   groupMembers: string[];
   /**
-   * a table with a cell open or a cell or range active (docs/FEATURES.md 2.1): the chip and the
+   * a table with a cell open or a cell or range active (docs/archive/rounds/FEATURES.md 2.1): the chip and the
    * ring band stay drawn as its move surface although `editing` may be true, and the handles hold
    * its free-move chip and eight resize squares
    */
   tableFrame: boolean;
-  /** the selected chart the Edit data button sits under (docs/FEATURES.md 2.2 rank 7), null otherwise */
+  /** the selected chart the Edit data button sits under (docs/archive/rounds/FEATURES.md 2.2 rank 7), null otherwise */
   editData: { blockId: string } | null;
   /** the value of a tapped chart mark, shown in the readout chip for a moment; null otherwise */
   valueReadout: string | null;
@@ -483,7 +483,7 @@ export type EditorOverlayView = {
   rotation: number | null;
   /** the live size while a resize is down, in sheet pixels */
   sizeReadout: { w: number; h: number } | null;
-  /** the moved column's width while a table's column seam is down, in sheet pixels (docs/RETURN.md 2.4 fix 5) */
+  /** the moved column's width while a table's column seam is down, in sheet pixels (docs/archive/rounds/RETURN.md 2.4 fix 5) */
   widthReadout: number | null;
   /** the rulers (SPEC-2 6.1 row 29); null while View > Show ruler is off */
   rulers: RulersView | null;
@@ -494,7 +494,7 @@ export type EditorOverlayView = {
   /** crop mode (SPEC-2 6.1 row 19) */
   crop: CropView | null;
   /**
-   * the chip of a linked run clicked once outside a session (docs/POLISH.md 2.3 item 20;
+   * the chip of a linked run clicked once outside a session (docs/archive/rounds/POLISH.md 2.3 item 20;
    * audit-text item 6): the address with Open, Copy, Change and Remove, drawn by the overlay
    * under the run's box; null with no such click, and gone with the next press or a session
    */
@@ -533,7 +533,7 @@ export type EditorContextTarget =
   | 'chart'
   | 'cellRange'
   | 'guide'
-  /** a right click on a table's ring or padding (docs/POLISH.md 2.6 item 71): the object's menu with the Table submenu; a cell inside answers tableCell */
+  /** a right click on a table's ring or padding (docs/archive/rounds/POLISH.md 2.6 item 71): the object's menu with the Table submenu; a cell inside answers tableCell */
   | 'table';
 
 /** A right-click on the stage, or Shift F10 with a block selected. */
@@ -581,11 +581,11 @@ export type EditorMenuSelection = {
   range?: [number, number];
   /** the selected picture carries a crop, mask or adjustment */
   imageEdited: boolean;
-  /** the one selected picture draws a vector asset (docs/VECTOR.md 4.4): crop is refused on it */
+  /** the one selected picture draws a vector asset (docs/archive/rounds/VECTOR.md 4.4): crop is refused on it */
   vectorPicture: boolean;
   /** the selected list item's level */
   listLevel?: number;
-  /** the range of table cells selected on the anchor table, ordered and grown over its merged cells (table-range.ts; docs/RETURN.md 2.4) */
+  /** the range of table cells selected on the anchor table, ordered and grown over its merged cells (table-range.ts; docs/archive/rounds/RETURN.md 2.4) */
   cells?: CellBounds;
 };
 
@@ -599,7 +599,7 @@ export type EditorNotice = { text: string; undo?: true };
 /**
  * The window event the studio's controller sends once a chrome insert (Insert > Table, the table
  * grid, Insert > Chart) has committed, with `{ deckId, slideId, blockIds }` as its detail, so the
- * stage selects the new object as Google does (docs/PRODUCT.md section 2 rank 1; the product
+ * stage selects the new object as Google does (docs/archive/rounds/PRODUCT.md section 2 rank 1; the product
  * round's build/b3.md). The name is the studio's `SELECT_OBJECTS_EVENT` of
  * `apps/studio/src/editor/select-after-write.ts`, repeated here because the viewer cannot import
  * the studio; that module's test pins the two to one string.
@@ -607,7 +607,7 @@ export type EditorNotice = { text: string; undo?: true };
 export const SELECT_OBJECTS_EVENT = 'turboslide:select-objects';
 
 /**
- * The chart's numbers from the stage (docs/FEATURES.md 2.2 rank 7; audit-objects 17): a double
+ * The chart's numbers from the stage (docs/archive/rounds/FEATURES.md 2.2 rank 7; audit-objects 17): a double
  * click on a chart, Enter on the selected chart, a click on a bar, a point or a slice of the
  * selected chart and the Edit data button under it all send this window event with the cell the
  * grid should make active (the grid's own coordinates: row 1 is the first category, column 1 the
@@ -648,7 +648,7 @@ export type EditorHandle = {
   disarmPaint: () => void;
   paintArmed: () => boolean;
   /**
-   * The brush as a store the toolbar's Paint format button follows (docs/POLISH.md 2.3 item 18;
+   * The brush as a store the toolbar's Paint format button follows (docs/archive/rounds/POLISH.md 2.3 item 18;
    * the polish round fix round 3, B5's R19): `listener` is told `true` when Paint format arms and
    * `false` when it disarms (a paint, Escape, Cmd+Option+V); answers the unsubscribe. The
    * subscription of a `useSyncExternalStore` whose snapshot is `paintArmed`, so the pressed state
@@ -669,7 +669,7 @@ export type EditorHandle = {
     where?: { blockId?: string; point?: Point; replace?: boolean; background?: boolean },
   ) => Promise<void>;
   /**
-   * a picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/PRODUCT.md
+   * a picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/archive/rounds/PRODUCT.md
    * section 5 "Image by URL"): the bytes are fetched by the page when the address answers it (its
    * own origin, a host that allows it), and then take the upload's path whole (the sniff, the
    * instant preview, `asset.add`, the placement in the body slot or the swap of `blockId`'s
@@ -683,7 +683,7 @@ export type EditorHandle = {
   /**
    * an asset the document holds already (Image by URL's `asset.add` answer) placed as a picture
    * object centred in the body slot at the largest size with the 40 px margin, selected
-   * (docs/PRODUCT.md section 5 "Image by URL"); `blockId` swaps the picture of that block instead.
+   * (docs/archive/rounds/PRODUCT.md section 5 "Image by URL"); `blockId` swaps the picture of that block instead.
    * An asset the server answered but the document has not received yet is waited for.
    */
   insertPictureAsset: (
@@ -691,7 +691,7 @@ export type EditorHandle = {
     where?: { blockId?: string },
   ) => Promise<void>;
   /**
-   * a logo asset the document holds (the Logo dialog's `logo.insert` answer; docs/FEATURES.md
+   * a logo asset the document holds (the Logo dialog's `logo.insert` answer; docs/archive/rounds/FEATURES.md
    * 4.4, B6): placed at the logo size, a symbol 160 sheet px tall or a wordmark 320 wide at the
    * mark's ratio, centred in the body slot's free area and never at the largest fit, selected;
    * `blockId` swaps that picture's asset and refits its box to the mark's aspect around the same centre (Replace image > Logo); `everySlide`
@@ -702,7 +702,7 @@ export type EditorHandle = {
     asset: { id: string; size?: Asset['size'] | undefined },
     where: { title: string; variant?: string; everySlide?: boolean; blockId?: string },
   ) => Promise<void>;
-  /** Add a caption on the selected shot (docs/PRODUCT.md section 2 rank 10): the caption field appears with its prompt and takes the caret; false when nothing selected takes one */
+  /** Add a caption on the selected shot (docs/archive/rounds/PRODUCT.md section 2 rank 10): the caption field appears with its prompt and takes the caret; false when nothing selected takes one */
   addCaption: () => boolean;
   /* round two: the canvas (SPEC-2 sections 1 and 6) */
   /** converts the slide to the canvas with no other write (slide.toCanvas) */
@@ -719,20 +719,20 @@ export type EditorHandle = {
   cropMode: () => void;
   exitCrop: () => void;
   /**
-   * True while a crop is open (docs/RETURN.md 4.1; build/b1.md R4): the shell's `key.commit`
+   * True while a crop is open (docs/archive/rounds/RETURN.md 4.1; build/b1.md R4): the shell's `key.commit`
    * reads it so a bare Enter with no crop is left to the focused element (the Slideshow button)
    * instead of being consumed by `exitCrop`.
    */
   cropOpen: () => boolean;
   /**
-   * The frames of the gesture that is down, or of the last one (docs/OBJECTS.md 2.4; the objects
+   * The frames of the gesture that is down, or of the last one (docs/archive/rounds/OBJECTS.md 2.4; the objects
    * round): the frame count, the worst and the mean frame in ms, the frames the budget skipped and
    * whether it degraded; null before the first gesture. The page publishes it through the window
    * API as `describe().state.gesture`, so a driver reads the cadence without instrumentation.
    */
   gestureRecord: () => GestureReport | null;
   /**
-   * A cell range on a table from the overlay's row and column heads (docs/OBJECTS.md 3.3 item 4;
+   * A cell range on a table from the overlay's row and column heads (docs/archive/rounds/OBJECTS.md 3.3 item 4;
    * build/b5.md R2): selects the table block with no session and sets the range from `r0,c0` to
    * `r1,c1`, so the range ring, `EditorMenuSelection.cells` and the tail's plans read it. Nothing
    * happens when the block is not a table of the slide.
@@ -806,7 +806,7 @@ export type EditorProps = {
   selection?: Selection;
   onSelectionChange?: (selection: Selection) => void;
   /**
-   * Link detection (docs/PRODUCT.md section 2 rank 9): a typed web or mail address becomes a link
+   * Link detection (docs/archive/rounds/PRODUCT.md section 2 rank 9): a typed web or mail address becomes a link
    * as the space or Enter lands; on unless the Tools > Preferences row turns it off. The route
    * passes the stored preference; absent means on.
    */
@@ -866,7 +866,7 @@ export type EditorProps = {
   /** the caret's marks and range changed inside a run (the toolbar's pressed state) */
   onCaret?: (info: CaretInfo | null) => void;
   /**
-   * The frame record of a gesture as it ends (docs/OBJECTS.md 2.4; the objects round): the same
+   * The frame record of a gesture as it ends (docs/archive/rounds/OBJECTS.md 2.4; the objects round): the same
    * report `EditorHandle.gestureRecord` answers, told once per gesture at its end, so the page
    * carries it to `describe().state.gesture` without polling the handle.
    */
@@ -887,7 +887,7 @@ export type EditorProps = {
    */
   mode?: 'editing' | 'commenting' | 'viewing';
   /**
-   * The parked controls predicate (docs/VECTOR.md 4.8; packages/chrome parked-controls.ts
+   * The parked controls predicate (docs/archive/rounds/VECTOR.md 4.8; packages/chrome parked-controls.ts
    * `isParked`, which the viewer cannot import): the four svg ways in and the svg copy read their
    * ids (`intake.svg.upload`, `.paste`, `.drop`, `.url`, `picture.svg.copy`) through it before
    * they act, and a parked way is off: an svg through it reads as a file that is not a picture,
@@ -920,19 +920,19 @@ type ActiveGesture = {
   /** the last modifiers seen, for the release */
   mods: GestureMods;
   /**
-   * the table cell whose session the press on a column seam ended (docs/OBJECTS.md 3.3 item 5):
+   * the table cell whose session the press on a column seam ended (docs/archive/rounds/OBJECTS.md 3.3 item 5):
    * the release queues it again, so a seam drag keeps the cell open with its caret
    */
   reopen?: { blockId: string; pointer: string };
   /**
    * the rows' measure of the table under a row seam or a resize, read from the stage at the press
-   * (table-fit.ts readTableRows; docs/OBJECTS.md 3.3 items 3 and 4): the row seam's drag writes
+   * (table-fit.ts readTableRows; docs/archive/rounds/OBJECTS.md 3.3 items 3 and 4): the row seam's drag writes
    * over it and the resize never goes below the rows' natural height (`tableFloor`)
    */
   tableRows?: TableRowsMeasure | null;
   /**
    * the seam of the other axis whose band also held the press (a crossing of a column seam and a
-   * row seam; docs/POLISH.md 2.2 item 11): the first movement routes the drag to the seam whose
+   * row seam; docs/archive/rounds/POLISH.md 2.2 item 11): the first movement routes the drag to the seam whose
    * axis matches the larger travel, then the field is cleared
    */
   crossing?: Handle | null;
@@ -977,7 +977,7 @@ const DROP_PICTURE_WIDTH = 480;
 /** The indent step of Cmd+] and Cmd+[ in px (SPEC-2 2.2.11). */
 const INDENT_STEP_PX = 64;
 
-/** How long the value of a tapped chart mark stays in the readout chip (docs/FEATURES.md 2.2 rank 7). */
+/** How long the value of a tapped chart mark stays in the readout chip (docs/archive/rounds/FEATURES.md 2.2 rank 7). */
 const MARK_READOUT_MS = 1500;
 
 function backdropFor(document: DeckDocument, slide: Slide | undefined, theme: Theme, base: string) {
@@ -1002,7 +1002,7 @@ function chipHandleFor(
 
 /**
  * The controls of the chrome a keydown may start from: their own keys, never the stage's. A grid
- * and its cells and headers are here for the chart data grid (docs/FEATURES.md 2.2 rank 1; audit
+ * and its cells and headers are here for the chart data grid (docs/archive/rounds/FEATURES.md 2.2 rank 1; audit
  * objects 1): a letter typed on the active cell opens it, and until this entry the stage's
  * capture listener consumed the letter as a stray key on the selected chart. The panel's own
  * class (`.ts-panel`, Panel.tsx) is here for the same reason, so every key pressed inside a panel
@@ -1091,7 +1091,7 @@ const HEADING_OWN_SIZE: Readonly<Record<'h1' | 'h2' | 'big' | 'title', number>> 
 };
 
 /**
- * The height a shrinking placeholder keeps under a session (docs/POLISH.md 2.3 item 21): one
+ * The height a shrinking placeholder keeps under a session (docs/archive/rounds/POLISH.md 2.3 item 21): one
  * line at the level's own size, in client px at the stage's scale. Reading the element's own
  * height instead let a title an earlier session had stepped down (one line at 60 px) shrink
  * again the next time it was opened, until a long title sat on one line at 34 px (the
@@ -1113,7 +1113,7 @@ function ladderStepDown(size: number): number | undefined {
   return sorted.find((step) => step < size);
 }
 
-/** The ways an svg comes in (docs/VECTOR.md 4.3) and the parked control id each reads (4.8). */
+/** The ways an svg comes in (docs/archive/rounds/VECTOR.md 4.3) and the parked control id each reads (4.8). */
 type SvgWay = 'upload' | 'paste' | 'drop' | 'url';
 const SVG_WAY_IDS: Readonly<Record<SvgWay, string>> = {
   upload: 'intake.svg.upload',
@@ -1205,7 +1205,7 @@ export function Editor({
   const shownSlide = shown.slides[slideId];
   const freeform = isFreeformSlide(slide);
 
-  /* a gesture frame the budget skipped (docs/OBJECTS.md 2.4; gesture-frame.ts rendersFrame
+  /* a gesture frame the budget skipped (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts rendersFrame
      false): the sheet keeps the markup of the last rendered frame while the draft still drives
      the ring and the handles from `pos`; the last rendered markup is kept for that */
   const sheetFrozen = useRef(false);
@@ -1253,7 +1253,7 @@ export function Editor({
   const [guides, setGuides] = useState<Guide[]>([]);
   const [marquee, setMarquee] = useState<Box | null>(null);
   const [editing, setEditing] = useState<Editing | null>(null);
-  /* the range of table cells on the selected table (table-range.ts; docs/RETURN.md 2.4): a Shift
+  /* the range of table cells on the selected table (table-range.ts; docs/archive/rounds/RETURN.md 2.4): a Shift
      click on a second cell or a drag from an open cell into another makes it, Escape, a session,
      another selection or a change of the grid ends it */
   const [cellRange, setCellRange] = useState<CellRange | null>(null);
@@ -1265,17 +1265,17 @@ export function Editor({
   const [groupEntered, setGroupEntered] = useState<string | null>(null);
   const [readout, setReadout] = useState<GestureReadout>(null);
   /* the value of the chart mark a tap named, shown for a moment in the overlay's readout chip
-     (docs/FEATURES.md 2.2 rank 7: "the readout shows the value") */
+     (docs/archive/rounds/FEATURES.md 2.2 rank 7: "the readout shows the value") */
   const [markReadout, setMarkReadout] = useState<string | null>(null);
   const markReadoutTimer = useRef(0);
-  /* the letter size of a word art while its resize is down (docs/FEATURES.md 2.3 item 8), shown
+  /* the letter size of a word art while its resize is down (docs/archive/rounds/FEATURES.md 2.3 item 8), shown
      beside the size readout; cleared with the gesture's readout */
   const [scaleReadout, setScaleReadout] = useState<string | null>(null);
   useEffect(() => {
     if (readout === null) setScaleReadout(null);
   }, [readout]);
   /* the picture being uploaded, drawn at once from the local file at its final box with a thin
-     progress bar until the asset lands (docs/PRODUCT.md section 2 rank 10; audit-seller 22) */
+     progress bar until the asset lands (docs/archive/rounds/PRODUCT.md section 2 rank 10; audit-seller 22) */
   const [uploading, setUploading] = useState<{ box: Box; url: string } | null>(null);
   /* Cmd+Shift+V pressed: the paste event that follows inserts plain text (rank 11 of the gaps) */
   const plainPasteArmed = useRef(false);
@@ -1335,7 +1335,7 @@ export function Editor({
   const cellRangeShape = useRef<TableRangeShape | null>(null);
   /* the cell the last session on the selected table sat in: the anchor of a Shift click made
      after that session ended (a parked session ends in the press's capture phase, before the
-     stage reads it; the kept cell pointer of the chrome is the same cell, docs/RETURN.md 2.4 fix 2) */
+     stage reads it; the kept cell pointer of the chrome is the same cell, docs/archive/rounds/RETURN.md 2.4 fix 2) */
   const lastCell = useRef<{ blockId: string; cell: CellAddress } | null>(null);
   const paintRef = useRef(paint);
   paintRef.current = paint;
@@ -1376,7 +1376,7 @@ export function Editor({
   const armedTool = useRef(tool);
   const htmlRef = useRef(html);
   htmlRef.current = html;
-  /* the live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts): one sheet render per
+  /* the live gesture's frames (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts): one sheet render per
      animation frame through the coalescer, the record of each render's cost, the budget's verdict
      and the last gesture's report for `gestureRecord()` and `onGesture` */
   const frames = useRef<FrameCoalescer | null>(null);
@@ -1395,7 +1395,7 @@ export function Editor({
   const parkedRef = useRef(parked);
   parkedRef.current = parked;
   /* the markup of every vector asset selected this page life, read ahead for the copy
-     (docs/VECTOR.md 4.5): one GET per asset file, keyed by the file's path */
+     (docs/archive/rounds/VECTOR.md 4.5): one GET per asset file, keyed by the file's path */
   const svgMarkup = useRef(new Map<string, string>());
   const svgMarkupInFlight = useRef(new Set<string>());
   const assetBaseRef = useRef(assetBase);
@@ -1506,7 +1506,7 @@ export function Editor({
     onSelectionRef.current?.(next);
   };
 
-  /* arming a draw tool clears the selection and the extra ids (docs/POLISH.md 2.4 item 34;
+  /* arming a draw tool clears the selection and the extra ids (docs/archive/rounds/POLISH.md 2.4 item 34;
      polish/build/b3.md request 7): the previous ring and chip leave while the sites draw. The
      clear goes through `select`, which tells the shell: the studio controls the selection, so a
      cleared inner state alone left the ring drawn (VERIFICATION.md "Polish round, pass 1"
@@ -1619,7 +1619,7 @@ export function Editor({
   };
 
   // -------------------------------------------------------------------------------------------
-  // The live gesture's frames (docs/OBJECTS.md 2.4; gesture-frame.ts)
+  // The live gesture's frames (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts)
 
   /** A gesture (a handle drag, a draw) is down: a fresh record, every frame rendered until the budget says otherwise. */
   const startFrames = () => {
@@ -1643,7 +1643,7 @@ export function Editor({
    * The draft document of one gesture frame: the mutations applied over the document, then the
    * connectors attached to the objects they moved re-routed the way the release re-routes them
    * (SPEC-2 2.4.7 followConnectors), so an elbow attached to a moved shape follows at every frame
-   * instead of jumping at the release (docs/OBJECTS.md 2.3 item 4). Throws what the reducer throws.
+   * instead of jumping at the release (docs/archive/rounds/OBJECTS.md 2.3 item 4). Throws what the reducer throws.
    */
   const draftDocument = (canvas: Slide, all: ReadonlyArray<Mutation>): DeckDocument => {
     const applied = applyMutations(docRef.current, [...all]).document;
@@ -1666,7 +1666,7 @@ export function Editor({
     );
 
   /**
-   * The wrapper path of a degraded move (docs/OBJECTS.md 2.4): the moved objects' `.free`
+   * The wrapper path of a degraded move (docs/archive/rounds/OBJECTS.md 2.4): the moved objects' `.free`
    * wrappers take their new left and top inline from the frame's mutations, the way the text
    * session writes a wrapper's height, and no renderSlide runs until the release. A wrapper in the
    * content layer is placed against the content origin, one in the sheet layer against the sheet
@@ -1691,7 +1691,7 @@ export function Editor({
   };
 
   /**
-   * One sheet render per animation frame (docs/OBJECTS.md 2.4): `build` answers the draft of the
+   * One sheet render per animation frame (docs/archive/rounds/OBJECTS.md 2.4): `build` answers the draft of the
    * latest pointer position (null clears the draft; `moved` names the `/pos` writes for the
    * wrapper path) and runs once per frame however many pointermoves arrived in between, the last
    * one winning. The render is synchronous inside the frame callback (flushSync), so the sheet,
@@ -1876,7 +1876,7 @@ export function Editor({
         (block.autofit === 'grow' || block.autofit === 'shrink'),
     );
     const out = [...mutations];
-    /* a touched table with `pos` is a candidate always (docs/OBJECTS.md 3.3 item 3; build/b2.md
+    /* a touched table with `pos` is a candidate always (docs/archive/rounds/OBJECTS.md 3.3 item 3; build/b2.md
        request 1d): its rule is `grow` with no "resized turns it off" clause, since a resize below
        the rows stops at the floor (the gesture's `tableFloor`); the rows are measured on the
        hidden 1x sheet and `pos.h` written up when they are taller than the box */
@@ -2052,7 +2052,7 @@ export function Editor({
       if (!after) return [];
       const followed = followConnectors(after, moved);
       /* a connector moved by its body detaches from every target that did not move in the same
-         write (docs/POLISH.md 2.4 item 27; polish/build/b3.md request 2): the free move and the
+         write (docs/archive/rounds/POLISH.md 2.4 item 27; polish/build/b3.md request 2): the free move and the
          arrow keys alone, never a resize and never the line end gesture that wrote the attachment */
       return options.detach === true
         ? [...followed, ...detachMovedConnectors(after, moved)]
@@ -2118,7 +2118,7 @@ export function Editor({
      (build-4/hotfix-3.md 3.5, seen on production); the next move recomputes the preview over the
      new document through docRef, and the release commits over it */
   useEffect(() => {
-    /* a draw's draft (docs/OBJECTS.md 2.4) stands the same way while its pointer is down */
+    /* a draw's draft (docs/archive/rounds/OBJECTS.md 2.4) stands the same way while its pointer is down */
     if (gesture.current === null && !frameDown.current) setDraft(null);
   }, [doc]);
 
@@ -2224,7 +2224,7 @@ export function Editor({
     const el = body.current;
     if (!after || !el) return null;
     const block = blockById(after, current.blockId);
-    /* the table's autofit (docs/OBJECTS.md 3.3 item 3; build/b2.md request 1d): a cell whose text
+    /* the table's autofit (docs/archive/rounds/OBJECTS.md 3.3 item 3; build/b2.md request 1d): a cell whose text
        wrapped grows its row on the stage, and the table's `pos.h` is written up in the same call
        as the burst's splice so the ring meets the last rule; the wrapper follows at once, since
        the markup is frozen for the session */
@@ -2244,7 +2244,7 @@ export function Editor({
       }
       return grow;
     }
-    /* a title placeholder without a box shrinks to the height it had (docs/POLISH.md 2.3 item 21;
+    /* a title placeholder without a box shrinks to the height it had (docs/archive/rounds/POLISH.md 2.3 item 21;
        audit-text item 7: a long title stayed 88 px and grew down the slide, three lines at ring
        height 204): a slot heading carries `autofit: 'shrink'` from its layout and the title
        slide's heading field is read as one; the size steps down the ladder while the element
@@ -2357,7 +2357,7 @@ export function Editor({
     const k = stage ? stage.getBoundingClientRect().width / SHEET.width : 0;
     const content = liveContentHeight(blockEl, wrapper ?? null, k, window);
     if (block.autofit === 'shrink') {
-      /* Shrink text on overflow (docs/PRODUCT.md section 5 "Autofit"): the size steps down the
+      /* Shrink text on overflow (docs/archive/rounds/PRODUCT.md section 5 "Autofit"): the size steps down the
          ladder until the text fits; the live element takes the step at once, since the markup is
          frozen for the session and would draw the old size until Escape */
       const typography =
@@ -2468,7 +2468,7 @@ export function Editor({
     const expected = expectedDocText.current;
     if (!current || !slideNow || expected === null) return;
     /* a paragraph write from the toolbar with the session parked (Center, 1.5, Increase indent;
-       docs/POLISH.md 2.3 item 14; audit-text item 3: the text moved only after the session closed)
+       docs/archive/rounds/POLISH.md 2.3 item 14; audit-text item 3: the text moved only after the session closed)
        reaches the live block at once: the stage's markup is frozen for the session, so the
        block's own alignment, leading and indent are set on its element from the document */
     const styled = blockById(slideNow, current.blockId);
@@ -2493,7 +2493,7 @@ export function Editor({
       }
     }
     /* a list item's level written under the session (Tab, Shift Tab, Cmd ] and Cmd [ in the
-       item; docs/POLISH.md 2.3 item 15) reaches the live item at once: the frozen markup would
+       item; docs/archive/rounds/POLISH.md 2.3 item 15) reaches the live item at once: the frozen markup would
        draw the nesting only after Escape, while Google indents the item as Tab lands */
     if (blockEl && styled?.type === 'plain') {
       const itemEls = blockEl.querySelectorAll<HTMLElement>('.item');
@@ -2510,7 +2510,7 @@ export function Editor({
       });
     }
     /* a row or column added or removed under a cell session (Format > Table, the cell menu, with
-       the session parked; docs/RETURN.md 2.4): the pointer names its cell by position, so the
+       the session parked; docs/archive/rounds/RETURN.md 2.4): the pointer names its cell by position, so the
        re-send below wrote the editable's text into whatever cell now sat there (measured on the
        checkout: Insert row above put "Q1 revenue" into the new row as well, and Cmd+Z took that
        write back instead of the row; build/b5.md section 7). The session ends with no re-send;
@@ -2532,7 +2532,7 @@ export function Editor({
       sessionTableShape.current = null;
       window.clearTimeout(reconcileTimer.current);
       reconcileTimer.current = 0;
-      /* every table command keeps the caret in the cell it had (docs/FEATURES.md 2.3 item 7,
+      /* every table command keeps the caret in the cell it had (docs/archive/rounds/FEATURES.md 2.3 item 7,
          P1; audit-objects 18: Insert row below from the cell menu left the table selected and
          the caret gone): the session that ends here reopens on the moved cell, at the end of its
          text, from the layout effect the end triggers; a cell that is gone reopens nothing */
@@ -2544,7 +2544,7 @@ export function Editor({
     const docText = readRunText(slideNow, current.blockId, current.pointer);
     if (docText === undefined) {
       /* the block became a list under the session (Bulleted list from the tail or the menu with
-         the session parked; docs/POLISH.md 2.3 item 15; audit-text item 4: Enter then raised
+         the session parked; docs/archive/rounds/POLISH.md 2.3 item 15; audit-text item 4: Enter then raised
          "text.splice: /text is not a string" over the stage): the text moved into the first
          item, so the session ends with no write of its own and opens again on that item at the
          end of its text; Enter then appends an item and Tab nests it */
@@ -2615,7 +2615,7 @@ export function Editor({
       anchor.row < block.rows.length &&
       anchor.col < block.columns.length
     ) {
-      /* a range stays a range after Merge (docs/FEATURES.md 2.3 item 7, P1): the merged cell
+      /* a range stays a range after Merge (docs/archive/rounds/FEATURES.md 2.3 item 7, P1): the merged cell
          stands as the range, drawn with the range ring, so Unmerge cells on the tail and in the
          cell menu act on it at once (the matrix rows tables.cells.merge-unmerge,
          tables.tail.merge-unmerge-buttons kept their reading: the merged cell selected) */
@@ -2681,7 +2681,7 @@ export function Editor({
         const block = blockById(slideNow, current.blockId);
         if (block?.type !== 'table') {
           /* Tab in an open label of a group moves to the next label in the group's order with
-             its text selected, Shift+Tab back, the member entered behind it (docs/FEATURES.md 2.2
+             its text selected, Shift+Tab back, the member entered behind it (docs/archive/rounds/FEATURES.md 2.2
              rank 6; audit-objects 11: Tab ended the session and opened nothing); the last label's
              Tab and the first's Shift+Tab return to the member, as before */
           const tag = block?.pos?.group;
@@ -2718,7 +2718,7 @@ export function Editor({
            commits, never on the element under the pointer now: the stage shows the markup frozen
            at the session's start, so once a burst had landed the cell element read here belonged
            to markup the re-render replaced, and the session opened on it ended at once with the
-           table selected and the next keys replacing its first cell (docs/RETURN.md 2.4 fix 1;
+           table selected and the next keys replacing its first cell (docs/archive/rounds/RETURN.md 2.4 fix 1;
            audit-objects rows 51, 93, 94). The effect runs on the session's end whether or not
            the markup changes, so an empty cell's Tab takes the same path (row 92). */
         pendingEdit.current = { blockId: block.id, pointer: next.pointer, caret: 'all' };
@@ -2732,7 +2732,7 @@ export function Editor({
       case 'range-right':
       case 'range-up':
       case 'range-down': {
-        /* an arrow at the cell's text edge (docs/FEATURES.md 2.2 rank 5; audit-objects 6): the
+        /* an arrow at the cell's text edge (docs/archive/rounds/FEATURES.md 2.2 rank 5; audit-objects 6): the
            adjacent cell opens with the caret at the matching edge, the start after Right or Down
            and the end after Left or Up, through the same layout effect as Tab; a merged cell
            counts as one (table-range.ts adjacentCell). With Shift the cells from this one to the
@@ -2797,7 +2797,7 @@ export function Editor({
 
   /** True when the run being edited is an item of a plain, rows or refs list: Enter appends an item (SPEC 7.4). */
   /**
-   * The table's box follows its rows at every input (docs/POLISH.md 2.1 item 2; polish/build/b2.md
+   * The table's box follows its rows at every input (docs/archive/rounds/POLISH.md 2.1 item 2; polish/build/b2.md
    * R2): a sentence typed at human speed wraps its cell and the row grows on the stage at once,
    * while the box and the ring followed only when a burst committed 100 ms after the last key,
    * so mid sentence the last rule sat 20 px below the ring. The wrapper's height is set from the
@@ -2909,7 +2909,7 @@ export function Editor({
   const stageRect = () => body.current?.parentElement?.getBoundingClientRect();
 
   /*
-   * A table command from the cell's right click menu keeps the caret in its cell (docs/FEATURES.md
+   * A table command from the cell's right click menu keeps the caret in its cell (docs/archive/rounds/FEATURES.md
    * 2.3 item 7, P1; audit-objects 18): the right click on a collapsed caret ends the session and
    * selects the cell as a run (onContextMenuEvent, the F4 rule), so when Insert row below lands the
    * stage holds a run selection on a table whose grid changed and no session. The memo below keeps
@@ -2970,7 +2970,7 @@ export function Editor({
     const editingNow = editingRef.current;
     if (editingNow && !el.contains(editingNow.element)) setEditing(null);
     /* a queued session or selection opens on the committed markup alone, never on a draft's
-       (docs/OBJECTS.md 2.4; measured on 4431: a column seam dragged with a cell open wrote the
+       (docs/archive/rounds/OBJECTS.md 2.4; measured on 4431: a column seam dragged with a cell open wrote the
        widths and the cell stayed closed, because the commit's markup equalled the draft's byte
        for byte, so `shownHtml` never changed and this effect never ran after the write; `doc` and
        `draft` are dependencies now, and the draft's own render is skipped here so a drawn text
@@ -3015,13 +3015,13 @@ export function Editor({
     };
     // the boxes follow the markup and the theme; measure, select and startEdit are closures over
     // refs; a session's end runs it too, so a queued cell (Tab, Shift+Tab) opens on the markup
-    // that end committed even when that markup did not change (docs/RETURN.md 2.4 fix 1); a
+    // that end committed even when that markup did not change (docs/archive/rounds/RETURN.md 2.4 fix 1); a
     // document change and the draft's clearing run it too, so a queued cell or selection lands
-    // after a write whose markup the draft had already drawn (docs/OBJECTS.md 2.4)
+    // after a write whose markup the draft had already drawn (docs/archive/rounds/OBJECTS.md 2.4)
   }, [shownHtml, theme, editing, doc, draft]);
 
   /*
-   * The instant preview of a picture being uploaded (docs/PRODUCT.md section 2 rank 10; the row
+   * The instant preview of a picture being uploaded (docs/archive/rounds/PRODUCT.md section 2 rank 10; the row
    * images.insert.instant-preview): the picture drawn inside the sheet at the box it will take, in
    * sheet px, with the thin progress bar, until the asset lands. It lives inside `.pt-slide`, where
    * the seller's eye and the drivers read the first img, and not on the overlay (the overlay's
@@ -3057,7 +3057,7 @@ export function Editor({
   }, [uploading, shownHtml]);
 
   /*
-   * The selection after a chrome insert (docs/PRODUCT.md section 2 rank 1): the controller sends
+   * The selection after a chrome insert (docs/archive/rounds/PRODUCT.md section 2 rank 1): the controller sends
    * SELECT_OBJECTS_EVENT once Insert > Table, the table grid or Insert > Chart has committed; the
    * stage selects the named objects when they are on the sheet, now if the markup already carries
    * them (the ring, the eight handles, the chip and its tail), else from the layout effect above
@@ -3201,7 +3201,7 @@ export function Editor({
   };
 
   /**
-   * The `typography.size` a word art's box height stands for (docs/FEATURES.md 2.3 item 8): the
+   * The `typography.size` a word art's box height stands for (docs/archive/rounds/FEATURES.md 2.3 item 8): the
    * size at the gesture's start times the new height over the start height, rounded and never
    * under 8 px; null for every other block or when the size does not change.
    */
@@ -3257,7 +3257,7 @@ export function Editor({
             : null;
       let mutations = result?.mutations ?? [];
       if (g.duplicate && kind === 'free-move') mutations = duplicateMutations(g, mutations);
-      /* word art scales its letters with its box (docs/FEATURES.md 2.3 item 8, P1; audit
+      /* word art scales its letters with its box (docs/archive/rounds/FEATURES.md 2.3 item 8, P1; audit
          objects 20: the box grew to 1027 by 205 and the letters stayed 88 px): a resize of a text
          block with an outline writes `typography.size` as the size at the gesture's start times
          the new height over the old, in the same commit as the box, and the readout shows the
@@ -3269,7 +3269,7 @@ export function Editor({
           setScaleReadout(`${scaled.size} px`);
         }
       }
-      /* a table's resize never goes below its rows' natural height (docs/OBJECTS.md 3.3 item 3;
+      /* a table's resize never goes below its rows' natural height (docs/archive/rounds/OBJECTS.md 3.3 item 3;
          build/b2.md request 1e): the box's height stops at the floor read at the press, a top
          edge drag keeps the bottom edge where it was, and the readout says the floored size */
       let floored: GestureReadout = readout;
@@ -3299,7 +3299,7 @@ export function Editor({
       };
     }
     if (isTableSeamHandle(g.handle)) {
-      /* a table seam of either axis (docs/RETURN.md 2.4 fix 5; docs/OBJECTS.md 3.3 item 4;
+      /* a table seam of either axis (docs/archive/rounds/RETURN.md 2.4 fix 5; docs/archive/rounds/OBJECTS.md 3.3 item 4;
          build/b2.md request 1c): a column seam widens the column on its left and narrows its
          neighbour in the table's own width, a row seam writes every row's height over the
          measure read at the press and the table's `pos.h` with it; the readout is the moved
@@ -3469,7 +3469,7 @@ export function Editor({
       setDrop(first.indicator);
       setDropSlot(first.slotBox);
     }
-    /* the preview of a pointer position (docs/OBJECTS.md 2.4): the draft document with the
+    /* the preview of a pointer position (docs/archive/rounds/OBJECTS.md 2.4): the draft document with the
        attached connectors re-routed, rendered once per animation frame however many moves land
        inside one; the kind tells the budget's degradation which path to take */
     const renderKind: GestureRenderKind =
@@ -3648,7 +3648,7 @@ export function Editor({
       kind === 'free-rotate' ||
       kind === 'line-end';
     if (!isCanvasWrite) {
-      /* a column seam dragged with a cell open (docs/OBJECTS.md 3.3 item 5): the press ended the
+      /* a column seam dragged with a cell open (docs/archive/rounds/OBJECTS.md 3.3 item 5): the press ended the
          session with its write, the release writes the widths, and the cell opens again on the
          markup that write lands, the caret at its end */
       if (g.reopen) pendingEdit.current = { ...g.reopen, caret: 'end' };
@@ -3681,7 +3681,7 @@ export function Editor({
     setCrop({ blockId, frame, trim, original: { frame, trim } });
   };
 
-  /** True when the block is a picture of a vector asset (docs/VECTOR.md 4.4: crop has no vector meaning this round). */
+  /** True when the block is a picture of a vector asset (docs/archive/rounds/VECTOR.md 4.4: crop has no vector meaning this round). */
   const isVectorPicture = (block: Block | undefined): boolean =>
     isCroppable(block) && vectorOf(docRef.current.deck.assets[block.asset] ?? RASTER) !== undefined;
 
@@ -3865,7 +3865,7 @@ export function Editor({
 
   /**
    * The vector file of the selection when it is exactly one picture of a vector asset
-   * (docs/VECTOR.md 4.5), for the theme on screen; null for every other selection.
+   * (docs/archive/rounds/VECTOR.md 4.5), for the theme on screen; null for every other selection.
    */
   const svgPathOfSelection = (): string | null => {
     const slideNow = slideRef.current;
@@ -3979,7 +3979,7 @@ export function Editor({
         document.execCommand('insertText', false, text);
         return;
       }
-      /* a spreadsheet's rows with no session open make a table (docs/FEATURES.md 2.3 item 5);
+      /* a spreadsheet's rows with no session open make a table (docs/archive/rounds/FEATURES.md 2.3 item 5);
          Paste without formatting keeps them as text, the chord's own promise */
       const grid = payload.kind === 'text' && !plain ? parseTablePaste(text) : null;
       if (grid !== null) {
@@ -3997,7 +3997,7 @@ export function Editor({
   };
 
   /**
-   * Two or more tab separated rows pasted with no session open (docs/FEATURES.md 2.3 item 5;
+   * Two or more tab separated rows pasted with no session open (docs/archive/rounds/FEATURES.md 2.3 item 5;
    * audit-objects 12): a table with one cell per pasted cell, a header row when the first row has
    * no numbers, its box sized to the rows and placed like an insert (centred, on top of the
    * stack, the slide converted first when it is not a canvas yet), in one commit. The snackbar
@@ -4012,7 +4012,7 @@ export function Editor({
   };
 
   /**
-   * A spreadsheet's rows pasted into an open table cell (docs/FEATURES.md 2.3 item 5): the cells
+   * A spreadsheet's rows pasted into an open table cell (docs/archive/rounds/FEATURES.md 2.3 item 5): the cells
    * fill right and down from that cell, the rows and columns they need added at the edges, at
    * most 20 by 20 (table-session.ts tableWithPastedGrid), in one commit of the rows and columns.
    * The session ends first, so its last keystrokes land before the grid and never over it, and
@@ -4087,7 +4087,7 @@ export function Editor({
         taken.add(next);
         return next;
       });
-      /* Cmd+D on an entered group member (docs/OBJECTS.md 4.2 item 3; build/b3.md request 1):
+      /* Cmd+D on an entered group member (docs/archive/rounds/OBJECTS.md 4.2 item 3; build/b3.md request 1):
          the copy becomes the entered member before the selection lands on it, so the next Escape
          returns to the group and a press on the copy reads it as the entered member, not as a
          member whose press selects the whole group */
@@ -4171,7 +4171,7 @@ export function Editor({
   /**
    * The format Cmd+Option+C copied (Google's copy formatting), kept until the next copy: unlike the
    * toolbar's Paint format, the chord arms no click to paint, so an Escape or a click on another
-   * object between the copy and Cmd+Option+V leaves it in place (docs/RETURN.md section 5
+   * object between the copy and Cmd+Option+V leaves it in place (docs/archive/rounds/RETURN.md section 5
    * formatting.paint-format.chords; the walk's Escape between the two chords disarmed the click
    * paint and pasted nothing, return/build/integrator.md).
    */
@@ -4213,10 +4213,10 @@ export function Editor({
    * Cmd B with a text block selected: the display weight on the whole block (SPEC 3.2 row 14).
    * Answers whether it wrote: the cover title's heading is a field object with no block, so the
    * key falls through to the shell's `format.text.bold` plan, whose write the studio converts
-   * (docs/RETURN.md 2.14 item 1; return/build/b2.md R1, `text.title.bold-cmd-b`).
+   * (docs/archive/rounds/RETURN.md 2.14 item 1; return/build/b2.md R1, `text.title.bold-cmd-b`).
    */
   /**
-   * The cells a mark on a selected table writes (docs/FEATURES.md 2.2 rank 8; audit-objects 7):
+   * The cells a mark on a selected table writes (docs/archive/rounds/FEATURES.md 2.2 rank 8; audit-objects 7):
    * the range's drawn cells when a range stands on the table, else every drawn cell of a table
    * selected by one click, each with its text and its whole plain range. Empty cells are left
    * out: a mark on no character writes nothing.
@@ -4314,7 +4314,7 @@ export function Editor({
     const slideNow = slideRef.current;
     if (!slideNow) return false;
     const mutations = selectedBlocks().flatMap((block): Mutation[] => {
-      /* a table: the mark over the range's cells or every cell (docs/FEATURES.md 2.2 rank 8) */
+      /* a table: the mark over the range's cells or every cell (docs/archive/rounds/FEATURES.md 2.2 rank 8) */
       if (block.type === 'table') return tableMarkMutations(slideNow, block, mark);
       const path =
         block.type === 'heading' || block.type === 'paragraph' || block.type === 'text'
@@ -4515,7 +4515,7 @@ export function Editor({
     replace?: boolean;
     background?: boolean;
     box?: Box;
-    /** the way the file came in (docs/VECTOR.md 4.8): each svg way reads its parked id; the chooser when absent */
+    /** the way the file came in (docs/archive/rounds/VECTOR.md 4.8): each svg way reads its parked id; the chooser when absent */
     way?: SvgWay;
   };
 
@@ -4538,7 +4538,7 @@ export function Editor({
   };
 
   /**
-   * The write for an asset the document holds (docs/PRODUCT.md section 2 rank 10; Google puts an
+   * The write for an asset the document holds (docs/archive/rounds/PRODUCT.md section 2 rank 10; Google puts an
    * inserted image into the slide's empty body placeholder, else centred over the body): a drop
    * keeps its point at the drop width; the picture of `blockId` is swapped in place with its box
    * kept ("Picture replaced" with Undo); `replace` on a picture slide swaps the slide's picture;
@@ -4574,7 +4574,7 @@ export function Editor({
     }
     const target = where.blockId !== undefined ? blockById(slideNow, where.blockId) : undefined;
     if (target && (target.type === 'shot' || target.type === 'picture')) {
-      /* the box keeps its centre and area and refits to the new picture's aspect (docs/POLISH.md
+      /* the box keeps its centre and area and refits to the new picture's aspect (docs/archive/rounds/POLISH.md
          2.5 item 37; polish/build/b4.md R1), in the same commit so one Cmd+Z takes both back */
       const replaced = asset.size ?? naturalSize;
       const refit: Mutation[] =
@@ -4620,7 +4620,7 @@ export function Editor({
     /* the box at the picture's own aspect: the picture fills its box since the focus round
        (docs/FOCUS.md rank 18), so a fixed box would squash it at the insert */
     const size = asset.size ?? naturalSize;
-    /* no hairline under a seller's picture (docs/POLISH.md 2.5 item 38; polish/build/b4.md R20) */
+    /* no hairline under a seller's picture (docs/archive/rounds/POLISH.md 2.5 item 38; polish/build/b4.md R20) */
     const shot = { id: 'shot', type: 'shot', asset: asset.id, border: false } as Block;
     if (where.box !== undefined) {
       insertObject(shot, { box: where.box });
@@ -4653,7 +4653,7 @@ export function Editor({
   };
 
   /**
-   * A logo asset the document holds (docs/FEATURES.md 4.4; audit-logos 9, 11, 14; B6): the Logo
+   * A logo asset the document holds (docs/archive/rounds/FEATURES.md 4.4; audit-logos 9, 11, 14; B6): the Logo
    * dialog's `logo.insert` stored the mark, and this places it. The size is the logo rule, never
    * the largest fit: a symbol 160 sheet px tall, a wordmark (a `wordmark*`, `lockup` or
    * `horizontal` variant) 320 wide, both at the mark's own ratio, scaled down when the free area
@@ -4846,7 +4846,7 @@ export function Editor({
   };
 
   /**
-   * One step insert of a picture file (gslides-parity SPEC 7.2.14; docs/PRODUCT.md section 2 rank
+   * One step insert of a picture file (gslides-parity SPEC 7.2.14; docs/archive/rounds/PRODUCT.md section 2 rank
    * 10): the file's first bytes are read before anything else, so a file that is not a picture is
    * refused at once with the sentence and nothing is drawn; a picture draws at once from a local
    * object URL inside the sheet at the box it will take, with a progress bar while `asset.add`
@@ -4868,7 +4868,7 @@ export function Editor({
     const kind = sniffPictureKind(head);
     if (kind === null)
       return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
-    /* a parked svg way is off (docs/VECTOR.md 4.8): the file reads as one that is not a picture */
+    /* a parked svg way is off (docs/archive/rounds/VECTOR.md 4.8): the file reads as one that is not a picture */
     if (kind === 'svg' && parkedRef.current?.(SVG_WAY_IDS[where.way ?? 'upload']) === true)
       return { ok: false, sentence: uploadFailureSentence('not-a-picture', maxMb) };
     const slideBefore = slideRef.current;
@@ -4955,7 +4955,7 @@ export function Editor({
   };
 
   /**
-   * A picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/PRODUCT.md
+   * A picture at a web address (Insert > Image > By URL, Replace image > By URL; docs/archive/rounds/PRODUCT.md
    * section 5 "Image by URL"; VERIFICATION.md product pass 1 finding 7): the page fetches the
    * bytes itself when the address lets it (its own origin on every tier, a host that allows a
    * cross origin read), and the file then takes the upload's whole path, the sniff, the instant
@@ -5008,7 +5008,7 @@ export function Editor({
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       /* the server's allowlist sentence of the features round names the four sites and reads whole
-         (docs/FEATURES.md 4.7, build/b7.md R2); the older lines keep their clause */
+         (docs/archive/rounds/FEATURES.md 4.7, build/b7.md R2); the older lines keep their clause */
       const allowlistSentence =
         /Pictures can be fetched from these sites only:.*?\.\s+Upload the file instead/i.exec(
           message,
@@ -5033,7 +5033,7 @@ export function Editor({
   };
 
   /**
-   * Add a caption on the selected shot (docs/PRODUCT.md section 2 rank 10; Google's caption is a
+   * Add a caption on the selected shot (docs/archive/rounds/PRODUCT.md section 2 rank 10; Google's caption is a
    * text box the seller places by hand): the caption field is written empty, so the figure draws
    * its "Add a caption" prompt, and the session opens on it at once; typing stores the caption
    * through the burst path and one Cmd+Z takes it back.
@@ -5045,7 +5045,7 @@ export function Editor({
     const block = anchor === null ? undefined : blockById(slideNow, anchor);
     if (!block || block.type !== 'shot') return false;
     if (block.caption === undefined) {
-      /* the box grows by the caption's row so the picture keeps its size (docs/POLISH.md 2.5
+      /* the box grows by the caption's row so the picture keeps its size (docs/archive/rounds/POLISH.md 2.5
          item 43; polish/build/b4.md R2), in the same commit as the empty caption */
       commit([
         { op: 'block.set', slideId: slideNow.id, blockId: block.id, path: '/caption', value: '' },
@@ -5275,7 +5275,7 @@ export function Editor({
         id: 'text',
         type: 'text',
         text: canonicalText(trimmed),
-        /* the regular weight (docs/POLISH.md 2.4 item 34): the tail's B reads unpressed at the
+        /* the regular weight (docs/archive/rounds/POLISH.md 2.4 item 34): the tail's B reads unpressed at the
            insert and one press bolds the letters */
         typography: { size: 88, align: 'center' },
         outline: { color: 'ink', width: 1.5 },
@@ -5588,7 +5588,7 @@ export function Editor({
         const fromPage = e.target === document.body;
         /* a Tab from a chrome control outside the stage and the overlay (the Slideshow half, a
            toolbar button, a panel field) is the browser's whether or not an object is selected
-           (docs/RETURN.md 4.1, chrome.split.tab-order: the stage took the Tab from the Slideshow
+           (docs/archive/rounds/RETURN.md 4.1, chrome.split.tab-order: the stage took the Tab from the Slideshow
            half with the title selected and moved the selection to the subtitle); an overlay
            handle keeps the walk, so Tab after a drag from a handle still cycles the objects */
         const fromOverlay = e.target instanceof Element && e.target.closest('.ts-overlay') !== null;
@@ -5686,7 +5686,7 @@ export function Editor({
         return;
       }
       /* Shift with an arrow while a cell range stands on the selected table and no cell is open
-         (docs/FEATURES.md 2.2 rank 5, `tables.range.shift-arrows`): the range's focus steps one
+         (docs/archive/rounds/FEATURES.md 2.2 rank 5, `tables.range.shift-arrows`): the range's focus steps one
          cell, the anchor stays; the plain arrows keep nudging the object */
       if (
         e.shiftKey &&
@@ -5757,7 +5757,7 @@ export function Editor({
           return;
         case 'enter': {
           /* Enter on a selected text object opens its session with the caret at the end
-             (AMENDMENTS.md A1 rule 4; SPEC 6.9); on a table the remembered cell (docs/FEATURES.md
+             (AMENDMENTS.md A1 rule 4; SPEC 6.9); on a table the remembered cell (docs/archive/rounds/FEATURES.md
              2.2 rank 4); on a selected chart the Chart data grid (rank 7); on a selected group
              the first label, with its member entered behind it (rank 6) */
           if (current === null) return;
@@ -5842,7 +5842,7 @@ export function Editor({
           /* the browser's copy, cut and paste events carry these (below): the default stays so
              the browser fires them, and the chord stops here so the shell's key table (which
              prevents the default of every Edit menu chord it matches) never swallows it. Cmd+Shift+V
-             arms a plain paste for the paste event the chord fires (docs/PRODUCT.md section 5:
+             arms a plain paste for the paste event the chord fires (docs/archive/rounds/PRODUCT.md section 5:
              the handler reads the paste event's text, never the async clipboard, which needs a
              permission and answered nothing, audit-gaps 11) */
           const owns =
@@ -5922,7 +5922,7 @@ export function Editor({
       const payload = payloadOfSelection();
       if (!payload) return;
       e.preventDefault();
-      /* a selection of exactly one svg picture (docs/VECTOR.md 4.5): its markup as text/plain,
+      /* a selection of exactly one svg picture (docs/archive/rounds/VECTOR.md 4.5): its markup as text/plain,
          what Figma, a text editor and a browser read, and the envelope inside a text/html
          comment so the product's own paste across tabs still finds it; the store notes the
          payload without its own system write, which would replace the markup. A copy before
@@ -5954,7 +5954,7 @@ export function Editor({
       }
       const text = e.clipboardData?.getData('text/plain') ?? '';
       /* Paste without formatting reads the event's plain text and never the product's envelope
-         nor an svg's markup as a picture (docs/VECTOR.md 4.3 item 4: the markup pastes as text) */
+         nor an svg's markup as a picture (docs/archive/rounds/VECTOR.md 4.3 item 4: the markup pastes as text) */
       if (plain) {
         if (text === '') return;
         e.preventDefault();
@@ -5990,7 +5990,7 @@ export function Editor({
     };
   }, []);
 
-  /* the read ahead of an svg picture's markup (docs/VECTOR.md 4.5): the copy event is
+  /* the read ahead of an svg picture's markup (docs/archive/rounds/VECTOR.md 4.5): the copy event is
      synchronous, so when a selection becomes exactly one vector picture its file is fetched once
      per file per page life (a same origin or public store GET, the store host in connect-src) into
      the map the copy reads; a selection of anything else fetches nothing, and a copy before the
@@ -6045,11 +6045,11 @@ export function Editor({
       beginCropDrag(handle.dir, e.clientX, e.clientY);
       return;
     }
-    /* the frame of a table with a cell open is its move surface (docs/FEATURES.md 2.1): the
+    /* the frame of a table with a cell open is its move surface (docs/archive/rounds/FEATURES.md 2.1): the
        session ends with its write, the table stands selected and the drag begins; every other
        handle is inert while a session is open, as before */
     const current = editingRef.current;
-    /* a column seam pressed with a cell open (docs/OBJECTS.md 3.3 item 5): the seam sits on the
+    /* a column seam pressed with a cell open (docs/archive/rounds/OBJECTS.md 3.3 item 5): the seam sits on the
        rules and never over the cell's text, so the drag proceeds and the release opens the cell
        again (finishCanvasGesture) */
     const reopen =
@@ -6229,19 +6229,19 @@ export function Editor({
       if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
     }
     /* no hover ring and no cell prompt while a draw is down: the drawn object's draft sits under
-       the pointer from the press (docs/OBJECTS.md 2.4) */
+       the pointer from the press (docs/archive/rounds/OBJECTS.md 2.4) */
     if (frameDown.current) return;
     const id = resolveObject(e.target, el, slideNow);
     setHover((prev) => (prev === id ? prev : id));
   };
 
-  /* no prompt in a table cell (docs/POLISH.md 2.1 item 1; polish/build/b2.md R1): the hovered
+  /* no prompt in a table cell (docs/archive/rounds/POLISH.md 2.1 item 1; polish/build/b2.md R1): the hovered
      cell's "Type to add text" wrapped in a narrow cell and grew its row under the pointer; the
      cell ring and the caret say where typing goes */
 
   /**
    * A Shift click on a cell of the edited or selected table selects the cells from the anchor
-   * cell to it (Google Slides; table-range.ts, docs/RETURN.md 2.4 "a drag over cells to select a
+   * cell to it (Google Slides; table-range.ts, docs/archive/rounds/RETURN.md 2.4 "a drag over cells to select a
    * range"; the matrix row tables.cells.merge-unmerge). The anchor is the open session's cell,
    * else the range's own anchor, else the selected run's cell, else the cell of the last session
    * on this table while it stays selected; the session ends with its write and the table stands
@@ -6364,7 +6364,7 @@ export function Editor({
       detach();
       if (live) window.getSelection()?.removeAllRanges();
       /* a press on the selected table that never travelled: the tap moves the caret to the
-         pressed cell (docs/FEATURES.md 2.1); with a session the browser's own click placed it */
+         pressed cell (docs/archive/rounds/FEATURES.md 2.1); with a session the browser's own click placed it */
       else if (session === undefined) tap?.({ x: ev.clientX, y: ev.clientY, target: ev.target });
     };
     window.addEventListener('pointermove', move);
@@ -6373,7 +6373,7 @@ export function Editor({
   };
 
   /**
-   * The caret in a table cell from a click (docs/FEATURES.md 2.2 rank 2; the amended A1 for
+   * The caret in a table cell from a click (docs/archive/rounds/FEATURES.md 2.2 rank 2; the amended A1 for
    * tables): the session opens on the cell's run with the caret at the click point, and the cell
    * becomes the table's remembered cell (`startEdit` records it). Nothing is written.
    */
@@ -6386,7 +6386,7 @@ export function Editor({
     if (readRunText(slideNow, run.blockId, run.pointer) === undefined) return;
     const current = editingRef.current;
     if (current !== null) {
-      /* one click on another cell moves the caret (docs/POLISH.md 2.2 item 4; polish/build/b2.md
+      /* one click on another cell moves the caret (docs/archive/rounds/POLISH.md 2.2 item 4; polish/build/b2.md
          R3): the open session ends with its final write and the pressed cell's session opens at
          the click point, as Google's does; a click inside the open cell is the caret's own */
       if (current.blockId === run.blockId && current.pointer === run.pointer) return;
@@ -6399,7 +6399,7 @@ export function Editor({
   /**
    * The run a key opens on a selected object (A1 rule 4): the anchor cell of its cell range, else
    * on a table the cell the seller last touched (the click that selected the table, the last
-   * session; `lastCell`, docs/FEATURES.md 2.2 rank 4), else its first run. A table selected by a
+   * session; `lastCell`, docs/archive/rounds/FEATURES.md 2.2 rank 4), else its first run. A table selected by a
    * marquee, by Tab from another object or from the filmstrip has no remembered cell and opens
    * cell 1,1.
    */
@@ -6422,7 +6422,7 @@ export function Editor({
   /**
    * The caret a typed key or Enter places on a selected object (A1 rule 4, `entryCaret`): over
    * the whole text so the first character replaces it, as in Google Slides; on a table at the end
-   * of the remembered cell's text so the letter appends (docs/FEATURES.md 2.2 rank 4; audit
+   * of the remembered cell's text so the letter appends (docs/archive/rounds/FEATURES.md 2.2 rank 4; audit
    * objects 5: a stray key with the table selected replaced cell 1,1's whole text), because a
    * table's text is many texts and replacing the first is a loss the seller did not ask for.
    */
@@ -6433,7 +6433,7 @@ export function Editor({
   ): CaretPlacement => {
     if (blockById(slideNow, blockId)?.type === 'table') return 'end';
     /* the selected object rule's replace (A1 rule 4) applies after a selection a click made,
-       never after a key that left a session (docs/POLISH.md 2.3 item 19; audit-assist section 6:
+       never after a key that left a session (docs/archive/rounds/POLISH.md 2.3 item 19; audit-assist section 6:
        Enter closed a title's session and the next sentence replaced the whole paragraph): the
        first printable key after such a key types at the end */
     if (entry === 'typing' && selectedByKey.current) return 'end';
@@ -6441,7 +6441,7 @@ export function Editor({
   };
 
   /**
-   * The labels of a group in document order (docs/FEATURES.md 2.2 rank 6): every member whose
+   * The labels of a group in document order (docs/archive/rounds/FEATURES.md 2.2 rank 6): every member whose
    * markup carries a run with a text behind it (a text box, a shape with text); a connector has
    * none. Enter on the selected group opens the first, Tab in an open label the next.
    */
@@ -6455,7 +6455,7 @@ export function Editor({
     });
 
   /**
-   * The Chart data grid from the stage (docs/FEATURES.md 2.2 rank 7): the window event the
+   * The Chart data grid from the stage (docs/archive/rounds/FEATURES.md 2.2 rank 7): the window event the
    * chrome's Overlay and the Chart data section answer (CHART_CELL_EVENT); `open` asks for Format
    * options on the section. Nothing is written.
    */
@@ -6472,7 +6472,7 @@ export function Editor({
   };
 
   /**
-   * The cell of a chart mark under a press (docs/FEATURES.md 2.2 rank 7): a bar, a point or a
+   * The cell of a chart mark under a press (docs/archive/rounds/FEATURES.md 2.2 rank 7): a bar, a point or a
    * slice carries `data-series` and `data-category` (render/blocks/chart.ts), read from the
    * element and never from the drawing. Null off a mark.
    */
@@ -6722,7 +6722,7 @@ export function Editor({
       return;
     }
     let current = mods;
-    /* the draft of the draw (docs/OBJECTS.md 2.4): the press builds the block.insert the release
+    /* the draft of the draw (docs/archive/rounds/OBJECTS.md 2.4): the press builds the block.insert the release
        will commit and previews it through the draft document, so the sheet draws the object
        itself from the pointer down, at the tool's default box at the press point and at the drawn
        box as the pointer travels, with the grammar's default fill and the preset's geometry; a
@@ -6765,7 +6765,7 @@ export function Editor({
     };
     /* the draw is a gesture of the stage's life like a resize (gesture-life.ts), so the size it
        would store shows while the pointer is down and clears with the release, the cancel or a
-       selection (docs/RETURN.md 2.1 "the drawing by drag with the readout"; stage-rules.ts
+       selection (docs/archive/rounds/RETURN.md 2.1 "the drawing by drag with the readout"; stage-rules.ts
        drawReadout) */
     startFrames();
     setHover(null);
@@ -6888,7 +6888,7 @@ export function Editor({
     if (linkChipRef.current !== null) setLinkChip(null);
     if (!el || !slideNow || e.button !== 0) return;
     /* a Shift or Cmd press adds to the selection and never starts the browser's own text
-       selection over the pictures (docs/POLISH.md 2.4 item 29; polish/build/b3.md request 4) */
+       selection over the pictures (docs/archive/rounds/POLISH.md 2.4 item 29; polish/build/b3.md request 4) */
     if ((e.shiftKey || e.metaKey || e.ctrlKey) && editingRef.current === null) e.preventDefault();
     if (shiftClickOnCell(e, el, slideNow)) return;
     const current = editingRef.current;
@@ -6903,7 +6903,7 @@ export function Editor({
         insideRun: e.target instanceof Node && current.element.contains(e.target),
         under: resolveObject(e.target, el, slideNow),
         blockId: current.blockId,
-        /* another cell of the edited table (docs/POLISH.md 2.2 item 4; polish/build/b2.md R3):
+        /* another cell of the edited table (docs/archive/rounds/POLISH.md 2.2 item 4; polish/build/b2.md R3):
            the session ends with its write and the press opens the pressed cell at the point */
         otherRun:
           pressedRunNow !== null &&
@@ -6984,7 +6984,7 @@ export function Editor({
        object (AMENDMENTS.md A2: the plan's `open`, a pointer up without a move opens the text at
        the release point, openOnSecondClick), the double click (onDoubleClick, InlineText
        clickEntry), a printable key and Enter (onKey). */
-    /* the cell of a table the press landed in (docs/FEATURES.md 2.1, the amended A1 for tables):
+    /* the cell of a table the press landed in (docs/archive/rounds/FEATURES.md 2.1, the amended A1 for tables):
        a tap places the caret there, a move on the selected table selects a range from it */
     const pressedRun = id !== null ? resolveRun(e.target, el) : null;
     const pressedCell =
@@ -7037,7 +7037,7 @@ export function Editor({
           selectObjects([plan.blockId]);
         }
         const point = { x: e.clientX, y: e.clientY };
-        /* the tap of the press: on a table cell the caret at the click point (docs/FEATURES.md 2.2
+        /* the tap of the press: on a table cell the caret at the click point (docs/archive/rounds/FEATURES.md 2.2
            rank 2; the pressed cell becomes the remembered cell of rank 4); on a bar, a point or a
            slice of the selected chart its cell in the Chart data grid with the value in the
            readout (rank 7); nothing elsewhere */
@@ -7130,7 +7130,7 @@ export function Editor({
   };
 
   /**
-   * The double click's word rule (docs/POLISH.md 2.4 item 30): on a shape's label or a diagram
+   * The double click's word rule (docs/archive/rounds/POLISH.md 2.4 item 30): on a shape's label or a diagram
    * member's text the double click selects the word at the point; a text box, a placeholder and a
    * grammar field take the caret (A1 rule 3).
    */
@@ -7250,7 +7250,7 @@ export function Editor({
     const id = resolveObject(e.target, el, slideNow);
     if (id === null) return;
     const clicked = blockById(slideNow, id);
-    /* a double click on a chart opens its numbers (docs/FEATURES.md 2.2 rank 7; audit-objects
+    /* a double click on a chart opens its numbers (docs/archive/rounds/FEATURES.md 2.2 rank 7; audit-objects
        17: the double click did nothing and a value was four clicks away): Format options on the
        Chart data section with the first value cell active; a double click on the title run still
        opens the title's session, below */
@@ -7275,9 +7275,9 @@ export function Editor({
         groupEnteredRef.current = id;
         select({ kind: 'block', blockId: id }, []);
         /* a member that carries a run (a text box, a shape with its label) opens its text at once
-           with the member entered behind it (docs/FEATURES.md 2.2 rank 6; audit-objects 11: one
+           with the member entered behind it (docs/archive/rounds/FEATURES.md 2.2 rank 6; audit-objects 11: one
            label was five clicks). On a shape's label or a diagram member's text the word at the
-           point is selected, so typing replaces it (docs/POLISH.md 2.4 item 30; VERIFICATION.md
+           point is selected, so typing replaces it (docs/archive/rounds/POLISH.md 2.4 item 30; VERIFICATION.md
            "Polish round, pass 1" finding 12: the caret landed mid word, "Ste plusp 2"); a text box
            inside a plain group keeps A1 rule 3's caret */
         if (entry.hasRun && entry.kind !== 'picture' && entry.kind !== 'line') {
@@ -7299,7 +7299,7 @@ export function Editor({
            padding, or on a closed shape's body (docs/FOCUS.md section 4), opens the first run at
            its end. The browser's own double click selection of the drawn text is prevented: the
            session places the caret itself. On a shape's label or a diagram member's text the
-           word at the point is selected, so typing replaces it (docs/POLISH.md 2.4 item 30;
+           word at the point is selected, so typing replaces it (docs/archive/rounds/POLISH.md 2.4 item 30;
            question 5's default; polish/build/b3.md request 5); a text box keeps A1 rule 3's caret */
         const under = resolveRun(e.target, el);
         const run = under !== null && under.blockId === id ? under : firstRunOf(el, id);
@@ -7324,7 +7324,7 @@ export function Editor({
     const anchor = e.target.closest('a');
     if (anchor === null) return;
     e.preventDefault();
-    /* one click on a linked word outside a session shows the chip (docs/POLISH.md 2.3 item 20;
+    /* one click on a linked word outside a session shows the chip (docs/archive/rounds/POLISH.md 2.3 item 20;
        audit-text item 6: the chip appeared only inside a session with the caret in the link);
        the click has already selected the box (A1 rule 1, onPointerDown) */
     const el = body.current;
@@ -7502,7 +7502,7 @@ export function Editor({
     const selectedAnchor = onOverlay ? selectedBlockId(selectionRef.current) : null;
     const id = inSheet ? resolveObject(e.target, el, slideNow) : selectedAnchor;
     /* the selected table's own overlay controls sit over its cells (the column and row seams on
-       the rules, drawn with a cell open too since docs/OBJECTS.md 3.3 item 5; the cell ring and
+       the rules, drawn with a cell open too since docs/archive/rounds/OBJECTS.md 3.3 item 5; the cell ring and
        the tools of TableOverlay.tsx): a right click on one is the cell beneath the pointer, so a
        merged cell whose centre falls on a seam still opens the cell's menu with Unmerge cells
        (the integrator's walk of the objects round: tables.cells.merge-unmerge read the object's
@@ -7599,7 +7599,7 @@ export function Editor({
      does not remount per render */
   const shaderPalette = useMemo(() => shaderPaletteOfDeck(doc.deck), [doc.deck]);
   /* the anchor as the shown document holds it: during a gesture the draft's block, so its `pos`
-     (the box, the angle) drives the ring and the handles at every frame (docs/OBJECTS.md 2.4) */
+     (the box, the angle) drives the ring and the handles at every frame (docs/archive/rounds/OBJECTS.md 2.4) */
   const anchorBlock =
     selectedId !== null
       ? ((shownSlide ? blockById(shownSlide, selectedId) : undefined) ??
@@ -7631,7 +7631,7 @@ export function Editor({
     (shownSlide ? blockById(shownSlide, id)?.type : undefined) ??
     (slide ? blockById(slide, id)?.type : undefined) ??
     blockTypeIn(body.current, id);
-  /* the selection ring (selection-box.ts; docs/OBJECTS.md 2.4): one selected object's `pos` box
+  /* the selection ring (selection-box.ts; docs/archive/rounds/OBJECTS.md 2.4): one selected object's `pos` box
      from the shown document, so a rotated object's ring is its own box turned by the overlay and
      a gesture's draft moves it in the same frame as the sheet; the measured box for an object
      without `pos`; the run's measured box, outset, while a text session is open */
@@ -7659,7 +7659,7 @@ export function Editor({
       ? null
       : { box, label: `${bounds.r0},${bounds.c0}:${bounds.r1},${bounds.c1}` };
   })();
-  /* the cell ring inside the table's ring (docs/OBJECTS.md 3.3 item 1): the range's union while
+  /* the cell ring inside the table's ring (docs/archive/rounds/OBJECTS.md 3.3 item 1): the range's union while
      one is active, else the open or selected cell's measured grid area (the `.td` carries the
      run attribute, so its run box is the cell's) */
   const cellRing: Box | null =
@@ -7671,7 +7671,7 @@ export function Editor({
           ? (boxes.runs[`${selection.blockId}/${selection.pointer}`] ?? null)
           : null;
   /* the union of a multi selection from the shown document, so a group's ring follows its
-     members' draft positions at every frame of a resize or a move (docs/OBJECTS.md 2.1; measured
+     members' draft positions at every frame of a resize or a move (docs/archive/rounds/OBJECTS.md 2.1; measured
      on 4431: the union read from the committed slide stood at the group's old box for the whole
      drag while the members and the handles moved) */
   const group =
@@ -7687,7 +7687,7 @@ export function Editor({
       : ringBoxFor(ringTypeOf(hover), measuredHoverBox);
   /* a table cell or a cell range is active: the work is inside the table, so its outer transform
      handles (the eight resize squares, the rotation ring) and the column seams are not drawn, as
-     Google draws them only for the whole-table selection (docs/RETURN.md 2.4). A single click
+     Google draws them only for the whole-table selection (docs/archive/rounds/RETURN.md 2.4). A single click
      selects the table block (chip Table, no cell), where they do show; a Shift click, a drag
      across cells or the cell left after a merge selects a cell, where they do not. Without this a
      merged cell's centre, which sits on a resize square, took a right click meant for its menu. */
@@ -7696,9 +7696,9 @@ export function Editor({
     ((selection?.kind === 'run' && cellPointer(selection.pointer) !== null) ||
       (cellRange !== null && cellRange.blockId === anchorId));
   /* a table with a cell open or a cell or range active keeps its frame as a move surface: the
-     chip and the ring band, and the eight handles (docs/FEATURES.md 2.1: "the table moves by its
+     chip and the ring band, and the eight handles (docs/archive/rounds/FEATURES.md 2.1: "the table moves by its
      ring band, its chip and its eight handles"; `tables.range.drag-from-selected`), while the
-     column seams stay away from the cells (docs/RETURN.md 2.4) */
+     column seams stay away from the cells (docs/archive/rounds/RETURN.md 2.4) */
   const tableFrame =
     shownSlide !== undefined &&
     editable &&
@@ -7720,9 +7720,9 @@ export function Editor({
             (handle) => handle.kind === 'free-move' || handle.kind === 'free-resize',
           )
         : [];
-  /* the column seams of one selected table (docs/RETURN.md 2.4 fix 5), from the header row's
+  /* the column seams of one selected table (docs/archive/rounds/RETURN.md 2.4 fix 5), from the header row's
      measured cells, beside its eight handles, whenever one table is selected, a cell open or
-     active or not (docs/OBJECTS.md 3.3 item 5: the seams sit on the rules and never over a
+     active or not (docs/archive/rounds/OBJECTS.md 3.3 item 5: the seams sit on the rules and never over a
      cell's text; a seam press with a cell open ends the session and the release opens the cell
      again, onHandleDown); none in crop mode or while another block's session is open */
   if (
@@ -7734,7 +7734,7 @@ export function Editor({
     (editing === null || editing.blockId === anchorId)
   ) {
     const seamBlock = blockById(shownSlide, anchorId);
-    /* the row seams under the column seams (docs/POLISH.md 2.2 item 11; polish/build/b2.md R6):
+    /* the row seams under the column seams (docs/archive/rounds/POLISH.md 2.2 item 11; polish/build/b2.md R6):
        at a crossing the column seam is on top, and the press routes by its first movement
        (beginGesture's `crossing`) */
     if (seamBlock?.type === 'table')
@@ -7790,7 +7790,7 @@ export function Editor({
           ? `${ids.length} objects`
           : `${blockDisplayName(shownSlide, selectedId, shown.deck.assets)}${showIds ? ` · ${selectedId}` : ''}`
       : null;
-  /* the Edit data button under the selected chart (docs/FEATURES.md 2.2 rank 7, `bar.chart.editData`) */
+  /* the Edit data button under the selected chart (docs/archive/rounds/FEATURES.md 2.2 rank 7, `bar.chart.editData`) */
   const editData =
     selectedId !== null && shownSlide && ids.length === 1 && !editing && editable && !crop
       ? blockById(shownSlide, selectedId)?.type === 'chart'
@@ -7869,7 +7869,7 @@ export function Editor({
 
   const backdrop = backdropFor(shown, shownSlide, theme, assetBase);
   const isPicture = backdrop !== undefined;
-  /* the brand kit's frame band (docs/PRODUCT.md 4.1, 4.4): the footer logo, the footer text and
+  /* the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the footer logo, the footer text and
      the counter's format on the editor's own Frame, so Logo > Replace, Footer > Text and Slide
      numbers > Format read on the stage as they do in the show and the exports */
   const band = useMemo(
@@ -7884,7 +7884,7 @@ export function Editor({
   const editingBox = editing
     ? (boxes.runs[`${editing.blockId}/${editing.pointer}`] ?? boxes.blocks[editing.blockId] ?? null)
     : null;
-  /* the slides the link popover can point at, by title (docs/PRODUCT.md section 2 rank 19) */
+  /* the slides the link popover can point at, by title (docs/archive/rounds/PRODUCT.md section 2 rank 19) */
   const slideTargets = useMemo(
     () =>
       slideOrder(shown.deck).map((id, index) => {
@@ -7942,7 +7942,7 @@ export function Editor({
         >
           {/* the counter follows the deck's Slide numbers (Insert > Slide numbers: on, off, skip
               title slides) the way the show, the PDF and the PowerPoint do through the render's
-              slideCounter; the Frame drew it on every slide before (docs/RETURN.md section 5
+              slideCounter; the Frame drew it on every slide before (docs/archive/rounds/RETURN.md section 5
               slides.numbers.apply; build/b5.md section 7) */}
           <Frame
             index={index}
@@ -7967,7 +7967,7 @@ export function Editor({
             dangerouslySetInnerHTML={{ __html: shownHtml }}
           />
           {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5): it re-mounts on every commit that moves or resizes an object (SPEC-2 0.94) */}
-          {/* the features round, ship two (docs/FEATURES.md 5.6, 5.7; build/b5/integrator-hunks.md R6): one live mount per stage (the selected shader plays, the others show their frame), the deck's kit palette, 1x device pixels below zoom 100 */}
+          {/* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6, 5.7; build/b5/integrator-hunks.md R6): one live mount per stage (the selected shader plays, the others show their frame), the deck's kit palette, 1x device pixels below zoom 100 */}
           <MaterialMount
             body={body}
             html={shownHtml}
@@ -7986,7 +7986,7 @@ export function Editor({
           on the overlay) */}
       <div
         className="ts-overlay ts-chrome"
-        /* the sheet's own appearance (docs/POLISH.md 2.5 item 49): the layer is a sibling of the
+        /* the sheet's own appearance (docs/archive/rounds/POLISH.md 2.5 item 49): the layer is a sibling of the
            stage root, so it carries the stage's theme itself for the selection tokens (tokens.css) */
         data-theme={theme}
         data-active-handle={activeHandle ?? undefined}
@@ -8003,7 +8003,7 @@ export function Editor({
         hidden={stageSize.width <= 0}
       >
         {overlay ? overlay(view) : null}
-        {/* the cell range on the selected table (table-range.ts; docs/RETURN.md 2.4): one ring in
+        {/* the cell range on the selected table (table-range.ts; docs/archive/rounds/RETURN.md 2.4): one ring in
             the selection colour over the union of its cells, inside the table's own ring (the
             Overlay's .ts-select rule; the chrome lint's `select` role); the plans read the same
             bounds through EditorMenuSelection.cells */}

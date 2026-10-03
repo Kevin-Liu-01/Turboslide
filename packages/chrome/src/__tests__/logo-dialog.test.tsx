@@ -28,7 +28,7 @@ import type { LogoSearchRow } from '../logo-model';
 import { LOGO_DIALOG } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
-// Insert > Logo (docs/FEATURES.md 4.3, 4.4, 4.6, 4.9; the rows logos.picker.* of 7.1): the search
+// Insert > Logo (docs/archive/rounds/FEATURES.md 4.3, 4.4, 4.6, 4.9; the rows logos.picker.* of 7.1): the search
 // field focused, the results on the keystroke with the first tile preselected and Enter inserting
 // it through `logo.insert` and the editor's placement; the tiles' paper and ink halves drawing the
 // variant logo-model.ts's appearance rule picks; the licence row as the seller's sentence with the
@@ -597,7 +597,7 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.empty')?.textContent).toContain(LOGO_WORDS.emptyKit);
   });
 
-  it('lists Your brand with the default kit’s mark alone, the deck’s logo asset under Recent, the results first while a query is typed, and places the asset through the editor (docs/POLISH.md items 39 and 46)', async () => {
+  it('lists Your brand with the default kit’s mark alone, the deck’s logo asset under Recent, the results first while a query is typed, and places the asset through the editor (docs/archive/rounds/POLISH.md items 39 and 46)', async () => {
     stubRoute();
     const insertPictureAsset = vi.fn(() => Promise.resolve());
     const { Host, closeDialog } = makeHost({
@@ -736,7 +736,7 @@ describe('LogoDialog', () => {
     );
   });
 
-  it('Replace image > Logo takes the picture route, which refits the box, unless the mark also goes on every slide (docs/POLISH.md item 37)', async () => {
+  it('Replace image > Logo takes the picture route, which refits the box, unless the mark also goes on every slide (docs/archive/rounds/POLISH.md item 37)', async () => {
     const { calls } = stubRoute();
     const target: PictureTarget = {
       kind: 'block',

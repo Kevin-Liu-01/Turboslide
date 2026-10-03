@@ -5,7 +5,7 @@ import { formatCount } from './facts';
 import { HOME_META } from './home-meta';
 
 /**
- * Every string of the /home page (docs/POLISH.md section 3, on the page grammar of docs/NEXT.md
+ * Every string of the /home page (docs/archive/rounds/POLISH.md section 3, on the page grammar of docs/NEXT.md
  * 4.1.2 and 4.1.3 item 9 since Round 1; the round four notes of gslides-parity SPEC-4 section 2
  * stand under it), in one module so `copy.test.ts` can lint them
  * all: sentence case headings with no comma and no trailing period, one thought per sentence

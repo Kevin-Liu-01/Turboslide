@@ -9,7 +9,7 @@
  * state, no effect, no measurement; the ten menu titles are the words the menu bar draws so the
  * row's type sits where it will.
  *
- * The product round (docs/PRODUCT.md 3.5; audit-interface 30): the filmstrip holds one numbered
+ * The product round (docs/archive/rounds/PRODUCT.md 3.5; audit-interface 30): the filmstrip holds one numbered
  * frame for the one slide draft of /new (`frames`, the deck's count where a route knows it) instead
  * of three, a quiet paper plate stands where the sheet will be instead of the dither figure, so
  * the editor that replaces it 100 to 250 ms later brings no flash and no layout jump, and the
@@ -21,7 +21,7 @@
 import { DEFAULT_MENU_CONTEXT, visibleMenus } from '@turboslide/chrome/menus/model';
 
 /**
- * The editor's own menu list in the default view (docs/POLISH.md item 106; audit-collab item
+ * The editor's own menu list in the default view (docs/archive/rounds/POLISH.md item 106; audit-collab item
  * 10: the skeleton drew an Extensions menu the editor has not got), read from the model once so
  * the row's type sits where the menu bar's will.
  */

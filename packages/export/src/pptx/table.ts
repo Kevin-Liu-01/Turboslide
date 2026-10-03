@@ -156,7 +156,7 @@ export function tableCell(
  * cell boxes as measured, scaled when their sum drifted from the box (a grid the browser laid
  * out past or short of the table, or a measurement of a cell that spanned the row while a
  * session was open); a `gridCol` wider than the frame is a width the file cannot hold
- * (docs/RETURN.md 2.4 fix 4; audit-objects row 85 read 240, 240, 240 and 960 for a 960 px table).
+ * (docs/archive/rounds/RETURN.md 2.4 fix 4; audit-objects row 85 read 240, 240, 240 and 960 for a 960 px table).
  * Columns of zero total, or a box of zero width, are written as measured.
  */
 export function normalisedColumnWidths(table: Pick<SceneTable, 'columns' | 'box'>): number[] {

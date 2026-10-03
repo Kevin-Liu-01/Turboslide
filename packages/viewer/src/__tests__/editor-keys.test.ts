@@ -278,7 +278,7 @@ describe('editorKeyAction', () => {
     expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, selected)).toBeNull();
   });
 
-  it('keeps the Group, Ungroup and Paint format chords whatever Tools > Advanced tools says: their rows are in the default view since the return round (docs/RETURN.md 2.11, 2.12; formatting.paint-format.chords, arrange.group.chords)', () => {
+  it('keeps the Group, Ungroup and Paint format chords whatever Tools > Advanced tools says: their rows are in the default view since the return round (docs/archive/rounds/RETURN.md 2.11, 2.12; formatting.paint-format.chords, arrange.group.chords)', () => {
     const off: EditorKeyContext = { ...selected, advanced: false };
     expect(editorKeyAction({ key: 'g', metaKey: true, altKey: true }, off)).toEqual({
       type: 'group',

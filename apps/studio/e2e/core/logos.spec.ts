@@ -35,7 +35,7 @@ import {
   waitEditor,
 } from './lib';
 
-// The logo picker's spec rows (docs/FEATURES.md 4.2, 4.7, 4.9, 4.11, 7.1 `logos.*` with the driver
+// The logo picker's spec rows (docs/archive/rounds/FEATURES.md 4.2, 4.7, 4.9, 4.11, 7.1 `logos.*` with the driver
 // core/logos.spec.ts): the rows the walk probe cannot drive in one tab. The recents across two
 // browser contexts, the mark route's headers and body, the refresh's dry run with the bearer and
 // its 401, the fixture upstream (a 404 variant marked unavailable and a slug's takedown), the cache
@@ -52,7 +52,7 @@ import {
 //
 // The routes are B6's (`routes/api/logo.$.ts`), the dialog B1's, the menu row the integrator's by
 // request; a control or a route that is not on the build skips with its id, which the gate reads
-// as not driven with that reason (docs/PRODUCT.md 8.1).
+// as not driven with that reason (docs/archive/rounds/PRODUCT.md 8.1).
 //
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/logos.spec.ts
 
@@ -115,10 +115,10 @@ async function routeOnBuild(): Promise<{ on: boolean; status: number; body: Coun
   const r = await refresh(true);
   return { on: r.status !== 404 && r.status !== 0, status: r.status, body: r.body };
 }
-const NOT_BUILT_ROUTE = 'not on this build: /api/logo (docs/FEATURES.md 4.2, B6)';
+const NOT_BUILT_ROUTE = 'not on this build: /api/logo (docs/archive/rounds/FEATURES.md 4.2, B6)';
 /**
  * `logo.search` over the dialog's own route. `since` names a refresh's `builtAt`: the answering
- * instance adopts the store's index when its held copy is older (docs/FEATURES.md 4.2; the fix
+ * instance adopts the store's index when its held copy is older (docs/archive/rounds/FEATURES.md 4.2; the fix
  * round's R17), so a read after a takedown measures the same day promise through the mechanism
  * the product offers and not the hour long hold of one instance.
  */
@@ -265,7 +265,8 @@ test(title('logos.picker.recents'), async () => {
   await openEditor(page, deck);
   const slideId = (await state(page)).slideId;
   const opened = await openLogo(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open)
+    test.skip(true, 'not on this build: insert.image.logo (docs/archive/rounds/FEATURES.md 4.3)');
   const inserted: string[] = [];
   for (const slug of ['figma', 'vercel']) {
     if (inserted.length > 0) {
@@ -295,7 +296,7 @@ test(title('logos.picker.recents'), async () => {
     type: 'recent',
     description: `recent tiles ${recent.join(', ') || 'none'}; the first group drawn ${firstGroup ?? 'none'}`,
   });
-  /* docs/POLISH.md 2.5 item 46: the deck's role logo assets list under Recent too (the two
+  /* docs/archive/rounds/POLISH.md 2.5 item 46: the deck's role logo assets list under Recent too (the two
      inserts wrote `asset.figma` and `asset.vercel`), so the two inserts are read among the
      group's marks; the ship's run of record read the four tiles against the two twice (the
      polish fix round 3, B6) */
@@ -355,7 +356,7 @@ test(title('logos.route.mark-headers'), async () => {
   if (res.status() === 404 && /not in the index|no logo named|unknown/i.test(body))
     test.skip(
       true,
-      `not driven: the index holds no figma on this base (${body.slice(0, 120)}); the unit tests of docs/FEATURES.md 7.3 cover the sanitizer (apps/studio/src/server/logos.test.ts)`,
+      `not driven: the index holds no figma on this base (${body.slice(0, 120)}); the unit tests of docs/archive/rounds/FEATURES.md 7.3 cover the sanitizer (apps/studio/src/server/logos.test.ts)`,
     );
   expect(res.status(), 'the mark is served').toBe(200);
   expect(headers['content-type'] ?? '', 'image/svg+xml').toMatch(/^image\/svg\+xml/);
@@ -426,7 +427,7 @@ test(title('logos.index.refresh-dry-run'), async () => {
   expect(wrong.status(), 'a wrong secret answers 401').toBe(401);
 });
 
-test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => {
+test.describe('the fixture upstream project (docs/archive/rounds/FEATURES.md 4.9, 7.2)', () => {
   test(title('logos.index.refresh-fixture'), async () => {
     test.setTimeout(300_000);
     await openEditor(page, deck);
@@ -438,7 +439,7 @@ test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => 
     if (upstream !== 'fixture')
       test.skip(
         true,
-        `not driven: the index reads ${upstream ?? 'an upstream the dry run does not name'}, not the ten mark fixture (TURBOSLIDE_LOGO_UPSTREAM=fixture on a preview); the unit tests apps/studio/src/server/logos.test.ts cover the 404 marking and the takedown (docs/FEATURES.md 7.3)`,
+        `not driven: the index reads ${upstream ?? 'an upstream the dry run does not name'}, not the ten mark fixture (TURBOSLIDE_LOGO_UPSTREAM=fixture on a preview); the unit tests apps/studio/src/server/logos.test.ts cover the 404 marking and the takedown (docs/archive/rounds/FEATURES.md 7.3)`,
       );
     const first = await refresh(false);
     test.info().annotations.push({
@@ -517,7 +518,7 @@ test.describe('the fixture upstream project (docs/FEATURES.md 4.9, 7.2)', () => 
     if (upstream !== 'down')
       test.skip(
         true,
-        `not driven: the index reads ${upstream ?? 'an upstream the dry run does not name'}, not the outage (TURBOSLIDE_LOGO_UPSTREAM=down on a preview); the unit test apps/studio/src/server/logos.test.ts covers the cache during an outage (docs/FEATURES.md 7.3)`,
+        `not driven: the index reads ${upstream ?? 'an upstream the dry run does not name'}, not the outage (TURBOSLIDE_LOGO_UPSTREAM=down on a preview); the unit test apps/studio/src/server/logos.test.ts covers the cache during an outage (docs/archive/rounds/FEATURES.md 7.3)`,
       );
     const search = await searchHttp('figma');
     test.info().annotations.push({
@@ -584,7 +585,7 @@ test(title('logos.cache.open-licence-only'), async () => {
   if (figma.status === 501 || /NotImplemented/i.test(JSON.stringify(figma.body ?? {})))
     test.skip(
       true,
-      'not on this build: logo.insert on the window transport and the route (docs/FEATURES.md 4.4, B6 with B7)',
+      'not on this build: logo.insert on the window transport and the route (docs/archive/rounds/FEATURES.md 4.4, B6 with B7)',
     );
   expect(figma.status, 'the Figma insert').toBe(200);
   const afterFigma = await refresh(true);
@@ -688,7 +689,7 @@ test(title('logos.agent.search-insert'), async () => {
   )
     test.skip(
       true,
-      'not on this build: the CLI command turboslide logo search (docs/FEATURES.md 4.11, B6)',
+      'not on this build: the CLI command turboslide logo search (docs/archive/rounds/FEATURES.md 4.11, B6)',
     );
   expect(cli.status, 'the CLI lists the row').toBe(0);
   expect(cliOut, 'Figma with its licence sentence').toMatch(/figma/i);
@@ -715,7 +716,7 @@ test(title('logos.agent.search-insert'), async () => {
   if (http.status() === 501)
     test.skip(
       true,
-      'not on this build: logo.insert on the HTTP transport (docs/FEATURES.md 4.11, B7 registers it)',
+      'not on this build: logo.insert on the HTTP transport (docs/archive/rounds/FEATURES.md 4.11, B7 registers it)',
     );
   expect(http.status(), 'logo.insert over HTTP').toBe(200);
   await expect
@@ -797,7 +798,7 @@ test(title('logos.agent.search-insert'), async () => {
 });
 
 /**
- * The vector round (docs/VECTOR.md 4.6; the row `logos.export.svgblip`): a logo inserted from the
+ * The vector round (docs/archive/rounds/VECTOR.md 4.6; the row `logos.export.svgblip`): a logo inserted from the
  * picker is an svg asset, so the Editable text file's logo `p:pic` carries `asvg:svgBlip` beside
  * its 3x PNG blip, the Perfect file's title and footer logo objects carry it too once the kit's
  * mark is that logo (`logo.insert { everySlide: true }` writes the kit's slots, the setup write),
@@ -813,7 +814,7 @@ test(title('logos.export.svgblip'), async () => {
   if (!actions.has('logo.insert'))
     test.skip(
       true,
-      'not on this build: logo.insert on the window transport (docs/FEATURES.md 4.4, 4.11)',
+      'not on this build: logo.insert on the window transport (docs/archive/rounds/FEATURES.md 4.4, 4.11)',
     );
   const s = await settled(page);
   const countsBefore = ((await invoke(page, 'deck.info')) as { counts: { assets: number } }).counts
@@ -830,7 +831,7 @@ test(title('logos.export.svgblip'), async () => {
     if (/NotImplemented|not implemented|lands in P1/i.test(message))
       test.skip(
         true,
-        `not on this build: logo.insert (docs/FEATURES.md 4.4): ${message.slice(0, 100)}`,
+        `not on this build: logo.insert (docs/archive/rounds/FEATURES.md 4.4): ${message.slice(0, 100)}`,
       );
     if (/did not answer|thesvg\.org|upstream|index/i.test(message))
       test.skip(
@@ -966,7 +967,7 @@ test(title('logos.export.svgblip'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.5 items 37, 38, 39 and 46, 5.1): Replace image keeps the
+// the polish round (docs/archive/rounds/POLISH.md 2.5 items 37, 38, 39 and 46, 5.1): Replace image keeps the
 // box's aspect, no plate under a free picture, the Logo dialog's results in view and its words
 // and tiles.
 
@@ -1006,7 +1007,10 @@ test(title('images.replace.keeps-aspect'), async () => {
     .catch(() => false);
   if (!there) {
     await page.keyboard.press('Escape');
-    test.skip(true, 'not on this build: format.image.replaceImage.logo (docs/FEATURES.md 4.3)');
+    test.skip(
+      true,
+      'not on this build: format.image.replaceImage.logo (docs/archive/rounds/FEATURES.md 4.3)',
+    );
   }
   await logoRow.click();
   const opened = await ctl(page, 'dialog.logo')
@@ -1270,7 +1274,8 @@ test(title('logos.dialog.results-in-view'), async () => {
   await openEditor(page, deck);
   const slideId = await addSlide(page);
   const opened = await openLogo(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open)
+    test.skip(true, 'not on this build: insert.image.logo (docs/archive/rounds/FEATURES.md 4.3)');
   /* tiles under Your brand and Recent: one insert first */
   const results0 = await searchInDialog(page, 'figma');
   if (results0.length > 0) {
@@ -1340,7 +1345,8 @@ test(title('logos.dialog.sentence-case-whole-names'), async () => {
   await openEditor(page, deck);
   const slideId = await addSlide(page);
   const opened = await openLogo(page);
-  if (!opened.open) test.skip(true, 'not on this build: insert.image.logo (docs/FEATURES.md 4.3)');
+  if (!opened.open)
+    test.skip(true, 'not on this build: insert.image.logo (docs/archive/rounds/FEATURES.md 4.3)');
   /* a customer logo inserted, so Recent has a tile */
   const results = await searchInDialog(page, 'vercel');
   if (results.length > 0) {
@@ -1364,7 +1370,7 @@ test(title('logos.dialog.sentence-case-whole-names'), async () => {
   const customerInRecent = recent ? recent.titles.some((t) => t && /vercel/i.test(t.text)) : false;
   const cut = brand ? brand.titles.filter((t) => t && (t.clipped || /…$/.test(t.text))) : [];
   const activeAtOpen = groups.groups.reduce((n, g) => n + g.active, 0);
-  /* the preselected tile is the first result (Logo.tsx `active`; docs/FEATURES.md 4.3: Enter
+  /* the preselected tile is the first result (Logo.tsx `active`; docs/archive/rounds/FEATURES.md 4.3: Enter
      inserts it), so the ring is read with results on screen; at the open no query has results
      and no tile is preselected. The ship's run of record read 0 at the open twice (the polish
      fix round 3, B6) */
@@ -1399,9 +1405,9 @@ coverage(import.meta.filename, [
   'logos.index.cached-offline',
   'logos.cache.open-licence-only',
   'logos.agent.search-insert',
-  /* the vector round (docs/VECTOR.md 4.6, 6.1): the logo's vector export */
+  /* the vector round (docs/archive/rounds/VECTOR.md 4.6, 6.1): the logo's vector export */
   'logos.export.svgblip',
-  /* the polish round (docs/POLISH.md 2.5 items 37, 38, 39 and 46) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 items 37, 38, 39 and 46) */
   'images.replace.keeps-aspect',
   'images.picture.no-plate',
   'logos.dialog.results-in-view',

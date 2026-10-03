@@ -1,4 +1,4 @@
-// The conversion a format write on a fixed kind's field needs first (docs/RETURN.md 2.14 item 1;
+// The conversion a format write on a fixed kind's field needs first (docs/archive/rounds/RETURN.md 2.14 item 1;
 // FOCUS.md 2.5; SPEC-2 1.6). The cover title keeps `heading` and `lead` as slide fields, a
 // statement keeps `big`, and the picture kinds keep their photograph and plate; the renderer
 // draws them as objects under fixed ids and the menus plan writes against those ids
@@ -36,7 +36,7 @@ export function fieldObjectIds(slide: Slide): ReadonlySet<string> {
 }
 
 /**
- * A text run on a title or statement slide's field (docs/SYNC.md 3.4; the sync and costs round):
+ * A text run on a title or statement slide's field (docs/archive/rounds/SYNC.md 3.4; the sync and costs round):
  * `text.splice`, `text.mark` or `text.replace` whose `blockId` names a field of the slide's kind
  * and whose `path` is the field's own pointer (schema mutations.ts `slideFieldOf`,
  * `slideFieldPath`). The reducer writes the field in place, so such a write addresses no block
@@ -102,9 +102,9 @@ function canvasFieldBlockId(after: Slide, field: SlideFieldId): string | null {
 /**
  * The write's field text runs re-addressed to the canvas the same write makes (VERIFICATION.md
  * "Polish round, pass 1" finding 1). A text run on the cover's heading names the field (`blockId`
- * `heading`, `path` `/heading`, docs/SYNC.md 3.4) and converts nothing on its own; when another
+ * `heading`, `path` `/heading`, docs/archive/rounds/SYNC.md 3.4) and converts nothing on its own; when another
  * mutation of the same write converts the slide first (the placeholder shrink's `block.set
- * /typography` and `/pos/h` on the title's last burst, docs/POLISH.md 2.3 item 21), the measured
+ * /typography` and `/pos/h` on the title's last burst, docs/archive/rounds/POLISH.md 2.3 item 21), the measured
  * `slide.replace` travels in front and the run is applied to a content slide, where `heading` is
  * a block whose Text sits at `/text`: the reducer refused it as `/heading is not a string on
  * block "heading"` and the whole write with it, so a title that wrapped lost its last words on

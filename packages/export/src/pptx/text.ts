@@ -18,7 +18,7 @@
 // 2.2.19); word art's `outline` (2.2.16); the object's `rotate`, `flipH`, `flipV`, `shadow` and
 // `altText` (2.1, 2.3.4, 2.5.6); and a shape's text as one `addText` with `shape` (2.2.17), its
 // margins the text layer's measured inset net of the preset's own text rectangle, which
-// PowerPoint applies on top (docs/VECTOR.md 2.3, 2.5).
+// PowerPoint applies on top (docs/archive/rounds/VECTOR.md 2.3, 2.5).
 import type PptxGenJS from 'pptxgenjs';
 
 import type { Box } from '@turboslide/schema/render';
@@ -75,7 +75,7 @@ export type TextEmitOptions = {
 const SHEET_FAMILIES = new Set(['Inter', 'GT Inter', 'DejaVu Sans Mono', 'Menlo', 'monospace']);
 
 /**
- * A catalog face (gslides-parity SPEC-5-amendments A5 item 5; docs/PRODUCT.md 4.2, 4.5): the
+ * A catalog face (gslides-parity SPEC-5-amendments A5 item 5; docs/archive/rounds/PRODUCT.md 4.2, 4.5): the
  * computed family of a run whose typography or brand kit names a `FONT_IDS` face is that face's
  * name (the renderer's `--ts-font-<id>` variable or the kit's `--display` and `--text` stacks
  * resolve to it), so the file names it in `a:latin typeface` as is and the residual line says

@@ -32,7 +32,7 @@ import { TIP_DELAY_MS, hideTooltip, shownTooltipAnchor } from '../Tooltip';
 // the dither tool with its generated treatment controls and its two writes, and the intake form
 // that ends in one asset.add. Every control carries the label and data-control id the window API
 // matches (SPEC 6.5, 7.4). Round one's Material section left this panel in the features round,
-// ship two (docs/FEATURES.md 5.3): its one home is the Shader section of Format options
+// ship two (docs/archive/rounds/FEATURES.md 5.3): its one home is the Shader section of Format options
 // (__tests__/shader-section.test.tsx) and the Background dialog's Shader row is
 // __tests__/background-shader.test.tsx.
 
@@ -167,7 +167,7 @@ describe('AssetIntake', () => {
 });
 
 describe('Inspector', () => {
-  it('shows the intake in the Asset section for a selected material block and no Material section (its one home is the Shader section of Format options, docs/FEATURES.md 5.3)', () => {
+  it('shows the intake in the Asset section for a selected material block and no Material section (its one home is the Shader section of Format options, docs/archive/rounds/FEATURES.md 5.3)', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     render(
       <Inspector deck={WORKED_DECK} slide={slide} blockId="mat" revision={5} dispatch={dispatch} />,

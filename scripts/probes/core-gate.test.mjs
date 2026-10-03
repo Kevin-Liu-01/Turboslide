@@ -354,7 +354,7 @@ describe('the gate refuses an --only value that names no driver (s2.md S2-R4)', 
   }, 30_000);
 });
 
-// The objects round fix round (docs/OBJECTS.md 6.2; the verifier's pass 1 finding 8): `--rows
+// The objects round fix round (docs/archive/rounds/OBJECTS.md 6.2; the verifier's pass 1 finding 8): `--rows
 // <ids>` runs and judges the spec rows named alone, `--areas <areas>` the walk probe's areas, so
 // the ship step reads two export rows again on production without the whole export spec. Each is
 // refused before any driver runs when it names another driver's row or area or is given without
@@ -512,7 +512,7 @@ describe('the gate narrows one driver to rows or areas (the objects round fix ro
   }, 30_000);
 });
 
-// The people round (docs/PEOPLE.md 6.2): `--only accounts` runs apps/studio/e2e/accounts.spec.ts
+// The people round (docs/archive/rounds/PEOPLE.md 6.2): `--only accounts` runs apps/studio/e2e/accounts.spec.ts
 // against a node server with an identity database and judges the ten local rows alone; in every
 // other run a local row is absent from the results and is listed apart under `local` with the
 // reason, never counted as passed, never "no step" and never a reason to park.
@@ -685,7 +685,9 @@ describe('the gate judges the local rows through --only accounts and lists them 
     expect(summary.blocking.map((b) => b.id)).not.toContain(local[0].id);
     expect(summary.wouldParkRows.map((r) => r.id)).not.toContain('people.avatar-upload');
     const table = readFileSync(join(out, 'core-matrix.md'), 'utf8');
-    expect(table).toContain('## Local rows this run did not record (docs/PEOPLE.md 6.2)');
+    expect(table).toContain(
+      '## Local rows this run did not record (docs/archive/rounds/PEOPLE.md 6.2)',
+    );
     expect(table).toContain(`${local.length} local rows this run did not record`);
     expect(run.stdout).toContain(`${local.length} local rows not recorded`);
     /* the walk probe's rows are no step in this stub, so the run exits 1 for them and not for the local rows */

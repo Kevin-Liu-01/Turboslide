@@ -4,7 +4,7 @@
 // `.ts-sheet` root class. Every value is the deck's, cited to the slide that set it.
 
 /**
- * The height a caption row adds under a free picture, in sheet px (docs/POLISH.md item 43): the
+ * The height a caption row adds under a free picture, in sheet px (docs/archive/rounds/POLISH.md item 43): the
  * `.shot-fig` figure's 12 px gap plus one 16 px line at 1.45 (the two rules below), rounded up.
  * The caption session (viewer Editor.tsx `addCaption`) and the panel's Caption field grow `pos.h`
  * by it when a caption is added to a free picture and shrink it back when the caption is emptied,
@@ -236,7 +236,7 @@ export const BLOCK_CSS = `
    positioned icon), a diagram object fills its box in both axes (renderDia adds
    preserveAspectRatio none for a positioned dia), a table object's rows share the box's height
    (the auto row tracks of both forms stretch over their floors, sheet.css .ts-sheet .table;
-   docs/OBJECTS.md 3.3 item 3); at the box the conversion measured nothing changes, so the
+   docs/archive/rounds/OBJECTS.md 3.3 item 3); at the box the conversion measured nothing changes, so the
    fidelity gate holds.
    hotfix-4 causes W2 and W8 add the mark object (renderMark writes no size for a positioned mark
    and the class mark-block; the symbol keeps its ratio inside the box) and the panel object: the
@@ -261,7 +261,7 @@ export const BLOCK_CSS = `
 .ts-sheet .shape-block { position: relative; display: block; }
 .ts-sheet .free > .shape-block, .ts-sheet .free > .link > .shape-block { width: 100%; height: 100%; }
 .ts-sheet .shape-block > svg.shape { display: block; width: 100%; height: 100%; }
-/* a shape's label is centred and middle unless the block sets an alignment (docs/FEATURES.md 2.2
+/* a shape's label is centred and middle unless the block sets an alignment (docs/archive/rounds/FEATURES.md 2.2
    rank 3, audit-objects 4: a label typed into a drawn rectangle sat in its top left corner);
    the inline text-align of typography.align and the flex of valign override this default, and
    the exporter reads the computed style either way */
@@ -296,7 +296,7 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .shot-fig > img.shot, .ts-sheet .free > .link > .shot-fig > img.shot { width: 100%; height: 100%; max-width: none; max-height: none; min-height: 0; object-fit: fill; }
 .ts-sheet .free > .shot-fig > .shot-crop, .ts-sheet .free > .link > .shot-fig > .shot-crop { height: 100%; min-height: 0; aspect-ratio: auto !important; }
 .ts-sheet .free > .shot-fig > .shot-crop > img.shot, .ts-sheet .free > .link > .shot-fig > .shot-crop > img.shot { object-fit: fill; }
-/* a free picture shows the slide through its transparent parts (docs/POLISH.md item 38;
+/* a free picture shows the slide through its transparent parts (docs/archive/rounds/POLISH.md item 38;
    audit-media item 5, audit-objects item 20: every logo and every uploaded svg sat on a grey plate):
    no plate under a free object's image or its crop frame. The flow figure keeps sheet.css's plate
    and hairline (the brand deck's screenshot block), and a converted screenshot covers its box with
@@ -320,7 +320,7 @@ export const BLOCK_CSS = `
 .ts-sheet .plain.marked > .item > span { display: block; padding: 0; border-bottom: 0; }
 .ts-sheet .plain.marked > .item > .num { font-variant-numeric: tabular-nums; }
 .ts-sheet .plain.marked > .item > .glyph { font-size: 0.8em; line-height: 1.75; }
-/* an empty table cell keeps its line box with no prompt in the markup (docs/FEATURES.md 2.3 item
+/* an empty table cell keeps its line box with no prompt in the markup (docs/archive/rounds/FEATURES.md 2.3 item
    9): a zero width space before the empty paragraph, so the rows of an empty table stand at the
    text's height and the editor's hovered prompt draws on that line */
 .ts-sheet .table .td > .para:empty::before { content: '\\200B'; }
@@ -330,7 +330,7 @@ export const BLOCK_CSS = `
 /* a cell fills its track in both forms (the theme's .ts-sheet .table .td rule, sheet.css): its rule
    sits on the row's bottom edge and its fill covers the row, as in Google's table and the a:tbl
    the export writes; the vertical alignment moves to the content */
-/* the header's display weight draws with the ink rule, under a header row that holds text (docs/POLISH.md item 3; B2's R8): the renderer writes has-text on such a row, and the editor's open session counts as text while its paragraph holds any */
+/* the header's display weight draws with the ink rule, under a header row that holds text (docs/archive/rounds/POLISH.md item 3; B2's R8): the renderer writes has-text on such a row, and the editor's open session counts as text while its paragraph holds any */
 .ts-sheet .table.grid > .tr.header.has-text .td, .ts-sheet.ts-editor .table.grid > .tr.header:has(.td.ts-editing .para:not(:empty)) .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
 
 /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */

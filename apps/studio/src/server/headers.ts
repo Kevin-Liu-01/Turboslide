@@ -77,7 +77,7 @@ const INLINE_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/w
  * `application/json` and any type outside the raster four a `Content-Disposition: attachment`
  * with a sandboxing policy, so a navigation to the file cannot run script or CSS in the studio's
  * origin. Since the vector round the `<img>` tags the renderer emits do load an svg picture's
- * file from this route (docs/VECTOR.md 4.4): an image fetch ignores `Content-Disposition`, so
+ * file from this route (docs/archive/rounds/VECTOR.md 4.4): an image fetch ignores `Content-Disposition`, so
  * the headers stand as they are and a navigation to the file is still a download.
  */
 export function assetResponseHeaders(
@@ -199,7 +199,7 @@ export function publicStoreHost(env: Env = process.env): string | null {
 
 /**
  * The public store's origin (`https://<host>`), the base every picture avatar URL is built from
- * on every instance (docs/PEOPLE.md 4.3: computed from the variable, never remembered per
+ * on every instance (docs/archive/rounds/PEOPLE.md 4.3: computed from the variable, never remembered per
  * process); null when the deployment names no public store.
  */
 export function publicStoreOrigin(env: Env = process.env): string | null {
@@ -257,7 +257,7 @@ export function buildCsp(options: CspOptions): string {
     /* 'wasm-unsafe-eval' admits WebAssembly.instantiate alone, never a JavaScript eval: the
        dither worker (apps/studio/src/workers/dither.worker.ts) compiles the native crate's wasm
        on every page the router builds it for, and without the keyword every page posted a
-       script-src report for it (docs/POLISH.md item 112; the polish round's verifier read two to
+       script-src report for it (docs/archive/rounds/POLISH.md item 112; the polish round's verifier read two to
        four reports per page) */
     `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
     "style-src 'self' 'unsafe-inline'",
@@ -397,7 +397,7 @@ export const CSRF_ROUTE_PATTERNS: ReadonlyArray<RegExp> = [
   /^\/api\/notify(?:\/|$)/,
   /^\/api\/auth(?:\/|$)/,
   /^\/device(?:\/|$)/,
-  // the assist route (docs/PRODUCT.md 6.3): the seller's page posts with its cookies; an agent
+  // the assist route (docs/archive/rounds/PRODUCT.md 6.3): the seller's page posts with its cookies; an agent
   // with the bearer is exempt below as on the room routes
   /^\/api\/assist(?:\/|$)/,
 ];
@@ -436,7 +436,7 @@ export function csrfFilter(ctx: {
 
 /** The three room routes of SPEC-3 3.3 (the stream, the ops, the presence). */
 const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence|checkpoint|seed|ticket)$/;
-/** The assist route (docs/PRODUCT.md 6.3): a bearer is its proof as on the room routes. */
+/** The assist route (docs/archive/rounds/PRODUCT.md 6.3): a bearer is its proof as on the room routes. */
 const ASSIST_ROUTE_PATTERN = /^\/api\/assist(?:\/|$)/;
 
 /**

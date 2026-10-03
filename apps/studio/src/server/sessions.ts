@@ -16,7 +16,7 @@ import { identityOfRequest, sessionDirectory } from './sessions.server';
 /**
  * Attached studio pages (SPEC 7.3 "the view tools when a studio session is attached"; MILESTONES
  * M4 item 1). A page on /edit, or a page on /deck, /present or /embed opened with `?agent=1`
- * (docs/SYNC.md 3.10), attaches once its window.turboslide.studio owner is ready, polls for
+ * (docs/archive/rounds/SYNC.md 3.10), attaches once its window.turboslide.studio owner is ready, polls for
  * commands while it is visible and answers them through that handle
  * (components/useStudioSession.ts), so `deck_goto_slide` over /mcp and `view.goto` over the HTTP
  * dispatcher run in the page with the same dispatcher a click uses and return its view state. The
@@ -160,7 +160,7 @@ export function redisSessionDirectory(kv: Kv, key = 'sessions:studio'): SessionD
 // handlers below are the only callers and the client transform drops them.
 
 /**
- * The longest a poll is held on the server (docs/SYNC.md 3.10; audit-costs item 1). Zero: a poll
+ * The longest a poll is held on the server (docs/archive/rounds/SYNC.md 3.10; audit-costs item 1). Zero: a poll
  * answers at once with the queued commands or `[]`, so the function runs for its own few
  * milliseconds instead of the 25 s hold that was 88 percent of production's provisioned memory
  * bill (413 of 467 GB hours in the seven days to 2026-09-20). The pacing is the client's

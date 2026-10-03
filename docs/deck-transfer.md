@@ -187,7 +187,7 @@ Since the Google Slides parity round (gslides-parity SPEC 6.2 to 6.5) the pages 
 
 The bundle gains a third group. `manifest.json` may carry `comments`, a map like `documents` and
 `assets` over `comments/index.json`, `comments/<threadId>.json` and `comments/authors.json`, the
-comments sidecar of `docs/gslides-parity/SPEC-3.md` section 2.2. The group is opt-in: `turboslide
+comments sidecar of `docs/archive/gslides-parity/SPEC-3.md` section 2.2. The group is opt-in: `turboslide
 deck pack --comments` (`packDeckDir(dir, { comments: true })`) writes it, and without the flag a
 bundle has the bytes it had before the group existed, so `packages/store/src/bundle.test.ts`
 asserts a pack with and without comments byte for byte. The group is absent from the manifest when

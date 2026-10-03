@@ -30,7 +30,7 @@ import './decks.css';
 import './decks.templates.css';
 
 /**
- * The template gallery, /decks/templates (docs/PRODUCT.md 4.3; audit-seller 12, audit-brand 3
+ * The template gallery, /decks/templates (docs/archive/rounds/PRODUCT.md 4.3; audit-seller 12, audit-brand 3
  * and 13, judge-seller additions 3 and 4): the heading "Template gallery", then Your organisation
  * (the templates saved on this deployment, with the template new presentations start from first
  * and marked "Used for new presentations"), then Turboslide's (Blank alone this round), each card
@@ -56,7 +56,7 @@ export const Route = createFileRoute('/decks/templates')({
   component: GalleryPage,
 });
 
-/** The gallery's words (docs/PRODUCT.md 4.3; sentence case, headings without a period). */
+/** The gallery's words (docs/archive/rounds/PRODUCT.md 4.3; sentence case, headings without a period). */
 export const TEMPLATES = {
   title: HOME.gallery,
   lead: 'Start a presentation from a template. The copy is yours to edit, and the template stays as it is.',
@@ -84,7 +84,7 @@ export const TEMPLATES = {
 } as const;
 
 /**
- * The control ids of the page (docs/PRODUCT.md 7.1, the gallery page row): `templates.page`,
+ * The control ids of the page (docs/archive/rounds/PRODUCT.md 7.1, the gallery page row): `templates.page`,
  * `templates.group.organisation`, `templates.group.turboslide`, `templates.card.<id>` with
  * `.open`, `.menu`, `.rename`, `.useForNew`, `.delete` and `.default`. The menu family
  * `templates.card.menu` is the id the matrix's `parks` names for the card menus

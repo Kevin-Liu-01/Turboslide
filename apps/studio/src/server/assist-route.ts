@@ -15,7 +15,7 @@ import { rateLimitedResponse } from './ratelimit';
 import type { RequestIdentity, RouteRefusal } from './room';
 
 /**
- * The assist route's logic (docs/PRODUCT.md 6.3, 6.4; build/b6.md R4 and R9): `POST
+ * The assist route's logic (docs/archive/rounds/PRODUCT.md 6.3, 6.4; build/b6.md R4 and R9): `POST
  * /api/assist?deck=<id>` with `{ action: 'assist.propose' | 'assist.accept', input }` from the
  * seller's page (the session cookie) or an agent (the bearer). Not a `createServerFn`, because
  * TanStack Start posts every server function to `/_serverFn/<id>` and firewall rule R1 counts

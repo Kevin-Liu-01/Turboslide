@@ -10,7 +10,7 @@ import './WordArtBar.css';
  * canvas ("Type your text and press Enter"). Enter inserts a text block at 88 px with an ink
  * outline of 1.5 px, centred on the sheet as an object (the slide converts to the canvas first
  * when it is not one); Esc cancels. A labelled text input with Enter and Esc (section 10); the
- * caller makes the write. The bar closes the way Google's does (the polish round, docs/POLISH.md
+ * caller makes the write. The bar closes the way Google's does (the polish round, docs/archive/rounds/POLISH.md
  * item 67; audit-chrome item 13: it stayed open through every later menu, dialog and panel
  * because Escape reached it only while its field had the focus): Escape anywhere in the document
  * cancels it unless a menu or a dialog took the key first, and so does a pointer down outside

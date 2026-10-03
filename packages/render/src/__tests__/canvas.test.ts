@@ -259,7 +259,7 @@ describe.skipIf(!fixtureReady)('the export fixture deck of SPEC-2 11.2 in both t
         '<i><u><s><sup><span style="color:#e5484d"><mark style="background:#f0a020">x</mark></span></sup></s></u></i>',
     );
     expect(renderRuns(parseText('plain'), { gtWord: true })).toBe('plain');
-    /* the size mark (docs/POLISH.md 2.3 item 16): a span after the colour's, before the highlight */
+    /* the size mark (docs/archive/rounds/POLISH.md 2.3 item 16): a span after the colour's, before the highlight */
     expect(renderRuns(parseText('[Acme]{c:red z:36 h:amber} renews'), { gtWord: true })).toBe(
       '<span style="color:#e5484d"><span style="font-size:36px"><mark style="background:#f0a020">Acme</mark></span></span> renews',
     );
@@ -394,7 +394,7 @@ describe.skipIf(!fixtureReady)('the export fixture deck of SPEC-2 11.2 in both t
   it('draws the merged table in the grid form with per cell rules, fills and row heights (2.7)', () => {
     const html = renderSlide(deck, slides['table-merge'] as Slide, options('light')).html;
     expect(html).toContain('class="table grid"');
-    /* a set row height is the track's floor, the row grows past it with its text (docs/OBJECTS.md
+    /* a set row height is the track's floor, the row grows past it with its text (docs/archive/rounds/OBJECTS.md
        3.3 item 3; Google's minimum row height) */
     expect(html).toContain(
       'grid-template-rows:minmax(56px, auto) minmax(56px, auto) minmax(56px, auto) minmax(56px, auto)',

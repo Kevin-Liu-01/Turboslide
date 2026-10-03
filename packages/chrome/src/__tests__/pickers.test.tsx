@@ -43,7 +43,7 @@ describe('ShapePicker', () => {
       '[data-control="shapes.pick.rightArrow"]',
     ) as HTMLElement;
     expect(tile.getAttribute('aria-label')).toBe('Right arrow');
-    /* the vector round (docs/VECTOR.md 2.6): one category names the grid after itself */
+    /* the vector round (docs/archive/rounds/VECTOR.md 2.6): one category names the grid after itself */
     const grid = arrows.container.querySelector('[role="grid"]') as HTMLElement;
     expect(grid.getAttribute('aria-label')).toBe('Arrows');
     expect(grid.getAttribute('data-category')).toBe('arrows');
@@ -59,9 +59,9 @@ describe('ShapePicker', () => {
     ).not.toBeNull();
   });
 
-  it('draws every tile from the preset’s own outline: the rows shapes.insert.grid-* count the distinct glyphs (docs/VECTOR.md 6.1)', () => {
+  it('draws every tile from the preset’s own outline: the rows shapes.insert.grid-* count the distinct glyphs (docs/archive/rounds/VECTOR.md 6.1)', () => {
     /* the glyph is `shapePath(id, 48, 36)` stroked once per tile; the rectangle's is the box; the
-       interpreter (B2, docs/VECTOR.md 2.1) answers every preset's own path, so the distinct count
+       interpreter (B2, docs/archive/rounds/VECTOR.md 2.1) answers every preset's own path, so the distinct count
        per category is the row's: Shapes at least 95 of 100, Arrows 26, Callouts 4, Equation 6 */
     const glyphs = (category: 'shapes' | 'arrows' | 'callouts' | 'equation') => {
       const view = render(<ShapePicker category={category} onPick={() => undefined} />);

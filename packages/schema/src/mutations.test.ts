@@ -16,7 +16,7 @@ import {
   writeSchema,
 } from './mutations.ts';
 
-describe('the slide field targets of the text ops (the sync round, docs/SYNC.md 3.4)', () => {
+describe('the slide field targets of the text ops (the sync round, docs/archive/rounds/SYNC.md 3.4)', () => {
   it('names heading and lead on a title slide and big on a statement, and nothing on any other slide', () => {
     expect(SLIDE_FIELD_IDS).toEqual(['heading', 'lead', 'big']);
     expect(slideFieldOf({ kind: 'title' }, 'heading')).toBe('heading');
@@ -61,7 +61,7 @@ describe('the slide field targets of the text ops (the sync round, docs/SYNC.md 
   });
 });
 
-describe('Write.origin (the sync round, docs/SYNC.md 3.2)', () => {
+describe('Write.origin (the sync round, docs/archive/rounds/SYNC.md 3.2)', () => {
   it('is a client id with at least one op id, and stays out of the write schema an agent posts', () => {
     expect(
       writeOriginSchema.safeParse({ clientId: 'a'.repeat(32), opIds: [`${'a'.repeat(32)}:1`] })

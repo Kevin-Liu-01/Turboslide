@@ -10,12 +10,12 @@ import { legacyAssetKey, linkIsLive, newDeckRecord } from '@turboslide/schema/ac
 import { shareGet, shareSetGeneralAccess, standing } from './access.ts';
 import type { AccessDeps, Caller } from './access.ts';
 
-// The general access writes (docs/POLISH.md items 79 and 96; the rows share.role-change.keeps-link
+// The general access writes (docs/archive/rounds/POLISH.md items 79 and 96; the rows share.role-change.keeps-link
 // and share.dialog.restricted-and-more): a role change alone keeps the live general link's token,
 // so an address a seller already sent keeps opening; Restricted revokes every live link, so
 // "Only you can open this presentation" holds for anyone holding a link.
 //
-// The share records' reader and the alias table (docs/PEOPLE.md 3.6; the people round's fix
+// The share records' reader and the alias table (docs/archive/rounds/PEOPLE.md 3.6; the people round's fix
 // round, b1.md R1): an account and the anonymous ids the alias table links to it are one person,
 // so a deck made before the sign in stays the account's own at `standing()` and `shareGet()`;
 // a caller without the alias is a stranger to it and reads the 404 sentence.

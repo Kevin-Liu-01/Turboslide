@@ -54,7 +54,7 @@ describe('text markup', () => {
   });
 });
 
-describe('run links in the rendered HTML (docs/PRODUCT.md section 2 rank 19)', () => {
+describe('run links in the rendered HTML (docs/archive/rounds/PRODUCT.md section 2 rank 19)', () => {
   it('opens an external address in a new tab and keeps a slide link in the page', () => {
     expect(renderText('[site](https://acme.com)', { gtWord: false })).toBe(
       '<a href="https://acme.com" target="_blank" rel="noreferrer">site</a>',

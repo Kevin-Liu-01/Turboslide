@@ -359,7 +359,7 @@ describe('expiry, revocation and the highest standing', () => {
       ],
     });
     expect(decide(rec, ctx(principal('usr_x')), 'read', { now: NOW }).ok).toBe(false);
-    /* the people round (docs/PEOPLE.md 3.10; SPEC-3 6.5): the invitee reads the deck before the
+    /* the people round (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5): the invitee reads the deck before the
        studio binds the grant to its id; the address is compared lower case */
     const invitee = ctx({ ...principal('usr_x'), email: 'Lee@Example.com' });
     expect(decide(rec, invitee, 'write', { now: NOW })).toEqual({
@@ -384,7 +384,7 @@ describe('expiry, revocation and the highest standing', () => {
   });
 
   test('an account stands as the owner or the grant holder its aliased anonymous id is (the sign in after the deck was made)', () => {
-    /* docs/PEOPLE.md 3.6; build/b1.md R3: the deck keeps owner anon_<uuid> after the sign in */
+    /* docs/archive/rounds/PEOPLE.md 3.6; build/b1.md R3: the deck keeps owner anon_<uuid> after the sign in */
     const owned = record({ owner: 'anon_creator' });
     const account = ctx({ ...principal('usr_c'), aliases: ['anon_creator'] });
     expect(decide(owned, account, 'transfer', { now: NOW })).toEqual({

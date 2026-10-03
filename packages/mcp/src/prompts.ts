@@ -168,7 +168,7 @@ export function deckReviewPrompt(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The deck_assist prompt (docs/PRODUCT.md 6.2, section 5): how an agent uses the assist's two
+// The deck_assist prompt (docs/archive/rounds/PRODUCT.md 6.2, section 5): how an agent uses the assist's two
 // actions and the tailoring pass over MCP, with the guardrails an agent must expect.
 
 export const DECK_ASSIST_PROMPT: Prompt = {

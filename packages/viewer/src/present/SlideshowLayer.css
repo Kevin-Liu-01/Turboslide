@@ -1,6 +1,6 @@
 /* The blank slides and the laser pointer of a show (SlideshowLayer.tsx; gslides-parity SPEC 9.2).
    The blank layer is a flat black or white sheet over the whole window; the laser is a 14 px ink
-   dot with a 2 px paper ring (docs/POLISH.md 2.7 item 94: the 12 px dot read as a speck at 1440),
+   dot with a 2 px paper ring (docs/archive/rounds/POLISH.md 2.7 item 94: the 12 px dot read as a speck at 1440),
    placed by transform so it follows the pointer without layout. The dot's colours are the panel
    tokens, the same in both themes. */
 .ts-present-blank {

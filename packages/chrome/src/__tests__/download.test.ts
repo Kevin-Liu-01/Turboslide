@@ -233,7 +233,7 @@ describe('downloadFromPage', () => {
   });
 });
 
-// The words of every download and the one name rule (docs/POLISH.md items 82, 86 and 87).
+// The words of every download and the one name rule (docs/archive/rounds/POLISH.md items 82, 86 and 87).
 describe('the download words', () => {
   it('names the kind in the progress, the file in the saved sentence and the kind in a refusal', async () => {
     const { DOWNLOAD_WORDS, fileNameOf } = await import('../download');

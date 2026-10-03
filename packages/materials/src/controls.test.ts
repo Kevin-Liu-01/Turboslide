@@ -1,4 +1,4 @@
-// The eleven common controls (docs/FEATURES.md 5.2, 7.3): every catalog entry maps them onto
+// The eleven common controls (docs/archive/rounds/FEATURES.md 5.2, 7.3): every catalog entry maps them onto
 // uniforms inside their ranges; a preset's authored uniforms hold until a control moves; the
 // record stores the controls and the resolved uniforms both (shaderBlockOf, shaderSetMutations);
 // the kit palette feeds the presets and the frame key follows it (5.5, 5.7).

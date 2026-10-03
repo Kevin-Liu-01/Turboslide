@@ -1,4 +1,4 @@
-// The assistant from the shell (docs/POLISH.md item 119; the action table's `assist.propose` and
+// The assistant from the shell (docs/archive/rounds/POLISH.md item 119; the action table's `assist.propose` and
 // `assist.accept` usages). The assistant's model runs in the studio's server (apps/studio, the
 // `assist.propose` and `assist.accept` actions over HTTP and MCP), not in this process: the
 // command names the transport that runs it and exits 2, so the usage line the generated skills

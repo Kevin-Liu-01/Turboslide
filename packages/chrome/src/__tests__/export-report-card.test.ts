@@ -5,7 +5,7 @@ import type { ExportReport } from '@turboslide/schema/export';
 import { runKindWord, runSentence } from '../ExportReportCard';
 import type { ArtifactRun } from '../ExportReportCard';
 
-// The download's Details is a seller's card (docs/POLISH.md item 80; the row
+// The download's Details is a seller's card (docs/archive/rounds/POLISH.md item 80; the row
 // export.details.seller-card): the head names the format from the run, never PPTX for a PDF, and
 // the sentence under the files is one plain statement.
 

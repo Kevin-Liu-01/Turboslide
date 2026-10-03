@@ -1,4 +1,4 @@
-/* The Shader section of Format options (docs/FEATURES.md 5.3; inspector/shader.tsx): Glyphfield's
+/* The Shader section of Format options (docs/archive/rounds/FEATURES.md 5.3; inspector/shader.tsx): Glyphfield's
    groups as labelled rows in the panel's grammar (fields.css draws the sliders, the number fields,
    the swatches and the buttons). A thumbnail row at the top, the preset tiles as 96 by 60 stills,
    the kit's six swatches, the collapsed Advanced group. Hairlines from the tokens, radius 0, no
@@ -47,7 +47,7 @@
   white-space: normal;
 }
 
-/* the name and Change on one line, 8 px apart or more (docs/POLISH.md item 47) */
+/* the name and Change on one line, 8 px apart or more (docs/archive/rounds/POLISH.md item 47) */
 .ts-shader-name-row {
   display: flex;
   align-items: center;

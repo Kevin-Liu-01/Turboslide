@@ -1,4 +1,4 @@
-// The parked controls (docs/FEATURES.md 7.2; judge-design rejection 16). The `advanced` flag of
+// The parked controls (docs/archive/rounds/FEATURES.md 7.2; judge-design rejection 16). The `advanced` flag of
 // menus/model.ts reaches a menu row, a toolbar control, a right click entry and a palette entry,
 // and the `advancedTools` prop of FormatOptions.tsx reaches a whole section; a control that is
 // none of those (an overlay handle or bar, a dialog control, a control inside the Shader section)

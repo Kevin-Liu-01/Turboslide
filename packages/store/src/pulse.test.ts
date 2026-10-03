@@ -106,7 +106,7 @@ describe('the deck pulse', () => {
     expect(POLL_BACKOFF_MAX_MS).toBe(60_000);
   });
 
-  it('ticks at 2 s with another roster row or an op in the last 30 s and at 10 s otherwise, both under the budget (docs/SYNC.md 3.10)', () => {
+  it('ticks at 2 s with another roster row or an op in the last 30 s and at 10 s otherwise, both under the budget (docs/archive/rounds/SYNC.md 3.10)', () => {
     expect(HOSTED_POLL_QUIET_MS).toBe(10_000);
     expect(POLL_ACTIVE_WINDOW_MS).toBe(30_000);
     const t = 1_000_000;

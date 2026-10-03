@@ -204,7 +204,7 @@ export function entryFor(catalog: FontsCatalog, pick: FamilyPick): FontEntry | u
   return catalog.entries.find((e) => e.family === pick.family);
 }
 
-/** The catalog's family names (docs/PRODUCT.md 4.2), the words PowerPoint and Google Slides use. */
+/** The catalog's family names (docs/archive/rounds/PRODUCT.md 4.2), the words PowerPoint and Google Slides use. */
 const CATALOG_NAMES: ReadonlySet<string> = new Set(Object.values(FONT_NAMES));
 
 /**
@@ -220,7 +220,7 @@ export function firstFamily(computed: string): string {
 }
 
 /**
- * The catalog face a computed family names (docs/PRODUCT.md 4.2, 4.5): the family name when the
+ * The catalog face a computed family names (docs/archive/rounds/PRODUCT.md 4.2, 4.5): the family name when the
  * first family of the stack is one of the catalog's, else null, so a run set in a catalog face
  * or drawn by the brand kit's Display or Text role travels under that name in `a:latin typeface`
  * and Inter keeps the export set's picks (`GT Inter Display`, `GT Inter Text 22`).

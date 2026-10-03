@@ -44,7 +44,7 @@ import { tipProps } from './Tooltip';
 import './ThemesPanel.css';
 
 /**
- * The Brand kit panel (docs/PRODUCT.md 4.1, 4.4; formerly the Themes panel of gslides-parity SPEC
+ * The Brand kit panel (docs/archive/rounds/PRODUCT.md 4.1, 4.4; formerly the Themes panel of gslides-parity SPEC
  * 5.7): the record on the deck edited in one place with live preview. Appearance (the two GT
  * tiles as before, `themes.gt.*`), Logo (the slot preview, Replace, Remove, Use the default logo,
  * a Position select for the title slide's logo and one for the footer's), Colors (the six roles,
@@ -201,7 +201,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   const defaultKit = defaultKitOfInput(input);
   const current = deckAppearance(deck);
   const [colorAppearance, setColorAppearance] = useState<Appearance>(current);
-  /* the Colors tab follows the appearance the seller picks (docs/POLISH.md item 49; audit-media
+  /* the Colors tab follows the appearance the seller picks (docs/archive/rounds/POLISH.md item 49; audit-media
      item 20: the Dark tile left the tab on Light): the tab resets when the deck's appearance
      changes, and the seller can still switch it to edit the other appearance's colours */
   const [seenAppearance, setSeenAppearance] = useState<Appearance>(current);

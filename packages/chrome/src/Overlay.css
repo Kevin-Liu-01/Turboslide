@@ -335,7 +335,7 @@
    and the eight handles in the selection colour (ruling 1), the handles filled with it as Google
    fills its black squares */
 /* the picture's full extent as a hairline, the cut part dimmed by the strips beside the frame
-   (docs/POLISH.md 2.5 item 50: the dim covered the kept part too) */
+   (docs/archive/rounds/POLISH.md 2.5 item 50: the dim covered the kept part too) */
 .ts-crop-full {
   position: absolute;
   box-sizing: border-box;
@@ -380,7 +380,7 @@
   pointer-events: none;
 }
 
-/* a bar button under the selected object's ring (the Edit data button of a chart, docs/FEATURES.md
+/* a bar button under the selected object's ring (the Edit data button of a chart, docs/archive/rounds/FEATURES.md
    2.2 rank 7): a 22 px paper button with a hairline, in the chrome's face, that takes the pointer
    and draws no second ring */
 .ts-bar-btn {
@@ -448,7 +448,7 @@
   fill: var(--pt-ink);
 }
 
-/* ---- the table's own controls (docs/OBJECTS.md 3.3 items 1 and 4; TableOverlay.tsx) ---- */
+/* ---- the table's own controls (docs/archive/rounds/OBJECTS.md 3.3 items 1 and 4; TableOverlay.tsx) ---- */
 
 /* the layer of the table's controls fills the overlay and takes no pointer; its controls do */
 .ts-table-tools {

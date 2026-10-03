@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildCommit } from './build-commit';
 
-// The build commit stamp (docs/POLISH.md section 0 item 1): the platform's sha when it names one,
+// The build commit stamp (docs/archive/rounds/POLISH.md section 0 item 1): the platform's sha when it names one,
 // else the stamp a CLI deploy passes, never an empty platform value over the stamp (the guard's
 // preview of c6227464 answered `instance.commit` null with both names in its environment).
 

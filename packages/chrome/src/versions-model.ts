@@ -44,7 +44,7 @@ export function identityOfAuthor(
 ): IdentityView {
   const resolved = author.principalId === undefined ? undefined : identities?.[author.principalId];
   /* an agent author names itself on the record (the assistant's accept writes as "Assistant",
-     docs/PRODUCT.md 6.1; an agent token as its token's name): the resolved identity of an agent
+     docs/archive/rounds/PRODUCT.md 6.1; an agent token as its token's name): the resolved identity of an agent
      id the deployment holds no token for is the generic "Agent", so the author's own name wins
      there and a named token's resolution stands */
   if (resolved !== undefined && author.kind !== 'agent') return resolved;

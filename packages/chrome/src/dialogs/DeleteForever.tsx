@@ -4,7 +4,7 @@ import { Dialog } from '../Dialog';
 import { DIALOGS } from '../menus/strings';
 
 /**
- * Delete forever (gslides-parity SPEC 6.4, 12 "Dialogs"; docs/PRODUCT.md 3.3): the chrome's one
+ * Delete forever (gslides-parity SPEC 6.4, 12 "Dialogs"; docs/archive/rounds/PRODUCT.md 3.3): the chrome's one
  * Dialog with the 18 px title "Delete <title> forever?" and the lead "This cannot be undone.",
  * one sentence naming what goes, Cancel and the solid Delete forever, which takes the focus on
  * open so Enter deletes and Esc keeps (docs/FOCUS.md rank 29). Presentational: the trash page runs
@@ -48,7 +48,7 @@ export function DeleteForeverDialog({
   onClose,
   busy = false,
 }: DeleteForeverDialogProps) {
-  /* the primary button holds the focus once the frame has settled (docs/POLISH.md item 97;
+  /* the primary button holds the focus once the frame has settled (docs/archive/rounds/POLISH.md item 97;
      audit-pages item 32): the opener's own focus return (a card menu closing after the dialog
      mounted) moved it to Cancel, and Enter cancelled while the tooltip said Enter deletes */
   useEffect(() => {

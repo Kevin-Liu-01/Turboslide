@@ -36,7 +36,7 @@ import type { Room } from './room';
 import type { ViewerFacts } from './room';
 import { stateDir } from './root';
 
-// The room's identity seam of the people round (docs/PEOPLE.md 3.6, 3.7, 3.8, 3.27; 6.5): the
+// The room's identity seam of the people round (docs/archive/rounds/PEOPLE.md 3.6, 3.7, 3.8, 3.27; 6.5): the
 // account session read on the room routes, the resolver's account and alias lookups, the roster
 // entry a link visitor reads (the role's plate, the hue kept) and the address a grant holder
 // reads, the resolved views of the people a page names. The runtime is a sqlite database in a
@@ -389,7 +389,7 @@ describe('identityViewsFor', () => {
   });
 });
 
-describe("the caller's own index facts past the cache (docs/PEOPLE.md 6.4)", () => {
+describe("the caller's own index facts past the cache (docs/archive/rounds/PEOPLE.md 6.4)", () => {
   it('the boot reads the choice another instance wrote at once, the presence tick keeps the row, and the resolution follows the facts inside the 5 s', async () => {
     /* people.own-chip-follows-avatar red on preview 7 (the verifier's pass 1 finding 3): the
        choice `account.setAvatar` wrote on one instance reached the instance that served the

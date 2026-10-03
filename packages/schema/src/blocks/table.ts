@@ -47,7 +47,7 @@ export type CellBorder = { color?: Color; weight?: TableBorderWeight; dash?: Das
 
 /**
  * One styled cell (SPEC-2 2.7.2): a fill, a border, and since the polish round its own alignment
- * (docs/POLISH.md 2.2 item 10: Center on a cell range centres those cells and not the column;
+ * (docs/archive/rounds/POLISH.md 2.2 item 10: Center on a cell range centres those cells and not the column;
  * the renderer reads `align` here before the column's).
  */
 export type TableCellStyle = {
@@ -324,11 +324,11 @@ function roundWidth(width: number): number {
   return Math.max(TABLE_MIN_COLUMN_PX, Math.round(width * 100) / 100);
 }
 
-/** The narrowest a column drag or a column insert leaves a column, in sheet px (docs/RETURN.md 2.4 fix 5). */
+/** The narrowest a column drag or a column insert leaves a column, in sheet px (docs/archive/rounds/RETURN.md 2.4 fix 5). */
 export const TABLE_MIN_COLUMN_PX = 40;
 
 // ---------------------------------------------------------------------------------------------
-// The rows and the box (docs/OBJECTS.md 3.3 item 3; Google: a row is its text's height plus the
+// The rows and the box (docs/archive/rounds/OBJECTS.md 3.3 item 3; Google: a row is its text's height plus the
 // padding, the table's box is the rows' sum, a frame drag distributes). The numbers below are the
 // theme's table rules (packages/theme sheet.css `.ts-sheet .table`: font-size from the ladder,
 // line-height 1.45, the cell padding 12 px above and below, the rule under every row at the
@@ -385,7 +385,7 @@ export function tableRowsFloor(block: Pick<TableFields, 'rows' | 'size' | 'borde
 /**
  * The box height Insert > Table gives a table of `rows` empty rows at the ladder `size` (the
  * width stays the tool's 960): `tableRowsFloor` of the empty table, whole px. The insert never
- * shrinks it (docs/POLISH.md 2.2 item 6): a table taller than the free room lands at the room's
+ * shrinks it (docs/archive/rounds/POLISH.md 2.2 item 6): a table taller than the free room lands at the room's
  * top at this height and runs past the room, as Google's does.
  */
 export function tableBoxHeight(rows: number, size: number = 20): number {
@@ -397,7 +397,7 @@ export function tableBoxHeight(rows: number, size: number = 20): number {
 /**
  * How many empty rows a `room` of sheet px holds at the ladder `size`, the hairline above
  * included: 13 in the 642 px content box at 15 px (46.75 a row), 11 at 20 px. At least 1, at most
- * the cap. The grid picker's size words name this count past it (docs/POLISH.md 2.2 item 6), so
+ * the cap. The grid picker's size words name this count past it (docs/archive/rounds/POLISH.md 2.2 item 6), so
  * a seller picking twenty rows knows the table will run off the slide.
  */
 export function tableRowsThatFit(room: number, size: number = 15): number {
@@ -424,7 +424,7 @@ export function tableGrownHeight(
 
 /**
  * The `pos.h` a rows edit leaves the box at so the rows it added draw inside the ring
- * (VERIFICATION.md "Objects round, pass 1" finding 1; docs/OBJECTS.md 3.3 item 3 with the fix
+ * (VERIFICATION.md "Objects round, pass 1" finding 1; docs/archive/rounds/OBJECTS.md 3.3 item 3 with the fix
  * round's proposal in build/b2.md): the box grows by the track of every row the edit added (its
  * set height, else the empty row's pitch at the table's size, 54 at 20 px), the rule the edge
  * "+" applies with the last row's drawn height (packages/chrome table-tools.ts `edgeInsert`) and
@@ -455,7 +455,7 @@ export type TableRowsMeasure = {
 };
 
 /**
- * The rows after the seam under row `index` moved by `dy` px (docs/OBJECTS.md 3.3 item 4;
+ * The rows after the seam under row `index` moved by `dy` px (docs/archive/rounds/OBJECTS.md 3.3 item 4;
  * Google drags a gridline between rows): every row takes its drawn height as its `height`, so
  * the slack the box held is captured and nothing else moves, row `index` takes its drawn height
  * plus the drag, never below its natural height (the text with the paddings and the rule), and
@@ -508,7 +508,7 @@ export function columnShares(columns: ReadonlyArray<TableColumn>, total: number)
 
 /**
  * The columns after a seam between `index` and `index + 1` moved by `dx` px inside a table
- * `total` px wide (docs/RETURN.md 2.4 fix 5; Google drags a gridline, research 05 A6): the left
+ * `total` px wide (docs/archive/rounds/RETURN.md 2.4 fix 5; Google drags a gridline, research 05 A6): the left
  * column widens by dx and its neighbour narrows, neither below TABLE_MIN_COLUMN_PX, the others
  * keep their drawn widths, and every column carries a width so the grid stays proportional.
  * Null when nothing would change (a click, a seam at its limit, an index off the grid).
@@ -642,7 +642,7 @@ function insertRowsAt(working: Working, at: number, count: number): void {
  * keeps its total: the new columns take an equal share and every other width scales down, so no
  * column is left as `{}` beside sized neighbours (the grid template then gave it the remainder or
  * nothing at all, and the Editable text PowerPoint wrote a gridCol the file could not hold;
- * docs/RETURN.md 2.4 fix 4, audit-objects rows 85 and 97).
+ * docs/archive/rounds/RETURN.md 2.4 fix 4, audit-objects rows 85 and 97).
  */
 function insertColumnsAt(working: Working, at: number, count: number): void {
   const room = Math.max(0, Math.min(count, TABLE_MAX_COLUMNS - working.columns.length));
@@ -866,7 +866,7 @@ export function applyTableCommand(
         else if (command.fill !== undefined) current.fill = command.fill;
         if (command.border === null) delete current.border;
         else if (command.border !== undefined) current.border = { ...command.border };
-        /* a cell whose only style is its alignment stays (docs/POLISH.md 2.2 item 10) */
+        /* a cell whose only style is its alignment stays (docs/archive/rounds/POLISH.md 2.2 item 10) */
         const empty =
           current.fill === undefined && current.border === undefined && current.align === undefined;
         if (index >= 0) {

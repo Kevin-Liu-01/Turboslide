@@ -82,7 +82,7 @@ describe('resolvePrincipal', () => {
       accountId: '01JKEVIN',
       admin: true,
       // the account's own label, so one account is one word on every id that renders as it
-      // (docs/PEOPLE.md 3.18)
+      // (docs/archive/rounds/PEOPLE.md 3.18)
       label: labelFor('usr_01JKEVIN'),
     });
     expect(trustTooltip(r.trust, r.email)).toBe('Signed in as kevin@example.com');
@@ -120,7 +120,7 @@ describe('resolvePrincipal', () => {
       'usr_01JKEVIN',
       lookup({ account: () => ({ ...KEVIN, name: '  ' }) }),
     );
-    // the label, never the address (docs/PEOPLE.md 3.18; AUDIT.md defect 21)
+    // the label, never the address (docs/archive/rounds/PEOPLE.md 3.18; AUDIT.md defect 21)
     expect(blankName.displayName).toBe(labelFor('usr_01JKEVIN'));
     expect(blankName.email).toBe('kevin@example.com');
   });
@@ -163,7 +163,7 @@ describe('resolvePrincipal', () => {
   });
 });
 
-// The people round (docs/PEOPLE.md 3.7, 3.18, 4.4; 6.5): the account without a typed name, the
+// The people round (docs/archive/rounds/PEOPLE.md 3.7, 3.18, 4.4; 6.5): the account without a typed name, the
 // picture URL on the resolved identity, the word beside the badge, the deleted flag on the view.
 describe('the people round', () => {
   const USR = `usr_${KEVIN.userId}`;

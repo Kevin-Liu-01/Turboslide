@@ -102,7 +102,7 @@ describe('the capture page', () => {
   });
 });
 
-describe('the frame key and the frame shape (docs/FEATURES.md 5.5)', () => {
+describe('the frame key and the frame shape (docs/archive/rounds/FEATURES.md 5.5)', () => {
   test('a client frame and a hosted frame of one recipe carry one frameKey and both are fresh; the aspect and the kit move it, the pixel size does not', () => {
     const entry = requireMaterial('paper:liquid-metal');
     const block = {
@@ -309,7 +309,7 @@ describe.skipIf(skipBrowser)('material capture in the browser', () => {
     expect(frame.asset.source.size).toEqual([3200, 800]);
     const decoded = await decodeImage(frame.frame);
     expect([decoded.width, decoded.height]).toEqual([3200, 800]);
-    // the bytes per capture (docs/FEATURES.md 5.5: measured, written into the ship note, never typed)
+    // the bytes per capture (docs/archive/rounds/FEATURES.md 5.5: measured, written into the ship note, never typed)
     const full = await captureMaterial(
       {
         materialId: 'paper:liquid-metal',

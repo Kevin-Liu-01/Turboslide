@@ -1,4 +1,4 @@
-// The resize invariant of the vector round (docs/VECTOR.md 2.4, row shapes.geometry.resize-keeps-adjust):
+// The resize invariant of the vector round (docs/archive/rounds/VECTOR.md 2.4, row shapes.geometry.resize-keeps-adjust):
 // a resize of a preset shape that carries `adjust` writes `pos` alone, so the fractions of 100000
 // hold and a star's inner radius scales with its box; the Format options fields are the one way
 // an adjust value changes. Pins `freeGesture` as it stands; Gestures.tsx and Editor.tsx change
@@ -83,7 +83,7 @@ function innerOverOuter(w: number, h: number, values: ReadonlyArray<number>): nu
   return radius(inner) / radius(outer);
 }
 
-describe('a resize keeps the adjust values (docs/VECTOR.md 2.4)', () => {
+describe('a resize keeps the adjust values (docs/archive/rounds/VECTOR.md 2.4)', () => {
   it('writes pos alone from the south east handle and the fractions hold at the new size', () => {
     const list = handlesFor(canvas, boxes, { kind: 'block', blockId: 'star' });
     const se = handle('free-resize', list, 'se');

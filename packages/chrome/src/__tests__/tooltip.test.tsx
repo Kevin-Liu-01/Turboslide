@@ -19,7 +19,7 @@ import {
 // The Tooltip primitive (Kevin, 2026-09-11: "have good tooltips in all control surfaces"): the
 // name, the sentence and the key from a title-like string; shown after 350 ms of hover and at
 // once on keyboard focus; one layer at a time; hidden on Escape and when the pointer leaves. Since
-// the polish round (docs/POLISH.md 2.6 item 61) a tooltip shows only where a person asked: a
+// the polish round (docs/archive/rounds/POLISH.md 2.6 item 61) a tooltip shows only where a person asked: a
 // mouseenter counts when the pointer's own movement is the newest input, a focus when a
 // navigation key is.
 function layer(): HTMLElement | null {
@@ -161,7 +161,7 @@ describe('Tooltip', () => {
     expect(second.getAttribute('aria-describedby')).toBe(TIP_ID);
   });
 
-  it('shows no tip for a control that moved under a resting pointer until the pointer moves, and none on a focus returned right after Escape (docs/POLISH.md 2.6 item 61)', () => {
+  it('shows no tip for a control that moved under a resting pointer until the pointer moves, and none on a focus returned right after Escape (docs/archive/rounds/POLISH.md 2.6 item 61)', () => {
     render(
       <Tooltip content="Insert image">
         <button type="button">Image</button>

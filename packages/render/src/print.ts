@@ -121,7 +121,7 @@ export function renderPrintDocument(
       html: entry.rendered.html.replace(/^<section class="slide/, '<section class="slide is-on'),
     },
   }));
-  /* the brand kit's frame band on every page (docs/PRODUCT.md 4.1, 4.5) */
+  /* the brand kit's frame band on every page (docs/archive/rounds/PRODUCT.md 4.1, 4.5) */
   const band = frameBandOf(
     deck,
     theme,

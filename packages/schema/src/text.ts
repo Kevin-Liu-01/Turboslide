@@ -46,7 +46,7 @@ export type RunMarks = {
   color?: Color;
   hl?: Color;
   /**
-   * the run's own font size in px (the polish round, docs/POLISH.md 2.3 item 16): a size set on a
+   * the run's own font size in px (the polish round, docs/archive/rounds/POLISH.md 2.3 item 16): a size set on a
    * selected word, as Google keeps it, serialized as `z:36` in the mark list; the block's
    * typography size stays the box's
    */
@@ -715,7 +715,7 @@ export function insertAt(text: Text, at: number, insert: string): Text {
   };
   const template: Run = host === undefined ? { t: '' } : { ...host.run, t: '' };
   delete template.gt;
-  /* typing at the end of a link continues the sentence and not the link (docs/PRODUCT.md section
+  /* typing at the end of a link continues the sentence and not the link (docs/archive/rounds/PRODUCT.md section
      2 rank 9; Google Slides): the letters keep the run's other marks and drop the address unless
      the run that starts there carries the same link (the caret is inside the link) */
   if (
@@ -923,7 +923,7 @@ function insertPlain(paragraphs: Run[][], at: number, insert: string, template?:
     const after = runs[index];
     const host = template ?? (before !== undefined && !before.gt ? before : after);
     const flags: Run = host === undefined ? { t: '' } : { ...host, t: '' };
-    /* a pure insertion at the end of a linked run leaves the link (docs/PRODUCT.md section 2 rank
+    /* a pure insertion at the end of a linked run leaves the link (docs/archive/rounds/PRODUCT.md section 2 rank
        9): "acme.com today" keeps "today" plain, as Google does; inside the link (the run that
        starts at the offset carries the same address) the letters stay linked */
     if (

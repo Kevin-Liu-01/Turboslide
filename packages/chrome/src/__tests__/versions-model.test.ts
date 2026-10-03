@@ -89,7 +89,7 @@ describe('groupVersions', () => {
     expect(
       identityOfAuthor({ kind: 'human', name: 'Titanium 471', principalId: 'anon_m' }, identities),
     ).toBe(maya);
-    /* a map entry carries the account's trust and its mark to the row (docs/PEOPLE.md 3.8) */
+    /* a map entry carries the account's trust and its mark to the row (docs/archive/rounds/PEOPLE.md 3.8) */
     const ada: IdentityView = {
       principalId: 'usr_ada',
       label: 'Cobalt 512',

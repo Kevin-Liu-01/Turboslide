@@ -200,10 +200,10 @@ describe('the editor shell in its default state', () => {
     /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition, the Later
        control, is absent while the switch is off (asserted behind the switch below) */
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
-    /* docs/POLISH.md 2.6 item 66: with nothing selected the button waits for a selection */
+    /* docs/archive/rounds/POLISH.md 2.6 item 66: with nothing selected the button waits for a selection */
     expect(comment.getAttribute('aria-disabled')).toBe('true');
     expect(toolbar.querySelector('[data-control="toolbar.transition"]')).toBeNull();
-    /* the return round (docs/RETURN.md 3.2): Paint format, Insert shape, Insert line, Theme and
+    /* the return round (docs/archive/rounds/RETURN.md 3.2): Paint format, Insert shape, Insert line, Theme and
        the Hide the menus chevron are back in the default view */
     for (const returned of [
       'toolbar.paintFormat',
@@ -213,7 +213,7 @@ describe('the editor shell in its default state', () => {
       'toolbar.hideMenus',
     ])
       expect(toolbar.querySelector(`[data-control="${returned}"]`), returned).not.toBeNull();
-    /* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25): its side panel
+    /* the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25): its side panel
        toggle sits in the title row's right cluster */
     expect(container.querySelector('[data-control="bottombar"]')).toBeNull();
     expect(container.querySelector('.ts-bottombar')).toBeNull();
@@ -277,17 +277,17 @@ describe('the editor shell in its default state', () => {
     expect(FORBIDDEN_DEFAULT_VIEW_WORDS.length).toBeGreaterThan(10);
   });
 
-  it('opens the File menu, keeps its words clean, closes on Esc with the focus off the title (docs/PRODUCT.md section 2 rank 29)', () => {
+  it('opens the File menu, keeps its words clean, closes on Esc with the focus off the title (docs/archive/rounds/PRODUCT.md section 2 rank 29)', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const file = container.querySelector('[data-control="menubar.file"]') as HTMLElement;
     fireEvent.click(file);
     const menu = screen.getByRole('menu', { name: 'File menu' });
-    /* docs/POLISH.md 2.6 item 74: Make a copy draws as its one visible row, Entire presentation */
+    /* docs/archive/rounds/POLISH.md 2.6 item 74: Make a copy draws as its one visible row, Entire presentation */
     expect(menu.querySelector('[data-menu-item="file.makeCopy.entire"]')).not.toBeNull();
     expect(menu.querySelector('[data-menu-item="file.makeCopy"]')).toBeNull();
     /* SPEC-3 13.3's Email row is Later, so it is absent while Tools > Advanced tools is off
        (docs/FOCUS.md 3.1; the test above asserts it behind the switch); Open returned to the
-       default view in the return round (docs/RETURN.md 2.17) */
+       default view in the return round (docs/archive/rounds/RETURN.md 2.17) */
     expect(menu.querySelector('[data-menu-item="file.open"]')).not.toBeNull();
     expect(menu.querySelector('[data-menu-item="file.email"]')).toBeNull();
     expect(menu.querySelector('[data-menu-item="file.move"]')).toBeNull();
@@ -329,7 +329,7 @@ describe('the editor shell in its default state', () => {
       (el) => el.dataset.control as string,
     );
     /* the parked controls of the text tail are absent (the fill and border controls, question 8
-       of docs/RETURN.md section 9), the core ones present with Highlight color back (RETURN.md
+       of docs/archive/rounds/RETURN.md section 9), the core ones present with Highlight color back (RETURN.md
        2.11), Font disabled */
     for (const parked of [
       'toolbar.fillColor',
@@ -359,7 +359,7 @@ describe('the editor shell in its default state', () => {
       'toolbar.formatOptions',
     ])
       expect(ids, core).toContain(core);
-    /* the Font dropdown is live (docs/PRODUCT.md 4.2; B5a): a listbox trigger, not a disabled word */
+    /* the Font dropdown is live (docs/archive/rounds/PRODUCT.md 4.2; B5a): a listbox trigger, not a disabled word */
     expect(
       toolbar.querySelector('[data-control="toolbar.font"]')?.getAttribute('aria-haspopup'),
     ).toBe('listbox');
@@ -407,7 +407,7 @@ describe('the editor shell in its default state', () => {
     probe.remove();
   });
 
-  it('the Full screen chord and the Hide the menus chevron work with Advanced tools off since the return round (docs/RETURN.md 2.16, 3.2)', () => {
+  it('the Full screen chord and the Hide the menus chevron work with Advanced tools off since the return round (docs/archive/rounds/RETURN.md 2.16, 3.2)', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     expect(container.querySelector('[data-control="toolbar.hideMenus"]')).not.toBeNull();
     fireEvent.keyDown(document.body, { key: 'F', code: 'KeyF', ctrlKey: true, shiftKey: true });
@@ -497,10 +497,10 @@ describe('the editor shell in its default state', () => {
       container.querySelector('[data-control="toolbar.newSlide.arrow"]') as HTMLElement,
     );
     const grid = screen.getByRole('dialog', { name: 'New slide with layout' });
-    /* Google's eleven first; the GT layouts open from the disclosure row (docs/PRODUCT.md 3.4) */
+    /* Google's eleven first; the GT layouts open from the disclosure row (docs/archive/rounds/PRODUCT.md 3.4) */
     expect(grid.querySelectorAll('.ts-layout-tile')).toHaveLength(11);
     fireEvent.click(grid.querySelector('[data-control="layout.new.gt"]') as HTMLElement);
-    /* twenty two since the product round: Title, subtitle and body joined the GT layouts (docs/PRODUCT.md section 2 rank 2) */
+    /* twenty two since the product round: Title, subtitle and body joined the GT layouts (docs/archive/rounds/PRODUCT.md section 2 rank 2) */
     expect(grid.querySelectorAll('.ts-layout-tile')).toHaveLength(22);
     fireEvent.click(grid.querySelector('[data-layout="big-number"]') as HTMLElement);
     await act(async () => {
@@ -526,7 +526,7 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(dispatch).not.toHaveBeenCalled();
     /* docs/FOCUS.md section 4 under the orchestrator's ruling (1), cycle 2 (build/b3.md R14) took
        Insert > Shape and Insert > Line out of the default view whole, with the two toolbar
-       buttons; the return round brought them back (docs/RETURN.md 2.2, 2.3, 3.2), so the Insert
+       buttons; the return round brought them back (docs/archive/rounds/RETURN.md 2.2, 2.3, 3.2), so the Insert
        menu lists them beside the seller's rows with the switch off, and the parked kinds (the
        galleries, Rule, Curve, Polyline, Scribble) stay behind the switch */
     clickMenuPath(first.container, 'insert');
@@ -581,7 +581,7 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(ellipse).not.toBeNull();
     fireEvent.click(ellipse as HTMLElement);
     expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'ellipse' });
-    /* the toolbar Shape button is a split like Image and Line (docs/POLISH.md 2.6 item 74): the
+    /* the toolbar Shape button is a split like Image and Line (docs/archive/rounds/POLISH.md 2.6 item 74): the
        button arms the rectangle tool and its arrow lists the named rows first, then the gallery
        rows */
     fireEvent.click(
@@ -705,7 +705,7 @@ describe('the Insert menu, compact mode and the title row', () => {
   });
 
   it('Insert > Shader opens the gallery; a card writes a material block with the entry’s featured preset', async () => {
-    /* the features round, ship two (docs/FEATURES.md 5.4): Insert > Shader is in the default view */
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): Insert > Shader is in the default view */
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.shader');
     const dialog = await screen.findByRole('dialog', { name: 'Animated pattern' });

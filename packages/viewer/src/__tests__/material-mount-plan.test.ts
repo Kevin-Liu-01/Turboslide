@@ -1,4 +1,4 @@
-// The one live mount rule of the stage (docs/FEATURES.md 5.6; the fix round of ship two,
+// The one live mount rule of the stage (docs/archive/rounds/FEATURES.md 5.6; the fix round of ship two,
 // verification F.5 items 1 and 4): the selected shader block plays and every other block draws
 // its frame; with no shader selected one frameless block mounts a still and a second frameless
 // block draws its plate, so two blocks whose frames are pending are one canvas, never two; a

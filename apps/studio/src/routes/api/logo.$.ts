@@ -26,7 +26,7 @@ import { flushRoom, readJsonBody, refuseCrossSite, refuseNonJson } from '../../s
 import type { RouteRefusal } from '../../server/room';
 import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../server/root';
 
-// /api/logo/* (docs/FEATURES.md 4.2, 4.7, 4.9, 4.11; audit-logos 2, 10; B6): the logo picker's
+// /api/logo/* (docs/archive/rounds/FEATURES.md 4.2, 4.7, 4.9, 4.11; audit-logos 2, 10; B6): the logo picker's
 // route beside the render, export and assist routes, so a WAF rule and a function duration can
 // name it; not a `createServerFn`, because every server function posts to `/_serverFn/<id>`.
 //
@@ -61,7 +61,7 @@ import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../
 //                                              dispatcher registers it (build/b6.md R4).
 //
 // Every refusal is one JSON object in the shape of the agent surface's errors; nothing here prints
-// a token. The store budget of docs/SYNC.md 4 holds: a search reads the index this instance holds,
+// a token. The store budget of docs/archive/rounds/SYNC.md 4 holds: a search reads the index this instance holds,
 // a tile is one store read for a cached open mark, an insert is the asset's puts and one write.
 // A store refusal under any of the four (the index read the public store's edge withholds after
 // the refresh wrote it, a 429, the deadline; server/logos.ts `LogoStoreBusyError`) is answered as

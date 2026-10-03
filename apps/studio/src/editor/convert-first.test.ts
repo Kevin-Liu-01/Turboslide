@@ -9,7 +9,7 @@ import { toCanvas } from '@turboslide/schema/canvas';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
 
-// The conversion a format write on a fixed kind's field needs first (docs/RETURN.md 2.14 item 1):
+// The conversion a format write on a fixed kind's field needs first (docs/archive/rounds/RETURN.md 2.14 item 1):
 // a mutation that names the cover title's heading, a statement's big line or a picture kind's
 // photograph, none of them a block of its slide, names the slide to convert; a block of a content
 // slide, a slide field write and a deck write name nothing.
@@ -80,7 +80,7 @@ describe('slideToConvertFor', () => {
   });
 
   it('reads past a text run on a slide field and still converts on a mark at another path', () => {
-    // the sync and costs round (docs/SYNC.md 3.4; build/b2.md R2): a burst into the cover's
+    // the sync and costs round (docs/archive/rounds/SYNC.md 3.4; build/b2.md R2): a burst into the cover's
     // heading travels as text.splice { blockId: 'heading', path: '/heading' } and writes the
     // field in place, so it names nothing; a mark on the heading at another path is a write
     // against the field object and converts as before

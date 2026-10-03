@@ -219,7 +219,7 @@ describe('turboslide cli', () => {
   }, 30_000);
 });
 
-// Every `cli.usage` line of the action table names a registered command (docs/POLISH.md item
+// Every `cli.usage` line of the action table names a registered command (docs/archive/rounds/POLISH.md item
 // 119): `turboslide assist propose` and `turboslide tailor` answered "unknown command" while the
 // table and the generated skills documented them.
 describe('the action table and the registry', () => {

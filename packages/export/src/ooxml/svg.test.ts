@@ -1,4 +1,4 @@
-// The svgBlip of the OOXML post-process (docs/VECTOR.md 4.6, 6.3): over a package in the shape
+// The svgBlip of the OOXML post-process (docs/archive/rounds/VECTOR.md 4.6, 6.3): over a package in the shape
 // probe (b) read from pptxgenjs, `writeSvgBlip` adds the ext with the svgBlip inside the pic's
 // blip, the image relationship, the media part and the content type default once, the package
 // validates, a second call on the same pic changes nothing, a pic the part does not hold or a

@@ -1,4 +1,4 @@
-/* Insert > Logo (dialogs/Logo.tsx; docs/FEATURES.md 4.3, 4.6): the search field over three groups
+/* Insert > Logo (dialogs/Logo.tsx; docs/archive/rounds/FEATURES.md 4.3, 4.6): the search field over three groups
    of 96 px tiles, each tile the mark drawn twice on a paper half and an ink half whose grounds are
    the kit's two Background colours (set inline, so the dark appearance keeps both halves), the
    title under it in 12 px, and the foot with the check, the licence row and the source sentence.
@@ -18,7 +18,7 @@
 }
 
 /* the groups scroll together under the field in a box of one height, so the dialog keeps its size
-   from open whatever a search answers (docs/POLISH.md item 39: it grew from 525 to 727 px when
+   from open whatever a search answers (docs/archive/rounds/POLISH.md item 39: it grew from 525 to 727 px when
    results arrived); the foot stays in view; the room at the bottom keeps the last row's titles
    whole when the box scrolls to its end */
 .ts-logo-groups {

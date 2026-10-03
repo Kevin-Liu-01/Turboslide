@@ -11,7 +11,7 @@
 export type GestureReadout =
   | { kind: 'angle'; value: number }
   | { kind: 'size'; w: number; h: number }
-  /* the moved column's width while a table's column seam drags (docs/RETURN.md 2.4 fix 5) */
+  /* the moved column's width while a table's column seam drags (docs/archive/rounds/RETURN.md 2.4 fix 5) */
   | { kind: 'width'; value: number }
   | null;
 

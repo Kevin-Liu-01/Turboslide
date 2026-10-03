@@ -12,7 +12,7 @@ import type { IdentityView } from '../editor-shell';
 import { PANELS } from '../menus/strings';
 import { VersionsPanel } from '../VersionsPanel';
 
-// The Version history panel of the people round (docs/PEOPLE.md 3.2, 3.7, 3.19, 3.23, 3.24):
+// The Version history panel of the people round (docs/archive/rounds/PEOPLE.md 3.2, 3.7, 3.19, 3.23, 3.24):
 // Restore this version is the first row of a version's More menu and dispatches what the row's
 // button dispatches, absent for the current version; a verified author's row carries the badge
 // after the author word and a guest's the guest word; the stylesheet keeps the marks strip at its

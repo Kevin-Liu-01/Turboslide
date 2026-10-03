@@ -1,4 +1,4 @@
-// The brand kit's override stylesheet (docs/PRODUCT.md 4.1, 8.3; ported from round five's test
+// The brand kit's override stylesheet (docs/archive/rounds/PRODUCT.md 4.1, 8.3; ported from round five's test
 // and re pointed at `deck.brand`): an empty record emits an empty sheet, each role redefines its
 // token under the appearance's selector, the derived tokens follow an edited text colour, the
 // slots draw the default, none and a picture (stage.ts frameBandOf and slide.ts titleMarkSlot),
@@ -162,7 +162,7 @@ describe('themeCss', () => {
     );
     expect(rules[0]?.declarations['--text']).toBe("'Roboto', 'Helvetica Neue', Arial, sans-serif");
     expect(fontStack('jetbrains-mono')).toContain('monospace');
-    // the sheet's own stack with the metric matched fallback second (docs/FEATURES.md 3.1 item 3)
+    // the sheet's own stack with the metric matched fallback second (docs/archive/rounds/FEATURES.md 3.1 item 3)
     expect(fontStack('inter')).toBe(
       "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif",
     );
@@ -172,7 +172,7 @@ describe('themeCss', () => {
     expect(fontVariablesRule(['roboto'])).toContain(`--ts-font-roboto: ${fontStack('roboto')};`);
   });
 
-  it('writes --display-features beside the display face: Inter keeps cv11 and ss01, another family reads normal (docs/FEATURES.md 3.1 item 5)', () => {
+  it('writes --display-features beside the display face: Inter keeps cv11 and ss01, another family reads normal (docs/archive/rounds/FEATURES.md 3.1 item 5)', () => {
     const fraunces = parseCss(themeCss(deck({ fonts: { display: 'fraunces' } })));
     expect(fraunces[0]?.declarations['--display']).toBe(fontStack('fraunces'));
     expect(fraunces[0]?.declarations['--display-features']).toBe('normal');
@@ -198,7 +198,7 @@ describe('themeCss', () => {
     expect(html).toContain(`--display: ${fontStack('fraunces')}`);
   });
 
-  it('emits the block declarations of a family and of tabular figures (docs/FEATURES.md 3.1 items 4 and 5)', () => {
+  it('emits the block declarations of a family and of tabular figures (docs/archive/rounds/FEATURES.md 3.1 items 4 and 5)', () => {
     // a block in another family drops the sheet's display features; Inter and an absent family keep them
     expect(typographyDeclarations({ family: 'playfair-display' })).toEqual([
       'font-family:var(--ts-font-playfair-display, inherit)',
@@ -290,7 +290,7 @@ describe('the slots', () => {
     expect(picture.counterFormat).toBe('Slide n');
     const html = frameBandHtml(picture);
     /* the kit's band carries the class the theme sheet's override reads (the features round,
-       docs/FEATURES.md 4.8): without it the export's document hid the footer logo */
+       docs/archive/rounds/FEATURES.md 4.8): without it the export's document hid the footer logo */
     expect(html).toContain('class="wordmark ts-kit-wordmark pos-bottom-right is-picture"');
     expect(html).toContain('<img src="decks/acme/assets/acme-mark.png" width="36" height="18"');
     expect(html).toContain('<div class="ts-kit-footer" aria-hidden="true">Confidential</div>');

@@ -263,7 +263,7 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     const time = fakeClock();
     const a = instance(client, time.now, { pushSpacingMs: 60_000 });
     const b = instance(client, time.now);
-    // a's row of C1 landed (a join pushes at once, docs/POLISH.md item 110), so the spacing
+    // a's row of C1 landed (a join pushes at once, docs/archive/rounds/POLISH.md item 110), so the spacing
     // holds a's next push of it
     await a.presence.set(DECK, C1, row(C1, 1, 'Titanium 471'), TTL);
     await a.presence.flush(DECK);
@@ -341,7 +341,7 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect(refreshed.rows.get(C1)?.expiresAt).toBe(time.now() + 30_000);
   });
 
-  it('pushes an idle tab at the quiet heartbeat of 10 s every 20 s, three pushes and nine puts a minute, and the timer pushes a deferred row only once the heartbeats stop (docs/SYNC.md 4.5; cost.editor-idle.calls; sync pass 1 F5)', async () => {
+  it('pushes an idle tab at the quiet heartbeat of 10 s every 20 s, three pushes and nine puts a minute, and the timer pushes a deferred row only once the heartbeats stop (docs/archive/rounds/SYNC.md 4.5; cost.editor-idle.calls; sync pass 1 F5)', async () => {
     expect(PRESENCE_REFRESH_TIMER_MS).toBe(5000);
     // after the heartbeat the quiet cadence lands with the least life left (15 s of 30 minus 10 s)
     expect(PRESENCE_REFRESH_TIMER_MS).toBeLessThanOrEqual(PRESENCE_SHARED_TTL_MS / 2 - 10_000);

@@ -22,7 +22,7 @@ import {
   runsOfBlock,
 } from './lib';
 
-// The documents, the spec rows (docs/RETURN.md 2.5, section 5 `charts.data.paste-rows` with the
+// The documents, the spec rows (docs/archive/rounds/RETURN.md 2.5, section 5 `charts.data.paste-rows` with the
 // driver core/documents.spec.ts): the clipboard paste of tab separated rows into the chart's data
 // grid, which the walk probe cannot drive in one tab (a paste event the grid handles,
 // inspector/chart.tsx `onPaste`). The chart is placed through the window API as a setup write;
@@ -136,7 +136,7 @@ test(title('charts.data.paste-rows'), async () => {
   if (switched) await menuPath(page, 'tools', 'tools.advancedTools');
 });
 
-/** The tab separated rows of docs/FEATURES.md 2.3 item 5: a header row and two rows of numbers. */
+/** The tab separated rows of docs/archive/rounds/FEATURES.md 2.3 item 5: a header row and two rows of numbers. */
 const TSV = ['Region\tQ1\tQ2', 'East\t120\t140', 'West\t80\t95'].join('\n');
 /** Dispatches a paste of text on the element in focus (or the stage), the clipboard event built in the page. */
 async function pasteText(p: Page, text: string): Promise<void> {
@@ -201,7 +201,7 @@ test(title('tables.paste.tsv-makes-table'), async () => {
   });
   expect(
     table,
-    `a table is inserted (the paste made ${other.join(', ') || 'nothing else'}; docs/FEATURES.md 2.3 item 5, B3)`,
+    `a table is inserted (the paste made ${other.join(', ') || 'nothing else'}; docs/archive/rounds/FEATURES.md 2.3 item 5, B3)`,
   ).not.toBeNull();
   const block = table!.block as unknown as TableBlock;
   expect(block.columns.length, 'three columns').toBe(3);
@@ -281,7 +281,7 @@ test(title('tables.paste.into-cell-spreads'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.7 items 91, 92 and 95, 5.1 `versions.*` and
+// the polish round (docs/archive/rounds/POLISH.md 2.7 items 91, 92 and 95, 5.1 `versions.*` and
 // `comments.marker.one-per-anchor`): the versions panel's rows, the Last edit words inline, one
 // comment marker per anchor.
 
@@ -485,10 +485,10 @@ test(title('comments.marker.one-per-anchor'), async () => {
 
 coverage(import.meta.filename, [
   'charts.data.paste-rows',
-  /* the features round, ship one (docs/FEATURES.md 2.3 item 5) */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 5) */
   'tables.paste.tsv-makes-table',
   'tables.paste.into-cell-spreads',
-  /* the polish round (docs/POLISH.md 2.7 items 91, 92 and 95) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.7 items 91, 92 and 95) */
   'versions.panel.rows-read-clean',
   'versions.title-row.last-edit-inline',
   'comments.marker.one-per-anchor',

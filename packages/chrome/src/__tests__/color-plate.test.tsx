@@ -36,7 +36,7 @@ function plate(onClose: () => void, onPick: (value: string) => void = () => unde
 }
 
 describe('ColorPlate', () => {
-  it('focuses the first swatch on mount, the brand kit’s Text swatch (docs/PRODUCT.md 4.1)', () => {
+  it('focuses the first swatch on mount, the brand kit’s Text swatch (docs/archive/rounds/PRODUCT.md 4.1)', () => {
     const first = plate(() => undefined);
     const { container } = render(first.node);
     const text = container.querySelector('[data-control="toolbar.fillColor.kit.text"]');

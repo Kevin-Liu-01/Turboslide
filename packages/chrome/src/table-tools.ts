@@ -31,9 +31,9 @@ import type { MenuActionId } from './menus/model';
  * be made says why in a sentence a sales user reads in the snackbar. Also here: the cell walk of
  * Tab and Shift+Tab across merged cells (`nextCell`), the range arithmetic the sections share, the
  * facts the menu context reads (`isMergedAnchor`), and the table's own controls of the objects
- * round (docs/OBJECTS.md 3.3 item 4): the range a row or column head names (`headRange`), the
+ * round (docs/archive/rounds/OBJECTS.md 3.3 item 4): the range a row or column head names (`headRange`), the
  * header row toggle (`toggleHeader`) and the one commit of the edge "+" (`edgeInsert`, which
- * since the polish round keeps the table inside the content box, docs/POLISH.md 2.2 item 9); and
+ * since the polish round keeps the table inside the content box, docs/archive/rounds/POLISH.md 2.2 item 9); and
  * the cells' own alignment a range or a session writes (`cellsWithAlign`, item 10). No React,
  * no DOM.
  */
@@ -51,7 +51,7 @@ export type TableCommandId =
   | 'cellFill'
   | 'cellBorder'
   | 'tableBorder'
-  /** the Header row check of the Table section and the row head's menu (docs/OBJECTS.md 3.3 items 4 and 6) */
+  /** the Header row check of the Table section and the row head's menu (docs/archive/rounds/OBJECTS.md 3.3 items 4 and 6) */
   | 'toggleHeader';
 
 export type TablePlan =
@@ -376,7 +376,7 @@ export function tableCommandOfItem(itemId: string): TableCommandId | null {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The header row, the heads and the edge "+" (docs/OBJECTS.md 3.3 items 4 and 6)
+// The header row, the heads and the edge "+" (docs/archive/rounds/OBJECTS.md 3.3 items 4 and 6)
 
 /** True while the table's first row is its header (`rows[0].header`). */
 export function isHeaderRow(block: Pick<TableBlock, 'rows'>): boolean {
@@ -399,7 +399,7 @@ export type HeadAxis = 'column' | 'row';
 
 /**
  * The range a row or column head names (the band above column `index`, or left of row `index`;
- * docs/OBJECTS.md 3.3 item 4): every cell of that column or row, in the shell's `cells` words,
+ * docs/archive/rounds/OBJECTS.md 3.3 item 4): every cell of that column or row, in the shell's `cells` words,
  * clamped to the grid; null off the grid or on an empty table.
  */
 export function headRange(
@@ -439,8 +439,8 @@ export const CONTENT_EDGES: EdgeBounds = {
 };
 
 /**
- * The one commit the edge "+" makes (docs/OBJECTS.md 3.3 item 4; the row
- * `tables.edge.add-row-column`: "the widths of the others hold"; docs/POLISH.md 2.2 item 9, the
+ * The one commit the edge "+" makes (docs/archive/rounds/OBJECTS.md 3.3 item 4; the row
+ * `tables.edge.add-row-column`: "the widths of the others hold"; docs/archive/rounds/POLISH.md 2.2 item 9, the
  * row `tables.edge.stays-inside-sheet`): a column right of the last one as wide as the last
  * column drawn (`size` px), the table's `pos.w` grown by it, so every other column keeps its
  * width; or a row under the last one, `pos.h` grown by the last row's drawn height. Every column
@@ -550,7 +550,7 @@ function spanAndCellWrites(
  * True when the range covers whole columns (every row of each column): the range a column head
  * names, or a drag down a column. Alignment on such a range keeps writing the column
  * (`columns[].align`), so a column's setting stays one field; on any other range or on the
- * caret's cell it writes the cells (docs/POLISH.md 2.2 item 10).
+ * caret's cell it writes the cells (docs/archive/rounds/POLISH.md 2.2 item 10).
  */
 export function rangeIsWholeColumns(block: Pick<TableBlock, 'rows'>, range: CellRange): boolean {
   return (
@@ -564,7 +564,7 @@ export function rangeIsWholeColumns(block: Pick<TableBlock, 'rows'>, range: Cell
  * style is then empty dropped; `undefined` when no cell keeps a style, so the write removes the
  * field. `null` clears the cells' own alignment and lets the column's show again. The alignment
  * rows of the toolbar tail and Format > Align write this on a range or a session
- * (docs/POLISH.md 2.2 item 10, the row `tables.range.align-cells-only`), and the renderer reads
+ * (docs/archive/rounds/POLISH.md 2.2 item 10, the row `tables.range.align-cells-only`), and the renderer reads
  * a cell's `align` before its column's.
  */
 export function cellsWithAlign(

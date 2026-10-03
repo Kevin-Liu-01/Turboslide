@@ -43,7 +43,7 @@ describe('InterVariable', () => {
     expect(inlined).toContain('font-style: italic;');
   });
 
-  it('is the italic file of the same v4.1 release, byte for byte, and its name table says so (docs/FEATURES.md 3.1 item 1)', () => {
+  it('is the italic file of the same v4.1 release, byte for byte, and its name table says so (docs/archive/rounds/FEATURES.md 3.1 item 1)', () => {
     const bytes = interItalicBytes();
     expect(bytes.byteLength).toBe(INTER_ITALIC.bytes);
     expect(bytes.byteLength).toBe(387976);
@@ -74,7 +74,7 @@ describe('InterVariable', () => {
     expect(INTER_ITALIC.version).toBe('4.001');
   });
 
-  it('names the release tag v4.1 in both release URLs, both licence URLs and fonts.json (docs/FEATURES.md 3.1 items 1 and 2)', () => {
+  it('names the release tag v4.1 in both release URLs, both licence URLs and fonts.json (docs/archive/rounds/FEATURES.md 3.1 items 1 and 2)', () => {
     const tag = 'https://github.com/rsms/inter/releases/tag/v4.1';
     expect(INTER_RELEASE).toBe(tag);
     expect(INTER.release).toBe(tag);

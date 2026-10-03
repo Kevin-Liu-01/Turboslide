@@ -28,7 +28,7 @@ import './-access-page.css';
  * SignInDialog reads the editor shell's context and cannot mount outside an editor). A dash
  * prefixed file under routes/ is not a route (the convention of -edit-search.ts).
  *
- * The product round (docs/PRODUCT.md 3.3; audit-interface 33): the page leads with the links a
+ * The product round (docs/archive/rounds/PRODUCT.md 3.3; audit-interface 33): the page leads with the links a
  * stranger can use and hides the request form while the deployment has no sign in provider,
  * which it learns from the access route's `authorize` field after hydration (`GET
  * /api/access/<id>` names the mode whatever the deck's state); the server's HTML keeps the form,
@@ -93,7 +93,7 @@ export function AccessPage({ deckId }: { deckId: string }) {
         linkComponent={RouterLinkSlot}
         signIn={
           canSignIn ? (
-            /* one sentence with the link in ink (docs/POLISH.md item 98; audit-pages item 35) */
+            /* one sentence with the link in ink (docs/archive/rounds/POLISH.md item 98; audit-pages item 35) */
             <p className="ts-access-signin-line" data-control="access.signin.line">
               If you were invited by email, sign in with that address from{' '}
               <Link

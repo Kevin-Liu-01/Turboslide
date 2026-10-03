@@ -88,7 +88,7 @@ export const FOLLOW_SETTLE_MS: Readonly<Record<ScrollBehavior, ReadonlyArray<num
  * view is centered in the list; every later selection moves the minimum
  * distance.
  *
- * The polish round (docs/POLISH.md item 107; the row slides.filmstrip.follows-every-move): a
+ * The polish round (docs/archive/rounds/POLISH.md item 107; the row slides.filmstrip.follows-every-move): a
  * move farther than the list's own height (End, Home, a deep click, a duplicate far away) is an
  * instant jump, not a smooth scroll: Chromium animated a 4,000 px smooth scroll for a second, a
  * Home pressed inside that second moved nothing, and a target read once before the jump landed
@@ -474,7 +474,7 @@ export function Filmstrip({
   const readyRef = useRef(ready ?? true);
   readyRef.current = ready ?? true;
   const [follow] = useState(() => makeFollow(listRef, readyRef));
-  /* the belt under the ref callback (docs/POLISH.md item 107): End, Home, a duplicate and a
+  /* the belt under the ref callback (docs/archive/rounds/POLISH.md item 107): End, Home, a duplicate and a
      window API write left the current card out of view when the callback ran before the row's
      box settled, so the current row is followed once more a frame after it changes */
   useEffect(() => {

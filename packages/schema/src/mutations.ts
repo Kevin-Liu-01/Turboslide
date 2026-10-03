@@ -64,7 +64,7 @@ export type Mutation =
    * concurrent edits in; the transform splits a concurrent mark around a pinned insertion).
    * Transformed at admission; the inverse is a splice.
    *
-   * The target is a block's Text, or a slide field (the sync round, docs/SYNC.md 3.4): `blockId`
+   * The target is a block's Text, or a slide field (the sync round, docs/archive/rounds/SYNC.md 3.4): `blockId`
    * `heading` or `lead` on a title slide and `big` on a statement slide name the field, with
    * `path` the field's own pointer (`/heading`, `/lead`, `/big`; `slideFieldPath`). The three
    * fields travelled as `slide.set` of the whole value before, so two people typing into a cover
@@ -111,7 +111,7 @@ export type TextMarkEdit =
 export type MutationOp = Mutation['op'];
 
 /**
- * The slide fields a person types into that are not blocks (docs/SYNC.md 3.4): the heading and
+ * The slide fields a person types into that are not blocks (docs/archive/rounds/SYNC.md 3.4): the heading and
  * the lead of a title slide, the big text of a statement slide. A text op names one with
  * `blockId` the field and `path` the field's pointer.
  */
@@ -189,7 +189,7 @@ export type Author = {
   principalId?: string;
 };
 /**
- * Who first sent a write, so a record names its origin (docs/SYNC.md 3.2, invariant 3): the
+ * Who first sent a write, so a record names its origin (docs/archive/rounds/SYNC.md 3.2, invariant 3): the
  * server issued client id of the tab and the op ids the write folded, in the order the client
  * posted them. The blob channel fills it from the POST's entries and the store carries it onto
  * the version record (`VersionRecord.origin`, packages/store), so a resend of the same op ids on
@@ -321,7 +321,7 @@ export const authorSchema = z.strictObject({
 /**
  * A write's origin as a record stores it (`WriteOrigin`): the client id and at least one op id,
  * each bounded the way the room protocol bounds them. The store's tolerant record parser extends
- * `versionSchema` with this as an optional field (docs/SYNC.md 3.2, deployment N tolerates it
+ * `versionSchema` with this as an optional field (docs/archive/rounds/SYNC.md 3.2, deployment N tolerates it
  * before N plus 1 writes it); `writeSchema` below stays closed to it on purpose, since an agent's
  * `deck.write` never carries one.
  */

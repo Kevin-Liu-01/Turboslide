@@ -611,7 +611,7 @@ async function readAccountSession(
   if (found === null) return null;
   const account = await accountFacts(runtime, found.user.id);
   if (account === null || account.profile.deletedAt !== null) return null;
-  /* the verified address and the aliased anonymous ids (docs/PEOPLE.md 3.6; b1.md R3), as the
+  /* the verified address and the aliased anonymous ids (docs/archive/rounds/PEOPLE.md 3.6; b1.md R3), as the
      room's session branch carries them (room.ts sessionIdentity): a pending grant by email admits
      the invitee and a deck made before the sign in keeps its creator as owner */
   const aliases = await runtime.aliases.aliasesOf(account.userId).catch(() => []);

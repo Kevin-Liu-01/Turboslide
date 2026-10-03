@@ -20,7 +20,7 @@ import type { VersionRecord, WriteOrigin } from './store.ts';
 export const VERSIONS_DIR = 'versions';
 
 /**
- * Whether a committed write's record stores its `origin` (docs/SYNC.md 3.2, the two deployment
+ * Whether a committed write's record stores its `origin` (docs/archive/rounds/SYNC.md 3.2, the two deployment
  * landing). The parser below tolerates the field whatever this reads, so deployment N ships with
  * `false` (every instance reads a record that names its origin and writes none), and N plus 1
  * flips it to `true` once N is the deployment an Instant Rollback lands on; a rollback of N plus
@@ -77,7 +77,7 @@ export const versionRecordSchema = versionSchema.extend({
   // the operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1): optional, so
   // every record written outside the room and before the round still parses
   ops: opsRangeSchema,
-  // the write's origin (docs/SYNC.md 3.2): optional, tolerated one deployment before it is
+  // the write's origin (docs/archive/rounds/SYNC.md 3.2): optional, tolerated one deployment before it is
   // written (RECORD_ORIGIN_WRITES), so a reader on the older deployment never stops on a record
   // the newer one wrote; a record without it parses as before the round
   origin: writeOriginSchema.optional(),
@@ -91,7 +91,7 @@ function asRecord(parsed: ReturnType<typeof versionRecordSchema.parse>): Version
 
 /**
  * How many record numbers are missing from a log: every n between the first record and the last
- * that no record carries (docs/SYNC.md 3.6, the hole's two rules; `deck.info.counts.holes`). A
+ * that no record carries (docs/archive/rounds/SYNC.md 3.6, the hole's two rules; `deck.info.counts.holes`). A
  * hole is a number a writer claimed whose commit landed after its record was released, or a
  * record a store lost; the reader's walk continues past it and the tabs above it reload once.
  * Version history's restore range ends at a hole (`assertContiguous`). Pure.
@@ -110,7 +110,7 @@ export function logHoles(records: ReadonlyArray<VersionRecord>): number {
 }
 
 /**
- * The newest record above `baseRevision` whose origin names one of `opIds` (docs/SYNC.md 3.2,
+ * The newest record above `baseRevision` whose origin names one of `opIds` (docs/archive/rounds/SYNC.md 3.2,
  * invariant 3): the first admission of a POST whose answer was lost, found by key rather than by
  * the byte equality of its mutations. Undefined when no record above the base names them, which
  * is every first attempt. Pure; the callers bound the records to the ones above the POST's base.

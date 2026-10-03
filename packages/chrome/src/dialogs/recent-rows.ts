@@ -1,4 +1,4 @@
-// This browser's own decks in the Open and Import slides dialogs (docs/POLISH.md item 75; B5's
+// This browser's own decks in the Open and Import slides dialogs (docs/archive/rounds/POLISH.md item 75; B5's
 // R29 to B1, landed by the ship step's third attempt): the Recent mirror's rows draw the moment
 // a dialog opens, and the store's listing replaces them when it lands, with any mirror row the
 // listing does not hold yet (a deck made a moment ago on the blob tier) folded in above it.

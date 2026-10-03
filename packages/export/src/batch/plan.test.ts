@@ -244,7 +244,7 @@ describe('the dialog’s estimate', () => {
   });
 });
 
-describe('the file names a download saves as (docs/PRODUCT.md section 2 rank 7)', () => {
+describe('the file names a download saves as (docs/archive/rounds/PRODUCT.md section 2 rank 7)', () => {
   it('names the file after the title, never the id, the appearance or the default mode', () => {
     expect(
       exportFileName({ title: 'GT pitch for Acme', deckId: 'gt-pitch-9x2k', format: 'pdf' }),

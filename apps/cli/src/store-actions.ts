@@ -7,7 +7,7 @@
 // lease throws ConflictError with the current document (409); a mutation the reducer rejects
 // throws TypeError (400); an unknown version throws RangeError (404).
 //
-// The Google Slides parity round two (docs/gslides-parity/SPEC-2.md sections 1, 3): every canvas
+// The Google Slides parity round two (docs/archive/gslides-parity/SPEC-2.md sections 1, 3): every canvas
 // write on a slide that is not on the freeform layout converts it first through `withCanvas`, the
 // measured conversion of @turboslide/schema/canvas over `deps.measureCanvas` (bound to headless
 // Chromium in the CLI and the MCP server, to the render worker facade in the studio), and travels
@@ -179,7 +179,7 @@ export type StoreActionDeps = {
    */
   materialize?: Materializer;
   /**
-   * The suffix a browser tab's minted slide ids carry (docs/POLISH.md item 99): two tabs that
+   * The suffix a browser tab's minted slide ids carry (docs/archive/rounds/POLISH.md item 99): two tabs that
    * press New slide within the propagation window mint `<layout>-<n>` from their own copies and
    * the second is refused as a duplicate; with a suffix drawn from the client id the ids never
    * meet. The CLI and the agents mint the plain form.
@@ -415,7 +415,7 @@ export function checkSlideMutations(slideId: string, mutations: ReadonlyArray<Mu
           : undefined;
     if (target === undefined) {
       /* the brand kit's slots may ride with the slide's own mutations (the features round,
-         docs/FEATURES.md 4.4: a logo placed on the slide and set as the kit's mark and footer in
+         docs/archive/rounds/FEATURES.md 4.4: a logo placed on the slide and set as the kit's mark and footer in
          one write, so one Undo takes both back); a kit write alone keeps its own action */
       if (onSlide && isKitWrite(mutation)) return;
       throw new TypeError(
@@ -816,7 +816,7 @@ type Positioned = { block: Block; pos: Position };
 function freeformBlocks(slide: Slide): Positioned[] {
   if (!isCanvasSlide(slide)) {
     throw new TypeError(
-      `Slide "${slide.id}" is not arranged by hand yet; slide.toCanvas converts it (docs/gslides-parity/SPEC-2.md 1.6)`,
+      `Slide "${slide.id}" is not arranged by hand yet; slide.toCanvas converts it (docs/archive/gslides-parity/SPEC-2.md 1.6)`,
     );
   }
   return (slide.slots.main ?? []).flatMap((block) =>
@@ -862,7 +862,7 @@ export async function withCanvas(
 async function measureOne(deps: StoreActionDeps, deck: Deck, slide: Slide): Promise<CanvasBoxes> {
   if (deps.measureCanvas === undefined) {
     throw new TypeError(
-      `Slide "${slide.id}" is not arranged by hand yet and this transport has no measurer to convert it; run the write through the turboslide CLI or the studio, or slide.toCanvas first (docs/gslides-parity/SPEC-2.md 1.3)`,
+      `Slide "${slide.id}" is not arranged by hand yet and this transport has no measurer to convert it; run the write through the turboslide CLI or the studio, or slide.toCanvas first (docs/archive/gslides-parity/SPEC-2.md 1.3)`,
     );
   }
   const measured = await deps.measureCanvas(deck, [slide]);
@@ -1079,7 +1079,7 @@ export async function slideSetLayout(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The Google Slides parity round (docs/gslides-parity/SPEC.md 7.5): slide.new, slide.duplicate,
+// The Google Slides parity round (docs/archive/gslides-parity/SPEC.md 7.5): slide.new, slide.duplicate,
 // slide.skip, slide.applyLayout, slide.import, block.duplicate and text.replaceAll as functions
 // from the action's input to its output, each one Write through commit; export.text as a pure
 // read. A Section header (the opener kind) is first in its section by the validator's rule, so
@@ -1435,7 +1435,7 @@ export function slideAssetIds(slide: Slide): string[] {
 
 /**
  * The files an asset record names under the deck directory, once each: the twins, the vector
- * files (docs/VECTOR.md 4.1 through `vectorOf`: an svg picture's sanitized source, a tinted logo's
+ * files (docs/archive/rounds/VECTOR.md 4.1 through `vectorOf`: an svg picture's sanitized source, a tinted logo's
  * two files, a ship one logo's untinted `sourceFile`) and the source file. What slide.import
  * copies; without the vector files an imported svg picture drew its PNG twin.
  */
@@ -1528,7 +1528,7 @@ export async function blockDuplicate(
   const takenGroups = new Set(
     placed.flatMap(({ block }) => (block.pos?.group !== undefined ? [block.pos.group] : [])),
   );
-  /* the objects round (docs/OBJECTS.md 4.2 item 3; objects/build/b3.md request 2): a member copied
+  /* the objects round (docs/archive/rounds/OBJECTS.md 4.2 item 3; objects/build/b3.md request 2): a member copied
      without the rest of its group keeps the tag, so Cmd+D on an entered diagram step lands the copy
      inside the diagram; a group copied whole takes the fresh tag as before */
   const kept = groupsKeptOnDuplicate(
@@ -1591,7 +1591,7 @@ export type TextTarget = { text: string; write: (value: string) => Mutation };
  * Every text Find and replace, the tailoring pass and the assist read on a slide, in document
  * order: the fixed kinds' fields, every block text (nested blocks addressed through their top
  * level block), then the notes. Exported for the assist's server module, which addresses the
- * same texts the product's own replace does (docs/PRODUCT.md 6.2).
+ * same texts the product's own replace does (docs/archive/rounds/PRODUCT.md 6.2).
  */
 export function textTargets(slide: Slide): TextTarget[] {
   const out: TextTarget[] = [];
@@ -1725,7 +1725,7 @@ export async function textReplaceAll(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The tailoring pass (docs/PRODUCT.md section 5; audit-gaps 16; research 07): rename the customer,
+// The tailoring pass (docs/archive/rounds/PRODUCT.md section 5; audit-gaps 16; research 07): rename the customer,
 // swap the logo, skip the internal slides, as one write and one undo step, deterministic and
 // without a model call. The Tailor dialog, the CLI (`turboslide tailor`), MCP (`deck_tailor`) and
 // HTTP run this one function; the Assist panel's first starter card opens the dialog.
@@ -1824,7 +1824,7 @@ function pictureTargets(slide: Slide): { assetId: string; write: (assetId: strin
  * order through the same replace Find and replace runs (never inside a link URL or the GT mark),
  * the logo over every picture whose asset's alt text names the old customer, and a skip on each
  * named slide that is not skipped yet. A logo without `replaceAlt` is refused until the brand kit
- * gives the deck a logo slot (docs/PRODUCT.md 4.1, B5a), with the reason in the sentence.
+ * gives the deck a logo slot (docs/archive/rounds/PRODUCT.md 4.1, B5a), with the reason in the sentence.
  */
 export function tailorPlan(document: DeckDocument, input: DeckTailorInput): TailorPlan {
   const mutations: Mutation[] = [];
@@ -2024,7 +2024,7 @@ function blockLines(block: Block): string[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The Google Slides parity round two (docs/gslides-parity/SPEC-2.md section 3): the 36 actions
+// The Google Slides parity round two (docs/archive/gslides-parity/SPEC-2.md section 3): the 36 actions
 // as functions from the action's input to its output, each one Write through commit. A canvas
 // write converts a grammar slide first (withCanvas); a move, rotate or flip carries the attached
 // connectors (withFollow).
@@ -2282,7 +2282,7 @@ export async function slideToCanvas(
   if (pending.length > 0) {
     if (deps.measureCanvas === undefined)
       throw new TypeError(
-        'slide.toCanvas needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/gslides-parity/SPEC-2.md 1.3)',
+        'slide.toCanvas needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/archive/gslides-parity/SPEC-2.md 1.3)',
       );
     // one sheet page for the call (SPEC-2 0.104)
     measured = await deps.measureCanvas(current.deck, pending);
@@ -2697,7 +2697,7 @@ export async function blockAutofit(
   if (input.apply === true && input.autofit !== 'none') {
     if (deps.measureFit === undefined)
       throw new TypeError(
-        'block.autofit with apply needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/gslides-parity/SPEC-2.md 0.64)',
+        'block.autofit with apply needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/archive/gslides-parity/SPEC-2.md 0.64)',
       );
     const measured = (await deps.measureFit(current.deck, slide))[input.blockId];
     const pos = block.pos;
@@ -2726,7 +2726,7 @@ export async function blockAutofit(
       }
     } else if (input.autofit === 'grow' && pos === undefined) {
       throw new TypeError(
-        `Block "${input.blockId}" has no position box; Resize shape to fit text works on an object of the canvas (docs/gslides-parity/SPEC-2.md 0.41)`,
+        `Block "${input.blockId}" has no position box; Resize shape to fit text works on an object of the canvas (docs/archive/gslides-parity/SPEC-2.md 0.41)`,
       );
     }
   }
@@ -2932,7 +2932,7 @@ export function listTypographyOf(block: Block): Typography | undefined {
 /**
  * A paragraph, heading or text box as a list block, one item per paragraph (the round one Bulleted
  * list; a heading since the polish round's fix round 2, so the cover title takes a list once the
- * slide has converted, docs/POLISH.md 2.3 item 18). A heading's list keeps the heading's look
+ * slide has converted, docs/archive/rounds/POLISH.md 2.3 item 18). A heading's list keeps the heading's look
  * (`listTypographyOf`): the level's size, weight, tracking and leading under the field's own.
  */
 function listBlockFrom(block: Block): Block {
@@ -3436,7 +3436,7 @@ export async function diagramInsert(
 ): Promise<SlideResult & { blockIds: string[]; group: string }> {
   if (deps.diagrams === undefined)
     throw new TypeError(
-      'diagram.insert needs the diagram templates, which this transport does not carry yet (docs/gslides-parity/SPEC-2.md 2.8.3)',
+      'diagram.insert needs the diagram templates, which this transport does not carry yet (docs/archive/gslides-parity/SPEC-2.md 2.8.3)',
     );
   const current = (await deps.store.read()).document;
   const canvas = await withCanvas(deps, current, requireSlide(current, input.slideId));

@@ -36,7 +36,7 @@ import type { Text } from './copy';
 import { formatCount } from './facts';
 import type { HomeFacts } from './facts';
 
-// The copy lints of the /home page (docs/POLISH.md 3.1 and 3.7; the round four rules of
+// The copy lints of the /home page (docs/archive/rounds/POLISH.md 3.1 and 3.7; the round four rules of
 // gslides-parity SPEC-4 2.2 stand under them): every string of copy.ts through the theme's
 // copy rules (no em dash, no exclamation mark, no metaphor word, no "X, not Y" pair, sentence
 // case headings without a trailing period, Title Case buttons), the default view words of the

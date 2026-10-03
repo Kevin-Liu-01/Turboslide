@@ -1,4 +1,4 @@
-// The chart block's type scale and label fit (the polish round, docs/POLISH.md item 31;
+// The chart block's type scale and label fit (the polish round, docs/archive/rounds/POLISH.md item 31;
 // audit-objects item 14: at 240 by 140 the category labels read "CateCategory 3" on the sheet,
 // in the thumbnail and in the PDF), and the svg's refusal of the browser's text selection (item
 // 29). The full size markup is pinned by the render snapshots; these tests read the small box.

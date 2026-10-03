@@ -7,7 +7,7 @@
 // `block.insert` mutations onto the current slide, at the source box on a freeform slide and 16 px
 // right and down when the source is the same slide. Paint format (SPEC 3.1 row 6) is the second
 // clipboard here: the look of a block (typography, colour, fill, stroke, stroke width) copied once
-// and applied as one `block.set` per field the target takes. The vector round (docs/VECTOR.md
+// and applied as one `block.set` per field the target takes. The vector round (docs/archive/rounds/VECTOR.md
 // 4.3, 4.5) adds the svg forms: a copy of one svg picture writes its markup as `text/plain` and
 // the envelope inside a `text/html` comment (`encodeClipboardHtml`, `decodeClipboardHtml`), and a
 // paste reads svg markup off `text/plain` or `text/html` (`svgMarkupOf`) into a file for the
@@ -61,7 +61,7 @@ export function decodeClipboard(text: string): ClipboardPayload | null {
 }
 
 /**
- * The envelope as a `text/html` comment before other markup (docs/VECTOR.md 4.5): what a copy of
+ * The envelope as a `text/html` comment before other markup (docs/archive/rounds/VECTOR.md 4.5): what a copy of
  * an svg picture writes beside the markup as `text/plain`, so the product's own paste across
  * tabs still finds the payload while Figma, a text editor and a browser read the markup.
  */
@@ -113,7 +113,7 @@ export function svgMarkupOfText(text: string): string | null {
 }
 
 /**
- * The svg markup of a paste (docs/VECTOR.md 4.3 item 4): the `text/plain` text when it is an svg
+ * The svg markup of a paste (docs/archive/rounds/VECTOR.md 4.3 item 4): the `text/plain` text when it is an svg
  * document, else the `text/html` text with the `<meta …>` prefix Chrome adds stripped; null for
  * anything else (a text that merely mentions `<svg>` included).
  */
@@ -162,7 +162,7 @@ export type ClipboardStore = {
   write: (payload: ClipboardPayload) => Promise<void>;
   /**
    * the in-page payload alone, with the text the copy event itself put on the system clipboard
-   * (an svg picture's markup, docs/VECTOR.md 4.5): no system write, so the event's text stands,
+   * (an svg picture's markup, docs/archive/rounds/VECTOR.md 4.5): no system write, so the event's text stands,
    * and `read` answers the payload while the system text is still that markup
    */
   note: (payload: ClipboardPayload, systemText: string) => void;

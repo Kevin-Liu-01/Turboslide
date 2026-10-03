@@ -11,7 +11,7 @@
 // last seq; `resync` reloads at a revision and rebases. Framework free, browser safe (no `node:`);
 // the transport is injected so the tests run it against fake-transport.ts.
 //
-// The sync and costs round (docs/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11): the client
+// The sync and costs round (docs/archive/rounds/SYNC.md 3.2, 3.10, 3.11 invariants 4, 10 and 11): the client
 // acknowledges by op id from the answer, from an echo's `covers` (the op ids a record folded,
 // channel.ts `Entry.covers`), from the replay and from the resync read's origins above its old
 // position; the byte match of `settleOwnEcho` stays as the fallback for a record without an
@@ -230,7 +230,7 @@ export const UNPLACEABLE_SENTENCE =
 export const BACKOFF_MAX_MS = 8000;
 /**
  * The longest the resend waits for the reopened stream's hello after the browser's `online`
- * event (docs/SYNC.md 3.7: the reopen's replay lands first, then the resend goes at the caught up
+ * event (docs/archive/rounds/SYNC.md 3.7: the reopen's replay lands first, then the resend goes at the caught up
  * base). A hello normally answers within a second; past this the pending ops post on the base the
  * tab has and the server transforms them (3.3), so a stream that hangs never holds a write.
  */
@@ -262,7 +262,7 @@ export const GAP_REOPEN_MS = 8000;
 /** How many recent entries `transformSince` can reach back over. */
 export const RECENT_ENTRIES = 2000;
 /**
- * How long after the last pointer, selection or slide move a tab counts as active (docs/SYNC.md
+ * How long after the last pointer, selection or slide move a tab counts as active (docs/archive/rounds/SYNC.md
  * 3.10): the heartbeat runs at PRESENCE_HEARTBEAT_MS inside this window and at
  * PRESENCE_HEARTBEAT_QUIET_MS after it, and a move brings it back at once.
  */
@@ -323,7 +323,7 @@ export type SyncStatus = {
   offline: boolean;
   /**
    * A write the client is sending again after a failed POST or a 5xx while the browser is
-   * online (docs/POLISH.md item 100): the title row's retry word is for this state alone, never
+   * online (docs/archive/rounds/POLISH.md item 100): the title row's retry word is for this state alone, never
    * for a refusal the card carries.
    */
   resending: boolean;
@@ -363,7 +363,7 @@ export type PersistedOffer = {
 };
 
 /**
- * One record above the tab's old position, as the resync read answers it (docs/SYNC.md 3.2,
+ * One record above the tab's old position, as the resync read answers it (docs/archive/rounds/SYNC.md 3.2,
  * invariant 10): the seq its commit made and the op ids it folded (`origin.opIds`), mutations
  * stripped. A pending op named here is acknowledged at `seq` and never re-sent.
  */
@@ -419,14 +419,14 @@ export type RoomClientOptions = {
   /**
    * The document at a revision the server named (a `resync`); null keeps the current one.
    * `since` is the tab's position before the resync, so the read can answer the origins of the
-   * records above it (`ResyncAnswer`; docs/SYNC.md 3.2) and the client drops the pending ops
+   * records above it (`ResyncAnswer`; docs/archive/rounds/SYNC.md 3.2) and the client drops the pending ops
    * those records name instead of re-sending them.
    */
   onResync?: (revision: number, since: number) => Promise<DeckDocument | ResyncAnswer | null>;
   /** a persisted queue from an earlier tab of this browser (SPEC-3 0.7) */
   onPersisted?: (offer: PersistedOffer) => void;
   /**
-   * Which of the given op ids the server's records already hold (docs/POLISH.md item 109): a
+   * Which of the given op ids the server's records already hold (docs/archive/rounds/POLISH.md item 109): a
    * queue saved before its acknowledgement was persisted offers nothing the server has; absent,
    * every unsaved op is offered.
    */
@@ -506,7 +506,7 @@ export function defaultTransform(
 /**
  * The whole Text rewrites a pending text op cannot survive (SPEC-3 3.5). A `slide.set` of a
  * title or statement slide's field (`/heading`, `/lead`, `/big`) rewrites the text run that
- * targets that field alone and no block's run (docs/SYNC.md 3.4, invariant 5); a `slide.set` of
+ * targets that field alone and no block's run (docs/archive/rounds/SYNC.md 3.4, invariant 5); a `slide.set` of
  * any other slide pointer rewrites every run on the slide, as the schema's own rule reads it
  * (transform.ts `rewritesText`), so the client never keeps an op the admission would refuse.
  */
@@ -544,7 +544,7 @@ export function rewritesText(against: Mutation, op: Mutation): boolean {
 }
 
 /**
- * The op ids a record's entry folded (channel.ts `Entry.covers`; docs/SYNC.md 3.2): the blob
+ * The op ids a record's entry folded (channel.ts `Entry.covers`; docs/archive/rounds/SYNC.md 3.2): the blob
  * channel emits them from the record's `origin` for every record written since the round, and
  * a record from before it carries none. Read structurally so an entry from an older server, or
  * a malformed field, covers nothing.
@@ -908,7 +908,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let streamBackoff = 0;
   let reopenTimer: unknown;
   /**
-   * The resend's hold after the browser's `online` event (docs/SYNC.md 3.7; the polish round's
+   * The resend's hold after the browser's `online` event (docs/archive/rounds/SYNC.md 3.7; the polish round's
    * sync fix round 3): the stream reopens at once and the pending ops wait for its hello, so the
    * replay of what landed while the browser was off transforms them before they go and the
    * resend carries the shifted offset at the caught up base. Released by the hello, by a reopen
@@ -978,7 +978,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let presenceTimer: unknown;
   let presenceDirty = false;
   let heartbeatTimer: unknown;
-  /** the last pointer, selection or slide move, for the heartbeat's cadence (docs/SYNC.md 3.10) */
+  /** the last pointer, selection or slide move, for the heartbeat's cadence (docs/archive/rounds/SYNC.md 3.10) */
   let lastMovedAt = now();
   /** whether the armed heartbeat is the quiet one, so a move can bring the cadence back */
   let heartbeatQuiet = false;
@@ -1136,7 +1136,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * The op ids of this tab that were acknowledged (from an answer, an echo's `covers`, the
    * replay or the resync read), the newest RECENT_ENTRIES of them: a record's echo whose every
    * op is here repeats content the document holds, whatever order the answer, the echo and the
-   * checkpoint frame arrived in (docs/SYNC.md 3.2, invariant 4).
+   * checkpoint frame arrived in (docs/archive/rounds/SYNC.md 3.2, invariant 4).
    */
   const settledOps = new Set<string>();
   const noteSettled = (opId: string): void => {
@@ -1196,7 +1196,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
-   * An echo that is the commit of one of this client's own POSTs, told by id (docs/SYNC.md 3.2,
+   * An echo that is the commit of one of this client's own POSTs, told by id (docs/archive/rounds/SYNC.md 3.2,
    * invariant 4): its `covers` names ops still pending here, so they are acknowledged at the
    * echo's seq, the server document takes the record's folded mutations once (unless it holds
    * that revision already, after a resync), and nothing is resent. The answer of the POST, when
@@ -1226,7 +1226,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * A store echo that is the commit of one of this client's own POSTs (in flight or lost), told
    * by content: its base at or above the POST's and its mutations the POST's fold, byte for
    * byte. The fallback for a record written without an origin (a server from before the sync
-   * round; docs/SYNC.md 3.2): a record that names its origin settles by id in `settleByCovers`
+   * round; docs/archive/rounds/SYNC.md 3.2): a record that names its origin settles by id in `settleByCovers`
    * and never here, so an equal fold from another tab is never taken for this tab's. The ops of
    * that POST still pending are acknowledged at the echo's seq, the server document takes the
    * echo once, and nothing is resent; the answer of the POST, when it comes, finds its ops
@@ -1270,7 +1270,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /**
    * An entry at or behind the position that names ops of this tab's (the answer of a resent
    * POST, which the server replays with the seq its first admission made, VERIFICATION C3-F1;
-   * the record's echo through `covers` after the answer settled the ops; docs/SYNC.md 3.2): the
+   * the record's echo through `covers` after the answer settled the ops; docs/archive/rounds/SYNC.md 3.2): the
    * ops it names are acknowledged and leave the pending set. The document holds their content
    * already, through the entry applied at that seq, the echo, or the resync that brought the
    * revision in, so nothing is applied again. Before this such an entry was dropped as a
@@ -1428,10 +1428,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const mutations = entry.mutations ?? [];
     const covers = coversOf(entry);
     // a record's echo whose every op this tab settled already (from the answer, an earlier echo
-    // or the resync read): its content is in the document, so it repeats nothing (docs/SYNC.md
+    // or the resync read): its content is in the document, so it repeats nothing (docs/archive/rounds/SYNC.md
     // 3.2; the position moved above)
     if (covers.length > 0 && covers.every((id) => settledOps.has(id))) return;
-    // the echo of this tab's own POST, told by the op ids the record folded (docs/SYNC.md 3.2)
+    // the echo of this tab's own POST, told by the op ids the record folded (docs/archive/rounds/SYNC.md 3.2)
     if (settleByCovers(entry)) return;
     // a store entry (the follower's copy of a record) that the document holds already is skipped
     if (isRecordEcho(entry) && entry.rev < server.deck.revision) return;
@@ -1567,7 +1567,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
-   * The resend waits for the reopened stream's hello (docs/SYNC.md 3.7): armed by the browser's
+   * The resend waits for the reopened stream's hello (docs/archive/rounds/SYNC.md 3.7): armed by the browser's
    * `online` event while the stream is down, released by the hello (onEvent), by a reopen that
    * failed (reopenStream) or by RECONNECT_HOLD_MAX_MS, whichever comes first.
    */
@@ -1613,7 +1613,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * Drains the contiguous entries buffered by seq, every sibling of a seq in arrival order: the
    * first moves the position and applies (a record's echo included, when it is what carries the
    * revision), the rest are taken at the position, so an echo buffered beside the answer's own
-   * entries above a gap never applies the batch a second time (docs/SYNC.md 3.2).
+   * entries above a gap never applies the batch a second time (docs/archive/rounds/SYNC.md 3.2).
    */
   const drain = (): void => {
     for (;;) {
@@ -1695,7 +1695,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
 
   /**
-   * The pending ops the resync read acknowledged (docs/SYNC.md 3.2, invariant 10): every op an
+   * The pending ops the resync read acknowledged (docs/archive/rounds/SYNC.md 3.2, invariant 10): every op an
    * origin above the old position names is settled at that record's seq and leaves the queue,
    * never re-sent. When the records did not reach the old position (`bounded`, or on the blob
    * tier a head more than REPLAY_MAX_ENTRIES above it, where the seq is the revision), an op
@@ -2315,7 +2315,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       : PRESENCE_HEARTBEAT_QUIET_MS;
 
   /**
-   * The heartbeat (docs/SYNC.md 3.10, audit-costs item 5): every 5 s while the pointer, the
+   * The heartbeat (docs/archive/rounds/SYNC.md 3.10, audit-costs item 5): every 5 s while the pointer, the
    * selection or the slide moved in the last 30 s, every 10 s when the tab is quiet; the wait is
    * chosen when each beat is armed, and a move while the quiet wait runs re-arms it at the
    * active cadence (`noteMoved`). The roster row's 30 s life and the server's refresh under 15 s
@@ -2410,7 +2410,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     offline = false;
     emitStatus();
     if (stopped) return;
-    // the reconnect's order is docs/SYNC.md 3.7's: the stream reopens at once (not on the
+    // the reconnect's order is docs/archive/rounds/SYNC.md 3.7's: the stream reopens at once (not on the
     // ladder's wait) and its replay lands first, then the resend goes at the caught up base with
     // the pending ops transformed past what landed while the browser was off. A flush at once
     // here sent the resend on the old base with the original offset and left the transform to
@@ -2524,7 +2524,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // the entries that landed after the op was recorded: every remote entry with a higher
       // position in the recent log, and none of the author's own (which the inverse already
       // knows). Own means this tab's: an entry under one of its client ids, or a record's echo
-      // whose `covers` name an op it minted (docs/SYNC.md invariant 11). A second tab of the
+      // whose `covers` name an op it minted (docs/archive/rounds/SYNC.md invariant 11). A second tab of the
       // same person carries its own client id, so its entries are remote here and the inverse
       // is moved past them, which is the right reading.
       const marker = recentMarkers.get(at);

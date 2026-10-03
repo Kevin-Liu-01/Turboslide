@@ -84,7 +84,7 @@ export type Entry = {
   at: string;
   /**
    * The op ids one blob tier record folded, in the order the client posted them (the sync round,
-   * docs/SYNC.md 3.2; `VersionRecord.origin`): a record's stream entry carries `opId: store:<n>`
+   * docs/archive/rounds/SYNC.md 3.2; `VersionRecord.origin`): a record's stream entry carries `opId: store:<n>`
    * and every client op id it covers here, so a tab acknowledges its own ops by id from the
    * echo, the replay and the answer's `between`, and undo skips the own echo by `clientId`. A
    * resent POST is answered with one synthesized entry per covered op id at the record's seq
@@ -95,7 +95,7 @@ export type Entry = {
   covers?: string[];
   /**
    * The history label an edit carries into Version history (the product round fix round;
-   * docs/PRODUCT.md 4.1 "Brand kit: Primary", 6.1 "Assist: <sentence>"): the checkpointer
+   * docs/archive/rounds/PRODUCT.md 4.1 "Brand kit: Primary", 6.1 "Assist: <sentence>"): the checkpointer
    * commits a noted entry as its own version record with this note, so the panel lists the row
    * by name. Absent on an ordinary edit, whose record's note stays '' (a named version is one
    * whose note is not empty, `@turboslide/store/store`).
@@ -211,7 +211,7 @@ export type RosterIdentity = {
   kind: 'human' | 'agent';
   role: Role;
   /**
-   * a verified person's address, for the tooltip (docs/PEOPLE.md 3.7; SPEC-3 4.8): never on the
+   * a verified person's address, for the tooltip (docs/archive/rounds/PEOPLE.md 3.7; SPEC-3 4.8): never on the
    * shared roster; written per reader by the room's `rosterEntryForReader` for a reader who holds
    * a grant or owns the deck, absent for everyone else
    */

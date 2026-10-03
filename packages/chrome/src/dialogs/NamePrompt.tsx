@@ -26,7 +26,7 @@ export type NamePromptDialogProps = {
   modal?: boolean;
   /**
    * The words of the prompt when another surface opens it: the first Share on a browser with no
-   * name asks "Your name, shown to collaborators" (docs/PRODUCT.md section 2 rank 4), and hands
+   * name asks "Your name, shown to collaborators" (docs/archive/rounds/PRODUCT.md section 2 rank 4), and hands
    * the result to `onDone` instead of closing the shell's dialog, since the Share dialog stands
    * behind it.
    */
@@ -39,7 +39,7 @@ export const SHARE_NAME_PROMPT_TITLE = 'Your name, shown to collaborators';
 
 /**
  * The prompt's state and writes, shared by the dialog and the title row's plate: the field opens
- * empty unless the person chose a name (docs/POLISH.md 2.6 item 63; audit-chrome item 10 read
+ * empty unless the person chose a name (docs/archive/rounds/POLISH.md 2.6 item 63; audit-chrome item 10 read
  * "studio", the write path's default author, filled in and selected on a fresh browser): a
  * prefilled value the route hands over, else the principal's chosen name, never the generated
  * label or the default author, with "Your name" as the placeholder. `close(named)` tells the
@@ -84,14 +84,14 @@ function useNamePrompt(onDone: ((named: boolean) => void) | undefined) {
 }
 
 /**
- * The prompt as a plate in the title row (docs/POLISH.md 2.8 item 103; the row
+ * The prompt as a plate in the title row (docs/archive/rounds/POLISH.md 2.8 item 103; the row
  * `share.name-prompt.never-mid-drag`): what the route opens on the first write, or at the join,
  * when nobody asked for it. It sits in the row's right cluster before the collaborators, 32 px
  * tall inside the 44 px row, so it is never over the sheet and never over the toolbar: the
  * floating card at the bottom right it replaces stood over the stage while the seller worked
  * (the polish round's collaboration audit, item 6). It takes no focus of its own: a person typing
  * keeps the caret, and a click in the field brings the caret here. Enter keeps the name, the
- * cross keeps the generated label. The field's placeholder is "Your name" (docs/POLISH.md 2.6
+ * cross keeps the generated label. The field's placeholder is "Your name" (docs/archive/rounds/POLISH.md 2.6
  * item 63; the row `share.name-prompt.empty-field`) and the question is the group's label, so
  * the plate stays about 340 px wide and the deck's name beside it keeps its room at 1440 (a label
  * before the field cut the title to one letter in the fix round 3's first read; the question as

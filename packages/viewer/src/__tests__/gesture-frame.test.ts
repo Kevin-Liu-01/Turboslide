@@ -12,7 +12,7 @@ import {
 } from '../gesture-frame';
 import type { FrameScheduler, GestureFrameRecord } from '../gesture-frame';
 
-// The frames of a live gesture (docs/OBJECTS.md 2.4; the objects round, B1): the record the
+// The frames of a live gesture (docs/archive/rounds/OBJECTS.md 2.4; the objects round, B1): the record the
 // Editor publishes as describe().state.gesture, the budget that degrades a gesture whose sheet
 // render misses two frames in a row, and the coalescer that renders a burst of pointermoves
 // inside one animation frame once.

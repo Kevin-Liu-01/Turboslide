@@ -456,7 +456,7 @@ export const FLAG_NAMES = [
   'htmlBlocks',
   'signup',
   'readOnly',
-  /* the product round (docs/PRODUCT.md 6.3, 6.4): the assistant's kill switch */
+  /* the product round (docs/archive/rounds/PRODUCT.md 6.3, 6.4): the assistant's kill switch */
   'assist',
 ] as const;
 export type FlagName = (typeof FLAG_NAMES)[number];

@@ -15,7 +15,7 @@ import { isParked } from '../parked-controls';
 import { tipProps } from '../Tooltip';
 
 /**
- * Download (gslides-parity SPEC 0.22, 6.7, 12 "Dialogs"; docs/PRODUCT.md section 2 ranks 8, 11
+ * Download (gslides-parity SPEC 0.22, 6.7, 12 "Dialogs"; docs/archive/rounds/PRODUCT.md section 2 ranks 8, 11
  * and 21): three ways in, one component.
  *
  * File > Download > PDF Document starts the download at once from the menu row, with no dialog:
@@ -135,7 +135,7 @@ export function progressSentence(
   const line = progress?.line ?? progress?.label ?? '';
   const perSlide = /slide\s+\d+\s+of\s+\d+/i.exec(line);
   if (perSlide !== null) return `${preparingHead(format)}, ${perSlide[0].toLowerCase()}`;
-  /* no estimate (docs/POLISH.md item 87; audit-pages item 45): the sentence promised "about 10
+  /* no estimate (docs/archive/rounds/POLISH.md item 87; audit-pages item 45): the sentence promised "about 10
      seconds for 2 slides" and the file came at 7 s */
   return preparingHead(format);
 }
@@ -183,7 +183,7 @@ export function downloadFileNames(
   return [downloadFileName(title, deckId, format, { ...(mode === undefined ? {} : { mode }) })];
 }
 
-/** One row of the report an export in flight carries (docs/FEATURES.md 5.5; build/b1.md R6). */
+/** One row of the report an export in flight carries (docs/archive/rounds/FEATURES.md 5.5; build/b1.md R6). */
 export type ExportReportRow = { id: string; text: string };
 
 /**
@@ -302,7 +302,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
         ...(format === 'pptx' && chosen.raster ? { headings: 'raster' } : {}),
         ...(chosen.skipped ? { includeSkipped: true } : {}),
         ...(format === 'pptx' && chosen.notes ? { includeNotes: true } : {}),
-        /* the vector round (docs/VECTOR.md 4.6, 6.2): an svg picture exports as vector by the
+        /* the vector round (docs/archive/rounds/VECTOR.md 4.6, 6.2): an svg picture exports as vector by the
            header's default; the parked control alone selects the PNG blip, and no key is sent
            otherwise so the header's default applies */
         ...(isParked('export.svg.vector', settings) ? { svgVector: false } : {}),
@@ -317,7 +317,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
         shell.closeDialog();
       })
       .catch((err: unknown) => {
-        /* one sentence for a refused download (docs/POLISH.md item 82): the store's and the
+        /* one sentence for a refused download (docs/archive/rounds/POLISH.md item 82): the store's and the
            worker's words stay in the console */
         console.error(`turboslide download: the ${format} export was refused`, err);
         const sentence = DOWNLOAD_WORDS.notMade(format);
@@ -361,7 +361,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
     sayRef.current(progressSentenceNow);
   }, [progressSentenceNow]);
 
-  /* the report rows of an export in flight (the features round, ship two, docs/FEATURES.md 5.5;
+  /* the report rows of an export in flight (the features round, ship two, docs/archive/rounds/FEATURES.md 5.5;
      build/b1.md R6): the route's `progress.rows` name what the export waited for ("2 shaders had
      no frame; the export waited 8 s for them"); the dialog draws each under the progress sentence
      and the direct path says each new row once */

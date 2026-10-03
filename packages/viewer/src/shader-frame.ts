@@ -1,4 +1,4 @@
-// The resting still of a shader, made in the editor's own WebGL (docs/FEATURES.md 5.5;
+// The resting still of a shader, made in the editor's own WebGL (docs/archive/rounds/FEATURES.md 5.5;
 // audit-shaders 1, 2; judge-design additions 3 to 6). The resting rule: a commit of any recipe
 // field, a resize of the box or a kit colour change schedules a capture 800 ms after the last
 // change; a held slider or a held handle previews and never commits, so nothing captures until
@@ -60,7 +60,7 @@ export type FrameEncoding = 'image/png' | 'image/webp';
 export type CaptureOptions = {
   /**
    * Over this many bytes the PNG is encoded again as a WebP on the same canvas before the mount is
-   * disposed (docs/POLISH.md item 36: a god rays frame at the content box is a PNG of several MB,
+   * disposed (docs/archive/rounds/POLISH.md item 36: a god rays frame at the content box is a PNG of several MB,
    * over the function's body cap on every path a deployment has). Absent, the PNG is answered as
    * it is.
    */
@@ -238,7 +238,7 @@ export type BackgroundShaderRecipe = {
 };
 
 /**
- * The block a shader ground's frame is keyed and sized by (docs/FEATURES.md 5.5; docs/POLISH.md
+ * The block a shader ground's frame is keyed and sized by (docs/archive/rounds/FEATURES.md 5.5; docs/archive/rounds/POLISH.md
  * section 2.5, the polish round's fix round 2 for `shaders.background.place-answers`): a covering
  * box at the sheet's own aspect, so `frameSizeFor(materialAspectOf(block))` reads 3200 by 1800
  * and `frameKeyOf` hashes the same recipe the hosted job would render. Pure; the capture below
@@ -419,7 +419,7 @@ export const FRAME_UPLOAD_ABOVE_BYTES = 3 * 1024 * 1024;
 
 /**
  * The one sentence the editor shows when a block's frame could not be saved after the capturer's
- * own retry (docs/POLISH.md item 36; audit-media item 2: god rays at 727 by 412 answered 413 four
+ * own retry (docs/archive/rounds/POLISH.md item 36; audit-media item 2: god rays at 727 by 412 answered 413 four
  * times and nothing said so). The controller wires it to the snackbar through `onError`.
  */
 export const SHADER_FRAME_FAILED_SENTENCE =
@@ -429,7 +429,7 @@ export const SHADER_FRAME_FAILED_SENTENCE =
  * One capturer per editor (5.5, the shared editor rule): debounced per block, one capture at a
  * time, the write through the controller's queue, the 409 rule, the hosted fallback.
  *
- * The frame over the function's cap (docs/POLISH.md item 36; the polish round's verifier, pass 1
+ * The frame over the function's cap (docs/archive/rounds/POLISH.md item 36; the polish round's verifier, pass 1
  * finding 2: a god rays PNG at the content box answered 413 on the presigned PUT too, since a
  * deployment's upload route is a function with the same 4.5 MB body cap, and the retry's grant
  * answered 429 while the first upload's slot was held). The capture is given `uploadAbove` (3 MB,

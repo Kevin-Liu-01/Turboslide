@@ -189,7 +189,7 @@ export const ACTION_IDS = [
   'deck.remove',
   'deck.setBackground',
   'deck.guides',
-  /* the product round's templates (docs/PRODUCT.md 4.3; B5b): the index reads and the writes of
+  /* the product round's templates (docs/archive/rounds/PRODUCT.md 4.3; B5b): the index reads and the writes of
      Save as template and the gallery's card menu; before the slide group so GS3_ACTION_IDS,
      the slice from presence.list, keeps its 64 */
   'template.list',
@@ -289,23 +289,23 @@ export const ACTION_IDS = [
   'control.activate',
   'control.set',
   'artifact.download',
-  // the product round (docs/PRODUCT.md 5, 6.2): the tailoring pass and the assist's two actions,
+  // the product round (docs/archive/rounds/PRODUCT.md 5, 6.2): the tailoring pass and the assist's two actions,
   // before the round three block so GS3_ACTION_IDS keeps its slice
   'deck.tailor',
   'assist.propose',
   'assist.accept',
-  // the product round's brand kit and font catalog (docs/PRODUCT.md 4.1, 4.2; B5a), before the
+  // the product round's brand kit and font catalog (docs/archive/rounds/PRODUCT.md 4.1, 4.2; B5a), before the
   // round three block for the same reason
   'brand.get',
   'brand.set',
   'brand.reset',
   'font.list',
-  // the features round's logo picker (docs/FEATURES.md 4.11; B6, build/b6.md R2), before the round
+  // the features round's logo picker (docs/archive/rounds/FEATURES.md 4.11; B6, build/b6.md R2), before the round
   // three block for the same reason
   'logo.search',
   'logo.insert',
   'logo.refresh',
-  // the features round, ship two (docs/FEATURES.md 5.8; B5, build/b5/actions-shader.patch.ts): the
+  // the features round, ship two (docs/archive/rounds/FEATURES.md 5.8; B5, build/b5/actions-shader.patch.ts): the
   // shader library, with material.list, material.capture and slide.setBackgroundMaterial kept as
   // aliases; before the round three block so GS3_ACTION_IDS keeps its slice
   'shader.list',
@@ -314,7 +314,7 @@ export const ACTION_IDS = [
   'shader.frame',
   'shader.capture',
   'shader.render',
-  // the people round's janitor for orphan pictures under u/ (docs/PEOPLE.md 4.6; B4, build/b4.md
+  // the people round's janitor for orphan pictures under u/ (docs/archive/rounds/PEOPLE.md 4.6; B4, build/b4.md
   // R2), before the round three block so GS3_ACTION_IDS keeps its slice
   'admin.avatar.sweep',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
@@ -397,7 +397,7 @@ export const GS3_ACTION_IDS = ACTION_IDS.slice(ACTION_IDS.indexOf('presence.list
  * the document's, the comments' or the access record's revision.
  */
 export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
-  /* the product round (docs/PRODUCT.md 4.3): a template folder has no revision a caller reads */
+  /* the product round (docs/archive/rounds/PRODUCT.md 4.3): a template folder has no revision a caller reads */
   'template.rename',
   'template.delete',
   'template.setDefault',
@@ -417,7 +417,7 @@ export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
   'admin.bootstrap',
   'admin.flag',
   'admin.migrateStorage',
-  /* the people round (docs/PEOPLE.md 4.6): the sweep removes files under u/ by key, no record */
+  /* the people round (docs/archive/rounds/PEOPLE.md 4.6): the sweep removes files under u/ by key, no record */
   'admin.avatar.sweep',
 ]);
 
@@ -618,7 +618,7 @@ export const ditherResultSchema = z.strictObject({
 /**
  * The two built in templates: the GT brand template record under decks/templates/gt-brand (the
  * deck's manifest and slides with a template.json naming it) and the blank deck. Since the
- * product round (docs/PRODUCT.md 4.3) deck.create `from` takes any id of the template index
+ * product round (docs/archive/rounds/PRODUCT.md 4.3) deck.create `from` takes any id of the template index
  * (`decks/templates/templates.json`, read by `template.list`); these two are the ids a decks folder
  * without an index still answers, and `blank` is the deployment default when `default.json` is
  * absent.
@@ -630,12 +630,12 @@ export type DeckTemplateId = (typeof DECK_TEMPLATES)[number];
  * The gallery categories a template record may carry (gslides-parity SPEC-5 4.1, Google's three
  * headings; the round after's Templates pane groups by them). The gallery page of the product
  * round groups by `organisation` instead: the templates saved on this deployment first, then
- * Turboslide's (docs/PRODUCT.md 4.3).
+ * Turboslide's (docs/archive/rounds/PRODUCT.md 4.3).
  */
 export const TEMPLATE_CATEGORIES = ['personal', 'work', 'education'] as const;
 export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
 
-/** One row of `decks/templates/templates.json`, what `template.list` answers (docs/PRODUCT.md 4.3). */
+/** One row of `decks/templates/templates.json`, what `template.list` answers (docs/archive/rounds/PRODUCT.md 4.3). */
 export type TemplateIndexEntry = {
   /** the template id, the folder under decks/templates and the `deck.create --from` value */
   id: string;
@@ -652,7 +652,7 @@ export type TemplateIndexEntry = {
   appearance?: (typeof APPEARANCES)[number];
   /** set on a template saved on this deployment (Your organisation); absent on Turboslide's */
   organisation?: true;
-  /** the brand kit record the template carries (docs/PRODUCT.md 4.1 `Deck.brand`, B5a's `BrandKit`), as saved */
+  /** the brand kit record the template carries (docs/archive/rounds/PRODUCT.md 4.1 `Deck.brand`, B5a's `BrandKit`), as saved */
   brand?: BrandKit;
 };
 
@@ -900,7 +900,7 @@ export const syncStatusSchema = z.strictObject({
   tier: z.enum(SYNC_TIERS),
   transport: z.enum(SYNC_TRANSPORTS),
   connected: z.boolean(),
-  /** The calls this instance made to the Blob store under the deck's prefix in the last `windowMs`, by operation, and the id of the answering instance (docs/SYNC.md 6.3); absent off the blob tier and in the page's own answer */
+  /** The calls this instance made to the Blob store under the deck's prefix in the last `windowMs`, by operation, and the id of the answering instance (docs/archive/rounds/SYNC.md 6.3); absent off the blob tier and in the page's own answer */
   storeCalls: z
     .strictObject({
       head: z.number().int().nonnegative(),
@@ -910,7 +910,7 @@ export const syncStatusSchema = z.strictObject({
       del: z.number().int().nonnegative(),
       windowMs: z.number().int().positive(),
       instance: z.string().regex(/^[0-9a-f]{8}$/),
-      /** the `list` calls by the folder listed under the deck (versions, snapshots, assets, thumbs, presence, deck, other): the pull never lists versions (docs/SYNC.md 3.5), the rest name their listing */
+      /** the `list` calls by the folder listed under the deck (versions, snapshots, assets, thumbs, presence, deck, other): the pull never lists versions (docs/archive/rounds/SYNC.md 3.5), the rest name their listing */
       lists: z.record(z.string(), z.number().int().nonnegative()).optional(),
     })
     .optional(),
@@ -1024,7 +1024,7 @@ const studioUrl = z
   .describe('The studio to talk to; the hosts.json default otherwise');
 
 // ---------------------------------------------------------------------------------------------
-// The product round's pieces (docs/PRODUCT.md 5, 6.2)
+// The product round's pieces (docs/archive/rounds/PRODUCT.md 5, 6.2)
 
 /** The tailoring pass's input (PRODUCT.md section 5): the replacements, the logo, the slides to skip. */
 export const tailorInputSchema = z.strictObject({
@@ -1111,7 +1111,7 @@ const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
 
 /**
- * One row of the cached logo index (docs/FEATURES.md 4.2; the shape of
+ * One row of the cached logo index (docs/archive/rounds/FEATURES.md 4.2; the shape of
  * packages/chrome/src/logo-model.ts `LogoRow`): the `icons.json` record trimmed to what the picker
  * reads, the variant file paths as the source names them, the licence string as recorded and the
  * two reads flags, absent until the refresh has rasterized the default once.
@@ -1174,7 +1174,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       theme: z.string(),
       revision,
       sections: outlineSchema,
-      /** the brand kit record when the deck carries one (docs/PRODUCT.md 4.1); brand.get answers it alone */
+      /** the brand kit record when the deck carries one (docs/archive/rounds/PRODUCT.md 4.1); brand.get answers it alone */
       brand: brandKitSchema.optional(),
       counts: z.strictObject({
         slides: z.number().int(),
@@ -1191,9 +1191,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         guides: z.number().int().optional(),
         /** the store's immutable per revision documents, on the Blob backend alone (SPEC-2 8.2) */
         snapshots: z.number().int().optional(),
-        /** the version records the log holds (docs/SYNC.md 3.6) */
+        /** the version records the log holds (docs/archive/rounds/SYNC.md 3.6) */
         records: z.number().int().nonnegative().optional(),
-        /** the record numbers missing between the log's first and last record (docs/SYNC.md 3.6, the hole's second rule) */
+        /** the record numbers missing between the log's first and last record (docs/archive/rounds/SYNC.md 3.6, the hole's second rule) */
         holes: z.number().int().nonnegative().optional(),
       }),
       /** the deck's appearance, counter and background defaults (gslides-parity SPEC 7.2.3, 7.2.4, SPEC-2 2.6.2) */
@@ -1510,7 +1510,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide deck remove <id> --confirm' },
     example: { id: 'q4-review', confirm: true, baseRevision: 3 },
   }),
-  // The templates of the product round (docs/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1): the
+  // The templates of the product round (docs/archive/rounds/PRODUCT.md 4.3; gslides-parity SPEC-5 4.1): the
   // index reads, Save as template, and the gallery card's Rename, Delete and Use for new
   // presentations. A template is a read only deck folder under decks/templates/<id>; the writes
   // below are the only writes that touch one, and every mutating action on a template's own
@@ -1831,7 +1831,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       id: slugSchema
         .optional()
         .describe(
-          'The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/POLISH.md 2.8 item 99)',
+          'The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)',
         ),
       baseRevision,
     }),
@@ -2401,7 +2401,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       treatment: twoToneParamsSchema.optional(),
       plate: plateSide.optional(),
       backend: z.enum(['angle-metal', 'swiftshader']).optional(),
-      /* the features round, ship two (docs/FEATURES.md 5.5; build/b7.md R2): the hosted fallback
+      /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.5; build/b7.md R2): the hosted fallback
          records the frame's staleness key beside recipeKey, so a frame it makes is fresh */
       frameKey: z
         .string()
@@ -2773,7 +2773,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe(
-          'Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects',
+          'Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects',
         ),
       baseline: z
         .enum(['libreoffice', 'none'])
@@ -3079,7 +3079,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     example: { label: 'list: Size', value: '22' },
   }),
 
-  // ---- the Google Slides parity round two (docs/gslides-parity/SPEC-2.md section 3) ----
+  // ---- the Google Slides parity round two (docs/archive/gslides-parity/SPEC-2.md section 3) ----
   'deck.setBackground': action({
     id: 'deck.setBackground',
     label: 'Set theme background',
@@ -3484,7 +3484,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         sub: z.boolean().optional(),
         color: colorSchema.nullable().optional(),
         highlight: colorSchema.nullable().optional(),
-        /* the polish round (docs/POLISH.md 2.3 item 16; polish/build/b1.md R3): the run's size in
+        /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 16; polish/build/b1.md R3): the run's size in
            pixels, serialized as z:<px> in the run's mark list (text.ts RunMarks.size) */
         size: z
           .number()
@@ -4026,7 +4026,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   // "Server side" means the window handler joins SERVER_SIDE_WINDOW_ACTIONS.
 
   // ---------------------------------------------------------------------------------------------
-  // The brand kit and the font catalog (docs/PRODUCT.md 4.1, 4.2; B5a)
+  // The brand kit and the font catalog (docs/archive/rounds/PRODUCT.md 4.1, 4.2; B5a)
 
   'brand.get': action({
     id: 'brand.get',
@@ -4104,7 +4104,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'font.list': action({
     id: 'font.list',
     label: 'Fonts',
-    doc: 'The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).',
+    doc: 'The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2).',
     group: 'render',
     mutates: false,
     transports: A,
@@ -4126,7 +4126,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mcp: 'deck_fonts_list',
     example: {},
   }),
-  /* the features round's logo picker over thesvg.org (docs/FEATURES.md 4.2, 4.4, 4.11; audit-logos
+  /* the features round's logo picker over thesvg.org (docs/archive/rounds/FEATURES.md 4.2, 4.4, 4.11; audit-logos
      8; B6): a deck less search over the cached index, the insert as a stored asset with its `logo`
      source, and the index refresh the daily cron and the CLI run */
   'logo.search': action({
@@ -4266,7 +4266,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mcp: 'deck_logo_refresh',
     example: { dryRun: true },
   }),
-  /* the features round, ship two (docs/FEATURES.md 5.8; B5, build/b5/actions-shader.patch.ts): the
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.8; B5, build/b5/actions-shader.patch.ts): the
      shader library's six actions; the handlers are packages/materials/src/actions.ts
      registerShaderActions on every transport, with the studio's bound, prune and transport lists in
      apps/studio/src/server/actions.ts and agent-actions.ts (B7) */
@@ -5461,7 +5461,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       variant: z.enum(AVATAR_VARIANTS),
       initials: z.string().max(3).optional(),
       salt: z.number().int().nonnegative().optional().describe('Another glyph or plate'),
-      /* the people round (docs/PEOPLE.md 4.2): the bound admits 512 KB of picture in base64 with
+      /* the people round (docs/archive/rounds/PEOPLE.md 4.2): the bound admits 512 KB of picture in base64 with
          the header (AVATAR_MAX_DATA_URL_LENGTH in auth/avatar.ts is 699,116) and refuses the JSON
          at validation on every transport; a file path never worked (avatars 8) */
       picture: z
@@ -5625,7 +5625,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide admin mail --to <to> --since <since>' },
     example: {},
   }),
-  /* the people round's janitor (docs/PEOPLE.md 4.6; B4, build/b4.md R2): the handler in
+  /* the people round's janitor (docs/archive/rounds/PEOPLE.md 4.6; B4, build/b4.md R2): the handler in
      auth/actions.ts registers itself behind isActionId once this row exists; the milestone is the
      later rounds' (P1), since the GS3 slice is counted once (actions-gs3.test.ts) */
   'admin.avatar.sweep': action({
@@ -5828,7 +5828,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     },
   }),
   // -------------------------------------------------------------------------------------------
-  // The product round (docs/PRODUCT.md section 5, 6.2): the tailoring pass and the assist
+  // The product round (docs/archive/rounds/PRODUCT.md section 5, 6.2): the tailoring pass and the assist
 
   'deck.tailor': action({
     id: 'deck.tailor',

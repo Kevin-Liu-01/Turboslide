@@ -1,4 +1,4 @@
-// The polish round's text rows (docs/POLISH.md 2.3, 2.6 item 70, 2.9 item 114, 5.1 `text.*` with
+// The polish round's text rows (docs/archive/rounds/POLISH.md 2.3, 2.6 item 70, 2.9 item 114, 5.1 `text.*` with
 // the driver `probe --core`; B6 the drivers, B1 the fixes): Bold on a run from the tail and the
 // menu, the tail's paragraph controls live in a session, Enter and Tab in a list, a size on a run
 // and a typed value, the five mark rows on a selected box, a heading's list and indent, Enter in a
@@ -176,7 +176,7 @@ export async function run(t) {
       const ok = tail.ok && menu.ok && wholeBold;
       return {
         ok,
-        observed: `tail: selected "${tail.sel}", mark ${tail.marked} at ${tail.markWeight}, rest ${tail.restWeight}, stored "${tail.stored}"${tail.wholeWeight !== null ? ` (block weight ${tail.wholeWeight})` : ''}; menu: mark ${menu.marked} at ${menu.markWeight}, rest ${menu.restWeight}, stored "${menu.stored}"; whole box: weight ${whole?.weight}, stored "${storedWhole}" (bold ${wholeBold})${ok ? '' : ` (docs/POLISH.md 2.3 item 12, ${LANE})`}`,
+        observed: `tail: selected "${tail.sel}", mark ${tail.marked} at ${tail.markWeight}, rest ${tail.restWeight}, stored "${tail.stored}"${tail.wholeWeight !== null ? ` (block weight ${tail.wholeWeight})` : ''}; menu: mark ${menu.marked} at ${menu.markWeight}, rest ${menu.restWeight}, stored "${menu.stored}"; whole box: weight ${whole?.weight}, stored "${storedWhole}" (bold ${wholeBold})${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 12, ${LANE})`}`,
       };
     },
   );
@@ -282,7 +282,7 @@ export async function run(t) {
       await escapeOut();
       return {
         ok,
-        observed: `${reads.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.3 item 14, ${LANE})`}`,
+        observed: `${reads.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 14, ${LANE})`}`,
       };
     },
   );
@@ -373,7 +373,7 @@ export async function run(t) {
         restored;
       return {
         ok,
-        observed: `listed ${listed}; items ${JSON.stringify(texts)} (second nested ${Boolean(nested)}); error over the stage ${errorEl ? `"${errorEl}"` : 'none'}; console ${consoleErrors.length}; restored by Cmd+Z ${restored}${ok ? '' : ` (docs/POLISH.md 2.3 item 15, ${LANE})`}`,
+        observed: `listed ${listed}; items ${JSON.stringify(texts)} (second nested ${Boolean(nested)}); error over the stage ${errorEl ? `"${errorEl}"` : 'none'}; console ${consoleErrors.length}; restored by Cmd+Z ${restored}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 15, ${LANE})`}`,
       };
     },
   );
@@ -419,7 +419,7 @@ export async function run(t) {
       await t.settled();
       return {
         ok,
-        observed: `selected "${sel}"; Acme drawn at ${acme?.size ?? 'no mark'} px, the run at ${rest?.size} px; block typography ${JSON.stringify(stored?.typography ?? null)}, text "${stored?.text}"; snackbar ${snackbar ? `"${snackbar}"` : 'none'}${ok ? '' : ` (docs/POLISH.md 2.3 item 16, ${LANE})`}`,
+        observed: `selected "${sel}"; Acme drawn at ${acme?.size ?? 'no mark'} px, the run at ${rest?.size} px; block typography ${JSON.stringify(stored?.typography ?? null)}, text "${stored?.text}"; snackbar ${snackbar ? `"${snackbar}"` : 'none'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 16, ${LANE})`}`,
       };
     },
   );
@@ -532,7 +532,7 @@ export async function run(t) {
       facts.push(`nothing selected: disabled ${disabled.join(', ')}`);
       return {
         ok,
-        observed: `${facts.join('; ')}${ok ? '' : ` (docs/POLISH.md 2.3 item 17, ${LANE}; model.ts 1657 by request to the integrator)`}`,
+        observed: `${facts.join('; ')}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 17, ${LANE}; model.ts 1657 by request to the integrator)`}`,
       };
     },
   );
@@ -660,7 +660,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `${facts.join('; ')}${refused.length > 0 ? `; refused with a sentence from an enabled button: ${refused.join(', ')}` : ''}${ok ? '' : ` (docs/POLISH.md 2.3 item 18, ${LANE})`}`,
+        observed: `${facts.join('; ')}${refused.length > 0 ? `; refused with a sentence from an enabled button: ${refused.join(', ')}` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 18, ${LANE})`}`,
       };
     },
   );
@@ -698,7 +698,7 @@ export async function run(t) {
         !/^more/.test(after.trim());
       return {
         ok,
-        observed: `title "${first}"; session after Enter ${stillOpen}, after typing ${openAfter}; lines ${info?.lines}; text after "${after.replace(/\n/g, '\\n')}"${ok ? '' : ` (docs/POLISH.md 2.3 item 19, ${LANE}; A1 rule 2)`}`,
+        observed: `title "${first}"; session after Enter ${stillOpen}, after typing ${openAfter}; lines ${info?.lines}; text after "${after.replace(/\n/g, '\\n')}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 19, ${LANE}; A1 rule 2)`}`,
       };
     },
   );
@@ -735,7 +735,7 @@ export async function run(t) {
       const ok = reads(title, headFont) && (LEAD === null || reads(sub, leadFont));
       return {
         ok,
-        observed: `title field "${title}" (drawn ${headFont} px); subtitle field "${sub}" (drawn ${leadFont} px)${ok ? '' : ` (docs/POLISH.md 2.3 item 22, ${LANE})`}`,
+        observed: `title field "${title}" (drawn ${headFont} px); subtitle field "${sub}" (drawn ${leadFont} px)${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 22, ${LANE})`}`,
       };
     },
   );
@@ -794,7 +794,7 @@ export async function run(t) {
       await onTitleSlide();
       return {
         ok,
-        observed: `font ${sizeBefore} -> ${info?.font} px over ${info?.lines} lines; ring height ${ringBefore ? r1(ringBefore.h) : '?'} -> ${ringAfter ? r1(ringAfter.h) : '?'} sheet px (kept ${ringKept}); text inside the sheet ${inside} (k ${r1(k)})${ok ? '' : ` (docs/POLISH.md 2.3 item 21, ${LANE})`}`,
+        observed: `font ${sizeBefore} -> ${info?.font} px over ${info?.lines} lines; ring height ${ringBefore ? r1(ringBefore.h) : '?'} -> ${ringAfter ? r1(ringAfter.h) : '?'} sheet px (kept ${ringKept}); text inside the sheet ${inside} (k ${r1(k)})${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 21, ${LANE})`}`,
       };
     },
   );
@@ -894,7 +894,7 @@ export async function run(t) {
       await t.clearAll();
       return {
         ok,
-        observed: `chip ${chip ? `"${chip.text}" with ${chip.controls.join(', ')}` : 'none'}; session open ${editing}${ok ? '' : ` (docs/POLISH.md 2.3 item 20, ${LANE})`}`,
+        observed: `chip ${chip ? `"${chip.text}" with ${chip.controls.join(', ')}` : 'none'}; session open ${editing}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 20, ${LANE})`}`,
       };
     },
   );
@@ -959,7 +959,7 @@ export async function run(t) {
       const ok = anchored && inside && whole;
       return {
         ok,
-        observed: `ring ${ring ? `${r1(ring.x)},${r1(ring.y)} ${r1(ring.w)}x${r1(ring.h)}` : 'none'}; bar ${bar ? `${r1(bar.x)},${r1(bar.y)} ${r1(bar.w)}x${r1(bar.h)}` : 'none'} (gap under the ring ${gap === null ? '?' : r1(gap)} px, inside the viewport ${inside}); dropdown ${dropdown ? `"${dropdown.label}" ${r1(dropdown.w)} px wide, scroll ${dropdown.scroll} in ${dropdown.client}` : 'none'}${ok ? '' : ` (docs/POLISH.md 2.6 item 70, B5's EditorShell.tsx by ${LANE}'s request)`}`,
+        observed: `ring ${ring ? `${r1(ring.x)},${r1(ring.y)} ${r1(ring.w)}x${r1(ring.h)}` : 'none'}; bar ${bar ? `${r1(bar.x)},${r1(bar.y)} ${r1(bar.w)}x${r1(bar.h)}` : 'none'} (gap under the ring ${gap === null ? '?' : r1(gap)} px, inside the viewport ${inside}); dropdown ${dropdown ? `"${dropdown.label}" ${r1(dropdown.w)} px wide, scroll ${dropdown.scroll} in ${dropdown.client}` : 'none'}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.6 item 70, B5's EditorShell.tsx by ${LANE}'s request)`}`,
       };
     },
   );
@@ -970,7 +970,7 @@ export async function run(t) {
     'off: no link mark; on: a link mark',
     async () => {
       /* Preferences holds one row, and a one row submenu is drawn as its row in the parent
-         (model.ts `collapseSingles`, docs/POLISH.md 2.6 item 74; the toggle keeps its own words),
+         (model.ts `collapseSingles`, docs/archive/rounds/POLISH.md 2.6 item 74; the toggle keeps its own words),
          so Link detection sits in Tools itself with its id `tools.preferences.linkDetection`; the
          row is read where it is drawn, and the hover on a Preferences row that is not there (the
          30 s `boundingBox` wait of the verifier's pass 2) is taken only when the submenu is */
@@ -1033,7 +1033,7 @@ export async function run(t) {
         onRead.linked >= 1;
       return {
         ok,
-        observed: `off (row checked ${off}): ${offRead.linked} link marks, stored "${offRead.stored}"; on (row checked ${on}): ${onRead.linked} link marks, stored "${onRead.stored}"${ok ? '' : ` (docs/POLISH.md 2.9 item 114, B5)`}`,
+        observed: `off (row checked ${off}): ${offRead.linked} link marks, stored "${offRead.stored}"; on (row checked ${on}): ${onRead.linked} link marks, stored "${onRead.stored}"${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.9 item 114, B5)`}`,
       };
     },
   );
@@ -1105,7 +1105,7 @@ export async function run(t) {
       const ok = Boolean(bandOk && sampleOk) && bad.length === 0;
       return {
         ok,
-        observed: `swatch ${swatch?.['background-color']}; band ${hl ? hl.background : 'no highlight mark'} (matches ${Boolean(bandOk)}); pixels ${sample ? sample.colors.map((c) => `${c.hex}×${c.count}`).join(', ') : 'unread'} (amber present ${Boolean(sampleOk)}); console after the reload ${errors.length} errors, ${bad.length} with 404 or 502${bad.length > 0 ? ` (${bad.slice(0, 3).join(' | ')})` : ''}${ok ? '' : ` (docs/POLISH.md 2.3 item 23, ${LANE} and B5)`}`,
+        observed: `swatch ${swatch?.['background-color']}; band ${hl ? hl.background : 'no highlight mark'} (matches ${Boolean(bandOk)}); pixels ${sample ? sample.colors.map((c) => `${c.hex}×${c.count}`).join(', ') : 'unread'} (amber present ${Boolean(sampleOk)}); console after the reload ${errors.length} errors, ${bad.length} with 404 or 502${bad.length > 0 ? ` (${bad.slice(0, 3).join(' | ')})` : ''}${ok ? '' : ` (docs/archive/rounds/POLISH.md 2.3 item 23, ${LANE} and B5)`}`,
       };
     },
   );

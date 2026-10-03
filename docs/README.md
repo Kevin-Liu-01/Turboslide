@@ -34,29 +34,30 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 
 ## The closed rounds
 
-Each round's evidence is under `gslides-parity/<round>/`. These specifications move to `archive/rounds/` in the last push of Round 1 (`NEXT.md` 5.2 item 4).
+These specifications are in `archive/rounds/` since the last push of Round 1 (`NEXT.md` 5.2 item 4). Each round's evidence is under `gslides-parity/<round>/`.
 
-| Specification              | Round                                                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [RETURN.md](RETURN.md)     | The return round: tables, shapes, charts, the formatting rows and the chrome rows back in the default view |
-| [PRODUCT.md](PRODUCT.md)   | The product round: the seller friction, the interface craft pass and the brand kit                         |
-| [FEATURES.md](FEATURES.md) | The features round: objects, fonts, logos and shaders, in two ships                                        |
-| [SYNC.md](SYNC.md)         | The sync and costs round: the write path and its order                                                     |
-| [VECTOR.md](VECTOR.md)     | The vector round: shapes drawn from their definitions and SVG pictures                                     |
-| [OBJECTS.md](OBJECTS.md)   | The objects round: the live gestures, tables, charts, diagrams, word art and lines                         |
-| [POLISH.md](POLISH.md)     | The polish round: the fixes of nine production audits and the home page                                    |
-| [PEOPLE.md](PEOPLE.md)     | The people round: identity, presence, authorship, avatars and accounts                                     |
+| Specification                             | Round                                                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| [RETURN.md](archive/rounds/RETURN.md)     | The return round: tables, shapes, charts, the formatting rows and the chrome rows back in the default view |
+| [PRODUCT.md](archive/rounds/PRODUCT.md)   | The product round: the seller friction, the interface craft pass and the brand kit                         |
+| [FEATURES.md](archive/rounds/FEATURES.md) | The features round: objects, fonts, logos and shaders, in two ships                                        |
+| [SYNC.md](archive/rounds/SYNC.md)         | The sync and costs round: the write path and its order                                                     |
+| [VECTOR.md](archive/rounds/VECTOR.md)     | The vector round: shapes drawn from their definitions and SVG pictures                                     |
+| [OBJECTS.md](archive/rounds/OBJECTS.md)   | The objects round: the live gestures, tables, charts, diagrams, word art and lines                         |
+| [POLISH.md](archive/rounds/POLISH.md)     | The polish round: the fixes of nine production audits and the home page                                    |
+| [PEOPLE.md](archive/rounds/PEOPLE.md)     | The people round: identity, presence, authorship, avatars and accounts                                     |
 
 ## Records and folders
 
-| Folder or file                                 | What it holds                                                                                                                                  |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| [gslides-parity/](gslides-parity/)             | The evidence of every round, one folder per round, with the evidence policy in its `README.md`; the gate still reads its matrix and ship lists |
-| [archive/status/](archive/status/)             | The milestone and hosting status documents of 2026-09-10 to 2026-09-22 and their five early evidence folders                                   |
-| [archive/deviations.md](archive/deviations.md) | The deviations list that `AGENTS.md` carried from M1 to round four                                                                             |
-| [readme/](readme/)                             | The README renderer of "What works today" with its pictures, and the tests of this index and of the evidence policy                            |
-| [spec/](spec/)                                 | The base specification, the milestone plan and the three experiment reports of 2026-09-10; `spec/README.md` records their provenance           |
+| Folder or file                                     | What it holds                                                                                                                                  |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [gslides-parity/](gslides-parity/)                 | The evidence of every round, one folder per round, with the evidence policy in its `README.md`; the gate still reads its matrix and ship lists |
+| [archive/status/](archive/status/)                 | The milestone and hosting status documents of 2026-09-10 to 2026-09-22 and their five early evidence folders                                   |
+| [archive/gslides-parity/](archive/gslides-parity/) | The specifications, milestone plans, build status records and verification records of the parity rounds one to five                            |
+| [archive/deviations.md](archive/deviations.md)     | The deviations list that `AGENTS.md` carried from M1 to round four                                                                             |
+| [readme/](readme/)                                 | The README renderer of "What works today" with its pictures, and the tests of this index and of the evidence policy                            |
+| [spec/](spec/)                                     | The base specification, the milestone plan and the three experiment reports of 2026-09-10; `spec/README.md` records their provenance           |
 
-The parity rounds one to five are at the top of `gslides-parity/` (`SPEC.md` to `SPEC-5.md`, `MILESTONES*.md`, `BUILD-STATUS*.md`, `VERIFICATION*.md`), cited in code by name as "gslides-parity SPEC-n". They move to `archive/gslides-parity/` with the closed round specifications.
+The parity rounds one to five are in `archive/gslides-parity/` (`SPEC.md` to `SPEC-5.md`, `MILESTONES*.md`, `BUILD-STATUS*.md`, `VERIFICATION*.md`), cited in code by name as "gslides-parity SPEC-n". Their evidence stays under `gslides-parity/`.
 
 The specification and the milestone plan cite private material and are in a public repository provisionally; see `AGENTS.md`, "Where the specification lives".

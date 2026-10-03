@@ -11,11 +11,11 @@ import { useEditorShell } from '../editor-shell-context';
 import { DIALOGS } from '../menus/strings';
 
 /**
- * Insert > Slide numbers (gslides-parity SPEC 2.4, 7.2.4, 12 "Dialogs"; docs/RETURN.md section 5
+ * Insert > Slide numbers (gslides-parity SPEC 2.4, 7.2.4, 12 "Dialogs"; docs/archive/rounds/RETURN.md section 5
  * `slides.numbers.apply`, research 07 "Number slides"): Google's dialog, On or Off, a Skip title
  * slides check under On, Apply for the whole presentation and Apply to selected for the selected
  * slides alone. Apply writes the brand kit's Slide numbers (`brand.set /counter/show` and
- * `/counter/skipTitle`, docs/PRODUCT.md 4.1: the Brand kit panel's section writes the same
+ * `/counter/skipTitle`, docs/archive/rounds/PRODUCT.md 4.1: the Brand kit panel's section writes the same
  * fields, and the older `defaults.counter` is read as the fallback until it is gone) and Apply to
  * selected one `slide.set /counter` per selected slide (on or off; the deck's mode stands for the
  * others), each through the editor's commit as one history entry, so Cmd+Z takes the numbers

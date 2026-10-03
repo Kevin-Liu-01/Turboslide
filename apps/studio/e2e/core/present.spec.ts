@@ -602,7 +602,7 @@ test(title('comments.resolve'), async () => {
 test(title('comments.toolbar-and-menu-routes'), async () => {
   test.setTimeout(120_000);
   await openEditor(page, deck);
-  /* the slide card stays selected (docs/POLISH.md 2.6 item 66: Insert > Comment and the toolbar
+  /* the slide card stays selected (docs/archive/rounds/POLISH.md 2.6 item 66: Insert > Comment and the toolbar
      button need an object, a text range or a slide card; with nothing selected they wait) */
   await clickCard(page, slides[3]!);
   /* the count once the threads have loaded, as the `comments.on-*` rows read it (b6 R5); read
@@ -624,7 +624,7 @@ test(title('comments.toolbar-and-menu-routes'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the product round's rows (docs/PRODUCT.md section 2 ranks 19 and 23, 3.1.1, 3.6, 4.1, 8.1): a
+// the product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 19 and 23, 3.1.1, 3.6, 4.1, 8.1): a
 // slide as a link's target followed in the show, no paper block under the show's bar, the bar on
 // entry and after a pointer move, the presenter's labels in sentence case, and the frame toggles
 // of the kit read in the editor, the show and the presenter. B2 owns the popover and the click in
@@ -683,7 +683,7 @@ test(title('text.link.slide-target'), async () => {
     ).toBe(true);
   }
   const tag = await slideSelect.evaluate((e) => e.tagName.toLowerCase());
-  /* the options read "<n>. <title>" since the product round (docs/PRODUCT.md section 2 rank 19,
+  /* the options read "<n>. <title>" since the product round (docs/archive/rounds/PRODUCT.md section 2 rank 19,
      InlineText.tsx slideTargets): the third slide is picked by its id, the option's value */
   if (tag === 'select')
     await slideSelect
@@ -918,7 +918,7 @@ test(title('brand.frame.toggles'), async () => {
     ),
   );
   if (!actions.includes('brand.set'))
-    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+    test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
   /* the three toggles through the panel where it is on the build, each row with its sentence */
   await menuPath(page, 'slide', 'slide.changeTheme');
   const panel = await ctl(page, 'panel.brand')
@@ -930,7 +930,7 @@ test(title('brand.frame.toggles'), async () => {
     sentences = await page.evaluate(() =>
       ['rails', 'rules', 'crosses'].map((k) => {
         /* the check row, then its sentence under it (ThemesPanel.tsx `.ts-brand-line`, the
-           product's "each with one sentence under it", docs/PRODUCT.md 4.4) */
+           product's "each with one sentence under it", docs/archive/rounds/PRODUCT.md 4.4) */
         const row = document
           .querySelector(`[data-control="panel.brand.frame.${k}"]`)
           ?.closest('label, div, li');
@@ -1019,7 +1019,7 @@ test(title('brand.frame.toggles'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.7 items 93, 94 and 2.8 item 105, 5.1 `present.*`): no dead
+// the polish round (docs/archive/rounds/POLISH.md 2.7 items 93, 94 and 2.8 item 105, 5.1 `present.*`): no dead
 // control in the show's bar, the laser's size, and the present link's first paint.
 
 test(title('present.bar.no-dead-control'), async () => {
@@ -1192,7 +1192,7 @@ test(title('present.laser.visible'), async () => {
 test(title('present.link.first-paint-show'), async ({ browser }) => {
   test.setTimeout(120_000);
   /* the same seller in a second browser (lib.ts `sameCookiesContext`): under
-     TURBOSLIDE_AUTHORIZE=enforce a new deck is Restricted (docs/POLISH.md 2.7 item 78) and a
+     TURBOSLIDE_AUTHORIZE=enforce a new deck is Restricted (docs/archive/rounds/POLISH.md 2.7 item 78) and a
      stranger's direct address meets the You need access page, never the show, so a fresh context
      with no storage read the 30 s wait for the show and not its first paint (B5's R12 in the fix
      round; the memory tier's shadow authorization let the stranger in, which is why the row was
@@ -1285,13 +1285,13 @@ coverage(import.meta.filename, [
   'comments.reply',
   'comments.resolve',
   'comments.toolbar-and-menu-routes',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'text.link.slide-target',
   'present.show.no-white-block',
   'present.show.bar-on-entry',
   'present.presenter.sentence-case',
   'brand.frame.toggles',
-  /* the polish round (docs/POLISH.md 2.7 items 93 and 94, 2.8 item 105) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.7 items 93 and 94, 2.8 item 105) */
   'present.bar.no-dead-control',
   'present.laser.visible',
   'present.link.first-paint-show',

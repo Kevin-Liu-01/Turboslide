@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { bundledLogoIndex, bundledLogoIndexBytes } from './logo-index-snapshot';
 
-// The snapshot bundled with the deployment (docs/FEATURES.md 4.2; build/hotfix.md section 9):
+// The snapshot bundled with the deployment (docs/archive/rounds/FEATURES.md 4.2; build/hotfix.md section 9):
 // the committed file parses as a real build the picker can serve, weighs under the plain file's
 // line, names no failure, and every caller gets its own copy.
 

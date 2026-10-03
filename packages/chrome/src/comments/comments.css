@@ -3,7 +3,7 @@
    fixed height rows with tabular times, the reply box and its autocomplete. Monochrome
    throughout: no hue reaches a comment. Every box is square; motion is opacity only. */
 
-/* ---- the empty panel (docs/PRODUCT.md 3.2; audit-interface 20): the sentence, then the one line
+/* ---- the empty panel (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 20): the sentence, then the one line
    that names the gesture; the tabs, the search and the filter arrive with the first comment ---- */
 .ts-comments-empty {
   display: flex;
@@ -370,7 +370,7 @@
   gap: 4px;
 }
 
-/* a slide comment's card sits beside the sheet, at its right edge (docs/POLISH.md item 66;
+/* a slide comment's card sits beside the sheet, at its right edge (docs/archive/rounds/POLISH.md item 66;
    audit-chrome item 12: it stood over the top left of the page) */
 .ts-comment-card[data-anchor='slide'] {
   left: auto !important;
@@ -379,7 +379,7 @@
   transform: translateX(calc(100% + 12px));
 }
 
-/* ---- the markers (11 6.8, 8 P3; docs/POLISH.md item 95: one plate per anchor) ---- */
+/* ---- the markers (11 6.8, 8 P3; docs/archive/rounds/POLISH.md item 95: one plate per anchor) ---- */
 .ts-comment-marker-btn {
   position: absolute;
   z-index: 3;
@@ -464,7 +464,7 @@
 }
 
 /* the filter is the one select of tokens.css (.pt-select: 32 px, the field boundary, the chrome's
-   chevron; docs/PRODUCT.md 3.1, the select row) */
+   chevron; docs/archive/rounds/PRODUCT.md 3.1, the select row) */
 .ts-comments-filter {
   flex: 0 0 auto;
 }

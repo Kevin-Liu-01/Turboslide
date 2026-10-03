@@ -1,4 +1,4 @@
-// The pure writes of the shader library (docs/FEATURES.md 5.2, 5.3, 5.8), browser safe: the block
+// The pure writes of the shader library (docs/archive/rounds/FEATURES.md 5.2, 5.3, 5.8), browser safe: the block
 // an insert lands (the entry's featured preset, the controls with their resolved uniforms beside
 // them, `motion.play: 'show'`, the alt in the seller's words), where it lands (the caller's box,
 // the placement helper's rectangle, else the sheet's centre), the material block of a slide, the

@@ -81,7 +81,7 @@ export function checkAssets(ctx: LintContext): Finding[] {
               path: `${ref.path}/frame`,
               text: asset.id,
               proposal:
-                /* DECK-GRAMMAR.md:56; the sentence reads plain (docs/POLISH.md 2.6 item 55) */
+                /* DECK-GRAMMAR.md:56; the sentence reads plain (docs/archive/rounds/POLISH.md 2.6 item 55) */
                 'A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground.',
               fix: [
                 {

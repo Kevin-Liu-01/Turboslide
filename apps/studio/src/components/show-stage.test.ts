@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SHOW_BAR_ROW, showStageSize } from './show-stage';
 
-// The show's stage box (docs/POLISH.md item 98; audit-pages item 44): the sheet's bottom edge
+// The show's stage box (docs/archive/rounds/POLISH.md item 98; audit-pages item 44): the sheet's bottom edge
 // stays clear of the bar's row on a short viewport, and a 16:9 screen keeps the whole box.
 describe('showStageSize', () => {
   it('drops the bar row at 1280 by 800, where the letterbox is thinner than the bar', () => {

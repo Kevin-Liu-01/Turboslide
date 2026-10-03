@@ -65,7 +65,7 @@ The list that `AGENTS.md` carried from M1 to round four of the Google Slides par
   generator does not write it; it serves `packages/agent/generated/openapi.json`. Step 3 of
   `scripts/check.mjs` names the file through git's `:(literal)` pathspec magic so the brackets
   are not read as a glob class.
-- The Google Slides parity round (`docs/gslides-parity/SPEC.md`, section 7.9, decision 15.11)
+- The Google Slides parity round (`docs/archive/gslides-parity/SPEC.md`, section 7.9, decision 15.11)
   amends six sentences of this spec; the integrator edited them into `docs/spec/SPEC.md` and
   records them here until Kevin approves them:
   1. SPEC 4.2 text markup: line breaks are allowed as a paragraph break in paragraph, text, box
@@ -82,7 +82,7 @@ The list that `AGENTS.md` carried from M1 to round four of the Google Slides par
      canvas with the notes pane, the right panels and the bottom bar of parity SPEC 1; the status
      chip and the revision leave the default view.
 - The builders' deviations from the parity SPEC, each argued in `docs/gslides-parity/build/
-<key>.md` and listed in `docs/gslides-parity/BUILD-STATUS.md`, recorded for Kevin (parity SPEC
+<key>.md` and listed in `docs/archive/gslides-parity/BUILD-STATUS.md`, recorded for Kevin (parity SPEC
   15.11):
   - B2: the PDF gate rasterizes at 3200 by 1800 instead of `pdftoppm -r 144` (parity SPEC 7.6),
     because the diff needs the 2x render's pixel grid; picture regions are compared separately
@@ -105,7 +105,7 @@ The list that `AGENTS.md` carried from M1 to round four of the Google Slides par
     (parity SPEC 7.5 lists none), which stay readable through `describe().state` and drivable by
     the keys and the menu.
 - The builders' deviations of round two (gslides-parity SPEC-2; `docs/gslides-parity/build-2/
-<key>.md`, listed in `docs/gslides-parity/BUILD-STATUS-2.md`), recorded for Kevin:
+<key>.md`, listed in `docs/archive/gslides-parity/BUILD-STATUS-2.md`), recorded for Kevin:
   - SPEC-2 2.9 (the amendments to the two specifications and to `docs/freeform.md`), edited in by
     the integrator at merge 2: every slide becomes a freeform slide on its first canvas
     manipulation and the grammar layouts are the templates (gslides-parity SPEC 7.1 rule 3, SPEC

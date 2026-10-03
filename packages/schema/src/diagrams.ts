@@ -187,7 +187,7 @@ function segment(
 
 /**
  * The index of the site of a shape kind nearest a point, for `connect`: the preset's own sites
- * since the vector round (docs/VECTOR.md 2.2; a rounded rectangle's ECMA four, a rectangle's eight).
+ * since the vector round (docs/archive/rounds/VECTOR.md 2.2; a rounded rectangle's ECMA four, a rectangle's eight).
  */
 function nearestSiteIndex(box: Box, point: Point, shape: string): number {
   let best = 0;
@@ -244,7 +244,7 @@ function link(
 }
 
 /**
- * A labelled node: one shape with its label as the shape's own text (docs/FEATURES.md 2.2 rank
+ * A labelled node: one shape with its label as the shape's own text (docs/archive/rounds/FEATURES.md 2.2 rank
  * 9; audit-objects 10). A step used to be a shape and a text box over the same box, so a drag
  * from the label moved the label alone and removing one step took three enter and delete cycles;
  * as one object a double click opens the label, a drag moves the step with its label and the
@@ -571,7 +571,7 @@ export function makeDiagram(
 }
 
 /**
- * The group tags a duplicate keeps (docs/OBJECTS.md 4.2 item 3): the groups of which the copied
+ * The group tags a duplicate keeps (docs/archive/rounds/OBJECTS.md 4.2 item 3): the groups of which the copied
  * ids hold some member but not every one. A member copied alone (Cmd+D on an entered diagram
  * step) stays in its group, so the copy is one more step of the diagram; a group copied whole
  * (Cmd+D on the selected diagram) is not in the answer and takes a fresh tag, as

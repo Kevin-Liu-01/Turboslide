@@ -13,7 +13,7 @@ import {
 } from '../inspector/alt';
 import { hideTooltip } from '../Tooltip';
 
-// The Alt text field's focus (docs/POLISH.md 2.5 item 45; the polish round's fix round 2, the row
+// The Alt text field's focus (docs/archive/rounds/POLISH.md 2.5 item 45; the polish round's fix round 2, the row
 // images.alt.focused-empty): the section hands the focus to its own field once the field is drawn
 // and enabled, while nothing else holds the focus and the section is the only open one of its
 // panel; a field that is not drawn yet waits a frame at a time and gives up after the bound; a

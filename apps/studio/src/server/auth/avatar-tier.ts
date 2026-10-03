@@ -1,4 +1,4 @@
-// The avatar store per tier (docs/PEOPLE.md 4.3; AUDIT.md defect 12; avatars 3): the public
+// The avatar store per tier (docs/archive/rounds/PEOPLE.md 4.3; AUDIT.md defect 12; avatars 3): the public
 // Blob store when the deck store is the blob tier, so the files are public URLs an `<img>` can
 // load and never the function's disk; the file store under `<stateDir>/users/` on a checkout or
 // a tmp store, served by routes/api/avatar.$.ts. The two readers of the folder (the writer here

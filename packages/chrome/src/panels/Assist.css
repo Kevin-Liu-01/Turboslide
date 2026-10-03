@@ -1,4 +1,4 @@
-/* The Assist panel (Assist.tsx; docs/PRODUCT.md 6.1): the Panel frame, the first line in
+/* The Assist panel (Assist.tsx; docs/archive/rounds/PRODUCT.md 6.1): the Panel frame, the first line in
    titanium, the three starter cards as ruled rows, a log region of cards and sentences, the
    composer at the bottom. Inter at 13 px, paper and ink, one hairline per boundary, the tokens
    only; nothing decorative (docs/brand.md section 9, docs/grammar.md copy rules). */
@@ -10,7 +10,7 @@
   color: var(--pt-ink);
 }
 
-/* the one line under the composer (docs/POLISH.md 2.9 item 118): nothing is written until an
+/* the one line under the composer (docs/archive/rounds/POLISH.md 2.9 item 118): nothing is written until an
    accept; the provider words live in the Assist button's tooltip and the Help dialog */
 .ts-assist-note {
   margin: 0;

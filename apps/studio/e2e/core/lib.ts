@@ -515,7 +515,7 @@ export async function newDeck(
       .isVisible()
       .catch(() => false)
   ) {
-    /* the floating card has an X; the Share dialog's modal prompt has Skip (docs/PRODUCT.md section 2 rank 4) */
+    /* the floating card has an X; the Share dialog's modal prompt has Skip (docs/archive/rounds/PRODUCT.md section 2 rank 4) */
     if ((await ctl(page, 'dialog.namePrompt.close').count()) > 0)
       await ctl(page, 'dialog.namePrompt.close')
         .click()
@@ -766,7 +766,7 @@ export async function otherContext(
 }
 
 /**
- * The same person in a second browser (docs/SYNC.md 6.1's B; the ordering audit's run 2): a fresh
+ * The same person in a second browser (docs/archive/rounds/SYNC.md 6.1's B; the ordering audit's run 2): a fresh
  * context that carries the first context's cookies and storage, so the second tab is an editor of
  * the deck the first made and its stream carries a client id of its own. No cookie is read or
  * printed here; Playwright copies the storage state from one context into the other.
@@ -942,7 +942,7 @@ export function pptxSlides(bytes: Buffer): string[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// the agent surface and the logo routes (the features round, docs/FEATURES.md 4.2, 4.11, 7.1)
+// the agent surface and the logo routes (the features round, docs/archive/rounds/FEATURES.md 4.2, 4.11, 7.1)
 
 /**
  * The bearer a spec sends to the agent surface on a deployment: TURBOSLIDE_TOKEN (the
@@ -1032,7 +1032,7 @@ export function pngSize(bytes: Buffer): { width: number; height: number } | null
 }
 
 // ---------------------------------------------------------------------------------------------
-// the shader library (the features round, ship two; docs/FEATURES.md section 5, 7.1): the shader
+// the shader library (the features round, ship two; docs/archive/rounds/FEATURES.md section 5, 7.1): the shader
 // block on a slide, its frame asset, the Shader section's sliders, the stage's canvases and the
 // pixel samples the frame rows compare. Every read goes through the page; a PNG or a JPEG the
 // spec holds as bytes is decoded by the page's own canvas, so no image library is needed here.
@@ -1181,7 +1181,7 @@ export async function shaderCards(
   });
 }
 
-// the vector round (docs/VECTOR.md section 4, 6.1): the svg fixtures under e2e/fixtures, the
+// the vector round (docs/archive/rounds/VECTOR.md section 4, 6.1): the svg fixtures under e2e/fixtures, the
 // paste and drop events built in the page (the pattern of core/images.spec.ts), the vector picture
 // placed as a setup write, the asset record read through slide.get and the picture's img facts
 
@@ -1960,7 +1960,7 @@ export async function dropFileAt(
     });
 }
 
-/** The asset record a slide references, through slide.get's `assets` (docs/VECTOR.md 4.1). */
+/** The asset record a slide references, through slide.get's `assets` (docs/archive/rounds/VECTOR.md 4.1). */
 export async function assetOf(
   page: Page,
   slideId: string,
@@ -1975,7 +1975,7 @@ export async function assetOf(
 }
 
 /**
- * Places a vector picture as a setup write (docs/VECTOR.md 4.3: the svg goes to asset.add as a
+ * Places a vector picture as a setup write (docs/archive/rounds/VECTOR.md 4.3: the svg goes to asset.add as a
  * data URL and takes the intake's svg branch), then a picture block of the upload's kind.
  */
 export async function placeSvgPicture(

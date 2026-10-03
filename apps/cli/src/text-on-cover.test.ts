@@ -1,4 +1,4 @@
-// The text actions on the cover's field objects (docs/RETURN.md 2.14 item 1; docs/POLISH.md 2.3
+// The text actions on the cover's field objects (docs/archive/rounds/RETURN.md 2.14 item 1; docs/archive/rounds/POLISH.md 2.3
 // item 18; VERIFICATION.md "Polish round, pass 2" finding 8): `text.list`, `text.indent` and
 // `text.case` name the title slide's `heading`, which is a slide field and no block, so the store
 // converts the slide to a canvas in the same write (the measured slide.replace of withCanvas in

@@ -2,7 +2,7 @@ import type { AssistCard, AssistRow } from '@turboslide/schema/actions';
 import { plainText } from '@turboslide/schema/text';
 
 /**
- * The pure half of the Assist panel (docs/PRODUCT.md 6.1 "The cards"): the before and after of a
+ * The pure half of the Assist panel (docs/archive/rounds/PRODUCT.md 6.1 "The cards"): the before and after of a
  * row with the changed words marked, and the panel's state words. No React, so `assist-panel.test`
  * pins it in Node.
  */
@@ -77,7 +77,7 @@ export function cardSlideIds(card: Pick<AssistCard, 'rows'>): string[] {
   return ids;
 }
 
-/** The panel's card ids: `panel.assist.card.<n>` from 1 (docs/PRODUCT.md 7.1). */
+/** The panel's card ids: `panel.assist.card.<n>` from 1 (docs/archive/rounds/PRODUCT.md 7.1). */
 export function cardControl(n: number, part?: 'accept' | 'dismiss' | 'change'): string {
   return part === undefined ? `panel.assist.card.${n}` : `panel.assist.card.${n}.${part}`;
 }

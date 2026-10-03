@@ -41,7 +41,7 @@
   outline-offset: -1px;
 }
 
-/* The two row popover of docs/PRODUCT.md section 2 rank 19: the Link label with the linked words,
+/* The two row popover of docs/archive/rounds/PRODUCT.md section 2 rank 19: the Link label with the linked words,
    then the address field, Slides in this presentation, Apply and Remove. Line law: one hairline
    ring on the plate and one on each field; nothing else draws a line. */
 .ts-link-pop {
@@ -87,7 +87,7 @@
   border: 1px solid var(--pt-hair);
 }
 
-/* as wide as "Slides in this presentation" (docs/POLISH.md 2.6 item 70; audit-chrome item 22 read
+/* as wide as "Slides in this presentation" (docs/archive/rounds/POLISH.md 2.6 item 70; audit-chrome item 22 read
    "Slides in this pres…") */
 .ts-run-link-slide {
   appearance: none;

@@ -239,7 +239,7 @@ describe('the sniff and the sharp guard (SPEC-3 8.5, 0.28; report 04 F17)', () =
     expect(sniffImage(new Uint8Array(heif))).toBeNull();
     expect(sniffImage(new Uint8Array(Buffer.from('%PDF-1.4')))).toBeNull();
     expect(sniffImage(new Uint8Array(0))).toBeNull();
-    /* svg joined the hosted list with the vector round; imageInfo still refuses it without a sanitizer (docs/VECTOR.md 4.2) */
+    /* svg joined the hosted list with the vector round; imageInfo still refuses it without a sanitizer (docs/archive/rounds/VECTOR.md 4.2) */
     expect(HOSTED_INPUT_FORMATS).toEqual(['png', 'jpeg', 'webp', 'gif', 'svg']);
   });
 
@@ -387,10 +387,10 @@ describe('the pinned lookup (SPEC-3 0.30, 8.6; report 04 F3 sketches 3 and 4)', 
   });
 });
 
-// The features round (docs/FEATURES.md 4.7; audit-logos 16 and 4): the browser transports'
+// The features round (docs/archive/rounds/FEATURES.md 4.7; audit-logos 16 and 4): the browser transports'
 // allowlist sentence names the sites and no CLI flag, the pinned fetch carries a User-Agent, and
 // the svg raster policy lets a hosted imageInfo keep an svg while the refusal's line is unchanged.
-describe('the features round (docs/FEATURES.md 4.7)', () => {
+describe('the features round (docs/archive/rounds/FEATURES.md 4.7)', () => {
   afterEach(() => {
     setIntakePolicy(CHECKOUT_INTAKE_POLICY);
   });

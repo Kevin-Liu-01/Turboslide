@@ -106,7 +106,7 @@ function cellId(prefix: string, row: number, column: number): string {
 }
 
 /**
- * The cell the stage asked for (docs/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT): a
+ * The cell the stage asked for (docs/archive/rounds/FEATURES.md 2.2 rank 7; Editor.tsx CHART_CELL_EVENT): a
  * double click on the chart, Enter on it or a click on a bar, a point or a slice names a cell of
  * the grid. A mounted section takes it at once; a section that mounts later (Format options was
  * closed, the Overlay opens it on the same event) reads the last request for its chart on mount,
@@ -145,7 +145,7 @@ export function ChartSection({
   const control = 'formatOptions.chart';
   const rows = block.categories.length;
   const columns = block.series.length;
-  /* Add series and Add category refused with their reason (docs/OBJECTS.md 4.2 item 1: a pie
+  /* Add series and Add category refused with their reason (docs/archive/rounds/OBJECTS.md 4.2 item 1: a pie
      draws one series; the caps of SPEC-2 2.8.1): the button and the header menu's row keep their
      tooltip through aria-disabled and the click writes nothing */
   const seriesRefusal = addSeriesRefusal(block);
@@ -155,7 +155,7 @@ export function ChartSection({
   const [swatchesFor, setSwatchesFor] = useState<number | null>(null);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
   /* the right click menu of a series or category header: Add series or Add category, then Remove
-     (docs/FEATURES.md 2.2 rank 12; docs/OBJECTS.md 4.2 item 1) */
+     (docs/archive/rounds/FEATURES.md 2.2 rank 12; docs/archive/rounds/OBJECTS.md 4.2 item 1) */
   const [menu, setMenu] = useState<(Active & { x: number; y: number }) | null>(null);
   const grid = useRef<HTMLTableElement>(null);
   const focusAfter = useRef<Active | null>(null);
@@ -317,7 +317,7 @@ export function ChartSection({
         startEdit(row, column);
         break;
       case 'Escape':
-        /* the grid owns its keys (docs/FEATURES.md 2.2 rank 1; audit-objects 1): Escape on the
+        /* the grid owns its keys (docs/archive/rounds/FEATURES.md 2.2 rank 1; audit-objects 1): Escape on the
            active cell with no open field leaves the grid and keeps the chart selected and the
            panel open; the stage's Escape never sees it, so the selection stands */
         event.currentTarget.blur();
@@ -347,7 +347,7 @@ export function ChartSection({
   };
 
   /**
-   * A right click on a series or a category header lists Remove (docs/FEATURES.md 2.2 rank 12;
+   * A right click on a series or a category header lists Remove (docs/archive/rounds/FEATURES.md 2.2 rank 12;
    * audit-objects 21: no right click row named a series). One row, the product's own menu, the
    * browser's never; Escape or a click elsewhere closes it.
    */

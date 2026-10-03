@@ -33,7 +33,7 @@ describe('createsDraft', () => {
     expect(createsDraft('slide.import')).toBe(true);
   });
 
-  it('carries the logo picker’s three ids once the action table names them (docs/FEATURES.md 4.11)', () => {
+  it('carries the logo picker’s three ids once the action table names them (docs/archive/rounds/FEATURES.md 4.11)', () => {
     // the pattern of SERVER_SIDE_WINDOW_ACTIONS_PENDING: the list is filtered through the table,
     // so on a tree before B6's entries land it is empty and nothing here is claimed
     expect([...SERVER_SIDE_WINDOW_ACTIONS_F1_IDS]).toEqual([
@@ -53,7 +53,7 @@ describe('createsDraft', () => {
     }
   });
 
-  it('carries the shader library’s ids once the action table names them (docs/FEATURES.md 5.8)', () => {
+  it('carries the shader library’s ids once the action table names them (docs/archive/rounds/FEATURES.md 5.8)', () => {
     // the same filter as the logo ids: empty on a tree before B5's entries land, every named id
     // on both lists once they do, the writes creating a /new draft's deck
     expect([...SERVER_SIDE_WINDOW_ACTIONS_F2_IDS]).toEqual([
@@ -103,7 +103,7 @@ describe('createsDraft', () => {
   });
 });
 
-// The store status handlers of the sync and costs round (docs/SYNC.md 6.3, 3.6): `sync.status`
+// The store status handlers of the sync and costs round (docs/archive/rounds/SYNC.md 6.3, 3.6): `sync.status`
 // answers the store's view with the call counters once the table names `storeCalls`, and
 // `deck.info` counts the log's records and holes once the table names them. A fake store with a
 // log that misses record 2; the dispatcher parses every answer against the table, so the test

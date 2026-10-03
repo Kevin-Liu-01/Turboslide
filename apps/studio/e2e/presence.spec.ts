@@ -241,7 +241,7 @@ test('the five fixed slots exist at first paint with nobody present and the page
   expect(box?.height).toBe(32);
   await expect(presence.locator('.ts-presence-slot.is-empty')).toHaveCount(4);
   await expect(page.locator('[data-control="presence.more"]')).toHaveText('');
-  /* docs/FOCUS.md 3.2 parks title.inbox and docs/RETURN.md 4.3 draws no inbox slot while the
+  /* docs/FOCUS.md 3.2 parks title.inbox and docs/archive/rounds/RETURN.md 4.3 draws no inbox slot while the
      plate is parked (the matrix row chrome.cluster.gaps-heights): in the default view the slot is
      in the DOM, empty and without a box; the plate is asserted with Tools > Advanced tools on,
      through the product's own row (C2-F17, b7's C2-R21: a parked row is asserted behind the

@@ -1,4 +1,4 @@
-// The shader commands from the shell (docs/POLISH.md item 119; the action table's `shader.*`
+// The shader commands from the shell (docs/archive/rounds/POLISH.md item 119; the action table's `shader.*`
 // usages): the catalog, a shader object on a slide, one of its fields, its frame from a PNG,
 // the hosted capture and a render to a file, each the same handler the studio's `shader.*`
 // actions run (@turboslide/materials/actions), over the deck folder the CLI works on.

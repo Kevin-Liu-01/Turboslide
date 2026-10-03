@@ -1,4 +1,4 @@
-// The svg asset of the vector round (docs/VECTOR.md 4.1, 6.3): the record validates with `kind`
+// The svg asset of the vector round (docs/archive/rounds/VECTOR.md 4.1, 6.3): the record validates with `kind`
 // and `vector`, and `vectorOf` answers the vector files of a new svg asset, a ship one logo's
 // untinted source, and nothing for a tinted logo or a raster.
 import { describe, expect, it } from 'vitest';
@@ -40,7 +40,7 @@ const shipOneLogo: Asset = {
   inline: 'pass-through',
 };
 
-describe('the svg asset (docs/VECTOR.md 4.1)', () => {
+describe('the svg asset (docs/archive/rounds/VECTOR.md 4.1)', () => {
   it('validates with kind svg, vector twins and the sanitizer record on a file source', () => {
     expect(assetSchema.safeParse(upload).success).toBe(true);
     const tinted: Asset = {

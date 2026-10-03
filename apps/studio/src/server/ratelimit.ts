@@ -86,9 +86,9 @@ export type Quota = {
 
 const TOO_MANY = 'Too many changes at once. Try again in a minute';
 const EXPORT_LIMIT = 'You have reached today’s export limit';
-/** The assist's refusal sentence (docs/PRODUCT.md 6.3). */
+/** The assist's refusal sentence (docs/archive/rounds/PRODUCT.md 6.3). */
 export const ASSIST_TOO_MANY = 'Too many assistant requests. Try again in a minute';
-/** The anonymous day cap of the assist without `TURBOSLIDE_ASSIST_DAY_CAP` (docs/PRODUCT.md 6.3). */
+/** The anonymous day cap of the assist without `TURBOSLIDE_ASSIST_DAY_CAP` (docs/archive/rounds/PRODUCT.md 6.3). */
 export const ASSIST_DAY_CAP_DEFAULT = 20;
 
 /** SPEC-3 8.3, the "Application quota beside it" column and the three rows without a WAF rule. */
@@ -258,7 +258,7 @@ export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
     limits: { anonymous: 500_000, account: 2_000_000, agent: 2_000_000 },
     sentence: TOO_MANY,
   },
-  /* The assist's two rows (docs/PRODUCT.md 6.3; audit-assist 5): a model call is the costliest
+  /* The assist's two rows (docs/archive/rounds/PRODUCT.md 6.3; audit-assist 5): a model call is the costliest
      request the product makes, so it is counted per deck per minute and per identity per day.
      On a deployment with anonymous principals every seller is anonymous, so the caps that apply
      are 6 a minute and 20 a day; `TURBOSLIDE_ASSIST_DAY_CAP` raises the anonymous day cap for a
@@ -279,7 +279,7 @@ export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
   },
 };
 
-/** The variable that raises the anonymous day cap of `assistCallsPerDay` (docs/PRODUCT.md 6.3). */
+/** The variable that raises the anonymous day cap of `assistCallsPerDay` (docs/archive/rounds/PRODUCT.md 6.3). */
 export const ASSIST_DAY_CAP_ENV = 'TURBOSLIDE_ASSIST_DAY_CAP';
 
 /**
@@ -609,7 +609,7 @@ export async function checkQuota(
 }
 
 /**
- * The assist's two rows in one call (docs/PRODUCT.md 6.3, 8.3): the per deck minute first, then
+ * The assist's two rows in one call (docs/archive/rounds/PRODUCT.md 6.3, 8.3): the per deck minute first, then
  * the day, whose anonymous cap reads `TURBOSLIDE_ASSIST_DAY_CAP`. A refusal names the row that
  * refused; the route and the agent action's handler both call this, so one table holds on every
  * transport. The minute row is counted before the day row so a refused minute never spends a

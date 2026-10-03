@@ -81,7 +81,7 @@ type Popover = 'list' | 'options' | 'shortcuts' | null;
 /** How long the toolbar stays after the pointer leaves its corner (SPEC 9.2). */
 const BAR_FADE_MS = 2000;
 /**
- * How long the bar shows on entry and after a pointer move anywhere over the show (docs/PRODUCT.md
+ * How long the bar shows on entry and after a pointer move anywhere over the show (docs/archive/rounds/PRODUCT.md
  * 3.1.1; audit-interface 13): about three seconds, as Google's does, so a presenter who has never
  * used the show learns where the controls are; the corner below keeps it up while the pointer is
  * there.
@@ -108,7 +108,7 @@ const ICONS: PresentIcons = {
 
 const tip: PresentTip = (content) => tipProps(content);
 
-/* the features round, ship two (docs/FEATURES.md 5.6; build/b1.md 2.5): the show's Options menu
+/* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6; build/b1.md 2.5): the show's Options menu
    mirrors View > Play shaders over the same per browser setting */
 const PLAY_SHADERS = {
   label: 'Play shaders',
@@ -248,7 +248,7 @@ export function Slideshow({
 
   const [blank, setBlank] = useState<BlankSlide | null>(null);
   const [laser, setLaser] = useState(false);
-  /* past the last slide (docs/POLISH.md item 98): the end plate, which a click or the next key leaves */
+  /* past the last slide (docs/archive/rounds/POLISH.md item 98): the end plate, which a click or the next key leaves */
   const [ended, setEnded] = useState(false);
   const [pointer, setPointer] = useState({ x: -100, y: -100 });
   const [fullscreen, setFullscreen] = useState(isFullscreen);
@@ -344,7 +344,7 @@ export function Slideshow({
     onState?.({ blank, laser, fullscreen });
   }, [blank, laser, fullscreen, onState]);
 
-  /* a slide link on a slide moves the show (docs/PRODUCT.md section 2 rank 19; build/b2.md R5):
+  /* a slide link on a slide moves the show (docs/archive/rounds/PRODUCT.md section 2 rank 19; build/b2.md R5):
      #next, #previous, #first and #last resolve against the play list here, #s/<id> too */
   useEffect(() => {
     const el = root.current;
@@ -571,7 +571,7 @@ export function Slideshow({
      it is on the client so its two Later stubs (Auto-play, More > Download as PDF) hide and show
      with the editor's rows. The Options menu is built only when opened, so no server markup reads it. */
   const [advancedTools, setAdvancedTools] = useState(false);
-  /* View > Play shaders (docs/FEATURES.md 5.6): read once on the client, written on a pick, so
+  /* View > Play shaders (docs/archive/rounds/FEATURES.md 5.6): read once on the client, written on a pick, so
      the editor's View row reads the same record on its next open */
   const [playShaders, setPlayShaders] = useState<PlayShaders>('show');
   useMountEffect(() => {

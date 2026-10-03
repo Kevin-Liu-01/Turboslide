@@ -3,7 +3,7 @@ import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
 
 /**
- * The page's links (gslides-parity SPEC-4 2.5, 0.39; docs/POLISH.md 3.7): an address inside the
+ * The page's links (gslides-parity SPEC-4 2.5, 0.39; docs/archive/rounds/POLISH.md 3.7): an address inside the
  * route tree is the router's `Link` with `preload="intent"`, so its loader runs on hover and the
  * move is a same document transition; `/new` is a document navigation on purpose (an editor route
  * whose graph this page must not carry, and the Speculation Rules candidate), an in page anchor

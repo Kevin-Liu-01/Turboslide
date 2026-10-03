@@ -1,4 +1,4 @@
-// The ten mark fixture upstream (docs/FEATURES.md 4.9; build/b6.md): the SVG files the fixture
+// The ten mark fixture upstream (docs/archive/rounds/FEATURES.md 4.9; build/b6.md): the SVG files the fixture
 // serves under `TURBOSLIDE_LOGO_UPSTREAM=fixture`, keyed by the path `icons.json` names. The
 // well known marks are the files thesvg.org served on 2026-09-22 through the jsDelivr mirror,
 // verbatim (their licences are in manifest.ts); acme, gradientco and northwind are Turboslide's own

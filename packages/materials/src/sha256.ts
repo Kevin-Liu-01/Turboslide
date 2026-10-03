@@ -1,7 +1,7 @@
 // SHA-256 in plain TypeScript (FIPS 180-4), synchronous and browser safe: the same block function
 // as packages/identity/src/sha256.ts, repeated here because the materials package depends on
 // neither the identity package nor node:crypto in the browser graph (AGENTS.md, the one way
-// dependency direction), and the frame key of docs/FEATURES.md 5.5 is computed in the editor
+// dependency direction), and the frame key of docs/archive/rounds/FEATURES.md 5.5 is computed in the editor
 // (the client capture names the key it writes) and on the server (the handler checks it), both
 // synchronously while a slider settles. Not a general hashing library: one call per key over a
 // few hundred bytes of canonical JSON.

@@ -3,7 +3,7 @@
 // plate cell is the fallback on a build that still draws the gallery, recorded as the route),
 // their drawing, the default look on both appearances, the battery of move, handles, ring, fill,
 // border, text, duplicate, delete, undo, redo, Format options, the reload and the viewer, and the
-// right click menu. The two export rows are core/export.spec.ts. The vector round (docs/VECTOR.md
+// right click menu. The two export rows are core/export.spec.ts. The vector round (docs/archive/rounds/VECTOR.md
 // 2 and 6.1) adds the geometry interpreter's rows (every preset drawn from its definition: the
 // sheet's path compared with `shapePath` imported from packages/schema/src/shapes.ts under Node's
 // type stripping, the same code the page runs), the four glyph grids, the seven Insert > Shape
@@ -33,9 +33,9 @@ export const IDS = [
   'shapes.text.colour-toolbar',
   'shapes.text.enter-opens-label',
   'shapes.borders-lines.menu',
-  /* the features round, ship one (docs/FEATURES.md 2.2 rank 3): the label centred by default */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2 rank 3): the label centred by default */
   'shapes.label.centred-default',
-  /* the vector round (docs/VECTOR.md 6.1): the interpreter, the grids, the icons, the two plates */
+  /* the vector round (docs/archive/rounds/VECTOR.md 6.1): the interpreter, the grids, the icons, the two plates */
   'shapes.insert.grid-shapes',
   'shapes.geometry.shapes.hexagon-sheet',
   'shapes.geometry.shapes.star5-adjust',
@@ -58,7 +58,7 @@ export const IDS = [
   'shapes.mask-image.plate',
 ];
 
-/** The seven Insert > Shape rows of docs/VECTOR.md 2.6: the three named rows, then the four categories. */
+/** The seven Insert > Shape rows of docs/archive/rounds/VECTOR.md 2.6: the three named rows, then the four categories. */
 const NAMED_ROWS = [
   'insert.shape.shapes.rectangle',
   'insert.shape.shapes.rounded',
@@ -270,7 +270,7 @@ export async function run(t) {
       };
     }, id);
   const insertShape = async (kind, at, dragTo = null) => {
-    /* the vector round (docs/VECTOR.md 2.6): the three named rows sit directly under Insert >
+    /* the vector round (docs/archive/rounds/VECTOR.md 2.6): the three named rows sit directly under Insert >
        Shape (the Shapes container left) and the plate is the Shapes gallery's tile; the two
        routes of the tree before the round hovered the container and read "neither route" on
        every insert of the area (the integrator's gates of 2026-09-25) */
@@ -439,7 +439,7 @@ export async function run(t) {
   await t.step(
     'shapes.insert.named-rows',
     'open Insert > Shape and the toolbar Shape button',
-    'Rectangle, Rounded rectangle and Ellipse as named rows above Shapes, Arrows, Callouts and Equation in both (docs/VECTOR.md 2.6)',
+    'Rectangle, Rounded rectangle and Ellipse as named rows above Shapes, Arrows, Callouts and Equation in both (docs/archive/rounds/VECTOR.md 2.6)',
     async () => {
       await t.clearAll();
       await t.openMenu('insert');
@@ -1128,7 +1128,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's rows (docs/RETURN.md 2.2, section 5)
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.2, section 5)
   /** The colour of the shape's label as drawn, and the stroke facts. */
   const labelColour = (blockId) =>
     page.evaluate((bid) => {
@@ -1281,7 +1281,7 @@ export async function run(t) {
   t.deck.shape = id;
   t.deck.shapeIds = [rect?.id, rounded?.id, ellipse?.id].filter(Boolean);
 
-  /* the features round, ship one (docs/FEATURES.md 2.2 rank 3): a shape's label is centred by
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2 rank 3): a shape's label is centred by
      default, the renderer's default the exporter reads; the row draws its own rounded rectangle
      by a drag so the label meets a block with no explicit alignment */
   await t.step(
@@ -1370,7 +1370,7 @@ export async function run(t) {
       };
     },
   );
-  // ---- the vector round (docs/VECTOR.md sections 2, 3 and 6.1): the geometry interpreter, the
+  // ---- the vector round (docs/archive/rounds/VECTOR.md sections 2, 3 and 6.1): the geometry interpreter, the
   // four glyph grids, the seven Insert > Shape rows with their icons, Change shape and Mask image
   /** The schema's shapes module under Node's type stripping: the same code the page runs. */
   let schema = null;
@@ -1403,7 +1403,7 @@ export async function run(t) {
           strokeWidth: parseFloat(cs.strokeWidth) || 0,
           opacity: parseFloat(cs.opacity),
           fillOpacity: parseFloat(cs.fillOpacity),
-          /* the shade overlay of docs/VECTOR.md 2.3 (primitives.ts shadeOverlay) */
+          /* the shade overlay of docs/archive/rounds/VECTOR.md 2.3 (primitives.ts shadeOverlay) */
           shade: el.getAttribute('data-shade'),
         };
       });
@@ -1424,7 +1424,7 @@ export async function run(t) {
   const first = (facts) => facts?.paths?.[0] ?? null;
   /**
    * The geometry paths of a block's svg: the distinct `d` strings in order. A shade path's
-   * overlay (docs/VECTOR.md 2.3: a paper or ink filled path over the same outline) repeats its
+   * overlay (docs/archive/rounds/VECTOR.md 2.3: a paper or ink filled path over the same outline) repeats its
    * `d`, so the joined distinct strings are what `shapePath` answers.
    */
   const geometryPaths = (facts) => {
@@ -1539,7 +1539,7 @@ export async function run(t) {
       return {
         ok: r.present,
         observed: r.switched
-          ? `insert.shape.gallery is parked on this build (docs/VECTOR.md 2.6, B1); Tools > Advanced tools turned on; the row drawn ${r.present}${schemaError ? `; the schema import failed: ${schemaError}` : ''}`
+          ? `insert.shape.gallery is parked on this build (docs/archive/rounds/VECTOR.md 2.6, B1); Tools > Advanced tools turned on; the row drawn ${r.present}${schemaError ? `; the schema import failed: ${schemaError}` : ''}`
           : `insert.shape.gallery is in the default view (${r.present})${schemaError ? `; the schema import failed: ${schemaError}` : ''}`,
       };
     },
@@ -1547,7 +1547,7 @@ export async function run(t) {
   const galleryReachable = reach.ok === true;
   const notReachable = (row) => ({
     ok: null,
-    observed: `not on this build: ${row} is not reachable with the switch on (docs/VECTOR.md 2.6, B1 by request in model.ts)`,
+    observed: `not on this build: ${row} is not reachable with the switch on (docs/archive/rounds/VECTOR.md 2.6, B1 by request in model.ts)`,
   });
 
   let hexagonFromGrid = null;
@@ -2057,7 +2057,7 @@ export async function run(t) {
   await t.step(
     'shapes.geometry.arrows.curved-right',
     'Curved right arrow by a drag to 240 by 240',
-    'three paths with arcs in each; the shade path drawn as the ink overlay at the opacity of docs/VECTOR.md 2.3',
+    'three paths with arcs in each; the shade path drawn as the ink overlay at the opacity of docs/archive/rounds/VECTOR.md 2.3',
     async () => {
       const n0 = (await t.objectsOf(S)).length;
       const r = await insertFromGrid(
@@ -2550,7 +2550,7 @@ export async function run(t) {
       };
       const m = judge(menu);
       let dropdown = [];
-      /* the polish round (docs/POLISH.md 2.6 item 74): the Shape button is a split like Image and
+      /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74): the Shape button is a split like Image and
          Line, its main half arms the rectangle tool and its arrow opens the dropdown */
       const button = (await t.visible('toolbar.insertShape.arrow'))
         ? 'toolbar.insertShape.arrow'

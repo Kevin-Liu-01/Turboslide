@@ -1,4 +1,4 @@
-// The logo sanitizer (docs/FEATURES.md 4.7; audit-logos 2, 6.2; judge-design rejection 15): an
+// The logo sanitizer (docs/archive/rounds/FEATURES.md 4.7; audit-logos 2, 6.2; judge-design rejection 15): an
 // allowlist parser over the SVG a logo source answers, so the file the picker draws, the store
 // caches and the deck keeps as `sourceFile` holds shapes, gradients, clip paths, masks, patterns and
 // the listed filter primitives and nothing else. A small strict XML reader (no DOM library: the
@@ -7,17 +7,17 @@
 // does not start with `#`, every `url(` that is not `url(#<id>)`, a `style` attribute or element
 // that imports or reaches out, `script`, `foreignObject`, `a`, `iframe`, the animation elements
 // and every element off the list, and records the drop. `text`, `tspan` and `textPath` are kept
-// with their words and their font attributes since the polish round (docs/POLISH.md item 32;
+// with their words and their font attributes since the polish round (docs/archive/rounds/POLISH.md item 32;
 // audit-objects item 15: a pasted svg lost its wordmark's text while the uploaded copy kept it),
 // so a wordmark set in type survives and the mono tint recolours it like a path; a `textPath`'s
 // `href` follows the local rule. An `image` element is kept when
 // its `href` is a `data:image/(png|jpeg|gif|webp);base64,` URI (Figma's Copy as SVG embeds raster
-// fills this way) and dropped otherwise (docs/VECTOR.md 4.2). When a dropped element draws (text,
+// fills this way) and dropped otherwise (docs/archive/rounds/VECTOR.md 4.2). When a dropped element draws (text,
 // an image, a primitive off the list, a subtree with shapes in it) the variant's look changed, so
 // `draws` is true and the caller marks the variant unavailable (4.7). A `viewBox` is added from
 // `width` and `height` when absent; a file over the cap is refused before parsing with the
 // sentence naming the cap; a file that does not parse answers "This logo's file is broken on
-// thesvg.org". The vector round reuses the same walk for an uploaded svg (docs/VECTOR.md 4.2):
+// thesvg.org". The vector round reuses the same walk for an uploaded svg (docs/archive/rounds/VECTOR.md 4.2):
 // `sanitizeLogoSvg` takes `{ maxBytes, words }`, so the intake runs it under the upload's 2 MB cap
 // with the upload's own sentences while the logo picker keeps `LOGO_MAX_BYTES` and `LOGO_WORDS`.
 // The mono tint (4.4) rewrites every fill and stroke over the same tree, and the attribution
@@ -34,7 +34,7 @@ export type SanitizeWords = {
   broken: string;
 };
 
-/** The logo picker's words, the default (docs/FEATURES.md 4.7). */
+/** The logo picker's words, the default (docs/archive/rounds/FEATURES.md 4.7). */
 export const LOGO_SANITIZE_WORDS: SanitizeWords = {
   tooLarge: (capBytes) => LOGO_WORDS.tooLarge(capBytes),
   broken: LOGO_WORDS.broken,
@@ -46,7 +46,7 @@ export type SanitizeOptions = {
   words?: SanitizeWords;
 };
 
-/** An `image` href the walk keeps (docs/VECTOR.md 4.2): a raster data URI, base64, of the four formats. */
+/** An `image` href the walk keeps (docs/archive/rounds/VECTOR.md 4.2): a raster data URI, base64, of the four formats. */
 const DATA_IMAGE_HREF = /^\s*data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=\s]*$/i;
 
 /** True when an `image` element's href is a raster data URI the walk keeps. */
@@ -96,7 +96,7 @@ export const KEPT_ELEMENTS: ReadonlySet<string> = new Set([
   'textPath',
 ]);
 
-/** The elements that hold words the walk keeps (docs/POLISH.md item 32). */
+/** The elements that hold words the walk keeps (docs/archive/rounds/POLISH.md item 32). */
 const TEXT_ELEMENTS: ReadonlySet<string> = new Set(['text', 'tspan', 'textPath']);
 
 /** The elements whose drop changes the look (4.7), beside a subtree that holds a shape. */
@@ -619,7 +619,7 @@ function imageHrefOf(element: SvgElement): string | undefined {
  * The allowlist walk over a parsed tree: kept elements keep their kept attributes and their
  * children; every other element leaves with its subtree and is recorded; a `<style>` whose text
  * imports or reaches out leaves too (its rules drew colours, so it counts as a draw); an `image`
- * stays only with a raster data URI href (docs/VECTOR.md 4.2) and leaves as a draw otherwise;
+ * stays only with a raster data URI href (docs/archive/rounds/VECTOR.md 4.2) and leaves as a draw otherwise;
  * words stay inside `title`, `desc`, `style` and the text elements (item 32).
  */
 export function sanitizeTree(root: SvgElement): {
@@ -684,7 +684,7 @@ export function sanitizeTree(root: SvgElement): {
 }
 
 /**
- * Sanitizes one svg file (4.7; docs/VECTOR.md 4.2): the cap before parsing, the parse, the walk,
+ * Sanitizes one svg file (4.7; docs/archive/rounds/VECTOR.md 4.2): the cap before parsing, the parse, the walk,
  * the viewBox from width and height when absent, the size. Throws LogoTooLargeError or
  * LogoBrokenError carrying the caller's words (`options.words`; the logo picker's by default)
  * under the caller's cap (`options.maxBytes`; `LOGO_MAX_BYTES` by default).

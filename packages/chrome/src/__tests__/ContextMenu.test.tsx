@@ -48,7 +48,7 @@ const CARD_ORDER = [
 
 /**
  * The same menu with the switch off: the Later row Transition is absent (docs/FOCUS.md 3.1, 3.4);
- * Change theme returned to the default view in the return round (docs/RETURN.md 2.13).
+ * Change theme returned to the default view in the return round (docs/archive/rounds/RETURN.md 2.13).
  */
 const CARD_ORDER_DEFAULT = CARD_ORDER.filter((label) => label !== 'Transition');
 
@@ -169,7 +169,7 @@ describe('ContextMenu', () => {
         .querySelector('[data-menu-item="slide.changeBackground"]')
         ?.getAttribute('aria-disabled'),
     ).toBeNull();
-    /* a right click lights no row (docs/POLISH.md 2.6 item 74; audit-chrome item 48): the list
+    /* a right click lights no row (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 48): the list
        itself holds the focus so Escape and the arrows land on it, and Down lights the first row */
     expect(document.activeElement).toBe(menu);
     expect(document.querySelectorAll('[role="menu"] [role^="menuitem"]:focus')).toHaveLength(0);

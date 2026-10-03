@@ -27,14 +27,14 @@ export function paraSpacingDeclarations(typography: Typography | undefined): str
 }
 
 export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): string {
-  /* one of the multiline pointers since the polish round (docs/POLISH.md 2.3 item 19): a
+  /* one of the multiline pointers since the polish round (docs/archive/rounds/POLISH.md 2.3 item 19): a
      paragraph break is one .para span each; a one paragraph heading renders as before */
   const text = renderMultiline(block.text, ctx, block, '/text');
   const inline = style(
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     block.marginBottom !== undefined && `margin-bottom:${block.marginBottom}px`,
     ...typographyDeclarations(block.typography),
-    /* the kit's colour on a heading (docs/PRODUCT.md 4.1; build/b5.md R9) */
+    /* the kit's colour on a heading (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R9) */
     block.color !== undefined && `color:${colorCss(block.color)}`,
   );
   const run = runAttr(ctx, block.id, 'text');

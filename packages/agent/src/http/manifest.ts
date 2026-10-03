@@ -98,7 +98,7 @@ export function expectedByMilestone(
   // GS1, GS2 and GS3 are the Google Slides parity rounds, landed after M6 (docs/gslides-parity/
   // MILESTONES.md, MILESTONES-2.md, MILESTONES-3.md); an id of a round after `current` is never
   // expected, and an unknown milestone answers -1 on both sides, which reads as expected
-  // P1 is the product round (docs/PRODUCT.md), landed after GS3
+  // P1 is the product round (docs/archive/rounds/PRODUCT.md), landed after GS3
   const order = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3', 'P1'];
   const landed = order.indexOf(ACTIONS[id].milestone);
   const wanted = order.indexOf(current);

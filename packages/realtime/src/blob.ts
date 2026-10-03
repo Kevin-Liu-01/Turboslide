@@ -72,7 +72,7 @@ export type BlobSharedDeps = {
   watchComments?: (deckId: string, onChange: (change: SidecarIndexChange) => void) => CommentsWatch;
   /** the tick while the deck is in use or the roster holds another client; HOSTED_POLL_MS by default (the tests shorten it) */
   pollMs?: number;
-  /** the tick when the one tab is alone and quiet (docs/SYNC.md 3.10); HOSTED_POLL_QUIET_MS by default */
+  /** the tick when the one tab is alone and quiet (docs/archive/rounds/SYNC.md 3.10); HOSTED_POLL_QUIET_MS by default */
   quietPollMs?: number;
 };
 
@@ -96,7 +96,7 @@ export type BlobChannelDeps = {
 
 /**
  * The wait between the close of a deck's last stream on the instance and the snapshot prune
- * (docs/SYNC.md 3.6, invariant 13; the sync round fix round, VERIFICATION.md sync pass 1 F6 and
+ * (docs/archive/rounds/SYNC.md 3.6, invariant 13; the sync round fix round, VERIFICATION.md sync pass 1 F6 and
  * F7). A stream closes and reopens without the seller leaving: at its lifetime's end
  * (protocol.ts STREAM_LIFETIME_MS), on a reconnect, on a resync; the client reopens within
  * seconds. A prune at every such close listed `snapshots/` once per tab per rollover, an
@@ -165,7 +165,7 @@ type DeckState = {
 };
 
 /**
- * The origin a record names (docs/SYNC.md 3.2; `Write.origin` carried onto the record by the
+ * The origin a record names (docs/archive/rounds/SYNC.md 3.2; `Write.origin` carried onto the record by the
  * store), or undefined for a record written outside a room or before the round. Read through a
  * shape of its own so this module compiles beside a store whose `VersionRecord` is a step behind.
  */
@@ -200,7 +200,7 @@ export function entryOfRecord(record: VersionRecord): Entry {
 }
 
 /**
- * The answer to a resent POST whose op ids a record already covers (docs/SYNC.md 3.2): one entry
+ * The answer to a resent POST whose op ids a record already covers (docs/archive/rounds/SYNC.md 3.2): one entry
  * per requested op id at the record's seq, in the record's order, the first carrying the
  * record's folded mutations and the rest none, so a client that applies the answer applies the
  * fold once and settles every op by its id (`covers` rides each so a client that acknowledges by
@@ -259,7 +259,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * The record a store's write answered as already committed (docs/SYNC.md 3.2: `{ ok: true,
+ * The record a store's write answered as already committed (docs/archive/rounds/SYNC.md 3.2: `{ ok: true,
  * replayed: <record> }` from the write path's origin check, with no claim and no commit), or
  * undefined for an ordinary commit. Read through its shape so this module compiles beside a
  * store whose `WriteOutcome` is a step behind.
@@ -349,7 +349,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
    * nothing), each with whether it sits on the far side of a hole in the log: a record whose
    * number is not the previous record's plus one, the previous being any record of the log (a
    * named version counts, its number is taken). The store's pull continues past a missing number
-   * since the sync round (docs/SYNC.md 3.6), so the mirror can hold n and n plus 2 without n
+   * since the sync round (docs/archive/rounds/SYNC.md 3.6), so the mirror can hold n and n plus 2 without n
    * plus 1; `announce` reads the flag.
    */
   const recordsAfter = async (
@@ -394,7 +394,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
       state.lastSeq = record.revision;
       if (!isReplayableRecord(record) || afterHole) {
         // a restore: the tabs reload at its revision (isReplayableRecord says why). The first
-        // record above a hole in the log the same way (docs/SYNC.md 3.6, the reader's rule): a
+        // record above a hole in the log the same way (docs/archive/rounds/SYNC.md 3.6, the reader's rule): a
         // tab at the revision under the hole cannot apply an op whose base it never reached, so
         // it reloads once at the head and takes the records after this one as ops
         await local.publish(deckId, checkpointOf(record, true));
@@ -434,7 +434,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
   };
 
   /**
-   * The snapshot prune at the last stream's close (docs/SYNC.md 3.6, invariant 13): the write
+   * The snapshot prune at the last stream's close (docs/archive/rounds/SYNC.md 3.6, invariant 13): the write
    * path prunes every twentieth commit, so a deck edited fewer than twenty times between two
    * visits would keep its unreferenced snapshots until its twentieth record; the close of the
    * deck's last stream on this instance runs the store's prune once, on the deck's queue so it
@@ -491,7 +491,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
    * per tick, the three reads when it moved, the manifest alone every PULSE_SAFETY_TICKS ticks
    * (a writer that stopped between its commit and its pulse put), and the backoff with the
    * `store` events when the store refuses. Runs while a client stream of the deck is open here.
-   * The tick is two paced (docs/SYNC.md 3.10; pulse.ts `pollTickMs`): `pollMs` while an op
+   * The tick is two paced (docs/archive/rounds/SYNC.md 3.10; pulse.ts `pollTickMs`): `pollMs` while an op
    * landed on this instance in the last POLL_ACTIVE_WINDOW_MS, the roster holds more than one
    * row or more than one stream of the deck is open here, `quietPollMs` when the one tab is
    * alone and quiet (nextTickMs says why a second tab of this instance counts). The roster is
@@ -701,7 +701,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
           // the history label of the batch: a noted entry's (channel.ts Entry.note); the room
           // client posts a labelled write on its own, so one note names the record
           const note = edits.find((entry) => entry.note !== undefined)?.note;
-          // the record names its origin (docs/SYNC.md 3.2): the batch's client and its op ids,
+          // the record names its origin (docs/archive/rounds/SYNC.md 3.2): the batch's client and its op ids,
           // in posting order, so a resend on any instance is answered from the record and a
           // tab acknowledges its own echo by id (entryOfRecord). One POST is one client's.
           const origin: WriteOrigin = {
@@ -743,7 +743,7 @@ export function blobChannel(deps: BlobChannelDeps): BlobChannel {
             throw new TypeError(outcome.message);
           }
           // the store found a record above the base that names this batch's op ids (its write
-          // path's origin check after its head and pull, docs/SYNC.md 3.2): the first attempt
+          // path's origin check after its head and pull, docs/archive/rounds/SYNC.md 3.2): the first attempt
           // committed and its answer was lost. Nothing was claimed or committed; the answer is
           // one synthesized entry per op id at that record's seq, and the record reaches the
           // streams here as any other instance's commit does (announce)

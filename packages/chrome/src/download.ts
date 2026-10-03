@@ -1,4 +1,4 @@
-// A file download that begins on the page (the return round fix round; docs/RETURN.md 2.17 and
+// A file download that begins on the page (the return round fix round; docs/archive/rounds/RETURN.md 2.17 and
 // 2.19; VERIFICATION.md R1-F5). File > Download > Turboslide bundle, Web page, JPEG image and PNG
 // image name a same origin address the server signed (a bundle ticket, a one time download token,
 // a render grant). Until this module they were an anchor click with `download=""`: the browser's
@@ -44,7 +44,7 @@ export function downloadKindWord(kind: DownloadKind): string {
 const UNSAFE_FILE_NAME = /["\\/:*?<>|\u0000-\u001f]/g;
 
 /**
- * One name rule for every download (docs/POLISH.md item 86): the deck's title with the unsafe
+ * One name rule for every download (docs/archive/rounds/POLISH.md item 86): the deck's title with the unsafe
  * characters removed, then the extension; an untitled deck keeps its id. The same rule the
  * Download dialog applies to a PDF and a PowerPoint file (dialogs/Download.tsx downloadFileName
  * adds the appearance and mode tags on top of it).
@@ -56,7 +56,7 @@ export function fileNameOf(title: string, deckId: string, extension: string): st
 }
 
 /**
- * The words of every download (docs/POLISH.md items 82, 86 and 87): one progress sentence with no
+ * The words of every download (docs/archive/rounds/POLISH.md items 82, 86 and 87): one progress sentence with no
  * estimate, one saved sentence naming the file, and one refusal sentence naming the kind. No
  * store's or worker's sentence reaches the seller; the cause stays in the console.
  */
@@ -167,7 +167,7 @@ function windowIo(): PageDownloadIo {
  * refused (a quota, a spent token, a missing bearer), so the caller's snackbar names the refusal.
  * When the page's request itself fails (the network, or a redirect the fetch may not read) the
  * browser's own anchor download stands in and the answer is null, as it is for an address on
- * another origin. `name` is the file name the caller wants: the one name rule of docs/POLISH.md
+ * another origin. `name` is the file name the caller wants: the one name rule of docs/archive/rounds/POLISH.md
  * item 86 names every file after the title, so a name the caller passes wins over the server's
  * `content-disposition` (the render route names a picture `<deck id>-<slide id>.jpg`, the
  * polish round's verifier read that id name on the JPEG and the PNG); without one the server's

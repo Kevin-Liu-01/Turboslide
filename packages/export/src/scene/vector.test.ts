@@ -1,4 +1,4 @@
-// The vector reading of the extractor (docs/VECTOR.md 4.6, 6.3): `svg` is a 3x kind under the
+// The vector reading of the extractor (docs/archive/rounds/VECTOR.md 4.6, 6.3): `svg` is a 3x kind under the
 // auto policy, and `vectorFilesOf` answers the vector file for the theme of every picture and
 // shot block whose asset answers `vectorOf` (an svg picture's `vector`, a ship one logo's
 // untinted source), through composites, never a missing asset, a raster asset or a tinted logo,

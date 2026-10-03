@@ -1,4 +1,4 @@
-// The inbox (docs/RETURN.md 2.16, section 5 `inbox.*` with the driver `probe --core`): the bell
+// The inbox (docs/archive/rounds/RETURN.md 2.16, section 5 `inbox.*` with the driver `probe --core`): the bell
 // and its panel as a toggle, and Notification settings kept across a reopen and a reload. The
 // notification that arrives from a second browser is core/share.spec.ts. The plate is parked
 // (`title.inbox`), so the rows are driven with Tools > Advanced tools on and the switch goes back.

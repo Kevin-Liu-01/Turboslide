@@ -15,7 +15,7 @@ import type { EditorShellState } from './editor-shell-context';
 import { PARKED_CONTROLS, isParked, isParkedIn } from './parked-controls';
 import { hideTooltip } from './Tooltip';
 
-// The parked controls (docs/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
+// The parked controls (docs/archive/rounds/FEATURES.md 7.2, 7.3): an id in the set is not drawn by the surfaces
 // that read the module; the same id is drawn when the Advanced tools setting is on; an empty set
 // draws everything. The pure rule is pinned over its own set, the committed set is pinned to the
 // parked list of the ship (ship-4300058d.json, the people round's, which carries the objects round's
@@ -56,7 +56,7 @@ describe('isParkedIn', () => {
   it("binds the committed set, the parked list of the people round's ship", async () => {
     /* the module is mocked below for the dialog's surface; the committed module is read here. The
        set is what core-matrix.mjs --emit-parked wrote from docs/gslides-parity/focus/ship-4300058d.json
-       (the people round's ship of 2026-09-30, docs/PEOPLE.md section 7), which carries the objects
+       (the people round's ship of 2026-09-30, docs/archive/rounds/PEOPLE.md section 7), which carries the objects
        round's list (ship-c1a7ff3.json) unchanged: nothing of the people round parks, its two rows with
        parks (people.own-chip-follows-name, people.own-chip-follows-avatar) green on the enforce
        preview and on the memory tier and its picture rows green on the local accounts run, and
@@ -67,7 +67,7 @@ describe('isParkedIn', () => {
        three P1 rows whose controls are not on the build, and the vector round's svg.copy.markup, red
        in the run of record and in its once rerun), sorted. The table's edge "+", heads and row seams
        and the word art outline left the list with the objects round, their rows green
-       (docs/OBJECTS.md section 7) */
+       (docs/archive/rounds/OBJECTS.md section 7) */
     const real = await vi.importActual<typeof import('./parked-controls')>('./parked-controls');
     expect([...real.PARKED_CONTROLS].sort()).toEqual([
       'bar.table',

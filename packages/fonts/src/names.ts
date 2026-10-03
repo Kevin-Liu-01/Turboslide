@@ -9,12 +9,12 @@ import type { FontCategory, FontId } from '@turboslide/schema/fonts';
 
 /**
  * The rsms/inter release both Inter files come from: the tag `v4.1` of 2024-11-16 (the fonts'
- * own name table reads "Version 4.001;git-9221beed3"; docs/FEATURES.md 3.1, audit-fonts 4 and 5).
+ * own name table reads "Version 4.001;git-9221beed3"; docs/archive/rounds/FEATURES.md 3.1, audit-fonts 4 and 5).
  * Here in the browser half so the picker's licence link and inter.ts read one constant.
  */
 export const INTER_RELEASE = 'https://github.com/rsms/inter/releases/tag/v4.1';
 
-/** The licence text of that release, the link More fonts carries (docs/FEATURES.md 3.1 item 2). */
+/** The licence text of that release, the link More fonts carries (docs/archive/rounds/FEATURES.md 3.1 item 2). */
 export const INTER_LICENCE_URL = 'https://github.com/rsms/inter/blob/v4.1/LICENSE.txt';
 
 /** The family name PowerPoint and Google Slides use, per id (the generated facts' `name`). */

@@ -107,7 +107,7 @@ export const PRESENCE = {
   youName: 'You',
   guest: 'guest',
   /* the accessible word after a signed in account's name, beside the 14 px check badge
-     (docs/PEOPLE.md 2.2 default 3, 3.7): "Ada Lovelace, signed in" */
+     (docs/archive/rounds/PEOPLE.md 2.2 default 3, 3.7): "Ada Lovelace, signed in" */
   signedIn: 'signed in',
   byLink: 'by link',
   /* the role word a link visitor sees instead of a name (0.12); the server writes the same four
@@ -282,7 +282,7 @@ export const ACCOUNT = {
     upload: 'Upload a picture',
     crop: 'Drag to crop',
     apply: 'Apply',
-    /* the Picture panel's sentences (docs/PEOPLE.md 4.1, 4.5; build/b3.md R8 names the keys):
+    /* the Picture panel's sentences (docs/archive/rounds/PEOPLE.md 4.1, 4.5; build/b3.md R8 names the keys):
        the guard on the original file before it is decoded, the sentence under the control at all
        times, the refusal when the browser's 256 px WebP is still over the request cap, the
        privacy sentence and the cache sentence under it (one thought per sentence), the refusal for
@@ -414,7 +414,7 @@ export const DIALOGS = {
   },
   download: {
     title: 'Download',
-    /* the two PowerPoint modes in a seller's words (docs/POLISH.md 2.6 item 73; audit-chrome item
+    /* the two PowerPoint modes in a seller's words (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item
        36: "Perfect" named nothing a seller can picture): every slide as a picture, or editable text */
     perfect: 'Pictures',
     editable: 'Editable text',
@@ -555,7 +555,7 @@ export const DIALOGS = {
   fromThisPresentation: { title: 'Pictures in this presentation' },
   /* the Insert pickers (SPEC 2.4): the Icon row of the theme; Insert > Table is the hover grid
      inside the menu (PICKERS.tableGrid, SPEC-2 0.26); Insert > Shader's gallery reads SHADER_GALLERY
-     (the features round, ship two, docs/FEATURES.md 5.4) */
+     (the features round, ship two, docs/archive/rounds/FEATURES.md 5.4) */
   insertIcon: {
     title: 'Icon',
     lead: 'One of the theme’s symbols; the tone is set in Format options',
@@ -595,7 +595,7 @@ export const PICKERS = {
     grid: 'Table size',
     doc: 'Point at the size and click it; the arrow keys move the highlight',
     /* Google's caption: "4 x 3" with a plain x; past the rows the slide holds at the insert's
-       size the caption says how many fit (docs/POLISH.md 2.2 item 6; polish/build/b2.md R9) */
+       size the caption says how many fit (docs/archive/rounds/POLISH.md 2.2 item 6; polish/build/b2.md R9) */
     size: (columns: number, rows: number, fit?: number) =>
       fit !== undefined && rows > fit
         ? `${columns} x ${rows}, ${fit} rows fit the slide`
@@ -633,7 +633,7 @@ export const PICKERS = {
  */
 export const CANVAS = {
   crop: 'Drag the handles to crop. Press Enter to finish',
-  /* the chip while a crop is open (docs/POLISH.md 2.5 item 50; polish/build/b4.md R8): one word;
+  /* the chip while a crop is open (docs/archive/rounds/POLISH.md 2.5 item 50; polish/build/b4.md R8): one word;
      the sentence above stays the handles' tooltip */
   cropChip: 'Crop',
   wordArt: 'Type your text and press Enter',
@@ -646,11 +646,11 @@ export const CANVAS = {
   rotation: (degrees: number) => `${degrees}°`,
   /* the size chip while a handle is down, in sheet pixels: "480 × 64" */
   size: (width: number, height: number) => `${width} × ${height}`,
-  /* the width chip while a table's column seam is down (docs/RETURN.md 2.4 fix 5): "400 px" */
+  /* the width chip while a table's column seam is down (docs/archive/rounds/RETURN.md 2.4 fix 5): "400 px" */
   width: (px: number) => `${px} px`,
-  /* the button under the selected chart (docs/FEATURES.md 2.2 rank 7) */
+  /* the button under the selected chart (docs/archive/rounds/FEATURES.md 2.2 rank 7) */
   editData: 'Edit data',
-  /* the table's own controls (docs/OBJECTS.md 3.3 item 4): the heads, their menu and the "+" */
+  /* the table's own controls (docs/archive/rounds/OBJECTS.md 3.3 item 4): the heads, their menu and the "+" */
   columnHead: (n: number) => `Column ${n}`,
   rowHead: (n: number) => `Row ${n}`,
   headDoc: 'Click to select the whole column or row; right click for its menu',
@@ -746,7 +746,7 @@ export const FORMAT = {
     none: 'None',
     reset: 'Reset image',
     frame: 'Frame',
-    /* the tail's word for the frame and the picture's name line (docs/POLISH.md 2.5 item 40;
+    /* the tail's word for the frame and the picture's name line (docs/archive/rounds/POLISH.md 2.5 item 40;
        polish/build/b4.md R4) */
     border: 'Border',
     name: 'Name',
@@ -756,7 +756,7 @@ export const FORMAT = {
     anchor: 'Crop anchor',
     top: 'Top',
     centre: 'Center',
-    /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so the menu row, the
+    /* the vector round (docs/archive/rounds/VECTOR.md 4.4): crop has no vector meaning, so the menu row, the
        toolbar's Crop button and the viewer's double click refuse an svg picture with one sentence;
        the viewer keeps its own copy of the words (it cannot import the chrome) and a test pins both */
     svgCrop: 'An SVG picture cannot be cropped. Resize it instead',
@@ -827,7 +827,7 @@ export const PANELS = {
     importTheme: 'Import theme',
     importStub: 'Turboslide has one theme, GT',
   },
-  /* the Brand kit panel (docs/PRODUCT.md 4.1; B5a): the section names, the one line under each
+  /* the Brand kit panel (docs/archive/rounds/PRODUCT.md 4.1; B5a): the section names, the one line under each
      control and the snackbar sentences, in the marketer's words */
   brand: {
     /* question 10's default (docs/NEXT.md 4.1.3 item 21): one noun for the toolbar button, the
@@ -898,7 +898,7 @@ export const PANELS = {
       'Layout',
       'Text',
       'Color',
-      /* the picture's section reads Image options, Google's words (docs/PRODUCT.md section 2 rank 10) */
+      /* the picture's section reads Image options, Google's words (docs/archive/rounds/PRODUCT.md section 2 rank 10) */
       'Image options',
       'Table',
       'List',
@@ -1019,7 +1019,7 @@ export const ERRORS = {
 } as const;
 
 /**
- * The Logo dialog's own words (the features round, docs/FEATURES.md 4.3; build/b1.md R3). The
+ * The Logo dialog's own words (the features round, docs/archive/rounds/FEATURES.md 4.3; build/b1.md R3). The
  * seller sentences the dialog shares with the server (the lead, the every slide check and its
  * line, the empty state, the licence sentences) are `LOGO_WORDS` in logo-model.ts, so the dialog
  * and the server say one thing; dialogs/Logo.tsx composes the two.
@@ -1054,10 +1054,10 @@ export const LOGO_DIALOG = {
     `thesvg.org’s index did not answer (${status}); try again in a minute`,
 } as const;
 
-/** The words of Tailor's Find the logo slot (docs/FEATURES.md 4.5; build/b1.md R3). */
+/** The words of Tailor's Find the logo slot (docs/archive/rounds/FEATURES.md 4.5; build/b1.md R3). */
 /**
  * The Shader gallery and the Background dialog's Shader row (the features round, ship two,
- * docs/FEATURES.md 5.4, 5.5; build/b1.md R3): the title, the one sentence under it, the search
+ * docs/archive/rounds/FEATURES.md 5.4, 5.5; build/b1.md R3): the title, the one sentence under it, the search
  * field, the category chips, the empty state, the tile docs, the alt, the Background row's words
  * and the one failure sentence of 5.5, which the server's RenderError answers byte for byte
  * (apps/studio/src/server/shader-frames.ts imports it; build/b7.md R4).

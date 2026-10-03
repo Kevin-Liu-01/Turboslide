@@ -409,7 +409,7 @@ test(title('images.background.remove-picture'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the product round's rows (docs/PRODUCT.md section 2 ranks 10, 14 and 17, section 5, 8.1): the
+// the product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 10, 14 and 17, section 5, 8.1): the
 // upload centred in the body slot and selected, the instant preview with its progress bar and no
 // snackbar, the toolbar Image button opening the chooser on click, the failure sentence for a
 // file that is not a picture, and Image by URL with its paused fetch and Replace image > By URL.
@@ -417,7 +417,7 @@ test(title('images.background.remove-picture'), async () => {
 
 /** The body slot of the current slide in sheet px: the body placeholder's box before a picture lands. */
 /**
- * The body slot a picture is centred in (docs/PRODUCT.md section 2 rank 10; b2.md R-F4;
+ * The body slot a picture is centred in (docs/archive/rounds/PRODUCT.md section 2 rank 10; b2.md R-F4;
  * viewer/picture-place.ts `pictureInsertArea`): the empty body paragraph's column (its box's x
  * and width; the box itself when it stands 240 px or taller), from the head band's bottom plus
  * 40 (the lowest heading whose top sits in the top third; the content top 129 without one) to
@@ -480,7 +480,7 @@ test(title('images.insert.centred-in-body'), async () => {
   if (!deck) deck = await newDeck(page, scratch, 'Pictures deck');
   await openEditor(page, deck);
   const slideId = await addSlide(page);
-  /* the row measures the body slot of a Title and body slide (docs/PRODUCT.md section 2 rank 10;
+  /* the row measures the body slot of a Title and body slide (docs/archive/rounds/PRODUCT.md section 2 rank 10;
      audit-seller 10 is the picture over the head prompt of that layout). New slide hands the fresh
      slide the current slide's layout (rank 2), and on this file's shared deck the current slide
      after the picture rows above is a title grammar slide (the mark over the title over the
@@ -504,7 +504,7 @@ test(title('images.insert.centred-in-body'), async () => {
   });
   const slot = await bodySlot();
   const before = await pictureCount(slideId);
-  /* a 720 by 480 PNG: the features round's logo size rule (docs/FEATURES.md 4.4) takes a picture
+  /* a 720 by 480 PNG: the features round's logo size rule (docs/archive/rounds/FEATURES.md 4.4) takes a picture
      whose long side is under 600 px to the logo size, so this row keeps a picture the rule leaves
      at the largest fit */
   await uploadThrough(
@@ -818,10 +818,10 @@ test(title('images.insert.by-url'), async () => {
 });
 
 /* the row `logos.intake.svg-sentence` of the features round left with its sentence in the vector
-   round (docs/VECTOR.md 4.7); the svg intake's rows are core/svg.spec.ts's */
+   round (docs/archive/rounds/VECTOR.md 4.7); the svg intake's rows are core/svg.spec.ts's */
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.5 items 35, 50 and 51, 5.1 `images.*`): no external write
+// the polish round (docs/archive/rounds/POLISH.md 2.5 items 35, 50 and 51, 5.1 `images.*`): no external write
 // banner after the tab's own asset write, the By URL preview contained, a dropped picture clamped
 // to the sheet, and a picture's natural size.
 
@@ -1139,13 +1139,13 @@ coverage(import.meta.filename, [
   'images.background.upload-picture',
   'images.background.remove-picture',
   'images.replace.drop-on-picture',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'images.insert.centred-in-body',
   'images.insert.instant-preview',
   'images.insert.menu-direct',
   'images.upload.failure-snackbar',
   'images.insert.by-url',
-  /* the polish round (docs/POLISH.md 2.5 items 35, 50 and 51) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 items 35, 50 and 51) */
   'images.insert.no-external-banner',
   'images.byurl.preview-contained',
   'images.drop.clamped',

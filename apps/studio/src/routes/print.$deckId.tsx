@@ -73,7 +73,7 @@ export function isBusyRefusal(error: unknown): boolean {
 export const PRINT_READ_RETRY_MS: ReadonlyArray<number> = [400, 900];
 
 /**
- * The deck for the print page (docs/POLISH.md item 83): the same read the viewer routes make,
+ * The deck for the print page (docs/archive/rounds/POLISH.md item 83): the same read the viewer routes make,
  * tried again twice when the store answers "not now" (a 429, a deadline: the polish audit met the
  * refusal on a deck four writes old and the page drew the error card at once), so the preview
  * opens on the head the editor holds; a refusal that stands is the route's own page with Reload
@@ -140,7 +140,7 @@ function PrintPage() {
   const [layout, setLayout] = useState<PrintLayout>(search.layout ?? 'slides');
   const [includeSkipped, setIncludeSkipped] = useState(search.skipped === 1);
   const [pdf, setPdf] = useState<string | null>(null);
-  /* the deck's own appearance unless the address names one (docs/POLISH.md item 77): the preview
+  /* the deck's own appearance unless the address names one (docs/archive/rounds/POLISH.md item 77): the preview
      drew every light deck as black pages while the PDF it downloaded was light */
   const theme: Theme = search.theme ?? payload.theme;
   const skipped = useMemo(() => new Set(payload.skipped), [payload.skipped]);
@@ -193,7 +193,7 @@ function PrintPage() {
       }
       if (url === null) throw new Error('the export produced no PDF');
       /* the file is named after the title, and the button is live again the moment the file is
-         saved (docs/POLISH.md items 83 and 86; audit-pages item 39) */
+         saved (docs/archive/rounds/POLISH.md items 83 and 86; audit-pages item 39) */
       const name = fileNameOf(payload.deck.title, deckId, 'pdf');
       const saved = await downloadFromPage(url, { name });
       setPdf(null);
@@ -265,7 +265,7 @@ function PrintPage() {
             ))}
           </select>
         </label>
-        {/* the chrome's DialogCheck (docs/POLISH.md item 83; audit-pages item 39): a tick in the
+        {/* the chrome's DialogCheck (docs/archive/rounds/POLISH.md item 83; audit-pages item 39): a tick in the
             box, not a filled square */}
         <DialogCheck
           label="Include skipped slides"
@@ -344,7 +344,7 @@ function PrintPage1({
   index: number;
   total: number;
   theme: Theme;
-  /** the brand kit's frame band (docs/PRODUCT.md 4.1) */
+  /** the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1) */
   band?: FrameBand;
   withNotes: boolean;
   skipped: boolean;

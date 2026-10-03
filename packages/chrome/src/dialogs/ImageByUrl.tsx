@@ -9,7 +9,7 @@ import { DIALOGS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
 /**
- * Insert > Image > By URL and Replace image > By URL (gslides-parity SPEC 2.4, 2.5; docs/PRODUCT.md
+ * Insert > Image > By URL and Replace image > By URL (gslides-parity SPEC 2.4, 2.5; docs/archive/rounds/PRODUCT.md
  * section 5 "Image by URL"; audit-gaps 13): a field with a preview that waits for a 600 ms pause or
  * the blur (typing at human speed fetched every partial address), then one `asset.add` from the
  * URL and the write the target names: a new picture centred in the body slot through the stage's
@@ -213,7 +213,7 @@ export function ImageByUrlDialog({ target }: { target?: PictureTarget }) {
       </DialogField>
       {preview !== '' ? (
         <div className="ts-dialog-slide-frame" style={{ maxHeight: 200 }}>
-          {/* the preview fits inside the frame whole (docs/POLISH.md item 50; audit-media item 21:
+          {/* the preview fits inside the frame whole (docs/archive/rounds/POLISH.md item 50; audit-media item 21:
               a 180 px icon was stretched to the dialog's width and cut by the footer) */}
           <img
             src={preview}

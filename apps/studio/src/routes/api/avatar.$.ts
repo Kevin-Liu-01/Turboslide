@@ -4,7 +4,7 @@ import { AVATAR_ROUTE, fileAvatarStore, parseAvatarPath } from '../../server/aut
 import { avatarFilesOnDisk, avatarUsersDir } from '../../server/auth/avatar-tier';
 
 // /api/avatar/u/<avatarKey>/<digest>-<size>.<webp|png> (gslides-parity SPEC-3 7.6; report 10
-// F43; docs/PEOPLE.md 4.3): the picture avatar files of a checkout or a tmp store, written by
+// F43; docs/archive/rounds/PEOPLE.md 4.3): the picture avatar files of a checkout or a tmp store, written by
 // account.setAvatar under `<stateDir>/users/` (`AVATAR_USERS_DIR`, one constant shared with the
 // writer). On the blob tier the files live on the public Blob store and their URLs point there,
 // so this route answers 404 (`avatarFilesOnDisk`, the writer's own predicate). The path grammar

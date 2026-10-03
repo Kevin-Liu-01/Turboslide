@@ -11,7 +11,7 @@ import type { CommentsDisplay } from '../menus/model';
 
 /**
  * The comment markers of the overlay (gslides-parity SPEC-3 5.3; research 11 6.8, 8 P3; the
- * polish round, docs/POLISH.md item 95): one 20 px marker per anchor at the anchored object's
+ * polish round, docs/archive/rounds/POLISH.md item 95): one 20 px marker per anchor at the anchored object's
  * top right outside its box (the slide's top left for a slide thread), a paper plate with an edge
  * holding the author's 16 px mark and the thread count in tabular figures, so a second thread
  * moves nothing; the two ring halo over pictures. The three tiles of the earlier rounds (the

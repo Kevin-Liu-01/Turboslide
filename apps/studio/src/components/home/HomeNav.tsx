@@ -7,7 +7,7 @@ import { HomeLink } from './HomeLink';
 import { SignInButton } from './sign-in';
 
 /**
- * The navigation of /home (docs/POLISH.md 3.2 item 0; the page grammar of docs/NEXT.md 4.1.2 and
+ * The navigation of /home (docs/archive/rounds/POLISH.md 3.2 item 0; the page grammar of docs/NEXT.md 4.1.2 and
  * 4.1.3 item 9): the 58 px bar in the 1104 px column with the seam under it and a cross where the
  * seam meets each rail, the lockup (the 24 px mark beside the 22 px word, B1's request 2) as one
  * link to this page, then Sign In, Documentation, the appearance group and the one solid button.

@@ -303,7 +303,7 @@ describe('blobChannel', () => {
                 proven,
               }),
             pollMs: options.pollMs ?? 20,
-            // one tab alone and quiet ticks at the quiet pace (docs/SYNC.md 3.10); the tests of
+            // one tab alone and quiet ticks at the quiet pace (docs/archive/rounds/SYNC.md 3.10); the tests of
             // the active pace pass the same value for both, the quiet test its own
             quietPollMs: options.quietPollMs ?? options.pollMs ?? 20,
           },
@@ -369,7 +369,7 @@ describe('blobChannel', () => {
       expect(result.ok).toBe(true);
       await until(() => seen.some((event) => event.type === 'checkpoint'), 4000);
       // the record travels with its writer's client id and the op ids it covers once the
-      // deployment writes the origin (docs/SYNC.md 3.2, deployment N plus 1); as `store` before
+      // deployment writes the origin (docs/archive/rounds/SYNC.md 3.2, deployment N plus 1); as `store` before
       expect(seen.find((event) => event.type === 'op')).toMatchObject({
         type: 'op',
         entry: RECORD_ORIGIN_WRITES
@@ -386,7 +386,7 @@ describe('blobChannel', () => {
       await b.close();
     });
 
-    it('ticks at the quiet pace while the one tab is alone and quiet, and at the active pace once another row joins the roster or an op lands here (docs/SYNC.md 3.10)', async () => {
+    it('ticks at the quiet pace while the one tab is alone and quiet, and at the active pace once another row joins the roster or an op lands here (docs/archive/rounds/SYNC.md 3.10)', async () => {
       // the active tick 20 ms, the quiet one 200 ms: alone and quiet, the pulse is headed
       // about once per 200 ms; a second roster row (another client's presence push, read on
       // the next quiet tick) brings the 20 ms tick back
@@ -780,7 +780,7 @@ describe('blobChannel', () => {
     await b.close();
   });
 
-  it("announces the first record above a hole in the log as an external checkpoint and the records after it as ops, so a tab under the hole reloads once (docs/SYNC.md 3.6, the reader's rule)", async () => {
+  it("announces the first record above a hole in the log as an external checkpoint and the records after it as ops, so a tab under the hole reloads once (docs/archive/rounds/SYNC.md 3.6, the reader's rule)", async () => {
     // a store whose log holds n 1, n 3 and n 4 (n 2 a claim whose commit landed after its record
     // was released, or a record the store lost); the mirror's position is 412 when the stream
     // opens and the store then reads 416
@@ -830,7 +830,7 @@ describe('blobChannel', () => {
     await channel.close();
   });
 
-  it("prunes the store's snapshots once when the deck's last stream on the instance has stayed closed for the delay and this instance committed while one was open; a reader's close and a reopen inside the delay list nothing (docs/SYNC.md 3.6, invariant 13; the sync round fix round, F6 and F7)", async () => {
+  it("prunes the store's snapshots once when the deck's last stream on the instance has stayed closed for the delay and this instance committed while one was open; a reader's close and a reopen inside the delay list nothing (docs/archive/rounds/SYNC.md 3.6, invariant 13; the sync round fix round, F6 and F7)", async () => {
     const fake = memoryBlobClient();
     const seedRoot = join(root, 'seed-prune');
     mkdirSync(join(seedRoot, 'gt-brand'), { recursive: true });
@@ -990,7 +990,7 @@ describe('blobChannel', () => {
     await b.close();
   });
 
-  describe('the record names its origin (the sync round, docs/SYNC.md 3.2)', () => {
+  describe('the record names its origin (the sync round, docs/archive/rounds/SYNC.md 3.2)', () => {
     const record = (n: number, origin?: { clientId: string; opIds: string[] }): VersionRecord => ({
       n,
       revision: 412 + n,

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import type { AvatarChoice } from './principal.ts';
 import { PICTURE_MARK_SIZE, PICTURE_SIZES, pictureUrlAt, pictureUrlOf } from './picture.ts';
 
-// The picture URL grammar (docs/PEOPLE.md 4.4, 6.5): `<base>/<digest>-<size>.webp`, the 64 px file
+// The picture URL grammar (docs/archive/rounds/PEOPLE.md 4.4, 6.5): `<base>/<digest>-<size>.webp`, the 64 px file
 // on the mark, every other size derived from it by the path alone.
 
 const DIGEST = 'a'.repeat(64);

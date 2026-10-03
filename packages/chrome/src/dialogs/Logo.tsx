@@ -34,11 +34,11 @@ import { tipProps } from '../Tooltip';
 import './Logo.css';
 
 /**
- * Insert > Logo, Insert > Image > Logo and Replace image > Logo (docs/FEATURES.md 4.3, 4.4, 4.6,
+ * Insert > Logo, Insert > Image > Logo and Replace image > Logo (docs/archive/rounds/FEATURES.md 4.3, 4.4, 4.6,
  * 4.9; audit-logos 1, 6, 12, 15, 17, 21): the picker over thesvg.org. The head holds the search
  * field "Company name" with the focus; the body is a box of one fixed height holding the groups
  * Results (the cache's matches, twenty at a time, more on scroll; drawn first while a query is
- * typed, docs/POLISH.md item 39), Your brand (the deployment's default kit logo and the deck's kit
+ * typed, docs/archive/rounds/POLISH.md item 39), Your brand (the deployment's default kit logo and the deck's kit
  * logo when it is a picture) and Recent (the deck's `role: 'logo'` assets, then the last twelve
  * picks on this browser; item 46); the foot holds the check "Use as this presentation's logo on
  * every slide" with its sentence, the selected tile's license row as a seller's sentence with the
@@ -637,7 +637,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const assetUrl = input.assetUrl ?? ((path: string) => `/decks/${input.deckId}/${path}`);
   const grounds = useMemo<Grounds>(() => kitGrounds(kit), [kit]);
 
-  /* Your brand (4.3; audit-logos 15; docs/POLISH.md item 46): the default kit's logo and the deck's
+  /* Your brand (4.3; audit-logos 15; docs/archive/rounds/POLISH.md item 46): the default kit's logo and the deck's
      kit logo when it is a picture, one brand. The deck's other logo assets (a customer's mark
      inserted from the picker, audit-media item 16) list under Recent with the browser's picks */
   const kitAsset =
@@ -671,7 +671,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const showResults = query.trim() !== '' && !parked(LOGO_GROUP_CONTROLS.results);
 
   /* the flat order the arrows walk, the order the groups draw in: the results first while a query
-     is typed (docs/POLISH.md item 39: what the seller searched for is in view before the tiles of
+     is typed (docs/archive/rounds/POLISH.md item 39: what the seller searched for is in view before the tiles of
      Your brand and Recent), then brand, then recent */
   const walk = useMemo<{ key: string; pick: LogoPick }[]>(() => {
     const out: { key: string; pick: LogoPick }[] = [];
@@ -820,7 +820,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
           editorPlaces &&
           editor?.insertPictureAsset !== undefined
         ) {
-          /* Replace image > Logo (docs/POLISH.md 2.5 item 37): the picture route swaps the
+          /* Replace image > Logo (docs/archive/rounds/POLISH.md 2.5 item 37): the picture route swaps the
              block's asset and refits its box to the mark's aspect around the same centre in one
              write (Editor.tsx placePictureAsset, the replacing branch), as Upload and By URL do;
              the logo route below keeps the box, and stays for a replace that also takes the kit's
@@ -1074,7 +1074,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
             </>
           )}
           {/* the license row keeps its line while no mark is selected, so the dialog's height holds
-              from open through a search and a pick (docs/POLISH.md item 39) */}
+              from open through a search and a pick (docs/archive/rounds/POLISH.md item 39) */}
           {parked('dialog.logo.license') ? null : selectedRow !== undefined &&
             license !== undefined ? (
             <p

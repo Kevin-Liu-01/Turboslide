@@ -264,7 +264,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
   });
 });
 
-describe('the shader frame row (docs/FEATURES.md 5.5; audit-shaders 9)', () => {
+describe('the shader frame row (docs/archive/rounds/FEATURES.md 5.5; audit-shaders 9)', () => {
   test('writes the count and, when the export waited, the seconds, in the seller’s words', () => {
     expect(shaderFrameSentence(0)).toBeNull();
     expect(shaderFrameSentence(-1)).toBeNull();

@@ -14,7 +14,7 @@ import type { SectionWrite } from '../inspector/fields';
 import { SHADER_WORDS, ShaderSection, isShaderGround } from '../inspector/shader';
 import { hideTooltip } from '../Tooltip';
 
-// The Shader section (docs/FEATURES.md 5.3, 7.2, 7.3): the groups in order, the ten slider
+// The Shader section (docs/archive/rounds/FEATURES.md 5.3, 7.2, 7.3): the groups in order, the ten slider
 // sentences in the tooltips, the preset tiles in sentence case with the current one pressed, the
 // kit's six swatches, one `slide.update` per release carrying the controls and the resolved
 // uniforms, a preset change clearing both, and a parked control not drawn while the switch is

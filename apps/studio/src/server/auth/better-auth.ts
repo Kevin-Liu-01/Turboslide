@@ -105,7 +105,7 @@ export type SignInMethods = {
 /**
  * What the dialog offers on this deployment (7.3), from the environment, the database and the
  * mail mode alone. The email method needs a sender: with TURBOSLIDE_MAIL=off every mail is
- * dropped (docs/PEOPLE.md 8.2 item 3), so the field is hidden rather than offered and Google may
+ * dropped (docs/archive/rounds/PEOPLE.md 8.2 item 3), so the field is hidden rather than offered and Google may
  * be the only method (REALTIME.md 7.7).
  */
 export function signInMethods(

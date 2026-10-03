@@ -1,4 +1,4 @@
-/* The Shader gallery (dialogs/ShaderGallery.tsx; docs/FEATURES.md 5.4): the sentence under the
+/* The Shader gallery (dialogs/ShaderGallery.tsx; docs/archive/rounds/FEATURES.md 5.4): the sentence under the
    title, the search field, the category chips, then a grid of cards, each a 320 by 200 still in a
    hairline frame with the name under it and the entry's presets as a row of 48 by 30 tiles. Two
    columns fill the 720 px card's 672 px body at 1440 and at 1280 (2 by 320 plus a 32 px gap); the
@@ -33,7 +33,7 @@
   grid-template-columns: repeat(2, 320px);
   gap: 16px 32px;
   max-height: min(560px, calc(100vh - 300px));
-  /* the polish round (docs/POLISH.md 2.5 item 47): the dialog keeps its size when a search has no match */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 47): the dialog keeps its size when a search has no match */
   min-height: min(560px, calc(100vh - 300px));
   overflow-y: auto;
   padding: 2px 2px 4px;

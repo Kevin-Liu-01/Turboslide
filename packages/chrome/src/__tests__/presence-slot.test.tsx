@@ -131,7 +131,7 @@ describe('the title row slots', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     const right = container.querySelector('.ts-title-r')!;
     const controls = Array.from(right.children).map((el) => el.getAttribute('data-control'));
-    /* the side panel toggle joined the cluster in the product round (docs/PRODUCT.md section 2
+    /* the side panel toggle joined the cluster in the product round (docs/archive/rounds/PRODUCT.md section 2
        rank 25): the bottom bar that held it left. The More key (NEXT.md 4.1.3 item 13) is in the
        markup at every width and drawn under 480 px alone (TitleRow.css); Sign In is absent here,
        since the harness offers no sign in method */
@@ -150,7 +150,7 @@ describe('the title row slots', () => {
     expect(presence.querySelectorAll('.ts-presence-slot.is-empty')).toHaveLength(4);
     expect(presence.querySelector('[data-control="presence.more"]')?.textContent).toBe('');
     /* the own chip (the account menu's opener) and its rule are in the default view since the
-       people round (docs/PEOPLE.md 3.14, default 2); the inbox plate stays parked (docs/FOCUS.md
+       people round (docs/archive/rounds/PEOPLE.md 3.14, default 2); the inbox plate stays parked (docs/FOCUS.md
        3.2): absent in the default view, the inbox slot kept empty for the row's geometry */
     expect(presence.querySelector('.ts-presence-rule')).not.toBeNull();
     expect(presence.querySelector('[data-control="title.account"]')).not.toBeNull();
@@ -197,7 +197,7 @@ describe('the title row slots', () => {
     fireEvent.click(plain.container.querySelector('[data-control="presence.more"]')!);
     const plainRoster = document.getElementById('ts-menu-roster')!;
     /* the twenty people and the own row (the account menu's opener, `title.presence.me`), in the
-       default view since the people round (docs/PEOPLE.md 3.14, default 2); the Join chat stub
+       default view since the people round (docs/archive/rounds/PEOPLE.md 3.14, default 2); the Join chat stub
        stays behind the switch */
     expect(plainRoster.querySelectorAll('[data-control^="presence.roster."]')).toHaveLength(21);
     expect(plainRoster.querySelector('[data-control="presence.roster.me"]')).not.toBeNull();
@@ -230,7 +230,7 @@ describe('the title row slots', () => {
     expect(onGoTo).toHaveBeenCalledWith('c1');
     expect(onFollow).not.toHaveBeenCalled();
     expect(document.getElementById('ts-menu-roster')).toBeNull();
-    /* an anonymous editor with a slide open can be followed (docs/POLISH.md item 104): the roster
+    /* an anonymous editor with a slide open can be followed (docs/archive/rounds/POLISH.md item 104): the roster
        the people button opens offers Follow on the person's row, and nothing follows until that
        row is clicked */
     fireEvent.click(presence.querySelector('[data-control="presence.more"]')!);
@@ -271,7 +271,7 @@ describe('the title row slots', () => {
     });
     const onFollow = vi.fn();
     const onUnfollow = vi.fn();
-    /* the Follow row is parked until its matrix row passes (docs/POLISH.md item 104): the switch
+    /* the Follow row is parked until its matrix row passes (docs/archive/rounds/POLISH.md item 104): the switch
        on draws it, as the run of record does with the control unparked */
     localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ advancedTools: true }));
     const { container, rerender } = render(
@@ -332,7 +332,7 @@ describe('the title row slots', () => {
     const rows = Array.from(menu.querySelectorAll('[role="menuitem"]')).map(
       (row) => row.textContent,
     );
-    /* Sessions is an account's row (docs/PEOPLE.md 3.14; accounts 8): an anonymous person is not
+    /* Sessions is an account's row (docs/archive/rounds/PEOPLE.md 3.14; accounts 8): an anonymous person is not
        offered a list that answers [] */
     expect(rows).toEqual(['Change name', 'Change avatar', 'Sign in', 'Forget this browser']);
   });
@@ -429,7 +429,7 @@ describe('the title row slots', () => {
     expect(document.activeElement).toBe(container.querySelector('[data-control="presence.more"]'));
   });
 
-  it('draws the roster opener from the first other person and hides it with nobody else present (docs/RETURN.md 4.3; return/build/b4.md request 6, collab.roster.go-to-slide)', () => {
+  it('draws the roster opener from the first other person and hides it with nobody else present (docs/archive/rounds/RETURN.md 4.3; return/build/b4.md request 6, collab.roster.go-to-slide)', () => {
     const nobody = render(
       <Harness input={input({ presence: { others: [] } })} shell={shellState()} />,
     );

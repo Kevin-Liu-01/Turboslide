@@ -1,4 +1,4 @@
-// The brand kit record (docs/PRODUCT.md 4.1, 8.3): a record with every field absent validates, the
+// The brand kit record (docs/archive/rounds/PRODUCT.md 4.1, 8.3): a record with every field absent validates, the
 // six roles, the positions and the lexicon validate, an unknown role is refused, the pointer writes
 // land at the shallowest missing ancestor and the resets remove the record or one field, the
 // counter helpers read the kit before the older defaults, and the manifest schema carries it.

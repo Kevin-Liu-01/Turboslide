@@ -202,7 +202,7 @@ describe('Inspector sections', () => {
       />,
     );
     const swatches = document.querySelectorAll('[data-section="color"] .ts-ctl-swatch[data-token]');
-    /* twelve tokens plus the brand kit's accent (docs/PRODUCT.md 4.1; schema color.ts) */
+    /* twelve tokens plus the brand kit's accent (docs/archive/rounds/PRODUCT.md 4.1; schema color.ts) */
     expect(swatches).toHaveLength(13);
     expect(swatches[0]?.getAttribute('data-tip')).toBe('Ink');
     expect(swatches[11]?.getAttribute('data-tip')).toBe('GT blue');

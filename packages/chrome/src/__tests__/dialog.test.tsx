@@ -276,7 +276,7 @@ describe('Dialog, the focus round cycle 2', () => {
   });
 });
 
-describe('the focus after a close and the trap (docs/POLISH.md 2.6 item 65)', () => {
+describe('the focus after a close and the trap (docs/archive/rounds/POLISH.md 2.6 item 65)', () => {
   it('returns the focus to the menubar button of the row that opened the dialog when the row is gone, and never to the body', async () => {
     /* the opener is a menu row that unmounts with its menu (audit-chrome item 15: the focus
        landed on the body for sixteen dialogs); the menubar button of its menu takes the focus */

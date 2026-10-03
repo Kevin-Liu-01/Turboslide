@@ -27,7 +27,7 @@ export type StageProps = {
   theme: Theme;
   dir: 'next' | 'prev';
   onStep?: (delta: number) => void;
-  /** the brand kit's frame band (docs/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format */
+  /** the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format */
   band?: FrameBand;
 };
 

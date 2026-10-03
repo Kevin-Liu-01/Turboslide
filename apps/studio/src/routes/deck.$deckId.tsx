@@ -48,7 +48,7 @@ import { deckCardMeta } from './-deck-card';
 // through the cacheable GET, so the document is the shell and one slide, and the CDN serves the
 // other slides from its cache for a minute (stale for an hour) under the revision's URL.
 //
-// The sync and costs round (docs/SYNC.md 3.10, open question 3's default): the page attaches a
+// The sync and costs round (docs/archive/rounds/SYNC.md 3.10, open question 3's default): the page attaches a
 // studio session only when the address carries `?agent=1` (components/useStudioSession.ts
 // `agentSessionRequested`), so a seller's show or a colleague's view costs no function request
 // after its load and `deck_goto_slide` over /mcp reaches a viewer tab only when an agent opened

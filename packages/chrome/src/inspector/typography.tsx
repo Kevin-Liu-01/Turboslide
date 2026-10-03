@@ -30,7 +30,7 @@ import './typography.css';
  * round reads back unchanged. The 500 cap is a lint mark (type/weight-cap) beside the weight and
  * a size off the ladder a mark (type/ladder) beside the size, never a hard block.
  *
- * The features round (docs/FEATURES.md 3.1 item 4; audit-fonts 2) adds the Tabular figures row
+ * The features round (docs/archive/rounds/FEATURES.md 3.1 item 4; audit-fonts 2) adds the Tabular figures row
  * (`numerals`): a check row carrying the sentence "Every digit takes the same width, so numbers
  * line up in a column" under its label and in its tooltip, writing `typography.numerals:
  * 'tabular'` on and removing the field off, and disabled with "This face has no tabular figures"
@@ -50,7 +50,7 @@ const FIELD_ICONS: Readonly<Record<string, IconName>> = {
 
 const UNITS: Readonly<Record<string, string>> = { size: 'px', tracking: 'em' };
 
-/** The control id of the Tabular figures row (docs/FEATURES.md 3.1 item 4, 7.1 `parks`). */
+/** The control id of the Tabular figures row (docs/archive/rounds/FEATURES.md 3.1 item 4, 7.1 `parks`). */
 export const NUMERALS_CONTROL = 'formatOptions.typography.numerals';
 
 /** The family the row reads its `tnum` flag from: the block's, else the theme's face. */
@@ -154,7 +154,7 @@ export function TypographyControl({ spec, onChange, context, disabled }: Control
 }
 
 /**
- * The Tabular figures row (docs/FEATURES.md 3.1 item 4): the label with its sentence under it, a
+ * The Tabular figures row (docs/archive/rounds/FEATURES.md 3.1 item 4): the label with its sentence under it, a
  * native checkbox (so the keyboard and the window API's set(label, boolean) reach it) that writes
  * `'tabular'` on and removes the field off, and the on or off word. On a face without `tnum` the
  * row is disabled and its sentence and tooltip read "This face has no tabular figures".

@@ -83,10 +83,10 @@ export const IDS = [
   'arrange.guides.context',
   'arrange.guides.clear',
   'arrange.select-none.menu',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'arrange.insert.selected-after-menu',
   'arrange.insert.free-rectangle',
-  /* the features round, ship one (docs/FEATURES.md 2.3 item 6, P1): the group tail's text controls */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 6, P1): the group tail's text controls */
   'arrange.group.tail-text-controls',
 ];
 
@@ -1440,7 +1440,7 @@ export async function run(t) {
   );
   await t.clearAll();
 
-  // ---- the return round's rows (docs/RETURN.md 2.12, 2.17, section 5): distribute, rotate,
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.12, 2.17, section 5): distribute, rotate,
   // flip, group by chord, menu and right click, the right click Rotate and Distribute, the
   // rulers, the guides, the snaps and Edit > Select none. Every row is reached in the default
   // view or with the switch on while it is parked (toolkit reachRow).
@@ -2257,7 +2257,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 2 rank 1, 8.1): a new table or chart from a
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 2 rank 1, 8.1): a new table or chart from a
  * menu is selected and lands in the free rectangle of the body slot, cascading 40 by 40 sheet px
  * when the slot is taken. B3 owns the placement (`block.insert` in controller.tsx,
  * select-after-write.ts); the rows read the selection facts and the stored positions.
@@ -2379,7 +2379,7 @@ async function productRound(t) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.3 item 6, P1 of B3; the row
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 6, P1 of B3; the row
  * `arrange.group.tail-text-controls`): the group tail lists Font, size, Bold, Italic, text colour
  * and Align and the size step writes every text member in one commit. Two text blocks sharing one
  * group are placed through the window API as setup; a group tail without the text controls reads

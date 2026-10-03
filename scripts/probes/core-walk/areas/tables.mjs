@@ -1,4 +1,4 @@
-// Tables (docs/RETURN.md 2.4, section 5 `tables.*` with the driver `probe --core`): the grid
+// Tables (docs/archive/rounds/RETURN.md 2.4, section 5 `tables.*` with the driver `probe --core`): the grid
 // picker, the cell sessions and Tab, the Format > Table rows with a session and with the table
 // selected by one click, the cell right click menu, the column widths after an insert, the seam
 // handle, the cell alignment from the menu and the tail, the table's selection and resize, the
@@ -32,7 +32,7 @@ export const IDS = [
   'tables.light-appearance',
   'tables.present',
   'tables.reload',
-  /* the features round, ship one (docs/FEATURES.md 2.2, 2.3, 3.1 item 4): the table click model,
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2, 2.3, 3.1 item 4): the table click model,
      the ranges, the appends, the arrows, the marks on a range, the Table section first, the P1
      handles, bar and prompts, and the tabular figures; driven by `featuresRound` below */
   'tables.cell.click-places-caret',
@@ -50,7 +50,7 @@ export const IDS = [
   'tables.bar.row-column-buttons',
   'tables.command.keeps-caret',
   'tables.cells.tabular-figures',
-  /* the objects round (docs/OBJECTS.md section 3, 6.1): the table's ring with a cell open, the
+  /* the objects round (docs/archive/rounds/OBJECTS.md section 3, 6.1): the table's ring with a cell open, the
      cell ring, the editor guide grid, the box from the rows, the rows that grow, the seams with a
      cell open, the header toggle from the row head and the Table section's words; driven by
      `objectsRound` below. `tables.show.rules-only` is core/export.spec.ts's */
@@ -69,7 +69,7 @@ export const IDS = [
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 /**
- * The selected table's own controls (the heads and the edge "+", docs/OBJECTS.md 3.3 item 4) are
+ * The selected table's own controls (the heads and the edge "+", docs/archive/rounds/OBJECTS.md 3.3 item 4) are
  * parked families on a ship (parked-controls.ts, read by the family for every table since the
  * objects round's merge), hidden while Tools > Advanced tools is off: when the selected table
  * draws no head the switch goes on, as the walk drives every parked row with it (docs/FOCUS.md
@@ -275,7 +275,7 @@ export async function run(t) {
           obj.type === 'table' &&
           /4\s*x\s*3/.test(words ?? '') &&
           t.near(obj.pos.w, 960, 2) &&
-          /* the objects round (docs/OBJECTS.md 3.3 item 3): the box fits its rows, 54 per row at 20 px
+          /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 3): the box fits its rows, 54 per row at 20 px
              with the rule under each and the hairline above (schema tableBoxHeight: 163 for three) */
           t.near(obj.pos.h, 163, 2) &&
           b?.columns?.length === 4 &&
@@ -640,10 +640,10 @@ export async function run(t) {
     'the 17 rows of the default view are listed, the two merge rows and the Header row check among them',
     async () => {
       /* the two merge rows follow their own matrix row tables.cells.merge-unmerge, which carries
-         `parks` (docs/RETURN.md section 1 rule 2): the integration re-parked them while no cell
+         `parks` (docs/archive/rounds/RETURN.md section 1 rule 2): the integration re-parked them while no cell
          range existed (build/integrator.md section 2 item 7) and the fix round returned them with
          the Editor's cell range (build/b5.md "Return round fix round"), so the default view's cell
-         menu has 16 rows, 17 with the objects round's Header row check (docs/OBJECTS.md 3.3 item 4);
+         menu has 16 rows, 17 with the objects round's Header row check (docs/archive/rounds/OBJECTS.md 3.3 item 4);
          the switch is read for the record alone */
       const advanced = await t.advancedOn();
       const on = await openCell(T, 1, 1);
@@ -832,7 +832,7 @@ export async function run(t) {
     },
   );
 
-  /* the caret's cell as stored: the polish round (docs/POLISH.md 2.2 item 10, b2.md R5 and R10)
+  /* the caret's cell as stored: the polish round (docs/archive/rounds/POLISH.md 2.2 item 10, b2.md R5 and R10)
      writes a session's alignment to `cells[]` ({ row, column, align }) and leaves `columns[]` as
      it was; a column head's click keeps writing `columns[]` */
   const cellAlign = (b, row, column) =>
@@ -1416,14 +1416,14 @@ export async function run(t) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.2 ranks 2, 4, 5, 8 and 13, 2.3 items 1 to 3, 7
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.2 ranks 2, 4, 5, 8 and 13, 2.3 items 1 to 3, 7
  * and 9, 3.1 item 4; the rows `tables.cell.click-places-caret` to `tables.cells.tabular-figures`):
  * the table click model amended by FEATURES.md 2.1 (one click on a cell of an unselected table
  * places the caret; a drag from inside still moves it), the range gestures, the appends, the
  * arrows, the marks on a range, the Table section first, the P1 handles, bar and prompts, and the
  * tabular figures. Every table here is placed through the window API as a setup write (the
  * matrix's `setup` field) on two fresh slides, so each gesture meets a known table. A P1 control
- * that is not on the build reads not built with its id and B3's name (docs/PRODUCT.md 8.1); a
+ * that is not on the build reads not built with its id and B3's name (docs/archive/rounds/PRODUCT.md 8.1); a
  * gesture on a control that exists is judged as the product does it today.
  */
 async function featuresRound(t, S, h) {
@@ -2208,7 +2208,7 @@ async function featuresRound(t, S, h) {
       const right = boxes.rows[1][boxes.rows[1].length - 1];
       await page.mouse.move(right.x + right.w - 2, right.y + right.h);
       await t.sleep(500);
-      /* the ids of docs/OBJECTS.md 3.3 item 4 are the block's (`handle.<block>.add.column`); the
+      /* the ids of docs/archive/rounds/OBJECTS.md 3.3 item 4 are the block's (`handle.<block>.add.column`); the
          declared family `handle.table.add.column` is read as well */
       const addColumnId = (await t.visible(`handle.${T3}.add.column`))
         ? `handle.${T3}.add.column`
@@ -2288,7 +2288,7 @@ async function featuresRound(t, S, h) {
       const top = boxes.rows[0][2];
       await page.mouse.move(top.x + top.w / 2, top.y - 6);
       await t.sleep(500);
-      /* the heads' ids are the block's (`handle.<block>.head.<axis>.<n>`, docs/OBJECTS.md 3.3
+      /* the heads' ids are the block's (`handle.<block>.head.<axis>.<n>`, docs/archive/rounds/OBJECTS.md 3.3
          item 4) or the declared family's */
       const heads = await page.evaluate(
         (id) =>
@@ -2526,13 +2526,13 @@ async function featuresRound(t, S, h) {
     );
     return { ok: Boolean(obj), observed: obj?.id ?? 'none' };
   });
-  /* tables.cells.prompt-hovered-only left with the polish round (docs/POLISH.md 2.1 item 1): the
+  /* tables.cells.prompt-hovered-only left with the polish round (docs/archive/rounds/POLISH.md 2.1 item 1): the
      editor draws no prompt in a table cell; its successor tables.cells.no-prompt is polish-tables.mjs's */
   await t.clickCard(S);
 }
 
 /**
- * The objects round (docs/OBJECTS.md section 3, 6.1; the rows `tables.select.ring-with-cell-open`
+ * The objects round (docs/archive/rounds/OBJECTS.md section 3, 6.1; the rows `tables.select.ring-with-cell-open`
  * to `tables.panel.section-words`): Kevin's screenshot answered. The one click state draws the
  * table's ring with the cell ring inside it (3.3 item 1), the empty cells read as a guide grid on
  * the editor's stage alone (item 2), the inserted table fits its rows and a row grows with its
@@ -2662,7 +2662,7 @@ async function objectsRound(t, S, h) {
     await t.settled();
   };
   /**
-   * The guide grid of a table (docs/OBJECTS.md 3.3 item 2; B2's numbers in build/b2.md): an inset
+   * The guide grid of a table (docs/archive/rounds/OBJECTS.md 3.3 item 2; B2's numbers in build/b2.md): an inset
    * box shadow on every `.td` but the last of its row (`rgba(...) -1px 0px 0px 0px inset` in the
    * --pt-hair colour), never a border, on the editor's stage alone; the last cell, the filmstrip
    * card, the show and the print document read `none`. A border right or a `::after` guide is
@@ -2798,7 +2798,7 @@ async function objectsRound(t, S, h) {
       }
       return {
         ok,
-        observed: `${out.join(' | ')}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE}; TOOL_SIZES.table by request)`}`,
+        observed: `${out.join(' | ')}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 3, ${LANE}; TOOL_SIZES.table by request)`}`,
       };
     },
   );
@@ -2899,7 +2899,7 @@ async function objectsRound(t, S, h) {
         Boolean(moved);
       return {
         ok,
-        observed: `after the click: session cell ${where ? `${where.row},${where.column}` : 'none'}; table ${boxStr(o?.table)}, ring ${boxStr(o?.ring)} (on the table ${ringOnTable}); chip ${o?.chip ? `"${o.chip.text}" at ${boxStr(o.chip.box)}` : 'none'} (above the ring ${chipAbove}); frame edges on the ring ${edges.join(',') || 'none'}; handles ${handles}, on the corners ${corners}; the ring band drag ${grip ? `${t.posStr(pos0)} -> ${t.posStr(pos1)} (by 80,40 ${moved})` : 'no frame edge to grip'}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
+        observed: `after the click: session cell ${where ? `${where.row},${where.column}` : 'none'}; table ${boxStr(o?.table)}, ring ${boxStr(o?.ring)} (on the table ${ringOnTable}); chip ${o?.chip ? `"${o.chip.text}" at ${boxStr(o.chip.box)}` : 'none'} (above the ring ${chipAbove}); frame edges on the ring ${edges.join(',') || 'none'}; handles ${handles}, on the corners ${corners}; the ring band drag ${grip ? `${t.posStr(pos0)} -> ${t.posStr(pos1)} (by 80,40 ${moved})` : 'no frame edge to grip'}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
       };
     },
   );
@@ -2945,7 +2945,7 @@ async function objectsRound(t, S, h) {
       const ok = cellRingOk && insideRing && rangeOk && oneRing;
       return {
         ok,
-        observed: `cell 1,1 open: cell ring ${boxStr(o?.cellRing)} against the cell's grid area ${boxStr(area)} (${cellRingOk}), inside the table ring ${boxStr(o?.ring)} ${insideRing}; the range 1,1 to 2,2: ring ${boxStr(rangeBox)} against the union ${boxStr(union)} (${rangeOk}), rings drawn ${o2?.rangeRings ?? 0} range and ${o2?.cellRings ?? 0} cell; table ${t.posStr(posAfter)}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
+        observed: `cell 1,1 open: cell ring ${boxStr(o?.cellRing)} against the cell's grid area ${boxStr(area)} (${cellRingOk}), inside the table ring ${boxStr(o?.ring)} ${insideRing}; the range 1,1 to 2,2: ring ${boxStr(rangeBox)} against the union ${boxStr(union)} (${rangeOk}), rings drawn ${o2?.rangeRings ?? 0} range and ${o2?.cellRings ?? 0} cell; table ${t.posStr(posAfter)}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 1, ${LANE} with B5)`}`,
       };
     },
   );
@@ -2967,7 +2967,7 @@ async function objectsRound(t, S, h) {
       const ok = every && lastNone && under && cardNone;
       return {
         ok,
-        observed: `stage: ${stage.found ? `${stage.drawn} of ${stage.seams} inner seams drawn as a ${stage.how} (${stage.color ?? 'no colour'}), the last cells drawn ${stage.lastDrawn}, the rule under the last row ${stage.under} px (${stage.underColor})` : 'no table'}; --pt-hair ${hair ?? 'unread'}; the filmstrip card: ${card.found ? `${card.drawn} seam(s) drawn` : card.image ? 'an image, no seams read' : 'no table markup'}${ok ? '' : ` (docs/OBJECTS.md 3.3 item 2, ${LANE})`}`,
+        observed: `stage: ${stage.found ? `${stage.drawn} of ${stage.seams} inner seams drawn as a ${stage.how} (${stage.color ?? 'no colour'}), the last cells drawn ${stage.lastDrawn}, the rule under the last row ${stage.under} px (${stage.underColor})` : 'no table'}; --pt-hair ${hair ?? 'unread'}; the filmstrip card: ${card.found ? `${card.drawn} seam(s) drawn` : card.image ? 'an image, no seams read' : 'no table markup'}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 2, ${LANE})`}`,
       };
     },
   );
@@ -3007,7 +3007,7 @@ async function objectsRound(t, S, h) {
               (r) =>
                 `${r.appearance} (${JSON.stringify(r.got)}): ${r.drawn} of ${r.seams} seams in ${r.color ?? 'no colour'} on ${r.ground} (${r.contrast === null ? 'no contrast' : `${r.contrast}:1`})`,
             )
-            .join('; ') + (ok ? '' : ` (docs/OBJECTS.md 3.3 item 2, ${LANE})`),
+            .join('; ') + (ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 2, ${LANE})`),
       };
     },
   );
@@ -3093,7 +3093,7 @@ async function objectsRound(t, S, h) {
       const ok = rowGrew && below && Boolean(written) && Boolean(ringMeets) && restored;
       return {
         ok,
-        observed: `typed ${typeof text === 'string' && text.includes('word40')}; the cell draws ${lines} line(s); row 1 ${r1(f0?.cells?.rowBoxes?.[1]?.h)} -> ${r1(f1?.cells?.rowBoxes?.[1]?.h)} px, row 2 from y ${r1(f0?.cells?.rowBoxes?.[2]?.y)} to ${r1(f1?.cells?.rowBoxes?.[2]?.y)}; pos.h ${pos0?.h} -> ${pos1?.h} against the rows' ${drawn} (written up ${written}); revision ${rev0} -> ${rev1} (${commits} commit(s), one ${oneCommit}, undone ${undone}); the ring's bottom ${r1(o?.ring ? o.ring.y + o.ring.h : null)} against the last rule ${lastRule} (${ringMeets}); Cmd+Z restored the text and the box together ${restored} (${t.posStr(posBack)})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
+        observed: `typed ${typeof text === 'string' && text.includes('word40')}; the cell draws ${lines} line(s); row 1 ${r1(f0?.cells?.rowBoxes?.[1]?.h)} -> ${r1(f1?.cells?.rowBoxes?.[1]?.h)} px, row 2 from y ${r1(f0?.cells?.rowBoxes?.[2]?.y)} to ${r1(f1?.cells?.rowBoxes?.[2]?.y)}; pos.h ${pos0?.h} -> ${pos1?.h} against the rows' ${drawn} (written up ${written}); revision ${rev0} -> ${rev1} (${commits} commit(s), one ${oneCommit}, undone ${undone}); the ring's bottom ${r1(o?.ring ? o.ring.y + o.ring.h : null)} against the last rule ${lastRule} (${ringMeets}); Cmd+Z restored the text and the box together ${restored} (${t.posStr(posBack)})${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 3, ${LANE})`}`,
       };
     },
   );
@@ -3144,7 +3144,7 @@ async function objectsRound(t, S, h) {
       const ok = shared && Boolean(floor) && Boolean(readoutOk);
       return {
         ok,
-        observed: `down by 120: rows ${h0.map(r1).join(', ')} -> ${h1.map(r1).join(', ')} (each +${shares.join(', +')}; even ${shared}); up by 200: pos.h ${pos0?.h} -> ${pos2?.h} against the rows' natural ${natural} (stopped at the floor ${floor}), the readout at the far point ${readout === null ? 'none' : `"${readout}"`} (says the floor ${readoutOk})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 3, ${LANE})`}`,
+        observed: `down by 120: rows ${h0.map(r1).join(', ')} -> ${h1.map(r1).join(', ')} (each +${shares.join(', +')}; even ${shared}); up by 200: pos.h ${pos0?.h} -> ${pos2?.h} against the rows' natural ${natural} (stopped at the floor ${floor}), the readout at the far point ${readout === null ? 'none' : `"${readout}"`} (says the floor ${readoutOk})${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 3, ${LANE})`}`,
       };
     },
   );
@@ -3166,7 +3166,7 @@ async function objectsRound(t, S, h) {
         await h.endSession();
         return {
           ok: false,
-          observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); no column seam handle with the cell open (docs/OBJECTS.md 3.3 item 5, B1 for ${LANE})`,
+          observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); no column seam handle with the cell open (docs/archive/rounds/OBJECTS.md 3.3 item 5, B1 for ${LANE})`,
         };
       }
       const first = seams.find((c) => c.endsWith('.0')) ?? seams[0];
@@ -3197,7 +3197,7 @@ async function objectsRound(t, S, h) {
         whereAfter?.column === 1;
       return {
         ok,
-        observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); seams ${seams.join(', ')}; columns ${JSON.stringify(before)} -> ${JSON.stringify(after)} (written ${written}); cell open after the drag ${stillOpen} (${whereAfter ? `${whereAfter.row},${whereAfter.column}` : 'no cell'})${ok ? '' : ` (docs/OBJECTS.md 3.3 item 5, B1 for ${LANE})`}`,
+        observed: `cell open ${open} (${where ? `${where.row},${where.column}` : 'no cell'}); seams ${seams.join(', ')}; columns ${JSON.stringify(before)} -> ${JSON.stringify(after)} (written ${written}); cell open after the drag ${stillOpen} (${whereAfter ? `${whereAfter.row},${whereAfter.column}` : 'no cell'})${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 5, B1 for ${LANE})`}`,
       };
     },
   );
@@ -3244,7 +3244,7 @@ async function objectsRound(t, S, h) {
         return t.notBuilt(
           'handle.table.head.row',
           'B5',
-          `no row head beside the selected table (docs/OBJECTS.md 3.3 item 4)${heads.length > 0 ? `; heads ${heads.join(', ')}` : ''}`,
+          `no row head beside the selected table (docs/archive/rounds/OBJECTS.md 3.3 item 4)${heads.length > 0 ? `; heads ${heads.join(', ')}` : ''}`,
         );
       const hr = await t.rectOf(`[data-control="${head}"]`);
       await t.rightClickAt(hr.x + hr.w / 2, hr.y + hr.h / 2);
@@ -3306,7 +3306,7 @@ async function objectsRound(t, S, h) {
       const ok = row !== null && row.checked === 'true' && cleared && w1 === body && back === true;
       return {
         ok,
-        observed: `head ${head}; the menu lists Header row ${row ? `(checked ${row.checked}, disabled ${row.disabled})` : 'not at all'} among ${rows.map((r) => r.id).join(', ')}; header ${true} -> ${header}; row 0 weight ${w0} -> ${w1} (the body's ${body}), hairline ${weight0?.borderWidth} ${weight0?.borderColor} -> ${style1?.borderWidth} ${style1?.borderColor}; Cmd+Z: header ${back}${ok ? '' : " (docs/OBJECTS.md 3.3 item 4; format.table.headerRow is the integrator's row by B5's request)"}`,
+        observed: `head ${head}; the menu lists Header row ${row ? `(checked ${row.checked}, disabled ${row.disabled})` : 'not at all'} among ${rows.map((r) => r.id).join(', ')}; header ${true} -> ${header}; row 0 weight ${w0} -> ${w1} (the body's ${body}), hairline ${weight0?.borderWidth} ${weight0?.borderColor} -> ${style1?.borderWidth} ${style1?.borderColor}; Cmd+Z: header ${back}${ok ? '' : " (docs/archive/rounds/OBJECTS.md 3.3 item 4; format.table.headerRow is the integrator's row by B5's request)"}`,
       };
     },
   );
@@ -3415,7 +3415,7 @@ async function objectsRound(t, S, h) {
         facts.generated === 0;
       return {
         ok,
-        observed: `sections ${facts.sections.join(', ')}; groups ${facts.groups.join(', ') || 'none'} (the order ${groupsOk}); Header row ${facts.headerRow}; Border ${facts.border}; Height fields ${facts.height}, per row ${facts.rowHeights}; Distribute rows ${facts.distributeRows}, Distribute columns ${facts.distributeColumns}; Cell fill ${facts.cellFill}, cell border ${facts.cellBorder}; Merge ${facts.merge}; the words in order ${facts.inOrder}; generated table fields below ${facts.generated}; reads "${facts.words}"${ok ? '' : ' (docs/OBJECTS.md 3.3 item 6, B5)'}`,
+        observed: `sections ${facts.sections.join(', ')}; groups ${facts.groups.join(', ') || 'none'} (the order ${groupsOk}); Header row ${facts.headerRow}; Border ${facts.border}; Height fields ${facts.height}, per row ${facts.rowHeights}; Distribute rows ${facts.distributeRows}, Distribute columns ${facts.distributeColumns}; Cell fill ${facts.cellFill}, cell border ${facts.cellBorder}; Merge ${facts.merge}; the words in order ${facts.inOrder}; generated table fields below ${facts.generated}; reads "${facts.words}"${ok ? '' : ' (docs/archive/rounds/OBJECTS.md 3.3 item 6, B5)'}`,
       };
     },
   );

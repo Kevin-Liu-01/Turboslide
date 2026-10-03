@@ -68,7 +68,7 @@ export function endsFollowOnView(
 }
 
 /**
- * The entries of a stream event the agent banner announces (docs/REALTIME.md 3.3; docs/PRODUCT.md
+ * The entries of a stream event the agent banner announces (docs/REALTIME.md 3.3; docs/archive/rounds/PRODUCT.md
  * 6.1 "Outside writes"): an author whose kind is `agent` (since the realtime round the server
  * writes it for every bearer whose caller is an agent, with the token's label as the name and the
  * `x-turboslide-author` run id when the request carried one; the assist's accept and the checkout

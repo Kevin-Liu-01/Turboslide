@@ -385,7 +385,7 @@ async function main() {
       const page = await opened.browser.newPage({ viewport: { width: 1440, height: 900 } });
       // the flag is the rule, not a test convenience: since the sync and costs round a /deck,
       // /present or /embed page attaches a studio session only when its address carries
-      // agent=1 and while it is visible (docs/SYNC.md 3.10, question 3's default;
+      // agent=1 and while it is visible (docs/archive/rounds/SYNC.md 3.10, question 3's default;
       // useStudioSession.ts agentSessionRequested), so an agent that wants deck_goto_slide to
       // reach a viewer page opens it this way
       await page.goto(new URL(`/deck/${DECK}?agent=1`, STUDIO_URL).href, { waitUntil: 'load' });

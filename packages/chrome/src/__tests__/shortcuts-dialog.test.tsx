@@ -68,7 +68,7 @@ describe('ShortcutsDialog', () => {
     expect(dialog.querySelector('tr[data-binding="edit.undo"]')).not.toBeNull();
     /* a Later stub's greyed row leaves the list; the chords of the rows the return round brought
        back (Group, Superscript, Full screen; RETURN.md 2.11, 2.12, 2.16) and Alt text, returned in
-       the product round (docs/PRODUCT.md section 5), are listed with the switch off */
+       the product round (docs/archive/rounds/PRODUCT.md section 5), are listed with the switch off */
     expect(dialog.querySelector('tr[data-binding="format.altText"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="arrange.group"]')).not.toBeNull();
     expect(dialog.querySelector('tr[data-binding="format.text.superscript"]')).not.toBeNull();

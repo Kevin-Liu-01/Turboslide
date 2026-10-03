@@ -83,13 +83,13 @@ describe('the primitives in the Insert group', () => {
     expect(insertLabel('shot')).toBe('Image');
   });
 
-  it('keeps the entries whose menu row is core in the default view and parks the rest (docs/FOCUS.md 3.1; docs/RETURN.md 2)', () => {
+  it('keeps the entries whose menu row is core in the default view and parks the rest (docs/FOCUS.md 3.1; docs/archive/rounds/RETURN.md 2)', () => {
     const plain = buildPaletteEntries({ ...context('content-rule'), advancedTools: false }).filter(
       (entry) => entry.group === 'insert',
     );
-    /* the return round (docs/RETURN.md 2.2 to 2.6) brought the shapes, the lines, the table, the
+    /* the return round (docs/archive/rounds/RETURN.md 2.2 to 2.6) brought the shapes, the lines, the table, the
        chart and the diagram back with their rows, and the features round's ship two brought the
-       Shader (docs/FEATURES.md 5.4); the Box (no row, question 5 of RETURN.md section 9), Rule and
+       Shader (docs/archive/rounds/FEATURES.md 5.4); the Box (no row, question 5 of RETURN.md section 9), Rule and
        Icon stay behind the switch */
     expect(
       plain.filter((entry) => entry.insert === 'primitive').map((entry) => entry.title),

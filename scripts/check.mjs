@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root, plus
 // the M2 format gate (step 19), the two steps of the Google Slides parity round (steps 20 and
-// 21, docs/gslides-parity/SPEC.md 14.1) and the three of round two (steps 22 to 24,
-// docs/gslides-parity/SPEC-2.md 11.1: the export fixture in both modes, the fonts build check,
+// 21, docs/archive/gslides-parity/SPEC.md 14.1) and the three of round two (steps 22 to 24,
+// docs/archive/gslides-parity/SPEC-2.md 11.1: the export fixture in both modes, the fonts build check,
 // the conversion fidelity gate), with the container verification of SPEC-2 11.3 as an optional
 // step 25 that runs when Docker is present. Every step is the literal command from the milestone plan,
 // with one guard: step 3 first proves the generated files are tracked, because
@@ -171,7 +171,7 @@ const NODE_SERVER_ENV = {
   TURBOSLIDE_DOWNLOAD_SECRET: 'check-node-server-download-secret-0000000000',
 };
 // The environment the runner's dev server carries (SPEC-3 16.1 step 26; server/tokens.ts).
-/** The tree's commit, stamped into every server the runner starts so /api/agent names it (docs/POLISH.md section 0 item 1). */
+/** The tree's commit, stamped into every server the runner starts so /api/agent names it (docs/archive/rounds/POLISH.md section 0 item 1). */
 function headCommit() {
   const out = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' });
   const sha = (out.stdout ?? '').trim();
@@ -208,7 +208,7 @@ const INNER_HTML_ALLOW = [
   'apps/studio/src/components/PresenterPage.tsx',
   'apps/studio/src/routes/print.$deckId.tsx',
   'apps/studio/src/components/DeckViewer.tsx',
-  // the template gallery mounts the theme's sprite once, as DeckViewer does (docs/PRODUCT.md 4.3)
+  // the template gallery mounts the theme's sprite once, as DeckViewer does (docs/archive/rounds/PRODUCT.md 4.3)
   'apps/studio/src/routes/decks.templates.tsx',
   'packages/viewer/src/SlideView.tsx',
   'packages/viewer/src/LiveClone.tsx',
@@ -258,14 +258,14 @@ const OVERWRITE_ALLOW = [
   // The write moved to export-jobs-store.ts in the sync and costs round (build/b1.md R10: the
   // pure module the client reads keeps no store import)
   'apps/studio/src/server/export-jobs-store.ts',
-  // the saved templates across instances (the product round fix round, b7 F2; docs/PRODUCT.md
+  // the saved templates across instances (the product round fix round, b7 F2; docs/archive/rounds/PRODUCT.md
   // 4.3): `templates/<id>/<file>` are one saved template folder's files, rewritten whole by the
   // instance that saved or replaced the template (the store's extras removed after), and
   // `templates/index.json` is the index of them, put under `ifMatch` on the version it was read
   // at; a template file is served through the studio's own routes, never as a public asset the
   // assets route hands out (the ship step of the product round; check step 6 named the two sites)
   'packages/store/src/blob-templates.ts',
-  // the logo index and the open licence mark cache of the features round (docs/FEATURES.md 4.2,
+  // the logo index and the open licence mark cache of the features round (docs/archive/rounds/FEATURES.md 4.2,
   // 4.10; build/b6.md item 5): `system/logo-index.json` is one record every refresh rewrites whole
   // and `system/logos/<slug>/<variant>.svg` is the sanitized file of a mark under an open licence,
   // rewritten with the same bytes by whichever instance fetched it; both live under the system

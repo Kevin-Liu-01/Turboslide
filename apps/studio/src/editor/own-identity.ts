@@ -6,7 +6,7 @@ import type {
 
 /**
  * The caller's own identity as the editor hands it to the chrome (gslides-parity SPEC-3 7.8;
- * docs/PEOPLE.md 3.11, 4.1, 4.4): one source for the own chip, the account head, the Profile
+ * docs/archive/rounds/PEOPLE.md 3.11, 4.1, 4.4): one source for the own chip, the account head, the Profile
  * head, the builder and the version rows' "You". The page payload names the caller at load; the
  * roster's own entry carries what the room resolved for everyone else (the server's mark, the
  * trust after a name was typed in another tab); the answer of Change name or Change avatar is
@@ -100,7 +100,7 @@ export function ownPrincipalOf(
  * key moved" before: on the blob tier the own row's mark moves on presence ticks that carry no
  * identity change (each instance grants its own hue slot), so the overlay dropped within a second
  * and the own chip fell back to the stale row for up to the room's 5 s identity cache (the
- * integrator's preview readings of people.own-chip-follows-name and -avatar, docs/PEOPLE.md 3.11).
+ * integrator's preview readings of people.own-chip-follows-name and -avatar, docs/archive/rounds/PEOPLE.md 3.11).
  */
 export function rowReflects(
   facts: MeAnswerFacts,

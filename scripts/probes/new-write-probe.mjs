@@ -130,7 +130,7 @@ const remotePresence = async (page) =>
   }));
 /**
  * Opens the roster menu, counts its rows and the self row, closes it. With nobody else present
- * the opener is not drawn (docs/RETURN.md 4.3: `.ts-presence-more.is-empty` takes no pointer;
+ * the opener is not drawn (docs/archive/rounds/RETURN.md 4.3: `.ts-presence-more.is-empty` takes no pointer;
  * return/build/b7.md B7-R6), so the roster is read through the window API's `presence.list`
  * instead, the same rows the menu would list: the self row and the others.
  */

@@ -1,4 +1,4 @@
-// The shader library, the probe's rows (docs/FEATURES.md section 5, 7.1 `shaders.*` with the
+// The shader library, the probe's rows (docs/archive/rounds/FEATURES.md section 5, 7.1 `shaders.*` with the
 // driver `probe --core`, and the View row `shaders.view.play-setting`): Insert > Shader's gallery
 // with its thumbnails, search and category chips, the insert in the body's free rectangle with the
 // chip Shader, the seller's words on every surface, the Shader section's Strength slider (live
@@ -13,7 +13,7 @@
 // The controls are B1's (`dialogs/ShaderGallery.tsx`, the Shader row of `dialogs/Background.tsx`)
 // and B5's (`inspector/shader.tsx`, the mount, the palette) with the menu row `insert.shader` in
 // `model.ts` by request to the integrator (FEATURES.md section 6). A row whose control is not on
-// the build reads not driven with the control's id and its lane (docs/PRODUCT.md 8.1); a control
+// the build reads not driven with the control's id and its lane (docs/archive/rounds/PRODUCT.md 8.1); a control
 // that exists is judged. Two readings need the mount at rest: the walk emulates
 // `prefers-reduced-motion: reduce` on its one page for them (FEATURES.md 5.6: speed 0) and puts
 // the media back, so a pixel comparison reads the slider or the preset and not the animation.

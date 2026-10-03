@@ -58,7 +58,7 @@ export const exportJobInput = z.strictObject({
   includeSkipped: z.boolean().optional(),
   /** Carry the speaker notes (gslides-parity SPEC 7.2.13, decision 15.2). */
   includeNotes: z.boolean().optional(),
-  /** The svgBlip switch of docs/VECTOR.md 4.6; false writes the PNG blip alone (`--no-svg-vector`). */
+  /** The svgBlip switch of docs/archive/rounds/VECTOR.md 4.6; false writes the PNG blip alone (`--no-svg-vector`). */
   svgVector: z.boolean().optional(),
   /** How a table block travels in Editable text (gslides-parity SPEC 7.3). */
   tables: z.enum(['auto', 'table', 'rows']).optional(),

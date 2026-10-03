@@ -13,7 +13,7 @@
 // pixels (slides report 2.3), and the recipe sidecar assets/<id>.recipe.json is written beside
 // the twins (SPEC 4.1). The store write is the caller's.
 //
-// The features round's ship two (docs/FEATURES.md 5.5): the frame takes the block's box aspect
+// The features round's ship two (docs/archive/rounds/FEATURES.md 5.5): the frame takes the block's box aspect
 // with the long side 3200 (`size`, any pair whose long side is 3200, or the aspect's pair from
 // recipe-key.ts `frameSizeFor`), the mount is the size at half in CSS px, the request may carry
 // the block's `frameKey` and the deck's shader palette (the kit's colours reach the presets), and
@@ -66,7 +66,7 @@ export function frameSizeOf(size: [number, number] | undefined): [number, number
     );
   if (Math.max(w, h) !== FRAME_LONG_SIDE)
     throw new RangeError(
-      `a material frame has the long side ${FRAME_LONG_SIDE} (docs/FEATURES.md 5.5; 3200 by 1800 for the 16:9 box); got ${w} by ${h}`,
+      `a material frame has the long side ${FRAME_LONG_SIDE} (docs/archive/rounds/FEATURES.md 5.5; 3200 by 1800 for the 16:9 box); got ${w} by ${h}`,
     );
   if (w % 2 !== 0 || h % 2 !== 0)
     throw new RangeError(

@@ -19,7 +19,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
  *
  * The record is an overwritten path (the start writes it queued, the worker's instance rewrites
  * it running and done), so it follows the store's proof rule since the sync and costs round
- * (docs/SYNC.md 3.5, invariant 8; audit-costs items 4 and 13): written with its immutable copy
+ * (docs/archive/rounds/SYNC.md 3.5, invariant 8; audit-costs items 4 and 13): written with its immutable copy
  * first (`putWithCopy`, under the store's `.turboslide/copies/` folder beside the record) and
  * read through `provenGet` (the head's version, the body only when its md5 is that version,
  * else the copy), because the public host serves an overwritten object for up to thirty days
@@ -47,7 +47,7 @@ export type ExportJobStatus = 'queued' | 'running' | 'done' | 'failed';
 export type ExportJobDownload = { name: string; bytes: number; url: string };
 
 /**
- * Where a running export is (the product round, docs/PRODUCT.md section 2 ranks 8 and 21; the
+ * Where a running export is (the product round, docs/archive/rounds/PRODUCT.md section 2 ranks 8 and 21; the
  * row `export.download.progress-per-slide`): the play list number of the slide the worker
  * rendered last and the slides the file holds, read off the worker's own log lines
  * (`progressOfLog`), so the snackbar reads "slide k of n" with k moving. A two appearance

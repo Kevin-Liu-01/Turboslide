@@ -118,7 +118,7 @@
   cursor: default;
 }
 
-/* The picture being uploaded (docs/PRODUCT.md section 2 rank 10): the local file drawn at its
+/* The picture being uploaded (docs/archive/rounds/PRODUCT.md section 2 rank 10): the local file drawn at its
    final box inside the sheet (`.pt-slide`, sheet px; Editor.tsx appends it beside the rendered
    slide), with a thin progress bar along its bottom edge until the asset lands and the block takes
    its place. Above the slide's own stacking context so the frame never covers it; one hairline
@@ -168,7 +168,7 @@
   }
 }
 
-/* The editor's guide grid on every table (docs/OBJECTS.md 3.3 item 2; Kevin's screenshot: an
+/* The editor's guide grid on every table (docs/archive/rounds/OBJECTS.md 3.3 item 2; Kevin's screenshot: an
    empty 3 by 3 table read as bare rules with no cell). A `--pt-hair` hairline on every inner
    column seam of every row, drawn as an inset shadow at the cell's right edge so no box moves
    and the show's wrap points hold; and, where the grammar's rule is absent (a table whose border
@@ -178,7 +178,7 @@
    the click model; the shell's own root carries .ts-editor as well and holds the filmstrip's
    cards) and not to its present state (.is-present, the show on the same root), so the filmstrip
    cards, the show, the thumbnails, the PDF and the PowerPoint draw the grammar's rules and no
-   seam (docs/grammar.md "table"; docs/OBJECTS.md section 8 question 1 keeps cell borders out of
+   seam (docs/grammar.md "table"; docs/archive/rounds/OBJECTS.md section 8 question 1 keeps cell borders out of
    the show). */
 .ts-sheet.ts-editor:not(.is-present) .pt-slide .table .td:not(.last) {
   box-shadow: inset -1px 0 0 var(--pt-hair);

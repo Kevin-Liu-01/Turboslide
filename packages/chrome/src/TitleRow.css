@@ -1,6 +1,6 @@
 /* TitleRow (TitleRow.tsx): the first of the editor's rows (gslides-parity SPEC 1.1, 1.2), 44 px
    (--pt-title-h), full width, its bottom edge in --pt-hair (the menu bar under it draws no rule;
-   docs/RETURN.md 4.2 item 1). Left group: the Turboslide mark at --ts-mark in its 32 px link box
+   docs/archive/rounds/RETURN.md 4.2 item 1). Left group: the Turboslide mark at --ts-mark in its 32 px link box
    (SPEC-4 1.10), the title as a 13.5 px display button (a field over the same box while
    renaming), the save words in titanium with the cloud glyph, the clock. Right group (RETURN.md
    4.3): the presence slot, the comments glyph as a toggle, the Slideshow split button as one
@@ -166,7 +166,7 @@
   color: var(--pt-titanium);
 }
 
-/* the Last edit words beside the clock (docs/POLISH.md item 92), hidden under 1280 px */
+/* the Last edit words beside the clock (docs/archive/rounds/POLISH.md item 92), hidden under 1280 px */
 .ts-title-clock-words {
   color: var(--pt-titanium);
   font-size: 12.5px;
@@ -198,7 +198,7 @@
   color: var(--pt-ink);
 }
 
-/* The Slideshow split button as one control (docs/RETURN.md 4.1; return/audit-chrome.md 5a): the
+/* The Slideshow split button as one control (docs/archive/rounds/RETURN.md 4.1; return/audit-chrome.md 5a): the
    wrapper owns the box: the one outline and the one ink ground, the chrome's one 8 px corner
    (DESIGN.md 430; docs/NEXT.md 4.1.2) on the outer corners only, --pt-ctl-h tall. The two halves
    are transparent inside it, 30 px in the 32 px box, no corners and no border of their own, the
@@ -330,7 +330,7 @@
   width: var(--pt-inbox-w, 60px);
 }
 
-/* the inbox slot collapses while the plate is parked (docs/RETURN.md 4.3, 2.16; question 9 of
+/* the inbox slot collapses while the plate is parked (docs/archive/rounds/RETURN.md 4.3, 2.16; question 9 of
    section 9): the first paint rule of SPEC-3 0.43 guards a plate that can appear, and a parked
    plate cannot, so the comments glyph sits 8 px from the Slideshow button; the 60 px slot returns
    with the plate when `title.inbox` is present again */
@@ -466,7 +466,7 @@
   }
 }
 
-/* The Assist button (docs/PRODUCT.md 6.1): the sparkle glyph with the word in one quiet button
+/* The Assist button (docs/archive/rounds/PRODUCT.md 6.1): the sparkle glyph with the word in one quiet button
    between the presence slot and the comments glyph, where Google draws Ask Gemini; its slot is
    as wide as the word, titanium at rest and ink while the panel is open like the comments glyph;
    the slot collapses when the entry is absent (a reader). */
@@ -487,7 +487,7 @@
   color: var(--pt-ink);
 }
 
-/* ---- the name prompt as a plate under the row (docs/POLISH.md 2.8 item 103; NEXT.md 4.1.3
+/* ---- the name prompt as a plate under the row (docs/archive/rounds/POLISH.md 2.8 item 103; NEXT.md 4.1.3
    item 13) ----
    The route's prompt on the first write or at the join floats under the title row's right end,
    in the menu bar's 28 px band (the menu titles sit at the left), never over the sheet and never

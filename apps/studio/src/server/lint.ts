@@ -19,7 +19,7 @@ import { openDeckStore } from './root';
  * document comes through the hosted store (root.ts openDeckStore), which pulls the Blob mirror
  * before it reads: a plain FileStore over this instance's overlay answered the document this
  * instance last pulled, so the window API's lint.run on a deployment counted another instance's
- * writes late (the editor depth round, docs/EDITOR-DEPTH-STATUS.md section 5).
+ * writes late (the editor depth round, docs/archive/status/EDITOR-DEPTH-STATUS.md section 5).
  *
  * The editor route imports this module for `lintLists` and the function stub, so nothing at its
  * top level may reach a node builtin (gslides-parity SPEC-2 8.3): the rendered layer, the worker

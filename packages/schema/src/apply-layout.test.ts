@@ -214,7 +214,7 @@ describe('applyLayout', () => {
     expect(statement.slide).toMatchObject({ kind: 'statement', big: 'The content rule' });
     expect(statement.dropped.sort()).toEqual(['fig', 'list', 'p1', 'p2']);
     // the other way: a title slide's heading lands in the head of Title and body and its lead in
-    // the body (the product round made Title and body one title over one body, docs/PRODUCT.md
+    // the body (the product round made Title and body one title over one body, docs/archive/rounds/PRODUCT.md
     // section 2 rank 2; the 4/8 head is Title, subtitle and body)
     const back = applyLayout({
       slide: title.slide,
@@ -424,7 +424,7 @@ describe('applyLayout', () => {
       ['fig', 'h', 'list', 'p1', 'p2'].sort(),
     );
     expect(blocking(boxed.slide)).toEqual([]);
-    // an untyped Title and body slide to Blank is an empty slide (docs/POLISH.md 2.3 item 13);
+    // an untyped Title and body slide to Blank is an empty slide (docs/archive/rounds/POLISH.md 2.3 item 13);
     // a typed box stays with its box
     const untyped = layoutEntry('split').make('untyped', blankDeck, 'deck');
     if (untyped === null) throw new Error('split needs no picture');

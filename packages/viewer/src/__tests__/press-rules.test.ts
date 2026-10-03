@@ -369,7 +369,7 @@ describe('the chip the press arms (Editor armPress, chipHandleFor): the whole ar
   });
 });
 
-describe('objectPressPlan on a table (docs/FEATURES.md 2.1: A1 rules 1 and 3 amended for tables alone)', () => {
+describe('objectPressPlan on a table (docs/archive/rounds/FEATURES.md 2.1: A1 rules 1 and 3 amended for tables alone)', () => {
   const cell = { row: 1, col: 2 };
 
   it('selects an unselected table, arms its drag and names the pressed cell for the tap', () => {

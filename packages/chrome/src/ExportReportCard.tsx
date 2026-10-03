@@ -6,7 +6,7 @@ import './ExportReportCard.css';
 
 /**
  * The summary card after an export or a build (SPEC 8.5: the report is the claim; the polish
- * round, docs/POLISH.md item 80: a seller's card first). The head names the file kind the run
+ * round, docs/archive/rounds/POLISH.md item 80: a seller's card first). The head names the file kind the run
  * made (PDF, PowerPoint file, web page), the files follow with their name, their size and a
  * Download button each, and one sentence says what the file holds and how long it took. The gate's
  * rows (the mode, the pages, Perfect, the page rasters, the worst fraction, the raster blocks, the

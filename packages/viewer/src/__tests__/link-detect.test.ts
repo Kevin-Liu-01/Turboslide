@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { addressRangeAt, detectLinkBefore, linkOfToken } from '../marks';
 
 // Link detection as the space or Enter lands, and the address a double click selects whole
-// (docs/PRODUCT.md section 2 rank 9; audit-seller 9). Pure over the plain text.
+// (docs/archive/rounds/PRODUCT.md section 2 rank 9; audit-seller 9). Pure over the plain text.
 
 describe('linkOfToken', () => {
   it('reads a bare domain, a path, www and a scheme as https addresses', () => {

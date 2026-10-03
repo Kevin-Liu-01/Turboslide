@@ -50,7 +50,7 @@ import type { RenderGrantTarget } from '../../server/tokens';
 // this route, so the token set on the production and preview environments of the `turboslide`
 // project since 2026-09-11 (docs/hosting.md section 6, option 2) costs the page nothing.
 //
-// The render grant (the return round, docs/RETURN.md 2.19; audit-surface rows 27 and 28): the
+// The render grant (the return round, docs/archive/rounds/RETURN.md 2.19; audit-surface rows 27 and 28): the
 // picture urls renderSlideImages answers carry `?g=<grant>` (server/tokens.ts signRenderGrant),
 // minted after authorize(read) passed for the caller and naming the deck, the slide, the theme,
 // the scale and the format for ten minutes. A request whose grant verifies for exactly the
@@ -177,12 +177,12 @@ export const Route = createFileRoute('/api/render/$slideId')({
               r: isThumbStamp(r) ? r : null,
             };
             /* a card's request (a stamp named) whose deck holds no capture on the blob tier
-               answers 204 and renders behind the response (docs/POLISH.md items 90 and 111) */
+               answers 204 and renders behind the response (docs/archive/rounds/POLISH.md items 90 and 111) */
             const thumb = await getThumbnail(request_, { renderBehind: request_.r !== null });
             return thumbResponse(thumb, request_, { revisionInUrl: request_.r !== null });
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            /* a thumbnail is a picture the page draws a plate for (docs/POLISH.md item 111): a
+            /* a thumbnail is a picture the page draws a plate for (docs/archive/rounds/POLISH.md item 111): a
                deck or slide that does not exist is 404; an unsaved draft and a capture that is
                not rendered yet (the store or the worker busy, the render refused) are 204, so
                the card keeps its title plate and asks again, and no load logs a 502 */

@@ -1,4 +1,4 @@
-// The shader.* actions on a file store (docs/FEATURES.md 5.5, 5.8, 7.3): `shader.list` answers
+// The shader.* actions on a file store (docs/archive/rounds/FEATURES.md 5.5, 5.8, 7.3): `shader.list` answers
 // the gallery's order with the categories, the previews and the control ranges; `shader.insert`
 // lands a shader object with its featured preset, `motion.play: 'show'` and the placement the deps
 // hand in (the sheet's centre without one), converting the slide first; `shader.set` writes the
@@ -334,7 +334,7 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     expect(finalAssets).toHaveLength(1);
   });
 
-  it('writes a WebP frame as the PNG twin at the same size, and refuses bytes that are neither (docs/POLISH.md item 36)', async () => {
+  it('writes a WebP frame as the PNG twin at the same size, and refuses bytes that are neither (docs/archive/rounds/POLISH.md item 36)', async () => {
     const slideId = 'canvas-opener';
     deps.placeInsert = () => ({ x: 200, y: 300, w: 480, h: 272 });
     const inserted = await shaderInsert(deps, ctx, {

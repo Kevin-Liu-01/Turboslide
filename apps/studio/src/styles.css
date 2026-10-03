@@ -32,7 +32,7 @@ body {
 }
 
 /* the fixture word chip beside the sidebar title: 11px titanium in a hair box (.ts-chip is the
-   identity chip of packages/chrome/src/presence/presence.css; docs/PEOPLE.md 3.3 renamed this one) */
+   identity chip of packages/chrome/src/presence/presence.css; docs/archive/rounds/PEOPLE.md 3.3 renamed this one) */
 .ts-word-chip {
   flex: 0 0 auto;
   font-family: var(--pt-display);
@@ -242,7 +242,7 @@ body {
 .pt-viewer.is-editor.ts-skeleton {
   --pt-sb-w: 256px;
   grid-template-columns: 256px minmax(0, 1fr) 0;
-  /* four rows: the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25) */
+  /* four rows: the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25) */
   grid-template-rows: 44px 28px 40px minmax(0, 1fr);
 }
 

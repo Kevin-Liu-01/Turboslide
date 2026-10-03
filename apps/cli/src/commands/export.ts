@@ -224,7 +224,7 @@ async function exportPptxCommand(
   const tableMode: TableMode = tablesFlag;
   const verify = flagBoolean(ctx.args, 'verify');
   const noJpeg = flagBoolean(ctx.args, 'no-jpeg');
-  // the svgBlip switch (docs/VECTOR.md 4.6): the PNG blip alone for a viewer that reads no vector
+  // the svgBlip switch (docs/archive/rounds/VECTOR.md 4.6): the PNG blip alone for a viewer that reads no vector
   const noSvgVector = flagBoolean(ctx.args, 'no-svg-vector');
   const startedAt = Date.now();
 

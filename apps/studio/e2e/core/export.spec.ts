@@ -60,7 +60,7 @@ import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 // shape's fill), each arriving within 30 s, and the print page's Download as PDF carrying what
 // the preview shows. The deck: a title, two more slides, the third skipped, a note on slide 1, a
 // picture placed as setup and a filled rectangle inserted from Insert > Shape. The return round
-// (docs/RETURN.md section 5) adds the bundle, the web page, the JPEG and the PNG downloads, the
+// (docs/archive/rounds/RETURN.md section 5) adds the bundle, the web page, the JPEG and the PNG downloads, the
 // table's two cells typed through the product, the chart, the word art and the two connectors in
 // the PDF and the Editable text PowerPoint; the documents are placed as setup writes (the walk
 // probe drives their insertion) and every file is read from the download's own bytes.
@@ -85,7 +85,7 @@ import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 // hands a row the owner whose quota holds `n` more downloads (five per identity, never spent
 // past it). The quota is the product's decision and stays; the file just keeps within it.
 //
-// The vector round (docs/VECTOR.md 2.5, 4.6, 6.1) adds the geometry interpreter's two export rows
+// The vector round (docs/archive/rounds/VECTOR.md 2.5, 4.6, 6.1) adds the geometry interpreter's two export rows
 // and the label rectangle row on a geometry deck of its own, and the svg picture's four export rows
 // on an svg deck of its own, each group under a fresh identity so no identity spends past the quota.
 //
@@ -150,7 +150,7 @@ async function makeOwner(browser: Browser): Promise<Owner> {
   await skipCurrent(page);
   /* the return round's documents on a fourth slide (setup writes): a table whose two cells the
      tables rows type through the product, a bar chart, a word art text and two connectors
-     between two rectangles (docs/RETURN.md 2.4 to 2.8) */
+     between two rectangles (docs/archive/rounds/RETURN.md 2.4 to 2.8) */
   const fourth = await addSlide(page);
   await clickCard(page, fourth);
   const s4 = await state(page);
@@ -290,7 +290,7 @@ test.afterAll(async () => {
 });
 
 /**
- * The download dialog with the PDF type picked (docs/PRODUCT.md section 2 rank 8): the PDF row
+ * The download dialog with the PDF type picked (docs/archive/rounds/PRODUCT.md section 2 rank 8): the PDF row
  * starts its download at once, so the dialog's way in is File > Download > More formats > Download options and its
  * File type choice; the dialog's control then reads `dialog.download.pdf`.
  */
@@ -539,14 +539,14 @@ test(title('export.print.download-pdf-follows-preview'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the return round's rows (docs/RETURN.md section 5)
+// the return round's rows (docs/archive/rounds/RETURN.md section 5)
 
 /** The text of every PDF page's content streams, with the parenthesised strings joined. */
 function pdfText(bytes: Buffer): string {
   /* a real extractor first, where the machine has one: Chromium prints the sheet's text as CID
      glyph ids in Flate compressed streams, which the stream reader below cannot turn into words,
      so the three docs rows (tables.export.pdf, charts.export.pdf, wordart.export.pdf) read "not
-     driven" on the first drive and would park their features whole (docs/RETURN.md section 1 rule
+     driven" on the first drive and would park their features whole (docs/archive/rounds/RETURN.md section 1 rule
      2). poppler's pdftotext maps the glyphs through the fonts' ToUnicode tables (the audits read
      their PDFs the same way); without it on PATH the reader below stands and the rows say so */
   const extracted = spawnSync('pdftotext', ['-layout', '-', '-'], {
@@ -626,7 +626,7 @@ test(title('export.zip.bundle'), async () => {
     names.some((n) => /(^|\/)deck\.json$/.test(n)),
     `deck.json is in the bundle (entries ${names.slice(0, 8).join(', ')})`,
   ).toBe(true);
-  /* one snackbar for every download (docs/POLISH.md 2.7 item 86): "Saved <name>" with the
+  /* one snackbar for every download (docs/archive/rounds/POLISH.md 2.7 item 86): "Saved <name>" with the
      file's name, the title's or the deck id's for an untitled deck (download.ts fileNameOf). The
      ship's run of record read the product's "Saved <id>.zip" twice against the row's older
      "names the bundle" (the polish fix round 3, B6) */
@@ -845,7 +845,7 @@ async function objectsOfSlide(page: Page, slideId: string) {
 /**
  * The rules a table draws, read from the cells of a sheet root: the inner column seams (a cell's
  * right border, or its `::after` guide), the rule under each row and the rule under the last row.
- * The objects round draws an editor guide grid on the stage alone (docs/OBJECTS.md 3.3 item 2,
+ * The objects round draws an editor guide grid on the stage alone (docs/archive/rounds/OBJECTS.md 3.3 item 2,
  * question 1's default); the show, the print document and the PDF keep the grammar's rules.
  */
 async function tableRules(page: Page, rootSelector: string, blockId: string) {
@@ -972,14 +972,14 @@ test(title('charts.export.pdf'), async () => {
     'the PDF text is not readable by this spec (pdftotext is not on PATH and no literal or single byte hex string carries the deck words)',
   );
   /* the chart's text is set in the variable Inter, which Chromium's printer emits as Type 3
-     glyph procedures with no ToUnicode map (docs/POLISH.md section 6, the deferred item after
+     glyph procedures with no ToUnicode map (docs/archive/rounds/POLISH.md section 6, the deferred item after
      audit-objects item 22), so pdftotext reads the sheet's words and none of the chart's: the
      row cannot read what it judges and is not driven, with the reason, until the print path
      loads the static cuts. The ship's run of record read the title and "North false" twice (the
      polish fix round 3, B6); a PDF with no Type 3 font and no chart word fails the row */
   test.skip(
     read.length === 0 && type3 > 0,
-    `the chart's text is Type 3 glyphs this spec cannot read (${type3} Type 3 fonts in the file; the deferred item of docs/POLISH.md section 6)`,
+    `the chart's text is Type 3 glyphs this spec cannot read (${type3} Type 3 fonts in the file; the deferred item of docs/archive/rounds/POLISH.md section 6)`,
   );
   for (const word of chartWords) expect(text, `${word} is in the PDF text`).toContain(word);
 });
@@ -1036,7 +1036,7 @@ test(title('lines.connector.export-pptx'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the product round's rows (docs/PRODUCT.md section 2 ranks 7, 8, 11 and 21, 4.2, 4.5, 8.1): the
+// the product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 7, 8, 11 and 21, 4.2, 4.5, 8.1): the
 // file named after the title, the direct PDF and PowerPoint rows with the snackbar's progress and
 // the Download options dialog, the mode sentence, the two large deck measurement rows, the kit's
 // footer text and logo in the PDF, and the catalog face named in the Editable text PowerPoint and
@@ -1139,8 +1139,8 @@ async function deckAsWritten(page: Page, written: number, what: string): Promise
   if (read === written) return;
   const sentence =
     read > written
-      ? `the ${what} read ${read} slides for ${written} written by its builder: a write admitted twice (the blob tier's admission class, docs/SYNC.md 3.2, the sync owner's; not the export's)`
-      : `the ${what} read ${read} slides for ${written} written by its builder: a slide the builder wrote is missing (the blob tier's lag, docs/SYNC.md 3.2, the sync owner's; not the export's)`;
+      ? `the ${what} read ${read} slides for ${written} written by its builder: a write admitted twice (the blob tier's admission class, docs/archive/rounds/SYNC.md 3.2, the sync owner's; not the export's)`
+      : `the ${what} read ${read} slides for ${written} written by its builder: a slide the builder wrote is missing (the blob tier's lag, docs/archive/rounds/SYNC.md 3.2, the sync owner's; not the export's)`;
   test.info().annotations.push({ type: 'deck', description: sentence });
   test.skip(true, sentence);
 }
@@ -1275,7 +1275,7 @@ test(title('export.download.options-dialog'), async () => {
   if (!(await hasOptionsRow(page)))
     test.skip(
       true,
-      'not on this build: file.download.options (docs/PRODUCT.md 7.1, B1 by request in model.ts)',
+      'not on this build: file.download.options (docs/archive/rounds/PRODUCT.md 7.1, B1 by request in model.ts)',
     );
   await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
   const dialog = page
@@ -1489,7 +1489,7 @@ test(title('brand.footer.text'), async () => {
   const { page, deck } = await withBudget(1);
   await openEditor(page, deck);
   if (!(await actionIds(page)).includes('brand.set'))
-    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+    test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
   const s = await settled(page);
   await invoke(page, 'brand.set', {
     path: '/footer/text',
@@ -1544,7 +1544,7 @@ test(title('brand.footer.text'), async () => {
     description: `title slide ${onTitle.drawn}; second slide ${onSecond.drawn}; PDF text ${inPdf}`,
   });
   expect(onSecond.drawn, 'the footer text draws on a slide after the title').toBe(true);
-  /* the polish round (docs/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
+  /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 49; polish/build/b4.md I3): the footer text draws
      on the title slide too, as the Brand kit panel's sentence says */
   expect(onTitle.drawn, 'and on the title since the polish round').toBe(true);
   expect(inPdf, "the PDF's text carries it").toBe(true);
@@ -1555,7 +1555,7 @@ test(title('brand.export.pdf-logo'), async () => {
   const { page, deck } = await withBudget(1);
   await openEditor(page, deck);
   if (!(await actionIds(page)).includes('brand.set'))
-    test.skip(true, 'not on this build: brand.set (docs/PRODUCT.md 4.1, B5a)');
+    test.skip(true, 'not on this build: brand.set (docs/archive/rounds/PRODUCT.md 4.1, B5a)');
   const s = await settled(page);
   const asset = await invoke<{ id: string }>(page, 'asset.add', {
     id: `pdf-logo-${Date.now().toString(36)}`,
@@ -1607,7 +1607,7 @@ test(title('brand.export.pdf-logo'), async () => {
 });
 
 /**
- * The three faces of the fonts export rows (docs/PRODUCT.md 4.2; docs/FEATURES.md 3.4): the title
+ * The three faces of the fonts export rows (docs/archive/rounds/PRODUCT.md 4.2; docs/archive/rounds/FEATURES.md 3.4): the title
  * heading in Roboto and two text boxes in Geist and Fraunces on the first slide, written through
  * the window API as setup. Answers the faces written; a family the schema refuses (the catalog
  * row not on this build) is named in the annotation and the row skips on it.
@@ -1692,12 +1692,12 @@ test(title('fonts.export.editable-names-face'), async () => {
   if (!faces.written.includes('roboto'))
     test.skip(
       true,
-      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
+      `not on this build: typography.family (docs/archive/rounds/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
     );
   if (!faces.written.includes('geist') || !faces.written.includes('fraunces'))
     test.skip(
       true,
-      `not on this build: the catalog rows geist and fraunces (docs/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
+      `not on this build: the catalog rows geist and fraunces (docs/archive/rounds/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
     );
   await openPptx(page);
   await ctl(page, 'dialog.download.mode.native').click({ force: true });
@@ -1724,12 +1724,12 @@ test(title('fonts.export.pdf-face'), async () => {
   if (!faces.written.includes('roboto'))
     test.skip(
       true,
-      `not on this build: typography.family (docs/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
+      `not on this build: typography.family (docs/archive/rounds/PRODUCT.md 4.2, B5a): ${faces.refused.join('; ').slice(0, 120)}`,
     );
   if (!faces.written.includes('geist') || !faces.written.includes('fraunces'))
     test.skip(
       true,
-      `not on this build: the catalog rows geist and fraunces (docs/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
+      `not on this build: the catalog rows geist and fraunces (docs/archive/rounds/FEATURES.md 3.2, B2): ${faces.refused.join('; ').slice(0, 160)}`,
     );
   await openPdf(page);
   const pdf = await download(page, () => ctl(page, 'dialog.download.ok').click());
@@ -1756,7 +1756,7 @@ test(title('fonts.export.pdf-face'), async () => {
 });
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.2 rank 9; the row `diagrams.export.step-label`):
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.2 rank 9; the row `diagrams.export.step-label`):
  * a process diagram of three steps placed through the window API as setup on a fresh slide, then
  * the PDF's text and the Editable text PowerPoint's shape with the label inside its txBody.
  */
@@ -1821,12 +1821,12 @@ test(title('diagrams.export.step-label'), async () => {
   expect(labelled.length, 'the label is inside a txBody').toBeGreaterThan(0);
   expect(
     inShape.length,
-    "the label sits inside the step's shape, not a separate text box (docs/FEATURES.md 2.2 rank 9, B3)",
+    "the label sits inside the step's shape, not a separate text box (docs/archive/rounds/FEATURES.md 2.2 rank 9, B3)",
   ).toBeGreaterThan(0);
 });
 
 /**
- * The features round, ship one (docs/FEATURES.md 4.8; the row `logos.export.pdf-pptx-crisp`): the
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 4.8; the row `logos.export.pdf-pptx-crisp`): the
  * Figma mark on every slide through `logo.insert { everySlide: true }` as setup, then the PDF's
  * first page and the two PowerPoint files' PNG sizes (the footer's 84 by 54 and the title slot's
  * 396 by 252 at 3x). The insert is B6's action registered by B7; a build without it skips.
@@ -1842,7 +1842,7 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
   if (!actions.has('logo.insert'))
     test.skip(
       true,
-      'not on this build: logo.insert on the window transport (docs/FEATURES.md 4.4, 4.11; B6 with B7)',
+      'not on this build: logo.insert on the window transport (docs/archive/rounds/FEATURES.md 4.4, 4.11; B6 with B7)',
     );
   const s = await settled(page);
   let inserted: unknown;
@@ -1858,7 +1858,7 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
     if (/NotImplemented|not implemented|lands in P1/i.test(message))
       test.skip(
         true,
-        `not on this build: logo.insert (docs/FEATURES.md 4.4, B6 with B7): ${message.slice(0, 100)}`,
+        `not on this build: logo.insert (docs/archive/rounds/FEATURES.md 4.4, B6 with B7): ${message.slice(0, 100)}`,
       );
     if (/did not answer|thesvg\.org|upstream|index/i.test(message))
       test.skip(
@@ -1918,7 +1918,7 @@ test(title('logos.export.pdf-pptx-crisp'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the vector round (docs/VECTOR.md 2.5, 4.6, 6.1): the geometry in both modes and the svg
+// the vector round (docs/archive/rounds/VECTOR.md 2.5, 4.6, 6.1): the geometry in both modes and the svg
 // pictures' exports. Each row group runs as its own anonymous identity with a deck built for it
 // as setup writes (the matrix's setup convention), so no identity spends past its five downloads:
 // the geometry deck holds a hexagon, the star with Adjust 30 and a rectangular callout on one slide
@@ -2540,7 +2540,7 @@ test(title('svg.export.web-page'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the features round, ship two (docs/FEATURES.md 5.5; the rows `shaders.export.*`): the shader's
+// the features round, ship two (docs/archive/rounds/FEATURES.md 5.5; the rows `shaders.export.*`): the shader's
 // frame in the PDF, the Editable PowerPoint and the web page, and the report row of an export
 // started before the frame. The shader lands on a fifth slide of the owner's deck the seller's way
 // when Insert > Shader is on the build, else through the window API (lib.ts `ensureShader`; the
@@ -2870,7 +2870,7 @@ test(title('shaders.export.missing-frame-row'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.1 item 3, 2.4 item 31, 2.7 items 77, 80, 82, 83, 86 and 87,
+// the polish round (docs/archive/rounds/POLISH.md 2.1 item 3, 2.4 item 31, 2.7 items 77, 80, 82, 83, 86 and 87,
 // 5.1): the header rule under text alone, a small chart's labels in their slot, the print
 // preview in the deck's appearance and opening on an old deck, the download's Details as a
 // seller's card, a refused download's sentence and its retry, one name rule for every file and
@@ -3241,7 +3241,7 @@ function serverFnFields(body: string): Map<string, string> {
 
 test(title('export.refusal.sentence-and-retry'), async () => {
   test.setTimeout(240_000);
-  /* docs/POLISH.md item 82 has two halves. The retry is the function's: the export's blob put
+  /* docs/archive/rounds/POLISH.md item 82 has two halves. The retry is the function's: the export's blob put
      runs inside the syncExport server function (server/export-sync.ts putWithOneRetry,
      server/download.ts), never in the page, so a `page.route` on the blob host meets no PUT on
      any tier (the polish round's run of record read "0 injected" twice; B5's R26 to B6, landed by
@@ -3359,7 +3359,7 @@ test(title('export.print.opens'), async () => {
       document.querySelector('[data-control="print.pages"]')?.getAttribute('data-count') ?? 0,
     ),
   }));
-  /* the checked box is the chrome's DialogCheck (docs/POLISH.md 2.7 item 83; audit-pages item
+  /* the checked box is the chrome's DialogCheck (docs/archive/rounds/POLISH.md 2.7 item 83; audit-pages item
      39): the native input is clipped to a point (Dialog.css `.ts-dialog-check input`) and the
      drawn `.ts-dialog-check-box` beside it takes the ink ground with a tick its `::after` draws
      once checked. The row checks the box through its label, reads the drawing, and unchecks it
@@ -3575,7 +3575,7 @@ coverage(import.meta.filename, [
   'export.png.current-slide',
   'tables.export.pdf',
   'tables.export.pptx-editable',
-  /* the objects round (docs/OBJECTS.md 3.3 item 2, question 1): the show and the print document keep the rules */
+  /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 2, question 1): the show and the print document keep the rules */
   'tables.show.rules-only',
   'charts.export.pdf',
   'charts.export.pptx-native',
@@ -3591,7 +3591,7 @@ coverage(import.meta.filename, [
   'shapes.export.pdf',
   'shapes.export.pptx',
   'export.print.download-pdf-follows-preview',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'export.download.named-after-title',
   'export.download.pdf-direct',
   'export.download.pptx-direct',
@@ -3605,15 +3605,15 @@ coverage(import.meta.filename, [
   'fonts.export.editable-names-face',
   'fonts.export.pdf-face',
 
-  /* the features round, ship one (docs/FEATURES.md 7.1) */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 7.1) */
   'diagrams.export.step-label',
   'logos.export.pdf-pptx-crisp',
-  /* the features round, ship two (docs/FEATURES.md 5.5, 7.1) */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.5, 7.1) */
   'shaders.export.pdf-frame',
   'shaders.export.pptx-frame',
   'shaders.export.html-frame',
   'shaders.export.missing-frame-row',
-  /* the vector round (docs/VECTOR.md 6.1): the geometry in both modes and the svg exports */
+  /* the vector round (docs/archive/rounds/VECTOR.md 6.1): the geometry in both modes and the svg exports */
   'shapes.geometry.text-rect',
   'shapes.geometry.export.pptx-prst-avlst',
   'shapes.geometry.export.raster-modes',
@@ -3621,7 +3621,7 @@ coverage(import.meta.filename, [
   'svg.export.pptx-svgblip',
   'svg.export.pptx-fallback',
   'svg.export.web-page',
-  /* the polish round (docs/POLISH.md 2.1 item 3, 2.4 item 31, 2.7) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.1 item 3, 2.4 item 31, 2.7) */
   'tables.header.rule-with-text',
   'charts.labels.fit-slot',
   'export.print.deck-appearance',

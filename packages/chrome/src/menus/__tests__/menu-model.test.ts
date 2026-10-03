@@ -85,7 +85,7 @@ const row = (
 
 /**
  * A row's disabled reason as text for the word checks: the string, or the function form (the
- * vector round, docs/VECTOR.md 4.4; vector/build/b1.md R1.6) read on an svg picture, the one
+ * vector round, docs/archive/rounds/VECTOR.md 4.4; vector/build/b1.md R1.6) read on an svg picture, the one
  * state in which it answers a sentence.
  */
 const reasonOf = (item: MenuItem): string | undefined => {
@@ -125,7 +125,7 @@ const SPEC_ROWS: Row[] = [
     'title.presence.me',
   ]),
   row('title', 'later', ['title.presence.joinChat']),
-  /* the product round (docs/PRODUCT.md 6.1, section 2 rank 25): the assistant's entry and the side panel toggle */
+  /* the product round (docs/archive/rounds/PRODUCT.md 6.1, section 2 rank 25): the assistant's entry and the side panel toggle */
   row('title', 'now', ['title.assist']),
   row('title', 'now', ['title.comments'], { was3: 'later' }),
   row('title', 'now', ['title.sidePanel']),
@@ -157,7 +157,7 @@ const SPEC_ROWS: Row[] = [
   row('file', 'now', ['file.importSlides']),
   row('file', 'now', ['file.makeCopy.entire']),
   row('file', 'now', ['file.makeCopy.selected']),
-  /* the product round (docs/PRODUCT.md 4.3): the deck as a template of this deployment */
+  /* the product round (docs/archive/rounds/PRODUCT.md 4.3): the deck as a template of this deployment */
   row('file', 'now', ['file.saveAsTemplate']),
   row('file', 'now', ['file.share.withOthers']),
   row('file', 'now', ['file.share.publish']),
@@ -170,7 +170,7 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-2 12: ODP and SVG are present in Google's position with the download clause */
   row('file', 'later', ['file.download.odp'], { was: 'omit' }),
   row('file', 'now', ['file.download.pdf']),
-  /* the product round (docs/PRODUCT.md section 2 rank 8): the whole dialog behind one row */
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 8): the whole dialog behind one row */
   row('file', 'now', ['file.download.options']),
   row('file', 'now', ['file.download.txt']),
   row('file', 'now', ['file.download.jpg']),
@@ -272,13 +272,13 @@ const SPEC_ROWS: Row[] = [
   ]),
   row('insert', 'now', ['insert.image.byUrl']),
   row('insert', 'now', ['insert.image.fromThisPresentation']),
-  /* the features round (docs/FEATURES.md 4.3): the Logo picker in the Image submenu; the top level
+  /* the features round (docs/archive/rounds/FEATURES.md 4.3): the Logo picker in the Image submenu; the top level
      Insert > Logo left in Round 1 (docs/NEXT.md 4.1.3 item 20) */
   row('insert', 'now', ['insert.image.logo']),
   row('insert', 'now', ['insert.textBox']),
   /* SPEC-2 12: Audio and Video are present with the recording clause */
   row('insert', 'later', ['insert.audio', 'insert.video'], { was: 'omit' }),
-  /* the vector round (docs/VECTOR.md 2.6): the three named rows sit directly under Insert > Shape,
+  /* the vector round (docs/archive/rounds/VECTOR.md 2.6): the three named rows sit directly under Insert > Shape,
      the Shapes container having left */
   row('insert', 'now', [
     'insert.shape.shapes.rectangle',
@@ -340,9 +340,9 @@ const SPEC_ROWS: Row[] = [
   row('format', 'now', ['format.text.underline'], { was: 'later' }),
   row('format', 'now', ['format.text.strikethrough']),
   row('format', 'now', ['format.text.superscript', 'format.text.subscript'], { was: 'omit' }),
-  /* the product round (docs/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
+  /* the product round (docs/archive/rounds/PRODUCT.md 4.2): the Font row opens the toolbar's dropdown */
   row('format', 'now', ['format.text.font']),
-  /* the features round (docs/FEATURES.md 3.1 item 4): the Tabular figures row */
+  /* the features round (docs/archive/rounds/FEATURES.md 3.1 item 4): the Tabular figures row */
   row('format', 'now', ['format.text.tabularFigures']),
   row('format', 'now', [
     'format.text.size',
@@ -407,7 +407,7 @@ const SPEC_ROWS: Row[] = [
     'format.table.deleteTable',
     'format.table.distributeRows',
     'format.table.distributeColumns',
-    /* the objects round (docs/OBJECTS.md 3.3 item 4): the Header row check row */
+    /* the objects round (docs/archive/rounds/OBJECTS.md 3.3 item 4): the Header row check row */
     'format.table.headerRow',
   ]),
   row('format', 'now', ['format.table.mergeCells', 'format.table.unmergeCells'], {
@@ -419,12 +419,12 @@ const SPEC_ROWS: Row[] = [
     'format.image.replaceImage',
     'format.image.replaceImage.upload',
     'format.image.replaceImage.byUrl',
-    /* the features round (docs/FEATURES.md 4.4): Replace image > Logo */
+    /* the features round (docs/archive/rounds/FEATURES.md 4.4): Replace image > Logo */
     'format.image.replaceImage.logo',
     'format.image.replaceImage.fromThisPresentation',
   ]),
   row('format', 'now', ['format.image.resetImage'], { was: 'later' }),
-  /* the product round (docs/PRODUCT.md section 2 rank 10, 4.4): the caption and the kit's logo */
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 10, 4.4): the caption and the kit's logo */
   row('format', 'now', ['format.image.addCaption']),
   row('format', 'now', ['format.image.useOnEverySlide']),
   /* SPEC-3 10.5, 13.2: the picture's Dither toggle */
@@ -469,7 +469,7 @@ const SPEC_ROWS: Row[] = [
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
   row('slide', 'later', ['slide.transition']),
-  /* the product round (docs/PRODUCT.md 4.1) drew Edit theme as a second way into the Brand kit
+  /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme as a second way into the Brand kit
      panel; Round 1 (docs/NEXT.md 4.1.3 item 20) omits it in Google's position */
   row('slide', 'omit', ['slide.editTheme']),
   row('slide', 'now', ['slide.changeTheme']),
@@ -526,7 +526,7 @@ const SPEC_ROWS: Row[] = [
   ]),
   /* SPEC-3 5.5, 13.2: Google's per file row */
   row('tools', 'now', ['tools.notificationSettings']),
-  /* the product round (docs/PRODUCT.md section 2 rank 9): the one preference, Link detection */
+  /* the product round (docs/archive/rounds/PRODUCT.md section 2 rank 9): the one preference, Link detection */
   row('tools', 'now', ['tools.preferences', 'tools.preferences.linkDetection']),
   /* the appearance (SPEC 2.12, a Turboslide row), under Tools > Preferences since Round 1 */
   row('tools', 'now', [
@@ -549,7 +549,7 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-3 5.7, 13.1, 13.3: the Activity panel and its one Later tab */
   row('tools', 'now', ['tools.activityDashboard'], { was3: 'omit' }),
   row('tools', 'later', ['tools.activityDashboard.viewers']),
-  /* the product round (docs/PRODUCT.md sections 5 and 6): Tailor for a customer; Tools > Assist left
+  /* the product round (docs/archive/rounds/PRODUCT.md sections 5 and 6): Tailor for a customer; Tools > Assist left
      in Round 1 (docs/NEXT.md 4.1.3 item 20) */
   row('tools', 'now', ['tools.tailor']),
   row('tools', 'now', ['tools.checkSlides']),
@@ -629,7 +629,7 @@ const OTHER_ROWS: Row[] = [
   row('arrange', 'now', ['arrange.regroup'], { was: 'omit' }),
   /* the focus round (docs/FOCUS.md 3.1): the one switch that shows the parked set, ours */
   row('tools', 'now', ['tools.advancedTools']),
-  /* the features round, ship two (docs/FEATURES.md 5.6): Play shaders, ours, under Tools >
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): Play shaders, ours, under Tools >
      Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
   row('tools', 'now', [
     'tools.preferences.playShaders',
@@ -653,25 +653,25 @@ const OTHER_ROWS: Row[] = [
  * [146, 17, 24] over 187 rows (build-3/b6.md section 2 has the arithmetic per menu).
  */
 const COUNTS: Record<string, Counts> = {
-  /* twelve since the product round: Assist and the side panel toggle (docs/PRODUCT.md 6.1, section 2 rank 25) */
+  /* twelve since the product round: Assist and the side panel toggle (docs/archive/rounds/PRODUCT.md 6.1, section 2 rank 25) */
   /* thirteen since Round 1: Sign In as text (docs/NEXT.md 4.1.3 item 13) */
   title: [13, 1, 4],
-  /* the product round adds Save as template and Download options (docs/PRODUCT.md 4.3, section 2 rank 8) */
+  /* the product round adds Save as template and Download options (docs/archive/rounds/PRODUCT.md 4.3, section 2 rank 8) */
   file: [26, 5, 5],
   edit: [11, 0, 0],
   /* 15 since Round 1: Appearance moved to Tools > Preferences (docs/NEXT.md 4.1.3 item 20) */
   view: [15, 1, 2],
   /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2); 23
-     with the features round's Logo row (docs/FEATURES.md 4.3) */
+     with the features round's Logo row (docs/archive/rounds/FEATURES.md 4.3) */
   insert: [23, 3, 5],
-  /* the product round adds Font, Add a caption and Use on every slide (docs/PRODUCT.md 4.2, section 2 rank 10, 4.4);
-     the features round adds Tabular figures (docs/FEATURES.md 3.1 item 4) */
+  /* the product round adds Font, Add a caption and Use on every slide (docs/archive/rounds/PRODUCT.md 4.2, section 2 rank 10, 4.4);
+     the features round adds Tabular figures (docs/archive/rounds/FEATURES.md 3.1 item 4) */
   format: [32, 2, 0],
-  /* Edit theme opened the Brand kit panel from the product round (docs/PRODUCT.md 4.1) until Round 1
+  /* Edit theme opened the Brand kit panel from the product round (docs/archive/rounds/PRODUCT.md 4.1) until Round 1
      omitted it (docs/NEXT.md 4.1.3 item 20) */
   slide: [8, 1, 1],
   arrange: [7, 0, 0],
-  /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/PRODUCT.md section 2 rank 9, 5, 6);
+  /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/archive/rounds/PRODUCT.md section 2 rank 9, 5, 6);
      Round 1 (docs/NEXT.md 4.1.3 item 20): Assist left and Appearance joined Preferences */
   tools: [18, 2, 4],
   extensions: [2, 0, 2],
@@ -817,12 +817,12 @@ describe('the SPEC rows', () => {
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
     /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2); 160 with the
-       features round's Logo and Tabular figures rows (docs/FEATURES.md 4.3, 3.1 item 4) */
+       features round's Logo and Tabular figures rows (docs/archive/rounds/FEATURES.md 4.3, 3.1 item 4) */
     /* Round 1 (docs/NEXT.md 4.1.3 item 20): Tools > Assist left (one Now row fewer) and Edit
        theme is omitted (one Now row to Omit) */
     expect(total).toEqual([159, 15, 25]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
-       round's nine rows (docs/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
+       round's nine rows (docs/archive/rounds/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
        198 after Round 1's cuts; 199 with Sign In as text */
     expect(total[0] + total[1] + total[2]).toBe(199);
   });
@@ -1125,7 +1125,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
       'activity',
     ] as const)
       expect(evaluate(predicate, DEFAULT_MENU_CONTEXT), predicate).toBe(true);
-    /* docs/POLISH.md 2.6 item 66: Comment waits for an object, a text range or a slide card */
+    /* docs/archive/rounds/POLISH.md 2.6 item 66: Comment waits for an object, a text range or a slide card */
     expect(evaluate('canComment', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(evaluate('canComment', { ...DEFAULT_MENU_CONTEXT, focus: 'filmstrip' })).toBe(true);
     expect(
@@ -1139,7 +1139,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(evaluate('canSignIn', DEFAULT_MENU_CONTEXT)).toBe(false);
     expect(hasCapability(DEFAULT_MENU_CONTEXT, 'write')).toBe(true);
     /* the three identity rows read the account facts, not a role, and wait for them (7.5); the
-       Sessions row is an account's since the people round (docs/PEOPLE.md 3.14; accounts 8) */
+       Sessions row is an account's since the people round (docs/archive/rounds/PEOPLE.md 3.14; accounts 8) */
     const identityRows = new Set([
       'title.account.signIn',
       /* Round 1: the title row's Sign In reads the same fact as the account menu's row */
@@ -1203,7 +1203,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
       expect(isPresent(itemById(id), viewer), id).toBe(true);
     /* the parked rows a viewer may use are drawn for them behind Tools > Advanced tools alone
        (docs/FOCUS.md 3.1, 3.2); Open and Details returned to the default view in the return round
-       (docs/RETURN.md 2.16, 2.17), and Show collaborator pointers in the realtime round
+       (docs/archive/rounds/RETURN.md 2.16, 2.17), and Show collaborator pointers in the realtime round
        (docs/REALTIME.md 2 row realtime.pointer.second-browser: every access level sees the
        pointers), so a viewer reads it with the switch off too */
     const viewerOn = asRole('viewer', {
@@ -1215,7 +1215,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     }
     expect(isPresent(itemById('view.livePointers.others'), viewer)).toBe(true);
     expect(isPresent(itemById('view.livePointers.others'), viewerOn)).toBe(true);
-    /* the own chip's menu returned to the default view in the people round (docs/PEOPLE.md 3.14,
+    /* the own chip's menu returned to the default view in the people round (docs/archive/rounds/PEOPLE.md 3.14,
        default 2), for a viewer too */
     for (const id of ['file.open', 'file.details', 'title.account']) {
       expect(isPresent(itemById(id), viewer), id).toBe(true);
@@ -1224,7 +1224,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(evaluate('viewOnly', viewer)).toBe(true);
     expect(evaluate('follow', viewer)).toBe(false);
     /* a viewer who may read comments under the owner's switch sees the read surfaces alone; the
-       View > Comments submenu returned with the view rows (docs/RETURN.md 2.16), so it follows
+       View > Comments submenu returned with the view rows (docs/archive/rounds/RETURN.md 2.16), so it follows
        the capability and not the switch */
     const reading = asRole('viewer', { capabilities: [...CAPABILITIES.viewer, 'readComments'] });
     const readingOn = {
@@ -1260,7 +1260,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
         selection: { ...commenter.selection, blocks: 1 },
       }),
     ).toBe(true);
-    /* View > Mode returned with the view rows (docs/RETURN.md 2.16) and follows the role alone;
+    /* View > Mode returned with the view rows (docs/archive/rounds/RETURN.md 2.16) and follows the role alone;
        Notification settings and the Activity dashboard stay parked (docs/FOCUS.md 3.2; RETURN.md
        2.16, section 8): their role rules are asserted with the switch on, their absence with it off */
     const commenterOn = asRole('commenter', {
@@ -1346,7 +1346,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
     expect(isChecked(itemById('view.livePointers.others'), DEFAULT_MENU_CONTEXT)).toBe(true);
     expect(isChecked(itemById('view.livePointers.mine'), DEFAULT_MENU_CONTEXT)).toBe(false);
     /* the own chip's rows read the identity facts; the account menu was parked in the focus
-       round (docs/FOCUS.md 3.2) and is in the default view since the people round (docs/PEOPLE.md
+       round (docs/FOCUS.md 3.2) and is in the default view since the people round (docs/archive/rounds/PEOPLE.md
        3.14, default 2), so the rows follow the facts with the switch off too, and Sessions is an
        account's row (accounts 8) */
     const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
@@ -1385,7 +1385,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
       account: { signedIn: false, signInAvailable: false },
     };
     expect(isPresent(itemById('title.account.signIn'), noSignIn)).toBe(false);
-    /* an anonymous person is not offered a Sessions list that answers [] (docs/PEOPLE.md 3.14) */
+    /* an anonymous person is not offered a Sessions list that answers [] (docs/archive/rounds/PEOPLE.md 3.14) */
     expect(
       visibleItems(itemById('title.account').items ?? [], { context: noSignIn }).map(
         (item) => item.label,
@@ -1447,7 +1447,7 @@ describe('every Google item of R01', () => {
         paths.add([menu.menu, ...entry.path, entry.label].join(' > ').toLowerCase());
     /* R01 describes this submenu by reference ("the same sources as Insert > Image"), so its children are checked under Insert > Image */
     const byReference = new Set(['format.image.replaceImage']);
-    /* the polish round (docs/POLISH.md 2.6 item 74; audit-chrome item 39): Google's Format menu
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 39): Google's Format menu
        lists Alt text under Format options, which R01's table recorded on the right click menus
        alone; the row draws in the menu bar as Google's does */
     const polishRows = new Set(['format.altText']);
@@ -1684,7 +1684,7 @@ describe('statuses and effects', () => {
         'title.lastEdit',
         /* the right group, left to right: the presence slot, the comments glyph, the inbox plate, Slideshow, Share, then the own chip */
         'title.presence',
-        /* the product round (docs/PRODUCT.md 6.1, section 2 rank 25): Assist, then the side panel toggle after the comments glyph */
+        /* the product round (docs/archive/rounds/PRODUCT.md 6.1, section 2 rank 25): Assist, then the side panel toggle after the comments glyph */
         'title.assist',
         'title.comments',
         'title.sidePanel',
@@ -2045,7 +2045,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     ];
     expect(labelsOf(on)).toEqual(order);
     /* with the switch off the Later row leaves (docs/FOCUS.md 3.4); Change theme returned with
-       the return round (docs/RETURN.md 2.13) and stays in the card menu */
+       the return round (docs/archive/rounds/RETURN.md 2.13) and stays in the card menu */
     expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(order.filter((label) => label !== 'Transition'));
   });
 
@@ -2057,7 +2057,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       }
     }
     /* the parked rows of docs/FOCUS.md 3.4 (Guides, Change theme, superscript, subscript,
-       capitalization, the table rows) returned in the return round (docs/RETURN.md 2.4, 2.11,
+       capitalization, the table rows) returned in the return round (docs/archive/rounds/RETURN.md 2.4, 2.11,
        2.13, 2.17) and are drawn in both contexts; the Later row Transition and the parked Alt
        text and Drop shadow (RETURN.md section 9, questions 6 and 7) stay behind the switch */
     const on: MenuContext = {
@@ -2077,7 +2077,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     const textOff = contextMenuItems('textBlock', DEFAULT_MENU_CONTEXT).map((entry) =>
       entry === DIVIDER ? '-' : entry.id,
     );
-    /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5) */
+    /* Alt text returned to the default view in the product round (docs/archive/rounds/PRODUCT.md section 5) */
     expect(textOff).toContain('format.altText');
     expect(textOff).not.toContain('format.dropShadow');
     expect(textOff).toContain('arrange.rotate');
@@ -2102,12 +2102,12 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
         '-',
         'format.formatOptions',
       ]);
-    /* the table rows returned with the tables (docs/RETURN.md 2.4): the cell menu lists its 16
+    /* the table rows returned with the tables (docs/archive/rounds/RETURN.md 2.4): the cell menu lists its 16
        rows (audit-objects row 60), the two merge rows among them in the default view since the
        fix round gave the Editor a cell range (return/build/b5.md "Return round fix round"; the
        integration had re-parked them, return/build/integrator.md section 6) */
     for (const [ctx, tableRows, all] of [
-      /* twelve table rows since the objects round's Header row check (docs/OBJECTS.md 3.3 item 4) */
+      /* twelve table rows since the objects round's Header row check (docs/archive/rounds/OBJECTS.md 3.3 item 4) */
       [DEFAULT_MENU_CONTEXT, 12, 17],
       [on, 12, 17],
     ] as const) {
@@ -2158,7 +2158,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     expect(plain.some((entry) => entry !== DIVIDER && entry.id === 'slide.changeBackground')).toBe(
       false,
     );
-    /* Guides returned with the guides (docs/RETURN.md 2.17): the three appended rows are drawn in
+    /* Guides returned with the guides (docs/archive/rounds/RETURN.md 2.17): the three appended rows are drawn in
        both contexts */
     const on = { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true };
     for (const settings of [DEFAULT_MENU_CONTEXT.settings, on]) {
@@ -2188,7 +2188,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       ),
     ).toEqual(['view.guides.delete']);
     /* the regroup row shows on a group menu only while the editor remembers an ungrouped set;
-       Regroup returned with the group rows (docs/RETURN.md 2.12), so the rule reads the same in
+       Regroup returned with the group rows (docs/archive/rounds/RETURN.md 2.12), so the rule reads the same in
        both contexts */
     for (const settings of [DEFAULT_MENU_CONTEXT.settings, on]) {
       expect(
@@ -2369,7 +2369,7 @@ describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3
     /* the item in the menu bar is untouched by an entry level flag */
     expect(isPresent(itemById('edit.copy'), OFF)).toBe(true);
     /* the model's own data: the guide target's Later row hides with the switch off and Delete
-       guide, returned with Guides in the return round (docs/RETURN.md 2.17), stays */
+       guide, returned with Guides in the return round (docs/archive/rounds/RETURN.md 2.17), stays */
     expect(contextMenuItems('guide', OFF).map(idOf)).toEqual(['view.guides.delete']);
     expect(contextMenuItems('guide', ON).map(idOf)).toEqual([
       'view.guides.delete',
@@ -2503,7 +2503,7 @@ describe('Tools > Advanced tools, the switch of the focus round (docs/FOCUS.md 3
 // Cycle 2 of the focus round (docs/gslides-parity/focus/VERIFICATION.md pass 2; build/b1.md
 // "Cycle 2") parked Insert > Shape, Insert > Line, Format > Borders & lines and the two toolbar
 // buttons under the orchestrator's ruling (1) on FOCUS.md section 9 (b3's R14); the return round
-// (docs/RETURN.md 2.2, 2.3, 3.2; return/build/b1.md) brought them back whole, with the tables,
+// (docs/archive/rounds/RETURN.md 2.2, 2.3, 3.2; return/build/b1.md) brought them back whole, with the tables,
 // the charts and the formatting rows, and this block asserts the returned state. Edit > Paste
 // stays enabled whatever this page copied, as Google's does (F-slides-paste, b4 FR2).
 describe('cycle 2 and the return round: the shapes and lines, the returned rows and the Paste rule', () => {
@@ -2533,7 +2533,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(isEnabled(itemById('edit.paste'), { ...OFF, clipboard: 'empty' })).toBe(true);
   });
 
-  it('lists Insert > Animated pattern where Material was, unflagged and in the default view, found by "shader" and "animation" (docs/FEATURES.md 5.4; docs/NEXT.md 4.1.3 item 21, question 10)', () => {
+  it('lists Insert > Animated pattern where Material was, unflagged and in the default view, found by "shader" and "animation" (docs/archive/rounds/FEATURES.md 5.4; docs/NEXT.md 4.1.3 item 21, question 10)', () => {
     const shader = itemById('insert.shader');
     expect(shader.label).toBe('Animated pattern');
     expect(shader.status).toBe('now');
@@ -2546,7 +2546,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(() => itemById('insert.material')).toThrow();
   });
 
-  it('Tools > Preferences > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20)', () => {
+  it('Tools > Preferences > Play shaders is a submenu of three toggle rows over one per browser setting, In the show only checked by default (docs/archive/rounds/FEATURES.md 5.6; docs/NEXT.md 4.1.3 item 20)', () => {
     const sub = itemById('tools.preferences.playShaders');
     expect(sub.label).toBe('Play animated patterns');
     expect(sub.turboslide).toBe(true);
@@ -2575,7 +2575,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(isPresent(sub, OFF)).toBe(true);
   });
 
-  it('returns Insert > Shape and Insert > Line whole to the default view with the named rows and the two connectors; the galleries and the freehand kinds stay parked (docs/RETURN.md 2.2, 2.3, 2.9, section 8)', () => {
+  it('returns Insert > Shape and Insert > Line whole to the default view with the named rows and the two connectors; the galleries and the freehand kinds stay parked (docs/archive/rounds/RETURN.md 2.2, 2.3, 2.9, section 8)', () => {
     const insertOff = ids(MENUS.find((m) => m.id === 'insert')!.items, OFF);
     const insertOn = ids(MENUS.find((m) => m.id === 'insert')!.items, ON);
     for (const id of [
@@ -2583,7 +2583,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'insert.shape.shapes.rectangle',
       'insert.shape.shapes.rounded',
       'insert.shape.shapes.ellipse',
-      /* the vector round (docs/VECTOR.md 2.6): the four glyph grids in the default view */
+      /* the vector round (docs/archive/rounds/VECTOR.md 2.6): the four glyph grids in the default view */
       'insert.shape.gallery',
       'insert.shape.arrows',
       'insert.shape.callouts',
@@ -2606,7 +2606,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(itemById(id).status, `${id} stays a now row`).toBe('now');
     }
     /* what stays parked under Insert (RETURN.md 2.10, 3.4, section 8; the galleries returned
-       with the vector round, docs/VECTOR.md 2.6) */
+       with the vector round, docs/archive/rounds/VECTOR.md 2.6) */
     for (const id of [
       'insert.line.rule',
       'insert.line.curve',
@@ -2621,7 +2621,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(isPresent(itemById(id), OFF), `${id} present off`).toBe(false);
       expect(isPresent(itemById(id), ON), `${id} present on`).toBe(true);
     }
-    /* the vector round (docs/VECTOR.md 2.6): Insert > Shape is seven rows in both contexts, the
+    /* the vector round (docs/archive/rounds/VECTOR.md 2.6): Insert > Shape is seven rows in both contexts, the
        three named rows above the four glyph grids; the Shapes container and the Arrows child left */
     const SEVEN = [
       'insert.shape.shapes.rectangle',
@@ -2655,7 +2655,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
     expect(lineRows(ON)).toHaveLength(8);
   });
 
-  it('returns Format > Borders & lines, the Table rows, Edit data and Chart type and keeps the Format menu of docs/RETURN.md 3.3', () => {
+  it('returns Format > Borders & lines, the Table rows, Edit data and Chart type and keeps the Format menu of docs/archive/rounds/RETURN.md 3.3', () => {
     const formatOff = ids(MENUS.find((m) => m.id === 'format')!.items, OFF);
     for (const id of [
       'format.text',
@@ -2695,7 +2695,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(isPresent(itemById(id), OFF), id).toBe(false);
       expect(isPresent(itemById(id), ON), id).toBe(true);
     }
-    /* Mask image and Change shape returned with the galleries (docs/VECTOR.md 2.6, item S7) */
+    /* Mask image and Change shape returned with the galleries (docs/archive/rounds/VECTOR.md 2.6, item S7) */
     for (const id of ['format.image.maskImage', 'format.changeShape']) {
       expect(itemById(id).advanced, id).toBeUndefined();
       expect(isPresent(itemById(id), OFF), id).toBe(true);
@@ -2756,7 +2756,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       for (const control of TOOLBAR_TAILS[kind])
         expect(control.advanced, `${kind} ${control.control}`).toBeUndefined();
     }
-    /* Change shape leads the shape tail in the default view since the vector round (docs/VECTOR.md
+    /* Change shape leads the shape tail in the default view since the vector round (docs/archive/rounds/VECTOR.md
        2.6, item S7): it carries the divider and the fill follows it without one */
     const shapeOff = presentControls(TOOLBAR_TAILS.shape, OFF);
     expect(shapeOff[0]?.control).toBe('toolbar.changeShape');
@@ -2858,7 +2858,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       expect(item?.status, binding.id).not.toBe('later');
     }
     /* the chords the stage's own table used to fire (build/b2.md, the third defect) are live
-       again with their rows (docs/RETURN.md 2.11, 2.12) */
+       again with their rows (docs/archive/rounds/RETURN.md 2.11, 2.12) */
     for (const id of [
       'arrange.group',
       'arrange.ungroup',
@@ -2869,7 +2869,7 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
       'file.open',
     ])
       expect(isPresent(itemById(id), OFF), id).toBe(true);
-    /* Alt text returned to the default view with its chord (docs/PRODUCT.md section 5); a parked
+    /* Alt text returned to the default view with its chord (docs/archive/rounds/PRODUCT.md section 5); a parked
        row's chord stays unbound (Drop shadow, RETURN.md section 9 question 7) */
     expect(isPresent(itemById('format.altText'), OFF)).toBe(true);
     expect(present.some((binding) => binding.id === 'format.altText')).toBe(true);
@@ -2877,10 +2877,10 @@ describe('cycle 2 and the return round: the shapes and lines, the returned rows 
   });
 });
 
-// The return round (docs/RETURN.md sections 2 and 3; build/b1.md "Return round"): the ledger of
+// The return round (docs/archive/rounds/RETURN.md sections 2 and 3; build/b1.md "Return round"): the ledger of
 // what left the parked set and what stays, read from the model, so a flag put back by mistake or
 // a parked row unflagged by mistake fails here before the matrix measures it.
-describe('the return round: the flags of the returned and the parked rows (docs/RETURN.md 2, 3)', () => {
+describe('the return round: the flags of the returned and the parked rows (docs/archive/rounds/RETURN.md 2, 3)', () => {
   const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
 
   it('draws every returned row in the default view', () => {
@@ -2915,7 +2915,7 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'tools.preferences.appearance.light',
       'tools.preferences.appearance.match',
       'insert.shape',
-      /* the vector round (docs/VECTOR.md 2.6, item S7): the four glyph grids, Change shape and
+      /* the vector round (docs/archive/rounds/VECTOR.md 2.6, item S7): the four glyph grids, Change shape and
          Mask image in the default view */
       'insert.shape.gallery',
       'insert.shape.arrows',
@@ -2993,7 +2993,7 @@ describe('the return round: the flags of the returned and the parked rows (docs/
     for (const id of [
       'file.versionHistory.showChanges',
       /* the Live pointers rows and Follow left this list in the realtime round (the test above);
-         title.presence.me and title.account left it in the people round (docs/PEOPLE.md 3.14,
+         title.presence.me and title.account left it in the people round (docs/archive/rounds/PEOPLE.md 3.14,
          default 2: the own chip and the roster's own row in the default view) */
       'title.inbox',
       'file.makeCopy.selected',
@@ -3018,7 +3018,7 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       'extensions.agentAccess',
       'extensions.embedInSite',
       'tools.spelling',
-      /* the templates feature, parked at the product round's ship (docs/PRODUCT.md 8.2;
+      /* the templates feature, parked at the product round's ship (docs/archive/rounds/PRODUCT.md 8.2;
          product/build/ship.md section 7): templates.card.rename-and-delete and
          templates.default.use-for-new read red twice on the enforce preview of record, the
          gallery on another instance keeping the old card, name or default while the public
@@ -3031,7 +3031,7 @@ describe('the return round: the flags of the returned and the parked rows (docs/
       expect(isPresent(item, OFF), `${id} absent in the default view`).toBe(false);
     }
     /* the replaced picture rows follow the Insert rows: By URL returned in the product round
-       (docs/PRODUCT.md section 5), From this presentation stays parked */
+       (docs/archive/rounds/PRODUCT.md section 5), From this presentation stays parked */
     expect(isPresent(itemById('format.image.replaceImage.byUrl'), OFF)).toBe(true);
     expect(isPresent(itemById('format.image.replaceImage.fromThisPresentation'), OFF)).toBe(false);
   });
@@ -3050,7 +3050,7 @@ describe('the return round: the flags of the returned and the parked rows (docs/
   });
 });
 
-describe('the features round, ship one: the Logo rows and the Tabular figures row (docs/FEATURES.md 4.3, 3.1 item 4, 7.3)', () => {
+describe('the features round, ship one: the Logo rows and the Tabular figures row (docs/archive/rounds/FEATURES.md 4.3, 3.1 item 4, 7.3)', () => {
   const OFF: MenuContext = DEFAULT_MENU_CONTEXT;
   const ids = (items: ReadonlyArray<MenuItem>, ctx: MenuContext): string[] =>
     visibleItems(items, { contextOnly: true, context: ctx }).flatMap((item) => [
@@ -3101,7 +3101,7 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
     expect(listed('line up numbers')).toContain('format.text.tabularFigures');
     const row = itemById('format.text.tabularFigures');
     expect(row.status).toBe('now');
-    /* the polish round (docs/POLISH.md 2.6 item 74): a check row over the block's numerals */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74): a check row over the block's numerals */
     expect(row.effect).toEqual({ kind: 'action', id: 'block.set' });
     expect(row.checked).toEqual({ selection: 'tabularFigures' });
     expect(row.enabled).toBe('textBlockSelected');
@@ -3111,7 +3111,7 @@ describe('the features round, ship one: the Logo rows and the Tabular figures ro
   });
 });
 
-// The vector round (docs/VECTOR.md 2.6, 3.2, 3.3, 4.4; the named unit tests of 6.3, B1;
+// The vector round (docs/archive/rounds/VECTOR.md 2.6, 3.2, 3.3, 4.4; the named unit tests of 6.3, B1;
 // vector/build/b1.md R1): Insert > Shape is the three named rows above the four glyph grids, in
 // the default view, each with an icon; every Insert row that names a thing and every Format row
 // that names a visual thing carries an icon; Change shape and Mask image are unflagged; Crop image
@@ -3248,7 +3248,7 @@ describe('the vector round: the seven Shape rows, the icons on the visual rows, 
       'format.chartType': 'chart-bar',
     };
     for (const [id, icon] of Object.entries(expected)) expect(itemById(id).icon, id).toBe(icon);
-    /* the polish round (docs/POLISH.md 2.6 item 57): the rows that named a setting by a word carry a glyph too */
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 57): the rows that named a setting by a word carry a glyph too */
     for (const id of [
       'format.text.font',
       'format.text.size',

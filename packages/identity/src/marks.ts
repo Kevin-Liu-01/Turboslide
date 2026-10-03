@@ -42,7 +42,7 @@ export type MarkOptions = {
   self?: boolean;
   /**
    * The public URL of the 64 px picture when the variant is `picture`; absent, the resolved
-   * identity's own `pictureUrl` is read (docs/PEOPLE.md 4.4), so no caller passes one today.
+   * identity's own `pictureUrl` is read (docs/archive/rounds/PEOPLE.md 4.4), so no caller passes one today.
    */
   pictureUrl?: string;
 };
@@ -93,7 +93,7 @@ export function accessibleName(identity: ResolvedIdentity): string {
 /** The mark for a resolved identity (research 11 7.1). */
 export function markSpec(identity: ResolvedIdentity, options: MarkOptions = {}): MarkSpec {
   const salt = identity.avatar.salt ?? 0;
-  /* one person, one mark (SPEC-3 7.4; docs/PEOPLE.md 6.1 people.versions-author-account): an
+  /* one person, one mark (SPEC-3 7.4; docs/archive/rounds/PEOPLE.md 6.1 people.versions-author-account): an
      aliased anonymous id hashes the account it renders as, so a record written before the sign
      in and one written after draw one field */
   const seedId =

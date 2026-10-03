@@ -16,7 +16,7 @@ import { gestureClock } from '../gesture-frame';
 import { drawDraftMutation } from '../Gestures';
 import type { Handle } from '../Gestures';
 
-// The draft path of a live gesture on the stage (docs/OBJECTS.md 2.4; the objects round, B1),
+// The draft path of a live gesture on the stage (docs/archive/rounds/OBJECTS.md 2.4; the objects round, B1),
 // with the stage mounted in jsdom over a fake animation frame: a burst of pointermoves inside one
 // frame renders the sheet once with the last position; the preview of a move re-routes the
 // connector attached to the moved shape at that frame, not at the release; Escape clears the
@@ -290,7 +290,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('the draft of a move (docs/OBJECTS.md 2.4)', () => {
+describe('the draft of a move (docs/archive/rounds/OBJECTS.md 2.4)', () => {
   it('renders a pointermove burst inside one frame once, with the last position, and the connector follows', async () => {
     const frames = fakeFrames();
     /* jsdom renders slowly on a loaded machine; the budget's verdict is pinned by the fake clock */
@@ -366,7 +366,7 @@ describe('the draft of a move (docs/OBJECTS.md 2.4)', () => {
   });
 });
 
-describe('the rotated ring (docs/OBJECTS.md 2.4; selection-box.ts)', () => {
+describe('the rotated ring (docs/archive/rounds/OBJECTS.md 2.4; selection-box.ts)', () => {
   it('turns the ring with the object during the drag: the ring box stays the pos box and the angle follows the draft', () => {
     const frames = fakeFrames();
     mounted = mount(documentOf(joinedSlide()), { selection: { kind: 'block', blockId: 'b' } });
@@ -394,7 +394,7 @@ describe('the rotated ring (docs/OBJECTS.md 2.4; selection-box.ts)', () => {
   });
 });
 
-describe('the budget (docs/OBJECTS.md 2.4; gesture-frame.ts)', () => {
+describe('the budget (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts)', () => {
   it('degrades a move after two slow frames: the wrappers move inline, the sheet keeps its markup, the ring follows', async () => {
     const frames = fakeFrames();
     /* every read of the clock advances 40 ms, so each rendered frame reads as over the budget */
@@ -432,7 +432,7 @@ describe('the budget (docs/OBJECTS.md 2.4; gesture-frame.ts)', () => {
   });
 });
 
-describe('the draft of a draw (docs/OBJECTS.md 2.4)', () => {
+describe('the draft of a draw (docs/archive/rounds/OBJECTS.md 2.4)', () => {
   it('draws the shape at the default box from the press, grows it with the pointer and commits the same block', async () => {
     const frames = fakeFrames();
     mounted = mount(documentOf(joinedSlide()), { tool: { kind: 'shape', shape: 'hexagon' } });
@@ -531,7 +531,7 @@ describe('the draft of a draw (docs/OBJECTS.md 2.4)', () => {
   });
 });
 
-describe('a column seam dragged with a cell open (docs/OBJECTS.md 3.3 item 5; build/b2.md request 1b)', () => {
+describe('a column seam dragged with a cell open (docs/archive/rounds/OBJECTS.md 3.3 item 5; build/b2.md request 1b)', () => {
   it('keeps the seam handles with the cell open, writes the widths and opens the cell again after the release', async () => {
     const frames = fakeFrames();
     fakeClock(1);

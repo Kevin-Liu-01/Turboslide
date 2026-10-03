@@ -14,7 +14,7 @@ import { pad2 } from './model';
  * in the studio without a re-render of the slide's HTML. Thumbnail and page
  * clones pass wordmark={false} counter={false} to carry the grid alone.
  *
- * The brand kit's frame band (docs/PRODUCT.md 4.1, 4.4; build/b5.md R5): with
+ * The brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1, 4.4; build/b5.md R5): with
  * `band` the footer's logo is the kit's (the default mark, a picture fitted to
  * the 18 px slot, or none), moved to its corner, the footer text sits beside
  * it and the counter reads the kit's format; the class `ts-kit-wordmark`

@@ -3,7 +3,7 @@ import { SHOTS_MANIFEST } from './shots';
 import type { ShotRecord } from './shots';
 
 /**
- * One product picture of /home (docs/POLISH.md 3.3 item 1): the two files the capture wrote for
+ * One product picture of /home (docs/archive/rounds/POLISH.md 3.3 item 1): the two files the capture wrote for
  * a kind, one per appearance (`scripts/build-home-assets.ts --capture` under
  * apps/studio/public/home, content hashed, a 2x and a 1x candidate each), as two `<img>`
  * elements with `width`, `height`, `srcset` and `sizes`, so the layout reserves the box before

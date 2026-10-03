@@ -75,7 +75,7 @@ export type SidebarEdit = {
    */
   registerHandle?: (handle: FilmstripHandle | null) => void;
   /**
-   * A reader's filmstrip (docs/POLISH.md 2.6 item 58; polish/build/b5.md R11): the cards, the
+   * A reader's filmstrip (docs/archive/rounds/POLISH.md 2.6 item 58; polish/build/b5.md R11): the cards, the
    * follow and the keys without the drag, the drop and the row menu, so a viewer at /edit keeps
    * the editor's column instead of the tree
    */

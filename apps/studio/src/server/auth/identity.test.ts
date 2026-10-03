@@ -379,7 +379,7 @@ describe('sign in through the library', () => {
     expect(resolved.accountId).toBe(userId);
     expect(resolved.email).toBe('maya@example.test');
     // an account without a typed name on its user row is its label, never its address, and the
-    // label is the account's own on every id that renders as it (docs/PEOPLE.md 3.18,
+    // label is the account's own on every id that renders as it (docs/archive/rounds/PEOPLE.md 3.18,
     // resolve.ts); the address travels in `email` alone
     expect(resolved.displayName).toBe(labelFor(`usr_${userId}`));
     expect(resolved.label).toBe(labelFor(`usr_${userId}`));

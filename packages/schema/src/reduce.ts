@@ -136,7 +136,7 @@ type TextTarget = {
 };
 
 /**
- * The Text a text op names, read as a string (docs/SYNC.md 3.4): a slide field when `blockId`
+ * The Text a text op names, read as a string (docs/archive/rounds/SYNC.md 3.4): a slide field when `blockId`
  * names one on this slide's kind (`slideFieldOf`), whose `path` must be the field's own pointer,
  * else the block's Text at `path`. TypeError when the pointer holds anything else or a field's
  * path is not its pointer.
@@ -180,7 +180,7 @@ function resolveTextTarget(
 export const UNTITLED_DECK_TITLE = 'Untitled presentation';
 
 /**
- * The Text the deck's title follows (docs/SYNC.md 3.4): the heading of the deck's first title
+ * The Text the deck's title follows (docs/archive/rounds/SYNC.md 3.4): the heading of the deck's first title
  * slide in section order, whether a grammar title slide (the `heading` field) or a title slide
  * converted to a canvas (canvas.ts keeps `grammar.kind` 'title' and the heading block's id as the
  * second id of its main slot, `heading` by default). Null for a deck without one.
@@ -202,7 +202,7 @@ export function deckTitleSource(
 }
 
 /**
- * The title rule of docs/SYNC.md 3.4, run after a text op landed on the deck's title source: the
+ * The title rule of docs/archive/rounds/SYNC.md 3.4, run after a text op landed on the deck's title source: the
  * deck title takes the heading's new plain text while it was following the heading, that is
  * while it still reads the blank deck's title or the heading's plain text from before the op.
  * A `deck.set /title` that made them differ (a rename from the title row, the card menu or the
@@ -264,7 +264,7 @@ function flagRestores(
 
 const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
 const FORBIDDEN_BLOCK_PATHS = new Set(['', '/id']);
-/* `brand` is the brand kit record (docs/PRODUCT.md 4.1): written by the brand.set and brand.reset
+/* `brand` is the brand kit record (docs/archive/rounds/PRODUCT.md 4.1): written by the brand.set and brand.reset
    handlers alone, whose pointer writes land at the shallowest missing ancestor so one Undo takes
    one field back; the `deck.set` action's own pointer regex stays closed to it */
 const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides', 'brand']);
@@ -445,7 +445,7 @@ export function applyMutation(
       const existed = hasAt(block, mutation.path);
       const old = existed ? cloneJson(getAt(block, mutation.path)) : undefined;
       // A field under an object the block does not carry yet (`/typography/family` on a heading
-      // with no typography, the font rows' agent write; docs/PRODUCT.md 4.2) creates the object
+      // with no typography, the font rows' agent write; docs/archive/rounds/PRODUCT.md 4.2) creates the object
       // the way `deck.set` creates `/defaults`; the inverse then removes the object whole, so undo
       // returns the block exactly. The rule is one level: a deeper pointer still needs its parents.
       const segments = mutation.path.split('/').slice(1);

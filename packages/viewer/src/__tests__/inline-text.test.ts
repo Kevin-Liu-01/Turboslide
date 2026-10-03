@@ -422,7 +422,7 @@ describe('textDiff and textBurstMutation', () => {
     ]);
   });
 
-  it('sends a burst on a title slide’s field as a text run at the field’s pointer (docs/SYNC.md 3.4)', () => {
+  it('sends a burst on a title slide’s field as a text run at the field’s pointer (docs/archive/rounds/SYNC.md 3.4)', () => {
     const title = document.slides['title'];
     if (!title) throw new Error('no title slide');
     // the field is the run's blockId and the field's own pointer its path, never `/text`, so the
@@ -1046,7 +1046,7 @@ describe('a blur into the chrome (docs/FOCUS.md section 5 rank 10)', () => {
       '.ts-plate-anchored',
       '.ts-layout-plate',
       '.ts-context-menu',
-      /* the return round (docs/RETURN.md 2.14 item 2): a Format > Text row on a double clicked
+      /* the return round (docs/archive/rounds/RETURN.md 2.14 item 2): a Format > Text row on a double clicked
          word marked the whole box because the menu bar press ended the session; the menu bar and
          every menu plate park it now, the rule the toolbar had */
       '.ts-menubar',

@@ -28,7 +28,7 @@ export type FormatSectionId =
   | 'adjustments'
   /** round three (gslides-parity SPEC-3 10.7): the deck's two tone screen over a picture */
   | 'dither'
-  /** the features round, ship two (docs/FEATURES.md 5.3): a shader block's one home */
+  /** the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): a shader block's one home */
   | 'shader'
   | 'shadow'
   | 'table'
@@ -48,7 +48,7 @@ export type FormatSectionMeta = {
   /**
    * A parked section (docs/FOCUS.md 3.2, 3.3): drawn only while Tools > Advanced tools is on. The
    * Dither and Drop shadow sections belong to parked rows (`format.image.dither`,
-   * `format.dropShadow`; docs/RETURN.md 2.15, 3.4 and question 7 of its section 9). The Table,
+   * `format.dropShadow`; docs/archive/rounds/RETURN.md 2.15, 3.4 and question 7 of its section 9). The Table,
    * Chart data and Shape sections returned with their features in the return round (RETURN.md 2.2,
    * 2.4, 2.5) and Alt text in the product round (PRODUCT.md section 5). `presentFormatSections`
    * applies the flag.
@@ -103,7 +103,7 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     doc: 'The deck’s two tone screen over the picture, kept live',
     advanced: true,
   },
-  /* the features round, ship two (docs/FEATURES.md 5.3, 5.10): the Shader section, a P0 section in
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3, 5.10): the Shader section, a P0 section in
      the default view; a parked control inside it is hidden through parked-controls.ts */
   {
     id: 'shader',
@@ -111,7 +111,7 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     icon: 'cube',
     doc: 'The pattern’s preset, your brand kit’s colors and Glyphfield’s controls',
   },
-  /* Drop shadow draws in the default view since the polish round (docs/POLISH.md 2.5 item 41;
+  /* Drop shadow draws in the default view since the polish round (docs/archive/rounds/POLISH.md 2.5 item 41;
      polish/build/b4.md R5): the parked list of record parks no `format.dropShadow` */
   {
     id: 'shadow',
@@ -144,8 +144,8 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     doc: 'The shape and its adjustable sides',
   },
   { id: 'list', title: 'List', icon: 'list-bullet', doc: 'The items and how the list draws them' },
-  /* Alt text returned to the default view in the product round (docs/PRODUCT.md section 5;
-     docs/RETURN.md question 6, default return): an enterprise buyer's deck policy asks for it */
+  /* Alt text returned to the default view in the product round (docs/archive/rounds/PRODUCT.md section 5;
+     docs/archive/rounds/RETURN.md question 6, default return): an enterprise buyer's deck policy asks for it */
   {
     id: 'altText',
     title: 'Alt text',
@@ -168,7 +168,7 @@ export function presentFormatSections(
 }
 
 /**
- * The section that leads the panel for a block (docs/FEATURES.md 2.2 rank 13; docs/RETURN.md 2.5
+ * The section that leads the panel for a block (docs/archive/rounds/FEATURES.md 2.2 rank 13; docs/archive/rounds/RETURN.md 2.5
  * for the chart): a chart's data is what a seller opens the panel for, and so is a table's Table
  * section, which sat last of 64 controls and out of view at 900 px (audit-objects 22). Null for
  * every other block, whose sections keep Google's order.
@@ -176,7 +176,7 @@ export function presentFormatSections(
 export function leadingFormatSection(block: Block | undefined): FormatSectionId | null {
   if (block?.type === 'chart') return 'chart';
   if (block?.type === 'table') return 'table';
-  /* the features round, ship two (docs/FEATURES.md 5.3): a shader's controls lead its panel */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): a shader's controls lead its panel */
   if (block?.type === 'material') return 'shader';
   return null;
 }
@@ -226,7 +226,7 @@ const PICTURE_FIELDS =
   /^(caption|caption size|crop|crop anchor|border|fit|aspect|width|asset|assets|picture|name|size|position)$/i;
 /** The round two fields the panel draws as its own sections, never as generated rows (SPEC-2 section 5). */
 const OWN_SECTION_PATHS: ReadonlySet<string> = new Set([
-  /* the features round, ship two (docs/FEATURES.md 5.3): the Shader section draws the recipe */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): the Shader section draws the recipe */
   '/materialId',
   '/uniforms',
   '/anchor',
@@ -301,7 +301,7 @@ export function formatSectionOfBlockControl(
   if (spec.path === '/outline') return 'colour';
   if (block.type === 'chart') return 'chart';
   if (block.type === 'shape') {
-    /* a field the kind never draws leaves the panel (docs/POLISH.md 2.6 item 52; audit-chrome
+    /* a field the kind never draws leaves the panel (docs/archive/rounds/POLISH.md 2.6 item 52; audit-chrome
        item 7, audit-objects item 13: a rectangle listed Corner radius, Arrowheads, Orientation
        and Height, and two sections were titled Shape): the schema's own rule says which apply */
     if (!shapeFieldApplies(spec.path, block)) return null;
@@ -331,9 +331,9 @@ export function formatSectionOfBlockControl(
     return 'table';
   }
   if (block.type === 'material') {
-    /* the features round, ship two (docs/FEATURES.md 5.3): the recipe fields are the Shader
+    /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.3): the recipe fields are the Shader
        section's own; the caption, the caption size and the flow height leave the panel (the
-       polish round, docs/POLISH.md 2.5 item 47; polish/build/b4.md R11: no Text section and no
+       polish round, docs/archive/rounds/POLISH.md 2.5 item 47; polish/build/b4.md R11: no Text section and no
        second Height stepper for a shader, Size and rotation draws the box) */
     if (spec.path === '/caption' || spec.path === '/captionSize' || spec.path === '/height')
       return null;
@@ -350,7 +350,7 @@ export function formatSectionOfBlockControl(
   if (spec.kind === 'color') return 'colour';
   if (spec.kind === 'typography') return 'text';
   if (PICTURE_TYPES.has(block.type)) {
-    /* a shot's and a picture's generated rows leave the panel (docs/POLISH.md 2.5 item 40;
+    /* a shot's and a picture's generated rows leave the panel (docs/archive/rounds/POLISH.md 2.5 item 40;
        polish/build/b4.md R4): the hand built Image options section is the whole picture panel,
        so no "Asset", "Role", "resample", "Fit" or "Caption size" row names an internal thing;
        pair, tiles and details keep their generated rows */

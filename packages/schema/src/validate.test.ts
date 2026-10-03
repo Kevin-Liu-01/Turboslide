@@ -106,7 +106,7 @@ describe('normalization', () => {
     expect(outHeading?.type === 'heading' && outHeading.text).toBe('A \\* in the heading');
   });
 
-  it('rejects a carriage return inside a Text and takes a paragraph break in a heading (docs/POLISH.md 2.3 item 19)', () => {
+  it('rejects a carriage return inside a Text and takes a paragraph break in a heading (docs/archive/rounds/POLISH.md 2.3 item 19)', () => {
     const slide = clone(CONTENT_RULE);
     if (slide.kind !== 'content') throw new Error('fixture');
     const heading = slide.slots.left?.[0];
@@ -292,7 +292,7 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
     );
   });
 
-  it('accepts a paragraph break in a title slide lead and, since the polish round, in its heading; a carriage return is refused (hotfix-4 W4; docs/POLISH.md 2.3 item 19)', () => {
+  it('accepts a paragraph break in a title slide lead and, since the polish round, in its heading; a carriage return is refused (hotfix-4 W4; docs/archive/rounds/POLISH.md 2.3 item 19)', () => {
     const lead = validateSlide({
       schemaVersion: 1,
       id: 'title',

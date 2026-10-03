@@ -147,7 +147,7 @@ describe('chartDataPlan', () => {
     expect(() => chartDataPlan(pie, { kind: 'addSeries' })).toThrow(CHART_PIE_ONE_SERIES);
   });
 
-  it('refuses Add series on a pie with the sentence the tooltip reads (docs/OBJECTS.md 4.2 item 1)', () => {
+  it('refuses Add series on a pie with the sentence the tooltip reads (docs/archive/rounds/OBJECTS.md 4.2 item 1)', () => {
     const pie: ChartBlock = { ...chart(), kind: 'pie', series: [{ name: 'A', values: [1, 2, 3] }] };
     expect(addSeriesRefusal(pie)).toBe(
       'A pie chart draws one series; change the chart type for more',

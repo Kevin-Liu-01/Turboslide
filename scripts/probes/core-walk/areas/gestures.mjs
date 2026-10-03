@@ -1,4 +1,4 @@
-// The live gestures (docs/OBJECTS.md section 2, 2.6 and 6.1, the `gestures.*` rows; the objects
+// The live gestures (docs/archive/rounds/OBJECTS.md section 2, 2.6 and 6.1, the `gestures.*` rows; the objects
 // round, B4 drives, B1 builds): every gesture draws the object itself at every frame through the
 // draft document. Each row is a frame comparison at the tenth step of a 12 step drag captured by
 // the toolkit's `captureDrag` (the object's own box on the sheet against the ring's box within
@@ -86,7 +86,7 @@ export async function run(t) {
   const { page } = t;
   const notBuilt = (field) => ({
     ok: null,
-    observed: `not on this build: ${field} (docs/OBJECTS.md 2.4, ${LANE} by request to the integrator)`,
+    observed: `not on this build: ${field} (docs/archive/rounds/OBJECTS.md 2.4, ${LANE} by request to the integrator)`,
   });
   /** A fresh blank slide after the last one this area made. */
   let last = t.deck.wordArtSlide ?? t.deck.titleSlide;
@@ -209,7 +209,7 @@ export async function run(t) {
       }
       return {
         ok,
-        observed: `${out.join(' | ')}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `${out.join(' | ')}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -283,7 +283,7 @@ export async function run(t) {
       }
       return {
         ok,
-        observed: `${drawnAt === null ? 'nothing drawn while the pointer was down for 120 ms' : `drawn ${drawnAt} ms after the press at ${boxStr(drawnBox)} (${id})`}; ${one ? `the block ${one.id} ${t.posStr(one.pos)} committed ${committedAt} ms after the release` : `${made.length} blocks after the release`}; selected ${selected}${ok ? '' : ` (docs/OBJECTS.md 2.4, question 2, ${LANE})`}`,
+        observed: `${drawnAt === null ? 'nothing drawn while the pointer was down for 120 ms' : `drawn ${drawnAt} ms after the press at ${boxStr(drawnBox)} (${id})`}; ${one ? `the block ${one.id} ${t.posStr(one.pos)} committed ${committedAt} ms after the release` : `${made.length} blocks after the release`}; selected ${selected}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, question 2, ${LANE})`}`,
       };
     },
   );
@@ -393,7 +393,7 @@ export async function run(t) {
         Boolean(f5?.free) && drawn5.ok && made.length === 1 && rev1 === rev0 + 1 && restored;
       return {
         ok,
-        observed: `canvas before ${canvasBefore}; at step 5 ${f5?.free ? `the shape ${boxStr(f5.free)} (off the drag box by ${drawn5.dx}/${drawn5.dy}/${drawn5.dw}/${drawn5.dh})` : `no shape element (marquee ${boxStr(f5?.marquee)})`}; the release: ${made.length} new block(s), converted ${converted}, revision ${rev0} -> ${rev1}; Cmd+Z restored the slide ${restored}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `canvas before ${canvasBefore}; at step 5 ${f5?.free ? `the shape ${boxStr(f5.free)} (off the drag box by ${drawn5.dx}/${drawn5.dy}/${drawn5.dw}/${drawn5.dh})` : `no shape element (marquee ${boxStr(f5?.marquee)})`}; the release: ${made.length} new block(s), converted ${converted}, revision ${rev0} -> ${rev1}; Cmd+Z restored the slide ${restored}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -480,7 +480,10 @@ export async function run(t) {
         );
         await undoOnce();
       }
-      return { ok, observed: `${out.join(' | ')}${ok ? '' : ` (docs/OBJECTS.md 2.6, ${LANE})`}` };
+      return {
+        ok,
+        observed: `${out.join(' | ')}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.6, ${LANE})`}`,
+      };
     },
   );
 
@@ -776,7 +779,7 @@ export async function run(t) {
       const ok = c.ok && scaled && Boolean(grew);
       return {
         ok,
-        observed: `step 10 ${t.describeFrame(f10, 10)}; the readout's letter size ${size ?? 'none'}, drawn ${drawn} px (from ${f0?.text?.fontSize} px)${ok ? '' : ' (docs/OBJECTS.md 4.2 item 7; FEATURES.md 2.3 item 8)'}`,
+        observed: `step 10 ${t.describeFrame(f10, 10)}; the readout's letter size ${size ?? 'none'}, drawn ${drawn} px (from ${f0?.text?.fontSize} px)${ok ? '' : ' (docs/archive/rounds/OBJECTS.md 4.2 item 7; FEATURES.md 2.3 item 8)'}`,
       };
     },
   );
@@ -860,7 +863,7 @@ export async function run(t) {
       const ok = facts.chip === 'Group' && allInside && onSites;
       return {
         ok,
-        observed: `${list.length} members (${boxes.length} steps, ${links.length} links), chip "${facts.chip}"; step 10: ring ${boxStr(ring)}, members inside ${inside.filter((x) => x.ok).length} of ${inside.length}; link ends on a step's edge: ${ends.map((e) => `${e.start ?? '?'}/${e.end ?? '?'}`).join(', ')} px${ok ? '' : ` (docs/OBJECTS.md 4.2 item 7, ${LANE})`}`,
+        observed: `${list.length} members (${boxes.length} steps, ${links.length} links), chip "${facts.chip}"; step 10: ring ${boxStr(ring)}, members inside ${inside.filter((x) => x.ok).length} of ${inside.length}; link ends on a step's edge: ${ends.map((e) => `${e.start ?? '?'}/${e.end ?? '?'}`).join(', ')} px${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 4.2 item 7, ${LANE})`}`,
       };
     },
   );
@@ -943,7 +946,7 @@ export async function run(t) {
       const ok = gap !== null && gap <= 2 && rev1 === rev0 + 1 && Boolean(followed);
       return {
         ok,
-        observed: `step 10: B ${boxStr(bBox)}, its left site ${site ? `${site.x},${site.y}` : 'none'}, the connector's end ${end ? `${end.x},${end.y}` : 'none'} (${gap === null ? 'unread' : `${gap} px apart`}); the release: revision ${rev0} -> ${rev1}, B ${t.posStr(bAfter)}, the connector ${t.posStr(elbowBefore)} -> ${t.posStr(elbowAfter)}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `step 10: B ${boxStr(bBox)}, its left site ${site ? `${site.x},${site.y}` : 'none'}, the connector's end ${end ? `${end.x},${end.y}` : 'none'} (${gap === null ? 'unread' : `${gap} px apart`}); the release: revision ${rev0} -> ${rev1}, B ${t.posStr(bAfter)}, the connector ${t.posStr(elbowBefore)} -> ${t.posStr(elbowAfter)}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -1021,7 +1024,7 @@ export async function run(t) {
       const ok = ringOk(r) && angleOk;
       return {
         ok,
-        observed: `step 10: ${describeRing(r)}; readout ${r.readout === null ? 'none' : `"${r.readout}"`}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `step 10: ${describeRing(r)}; readout ${r.readout === null ? 'none' : `"${r.readout}"`}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -1071,7 +1074,7 @@ export async function run(t) {
         typeof pos?.rotate === 'number';
       return {
         ok,
-        observed: `stored rotate ${pos?.rotate}; after the release: ${describeRing(after)}; after Escape and a click: ${describeRing(reselected)}; after a reload: ${describeRing(reloaded)}; the corner handles ${corners}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `stored rotate ${pos?.rotate}; after the release: ${describeRing(after)}; after Escape and a click: ${describeRing(reselected)}; after a reload: ${describeRing(reloaded)}; the corner handles ${corners}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -1175,7 +1178,7 @@ export async function run(t) {
       await undoOnce();
       return {
         ok,
-        observed: `gesture ${g ? JSON.stringify(g) : 'none'}; animation frames from the press to the release ${meter?.frames ?? 'unread'}; sheet mutation batches ${meter?.mutations ?? 'unread'}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `gesture ${g ? JSON.stringify(g) : 'none'}; animation frames from the press to the release ${meter?.frames ?? 'unread'}; sheet mutation batches ${meter?.mutations ?? 'unread'}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -1277,7 +1280,7 @@ export async function run(t) {
         readoutMoved(resizeReadouts);
       return {
         ok,
-        observed: `${slides} slides; the table moved: gesture ${moveG ? JSON.stringify(moveG) : 'none'}, the readout moved at every step ${readoutMoved(moveReadouts)}${moveReadouts.every((b) => b === null) ? ` (no readout during the move; the ring moved at every step ${readoutMoved(moveRings)})` : ''}; the chart resized: gesture ${resizeG ? JSON.stringify(resizeG) : 'none'}, the readout moved at every step ${readoutMoved(resizeReadouts)}${ok ? '' : ` (docs/OBJECTS.md 2.4, ${LANE})`}`,
+        observed: `${slides} slides; the table moved: gesture ${moveG ? JSON.stringify(moveG) : 'none'}, the readout moved at every step ${readoutMoved(moveReadouts)}${moveReadouts.every((b) => b === null) ? ` (no readout during the move; the ring moved at every step ${readoutMoved(moveRings)})` : ''}; the chart resized: gesture ${resizeG ? JSON.stringify(resizeG) : 'none'}, the readout moved at every step ${readoutMoved(resizeReadouts)}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 2.4, ${LANE})`}`,
       };
     },
   );
@@ -1428,7 +1431,7 @@ export async function run(t) {
       }
       return {
         ok,
-        observed: `${out.join(' | ')}${ok ? '' : ' (docs/OBJECTS.md 4.2 item 2: the fix round takes a second reading)'}`,
+        observed: `${out.join(' | ')}${ok ? '' : ' (docs/archive/rounds/OBJECTS.md 4.2 item 2: the fix round takes a second reading)'}`,
       };
     },
   );

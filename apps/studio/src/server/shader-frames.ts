@@ -1,4 +1,4 @@
-// The studio's half of the shader library's resting still (docs/FEATURES.md 5.5, 5.8;
+// The studio's half of the shader library's resting still (docs/archive/rounds/FEATURES.md 5.5, 5.8;
 // audit-shaders 1, 2, 9; judge-design additions 3 to 6): the 30 s bound of the hosted capture with
 // its one sentence, the orphan prune behind a `shader.frame` response, and the wait an export
 // gives a frame that is still on its way.
@@ -13,7 +13,7 @@
 // adds around it is the studio's: the orphan prune (packages/store frames.ts `pruneFrameAssets`,
 // B5's rule over the caller's listing) runs behind the response through `waitUntil`, at most once
 // a minute per deck per instance, so a slider burst costs one listing and the cost rows of
-// docs/SYNC.md 6.1 hold; the listing is the Blob prefix on a deployment and this instance's folder
+// docs/archive/rounds/SYNC.md 6.1 hold; the listing is the Blob prefix on a deployment and this instance's folder
 // on a checkout or the tmp store.
 //
 // The hosted capture (`material.capture`, `shader.capture`, `slide.setBackgroundMaterial`) is the
@@ -31,7 +31,7 @@
 // up to 10 s, then reports the count it waited for and the seconds it waited as the report row
 // report.ts `shaderReportRow` writes and the Download dialog's `progress.rows` carries. At most six
 // document reads per export, none without a pending frame, no listing, no timer of its own
-// (docs/SYNC.md 4.5).
+// (docs/archive/rounds/SYNC.md 4.5).
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -210,7 +210,7 @@ export function runBehindResponse(work: Promise<unknown>, label: string): void {
 /**
  * The deck's `assets/` files for the prune: the Blob prefix listing with its upload times on a
  * deployment, this instance's folder with the files' modification times on a checkout or the tmp
- * store. The one listing the prune costs (docs/SYNC.md 4.5), taken behind the response.
+ * store. The one listing the prune costs (docs/archive/rounds/SYNC.md 4.5), taken behind the response.
  */
 export function frameFileLister(
   deckId: string,

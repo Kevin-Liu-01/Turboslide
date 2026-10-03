@@ -36,7 +36,7 @@ import {
 import type { AssistLogLine, ModelAnswer, ModelClient } from './assist';
 import { fixtureModel, notesFor, shorterText } from './assist-fixtures';
 
-// The guardrails of docs/PRODUCT.md 6.4, each by its name in 8.3: a propose never writes; a card
+// The guardrails of docs/archive/rounds/PRODUCT.md 6.4, each by its name in 8.3: a propose never writes; a card
 // naming an action outside the allowlist is refused; a card naming an unknown block id is
 // dropped; a stale card re bases or drops; a forged, expired or foreign card is refused; the kill
 // switch answers 503; readOnly refuses accept (the route's `assertFlag`, asserted here as the

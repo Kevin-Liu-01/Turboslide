@@ -64,7 +64,7 @@ describe('tokens agree with sheet.css', () => {
     ).toEqual([...TOKEN_NAMES].sort());
   });
 
-  it('declares the font stacks, with the metric matched fallback face second (docs/FEATURES.md 3.1 item 3)', () => {
+  it('declares the font stacks, with the metric matched fallback face second (docs/archive/rounds/FEATURES.md 3.1 item 3)', () => {
     const light = customProperties(sheet, '.ts-sheet');
     expect(light.display).toBe(FONTS.display);
     expect(light.text).toBe(FONTS.text);
@@ -82,7 +82,7 @@ describe('tokens agree with sheet.css', () => {
     }
   });
 
-  it('gates the display features on Inter through --display-features (docs/FEATURES.md 3.1 item 5)', () => {
+  it('gates the display features on Inter through --display-features (docs/archive/rounds/FEATURES.md 3.1 item 5)', () => {
     const light = customProperties(sheet, '.ts-sheet');
     expect(light[DISPLAY_FEATURES_TOKEN]).toBe(DISPLAY.features);
     expect(DISPLAY.features).toBe("'cv11', 'ss01'");
@@ -100,7 +100,7 @@ describe('tokens agree with sheet.css', () => {
     expect(literal.map((rule) => rule.selector)).toEqual([]);
   });
 
-  it('sets tabular figures on table cells, chart labels and the board, never on running text (docs/FEATURES.md 3.1 item 4)', () => {
+  it('sets tabular figures on table cells, chart labels and the board, never on running text (docs/archive/rounds/FEATURES.md 3.1 item 4)', () => {
     const tabular = sheet.filter(
       (rule) => rule.declarations['font-variant-numeric'] === 'tabular-nums',
     );
@@ -124,7 +124,7 @@ describe('tokens agree with sheet.css', () => {
     expect(declarationsOf(sheet, '.ts-sheet .ic.ok').color).toBe(SEMANTIC.ok);
     expect(declarationsOf(sheet, '.ts-sheet .ic.warn').color).toBe(SEMANTIC.warn);
     expect(declarationsOf(sheet, '.ts-sheet .ic.no').color).toBe(SEMANTIC.no);
-    /* the info hue is the brand kit's Primary (docs/PRODUCT.md 4.1): the icon reads --blue,
+    /* the info hue is the brand kit's Primary (docs/archive/rounds/PRODUCT.md 4.1): the icon reads --blue,
        whose value on both roots is GT blue, with the hue itself as the fallback */
     expect(declarationsOf(sheet, '.ts-sheet .ic.info').color).toBe(`var(--blue, ${SEMANTIC.info})`);
     expect(TOKENS.light.blue).toBe(SEMANTIC.info);
@@ -288,7 +288,7 @@ describe('the type ladder agrees with the CSS', () => {
     const under = sizes.filter((row) => row.size < FLOOR);
     // head:137 and head:144 set 14 px labels that the slides raise to 15; the counter is chrome at
     // 13 px, and the brand kit's frame band (the footer text and the counter the kit draws) keeps
-    // the counter's 13 px (docs/PRODUCT.md 4.1)
+    // the counter's 13 px (docs/archive/rounds/PRODUCT.md 4.1)
     expect(under.map((row) => row.selector).sort()).toEqual([
       '.ts-sheet .counter',
       '.ts-sheet .ladder > div > small',

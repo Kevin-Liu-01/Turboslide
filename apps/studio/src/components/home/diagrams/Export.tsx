@@ -2,7 +2,7 @@ import { EXPORT } from '../copy';
 import { Marker } from './Marker';
 
 /**
- * Export (docs/POLISH.md 3.2 item 5, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): one slide frame with
+ * Export (docs/archive/rounds/POLISH.md 3.2 item 5, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): one slide frame with
  * a 1 px line that forks to two file tiles labelled pitch.pdf and pitch.pptx, each fork ending in
  * an 11 unit square marker at its tile (no arrowheads, slide 33), each tile a square with a plate
  * in it and a 1 px frame. Labels are 20 units with at least 12 units of clearance. Inline SVG in

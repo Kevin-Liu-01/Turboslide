@@ -86,7 +86,7 @@ function Field({
   /* the value the last commit wrote, until the document carries it: the change event fires on
      Enter and again on the blur before the write has landed, and the second commit compared the
      typed value with the old `value` and wrote it again, so X, Y and Rotate made two history
-     entries per typed value (docs/RETURN.md 2.14 item 3; audit-formatting rows 65, 66) */
+     entries per typed value (docs/archive/rounds/RETURN.md 2.14 item 3; audit-formatting rows 65, 66) */
   const written = useRef<number | undefined | null>(null);
   if (written.current !== null && written.current === value) written.current = null;
   const commit = (raw: string) => {

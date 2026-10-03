@@ -59,12 +59,12 @@ const STATIC_EXPECTED: RuleId[] = [
   'freeform/off-sheet',
   'type/ladder',
   'color/off-palette',
-  // the Google Slides parity round (docs/gslides-parity/SPEC.md 5.4, 7.3)
+  // the Google Slides parity round (docs/archive/gslides-parity/SPEC.md 5.4, 7.3)
   'copy/empty-placeholder',
   'table/size',
-  // the parity round two (docs/gslides-parity/SPEC-2.md 0.60), planted on canvas-objects
+  // the parity round two (docs/archive/gslides-parity/SPEC-2.md 0.60), planted on canvas-objects
   'chart/size',
-  // the parity round three (docs/gslides-parity/SPEC-3.md 8.4): the escape block of bad-escape
+  // the parity round three (docs/archive/gslides-parity/SPEC-3.md 8.4): the escape block of bad-escape
   // carries no htmlSanitized stamp
   'html/sanitize',
 ];
@@ -201,7 +201,7 @@ describe('lintStatic', () => {
     const palette = onSlide.find((f) => f.rule === 'color/off-palette');
     expect(palette).toMatchObject({ severity: 2, blockId: 'b1', path: '/slots/main/2/fill' });
     expect(palette?.evidence.text).toBe('#ff0000');
-    /* the sentence names no id and no parenthesis (docs/POLISH.md 2.6 item 55); the block is the
+    /* the sentence names no id and no parenthesis (docs/archive/rounds/POLISH.md 2.6 item 55); the block is the
        finding's blockId */
     expect(palette?.proposal).toContain('custom color');
     expect(palette?.proposal).not.toMatch(/[()]|"b1"/);
@@ -322,7 +322,7 @@ describe('lintStatic', () => {
     expect(title?.proposal).toMatch(/^Slide 5 has an empty title/);
     expect(cell).toMatchObject({ blockId: 'grid', path: '/slots/main/1/rows/1/cells/0' });
     expect(cell?.proposal).toBe('The table has an empty cell. Type into it or remove the row.');
-    /* the polish round (docs/POLISH.md 2.6 item 55): one finding per table with the count, no
+    /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 55): one finding per table with the count, no
        parenthesis and no specification cited in any sentence a seller reads */
     for (const finding of empty) expect(finding.proposal).not.toMatch(/\(|SPEC/);
     // the two planted blocks trip no other copy rule
@@ -356,7 +356,7 @@ describe('lintStatic', () => {
     expect(blank[1]?.proposal).toMatch(/Slide 1 has an empty subtitle/);
   });
 
-  test('copy/empty-placeholder names a table with nine empty cells once, with the count (docs/POLISH.md 2.6 item 55)', () => {
+  test('copy/empty-placeholder names a table with nine empty cells once, with the count (docs/archive/rounds/POLISH.md 2.6 item 55)', () => {
     const grid = lintStatic({
       deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['g'] }] },
       slides: {

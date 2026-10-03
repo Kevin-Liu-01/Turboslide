@@ -107,7 +107,7 @@ export type IntakePolicy = {
   /** The hosted allowlist (no loopback) and the hosted format rule (svg only through the sanitizer). */
   hosted: boolean;
   /**
-   * The hosted svg branch (docs/FEATURES.md 4.7; docs/VECTOR.md 4.2): the seam the host injects
+   * The hosted svg branch (docs/archive/rounds/FEATURES.md 4.7; docs/archive/rounds/VECTOR.md 4.2): the seam the host injects
    * its sanitizer through. Set, a hosted intake passes an svg through `sanitize`, keeps the
    * sanitized file as the asset's vector and rasterizes it by sharp into a PNG twin at 3x of an
    * 800 by 450 box (intake.ts); absent or false, a hosted intake refuses svg, which no deployment
@@ -163,14 +163,14 @@ export type AllowHostOptions = {
   hosted?: boolean;
   /**
    * Whether the caller can pass `--allow` (the CLI, paths on); the process policy otherwise. Off,
-   * the refusal is the seller's sentence naming the sites and no flag (docs/FEATURES.md 4.7).
+   * the refusal is the seller's sentence naming the sites and no flag (docs/archive/rounds/FEATURES.md 4.7).
    */
   allowPaths?: boolean;
 };
 
 /**
  * The sentence a browser transport's caller reads when a picture's address is off the list
- * (docs/FEATURES.md 4.7; audit-logos 16): the sites in the seller's words and what to do instead,
+ * (docs/archive/rounds/FEATURES.md 4.7; audit-logos 16): the sites in the seller's words and what to do instead,
  * no CLI flag a page cannot pass. The row logos.intake.url-sentence reads it off `asset.add`.
  */
 export const ALLOWLIST_SENTENCE =
@@ -209,7 +209,7 @@ export function assertAllowedHost(
 }
 
 /**
- * The User-Agent every pinned fetch sends (docs/FEATURES.md 4.7; audit-logos 16): Wikimedia's
+ * The User-Agent every pinned fetch sends (docs/archive/rounds/FEATURES.md 4.7; audit-logos 16): Wikimedia's
  * policy asks for a name and a contact, and the one allowlisted public source answered 403 to a
  * fetch without one. `Turboslide/<version> (+<origin>)`, the version from `TURBOSLIDE_VERSION`,
  * else the deployment's commit, else the workspace's 0.0.0; the origin from
@@ -583,7 +583,7 @@ export async function readInput(input: string, options: ReadInputOptions = {}): 
   return { bytes, name: basename(path), origin: basename(path), kind: 'path' };
 }
 
-/** The formats an intake decodes: the four raster formats everywhere, svg on a checkout as it came and hosted through the sanitizer (SPEC-3 0.28, 8.5; docs/VECTOR.md 4.2). */
+/** The formats an intake decodes: the four raster formats everywhere, svg on a checkout as it came and hosted through the sanitizer (SPEC-3 0.28, 8.5; docs/archive/rounds/VECTOR.md 4.2). */
 export type SniffedFormat = 'png' | 'jpeg' | 'webp' | 'gif' | 'svg';
 
 /** What a hosted intake accepts: the four raster formats, and svg when the policy carries a sanitizer (`imageInfo`). */
@@ -658,7 +658,7 @@ export type ImageInfo = { width: number; height: number; format: string; ext: st
 /**
  * Width, height and format of an image buffer through sharp, after the magic byte sniff: a buffer
  * that is none of png, jpeg, webp, gif or svg is refused before libvips opens it, svg is refused
- * on a hosted instance whose policy carries no sanitizer (SPEC-3 0.28; docs/VECTOR.md 4.2: every
+ * on a hosted instance whose policy carries no sanitizer (SPEC-3 0.28; docs/archive/rounds/VECTOR.md 4.2: every
  * deployment carries one, and intake.ts hands this function the sanitized text, so sharp never
  * reads an svg as it came hosted), and sharp runs with the 64 megapixel budget and
  * `failOn: 'error'` (SPEC-3 8.5). For an svg the width and height are the file's intrinsic size

@@ -1,5 +1,5 @@
 // The addresses this browser minted, by deck and link id, in `localStorage` (docs/FOCUS.md 2.7;
-// docs/PRODUCT.md section 2 rank 3). A share token is stored hashed on the record (SPEC-3 6.4),
+// docs/archive/rounds/PRODUCT.md section 2 rank 3). A share token is stored hashed on the record (SPEC-3 6.4),
 // so the address exists only where it was minted: here, so Copy link sends the same address
 // twice instead of rotating the link (which would stop the address the seller already sent),
 // and so the field holds the general link's address at the dialog's first open when the deck's

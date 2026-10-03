@@ -36,7 +36,7 @@ function block(type: Block['type']): Block {
 describe('the sections', () => {
   it('carry the names of SPEC 12 and SPEC-2 section 5 in Google’s order, plus the block fallback', () => {
     const names = FORMAT_SECTIONS.map((section) => section.title);
-    /* the Picture section reads "Image options" since the product round (docs/PRODUCT.md section 2
+    /* the Picture section reads "Image options" since the product round (docs/archive/rounds/PRODUCT.md section 2
        rank 10, the words), in the panel's word list of menus/strings.ts too */
     for (const name of PANELS.formatOptions.sections) expect(names).toContain(name);
     expect(names.indexOf('Size & rotation')).toBeLessThan(names.indexOf('Position'));
@@ -70,7 +70,7 @@ describe('a block control routes to', () => {
     expect(sections.get('/link')).toBeNull();
   });
 
-  it('draws a shape’s fields by its kind: no Corner radius, Arrowheads, Orientation or Height on a rectangle; the radius on a rounded rectangle; the arrowheads on an arrow (docs/POLISH.md 2.6 item 52)', () => {
+  it('draws a shape’s fields by its kind: no Corner radius, Arrowheads, Orientation or Height on a rectangle; the radius on a rounded rectangle; the arrowheads on an arrow (docs/archive/rounds/POLISH.md 2.6 item 52)', () => {
     const rect: Block = {
       id: 'r',
       type: 'shape',
@@ -111,7 +111,7 @@ describe('a block control routes to', () => {
     if (radius) expect(formatSectionOfBlockControl(radius, box)).toBe('size');
   });
 
-  it('no generated row for a shot (the Image options section is the whole picture panel, docs/POLISH.md 2.5 item 40); Table for a table’s cells', () => {
+  it('no generated row for a shot (the Image options section is the whole picture panel, docs/archive/rounds/POLISH.md 2.5 item 40); Table for a table’s cells', () => {
     const shot: Block = { id: 's', type: 'shot', asset: 'a', caption: 'c' };
     for (const spec of blockControls(shot).controls) {
       if (spec.path === '/asset' || spec.path === '/caption' || spec.path === '/crop')
@@ -209,7 +209,7 @@ describe('Drop shadow (gslides-parity SPEC-2 2.3.4)', () => {
   });
 });
 
-describe('the leading section (docs/FEATURES.md 2.2 rank 13; docs/RETURN.md 2.5)', () => {
+describe('the leading section (docs/archive/rounds/FEATURES.md 2.2 rank 13; docs/archive/rounds/RETURN.md 2.5)', () => {
   it('leads with Chart data for a chart and Table for a table, and keeps Google’s order otherwise', () => {
     const chart = { id: 'c', type: 'chart', kind: 'bar', categories: ['a'], series: [] } as Block;
     const table = { id: 't', type: 'table', columns: [{}], rows: [{ cells: [''] }] } as Block;

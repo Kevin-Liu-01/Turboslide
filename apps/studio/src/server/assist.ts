@@ -29,7 +29,7 @@ export { assistTargets };
 export type { AssistTarget };
 
 /**
- * The assist's server half (docs/PRODUCT.md section 6; audit-assist): the prompt, the model
+ * The assist's server half (docs/archive/rounds/PRODUCT.md section 6; audit-assist): the prompt, the model
  * call, the card's validation and its signature, framework free. The route
  * (`routes/api/assist.ts`) authorizes, reads the flags and the quotas and hands the validated
  * request here; the deck dispatcher registers the same two handlers so `assist.propose` and
@@ -320,7 +320,7 @@ export type ModelAnswer = {
 export type ModelClient = (request: ModelRequest, signal?: AbortSignal) => Promise<ModelAnswer>;
 
 /**
- * `claude-opus-5` through the Messages API (docs/PRODUCT.md 6.3): adaptive thinking (the model's
+ * `claude-opus-5` through the Messages API (docs/archive/rounds/PRODUCT.md 6.3): adaptive thinking (the model's
  * default), effort low, the JSON schema of the card as `output_config.format`, 4,000 output
  * tokens, the system block cached, and `fallbacks: 'default'` under its beta header so a decline
  * by category is re run on the fallback model inside the same call. A `fetch` to the API rather

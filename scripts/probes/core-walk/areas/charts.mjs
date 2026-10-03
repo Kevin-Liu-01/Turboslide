@@ -1,4 +1,4 @@
-// Charts (docs/RETURN.md 2.5, section 5 `charts.*` with the driver `probe --core`): the four
+// Charts (docs/archive/rounds/RETURN.md 2.5, section 5 `charts.*` with the driver `probe --core`): the four
 // kinds from Insert > Chart, the selection and the chart tail, the resize, Chart type from the
 // panel, the tail and the menu, the data grid (Add series, Add category, a cell edit), Edit data
 // from the tail and the menu, the Legend and Number format lists, the right click menu, the light
@@ -28,7 +28,7 @@ export const IDS = [
   'charts.light-appearance',
   'charts.present',
   'charts.reload',
-  /* the features round, ship one (docs/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12): the grid owns
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12): the grid owns
      its keys, the double click and the mark click, Legend > None from the tail, one control each
      in the panel and the visible remove controls; driven by `featuresRound` below */
   'charts.grid.type-to-edit',
@@ -38,7 +38,7 @@ export const IDS = [
   'charts.legend.none-from-toolbar',
   'charts.panel.no-duplicate-controls',
   'charts.grid.remove-visible',
-  /* the objects round (docs/OBJECTS.md 4.2 item 1): the pie's Add series refused with its sentence */
+  /* the objects round (docs/archive/rounds/OBJECTS.md 4.2 item 1): the pie's Add series refused with its sentence */
   'charts.pie.add-series-refused',
 ];
 
@@ -819,7 +819,7 @@ export async function run(t) {
 }
 
 /**
- * The objects round (docs/OBJECTS.md 4.2 item 1, the row `charts.pie.add-series-refused`): a pie
+ * The objects round (docs/archive/rounds/OBJECTS.md 4.2 item 1, the row `charts.pie.add-series-refused`): a pie
  * chart draws one series, so the grid's Add series is disabled with the sentence in its tooltip
  * and writes nothing; on a column chart the same control adds a series. Both charts are placed
  * through the window API as setup writes on their own slide.
@@ -923,7 +923,7 @@ async function objectsRound(t, S, h) {
       const ok = refused && said && added && factsCol?.disabled !== true;
       return {
         ok,
-        observed: `the pie: Add series ${facts ? `disabled ${facts.disabled} (aria-disabled ${facts.ariaDisabled})` : 'not drawn'}, tooltip ${tip === null ? 'none' : `"${tip}"`} (the sentence ${said}), series ${before} -> ${after}; the column chart: disabled ${factsCol?.disabled}, series ${beforeCol} -> ${afterCol} (added ${added})${ok ? '' : ` (docs/OBJECTS.md 4.2 item 1, ${LANE})`}`,
+        observed: `the pie: Add series ${facts ? `disabled ${facts.disabled} (aria-disabled ${facts.ariaDisabled})` : 'not drawn'}, tooltip ${tip === null ? 'none' : `"${tip}"`} (the sentence ${said}), series ${before} -> ${after}; the column chart: disabled ${factsCol?.disabled}, series ${beforeCol} -> ${afterCol} (added ${added})${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 4.2 item 1, ${LANE})`}`,
       };
     },
   );
@@ -931,13 +931,13 @@ async function objectsRound(t, S, h) {
 }
 
 /**
- * The features round, ship one (docs/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12; the rows
+ * The features round, ship one (docs/archive/rounds/FEATURES.md 2.2 ranks 1, 7, 10, 11 and 12; the rows
  * `charts.grid.type-to-edit` to `charts.grid.remove-visible`): the grid owns its keys, a double
  * click on the chart opens its numbers and a click on a mark selects its cell, Legend > None from
  * the tail writes none, the panel lists each control once and the grid's remove controls are
  * visible. The charts are the area's own inserts (C the bar chart, `charts.column` the column
  * chart). The Edit data button under the chart (`bar.chart.editData`) is B3's new control: a
- * build without it and without the double click reads not built with its id (docs/PRODUCT.md 8.1).
+ * build without it and without the double click reads not built with its id (docs/archive/rounds/PRODUCT.md 8.1).
  */
 async function featuresRound(t, S, h) {
   const { page } = t;
@@ -1226,7 +1226,7 @@ async function featuresRound(t, S, h) {
             titles: labels.filter((l) => /^Title$/i.test(l)).length,
             legends: labels.filter((l) => /^Legend$/i.test(l)).length,
             /* the JSON view lives in the chart's own section; the Alt text section's Description
-               field is a textarea of another section (docs/PRODUCT.md section 5) */
+               field is a textarea of another section (docs/archive/rounds/PRODUCT.md section 5) */
             textareas: [
               ...(panel?.querySelectorAll('[data-section="chart"] textarea') ?? []),
             ].filter(visible).length,
@@ -1267,7 +1267,7 @@ async function featuresRound(t, S, h) {
       await t.sleep(200);
       await page.mouse.move(20, 450);
       await t.sleep(400);
-      /* the polish round (docs/POLISH.md 2.4 item 26, B3): the remove square draws on the row's
+      /* the polish round (docs/archive/rounds/POLISH.md 2.4 item 26, B3): the remove square draws on the row's
          hover and focus alone, so the grid holds every series in view; the read hovers the row */
       const awayOpacity = await page.evaluate(() => {
         const remove = document.querySelector(

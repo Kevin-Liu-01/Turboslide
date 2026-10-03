@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The logo coverage list of a ship (docs/FEATURES.md 4.1; the ship note's `logo-coverage-list.txt`):
+// The logo coverage list of a ship (docs/archive/rounds/FEATURES.md 4.1; the ship note's `logo-coverage-list.txt`):
 // the brand names a General Translation seller or marketer types into the logo search, run through
 // `logo.search` against a deployment's index on the day of the ship, with the matched slug beside
 // each name and the number missing at the foot. The coverage is a number the ship measures and
@@ -13,7 +13,7 @@
 //   node scripts/probes/logo-coverage.mjs --base <origin> [--names <file>] [--out <file>] [--limit 5]
 //
 // The search is `GET <origin>/api/logo/search?q=<name>&limit=<limit>` (the dialog's own route,
-// docs/FEATURES.md 4.2), one name at a time; on a preview behind Vercel Authentication the request
+// docs/archive/rounds/FEATURES.md 4.2), one name at a time; on a preview behind Vercel Authentication the request
 // carries VERCEL_OIDC_TOKEN as x-vercel-trusted-oidc-idp-token and, where the surface needs it, the
 // bearer from TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json (read into
 // memory, never printed). The file goes to `--out` (default
@@ -224,7 +224,7 @@ export function renderCoverage({ base, date, updatedAt, results, source }) {
   const counts = coverageCounts(results);
   const lines = [
     `# logo coverage: ${counts.present} of ${counts.names} names matched on ${base} on ${date}; ${counts.missing} missing`,
-    `# the index of thesvg.org ${updatedAt ? `updated ${updatedAt}` : 'with no updatedAt'}; names from ${source}; a name matches a row's title, slug or alias, case folded (docs/FEATURES.md 4.1)`,
+    `# the index of thesvg.org ${updatedAt ? `updated ${updatedAt}` : 'with no updatedAt'}; names from ${source}; a name matches a row's title, slug or alias, case folded (docs/archive/rounds/FEATURES.md 4.1)`,
     '',
     ...results.map((r) => `${r.name}\t${r.slug ?? '-'}`),
     '',

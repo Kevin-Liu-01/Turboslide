@@ -108,7 +108,7 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
 const UNSAFE_FILE_NAME = /["\\/:*?<>|\u0000-\u001f]/g;
 
 /**
- * One name rule for every download (docs/POLISH.md item 86; @turboslide/chrome/download
+ * One name rule for every download (docs/archive/rounds/POLISH.md item 86; @turboslide/chrome/download
  * fileNameOf spells the same rule for the page): the title with the unsafe characters removed,
  * then the extension; an untitled deck keeps its id.
  */

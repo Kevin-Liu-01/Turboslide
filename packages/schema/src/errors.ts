@@ -11,7 +11,7 @@ import type { Author } from './mutations.ts';
 
 /* zod's JIT compiles object parsers with the Function constructor and probes for it with
    `new Function("")`; a page under the studio's script-src policy reports both as `eval` on
-   every parse (docs/POLISH.md item 112: the polish round's verifier read two to four CSP reports
+   every parse (docs/archive/rounds/POLISH.md item 112: the polish round's verifier read two to four CSP reports
    a page, and the fix round captured every one as script-src / eval from zod's util and its
    compiled parser). The browser runs zod jitless; the server keeps the JIT. This module is the
    studio root route's first import (apps/studio/src/routes/__root.tsx), so the flag is set
@@ -82,7 +82,7 @@ export class GoneError extends Error {
   }
 }
 
-/** The HTTP status an error class maps to on the agent transport; a numeric `status` the error carries wins (docs/POLISH.md item 120: the assistant's 503 answered 500). */
+/** The HTTP status an error class maps to on the agent transport; a numeric `status` the error carries wins (docs/archive/rounds/POLISH.md item 120: the assistant's 503 answered 500). */
 export function errorStatus(error: unknown): number {
   const carried = (error as { status?: unknown } | null)?.status;
   if (typeof carried === 'number' && Number.isInteger(carried) && carried >= 400 && carried < 600)

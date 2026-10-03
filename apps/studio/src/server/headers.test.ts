@@ -308,7 +308,7 @@ describe('firewall/rules.json (SPEC-3 0.25, 8.3, 11.5 R0)', () => {
   });
 });
 
-describe('the public store host (docs/PEOPLE.md 4.3)', () => {
+describe('the public store host (docs/archive/rounds/PEOPLE.md 4.3)', () => {
   it('reads the variable as a bare host and answers the https origin the picture URLs are built from', () => {
     const host = 'ggmycvj7j6224ay5.public.blob.vercel-storage.com';
     expect(publicStoreHost({ TURBOSLIDE_PUBLIC_STORE_HOST: host })).toBe(host);

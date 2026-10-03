@@ -8,7 +8,7 @@ import {
 
 /**
  * The identity mark's cells for the chip (gslides-parity SPEC-3 4.1; research 11 6.1, 7.1;
- * docs/PEOPLE.md 3.4, 3.5): the field of the package's `renderMarkBits` in field coordinates,
+ * docs/archive/rounds/PEOPLE.md 3.4, 3.5): the field of the package's `renderMarkBits` in field coordinates,
  * one rect per run of lit pixels, so `IdentityChip`, the builder's previews, the flags and the
  * filmstrip draw exactly what `renderMarkSvg` and `turboslide account me --avatar-png` draw
  * (mark-agreement.test.ts compares the two bit grids). The chip is a square of `size` with a 1 px

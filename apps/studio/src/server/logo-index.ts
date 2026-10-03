@@ -1,4 +1,4 @@
-// The cached logo index and its refresh (docs/FEATURES.md 4.2, 4.9; audit-logos 10, 13). The
+// The cached logo index and its refresh (docs/archive/rounds/FEATURES.md 4.2, 4.9; audit-logos 10, 13). The
 // server keeps `system/logo-index.json`, built from jsDelivr's `icons.json` (the file with the
 // variant paths, `dateAdded`, `collection` and `guidelines`; `registry.json` is not a fallback,
 // judge-design rejection 8) and trimmed to the row shape of @turboslide/chrome/logo-model, with two

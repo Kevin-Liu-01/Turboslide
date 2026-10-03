@@ -108,7 +108,7 @@ export type ViewerShellProps = {
   /** the mode the route asked for (?mode=), ahead of the saved one */
   initialMode?: ShellMode;
   /**
-   * The show from the first paint (docs/POLISH.md 2.7 item 105): /deck/<id>?present=1 renders
+   * The show from the first paint (docs/archive/rounds/POLISH.md 2.7 item 105): /deck/<id>?present=1 renders
    * present mode on the server, so no viewer bar shows before the mount effect hides it
    */
   initialPresent?: boolean;

@@ -58,7 +58,7 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
     expect(FONT_SOURCES.map((row) => row.id)).toEqual([...FONT_IDS]);
     expect(CATALOG_FILES.map((row) => row.id)).toEqual([...FONT_IDS]);
     for (const row of FONT_CATALOG) expect(isFontId(row.id)).toBe(true);
-    // the product round's 26 and the features round's eight (docs/FEATURES.md 3.2)
+    // the product round's 26 and the features round's eight (docs/archive/rounds/FEATURES.md 3.2)
     expect(FONT_IDS).toHaveLength(34);
     expect(FONT_IDS.slice(26)).toEqual([
       'geist',
@@ -73,7 +73,7 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
     expect(GOOGLE_FONTS_COMMIT).toMatch(/^[0-9a-f]{40}$/);
   });
 
-  it('carries the eight families of docs/FEATURES.md 3.2 as variable files under OFL 1.1 with no Reserved Font Name', () => {
+  it('carries the eight families of docs/archive/rounds/FEATURES.md 3.2 as variable files under OFL 1.1 with no Reserved Font Name', () => {
     const eight = FONT_IDS.slice(26);
     for (const id of eight) {
       const row = catalogFont(id);
@@ -105,7 +105,7 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
     expect(bytes).toBeLessThan(1_850_000);
   });
 
-  it('records the tabular figures flag per family from the GSUB tables (docs/FEATURES.md 3.1 item 4)', () => {
+  it('records the tabular figures flag per family from the GSUB tables (docs/archive/rounds/FEATURES.md 3.1 item 4)', () => {
     for (const row of CATALOG_FILES) {
       expect(typeof row.tnum, row.id).toBe('boolean');
       expect(Array.isArray(row.features), row.id).toBe(true);
@@ -238,7 +238,7 @@ describe('the font catalog (gslides-parity SPEC-5-amendments A5 item 2)', () => 
 
   it('writes the font-family stack, the custom property and the asset path per face', () => {
     // the name, then the base sheet's fallbacks for the category, ending in the generic family
-    // (docs/FEATURES.md 3.5; audit-fonts 16: one stack for the block path and the kit path)
+    // (docs/archive/rounds/FEATURES.md 3.5; audit-fonts 16: one stack for the block path and the kit path)
     expect(fontFamilyStack('roboto')).toBe("'Roboto', 'Helvetica Neue', Arial, sans-serif");
     expect(fontFamilyStack('merriweather')).toBe(
       "'Merriweather', Georgia, 'Times New Roman', serif",

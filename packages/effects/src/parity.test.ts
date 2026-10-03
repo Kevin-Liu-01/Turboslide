@@ -145,7 +145,7 @@ describe('native builds', () => {
 
 describe.skipIf(!hasNative)('cell identity on the deck two-tone assets', () => {
   test('the deck carries the sixteen two-tone assets', () => {
-    // the 15 imported pictures plus liquid-metal-diamond, captured in M5 (docs/M4-M5-STATUS.md)
+    // the 15 imported pictures plus liquid-metal-diamond, captured in M5 (docs/archive/status/M4-M5-STATUS.md)
     expect(twoToneAssets.length).toBe(16);
   });
 

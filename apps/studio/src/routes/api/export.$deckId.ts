@@ -60,7 +60,7 @@ import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
 // `?format=json` (or an Accept header naming application/json) the answer is the full ExportReport
 // and the file list instead of the bytes. Verify runs only where LibreOffice answers; otherwise the
 // report's residual says `verify: unavailable in this environment` and the summary's `verify` is
-// `skipped`. Inside a function a body over 4.5 MB cannot leave (docs/hosting-diagnosis.md
+// `skipped`. Inside a function a body over 4.5 MB cannot leave (docs/archive/status/hosting-diagnosis.md
 // section 4), so such a result answers 413 with the JSON body, and the caller exports one theme,
 // a slide subset, or asks the hosting store for a stored copy.
 //

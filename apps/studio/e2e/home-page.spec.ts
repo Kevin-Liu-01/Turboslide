@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
-// The product page, /home (docs/POLISH.md section 3, its rows decks.home.* of 5.1; the round
+// The product page, /home (docs/archive/rounds/POLISH.md section 3, its rows decks.home.* of 5.1; the round
 // four rules of gslides-parity SPEC-4 section 2 stand under them): the page answers 200 with the
 // hero sentence, its `main#top` and the head in the server's HTML; the sections stand in order
 // with one heading, one lead and one picture or one diagram each; the pictures carry width,

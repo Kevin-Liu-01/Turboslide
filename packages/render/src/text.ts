@@ -57,7 +57,7 @@ function wrappersOf(run: Run): Wrapper[] {
   if (run.sup === true) out.push({ tag: 'sup' });
   else if (run.sub === true) out.push({ tag: 'sub' });
   if (run.color !== undefined) out.push({ tag: 'span', style: `color:${colorCss(run.color)}` });
-  /* the size mark `z:36` (docs/POLISH.md 2.3 item 16; schema text.ts RunMarks.size): a span with
+  /* the size mark `z:36` (docs/archive/rounds/POLISH.md 2.3 item 16; schema text.ts RunMarks.size): a span with
      the size after the colour's, before the highlight, so a sized run draws in the stage and in
      the session's editable alike (InlineText reads the style back into the run) */
   if (run.size !== undefined) out.push({ tag: 'span', style: `font-size:${run.size}px` });
@@ -93,7 +93,7 @@ export function renderRuns(runs: Run[], options: RenderTextOptions): string {
     open = want;
     if (run.link) {
       /* a slide link (`#s/<id>`, `#next`) stays in the page so the show and the viewer follow it
-         through the hash (docs/PRODUCT.md section 2 rank 19); an external address opens a tab */
+         through the hash (docs/archive/rounds/PRODUCT.md section 2 rank 19); an external address opens a tab */
       const external = options.externalLinks !== false && !run.link.startsWith('#');
       const anchor = `<a href="${escapeAttr(run.link)}"${
         external ? ' target="_blank" rel="noreferrer"' : ''

@@ -19,7 +19,7 @@ import {
   tableRangeShapeOf,
 } from '../table-range';
 
-// The cell range of a selected table (docs/RETURN.md 2.4; the matrix rows
+// The cell range of a selected table (docs/archive/rounds/RETURN.md 2.4; the matrix rows
 // tables.cells.merge-unmerge and tables.tail.merge-unmerge-buttons): the bounds the plans read, the
 // box the overlay draws, the texts Delete clears, and when the range ends.
 
@@ -185,7 +185,7 @@ describe('rangeStands', () => {
   });
 });
 
-describe('adjacentCell (docs/FEATURES.md 2.2 rank 5: the arrows cross cells at the text edges)', () => {
+describe('adjacentCell (docs/archive/rounds/FEATURES.md 2.2 rank 5: the arrows cross cells at the text edges)', () => {
   it('walks the drawn cells in reading order for Left and Right and stops at the grid', () => {
     expect(adjacentCell(grid, { row: 1, col: 1 }, 'right')).toEqual({ row: 1, col: 2 });
     expect(adjacentCell(grid, { row: 1, col: 3 }, 'right')).toEqual({ row: 2, col: 0 });

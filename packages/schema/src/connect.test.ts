@@ -284,7 +284,7 @@ describe('followConnectors', () => {
   });
 });
 
-describe('a connector moved by its body (the polish round, docs/POLISH.md item 27)', () => {
+describe('a connector moved by its body (the polish round, docs/archive/rounds/POLISH.md item 27)', () => {
   it('detaches from every target that stayed, and the next move of the target leaves it alone', () => {
     const moved = apply(slide(), [
       {
@@ -336,7 +336,7 @@ describe('a connector moved by its body (the polish round, docs/POLISH.md item 2
   });
 });
 
-describe('the axis of a connector at its sites (the polish round, docs/POLISH.md item 33)', () => {
+describe('the axis of a connector at its sites (the polish round, docs/archive/rounds/POLISH.md item 33)', () => {
   /** a and b as the fixture places them, with an elbow between the named sites. */
   function elbowSlide(
     startSite: number,

@@ -1,4 +1,4 @@
-// The account commands (gslides-parity SPEC-3 7.9, 12; docs/PEOPLE.md 4.7): `account me` (the
+// The account commands (gslides-parity SPEC-3 7.9, 12; docs/archive/rounds/PEOPLE.md 4.7): `account me` (the
 // caller's principal, trust, label, mark and avatar; `--avatar-png <file>` writes the mark as the
 // 256 px one bit PNG the chip draws), `account name <name>` (the display name under the rules of
 // 0.19), `account avatar --variant <v>` (the mark: initials, glyph, dither; `--picture <file>`
@@ -36,7 +36,7 @@ export const ACCOUNT_USAGE = `usage: turboslide account <me|name|avatar|decks|se
                                     API keys (account.tokens.create, account.tokens.list, account.tokens.revoke)
 Every command takes --to <studio> (required for sessions, sign-out and tokens), --author <name> and --json.`;
 
-/** The request cap of docs/PEOPLE.md 4.2, the server's `AVATAR_MAX_BYTES`. */
+/** The request cap of docs/archive/rounds/PEOPLE.md 4.2, the server's `AVATAR_MAX_BYTES`. */
 export const PICTURE_MAX_BYTES = 512 * 1024;
 export const PICTURE_TOO_LARGE = 'Pictures up to 512 KB after resizing';
 export const PICTURE_NOT_A_PICTURE = 'Use a JPEG, PNG, WebP or GIF picture';
@@ -85,7 +85,7 @@ export function sniffPictureType(bytes: Uint8Array): string | null {
 }
 
 /**
- * A picture file as the data URL `account.setAvatar` takes (docs/PEOPLE.md 4.7): sniffed by its
+ * A picture file as the data URL `account.setAvatar` takes (docs/archive/rounds/PEOPLE.md 4.7): sniffed by its
  * magic number and refused over the cap before anything leaves, with the server's sentences.
  */
 export function pictureDataUrl(bytes: Uint8Array): string {

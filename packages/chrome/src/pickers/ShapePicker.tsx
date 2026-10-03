@@ -23,7 +23,7 @@ const tileTip = (name: string) => tipProps({ name });
  * nothing copied from Google. One category when the row names one (Insert > Shape > Arrows), all
  * four under their headings otherwise (Mask image, Change shape). The grid is one focusable
  * control with `gridcell` tiles named after the preset, the arrows walk it, Enter picks, and
- * ArrowLeft on the first column is left to the menu. The vector round (docs/VECTOR.md 2.6): the
+ * ArrowLeft on the first column is left to the menu. The vector round (docs/archive/rounds/VECTOR.md 2.6): the
  * geometry interpreter answers `shapePath` for every preset, so every tile draws its own outline;
  * one `<path>` per tile still, since the joined `d` string carries every subpath of a multi path
  * preset. `columns` sets the tiles per row (8 in a menu plate; the panel's mask grid passes 7 so
@@ -40,7 +40,7 @@ export type ShapePickerProps = {
   control?: string;
   /**
    * Tiles per row: 8 in a menu plate, 7 inside the 320 px Format options panel (the polish
-   * round, docs/POLISH.md item 42: the mask grid's eighth column was cut at the panel's edge).
+   * round, docs/archive/rounds/POLISH.md item 42: the mask grid's eighth column was cut at the panel's edge).
    */
   columns?: number;
 };

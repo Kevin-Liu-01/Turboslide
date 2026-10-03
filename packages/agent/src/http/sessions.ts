@@ -5,7 +5,7 @@
 // `view.goto` over /mcp or /api/actions is a command the page runs with the same dispatcher a
 // click uses (SPEC 7.1) and the result is the page's view state. The registry is in-memory and
 // per process; a session that stops polling is swept after `staleMs`. A poll is answered at once
-// (docs/SYNC.md 3.10): the client paces the loop, so a command waits for the page's next poll,
+// (docs/archive/rounds/SYNC.md 3.10): the client paces the loop, so a command waits for the page's next poll,
 // which is why `DEFAULT_COMMAND_TIMEOUT_MS` covers a whole pause. Framework free: the studio
 // wraps it in server functions.
 
@@ -238,8 +238,8 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
       const entry = entries.get(id);
       if (!entry) {
         // an id this instance does not hold (another instance's page, or a swept session): empty
-        // at once (docs/SYNC.md 3.10). The hold that stood here from the storm fix of 2026-09-15
-        // (gslides-parity SPEC-4 0.37; docs/sessions-polling.md 1.2) cost 25 s of a 2 GB function
+        // at once (docs/archive/rounds/SYNC.md 3.10). The hold that stood here from the storm fix of 2026-09-15
+        // (gslides-parity SPEC-4 0.37; docs/archive/status/sessions-polling.md 1.2) cost 25 s of a 2 GB function
         // per call for nothing; the pace that keeps a wrong instance from being polled every few
         // milliseconds is the client's pause after an empty answer, on every deployment since
         // that fix.

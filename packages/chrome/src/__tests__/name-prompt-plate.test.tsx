@@ -15,7 +15,7 @@ import { ACCOUNT } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
 // The name prompt the route opens on the first write or at the join is the title row's plate
-// (docs/POLISH.md 2.8 item 103; the row share.name-prompt.never-mid-drag): inside the row's right
+// (docs/archive/rounds/POLISH.md 2.8 item 103; the row share.name-prompt.never-mid-drag): inside the row's right
 // cluster, never a card over the sheet; Continue keeps the name through the account's setName,
 // the cross keeps the generated label; a dialog a person opened covers it.
 
@@ -87,7 +87,7 @@ function input(extra: Partial<EditorShellInput> = {}): EditorShellInput {
 
 function account(over: Record<string, unknown> = {}): NonNullable<EditorShellInput['account']> {
   return {
-    /* the people round's identity view (docs/PEOPLE.md 3.11): the own chip hashes principalId */
+    /* the people round's identity view (docs/archive/rounds/PEOPLE.md 3.11): the own chip hashes principalId */
     principal: { principalId: 'anon_1', label: 'Titanium 101', trust: 'label', kind: 'anonymous' },
     namePrompt: { open: true, prefilled: '' },
     onNamePrompt: vi.fn(),

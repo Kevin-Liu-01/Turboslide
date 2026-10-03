@@ -1,4 +1,4 @@
-// Who is who on a deck, as the editor's controller hands it to the chrome (docs/PEOPLE.md 3.8,
+// Who is who on a deck, as the editor's controller hands it to the chrome (docs/archive/rounds/PEOPLE.md 3.8,
 // 3.9, 3.11, 3.15, 3.16, 3.17; gslides-parity SPEC-3 4.11, 7.8): the payload's resolved people
 // (the version authors, the comment authors, the record's people, resolved by the server at load)
 // under the room's live roster and the caller, with two people of one text told apart by the
@@ -15,7 +15,7 @@ import type { Author, Version } from '@turboslide/schema/mutations';
 
 import type { EditorIdentity } from '../server/write';
 
-/** The identity as the chrome draws it (SPEC-3 7.8), with the server's mark (docs/PEOPLE.md 3.11). */
+/** The identity as the chrome draws it (SPEC-3 7.8), with the server's mark (docs/archive/rounds/PEOPLE.md 3.11). */
 export function identityView(identity: EditorIdentity | undefined, author: Author): IdentityView {
   if (identity === undefined) {
     return { principalId: author.name, label: author.name, trust: 'guest', kind: 'anonymous' };
@@ -44,7 +44,7 @@ export type ParticipantView = PresenceParticipant & { drag?: PresenceDrag };
 /**
  * A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's
  * PresenceParticipant). The wire's hue slot is 0 to 5 and the chrome's `HueSlot` is 1 to 6
- * (docs/PEOPLE.md 3.15), so the slot moves up by one here and the caret, the outline, the flag
+ * (docs/archive/rounds/PEOPLE.md 3.15), so the slot moves up by one here and the caret, the outline, the flag
  * and the stripe draw the hue the room granted (`mark.hue.slot` on the same entry agrees).
  * `lastSeenAt` is the room client's stamp of when the row's state last changed
  * (`receivedAtOf`; docs/REALTIME.md 3.5, audit-people.md defect 8) and the mapping time only for
@@ -123,7 +123,7 @@ export type IdentityIndexInput = {
   author: Author;
   /** the threads the sidecar holds */
   threads: readonly Thread[];
-  /** the payload's resolved people (docs/PEOPLE.md 3.8), keyed by principal id */
+  /** the payload's resolved people (docs/archive/rounds/PEOPLE.md 3.8), keyed by principal id */
   resolved?: Readonly<Record<string, EditorIdentity>> | undefined;
   /** the version log the payload carries, oldest first, for the order of first appearance */
   versions?: readonly Version[] | undefined;
@@ -141,7 +141,7 @@ function textOf(view: IdentityView): string {
  * wrote as), then the roster's rows (the live mark, the hue, the trust the room read) and the
  * caller, which override by id. Two people of one text are told apart by " (2)" and " (3)" in
  * order of first appearance (the log oldest first, then the comment authors, then the roster in
- * join order, then the caller; docs/PEOPLE.md default 4): the suffix reaches the text alone, the
+ * join order, then the caller; docs/archive/rounds/PEOPLE.md default 4): the suffix reaches the text alone, the
  * plate's initial is the mark's and never changes, and nothing is stored.
  */
 export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, IdentityView> {
@@ -213,7 +213,7 @@ export function identityIndex(input: IdentityIndexInput): ReadonlyMap<string, Id
 }
 
 /**
- * The roster after a `presence` event (docs/PEOPLE.md 3.16): the updated client's row replaced
+ * The roster after a `presence` event (docs/archive/rounds/PEOPLE.md 3.16): the updated client's row replaced
  * where it stands, so the roster, the four slots and the filmstrip keep join order; a client the
  * roster does not hold yet joins at the end.
  */

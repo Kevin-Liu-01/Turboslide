@@ -18,7 +18,7 @@ The order of delivery follows the thesis. The CLI ships first because it is the 
 
 Seven properties define agent native here (report 05 section 2): discoverable, declarative and diffable, parity by named actions, deterministic and visible, lintable, verified by artifact, shared history. Each section below says which property it serves.
 
-What Turboslide is not: it is not a free-form canvas by default. The grammar layouts carry no free coordinates, no z-order and no rotation; since the Google Slides parity round two (docs/gslides-parity/SPEC-2.md section 1, Kevin's directive of 2026-09-12) every slide becomes a canvas on its first manipulation, where every object carries `pos` with rotation and flip and takes resize handles, and the grammar layouts are the templates it re-flows by. Anything the grammar cannot express goes into an `html` escape block that the linter flags and the exporter rasterizes; the count of such blocks in a deck is the honest scope of the grammar (report 05 section 9 item 1).
+What Turboslide is not: it is not a free-form canvas by default. The grammar layouts carry no free coordinates, no z-order and no rotation; since the Google Slides parity round two (docs/archive/gslides-parity/SPEC-2.md section 1, Kevin's directive of 2026-09-12) every slide becomes a canvas on its first manipulation, where every object carries `pos` with rotation and flip and takes resize handles, and the grammar layouts are the templates it re-flows by. Anything the grammar cannot express goes into an `html` escape block that the linter flags and the exporter rasterizes; the count of such blocks in a deck is the honest scope of the grammar (report 05 section 9 item 1).
 
 ## 2. The look
 

@@ -74,7 +74,7 @@
   border-color: var(--pt-ink);
 }
 
-/* One ring (docs/PRODUCT.md 3.1, the filmstrip card row; audit-interface 19): a selected card's
+/* One ring (docs/archive/rounds/PRODUCT.md 3.1, the filmstrip card row; audit-interface 19): a selected card's
    frame turns ink at 1 px, the current card's frame is one 2 px ink border and no second outline
    (the parity rounds drew a 1 px border, a gap and a 2 px outline, three rings). The frame keeps
    its outer box (border-box), so the cards do not move. */

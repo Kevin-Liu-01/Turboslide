@@ -35,7 +35,7 @@ import {
   title,
 } from './lib';
 
-// The SVG pictures, the spec rows (docs/VECTOR.md section 4, 6.1 `svg.*` with the driver
+// The SVG pictures, the spec rows (docs/archive/rounds/VECTOR.md section 4, 6.1 `svg.*` with the driver
 // core/svg.spec.ts): the ways in the walk probe cannot drive in one tab (the file chooser, a
 // paste built in the page as a file and as markup, a DataTransfer drop, the By URL dialog), the
 // sheet at two zooms and in the show and the viewer, the picture gestures on the vector picture,
@@ -92,7 +92,7 @@ async function uploadThrough(bytes: Buffer, name: string, mime = 'image/svg+xml'
   await fc.setFiles({ name, mimeType: mime, buffer: bytes });
   return Date.now();
 }
-/** True when the block draws an `img` whose source is the svg file (docs/VECTOR.md 4.4). */
+/** True when the block draws an `img` whose source is the svg file (docs/archive/rounds/VECTOR.md 4.4). */
 async function drawsVector(blockId: string): Promise<boolean> {
   const img = await pictureImg(page, blockId);
   return img !== null && /\.svg(\?|$)/.test(img.src);
@@ -291,7 +291,7 @@ test(title('svg.import.url'), async () => {
   if (probe.status !== 200)
     test.skip(
       true,
-      `not driven: ${address.replace(origin, '')} answered ${probe.status} on this base (the fixture upstream on the preview, the live index on production; docs/VECTOR.md 4.3)`,
+      `not driven: ${address.replace(origin, '')} answered ${probe.status} on this base (the fixture upstream on the preview, the live index on production; docs/archive/rounds/VECTOR.md 4.3)`,
     );
   let switched = false;
   if (!(await rowPresent('insert', 'insert.image', 'insert.image.byUrl'))) {
@@ -317,12 +317,12 @@ test(title('svg.import.url'), async () => {
   });
   if (switched) await switchOff();
   expect(await drawsVector(pic.id), 'a vector picture').toBe(true);
-  /* the polish round's item 45 (docs/POLISH.md 2.5): a picture's description starts empty and the
+  /* the polish round's item 45 (docs/archive/rounds/POLISH.md 2.5): a picture's description starts empty and the
      file's name stays the asset's name (its id through `assetIdFor`), so the By URL path sends
      `alt: ''` as the upload does (B4's F2b); the vector round's read of the alt as the file's name
      predated it (the verifier's pass 2 finding 13; B4's R5 to B6 in the fix round 2) */
   expect(String(asset?.['id'] ?? ''), 'the asset is named after the file').toMatch(/default/);
-  expect(alt, 'the description starts empty (docs/POLISH.md 2.5 item 45)').toBe('');
+  expect(alt, 'the description starts empty (docs/archive/rounds/POLISH.md 2.5 item 45)').toBe('');
 });
 
 /** The svg picture the render, gesture and copy rows read: the upload's, else one placed as setup. */
@@ -694,7 +694,7 @@ test(title('svg.render.picture-gestures'), async () => {
   const disabled = (await crop.getAttribute('aria-disabled').catch(() => null)) === 'true';
   await crop.hover().catch(() => undefined);
   await page.waitForTimeout(700);
-  /* a disabled row draws no plate (docs/POLISH.md 2.6 item 61), so the one `.pt-tip` layer on
+  /* a disabled row draws no plate (docs/archive/rounds/POLISH.md 2.6 item 61), so the one `.pt-tip` layer on
      the page is read only while the row anchors it (`aria-describedby`, Tooltip.tsx); the words
      of record are the row's own attributes and, below, the toolbar Crop button's doc, which
      carries the disabled reason (ToolbarHead.tsx). The ship's run of record read the rotate
@@ -903,7 +903,7 @@ test(title('svg.sanitize.broken'), async () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// the polish round (docs/POLISH.md 2.4 item 32, 2.5 item 50, 5.1 `svg.*`): a pasted svg keeps its
+// the polish round (docs/archive/rounds/POLISH.md 2.4 item 32, 2.5 item 50, 5.1 `svg.*`): a pasted svg keeps its
 // text, and an svg that opens with a long comment is accepted.
 
 const SVG_WITH_TEXT = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80"><rect width="200" height="80" fill="#e8e8e8"/><text x="20" y="50" font-size="28" fill="#1b1b1b">Vector mark</text></svg>`;
@@ -975,7 +975,7 @@ coverage(import.meta.filename, [
   'svg.sanitize.data-image-kept',
   'svg.sanitize.cap',
   'svg.sanitize.broken',
-  /* the polish round (docs/POLISH.md 2.4 item 32, 2.5 item 50) */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.4 item 32, 2.5 item 50) */
   'svg.paste.keeps-text',
   'svg.intake.long-comment',
 ]);

@@ -102,7 +102,7 @@ describe('every action', () => {
           'admin.bootstrap',
           'admin.flag',
           'admin.migrateStorage',
-          // the product round (docs/PRODUCT.md 4.3): a template folder has no revision a caller reads,
+          // the product round (docs/archive/rounds/PRODUCT.md 4.3): a template folder has no revision a caller reads,
           // so the three deckless template writes carry none; create and update base on the deck
           'template.rename',
           'template.delete',

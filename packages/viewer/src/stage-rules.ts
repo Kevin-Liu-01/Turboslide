@@ -1,5 +1,5 @@
 // Three pure rules of the stage's gestures, kept out of Editor.tsx so they carry unit tests
-// (__tests__/stage-rules.test.ts; the return round, docs/RETURN.md section 6, B3 objects):
+// (__tests__/stage-rules.test.ts; the return round, docs/archive/rounds/RETURN.md section 6, B3 objects):
 // which deck guide a press at a crossing of two guides drags, whether the stage or the browser
 // owns a Tab, and the size a draw drag shows while it is down. Framework free, no DOM.
 import type { Box } from '@turboslide/schema/render';
@@ -82,7 +82,7 @@ export type TabPress = {
  * True when the stage walks the objects on Tab and Shift Tab (SPEC-2 0.83); false leaves the
  * browser's focus order. A Tab from a chrome control outside the stage and the overlay (a title
  * row button, a toolbar button, a panel field, a filmstrip card) is the browser's whether or not
- * an object is selected: docs/RETURN.md 4.1 (`chrome.split.tab-order`) measured the stage taking
+ * an object is selected: docs/archive/rounds/RETURN.md 4.1 (`chrome.split.tab-order`) measured the stage taking
  * the Tab from the Slideshow half while the title was selected, so the focus never reached the
  * chevron and the canvas selection moved to the subtitle. A Tab from the stage, the body or an
  * overlay handle walks the objects as before; with nothing selected, only the stage and the body

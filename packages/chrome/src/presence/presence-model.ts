@@ -169,7 +169,7 @@ export function displayNameFor(participant: PresenceParticipant, viewer: ViewerF
 }
 
 /**
- * The trust word beside a name (15; docs/PEOPLE.md 2.2 default 3): "guest" for a typed name,
+ * The trust word beside a name (15; docs/archive/rounds/PEOPLE.md 2.2 default 3): "guest" for a typed name,
  * "signed in" for a verified account (the accessible word beside the badge), nothing for a label,
  * an agent or a deleted account.
  */
@@ -182,7 +182,7 @@ export function trustWordFor(
 }
 
 /**
- * The trust sentence of a tooltip's doc line (research 11 5.2; docs/PEOPLE.md 3.7): "Signed in
+ * The trust sentence of a tooltip's doc line (research 11 5.2; docs/archive/rounds/PEOPLE.md 3.7): "Signed in
  * as <email>" when the view carries an address the reader may see, "Signed in" for a verified
  * person without one, "Not signed in. This name was typed, not verified." for a guest, "Not signed
  * in. A generated label for this browser." for a label, the agent's sentence for an agent.
@@ -192,7 +192,7 @@ export function trustSentenceOf(identity: Pick<IdentityView, 'trust' | 'email'>)
 }
 
 /**
- * The one identity this browser reads as itself on every surface (docs/PEOPLE.md 3.11; authorship
+ * The one identity this browser reads as itself on every surface (docs/archive/rounds/PEOPLE.md 3.11; authorship
  * 12): the account's principal when signed in (it carries the address), else the roster's own
  * entry (it carries the server's mark, the typed name and the hue), else the account's principal
  * from the page payload, else nothing. The own chip, the account head, the Profile head, the
@@ -205,7 +205,7 @@ export function meOf(input: {
   if (input.account?.signedIn === true) return input.account.principal;
   /* an anonymous person too reads `account.principal` when it names a real principal: the editor
      builds it from the roster's own row under the last answer of Change name or Change avatar
-     (docs/PEOPLE.md 3.11; own-identity.ts), so the own chip and the two heads change with the
+     (docs/archive/rounds/PEOPLE.md 3.11; own-identity.ts), so the own chip and the two heads change with the
      answer and not with the room's 5 s identity cache, which on the blob tier left the chip on the
      old name for 3 to 5 s (the integrator's preview readings of people.own-chip-follows-name and
      -avatar); the roster row stands in when the payload named nobody */
@@ -223,7 +223,7 @@ export function rosterRoleWord(participant: PresenceParticipant): string {
 /**
  * Follow is offered on editors and owners with a slide selected and refused for viewers,
  * commenters and agents (4.4); the caller needs the `follow` capability (6.2). An anonymous
- * editor can be followed (the polish round, docs/POLISH.md item 104): every seller on a
+ * editor can be followed (the polish round, docs/archive/rounds/POLISH.md item 104): every seller on a
  * deployment without sign in is anonymous, and the rule that followed accounts alone offered
  * "Go to slide 3" and never Follow there. Since the realtime round (docs/REALTIME.md 2 row
  * realtime.follow.for-everyone, 7 default 5) the server grants `follow` to every editor and owner,
@@ -250,7 +250,7 @@ export function chipTipOf(
 }
 
 /**
- * The trust sentence a participant's tooltip carries for this viewer (docs/PEOPLE.md 3.7): a
+ * The trust sentence a participant's tooltip carries for this viewer (docs/archive/rounds/PEOPLE.md 3.7): a
  * verified person a link visitor sees as a role word (the server's rewrite, or the chrome's under
  * `displayNameFor`) reads the plain "Signed in", never the address and never the generated label
  * sentence (build/b1.md R2); everyone else reads `trustSentenceOf`.
@@ -263,7 +263,7 @@ export function trustSentenceFor(participant: PresenceParticipant, viewer: Viewe
 }
 
 /**
- * The chip's tooltip doc line (docs/PEOPLE.md 3.7; the row people.chip-tooltip-trust): the trust
+ * The chip's tooltip doc line (docs/archive/rounds/PEOPLE.md 3.7; the row people.chip-tooltip-trust): the trust
  * sentence first, then the action sentence the surface adds ("Go to slide 12", "Click to follow;
  * click again to stop") when it has one.
  */

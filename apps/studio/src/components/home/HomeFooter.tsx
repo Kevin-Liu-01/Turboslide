@@ -5,7 +5,7 @@ import { FOOTER, NAV } from './copy';
 import { HomeLink } from './HomeLink';
 
 /**
- * The footer (docs/POLISH.md 3.2 item 8; docs/NEXT.md 4.1.2): the lockup (the 24 px mark beside
+ * The footer (docs/archive/rounds/POLISH.md 3.2 item 8; docs/NEXT.md 4.1.2): the lockup (the 24 px mark beside
  * the word, B1's request 2) as an anchor to `#top` (the `main` element's id, so the lockup
  * scrolls the page to its top; audit-home item 10), six links in one row, GitHub among them since
  * Round 1 moved it out of the navigation, and the closing line: the one sentence that names

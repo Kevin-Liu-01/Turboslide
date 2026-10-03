@@ -25,7 +25,7 @@ import './LayoutGrid.css';
  * package does not depend on @turboslide/render (the route passes `renderSlide`), and without one
  * a tile shows the layout's name on the plate. New in Turboslide (no Prototemplate source).
  *
- * The product round (docs/PRODUCT.md 3.4, section 2 rank 24): four columns at 1280 px and up so
+ * The product round (docs/archive/rounds/PRODUCT.md 3.4, section 2 rank 24): four columns at 1280 px and up so
  * Google's eleven show without scrolling (audit-interface 34); the GT layouts as a collapsed
  * group under a disclosure row, remembered per browser; and the layout's sentence in a caption
  * row at the bottom of the plate for the hovered or focused tile instead of a floating tooltip

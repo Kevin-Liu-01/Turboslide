@@ -67,7 +67,7 @@ export type BlockContext = {
   /**
    * The title slide's mark slot once the slide is a canvas (schema/canvas.ts toCanvas makes a
    * `mark` block of it): that block's id and the brand kit's mark record, so the block draws what
-   * the slot drew (docs/PRODUCT.md 4.1, 4.4: the kit's picture, nothing for none, the GT glyph
+   * the slot drew (docs/archive/rounds/PRODUCT.md 4.1, 4.4: the kit's picture, nothing for none, the GT glyph
    * for default). Absent on every other slide, where a `mark` block is the brand deck's specimen
    * (the features round's fix round, VERIFICATION.md pass 1 F1; build/b6.md R15).
    */

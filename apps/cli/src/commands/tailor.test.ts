@@ -1,4 +1,4 @@
-// The tailoring pass (docs/PRODUCT.md section 5; audit-gaps 16): `deck.tailor` as one write over
+// The tailoring pass (docs/archive/rounds/PRODUCT.md section 5; audit-gaps 16): `deck.tailor` as one write over
 // the customer name, the pictures named after the old customer and the slides to skip; the plan
 // is pure over a document, the store half commits it and answers the counts. The CLI usage is
 // `turboslide tailor --replace Acme=Globex --skip pricing-internal`, the MCP tool `deck_tailor`.

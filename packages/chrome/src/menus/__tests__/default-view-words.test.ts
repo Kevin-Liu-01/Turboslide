@@ -86,7 +86,7 @@ describe('the menu model', () => {
       clean(item.label, item.id);
       clean(item.altLabel?.label, item.id);
       clean(item.doc, item.id);
-      /* the vector round (docs/VECTOR.md 4.4): a function valued reason answers per state; its one
+      /* the vector round (docs/archive/rounds/VECTOR.md 4.4): a function valued reason answers per state; its one
          sentence is FORMAT.picture.svgCrop, cleaned through the strings and pinned by menu-model */
       if (typeof item.disabledReason !== 'function') clean(item.disabledReason, item.id);
       if (item.stubReason !== undefined) {

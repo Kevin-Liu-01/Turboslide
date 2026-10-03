@@ -16,13 +16,13 @@ import './Tooltip.css';
  * component, ported or new, attaches it through `tipProps` without a provider, and the text is
  * written with textContent, never markup.
  *
- * Where a tooltip does not fire (docs/PRODUCT.md 3.1.1; audit-interface 4): on keyboard focus
+ * Where a tooltip does not fire (docs/archive/rounds/PRODUCT.md 3.1.1; audit-interface 4): on keyboard focus
  * inside a menu, a right click menu or a dialog, because the first row of every menu and the
  * autofocused control of every dialog took focus on open and drew a plate over the rows and the
  * card under them; hover alone shows a tooltip there. The toolbar and the title row keep their
  * focus tooltips, where a keyboard user needs the name.
  *
- * A tooltip is shown only where a person asked for it (docs/POLISH.md 2.6 item 61). The manager
+ * A tooltip is shown only where a person asked for it (docs/archive/rounds/POLISH.md 2.6 item 61). The manager
  * records the last input of each kind anywhere in the document: the pointer's last movement and
  * its last movement to a new point, the last press, the last navigation key and the last return
  * (Escape, Enter, or a menu opening or a dialog closing, which call `hideTooltipUntilInput`). A
@@ -66,7 +66,7 @@ const VIEWPORT_MARGIN = 8;
 /**
  * A pointer that entered a control without moving within this window is a resting pointer: the
  * control moved under it (a menu closed, a panel opened), and no tip shows until it moves
- * (docs/POLISH.md 2.6 item 61; audit-media item 15: the toolbar's Image tip opened under the
+ * (docs/archive/rounds/POLISH.md 2.6 item 61; audit-media item 15: the toolbar's Image tip opened under the
  * resting pointer when the Insert menu closed and stayed through the upload).
  */
 const REST_MS = 500;

@@ -59,7 +59,7 @@ export type RenderOptions = {
    */
   htmlFrame?: (block: BlockOf<'html'>) => HtmlFrameSource | undefined;
   /**
-   * Where a catalog face's woff2 comes from (docs/PRODUCT.md 4.2; fonts.ts): the studio's fonts
+   * Where a catalog face's woff2 comes from (docs/archive/rounds/PRODUCT.md 4.2; fonts.ts): the studio's fonts
    * route when absent, a data URI or a file URL for a self contained document (the export's
    * capture passes @turboslide/fonts/catalog-node's).
    */
@@ -71,7 +71,7 @@ export type RenderOptions = {
    */
   deckSlides?: Iterable<Slide>;
   /**
-   * Leave the kit's stylesheet out of the slide (docs/PRODUCT.md 4.1): a caller that mounts
+   * Leave the kit's stylesheet out of the slide (docs/archive/rounds/PRODUCT.md 4.1): a caller that mounts
    * themeCss once for the page (a tile that shows the base theme with `data-theme-base`).
    */
   noKitCss?: boolean;
@@ -120,7 +120,7 @@ function twinResolver(
 }
 
 /**
- * An asset's image for the sheet: its vector files when it has them (docs/VECTOR.md 4.4: an svg
+ * An asset's image for the sheet: its vector files when it has them (docs/archive/rounds/VECTOR.md 4.4: an svg
  * asset of the vector round, or a ship one logo's untinted source, read through `vectorOf`), so
  * the editor, the render route, the print document and the standalone page all draw the svg and
  * never request the PNG twin; the twins otherwise.
@@ -235,7 +235,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   };
   const residual = importResidual(slide.ext);
   const scopeClass = residual?.css ? `ts-x-${slide.id}` : undefined;
-  // the brand kit's stylesheet and the catalog faces (docs/PRODUCT.md 4.1, 4.2) ride inside the
+  // the brand kit's stylesheet and the catalog faces (docs/archive/rounds/PRODUCT.md 4.1, 4.2) ride inside the
   // slide, so every surface that renders slides through this one function carries them: the
   // editor stage, the filmstrip clones, the layout tiles, the show, the print document, the
   // standalone file and the export capture. Empty for a deck without a record that uses the
@@ -317,7 +317,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     }
     case 'title': {
       // The title slide (s02:3-7): the mark, h1 44 px below it, the lead 26 px below that. The
-      // brand kit's logo slot (docs/PRODUCT.md 4.1, 4.4) replaces the mark with a picture, empties
+      // brand kit's logo slot (docs/archive/rounds/PRODUCT.md 4.1, 4.4) replaces the mark with a picture, empties
       // it or moves it to a corner; a deck without a record draws the GT mark as before.
       const slot = titleMarkSlot(deck, slide.mark, ctx);
       const mark = slot.inFlow;
@@ -334,7 +334,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'heading', 'data-type': 'heading', 'data-run': 'heading/text' }
             : {}),
         },
-        /* the title placeholder takes paragraph breaks since the polish round (docs/POLISH.md 2.3 item 19) */
+        /* the title placeholder takes paragraph breaks since the polish round (docs/archive/rounds/POLISH.md 2.3 item 19) */
         renderMultiline(slide.heading, ctx, undefined, '/heading'),
       );
       const lead = el(
@@ -428,7 +428,7 @@ export function kitStyle(deck: Deck, slide: Slide, options: RenderOptions): stri
 }
 
 /**
- * The title slide's logo slot (docs/PRODUCT.md 4.1, 4.4): the GT mark in the flow above the
+ * The title slide's logo slot (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the GT mark in the flow above the
  * heading for a deck without a record or with `mark.kind: 'default'`; a picture fitted into the
  * 132 by 84 box (or the record's box) for `'picture'`; nothing for `'none'` or a hidden position;
  * and, for a corner position, the same logo in the kit layer at that corner of the sheet instead

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// The word at the double click's point (docs/POLISH.md 2.4 item 30; VERIFICATION.md "Polish
+// The word at the double click's point (docs/archive/rounds/POLISH.md 2.4 item 30; VERIFICATION.md "Polish
 // round, pass 1" finding 12): the word the caret's text node holds around the caret, taking the
 // character after the caret first, so a caret before "2" in "Step 2" selects "2" and a caret
 // inside "Step" selects "Step". The DOM path (placeCaret with `word`) runs in the walk's

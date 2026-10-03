@@ -66,7 +66,7 @@ describe('the storage migration', () => {
     expect(isPublicPath('decks/q4/assets/a.png')).toBe(true);
     expect(isPublicPath('d/q4/key/a.png')).toBe(true);
     expect(isPublicPath('exports/q4/job/deck.pptx')).toBe(true);
-    // the picture avatars (docs/PEOPLE.md 4.3): public, so an <img> loads them by URL
+    // the picture avatars (docs/archive/rounds/PEOPLE.md 4.3): public, so an <img> loads them by URL
     expect(isPublicPath('u/AbCdEfGhIjKlMnOpQrStUv/0123abcd-64.webp')).toBe(true);
     expect(isPublicPath('decks/q4/deck.json')).toBe(false);
     expect(isPublicPath('decks/q4/access.json')).toBe(false);

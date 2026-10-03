@@ -398,7 +398,7 @@ test('an idle editor holds one stream and polls its session at the long poll cad
   expect(streams.length).toBeGreaterThanOrEqual(1);
   expect(streamsInWindow).toBeLessThanOrEqual(1);
   /* the idle ceiling: SPEC-4 4.4's four server function responses per minute (the poll held 25 s
-     and paused 6 s) is superseded by docs/SYNC.md 6.1 `cost.editor-idle.calls` since the sync and
+     and paused 6 s) is superseded by docs/archive/rounds/SYNC.md 6.1 `cost.editor-idle.calls` since the sync and
      costs round. The session poll survives round three (0.37) but is no longer held: the server
      answers `[]` at once when the instance holds no session and the hook pauses 20 s
      (useStudioSession.ts EMPTY_ANSWER_PAUSE_MS), so the poll lands floor(60 / 20) + 1 = 4 times in

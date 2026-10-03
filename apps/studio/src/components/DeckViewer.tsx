@@ -45,7 +45,7 @@ import { useStudioSession } from './useStudioSession';
  * draw as the plate. The first build streamed the answer inside the document instead
  * (routes/deck.$deckId.tsx says what that cost).
  *
- * The document is the load's (docs/SYNC.md 3.10 and 4.1; VERIFICATION.md, the sync round's pass 1,
+ * The document is the load's (docs/archive/rounds/SYNC.md 3.10 and 4.1; VERIFICATION.md, the sync round's pass 1,
  * F10): the page opens no stream and makes no function request after its load, so a reader here
  * sees a seller's later edit on a reload alone. The live document for a reader who may not edit is
  * the editor page on its viewer floor (/edit/<id> under a viewer grant, whose stream carries the
@@ -65,7 +65,7 @@ export type DeckViewerProps = {
   /** ?present=1 from the route: present mode (chrome hidden) on mount */
   present?: boolean;
   /**
-   * ?agent=1 from the route (docs/SYNC.md 3.10): the page attaches a studio session so an agent
+   * ?agent=1 from the route (docs/archive/rounds/SYNC.md 3.10): the page attaches a studio session so an agent
    * can drive it; off, the page makes no function request after its load
    */
   agent?: boolean;
@@ -214,7 +214,7 @@ export function DeckViewer({
                 fixture
               </span>
             ) : null}
-            {/* no Assist for a reader (docs/POLISH.md item 115): a viewer cannot write, and the
+            {/* no Assist for a reader (docs/archive/rounds/POLISH.md item 115): a viewer cannot write, and the
                 button opened nothing; the assistant's sentence for a viewer is the editor's
                 viewer floor's (packages/chrome/src/panels/Assist.tsx) */}
           </>
@@ -289,7 +289,7 @@ function StageBridge({
         slide={slide}
         index={Math.max(0, shell.index)}
         total={shell.total}
-        /* a show's sheet sits above the bar's row on a short viewport (docs/POLISH.md item 98) */
+        /* a show's sheet sits above the bar's row on a short viewport (docs/archive/rounds/POLISH.md item 98) */
         stageSize={shell.present ? showStageSize(stageSize) : stageSize}
         mode={shell.mode}
         present={shell.present}
@@ -355,7 +355,7 @@ function StageBridge({
  * the session hook polls the server for commands (`deck_goto_slide` over /mcp) and answers them
  * through this handle. The owner is registered on every viewer page, so the window API works for
  * a script in the page; the session attaches only when the address carries `?agent=1`
- * (docs/SYNC.md 3.10), on /deck and in the embed frame alike, so a show or a colleague's view
+ * (docs/archive/rounds/SYNC.md 3.10), on /deck and in the embed frame alike, so a show or a colleague's view
  * costs no function request after its load and a host page drives a plain frame through the
  * frame protocol.
  */

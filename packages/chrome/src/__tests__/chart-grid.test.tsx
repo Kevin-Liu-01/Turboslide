@@ -188,7 +188,7 @@ describe('ChartSection', () => {
     const add = document.querySelector(
       '[data-control="formatOptions.chart.addSeries"]',
     ) as HTMLButtonElement;
-    /* refused with its reason (docs/OBJECTS.md 4.2 item 1): aria-disabled keeps the tooltip and
+    /* refused with its reason (docs/archive/rounds/OBJECTS.md 4.2 item 1): aria-disabled keeps the tooltip and
        the tab order, the click writes nothing */
     expect(add.disabled).toBe(false);
     expect(add.getAttribute('aria-disabled')).toBe('true');
@@ -417,7 +417,7 @@ describe('ChartSection', () => {
   });
 });
 
-describe('the grid owns its keys and shows its remove controls (docs/FEATURES.md 2.2 ranks 1, 7 and 12)', () => {
+describe('the grid owns its keys and shows its remove controls (docs/archive/rounds/FEATURES.md 2.2 ranks 1, 7 and 12)', () => {
   it('Escape on the active cell with no open field leaves the grid and keeps the section drawn', () => {
     const { dispatch } = mount();
     const target = cell(1, 1);

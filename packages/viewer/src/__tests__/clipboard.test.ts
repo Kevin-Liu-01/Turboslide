@@ -70,7 +70,7 @@ const FIGMA_SVG =
   '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">\n<rect width="24" height="24" fill="#D9D9D9"/>\n</svg>\n';
 const PLAIN_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle r="4"/></svg>';
 
-describe('the svg forms (docs/VECTOR.md 4.3, 4.5)', () => {
+describe('the svg forms (docs/archive/rounds/VECTOR.md 4.3, 4.5)', () => {
   it('reads svg markup off text/plain with a prolog, a BOM or a comment, and text/html behind Chrome’s meta prefix', () => {
     expect(svgMarkupOf(transferOf({ 'text/plain': FIGMA_SVG }))).toBe(FIGMA_SVG.trim());
     expect(svgMarkupOf(transferOf({ 'text/plain': PLAIN_SVG }))).toBe(PLAIN_SVG);

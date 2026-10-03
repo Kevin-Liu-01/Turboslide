@@ -124,7 +124,7 @@ describe('spaces beside hyperlink runs', () => {
 
 describe('the raster scale policy', () => {
   it('shoots icons, marks and logos at 3x, diagrams at 1x and the rest at 2x under auto, or a fixed scale', () => {
-    /* the logo role joined the 3x kinds in the features round (docs/FEATURES.md 4.8) */
+    /* the logo role joined the 3x kinds in the features round (docs/archive/rounds/FEATURES.md 4.8) */
     expect([...THREE_X_KINDS].sort()).toEqual(['icon', 'logo', 'mark', 'svg']);
     expect(rasterScaleFor('icon', 'auto')).toBe(3);
     expect(rasterScaleFor('mark', 'auto')).toBe(3);
@@ -333,7 +333,7 @@ describe('the run marks of gslides-parity SPEC-2 7.2', () => {
   });
 });
 
-// The vector round (docs/VECTOR.md 2.3, 2.5, 6.3): a shape's text margins are the text layer's
+// The vector round (docs/archive/rounds/VECTOR.md 2.3, 2.5, 6.3): a shape's text margins are the text layer's
 // measured inset net of the preset's own text rectangle, clamped at zero, since PowerPoint applies
 // the preset's rectangle on top of the body insets.
 describe('the shape text insets net of the preset text rectangle (VECTOR.md 2.5)', () => {

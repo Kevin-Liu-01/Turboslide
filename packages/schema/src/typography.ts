@@ -46,7 +46,7 @@ export const TYPE_LEADING = [
 export const LINE_SPACING_PRESETS = [1, 1.15, 1.5, 2] as const;
 
 /**
- * The numeral spacing a block may ask for (docs/FEATURES.md 3.1 item 4; audit-fonts 2): `tabular`
+ * The numeral spacing a block may ask for (docs/archive/rounds/FEATURES.md 3.1 item 4; audit-fonts 2): `tabular`
  * gives every digit the same width so numbers line up in a column; absent keeps the face's
  * proportional digits. One value today; the type is a union so `oldstyle` can join later.
  */
@@ -83,9 +83,9 @@ export type Typography = {
   columns?: TypeColumns;
   /** The paragraphs' left indent in px (SPEC-2 2.2.11). */
   indent?: number;
-  /** The face by catalog id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme's face when absent. */
+  /** The face by catalog id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme's face when absent. */
   family?: FontId;
-  /** Tabular figures (docs/FEATURES.md 3.1 item 4): every digit the same width; proportional when absent. */
+  /** Tabular figures (docs/archive/rounds/FEATURES.md 3.1 item 4): every digit the same width; proportional when absent. */
   numerals?: TypeNumerals;
 };
 
@@ -157,7 +157,7 @@ export const typographyObjectSchema = z.strictObject({
     control: 'select',
     snap: FONT_IDS,
     group: 'Text',
-    help: 'A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2); the theme’s face when absent.',
+    help: 'A face from the font catalog by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.',
   }),
   numerals: annotate(z.enum(TYPE_NUMERALS).optional(), {
     label: 'Tabular figures',
@@ -168,10 +168,10 @@ export const typographyObjectSchema = z.strictObject({
   }),
 }) satisfies z.ZodType<Typography>;
 
-/** The sentence under the Tabular figures row and in its tooltip (docs/FEATURES.md 3.1 item 4; judge-seller addition 10). */
+/** The sentence under the Tabular figures row and in its tooltip (docs/archive/rounds/FEATURES.md 3.1 item 4; judge-seller addition 10). */
 export const NUMERALS_SENTENCE = 'Every digit takes the same width, so numbers line up in a column';
 
-/** The reason the Tabular figures row is disabled on a face without `tnum` (docs/FEATURES.md 3.1 item 4). */
+/** The reason the Tabular figures row is disabled on a face without `tnum` (docs/archive/rounds/FEATURES.md 3.1 item 4). */
 export const NUMERALS_UNAVAILABLE = 'This face has no tabular figures';
 
 /** The typography group as one inspector control (control `typography`, SPEC 6.5). */
@@ -216,13 +216,13 @@ export function typographyDeclarations(typography: Typography | undefined): stri
     out.push(`column-count:${typography.columns}`, `column-gap:${COLUMN_GAP_PX}px`);
   if (typography.indent !== undefined && typography.indent > 0)
     out.push(`padding-left:${typography.indent}px`);
-  // the catalog face by id (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2): the block
+  // the catalog face by id (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2): the block
   // reads the custom property @turboslide/fonts/catalog fontFamilyVariable names, which
   // @turboslide/render/fonts defines on the sheet root beside the family's @font-face rules; a
   // family whose faces are not loaded inherits the sheet's face
   if (typography.family !== undefined)
     out.push(`font-family:var(--ts-font-${typography.family}, inherit)`);
-  // the display features are Inter's (docs/FEATURES.md 3.1 item 5; audit-fonts 7): a block in
+  // the display features are Inter's (docs/archive/rounds/FEATURES.md 3.1 item 5; audit-fonts 7): a block in
   // another family drops the sheet's cv11 and ss01, whose ss01 would mean something else in 17 of
   // the catalog's families; Inter itself keeps the sheet's rule (the heading rules read
   // --display-features, which the kit sets)

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { STORE_RETRY_MS, putWithOneRetry } from './export-sync';
 
-// A refused download retries once (docs/POLISH.md item 82; the row export.refusal.sentence-and-retry):
+// A refused download retries once (docs/archive/rounds/POLISH.md item 82; the row export.refusal.sentence-and-retry):
 // the store's 429 is tried again after the seconds it names, capped, and a second refusal is the
 // caller's to word; any other error is thrown at once.
 

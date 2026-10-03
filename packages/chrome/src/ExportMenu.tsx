@@ -52,7 +52,7 @@ export type ExportProgress = {
   line?: string;
   /**
    * The report rows the route wrote while the export runs (the features round, ship two,
-   * docs/FEATURES.md 5.5; build/b1.md R6, build/b7.md R1): the Download dialog draws each as
+   * docs/archive/rounds/FEATURES.md 5.5; build/b1.md R6, build/b7.md R1): the Download dialog draws each as
    * `dialog.download.report.<id>` under the progress sentence and the direct path says it once.
    */
   rows?: ReadonlyArray<{ id: string; text: string }>;

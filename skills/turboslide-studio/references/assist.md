@@ -1,6 +1,6 @@
 # The assist and the tailoring pass
 
-Written by hand for the product round (docs/PRODUCT.md sections 5 and 6); the action contracts beside it (`actions.md` in `turboslide-api`) are generated.
+Written by hand for the product round (docs/archive/rounds/PRODUCT.md sections 5 and 6); the action contracts beside it (`actions.md` in `turboslide-api`) are generated.
 
 ## What a seller sees
 

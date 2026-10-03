@@ -12,7 +12,7 @@ import type { ExportJobRecord } from './export-jobs';
 
 /**
  * The export job record's reads and writes against the part store, server only (the sync and
- * costs round; docs/SYNC.md 3.5, invariant 8; build/b1.md R10). They lived in export-jobs.ts,
+ * costs round; docs/archive/rounds/SYNC.md 3.5, invariant 8; build/b1.md R10). They lived in export-jobs.ts,
  * whose plain exports the editor's client reads (download.ts imports `SYNC_PROGRESS_JOB_PATTERN`
  * as a value into a server function's validator), so when the proof rule brought
  * `@turboslide/store/access-store` into that module the client stub kept the import and `/new`

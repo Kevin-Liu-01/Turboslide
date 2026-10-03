@@ -1,4 +1,4 @@
-// The template index and the template writes (docs/PRODUCT.md 4.3, 8.3; gslides-parity SPEC-5
+// The template index and the template writes (docs/archive/rounds/PRODUCT.md 4.3, 8.3; gslides-parity SPEC-5
 // 4.1, 4.3, 4.6; ported from the round five branch and extended for the product round): the
 // committed templates.json equals the folders under the carried facts rule, Blank first and the
 // GT brand deck under its own name as an organisation template; deck.create copies any template
@@ -87,7 +87,7 @@ function sellerDeck(decks: string, name: string, brand?: Record<string, unknown>
   return created.deckId;
 }
 
-describe('decks/templates/templates.json (docs/PRODUCT.md 4.3)', () => {
+describe('decks/templates/templates.json (docs/archive/rounds/PRODUCT.md 4.3)', () => {
   const rows = readTemplateIndex(REPO_DECKS);
 
   it('equals the folders under the carried facts rule, Blank first, then the GT brand deck', () => {
@@ -345,7 +345,7 @@ describe('the card menu (template.rename, template.delete)', () => {
   });
 });
 
-describe('the deployment default (default.json; docs/PRODUCT.md 4.1, 4.3)', () => {
+describe('the deployment default (default.json; docs/archive/rounds/PRODUCT.md 4.1, 4.3)', () => {
   it('is blank when the record is absent, names a saved template after Use for new presentations, and blank removes the record', () => {
     const decks = scratchDecks('default');
     expect(readDefaultTemplateId(decks)).toBe('blank');

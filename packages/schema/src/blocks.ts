@@ -285,7 +285,7 @@ export type HeadingBlock = BlockBase & {
   typography?: Typography;
   /** Text fitting; the content layouts write shrink on their placeholders (gslides-parity SPEC-2 0.41). */
   autofit?: Autofit;
-  /** The text colour; the ink unless set (docs/PRODUCT.md 4.1: a heading painted with the kit's Primary). */
+  /** The text colour; the ink unless set (docs/archive/rounds/PRODUCT.md 4.1: a heading painted with the kit's Primary). */
   color?: Color;
 };
 export type ParagraphBlock = BlockBase & {
@@ -297,7 +297,7 @@ export type ParagraphBlock = BlockBase & {
   marginTop?: number;
   typography?: Typography;
   autofit?: Autofit;
-  /** The text colour; the role's ink unless set (docs/PRODUCT.md 4.1). */
+  /** The text colour; the role's ink unless set (docs/archive/rounds/PRODUCT.md 4.1). */
   color?: Color;
 };
 
@@ -358,7 +358,7 @@ export const ARROWHEADS = ['end', 'start', 'both', 'none'] as const;
 export type Arrowheads = (typeof ARROWHEADS)[number];
 /**
  * The axis an elbow or curved connector leaves its start and arrives at its end along (the polish
- * round, docs/POLISH.md item 33): horizontal is the S of `bentConnector3` and `curvedConnector3`
+ * round, docs/archive/rounds/POLISH.md item 33): horizontal is the S of `bentConnector3` and `curvedConnector3`
  * as PowerPoint draws them unrotated; vertical is the same connector turned a quarter, the one a
  * site that faces up or down asks for. `horizontal-vertical` and `vertical-horizontal` are the L
  * of `bentConnector2` and `curvedConnector2`: the connector leaves along the first axis and
@@ -428,7 +428,7 @@ export type ShapeBlock = BlockBase & {
   shadow?: Shadow;
   /** Where a connector bends, 0 to 1 along the box; 0.5 unless set (SPEC-2 2.4.1). */
   bend?: number;
-  /** The axis a connector leaves and arrives along, or the pair of an L; horizontal unless set (docs/POLISH.md item 33). */
+  /** The axis a connector leaves and arrives along, or the pair of an L; horizontal unless set (docs/archive/rounds/POLISH.md item 33). */
   axis?: ConnectorAxis;
   /** The points of a curve, polyline or scribble as fractions of the box (SPEC-2 2.4.3). */
   points?: [number, number][];
@@ -545,7 +545,7 @@ export type ShotTrim = { left: number; right: number; top: number; bottom: numbe
 /** Transparency 0 to 1, brightness and contrast -1 to 1 (SPEC-2 2.5.3). */
 export type ShotAdjust = { transparency?: number; brightness?: number; contrast?: number };
 /**
- * The picture's border weights in px (SPEC-2 2.5.5; docs/POLISH.md 2.5 item 44: Google's list),
+ * The picture's border weights in px (SPEC-2 2.5.5; docs/archive/rounds/POLISH.md 2.5 item 44: Google's list),
  * one list for the toolbar's picker, the panel and the schema.
  */
 export const SHOT_FRAME_WEIGHTS = [1, 1.5, 2, 3, 4, 8, 12] as const;
@@ -1003,7 +1003,7 @@ export const headingBlockSchema = z.strictObject({
     group: 'Block',
     help: 'h1 88 px, h2 44 px, big 72 px, title 44 px on a mood plate (head:59-61).',
   }),
-  /* the polish round (docs/POLISH.md 2.3 item 19): paragraph breaks, one .para span each */
+  /* the polish round (docs/archive/rounds/POLISH.md 2.3 item 19): paragraph breaks, one .para span each */
   text: annotate(multilineTextSchema, { label: 'Text', control: 'textarea', group: 'Text' }),
   marginTop: annotate(z.number().optional(), {
     label: 'Margin top',
@@ -1842,7 +1842,7 @@ export const shapeBlockSchema = z.strictObject({
     control: 'select',
     snap: CONNECTOR_AXES,
     group: 'Block',
-    help: 'The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/POLISH.md item 33).',
+    help: 'The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33).',
   }),
   points: annotate(
     z
@@ -1918,7 +1918,7 @@ const CLOSED_FIELDS: ReadonlySet<string> = new Set([
 
 /**
  * Whether Format options draws a shape field for a block of this kind (the polish round,
- * docs/POLISH.md item 52; audit-chrome item 7, audit-objects item 13: a star listed "Corner
+ * docs/archive/rounds/POLISH.md item 52; audit-chrome item 7, audit-objects item 13: a star listed "Corner
  * radius", "Arrowheads", "Orientation" and "Height"). Google's rectangle shows Size and rotation,
  * Position, Text fitting and Alt text, so a field a kind never reads is not drawn: the corner
  * radius belongs to the rounded rectangle, the arrowheads to the arrow and the connectors, the

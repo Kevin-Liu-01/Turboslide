@@ -19,7 +19,7 @@ import { DEFAULT_AVATAR } from './principal.ts';
 export type Trust = 'label' | 'guest' | 'verified' | 'agent';
 
 /**
- * The words a surface shows beside a name for each trust state (research 11 5.2; docs/PEOPLE.md
+ * The words a surface shows beside a name for each trust state (research 11 5.2; docs/archive/rounds/PEOPLE.md
  * default 3): "signed in" beside the check badge of a verified account, so the accessible name
  * reads "<name>, signed in" and the badge is never shape alone.
  */
@@ -88,7 +88,7 @@ export type ResolvedIdentity = {
   accountId?: string;
   avatar: AvatarChoice;
   /**
-   * The 64 px file of a picture avatar (docs/PEOPLE.md 4.4; picture.ts), so `markSpec` draws the
+   * The 64 px file of a picture avatar (docs/archive/rounds/PEOPLE.md 4.4; picture.ts), so `markSpec` draws the
    * picture with no per caller argument; absent for every other choice.
    */
   pictureUrl?: string;
@@ -114,7 +114,7 @@ function fromAccount(
   profile: AccountProfile,
   record: PrincipalRecord | null | undefined,
 ): ResolvedIdentity {
-  /* the account's own label on every id that renders as it (docs/PEOPLE.md 3.18): an aliased
+  /* the account's own label on every id that renders as it (docs/archive/rounds/PEOPLE.md 3.18): an aliased
      anonymous id and the account id are one person and one word, so the label is the account
      id's, never the anonymous id's */
   const label = labelFor(accountPrincipalId(profile.userId));
@@ -131,7 +131,7 @@ function fromAccount(
       admin: false,
     };
   }
-  /* an account without a typed name is its label, never its address (docs/PEOPLE.md 3.18): the
+  /* an account without a typed name is its label, never its address (docs/archive/rounds/PEOPLE.md 3.18): the
      address travels in `email` under `showEmail` alone, and the author name the server writes
      for such an account is the label too, so one account is one word everywhere */
   const avatar = profile.avatar ?? record?.avatar ?? { ...DEFAULT_AVATAR };
@@ -256,7 +256,7 @@ export type IdentityView = {
   deleted?: boolean;
   /**
    * The account principal id (`usr_<id>`) behind an aliased anonymous id, so two ids of one
-   * person are one person to the label suffix (docs/PEOPLE.md 3.17); absent on the account's own
+   * person are one person to the label suffix (docs/archive/rounds/PEOPLE.md 3.17); absent on the account's own
    * id and on every other principal.
    */
   accountId?: string;

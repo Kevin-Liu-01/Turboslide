@@ -26,7 +26,7 @@
 // page's `ts-editor-settings` seeded with `{ "advancedTools": true }` before the load), so every
 // control a person can reach is hovered in one of the two passes; the expected set of each pass is
 // what the page draws, since a parked control is hidden, never disabled.
-// The polish round (docs/POLISH.md 3.7 and section 7 question 2, the default; polish/build/b7.md
+// The polish round (docs/archive/rounds/POLISH.md 3.7 and section 7 question 2, the default; polish/build/b7.md
 // request 1): `/home` is exempt. The product page's links, its theme buttons and its footer lockup
 // draw no tooltip plates (HomeLink drops tipProps), so the page leaves the default list and a
 // `--url <origin>/home` is listed as skipped, never walked as misses. The `/decks` card links (the
@@ -54,14 +54,14 @@ const values = (name) => {
 const BASE = values('base')[0] ?? 'http://localhost:4321';
 const urls = values('url');
 // the default pages: the editor, the viewer and the files page (gslides-parity SPEC-4 2.6, 6.2;
-// build-4/b2.md R3). The /home product page left the list in the polish round (docs/POLISH.md 3.7,
+// build-4/b2.md R3). The /home product page left the list in the polish round (docs/archive/rounds/POLISH.md 3.7,
 // question 2's default): its links carry no plates by design. One page alone is `--url`.
 const pages =
   urls.length > 0 ? urls : [`${BASE}/edit/gt-brand`, `${BASE}/deck/gt-brand`, `${BASE}/decks`];
 /** A page the audit never walks: the product page, whose links draw no plates (POLISH.md 3.7). */
 const isExemptPage = (url) => /\/home(?:[?#]|$)/.test(url);
 const EXEMPT_REASON =
-  'not walked: /home is exempt, its links, theme buttons and footer lockup draw no tooltip plates by design (docs/POLISH.md 3.7, question 2)';
+  'not walked: /home is exempt, its links, theme buttons and footer lockup draw no tooltip plates by design (docs/archive/rounds/POLISH.md 3.7, question 2)';
 const width = Number(values('width')[0] ?? 1440);
 const theme = values('theme')[0] ?? 'light';
 const edit = flag('edit') || urls.length === 0;

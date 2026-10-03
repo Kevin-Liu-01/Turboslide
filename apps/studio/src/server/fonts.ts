@@ -1,5 +1,5 @@
 // The catalog's faces for the editor, the viewer and the picker (gslides-parity SPEC-5-amendments
-// A5 items 3 and 4; docs/PRODUCT.md 4.2; ported from the round five branch at the product round's
+// A5 items 3 and 4; docs/archive/rounds/PRODUCT.md 4.2; ported from the round five branch at the product round's
 // merge, build/b5.md R7), behind GET /fonts/* (apps/studio/src/routes/fonts.$.ts). Two forms,
 // both under the catalog's version so a refetch at another commit is another URL and the answers
 // cache as immutable:

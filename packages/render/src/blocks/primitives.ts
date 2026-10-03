@@ -6,7 +6,7 @@
 // stroke the way a declared diagram is (report 03 section 5.11): the five legacy kinds draw as
 // they did in round one (byte for byte when no round two field is set), a preset of shapes.ts
 // draws the paths of its ECMA geometry from `shapeGeometry` inset by half the stroke, one `<path>`
-// per geometry path with its fill mode and stroke flag (docs/VECTOR.md 2.3), a line kind draws
+// per geometry path with its fill mode and stroke flag (docs/archive/rounds/VECTOR.md 2.3), a line kind draws
 // its segments or curve through the box, and the ten decorations of `lineEndPath` sit at the
 // ends, sized as a medium DrawingML line end for the stroke (decorationSize) and centred on the
 // end for the circle, square and diamond kinds the way PowerPoint and LibreOffice draw `oval`
@@ -54,7 +54,7 @@ import { paraSpacingDeclarations } from './text-blocks.ts';
 /** The filled arrowhead length in px, the largest dia/stroke-grammar allows (DECK-GRAMMAR.md:44). */
 export const ARROWHEAD = 8;
 /**
- * The width of a line kind's transparent hit stroke in sheet px (the polish round, docs/POLISH.md
+ * The width of a line kind's transparent hit stroke in sheet px (the polish round, docs/archive/rounds/POLISH.md
  * item 24): a press within 6 px of the stroke lands on the line, the way Google's lines hit; a
  * press further inside the line's box lands on whatever the box covers.
  */
@@ -324,7 +324,7 @@ export function catmullRomPath(points: ReadonlyArray<Point>, closed: boolean): s
 /**
  * The text rectangle of a shape block at its box (SPEC-2 2.2.17): `textInset` of shapes.ts through
  * the legacy id's preset, the ECMA text rectangle of the preset at the block's box with its adjust
- * values (docs/VECTOR.md 2.3: a rounded rectangle's label steps in by 29 percent of the corner
+ * values (docs/archive/rounds/VECTOR.md 2.3: a rounded rectangle's label steps in by 29 percent of the corner
  * radius, a right arrow's sits in the shaft); the Editable PPTX export subtracts the same
  * rectangle from the measured insets, so the layer and the PPTX body insets agree.
  */
@@ -334,7 +334,7 @@ export function shapeTextRect(block: BlockOf<'shape'>, w: number, h: number): Bo
 }
 
 /**
- * The overlay a shade fill mode draws over the block's fill (docs/VECTOR.md 2.3, question 5): the
+ * The overlay a shade fill mode draws over the block's fill (docs/archive/rounds/VECTOR.md 2.3, question 5): the
  * deck's palette has no shades, so `lighten` and `lightenLess` lay the paper token over the fill
  * at 0.3 and 0.15 and `darken` and `darkenLess` the ink token; `norm` and `none` draw none.
  */
@@ -371,7 +371,7 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
   const stroke = colorCss(block.stroke ?? (closed ? 'hair' : 'ink'));
   const fill = block.fill !== undefined ? colorCss(block.fill) : 'none';
   const withText = closed && block.text !== undefined;
-  /* a line kind's hit area is its stroke (the polish round, docs/POLISH.md item 24; audit-objects
+  /* a line kind's hit area is its stroke (the polish round, docs/archive/rounds/POLISH.md item 24; audit-objects
      item 2: a connector's box took the press meant for the shape under it): the svg takes no
      pointer, the transparent hit path over the stroke does (pointer-events="stroke"), so a press
      inside the box off the stroke reaches the object under it; `.is-line` lets the sheet's CSS
@@ -464,7 +464,7 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
         block.lineStart ?? (heads === 'start' || heads === 'both' ? 'fillArrow' : 'none');
       const endKind: LineEnd =
         block.lineEnd ?? (heads === 'end' || heads === 'both' ? 'fillArrow' : 'none');
-      /* the axis the connector leaves and arrives along (the polish round, docs/POLISH.md item
+      /* the axis the connector leaves and arrives along (the polish round, docs/archive/rounds/POLISH.md item
          33; audit-objects item 16: the curve from a bottom site ran along the shape's edge): the
          horizontal S of `bentConnector3` and `curvedConnector3` unless the block's `axis` says
          vertical, when the same connector is drawn turned a quarter: it leaves along y, runs
@@ -578,7 +578,7 @@ export function renderShape(block: BlockOf<'shape'>, ctx: BlockContext): string 
       break;
     }
     default: {
-      // a preset of shapes.ts (SPEC-2 2.3.1; docs/VECTOR.md 2.3): the ECMA geometry at the box
+      // a preset of shapes.ts (SPEC-2 2.3.1; docs/archive/rounds/VECTOR.md 2.3): the ECMA geometry at the box
       // less the stroke, inset by half of it so the outline stays inside the box, with the adjust
       // values of 2.3.2; one path per geometry path in the file's order, filled with the block's
       // fill for `norm`, none for `none`, and for a shade mode the block's fill under the overlay

@@ -18,7 +18,7 @@ import { tipProps } from '../Tooltip';
 import './accounts.css';
 
 /**
- * The avatar builder (gslides-parity SPEC-3 0.22, 7.6; research 03 I3, 11 8 P8; docs/PEOPLE.md
+ * The avatar builder (gslides-parity SPEC-3 0.22, 7.6; research 03 I3, 11 8 P8; docs/archive/rounds/PEOPLE.md
  * 4.1): one 560 by 640 dialog with four tabs in the order a person wants them, Initials, Glyph,
  * Dither, Picture, each showing the result at 24, 32, 64 and 128 px in light and dark chrome in a
  * fixed 2 by 4 preview strip from first paint; the panel body 292 px for every tab. Initials
@@ -43,12 +43,12 @@ const TABS: ReadonlyArray<{ value: Tab; label: string }> = [
 ];
 /** The strip's sizes: the three chip sizes the picture files serve at 1x and 2x, and the head's 128 (build/b3.md). */
 const SIZES = [24, 32, 64, 128] as const;
-/** The Picture panel's control id; the picture rows of the matrix park it (docs/PEOPLE.md 6.1). */
+/** The Picture panel's control id; the picture rows of the matrix park it (docs/archive/rounds/PEOPLE.md 6.1). */
 const PICTURE_PANEL = 'dialog.avatarBuilder.panel.picture';
 
 /** The guard on the original file before any decode (docs/security.md section 10, the anonymous picture tier). */
 export const AVATAR_ORIGINAL_MAX_BYTES = 25 * 1024 * 1024;
-/** The cap on the encoded picture, the same number the server refuses at (docs/PEOPLE.md 4.2). */
+/** The cap on the encoded picture, the same number the server refuses at (docs/archive/rounds/PEOPLE.md 4.2). */
 export const AVATAR_MAX_BYTES = 512 * 1024;
 /** The crop box and the encoded square, in px. */
 export const AVATAR_CROP_PX = 256;
@@ -60,7 +60,7 @@ const ACCEPTED = /^image\/(png|jpeg|webp|gif)$/;
 const NUDGE_PX = 4;
 
 /**
- * The builder's sentences (docs/PEOPLE.md 4.1, 4.5): one thought per sentence, the chrome's
+ * The builder's sentences (docs/archive/rounds/PEOPLE.md 4.1, 4.5): one thought per sentence, the chrome's
  * words of `ACCOUNT.avatar` (build/b3.md R8 named the keys, build/b2.md request 5 landed them
  * there; the integrator swapped the lane's copy for the strings at B2's merge).
  */

@@ -34,7 +34,7 @@ const FEATURES = [
   ['slides', '2.2 Slides and the filmstrip'],
   ['text', '2.3 Text'],
   ['images', '2.4 Pictures and the slide background'],
-  /* the objects round (docs/OBJECTS.md 6.1): the `gestures.*` rows of the live gestures are the
+  /* the objects round (docs/archive/rounds/OBJECTS.md 6.1): the `gestures.*` rows of the live gestures are the
      arrange feature's (AREA_FEATURE), so they count here and never park */
   ['arrange', '2.5 Selection, arrange and the canvas'],
   ['shapes', '2.6 Shapes'],
@@ -45,7 +45,7 @@ const FEATURES = [
   ['versions', '2.7 Version history'],
   ['export', '2.8 Download and print'],
   ['help', '2.8 Help'],
-  /* the return round's features (docs/RETURN.md section 5), numbered by its sections */
+  /* the return round's features (docs/archive/rounds/RETURN.md section 5), numbered by its sections */
   ['tables', 'RETURN 2.4 Tables'],
   ['charts', 'RETURN 2.5 Charts'],
   ['diagrams', 'RETURN 2.6 Diagrams'],
@@ -54,24 +54,24 @@ const FEATURES = [
   ['chrome', "RETURN 2.16 The editor's chrome"],
   ['view', 'RETURN 2.16 The View menu'],
   ['inbox', 'RETURN 2.16 Notifications'],
-  /* the product round's features (docs/PRODUCT.md sections 4 and 6, 8.1), numbered by its sections */
+  /* the product round's features (docs/archive/rounds/PRODUCT.md sections 4 and 6, 8.1), numbered by its sections */
   ['brand', 'PRODUCT 4.1 The brand kit'],
   ['fonts', 'PRODUCT 4.2 The font catalog'],
   ['templates', 'PRODUCT 4.3 Templates'],
   ['assist', 'PRODUCT 6 The assist'],
-  /* the sync and costs round (docs/SYNC.md 6.1): the write path's order and the calls per state */
+  /* the sync and costs round (docs/archive/rounds/SYNC.md 6.1): the write path's order and the calls per state */
   ['sync', 'SYNC 6.1 The write path'],
   ['cost', 'SYNC 6.1 The calls per state'],
   /* the realtime round (docs/REALTIME.md section 2): two people on one slide over the redis tier; unparkable */
   ['realtime', 'REALTIME 2 Realtime'],
   /* the Cloudflare phase (docs/CLOUDFLARE.md 2.3): the setup rows of the do tier; unparkable, read on that tier alone */
   ['setup', 'CLOUDFLARE 2.3 The setup rows'],
-  /* the features round, ship one (docs/FEATURES.md section 4, 7.1): the logo picker over thesvg.org */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md section 4, 7.1): the logo picker over thesvg.org */
   ['logos', 'FEATURES 4 The logo picker'],
-  /* the features round, ship two (docs/FEATURES.md section 5, 7.1): the shader library */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md section 5, 7.1): the shader library */
   ['shaders', 'FEATURES 5 The shader library'],
-  /* the vector round (docs/VECTOR.md section 4, 6.1): the SVG pictures. The polish round
-     (docs/POLISH.md section 5, 2026-09-28) added its 130 rows to these features and no feature of
+  /* the vector round (docs/archive/rounds/VECTOR.md section 4, 6.1): the SVG pictures. The polish round
+     (docs/archive/rounds/POLISH.md section 5, 2026-09-28) added its 130 rows to these features and no feature of
      its own; the `decks.home.*` rows of the remade home page (section 3) count under decks */
   ['svg', 'VECTOR 4 SVG pictures'],
   ['surface', '3 The switch'],
@@ -226,7 +226,7 @@ function readme() {
   const held = [];
   for (const [key, heading] of FEATURES) {
     const mine = rows.filter((r) => r.feature === key);
-    /* a local row (docs/PEOPLE.md 6.2, the accounts spec on a node server with an identity
+    /* a local row (docs/archive/rounds/PEOPLE.md 6.2, the accounts spec on a node server with an identity
        database) never holds a paragraph: production cannot drive it; it is listed apart below */
     const red = mine.filter((r) => r.today !== 'works' && !LOCAL_SPEC_DRIVERS.includes(r.driver));
     if (red.length === 0) passing.push(key);
@@ -263,7 +263,7 @@ function readme() {
   if (local.length > 0) {
     lines.push('');
     lines.push(
-      `The local rows of docs/PEOPLE.md 6.2 (driven by ${LOCAL_SPEC_DRIVERS.map(code).join(', ')} on a node server with an identity database, never on production, and never holding a paragraph): ${local.map((r) => code(r.id)).join(', ')}.`,
+      `The local rows of docs/archive/rounds/PEOPLE.md 6.2 (driven by ${LOCAL_SPEC_DRIVERS.map(code).join(', ')} on a node server with an identity database, never on production, and never holding a paragraph): ${local.map((r) => code(r.id)).join(', ')}.`,
     );
   }
   return lines.join('\n');

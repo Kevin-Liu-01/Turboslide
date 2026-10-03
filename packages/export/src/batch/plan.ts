@@ -75,7 +75,7 @@ export type BatchExportInput = {
   slideIds?: 'all' | string[];
   includeSkipped?: boolean;
   includeNotes?: boolean;
-  /** the svgBlip switch of docs/VECTOR.md 4.6; false writes the PNG blip alone */
+  /** the svgBlip switch of docs/archive/rounds/VECTOR.md 4.6; false writes the PNG blip alone */
   svgVector?: boolean;
 };
 
@@ -322,7 +322,7 @@ export function staleJobPaths(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The file names a download saves as (the product round, docs/PRODUCT.md section 2 rank 7;
+// The file names a download saves as (the product round, docs/archive/rounds/PRODUCT.md section 2 rank 7;
 // audit-seller 7, audit-brand 18): the deck's title, never its id and never the appearance or
 // the mode a seller did not choose. Google saves `<presentation title>.pdf`.
 

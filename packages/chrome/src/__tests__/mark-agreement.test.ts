@@ -9,7 +9,7 @@ import { sha256 } from '@turboslide/identity/sha256';
 
 import { markCells, plateOf } from '../presence/mark-svg';
 
-// The two mark renderers agree (docs/PEOPLE.md 3.5, 6.5): the chrome's chip draws the field of
+// The two mark renderers agree (docs/archive/rounds/PEOPLE.md 3.5, 6.5): the chrome's chip draws the field of
 // the package's `renderMarkBits` through `markCells`, so 64 random specs at the four chip sizes
 // rasterised from the chip's rects equal the package's bit grid cell for cell. The spec stream is
 // seeded (a digest per index), so the run is the same every time.

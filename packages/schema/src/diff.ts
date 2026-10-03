@@ -198,7 +198,7 @@ export function diffDecks(a: DeckDocument, b: DeckDocument): Mutation[] {
   const out: Mutation[] = [];
 
   // Manifest fields other than sections, assets, revision and timestamps. The brand kit record
-  // is one of them (docs/PRODUCT.md 4.1): a restore of an earlier version takes the kit back
+  // is one of them (docs/archive/rounds/PRODUCT.md 4.1): a restore of an earlier version takes the kit back
   // with it, so Version history's row before a kit change restores the colour (the row
   // brand.colors.version-history-entry; before this the record stayed as it was).
   out.push(

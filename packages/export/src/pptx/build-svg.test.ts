@@ -1,4 +1,4 @@
-// The vector picture through the PowerPoint builder without a browser (docs/VECTOR.md 4.6, 6.3),
+// The vector picture through the PowerPoint builder without a browser (docs/archive/rounds/VECTOR.md 4.6, 6.3),
 // over scenes built by hand the way the extractor records them: a picture raster carrying the
 // asset's vector file travels as its 3x PNG blip (the fallback, whose IHDR width is the box
 // times three) with `asvg:svgBlip` beside it, the media part holds the svg's bytes, the content
@@ -142,7 +142,7 @@ describe('the Editable text file (native mode)', () => {
     expect(built.validation.issues).toEqual([]);
     expect(built.counts?.svgBlips).toBe(1);
     expect(built.residual).toContain(
-      'svg: 1 picture(s) carry asvg:svgBlip beside the PNG blip (docs/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback',
+      'svg: 1 picture(s) carry asvg:svgBlip beside the PNG blip (docs/archive/rounds/VECTOR.md 4.6); PowerPoint 2016 and later draw the vector, every other viewer the PNG fallback',
     );
     const { pic, png, svgPart, types } = await readPic(built.bytes, 'ts:s1#p1:1');
     expect(pic).toContain(`<a:ext uri="${SVG_BLIP_EXT_URI}"><asvg:svgBlip`);

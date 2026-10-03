@@ -34,7 +34,7 @@ export function ProfileDialog() {
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setBusy(false));
   };
-  /* the head reads the one own identity every surface reads (docs/PEOPLE.md 3.11) */
+  /* the head reads the one own identity every surface reads (docs/archive/rounds/PEOPLE.md 3.11) */
   const identity = meOf({ account, presence: shell.input.presence }) ?? undefined;
   const sessions = account?.sessions ?? [];
   const tokens = account?.tokens ?? [];
@@ -84,7 +84,7 @@ export function ProfileDialog() {
               identity={identity}
               size={24}
               self
-              /* the head reads the 128 px file (docs/PEOPLE.md 4.4), 64 at 1x through srcset */
+              /* the head reads the 128 px file (docs/archive/rounds/PEOPLE.md 4.4), 64 at 1x through srcset */
               pictureUrl={pictureUrlAt(account?.pictureUrl, 128) ?? account?.pictureUrl}
             />
             <span className="ts-profile-row-text">

@@ -1,4 +1,4 @@
-// The box of the selection ring (docs/OBJECTS.md 2.4, the rotated ring; the objects round, B1).
+// The box of the selection ring (docs/archive/rounds/OBJECTS.md 2.4, the rotated ring; the objects round, B1).
 // Measured on production (audit `a1-rectangle-rotate-08-step7.png`, `-17-up+400.png`): the ring
 // of a rotated object was the measured box of its `.free` wrapper, which for a turned wrapper is
 // the axis aligned bounding box (707 by 707 for 680 by 320 at 45 degrees), and the overlay then

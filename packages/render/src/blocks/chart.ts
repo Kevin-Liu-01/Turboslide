@@ -7,7 +7,7 @@
 // arithmetic over the box: a positioned chart takes its `pos`, a flow chart the slot width and its
 // `height` (480 when absent). The type and the gutters scale with the box below 640 by 360 and the
 // category labels are fitted to their slots (every n-th kept, a long one cut with an ellipsis), so
-// a small chart never piles its labels (the polish round, docs/POLISH.md item 31); the svg takes
+// a small chart never piles its labels (the polish round, docs/archive/rounds/POLISH.md item 31); the svg takes
 // no browser text selection (item 29). Nothing here reads a DOM; the export screenshots the svg
 // as a raster in Perfect and writes `addChart` from the block's data in Editable text.
 import type { BlockOf } from '@turboslide/schema/blocks';
@@ -51,7 +51,7 @@ const LABEL_GAP = 6;
 type Box = { x: number; y: number; w: number; h: number };
 
 /**
- * The type scale of a chart box (the polish round, docs/POLISH.md item 31; audit-objects item
+ * The type scale of a chart box (the polish round, docs/archive/rounds/POLISH.md item 31; audit-objects item
  * 14: at 240 by 140 the category labels piled up): 1 at or above 640 by 360, down to 0.6 in a
  * small box, so every size, gutter and pitch of the chart shrinks with it. Google scales a chart's
  * text with the chart.
@@ -221,7 +221,7 @@ export function renderChart(block: BlockOf<'chart'>, ctx: BlockContext): string 
   }));
   const k = chartTypeScale(w, h);
   /* no browser text selection over the legend or the labels on a double click that opens the
-     Chart data grid (the polish round, docs/POLISH.md item 29; audit-objects item 11) */
+     Chart data grid (the polish round, docs/archive/rounds/POLISH.md item 29; audit-objects item 11) */
   const attributes = rootAttrs(block, ctx, {
     className: 'chart',
     style: style('user-select:none', dropShadowDeclaration(block.shadow)),
@@ -294,7 +294,7 @@ function pieMarkup(
     const end = angle + sweep;
     const color = colors[i % colors.length] ?? 'var(--ink)';
     /* every mark names its cell (`data-series`, `data-category`) so a click on a slice, a bar or a
-       point of the selected chart makes its cell active in the Chart data grid (docs/FEATURES.md
+       point of the selected chart makes its cell active in the Chart data grid (docs/archive/rounds/FEATURES.md
        2.2 rank 7; the editor's mark hit test reads the two attributes, never the drawing) */
     const mark = ` data-series="0" data-category="${i}"`;
     if (values.length === 1 || sweep >= Math.PI * 2 - 1e-6) {
@@ -402,7 +402,7 @@ function axesMarkup(
       const points = s.values.map((v, i) => ({ x: left + slot * (i + 0.5), y: along(v) }));
       const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p.x)},${px(p.y)}`).join(' ');
       out += `<path class="series" data-series="${si}" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-      /* a point names its cell for the editor's mark hit test (docs/FEATURES.md 2.2 rank 7) */
+      /* a point names its cell for the editor's mark hit test (docs/archive/rounds/FEATURES.md 2.2 rank 7) */
       points.forEach((p, i) => {
         out += `<circle cx="${px(p.x)}" cy="${px(p.y)}" r="${px(4 * k)}" data-series="${si}" data-category="${i}" fill="${s.color}"/>`;
       });
@@ -425,7 +425,7 @@ function axesMarkup(
       const end = along(v);
       const from = Math.min(zero, end);
       const length = Math.abs(end - zero);
-      /* a bar names its cell for the editor's mark hit test (docs/FEATURES.md 2.2 rank 7) */
+      /* a bar names its cell for the editor's mark hit test (docs/archive/rounds/FEATURES.md 2.2 rank 7) */
       const mark = ` data-series="${si}" data-category="${i}"`;
       if (horizontal)
         out += `<rect x="${px(from)}" y="${px(start)}" width="${px(length)}" height="${px(Math.max(0, barSize - 2))}"${mark} fill="${s.color}"/>`;

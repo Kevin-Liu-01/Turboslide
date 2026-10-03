@@ -13,7 +13,7 @@ import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
 // The Open and Import slides dialogs draw this browser's own decks the moment they open and the
-// store's listing replaces them when it lands (docs/POLISH.md item 75; B5's R29 to B1, landed by
+// store's listing replaces them when it lands (docs/archive/rounds/POLISH.md item 75; B5's R29 to B1, landed by
 // the ship step's third attempt): a deck made a moment ago is in the list before the blob tier's
 // listing holds it, and the dialog never waits on the listing to draw a row.
 

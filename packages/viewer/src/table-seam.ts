@@ -1,4 +1,4 @@
-// The seam handles of a selected table (docs/RETURN.md 2.4 fix 5; docs/OBJECTS.md 3.3 items 4
+// The seam handles of a selected table (docs/archive/rounds/RETURN.md 2.4 fix 5; docs/archive/rounds/OBJECTS.md 3.3 items 4
 // and 5; Google drags a gridline between columns or rows, research 05 A6 "Resize"): one `v`
 // handle on every inner column seam, placed from the header row's measured cell boxes, whose
 // drag widens the column on its left and narrows the one on its right with the widths written on
@@ -10,7 +10,7 @@
 // and the table's `pos.h` in the same commit, so the rows below move down and the seam under the
 // last row grows the table. Both are the layout's `col-seam` kind with a `blockId` and an
 // `index`; the row seam carries `axis: 'y'` and the window API id `handle.<block>.row.<n>`; the
-// label a tooltip reads is the gesture alone, "Column seam 2", never the block's id (docs/POLISH.md
+// label a tooltip reads is the gesture alone, "Column seam 2", never the block's id (docs/archive/rounds/POLISH.md
 // 2.6 item 60: a seller read "table-2: Column seam 2" and a hash on a pasted table). The
 // overlay draws a `v` handle as a vertical rule and tells a row seam by its axis (Overlay.tsx);
 // the Editor tells a table seam from the layout's by the block (Gestures.tsx `Handle.blockId`,
@@ -42,7 +42,7 @@ export function isTableSeamHandle(handle: Handle): handle is TableSeamHandle {
   return handle.kind === 'col-seam' && handle.blockId !== undefined && handle.index !== undefined;
 }
 
-/** A table seam whose drag moves a row rule up or down (docs/OBJECTS.md 3.3 item 4). */
+/** A table seam whose drag moves a row rule up or down (docs/archive/rounds/OBJECTS.md 3.3 item 4). */
 export function isTableRowSeamHandle(handle: Handle): handle is TableSeamHandle & { axis: 'y' } {
   return isTableSeamHandle(handle) && handle.axis === 'y';
 }
@@ -121,7 +121,7 @@ export function tableRowSeamYs(
 }
 
 /**
- * The handles on the rules under a selected table's rows (docs/OBJECTS.md 3.3 item 4; ship one
+ * The handles on the rules under a selected table's rows (docs/archive/rounds/OBJECTS.md 3.3 item 4; ship one
  * P1 item 1): one per row, the table's width along each rule, `handle.<block>.row.<r>` for the
  * window API, the drag direction down; the one under the last row grows the table. None for a
  * table with no measured box.

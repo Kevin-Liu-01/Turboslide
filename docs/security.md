@@ -1,6 +1,6 @@
 # Security
 
-The security platform of the third Google Slides parity round (`docs/gslides-parity/SPEC-3.md`
+The security platform of the third Google Slides parity round (`docs/archive/gslides-parity/SPEC-3.md`
 sections 6, 8 and 11.4; the threat model is `docs/gslides-parity/research-3/04-security-and-rate-limiting.md`
 and its addendum `10-security-and-storage-addendum.md`). This page is the operator's reference:
 what every request passes through, the tables the code reads, the variables each environment
@@ -53,7 +53,7 @@ from that context (`authorFor`): the anonymous label with the principal id, an a
 `?author=` and the body's author are never trusted for identity (8.2).
 
 A signed in account is one person with the anonymous ids the alias table links to it (SPEC-3 7.4;
-docs/PEOPLE.md 3.6): its `Principal` carries `aliases`, and `standingOf` matches the record's
+docs/archive/rounds/PEOPLE.md 3.6): its `Principal` carries `aliases`, and `standingOf` matches the record's
 owner and grant holders against the account and its aliases, so a deck made before the sign in
 keeps its creator as the owner. The `Principal` of an account also carries its verified address
 and nothing else's: a pending grant by email admits the account whose address it names
@@ -85,7 +85,7 @@ the rows).
 ## 3. The WAF rules
 
 `firewall/rules.json`: R1 to R21 and R16b of 8.3, R22 of the product round (`/api/assist` 30 per
-60 s per IP, log mode first, docs/PRODUCT.md 6.3) plus the CLI and MCP bypass, in the shape the
+60 s per IP, log mode first, docs/archive/rounds/PRODUCT.md 6.3) plus the CLI and MCP bypass, in the shape the
 firewall API's `rules.insert` takes, every applied action `log`, and the `enforce` object per rule
 holding the action of the R8 flip (429, deny 15 minutes or 1 hour, challenge). Counters are per IP
 and per region, so each number sits about a third under the intended global one and is counted
@@ -149,7 +149,7 @@ next deploy) and, for the `upstash` backend, set `UPSTASH_REDIS_REST_URL` and
 the 401st anonymous render of an hour answers 429 with `Retry-After` and "Too many slide renders
 this hour. Try again later" from any instance.
 
-The assistant's two rows (docs/PRODUCT.md 6.3): `assistCallsPerMinutePerDeck` (anonymous 6,
+The assistant's two rows (docs/archive/rounds/PRODUCT.md 6.3): `assistCallsPerMinutePerDeck` (anonymous 6,
 account 20, agent 60, per deck) and `assistCallsPerDay` (anonymous `TURBOSLIDE_ASSIST_DAY_CAP`,
 default 20; account 300; agent 1000), refused with 429, `Retry-After` and "Too many assistant
 requests. Try again in a minute" or "You have reached today's limit for the assistant"; counted on
@@ -164,7 +164,7 @@ pictures per day, bytes per day and the largest picture on the presigned route.
 
 ## 5. The kill switches
 
-`apps/studio/src/server/flags.ts`. Thirteen flags (8.12; docs/PRODUCT.md 6.3, 6.4) read per request
+`apps/studio/src/server/flags.ts`. Thirteen flags (8.12; docs/archive/rounds/PRODUCT.md 6.3, 6.4) read per request
 with a 5 second in process cache: `realtime`, `presence`, `comments`, `invites`, `email`, `exports`,
 `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly`, `assist` (the
 assistant's kill switch: off answers 503 with "The assistant is off on this Turboslide" on
@@ -342,7 +342,7 @@ production.
 `apps/studio/src/server/upload.ts`, `packages/headless/src/capture/intake.ts` (0.29, 8.5). One
 pipeline for every picture: a size cap by tier (25 MB anonymous, 50 MB signed in, 512 KB avatar
 after the browser's 256 px resize, checked on the data URL string before any decode and again on
-the bytes; `limitInputPixels` 1024 by 1024 for that path, docs/PEOPLE.md 4.2), the magic byte
+the bytes; `limitInputPixels` 1024 by 1024 for that path, docs/archive/rounds/PEOPLE.md 4.2), the magic byte
 sniff (png, jpeg, webp, gif; svg refused hosted), sharp 0.35.4 with `limitInputPixels` at 64
 megapixels and `failOn: 'error'`, HEIF and JXL blocked at process start, animated GIFs flattened,
 a re-encode hosted so no byte of the input survives, digest named twins through the store's
@@ -403,7 +403,7 @@ runtime logs alone are one day.
 | `TURBOSLIDE_WEB_SECURITY`                                                                                                                                          | `strict` once the fixture renders                                                                                                                                                                     | section 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `TURBOSLIDE_PUBLIC_STORE_HOST`, `TURBOSLIDE_PRESIGN_HOST`, `TURBOSLIDE_EMBED_ANCESTORS`                                                                            | when the stores and the customers exist                                                                                                                                                               | section 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                                                                               | never set in the Cloudflare phase (docs/CLOUDFLARE.md 4.4)                                                                                                                                            | section 4; the memory limiter per instance stays under the WAF rule R8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `TURBOSLIDE_ASSIST`                                                                                                                                                | `fixture` on the enforce preview; unset in production                                                                                                                                                 | docs/PRODUCT.md 6.3: `fixture` answers every propose with a canned card, `off` refuses, unset runs the model when the key is set                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `TURBOSLIDE_ASSIST`                                                                                                                                                | `fixture` on the enforce preview; unset in production                                                                                                                                                 | docs/archive/rounds/PRODUCT.md 6.3: `fixture` answers every propose with a canned card, `off` refuses, unset runs the model when the key is set                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `RAMP_ROUTER_API_KEY`                                                                                                                                              | production on both projects (2026-09-29)                                                                                                                                                              | the assistant's model key for the router (docs.router.com; `ASSIST_ROUTER_KEY_ENV`); never on a preview, never printed; wins over the Anthropic key                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `TURBOSLIDE_ASSIST_MODEL`                                                                                                                                          | unset (the code names `gpt-6-luna`)                                                                                                                                                                   | the router model, an id from the router's GET /v1/models; docs/gslides-parity/product/assist-router.md is the benchmark behind the default                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `ANTHROPIC_API_KEY`                                                                                                                                                | unset; the Messages API path without the router                                                                                                                                                       | the assistant's model key (`ASSIST_KEY_ENV`); never on a preview, never printed; without either key a propose answers 503 with the unavailable sentence                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |

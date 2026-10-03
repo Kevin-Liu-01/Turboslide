@@ -13,11 +13,11 @@ export const IDS = [
   'versions.undo-restore',
   'versions.show-changes-toggle',
   'versions.show-changes-marks',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'versions.panel.author-you',
   'versions.field.square',
   'comments.panel.empty-gesture',
-  /* the people round (docs/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column and
+  /* the people round (docs/archive/rounds/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column and
      Restore in the row's More menu */
   'versions.window-mark-column',
   'versions.restore-in-more',
@@ -206,7 +206,7 @@ export async function run(t) {
       const revisionBefore = (await t.state()).revision;
       await expandWindows();
       /* the row's Restore button is drawn on the row's hover and focus since the people round
-         (docs/PEOPLE.md 3.19), so the controls are read by their rows being drawn, not by the
+         (docs/archive/rounds/PEOPLE.md 3.19), so the controls are read by their rows being drawn, not by the
          button's own box, and the row is hovered before the click, as a person does */
       const readRestores = () =>
         page.evaluate(() =>
@@ -305,7 +305,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's rows (docs/RETURN.md 2.17, section 5): Show changes and its marks
+  // ---- the return round's rows (docs/archive/rounds/RETURN.md 2.17, section 5): Show changes and its marks
   const openHistory = async () => {
     if (!(await t.visible('panel.versionHistory'))) {
       await t.menuPath('file', 'file.versionHistory', 'file.versionHistory.see');
@@ -430,7 +430,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md 3.2, 8.1): the version row's author You at 12 px in
+ * The product round's rows (docs/archive/rounds/PRODUCT.md 3.2, 8.1): the version row's author You at 12 px in
  * ink-2 with Name this version in the panel head, the square version name field, and the Comments
  * panel's empty state with the gesture line. B1 owns the panels.
  */
@@ -519,7 +519,7 @@ async function productRound(t) {
     async () => {
       await openHistory();
       await t.clickControl('versionHistory.nameCurrent');
-      /* the polish round (docs/POLISH.md 2.7 item 96, B5): Name current version opens the Name
+      /* the polish round (docs/archive/rounds/POLISH.md 2.7 item 96, B5): Name current version opens the Name
          version dialog; an older build drew the field inline in the panel */
       const field = page
         .locator(
@@ -582,7 +582,7 @@ async function productRound(t) {
 }
 
 /**
- * The people round's rows (docs/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column in
+ * The people round's rows (docs/archive/rounds/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column in
  * Version history (the first mark 16 px from the panel's left edge, level with the standalone
  * rows and the day heading; the expanded window's rule at x 25 and its rows' marks at x 41; a one
  * author window's text in the standalone rows' text column; the "+N" count at 11 px) and Restore

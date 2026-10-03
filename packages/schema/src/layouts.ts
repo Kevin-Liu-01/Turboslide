@@ -40,7 +40,7 @@ export type LayoutEntry = {
   /** one sentence: what the layout is for, in the grammar's terms (for agents and the docs) */
   doc: string;
   /**
-   * The seller's sentence (docs/PRODUCT.md section 2 rank 24; audit-seller 26): the layout's name,
+   * The seller's sentence (docs/archive/rounds/PRODUCT.md section 2 rank 24; audit-seller 26): the layout's name,
    * a colon and what a person gets, in the words a seller reads ("your logo", never "your mark").
    * The layout plate's caption row shows it for the hovered or focused tile; `doc` keeps the
    * geometry for agents.
@@ -91,7 +91,7 @@ export type PromptContext = {
  * The prompt for an empty Text (SPEC 5.4): "Click to add title" for a heading at level h1, h2 or
  * title and for the opener, mood and closing headings; "Click to add subtitle" for the title
  * slide's lead and for the head paragraph beside the title of a two column head (Title, subtitle
- * and body, Tile grid, Detail grid, Status board; docs/PRODUCT.md section 2 rank 2, so two boxes
+ * and body, Tile grid, Detail grid, Status board; docs/archive/rounds/PRODUCT.md section 2 rank 2, so two boxes
  * on one slide never read the same); "Click to add a number" for the Big number heading; "Add a
  * caption" for an empty caption; "Click to add text" for everything else. The cover converted to
  * a canvas keeps its words: its lead is a paragraph with the `lead` role on the title template
@@ -220,7 +220,7 @@ export function hasStarterPicture(deck: Deck): boolean {
 // Block builders (empty Texts)
 
 /**
- * A title placeholder shrinks its text on overflow (docs/POLISH.md 2.3 item 21; audit-text item 7:
+ * A title placeholder shrinks its text on overflow (docs/archive/rounds/POLISH.md 2.3 item 21; audit-text item 7:
  * a long title stayed 88 px and grew down the slide, three lines at ring height 204), as
  * Google's title placeholder does; the mood plate's title keeps its fixed line.
  */
@@ -487,7 +487,7 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     make: (id) => content(id, { type: 'freeform' }, {}),
   },
   {
-    // the 4/8 split that was Title and body until the product round (docs/PRODUCT.md section 2
+    // the 4/8 split that was Title and body until the product round (docs/archive/rounds/PRODUCT.md section 2
     // rank 2): the heading at column 4, the subtitle paragraph at column 8, one body under them
     id: 'subtitle-body' as LayoutId,
     label: 'Title, subtitle and body',

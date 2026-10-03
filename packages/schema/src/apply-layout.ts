@@ -245,7 +245,7 @@ export function extractContent(slide: Slide, untouched: Untouched = NOTHING_UNTO
   if (isPictureSlide(slide) && !untouched.picture) {
     out.pictures.push({ asset: slide.picture.asset, from: 'picture' });
   }
-  /* the paragraph beside the title of a two column head is the slide's subtitle (docs/PRODUCT.md
+  /* the paragraph beside the title of a two column head is the slide's subtitle (docs/archive/rounds/PRODUCT.md
      section 2 rank 2), and stays one when the next layout has a head paragraph */
   const headParagraphs = new Set(
     slide.kind === 'content' ? (slide.slots.headRight ?? []).map((block) => block.id) : [],
@@ -377,7 +377,7 @@ export function applyLayout(input: ApplyLayoutInput): ApplyLayoutResult {
 
   // Blank: freeform keeps every box, a grammar source runs through toFreeform, the fixed kinds
   // become a stack first. The placeholders the source layout placed and nobody typed into leave
-  // before the convert (docs/POLISH.md 2.3 item 13; audit-text item 2 read the title and body
+  // before the convert (docs/archive/rounds/POLISH.md 2.3 item 13; audit-text item 2 read the title and body
   // prompts of an untyped Title and body slide overprinting the whole Blank slide as two boxes):
   // Google's Blank is an empty slide; a typed box stays.
   if (entry.id === 'blank') {
@@ -524,7 +524,7 @@ function fillContent(
   }
 
   // the head paragraph beside the title (a two column head's headRight, the subtitle of
-  // docs/PRODUCT.md section 2 rank 2) takes a subtitle alone: the source's lead or its own head
+  // docs/archive/rounds/PRODUCT.md section 2 rank 2) takes a subtitle alone: the source's lead or its own head
   // paragraph, never a body paragraph, so Title and body's text lands in the body of Title,
   // subtitle and body and the subtitle keeps its prompt (the product round's gate, slide 102)
   const headParagraphIds = new Set((target.slots.headRight ?? []).map((block) => block.id));

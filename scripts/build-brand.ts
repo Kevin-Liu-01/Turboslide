@@ -1554,7 +1554,7 @@ function checkStepCount(): number {
 
 /**
  * The origins a deployment profile run counts as production: the domain, and the project origin
- * that served main while the domain was two ship rounds behind it (docs/POLISH.md section 0; the
+ * that served main while the domain was two ship rounds behind it (docs/archive/rounds/POLISH.md section 0; the
  * same pair packages/theme/src/brand.test.ts accepts for facts.measured.base).
  */
 const PRODUCTION_ORIGINS: readonly string[] = [
@@ -1662,7 +1662,7 @@ function computeFacts(): Facts {
     export: {
       worstPageMismatchPercent: 0.003,
       source:
-        'docs/HOSTED-STATUS.md (the flatten export of the 85 slide GT deck: perfect true, worst decoded mismatch 0.003 percent, horizon, 194 of 5,760,000 px); README.md "Perfect PPTX"',
+        'docs/archive/status/HOSTED-STATUS.md (the flatten export of the 85 slide GT deck: perfect true, worst decoded mismatch 0.003 percent, horizon, 194 of 5,760,000 px); README.md "Perfect PPTX"',
     },
     measured: {
       source: perf.path,

@@ -310,7 +310,7 @@ import { partitionRoster, readClientIds, rememberClientId, tabToken } from './cl
 // 0.44; PP 7 row 1): the controller, its types and the helpers it reads. EditorRoot.tsx renders
 // it and shell-bridge.tsx wires the shell to it; the route file holds the route options alone.
 
-/* the identity views the editor root reads (docs/PEOPLE.md 3.11, 3.15): identity-index.ts holds
+/* the identity views the editor root reads (docs/archive/rounds/PEOPLE.md 3.11, 3.15): identity-index.ts holds
    them beside the index, so the unit test reads them without this module's graph */
 export { identityView, participantOf };
 
@@ -597,7 +597,7 @@ export type EditorController = {
   stop: () => void;
   attachShell: (shell: ShellState) => void;
   /**
-   * The editor shell's snackbar with one action (docs/PRODUCT.md 6.1): the outside write's Undo
+   * The editor shell's snackbar with one action (docs/archive/rounds/PRODUCT.md 6.1): the outside write's Undo
    * and the accept's; ShellBridge hands it over (build/b6.md R10); without it the sentences
    * reach the plain snackbar with no action
    */
@@ -612,7 +612,7 @@ export type EditorController = {
   ) => Promise<{ revision: number; slideIds: string[]; sentence: string }>;
   /** re-posts this tab's presence now, so a typed display name reaches the other browsers' chips ahead of the heartbeat (b1.md R18) */
   refreshPresence: () => void;
-  /** the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), so describe().state.account reads what the own chip draws until the room's own row carries it */
+  /** the answer of Change name or Change avatar the editor wrote back (docs/archive/rounds/PEOPLE.md 3.11), so describe().state.account reads what the own chip draws until the room's own row carries it */
   noteOwnAnswer: (facts: MeAnswerFacts) => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
@@ -637,7 +637,7 @@ export type EditorController = {
   /** the threads as the chrome reads them, anchors resolved against the current document */
   threadViews: () => readonly CommentThreadView[];
   /**
-   * who is who on this deck (docs/PEOPLE.md 3.8, 3.17): the payload's resolved people under the
+   * who is who on this deck (docs/archive/rounds/PEOPLE.md 3.8, 3.17): the payload's resolved people under the
    * roster and the caller, labels disambiguated, keyed by principal id; the shell input's
    * `identities` for the version rows, the comment cards and the Share dialog
    */
@@ -677,7 +677,7 @@ export type EditorController = {
   setView: (view: EditorView) => void;
   /** the editor shell's stored settings (Tools > Advanced tools among them), for describe().state.settings (docs/FOCUS.md 3.1) */
   setShellSettings: (settings: Readonly<Record<string, boolean | string>>) => void;
-  /** the last gesture's frame record from the stage, for describe().state.gesture (docs/OBJECTS.md 2.4; objects/build/b1.md request 1) */
+  /** the last gesture's frame record from the stage, for describe().state.gesture (docs/archive/rounds/OBJECTS.md 2.4; objects/build/b1.md request 1) */
   setGestureRecord: (report: GestureReport | null) => void;
   /** the shell's toast */
   say: (message: string) => void;
@@ -717,7 +717,7 @@ function outlineOf(document: DeckDocument) {
 }
 
 /**
- * The words that changed between two texts (docs/POLISH.md item 117): the common head and tail
+ * The words that changed between two texts (docs/archive/rounds/POLISH.md item 117): the common head and tail
  * of the word lists leave, and what is left reads "renewal became contract"; an insertion reads
  * "added <words>", a deletion "removed <words>". Each side is cut at 40 characters.
  */
@@ -920,7 +920,7 @@ async function runSyncExport(
         const answer = await pollExport({ jobId: progressJobId });
         if (settled) break;
         /* the report rows of the export's wait for a pending shader frame ride the same poll
-           (the features round, ship two, docs/FEATURES.md 5.5; build/b7.md R1) */
+           (the features round, ship two, docs/archive/rounds/FEATURES.md 5.5; build/b7.md R1) */
         const rows = answer.rows !== undefined && answer.rows.length > 0 ? answer.rows : undefined;
         if (answer.line || rows !== undefined) onLine(answer.line || undefined, rows);
       } catch {
@@ -964,7 +964,7 @@ function menuInputOf(input: ExportRunInput): ExportMenuInput {
   };
 }
 
-/** True for the three text run ops the admission transforms and the reducer follows the title from (docs/SYNC.md 3.4). */
+/** True for the three text run ops the admission transforms and the reducer follows the title from (docs/archive/rounds/SYNC.md 3.4). */
 function isTextRunMutation(
   mutation: Mutation,
 ): mutation is Extract<Mutation, { op: 'text.splice' | 'text.mark' | 'text.replace' }> {
@@ -976,7 +976,7 @@ function isTextRunMutation(
 /**
  * True for a text run on a title or statement slide's field: `blockId` names the field on a
  * slide of that kind and `path` is the field's pointer (schema mutations.ts `slideFieldOf`,
- * `slideFieldPath`; docs/SYNC.md 3.4). Such a write addresses no block, so it never asks for the
+ * `slideFieldPath`; docs/archive/rounds/SYNC.md 3.4). Such a write addresses no block, so it never asks for the
  * canvas conversion a format write on the field object does (convert-first.ts).
  */
 function isSlideFieldTextRun(document: DeckDocument, mutation: Mutation): boolean {
@@ -988,7 +988,7 @@ function isSlideFieldTextRun(document: DeckDocument, mutation: Mutation): boolea
 }
 
 /**
- * The origins the resync read answered (docs/SYNC.md 3.2; write.ts `readEditorDeck` with
+ * The origins the resync read answered (docs/archive/rounds/SYNC.md 3.2; write.ts `readEditorDeck` with
  * `since` answers `EditorDeck.origins`, B3's half): the records above the tab's old position
  * that name their origin, each with the seq its commit made and the op ids it folded, the
  * newest RESYNC_ORIGINS_MAX of them. The payload is parsed JSON, so each row is checked before
@@ -1068,7 +1068,7 @@ export function createEditorController(init: {
   const listeners = new Set<() => void>();
   let alive = false;
   let shell: ShellState | null = null;
-  /* the editor shell's snackbar with an action (docs/PRODUCT.md 6.1), from ShellBridge */
+  /* the editor shell's snackbar with an action (docs/archive/rounds/PRODUCT.md 6.1), from ShellBridge */
   let editorShell: EditorShellSnack | null = null;
   /* the editor shell's open panel at the last attach, for the Version history follow trigger */
   let shellPanel: string | null = null;
@@ -1078,7 +1078,7 @@ export function createEditorController(init: {
   let onLocalApply: ((mutations: readonly Mutation[]) => void) | null = null;
   /* the editor shell's stored settings, for describe().state.settings (docs/FOCUS.md 3.1) */
   let shellSettings: Readonly<Record<string, boolean | string>> = {};
-  /* the last ended gesture's frame record (frames, maxMs, meanMs, skipped, degraded), for describe().state.gesture (docs/OBJECTS.md 2.4) */
+  /* the last ended gesture's frame record (frames, maxMs, meanMs, skipped, degraded), for describe().state.gesture (docs/archive/rounds/OBJECTS.md 2.4) */
   let gestureRecord: GestureReport | null = null;
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
   let room: RoomClient | null = null;
@@ -1434,7 +1434,7 @@ export function createEditorController(init: {
   };
 
   /**
-   * The History panel's rows follow the checkpoint frames (docs/SYNC.md 3.10; audit-costs item
+   * The History panel's rows follow the checkpoint frames (docs/archive/rounds/SYNC.md 3.10; audit-costs item
    * 7): a frame at the revision after the last row appends one row from what it carries (the
    * revision, the author, the note; the record number is the next one, since a named version
    * and a restore append their own rows when they land), and the log is read only when a frame
@@ -1519,7 +1519,7 @@ export function createEditorController(init: {
   };
 
   /**
-   * An outside write by an agent author that arrived live (docs/PRODUCT.md 6.1 "Outside writes";
+   * An outside write by an agent author that arrived live (docs/archive/rounds/PRODUCT.md 6.1 "Outside writes";
    * audit-assist 1, 7): the snackbar names the slide and the change with Undo for the snackbar's
    * hold, the Undo writes the inverse as this seller (one commit, on this seller's stack, so the
    * seller's own last edit stays), and the auto title rule follows a write to the first title
@@ -1565,7 +1565,7 @@ export function createEditorController(init: {
           const from = was === undefined ? undefined : readRunText(was, mutation.blockId, pointer);
           const to = now === undefined ? undefined : readRunText(now, mutation.blockId, pointer);
           if (from !== undefined && to !== undefined && from !== to) {
-            /* the changed words alone (docs/POLISH.md item 117): "renewal became contract", not
+            /* the changed words alone (docs/archive/rounds/POLISH.md item 117): "renewal became contract", not
                two cut sentences */
             change = `: ${changedWords(from, to)}`;
             break;
@@ -1604,7 +1604,7 @@ export function createEditorController(init: {
             },
           },
     );
-    // a text run on the cover's heading carries the title with it in the reducer (docs/SYNC.md
+    // a text run on the cover's heading carries the title with it in the reducer (docs/archive/rounds/SYNC.md
     // 3.4), so only a whole value write the reducer does not derive from is followed here
     if (before !== null && !mutations.some(isTextRunMutation)) {
       const rename = autoTitleMutations(before, mutations, autoTitle);
@@ -1991,7 +1991,7 @@ export function createEditorController(init: {
             if (event.role === 'viewer' && event.editing >= 100) say(REFUSALS.tooManyEditors);
             return;
           case 'presence': {
-            // the row replaced where it stands (docs/PEOPLE.md 3.16): join order holds, so the
+            // the row replaced where it stands (docs/archive/rounds/PEOPLE.md 3.16): join order holds, so the
             // slots and the filmstrip never swap chips on a caret move
             publish({ roster: replaceRosterRow(latest().roster, event.state) });
             // Follow (SPEC-3 4.4): the stage moves with the followed client's slide; the shell's
@@ -2039,7 +2039,7 @@ export function createEditorController(init: {
       onReject: (rejected) => {
         const notice = rejectNoticeOf(rejected);
         /* a structural refusal (a slide add, a move, a resize: nothing typed to keep) is one
-           snackbar sentence (docs/POLISH.md item 102); the card stays for typed text, whose
+           snackbar sentence (docs/archive/rounds/POLISH.md item 102); the card stays for typed text, whose
            words a seller would otherwise lose */
         if (notice.text === '') {
           say(structuralRefusalSentence(notice.mutations));
@@ -2054,9 +2054,9 @@ export function createEditorController(init: {
           ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
         });
         /* an op the document no longer takes after a remote change (a move of a block whose
-           slide a collaborator deleted first, the loser of docs/SYNC.md 6.1
+           slide a collaborator deleted first, the loser of docs/archive/rounds/SYNC.md 6.1
            `sync.structural.concurrent`) is refused the way the room refuses it: one snackbar
-           sentence when nothing was typed (docs/POLISH.md item 102), the card for typed text */
+           sentence when nothing was typed (docs/archive/rounds/POLISH.md item 102), the card for typed text */
         if (notice.text === '') {
           say(structuralRefusalSentence(notice.mutations));
           return;
@@ -2069,7 +2069,7 @@ export function createEditorController(init: {
         // tab just learned of (its own restore, another tab's write announced as an external
         // checkpoint), and a document from before it left the tab on the old slides while its
         // revision moved (VERIFICATION F-versions); write.ts syncs the store by force when behind.
-        // The read carries the tab's position before the resync (`since`; docs/SYNC.md 3.2), so
+        // The read carries the tab's position before the resync (`since`; docs/archive/rounds/SYNC.md 3.2), so
         // the answer names the op ids of the records above it and the room client drops the
         // pending ops those records name instead of re-sending them (invariant 10)
         let payload: EditorDeck | null;
@@ -2090,7 +2090,7 @@ export function createEditorController(init: {
         if (payload === null) return null;
         const fresh = payload.document.deck.revision;
         /* a reload that lands below the revision this tab acknowledged is an older document from
-           a lagging instance (docs/POLISH.md item 108: seven 503s in one run drew the old words
+           a lagging instance (docs/archive/rounds/POLISH.md item 108: seven 503s in one run drew the old words
            over the stage): the tab keeps its own document and the next event asks again */
         if (fresh < latest().serverRevision) return null;
         /* the tab's own server side write reached the store without answering its revision
@@ -2123,7 +2123,7 @@ export function createEditorController(init: {
         });
         return { document: payload.document, ...resyncOriginsOf(payload) };
       },
-      /* the plate offers only what the server does not hold (docs/POLISH.md item 109) */
+      /* the plate offers only what the server does not hold (docs/archive/rounds/POLISH.md item 109) */
       heldOps: async (opIds) => {
         if (opIds.length === 0) return new Set<string>();
         const answer = await heldOpIds({ deckId, opIds: [...opIds] });
@@ -2197,9 +2197,9 @@ export function createEditorController(init: {
    * A write the local document refuses (`applyMutations` throws before the room sees it).
    * When the refusal is that the write's slide or block is gone, another browser's Delete slide
    * landed under this gesture and the write is the loser of a structural race: the refusal is
-   * shown the way the room's own reject of the same write is shown (docs/SYNC.md 6.1
+   * shown the way the room's own reject of the same write is shown (docs/archive/rounds/SYNC.md 6.1
    * `sync.structural.concurrent`: the drag released after B's delete posted nothing and nothing
-   * showed; the integrator, ship one), which since docs/POLISH.md item 102 is one snackbar
+   * showed; the integrator, ship one), which since docs/archive/rounds/POLISH.md item 102 is one snackbar
    * sentence for a write that carried no typed text and the card with Copy text for typed text.
    * Any other local refusal (a malformed write through the window API) stays a sentence in
    * `error`.
@@ -2296,7 +2296,7 @@ export function createEditorController(init: {
       const base = latest().serverRevision;
       void applied.settled.then(async (outcome) => {
         if ('rejected' in outcome) {
-          /* the caller is thrown the sentence the seller reads (docs/POLISH.md item 102;
+          /* the caller is thrown the sentence the seller reads (docs/archive/rounds/POLISH.md item 102;
              refused-write.ts): the chrome's dispatch says it in the snackbar, the same sentence
              `onReject` said, so a structural refusal reads one sentence and never the room's
              words ("The room answered 409", a reducer sentence with an id) */
@@ -2386,7 +2386,7 @@ export function createEditorController(init: {
     };
     setDocument(result.document, changedBy(mutations));
     /* a draft's own commit schedules its shader stills too; the frame write waits for the draft
-       chain, so the deck exists by the time it goes up (docs/FEATURES.md 5.5) */
+       chain, so the deck exists by the time it goes up (docs/archive/rounds/FEATURES.md 5.5) */
     shaderFrames.afterCommit(mutations);
     publish({ pending: snapshot.pending + 1 });
     draftInFlight = true;
@@ -2480,7 +2480,7 @@ export function createEditorController(init: {
       return draftCommit(mutations, label, kind);
     }
     wroteInSession = true;
-    /* a client write is validated before it is applied (docs/POLISH.md item 54; B1's R10): a
+    /* a client write is validated before it is applied (docs/archive/rounds/POLISH.md item 54; B1's R10): a
        write the schema refuses (a spacing field the table has no schema for, a size outside the
        ladder) never reaches the stage, the room or the undo stack, so Redo never prints a path;
        the pointer stays in the console and the snackbar reads the shell's sentence */
@@ -2524,7 +2524,7 @@ export function createEditorController(init: {
     setDocument(applied.document, changedBy(mutations));
     stopFollowing();
     /* this tab's own commit, an undo or a redo included: the shader blocks it touched capture
-       their still after the rest (docs/FEATURES.md 5.5); an entry the room brings never does */
+       their still after the rest (docs/archive/rounds/FEATURES.md 5.5); an entry the room brings never does */
     shaderFrames.afterCommit(mutations);
     return applied.settled.then(async (outcome) => {
       if ('rejected' in outcome) {
@@ -2545,7 +2545,7 @@ export function createEditorController(init: {
   let inlineActive = false;
   let namePromptDue = false;
   /* a pointer button is down (a drag of a card or a block may be live): the prompt waits for
-     the release (docs/POLISH.md item 103: it opened over the stage mid drag) */
+     the release (docs/archive/rounds/POLISH.md item 103: it opened over the stage mid drag) */
   let pointerHeld = false;
   const onPointerHeld = (): void => {
     pointerHeld = true;
@@ -2583,7 +2583,7 @@ export function createEditorController(init: {
   };
 
   /*
-   * The history label a write carries into Version history (b7.md FR3; docs/PRODUCT.md 4.1, 6.1):
+   * The history label a write carries into Version history (b7.md FR3; docs/archive/rounds/PRODUCT.md 4.1, 6.1):
    * the brand kit's writes ("Brand kit: Primary", from the panel, the dialogs and `brand.set`) and
    * the assist's accept ("Assist: <sentence>") are their own named rows in the panel, so Restore
    * of the row before takes the colour back and the assistant's change reads by its sentence. An
@@ -2592,13 +2592,13 @@ export function createEditorController(init: {
   const historyNoteOf = (label: string): string | undefined =>
     /^(Brand kit|Assist):/.test(label) ? label : undefined;
 
-  /* the auto-title (gslides-parity SPEC 6.3; docs/RETURN.md 2.18): a write that changes the title
+  /* the auto-title (gslides-parity SPEC 6.3; docs/archive/rounds/RETURN.md 2.18): a write that changes the title
      slide's heading renames the deck in the same write while the name still follows the heading
      (Untitled, or the name this rule gave it), so one undo removes both and a slow typist's deck
      reads its whole title (decks.name.follows-heading) */
   const autoTitle: AutoTitleMemory = { lastAuto: null };
   const withAutoTitle = (mutations: Mutation[]): Mutation[] => {
-    /* the sync round (docs/SYNC.md 3.4, audit-ordering item 1): a text run on the cover's heading
+    /* the sync round (docs/archive/rounds/SYNC.md 3.4, audit-ordering item 1): a text run on the cover's heading
        carries no rename of its own, since the reducer derives the deck's title from the heading
        while the title was following it (schema reduce.ts `followTitle`) and the inverse it answers
        restores the title too. A `deck.set /title` riding every burst was never transformed, so two
@@ -2614,7 +2614,7 @@ export function createEditorController(init: {
   };
   /* the first format write on a fixed kind's field (the cover title's heading: Bold, Center, the
      size, a mark, a colour, Clear formatting) converts the slide to a canvas in the same write,
-     the way the Align rows do through the store's withCanvas (docs/RETURN.md 2.14 item 1; SPEC-2
+     the way the Align rows do through the store's withCanvas (docs/archive/rounds/RETURN.md 2.14 item 1; SPEC-2
      1.6): the measured slide.replace travels in front of the write's mutations, so one revision
      and one undo step hold both. Every other write keeps its synchronous local apply. The answer
      is the one the write took when it was made (commit-answer.ts), before the measure's await. */
@@ -2649,7 +2649,7 @@ export function createEditorController(init: {
   };
   const commit = (rawMutations: Mutation[], label: string): Promise<Committed> => {
     const answer = chromeAnswer.answer();
-    /* the seller's edit of an assisted block clears its mark (docs/PRODUCT.md 6.1) */
+    /* the seller's edit of an assisted block clears its mark (docs/archive/rounds/PRODUCT.md 6.1) */
     const mutations = withAssistClear(snapshot.document, rawMutations);
     /* a text run on a title or statement slide's field names the field as its blockId (docs/
        SYNC.md 3.4) and is not a write against the field object that converts the slide to a
@@ -2674,7 +2674,7 @@ export function createEditorController(init: {
   };
 
   /**
-   * Accept a card of the assist (docs/PRODUCT.md 6.1, 6.2): the shared plan re bases the card on
+   * Accept a card of the assist (docs/archive/rounds/PRODUCT.md 6.1, 6.2): the shared plan re bases the card on
    * the document as it stands (the stale sentence otherwise) and adds the `ext.assist` marks; the
    * write is one commit labelled "Assist: <sentence>" under this tab's session, so Cmd+Z is the
    * step back and Change history lists it once. The marks are the card's own, so the commit's
@@ -2693,7 +2693,7 @@ export function createEditorController(init: {
       const committed = await commitAs(withAutoTitle(plan.mutations), label, 'edit');
       return { revision: committed.revision, slideIds: plan.slideIds, sentence: plan.sentence };
     }
-    /* the route writes as the assistant (b7.md FR3; docs/PRODUCT.md 6.1): Version history lists
+    /* the route writes as the assistant (b7.md FR3; docs/archive/rounds/PRODUCT.md 6.1): Version history lists
        the revision as the assistant's own row with the agent mark and the note, the audit trail
        names who wrote; the page keeps Undo by holding the plan's inverse, measured on the
        document the write applied to, on its own stack, and the room brings the entry back */
@@ -2940,7 +2940,7 @@ export function createEditorController(init: {
     await idle();
     const version = await saveVersion({ deckId, author, note });
     publish({ versions: [...snapshot.versions, version], versionPrompt: false });
-    /* the one sentence is the caller's (the Name version dialog, the panel's notice; docs/POLISH.md
+    /* the one sentence is the caller's (the Name version dialog, the panel's notice; docs/archive/rounds/POLISH.md
        item 91): "Saved the version <name>", never a second "Version 7 saved" beside it */
     return version;
   };
@@ -3007,7 +3007,7 @@ export function createEditorController(init: {
   const dispatcher: Dispatcher = createDispatcher();
   const context: ActionContext = { author };
   /*
-   * The origin of a dispatch (docs/PRODUCT.md section 2 rank 1; build/b3.md): the chrome's own
+   * The origin of a dispatch (docs/archive/rounds/PRODUCT.md section 2 rank 1; build/b3.md): the chrome's own
    * dispatch (`invoke`: the menus, the toolbar, the pickers, the sidebar) and the window API's
    * (`invokeAsAgent`: the two owners' adapters, which an agent or a driver runs) reach the same
    * handlers with the same author; a handler that places an object for a person or selects it
@@ -3234,7 +3234,7 @@ export function createEditorController(init: {
   });
   on<{ name: string; from: DeckTemplateId; id?: string }>('deck.create', async (input) => {
     const created = await createNewDeck(input);
-    // the seller's words, never an id (docs/PRODUCT.md section 2 rank 14)
+    // the seller's words, never an id (docs/archive/rounds/PRODUCT.md section 2 rank 14)
     const count = created.counts.slides;
     say(`Created ${created.title}, ${count} slide${count === 1 ? '' : 's'}`);
     init.onDeckCreated?.(created.deckId);
@@ -3372,7 +3372,7 @@ export function createEditorController(init: {
           }
         }
         // a refusal is shown, never swallowed (rank 5: "the seller sees nothing"), as a sentence
-        // with its reason and never an action id (docs/PRODUCT.md section 2 rank 14). The chrome's
+        // with its reason and never an action id (docs/archive/rounds/PRODUCT.md section 2 rank 14). The chrome's
         // own route says its own sentence from the rejection (EditorRoot.tsx uploadPicture), so
         // the snackbar here is the agent's (the window API), and the error word is everyone's.
         if (writesDeck) {
@@ -3432,7 +3432,7 @@ export function createEditorController(init: {
         // no snackbar on success (rank 14): the picture is on the sheet and selected; the ids
         // are in the answer for the agent transports
         /* a server side write of this tab (shader.insert, shader.set, a kit colour through the
-           agent) is this tab's own commit to the resting rule (docs/FEATURES.md 5.5): the shader
+           agent) is this tab's own commit to the resting rule (docs/archive/rounds/FEATURES.md 5.5): the shader
            blocks it left stale capture their still, one block at a time */
         shaderFrames.scheduleStale();
       }
@@ -3619,7 +3619,7 @@ export function createEditorController(init: {
       },
       // the parity round's manifest facts (gslides-parity SPEC 7.2.3 to 7.2.5), only when written
       ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
-      /* the brand kit record (docs/PRODUCT.md 4.1), only when the deck carries one */
+      /* the brand kit record (docs/archive/rounds/PRODUCT.md 4.1), only when the deck carries one */
       ...(document.deck.brand !== undefined ? { brand: document.deck.brand } : {}),
       ...(document.deck.guides !== undefined ? { guides: document.deck.guides } : {}),
       ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
@@ -3758,7 +3758,7 @@ export function createEditorController(init: {
   });
   on<BlockSetInput>('block.set', (input) => blockSet(storeDeps('block.set'), context, input));
   /*
-   * block.insert (docs/PRODUCT.md section 2 rank 1; audit-seller 1; build/b3.md): a table or a
+   * block.insert (docs/archive/rounds/PRODUCT.md section 2 rank 1; audit-seller 1; build/b3.md): a table or a
    * chart the chrome inserts from a menu, the toolbar or the table grid arrives with the centred
    * default box of editor-shell.ts insertBlockPlan, which landed a chart over the table a seller
    * had typed. Here it lands in the largest free rectangle of the body slot, 40 sheet px from
@@ -4000,10 +4000,10 @@ export function createEditorController(init: {
     }
     serverSide(id as ServerSideWindowAction);
   }
-  /* the template ids of the product round (docs/PRODUCT.md 4.3): each is a read or a write of the
+  /* the template ids of the product round (docs/archive/rounds/PRODUCT.md 4.3): each is a read or a write of the
      collection's templates folder, so every one runs on the server through runDeckAction */
   for (const id of SERVER_SIDE_WINDOW_ACTIONS_P1) serverSide(id);
-  /* the logo picker's ids of the features round (docs/FEATURES.md 4.11; build/b6.md R3): the
+  /* the logo picker's ids of the features round (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R3): the
      index and the store live on the server, so the search, the insert and the refresh run there.
      `logo.insert` writes this deck (the asset record, the kit's slots), so it announces as
      `asset.add` does: the answer waits until the write has come back over the channel (a resync
@@ -4011,7 +4011,7 @@ export function createEditorController(init: {
      document, finds the asset it names (the fix round; VERIFICATION.md pass 1 F2, b6.md R13) */
   for (const id of SERVER_SIDE_WINDOW_ACTIONS_F1)
     serverSide(id, id === 'logo.insert' ? { announce: true } : {});
-  /* the shader library's ids of the features round, ship two (docs/FEATURES.md 5.8; build/b7.md,
+  /* the shader library's ids of the features round, ship two (docs/archive/rounds/FEATURES.md 5.8; build/b7.md,
      build/b5.md R8): the catalog, the insert, the set, the frame write, the hosted capture and the
      render run on the server; the ones that write this deck announce as logo.insert does, so the
      answer waits until the write has come back and the tab holds the frame it names */
@@ -4160,7 +4160,7 @@ export function createEditorController(init: {
   on<TextReplaceAllInput>('text.replaceAll', (input) =>
     textReplaceAll(storeDeps('text.replaceAll'), context, input),
   );
-  /* the tailoring pass (docs/PRODUCT.md section 5): one commit labelled "Tailor for <name>", the
+  /* the tailoring pass (docs/archive/rounds/PRODUCT.md section 5): one commit labelled "Tailor for <name>", the
      snackbar with Undo */
   on<DeckTailorInput>('deck.tailor', async (input) => {
     const to = input.replacements?.find((pair) => pair.to.trim() !== '')?.to.trim();
@@ -4202,7 +4202,7 @@ export function createEditorController(init: {
   on<DeckSetBackgroundInput>('deck.setBackground', (input) =>
     deckSetBackground(storeDeps('deck.setBackground'), context, input),
   );
-  /* the brand kit on the window transport (docs/PRODUCT.md 4.1; build/b5.md R2): the reads over
+  /* the brand kit on the window transport (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R2): the reads over
      the page's document, the writes as one commit with the kit's history label, so Cmd+Z takes
      one field back as the panel's own writes do */
   on<Record<string, never>>('brand.get', () => brandGet(snapshot.document.deck));
@@ -4396,7 +4396,7 @@ export function createEditorController(init: {
    * of the stream refreshes, so a share write based on `state.access.revision` never meets a
    * stale record (comments.spec.ts, share.spec.ts).
    */
-  /* the answer of Change name or Change avatar the editor wrote back (docs/PEOPLE.md 3.11), held
+  /* the answer of Change name or Change avatar the editor wrote back (docs/archive/rounds/PEOPLE.md 3.11), held
      until the room's own row carries it (own-identity.ts rowReflects): on the blob tier the row
      lags the answer for the room's 5 s identity cache and the own chip follows the answer, so the
      state reads the answer too or the two disagree in that window (the integrator's preview
@@ -4431,11 +4431,11 @@ export function createEditorController(init: {
       // the focus round (docs/FOCUS.md 3.1): the shell's stored settings as the rows read them,
       // Tools > Advanced tools among them (`advancedTools`), so a driver reads the switch here
       settings: { ...shellSettings },
-      // the objects round (docs/OBJECTS.md 2.4, 6.1 gestures.frame.*): the last ended gesture's
+      // the objects round (docs/archive/rounds/OBJECTS.md 2.4, 6.1 gestures.frame.*): the last ended gesture's
       // frame record as the stage told it, so a driver reads the cadence and the budget without
       // instrumentation; null before the first gesture
       gesture: gestureRecord === null ? null : { ...gestureRecord },
-      // the features round (docs/FEATURES.md 4.4; the integrator, ship one): the deck's asset
+      // the features round (docs/archive/rounds/FEATURES.md 4.4; the integrator, ship one): the deck's asset
       // records as the document holds them, so a driver or an agent reads a placed logo's role,
       // source, twins and scale without an export (source.read is the active slide's source)
       assets: snapshot.document.deck.assets,
@@ -4465,7 +4465,7 @@ export function createEditorController(init: {
       // and others[]) beside the count the round two readers had
       presence: (() => {
         const { self, others } = participants();
-        /* the address the room wrote for this reader (docs/PEOPLE.md 3.7: the owner and a grant
+        /* the address the room wrote for this reader (docs/archive/rounds/PEOPLE.md 3.7: the owner and a grant
            holder, on a verified entry) rides describe() beside the contract's fields; the
            `presence.list` answer keeps its strict shape without it */
         const withEmail = (row: PresenceParticipant) => ({
@@ -4517,7 +4517,7 @@ export function createEditorController(init: {
         signInAvailable: init.payload.auth?.signIn ?? false,
         ...(ownMark === undefined ? {} : { mark: ownMark }),
       },
-      /* who is who on this deck (docs/PEOPLE.md 3.8, 3.17), as the shell input's `identities`
+      /* who is who on this deck (docs/archive/rounds/PEOPLE.md 3.8, 3.17), as the shell input's `identities`
          reads it: the payload's resolved people under the roster and the caller, keyed by
          principal id, labels disambiguated; the people rows read an author's trust and mark here */
       identities: identities(),
@@ -4597,7 +4597,7 @@ export function createEditorController(init: {
   });
 
   /**
-   * The one capturer of the editor's shader frames (docs/FEATURES.md 5.5; build/b5.md R8): a commit
+   * The one capturer of the editor's shader frames (docs/archive/rounds/FEATURES.md 5.5; build/b5.md R8): a commit
    * of this tab that touches a shader block (a recipe field, the box, a kit colour) schedules its
    * still 800 ms after the last change through `afterCommit` below, never from the document
    * observer, so a follower draws the frame the room brings. The write is a system write: behind
@@ -4656,7 +4656,7 @@ export function createEditorController(init: {
         () => typeof revision === 'number' && latest().document.deck.revision >= revision,
       );
     },
-    /* the presigned path for a frame over the function's body cap (B4's R17, docs/POLISH.md
+    /* the presigned path for a frame over the function's body cap (B4's R17, docs/archive/rounds/POLISH.md
        item 36): the picture intake's grant, then the PUT, then the key `shader.frame` reads */
     upload: (bytes) => presignUpload(deckId, 'image/png', bytes),
     uploadAbove: FRAME_UPLOAD_ABOVE_BYTES,
@@ -4685,7 +4685,7 @@ export function createEditorController(init: {
           init.payload.room?.seq ?? 0,
           init.payload.room?.tier ?? 'memory',
         );
-        /* a deck opened with stale frames catches up one block at a time (docs/FEATURES.md 5.5;
+        /* a deck opened with stale frames catches up one block at a time (docs/archive/rounds/FEATURES.md 5.5;
            build/b5.md R8), by an editor who can write it */
         if (hasCapability('write')) shaderFrames.scheduleStale();
       }
@@ -4919,7 +4919,7 @@ export function slideStamp(slide: Slide): string {
  * frame's word is the GT mark, not the title.
  */
 function renderDeckStamp(deck: DeckDocument['deck'], theme: Theme, assetBase: string): string {
-  /* the brand kit is a render input too (docs/PRODUCT.md 4.1; build/b5.md R12): the kit's
+  /* the brand kit is a render input too (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R12): the kit's
      stylesheet rides inside every slide, so a kit change re renders the memoized slides the show
      and the filmstrip read */
   return fnv1a(
@@ -4978,7 +4978,7 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
         ...(slide.skip === true ? { skip: true } : {}),
         ...(slide.template !== undefined ? { template: slide.template } : {}),
         // the show's frame follows Insert > Slide numbers as the editor stage does (render/deck.ts
-        // slideCounter; docs/RETURN.md section 5 slides.numbers.apply, "in the show too")
+        // slideCounter; docs/archive/rounds/RETURN.md section 5 slides.numbers.apply, "in the show too")
         counter: slideCounter(deck, slide, 1, 1) !== '',
       });
     }
@@ -4993,7 +4993,7 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
       slideIds: section.slideIds.filter((id) => slides[id]),
     })),
     slides: out,
-    /* the brand kit's frame band for the show's Frame (docs/PRODUCT.md 4.1; build/b5.md R5) */
+    /* the brand kit's frame band for the show's Frame (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R5) */
     band: frameBandOf(
       deck,
       readTheme(),

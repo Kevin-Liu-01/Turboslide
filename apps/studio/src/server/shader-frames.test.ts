@@ -1,4 +1,4 @@
-// The studio's half of the shader frame (docs/FEATURES.md 5.5, 5.8; the named tests of 7.3 that
+// The studio's half of the shader frame (docs/archive/rounds/FEATURES.md 5.5, 5.8; the named tests of 7.3 that
 // fall to B7): the hosted capture's bound and its one sentence, the orphan prune scheduled behind a
 // frame write's response, and the export's wait for a frame on its way, over a scratch copy of the
 // export fixture deck with a shader block on it. No browser: a frame record is written as the
@@ -123,7 +123,7 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-describe('the hosted capture’s bound (docs/FEATURES.md 5.5; audit-shaders 1)', () => {
+describe('the hosted capture’s bound (docs/archive/rounds/FEATURES.md 5.5; audit-shaders 1)', () => {
   it('reads the one sentence B1’s dialog shows, and the bound is 30 s', () => {
     expect(RENDER_ERROR_SENTENCE).toBe(
       'The frame could not be rendered. Try again, or place the shader without a frame',
@@ -232,7 +232,7 @@ describe('the hosted capture’s bound (docs/FEATURES.md 5.5; audit-shaders 1)',
   });
 });
 
-describe('the orphan prune behind the response (docs/FEATURES.md 5.5)', () => {
+describe('the orphan prune behind the response (docs/archive/rounds/FEATURES.md 5.5)', () => {
   it('is due once a minute per deck on this instance', () => {
     const table = new Map<string, number>();
     expect(pruneDue('x', 0, FRAME_PRUNE_EVERY_MS, table)).toBe(true);
@@ -309,7 +309,7 @@ describe('the orphan prune behind the response (docs/FEATURES.md 5.5)', () => {
   });
 });
 
-describe('the export’s wait for a frame (docs/FEATURES.md 5.5)', () => {
+describe('the export’s wait for a frame (docs/archive/rounds/FEATURES.md 5.5)', () => {
   it('names the shaders whose frame is missing or stale, and none once the frame is fresh', async () => {
     expect(pendingShaderBlocks(await document())).toEqual([`${SLIDE}#${BLOCK}`]);
     expect(pendingShaderBlocks(await document(), ['title'])).toEqual([]);

@@ -4,7 +4,7 @@ import { newestFirst, recentRowsOf, withRecent } from '../dialogs/recent-rows';
 import type { DeckHeadRow } from '../editor-shell';
 
 // The Open and Import slides dialogs draw this browser's own decks before the store's listing
-// lands and fold them in above it after (docs/POLISH.md item 75; B5's R29 to B1).
+// lands and fold them in above it after (docs/archive/rounds/POLISH.md item 75; B5's R29 to B1).
 
 function row(id: string, updatedAt: string): DeckHeadRow {
   return { id, title: id, slides: 1, sections: 1, revision: 1, updatedAt, createdAt: updatedAt };

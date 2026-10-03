@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { blurVerdictOf, isParkingField } from '../InlineText';
 
-// The menu bar and the menu plates as transient surfaces (docs/RETURN.md 2.14 item 2): a blur
+// The menu bar and the menu plates as transient surfaces (docs/archive/rounds/RETURN.md 2.14 item 2): a blur
 // into a menu bar title or a menu row parks the session and leaves the focus with the menu for
 // the keyboard's walk; a field anywhere and the page outside the chrome still end it.
 describe('blurVerdictOf on the menu bar and a menu plate', () => {
@@ -35,7 +35,7 @@ describe('blurVerdictOf on the menu bar and a menu plate', () => {
     }
   });
 
-  /* the toolbar's size field marks itself as one the session parks for (docs/POLISH.md 2.3 item
+  /* the toolbar's size field marks itself as one the session parks for (docs/archive/rounds/POLISH.md 2.3 item
      16): its typed value lands on the selected run as a mark, and the run takes the focus and
      its range back when the field blurs; a plain field of the toolbar still ends the session */
   it('parks a session for a field marked data-session-park (the size field) and ends it for another toolbar field', () => {

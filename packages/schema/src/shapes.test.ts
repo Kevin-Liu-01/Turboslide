@@ -2,7 +2,7 @@
 // category and a prstGeom that is a name in the committed ECMA definitions file (ST_ShapeType, not
 // the pptxgenjs enum, 0.47); the 135 rows in Google's four categories; the legacy ids map; every
 // preset answers the interpreter's path, its ECMA text rectangle and its own sites at three sizes
-// (docs/VECTOR.md 2.2), the three paths of ship one byte for byte, `rect` alone eight sites; a
+// (docs/archive/rounds/VECTOR.md 2.2), the three paths of ship one byte for byte, `rect` alone eight sites; a
 // line kind and an unknown kind the box; lineEndPath for the ten decorations; the dashes and the
 // pptxgenjs names. The interpreter's own tests are shapes/geometry.test.ts.
 import { describe, expect, it } from 'vitest';
@@ -190,7 +190,7 @@ describe('the geometry of the presets', () => {
     expect(shapePath('roundRect', 240, 160, [-5])).toBe('M0,0 H240 V160 H0 Z');
     // the picker's glyph at 48 by 36: 36 * 0.16667 = 6
     expect(shapePath('roundRect', 48, 36)).toContain('A6,6 0 0 1 6,0');
-    // the text rectangle steps in by x1 * 29289 / 100000 on every side (docs/VECTOR.md 2.2)
+    // the text rectangle steps in by x1 * 29289 / 100000 on every side (docs/archive/rounds/VECTOR.md 2.2)
     const inset = textInset('roundRect', 240, 160);
     expect(inset.x).toBeCloseTo(7.81, 2);
     expect(inset.y).toBeCloseTo(7.81, 2);

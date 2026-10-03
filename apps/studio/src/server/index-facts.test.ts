@@ -1,4 +1,4 @@
-// The deck index as the carrier of a person's facts across instances (b1.md R17; docs/PEOPLE.md
+// The deck index as the carrier of a person's facts across instances (b1.md R17; docs/archive/rounds/PEOPLE.md
 // 3.13, 6.4; the fix round of the verifier's pass 1 finding 3, people.own-chip-follows-avatar):
 // `indexFactsFor` keeps one row per principal for 5 s and the drop bus is process local, so a
 // choice written on another instance reaches this one only when the row expires or a caller
@@ -35,7 +35,7 @@ function anon(): string {
   return `anon_${randomUUID()}`;
 }
 
-describe('recordWithIndexFacts (docs/PEOPLE.md 3.13; b1.md R17)', () => {
+describe('recordWithIndexFacts (docs/archive/rounds/PEOPLE.md 3.13; b1.md R17)', () => {
   const base = (): PrincipalRecord => newPrincipalRecord(anon(), NOW);
 
   it('answers the same record when the index carries nothing it applies', () => {
@@ -97,7 +97,7 @@ describe('recordWithIndexFacts (docs/PEOPLE.md 3.13; b1.md R17)', () => {
   });
 });
 
-describe('refreshIndexFacts (docs/PEOPLE.md 6.4)', () => {
+describe('refreshIndexFacts (docs/archive/rounds/PEOPLE.md 6.4)', () => {
   it('reads the choice another instance wrote past this instance cache and fills the row for the reads that follow', async () => {
     const id = anon();
     const folder = join(stateDir(), 'users', principalFolder(id));

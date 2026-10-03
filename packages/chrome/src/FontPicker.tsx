@@ -49,7 +49,7 @@ import { tipProps } from './Tooltip';
 import './FontPicker.css';
 
 /**
- * The toolbar's Font dropdown (gslides-parity SPEC-5-amendments A5 item 4; docs/PRODUCT.md 4.2;
+ * The toolbar's Font dropdown (gslides-parity SPEC-5-amendments A5 item 4; docs/archive/rounds/PRODUCT.md 4.2;
  * ported from round five): in Google's position, left of the font size control, a text button
  * that reads the selected block's family and opens a plate with a search field, the brand kit's
  * two faces under Brand, the families this presentation uses, then the catalog by category,
@@ -61,7 +61,7 @@ import './FontPicker.css';
  * inside it), so opening the picker costs nothing until a row shows. The Brand kit panel's two
  * Fonts controls are the same dropdown (`FontDropdown`) with their own control ids.
  *
- * The features round (docs/FEATURES.md 3.5, P1; audit-fonts 10, 11, 17): a Recent group of up to
+ * The features round (docs/archive/rounds/FEATURES.md 3.5, P1; audit-fonts 10, 11, 17): a Recent group of up to
  * five faces per browser after Used, written on every pick, with Clear recent at its foot; the
  * search matches the name, the category label and the id; a row's tooltip names the face and its
  * category, and the licence stays in More fonts.
@@ -556,7 +556,7 @@ export function FontDropdown({
 /**
  * The toolbar control (toolbar-tails.ts `toolbar.font`, ToolbarTail.tsx renders it for
  * `op: 'font'`): the selected block's family name with a chevron; the plate on a click. With the
- * catalog parked by the ship's rule (`FONTS_PARKED`, docs/PRODUCT.md 3.4) the control draws the
+ * catalog parked by the ship's rule (`FONTS_PARKED`, docs/archive/rounds/PRODUCT.md 3.4) the control draws the
  * family as a read only value with the same tooltip and no chevron.
  *
  * A fixed kind's field (the cover's heading and lead, a statement's big line, a picture kind's

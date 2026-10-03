@@ -337,7 +337,7 @@ export function sameText(a: TextOp, b: TextOp): boolean {
  * True when `against` rewrites or removes the Text `op` names as a whole (SPEC-3 3.5): a
  * `text.replace` of the pointer, a `block.set` of the pointer or a parent of it, a
  * `slide.replace` of the slide, a `slide.set` of one of the three slide fields when the op names
- * that field (docs/SYNC.md 3.4: `slide.set /heading` rewrites the heading's ops alone, never the
+ * that field (docs/archive/rounds/SYNC.md 3.4: `slide.set /heading` rewrites the heading's ops alone, never the
  * lead's or a block's) and of any other slide pointer as before, the removal of the block or the
  * slide, or a restore. The string is last writer wins, so the text op cannot be placed and
  * returns to its author.

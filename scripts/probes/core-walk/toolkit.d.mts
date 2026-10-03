@@ -1,5 +1,5 @@
 // Type declarations for the TypeScript callers of the walk toolkit's pure reads (the polish
-// round, docs/POLISH.md 5.1: the core specs read a frame's pixels the way the walk does, through
+// round, docs/archive/rounds/POLISH.md 5.1: the core specs read a frame's pixels the way the walk does, through
 // `decodePng`, `pixelAt` and `sampleBox`). The toolkit itself (`createToolkit`) is the walk's and
 // stays untyped here; the declarations cover the exports a spec imports.
 

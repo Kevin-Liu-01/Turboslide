@@ -1,6 +1,6 @@
 /* LayoutGrid (LayoutGrid.tsx): 21 tiles at 128 by 72 with the name under each (gslides-parity
    SPEC 5.2); three columns, four at 1280 px and up so Google's eleven show without scrolling
-   (docs/PRODUCT.md 3.4; audit-interface 34); Google's eleven, then the GT layouts as a collapsed
+   (docs/archive/rounds/PRODUCT.md 3.4; audit-interface 34); Google's eleven, then the GT layouts as a collapsed
    group under a disclosure row, then the caption row that reads the hovered or focused tile's
    sentence (section 2 rank 24: no floating plate over the neighbouring tiles). A tile is a
    --pt-edge frame around the live clone of the layout's slide; the current one draws one 2 px ink

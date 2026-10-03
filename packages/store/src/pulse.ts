@@ -18,7 +18,7 @@
 // it; the callers pass a bounded client (blob-store.ts boundedBlobClient), so a hung put ends at
 // its deadline.
 //
-// The sync round (docs/SYNC.md 3.10, 4.5; audit-costs item 12) makes the tick two paced: 2 s
+// The sync round (docs/archive/rounds/SYNC.md 3.10, 4.5; audit-costs item 12) makes the tick two paced: 2 s
 // while the deck is in use on this instance (an op landed here in the last 30 s) or somebody
 // else is in the roster (a colleague's edit may land any second), 10 s when the one tab is
 // alone and quiet. A colleague's arrival moves the pulse through their presence push, so the
@@ -28,7 +28,7 @@ import type { BlobClient, BlobEntry } from './blob-store.ts';
 
 /** The hosted poll interval per open deck per instance while the deck is in use: one head of the pulse per tick (SPEC-3 2.5, amended). */
 export const HOSTED_POLL_MS = 2000;
-/** The tick when the one tab is alone in the roster and no op landed on this instance lately (docs/SYNC.md 3.10). */
+/** The tick when the one tab is alone in the roster and no op landed on this instance lately (docs/archive/rounds/SYNC.md 3.10). */
 export const HOSTED_POLL_QUIET_MS = 10_000;
 /** How long after an op landed on this instance the deck counts as in use, so the tick stays at HOSTED_POLL_MS. */
 export const POLL_ACTIVE_WINDOW_MS = 30_000;
@@ -68,7 +68,7 @@ export type PollTickInput = {
 };
 
 /**
- * The wait before the next poll of one deck on one instance (docs/SYNC.md 3.10): the active tick
+ * The wait before the next poll of one deck on one instance (docs/archive/rounds/SYNC.md 3.10): the active tick
  * while an op landed here inside the window, the deck has company (`others`: another
  * instance's row, a second own row, or a second stream on this instance) or the roster is not
  * known yet (`rosterKnown` false), the quiet tick otherwise. Both stay under

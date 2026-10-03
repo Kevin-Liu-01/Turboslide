@@ -242,7 +242,7 @@ test('a banner stands in the status row and covers neither the toolbar, nor the 
         banner.left >= r.right ||
         banner.bottom <= r.top ||
         banner.top >= r.bottom;
-      /* the bottom bar left in the product round (docs/PRODUCT.md section 2 rank 25; b1 R6): the
+      /* the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25; b1 R6): the
          banner sits along the window's bottom edge on its own */
       return {
         bannerTop: banner.top,

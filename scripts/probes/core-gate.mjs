@@ -3,13 +3,13 @@
 // runs every driver of the matrix against one base and judges the whole matrix. It runs the walk
 // probe in --core mode (scripts/probes/editor-walk-probe.mjs --core), the core specs under
 // apps/studio/e2e/core/ with Playwright's JSON reporter and, since the sync and costs round
-// (docs/SYNC.md 6.3), the cost probe (scripts/probes/sync-cost-probe.mjs --all: one page state per
+// (docs/archive/rounds/SYNC.md 6.3), the cost probe (scripts/probes/sync-cost-probe.mjs --all: one page state per
 // process for three minutes, every request the page made, sync.status.storeCalls sampled five
 // times, the counts beside the ceilings in its JSON), merges every row's result by its
 // matrix id, writes the matrix table with every row id and its result, and exits 1 on any
 // failed or not driven driven row unless its feature is in the committed parked list (6.2;
 // an unparkable feature cannot be listed) or the row is one of the list's `parkedRows` (a row
-// carrying `parks`, docs/RETURN.md section 1 rule 2; the run's `wouldParkRows` names them). A row no driver recorded is "no step" and fails the run whatever
+// carrying `parks`, docs/archive/rounds/RETURN.md section 1 rule 2; the run's `wouldParkRows` names them). A row no driver recorded is "no step" and fails the run whatever
 // the list says. Not driven rows are listed by id and reason and are never counted as passed.
 //
 //   node scripts/probes/core-gate.mjs --base <origin> [--out <dir>] [--parked <ship json>]
@@ -19,7 +19,7 @@
 //     [--allow-scratch] [--decks <dir>] [--dry-run] [--lock <path>]
 // `--only cost` runs the cost probe alone and judges its rows alone; `--only specs` judges the spec
 // rows alone and `--only probe` the walk probe's, so a driver's partial run never reads another
-// driver's rows as "no step". The people round (docs/PEOPLE.md 6.2): `--only accounts` runs
+// driver's rows as "no step". The people round (docs/archive/rounds/PEOPLE.md 6.2): `--only accounts` runs
 // apps/studio/e2e/accounts.spec.ts with the JSON reporter against a node server started with an
 // identity database (`TURBOSLIDE_AUTH_DB`, `TURBOSLIDE_MAIL=capture`; the spec reads the same
 // `TURBOSLIDE_AUTH_DB` and `TURBOSLIDE_OVERLAY_DIR` from this process's environment to find the
@@ -35,7 +35,7 @@
 // `--cost-minutes` shortens each state's window for a smoke (the run of record keeps 3; the JSON
 // names the minutes it ran). On a deployment the cost probe reads the bearer for sync.status
 // from TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json and never prints it.
-// The objects round fix round (docs/OBJECTS.md 6.2, the verifier's pass 1 finding 8): `--rows
+// The objects round fix round (docs/archive/rounds/OBJECTS.md 6.2, the verifier's pass 1 finding 8): `--rows
 // <ids>` with `--only specs` runs the tests of the spec rows named alone (Playwright's `--grep`
 // on each id at the head of its title, over the rows' own spec files unless `--spec` names them)
 // and judges those rows alone, so the ship step reads two export rows again on production in
@@ -44,7 +44,7 @@
 // are narrowings of one driver, never a way past a row: the summary names them under `narrowed`,
 // and the ledger of a narrowed run stands beside the run of record, never in its place.
 // The blob tier's admission class (finding 8: a write acknowledged late, resent and admitted a
-// second time by an instance behind the store, docs/SYNC.md 3.2, the sync owner's): a spec's
+// second time by an instance behind the store, docs/archive/rounds/SYNC.md 3.2, the sync owner's): a spec's
 // setup that reads one more slide than it wrote is recorded not driven by the export rows with
 // the count and the class in the reason, and read red by the sync rows with the same words, so
 // the table names the mechanism; nothing here changes the merge or the verdict.
@@ -66,13 +66,13 @@
 // The gate holds that rule itself: under vitest (`VITEST` is set in every worker and a spawned gate
 // inherits it) a localhost run that names neither flag is refused with exit 2 before the scratch
 // check, so a later test cannot take the checkout's lock by leaving the flags out.
-// The objects round (docs/OBJECTS.md 6.1, 6.3): the `gestures.*` rows are the arrange feature's
+// The objects round (docs/archive/rounds/OBJECTS.md 6.1, 6.3): the `gestures.*` rows are the arrange feature's
 // (unparkable), driven by the walk probe's gestures area with the toolkit's frame capture; the two
 // frame rows read `describe().state.gesture` and their reason carries the record (frames, maxMs,
 // skipped, degraded) with the animation frames the drag had, so a frame row red on the preview
 // alone with fewer than 6 animation frames (a throttled headless tab) is the recorded class of 6.3,
 // rerun once, and a second reading fails the row; nothing here changes the merge or the verdict.
-// The polish round (docs/POLISH.md 5.1): `--areas` names the walk's modules (core-walk/index.mjs
+// The polish round (docs/archive/rounds/POLISH.md 5.1): `--areas` names the walk's modules (core-walk/index.mjs
 // AREAS, the names the walk's `--only` takes), and a module's rows are the ids it declares, so
 // `--areas polish-tables` runs and judges the polish round's table rows alone while `--areas
 // tables` keeps the tables module's own rows.
@@ -184,7 +184,7 @@ const OUT = resolve(ROOT, arg('out', '.turboslide/core-gate'));
 const PARKED = arg('parked', null);
 const ONLY = arg('only', null);
 /**
- * The drivers `--only` names (docs/PEOPLE.md 6.2 added the accounts spec) and the one feature
+ * The drivers `--only` names (docs/archive/rounds/PEOPLE.md 6.2 added the accounts spec) and the one feature
  * narrowing (docs/REALTIME.md 5.1 R5: `realtime`, the realtime rows' drivers and rows alone).
  */
 const ONLY_VALUES = ['probe', 'specs', 'cost', 'accounts', 'realtime', 'setup'];
@@ -235,7 +235,7 @@ if (ONLY !== null && !ONLY_VALUES.includes(ONLY)) {
   console.error(USAGE);
   process.exit(2);
 }
-/** The accounts spec of the local rows (docs/PEOPLE.md 6.2), as the gate runs it. */
+/** The accounts spec of the local rows (docs/archive/rounds/PEOPLE.md 6.2), as the gate runs it. */
 const ACCOUNTS_SPEC = 'apps/studio/e2e/accounts.spec.ts';
 const SPEC_ONLY = arg('spec', null);
 /** A comma list flag as its trimmed, non empty items; null when absent. */
@@ -283,7 +283,7 @@ const WALK_MODULE_OF = declaredIds();
 const WALK_MODULES = new Set([...WALK_MODULE_OF.values()]);
 /**
  * True when a probe row is in the area `--areas` names. A module's name names the rows that
- * module declares and no other (the polish round, docs/POLISH.md 5.1: `polish-tables` drives
+ * module declares and no other (the polish round, docs/archive/rounds/POLISH.md 5.1: `polish-tables` drives
  * `tables.*` rows, so `tables` is the tables module's own 48 rows); a name that is no module is
  * an id area, the rows whose id starts with it wherever they are declared (the people round,
  * build/b5.md: the versions and comments rows live in the share module). The ship step's third
@@ -302,7 +302,7 @@ if (ROWS_ONLY !== null) {
     console.error(USAGE);
     process.exit(2);
   }
-  /* `--only specs` takes core spec rows, `--only accounts` the local rows (docs/PEOPLE.md 6.2) */
+  /* `--only specs` takes core spec rows, `--only accounts` the local rows (docs/archive/rounds/PEOPLE.md 6.2) */
   const drivers = ONLY === 'accounts' ? LOCAL_SPEC_DRIVERS : CORE_SPEC_DRIVERS;
   const unknown = ROWS_ONLY.filter((id) => {
     const row = CORE_MATRIX.find((r) => r.id === id);
@@ -338,7 +338,7 @@ if (AREAS_ONLY !== null) {
     process.exit(2);
   }
   /* the walk's own modules (core-walk/index.mjs AREAS), the names its `--only` takes, and the id
-     areas of the probe rows: since the polish round (docs/POLISH.md 5.1) a module's name can
+     areas of the probe rows: since the polish round (docs/archive/rounds/POLISH.md 5.1) a module's name can
      differ from its rows' id area (`polish-tables` drives `tables.*` rows), so a run over a
      module's name judges the rows that module declares, never every row whose id starts with
      the name; an id area no module carries (`versions`, `comments`, in the share module) judges
@@ -414,7 +414,7 @@ const probeRowsJudged = rowsForDriver(PROBE_DRIVER).filter(
 const costRowsJudged = costRows().filter(
   (r) => !COST_ROWS || COST_ROWS.split(',').some((id) => id.trim() === r.id),
 );
-/* the local rows an `--only accounts` run drives and judges alone (docs/PEOPLE.md 6.2), narrowed by `--rows` */
+/* the local rows an `--only accounts` run drives and judges alone (docs/archive/rounds/PEOPLE.md 6.2), narrowed by `--rows` */
 const accountsRowsJudged = localRows().filter(
   (r) => ROWS_ONLY === null || ROWS_ONLY.includes(r.id),
 );
@@ -564,7 +564,7 @@ function readProbe(json, exit, ms) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// the cost probe (docs/SYNC.md 6.3)
+// the cost probe (docs/archive/rounds/SYNC.md 6.3)
 
 function runCost() {
   const json = join(OUT, 'cost-probe.json');
@@ -707,7 +707,7 @@ function runSpecs() {
 }
 
 /**
- * The local rows' spec (docs/PEOPLE.md 6.2): apps/studio/e2e/accounts.spec.ts against a node
+ * The local rows' spec (docs/archive/rounds/PEOPLE.md 6.2): apps/studio/e2e/accounts.spec.ts against a node
  * server with an identity database. The spec titles its rows by `coreTitle(id)` the way the
  * core specs do, so `readSpecs` maps the report back to the ten local rows; its other tests
  * (the share link exchange, the device flow, the seeded route) carry no id and are not judged.
@@ -1037,7 +1037,7 @@ let defaultTemplate = null;
 let seedTwins = null;
 let specs = null;
 let cost = null;
-/** The accounts spec's run (docs/PEOPLE.md 6.2): `--only accounts` alone runs it. */
+/** The accounts spec's run (docs/archive/rounds/PEOPLE.md 6.2): `--only accounts` alone runs it. */
 let accounts = null;
 /**
  * Which drivers this run covers: the walk probe, the core specs and the cost probe when `--only`
@@ -1245,7 +1245,7 @@ const reasons = {
   ...(hand?.reasons ?? {}),
 };
 /**
- * A local row this run did not record (docs/PEOPLE.md 6.2): the accounts run's, listed apart
+ * A local row this run did not record (docs/archive/rounds/PEOPLE.md 6.2): the accounts run's, listed apart
  * with the reason, never counted as passed and never "no step"; a local row the run did record
  * (an `--only accounts` run) is judged like any row below.
  */
@@ -1391,7 +1391,7 @@ const summary = {
   results,
   verdict,
   wouldPark: parking.parked,
-  /* docs/RETURN.md section 1 rule 2: the red rows whose own controls a ship would keep parked */
+  /* docs/archive/rounds/RETURN.md section 1 rule 2: the red rows whose own controls a ship would keep parked */
   wouldParkRows: parking.parkedRows,
   blocking: parking.blocking,
   retriesOk,
@@ -1443,7 +1443,7 @@ if (tierRowsApart.length > 0)
   );
 if (local.length > 0)
   lines.push(
-    '## Local rows this run did not record (docs/PEOPLE.md 6.2)',
+    '## Local rows this run did not record (docs/archive/rounds/PEOPLE.md 6.2)',
     '',
     `Driven by ${LOCAL_SPEC_DRIVERS.join(', ')} on a node server with an identity database (\`--only accounts\`), never by a deployment run; listed apart with the reason "${LOCAL_ABSENT_REASON}", never counted as passed and never a reason to park.`,
     '',

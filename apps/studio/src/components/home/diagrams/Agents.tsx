@@ -3,7 +3,7 @@ import type { HomeFacts } from '../facts';
 import { Marker } from './Marker';
 
 /**
- * Agents (docs/POLISH.md 3.2 item 6, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): one table labelled
+ * Agents (docs/archive/rounds/POLISH.md 3.2 item 6, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): one table labelled
  * with the action count in its head, four 1 px lines in from the CLI, MCP, HTTP and the page, one
  * line out to a deck frame with a title line and a body line, each line ending in an 11 unit
  * square marker where it meets the table or the deck (no arrowheads, slide 33). The deck frame

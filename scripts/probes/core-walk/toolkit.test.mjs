@@ -75,7 +75,7 @@ describe('t.stableRevision', () => {
   });
 });
 
-// The frame comparison of the objects round (docs/OBJECTS.md 2.6, 6.4): the object's box against
+// The frame comparison of the objects round (docs/archive/rounds/OBJECTS.md 2.6, 6.4): the object's box against
 // the ring's within 1 px, a text ring's 10 px outset removed; the corners of a turned box; the
 // readouts of a capture's steps.
 import { boxCorners, compareFrame, cornersDistance, readoutsOf } from './toolkit.mjs';
@@ -117,7 +117,7 @@ describe('compareFrame', () => {
 describe('boxCorners and cornersDistance', () => {
   it('turns a 680 by 320 box by 45 degrees about its centre', () => {
     const corners = boxCorners({ x: 0, y: 0, w: 680, h: 320 }, 45);
-    /* the bounding box of the turned corners is 707 by 707 (docs/OBJECTS.md 2.2) */
+    /* the bounding box of the turned corners is 707 by 707 (docs/archive/rounds/OBJECTS.md 2.2) */
     const xs = corners.map((c) => c.x);
     const ys = corners.map((c) => c.y);
     expect(Math.round(Math.max(...xs) - Math.min(...xs))).toBe(707);
@@ -151,7 +151,7 @@ describe('readoutsOf', () => {
   });
 });
 
-// The polish round (docs/POLISH.md 5.1): the pixel read and the boxes read of the frame capture,
+// The polish round (docs/archive/rounds/POLISH.md 5.1): the pixel read and the boxes read of the frame capture,
 // pure over a scripted shot.
 import { boxGap, boxInside, boxIntersects, pixelAt, sampleBox } from './toolkit.mjs';
 

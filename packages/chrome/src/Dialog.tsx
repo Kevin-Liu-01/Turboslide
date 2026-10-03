@@ -74,7 +74,7 @@ export type DialogProps = {
   children?: ReactNode;
   /**
    * One sentence under the buttons, in titanium: the reason the primary action is disabled
-   * (docs/POLISH.md 2.9 item 116; audit-assist item 18: a disabled button takes no pointer, so
+   * (docs/archive/rounds/POLISH.md 2.9 item 116; audit-assist item 18: a disabled button takes no pointer, so
    * its tooltip never reached the seller). Drawn as `<control>.reason` when the dialog has a
    * control id.
    */
@@ -82,13 +82,13 @@ export type DialogProps = {
 };
 
 /* a `summary` is focusable by the browser without a tabindex, so the trap counts it too
-   (docs/POLISH.md 2.6 item 65; audit-chrome item 16: four Tabs left the Logo dialog through its
+   (docs/archive/rounds/POLISH.md 2.6 item 65; audit-chrome item 16: four Tabs left the Logo dialog through its
    More summary) */
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Where the focus goes when a dialog closes (docs/POLISH.md 2.6 item 65; audit-chrome item 15):
+ * Where the focus goes when a dialog closes (docs/archive/rounds/POLISH.md 2.6 item 65; audit-chrome item 15):
  * the element that opened it while it is still in the document, else, for a dialog a menu row
  * opened (the row left with its menu), the menubar button of that row's menu, so a keyboard user
  * lands where the menu was and not on the page body. Null when neither exists.
@@ -126,7 +126,7 @@ export function recentMenuRow(): string | null {
  * The focusable elements inside a root, in document order, that a Tab can reach: an element
  * inside a closed `details` (past its summary) is one the browser skips, and a trap that counted
  * it as the last element never saw the focus reach it, so Tab from the summary left the card
- * (docs/POLISH.md 2.6 item 65; the walk's Logo dialog kept three of eight Tabs inside).
+ * (docs/archive/rounds/POLISH.md 2.6 item 65; the walk's Logo dialog kept three of eight Tabs inside).
  */
 export function focusableIn(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
@@ -189,7 +189,7 @@ export function Dialog({
      leaves focus where it is, and returns it only if it took it) */
   useMountEffect(() => {
     /* a plate over the opener leaves as the card opens, and the focus the close returns to the
-       opener draws none (docs/POLISH.md 2.6 item 61: the "Format menu" plate over the toolbar
+       opener draws none (docs/archive/rounds/POLISH.md 2.6 item 61: the "Format menu" plate over the toolbar
        after a dialog closed on a click) */
     hideTooltipUntilInput();
     if (!modal) {

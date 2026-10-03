@@ -22,7 +22,7 @@ export function OpenDialog() {
   const { input } = shell;
   const [tab, setTab] = useState<'presentations' | 'upload'>('presentations');
   const [query, setQuery] = useState('');
-  /* this browser's own decks first (docs/POLISH.md item 75): the mirror's rows draw the moment
+  /* this browser's own decks first (docs/archive/rounds/POLISH.md item 75): the mirror's rows draw the moment
      the dialog opens; the store's listing replaces them when it lands and is marked busy until then */
   const [decks, setDecks] = useState<ReadonlyArray<DeckHeadRow> | null>(() =>
     recentRowsOf(input.recentDecks),
@@ -35,7 +35,7 @@ export function OpenDialog() {
   const [over, setOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  /* the zone takes a dropped file (docs/POLISH.md item 88) */
+  /* the zone takes a dropped file (docs/archive/rounds/POLISH.md item 88) */
   const takeFile = (picked: File | null | undefined) => {
     setError(null);
     setFile(picked ?? null);

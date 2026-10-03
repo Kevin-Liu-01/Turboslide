@@ -55,11 +55,11 @@ export const PRESENCE_BATCH_MS = 80;
 export const PRESENCE_PER_SECOND = 15;
 /**
  * The presence heartbeat while the tab is active: the pointer, the selection or the slide moved
- * in the last 30 s (docs/SYNC.md 3.10; room-client.ts `heartbeat`, `PRESENCE_QUIET_AFTER_MS`).
+ * in the last 30 s (docs/archive/rounds/SYNC.md 3.10; room-client.ts `heartbeat`, `PRESENCE_QUIET_AFTER_MS`).
  */
 export const PRESENCE_HEARTBEAT_MS = 5000;
 /**
- * The heartbeat while the tab is quiet (docs/SYNC.md 3.10, audit-costs item 5): the row's 30 s
+ * The heartbeat while the tab is quiet (docs/archive/rounds/SYNC.md 3.10, audit-costs item 5): the row's 30 s
  * life and the server's refresh at a remaining life under 15 s stay, so an idle tab pushes
  * every 20 s instead of every 15 s.
  */
@@ -339,7 +339,7 @@ const identityFields = {
   hueSlot: z.number().int().min(0).max(5),
   kind: z.enum(['human', 'agent']),
   role: roleSchema,
-  /* the reader's view of a verified person's address (docs/PEOPLE.md 3.7): optional on the wire,
+  /* the reader's view of a verified person's address (docs/archive/rounds/PEOPLE.md 3.7): optional on the wire,
      never in a presence body (the identity fields are refused there, report 10 F31) */
   email: z.string().max(254).optional(),
 };

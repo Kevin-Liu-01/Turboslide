@@ -1,4 +1,4 @@
-// Where a table or a chart the chrome inserts lands (docs/PRODUCT.md section 2 rank 1; audit-seller
+// Where a table or a chart the chrome inserts lands (docs/archive/rounds/PRODUCT.md section 2 rank 1; audit-seller
 // 1; the product round, build/b3.md). Insert > Table, the table grid and Insert > Chart arrive at
 // the controller with the centred default box of editor-shell.ts `insertBlockPlan` (a 960 by 320
 // table, a 960 by 540 chart at the sheet centre), which put a chart over the table a seller had
@@ -10,7 +10,7 @@
 // sheet. The object sits at the top of its rectangle, centred across it, so a second insert has
 // the room under the first (a table centred in the body leaves two strips too thin for anything).
 //
-// The polish round (docs/POLISH.md 2.2 items 6 and 8): a table's box is never shorter than its
+// The polish round (docs/archive/rounds/POLISH.md 2.2 items 6 and 8): a table's box is never shorter than its
 // rows. Its wanted height is the rows' floor (schema `tableBoxHeight`), so a table taller than the
 // room lands at the top of the room at its full height and runs past it, as Google's does; only
 // its width shrinks to the room. And a rectangle is skipped only when the rectangle itself is
@@ -33,7 +33,7 @@ export type Rect = { x: number; y: number; w: number; h: number };
 export type Size = readonly [number, number];
 /**
  * The block kinds the chrome's menus insert through `block.insert` with a default box: a table, a
- * chart and, since the features round's ship two (docs/FEATURES.md 5.4, section 1's placement
+ * chart and, since the features round's ship two (docs/archive/rounds/FEATURES.md 5.4, section 1's placement
  * decision), a shader.
  */
 export type PlacedKind = 'table' | 'chart' | 'material';
@@ -52,7 +52,7 @@ export const CHART_SHARED_SIZE: Size = [640, 360];
 export const INSERT_MIN_SIZE: Readonly<Record<PlacedKind, Size>> = {
   table: [480, 120],
   chart: [320, 160],
-  /* the features round, ship two (docs/FEATURES.md 5.4): a shader under 240 by 135 is a swatch */
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.4): a shader under 240 by 135 is a swatch */
   material: [240, 135],
 };
 /** Headings whose top sits above this line make the head band (the top third of the sheet). */
@@ -211,7 +211,7 @@ const round = (value: number): number => Math.round(value);
  * menu plan carried (its width and height); a chart that shares the slot with content wants
  * 640 by 360 at most. The object takes the free rectangle that gives it the most area, shrunk
  * to the rectangle on each axis when the rectangle is smaller (a table on its width alone: its
- * height is its rows' floor and never shrinks, docs/POLISH.md 2.2 item 6); a rectangle smaller
+ * height is its rows' floor and never shrinks, docs/archive/rounds/POLISH.md 2.2 item 6); a rectangle smaller
  * than the kind's minimum is skipped (item 8); the object sits at the top of the rectangle,
  * centred across it. When no rectangle holds the minimum the slot is taken and the object
  * cascades from the last object; an empty slide too small for the minimum (never, on the 1600

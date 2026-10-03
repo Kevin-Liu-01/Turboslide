@@ -15,7 +15,7 @@
 // on production on the date the matrix names. With `--results` the file is a run of FOCUS.md 6.2:
 // `{ "commit", "origin", "date", "results": { "<id>": "passed" | "failed" | "not driven" } }`, or
 // the `results` map alone; an id the run does not name is not driven (the rule of
-// `parkedFeaturesOf`), except a local row of docs/PEOPLE.md 6.2 (the accounts spec's on a node
+// `parkedFeaturesOf`), except a local row of docs/archive/rounds/PEOPLE.md 6.2 (the accounts spec's on a node
 // server with an identity database), which a reading that did not record it lists apart and
 // never holds a paragraph by; the matrix's own reading leaves the local rows out for the same
 // reason. Node only; no dependency.
@@ -57,7 +57,7 @@ export function matrixDate() {
 
 /**
  * The results the matrix's `today` field implies: works passed, broken and flaky failed. A local
- * row (docs/PEOPLE.md 6.2; `isLocalRow`) is left out: its `today` is what production could not
+ * row (docs/archive/rounds/PEOPLE.md 6.2; `isLocalRow`) is left out: its `today` is what production could not
  * drive (no identity database there), so the reading lists it apart the way a deployment run does
  * and a feature's paragraph is never held by it.
  */
@@ -152,24 +152,24 @@ export function renderSection(run) {
         .join(', ')}.`,
     );
   }
-  /* the local rows of docs/PEOPLE.md 6.2 this reading did not record: driven by the accounts spec
+  /* the local rows of docs/archive/rounds/PEOPLE.md 6.2 this reading did not record: driven by the accounts spec
      on a node server with an identity database, never by a deployment run; listed apart, never
      counted as passed and never holding a feature's paragraph */
   if (local.length > 0) {
     lines.push('');
     lines.push(
-      `Driven on a node server with an identity database, never on the deployment this reading comes from (docs/PEOPLE.md 6.2; the gate's \`--only accounts\` run judges them): ${local
+      `Driven on a node server with an identity database, never on the deployment this reading comes from (docs/archive/rounds/PEOPLE.md 6.2; the gate's \`--only accounts\` run judges them): ${local
         .map((r) => code(r.id))
         .join(', ')}.`,
     );
   }
-  /* the measurement rows of docs/PRODUCT.md 8.2: a red one is recorded with its number and never
+  /* the measurement rows of docs/archive/rounds/PRODUCT.md 8.2: a red one is recorded with its number and never
      holds a release or a feature's paragraph; the ship note carries it by id with its mechanism */
   const measured = CORE_MATRIX.filter((r) => isMeasureRow(r) && results[r.id] !== 'passed');
   if (measured.length > 0) {
     lines.push('');
     lines.push(
-      `Measured and recorded, never holding a release (docs/PRODUCT.md 8.2): ${measured
+      `Measured and recorded, never holding a release (docs/archive/rounds/PRODUCT.md 8.2): ${measured
         .map(
           (r) => `${code(r.id)} (${wordOf({ id: r.id, result: results[r.id] ?? 'not driven' })})`,
         )

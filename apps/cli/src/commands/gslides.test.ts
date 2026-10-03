@@ -1,4 +1,4 @@
-// The Google Slides parity round's CLI (docs/gslides-parity/MILESTONES.md, B1 acceptance): in a
+// The Google Slides parity round's CLI (docs/archive/gslides-parity/MILESTONES.md, B1 acceptance): in a
 // temp deck created with `turboslide deck create --from blank` (the committed blank template with
 // its four starter pictures), `slide new --layout big-number`, `slide apply-layout <id> title`,
 // `text replace Acme Globex`, `slide skip <id>`, `deck copy <id> --name Copy`, `deck trash <id>`,
@@ -36,7 +36,7 @@ type Run = { code: number; stdout: string; stderr: string; json: unknown };
 
 const REPO_DECKS = join(import.meta.dirname, '..', '..', '..', '..', 'decks');
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
-/** An svg picture of the vector round in the worked deck (docs/VECTOR.md 4.1): its sanitized source beside its PNG twin. */
+/** An svg picture of the vector round in the worked deck (docs/archive/rounds/VECTOR.md 4.1): its sanitized source beside its PNG twin. */
 const MARK_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64"><rect width="96" height="64"/></svg>';
 const MARK_VECTOR = 'assets/mark.0123abcd.svg';
@@ -540,7 +540,7 @@ describe('the Google Slides parity actions on a local decks folder', () => {
     expect((production.json as { assets: string[] }).assets).toEqual(['site-home']);
     expect(existsSync(join(deckDir, 'assets', 'site-home-light.jpg'))).toBe(true);
     await validates();
-    // an svg picture's vector file travels beside its PNG twin (docs/VECTOR.md 4.1), so the
+    // an svg picture's vector file travels beside its PNG twin (docs/archive/rounds/VECTOR.md 4.1), so the
     // imported picture draws the svg and not the twin
     const mark = await run(['slide', 'import', 'worked', 'the-mark', '--deck', deckDir]);
     expect(mark.code, mark.stderr).toBe(0);

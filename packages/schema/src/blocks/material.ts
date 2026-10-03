@@ -7,7 +7,7 @@
 // preview (packages/viewer MaterialMount). The block lives in content slots as a figure; the
 // picture of an opener or a mood slide references a material asset directly.
 //
-// The features round, ship two (docs/FEATURES.md 5.1; audit-shaders 16): three optional fields,
+// The features round, ship two (docs/archive/rounds/FEATURES.md 5.1; audit-shaders 16): three optional fields,
 // additive at version 1 with a defined absence. `motion` says whether the show plays the shader
 // (absent is off); `controls` holds the eleven common controls of the Shader section (absent means
 // the preset's authored uniforms); `palette` records whether the recipe's colours are the brand
@@ -39,7 +39,7 @@ export type MaterialPlateSide = (typeof MATERIAL_PLATE_SIDES)[number];
 /** Frame anchors the deck's openers were sampled at (OPENERS.md: about 4, 5.5 and 7 seconds). */
 export const MATERIAL_ANCHORS = [4000, 5500, 7000] as const;
 
-/** The two values of `motion.play` (docs/FEATURES.md 5.1, 5.6): the show plays the shader, or never. */
+/** The two values of `motion.play` (docs/archive/rounds/FEATURES.md 5.1, 5.6): the show plays the shader, or never. */
 export const MATERIAL_MOTION_PLAYS = ['off', 'show'] as const;
 export type MaterialMotionPlay = (typeof MATERIAL_MOTION_PLAYS)[number];
 
@@ -47,7 +47,7 @@ export type MaterialMotionPlay = (typeof MATERIAL_MOTION_PLAYS)[number];
 export type MaterialMotion = { play: MaterialMotionPlay; speed?: number };
 
 /**
- * The eleven common controls of the Shader section (docs/FEATURES.md 5.2, 5.3; Glyphfield's
+ * The eleven common controls of the Shader section (docs/archive/rounds/FEATURES.md 5.2, 5.3; Glyphfield's
  * `LiveMaterialSettings` with the three colours taken by the kit's palette and one rotation axis
  * for a flat shader). Every field is optional: an absent control reads as its default and moves
  * nothing, so a preset keeps its authored uniforms until a control moves. The ranges are the
@@ -108,7 +108,7 @@ export type MaterialBlock = {
   plate?: MaterialPlateSide;
   /** The frozen frame asset the block shows; absent until the recipe is captured. */
   asset?: AssetId;
-  /** The show's motion (docs/FEATURES.md 5.6); absent is off, so every still surface draws the frame. */
+  /** The show's motion (docs/archive/rounds/FEATURES.md 5.6); absent is off, so every still surface draws the frame. */
   motion?: MaterialMotion;
   /** The Shader section's common controls (5.2, 5.3); absent means the preset's authored uniforms. */
   controls?: MaterialControls;

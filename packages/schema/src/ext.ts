@@ -48,7 +48,7 @@ export function withImportResidual(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The assistant's mark (docs/PRODUCT.md 6.1 "The mark"; audit-assist 3, 15)
+// The assistant's mark (docs/archive/rounds/PRODUCT.md 6.1 "The mark"; audit-assist 3, 15)
 
 /**
  * `ext.assist` on a block or a slide the assistant wrote: when, under which run and from which

@@ -1,4 +1,4 @@
-// The client's frame of a shader ground (docs/FEATURES.md 5.5; the polish round's fix round 2, the
+// The client's frame of a shader ground (docs/archive/rounds/FEATURES.md 5.5; the polish round's fix round 2, the
 // row shaders.background.place-answers): `slide.setBackgroundMaterial` with `frame` stores the
 // bytes under the key derived id the block frames use, records the asset `shader.frame` writes
 // (backend client, the renderer, the preset under `ext` for the Shader section's ground read) and

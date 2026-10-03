@@ -153,7 +153,7 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const closer = createStreamCloser(() => {
     slot.release();
     void room.channel.presence.leave(deckId, clientId).catch(() => undefined);
-    // the card thumbnail once when the stream closes (docs/SYNC.md 3.10; the sync round,
+    // the card thumbnail once when the stream closes (docs/archive/rounds/SYNC.md 3.10; the sync round,
     // build/b3.md R4): a pending render moves to now, held at the 8 s floor when one ran inside
     // it, and nothing renders when no write waits, so a reader's close costs nothing. The
     // dynamic import keeps the renderer out of this module's graph, as write.ts imports

@@ -50,7 +50,7 @@ describe('renderTable', () => {
     expect(html).toContain('data-type="table"');
     expect(html).toContain('role="table"');
     expect(html.match(/<div class="tr/g)?.length).toBe(3);
-    /* the header row holds text, so it carries has-text (docs/POLISH.md 2.1 item 3) */
+    /* the header row holds text, so it carries has-text (docs/archive/rounds/POLISH.md 2.1 item 3) */
     expect(html).toContain('<div class="tr header has-text">');
     expect(html.match(/<span class="td/g)?.length).toBe(9);
   });
@@ -116,7 +116,7 @@ describe('renderTable', () => {
     expect(html).not.toContain('--table-rule');
   });
 
-  it('writes the row tracks of both forms: auto for a row, minmax(<height>px, auto) for a set height (docs/OBJECTS.md 3.3 item 3)', () => {
+  it('writes the row tracks of both forms: auto for a row, minmax(<height>px, auto) for a set height (docs/archive/rounds/OBJECTS.md 3.3 item 3)', () => {
     /* an auto track: the floor is the empty cell's line box (54 at 20 px with the rule) and a
        wrapped cell grows it; a fixed minimum would turn the row's content minimum off */
     expect(tableRowsTemplate(emptyTable('t', 2, 3))).toBe('auto auto auto');
@@ -151,7 +151,7 @@ describe('renderTable', () => {
     expect(html).toContain('minmax(80px, auto)');
   });
 
-  it('names the absent rules for the stage guides and writes no guide of its own (docs/OBJECTS.md 3.3 item 2)', () => {
+  it('names the absent rules for the stage guides and writes no guide of its own (docs/archive/rounds/OBJECTS.md 3.3 item 2)', () => {
     const plain = renderTable(emptyTable('t', 2, 2), context());
     expect(plain).not.toContain('no-rule');
     /* Google's Transparent border: the class on the root */
@@ -177,15 +177,15 @@ describe('renderTable', () => {
     }
   });
 
-  it('writes no prompt words into a cell (docs/POLISH.md 2.1 item 1; the stage draws none since the polish round)', () => {
+  it('writes no prompt words into a cell (docs/archive/rounds/POLISH.md 2.1 item 1; the stage draws none since the polish round)', () => {
     expect(renderTable(emptyTable('t', 1, 1), context({ live: true }))).not.toContain(
       'Type to add text',
     );
   });
 
-  it('draws no prompt in an empty cell, on the editor stage or elsewhere, and keeps the empty paragraph (docs/FEATURES.md 2.3 item 9)', () => {
+  it('draws no prompt in an empty cell, on the editor stage or elsewhere, and keeps the empty paragraph (docs/archive/rounds/FEATURES.md 2.3 item 9)', () => {
     /* a 5 by 6 table drew thirty prompts before the features round; since the polish round no
-       prompt is drawn in a cell at all (docs/POLISH.md 2.1 item 1) */
+       prompt is drawn in a cell at all (docs/archive/rounds/POLISH.md 2.1 item 1) */
     const live = renderTable(emptyTable('t', 2, 1), context({ live: true }));
     expect(live).not.toContain('data-prompt');
     expect(live.match(/<span class="para"><\/span>/g)?.length).toBe(2);

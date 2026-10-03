@@ -36,7 +36,7 @@ export type PackedBundle = {
   manifest: BundleManifest;
   /** `<deckId>-r<revision>.zip` */
   fileName: string;
-  /** the deck's title, for a download named after it (docs/POLISH.md item 86) */
+  /** the deck's title, for a download named after it (docs/archive/rounds/POLISH.md item 86) */
   title: string;
   counts: { documents: number; assets: number; versions: number; comments: number };
 };

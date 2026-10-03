@@ -7,11 +7,11 @@
 // size ladder. Every cell is addressable through data-run "<blockId>/rows/<r>/cells/<c>" (the
 // pointer the linter, find and replace and the inline editor read, packages/lint/src/context.ts),
 // and every paragraph of a cell is its own `.para` span (SPEC 7.4), always, so the editor's cell
-// contract has one shape. An empty cell draws no prompt anywhere (docs/POLISH.md 2.1 item 1,
+// contract has one shape. An empty cell draws no prompt anywhere (docs/archive/rounds/POLISH.md 2.1 item 1,
 // Kevin's screenshot: the hovered prompt wrapped in a narrow cell and grew its row): the cell ring
 // and the caret say where typing goes, and the empty `.para` keeps a line box through CSS.
 //
-// The polish round (docs/POLISH.md 2.1 item 3, 2.2 item 10): the header row carries `has-text`
+// The polish round (docs/archive/rounds/POLISH.md 2.1 item 3, 2.2 item 10): the header row carries `has-text`
 // when one of its cells holds text, and the sheet draws the header's ink rule and display weight
 // from that class alone, so an inserted table reads as equal rows until the seller types a
 // heading (Google draws equal borders on every row); a cell's own `align` (`cells[].align`) is
@@ -26,7 +26,7 @@
 // border says weight 0, the cell's own colour and dash where set); a cell fill is inline. A table
 // written before this round renders byte for byte.
 //
-// The objects round (docs/OBJECTS.md 3.3 items 2 and 3): both forms are one CSS grid whose row
+// The objects round (docs/archive/rounds/OBJECTS.md 3.3 items 2 and 3): both forms are one CSS grid whose row
 // tracks the renderer writes inline (`tableRowsTemplate`): `auto` for a row with no set height,
 // whose floor is its content (the empty cell's line box, 54 px at 20 px with the rule, the
 // schema's `tableRowTrack`), and `minmax(<height>px, auto)` for a row with a set `height`,
@@ -61,13 +61,13 @@ export const TABLE_DEFAULT_BORDER: TableBorderWeight = 1;
 
 /**
  * The words the editor's stage drew in the hovered empty cell until the polish round
- * (docs/OBJECTS.md 3.3 item 7). A table cell draws no prompt now (docs/POLISH.md 2.1 item 1: the
+ * (docs/archive/rounds/OBJECTS.md 3.3 item 7). A table cell draws no prompt now (docs/archive/rounds/POLISH.md 2.1 item 1: the
  * words wrapped in a cell of 160 px or less, grew the row and ran the guide grid past the ring),
  * and the sheet hides any prompt appended to a cell (gt-ink-paper sheet.css). The constant stays
  * exported only while packages/viewer Editor.tsx `promptHoveredCell` imports it; it leaves with
  * that hunk (build/b2.md, the request to B1).
  */
-/* the polish round (docs/POLISH.md 2.1 item 1): a table cell draws no prompt; the words left with the stage's last reader */
+/* the polish round (docs/archive/rounds/POLISH.md 2.1 item 1): a table cell draws no prompt; the words left with the stage's last reader */
 
 /**
  * The row tracks of the table's grid: `auto` for a row with no set height, so its floor is its
@@ -96,7 +96,7 @@ export function tableRowsTemplate(block: BlockOf<'table'>): string {
  * px where set and an equal share of the rest otherwise; and, once every column carries a width,
  * proportional shares (`fr`) of the table's own width, so a table resized by its handles scales
  * its columns and widths that drifted from the box still fill it with no gap and no overlap
- * (docs/RETURN.md 2.4 fix 4; the seam handle and the column commands write every width). The
+ * (docs/archive/rounds/RETURN.md 2.4 fix 4; the seam handle and the column commands write every width). The
  * numbers agree with `columnShares` in @turboslide/schema/blocks/table.
  */
 export function tableColumnsTemplate(columns: BlockOf<'table'>['columns']): string {
@@ -159,7 +159,7 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
       `--table-rule-style:${block.border.dash === 'dot' ? 'dotted' : 'dashed'}`,
     block.valign === 'middle' && '--table-valign:center',
     block.valign === 'bottom' && '--table-valign:end',
-    /* the row tracks of both forms (docs/OBJECTS.md 3.3 item 3): a floor per row, growth with
+    /* the row tracks of both forms (docs/archive/rounds/OBJECTS.md 3.3 item 3): a floor per row, growth with
        the text, the slack shared; the classic form's rows are the items of the root's one column
        grid (sheet.css `.ts-sheet .table`) and the grid form's cells span it */
     `grid-template-rows:${tableRowsTemplate(block)}`,
@@ -208,7 +208,7 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
                   ? `${span.rows}x${span.columns}`
                   : undefined,
             },
-            /* an empty cell draws no prompt, on the stage or anywhere (docs/POLISH.md 2.1
+            /* an empty cell draws no prompt, on the stage or anywhere (docs/archive/rounds/POLISH.md 2.1
                item 1): the empty `.para` keeps its line box through the sheet's CSS (block-css.ts) */
             cell === ''
               ? el('span', { class: 'para' }, '')
@@ -219,7 +219,7 @@ export function renderTable(block: BlockOf<'table'>, ctx: BlockContext): string 
       /* a row's set height is its track's floor (the root's grid-template-rows above), never an
          inline height that clipped a wrapped cell: Google's minimum row height. The header row
          carries `has-text` once a cell holds text: the sheet draws its ink rule and display
-         weight from that class, so an empty header row reads as any other row (docs/POLISH.md
+         weight from that class, so an empty header row reads as any other row (docs/archive/rounds/POLISH.md
          2.1 item 3) */
       return el(
         'div',

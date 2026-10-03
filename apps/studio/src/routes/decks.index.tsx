@@ -107,7 +107,7 @@ import './decks.css';
  * stays so every build carries the server-only marker scripts/check-client-bundle.mjs looks for
  * (AGENTS.md).
  *
- * The product round (docs/PRODUCT.md section 2 ranks 4, 15, 16 and 26, section 3.6): the Opened on
+ * The product round (docs/archive/rounds/PRODUCT.md section 2 ranks 4, 15, 16 and 26, section 3.6): the Opened on
  * this device head carries the sentence that the list is this browser's; the row drops a deck the
  * editor moved to the trash (its marker, ./-recent.ts) and any deck the listing no longer holds,
  * and the page shows Moved to trash with Undo when it lands from the editor's File > Move to
@@ -122,7 +122,7 @@ export const Route = createFileRoute('/decks/')({
   validateSearch: (search: Record<string, unknown>): HomeSearch =>
     search.show === 'all' ? { show: 'all' } : {},
   loaderDeps: ({ search }) => ({ show: search.show }),
-  /* the old Template gallery anchor (/decks#templates) lands on the gallery page (docs/PRODUCT.md 4.3) */
+  /* the old Template gallery anchor (/decks#templates) lands on the gallery page (docs/archive/rounds/PRODUCT.md 4.3) */
   beforeLoad: ({ location }) => {
     if (location.hash === 'templates' || location.hash === '#templates')
       throw redirect({ to: '/decks/templates' });
@@ -145,7 +145,7 @@ export const Route = createFileRoute('/decks/')({
       signIn,
     };
   },
-  /* Back from the editor paints the cards it left (docs/POLISH.md item 89): a match younger than
+  /* Back from the editor paints the cards it left (docs/archive/rounds/POLISH.md item 89): a match younger than
      this reuses its loader data instead of streaming the listing again behind grey frames; a
      rename, a copy and an undo still refetch through `router.invalidate()` */
   staleTime: 30_000,
@@ -215,7 +215,7 @@ export function homeCookieValue(settings: HomeSettings): string {
 /**
  * The two cookies of the request: the saved settings (or null) and this browser's Recent entries
  * (SPEC-4 0.29); the client keeps both beside localStorage. `now` is the request's time, so the
- * server and the first client render word "Opened 2 minutes ago" from one clock (docs/POLISH.md
+ * server and the first client render word "Opened 2 minutes ago" from one clock (docs/archive/rounds/POLISH.md
  * item 112: the server drew the ISO date and hydration replaced it with the relative words).
  */
 const readHomeCookies = createServerFn({ method: 'GET' }).handler(
@@ -288,7 +288,7 @@ export function shortDate(iso: string, now: Date = new Date()): string {
 
 /**
  * `Edited today at 2:02 PM`, `Edited yesterday at 2:02 PM`, else `Edited Sep 12, 2026`, the time in
- * the browser's locale (docs/PRODUCT.md 3.6; audit-interface 27: the card read a calendar date
+ * the browser's locale (docs/archive/rounds/PRODUCT.md 3.6; audit-interface 27: the card read a calendar date
  * alone). With `by` the author's name follows: `Edited yesterday at 2:02 PM by Kevin`.
  */
 export function editedLine(iso: string, now: Date = new Date(), by?: string): string {
@@ -417,7 +417,7 @@ function openedOf(recent: ReadonlyArray<RecentEntry>): Record<string, string> {
 }
 
 /**
- * A card drawn from this browser's Recent record alone (docs/POLISH.md items 75 and 76): the
+ * A card drawn from this browser's Recent record alone (docs/archive/rounds/POLISH.md items 75 and 76): the
  * facts the mirror kept when the deck was opened, standing in for the store's card until the
  * listing holds the deck. The slide count is the mirror's when the writer knew it, else 0, and
  * the list view's column reads it.
@@ -528,7 +528,7 @@ function HomePage() {
   const search = Route.useSearch();
   const router = useRouter();
   const navigate = useNavigate();
-  /* the old Template gallery anchor on a full load (docs/PRODUCT.md 4.3): the hash never reaches
+  /* the old Template gallery anchor on a full load (docs/archive/rounds/PRODUCT.md 4.3): the hash never reaches
      the server and the route's beforeLoad does not run again on hydration, so the page sends the
      reader on itself */
   useEffect(() => {
@@ -606,7 +606,7 @@ function HomePage() {
     }
   });
 
-  /* the editor's Move to trash write refused after it left for this page (docs/POLISH.md item
+  /* the editor's Move to trash write refused after it left for this page (docs/archive/rounds/POLISH.md item
      81): the card comes back and the list's snackbar says so */
   useEffect(() => {
     const onRefused = (event: Event) => {
@@ -691,7 +691,7 @@ function HomePage() {
     window.open(presentPath(card.id), '_blank', 'noopener');
   };
 
-  /* the card's Download is the PowerPoint file File > Download gives (docs/POLISH.md item 85):
+  /* the card's Download is the PowerPoint file File > Download gives (docs/archive/rounds/POLISH.md item 85):
      the same export.run as the editor's row, the file named after the title, "Saved <name>" when
      it lands; the bundle stays under the editor's File > Download */
   const download = async (card: DeckCard) => {
@@ -884,7 +884,7 @@ function HomePage() {
         <div className="ts-col">
           <div className="ts-strip-head">
             <h2 id="ts-strip-heading">{HOME.startNew}</h2>
-            {/* the gallery page (docs/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
+            {/* the gallery page (docs/archive/rounds/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
             <Link
               to="/decks/templates"
               className="ts-strip-gallery"
@@ -1090,7 +1090,7 @@ const FRAME_COLUMNS = 4;
 /**
  * The card grid's frame while the store listing streams (SPEC-4 0.29): this browser's own decks
  * as real cards first (the mirror's facts, in the server's HTML and clickable before the store
- * answers; docs/POLISH.md item 76), then one row of empty card boxes at the card's size, or the
+ * answers; docs/archive/rounds/POLISH.md item 76), then one row of empty card boxes at the card's size, or the
  * rows' head with empty rows, so the cards arrive into the same height. `aria-busy` names the
  * wait. The recent cards keep their ids and their order in the listed grid, so the swap is in
  * place.
@@ -1215,7 +1215,7 @@ export function useStreamedList<T>(promise: Promise<T>): T {
 }
 
 /**
- * The last listing this browser drew, kept in the module (docs/POLISH.md item 89): Back from the
+ * The last listing this browser drew, kept in the module (docs/archive/rounds/POLISH.md item 89): Back from the
  * editor mounts the page again with a new loader promise, and without this the grid would show
  * its frames until the store answered; with it the cards paint at once and the new listing
  * replaces them when it lands. Never read on the server, where the module is shared by every
@@ -1629,7 +1629,7 @@ function RenameField({
 /**
  * How many times one card asks the render route for its capture in one page life: the first ask
  * when the browser loads the lazy image, and one more each time the card comes back into view
- * after a failed ask, up to this count. There is no timed retry (docs/POLISH.md items 90 and
+ * after a failed ask, up to this count. There is no timed retry (docs/archive/rounds/POLISH.md items 90 and
  * 111): the polish round's verifier read the listing asking `/api/render/<slide>` 243 times in
  * 14 s for 98 cards on the blob tier, every card that answered 404 or 204 asking again after 3 s,
  * after 6 s and once more on viewport entry, and the load took 10 s with 46 to 77 console errors.
@@ -1638,9 +1638,9 @@ function RenameField({
 export const THUMB_ASKS_PER_VIEW_MAX = 3;
 
 /**
- * A card's thumbnail (docs/PRODUCT.md 3.6): the render route's capture of slide 1, and under it
+ * A card's thumbnail (docs/archive/rounds/PRODUCT.md 3.6): the render route's capture of slide 1, and under it
  * from the first paint a plate in the deck's paper with the title in its ink (decks.css), so a
- * card is never a grey box. One ask per view (docs/POLISH.md items 90 and 111): the browser asks
+ * card is never a grey box. One ask per view (docs/archive/rounds/POLISH.md items 90 and 111): the browser asks
  * once when the lazy image nears the viewport; a failed ask leaves the plate standing, and the
  * card asks once more only when it leaves the viewport and comes back (a new view), at most
  * THUMB_ASKS_PER_VIEW_MAX times in the page's life. A fresh deck's capture on save lands behind
@@ -1927,7 +1927,7 @@ function DeckRowView({
 }
 
 // ---------------------------------------------------------------------------------------------
-// The card's Download (docs/POLISH.md item 85): the PowerPoint file of the whole deck
+// The card's Download (docs/archive/rounds/POLISH.md item 85): the PowerPoint file of the whole deck
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1936,7 +1936,7 @@ function sleep(ms: number): Promise<void> {
 /**
  * The stored address of a PowerPoint file of the deck, and the name the store serves it under:
  * `export.run` with the Perfect mode in the deck's own appearance (one theme, so the name is the
- * title with no appearance tag, docs/POLISH.md items 85 and 86), through the same server
+ * title with no appearance tag, docs/archive/rounds/POLISH.md items 85 and 86), through the same server
  * functions the editor's row and the print route use (a sync export on a deployment, a job on a
  * checkout). The address answers the file as an attachment; `downloadFromPage` saves it under
  * the title.
@@ -1978,7 +1978,7 @@ function downloadAddress(url: string): string {
 }
 
 /**
- * The one sentence a refused export shows (docs/POLISH.md item 82): the store's and the worker's
+ * The one sentence a refused export shows (docs/archive/rounds/POLISH.md item 82): the store's and the worker's
  * words never reach the seller; the format is named and the advice is to try again.
  */
 export function exportRefusal(format: 'pptx' | 'pdf', error: unknown): string {

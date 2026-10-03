@@ -21,7 +21,7 @@
 // the worst page.
 //
 // A shader block's frame reaches the page through the print document's own `<img>` at the block's
-// box (the renderer, docs/FEATURES.md 5.5), so the PDF carries the frame's pixels with nothing
+// box (the renderer, docs/archive/rounds/FEATURES.md 5.5), so the PDF carries the frame's pixels with nothing
 // drawn here; a shader whose frame was missing or stale at export time is the report's one
 // `shaders:` row, the same row the PowerPoint builder writes (scene/shaders.ts, report.ts).
 //
@@ -192,7 +192,7 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
     includeSkipped: options.includeSkipped,
     assetBase,
     title: `${deck.title} (${theme})`,
-    // the catalog faces the deck uses ride inside the pages as data URIs (docs/PRODUCT.md 4.2,
+    // the catalog faces the deck uses ride inside the pages as data URIs (docs/archive/rounds/PRODUCT.md 4.2,
     // 4.5; build/b5.md R6): the headless page draws the face and the PDF embeds its subset
     fontSrc: (id, file) => fontFileDataUri(id, file.file),
     deckSlides: Object.values(slides),
@@ -306,7 +306,7 @@ export async function exportPdf(options: ExportPdfOptions): Promise<ExportPdfRes
       ? `skipped: ${omitted.length} slide(s) left out (${omitted.join(', ')}); pass includeSkipped to carry them`
       : 'skipped: none; every slide of the deck is in the file',
   );
-  // the one shader row (docs/FEATURES.md 5.5): the shaders of the exported slides whose frame was
+  // the one shader row (docs/archive/rounds/FEATURES.md 5.5): the shaders of the exported slides whose frame was
   // missing or stale at export time; the page draws what the renderer drew for them
   const pendingShaders = ids.flatMap((slideId) => {
     const slide = slides[slideId];

@@ -57,7 +57,7 @@ import * as tables from './areas/tables.mjs';
 import * as text from './areas/text.mjs';
 import * as view from './areas/view.mjs';
 import * as wordart from './areas/wordart.mjs';
-/* the polish round (docs/POLISH.md 5.1): the acceptance rows, one module per audit area, each on
+/* the polish round (docs/archive/rounds/POLISH.md 5.1): the acceptance rows, one module per audit area, each on
    its own slides after the chrome area, so `--areas polish-tables` drives Kevin's table rows alone */
 import * as polishTables from './areas/polish-tables.mjs';
 import * as polishText from './areas/polish-text.mjs';
@@ -67,13 +67,13 @@ import * as polishChrome from './areas/polish-chrome.mjs';
 
 /**
  * The areas in the order the walk runs them; each declares the rows it drives. The return round
- * (docs/RETURN.md section 5) added the documents (tables, charts, diagrams, word art), the
+ * (docs/archive/rounds/RETURN.md section 5) added the documents (tables, charts, diagrams, word art), the
  * formatting rows, the chrome, the View rows and the inbox; the chrome area runs last among the
  * editor areas because its 900 px reads resize the viewport and put it back. The product round
- * (docs/PRODUCT.md 8.1) added the brand kit, the fonts and the assist after the View rows; a row
+ * (docs/archive/rounds/PRODUCT.md 8.1) added the brand kit, the fonts and the assist after the View rows; a row
  * whose control a lane has not landed reads not driven with the control's id. The features round
- * (docs/FEATURES.md 7.1) added the logo picker after the fonts and, at ship two, the shader library
- * after the logos. The objects round (docs/OBJECTS.md 6.1) added the gestures area after the word
+ * (docs/archive/rounds/FEATURES.md 7.1) added the logo picker after the fonts and, at ship two, the shader library
+ * after the logos. The objects round (docs/archive/rounds/OBJECTS.md 6.1) added the gestures area after the word
  * art: the frame rows of the live gestures, each on its own slide.
  */
 export const AREAS = [
@@ -89,11 +89,11 @@ export const AREAS = [
   charts,
   diagrams,
   wordart,
-  /* the objects round (docs/OBJECTS.md 2.6, 6.1): the live gestures after the documents, on their
+  /* the objects round (docs/archive/rounds/OBJECTS.md 2.6, 6.1): the live gestures after the documents, on their
      own slides, so every block kind the frames read is the walk's own */
   gestures,
   share,
-  /* the people round (docs/PEOPLE.md 6.1): how a person is drawn, after the share and versions
+  /* the people round (docs/archive/rounds/PEOPLE.md 6.1): how a person is drawn, after the share and versions
      rows on the same deck: the chip geometry, the renderers' agreement, the own chip following
      the name and the avatar, the anonymous picture refusal */
   people,
@@ -105,15 +105,15 @@ export const AREAS = [
   view,
   brand,
   fonts,
-  /* the features round, ship one (docs/FEATURES.md 7.1): the logo picker after the fonts, on a Title and body slide */
+  /* the features round, ship one (docs/archive/rounds/FEATURES.md 7.1): the logo picker after the fonts, on a Title and body slide */
   logos,
-  /* the features round, ship two (docs/FEATURES.md 7.1): the shader library after the logos, on a
+  /* the features round, ship two (docs/archive/rounds/FEATURES.md 7.1): the shader library after the logos, on a
      Title slide and a Title and body slide of its own; its View row rides here too */
   shaders,
   assist,
   inbox,
   chrome,
-  /* the polish round (docs/POLISH.md 5.1): the acceptance rows of the nine audits' areas, after
+  /* the polish round (docs/archive/rounds/POLISH.md 5.1): the acceptance rows of the nine audits' areas, after
      the chrome area (whose 900 px reads resize the viewport and put it back) and before the
      switch's row; each module makes its own slides and turns the switch back off */
   polishTables,

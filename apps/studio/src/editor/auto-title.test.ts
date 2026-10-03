@@ -7,7 +7,7 @@ import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
 
 import { autoTitleMutations, headingAfter, titleHeadingOf } from './auto-title';
 
-// The auto-title (SPEC 6.3; docs/RETURN.md 2.18, `decks.name.follows-heading`): the deck's name
+// The auto-title (SPEC 6.3; docs/archive/rounds/RETURN.md 2.18, `decks.name.follows-heading`): the deck's name
 // follows the title slide's heading burst by burst until the deck is renamed by hand, so a slow
 // typist's deck is not named after its first eight characters.
 

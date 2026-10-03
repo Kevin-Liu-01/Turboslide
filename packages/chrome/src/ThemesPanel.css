@@ -97,7 +97,7 @@
   color: var(--pt-ink);
 }
 
-/* The Brand kit panel (ThemesPanel.tsx; docs/PRODUCT.md 4.1): nine sections under 12 px titanium
+/* The Brand kit panel (ThemesPanel.tsx; docs/archive/rounds/PRODUCT.md 4.1): nine sections under 12 px titanium
    heads, the logo preview at 132 by 84 on the deck's appearance, six colour rows of a swatch,
    the role and a hex field, the Font dropdowns, the footer and counter fields, the frame checks
    with one sentence each, the lexicon and the Reset button at the foot. Tokens only; radius 0. */

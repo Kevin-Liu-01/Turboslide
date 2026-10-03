@@ -285,7 +285,7 @@ describe('presencePostSchema', () => {
     expect(rosterEntrySchema.parse(roster)).toEqual(roster);
     expect(rosterEntrySchema.safeParse({ ...roster, hueSlot: 6 }).success).toBe(false);
     expect(rosterEntrySchema.safeParse({ ...roster, trust: 'admin' }).success).toBe(false);
-    // the reader's email (docs/PEOPLE.md 3.7): absent by default, round trips when the room wrote it
+    // the reader's email (docs/archive/rounds/PEOPLE.md 3.7): absent by default, round trips when the room wrote it
     expect(rosterEntrySchema.parse(roster)).not.toHaveProperty('email');
     const withEmail = { ...roster, trust: 'verified' as const, email: 'maya@example.test' };
     expect(rosterEntrySchema.parse(withEmail)).toEqual(withEmail);
@@ -328,7 +328,7 @@ describe('entries and events', () => {
     ).toBe(false);
   });
 
-  it('carries the op ids a blob tier record covers, and lets a covering edit ride without mutations (channel.ts Entry.covers; docs/SYNC.md 3.2)', () => {
+  it('carries the op ids a blob tier record covers, and lets a covering edit ride without mutations (channel.ts Entry.covers; docs/archive/rounds/SYNC.md 3.2)', () => {
     const covered = { ...entry, covers: [`${CLIENT}:7`, `${CLIENT}:8`] };
     expect(entrySchema.parse(covered)).toEqual(covered);
     // the later synthesized entries of a resend answer carry the ids and no mutations

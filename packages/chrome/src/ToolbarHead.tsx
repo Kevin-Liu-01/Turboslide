@@ -53,7 +53,7 @@ export type ToolbarButtonProps = {
   text?: string;
   /** a dropdown chevron after the glyph or the word */
   chevron?: boolean;
-  /** the control's current value as `data-value` (the Align list reads the effective alignment, docs/FEATURES.md 2.2 rank 3) */
+  /** the control's current value as `data-value` (the Align list reads the effective alignment, docs/archive/rounds/FEATURES.md 2.2 rank 3) */
   value?: string;
   className?: string;
   children?: ReactNode;
@@ -269,7 +269,7 @@ const noPaintStore = () => () => undefined;
 export function ToolbarHead() {
   const shell = useEditorShell();
   const editor = shell.input.editor;
-  /* Paint format reads pressed while the brush is armed (docs/POLISH.md 2.3 item 18; the polish
+  /* Paint format reads pressed while the brush is armed (docs/archive/rounds/POLISH.md 2.3 item 18; the polish
      round fix round 3, B5's R19: the button armed on the title placeholder and said nothing, so the
      walk row `text.tail.heading-takes-list-indent` read it as not armed): the stage's handle is the
      store, `subscribePaint` its subscription and `paintArmed` the snapshot, so nothing is wired

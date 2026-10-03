@@ -541,7 +541,7 @@ describe('hosted stores', () => {
       expect(Object.keys(body.slides)).toHaveLength(WORKED_SLIDES.length);
       // the seed's snapshot, which no record names, waits for the prune: since the sync and
       // costs round the prune runs every SNAPSHOT_PRUNE_EVERY records and at the last stream's
-      // close, not after every commit (docs/SYNC.md 3.6), so the write itself lists nothing
+      // close, not after every commit (docs/archive/rounds/SYNC.md 3.6), so the write itself lists nothing
       expect(fake.calls.filter((c) => c.op === 'list')).toEqual([]);
       expect(await a.snapshots()).toBe(2);
       expect(await a.pruneSnapshots()).toBe(1);
@@ -591,7 +591,7 @@ describe('hosted stores', () => {
       expect(lost.ok).toBe(false);
       // two different bodies, two different keys: the loser stored its snapshot and then failed
       // the conditional manifest push, so its snapshot is named by no record and no etag; the
-      // seed's snapshot stands beside them until the prune runs (docs/SYNC.md 3.6)
+      // seed's snapshot stands beside them until the prune runs (docs/archive/rounds/SYNC.md 3.6)
       const stored = blobsOf(pair.fake, 'decks/gt-brand/snapshots/');
       expect(stored).toHaveLength(3);
       expect(stored).toContain(seedSnapshot());
@@ -800,7 +800,7 @@ describe('hosted stores', () => {
       const at = (needle: string) => ops.findIndex((op) => op.startsWith(needle));
       const key = outcome.entry.snapshot!;
       // round one: the head and the leases read, before anything is put. The leases are read
-      // proven since the sync and costs round (docs/SYNC.md 3.5: the head first, the body only
+      // proven since the sync and costs round (docs/archive/rounds/SYNC.md 3.5: the head first, the body only
       // when its md5 is the head's version), and the seed holds no leases file, so the head
       // answers null and no body is read
       const firstPut = ops.findIndex((op) => op.startsWith('put '));
@@ -809,7 +809,7 @@ describe('hosted stores', () => {
       expect(at('head decks/gt-brand/deck.json')).toBeLessThan(firstPut);
       expect(at('head decks/gt-brand/leases.json')).toBeLessThan(firstPut);
       expect(at('get decks/gt-brand/leases.json')).toBe(-1);
-      // no listing anywhere in the write (docs/SYNC.md invariant 7)
+      // no listing anywhere in the write (docs/archive/rounds/SYNC.md invariant 7)
       expect(ops.filter((op) => op.startsWith('list '))).toEqual([]);
       // round two: the snapshot, the changed slide body and the record all precede the manifest
       const commit = at('put decks/gt-brand/deck.json');
@@ -1112,7 +1112,7 @@ describe('hosted stores', () => {
           appearance: WORKED_DECK.defaults?.appearance ?? WORKED_DECK.brand?.appearance ?? 'dark',
           firstSlide: WORKED_DECK.sections[0]?.slideIds[0] ?? null,
         });
-        // the new deck's facts are its stored manifest's (the appearance the template gave it, docs/PRODUCT.md 4.1)
+        // the new deck's facts are its stored manifest's (the appearance the template gave it, docs/archive/rounds/PRODUCT.md 4.1)
         const stored = JSON.parse(
           new TextDecoder().decode(fake.blobs.get('decks/light-deck/deck.json')!.bytes),
         ) as { defaults?: { appearance?: string }; brand?: { appearance?: string } };
@@ -2461,7 +2461,7 @@ describe('hosted stores', () => {
     });
   });
   // -------------------------------------------------------------------------------------------
-  // The sync and costs round, the store tier (docs/SYNC.md 3.2, 3.5, 3.6, 6.3, 6.4; build/b3.md)
+  // The sync and costs round, the store tier (docs/archive/rounds/SYNC.md 3.2, 3.5, 3.6, 6.3, 6.4; build/b3.md)
 
   describe('the sync and costs round: the store tier', () => {
     const opsOf = (fake: FakeBlobClient): string[] =>
@@ -2533,7 +2533,7 @@ describe('hosted stores', () => {
         'head decks/gt-brand/versions/2.json',
         'head decks/gt-brand/comments/index.json',
       ]);
-      // four heads and two gets, no listing: the reader's row of docs/SYNC.md 4.5
+      // four heads and two gets, no listing: the reader's row of docs/archive/rounds/SYNC.md 4.5
       expect(ops).toHaveLength(6);
       // a second read inside the same head is one head and nothing else
       fake.calls.length = 0;

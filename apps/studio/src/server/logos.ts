@@ -1,6 +1,6 @@
-// The logo picker's server (docs/FEATURES.md 4.2, 4.4, 4.7, 4.9, 4.11; audit-logos 2, 8, 10, 12):
+// The logo picker's server (docs/archive/rounds/FEATURES.md 4.2, 4.4, 4.7, 4.9, 4.11; audit-logos 2, 8, 10, 12):
 // the cached index held in memory per instance and read from the store once (one `get`, then a
-// `head` at most once an hour on a request, never on a timer, docs/SYNC.md 4), the search over
+// `head` at most once an hour on a request, never on a timer, docs/archive/rounds/SYNC.md 4), the search over
 // it, the mark route's cache rule (an open licence mark's sanitized file is kept in the store with
 // its attribution `<desc>` and served from there; every other mark is fetched at each call,
 // sanitized in the function and never written to the store, judge-design rejection 17), the
@@ -141,14 +141,14 @@ export const INDEX_REVALIDATE_MS = 60 * 60 * 1000;
  * does not hold (`since`, the refresh answer's `builtAt`; the verifier's pass 1, F4): a refresh
  * made on another instance is adopted by the instance that answers the next search that names
  * it, in place of waiting out the hour above. One head per instance per this interval at most,
- * on a request, never on a timer (docs/SYNC.md 4).
+ * on a request, never on a timer (docs/archive/rounds/SYNC.md 4).
  */
 export const SEARCH_REVALIDATE_MS = 2 * 1000;
 /**
  * How long an instance serving the bundled snapshot waits before it asks the store for the index
  * again (build/hotfix.md section 9): the edge's window is minutes, the hourly interval above would
  * leave a seller on a copy of the ship's day for the hour, and one head every half minute per
- * instance on a request stays inside docs/SYNC.md 4.
+ * instance on a request stays inside docs/archive/rounds/SYNC.md 4.
  */
 export const SNAPSHOT_REVALIDATE_MS = 30 * 1000;
 /** How often an instance persists a discovery (an unavailable variant, a newly cached mark) at most. */
@@ -1116,7 +1116,7 @@ export async function logoInsert(
     sourceBytes,
     'image/svg+xml',
   );
-  // the vector files (docs/VECTOR.md 4.1): the sanitized source itself for one neutral mark, and
+  // the vector files (docs/archive/rounds/VECTOR.md 4.1): the sanitized source itself for one neutral mark, and
   // for a tinted mono or a light and dark pair the two svg strings this insert already holds, one
   // file per appearance, so the sheet, the PDF and the web page draw the mark as vector
   let twins: AssetTwins;

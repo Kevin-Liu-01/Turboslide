@@ -72,7 +72,7 @@ export type DeckPayload = {
   deck: ViewerDeck;
   /**
    * the appearance the slides were rendered in: the caller's `theme`, else the deck's own
-   * (docs/POLISH.md item 77: the print route draws and downloads the deck as it is)
+   * (docs/archive/rounds/POLISH.md item 77: the print route draws and downloads the deck as it is)
    */
   theme: 'light' | 'dark';
   /** the theme's icon sprite (63 Heroicons plus gt-mark), inlined once per page */
@@ -238,7 +238,7 @@ function buildViewerDeck(
         .filter((section) => section.slideIds.length > 0),
       slides: out,
       fallback: servedId === requestedId ? undefined : servedId,
-      /* the brand kit's frame band for the viewer's and the print page's Frame (docs/PRODUCT.md 4.1) */
+      /* the brand kit's frame band for the viewer's and the print page's Frame (docs/archive/rounds/PRODUCT.md 4.1) */
       band: frameBandOf(
         deck,
         options.theme,
@@ -380,7 +380,7 @@ export const getHostingFacts = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HostingFacts> => hostingFacts(),
 );
 
-/** `from` is a built in id or any id of the template index (docs/PRODUCT.md 4.3); createDeck refuses an unknown one naming the index. */
+/** `from` is a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3); createDeck refuses an unknown one naming the index. */
 export type CreateDeckInput = { name: string; from: DeckTemplateId | string; id?: string };
 
 function isTemplateId(value: unknown): value is string {
@@ -510,7 +510,7 @@ export type CopyDeckRequest = {
   name: string;
   slideIds?: string[];
   removeNotes?: boolean;
-  /** carry the comment threads (docs/POLISH.md item 98) */
+  /** carry the comment threads (docs/archive/rounds/POLISH.md item 98) */
   copyComments?: boolean;
   baseRevision?: number;
 };
@@ -683,7 +683,7 @@ export async function deckDetails(input: { deckId: string }): Promise<DeckDetail
 }
 
 /**
- * One deck's card from its own head (the polish round, docs/POLISH.md item 75): the home page
+ * One deck's card from its own head (the polish round, docs/archive/rounds/POLISH.md item 75): the home page
  * keeps a deck this browser opened on its grid until the store's listing holds it, and asks here
  * for the ones the listing does not hold yet. The answer is the card the listing would carry
  * (the title, the slide count, the appearance, the first slide), null for a deck that is

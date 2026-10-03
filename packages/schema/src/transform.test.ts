@@ -378,7 +378,7 @@ describe('transformMutation and transformAgainst', () => {
     expect(transformAgainst(mark([0, 2], italic), [splice(0, 5, '')])).toEqual([]);
   });
 
-  it("transforms a heading splice against another heading splice on both sides, as a block's (docs/SYNC.md 3.4)", () => {
+  it("transforms a heading splice against another heading splice on both sides, as a block's (docs/archive/rounds/SYNC.md 3.4)", () => {
     const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
     const hs = (at: number, remove: number, insert: string): SpliceMutation => ({
       op: 'text.splice',
@@ -403,7 +403,7 @@ describe('transformMutation and transformAgainst', () => {
     expect(sameText(a, lead)).toBe(false);
   });
 
-  it('reads slide.set of a field as a rewrite of that field alone, and of another slide pointer as the whole slide (docs/SYNC.md 3.4)', () => {
+  it('reads slide.set of a field as a rewrite of that field alone, and of another slide pointer as the whole slide (docs/archive/rounds/SYNC.md 3.4)', () => {
     const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
     const onHeading: SpliceMutation = {
       op: 'text.splice',
@@ -513,7 +513,7 @@ function randomEdit(random: () => number): MarkMutation['edit'] {
     }
     if (key === 'color' || key === 'hl') set[key] = COLORS[randomInt(random, COLORS.length - 1)]!;
     else if (key === 'link') set.link = 'https://x.y/z';
-    /* the run's own size (the polish round, docs/POLISH.md 2.3 item 16): an integer in px */
+    /* the run's own size (the polish round, docs/archive/rounds/POLISH.md 2.3 item 16): an integer in px */
     else if (key === 'size') set.size = 12 + randomInt(random, 60);
     else set[key] = true;
   }
@@ -926,7 +926,7 @@ function base() {
   return { deck: result.deck, slides: result.slides };
 }
 
-describe('the deck title follows the cover heading in the reducer (the sync round, docs/SYNC.md 3.4)', () => {
+describe('the deck title follows the cover heading in the reducer (the sync round, docs/archive/rounds/SYNC.md 3.4)', () => {
   const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
   const hs = (at: number, remove: number, insert: string): SpliceMutation => ({
     op: 'text.splice',

@@ -11,7 +11,7 @@ import type { SectionWrite } from './fields';
  * Text fitting (gslides-parity SPEC-2 0.23, 0.41, 2.1.5, 2.2.18, 2.2.19, section 5; R09 A5):
  * Autofit as Google's three radios (Resize shape to fit text disabled on a block without `pos`
  * with its note), Indentation Left in px, Padding as one head over a two by two grid of Top,
- * Bottom, Left and Right with the unit inside each field (docs/PRODUCT.md 3.2; audit-interface
+ * Bottom, Left and Right with the unit inside each field (docs/archive/rounds/PRODUCT.md 3.2; audit-interface
  * 15) and Vertical alignment on a positioned box, shape or text box, or a table. Each control is one action call: `block.autofit`
  * with `apply` so the fit is written at once, `text.indent` with `to`, `block.set /padding`,
  * `block.set /valign`.
@@ -126,7 +126,7 @@ export function TextFittingSection({ block, write }: FittingSectionProps) {
       {takesPadding ? (
         <div className="ts-fo-row ts-fo-padding" data-control="formatOptions.padding">
           {/* one Padding head over a two by two grid of Top, Bottom, Left, Right, the unit inside
-              each field (docs/PRODUCT.md 3.2; audit-interface 15) */}
+              each field (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 15) */}
           <span className="ts-fo-field-label ts-fo-head">{words.padding}</span>
           <div className="ts-fo-fields is-two">
             {(['top', 'bottom', 'left', 'right'] as const).map((side) => (

@@ -1165,7 +1165,7 @@
     },
     "font.list": {
       "label": "Fonts",
-      "doc": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/PRODUCT.md 4.2).",
+      "doc": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2).",
       "mutates": false,
       "milestone": "P1",
       "group": "render"

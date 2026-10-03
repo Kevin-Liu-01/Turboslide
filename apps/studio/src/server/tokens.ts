@@ -32,7 +32,7 @@ import { logSecurityEvent } from './log';
  * handed to the page by the `thumbGrant` server function) gates the `?w=` variant of the render
  * route in enforce mode.
  *
- * The return round (docs/RETURN.md 2.19): the render grant (`signRenderGrant`, an HMAC over the
+ * The return round (docs/archive/rounds/RETURN.md 2.19): the render grant (`signRenderGrant`, an HMAC over the
  * deck, the slide, the theme, the scale, the format and an expiry of 10 minutes), appended by the
  * `renderSlideImages` server function to every picture url it answers, so the tab File > Download
  * > JPEG image or PNG image opens on the render route is served without the bearer and as an
@@ -391,7 +391,7 @@ export function verifyThumbGrant(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The render grant (the return round, docs/RETURN.md 2.19; audit-surface rows 27 and 28): File >
+// The render grant (the return round, docs/archive/rounds/RETURN.md 2.19; audit-surface rows 27 and 28): File >
 // Download > JPEG image and PNG image run `render.slide` and open the first picture url in a tab,
 // which carries no header, so on a deployment with TURBOSLIDE_TOKEN set the render route answered
 // 401 "bearer token required". The `renderSlideImages` server function, which runs `authorize(read)`

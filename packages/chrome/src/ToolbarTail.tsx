@@ -79,7 +79,7 @@ import { tipProps } from './Tooltip';
  * Fill color writes the selected cells through the table plans. The tail measures its controls
  * against the bar on every selection change and on every resize and folds the ones that do not
  * fit into one More button whose menu lists them with their labels, at any window width
- * (docs/PRODUCT.md 3.4; the fixed fold at 1100 px left with the product round: with a shape
+ * (docs/archive/rounds/PRODUCT.md 3.4; the fixed fold at 1100 px left with the product round: with a shape
  * selected the tail ended at x 1525 in a 1440 px bar and Format options was cut to "Format
  * optio", audit-interface section 6). The fold order is Clear formatting, the indent pair, the
  * list buttons, Highlight color, then the fill and border group, then the rest from the right
@@ -226,7 +226,7 @@ export function shownSize(block: Block | undefined): number | null {
 }
 
 /**
- * The size mark the selected range carries, read from the document's text (docs/POLISH.md 2.3
+ * The size mark the selected range carries, read from the document's text (docs/archive/rounds/POLISH.md 2.3
  * item 16; VERIFICATION.md "Polish round, pass 1" finding 10: "Acme" selected, the tail's "+"
  * wrote a 22 px mark on the run and the field kept reading the block's 20). The document is read
  * rather than the session's caret report, which lags a mark write by a render. A collapsed caret
@@ -297,7 +297,7 @@ function listButtonOf(
 }
 
 /**
- * True when the selected picture draws a vector asset (docs/VECTOR.md 4.4): the shell's context
+ * True when the selected picture draws a vector asset (docs/archive/rounds/VECTOR.md 4.4): the shell's context
  * carries `selection.vector` from the asset's `vectorOf` (vector/build/b1.md R1.4, R2); read
  * through a widened type so this file typechecks before and after the fact lands, and false
  * while the context has no such fact, which is what production does today.
@@ -313,7 +313,7 @@ export function ToolbarTail() {
   const slide = input.document.slides[input.slideId];
   const block = selectedBlock(slide, input.selection);
   /* the title slide's fields are pseudo blocks the menus see (editor-shell `pseudoBlockOf`): the
-     size field reads their heading's size (docs/POLISH.md 2.3 item 22; the box read empty while
+     size field reads their heading's size (docs/archive/rounds/POLISH.md 2.3 item 22; the box read empty while
      a title or a subtitle was edited) */
   const sizeBlock =
     block ??
@@ -322,7 +322,7 @@ export function ToolbarTail() {
       : undefined);
   const members = selectedBlocks(slide, input.selection);
   /* a text block with an outline is word art: the shape tail's fill and border controls lead its
-     text tail (docs/OBJECTS.md 4.2 item 4; toolbar-tails.ts WORDART_TAIL) */
+     text tail (docs/archive/rounds/OBJECTS.md 4.2 item 4; toolbar-tails.ts WORDART_TAIL) */
   const base: TailKind = tailOfSelection(slide, input.selection);
   const kind: TailKind =
     base === 'text' && block?.type === 'text' && block.outline !== undefined ? 'wordart' : base;
@@ -332,7 +332,7 @@ export function ToolbarTail() {
      whole (a chart, a table cell, a group) falls back to the default tail, so the bar is never
      empty while a parked block is selected; a control whose arrow opens a parked row (Crop image
      and Mask image) keeps its button and loses the arrow. */
-  /* the tail reads the mode (docs/POLISH.md 2.6 item 58; audit-pages item 6, audit-chrome item
+  /* the tail reads the mode (docs/archive/rounds/POLISH.md 2.6 item 58; audit-pages item 6, audit-chrome item
      27): a reader at /edit and Commenting mode get no write control, since every tail control
      writes; the tail's end (the pointer toggle, Hide the menus) and the head's view controls stay */
   const canEdit = tailEditable(menuContext);
@@ -419,7 +419,7 @@ export function ToolbarTail() {
   };
 
   /**
-   * The effective alignment the Align control reads and shows (docs/FEATURES.md 2.2 rank 3): the
+   * The effective alignment the Align control reads and shows (docs/archive/rounds/FEATURES.md 2.2 rank 3): the
    * block's typography, a table's caret column, and a closed shape's label centred and middle
    * unless the block says otherwise (the renderer's default, packages/render/src/block-css.ts
    * `.shape-text`); `undefined` reads as Left and Top in the list.
@@ -464,7 +464,7 @@ export function ToolbarTail() {
     if (block === undefined) return null;
     switch (op) {
       case 'fillColor':
-        /* word art's Fill color is the letters' colour (docs/OBJECTS.md 4.2 item 4) */
+        /* word art's Fill color is the letters' colour (docs/archive/rounds/OBJECTS.md 4.2 item 4) */
         if (block.type === 'text' && block.outline !== undefined)
           return { path: '/color', current: colorOf(block.color) };
         if (block.type === 'table') {
@@ -495,7 +495,7 @@ export function ToolbarTail() {
         return null;
       case 'textColor':
         /* a heading or a paragraph takes any kit colour once its schema carries `color`
-           (docs/PRODUCT.md 4.1, the fix for the heading swatch that did nothing; the field is the
+           (docs/archive/rounds/PRODUCT.md 4.1, the fix for the heading swatch that did nothing; the field is the
            integrator's request in build/b5.md); until then the two tones of before */
         if (block.type === 'heading' || block.type === 'paragraph') {
           if (HEADING_TAKES_COLOR)
@@ -513,7 +513,7 @@ export function ToolbarTail() {
         }
         /* a shape's label colour is its `color` field, optional in the schema, so a shape drawn by
            the tool has none until a swatch writes it: the `in` check below answered null and the
-           Paper swatch wrote nothing on the rectangle (docs/RETURN.md 2.2 the fix; audit-formatting
+           Paper swatch wrote nothing on the rectangle (docs/archive/rounds/RETURN.md 2.2 the fix; audit-formatting
            row 77), the gap the focus round closed for text boxes (FOCUS.md rank 12) */
         if (block.type === 'shape') return { path: '/color', current: colorOf(block.color) };
         return 'color' in block ? { path: '/color', current: colorOf(block.color) } : null;
@@ -548,7 +548,7 @@ export function ToolbarTail() {
         if (block?.type === 'shot' || block?.type === 'picture') {
           const current =
             block.frame?.weight ?? (block.type === 'shot' && block.border === true ? 1 : 0);
-          /* Google's list (docs/POLISH.md 2.5 item 44; polish/build/b4.md R6): None, then the
+          /* Google's list (docs/archive/rounds/POLISH.md 2.5 item 44; polish/build/b4.md R6): None, then the
              schema's SHOT_FRAME_WEIGHTS, one list for the tail, the panel and the schema */
           return [0, ...SHOT_FRAME_WEIGHTS].map((weight) => ({
             id: `weight-${weight}`,
@@ -584,7 +584,7 @@ export function ToolbarTail() {
         }));
       }
       case 'align': {
-        /* Justify sits beside Left, Center and Right while its row is present (docs/RETURN.md 3.2,
+        /* Justify sits beside Left, Center and Right while its row is present (docs/archive/rounds/RETURN.md 3.2,
            `formatting.align.toolbar-justify`); a parked row leaves the list with the switch off */
         const items = ALIGN_ITEMS.map((id) => itemById(id)).filter((item) =>
           isPresent(item, menuContext),
@@ -634,7 +634,7 @@ export function ToolbarTail() {
         }));
       }
       case 'legend': {
-        /* an absent field means right (blocks/chart.ts); the check mark reads it so (docs/FEATURES.md
+        /* an absent field means right (blocks/chart.ts); the check mark reads it so (docs/archive/rounds/FEATURES.md
            2.2 rank 10, audit-objects 15: the tail checked None while the legend was drawn) */
         const current =
           block?.type === 'chart' ? ((block as ChartBlock).legend ?? 'right') : 'right';
@@ -714,7 +714,7 @@ export function ToolbarTail() {
       case 'numberFormat': {
         /* the tail's pick goes through the same plan as the panel's select (chart-tools.ts
            chartTailPlan): the default of a field (right, plain) removes it and every other value
-           is stored, so Legend > None writes `none` and hides the legend (docs/FEATURES.md 2.2
+           is stored, so Legend > None writes `none` and hides the legend (docs/archive/rounds/FEATURES.md 2.2
            rank 10; audit-objects 15 measured `/legend` written as undefined for None) */
         if (block.type !== 'chart') return;
         const plan = chartTailPlan(block as ChartBlock, op, String(option.value));
@@ -745,7 +745,7 @@ export function ToolbarTail() {
       return;
     }
     /* Text color on a table with a range or with no cell open writes the colour mark into every
-       selected cell's text (docs/FEATURES.md 2.2 rank 8; editor-shell.ts tableMarksPlan); before
+       selected cell's text (docs/archive/rounds/FEATURES.md 2.2 rank 8; editor-shell.ts tableMarksPlan); before
        this the swatch reached no colour target on a table and wrote nothing */
     if (op === 'textColor' && !many && block !== undefined && block.type === 'table') {
       run(textStylePlan(facts(), { color: value === 'none' ? null : value }, 'Text color'));
@@ -807,7 +807,7 @@ export function ToolbarTail() {
       if (value === 'none') delete frame.color;
       else {
         frame.color = value;
-        /* a colour on a picture with no weight draws at once at 1 px (docs/POLISH.md 2.5 item 44;
+        /* a colour on a picture with no weight draws at once at 1 px (docs/archive/rounds/POLISH.md 2.5 item 44;
            polish/build/b4.md R6) */
         if (frame.weight === undefined) frame.weight = 1;
       }
@@ -821,7 +821,7 @@ export function ToolbarTail() {
     switch (op) {
       case 'borderDash':
       case 'lineDash': {
-        /* word art's Border dash is its outline's (docs/OBJECTS.md 4.2 item 4), written as one
+        /* word art's Border dash is its outline's (docs/archive/rounds/OBJECTS.md 4.2 item 4), written as one
            /outline once the schema carries the field (toolbar-tails.ts WORDART_TAKES_DASH) */
         if (block?.type === 'text' && block.outline !== undefined) {
           const outline = block.outline as { color: Color; width: number; dash?: Dash };
@@ -972,7 +972,7 @@ export function ToolbarTail() {
       return;
     }
     if (op === 'crop') {
-      /* the vector round (docs/VECTOR.md 4.4): crop has no vector meaning, so an svg picture is
+      /* the vector round (docs/archive/rounds/VECTOR.md 4.4): crop has no vector meaning, so an svg picture is
          refused with the one sentence the menu row and the viewer's double click say */
       if (vectorPictureSelected(menuContext)) {
         shell.say(FORMAT.picture.svgCrop);
@@ -1009,14 +1009,14 @@ export function ToolbarTail() {
       shell.runControl(control, anchor);
       return;
     }
-    /* the Image button opens the file chooser on click (docs/PRODUCT.md section 2 rank 17; build/b2.md
+    /* the Image button opens the file chooser on click (docs/archive/rounds/PRODUCT.md section 2 rank 17; build/b2.md
        R4); its arrow keeps the Insert > Image sources */
     if (control.control === 'toolbar.insertImage' && input.uploadPicture !== undefined) {
       input.uploadPicture(pictureTargetOf('insert.image.upload', input.slideId, undefined));
       return;
     }
     /* the Shape button arms the rectangle tool the way the Line button arms the line tool, and
-       its arrow lists the shapes, so the three insert buttons share one form (docs/POLISH.md 2.6
+       its arrow lists the shapes, so the three insert buttons share one form (docs/archive/rounds/POLISH.md 2.6
        item 74; audit-chrome item 44: Image and Line were splits and Shape a chevron button) */
     if (control.control === 'toolbar.insertShape' && input.onDrawTool !== undefined) {
       input.onDrawTool({ kind: 'shape', shape: 'rectangle' });
@@ -1066,7 +1066,7 @@ export function ToolbarTail() {
     }));
 
   /**
-   * The pressed state of a text mark button (SPEC-2 6.2; docs/PRODUCT.md 3.1, the pressed cell):
+   * The pressed state of a text mark button (SPEC-2 6.2; docs/archive/rounds/PRODUCT.md 3.1, the pressed cell):
    * the marks under the caret or the selection, from the editor's report when it carries them and
    * else from the block's text and the range (`selectionMarks`), so Cmd+B in a session lights the
    * button; a block level bold (the heading's weight) counts as well.
@@ -1133,7 +1133,7 @@ export function ToolbarTail() {
               />
             </span>
           );
-        /* the Font dropdown in Google's position, left of the size field (docs/PRODUCT.md 4.2;
+        /* the Font dropdown in Google's position, left of the size field (docs/archive/rounds/PRODUCT.md 4.2;
            FontPicker.tsx); the read only family while the catalog is parked (3.4) */
         if (control.op === 'font')
           return (
@@ -1151,7 +1151,7 @@ export function ToolbarTail() {
             <ToolbarDivider key={`${key}-sep`} />
           ) : null;
         /* a button whose plan refuses reads disabled with the plan's sentence in its tooltip
-           (docs/POLISH.md 2.3 item 18; audit-chrome item 17: Bulleted list drew enabled on a
+           (docs/archive/rounds/POLISH.md 2.3 item 18; audit-chrome item 17: Bulleted list drew enabled on a
            heading and answered with a snackbar); the plans are pure, so the read is cheap */
         const refusal = refusalOf(control);
         const drawn: TailControl =
@@ -1177,7 +1177,7 @@ export function ToolbarTail() {
           control.arrow !== undefined
         ) {
           const arrowItem = itemById(control.arrow);
-          /* the vector round (docs/VECTOR.md 4.4; vector/build/b3.md R2): the Crop button is
+          /* the vector round (docs/archive/rounds/VECTOR.md 4.4; vector/build/b3.md R2): the Crop button is
              disabled with the sentence on an svg picture, the way the menu row is; the Mask arrow
              beside it stays live, since a mask clips the vector as it clips a raster */
           const cropRefused = control.op === 'crop' && vectorPictureSelected(menuContext);
@@ -1339,7 +1339,7 @@ export function ToolbarTail() {
             returnFocusTo={plate.anchor}
             onSelect={(chosen) => shell.runItem(chosen, plate.anchor)}
             onClose={() => setPlate(null)}
-            /* the vector round (docs/VECTOR.md 2.6): a pick in a plate the dropdown opens (the
+            /* the vector round (docs/archive/rounds/VECTOR.md 2.6): a pick in a plate the dropdown opens (the
                Shapes, Arrows, Callouts and Equation rows of the Shape button) closes the dropdown,
                so the click that places the shape lands on the sheet and not on a tile */
             renderDynamic={(item, options) =>
@@ -1421,7 +1421,7 @@ function AnchoredPlate({
   children: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  /* the plate opens under its anchor and scrolls inside the viewport (docs/POLISH.md 2.6 item
+  /* the plate opens under its anchor and scrolls inside the viewport (docs/archive/rounds/POLISH.md 2.6 item
      53): the height passed to anchoredAt is the room below the anchor, so a tall plate is never
      placed above the toolbar off screen; Pickers.css caps it with `--ts-plate-top` */
   const at = anchoredAt(anchor, 360, 0);
@@ -1476,7 +1476,7 @@ function FontSizeField({
   const [typing, setTyping] = useState<string | null>(null);
   /* the typed value as the handlers read it: Enter commits and blurs in one event, and the blur's
      commit ran again on the state the render had bound, so one typed size made two writes and two
-     history entries and the first Cmd+Z restored nothing (docs/RETURN.md 2.14 item 3;
+     history entries and the first Cmd+Z restored nothing (docs/archive/rounds/RETURN.md 2.14 item 3;
      audit-formatting row 12). The ref is cleared before the write, so the blur finds nothing */
   const typingRef = useRef<string | null>(null);
   const tip = controlTip(control, shell.platform, enabled);
@@ -1506,7 +1506,7 @@ function FontSizeField({
       return;
     }
     /* a table's text has its own ladder, 15 to 20 (schema TABLE_SIZES): a typed value outside it
-       lands on the nearest end with the end's sentence, never on the validator (docs/POLISH.md
+       lands on the nearest end with the end's sentence, never on the validator (docs/archive/rounds/POLISH.md
        2.6 item 59; the walk's 22 answered "Invalid option: expected one of 20|18|17|16|15") */
     if (block.type === 'table') {
       const ladder = [...TABLE_SIZES].sort((a, b) => a - b);
@@ -1533,7 +1533,7 @@ function FontSizeField({
         );
       return;
     }
-    /* a typed value is honoured (docs/POLISH.md 2.3 item 16; audit-text item 5: 36 landed on 34
+    /* a typed value is honoured (docs/archive/rounds/POLISH.md 2.3 item 16; audit-text item 5: 36 landed on 34
        with a snackbar); the ladder stays for the steppers */
     const step = Math.round(next);
     /* a range selected in a session takes the size as a run mark, as a colour does (item 16), so
@@ -1600,7 +1600,7 @@ function FontSizeField({
   const fieldTip = tipProps(tip);
   const decrease = itemById('format.text.size.decrease');
   const increase = itemById('format.text.size.increase');
-  /* a table's steppers walk the table ladder 15 to 20 (docs/POLISH.md 2.2 item 5; polish/build/b2.md
+  /* a table's steppers walk the table ladder 15 to 20 (docs/archive/rounds/POLISH.md 2.2 item 5; polish/build/b2.md
      R4): at its ends the button reads disabled with the sentence, and no write reaches the
      validator from the control */
   const tableLadder = [...TABLE_SIZES].sort((a, b) => a - b);
@@ -1658,7 +1658,7 @@ function FontSizeField({
         spellCheck={false}
         /* a session parks while the field holds the focus and resumes with its range when the
            field blurs (viewer InlineText `isParkingField`), so a typed size lands on the selected
-           run as a mark (docs/POLISH.md 2.3 item 16) */
+           run as a mark (docs/archive/rounds/POLISH.md 2.3 item 16) */
         {...{ [SESSION_PARK_ATTRIBUTE]: 'true' }}
         {...fieldTip}
         onFocus={(event) => {

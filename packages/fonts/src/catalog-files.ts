@@ -30,7 +30,7 @@ export type CatalogFamilyFacts = {
   copyright: string;
   /** the variable axes of the upright file, tag to [min, max]; null for a static family */
   axes: Record<string, [number, number]> | null;
-  /** the GSUB feature tags of the upright file, sorted (docs/FEATURES.md 3.1 item 4) */
+  /** the GSUB feature tags of the upright file, sorted (docs/archive/rounds/FEATURES.md 3.1 item 4) */
   features: string[];
   /** true when the face has tabular figures (`tnum`), so the Tabular figures row is enabled for it */
   tnum: boolean;

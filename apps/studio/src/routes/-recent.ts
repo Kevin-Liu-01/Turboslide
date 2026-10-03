@@ -235,7 +235,7 @@ export function recordDeckOpened(
 
 /**
  * Rewrites the facts of a deck this browser opened without touching its time (the polish round,
- * docs/POLISH.md item 76): a rename from the card or the editor's title field reaches the
+ * docs/archive/rounds/POLISH.md item 76): a rename from the card or the editor's title field reaches the
  * mirror, so the card the mirror draws before the listing catches up reads the new name. A deck
  * the record does not hold is left alone; a rename is not an open.
  */
@@ -256,7 +256,7 @@ export function updateDeckFacts(deckId: string, patch: Partial<DeckOpenFacts>): 
 }
 
 /**
- * The trashed marker (docs/PRODUCT.md section 2 ranks 15 and 16; audit-seller 15, 16): File >
+ * The trashed marker (docs/archive/rounds/PRODUCT.md section 2 ranks 15 and 16; audit-seller 15, 16): File >
  * Move to trash in the editor writes the deck's id and title here before it leaves for /decks, so
  * the home page drops the deck from its Opened on this device row, shows "Moved to trash" with
  * Undo within its first seconds, and restores the deck when Undo is pressed. sessionStorage, so
@@ -270,7 +270,7 @@ export const TRASHED_MAX_AGE_MS = 15_000;
 
 /**
  * The window event the editor raises when its Move to trash write is refused after the page has
- * left for /decks (docs/POLISH.md item 81; packages/chrome/src/EditorShell.tsx spells the same
+ * left for /decks (docs/archive/rounds/POLISH.md item 81; packages/chrome/src/EditorShell.tsx spells the same
  * name): the home page shows the sentence and keeps the card. `detail` is `{ id, message }`.
  */
 export const TRASH_REFUSED_EVENT = 'turboslide:trash-refused';

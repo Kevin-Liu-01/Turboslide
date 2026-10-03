@@ -69,7 +69,7 @@ describe('ExportMenu focus', () => {
     if (!bundle) throw new Error('no bundle button');
     expect(bundle.getAttribute('data-tip')).toBe('Download deck bundle');
     expect(bundle.hasAttribute('title')).toBe(false);
-    /* inside a dialog a tooltip shows on hover alone, never on keyboard focus (docs/PRODUCT.md
+    /* inside a dialog a tooltip shows on hover alone, never on keyboard focus (docs/archive/rounds/PRODUCT.md
        3.1.1; audit-interface 4): the focus shows nothing, the pointer shows the sentence */
     hideTooltip();
     fireEvent.focus(bundle);

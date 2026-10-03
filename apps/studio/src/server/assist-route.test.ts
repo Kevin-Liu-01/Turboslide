@@ -17,7 +17,7 @@ import {
 import type { AssistRouteDeps } from './assist-route';
 import type { RequestIdentity } from './room';
 
-// The assist route (docs/PRODUCT.md 6.3, 6.4; the rows assist.quota.429, assist.viewer.disabled,
+// The assist route (docs/archive/rounds/PRODUCT.md 6.3, 6.4; the rows assist.quota.429, assist.viewer.disabled,
 // assist.agent.propose-accept's server half): every refusal in one shape and one sentence, the
 // switches, the quotas on a propose alone, the action under the caller's author, and the errors
 // the module throws mapped to a status and never a stack. Over fakes; the route file binds the

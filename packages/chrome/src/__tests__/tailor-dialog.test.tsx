@@ -14,10 +14,10 @@ import type { EditorShellState } from '../editor-shell-context';
 import { TAILOR } from '../panels/assist-strings';
 import { hideTooltip } from '../Tooltip';
 
-// Tools > Tailor for a customer (docs/PRODUCT.md section 5): the live count over the deck's texts,
+// Tools > Tailor for a customer (docs/archive/rounds/PRODUCT.md section 5): the live count over the deck's texts,
 // the skip rows, Apply as one `deck.tailor` with the replacements and the skips, the disabled Use
 // this logo on every slide row (not driven, never broken until the brand kit lands). The features
-// round (docs/FEATURES.md 4.5): the Find the <To> logo slot over a finder, the stored mark named
+// round (docs/archive/rounds/FEATURES.md 4.5): the Find the <To> logo slot over a finder, the stored mark named
 // in the one `deck.tailor`, and the chooser's four raster types.
 
 afterEach(() => {
@@ -89,7 +89,7 @@ describe('TailorDialog', () => {
       baseRevision: 7,
     });
     expect(closeDialog).toHaveBeenCalledTimes(1);
-    /* the result is said as the pass is sent and again once it is acknowledged (docs/POLISH.md
+    /* the result is said as the pass is sent and again once it is acknowledged (docs/archive/rounds/POLISH.md
        2.9 item 116; the polish round's fix round): the same sentence with the dialog's counts */
     expect(say.mock.calls.map((call: unknown[]) => call[0])).toEqual([
       TAILOR.result('Globex', 5, 3, 1),
@@ -135,7 +135,7 @@ describe('TailorDialog', () => {
     expect(say).toHaveBeenCalledTimes(2);
   });
 
-  it('draws no dead Use this logo on every slide row, the reason under the buttons while Apply waits, and reports a refused write in the snackbar after the dialog closed (docs/POLISH.md 2.9 item 116)', async () => {
+  it('draws no dead Use this logo on every slide row, the reason under the buttons while Apply waits, and reports a refused write in the snackbar after the dialog closed (docs/archive/rounds/POLISH.md 2.9 item 116)', async () => {
     const dispatch = vi.fn(() =>
       Promise.reject(new Error('The slide changed while this was written; ask again')),
     );

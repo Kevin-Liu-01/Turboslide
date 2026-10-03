@@ -1,4 +1,4 @@
-// The two keys of a material frame (SPEC 5.4; docs/FEATURES.md 5.5). `recipeKey` is the capture's
+// The two keys of a material frame (SPEC 5.4; docs/archive/rounds/FEATURES.md 5.5). `recipeKey` is the capture's
 // own identity, `sha256(materialId, uniforms, size, timeMs, backend)`, the same digest
 // packages/import/src/assets.ts writes for the imported deck: the JSON of the five fields in that
 // order, hashed as written, so a key recorded in deck.json is reproduced from the record and a
@@ -48,7 +48,7 @@ export function anchorOf(block: Pick<MaterialBlock, 'anchor'>): number {
   return block.anchor ?? MATERIAL_ANCHORS[1];
 }
 
-/** The long side of every frame, in pixels (SPEC 4.2; docs/FEATURES.md 5.5). */
+/** The long side of every frame, in pixels (SPEC 4.2; docs/archive/rounds/FEATURES.md 5.5). */
 export const FRAME_LONG_SIDE = 3200;
 
 /**

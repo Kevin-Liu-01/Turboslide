@@ -526,7 +526,7 @@ export type RequestIdentity = {
   setCookie?: string;
   record: PrincipalRecord | null;
   /**
-   * the account a sign in session resolved to (docs/PEOPLE.md 3.6; SPEC-3 7.4), so the author,
+   * the account a sign in session resolved to (docs/archive/rounds/PEOPLE.md 3.6; SPEC-3 7.4), so the author,
    * the boot identity and the roster entry render the account without a store read; null or
    * absent for an anonymous browser and a bearer
    */
@@ -537,14 +537,14 @@ export type RequestIdentityOptions = {
   /**
    * read the principal's deck index past this instance's 5 s row (access.ts refreshIndexFacts):
    * the editor boot, so a reload's payload carries the name and the choice written on another
-   * instance at once (docs/PEOPLE.md 6.4); the routes between keep the row
+   * instance at once (docs/archive/rounds/PEOPLE.md 6.4); the routes between keep the row
    */
   freshIndex?: boolean;
 };
 
 /**
  * The identity of a request on the room routes: the bearer as the bootstrap admin agent (SPEC-3
- * 0.23), else the account session when the deployment has an identity database (docs/PEOPLE.md
+ * 0.23), else the account session when the deployment has an identity database (docs/archive/rounds/PEOPLE.md
  * 3.6: a signed in browser is its account on the editor boot, presence, ops, the stream, share,
  * access, notify, assist and the version authors, one id with the comments the actions transport
  * writes), else the sealed anonymous cookie (minted here when absent, so a stream opened before
@@ -608,11 +608,11 @@ export async function requestIdentity(
     .touch(principal.id, new Date(), true)
     .catch(() => null);
   /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
-     (docs/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
+     (docs/archive/rounds/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
      instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
      principal's deck index on the Blob store (the carrier the link grants use), read through
      this instance's 5 s row (access.ts indexFactsFor) or past it when the caller asks
-     (`freshIndex`, the editor boot; docs/PEOPLE.md 6.4), and applied by access.ts
+     (`freshIndex`, the editor boot; docs/archive/rounds/PEOPLE.md 6.4), and applied by access.ts
      recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
      replaces the record's unless the record's choice is a picture, which the index never carries
      and a stale glyph must not outlive */
@@ -647,7 +647,7 @@ export async function requestIdentity(
 }
 
 /**
- * The account session of a request, as the room reads it (docs/PEOPLE.md 3.6): the better-auth
+ * The account session of a request, as the room reads it (docs/archive/rounds/PEOPLE.md 3.6): the better-auth
  * session before the anonymous cookie when the deployment has an identity database. The rule is
  * the auth runtime's `requestIdentity` (auth/identity.ts): the account principal `usr_<id>` with
  * its address and the admin flag, the anonymous cookie beside it linked to the account if it is
@@ -674,7 +674,7 @@ async function sessionIdentity(
     const record =
       (await runtime.principals.touch(facts.principalId, now, true)) ??
       newPrincipalRecord(facts.principalId, now);
-    /* the choice on the profile row first, the record second (docs/PEOPLE.md 3.13): the profile
+    /* the choice on the profile row first, the record second (docs/archive/rounds/PEOPLE.md 3.13): the profile
        outlives the record's 90 day TTL */
     const avatar = facts.profile.avatar ?? record.avatar;
     const account: AccountProfile = {
@@ -747,7 +747,7 @@ export function authorOf(identity: RequestIdentity): Author {
 
 /**
  * The resolved identity of a principal id from its record and, for a signed in request, the
- * account the session resolved to (docs/PEOPLE.md 3.6). Synchronous: the author of a write and
+ * account the session resolved to (docs/archive/rounds/PEOPLE.md 3.6). Synchronous: the author of a write and
  * the boot identity read it on the request's own facts. An anonymous id linked to an account by
  * the alias table is resolved by `resolvePrincipalId` and `resolveRequestIdentity`, which read
  * the runtime's alias and account stores.
@@ -771,7 +771,7 @@ export function resolveIdentity(
 
 /**
  * The resolution over the stores for an id the request did not carry (the version history, the
- * comment authors, the access record's people; docs/PEOPLE.md 3.6, 3.8): an account id and an
+ * comment authors, the access record's people; docs/archive/rounds/PEOPLE.md 3.6, 3.8): an account id and an
  * anonymous id the alias table links to an account resolve through the auth runtime (its
  * profile, its picture, "Deleted account" for a profile that is gone), an agent id through its
  * token record, and an anonymous id nobody linked from the room's principal record.
@@ -789,7 +789,7 @@ export async function resolvePrincipalId(principalId: string): Promise<ResolvedI
     .get(principalId)
     .catch(() => null);
   /* the name and the choice typed on another instance ride the principal's deck index (b1.md
-     R17; docs/PEOPLE.md 3.13), read here the way requestIdentity reads them for the request's
+     R17; docs/archive/rounds/PEOPLE.md 3.13), read here the way requestIdentity reads them for the request's
      own principal: the blob tier's principal store is a file store per instance, so a departed
      guest's comment read on another instance drew the label without this (the integrator's
      preview run, people.comment-departed-guest) */
@@ -826,7 +826,7 @@ async function carriedFacts(
 
 /**
  * The address of a verified person this instance resolved lately, for the roster entry a grant
- * holder or the owner reads (docs/PEOPLE.md 3.7): never on the shared roster, so the reader's
+ * holder or the owner reads (docs/archive/rounds/PEOPLE.md 3.7): never on the shared roster, so the reader's
  * instance answers from what it resolved itself (the presence post it served, the boot payload
  * it built) within EMAIL_MEMORY_MS; a person resolved on another instance alone reads with no
  * address until this instance resolves them.
@@ -882,7 +882,7 @@ export type IdentityViewsOptions = {
 };
 
 /**
- * The resolved views of the people a page names (docs/PEOPLE.md 3.8): the version authors, the
+ * The resolved views of the people a page names (docs/archive/rounds/PEOPLE.md 3.8): the version authors, the
  * comment authors, the owner, the pending owner and the grants, keyed by principal id, with the
  * mark and, for a reader who may see it, the address. An id of no known format (a round one
  * author name) is left out and renders by the chrome's fallback.
@@ -2041,7 +2041,7 @@ async function liveForBase(room: Room, baseSeq: number): Promise<LiveDocument> {
  */
 /**
  * How many forced syncs a resync that names a revision makes, and the pause between them: up to
- * about three seconds in all (the product round, docs/PRODUCT.md 8.2 the recorded classes;
+ * about three seconds in all (the product round, docs/archive/rounds/PRODUCT.md 8.2 the recorded classes;
  * RETURN ship.md section 5 `versions.undo-restore`: the restore's resync on the blob tier landed
  * after the revision on another instance inside the row's bound, so the tab kept the document
  * from before the restore and Cmd+Z had nothing to bring back; three tries 250 ms apart were
@@ -2094,7 +2094,7 @@ export async function liveAtLeast(
 /**
  * A candidate the reducer refused on the blob tier. Since the sync round the entry was transformed
  * past every record between its base and the mirror's revision before the reducer judged it
- * (docs/SYNC.md 3.3, invariant 2), so a refusal against a mirror at or above the base is the
+ * (docs/archive/rounds/SYNC.md 3.3, invariant 2), so a refusal against a mirror at or above the base is the
  * reducer's answer to the client's write and the loser reads the reducer's sentence in its
  * reject card, as on the memory tier (row `sync.structural.concurrent`: a move of a block whose
  * slide another person deleted first is refused with "No slide"). Before the round the blob
@@ -2114,7 +2114,7 @@ export function blobRefusal(
 }
 
 /**
- * The origin check of docs/SYNC.md 3.2 (invariant 3), the cheap first pass: the records above a
+ * The origin check of docs/archive/rounds/SYNC.md 3.2 (invariant 3), the cheap first pass: the records above a
  * POST's base, read from the mirror as stream entries (blob.ts `since`, `Entry.covers`), name the
  * op ids they folded, so a resent POST whose first attempt committed is answered with one
  * synthesized entry per op id at that record's seq and never placed again. Until the sync round
@@ -2165,7 +2165,7 @@ export const STALE_AFTER_REFUSAL =
 
 /**
  * The blob tier (SPEC-3 3.7 e): every append is a commit; the seq is the revision. Exported for
- * its test. The sync round (docs/SYNC.md 3.2, 3.3; invariants 2 and 3) made it read the records
+ * its test. The sync round (docs/archive/rounds/SYNC.md 3.2, 3.3; invariants 2 and 3) made it read the records
  * between the POST's base and the mirror's revision once (`channel.since`, from the mirror, no
  * store call) and use them twice: the op ids they cover answer a resend without a placement
  * (`splitReplayed`), and their mutations are what every fresh entry is transformed past before
@@ -2322,7 +2322,7 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       }
       if (!placed.ok) {
         // the entry's own first admission, found by its op id: answered from the record, as a
-        // resend above the base is (docs/SYNC.md 3.2), and the refusal is not the tab's to read
+        // resend above the base is (docs/archive/rounds/SYNC.md 3.2), and the refusal is not the tab's to read
         const covering = await coveringEntry(entry.opId);
         if (covering !== undefined) {
           replayed.push(...synthesizeReplayed(covering, [entry.opId]));
@@ -2473,7 +2473,7 @@ export function forgetIdentity(identity: string): void {
 }
 
 /**
- * The facts of a request its resolution depends on, the cache row's validator (docs/PEOPLE.md
+ * The facts of a request its resolution depends on, the cache row's validator (docs/archive/rounds/PEOPLE.md
  * 6.4): a request whose record or account carries another name or choice than the row was
  * resolved from (the index read past its cache at a boot or a first presence post, a record
  * another route wrote on this instance) is resolved again inside the 5 s, so the index row's
@@ -2490,7 +2490,7 @@ function identityFactsKey(identity: RequestIdentity): string {
 
 /**
  * The request identity with its record read against the deck index past this instance's 5 s row
- * (access.ts refreshIndexFacts and recordWithIndexFacts; docs/PEOPLE.md 6.4): a client's first
+ * (access.ts refreshIndexFacts and recordWithIndexFacts; docs/archive/rounds/PEOPLE.md 6.4): a client's first
  * presence post after its boot. The same identity for a bearer, a request without a record, a
  * store that did not answer, or an index that carries nothing new.
  */
@@ -2504,7 +2504,7 @@ export async function withFreshIndexFacts(identity: RequestIdentity): Promise<Re
 }
 
 /**
- * The resolved identity of a request, through the 5 s cache (docs/PEOPLE.md 3.6): a bearer as
+ * The resolved identity of a request, through the 5 s cache (docs/archive/rounds/PEOPLE.md 3.6): a bearer as
  * its agent, a signed in request as the account the session resolved to, an anonymous request as
  * its record, or as the account the alias table links it to (a browser that signed in once and
  * carries the old cookie; SPEC-3 7.4). The boot payload and the roster entry read it.
@@ -2559,7 +2559,7 @@ export async function rosterEntryFor(
   existing: readonly RosterEntry[],
 ): Promise<RosterEntry> {
   /* a client's first post after its boot reads the person's index past this instance's 5 s row
-     (docs/PEOPLE.md 6.4): the boot's payload read the store on its instance, and the instance
+     (docs/archive/rounds/PEOPLE.md 6.4): the boot's payload read the store on its instance, and the instance
      that serves the first post may hold the row from before the choice; the ticks after keep
      the row, so the cost is one index read per client, never per tick */
   const first = existing.every((row) => row.clientId !== post.clientId);
@@ -2601,7 +2601,7 @@ export async function rosterEntryFor(
 // and the function run one transform, one placement and one reader projection. Every name is
 // re-exported here so the routes, the dispatchers and the tests read them where they always did;
 // the two reader functions are bound to this instance's email memory (`rememberedEmail`,
-// docs/PEOPLE.md 3.7), which the object replaces with the ticket's `email` claim.
+// docs/archive/rounds/PEOPLE.md 3.7), which the object replaces with the ticket's `email` claim.
 
 export {
   BETWEEN_MAX_BYTES,

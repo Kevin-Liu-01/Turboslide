@@ -27,7 +27,7 @@ import {
 } from './logo-model';
 import type { LogoBox, LogoPlacedObject, LogoRow } from './logo-model';
 
-// The logo picker's pure rules (docs/FEATURES.md 7.3, the B6 test in packages/chrome): the
+// The logo picker's pure rules (docs/archive/rounds/FEATURES.md 7.3, the B6 test in packages/chrome): the
 // appearance rule picks `dark`, `default`, `mono` tinted or the plate line for the fixture marks on
 // paper and on ink; the licence sentence mapping covers the 57 strings thesvg.org recorded on
 // 2026-09-20 with "The brand's own terms" as the fallback; the mono tint is off for CC BY-ND,

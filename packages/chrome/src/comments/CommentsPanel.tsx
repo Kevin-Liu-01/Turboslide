@@ -30,7 +30,7 @@ import './comments.css';
  * under its slide with its quoted text; a resolved thread offers "Re-open". A click opens the
  * thread's card on its slide. The foot links to Notification settings, Google's position. With no
  * comment at all the panel shows the sentence and one line that names the gesture, and the tabs,
- * the search field and the filter arrive with the first comment (docs/PRODUCT.md 3.2;
+ * the search field and the filter arrive with the first comment (docs/archive/rounds/PRODUCT.md 3.2;
  * audit-interface 20: seven controls stood around one sentence).
  */
 

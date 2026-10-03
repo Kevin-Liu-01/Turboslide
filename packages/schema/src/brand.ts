@@ -1,4 +1,4 @@
-// The brand kit (docs/PRODUCT.md 4.1, 4.4): one record on the deck, every field optional with a
+// The brand kit (docs/archive/rounds/PRODUCT.md 4.1, 4.4): one record on the deck, every field optional with a
 // defined meaning when absent, edited in the Brand kit panel through `brand.set` and read by every
 // renderer through the override stylesheet of @turboslide/render/theme-css. The six colour roles
 // are named once, in the marketer's words, and map to the sheet tokens; the logo and footer slots
@@ -66,7 +66,7 @@ export const SLOT_POSITION_LABELS: Readonly<Record<SlotPosition, string>> = {
 };
 
 /**
- * The title slide's mark when the record names no position (docs/POLISH.md item 49; audit-media
+ * The title slide's mark when the record names no position (docs/archive/rounds/POLISH.md item 49; audit-media
  * item 20): it draws in the flow above the heading (render slide.ts `titleMarkSlot`), which the
  * panel's select names by what is drawn instead of "Bottom left". The value is the select's
  * alone, never written to the record: picking it removes `positions.mark`.

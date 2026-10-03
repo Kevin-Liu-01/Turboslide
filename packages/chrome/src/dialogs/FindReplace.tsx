@@ -13,7 +13,7 @@ import { tipProps } from '../Tooltip';
 /**
  * Edit > Find and replace (gslides-parity SPEC 2.2, 12 "Dialogs"; Cmd+Shift+H): Find, Replace
  * with, Match case, Prev, Next, Replace, Replace all. The matches are counted over every visible
- * text of the deck and the count line reads "k of n" as the query is typed (docs/PRODUCT.md
+ * text of the deck and the count line reads "k of n" as the query is typed (docs/archive/rounds/PRODUCT.md
  * section 5; audit-gaps 21); Prev and Next step match by match, moving to its slide (view.goto)
  * and selecting the block that holds it; Replace runs `text.replaceAll` on the current slide
  * alone, Replace all over the deck, each one write.
@@ -23,7 +23,7 @@ import { tipProps } from '../Tooltip';
 export type FindMatch = { slideId: string; blockId: string | null; index: number };
 
 /**
- * Every match of the query over the deck in reading order (docs/PRODUCT.md section 5 "Find and
+ * Every match of the query over the deck in reading order (docs/archive/rounds/PRODUCT.md section 5 "Find and
  * replace"; audit-gaps 21): the count line reads "k of n" from it and Prev and Next step through
  * it, selecting the block that holds the match on its slide. A block's texts are read the way
  * `slideStrings` reads them; a notes match names no block.
@@ -171,7 +171,7 @@ export function FindReplaceDialog() {
     [input.document, order, find, matchCase],
   );
   /* the match the seller stands on: the first one on the current slide as the query is typed,
-     then the one Prev and Next step to (docs/PRODUCT.md section 5: "1 of 2"; audit-gaps 21) */
+     then the one Prev and Next step to (docs/archive/rounds/PRODUCT.md section 5: "1 of 2"; audit-gaps 21) */
   const [stepped, setStepped] = useState<number | null>(null);
   const firstOnSlide = matches.findIndex((match) => match.slideId === input.slideId);
   const current =

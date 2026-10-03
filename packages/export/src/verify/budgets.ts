@@ -30,7 +30,7 @@ export const DEFAULT_BUDGETS: Budgets = {
 
 /**
  * Where the ink cut sits on the line from the background to the block's ink color. Measured on
- * the deck's native export against LibreOffice's pages (M2 review, docs/M2-STATUS.md), as a share
+ * the deck's native export against LibreOffice's pages (M2 review, docs/archive/status/M2-STATUS.md), as a share
  * of the paper-to-ink range: the --hair token at 18 percent alpha paints at 18 percent and at
  * about 9 after LibreOffice resamples the 2x raster onto two rows; a diagram's medium strokes at
  * about 30 (15 resampled); the muted text color at 46; the value color of ruled rows at 77. A cut

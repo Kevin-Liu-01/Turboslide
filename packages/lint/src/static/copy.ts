@@ -102,7 +102,7 @@ function lastParagraph(plain: string): string {
 
 /**
  * copy/empty-placeholder (gslides-parity SPEC 5.4): the empty Texts a layout left for copy. The
- * sentence names the object in plain words and cites no specification (docs/POLISH.md 2.6 item
+ * sentence names the object in plain words and cites no specification (docs/archive/rounds/POLISH.md 2.6 item
  * 55; audit-chrome item 3 read the same sentence nine times on one table, one per empty cell,
  * each ending in a parenthesis): a table's empty cells are one finding with their count, on the
  * first empty cell's path.
@@ -130,7 +130,7 @@ function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
           blockId: ref.block.id,
           path: `${ref.path}${first.path}`,
           /* the panel lists one slide's findings, so the sentence names the table alone, as
-             docs/POLISH.md 2.6 item 55 words it: "The table has 9 empty cells" */
+             docs/archive/rounds/POLISH.md 2.6 item 55 words it: "The table has 9 empty cells" */
           proposal:
             count === 1
               ? 'The table has an empty cell. Type into it or remove the row.'

@@ -1,4 +1,4 @@
-// The sentence a refused write shows a seller (the polish round, docs/POLISH.md item 59; B1's
+// The sentence a refused write shows a seller (the polish round, docs/archive/rounds/POLISH.md item 59; B1's
 // R11): a validator's refusal names a pointer and a schema word ("slides/split-1.json
 // /slots/main/2/size: Invalid option: expected one of 20|18|17|16|15", "…/typography: Unknown
 // field"), which stays in the console and the ledger; the snackbar reads one sentence in the

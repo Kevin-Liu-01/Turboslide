@@ -34,7 +34,7 @@ import type {
 } from './identity.ts';
 
 /**
- * Where a role lands after the exchange (SPEC-3 0.13; the polish round, docs/POLISH.md item
+ * Where a role lands after the exchange (SPEC-3 0.13; the polish round, docs/archive/rounds/POLISH.md item
  * 101): every role lands on the editor page, whose stream carries the ops, so a viewer sees an
  * edit within a second instead of on a reload; the editor draws its viewer floor for a viewer
  * (no write tools). `/deck/<id>` stays the viewer for the present link and the example deck.

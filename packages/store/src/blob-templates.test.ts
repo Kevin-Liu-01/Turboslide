@@ -1,5 +1,5 @@
 // The saved templates across instances on the blob tier (the product round fix round;
-// docs/PRODUCT.md 4.3; VERIFICATION.md "Product round, pass 1" finding 2): two blob collections
+// docs/archive/rounds/PRODUCT.md 4.3; VERIFICATION.md "Product round, pass 1" finding 2): two blob collections
 // over one fake store stand in for two function instances. A template saved and pushed on one
 // lists on the other after a pull, a deck is made from it there, a rename and a deletion travel,
 // the deployment default travels, a pull with nothing moved is one head, and the seed's own

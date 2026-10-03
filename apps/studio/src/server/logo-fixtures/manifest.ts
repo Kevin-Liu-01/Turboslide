@@ -1,4 +1,4 @@
-// The ten mark fixture upstream's manifest (docs/FEATURES.md 4.9; build/b6.md): `icons.json`
+// The ten mark fixture upstream's manifest (docs/archive/rounds/FEATURES.md 4.9; build/b6.md): `icons.json`
 // records in thesvg.org's own shape (slug, title, aliases, hex, categories, variants as paths,
 // license, url, guidelines, dateAdded, collection) for the ten marks marks.ts serves. The cases the
 // rows and the tests need: a CC0 mark with a mono and a wordmark (figma); a white default with a

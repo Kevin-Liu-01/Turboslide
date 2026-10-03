@@ -25,7 +25,7 @@ export { FLAG_DEFAULTS, FLAG_NAMES };
 export type { FlagName };
 
 /**
- * The assist's kill switch (docs/PRODUCT.md 6.3, 6.4: "the kill switch answers 503"). Its name
+ * The assist's kill switch (docs/archive/rounds/PRODUCT.md 6.3, 6.4: "the kill switch answers 503"). Its name
  * joins `FLAG_NAMES` in `packages/schema/src/access.ts` by request to the integrator
  * (build/b7.md, Product round); until that line lands the switch is known here alone: read from
  * the same reader as the twelve under its own name, on by default, so the route and the panel
@@ -50,7 +50,7 @@ export function isStudioFlagName(value: string): value is StudioFlagName {
 export const FLAG_CACHE_MS = 5_000;
 
 // ---------------------------------------------------------------------------------------------
-// The two deployment variables of the features round (docs/FEATURES.md 4.7, 4.9; build/b6.md R5).
+// The two deployment variables of the features round (docs/archive/rounds/FEATURES.md 4.7, 4.9; build/b6.md R5).
 // Neither is a kill switch: each is read from the environment at the call, never from Redis, and
 // a preview sets them per spec project while production leaves both unset. The names are defined
 // here, the light module every server file reads, so `logo-index.ts` (sharp, the store) and the
@@ -74,7 +74,7 @@ export function logoUpstreamMode(
   return 'network';
 }
 
-/* `TURBOSLIDE_SVG_RASTER` of the features round left with the vector round (docs/VECTOR.md 4.7):
+/* `TURBOSLIDE_SVG_RASTER` of the features round left with the vector round (docs/archive/rounds/VECTOR.md 4.7):
    the hosted intake's svg branch runs by default and the variable is unread. */
 
 /** The checkout's flag file under the state folder. */

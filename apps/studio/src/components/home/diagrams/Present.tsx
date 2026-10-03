@@ -2,7 +2,7 @@ import { PRESENT } from '../copy';
 import { Marker } from './Marker';
 
 /**
- * Present and share (docs/POLISH.md 3.2 item 4, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): three
+ * Present and share (docs/archive/rounds/POLISH.md 3.2 item 4, 3.3 item 2; docs/NEXT.md 4.1.3 item 9): three
  * frames on a 20 unit grid, the editor window with its filmstrip and stage, the presenter window
  * with the timer, the next slide and the notes as labelled boxes, and a phone with the show,
  * joined by 1 px lines labelled with the S key and the present link, each ending in an 11 unit

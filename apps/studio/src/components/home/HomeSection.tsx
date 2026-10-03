@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /**
- * One section of /home (docs/POLISH.md 3.2; the page grammar of docs/NEXT.md 4.1.2): one
+ * One section of /home (docs/archive/rounds/POLISH.md 3.2; the page grammar of docs/NEXT.md 4.1.2): one
  * purpose, one heading with no icon before it (DECK-GRAMMAR 40: an icon sits only in a key cell),
  * one lead at the 560 px measure, at most one action or note under the lead (`after`), and one
  * picture or one diagram beside the text (`children`) in the two column block of 3.4 (text 5 of

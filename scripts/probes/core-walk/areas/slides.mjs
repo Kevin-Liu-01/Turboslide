@@ -84,7 +84,7 @@ export const IDS = [
   'slides.notes.view-menu-toggle',
   'slides.context.empty-canvas',
   'slides.numbers.apply',
-  /* the product round (docs/PRODUCT.md 8.1) */
+  /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'slides.layout.title-and-body-single',
   'slides.layout.subtitle-prompt',
   'slides.layout.new-slide-inherits',
@@ -449,7 +449,7 @@ export async function run(t) {
       const before = await t.slideOrder();
       const c = await t.cardCenter(before[before.length - 1]);
       await t.rightClickAt(c.x, c.y);
-      /* the polish round (docs/POLISH.md 2.6 item 73; audit-chrome item 49): the card's row is
+      /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item 49): the card's row is
          Delete slide, the sheet's row, since the integrator's model.ts landed it */
       await t.clickContextRow('slide.deleteSlide');
       order = await orderOf(before.length - 1);
@@ -1463,7 +1463,7 @@ export async function run(t) {
     },
   );
 
-  // ---- the return round's row (docs/RETURN.md 3.4, section 5)
+  // ---- the return round's row (docs/archive/rounds/RETURN.md 3.4, section 5)
   await t.step(
     'slides.numbers.apply',
     'Insert > Slide numbers, Skip title slides, Apply; read the sheets and the show; Apply to selected; Cmd+Z',
@@ -1489,7 +1489,7 @@ export async function run(t) {
         await t.sleep(250);
         return counter();
       };
-      /* the dialog writes the brand kit's Slide numbers since the product round (docs/PRODUCT.md
+      /* the dialog writes the brand kit's Slide numbers since the product round (docs/archive/rounds/PRODUCT.md
          4.1; the older defaults.counter is the fallback the schema still reads) */
       const storedMode = async () => {
         const info = await t.invoke('deck.info').catch(() => null);
@@ -1640,7 +1640,7 @@ export async function run(t) {
 }
 
 /**
- * The product round's rows (docs/PRODUCT.md section 2 ranks 2 and 24, 4.3, 8.1): the Title and
+ * The product round's rows (docs/archive/rounds/PRODUCT.md section 2 ranks 2 and 24, 4.3, 8.1): the Title and
  * body layout with one title over one body, the subtitle prompt of the 4/8 split, New slide
  * inheriting the current layout, the layout plate's caption row, and Import slides with nothing
  * preselected. B3 owns the layouts and the dialog, B1 the plate's caption.

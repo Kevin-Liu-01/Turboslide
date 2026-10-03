@@ -32,7 +32,7 @@ describe('LayoutGrid', () => {
         render={() => '<section class="slide"></section>'}
       />,
     );
-    /* the GT layouts sit behind the disclosure row (docs/PRODUCT.md 3.4), which names the group
+    /* the GT layouts sit behind the disclosure row (docs/archive/rounds/PRODUCT.md 3.4), which names the group
        and its count; the group opens on its own when the current layout is one of GT's (the rule
        slide's is), and the row collapses and reopens it */
     const rule = container.querySelector<HTMLElement>('.ts-layout-rule');

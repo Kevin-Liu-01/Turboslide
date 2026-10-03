@@ -86,6 +86,7 @@ registerBand('tailor', () => import('./tailor'));
 registerBand('kits', () => import('./kits'));
 registerBand('agents', () => import('./history').then((m) => ({ start: m.startHistory })));
 registerBand('agents', () => import('./agents').then((m) => ({ start: m.startAgents })));
+registerBand('agents', () => import('./versions'));
 registerBand('present', () => import('./show').then((m) => ({ start: m.startShow })));
 registerBand('present', () => import('./print').then((m) => ({ start: m.startPrint })));
 registerBand('export', () => import('./seam').then((m) => ({ start: m.startSeam })));

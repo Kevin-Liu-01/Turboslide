@@ -10355,6 +10355,26 @@
       "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3); replaces home.agents.run. The 5 s, 24 ms and 700 ms bounds are interaction bounds, read at a one minute load under 24"
     },
     {
+      "id": "home.versions.scrub",
+      "feature": "decks",
+      "interaction": "The scrubber's ticks equal the versions (the deck before the run, the run's three, each change on the page); a drag, a click and the keys move the chosen version; the slide above shows that version's changed slide as it stood, by a cut within one frame; the caption names the version; nothing else on the page changes",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "direction-c strip-versions.jpg",
+      "note": "docs/LANDING.md 6.7 (second pass)"
+    },
+    {
+      "id": "home.versions.restore",
+      "feature": "decks",
+      "interaction": "Restore This Version on version k commits one change by You; every band then equals version k (the counters, the names, the kit, slide 5's state); a new newest row enters; Restore is aria-disabled on the newest; a typed version restore <n> does the same by Agent",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "direction-c strip-versions.jpg",
+      "note": "docs/LANDING.md 6.7 (second pass)"
+    },
+    {
       "id": "home.present.show",
       "feature": "decks",
       "interaction": "Present, or Cmd+Enter (Ctrl+F5 off macOS) with the band half in view and no text field focused, opens the show on the slide chosen in the list within 800 ms with focus on the stage; keys page with a cut; Space and Enter go forward on the stage and press a focused Previous or Exit; the counter, notes and timer show; the slides carry the visitor's changes, slide 1 with the hero's Blue Marble and its credit (answer 1); Escape returns within 400 ms with focus on Present; S opens nothing",

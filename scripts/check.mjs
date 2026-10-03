@@ -244,6 +244,9 @@ const INNER_HTML_ALLOW = [
   // the miniature editor (V2#11): the renderer's markup of a slide, a text box and two shapes,
   // rendered at build (bands/deck.generated.ts, menus.generated.ts), parsed in a template element
   'apps/studio/src/components/home/live/menus.ts',
+  // the scrubber's view (V2#14): slide 5's earlier states, the renderer's output rendered at build
+  // (bands/live.generated.ts), parsed in a template element
+  'apps/studio/src/components/home/live/versions.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

@@ -477,6 +477,98 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- the Version history scrubber (2.9) ---- */
+
+/* the slider across the column, then Restore This Version, then the caption on one line (2.9) */
+.ts-versions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  row-gap: 6px;
+  margin: 0 0 12px;
+}
+
+.ts-versions > [data-version-slider] {
+  justify-self: stretch;
+}
+
+.ts-versions-slider {
+  position: relative;
+  height: 40px;
+  outline: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.ts-versions-slider:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-versions-track {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 17px;
+  height: 1px;
+  background: var(--pt-hair);
+}
+
+.ts-versions-thumb {
+  position: absolute;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: var(--pt-ink);
+}
+
+.ts-versions-ticks {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 26px;
+  height: 6px;
+}
+
+.ts-versions-ticks > i {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 6px;
+  margin-left: -0.5px;
+  background: var(--pt-titanium);
+}
+
+.ts-versions-ticks > i[data-author='you'] {
+  background: var(--pt-ink);
+}
+
+[data-version-restore][aria-disabled='true'] {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-versions-caption,
+[data-version-caption] {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-home-sheet.ts-version-view[data-version-view] {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: auto;
+}
+
 /* ---- under 720 px: one Menus key, the stage over a horizontal filmstrip (C's phone editor) ---- */
 
 @media (max-width: 719.98px) {
@@ -568,7 +660,8 @@
 }
 
 @media print {
-  .ts-mini-plates {
+  .ts-mini-plates,
+  .ts-version-view {
     display: none;
   }
 }

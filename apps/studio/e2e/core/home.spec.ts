@@ -8,6 +8,7 @@ import * as objects from './home/objects';
 import * as page from './home/page';
 import * as present from './home/present';
 import * as tailor from './home/tailor';
+import * as versions from './home/versions';
 
 // The driver of the landing's `home.*` rows (docs/LANDING.md 6.1, 6.7; the second pass, 6.4's
 // shared file table). V4 owns this file; each lane owns its module under home/ and fills it in the
@@ -39,7 +40,18 @@ import * as tailor from './home/tailor';
 //
 //   PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/home.spec.ts
 
-const MODULES = [page, objects, tailor, agents, present, exportBand, motion, menus, kits] as const;
+const MODULES = [
+  page,
+  objects,
+  tailor,
+  agents,
+  present,
+  exportBand,
+  motion,
+  menus,
+  kits,
+  versions,
+] as const;
 
 for (const module of MODULES) module.rows();
 

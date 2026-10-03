@@ -238,7 +238,12 @@ export function startTailor(ctx: LiveContext): void {
     if (renamed) {
       const from = shown;
       shown = state.customer;
-      rename(from, state.customer, event.kind === 'commit');
+      // a restore sets the version's names by a cut, as every other band takes the version (2.9)
+      rename(
+        from,
+        state.customer,
+        event.kind === 'commit' && event.change.restoredFrom === undefined,
+      );
     }
     paintCount();
     if (event.change.band !== 'tailor') return;

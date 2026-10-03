@@ -10363,6 +10363,26 @@
       "severity": 1,
       "evidence": "print-deck.jpg",
       "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 5 (L3)"
+    },
+    {
+      "id": "home.export.seam",
+      "feature": "decks",
+      "interaction": "Dragging the seam follows the pointer 1:1 with no inertia; a click sets it; the left side decodes to the pixels of slide 7's picture part in the Perfect file (the opener field's slide, answer 1; `assets.json`) and its label's size equals that picture's; the right side's text boxes sit at the Editable text file's `a:off` and `a:ext` within 1 px at the sheet's scale, hold its `a:t` runs and are selectable; the labels read Perfect and Editable text; the handle is a slider with arrows 2, Shift 10, Home and End",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "strip-export-seam.jpg; judge-3 6 graft 8; critic 2",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
+    },
+    {
+      "id": "home.export.figure",
+      "feature": "decks",
+      "interaction": "The Perfect row's figure equals `facts.json` `export` and its sentence compares the picture with its screenshot; the link goes to `docs/pptx.md`; Download the PDF downloads a PDF of 8 pages whose sha256 is in `assets.json`, requested only on the click; no text on the page reads \"pixel for pixel\"",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "judge-1 4; judge-2 2",
+      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
     }
   ]
 }

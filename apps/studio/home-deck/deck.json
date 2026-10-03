@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "turboslide-home",
-  "title": "Turboslide",
+  "title": "Onboarding plan",
   "theme": "gt-ink-paper",
   "brand": {
     "mark": {
@@ -17,8 +17,9 @@
         "plan",
         "gets",
         "ships",
-        "rosetta",
+        "lighthouse",
         "field",
+        "pattern",
         "close"
       ]
     }
@@ -80,13 +81,13 @@
         }
       }
     },
-    "mood-rosetta": {
-      "id": "mood-rosetta",
+    "mood-lighthouse": {
+      "id": "mood-lighthouse",
       "role": "mood",
-      "alt": "The Rosetta Stone, its three scripts carved in rows, rendered as a two-tone dither",
+      "alt": "Louisbourg lighthouse on its headland in a fall storm, rendered as a two-tone dither",
       "twins": {
-        "light": "assets/mood-rosetta-light.jpg",
-        "dark": "assets/mood-rosetta-dark.jpg"
+        "light": "assets/mood-lighthouse-light.jpg",
+        "dark": "assets/mood-lighthouse-dark.jpg"
       },
       "size": [
         1600,
@@ -95,33 +96,40 @@
       "scale": 1,
       "source": {
         "kind": "photo",
-        "origin": "File:Rosetta Stone.JPG (local copy `scratchpad/photo/rosetta.jpg`, 1539 by 1800).",
-        "artist": "Hans Hillewaert",
-        "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required",
+        "origin": "File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg",
+        "artist": "Ken Heaton",
+        "license": "CC BY-SA 4.0",
         "shareAlike": true
       },
       "treatment": {
         "kind": "two-tone",
         "crop": [
-          0,
           300,
-          1539,
-          1166
+          330,
+          1800,
+          1174
         ],
-        "blur": 0.6,
+        "blur": 0.5,
         "autocontrast": 0.5,
-        "black": 140,
-        "white": 230,
-        "gamma": 0.9,
+        "black": 0,
+        "white": 212,
+        "gamma": 0.8,
+        "unsharp": {
+          "rows": [
+            150,
+            260
+          ],
+          "amount": 180
+        },
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
         "resampler": "lanczos3"
       },
-      "credit": "Photograph: Hans Hillewaert, CC BY-SA 4.0",
+      "credit": "Photograph: Ken Heaton, CC BY-SA 4.0",
       "inline": "two-color",
       "metrics": {
-        "litFraction": 0.0889,
+        "litFraction": 0.4358,
         "plateClear": {
           "plate": [
             851,
@@ -130,8 +138,8 @@
             232
           ],
           "nearestLitPx": 0,
-          "litUnder": 6108,
-          "litInBand": 1697
+          "litUnder": 30358,
+          "litInBand": 10684
         }
       }
     },
@@ -153,6 +161,54 @@
       },
       "credit": "Drawn in Turboslide",
       "inline": "two-color"
+    },
+    "pattern": {
+      "id": "pattern",
+      "role": "mood",
+      "alt": "An animated pattern of dots in the theme's colors",
+      "twins": {
+        "light": "assets/pattern-light.png",
+        "dark": "assets/pattern-dark.png"
+      },
+      "size": [
+        3200,
+        1800
+      ],
+      "scale": 2,
+      "source": {
+        "kind": "material",
+        "materialId": "paper:dithering",
+        "uniforms": {
+          "u_colorBack": "#ffffff",
+          "u_colorFront": "#070707",
+          "u_shape": "sphere",
+          "u_type": "8x8",
+          "u_pxSize": 3,
+          "u_fit": "none",
+          "u_scale": 0.62,
+          "u_rotation": 0,
+          "u_offsetX": -0.28,
+          "u_offsetY": 0.04,
+          "u_originX": 0.5,
+          "u_originY": 0.5,
+          "u_worldWidth": 0,
+          "u_worldHeight": 0
+        },
+        "size": [
+          3200,
+          1800
+        ],
+        "timeMs": 0,
+        "backend": "angle-metal",
+        "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+        "recipeKey": "sha256:26d20700ed94468a827bb7f800c5c3cb2c6e8bc01621d92a49c4de55c115922a"
+      },
+      "treatment": {
+        "kind": "continuous",
+        "quality": 92
+      },
+      "credit": "Material: dithering, Paper Shaders, rendered in Turboslide",
+      "inline": "native"
     }
   },
   "revision": 0,

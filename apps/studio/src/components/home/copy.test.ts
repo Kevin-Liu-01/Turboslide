@@ -11,13 +11,13 @@ import {
   wordsOutsideSentenceCase,
 } from '@turboslide/theme/copy';
 
-import { VISIT_GAPS } from './boot.generated';
 import {
   AGENTS,
   CANVAS,
   CLOSE,
   DEFAULT_VIEW_EXEMPT,
   EXPORT,
+  FEATURES,
   FOOTER,
   FORBIDDEN_PHRASES,
   FORBIDDEN_WORDS,
@@ -26,28 +26,35 @@ import {
   HOME_COPY,
   HOME_META,
   HOME_PROPER_NOUNS,
+  KITS,
+  MENUS,
   NAV,
-  PARTS,
+  NUMBERS,
+  PATTERNS,
+  PEOPLE,
   PRESENT,
   REPORT_WORDS,
   SLIDES,
   TAILOR,
+  VERSIONS,
 } from './copy';
 import { HOME_DECK, HOME_EXPORT_FACTS, HOME_RUN_FACTS, HOME_TAILOR_WORDS } from './deck.generated';
+import { FACTS_DATA } from './facts-data';
 import { HOME_FACTS, formatCount } from './facts';
 import type { HomeFacts } from './facts';
 import { REQUEST_ONLY } from './panel-format';
 import { HOME_RUN } from './run.generated';
 
-// The copy lints of the landing (docs/LANDING.md 2.12 and the row decks.home.copy-rules): every
-// string of copy.ts through the theme's copy rules (no em dash, en dash or exclamation mark, no
-// metaphor word, no "X, not Y" pair, sentence case headings without a trailing period, Title Case
-// buttons); no semicolon or colon outside the generated command lines; every sentence one thought
-// under 20 words; none of the five words of SPEC-4 0.26, the phrases or the report words; no file
-// path outside the generated command lines; the default view words of the menu model kept out of
-// every band but the head, the agents band, the Command row's line and the parts table; the page's
-// own copy under 350 words at rest with Sign In shown; every count of the tree a function of the
-// facts; the hero's visit sentences at most 50 characters and the boot script's.
+// The copy lints of the landing (docs/LANDING.md 2.17, the second pass, and the row
+// decks.home.copy-rules): every string of copy.ts through the theme's copy rules (no em dash, en
+// dash or exclamation mark, no metaphor word, no "X, not Y" pair, sentence case headings without a
+// trailing period, Title Case buttons and chips); no semicolon or colon outside the generated
+// command lines and the product's own sentences; every sentence one thought under 20 words; none
+// of the five words of SPEC-4 0.26, the phrases or the report words; no file path outside the
+// generated command lines; the default view words of the menu model kept out of every band but the
+// head, the hero's stage, the agents band, the Command row's line, the two people band and the
+// features table; the page's own copy under 750 words at rest with Sign In shown; every count of
+// the tree a function of the facts; the hero's visit sentences at most 50 characters.
 
 /** Distinct primes above 99,999, so every formatted probe carries a thousands separator and no two collide. */
 const PROBE: HomeFacts = {
@@ -72,28 +79,32 @@ type Visit = (text: string, path: string, resolved: boolean) => void;
 
 /** A text function's probe call: the facts, or small numbers for a function of plain arguments. */
 function probeCall(fn: (...args: never[]) => unknown, path: string): string {
-  if (path.startsWith('parts.')) return String((fn as (f: HomeFacts) => string)(PROBE));
-  if (path === 'export.rows.perfect.sentence')
-    return (fn as (s: { width: number; height: number }, f: HomeFacts) => string)(
-      { width: 3200, height: 1800 },
-      PROBE,
-    );
-  if (path === 'canvas.log.pos')
-    return (fn as (a: string, b: string, c: object) => string)('rosetta', 'h', {
-      x: 612,
-      y: 388,
-      w: 520,
-      h: 96,
-    });
-  if (path.startsWith('canvas.log.'))
-    return (fn as (a: string, b: string, c: number) => string)('rosetta', 'h', 15);
-  if (path === 'tailor.kitStatus') return (fn as (k: string, n: number) => string)('kestrel', 8);
-  if (/^history\.(moved|resized|edited)$/.test(path))
-    return (fn as (a: string, b: number) => string)('the title', 1);
-  if (path === 'history.turned')
-    return (fn as (a: string, b: number, c: number) => string)('the heading', 6, 15);
-  if (/^history\.(tailored|kit)$/.test(path)) return (fn as (a: string) => string)('Globex');
-  return String((fn as (a: number, b: number) => string)(3, 8));
+  const call = fn as (...args: unknown[]) => string;
+  if (path.startsWith('parts.') || path.startsWith('numbers.') || path === 'agents.lead')
+    return String(call(PROBE));
+  if (path === 'export.rows.perfect.sentence') return call({ width: 3200, height: 1800 }, PROBE);
+  if (path === 'canvas.log.pos') return call('lighthouse', 'h', { x: 612, y: 388, w: 520, h: 96 });
+  if (path.startsWith('canvas.log.')) return call('lighthouse', 'h', 15);
+  if (path === 'tailor.kitStatus') return call('kestrel', 9);
+  if (path === 'kits.status.kit') return call('globex', 9);
+  if (path === 'kits.status.background') return call('#e6e0d2');
+  if (path === 'kits.status.contrast') return call('#777777', 4.4);
+  if (path === 'menus.editorRow') return call('Opens the Rename dialog');
+  if (path === 'menus.readout') return call('Title', 789, 362, 0);
+  if (path === 'agents.versions.caption') return call(4, 6, 'Agent', '6:45 PM');
+  if (path === 'agents.chips.tailor') return call('Initech');
+  if (path === 'export.loupe.readout') return call(4, 196, 1210, 640);
+  if (/^history\.(moved|resized|edited|deletedBlock|duplicatedBlock|cleared)$/.test(path))
+    return call('the title', 1);
+  if (path === 'history.turned' || path === 'history.rotated') return call('the heading', 6, 15);
+  if (path === 'history.inserted') return call('a text box', 2);
+  if (path === 'history.styled') return call('bold', 'the heading', 2);
+  if (path === 'history.aligned') return call('the heading', 2, 'left');
+  if (path === 'history.ordered') return call('the heading', 2, 'to the front');
+  if (/^history\.(tailored|kit|renamed|versionNamed)$/.test(path)) return call('Globex');
+  if (path === 'history.restored') return call('6:45 PM');
+  if (path === 'history.background') return call('#e6e0d2');
+  return String(call(3, 9));
 }
 
 /** Every string and every text function of a copy object, with a dotted path (an `id` names an array entry). */
@@ -129,9 +140,14 @@ function walk(value: unknown, path: string, visit: Visit): void {
 const every: { text: string; path: string; resolved: boolean }[] = [];
 walk(HOME_COPY, '', (text, path, resolved) => every.push({ text, path, resolved }));
 
-/** Generated command lines and the panel's prompt: code, not page copy. */
+/** Generated command lines, the panel's prompt and a colour in code form: code, not page copy. */
 const isCommand = (path: string): boolean =>
-  path.startsWith('canvas.log.') || path === 'agents.panel.prompt';
+  path.startsWith('canvas.log.') ||
+  path === 'agents.panel.prompt' ||
+  path === 'kits.backgroundPlaceholder' ||
+  path === 'hero.stage.terminal.folder';
+/** The product's own sentences (the menu model's `doc`), exempt from the page's colon rule. */
+const isProduct = (path: string): boolean => path === 'menus.editorRow';
 /** The slide's credit line, in the deck's own credit form ("Image: ..., 2007, public domain"). */
 const isCredit = (path: string): boolean => path === 'slides.heroCredit';
 const isExempt = (path: string): boolean =>
@@ -164,28 +180,21 @@ function restingStrings(): string[] {
     ...NAV.links.map((link) => link.label),
     NAV.appearance.light.label,
     NAV.appearance.dark.label,
+    NAV.motion.pause,
     NAV.signIn.label,
     NAV.newPresentation.label,
-    HERO.caption.pointer,
-    HERO.undo,
+    HERO.visit[0],
     HERO.lead,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,
-    AGENTS.h2,
-    AGENTS.lead,
-    AGENTS.run.again,
-    AGENTS.stepLabel(3, 3),
-    AGENTS.caption(HOME_RUN_FACTS.captionSeconds),
-    AGENTS.historyLabel,
-    TAILOR.h2,
-    TAILOR.lead,
-    TAILOR.examplesKey,
-    TAILOR.placeholder,
-    TAILOR.kits.gt.name,
-    TAILOR.kits.kestrel.name,
-    TAILOR.kits.fenwick.name,
-    TAILOR.moveUp,
-    TAILOR.moveDown,
+    ...HERO.stage.steps.map((step) => step.label),
+    HERO.stage.caption(19),
+    HERO.undo,
+    ...NUMBERS.cells.flatMap((cell) => [cell.figure(HOME_FACTS), cell.sentence]),
+    MENUS.h2,
+    MENUS.lead,
+    MENUS.slides(9),
+    MENUS.statusRest,
     CANVAS.h2,
     CANVAS.lead,
     CANVAS.layoutKey,
@@ -193,6 +202,34 @@ function restingStrings(): string[] {
     CANVAS.undo,
     CANVAS.commandKey,
     CANVAS.commandRest,
+    TAILOR.h2,
+    TAILOR.lead,
+    TAILOR.placeholder,
+    TAILOR.moveUp,
+    TAILOR.moveDown,
+    KITS.h2,
+    KITS.lead,
+    KITS.kitsKey,
+    KITS.kits.gt.name,
+    KITS.kits.kestrel.name,
+    KITS.kits.globex.name,
+    KITS.backgroundKey,
+    KITS.backgroundHelp,
+    KITS.undo,
+    AGENTS.h2,
+    AGENTS.lead(HOME_FACTS),
+    AGENTS.chips.tailor('Initech'),
+    AGENTS.chips.turn,
+    AGENTS.chips.row,
+    AGENTS.chips.skip,
+    AGENTS.chipsCaption,
+    VERSIONS.label,
+    VERSIONS.restore,
+    PEOPLE.h2,
+    PEOPLE.lead,
+    PEOPLE.screens.maya,
+    PEOPLE.screens.sam,
+    PEOPLE.caption(14),
     PRESENT.h2,
     PRESENT.lead,
     PRESENT.present,
@@ -201,6 +238,7 @@ function restingStrings(): string[] {
     EXPORT.lead,
     EXPORT.labels.perfect,
     EXPORT.labels.editable,
+    EXPORT.caption,
     EXPORT.rows.perfect.key,
     EXPORT.rows.perfect.sentence(
       { width: HOME_EXPORT_FACTS.perfectWidth, height: HOME_EXPORT_FACTS.perfectHeight },
@@ -212,8 +250,16 @@ function restingStrings(): string[] {
     EXPORT.rows.pdf.key,
     EXPORT.rows.pdf.sentence,
     EXPORT.rows.pdf.link,
-    PARTS.h2,
-    ...PARTS.rows.flatMap((row) => [row.key, row.where, row.figure(HOME_FACTS)]),
+    PATTERNS.h2,
+    PATTERNS.lead,
+    PATTERNS.labels.moving,
+    PATTERNS.labels.still,
+    FEATURES.h2,
+    FEATURES.heads.feature,
+    FEATURES.heads.where,
+    FEATURES.heads.shortcut,
+    ...FEATURES.rows.map((row) => row.key),
+    ...FACTS_DATA.features.map((row) => row.where),
     CLOSE.h2,
     CLOSE.lead,
     CLOSE.buttons.newPresentation.label,
@@ -228,7 +274,7 @@ describe('every string of the page', () => {
   it('is collected with a path', () => {
     expect(every.length).toBeGreaterThan(80);
     expect(every.some((e) => e.path === 'hero.heading')).toBe(true);
-    expect(every.some((e) => e.path === 'agents.caption')).toBe(true);
+    expect(every.some((e) => e.path === 'hero.stage.caption')).toBe(true);
     expect(every.some((e) => e.path === 'footer.closing')).toBe(true);
   });
 
@@ -238,8 +284,9 @@ describe('every string of the page', () => {
       expect(text, path).not.toContain(EN_DASH);
       expect(text, path).not.toContain(';');
       expect(text, path).not.toContain(EXCLAMATION);
-      if (isCommand(path) || isCredit(path)) continue;
-      expect(text, path).not.toContain(':');
+      if (isCommand(path) || isCredit(path) || isProduct(path)) continue;
+      /* a time of day in a generated line ("6:45 PM") is a figure, not a colon of prose */
+      expect(text.replace(/\d:\d\d/g, ''), path).not.toContain(':');
     }
   });
 
@@ -279,7 +326,7 @@ describe('every string of the page', () => {
     }
   });
 
-  it('keeps the default view words out of every band but the four that earn them', () => {
+  it('keeps the default view words out of every band but the ones that earn them', () => {
     let checked = 0;
     for (const { text, path } of every) {
       if (isExempt(path) || isCommand(path)) continue;
@@ -287,29 +334,40 @@ describe('every string of the page', () => {
       expect(forbiddenWordsIn(text), `${path}: "${text}"`).toEqual([]);
     }
     expect(checked).toBeGreaterThan(60);
-    expect(DEFAULT_VIEW_EXEMPT).toEqual(['meta', 'agents', 'canvas.log', 'parts']);
+    expect(DEFAULT_VIEW_EXEMPT).toEqual([
+      'meta',
+      'hero.stage',
+      'agents',
+      'canvas.log',
+      'people',
+      'features',
+    ]);
     /* and the exemptions earn it: the agents band names the transports */
-    expect(forbiddenWordsIn(AGENTS.lead)).toContain('MCP');
+    expect(forbiddenWordsIn(AGENTS.lead(HOME_FACTS))).toContain('MCP');
     /* the canvas band's resting line names none of them (docs/LANDING.md 2.12) */
     expect(forbiddenWordsIn(CANVAS.commandRest)).toEqual([]);
   });
 
-  it('holds the page under 350 words at rest', () => {
+  it('holds the page under 750 words at rest (question 12)', () => {
     const words = restingStrings().reduce((sum, text) => sum + wordCount(text), 0);
-    expect(words).toBeGreaterThan(250);
-    expect(words).toBeLessThan(350);
+    expect(words).toBeGreaterThan(450);
+    expect(words).toBeLessThan(750);
   });
 });
 
 describe('headings and buttons', () => {
   const headings: string[] = [
     HERO.heading,
-    AGENTS.h2,
-    TAILOR.h2,
+    MENUS.h2,
     CANVAS.h2,
+    TAILOR.h2,
+    KITS.h2,
+    AGENTS.h2,
+    PEOPLE.h2,
     PRESENT.h2,
     EXPORT.h2,
-    PARTS.h2,
+    PATTERNS.h2,
+    FEATURES.h2,
     CLOSE.h2,
   ];
 
@@ -332,13 +390,27 @@ describe('headings and buttons', () => {
     NAV.newPresentation.label,
     NAV.appearance.light.label,
     NAV.appearance.dark.label,
+    NAV.motion.pause,
+    NAV.motion.play,
     HERO.undo,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,
+    ...HERO.stage.steps.map((step) => step.label),
     AGENTS.run.again,
     AGENTS.run.step(2),
+    AGENTS.chips.tailor('Initech'),
+    AGENTS.chips.tailor('Northwind'),
+    AGENTS.chips.turn,
+    AGENTS.chips.straighten,
+    AGENTS.chips.row,
+    AGENTS.chips.putBack,
+    AGENTS.chips.skip,
+    AGENTS.chips.unskip,
+    VERSIONS.restore,
+    PEOPLE.stop,
     TAILOR.moveUp,
     TAILOR.moveDown,
+    KITS.undo,
     CANVAS.undo,
     PRESENT.present,
     PRESENT.print,
@@ -364,53 +436,61 @@ describe('headings and buttons', () => {
     expect(EXPORT.rows.pdf.link).toBe('Download the PDF');
   });
 
-  it('puts the Heroicons in the parts table key cells only, never sparkles or cursor-arrow-rays', () => {
-    const icons = PARTS.rows.map((row) => row.icon);
+  it('puts the Heroicons in the features table key cells only, never sparkles or cursor-arrow-rays', () => {
+    const icons = FEATURES.rows.map((row) => row.icon);
     expect(icons).toEqual([
       'bars-3',
-      'squares-2x2',
+      'pencil-square',
+      'swatch',
+      'chat-bubble-left-right',
+      'clock',
+      'user-group',
+      'presentation-chart-bar',
+      'arrow-down-tray',
       'cube',
-      'paint-brush',
       'command-line',
-      'server',
-      'globe-alt',
-      'scale',
     ]);
     for (const icon of icons) expect(['sparkles', 'cursor-arrow-rays']).not.toContain(icon);
   });
 });
 
 describe('the counts of the tree (SPEC-4 0.25)', () => {
-  it('flow through functions of the facts in the parts table', () => {
-    const figures = PARTS.rows.map((row) => row.figure(PROBE));
-    expect(figures).toEqual([
-      formatCount(PROBE.menus),
-      formatCount(PROBE.layouts),
-      formatCount(PROBE.shapes),
-      formatCount(PROBE.materials),
-      formatCount(PROBE.cliCommands),
-      formatCount(PROBE.mcpTools),
-      formatCount(PROBE.httpPaths),
-      PROBE.licence,
+  it('flow through functions of the facts in the numbers row and the agents lead', () => {
+    expect(NUMBERS.cells.map((cell) => cell.figure(PROBE))).toEqual([
+      `${formatCount(PROBE.actions)} actions`,
+      `${formatCount(PROBE.layouts)} layouts`,
+      `${formatCount(PROBE.materials)} patterns`,
+      `${formatCount(PROBE.shapes)} shapes`,
     ]);
-    /* and on today's tree the table reads LANDING.md 2.9 */
-    expect(PARTS.rows.map((row) => row.figure(HOME_FACTS))).toEqual([
-      '9',
-      '22',
-      '135',
-      '17',
-      '180',
-      '169',
-      '177',
-      'MIT',
+    expect(AGENTS.lead(PROBE)).toContain(formatCount(PROBE.cliCommands));
+    expect(AGENTS.lead(PROBE)).toContain(formatCount(PROBE.mcpTools));
+    expect(AGENTS.lead(PROBE)).toContain(formatCount(PROBE.httpPaths));
+    /* and on today's tree the row reads LANDING.md 2.3, the lead 2.9 */
+    expect(NUMBERS.cells.map((cell) => cell.figure(HOME_FACTS))).toEqual([
+      '193 actions',
+      '22 layouts',
+      '17 patterns',
+      '135 shapes',
     ]);
+    expect(AGENTS.lead(HOME_FACTS)).toBe(
+      "The CLI takes 180 of the editor's actions, the MCP server 169 and the HTTP API 177. The commands below change the slide above them.",
+    );
+  });
+
+  it("puts no figure in the features table, whose where cells are the menu model's", () => {
+    expect(FACTS_DATA.features.map((row) => row.id)).toEqual(FEATURES.rows.map((row) => row.id));
+    for (const row of FACTS_DATA.features) expect(/\d/.test(row.where), row.where).toBe(false);
+    expect(FACTS_DATA.features.find((row) => row.id === 'versions')?.where).toBe(
+      'File > Version history > See version history',
+    );
+    expect(FACTS_DATA.features.find((row) => row.id === 'menus')?.where).toBe('File to Help');
   });
 
   it('keeps the plain strings free of a count of the tree', () => {
-    /* a plain string may carry the facts of the page's own slides in digits (slide 7, 196 BC, the
-       8 by 8 screen at 2 px cells, the filmstrip's slides 2 to 5, the 24 characters of a name) and
+    /* a plain string may carry the facts of the page's own slides in digits (slide 5, slide 7, the
+       8 by 8 screen at 2 px cells, the filmstrip's slides 1 to 5, the 24 characters of a name) and
        nothing else */
-    const allowed = new Set(['2', '5', '7', '8', '24', '196']);
+    const allowed = new Set(['1', '2', '5', '7', '8', '24']);
     for (const { text, path, resolved } of every) {
       /* a function's digits are its arguments' (the probes above) */
       if (resolved || isCommand(path) || isCredit(path)) continue;
@@ -423,7 +503,12 @@ describe('the counts of the tree (SPEC-4 0.25)', () => {
     expect(HOME_RUN_FACTS.captionSeconds).toBe(HOME_RUN.captionSeconds);
     expect(HOME_RUN.captionSeconds).toBe(Math.round(HOME_RUN.totalMs / 1000));
     expect(AGENTS.caption(HOME_RUN.captionSeconds)).toContain(`${HOME_RUN.captionSeconds} seconds`);
-    expect(AGENTS.panel.refusal(5, HOME_FACTS.cliCommands)).toBe(HOME_RUN.refusal);
+    expect(HOME_RUN.refusal).toBe(
+      AGENTS.panel.refusal(
+        Number(/runs (\d+) of/.exec(HOME_RUN.refusal)?.[1]),
+        HOME_FACTS.cliCommands,
+      ),
+    );
     expect(HOME_RUN.cliCommands).toBe(HOME_FACTS.cliCommands);
     expect(AGENTS.panel.requestOnly).toBe(REQUEST_ONLY);
     expect(HOME_EXPORT_FACTS.perfectWidth).toBe(3200);
@@ -438,17 +523,27 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
     expect(HOME_META.title).toBe('Turboslide is a slides editor in the browser');
   });
 
-  it("gives the hero three true visit sentences of at most 50 characters, the boot script's", () => {
+  it('gives the hero three true visit sentences of at most 50 characters', () => {
     expect(HERO.visit.length).toBe(3);
     for (const sentence of HERO.visit) expect(sentence.length).toBeLessThanOrEqual(50);
     expect(HERO.visit[0]).toBe('Turboslide is a slides editor in the browser.');
-    expect(VISIT_GAPS.map((table) => table.sentence)).toEqual([...HERO.visit]);
-    for (const table of VISIT_GAPS) expect(table.lastKeyMs).toBeLessThanOrEqual(3970);
-    /* the slide's markup holds the first sentence; the build's fixture spells it */
+    /* slide 1 is the customer deck's cover (2.0): the h1 is page text, said once */
+    expect(HOME_DECK.title).toBe('Onboarding plan');
+    expect(HOME_DECK.slides.title.title).toBe('Onboarding plan for Northwind');
     expect(HOME_DECK.slides.title.objects.find((o) => o.id === 'title#lead')?.text).toBe(
-      HERO.visit[0],
+      'Four weeks from the first call to the first deck.',
     );
-    expect(HOME_DECK.slides.title.title).toBe(HERO.heading);
+    expect(HOME_DECK.order).toEqual([
+      'title',
+      'plan',
+      'gets',
+      'ships',
+      'next-steps',
+      'lighthouse',
+      'field',
+      'pattern',
+      'close',
+    ]);
   });
 
   it('routes the buttons as section 2 says', () => {
@@ -461,7 +556,7 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
     expect(NAV.links.map((link) => link.label)).toEqual(['Documentation']);
     expect(NAV.skip).toBe('Skip to content');
     expect(EXPORT.rows.perfect.link.href).toMatch(/\/docs\/pptx\.md$/);
-    expect(PARTS.rows.find((row) => row.id === 'license')?.href).toBe(
+    expect(FOOTER.links.find((link) => link.id === 'home.foot.github')?.href).toBe(
       'https://github.com/Kevin-Liu-01/Turboslide',
     );
   });
@@ -474,15 +569,18 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
       `${HOME_RUN.tailorCounts.rest.places} places on ${HOME_RUN.tailorCounts.rest.slides} slides`,
     );
     expect(TAILOR.empty).toBe('Type a customer name first.');
-    expect(TAILOR.kitStatus('kestrel', 8)).toBe(
-      "Kestrel, an example customer's kit, set the colors of 8 slides.",
+    expect(TAILOR.kitStatus('kestrel', 9)).toBe(
+      "Kestrel, an example customer's kit, set the colors of 9 slides.",
+    );
+    expect(KITS.status.kit('globex', 9)).toBe(
+      "Globex, an example customer's kit, set the colors of 9 slides.",
     );
     expect(TAILOR.examplesKey).toBe('Example kits');
   });
 
   it('keeps the footer and the words of the history and the slides', () => {
     expect(FOOTER.lockup.href).toBe('#top');
-    expect(FOOTER.links.find((link) => link.label === 'License')?.id).toBe('home.foot.licence');
+    expect(FOOTER.links.find((link) => link.label === 'MIT License')?.id).toBe('home.foot.licence');
     for (const { text, path } of every)
       expect(/\blicence\b/i.test(text), `${path}: "${text}"`).toBe(false);
     expect(HISTORY.slideMoved(2, 4)).toBe('Moved slide 2 to place 4');
@@ -493,16 +591,18 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
       'Set the rows of slide 5',
     ]);
     expect(SLIDES.heroCredit).toBe('Image: NASA, Reto Stöckli, 2007, public domain');
-    expect(CANVAS.log.pos('rosetta', 'h', { x: 612, y: 388, w: 520, h: 96 })).toBe(
-      `turboslide block set rosetta#h /pos '{"x":612,"y":388,"w":520,"h":96}'`,
+    expect(CANVAS.log.pos('lighthouse', 'h', { x: 612, y: 388, w: 520, h: 96 })).toBe(
+      `turboslide block set lighthouse#h /pos '{"x":612,"y":388,"w":520,"h":96}'`,
     );
-    expect(CANVAS.log.rotate('rosetta', 'h', 15)).toBe('turboslide block rotate rosetta#h --to 15');
-    expect(CANVAS.log.toCanvas('rosetta')).toBe('turboslide slide to-canvas rosetta');
+    expect(CANVAS.log.rotate('lighthouse', 'h', 15)).toBe(
+      'turboslide block rotate lighthouse#h --to 15',
+    );
+    expect(CANVAS.log.toCanvas('lighthouse')).toBe('turboslide slide to-canvas lighthouse');
     /* the three gesture forms were run against the page deck and accepted (run.generated.ts) */
     expect(HOME_RUN.gestures.map((g) => g.argv.join(' '))).toEqual([
-      'slide to-canvas rosetta',
-      `block set rosetta#h /pos {"x":612,"y":388,"w":520,"h":96}`,
-      'block rotate rosetta#h --to 15',
+      'slide to-canvas lighthouse',
+      `block set lighthouse#h /pos {"x":612,"y":388,"w":520,"h":96}`,
+      'block rotate lighthouse#h --to 15',
     ]);
   });
 });

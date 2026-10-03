@@ -1,19 +1,19 @@
 {
   "generator": "scripts/build-home-assets.ts --export",
-  "fixtureSha256": "f8b65f43796ff04ddf64d83b53ec8c9feb864f72691336ff75fbe27212c93d5b",
-  "pageDeckSha256": "71d22b311b740c58caf8718981c32dad641de18a2ef48f7cae4a47a92aeadeba",
+  "fixtureSha256": "07fd26398406461c8fdea22881fe90129cb0a2f0c160b7ae70f271868cb9fe96",
+  "pageDeckSha256": "3e7e5a36ef2aaea0520ea2ba65a7fdfc3c6d252799890ee8f00900d30119ed04",
   "assets": [
     {
       "role": "export-perfect",
       "appearance": "light",
       "variant": null,
-      "path": "/home/export-perfect-light-c073dff6a0.webp",
-      "bytes": 35338,
-      "sha256": "c073dff6a01f7669f8cf3b4c7879174fea1c57d0c1c749d944df1aea4cb21747",
+      "path": "/home/export-perfect-light-c2b3ddbf8d.webp",
+      "bytes": 35506,
+      "sha256": "c2b3ddbf8d116a7cc9508a0fc851f3b8df67e7087a2edcfe6241f5cecf5f38ac",
       "width": 3200,
       "height": 1800,
-      "pixelsSha256": "2f462d4af1a2364fb0ed9742be90f962b9d14f8475879c04b50f995d30da6b69",
-      "partSha256": "3d4c0bbaf43c90dc22be783f403fa8cc68936445527a3228b3bb26678fb1d57e",
+      "pixelsSha256": "f6400b90962b644c122c022ef4bf89f1db30cbbdded70726b8910453840a28cd",
+      "partSha256": "fb24c9f9739332814b6069f9d642a130b45700ffa4434eb57e5fd83fe8b2e91e",
       "pages": null
     },
     {
@@ -46,26 +46,26 @@
       "role": "pdf",
       "appearance": "light",
       "variant": null,
-      "path": "/home/pdf-light-f534b1c8c4.pdf",
-      "bytes": 737337,
-      "sha256": "f534b1c8c412e1611aff27e5082c841219b13fdfe8e0bd70d37fc7af60cd954c",
+      "path": "/home/pdf-light-6f207f1381.pdf",
+      "bytes": 895057,
+      "sha256": "6f207f138141db34e0699a570e5748c520cf522e60538e5124dfcb0a8767c63d",
       "width": null,
       "height": null,
       "pixelsSha256": null,
       "partSha256": null,
-      "pages": 8
+      "pages": 9
     },
     {
       "role": "export-perfect",
       "appearance": "dark",
       "variant": null,
-      "path": "/home/export-perfect-dark-56cf7b1dac.webp",
-      "bytes": 35294,
-      "sha256": "56cf7b1dac8f255c81098559a45e63034a34db514fa84f3ce81d9a878de66878",
+      "path": "/home/export-perfect-dark-51b954599c.webp",
+      "bytes": 35192,
+      "sha256": "51b954599c6e1880013d20e87ee38cc5ed778c5328802053957693ea154bbf37",
       "width": 3200,
       "height": 1800,
-      "pixelsSha256": "1482026d836f2810960b74dd1f2ac008f5710d5a4f2e8a614cfadad03ac483a4",
-      "partSha256": "2649450cb09cfe9f214a905ec030cebddc7003037b8175c2119ab32814da3c34",
+      "pixelsSha256": "2f2fd7c1070013a8b530004a54ee0edf3587ab837487fc7cb72d492921577bd9",
+      "partSha256": "c73b77ee4865b6b393e6b08d426d177eab7efd915ff94b00030cbbfca0bd3b43",
       "pages": null
     },
     {
@@ -98,14 +98,14 @@
       "role": "pdf",
       "appearance": "dark",
       "variant": null,
-      "path": "/home/pdf-dark-44b868dce4.pdf",
-      "bytes": 737275,
-      "sha256": "44b868dce44e8479bdd69023be44ac6c3dc977b625626250075147b64d24d251",
+      "path": "/home/pdf-dark-a8aa63f53d.pdf",
+      "bytes": 900126,
+      "sha256": "a8aa63f53d53cdc5f96f3749b74bb38d642988b36f1e9b908fdd3d59d27945c9",
       "width": null,
       "height": null,
       "pixelsSha256": null,
       "partSha256": null,
-      "pages": 8
+      "pages": 9
     }
   ],
   "editable": {
@@ -162,7 +162,7 @@
         "h": 15.73,
         "paragraphs": [
           {
-            "text": "07 / 08",
+            "text": "07 / 09",
             "size": 13,
             "tracking": 0.27,
             "lineHeight": 15.73,

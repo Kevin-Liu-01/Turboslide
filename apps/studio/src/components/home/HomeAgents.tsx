@@ -1,32 +1,26 @@
 import { AGENTS } from './copy';
 import { HOME_RUN_FACTS } from './deck.generated';
-import { BandHead, HomeSection } from './HomeSection';
+import { HOME_FACTS } from './facts';
+import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { HomeSheet, ServerHtml } from './HomeSheet';
 import { HOME_RUN } from './run.generated';
 import { iconMarkup } from './SectionIcon';
-import type { PanelText } from './run.generated';
 
 /**
- * Agents run the same actions (docs/LANDING.md 2.4, band 2), painted at the run's end at rest:
- * the one `#101010` panel (SPEC-4 0.20, the one monospace on the page) with its CLI, MCP and HTTP
- * tabs, the transcript of the three recorded commands in its fixed line slots (14 of 64 columns
- * at 720 px and over, 22 of 44 under), the typed line, Run Again with the step label and the
- * staged caption; beside it slide 5 as the run wrote it and Version history with the run's three
- * Agent rows. The panel's lines and the history rows are server markup from run.generated.ts
- * (`ServerHtml`), so the route chunk never carries the recording; the live module (L3's
- * `live/agents.ts`, push 4) replays and answers from the same file. Hooks: integrator.md 4.1 and
- * l3.md R1, R5.
+ * Agents run the same actions (docs/LANDING.md 2.9, the agents band of Kevin's picks "A+B" and
+ * "C"), after the editing bands. Until V3#13 rebuilds it around the chips and the scrubber, the
+ * band is the first pass's, painted at the run's end at rest: the one `#101010` console (the
+ * page's second code surface, 2.0) with its CLI, MCP and HTTP tabs, the transcript of the three
+ * recorded commands in its fixed line slots (14 of 64 columns at 720 px and over, 22 of 44 under),
+ * the typed line, Run Again with the step label and the staged caption; beside it slide 5 as the
+ * run wrote it and Version history with the run's three Agent rows. The console's screen and
+ * slide 5 are placeholders in the band's reserved box, written by its chunk after `load` (4.2);
+ * Version history's rows are words and stay in the document. Hooks: integrator.md 4.1, l3.md R1,
+ * R5, v1.md "To V3".
  */
 
 const esc = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-/** One screen at both widths, one `span` a line (l3.md R1), shown by home.css at the breakpoint. */
-function screenHtml(screen: PanelText): string {
-  const lines = (list: readonly string[]): string =>
-    list.map((line) => `<span>${esc(line)}</span>`).join('');
-  return `<div class="ts-home-panel-text is-wide" data-panel-text="wide">${lines(screen.wide)}</div><div class="ts-home-panel-text is-narrow" data-panel-text="narrow">${lines(screen.narrow)}</div>`;
-}
 
 function historyHtml(icon: string): string {
   /* newest first: step 3, 2, 1 */
@@ -49,8 +43,8 @@ export function HomeAgents() {
   const ssr = import.meta.env.SSR;
   return (
     <HomeSection id="agents">
-      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS.lead} span={7} />
-      <div className="ts-agents">
+      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS.lead(HOME_FACTS)} span={7} />
+      <Reserve band="agents" className="ts-agents">
         <div className="ts-agents-run">
           <div className="ts-home-panel" data-panel-root>
             <div
@@ -81,8 +75,9 @@ export function HomeAgents() {
               aria-labelledby="ts-agents-tab-cli"
               className="ts-home-panel-screen"
               data-panel
+              data-fill="panel-cli"
               data-transport-panel="cli"
-              html={ssr ? screenHtml(HOME_RUN.screens.transcript) : ''}
+              html=""
             />
             {/* the MCP and HTTP screens are the live module's (L3, push 4), written from
                 run.generated.ts when their tab opens: without script the tabs do not switch, so
@@ -131,7 +126,7 @@ export function HomeAgents() {
           <p className="ts-caption">{AGENTS.caption(HOME_RUN_FACTS.captionSeconds)}</p>
         </div>
         <div className="ts-agents-slide">
-          <HomeSheet instance="agents" className="ts-agents-sheet" />
+          <HomeSheet instance="agents" fill className="ts-agents-sheet" />
           <p className="ts-label" id="ts-agents-history">
             {AGENTS.historyLabel}
           </p>
@@ -143,7 +138,7 @@ export function HomeAgents() {
             html={ssr ? historyHtml(iconMarkup('command-line')) : ''}
           />
         </div>
-      </div>
+      </Reserve>
       <p className="ts-sr" aria-live="polite" data-announce />
     </HomeSection>
   );

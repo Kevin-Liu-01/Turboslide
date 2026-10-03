@@ -3,12 +3,12 @@
 //
 // The client safe facts of the page deck: the ids, the order, the titles, the notes and the
 // boxes of the selectable objects in sheet units. No slide markup and no still lives here (they
-// are in slides.generated.ts, read only on the server, and live-slides.generated.ts, which only
-// the live module imports), so the route chunk and the live module may both import this file.
+// are in slides.generated.ts, read only on the server, and bands.generated.ts, which only the band
+// chunks import), so the route chunk and the live module may both import this file.
 
-/** The eight slides of the page deck, by id (docs/LANDING.md 2.0 with Kevin's answer 1). */
+/** The nine slides of the page deck, by id (docs/LANDING.md 2.0, the second pass). */
 export type HomeSlideId =
-  'title' | 'plan' | 'gets' | 'ships' | 'next-steps' | 'rosetta' | 'field' | 'close';
+  'title' | 'plan' | 'gets' | 'ships' | 'next-steps' | 'lighthouse' | 'field' | 'pattern' | 'close';
 
 /** A box in sheet units (1 unit is 1/1600 of the sheet's width), turned `rot` degrees clockwise. */
 export type SheetBox = { x: number; y: number; w: number; h: number; rot: number };
@@ -17,24 +17,25 @@ export type SheetBox = { x: number; y: number; w: number; h: number; rot: number
 export type HomeObjectId = `${HomeSlideId}#${string}`;
 
 /** The word the selection chip shows (the editor's role chip). */
-export type HomeObjectRole = 'Title' | 'Subtitle' | 'Heading' | 'Text' | 'Credit' | 'Plate';
+export type HomeObjectRole =
+  'Title' | 'Subtitle' | 'Heading' | 'Text' | 'Rows' | 'Credit' | 'Plate';
 
 export type HomeObject = {
   id: HomeObjectId;
   role: HomeObjectRole;
-  /** the box at rest: the hero's hand set boxes, the Rosetta Stone's from `slide to-canvas` */
+  /** the box at rest, as the CLI's `slide to-canvas` measures it */
   box: SheetBox;
   /** the text at rest; '' for the plate */
   text: string;
-  /** a second click or Enter types in it */
+  /** a second click or Enter types in it (every text block; not the plate or a rows block) */
   editable: boolean;
-  /** the block id the CLI prints for this object after `slide to-canvas`; null on the hero */
+  /** the block id the CLI prints for this object after `slide to-canvas`; the lighthouse's alone */
   canvasBlock: string | null;
 };
 
 export type HomeSlideFacts = {
   id: HomeSlideId;
-  /** the deck number at rest (1 to 8) */
+  /** the deck number at rest (1 to 9) */
   n: number;
   /** `slideTitle` of the slide, the Present list's row */
   title: string;
@@ -55,27 +56,39 @@ export type HomeDeckFacts = {
   pageDeckSha256: string;
   /** the customer name the fixture spells */
   customer: string;
-  /** the page deck at rest: eight ids */
+  /** the page deck at rest: nine ids */
   order: readonly HomeSlideId[];
-  /** the fixture, the run's start: seven ids, `next-steps` absent */
+  /** the fixture, the run's start: eight ids, `next-steps` absent */
   startOrder: readonly HomeSlideId[];
   slides: Readonly<Record<HomeSlideId, HomeSlideFacts>>;
+  /** the deck's title ("Onboarding plan"), which the hero frame's and the miniature's title rows show */
+  title: string;
   /** the hero's Blue Marble disc (answer 1) */
   heroDisc: FieldDisc;
 };
 
 export const HOME_DECK: HomeDeckFacts = {
-  fixtureSha256: 'f8b65f43796ff04ddf64d83b53ec8c9feb864f72691336ff75fbe27212c93d5b',
-  pageDeckSha256: '71d22b311b740c58caf8718981c32dad641de18a2ef48f7cae4a47a92aeadeba',
+  fixtureSha256: '07fd26398406461c8fdea22881fe90129cb0a2f0c160b7ae70f271868cb9fe96',
+  pageDeckSha256: '3e7e5a36ef2aaea0520ea2ba65a7fdfc3c6d252799890ee8f00900d30119ed04',
   customer: 'Northwind',
-  order: ['title', 'plan', 'gets', 'ships', 'next-steps', 'rosetta', 'field', 'close'],
-  startOrder: ['title', 'plan', 'gets', 'ships', 'rosetta', 'field', 'close'],
+  order: [
+    'title',
+    'plan',
+    'gets',
+    'ships',
+    'next-steps',
+    'lighthouse',
+    'field',
+    'pattern',
+    'close',
+  ],
+  startOrder: ['title', 'plan', 'gets', 'ships', 'lighthouse', 'field', 'pattern', 'close'],
   slides: {
     title: {
       id: 'title',
       n: 1,
-      title: 'Build the pitch, present it and send the link',
-      notes: 'Turboslide opens on a blank deck. No account is needed.',
+      title: 'Onboarding plan for Northwind',
+      notes: 'Open with the goals Northwind named on the call.',
       layout: 'title',
       objects: [
         {
@@ -83,12 +96,12 @@ export const HOME_DECK: HomeDeckFacts = {
           role: 'Title',
           box: {
             x: 137,
-            y: 150,
-            w: 884,
-            h: 441,
+            y: 395.28,
+            w: 1326,
+            h: 89.75,
             rot: 0,
           },
-          text: 'Build the pitch, present it and send the link',
+          text: 'Onboarding plan for Northwind',
           editable: true,
           canvasBlock: null,
         },
@@ -97,12 +110,12 @@ export const HOME_DECK: HomeDeckFacts = {
           role: 'Subtitle',
           box: {
             x: 137,
-            y: 640,
-            w: 744,
-            h: 48,
+            y: 511.03,
+            w: 901.45,
+            h: 37.69,
             rot: 0,
           },
-          text: 'Turboslide is a slides editor in the browser.',
+          text: 'Four weeks from the first call to the first deck.',
           editable: true,
           canvasBlock: null,
         },
@@ -111,10 +124,39 @@ export const HOME_DECK: HomeDeckFacts = {
     plan: {
       id: 'plan',
       n: 2,
-      title: 'Onboarding plan for Northwind',
-      notes: 'Open with the goals Northwind named on the call.',
-      layout: 'one-column',
-      objects: [],
+      title: 'The four weeks',
+      notes: 'Ask Northwind who reviews each week.',
+      layout: 'rows',
+      objects: [
+        {
+          id: 'plan#h',
+          role: 'Heading',
+          box: {
+            x: 137,
+            y: 416.8,
+            w: 522.5,
+            h: 48.39,
+            rot: 0,
+          },
+          text: 'The four weeks',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'plan#rows',
+          role: 'Rows',
+          box: {
+            x: 731.5,
+            y: 333.5,
+            w: 731.5,
+            h: 233,
+            rot: 0,
+          },
+          text: '',
+          editable: false,
+          canvasBlock: null,
+        },
+      ],
     },
     gets: {
       id: 'gets',
@@ -122,7 +164,50 @@ export const HOME_DECK: HomeDeckFacts = {
       title: 'What Northwind gets',
       notes: 'Read the three rows aloud, then ask Northwind which one matters most.',
       layout: 'rows',
-      objects: [],
+      objects: [
+        {
+          id: 'gets#h',
+          role: 'Heading',
+          box: {
+            x: 137,
+            y: 389.3,
+            w: 522.5,
+            h: 48.39,
+            rot: 0,
+          },
+          text: 'What Northwind gets',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'gets#p1',
+          role: 'Text',
+          box: {
+            x: 137,
+            y: 477.69,
+            w: 522.5,
+            h: 33,
+            rot: 0,
+          },
+          text: 'Three things on the first day.',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'gets#rows',
+          role: 'Rows',
+          box: {
+            x: 731.5,
+            y: 362.5,
+            w: 731.5,
+            h: 175,
+            rot: 0,
+          },
+          text: '',
+          editable: false,
+          canvasBlock: null,
+        },
+      ],
     },
     ships: {
       id: 'ships',
@@ -130,7 +215,22 @@ export const HOME_DECK: HomeDeckFacts = {
       title: 'The first Northwind deck ships in week one',
       notes: 'Ask Northwind who presents the first deck.',
       layout: 'statement',
-      objects: [],
+      objects: [
+        {
+          id: 'ships#big',
+          role: 'Heading',
+          box: {
+            x: 304.53,
+            y: 373.69,
+            w: 990.92,
+            h: 152.63,
+            rot: 0,
+          },
+          text: 'The first Northwind deck ships in week one',
+          editable: true,
+          canvasBlock: null,
+        },
+      ],
     },
     'next-steps': {
       id: 'next-steps',
@@ -138,23 +238,66 @@ export const HOME_DECK: HomeDeckFacts = {
       title: 'Next steps with Northwind',
       notes: '',
       layout: 'rows',
-      objects: [],
+      objects: [
+        {
+          id: 'next-steps#h',
+          role: 'Heading',
+          box: {
+            x: 137,
+            y: 389.3,
+            w: 522.5,
+            h: 48.39,
+            rot: 0,
+          },
+          text: 'Next steps with Northwind',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'next-steps#p1',
+          role: 'Text',
+          box: {
+            x: 137,
+            y: 477.69,
+            w: 522.5,
+            h: 33,
+            rot: 0,
+          },
+          text: '',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'next-steps#rows',
+          role: 'Rows',
+          box: {
+            x: 731.5,
+            y: 362.5,
+            w: 731.5,
+            h: 175,
+            rot: 0,
+          },
+          text: '',
+          editable: false,
+          canvasBlock: null,
+        },
+      ],
     },
-    rosetta: {
-      id: 'rosetta',
+    lighthouse: {
+      id: 'lighthouse',
       n: 6,
-      title: 'The Rosetta Stone',
+      title: 'Louisbourg lighthouse',
       notes: 'Drag the heading off the plate, then press Undo.',
       layout: 'mood',
       objects: [
         {
-          id: 'rosetta#plate',
+          id: 'lighthouse#plate',
           role: 'Plate',
           box: {
-            x: 1031.03,
-            y: 602.73,
-            w: 431.97,
-            h: 168.27,
+            x: 903,
+            y: 569.73,
+            w: 560,
+            h: 201.27,
             rot: 0,
           },
           text: '',
@@ -162,44 +305,44 @@ export const HOME_DECK: HomeDeckFacts = {
           canvasBlock: 'plate',
         },
         {
-          id: 'rosetta#h',
+          id: 'lighthouse#h',
           role: 'Heading',
           box: {
-            x: 612,
-            y: 388,
-            w: 520,
-            h: 96,
+            x: 929,
+            y: 591.73,
+            w: 508,
+            h: 47.52,
             rot: 0,
           },
-          text: 'The Rosetta Stone',
+          text: 'Louisbourg lighthouse',
           editable: true,
           canvasBlock: 'h',
         },
         {
-          id: 'rosetta#p1',
+          id: 'lighthouse#p1',
           role: 'Text',
           box: {
-            x: 1057.03,
-            y: 684.25,
-            w: 379.97,
-            h: 33,
+            x: 929,
+            y: 651.25,
+            w: 508,
+            h: 66,
             rot: 0,
           },
-          text: 'One decree of 196 BC in three scripts.',
+          text: 'A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells.',
           editable: true,
           canvasBlock: 'p1',
         },
         {
-          id: 'rosetta#credit',
+          id: 'lighthouse#credit',
           role: 'Credit',
           box: {
-            x: 1057.03,
+            x: 929,
             y: 729.25,
-            w: 379.97,
+            w: 508,
             h: 21.75,
             rot: 0,
           },
-          text: 'Photograph: Hans Hillewaert, CC BY-SA 4.0',
+          text: 'Photograph: Ken Heaton, CC BY-SA 4.0',
           editable: true,
           canvasBlock: 'credit',
         },
@@ -211,17 +354,155 @@ export const HOME_DECK: HomeDeckFacts = {
       title: 'The opener field',
       notes: 'Download this deck as a PDF or a PowerPoint file.',
       layout: 'mood',
-      objects: [],
+      objects: [
+        {
+          id: 'field#plate',
+          role: 'Plate',
+          box: {
+            x: 903,
+            y: 569.73,
+            w: 560,
+            h: 201.27,
+            rot: 0,
+          },
+          text: '',
+          editable: false,
+          canvasBlock: null,
+        },
+        {
+          id: 'field#h',
+          role: 'Heading',
+          box: {
+            x: 929,
+            y: 591.73,
+            w: 508,
+            h: 47.52,
+            rot: 0,
+          },
+          text: 'The opener field',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'field#p1',
+          role: 'Text',
+          box: {
+            x: 929,
+            y: 651.25,
+            w: 508,
+            h: 66,
+            rot: 0,
+          },
+          text: 'A lit sphere drawn from a formula and printed through an 8 by 8 screen at 2 px cells.',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'field#credit',
+          role: 'Credit',
+          box: {
+            x: 929,
+            y: 729.25,
+            w: 508,
+            h: 21.75,
+            rot: 0,
+          },
+          text: 'Drawn in Turboslide',
+          editable: true,
+          canvasBlock: null,
+        },
+      ],
+    },
+    pattern: {
+      id: 'pattern',
+      n: 8,
+      title: 'Questions from Northwind',
+      notes: 'Take the questions, then send the link.',
+      layout: 'mood',
+      objects: [
+        {
+          id: 'pattern#plate',
+          role: 'Plate',
+          box: {
+            x: 922.22,
+            y: 636.48,
+            w: 540.78,
+            h: 134.52,
+            rot: 0,
+          },
+          text: '',
+          editable: false,
+          canvasBlock: null,
+        },
+        {
+          id: 'pattern#h',
+          role: 'Heading',
+          box: {
+            x: 948.22,
+            y: 658.48,
+            w: 488.78,
+            h: 47.52,
+            rot: 0,
+          },
+          text: 'Questions from Northwind',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'pattern#p1',
+          role: 'Text',
+          box: {
+            x: 948.22,
+            y: 718,
+            w: 488.78,
+            h: 33,
+            rot: 0,
+          },
+          text: 'Thank you for the time today.',
+          editable: true,
+          canvasBlock: null,
+        },
+      ],
     },
     close: {
       id: 'close',
-      n: 8,
+      n: 9,
       title: 'Turboslide',
       notes: 'New Presentation opens a blank deck.',
       layout: 'big-number',
-      objects: [],
+      objects: [
+        {
+          id: 'close#h',
+          role: 'Heading',
+          box: {
+            x: 643.42,
+            y: 261.48,
+            w: 313.16,
+            h: 76.31,
+            rot: 0,
+          },
+          text: 'Turboslide',
+          editable: true,
+          canvasBlock: null,
+        },
+        {
+          id: 'close#p1',
+          role: 'Text',
+          box: {
+            x: 688.77,
+            y: 616.77,
+            w: 222.45,
+            h: 21.75,
+            rot: 0,
+          },
+          text: 'Made in Turboslide. Set in Inter.',
+          editable: true,
+          canvasBlock: null,
+        },
+      ],
     },
   },
+  title: 'Onboarding plan',
   heroDisc: {
     cx: 1450,
     cy: 1180,
@@ -239,7 +520,7 @@ export const HOME_TAILOR_WORDS = {
   to: 'With',
   apply: 'Apply',
   undo: 'Undo',
-  countRest: '8 places on 4 slides',
+  countRest: '13 places on 6 slides',
 } as const;
 
 /** The Perfect file's picture size, read from the file the CLI wrote (docs/LANDING.md 2.8). */

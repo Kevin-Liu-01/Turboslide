@@ -3,12 +3,14 @@
 // fact the landing draws is product output made here, and nothing under the generated files is
 // edited by hand.
 //
-// The page deck. `apps/studio/home-deck/` is the fixture: seven slides in the GT theme with
-// Turboslide's own words. `--run` copies it to a temporary folder and runs the agents band's three
-// commands on the copy with the CLI (`node apps/cli/bin/turboslide.mjs`, the orchestrator's rules
-// forbid `pnpm exec`); the eight slide deck that results is the page deck. The run also records
-// every typed form the panel answers for each deck state, the gesture forms of the canvas band
-// (`slide to-canvas`, `block set /pos`, `block rotate`) and the tailor counts. Every answer is
+// The page deck. `apps/studio/home-deck/` is the fixture: eight slides in the GT theme, a
+// customer's onboarding plan (docs/LANDING.md 2.0, the second pass). `--run` copies it to a
+// temporary folder and runs the recorded run's three commands on the copy with the CLI (`node
+// apps/cli/bin/turboslide.mjs`, the orchestrator's rules forbid `pnpm exec`); the nine slide deck
+// that results is the page deck. The run also records every typed form the panel answers for each
+// deck state, the boxes of slide 1's title and subtitle as the CLI's `slide to-canvas` measures
+// them, the gesture forms of the canvas band (`slide to-canvas`, `block set /pos`, `block rotate`)
+// on the lighthouse and the tailor counts. Every answer is
 // written verbatim to `apps/studio/home-deck/recorded/` with the slide states the run produced,
 // so the rest of the build reads files, never the CLI.
 //
@@ -31,8 +33,8 @@
 // What the derivation writes (docs/LANDING.md 6.1 "Generated"; integrator.md 4.2):
 //   apps/studio/home-deck/assets/field-{light,dark}.png   slide 7's opener field (B's openerTone)
 //   apps/studio/src/components/home/deck.generated.ts       the client safe facts of the page deck
-//   apps/studio/src/components/home/slides.generated.ts     the ten instances and the inlined stills
-//   apps/studio/src/components/home/live-slides.generated.ts slide 7 and slide 5's earlier states
+//   apps/studio/src/components/home/slides.generated.ts     the first screen's ten instances and stills
+//   apps/studio/src/components/home/bands.generated.ts      every instance below the first screen
 //   apps/studio/src/components/home/run.generated.ts        the recorded run, formatted for the panel
 //   apps/studio/src/components/home/boot.generated.ts       the boot script and the visit gap tables
 //   apps/studio/src/components/home/assets.json, assets.ts  every file under public/home
@@ -65,7 +67,14 @@ import { bayer8 } from '../packages/effects/src/bayer.ts';
 import { slideTitle } from '../packages/schema/src/deck.ts';
 import { SPRITE } from '../packages/theme/src/sprite.ts';
 import type { Deck, Slide } from '../packages/schema/src/deck.ts';
-import { DEFAULT_MENU_CONTEXT, visibleMenus } from '../packages/chrome/src/menus/model.ts';
+import {
+  DEFAULT_MENU_CONTEXT,
+  itemById,
+  itemPath,
+  visibleMenus,
+} from '../packages/chrome/src/menus/model.ts';
+import { shortcutLabel } from '../packages/chrome/src/menus/keys.ts';
+import type { Shortcut } from '../packages/chrome/src/menus/keys.ts';
 import { TAILOR } from '../packages/chrome/src/panels/assist-strings.ts';
 import { layoutEntry } from '../packages/schema/src/layouts.ts';
 import {
@@ -82,6 +91,11 @@ import {
   substituteName,
 } from '../apps/studio/src/components/home/panel-format.ts';
 import type { PanelWidth } from '../apps/studio/src/components/home/panel-format.ts';
+/* the lanes' build modules (docs/LANDING.md 6.1, 6.4): V3's chips and loop, V4's boot script and
+   slide 8's still frame; the entry calls them and writes what they return */
+import { deriveChips, recordChips } from './home/run.ts';
+import { deriveBoot } from './home/boot.ts';
+import { derivePattern } from './home/pattern.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = 'apps/studio/home-deck';
@@ -105,21 +119,67 @@ const ABSENT_NAME = 'Initech';
 /** The author the CLI records for every write of the run (Version history names Agent). */
 const RUN_AUTHOR = 'agent:landing';
 
-/** The ten instances in the markup and the slide each draws (docs/LANDING.md 2.0). */
-const INSTANCES = [
-  ['hero', 'title'],
-  ['agents', 'next-steps'],
-  ['tailor-stage', 'plan'],
-  ['tailor-thumb-plan', 'plan'],
-  ['tailor-thumb-gets', 'gets'],
-  ['tailor-thumb-ships', 'ships'],
-  ['tailor-thumb-next-steps', 'next-steps'],
-  ['canvas', 'rosetta'],
-  ['present', 'gets'],
-  ['close', 'close'],
+/** The page deck's nine slides in their order at rest (docs/LANDING.md 2.0 "The page deck"). */
+const PAGE_ORDER = [
+  'title',
+  'plan',
+  'gets',
+  'ships',
+  'next-steps',
+  'lighthouse',
+  'field',
+  'pattern',
+  'close',
 ] as const;
 
-type SlideId = 'title' | 'plan' | 'gets' | 'ships' | 'next-steps' | 'rosetta' | 'field' | 'close';
+type SlideId = (typeof PAGE_ORDER)[number];
+
+/**
+ * The first screen's ten instances, inlined in the document (docs/LANDING.md 2.0, 2.2): the hero
+ * frame's slide 1 and its filmstrip's nine thumbnails, every one with the renderer's block
+ * attributes, so any slide the frame shows can be selected and the show and the print can clone
+ * every slide from the page.
+ */
+const INSTANCES: readonly (readonly [string, SlideId])[] = [
+  ['hero', 'title'],
+  ...PAGE_ORDER.map((id) => [`hero-thumb-${id}`, id] as const),
+];
+
+/** The bands below the first screen whose markup the build fills (bands.generated.ts). */
+type FillBand =
+  'canvas' | 'tailor' | 'agents' | 'people' | 'present' | 'export' | 'patterns' | 'close';
+
+/**
+ * Below the first screen, each band's instances by its `data-fill` key (docs/LANDING.md 2.0, 4.2):
+ * they travel in the band's chunk (`bands.generated.ts`), never in the document.
+ */
+const BAND_INSTANCES: Readonly<Record<FillBand, readonly (readonly [string, SlideId])[]>> = {
+  canvas: [['canvas', 'lighthouse']],
+  tailor: [
+    ['tailor-stage', 'plan'],
+    ['tailor-thumb-title', 'title'],
+    ['tailor-thumb-plan', 'plan'],
+    ['tailor-thumb-gets', 'gets'],
+    ['tailor-thumb-ships', 'ships'],
+    ['tailor-thumb-next-steps', 'next-steps'],
+  ],
+  agents: [['agents', 'next-steps']],
+  /* the two people's screens: slides 2 and 3 at rest on each (v4.md, 11:45) */
+  people: [
+    ['people-maya-plan', 'plan'],
+    ['people-maya-gets', 'gets'],
+    ['people-sam-plan', 'plan'],
+    ['people-sam-gets', 'gets'],
+  ],
+  present: [['present', 'gets']],
+  export: [],
+  /* slide 8 twice: the moving pattern's slide and the still frame's (v4.md Q6) */
+  patterns: [
+    ['patterns-moving', 'pattern'],
+    ['patterns-still', 'pattern'],
+  ],
+  close: [['close', 'close']],
+};
 type RunState = 'absent' | 'placeholders' | 'titled' | 'filled';
 const STATES: readonly RunState[] = ['absent', 'placeholders', 'titled', 'filled'];
 
@@ -279,10 +339,12 @@ const VERSION_LIST = ['version', 'list'];
 /** The canvas band's gesture forms (docs/LANDING.md 2.6), run against the page deck. */
 const GESTURE_POS = { x: 612, y: 388, w: 520, h: 96 };
 const GESTURES = [
-  ['slide', 'to-canvas', 'rosetta'],
-  ['block', 'set', 'rosetta#h', '/pos', JSON.stringify(GESTURE_POS)],
-  ['block', 'rotate', 'rosetta#h', '--to', '15'],
+  ['slide', 'to-canvas', 'lighthouse'],
+  ['block', 'set', 'lighthouse#h', '/pos', JSON.stringify(GESTURE_POS)],
+  ['block', 'rotate', 'lighthouse#h', '--to', '15'],
 ];
+/** Every slide's blocks as the CLI measures them: their boxes at rest (one headless page). */
+const MEASURE = ['slide', 'to-canvas', PAGE_ORDER.join(',')];
 
 type RecordedTyped = {
   form: 'tailor' | 'tailor-spaced' | 'version-list' | 'step';
@@ -401,23 +463,49 @@ function runMode(): void {
         fail(`the CLI refused the gesture form ${argv.join(' ')}: ${humanOf(answer).join(' | ')}`);
       gestures.push(answer);
     }
-    const canvasSlide = readFileSync(join(scratch, 'slides', 'rosetta.json'), 'utf8');
-    /* the tailor counts on the fixture (seven slides) and the page deck (eight) */
+    const canvasSlide = readFileSync(join(scratch, 'slides', 'lighthouse.json'), 'utf8');
+    /* every block's box at rest: the CLI's measurer on a copy, so the page deck keeps its layout */
+    copyDeck(deck, scratch);
+    const measuring = cli(scratch, MEASURE);
+    if (measuring.code !== 0)
+      fail(`the CLI refused ${MEASURE.join(' ')}: ${humanOf(measuring).join(' | ')}`);
+    const measured = Object.fromEntries(
+      PAGE_ORDER.map((id) => {
+        const slide = JSON.parse(readFileSync(join(scratch, 'slides', `${id}.json`), 'utf8')) as {
+          slots: { main: { id: string; type: string; pos: unknown; text?: string }[] };
+        };
+        return [
+          id,
+          slide.slots.main.map((b) => ({
+            id: b.id,
+            type: b.type,
+            pos: b.pos,
+            ...(b.text !== undefined ? { text: b.text } : {}),
+          })),
+        ];
+      }),
+    );
+    /* the tailor counts on the fixture (eight slides) and the page deck (nine) */
     copyDeck(states.get('absent') as string, scratch);
     const start = cli(scratch, TAILOR_FOUND);
     copyDeck(deck, scratch);
     const rest = cli(scratch, TAILOR_FOUND);
     if (start.code !== 0 || rest.code !== 0) fail('the CLI refused the tailor form');
-    /* write the recordings */
+    /* write the recordings; the export's record stays (its page deck sha tells the check whether
+       it was read from this run's deck) */
     const out = resolve(ROOT, RECORDED);
+    const exportPath = join(out, 'export.json');
+    const exportRecord = existsSync(exportPath) ? readFileSync(exportPath) : null;
     rmSync(out, { recursive: true, force: true });
     mkdirSync(out, { recursive: true });
+    if (exportRecord !== null) writeFileSync(exportPath, exportRecord);
     for (const state of ['placeholders', 'titled', 'filled'] as const)
       writeFileSync(
         join(out, `next-steps-${state}.json`),
         readFileSync(join(states.get(state) as string, 'slides', 'next-steps.json')),
       );
-    writeFileSync(join(out, 'rosetta-canvas.json'), canvasSlide);
+    writeFileSync(join(out, 'lighthouse-canvas.json'), canvasSlide);
+    writeFileSync(join(out, 'measured.json'), jsonText(measured));
     writeFileSync(
       join(out, 'page-deck-sections.json'),
       jsonText(
@@ -447,7 +535,13 @@ function runMode(): void {
 // The served files (assets.json; integrator.md section 6)
 
 type AssetRole =
-  'canvas-still' | 'canvas-tone' | 'field-still' | 'export-perfect' | 'export-editable' | 'pdf';
+  | 'lighthouse-still'
+  | 'lighthouse-tone'
+  | 'field-still'
+  | 'pattern-still'
+  | 'export-perfect'
+  | 'export-editable'
+  | 'pdf';
 type AssetVariant = 'wide' | 'narrow' | null;
 type ServedAsset = {
   role: AssetRole;
@@ -798,7 +892,8 @@ async function exportMode(): Promise<void> {
       const pages = (
         new TextDecoder('latin1').decode(pdfBytes).match(/\/Type\s*\/Page(?![s\w])/g) ?? []
       ).length;
-      if (pages !== 8) fail(`the PDF (${theme}) has ${pages} pages, not 8`);
+      if (pages !== PAGE_ORDER.length)
+        fail(`the PDF (${theme}) has ${pages} pages, not ${PAGE_ORDER.length}`);
       const pdf = await served('pdf', theme, null, pdfBytes, 'pdf', { pages });
       assets.push(pdf.asset);
       written.push({ name: pdf.asset.path.slice(URL_PREFIX.length + 1), bytes: pdf.bytes });
@@ -858,32 +953,83 @@ const GRID_SIZE = (grid: { cols: number; rows: number }): { width: number; heigh
 });
 const STRIP_GRID = { wide: { cols: 512, rows: 80 }, narrow: { cols: 179, rows: 48 } } as const;
 
-/** The hero's disc on the sheet (integrator.md 2.2): the planet's northern limb in the lower right. */
+/**
+ * The hero frame's slide (docs/LANDING.md 2.2): 540 by 304 px at 1,024 px and over, 326 by 183
+ * under 720 px, printed at the deck's 2 px cell.
+ */
+const FRAME_GRID = { wide: { cols: 270, rows: 152 }, narrow: { cols: 163, rows: 92 } } as const;
+/** The Blue Marble's disc on slide 1 (integrator.md 2.2): the planet's northern limb in the lower right. */
 const HERO_DISC = { cx: 1450, cy: 1180, r: 600 };
-/** The hand set boxes of the hero slide in sheet units (docs/LANDING.md 2.2), measured in the page. */
-const HERO_BOXES = {
-  title: { x: 137, y: 150, w: 884, h: 441 },
-  /** the longest visit sentence, 49 characters at 32 units */
-  lead: { x: 137, y: 640, w: 744, h: 48 },
-  /** under 720 px: the lead at the 17 px floor, two lines reserved, on the sheet's left half */
-  leadNarrow: { x: 137, y: 300, w: 640, h: 230 },
+/** One block as the CLI's `slide to-canvas` measured it on the page deck at rest (--run). */
+type MeasuredBlock = {
+  id: string;
+  type: string;
+  pos: { x: number; y: number; w: number; h: number; rotate?: number };
+  text?: string;
 };
+
+function measuredBlocks(slide: SlideId): MeasuredBlock[] {
+  const all = readJson<Record<string, MeasuredBlock[]>>(`${RECORDED}/measured.json`);
+  return all[slide] ?? fail(`${RECORDED}/measured.json has no slide ${slide}`);
+}
+
+/** A selectable object of the page deck: the block the renderer marks, its chip word and its box. */
+type SlideObject = {
+  block: string;
+  id: string;
+  role: string;
+  box: Box;
+  text: string;
+  editable: boolean;
+};
+
+/**
+ * Every text, rows and plate block of a slide as an object (docs/LANDING.md 2.5, 2.6; v2.md R1):
+ * slide 1's heading and lead are its Title and Subtitle, a mood slide's plate its Plate.
+ */
+function slideObjects(slide: SlideId): SlideObject[] {
+  const role = (b: MeasuredBlock): string | null => {
+    if (slide === 'title')
+      return b.id === 'heading' ? 'Title' : b.id === 'lead' ? 'Subtitle' : null;
+    if (b.id === 'plate' && b.type === 'box') return 'Plate';
+    if (b.type === 'heading') return 'Heading';
+    if (b.type === 'paragraph') return 'Text';
+    if (b.type === 'credit') return 'Credit';
+    if (b.type === 'rows') return 'Rows';
+    return null;
+  };
+  return measuredBlocks(slide).flatMap((b) => {
+    const word = role(b);
+    if (word === null) return [];
+    return [
+      {
+        block: b.id,
+        id: `${slide}#${b.id}`,
+        role: word,
+        box: { x: round2(b.pos.x), y: round2(b.pos.y), w: round2(b.pos.w), h: round2(b.pos.h) },
+        text: b.text ?? '',
+        editable: word !== 'Plate' && word !== 'Rows',
+      },
+    ];
+  });
+}
+
+/** Slide 1's title and subtitle in sheet units, as measured. */
+function titleBoxes(): { heading: Box; lead: Box } {
+  const objects = slideObjects('title');
+  const box = (block: string): Box =>
+    objects.find((o) => o.block === block)?.box ?? fail(`slide 1 has no measured ${block}`);
+  return { heading: box('heading'), lead: box('lead') };
+}
 /** the bottom margin's chips: the mark, the credit and the counter (stage.css, block-css.ts .ts-chips) */
-const HERO_CHIPS = {
-  wide: [
-    { x: 66, y: 858, w: 40, h: 30 },
-    { x: 126, y: 856, w: 352, h: 30 },
-    { x: 1474, y: 856, w: 60, h: 28 },
-  ],
-  /* under 720 px the credit sits under the sheet (HomeHero), so the margin keeps the mark and the counter */
-  narrow: [
-    { x: 40, y: 846, w: 92, h: 54 },
-    { x: 1404, y: 850, w: 140, h: 50 },
-  ],
-};
+const HERO_CHIPS = [
+  { x: 66, y: 858, w: 40, h: 30 },
+  { x: 126, y: 856, w: 352, h: 30 },
+  { x: 1474, y: 856, w: 60, h: 28 },
+];
 const CLEAR = 24;
 /** the canvas print's ink curve (deriveStills) */
-const ROSETTA_GAMMA = 0.7;
+const LIGHTHOUSE_GAMMA = 1;
 
 function grow(box: Box, by: number): Box {
   return { x: box.x - by, y: box.y - by, w: box.w + 2 * by, h: box.h + 2 * by };
@@ -1040,110 +1186,23 @@ function stripBits(width: 'wide' | 'narrow'): Bits {
   return ditherSheet(cols, rows, tone, [], { w: W, h: H });
 }
 
+/** The thumbnails' grid in the hero frame's filmstrip (56 by 31.5 px, 64 by 36 under 720 px). */
+const MINI_GRID = { cols: 32, rows: 18 } as const;
+
 type Stills = {
   hero: { wide: Bits; narrow: Bits };
   strip: { wide: Bits; narrow: Bits };
   canvas: { wide: Bits; narrow: Bits };
   field: Bits;
+  /** the hero frame's filmstrip: each picture slide's print at the thumbnails' grid, inlined */
+  mini: { hero: Bits; canvas: Bits; field: Bits; pattern: Bits };
   /** the opener field's picture, the fixture's slide 7 asset (1600 by 900, 2 px cells) */
   fieldPicture: { light: Uint8Array; dark: Uint8Array };
   canvasTone: Uint8Array;
 };
 
-async function deriveStills(): Promise<Stills> {
-  /* the hero: the Blue Marble from the light file, blurred back to tone (A's method) */
-  const earth = await grayOf(`${FIXTURE}/assets/mood-earth-light.jpg`, 1.6);
-  const earthInk = await grayOf(`${FIXTURE}/assets/mood-earth-light.jpg`, 0);
-  const src = sourceDisc(earthInk);
-  const heroTone: Tone = (x, y) => {
-    const dx = (x - HERO_DISC.cx) / HERO_DISC.r;
-    const dy = (y - HERO_DISC.cy) / HERO_DISC.r;
-    if (dx * dx + dy * dy > 1) return 0;
-    return sampleInk(earth, src.cx + dx * src.r, src.cy + dy * src.r);
-  };
-  const wideZones = [
-    grow(HERO_BOXES.title, CLEAR),
-    grow(HERO_BOXES.lead, CLEAR),
-    ...HERO_CHIPS.wide,
-  ];
-  const narrowZones = [grow(HERO_BOXES.leadNarrow, CLEAR), ...HERO_CHIPS.narrow];
-  /* the whole disc's print, no zone cut (l4.md M12): each box draws its own ground of paper 24
-     units beyond itself (home.css), so the ground moves with the box and the field shows under
-     its old place in the same frame */
-  const heroWide = ditherSheet(GRID.wide.cols, GRID.wide.rows, heroTone);
-  const heroNarrow = ditherSheet(GRID.narrow.cols, GRID.narrow.rows, heroTone);
-  /* integrator.md 2.2: no clear zone (a box's ground at rest) covers more than 5 percent of the
-     disc's cells on the sheet */
-  for (const [label, zones, grid] of [
-    ['wide', wideZones, GRID.wide],
-    ['narrow', narrowZones, GRID.narrow],
-  ] as const) {
-    let disc = 0;
-    const cleared = zones.map(() => 0);
-    const cw = SHEET.w / grid.cols;
-    const ch = SHEET.h / grid.rows;
-    for (let r = 0; r < grid.rows; r += 1)
-      for (let c = 0; c < grid.cols; c += 1) {
-        const x = (c + 0.5) * cw;
-        const y = (r + 0.5) * ch;
-        if ((x - HERO_DISC.cx) ** 2 + (y - HERO_DISC.cy) ** 2 > HERO_DISC.r ** 2) continue;
-        disc += 1;
-        zones.forEach((z, i) => {
-          if (inBox(z, x, y)) cleared[i] = (cleared[i] ?? 0) + 1;
-        });
-      }
-    cleared.forEach((n, i) => {
-      if (n / disc > 0.05)
-        fail(
-          `the hero's clear zone ${i} covers ${((n / disc) * 100).toFixed(1)} percent of the disc at ${label} width (over 5)`,
-        );
-    });
-  }
-  /* the canvas band: the Rosetta Stone through the page's screen at 2 px cells. The deck's print
-     is resampled to each grid by area (Mitchell), which keeps the carved rows that a Gaussian
-     back to tone smears, and inked with a gamma of 0.7 so the rows hold their weight at the
-     page's coarser cells */
-  const rosettaGrid = async (cols: number, rows: number): Promise<Bits> => {
-    const gray = await grayOf(`${FIXTURE}/assets/mood-rosetta-light.jpg`, 0, {
-      width: cols,
-      height: rows,
-    });
-    const bits = new Uint8Array(cols * rows);
-    for (let r = 0; r < rows; r += 1)
-      for (let c = 0; c < cols; c += 1) {
-        const ink = (1 - (gray.data[r * cols + c] ?? 255) / 255) ** ROSETTA_GAMMA;
-        if (ink > (bayer8(r, c) + 0.5) / 64) bits[r * cols + c] = 1;
-      }
-    return { cols, rows, bits };
-  };
-  /* the tone map C1 develops from: the wide grid's tone, one grey pixel a cell (512 by 288, JPEG
-     at quality 50, about 23 KB of the 26 KB line; LANDING.md 6.1 wrote 640 by 360, which at any
-     quality that keeps the carved rows weighs 31 KB or more), its luminance the inked tone's
-     complement (ink = 1 minus luminance). The wide still is the screen over that file as it
-     decodes, so a develop from it ends on the still's cells */
-  const toneGray = await grayOf(
-    `${FIXTURE}/assets/mood-rosetta-light.jpg`,
-    0,
-    GRID_SIZE(GRID.wide),
-  );
-  const toned = Buffer.from(
-    toneGray.data.map((v) => Math.round(255 * (1 - (1 - v / 255) ** ROSETTA_GAMMA))),
-  );
-  const canvasTone = new Uint8Array(
-    await sharp(toned, { raw: { width: GRID.wide.cols, height: GRID.wide.rows, channels: 1 } })
-      .jpeg({ quality: 50, mozjpeg: true })
-      .toBuffer(),
-  );
-  const decoded = await sharp(canvasTone).greyscale().raw().toBuffer();
-  const canvasWideBits = new Uint8Array(GRID.wide.cols * GRID.wide.rows);
-  for (let r = 0; r < GRID.wide.rows; r += 1)
-    for (let c = 0; c < GRID.wide.cols; c += 1) {
-      const ink = 1 - (decoded[r * GRID.wide.cols + c] ?? 255) / 255;
-      if (ink > (bayer8(r, c) + 0.5) / 64) canvasWideBits[r * GRID.wide.cols + c] = 1;
-    }
-  const canvasWide: Bits = { ...GRID.wide, bits: canvasWideBits };
-  const canvasNarrow = await rosettaGrid(GRID.narrow.cols, GRID.narrow.rows);
-  /* slide 7: the opener field as the fixture's picture (800 by 450 cells of 2 px) */
+/** Slide 7's picture in the fixture: the opener field at 800 by 450 cells of 2 px, both appearances. */
+async function fieldPictures(): Promise<{ light: Uint8Array; dark: Uint8Array }> {
   const cells = ditherSheet(800, 450, openerTone);
   const picture = async (
     ink: [number, number, number],
@@ -1162,16 +1221,123 @@ async function deriveStills(): Promise<Stills> {
         .toBuffer(),
     );
   };
-  const fieldPicture = {
+  return {
     light: await picture([7, 7, 7], [255, 255, 255]),
     dark: await picture([242, 242, 240], [7, 7, 7]),
   };
+}
+
+async function deriveStills(): Promise<Stills> {
+  /* the hero: the Blue Marble from the light file, blurred back to tone (A's method) */
+  const earth = await grayOf(`${FIXTURE}/assets/mood-earth-light.jpg`, 1.6);
+  const earthInk = await grayOf(`${FIXTURE}/assets/mood-earth-light.jpg`, 0);
+  const src = sourceDisc(earthInk);
+  const heroTone: Tone = (x, y) => {
+    const dx = (x - HERO_DISC.cx) / HERO_DISC.r;
+    const dy = (y - HERO_DISC.cy) / HERO_DISC.r;
+    if (dx * dx + dy * dy > 1) return 0;
+    return sampleInk(earth, src.cx + dx * src.r, src.cy + dy * src.r);
+  };
+  const boxes = titleBoxes();
+  const zones = [grow(boxes.heading, CLEAR), grow(boxes.lead, CLEAR), ...HERO_CHIPS];
+  /* the whole disc's print, no zone cut (l4.md M12): each box draws its own ground of paper 24
+     units beyond itself (home.css), so the ground moves with the box and the field shows under
+     its old place in the same frame */
+  const heroWide = ditherSheet(FRAME_GRID.wide.cols, FRAME_GRID.wide.rows, heroTone);
+  const heroNarrow = ditherSheet(FRAME_GRID.narrow.cols, FRAME_GRID.narrow.rows, heroTone);
+  /* integrator.md 2.2: no clear zone (a box's ground at rest) covers more than 5 percent of the
+     disc's cells on the sheet */
+  {
+    const grid = FRAME_GRID.wide;
+    let disc = 0;
+    const cleared = zones.map(() => 0);
+    const cw = SHEET.w / grid.cols;
+    const ch = SHEET.h / grid.rows;
+    for (let r = 0; r < grid.rows; r += 1)
+      for (let c = 0; c < grid.cols; c += 1) {
+        const x = (c + 0.5) * cw;
+        const y = (r + 0.5) * ch;
+        if ((x - HERO_DISC.cx) ** 2 + (y - HERO_DISC.cy) ** 2 > HERO_DISC.r ** 2) continue;
+        disc += 1;
+        zones.forEach((z, i) => {
+          if (inBox(z, x, y)) cleared[i] = (cleared[i] ?? 0) + 1;
+        });
+      }
+    cleared.forEach((n, i) => {
+      if (n / disc > 0.05)
+        fail(
+          `the hero's clear zone ${i} covers ${((n / disc) * 100).toFixed(1)} percent of the disc (over 5)`,
+        );
+    });
+  }
+  /* the canvas band: the Louisbourg lighthouse through the page's screen at 2 px cells. The deck's
+     print is resampled to each grid by area (Mitchell), which keeps the tower's edges that a
+     Gaussian back to tone smears */
+  const lighthouseGrid = async (cols: number, rows: number): Promise<Bits> => {
+    const gray = await grayOf(`${FIXTURE}/assets/mood-lighthouse-light.jpg`, 0, {
+      width: cols,
+      height: rows,
+    });
+    const bits = new Uint8Array(cols * rows);
+    for (let r = 0; r < rows; r += 1)
+      for (let c = 0; c < cols; c += 1) {
+        const ink = (1 - (gray.data[r * cols + c] ?? 255) / 255) ** LIGHTHOUSE_GAMMA;
+        if (ink > (bayer8(r, c) + 0.5) / 64) bits[r * cols + c] = 1;
+      }
+    return { cols, rows, bits };
+  };
+  /* the tone map C1 develops from: the wide grid's tone, one grey pixel a cell (512 by 288, JPEG
+     at quality 50, under the 26 KB line of LANDING.md 4.1), its luminance the inked tone's
+     complement (ink = 1 minus luminance). The wide still is the screen over that file as it
+     decodes, so a develop from it ends on the still's cells */
+  const toneGray = await grayOf(
+    `${FIXTURE}/assets/mood-lighthouse-light.jpg`,
+    0,
+    GRID_SIZE(GRID.wide),
+  );
+  const toned = Buffer.from(
+    toneGray.data.map((v) => Math.round(255 * (1 - (1 - v / 255) ** LIGHTHOUSE_GAMMA))),
+  );
+  const canvasTone = new Uint8Array(
+    await sharp(toned, { raw: { width: GRID.wide.cols, height: GRID.wide.rows, channels: 1 } })
+      .jpeg({ quality: 50, mozjpeg: true })
+      .toBuffer(),
+  );
+  const decoded = await sharp(canvasTone).greyscale().raw().toBuffer();
+  const canvasWideBits = new Uint8Array(GRID.wide.cols * GRID.wide.rows);
+  for (let r = 0; r < GRID.wide.rows; r += 1)
+    for (let c = 0; c < GRID.wide.cols; c += 1) {
+      const ink = 1 - (decoded[r * GRID.wide.cols + c] ?? 255) / 255;
+      if (ink > (bayer8(r, c) + 0.5) / 64) canvasWideBits[r * GRID.wide.cols + c] = 1;
+    }
+  const canvasWide: Bits = { ...GRID.wide, bits: canvasWideBits };
+  const canvasNarrow = await lighthouseGrid(GRID.narrow.cols, GRID.narrow.rows);
+  /* slide 8's thumbnail in the hero frame: the fixture's captured pattern (3200 by 1800, the light
+     twin) blurred back to its tone and printed at the thumbnail's grid; slide 8's still frame on the
+     page is V4's (scripts/home/pattern.ts, the role pattern-still) */
+  const patternGray = await grayOf(`${FIXTURE}/assets/pattern-light.png`, 6);
+  const patternTone: Tone = (x, y) =>
+    sampleInk(patternGray, (x / SHEET.w) * patternGray.width, (y / SHEET.h) * patternGray.height);
+  const lighthouseGray = await grayOf(`${FIXTURE}/assets/mood-lighthouse-light.jpg`, 1.2);
+  const lighthouseTone: Tone = (x, y) =>
+    sampleInk(
+      lighthouseGray,
+      (x / SHEET.w) * lighthouseGray.width,
+      (y / SHEET.h) * lighthouseGray.height,
+    ) ** LIGHTHOUSE_GAMMA;
+  const mini = (tone: Tone): Bits => ditherSheet(MINI_GRID.cols, MINI_GRID.rows, tone);
   return {
     hero: { wide: heroWide, narrow: heroNarrow },
     strip: { wide: stripBits('wide'), narrow: stripBits('narrow') },
     canvas: { wide: canvasWide, narrow: canvasNarrow },
     field: ditherSheet(GRID.wide.cols, GRID.wide.rows, openerTone),
-    fieldPicture,
+    mini: {
+      hero: mini(heroTone),
+      canvas: mini(lighthouseTone),
+      field: mini(openerTone),
+      pattern: mini(patternTone),
+    },
+    fieldPicture: await fieldPictures(),
     canvasTone,
   };
 }
@@ -1203,22 +1369,12 @@ function loadPageDeck(): DeckDoc {
   };
 }
 
-const HERO_LINES = ['Build the pitch,', 'present it and', 'send the link'] as const;
 const ALT = {
   hero: "The Blue Marble, NASA's photograph of the Earth",
-  canvas: 'The Rosetta Stone, a decree of 196 BC in three scripts',
+  canvas: 'Louisbourg lighthouse, a lighthouse on the Nova Scotia coast',
   field: 'The opener field, a lit sphere printed in dots',
+  pattern: "An animated pattern of dots in the theme's colors",
 };
-/** The object chip words (docs/LANDING.md 2.2, 2.6; integrator.md 2.1). */
-const OBJECT_ROLES: Record<string, string> = {
-  'title#heading': 'Title',
-  'title#lead': 'Subtitle',
-  'rosetta#h': 'Heading',
-  'rosetta#p1': 'Text',
-  'rosetta#credit': 'Credit',
-  'rosetta#plate': 'Plate',
-};
-
 const RENDER_BASE = {
   chrome: true,
   assetBase: '',
@@ -1227,17 +1383,9 @@ const RENDER_BASE = {
   active: true,
 } as const;
 
-/**
- * The instances whose blocks a band edits or writes keep the renderer's block attributes
- * (`data-block`, `data-type`, `data-run`): the hero and the canvas slide (L2's objects), the
- * agents band's slide 5 (L3's landing) and the live states. The rest draw without them, which keeps
- * the document inside its 80 KB (LANDING.md 4.1).
- */
-const BLOCK_ATTR_INSTANCES = new Set(['hero', 'canvas', 'agents', 'show']);
-
 /** One slide's markup, with the check that its two appearances differ only in picture sources. */
-function renderBoth(doc: DeckDoc, slide: Slide, prompts: boolean, blockAttrs = true): string {
-  const base = { ...RENDER_BASE, blockAttrs, ...(prompts ? { prompts: true } : {}) };
+function renderBoth(doc: DeckDoc, slide: Slide, prompts: boolean): string {
+  const base = { ...RENDER_BASE, ...(prompts ? { prompts: true } : {}) };
   const light = renderSlide(doc.deck, slide, { ...base, theme: 'light' });
   const dark = renderSlide(doc.deck, slide, { ...base, theme: 'dark' });
   for (const r of [light, dark])
@@ -1251,7 +1399,7 @@ function renderBoth(doc: DeckDoc, slide: Slide, prompts: boolean, blockAttrs = t
   return light.html;
 }
 
-/** Every heading element outside the hero becomes a div with the heading's look (one h1, one h2 per band). */
+/** Every heading element becomes a div with the heading's look: the page's one h1 is page text. */
 function headingsToDivs(html: string): string {
   return html
     .replace(/<h([1-6])\b([^>]*)>/g, (_m, level: string, rest: string) => {
@@ -1265,17 +1413,30 @@ function headingsToDivs(html: string): string {
     .replace(/<\/h[1-6]>/g, '</div>');
 }
 
-function objectAttrs(id: string): string {
-  const role = OBJECT_ROLES[id] ?? fail(`no chip word for ${id}`);
-  return ` data-object="${id}" tabindex="0" role="group" aria-roledescription="text box" aria-label="${role}"`;
+/** An object's attributes: its id, its chip word as its name, and Tab on it unless it is a thumbnail's. */
+function objectAttrs(object: SlideObject, tab: 0 | -1): string {
+  return ` data-object="${object.id}" tabindex="${tab}" role="group" aria-roledescription="text box" aria-label="${object.role}"`;
 }
 
 /** Adds a selectable object's attributes to the element that carries `data-block="<block>"`. */
-function markObject(html: string, block: string, id: string): string {
-  const at = html.indexOf(`data-block="${block}"`);
-  if (at < 0) fail(`${id}: no data-block="${block}" in the slide`);
+function markObject(html: string, object: SlideObject, tab: 0 | -1): string {
+  const at = html.indexOf(`data-block="${object.block}"`);
+  if (at < 0) fail(`${object.id}: no data-block="${object.block}" in the slide`);
   const close = html.indexOf('>', at);
-  return `${html.slice(0, close)}${objectAttrs(id)}${html.slice(close)}`;
+  return `${html.slice(0, close)}${objectAttrs(object, tab)}${html.slice(close)}`;
+}
+
+/**
+ * Wraps the element that carries `data-block="<block>"` in an object box (l2.md Q2): the wrapper
+ * moves and draws the clear zone of paper under the text, so type never sits on the Blue Marble.
+ */
+function wrapObject(html: string, object: SlideObject, cls: string): string {
+  const at = html.indexOf(`data-block="${object.block}"`);
+  if (at < 0) fail(`${object.id}: no data-block="${object.block}" in the slide`);
+  const open = html.lastIndexOf('<', at);
+  const tag = /^<([a-z0-9]+)/.exec(html.slice(open))?.[1] ?? fail(`${object.id}: no element`);
+  const end = html.indexOf(`</${tag}>`, at) + `</${tag}>`.length;
+  return `${html.slice(0, open)}<div class="ts-home-obj ${cls}"${objectAttrs(object, 0)}>${html.slice(open, end)}</div>${html.slice(end)}`;
 }
 
 /** A field box (l4.md M4): the still as the one masked child, then the canvas the live module prints on. */
@@ -1297,45 +1458,36 @@ type InstanceOptions = {
   prompts?: boolean;
 };
 
+const isThumb = (instance: string): boolean => /^(hero|tailor)-thumb-/.test(instance);
+
 function instanceHtml(doc: DeckDoc, options: InstanceOptions): string {
   const slide = doc.slides[options.slideId] ?? fail(`no slide ${options.slideId}`);
-  let html = renderBoth(
-    doc,
-    slide,
-    options.prompts === true,
-    BLOCK_ATTR_INSTANCES.has(options.instance),
-  );
-  const hero = options.instance === 'hero';
-  if (hero) {
-    const heading = (slide as { heading?: string }).heading ?? '';
-    if (heading !== HERO_LINES.join(' '))
-      fail(`the hero's heading "${heading}" is not its three lines`);
-    html = html.replace(
-      /<h1 style="[^"]*"([^>]*)>[^<]*<\/h1>/,
-      (_m, rest: string) =>
-        `<div class="ts-home-obj ts-home-title"${objectAttrs('title#heading')}><h1 id="ts-product-h1"${rest}>${HERO_LINES.map((line) => `<span class="ts-home-line">${line}</span>`).join('<br> ')}</h1></div>`,
-    );
-    html = html.replace(
-      /<p class="lead muted max-p" style="[^"]*"([^>]*)>([\s\S]*?)<\/p>/,
-      (_m, rest: string, text: string) =>
-        `<div class="ts-home-obj ts-home-sub"${objectAttrs('title#lead')}><p class="lead muted"${rest}>${text}</p></div>`,
-    );
-    if (!html.includes('id="ts-product-h1"') || !html.includes('data-object="title#lead"'))
-      fail('the hero slide did not take its hand set title and subtitle');
-  } else {
-    html = headingsToDivs(html);
-  }
-  if (options.slideId === 'rosetta' && options.instance === 'canvas') {
-    for (const block of ['h', 'p1', 'credit']) html = markObject(html, block, `rosetta#${block}`);
-    html = html.replace(
-      '<div class="mood-plate"',
-      `<div class="mood-plate"${objectAttrs('rosetta#plate')}`,
-    );
+  let html = headingsToDivs(renderBoth(doc, slide, options.prompts === true));
+  /* every text, rows and plate block of a slide shown at size is an object (v2.md R1); the hero
+     frame's slide 1 wraps its title and subtitle in boxes that draw their clear zone over the Blue
+     Marble (l2.md Q2). A thumbnail carries the renderer's block attributes alone: the core's
+     painter marks its blocks when it shows one (V2's `markObjects`), which keeps about 2.5 KB of
+     attributes out of the document (4.1). Slide 5's earlier states keep the blocks they hold */
+  const tab = 0;
+  const objects = isThumb(options.instance) ? [] : slideObjects(options.slideId);
+  for (const object of objects) {
+    if (options.instance === 'hero' && object.block === 'heading')
+      html = wrapObject(html, object, 'ts-home-title');
+    else if (options.instance === 'hero' && object.block === 'lead')
+      html = wrapObject(html, object, 'ts-home-sub');
+    else if (object.block === 'plate')
+      html = html.replace(
+        '<div class="mood-plate"',
+        `<div class="mood-plate"${objectAttrs(object, tab)}`,
+      );
+    else if (html.includes(`data-block="${object.block}"`)) html = markObject(html, object, tab);
+    else if (options.prompts !== true) fail(`${options.instance}: no block ${object.block}`);
   }
   /* every picture is the page's own print (docs/LANDING.md 2.0) */
   html = html.replace(/<img class="mood-img"[^>]*>/g, () => {
-    if (options.slideId === 'rosetta') return PRINT('canvas', ALT.canvas);
+    if (options.slideId === 'lighthouse') return PRINT('canvas', ALT.canvas);
     if (options.slideId === 'field') return PRINT('field-slide', ALT.field);
+    if (options.slideId === 'pattern') return PRINT('pattern', ALT.pattern);
     return fail(`${options.slideId}: a picture the page has no print for`);
   });
   if (/<img\b/.test(html)) fail(`${options.instance}: a picture is left in the markup`);
@@ -1347,7 +1499,7 @@ function instanceHtml(doc: DeckDoc, options: InstanceOptions): string {
     titleSlide: slide.kind === 'title',
   });
   stage = stage.replace(/^<div class="ts-sheet sheet" data-theme="light">/, () => {
-    const thumb = options.instance.startsWith('tailor-thumb-');
+    const thumb = isThumb(options.instance);
     return `<div class="ts-sheet sheet ts-home-slide${thumb ? ' is-thumb' : ''}" data-home-slides data-slide="${options.slideId}" data-instance="${options.instance}" data-counter="${counter}">`;
   });
   if (!stage.startsWith('<div class="ts-sheet sheet ts-home-slide'))
@@ -1355,26 +1507,34 @@ function instanceHtml(doc: DeckDoc, options: InstanceOptions): string {
   stage = stage.replace(/href="#gt-mark"/g, 'href="#ts-mark"');
   /* the counter's text, which the live module renumbers (l2.md Q4) */
   stage = stage.replace('<div class="counter">', '<div class="counter" data-counter-text>');
-  if (hero) {
+  /* slide 1 draws the Blue Marble in its lower right with its credit (Kevin's answer 1); only the
+     hero frame's own slide is `hero`, the box H5 develops, every other copy a `hero-print` */
+  if (options.slideId === 'title') {
     const credit =
       (doc.deck.assets['mood-earth'] as { credit?: string } | undefined)?.credit ??
       fail('the Blue Marble has no credit');
     const opened =
-      /<div class="ts-stage stage[^"]*">/.exec(stage)?.[0] ?? fail('the hero has no stage');
+      /<div class="ts-stage stage[^"]*">/.exec(stage)?.[0] ?? fail('slide 1 has no stage');
+    const field = options.instance === 'hero' ? 'hero' : 'hero-print';
     stage = stage.replace(
       opened,
-      `${opened}${FIELD_BOX('ts-home-field ts-hero-field', 'hero', ALT.hero)}`,
+      `${opened}${FIELD_BOX('ts-home-field ts-hero-field', field, ALT.hero)}`,
     );
-    if (!stage.includes('data-field="hero"')) fail('the hero field did not land in the stage');
+    if (!stage.includes(`data-field="${field}"`)) fail('the Blue Marble did not land in slide 1');
     stage = stage.replace(
       '<div class="counter" data-counter-text>',
       `<div class="ts-home-credit">${credit}</div><div class="counter" data-counter-text>`,
     );
   }
+  if (options.slideId === 'close')
+    stage = stage.replace(
+      '<div class="center" data-slot="main">',
+      `<div class="center" data-slot="main">${markPieces()}`,
+    );
   return stage;
 }
 
-/** The mark of the close in seven pieces, leftmost first (docs/LANDING.md 2.10 Kind). */
+/** The mark of the close in seven pieces, leftmost first (docs/LANDING.md 2.15 Kind). */
 function markPieces(): string {
   const svg = readFileSync(resolve(ROOT, MARK_PATH), 'utf8');
   const viewBox = /viewBox="([^"]+)"/.exec(svg)?.[1] ?? fail('mark.svg has no viewBox');
@@ -1392,7 +1552,12 @@ function markPieces(): string {
 }
 
 type DerivedSlides = {
+  /** the first screen's instances (slides.generated.ts) */
   instances: Record<string, { slide: SlideId; html: string }>;
+  /** each band's instances below the first screen, by `data-fill` key (bands.generated.ts) */
+  bands: Record<FillBand, Record<string, string>>;
+  /** every slide at rest, once, for the bands that place their own copies */
+  markup: Record<SlideId, string>;
   live: { field: string; placeholders: string; titled: string };
 };
 
@@ -1400,18 +1565,32 @@ function deriveSlides(): DerivedSlides {
   const page = loadPageDeck();
   const order = page.deck.sections.flatMap((s) => s.slideIds) as SlideId[];
   const total = order.length;
-  if (total !== 8) fail(`the page deck has ${total} slides, not 8`);
+  if (JSON.stringify(order) !== JSON.stringify(PAGE_ORDER))
+    fail(`the page deck's order ${order.join(', ')} is not ${PAGE_ORDER.join(', ')}`);
   const nOf = (id: SlideId): number => order.indexOf(id) + 1;
   const instances: DerivedSlides['instances'] = {};
-  for (const [instance, slideId] of INSTANCES) {
-    let html = instanceHtml(page, { instance, slideId, n: nOf(slideId), total });
-    if (instance === 'close')
-      html = html.replace(
-        '<div class="center" data-slot="main">',
-        `<div class="center" data-slot="main">${markPieces()}`,
-      );
-    instances[instance] = { slide: slideId, html };
-  }
+  for (const [instance, slideId] of INSTANCES)
+    instances[instance] = {
+      slide: slideId,
+      html: instanceHtml(page, { instance, slideId, n: nOf(slideId), total }),
+    };
+  const bands = {} as DerivedSlides['bands'];
+  for (const [band, list] of Object.entries(BAND_INSTANCES) as [
+    FillBand,
+    readonly (readonly [string, SlideId])[],
+  ][])
+    bands[band] = Object.fromEntries(
+      list.map(([instance, slideId]) => [
+        instance,
+        instanceHtml(page, { instance, slideId, n: nOf(slideId), total }),
+      ]),
+    );
+  const markup = Object.fromEntries(
+    PAGE_ORDER.map((id) => [
+      id,
+      instanceHtml(page, { instance: `slide-${id}`, slideId: id, n: nOf(id), total }),
+    ]),
+  ) as Record<SlideId, string>;
   const state = (name: 'placeholders' | 'titled'): string => {
     const doc = {
       deck: page.deck,
@@ -1430,6 +1609,8 @@ function deriveSlides(): DerivedSlides {
   };
   return {
     instances,
+    bands,
+    markup,
     live: {
       field: instanceHtml(page, { instance: 'show', slideId: 'field', n: nOf('field'), total }),
       placeholders: state('placeholders'),
@@ -1546,7 +1727,11 @@ function screen(linesIn: readonly string[], options: { banner?: boolean } = {}):
   return { wide: at('wide'), narrow: at('narrow') };
 }
 
-function deriveRun(stills: { pageDeck: DeckDoc }): { source: string; totalMs: number } {
+function deriveRun(stills: { pageDeck: DeckDoc }): {
+  source: string;
+  totalMs: number;
+  transcript: PanelText;
+} {
   const run = readJson<RecordedRun>(`${RECORDED}/run.json`);
   const cliJson = readJson<{ actions: { action: string; usage: string }[] }>(CLI_JSON);
   const mcp = readJson<{ tools: { name: string; action: string; inputSchema: Schema }[] } & Schema>(
@@ -1860,7 +2045,7 @@ export type HomeRun = {
 
 export const HOME_RUN: HomeRun = ${JSON.stringify(data, null, 2)};
 `;
-  return { source, totalMs };
+  return { source, totalMs, transcript: screens.transcript };
 }
 
 /** The header every generated module carries. */
@@ -1870,7 +2055,7 @@ function GENERATED_HEADER(flag: string, spec: string): string {
 }
 
 // ---------------------------------------------------------------------------------------------
-// deck.generated.ts, slides.generated.ts, live-slides.generated.ts (integrator.md 4.2)
+// deck.generated.ts, slides.generated.ts, bands.generated.ts and bands/*.generated.ts (LANDING.md 4.2)
 
 /** The layout id each fixture slide is drawn from (the editor's Slide > Apply layout names). */
 function layoutOf(slide: Slide): string {
@@ -1889,62 +2074,26 @@ function deriveDeckFacts(
 ): string {
   const order = page.deck.sections.flatMap((s) => s.slideIds) as SlideId[];
   const startOrder = loadFixture().deck.sections.flatMap((s) => s.slideIds) as SlideId[];
-  const canvas = readJson<{
-    slots: {
-      main: {
-        id: string;
-        type: string;
-        text?: string;
-        pos: { x: number; y: number; w: number; h: number };
-      }[];
-    };
-  }>(`${RECORDED}/rosetta-canvas.json`);
-  const blockOf = (id: string) =>
-    canvas.slots.main.find((b) => b.id === id) ??
-    fail(`the converted Rosetta slide has no block ${id}`);
-  const title = page.slides['title'] as Slide & { heading: string; lead: string };
+  /* the lighthouse after `slide to-canvas`: the block ids the canvas band's CLI lines print */
+  const canvas = readJson<{ slots: { main: { id: string }[] } }>(
+    `${RECORDED}/lighthouse-canvas.json`,
+  );
   const slides: Record<string, unknown> = {};
   for (const id of order) {
     const slide = page.slides[id] as Slide & { notes?: string };
     const n = order.indexOf(id) + 1;
-    let objects: unknown[] = [];
-    if (id === 'title')
-      objects = [
-        {
-          id: 'title#heading',
-          role: 'Title',
-          box: { ...HERO_BOXES.title, rot: 0 },
-          text: title.heading,
-          editable: true,
-          canvasBlock: null,
-        },
-        {
-          id: 'title#lead',
-          role: 'Subtitle',
-          box: { ...HERO_BOXES.lead, rot: 0 },
-          text: title.lead,
-          editable: true,
-          canvasBlock: null,
-        },
-      ];
-    if (id === 'rosetta')
-      objects = (['plate', 'h', 'p1', 'credit'] as const).map((block) => {
-        const b = blockOf(block);
-        return {
-          id: `rosetta#${block}`,
-          role: OBJECT_ROLES[`rosetta#${block}`],
-          box: {
-            x: round2(b.pos.x),
-            y: round2(b.pos.y),
-            w: round2(b.pos.w),
-            h: round2(b.pos.h),
-            rot: 0,
-          },
-          text: b.text ?? '',
-          editable: block !== 'plate',
-          canvasBlock: b.id,
-        };
-      });
+    const objects = slideObjects(id).map((o) => ({
+      id: o.id,
+      role: o.role,
+      box: { ...o.box, rot: 0 },
+      text: o.text,
+      editable: o.editable,
+      canvasBlock:
+        id === 'lighthouse'
+          ? (canvas.slots.main.find((b) => b.id === o.block)?.id ??
+            fail(`the converted lighthouse slide has no block ${o.block}`))
+          : null,
+    }));
     slides[id] = {
       id,
       n,
@@ -1961,6 +2110,7 @@ function deriveDeckFacts(
     order,
     startOrder,
     slides,
+    title: page.deck.title,
     heroDisc: HERO_DISC,
   };
   const tailorWords = {
@@ -1986,12 +2136,12 @@ function deriveDeckFacts(
 //
 // The client safe facts of the page deck: the ids, the order, the titles, the notes and the
 // boxes of the selectable objects in sheet units. No slide markup and no still lives here (they
-// are in slides.generated.ts, read only on the server, and live-slides.generated.ts, which only
-// the live module imports), so the route chunk and the live module may both import this file.
+// are in slides.generated.ts, read only on the server, and bands.generated.ts, which only the band
+// chunks import), so the route chunk and the live module may both import this file.
 
-/** The eight slides of the page deck, by id (docs/LANDING.md 2.0 with Kevin's answer 1). */
+/** The nine slides of the page deck, by id (docs/LANDING.md 2.0, the second pass). */
 export type HomeSlideId =
-  'title' | 'plan' | 'gets' | 'ships' | 'next-steps' | 'rosetta' | 'field' | 'close';
+  ${PAGE_ORDER.map((id) => `'${id}'`).join(' | ')};
 
 /** A box in sheet units (1 unit is 1/1600 of the sheet's width), turned \`rot\` degrees clockwise. */
 export type SheetBox = { x: number; y: number; w: number; h: number; rot: number };
@@ -2000,24 +2150,31 @@ export type SheetBox = { x: number; y: number; w: number; h: number; rot: number
 export type HomeObjectId = \`\${HomeSlideId}#\${string}\`;
 
 /** The word the selection chip shows (the editor's role chip). */
-export type HomeObjectRole = 'Title' | 'Subtitle' | 'Heading' | 'Text' | 'Credit' | 'Plate';
+export type HomeObjectRole =
+  | 'Title'
+  | 'Subtitle'
+  | 'Heading'
+  | 'Text'
+  | 'Rows'
+  | 'Credit'
+  | 'Plate';
 
 export type HomeObject = {
   id: HomeObjectId;
   role: HomeObjectRole;
-  /** the box at rest: the hero's hand set boxes, the Rosetta Stone's from \`slide to-canvas\` */
+  /** the box at rest, as the CLI's \`slide to-canvas\` measures it */
   box: SheetBox;
   /** the text at rest; '' for the plate */
   text: string;
-  /** a second click or Enter types in it */
+  /** a second click or Enter types in it (every text block; not the plate or a rows block) */
   editable: boolean;
-  /** the block id the CLI prints for this object after \`slide to-canvas\`; null on the hero */
+  /** the block id the CLI prints for this object after \`slide to-canvas\`; the lighthouse's alone */
   canvasBlock: string | null;
 };
 
 export type HomeSlideFacts = {
   id: HomeSlideId;
-  /** the deck number at rest (1 to 8) */
+  /** the deck number at rest (1 to 9) */
   n: number;
   /** \`slideTitle\` of the slide, the Present list's row */
   title: string;
@@ -2038,11 +2195,13 @@ export type HomeDeckFacts = {
   pageDeckSha256: string;
   /** the customer name the fixture spells */
   customer: string;
-  /** the page deck at rest: eight ids */
+  /** the page deck at rest: nine ids */
   order: readonly HomeSlideId[];
-  /** the fixture, the run's start: seven ids, \`next-steps\` absent */
+  /** the fixture, the run's start: eight ids, \`next-steps\` absent */
   startOrder: readonly HomeSlideId[];
   slides: Readonly<Record<HomeSlideId, HomeSlideFacts>>;
+  /** the deck's title ("Onboarding plan"), which the hero frame's and the miniature's title rows show */
+  title: string;
   /** the hero's Blue Marble disc (answer 1) */
   heroDisc: FieldDisc;
 };
@@ -2073,7 +2232,13 @@ async function deriveSlidesSource(
   stills: Stills,
   exportRec: RecordedExport | null,
   assets: ServedAsset[],
-): Promise<{ slides: string; live: string; stillsBytes: number }> {
+  transcript: PanelText,
+): Promise<{
+  slides: string;
+  bands: string;
+  bandSources: Record<string, string>;
+  stillsBytes: number;
+}> {
   const still = async (grid: Bits) => ({
     cols: grid.cols,
     rows: grid.rows,
@@ -2084,11 +2249,18 @@ async function deriveSlidesSource(
     hero: { wide: await still(stills.hero.wide), narrow: await still(stills.hero.narrow) },
     strip: { wide: await still(stills.strip.wide), narrow: await still(stills.strip.narrow) },
   };
+  const mini = {
+    hero: await still(stills.mini.hero),
+    canvas: await still(stills.mini.canvas),
+    field: await still(stills.mini.field),
+    pattern: await still(stills.mini.pattern),
+  };
   const stillsBytes = [
     fieldStills.hero.wide,
     fieldStills.hero.narrow,
     fieldStills.strip.wide,
     fieldStills.strip.narrow,
+    ...Object.values(mini),
   ].reduce((n, s) => n + s.ink.length, 0);
   const pathOf = (
     role: AssetRole,
@@ -2099,12 +2271,22 @@ async function deriveSlidesSource(
       assets.find((a) => a.role === role && a.appearance === appearance && a.variant === variant) ??
       fail(`no asset ${role} ${appearance} ${variant}`)
     ).path;
-  /* the server only stylesheet: the inlined stills, then the band stills' files (requested with their band) */
+  /* the server only stylesheet: the inlined stills (slide 1 in the hero frame, the strip and the
+     frame filmstrip's thumbnails, which are in the first screen and request nothing), then the
+     band stills' files, requested only when a box that draws them comes near the viewport */
+  const hero = '[data-field="hero"],[data-field="hero-print"]';
+  const strip = '[data-field="strip"]';
+  const canvas = '[data-field="canvas"]';
+  const thumb = (field: string): string => `[data-hero-filmstrip] [data-field="${field}"]`;
   const css = [
-    `[data-field="hero"]{--ts-still:url("${fieldStills.hero.wide.ink}")}`,
-    `[data-field="strip"]{--ts-still:url("${fieldStills.strip.wide.ink}")}`,
-    `[data-field="canvas"]{--ts-still:url("${pathOf('canvas-still', null, 'wide')}")}`,
-    `@media (max-width:719px){[data-field="hero"]{--ts-still:url("${fieldStills.hero.narrow.ink}")}[data-field="strip"]{--ts-still:url("${fieldStills.strip.narrow.ink}")}[data-field="canvas"]{--ts-still:url("${pathOf('canvas-still', null, 'narrow')}")}}`,
+    `${hero}{--ts-still:url("${fieldStills.hero.wide.ink}")}`,
+    `${strip}{--ts-still:url("${fieldStills.strip.wide.ink}")}`,
+    `${canvas}{--ts-still:url("${pathOf('lighthouse-still', null, 'wide')}")}`,
+    `@media (max-width:719px){${hero}{--ts-still:url("${fieldStills.hero.narrow.ink}")}${strip}{--ts-still:url("${fieldStills.strip.narrow.ink}")}${canvas}{--ts-still:url("${pathOf('lighthouse-still', null, 'narrow')}")}}`,
+    `${thumb('hero-print')}{--ts-still:url("${mini.hero.ink}")}`,
+    `${thumb('canvas')}{--ts-still:url("${mini.canvas.ink}")}`,
+    `${thumb('field-slide')}{--ts-still:url("${mini.field.ink}")}`,
+    `${thumb('pattern')}{--ts-still:url("${mini.pattern.ink}")}`,
   ].join('');
   /* the Editable text side of slide 7 (docs/LANDING.md 2.8): the file's frames at their places */
   let editable = '';
@@ -2164,36 +2346,43 @@ async function deriveSlidesSource(
       .join('');
     editable = `<div class="ts-home-editable">${pictures}${fills}${lines}${frames}</div>`;
   }
+  const esc = (text: string): string =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  /* one screen of the agents panel at both widths, one span a line (l3.md R1) */
+  const screenHtml = (screen: PanelText): string => {
+    const lines = (list: readonly string[]): string =>
+      list.map((line) => `<span>${esc(line)}</span>`).join('');
+    return `<div class="ts-home-panel-text is-wide" data-panel-text="wide">${lines(screen.wide)}</div><div class="ts-home-panel-text is-narrow" data-panel-text="narrow">${lines(screen.narrow)}</div>`;
+  };
   const instances = Object.fromEntries(
     Object.entries(slides.instances).map(([instance, v]) => [
       instance,
       { instance, slide: v.slide, html: v.html },
     ]),
   );
-  const slidesSource = `${GENERATED_HEADER('--slides and --stills', 'docs/LANDING.md 2.0, 2.2, 2.3, 6.1')}
+  const fills: Record<FillBand, Record<string, string>> = {
+    ...slides.bands,
+    agents: { ...slides.bands.agents, 'panel-cli': screenHtml(transcript) },
+    export: { ...slides.bands.export, 'export-editable': editable },
+  };
+  const instanceIds = Object.keys(instances);
+  const slidesSource = `${GENERATED_HEADER('--slides and --stills', 'docs/LANDING.md 2.0, 2.2, 4.1, 6.1')}
 //
-// Server only. \`HomeSheet\` and \`HomeField\` read this module behind \`import.meta.env.SSR\`, which
+// Server only. \`HomeSheet\` and \`HomeHero\` read this module behind \`import.meta.env.SSR\`, which
 // the client build folds to false so Rollup drops the module from the route chunk; on the client
 // they render the same element with an empty \`dangerouslySetInnerHTML\` and
 // \`suppressHydrationWarning\`, which React leaves untouched after hydration. The route chunk must
-// never contain \`HOME_SLIDES_SENTINEL\` (row home.budget.bytes-first).
+// never contain \`HOME_SLIDES_SENTINEL\` (row home.budget.bytes-first). It holds the first screen
+// alone (docs/LANDING.md 2.0 "Slides"): the hero frame's slide 1 and its filmstrip's nine
+// thumbnails; every instance below the first screen is in bands.generated.ts.
 import type { HomeSlideId } from './deck.generated';
 
 /** The attribute on the root of every server rendered slide instance (docs/LANDING.md 6.3). */
 export const HOME_SLIDES_SENTINEL = 'data-home-slides';
 
-/** The ten slide instances in the markup (docs/LANDING.md 2.0), by the band that holds each. */
+/** The first screen's ten slide instances: the hero frame's slide and its nine thumbnails. */
 export type HomeInstanceId =
-  | 'hero'
-  | 'agents'
-  | 'tailor-stage'
-  | 'tailor-thumb-plan'
-  | 'tailor-thumb-gets'
-  | 'tailor-thumb-ships'
-  | 'tailor-thumb-next-steps'
-  | 'canvas'
-  | 'present'
-  | 'close';
+${instanceIds.map((id) => `  | '${id}'`).join('\n')};
 
 export type HomeSlideInstance = {
   instance: HomeInstanceId;
@@ -2201,17 +2390,17 @@ export type HomeSlideInstance = {
   /**
    * \`renderSlide\` output in its stage (\`renderStage\`), appearance neutral: the sheet's
    * \`data-theme\` removed (the page sets the tokens from its appearance), every picture replaced
-   * by the page's print, every heading element outside the hero rewritten to a \`div\`, the root
-   * carrying \`data-home-slides\`, \`data-slide\`, \`data-instance\` and \`data-counter\`, every
-   * selectable block carrying its \`data-object\`.
+   * by the page's print, every heading element rewritten to a \`div\` (the page's one h1 is page
+   * text), the renderer's block attributes kept, the root carrying \`data-home-slides\`,
+   * \`data-slide\`, \`data-instance\` and \`data-counter\`, every selectable block its \`data-object\`.
    */
   html: string;
 };
 
 /**
- * One 1 bit still of a field (docs/LANDING.md 2.2, 2.3): a PNG of the cell grid, one pixel per
- * cell, inlined once as a data URI and drawn as a CSS mask over a box filled with the sheet's ink,
- * so one still serves every appearance and every kit.
+ * One 1 bit still of a field (docs/LANDING.md 2.2): a PNG of the cell grid, one pixel per cell,
+ * inlined once as a data URI and drawn as a CSS mask over a box filled with the sheet's ink, so
+ * one still serves every appearance and every kit.
  */
 export type FieldStill = {
   cols: number;
@@ -2229,140 +2418,103 @@ export type FieldStillPair = { wide: FieldStill; narrow: FieldStill };
 
 export const HOME_SLIDE_HTML: Readonly<Record<HomeInstanceId, HomeSlideInstance>> = ${JSON.stringify(instances, null, 2)};
 
-/** The two inlined stills: the hero's Blue Marble and the field strip, each at both widths. */
+/**
+ * The inlined stills: the Blue Marble on the hero frame's slide 1 (270 by 152 cells at 540 px, 163
+ * by 92 at 326 px) and the field strip, each at both widths.
+ */
 export const HOME_FIELD_STILLS: Readonly<{ hero: FieldStillPair; strip: FieldStillPair }> = ${JSON.stringify(fieldStills, null, 2)};
 
-/** The server only stylesheet that gives every field box its still. */
+/** The server only stylesheet that gives every field box on the page its still. */
 export const HOME_STILLS_CSS: string = ${JSON.stringify(css)};
 
-/** Slide 7 from the Editable text file: its text frames, pictures and hairlines at their places. */
-export const HOME_EXPORT_EDITABLE: string = ${JSON.stringify(editable)};
+/** The resting transcript of the recorded run (run.generated.ts), for the hero's terminal. */
+export const HOME_HERO_TRANSCRIPT: readonly string[] = ${JSON.stringify(transcript.narrow, null, 2)};
 `;
-  const liveSource = `${GENERATED_HEADER('--slides', 'docs/LANDING.md 2.0, 2.4, 2.7, 6.1')}
-//
-// Imported by the live module alone (\`src/components/home/live/\`), so this markup travels in the
-// one live chunk and never in the route chunk: a module imported by both chunks would be placed
-// in the route chunk whole. Slide 7 is the show's and the print's (it is in no band's markup) and
-// slide 5's two earlier written states are the agents run's (the absent state has no markup and
-// the filled state is the agents band's instance).
+  const bandIds = Object.keys(fills) as FillBand[];
+  const bandsHeader = `${GENERATED_HEADER('--slides', 'docs/LANDING.md 2.0, 4.2, 6.1, 6.3')}
+//`;
+  /* the types every band chunk shares; the markup is one module per chunk (v2.md R2): Rollup
+     places a module two dynamic chunks import in a shared chunk of its own, whole */
+  const bandsTypes = `${bandsHeader}
+// The bands below the first screen (docs/LANDING.md 2.0 "Slides", 4.2): the types of their
+// generated markup. The markup itself is one module per band chunk under \`bands/\`, imported only
+// by that band's chunk, never by the route or the core, so the document and the route chunk carry
+// none of it: \`bands/<band>.generated.ts\` (\`FILLS\`) for ${bandIds.join(', ')}; \`bands/deck.generated.ts\`
+// (the nine slides once, for the bands that place their own copies); \`bands/live.generated.ts\`
+// (the show's slide 7 and slide 5's two earlier states). Each band's reserved box
+// (\`[data-reserve="<band>"]\`) holds empty placeholders \`[data-fill="<key>"]\`, which the band loader
+// writes from its chunk's \`FILLS[key]\` before the band starts.
+
+/** The bands whose reserved box the build fills (docs/LANDING.md 6.3). */
+export type HomeBandId = ${bandIds.map((b) => `'${b}'`).join(' | ')};
+
+/** A band's placeholders by their \`data-fill\` key: the renderer's markup for each. */
+export type BandFills = Readonly<Record<string, string>>;
 
 export type LiveSlides = {
-  /** slide 7, the opener field's slide (answer 1), in the same form as slides.generated.ts */
+  /** slide 7, the opener field's slide, for the show and the print */
   field: string;
   /** slide 5 after step 1 (the layout's placeholders) and after step 2 (the title written) */
   nextSteps: { placeholders: string; titled: string };
 };
+`;
+  const bandSources: Record<string, string> = {};
+  for (const band of bandIds)
+    bandSources[band] = `${bandsHeader}
+// The ${band} band's placeholders (\`[data-fill]\` in \`[data-reserve="${band}"]\`), imported only by
+// its chunk (bands.generated.ts).
+import type { BandFills } from '../bands.generated';
+
+export const FILLS: BandFills = ${JSON.stringify(fills[band], null, 2)};
+`;
+  bandSources['deck'] = `${bandsHeader}
+// Every slide of the page deck at rest, once (instance \`slide-<id>\`, counter "n / 9", block and
+// object attributes on, pictures as the page's prints), for the bands that place their own copies:
+// the miniature editor, the kits grid, the two people's screens and the patterns band.
+import type { HomeSlideId } from '../deck.generated';
+
+export const HOME_SLIDE_MARKUP: Readonly<Record<HomeSlideId, string>> = ${JSON.stringify(slides.markup, null, 2)};
+`;
+  bandSources['live'] = `${bandsHeader}
+// The live states (the first pass's live-slides.generated.ts): slide 7 for the show and the
+// print (it is in no band's markup), slide 5's two earlier written states for the agents run.
+import type { LiveSlides } from '../bands.generated';
 
 export const LIVE_SLIDE_HTML: LiveSlides = ${JSON.stringify({ field: slides.live.field, nextSteps: { placeholders: slides.live.placeholders, titled: slides.live.titled } }, null, 2)};
 `;
-  return { slides: slidesSource, live: liveSource, stillsBytes };
+  return { slides: slidesSource, bands: bandsTypes, bandSources, stillsBytes };
 }
 
 // ---------------------------------------------------------------------------------------------
-// boot.generated.ts (docs/LANDING.md 2.2, 3.2 H2 to H4)
+// boot.generated.ts (docs/LANDING.md 2.2, 3.2): V4's scripts/home/boot.ts minifies the script
 
-/** The three visit sentences, in visit order (docs/LANDING.md 2.2; copy.ts HERO.visit). */
+/** The three visit sentences, in visit order (docs/LANDING.md 2.2; copy.ts HERO.visit, copy.test.ts). */
 const VISIT = [
   'Turboslide is a slides editor in the browser.',
   'Turboslide puts one customer name on every slide.',
   'Turboslide downloads PDF and PowerPoint files.',
 ] as const;
 
-/** A seeded generator, so the gap tables are the same on every build. */
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function gapTable(sentence: string): { sentence: string; gapsMs: number[]; lastKeyMs: number } {
-  if (sentence.length > 50) fail(`the visit sentence "${sentence}" is over 50 characters`);
-  const rand = mulberry32(parseInt(sha256(sentence).slice(0, 8), 16));
-  const gapsMs = [...sentence].map((_c, i) =>
-    i === 0 ? 0 : 34 + Math.floor(rand() * 27) + (sentence[i - 1] === ' ' ? 30 : 0),
-  );
-  const lastKeyMs = 700 + gapsMs.reduce((a, b) => a + b, 0);
-  if (lastKeyMs > 3970) fail(`"${sentence}" types its last key at ${lastKeyMs} ms, over 3,970`);
-  return { sentence, gapsMs, lastKeyMs };
-}
-
-async function deriveBoot(): Promise<string> {
-  let gaps: { sentence: string; gapsMs: readonly number[]; lastKeyMs: number }[] =
-    VISIT.map(gapTable);
-  let script = '';
-  /* the committed boot.ts only: a lane's file still in the working tree does not reach the string */
-  const tracked =
-    spawnSync('git', ['ls-files', '--error-unmatch', BOOT_SOURCE], { cwd: ROOT, stdio: 'ignore' })
-      .status === 0;
-  if (tracked && existsSync(resolve(ROOT, BOOT_SOURCE))) {
-    /* L4's boot.ts (l4.md M2): bootSource(sentences) gives the script's source and the gap tables;
-       the minifier is the one Vite carries */
-    const boot = (await import(pathToFileURL(resolve(ROOT, BOOT_SOURCE)).href)) as {
-      bootSource(sentences: readonly string[]): { source: string; tables: typeof gaps };
-      BOOT_LIMIT_BYTES: number;
-    };
-    const { source, tables } = boot.bootSource(VISIT);
-    gaps = tables;
-    const vite = createRequire(resolve(ROOT, 'apps/studio/package.json'))('vite') as {
-      minifySync(name: string, code: string, options: Record<string, unknown>): { code: string };
-    };
-    script = vite.minifySync('boot.js', source, { compress: true, mangle: true }).code.trim();
-    if (Buffer.byteLength(script) > boot.BOOT_LIMIT_BYTES)
-      fail(
-        `the boot script is ${Buffer.byteLength(script)} B minified, over ${boot.BOOT_LIMIT_BYTES}`,
-      );
-    if (
-      /getBoundingClientRect|offset(Width|Height|Top|Left)|getComputedStyle|scroll(Top|Height)/.test(
-        script,
-      )
-    )
-      fail('the boot script reads layout');
-  }
-  return `${GENERATED_HEADER('--boot', 'docs/LANDING.md 2.2, 3.2 H2 to H4, 6.1')}
-//
-// \`BOOT_SCRIPT\` is \`bootSource(VISIT)\` of src/components/home/boot.ts (L4's) minified by the
-// minifier Vite carries; src/routes/home.tsx inlines it as the first child of main#top, at most
-// 1,500 bytes minified, and it reads no layout. The gap tables are boot.ts's \`gapTable\`.
-
-/** One visit sentence's typing clock (H3): a person's uneven rhythm from the build's gap table. */
-export type GapTable = {
-  sentence: string;
-  /** the gap before each key in ms, 34 to 60, plus 30 after a space; the first key's is 0 */
-  gapsMs: readonly number[];
-  /** the last key's time from T0: 700 ms plus the gaps; at most 3,970 ms (row home.motion.hero) */
-  lastKeyMs: number;
-};
-
-/** The minified boot script; '' until L4's boot.ts lands. */
-export const BOOT_SCRIPT: string = ${JSON.stringify(script)};
-
-/** sha256 of BOOT_SCRIPT, checked by \`build-home-assets.ts --check\` */
-export const BOOT_SHA256: string = ${JSON.stringify(script === '' ? '' : sha256(script))};
-
-/** The three sentences' tables in visit order (answer 9). */
-export const VISIT_GAPS: readonly GapTable[] = ${JSON.stringify(gaps, null, 2)};
-`;
-}
-
 // ---------------------------------------------------------------------------------------------
-// icons.generated.css: the key cells' Heroicons as CSS masks (docs/LANDING.md 2.0 "Shape", 2.9)
+// icons.generated.css: the key cells' Heroicons as CSS masks (docs/LANDING.md 2.0 "Shape", 2.14)
 
-/** The nine Heroicons 20 solid of the page's key cells (copy.ts SectionIconName). */
+/**
+ * The Heroicons 20 solid of the page's key cells (copy.ts SectionIconName): the features table's
+ * ten, Version history's author cells, and the editor's skipped slide mark (v3.md R5).
+ */
 const ICONS = [
   'bars-3',
-  'squares-2x2',
+  'pencil-square',
+  'swatch',
+  'chat-bubble-left-right',
+  'clock',
+  'user-group',
+  'presentation-chart-bar',
+  'arrow-down-tray',
   'cube',
-  'paint-brush',
   'command-line',
-  'server',
-  'globe-alt',
-  'scale',
   'user-circle',
+  'eye-slash',
   /* the General Translation mark of the footer's closing line, at the text's cap */
   'gt-mark',
 ] as const;
@@ -2405,6 +2557,45 @@ function countOf(value: unknown, key: string): number {
   return n;
 }
 
+/**
+ * The features table's where cells and shortcuts (docs/LANDING.md 2.14): each row's place in the
+ * editor as the menu model names it and its shortcut as keys.ts prints it on a Mac and elsewhere.
+ * The title row's items are named as the editor's title row shows them (Share, Slideshow).
+ */
+const FEATURE_ITEMS = [
+  ['tailor', 'tools.tailor'],
+  ['kit', 'slide.changeTheme'],
+  ['comments', 'insert.comment'],
+  ['versions', 'file.versionHistory.see'],
+  ['share', 'title.share'],
+  ['presenter', 'title.slideshow.presenterView'],
+  ['download', 'file.download'],
+  ['pattern', 'insert.shader'],
+] as const;
+
+function deriveFeatures(): { id: string; where: string; mac: string; other: string }[] {
+  const menus = visibleMenus(DEFAULT_MENU_CONTEXT);
+  const first = menus[0]?.label ?? fail('no menus');
+  const last = menus[menus.length - 1]?.label ?? fail('no menus');
+  const rows = FEATURE_ITEMS.map(([id, item]) => {
+    const path = itemPath(item);
+    if (path.length === 0) fail(`the menu model has no path for ${item}`);
+    const where = (path[0] === 'Title row' ? path.slice(1) : path).join(' > ');
+    const key = (itemById(item) as { key?: Shortcut }).key;
+    return {
+      id,
+      where,
+      mac: key === undefined ? '' : shortcutLabel(key, 'mac', 'symbols'),
+      other: key === undefined ? '' : shortcutLabel(key, 'win', 'symbols'),
+    };
+  });
+  return [
+    { id: 'menus', where: `${first} to ${last}`, mac: '', other: '' },
+    ...rows,
+    { id: 'agents', where: 'The CLI, the MCP server and the HTTP API', mac: '', other: '' },
+  ];
+}
+
 function deriveFacts(): string {
   const bytes = new Uint8Array(readFileSync(resolve(ROOT, FACTS_PATH)));
   const facts = JSON.parse(new TextDecoder().decode(bytes)) as Record<string, unknown>;
@@ -2423,13 +2614,15 @@ function deriveFacts(): string {
     cliCommands: readJson<{ actions: unknown[] }>(CLI_JSON).actions.length,
     mismatchPercent: mismatch,
     licence,
+    features: deriveFeatures(),
   };
   return `${GENERATED_HEADER('--facts', 'docs/LANDING.md 2.9; gslides-parity SPEC-4 0.25')}
 //
 // The counts the /home page states, copied from packages/theme/brand/facts.json (B1's file) so
 // the page's JavaScript carries these values and not the file's measured rows; \`menus\` is
-// \`visibleMenus(DEFAULT_MENU_CONTEXT).length\` of packages/chrome/src/menus/model.ts and
-// \`cliCommands\` the length of packages/agent/generated/cli.json \`actions\`.
+// \`visibleMenus(DEFAULT_MENU_CONTEXT).length\` of packages/chrome/src/menus/model.ts,
+// \`cliCommands\` the length of packages/agent/generated/cli.json \`actions\`, and \`features\` the
+// features table's where cells and shortcuts (the menu model's paths, keys.ts's Mac and other forms).
 export const FACTS_DATA = ${JSON.stringify(data, null, 2)} as const;
 `;
 }
@@ -2440,17 +2633,24 @@ export const FACTS_DATA = ${JSON.stringify(data, null, 2)} as const;
 async function deriveServed(
   stills: Stills,
   exportRec: RecordedExport | null,
+  patternFiles: Awaited<ReturnType<typeof derivePattern>>['files'],
 ): Promise<{ assets: ServedAsset[]; files: { name: string; bytes: Uint8Array }[] }> {
   const made = [
-    await served('canvas-still', null, 'wide', await bitsWebp(stills.canvas.wide), 'webp'),
-    await served('canvas-still', null, 'narrow', await bitsWebp(stills.canvas.narrow), 'webp'),
-    await served('canvas-tone', null, null, stills.canvasTone, 'jpg'),
+    await served('lighthouse-still', null, 'wide', await bitsWebp(stills.canvas.wide), 'webp'),
+    await served('lighthouse-still', null, 'narrow', await bitsWebp(stills.canvas.narrow), 'webp'),
+    await served('lighthouse-tone', null, null, stills.canvasTone, 'jpg'),
     await served('field-still', null, 'wide', await bitsWebp(stills.field), 'webp'),
+    ...(await Promise.all(
+      patternFiles.map((file) =>
+        served(file.role, file.appearance, file.variant, file.bytes, file.ext),
+      ),
+    )),
   ];
   const budgets: Partial<Record<AssetRole, number>> = {
-    'canvas-still': 24_000,
-    'canvas-tone': 26_000,
+    'lighthouse-still': 24_000,
+    'lighthouse-tone': 26_000,
     'field-still': 24_000,
+    'pattern-still': 48_000,
   };
   for (const m of made) {
     const limit = budgets[m.asset.role];
@@ -2476,17 +2676,19 @@ export type HomeAppearance = 'light' | 'dark';
 
 /** What a file under public/home/ is (integrator.md section 6, with Kevin's answer 1). */
 export type HomeAssetRole =
-  /** slide 6's dithered picture (the Rosetta Stone) as a two colour lossless WebP mask, at most 24 KB */
-  | 'canvas-still'
-  /** the Rosetta Stone's tone map, a 640 by 360 grey JPEG, at most 26 KB, one for both appearances */
-  | 'canvas-tone'
+  /** slide 6's dithered picture (the Louisbourg lighthouse) as a two colour lossless WebP mask, at most 24 KB */
+  | 'lighthouse-still'
+  /** the lighthouse's tone map, a 512 by 288 grey JPEG, at most 26 KB, one for both appearances */
+  | 'lighthouse-tone'
   /** slide 7's dithered picture (the opener field), requested only by the show and the print */
   | 'field-still'
+  /** slide 8's still frame: the exporter's capture of the pattern, lossless WebP, at most 48 KB (V4's) */
+  | 'pattern-still'
   /** slide 7's picture part from the Perfect file, at most 60 KB */
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */
   | 'export-editable'
-  /** the page deck's PDF, 8 pages, requested only on the click of Download the PDF */
+  /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
   | 'pdf';
 
 /** A still's grid: \`wide\` at 2 px cells on the 1,024 px sheet, \`narrow\` on the 358 px sheet. */
@@ -2559,9 +2761,11 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
   const stills = await deriveStills();
   const page = loadPageDeck();
   const slides = deriveSlides();
-  const { assets, files } = await deriveServed(stills, exportRec);
-  const slideSources = await deriveSlidesSource(slides, stills, exportRec, assets);
+  const pattern = await derivePattern();
+  const chips = await deriveChips();
+  const { assets, files } = await deriveServed(stills, exportRec, pattern.files);
   const run = deriveRun({ pageDeck: page });
+  const slideSources = await deriveSlidesSource(slides, stills, exportRec, assets, run.transcript);
   const assetSources = assetsSources(assets);
   const outputs: Output[] = [
     { path: `${FIXTURE}/assets/field-light.png`, content: stills.fieldPicture.light },
@@ -2578,16 +2782,30 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
       content: await formatTs(`${HOME}/slides.generated.ts`, slideSources.slides),
     },
     {
-      path: `${HOME}/live-slides.generated.ts`,
-      content: await formatTs(`${HOME}/live-slides.generated.ts`, slideSources.live),
+      path: `${HOME}/bands.generated.ts`,
+      content: await formatTs(`${HOME}/bands.generated.ts`, slideSources.bands),
     },
+    ...(await Promise.all(
+      Object.entries(slideSources.bandSources).map(async ([band, source]) => ({
+        path: `${HOME}/bands/${band}.generated.ts`,
+        content: await formatTs(`${HOME}/bands/${band}.generated.ts`, source),
+      })),
+    )),
     {
       path: `${HOME}/run.generated.ts`,
       content: await formatTs(`${HOME}/run.generated.ts`, run.source),
     },
     {
       path: `${HOME}/boot.generated.ts`,
-      content: await formatTs(`${HOME}/boot.generated.ts`, await deriveBoot()),
+      content: await formatTs(`${HOME}/boot.generated.ts`, deriveBoot(VISIT)),
+    },
+    {
+      path: `${HOME}/chips.generated.ts`,
+      content: await formatTs(`${HOME}/chips.generated.ts`, chips.source),
+    },
+    {
+      path: `${HOME}/pattern.generated.ts`,
+      content: await formatTs(`${HOME}/pattern.generated.ts`, pattern.source),
     },
     {
       path: `${HOME}/facts-data.ts`,
@@ -2666,8 +2884,7 @@ async function checkAll(): Promise<void> {
 }
 
 async function writeFieldPictures(): Promise<void> {
-  const stills = await deriveStills();
-  for (const [theme, bytes] of Object.entries(stills.fieldPicture)) {
+  for (const [theme, bytes] of Object.entries(await fieldPictures())) {
     const file = resolve(ROOT, FIXTURE, `assets/field-${theme}.png`);
     if (!existsSync(file) || !same(bytes, new Uint8Array(readFileSync(file))))
       writeFileSync(file, bytes);
@@ -2686,7 +2903,11 @@ async function main(argv: string[]): Promise<void> {
   }
   /* the fixture's field pictures come first: the run records the fixture's sha256 with them */
   await writeFieldPictures();
-  if (flags.has('--run')) runMode();
+  if (flags.has('--run')) {
+    runMode();
+    /* V3's recordings: the save before the run, the hero's loop, the chips (scripts/home/run.ts) */
+    recordChips();
+  }
   if (flags.has('--export')) await exportMode();
   await writeAll();
 }

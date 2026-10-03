@@ -1,6 +1,6 @@
 {
   "generator": "scripts/build-home-assets.ts --run",
-  "fixtureSha256": "f8b65f43796ff04ddf64d83b53ec8c9feb864f72691336ff75fbe27212c93d5b",
+  "fixtureSha256": "07fd26398406461c8fdea22881fe90129cb0a2f0c160b7ae70f271868cb9fe96",
   "versionAnswer": {
     "argv": [
       "--version"
@@ -9,7 +9,7 @@
     "stdout": [
       " ███████████  Turboslide 2026.1001.3",
       " ▀▀▀▀▀███▀▀▀  https://www.turboslide.com",
-      "▄▄▄▄▄ ███     193 actions, effects backend: wasm",
+      "▄▄▄▄▄ ███     193 actions, effects backend: native",
       "▄▄▄▄ ▄▄▄",
       "     ███",
       "███ ███"
@@ -101,7 +101,7 @@
         ],
         "code": 0,
         "stdout": [
-          "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 1"
+          "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 1"
         ],
         "stderr": []
       },
@@ -233,7 +233,7 @@
         ],
         "code": 0,
         "stdout": [
-          "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 2"
+          "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 2"
         ],
         "stderr": []
       },
@@ -275,7 +275,7 @@
         ],
         "code": 0,
         "stdout": [
-          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert"
+          "  1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert"
         ],
         "stderr": []
       },
@@ -375,7 +375,7 @@
         ],
         "code": 0,
         "stdout": [
-          "7 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 3"
+          "12 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 3"
         ],
         "stderr": []
       },
@@ -417,8 +417,8 @@
         ],
         "code": 0,
         "stdout": [
-          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert",
-          "  2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set"
+          "  1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert",
+          "  2  r2     2026-10-03T18:16:24.704Z  agent:landing      1 mutation(s): block.set"
         ],
         "stderr": []
       },
@@ -518,7 +518,7 @@
         ],
         "code": 0,
         "stdout": [
-          "8 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 4"
+          "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 4"
         ],
         "stderr": []
       },
@@ -560,9 +560,9 @@
         ],
         "code": 0,
         "stdout": [
-          "  1  r1     2026-10-03T04:01:33.834Z  agent:landing      1 mutation(s): slide.insert",
-          "  2  r2     2026-10-03T04:01:34.707Z  agent:landing      1 mutation(s): block.set",
-          "  3  r3     2026-10-03T04:01:35.630Z  agent:landing      1 mutation(s): block.set"
+          "  1  r1     2026-10-03T18:16:20.738Z  agent:landing      1 mutation(s): slide.insert",
+          "  2  r2     2026-10-03T18:16:24.704Z  agent:landing      1 mutation(s): block.set",
+          "  3  r3     2026-10-03T18:16:28.630Z  agent:landing      1 mutation(s): block.set"
         ],
         "stderr": []
       },
@@ -677,16 +677,16 @@
       "argv": [
         "slide",
         "to-canvas",
-        "rosetta"
+        "lighthouse"
       ],
       "code": 0,
       "stdout": [
-        "rosetta: arranged by hand (mood), 5 object(s)",
+        "lighthouse: arranged by hand (mood), 5 object(s)",
         "  picture      picture    0,0 1600x900 z 0",
-        "  plate        box        1031.03125,602.734375 431.96875x168.265625 z 1",
-        "  h            heading    1057.03125,624.734375 379.96875x47.515625 z 2",
-        "  p1           paragraph  1057.03125,684.25 379.96875x33 z 3",
-        "  credit       credit     1057.03125,729.25 379.96875x21.75 z 4",
+        "  plate        box        903,569.734375 560x201.265625 z 1",
+        "  h            heading    929,591.734375 508x47.515625 z 2",
+        "  p1           paragraph  929,651.25 508x66 z 3",
+        "  credit       credit     929,729.25 508x21.75 z 4",
         "revision 4, 2 finding(s)"
       ],
       "stderr": []
@@ -695,15 +695,15 @@
       "argv": [
         "block",
         "set",
-        "rosetta#h",
+        "lighthouse#h",
         "/pos",
         "{\"x\":612,\"y\":388,\"w\":520,\"h\":96}"
       ],
       "code": 0,
       "stdout": [
-        "set h /pos on rosetta: revision 5, 2 finding(s)",
-        "  rosetta export/non-native (1): In native mode an image exports as a 2x raster.",
-        "  rosetta layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        "set h /pos on lighthouse: revision 5, 2 finding(s)",
+        "  lighthouse export/non-native (1): In native mode an image exports as a 2x raster.",
+        "  lighthouse layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
       ],
       "stderr": []
     },
@@ -711,15 +711,15 @@
       "argv": [
         "block",
         "rotate",
-        "rosetta#h",
+        "lighthouse#h",
         "--to",
         "15"
       ],
       "code": 0,
       "stdout": [
-        "rotated h to 15 degrees on rosetta: revision 6, 2 finding(s)",
-        "  rosetta export/non-native (1): In native mode an image exports as a 2x raster.",
-        "  rosetta layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
+        "rotated h to 15 degrees on lighthouse: revision 6, 2 finding(s)",
+        "  lighthouse export/non-native (1): In native mode an image exports as a 2x raster.",
+        "  lighthouse layout/freeform (1): This slide is arranged by hand. Apply layout re-flows it."
       ],
       "stderr": []
     }
@@ -732,7 +732,7 @@
       ],
       "code": 0,
       "stdout": [
-        "6 replacements on 3 slides, 0 pictures swapped, 0 skipped; revision 1"
+        "11 replacements on 5 slides, 0 pictures swapped, 0 skipped; revision 1"
       ],
       "stderr": []
     },
@@ -743,7 +743,7 @@
       ],
       "code": 0,
       "stdout": [
-        "8 replacements on 4 slides, 0 pictures swapped, 0 skipped; revision 4"
+        "13 replacements on 6 slides, 0 pictures swapped, 0 skipped; revision 4"
       ],
       "stderr": []
     }

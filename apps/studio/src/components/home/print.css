@@ -1,8 +1,8 @@
-/* Print This Deck (docs/LANDING.md 2.7; l3.md R7): one 16 by 9 page per slide of the visitor's
-   deck. The live module (L3's live/print.ts, push 5) fills `[data-print-deck]` on `beforeprint`
-   with the deck's slides in their current state and empties it on `afterprint`; while the
-   container is empty (no live module), the print is the hero slide alone. Nothing of the page's
-   chrome prints. */
+/* Print This Deck (docs/LANDING.md 2.11; l3.md R7): one 16 by 9 page per slide of the visitor's
+   deck. The live module (V3's live/print.ts) fills `[data-print-deck]` on `beforeprint` with the
+   deck's slides in their current state and empties it on `afterprint`; while the container is
+   empty (no live module), the print is the hero frame's slide 1 alone (5 "Print"). Nothing of the
+   page's chrome prints. */
 
 @page {
   size: 16in 9in;
@@ -37,8 +37,25 @@
   .ts-product-footer,
   .ts-product [data-band]:not([data-band='hero']),
   .ts-product .ts-hatch,
-  .ts-product [data-band='hero'] > .ts-col > :not(.ts-hero-sheet) {
+  .ts-product [data-band='hero'] > .ts-col > :not(.ts-hero-stage),
+  .ts-product .ts-hero-terminal,
+  .ts-product .ts-hero-frame-title,
+  .ts-product .ts-hero-frame-menus,
+  .ts-product .ts-hero-filmstrip {
     display: none;
+  }
+
+  /* the frame's chrome steps aside: slide 1 alone fills the page */
+  .ts-product .ts-hero-stage,
+  .ts-product .ts-hero-frame,
+  .ts-product .ts-hero-frame-body,
+  .ts-product .ts-hero-frame-stage {
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
   }
 
   .ts-product [data-band='hero'] {
@@ -61,6 +78,7 @@
      credit and the counter) broke onto a second page; the sheet clips at its 9 in */
   .ts-product .ts-hero-sheet {
     width: 16in;
+    max-width: none;
     height: 9in;
     margin: 0;
     overflow: hidden;

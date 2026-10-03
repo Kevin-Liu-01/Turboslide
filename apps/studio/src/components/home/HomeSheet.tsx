@@ -11,23 +11,32 @@ import type { HomeInstanceId } from './slides.generated';
  * client the wrapper renders an empty `dangerouslySetInnerHTML` with `suppressHydrationWarning`,
  * and React leaves the server's markup in place after hydration. No sheet wider than a thumbnail
  * draws a frame (its edge is its own rails); a thumbnail keeps the 1 px edge.
+ *
+ * Below the first screen (docs/LANDING.md 2.0, 4.2) a sheet is a placeholder: `fill` renders the
+ * same element empty with `data-fill="<instance>"`, at its final size, and the band loader writes
+ * it from `bands.generated.ts` `BAND_FILLS[band][instance]` when the band's chunk arrives.
  */
 export function HomeSheet({
   instance,
+  fill = false,
   className,
   label,
-}: {
-  instance: HomeInstanceId;
+  hidden = false,
+}: ({ instance: HomeInstanceId; fill?: false } | { instance: string; fill: true }) & {
   className?: string;
   /** the slide's name for assistive technology when the sheet is not inside a named control */
   label?: string;
+  /** a sheet the band shows later (the second slide of a people screen) */
+  hidden?: boolean;
 }) {
-  const thumb = instance.startsWith('tailor-thumb-');
-  const html = import.meta.env.SSR ? HOME_SLIDE_HTML[instance].html : '';
+  const thumb = /^(hero|tailor)-thumb-/.test(instance);
+  const html = !fill && import.meta.env.SSR ? HOME_SLIDE_HTML[instance as HomeInstanceId].html : '';
   return (
     <div
       className={`ts-home-sheet${thumb ? ' is-thumb' : ''}${className ? ` ${className}` : ''}`}
       data-sheet={instance}
+      {...(fill ? { 'data-fill': instance } : {})}
+      {...(hidden ? { hidden: true } : {})}
       {...(label !== undefined ? { role: 'group', 'aria-label': label } : {})}
       suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: html }}

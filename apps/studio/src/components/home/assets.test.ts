@@ -6,8 +6,15 @@ import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
 import { HOME_ASSETS, homeAsset } from './assets';
+import { FILLS as AGENTS_FILLS } from './bands/agents.generated';
+import { FILLS as CANVAS_FILLS } from './bands/canvas.generated';
+import { FILLS as CLOSE_FILLS } from './bands/close.generated';
+import { HOME_SLIDE_MARKUP } from './bands/deck.generated';
+import { FILLS as EXPORT_FILLS } from './bands/export.generated';
+import { LIVE_SLIDE_HTML } from './bands/live.generated';
+import { FILLS as PRESENT_FILLS } from './bands/present.generated';
+import { FILLS as TAILOR_FILLS } from './bands/tailor.generated';
 import { HOME_DECK } from './deck.generated';
-import { LIVE_SLIDE_HTML } from './live-slides.generated';
 import {
   HOME_FIELD_STILLS,
   HOME_SLIDES_SENTINEL,
@@ -15,11 +22,12 @@ import {
   HOME_STILLS_CSS,
 } from './slides.generated';
 
-// The landing's files (docs/LANDING.md 4.1, 6.1; build/integrator.md section 6): every file under
+// The landing's files (docs/LANDING.md 4.1, 6.1, the second pass): every file under
 // apps/studio/public/home/ is in assets.json at its bytes and sha256 and decodes to the pixels the
 // build recorded, nothing else is there, every picture holds its budget, the export pictures are
-// the parts the CLI's files hold (their part sha256 recorded), the PDFs have eight pages, and the
-// inlined stills are 1 bit masks of their cell grids. scripts/build-home-assets.ts --check also
+// the parts the CLI's files hold (their part sha256 recorded), the PDFs have nine pages, the
+// inlined stills are 1 bit masks of their cell grids, the document's instances are the first
+// screen's ten, and every other instance is in its band's module. scripts/build-home-assets.ts --check also
 // re-derives each file from its sources; this test reads the committed files alone.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..', '..', '..');
@@ -28,9 +36,10 @@ const PUBLIC = join(ROOT, 'apps/studio/public/home');
 const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
 
 const BUDGET: Readonly<Record<string, number>> = {
-  'canvas-still': 24_000,
-  'canvas-tone': 26_000,
+  'lighthouse-still': 24_000,
+  'lighthouse-tone': 26_000,
   'field-still': 24_000,
+  'pattern-still': 48_000,
   'export-perfect': 60_000,
   'export-editable': 32_000,
 };
@@ -67,30 +76,30 @@ describe('public/home', () => {
     }
   });
 
-  it("carries the export band's files: both appearances, the Perfect picture at 3200 by 1800, PDFs of 8 pages", () => {
+  it("carries the export band's files: both appearances, the Perfect picture at 3200 by 1800, PDFs of 9 pages", () => {
     for (const theme of ['light', 'dark'] as const) {
       const perfect = homeAsset('export-perfect', theme);
       expect([perfect.width, perfect.height]).toEqual([3200, 1800]);
       expect(perfect.partSha256).toMatch(/^[0-9a-f]{64}$/);
       const pdf = homeAsset('pdf', theme);
-      expect(pdf.pages).toBe(8);
+      expect(pdf.pages).toBe(9);
       const bytes = readFileSync(join(PUBLIC, pdf.path.replace(/^\/home\//, '')));
       expect(bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     }
     /* the band stills at the two cell grids of 2 px cells */
     expect([
-      homeAsset('canvas-still', null, 'wide').width,
-      homeAsset('canvas-still', null, 'wide').height,
+      homeAsset('lighthouse-still', null, 'wide').width,
+      homeAsset('lighthouse-still', null, 'wide').height,
     ]).toEqual([512, 288]);
     expect([
-      homeAsset('canvas-still', null, 'narrow').width,
-      homeAsset('canvas-still', null, 'narrow').height,
+      homeAsset('lighthouse-still', null, 'narrow').width,
+      homeAsset('lighthouse-still', null, 'narrow').height,
     ]).toEqual([179, 100]);
   });
 });
 
 describe('the inlined stills and the slide markup', () => {
-  it('inlines four 1 bit stills at their cell grids', async () => {
+  it("inlines four 1 bit stills at their cell grids: the hero frame's slide and the strip", async () => {
     const stills = [
       HOME_FIELD_STILLS.hero.wide,
       HOME_FIELD_STILLS.hero.narrow,
@@ -98,8 +107,8 @@ describe('the inlined stills and the slide markup', () => {
       HOME_FIELD_STILLS.strip.narrow,
     ];
     expect(stills.map((s) => [s.cols, s.rows])).toEqual([
-      [512, 288],
-      [179, 100],
+      [270, 152],
+      [163, 92],
       [512, 80],
       [179, 48],
     ]);
@@ -123,37 +132,60 @@ describe('the inlined stills and the slide markup', () => {
     expect(bytes).toBeLessThan(6000);
   });
 
-  it('marks every server rendered instance and keeps the live markup apart', () => {
-    for (const [instance, entry] of Object.entries(HOME_SLIDE_HTML)) {
-      expect(entry.html.startsWith('<div class="ts-sheet sheet ts-home-slide'), instance).toBe(
-        true,
+  it('marks every server rendered instance and keeps every other in its band', () => {
+    const order = HOME_DECK.order;
+    /* the document: the hero frame's slide 1 and its nine thumbnails (2.0 "Slides") */
+    expect(Object.keys(HOME_SLIDE_HTML)).toEqual([
+      'hero',
+      ...order.map((id) => `hero-thumb-${id}`),
+    ]);
+    const all: [string, string, string][] = [
+      ...Object.entries(HOME_SLIDE_HTML).map(
+        ([i, e]) => [i, e.slide, e.html] as [string, string, string],
+      ),
+      ...Object.entries({
+        ...CANVAS_FILLS,
+        ...TAILOR_FILLS,
+        ...AGENTS_FILLS,
+        ...PRESENT_FILLS,
+        ...EXPORT_FILLS,
+        ...CLOSE_FILLS,
+      })
+        .filter(([key]) => !['panel-cli', 'export-editable'].includes(key))
+        .map(
+          ([i, html]) =>
+            [i, /data-slide="([^"]+)"/.exec(html)?.[1] ?? '', html] as [string, string, string],
+        ),
+      ...Object.entries(HOME_SLIDE_MARKUP).map(
+        ([id, html]) => [`slide-${id}`, id, html] as [string, string, string],
+      ),
+    ];
+    for (const [instance, slide, html] of all) {
+      expect(html.startsWith('<div class="ts-sheet sheet ts-home-slide'), instance).toBe(true);
+      expect(html, instance).toContain(
+        `${HOME_SLIDES_SENTINEL} data-slide="${slide}" data-instance="${instance}"`,
       );
-      expect(entry.html, instance).toContain(
-        `${HOME_SLIDES_SENTINEL} data-slide="${entry.slide}" data-instance="${instance}"`,
-      );
-      expect(entry.html, instance).not.toContain('data-theme=');
-      expect(entry.html, instance).not.toContain('<img');
-      expect(entry.html, instance).not.toContain('#gt-mark');
-      const n = HOME_DECK.slides[entry.slide].n;
-      expect(entry.html, instance).toContain(`data-counter="${n} / 8"`);
+      expect(html, instance).not.toContain('data-theme=');
+      expect(html, instance).not.toContain('<img');
+      expect(html, instance).not.toContain('#gt-mark');
+      /* one h1 on the page, the page text h1: every heading in a slide is a div */
+      expect(/<h[1-6]\b/.test(html), instance).toBe(false);
+      const n = HOME_DECK.slides[slide as keyof typeof HOME_DECK.slides].n;
+      expect(html, instance).toContain(`data-counter="${n} / 9"`);
     }
-    /* one h1 on the page: the hero's title, the build's three lines */
-    const h1 = Object.values(HOME_SLIDE_HTML).flatMap((e) => e.html.match(/<h1\b/g) ?? []);
-    expect(h1.length).toBe(1);
-    expect(HOME_SLIDE_HTML.hero.html).toContain('id="ts-product-h1"');
-    expect(Object.values(HOME_SLIDE_HTML).some((e) => /<h[2-6]\b/.test(e.html))).toBe(false);
-    /* the close's mark in seven pieces, the canvas slide's four objects */
-    for (let i = 0; i < 7; i += 1)
-      expect(HOME_SLIDE_HTML.close.html).toContain(`data-mark-piece="${i}"`);
-    for (const object of ['rosetta#plate', 'rosetta#h', 'rosetta#p1', 'rosetta#credit'])
-      expect(HOME_SLIDE_HTML.canvas.html).toContain(`data-object="${object}"`);
+    /* the close's mark in seven pieces, the lighthouse's four objects, slide 1's two */
+    for (let i = 0; i < 7; i += 1) expect(CLOSE_FILLS['close']).toContain(`data-mark-piece="${i}"`);
+    for (const object of ['lighthouse#plate', 'lighthouse#h', 'lighthouse#p1', 'lighthouse#credit'])
+      expect(CANVAS_FILLS['canvas']).toContain(`data-object="${object}"`);
     for (const object of ['title#heading', 'title#lead'])
       expect(HOME_SLIDE_HTML.hero.html).toContain(`data-object="${object}"`);
-    /* slide 7 and slide 5's two earlier states travel in the live module alone */
+    expect(HOME_SLIDE_HTML.hero.html).toContain('data-field="hero"');
+    /* slide 7 and slide 5's two earlier states travel with their bands */
     expect(LIVE_SLIDE_HTML.field).toContain('data-slide="field"');
     expect(LIVE_SLIDE_HTML.field).toContain('data-still="field-still"');
     expect(LIVE_SLIDE_HTML.nextSteps.placeholders).toContain('data-slide="next-steps"');
     expect(LIVE_SLIDE_HTML.nextSteps.titled).toContain('Next steps with Northwind');
-    expect(Object.values(HOME_SLIDE_HTML).some((e) => e.slide === 'field')).toBe(false);
+    expect(AGENTS_FILLS['panel-cli']).toContain('data-panel-text="narrow"');
+    expect(EXPORT_FILLS['export-editable']).toContain('data-seam-text');
   });
 });

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "lighthouse",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-lighthouse",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "Louisbourg lighthouse"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: Ken Heaton, CC BY-SA 4.0"
+      }
+    ]
+  },
+  "notes": "Drag the heading off the plate, then press Undo."
+}

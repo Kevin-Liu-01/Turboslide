@@ -3,8 +3,9 @@
 //
 // The counts the /home page states, copied from packages/theme/brand/facts.json (B1's file) so
 // the page's JavaScript carries these values and not the file's measured rows; `menus` is
-// `visibleMenus(DEFAULT_MENU_CONTEXT).length` of packages/chrome/src/menus/model.ts and
-// `cliCommands` the length of packages/agent/generated/cli.json `actions`.
+// `visibleMenus(DEFAULT_MENU_CONTEXT).length` of packages/chrome/src/menus/model.ts,
+// `cliCommands` the length of packages/agent/generated/cli.json `actions`, and `features` the
+// features table's where cells and shortcuts (the menu model's paths, keys.ts's Mac and other forms).
 export const FACTS_DATA = {
   factsSha256: 'c9405be5cfc28671a52a9a7a4a7ff5b6d867b8c24df9ea85c2fe98354b567615',
   actions: 193,
@@ -19,4 +20,66 @@ export const FACTS_DATA = {
   cliCommands: 180,
   mismatchPercent: 0.003,
   licence: 'MIT',
+  features: [
+    {
+      id: 'menus',
+      where: 'File to Help',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'tailor',
+      where: 'Tools > Tailor for a customer',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'kit',
+      where: 'Slide > Change theme',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'comments',
+      where: 'Insert > Comment',
+      mac: '⌥⌘M',
+      other: 'Ctrl+Alt+M',
+    },
+    {
+      id: 'versions',
+      where: 'File > Version history > See version history',
+      mac: '⌥⇧⌘H',
+      other: 'Ctrl+Alt+Shift+H',
+    },
+    {
+      id: 'share',
+      where: 'Share',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'presenter',
+      where: 'Slideshow > Presenter view',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'download',
+      where: 'File > Download',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'pattern',
+      where: 'Insert > Animated pattern',
+      mac: '',
+      other: '',
+    },
+    {
+      id: 'agents',
+      where: 'The CLI, the MCP server and the HTTP API',
+      mac: '',
+      other: '',
+    },
+  ],
 } as const;

@@ -1,20 +1,24 @@
 import { TAILOR } from './copy';
 import { HOME_DECK, HOME_TAILOR_WORDS } from './deck.generated';
 import type { HomeSlideId } from './deck.generated';
-import { BandHead, HomeSection } from './HomeSection';
+import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { HomeSheet } from './HomeSheet';
 
 /**
- * One customer on every slide (docs/LANDING.md 2.5, band 3): the Tailor dialog as ruled rows
- * (Replace, With, the count and Apply, the example kits), then the editor in part: a filmstrip of
- * slides 2 to 5 as framed 144 by 81 thumbnails and, beside it, a stage of 856 by 481 showing the
- * chosen slide unframed, with a row reserved under it for the snackbar. At rest the dialog holds
- * the deck's customer and the count of the CLI's recorded answer; the kits show GT pressed; the
- * stage shows slide 2. Tailor, the kits and the filmstrip are the live module's (L2, push 3);
- * the dialog's own words are the product's (`HOME_TAILOR_WORDS`, copied from @turboslide/chrome's
+ * One name on every slide (docs/LANDING.md 2.7, Kevin's pick "A: One name on every slide, Tailor
+ * with a reorderable filmstrip"): the Tailor dialog as ruled rows (Replace, With, the count and
+ * Apply; the example kits until V2#12 moves them to their own band), then the editor in part: a
+ * filmstrip of slides 1 to 5, the slides that carry the customer's name, as framed 144 by 81
+ * thumbnails and, beside it, a stage of 856 by 481 showing the chosen slide unframed, with a row
+ * reserved under it for the snackbar. The filmstrip and the stage are the band's reserved box: the
+ * slides are written by its chunk after `load` (4.2), into the placeholders the document holds at
+ * their final sizes. At rest the dialog holds the deck's customer and the count of the CLI's
+ * recorded answer; the stage shows slide 2. Tailor, the kits and the filmstrip are V2's; the
+ * dialog's own words are the product's (`HOME_TAILOR_WORDS`, copied from @turboslide/chrome's
  * TAILOR). Hooks: integrator.md 4.1 and l2.md Q3.
  */
 const THUMBS = [
+  ['tailor-thumb-title', 'title'],
   ['tailor-thumb-plan', 'plan'],
   ['tailor-thumb-gets', 'gets'],
   ['tailor-thumb-ships', 'ships'],
@@ -90,7 +94,7 @@ export function HomeTailor() {
           </div>
         </form>
       </div>
-      <div className="ts-tailor-editor">
+      <Reserve band="tailor" className="ts-tailor-editor">
         <ol className="ts-home-filmstrip" data-filmstrip aria-label={TAILOR.filmstripLabel}>
           {THUMBS.map(([instance, id]) => (
             <li
@@ -104,7 +108,7 @@ export function HomeTailor() {
               <span className="ts-home-thumb-n" data-thumb-n aria-hidden="true">
                 {HOME_DECK.slides[id].n}
               </span>
-              <HomeSheet instance={instance} />
+              <HomeSheet instance={instance} fill />
               <span className="ts-home-thumb-moves">
                 <button type="button" className="ts-text-button" data-thumb-move="up" tabIndex={-1}>
                   {TAILOR.moveUp}
@@ -122,7 +126,7 @@ export function HomeTailor() {
           ))}
         </ol>
         <div className="ts-tailor-stage" data-stage>
-          <HomeSheet instance="tailor-stage" label={title('plan')} />
+          <HomeSheet instance="tailor-stage" fill label={title('plan')} />
           <div className="ts-home-snackbar" data-snackbar>
             <span data-snackbar-text aria-live="polite" />
             <button type="button" className="ts-text-button" data-snackbar-undo data-undo="tailor">
@@ -130,7 +134,7 @@ export function HomeTailor() {
             </button>
           </div>
         </div>
-      </div>
+      </Reserve>
       <p className="ts-sr" aria-live="polite" data-announce />
     </HomeSection>
   );

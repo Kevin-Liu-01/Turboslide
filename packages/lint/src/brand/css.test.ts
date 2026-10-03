@@ -66,7 +66,8 @@ describe('the CSS checks', () => {
     expect(rulesOf('.ts-x code, .ts-y { font-family: monospace }')).toEqual([
       'css/mono-outside-code',
     ]);
-    /* /home's one code surface is the agents band's panel since the landing (config.ts) */
+    /* /home's code surfaces are its two #101010 panels, the hero's terminal and the agents band's
+       console, both `.ts-home-panel` since the landing's second pass (config.ts) */
     expect(
       rulesOf('.ts-home-panel { font-family: var(--pt-mono) }', 'apps/studio/src/routes/home.css'),
     ).toEqual([]);

@@ -1,13 +1,25 @@
 import type { ReactNode } from 'react';
 
 /**
- * The band shell every band of /home uses (docs/LANDING.md 2.0 "The column"; 6.1): a
- * `section[data-band]` labelled by its h2, 96 px of padding above and below at 1,024 px and over
- * (64 px under 720 px), the 1,104 px column inside it, and the band closed by `.ts-seam` with its
- * 9 px crosses where the seam meets the rails. The band's own layout is its children.
+ * The band shell every band of /home below the first screen uses (docs/LANDING.md 2.0 "The
+ * column"; 6.1): a `section[data-band]` labelled by its h2, 96 px of padding above and below at
+ * 1,024 px and over (64 px under 720 px), the 1,104 px column inside it, and the band closed by
+ * `.ts-seam` with its 9 px crosses where the seam meets the rails. The band's own layout is its
+ * children; its instrument sits in one `Reserve` box at its final size (4.2).
  */
 export type HomeSectionProps = {
-  id: 'agents' | 'tailor' | 'canvas' | 'present' | 'export' | 'parts' | 'close';
+  id:
+    | 'menus'
+    | 'canvas'
+    | 'tailor'
+    | 'kits'
+    | 'agents'
+    | 'people'
+    | 'present'
+    | 'export'
+    | 'patterns'
+    | 'features'
+    | 'close';
   children: ReactNode;
   className?: string;
 };
@@ -52,6 +64,27 @@ export function BandHead({
         {heading}
       </h2>
       {lead !== undefined ? <p className="ts-lead">{lead}</p> : null}
+      {children}
+    </div>
+  );
+}
+
+/**
+ * A band's reserved instrument box (docs/LANDING.md 2.0 "At rest", 4.2, 6.3): `[data-reserve]` at
+ * its final size in the document, so the chunk that fills it after \`load\` moves nothing. The
+ * band loader sets `data-filled` once it wrote the box's placeholders (`[data-fill]`) or markup.
+ */
+export function Reserve({
+  band,
+  className,
+  children,
+}: {
+  band: HomeSectionProps['id'];
+  className?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className={className ? `ts-reserve ${className}` : 'ts-reserve'} data-reserve={band}>
       {children}
     </div>
   );

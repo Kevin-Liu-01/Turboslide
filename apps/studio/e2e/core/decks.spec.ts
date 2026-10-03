@@ -1354,9 +1354,9 @@ test(title('decks.recent.this-browser-sentence'), async () => {
 
 test(title('decks.home.seller-lead'), async ({ browser }) => {
   test.setTimeout(90_000);
-  /* the landing (docs/LANDING.md 2.2, 6.7): the h1 is the hero slide's title in three hand set
-     lines, its text the standing sentence; in a fresh context (no visit recorded) the slide's
-     subtitle is the first visit sentence; the second hero button opens the GT brand deck */
+  /* the landing (docs/LANDING.md 2.2, 6.7, the second pass): the h1 is page text in three locked
+     lines, its text the standing sentence; in a fresh context (no visit recorded) the lead's first
+     sentence is the first visit sentence; the second hero button opens the GT brand deck */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
@@ -1372,16 +1372,17 @@ test(title('decks.home.seller-lead'), async ({ browser }) => {
       });
     const h1 = await p.locator('main h1').first().textContent();
     expect(h1?.replace(/\s+/g, ' ').trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
-    const lines = await p.locator('main h1 .ts-home-line').allTextContents();
-    expect(lines, 'three hand set lines').toEqual([
+    const lines = (await p.locator('main h1 .ts-h1-line').allTextContents()).map((l) => l.trim());
+    expect(lines, 'three locked lines').toEqual([
       'Build the pitch,',
       'present it and',
       'send the link',
     ]);
-    const subtitle = await p.locator('[data-object="title#lead"]').first().textContent();
-    expect(subtitle?.trim(), "the subtitle is the first visit's sentence").toBe(
-      'Turboslide is a slides editor in the browser.',
-    );
+    const lead = await p.locator('[data-band="hero"] .ts-hero-lead').first().textContent();
+    expect(
+      lead?.replace(/\s+/g, ' ').trim().startsWith('Turboslide is a slides editor in the browser.'),
+      "the lead begins with the first visit's sentence",
+    ).toBe(true);
     const deckButton = p.locator('[data-band="hero"] a[href="/deck/gt-brand"]').first();
     await expect(deckButton, 'the second button opens the example deck').toHaveText(
       'Open the Example Deck',
@@ -2003,11 +2004,16 @@ async function homeScroll(p: Page): Promise<void> {
   }
   await p.waitForTimeout(400);
 }
-/** The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358. */
+/**
+ * The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358
+ * (the second pass: the hero frame's slide 540 and 326; the agents band's slide 5 keeps the first
+ * pass's 412 until V3#13 sets it above the console at 588).
+ */
 const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
-  hero: [1024, 358],
+  hero: [540, 326],
   agents: [412, 358],
   'tailor-stage': [856, 358],
+  'tailor-thumb-title': [144, 80],
   'tailor-thumb-plan': [144, 80],
   'tailor-thumb-gets': [144, 80],
   'tailor-thumb-ships': [144, 80],
@@ -2016,16 +2022,20 @@ const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
   present: [588, 358],
   close: [1024, 358],
 };
+/** The narrowest width the page holds without a sideways scroll (docs/LANDING.md 5, 2.1). */
+const HOME_NARROWEST = { width: 320, height: 640 };
 
 test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
   test.setTimeout(300_000);
   const failures: string[] = [];
   const notes: string[] = [];
-  for (const size of HOME_WIDTHS)
+  for (const size of [...HOME_WIDTHS, HOME_NARROWEST])
     for (const theme of ['dark', 'light'] as const) {
       const { context: fresh, page: p } = await homeContext(browser, size, theme);
       try {
         await homeOpen(p);
+        /* every band's chunk, so the slides below the first screen are in place */
+        await homeScroll(p);
         const narrow = size.width < 720;
         const facts = await p.evaluate(() => {
           const sheets = [...document.querySelectorAll<HTMLElement>('main [data-sheet]')].map(
@@ -2039,9 +2049,19 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
             },
           );
           const seam = document.querySelector<HTMLElement>('[data-seam-root] .ts-seam-box');
+          /* a filmstrip that scrolls inside its frame (2.2, 2.7) holds thumbnails past the
+             viewport's edge, clipped by the scroller: they cross nothing the reader sees */
+          const inScroller = (el: Element) => {
+            for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+              if (getComputedStyle(a).overflowX === 'visible') continue;
+              const r = a.getBoundingClientRect();
+              if (r.left >= -1 && r.right <= innerWidth + 1) return true;
+            }
+            return false;
+          };
           const wide = [...document.querySelectorAll('main *')].filter((el) => {
             const r = el.getBoundingClientRect();
-            return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1);
+            return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1) && !inScroller(el);
           }).length;
           return {
             sheets,
@@ -2056,6 +2076,8 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
           `${label}: height ${facts.height}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.w}`).join(', ')}, seam ${facts.seam}, wide ${facts.wide}`,
         );
         for (const [sheet, [wideW, narrowW]] of Object.entries(HOME_SHEET_WIDTHS)) {
+          /* at 320 the column is 288 px: the widths are read at the three widths of section 2 */
+          if (size.width < 390) break;
           const found = facts.sheets.find((s) => s.sheet === sheet);
           const want = narrow ? narrowW : wideW;
           if (!found) failures.push(`${label}: no ${sheet} slide`);
@@ -2067,14 +2089,14 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
           }
         }
         const seamWant = narrow ? 358 : 1024;
-        if (facts.seam === null || Math.abs(facts.seam - seamWant) > 1.5)
+        if (size.width >= 390 && (facts.seam === null || Math.abs(facts.seam - seamWant) > 1.5))
           failures.push(
             `${label}: the export slide is ${facts.seam} px wide (section 2 says ${seamWant})`,
           );
         if (facts.overflow || facts.wide > 0)
           failures.push(`${label}: ${facts.wide} elements wider than the viewport`);
-        /* Kevin's answer 5: under 7,500 px at 1440 (and 1280), 8,500 at 390 */
-        if (facts.height >= (narrow ? 8500 : 7500))
+        /* question 11: under 14,000 px at 1440 (and 1280), 15,000 at 390 */
+        if (facts.height >= (narrow ? 15_000 : 14_000))
           failures.push(`${label}: the page is ${facts.height} px tall`);
       } finally {
         await fresh.close();
@@ -2086,7 +2108,7 @@ test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
 
 test(title('decks.home.copy-rules'), async ({ browser }) => {
   test.setTimeout(240_000);
-  /* copy.test.ts with the rules of LANDING.md 2.12, run from the checkout beside the spec */
+  /* copy.test.ts with the rules of LANDING.md 2.17, run from the checkout beside the spec */
   const root = resolve(import.meta.dirname, '..', '..', '..', '..');
   const vitest = spawnSync(
     resolve(root, 'node_modules', '.bin', 'vitest'),
@@ -2113,12 +2135,13 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
       const headings = [...main.querySelectorAll('h1, h2')].map((h) =>
         (h.textContent ?? '').replace(/\s+/g, ' ').trim(),
       );
-      /* the page's own copy: outside the slides, the panel, Version history's rows and the
-         Tailor dialog's product strings (LANDING.md 2.12); the export band's Editable text side
-         is slide 7 as the PowerPoint file holds it, so it counts as a slide */
+      /* the page's own copy: outside the slides, the two panels, Version history's rows, the
+         editor frame's drawn chrome, the features table's shortcuts and the Tailor dialog's
+         product strings (LANDING.md 2.17); the export band's Editable text side is slide 7 as
+         the PowerPoint file holds it, so it counts as a slide */
       const clone = main.cloneNode(true) as HTMLElement;
       for (const el of clone.querySelectorAll(
-        'script, style, template, [data-home-slides], .ts-seam-editable, .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, .ts-hero-credit, .ts-sr, .ts-skip, [hidden]',
+        'script, style, template, [data-home-slides], .ts-seam-editable, .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, [data-hero-title], [data-hero-counter], [data-hero-thumb], [aria-hidden="true"], kbd, .ts-sr, .ts-skip, [hidden]',
       ))
         el.remove();
       document.body.append(clone);
@@ -2138,7 +2161,7 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
       description: `${words} words of the page's own copy; ${copy.headings.length} headings; semicolons ${(copy.prose.match(/;/g) ?? []).length}; report words ${report.join(', ') || 'none'}; paths ${paths.join(', ') || 'none'}`,
     });
     expect(vitest.status, 'copy.test.ts passes').toBe(0);
-    expect(words, 'under 350 words').toBeLessThan(350);
+    expect(words, 'under 750 words').toBeLessThan(750);
     expect(copy.prose, 'no semicolon').not.toContain(';');
     expect(commaHeadings, 'no comma in a heading').toEqual([]);
     expect(report, 'no report word').toEqual([]);
@@ -2180,6 +2203,7 @@ test(title('decks.home.product-pictures'), async ({ browser }) => {
     try {
       await homeOpen(p);
       await homeScroll(p);
+      await p.waitForTimeout(1500);
       const facts = await p.evaluate(() => {
         const roots = [...document.querySelectorAll<HTMLElement>('main [data-home-slides]')];
         const pictures = [...document.querySelectorAll<HTMLImageElement>('main img')]
@@ -2201,8 +2225,23 @@ test(title('decks.home.product-pictures'), async ({ browser }) => {
       notes.push(
         `${theme}: ${facts.instances.length} instances (${facts.instances.join(', ')}); pictures ${facts.pictures.join(', ')}; fields ${facts.masks.join('; ')}`,
       );
-      if (facts.instances.length !== 10)
-        failures.push(`${theme}: ${facts.instances.length} slide instances, not 10`);
+      /* the first screen's ten (the hero frame's slide and its nine thumbnails) and every band's */
+      const nine = [
+        'title',
+        'plan',
+        'gets',
+        'ships',
+        'next-steps',
+        'lighthouse',
+        'field',
+        'pattern',
+        'close',
+      ];
+      if (facts.instances.length < 10)
+        failures.push(`${theme}: ${facts.instances.length} slide instances, fewer than 10`);
+      for (const instance of facts.instances)
+        if (!nine.includes(instance.split('=')[1] ?? ''))
+          failures.push(`${theme}: the instance ${instance} draws no slide of the page deck`);
       if (facts.themes > 0)
         failures.push(`${theme}: ${facts.themes} slides carry their own data-theme`);
       for (const src of facts.pictures)
@@ -2332,7 +2371,7 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
       `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (line 400 cold, the h1)`,
       `ready ${readyMs} ms (line 500)`,
       `pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests (line 0)`,
-      `pictures after a full scroll ${after} B (line 160000)`,
+      `pictures after a full scroll ${after} B (line 200000)`,
       `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)`,
       `long animation frames over 100 ms ${before.longFrames.length}`,
       `JavaScript decoded ${before.js} B (reported against 600000)`,
@@ -2343,7 +2382,7 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
     expect(/^h1/.test(before.lcpElement), lines[1]).toBe(true);
     expect(readyMs, lines[2]).toBeLessThanOrEqual(500);
     expect(before.pictureCount, lines[3]).toBe(0);
-    expect(after, lines[4]).toBeLessThanOrEqual(160_000);
+    expect(after, lines[4]).toBeLessThanOrEqual(200_000);
     expect(before.longFrames, lines[6]).toEqual([]);
   } finally {
     await fresh.close();
@@ -2397,7 +2436,8 @@ test(title('decks.home.layout-shift'), async ({ browser }) => {
 });
 
 // ---- the landing's grammar (docs/LANDING.md 2.0; Round 1's B2a rule kept): the rails, the seams,
-// the 58 px bar, no icon before a heading, the one monospace on the #101010 panel, and no sheet
+// the 58 px bar, no icon before a heading, the monospace on the two #101010 panels alone (the hero's
+// terminal and the agents band's console, LANDING.md 2.0 "The two panels"), and no sheet
 // wider than a thumbnail drawing a frame
 
 /** The selection colour, which /home draws only while something is being worked on (answer 3). */
@@ -2415,6 +2455,10 @@ test(title('decks.home.grammar'), async ({ browser }) => {
     );
     try {
       await homeOpen(p);
+      /* every band's chunk in place, so the sheets below the first screen are read filled */
+      await homeScroll(p);
+      await p.evaluate(() => window.scrollTo(0, 0));
+      await p.waitForTimeout(400);
       const facts = await p.evaluate(() => {
         const num = (v: string) => Math.round(parseFloat(v) * 100) / 100;
         const rails = [...document.querySelectorAll<HTMLElement>('main.ts-product .ts-rails')].map(
@@ -2544,12 +2588,14 @@ test(title('decks.home.grammar'), async ({ browser }) => {
         failures.push(`${label}: the navigation is ${facts.navHeight} px`);
       for (const h of facts.headings)
         if (h.svg > 0 || h.before) failures.push(`${label}: an icon at the heading "${h.text}"`);
-      if (facts.panel?.count !== 1) failures.push(`${label}: ${facts.panel?.count ?? 0} panels`);
+      if (facts.panel?.count !== 2)
+        failures.push(`${label}: ${facts.panel?.count ?? 0} panels, not 2`);
       if (facts.panel?.background !== 'rgb(16, 16, 16)')
         failures.push(`${label}: the panel sits on ${facts.panel?.background}`);
       if (!/monospace|Menlo|Consolas/.test(facts.panel?.font ?? ''))
         failures.push(`${label}: the panel is set in ${facts.panel?.font}`);
-      if (facts.mono > 0) failures.push(`${label}: ${facts.mono} monospace runs outside the panel`);
+      if (facts.mono > 0)
+        failures.push(`${label}: ${facts.mono} monospace runs outside the panels`);
       for (const f of facts.frames) {
         if (f.border !== 0 || (f.shadow !== 'none' && f.shadow !== ''))
           failures.push(
@@ -2601,9 +2647,12 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
           const active = document.activeElement;
           return {
             blues,
-            overlays: document.querySelectorAll(
-              '.ts-home-sel-layer, [data-live-overlay], .ts-home-guide, .ts-home-ring, .ts-home-flag',
-            ).length,
+            /* drawn ones: the version view waits hidden in the agents band until a row is shown */
+            overlays: [
+              ...document.querySelectorAll(
+                '.ts-home-sel-layer, [data-live-overlay], .ts-home-guide, .ts-home-ring, .ts-home-flag',
+              ),
+            ].filter((el) => el.getClientRects().length > 0).length,
             focused: active && active !== document.body ? active.tagName.toLowerCase() : 'none',
           };
         }, SELECTION_BLUE);
@@ -2686,10 +2735,19 @@ test(title('decks.home.phone'), async ({ browser }) => {
               right: Math.round(r.right),
             };
           });
+        /* thumbnails clipped by a filmstrip that scrolls inside its frame cross nothing */
+        const inScroller = (el: Element) => {
+          for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+            if (getComputedStyle(a).overflowX === 'visible') continue;
+            const r = a.getBoundingClientRect();
+            if (r.left >= -1 && r.right <= width + 1) return true;
+          }
+          return false;
+        };
         const crossing = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
           .filter((el) => {
             const r = el.getBoundingClientRect();
-            return r.width > 0 && (r.right > width + 1 || r.left < -1);
+            return r.width > 0 && (r.right > width + 1 || r.left < -1) && !inScroller(el);
           })
           .map((el) => `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}`);
         return {

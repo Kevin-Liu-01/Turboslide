@@ -172,7 +172,7 @@ export const CODE_SURFACES: readonly CodeSurface[] = [
     file: 'apps/studio/src/routes/home.css',
     selector: '.ts-home-panel',
     reason:
-      'The /home agents panel, the one code surface on the page (SPEC-4 0.20; DECK-GRAMMAR.md:31): the #101010 panel with its CLI, MCP and HTTP screens and its input line (docs/LANDING.md 2.0 "Type", 2.4).',
+      "The /home terminals: the hero's agent terminal and the agents band's console, the page's only code surfaces (LANDING.md 2.0 \"The two panels\"; DECK-GRAMMAR.md:31, Kevin's pick of the hero's terminal, question 18).",
   },
   {
     file: 'packages/chrome/src/EditHtmlPanel.css',

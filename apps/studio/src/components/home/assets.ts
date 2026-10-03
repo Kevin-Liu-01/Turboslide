@@ -6,17 +6,19 @@ export type HomeAppearance = 'light' | 'dark';
 
 /** What a file under public/home/ is (integrator.md section 6, with Kevin's answer 1). */
 export type HomeAssetRole =
-  /** slide 6's dithered picture (the Rosetta Stone) as a two colour lossless WebP mask, at most 24 KB */
-  | 'canvas-still'
-  /** the Rosetta Stone's tone map, a 640 by 360 grey JPEG, at most 26 KB, one for both appearances */
-  | 'canvas-tone'
+  /** slide 6's dithered picture (the Louisbourg lighthouse) as a two colour lossless WebP mask, at most 24 KB */
+  | 'lighthouse-still'
+  /** the lighthouse's tone map, a 512 by 288 grey JPEG, at most 26 KB, one for both appearances */
+  | 'lighthouse-tone'
   /** slide 7's dithered picture (the opener field), requested only by the show and the print */
   | 'field-still'
+  /** slide 8's still frame: the exporter's capture of the pattern, lossless WebP, at most 48 KB (V4's) */
+  | 'pattern-still'
   /** slide 7's picture part from the Perfect file, at most 60 KB */
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */
   | 'export-editable'
-  /** the page deck's PDF, 8 pages, requested only on the click of Download the PDF */
+  /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
   | 'pdf';
 
 /** A still's grid: `wide` at 2 px cells on the 1,024 px sheet, `narrow` on the 358 px sheet. */
@@ -43,41 +45,41 @@ export type HomeAsset = {
 
 export const HOME_ASSETS: readonly HomeAsset[] = [
   {
-    role: 'canvas-still',
+    role: 'lighthouse-still',
     appearance: null,
     variant: 'wide',
-    path: '/home/canvas-still-wide-53bc306ad5.webp',
-    bytes: 7352,
-    sha256: '53bc306ad54b368ddba8aa942bd7c053bf629d2b68fd1f7519290516300dd6f4',
+    path: '/home/lighthouse-still-wide-79b80783b6.webp',
+    bytes: 4292,
+    sha256: '79b80783b699045ab4dfb7dab5b6998e8c2407f12f467e173d2600d34be0c4f9',
     width: 512,
     height: 288,
-    pixelsSha256: '724886483336a1844c6529342ee4e70ac15f7b03ea249820efa65c94b15ea6b2',
+    pixelsSha256: 'd07aa78f8a9c5d3319eb177c4b7ad796c86beeadc2c7a0d99eacb0c4bdb5040b',
     partSha256: null,
     pages: null,
   },
   {
-    role: 'canvas-still',
+    role: 'lighthouse-still',
     appearance: null,
     variant: 'narrow',
-    path: '/home/canvas-still-narrow-6ae9a11409.webp',
-    bytes: 888,
-    sha256: '6ae9a11409514aab5d895761c065162a1d51aa476da7b807ec008b80efc61574',
+    path: '/home/lighthouse-still-narrow-c714ece9a4.webp',
+    bytes: 672,
+    sha256: 'c714ece9a481d4ea0d14d05b811ef2cc679f4bd1fb72546cf430ac7b494b562b',
     width: 179,
     height: 100,
-    pixelsSha256: 'faf1447fa4dfcdffbabd72758855c239a71e8d6b2fe91ce3d1248411dd972818',
+    pixelsSha256: '923479ef228f6ab55403e125eb6ee9693a88e53d29200cd27ba340f171e94c2d',
     partSha256: null,
     pages: null,
   },
   {
-    role: 'canvas-tone',
+    role: 'lighthouse-tone',
     appearance: null,
     variant: null,
-    path: '/home/canvas-tone-13b4f4c85a.jpg',
-    bytes: 23436,
-    sha256: '13b4f4c85a877c8e91a2094d684337c1f2e28fbe7729a72ede9a050595c0bf83',
+    path: '/home/lighthouse-tone-e58fc86d6e.jpg',
+    bytes: 12649,
+    sha256: 'e58fc86d6efc501471623c54f9b584aaae757fe4a3a4b39e62aecfc552198459',
     width: 512,
     height: 288,
-    pixelsSha256: '9510583df6a81d3a00d44bc86517ee3c61c840d85dfedacf4f3bf06d5590111e',
+    pixelsSha256: '0b682260e6c30bd9a0f71e8a8dfc544cf5aba8133ea0c5a933277c31a529ee47',
     partSha256: null,
     pages: null,
   },
@@ -95,16 +97,42 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     pages: null,
   },
   {
+    role: 'pattern-still',
+    appearance: 'light',
+    variant: null,
+    path: '/home/pattern-still-light-7a43233af0.webp',
+    bytes: 1794,
+    sha256: '7a43233af029925620fcd96c5df7233b4d2c2bd055931fb51cb23aecf6fa8a96',
+    width: 3200,
+    height: 1800,
+    pixelsSha256: '92db81d32c9669096c712053d5a46ebf1fe0bbe2ba6dd37cd31bd329965d4197',
+    partSha256: null,
+    pages: null,
+  },
+  {
+    role: 'pattern-still',
+    appearance: 'dark',
+    variant: null,
+    path: '/home/pattern-still-dark-50bd5584fa.webp',
+    bytes: 1794,
+    sha256: '50bd5584fa5b01a06b0ba2d5dd5eb4a193eedf78849906b0e871d1f98739d4f6',
+    width: 3200,
+    height: 1800,
+    pixelsSha256: 'bc9b3344743459f8a8a1ddcbb7e5834d074c7b43d8dc20f68fa6c8d11129efb2',
+    partSha256: null,
+    pages: null,
+  },
+  {
     role: 'export-perfect',
     appearance: 'light',
     variant: null,
-    path: '/home/export-perfect-light-c073dff6a0.webp',
-    bytes: 35338,
-    sha256: 'c073dff6a01f7669f8cf3b4c7879174fea1c57d0c1c749d944df1aea4cb21747',
+    path: '/home/export-perfect-light-c2b3ddbf8d.webp',
+    bytes: 35506,
+    sha256: 'c2b3ddbf8d116a7cc9508a0fc851f3b8df67e7087a2edcfe6241f5cecf5f38ac',
     width: 3200,
     height: 1800,
-    pixelsSha256: '2f462d4af1a2364fb0ed9742be90f962b9d14f8475879c04b50f995d30da6b69',
-    partSha256: '3d4c0bbaf43c90dc22be783f403fa8cc68936445527a3228b3bb26678fb1d57e',
+    pixelsSha256: 'f6400b90962b644c122c022ef4bf89f1db30cbbdded70726b8910453840a28cd',
+    partSha256: 'fb24c9f9739332814b6069f9d642a130b45700ffa4434eb57e5fd83fe8b2e91e',
     pages: null,
   },
   {
@@ -137,26 +165,26 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     role: 'pdf',
     appearance: 'light',
     variant: null,
-    path: '/home/pdf-light-f534b1c8c4.pdf',
-    bytes: 737337,
-    sha256: 'f534b1c8c412e1611aff27e5082c841219b13fdfe8e0bd70d37fc7af60cd954c',
+    path: '/home/pdf-light-6f207f1381.pdf',
+    bytes: 895057,
+    sha256: '6f207f138141db34e0699a570e5748c520cf522e60538e5124dfcb0a8767c63d',
     width: null,
     height: null,
     pixelsSha256: null,
     partSha256: null,
-    pages: 8,
+    pages: 9,
   },
   {
     role: 'export-perfect',
     appearance: 'dark',
     variant: null,
-    path: '/home/export-perfect-dark-56cf7b1dac.webp',
-    bytes: 35294,
-    sha256: '56cf7b1dac8f255c81098559a45e63034a34db514fa84f3ce81d9a878de66878',
+    path: '/home/export-perfect-dark-51b954599c.webp',
+    bytes: 35192,
+    sha256: '51b954599c6e1880013d20e87ee38cc5ed778c5328802053957693ea154bbf37',
     width: 3200,
     height: 1800,
-    pixelsSha256: '1482026d836f2810960b74dd1f2ac008f5710d5a4f2e8a614cfadad03ac483a4',
-    partSha256: '2649450cb09cfe9f214a905ec030cebddc7003037b8175c2119ab32814da3c34',
+    pixelsSha256: '2f2fd7c1070013a8b530004a54ee0edf3587ab837487fc7cb72d492921577bd9',
+    partSha256: 'c73b77ee4865b6b393e6b08d426d177eab7efd915ff94b00030cbbfca0bd3b43',
     pages: null,
   },
   {
@@ -189,14 +217,14 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     role: 'pdf',
     appearance: 'dark',
     variant: null,
-    path: '/home/pdf-dark-44b868dce4.pdf',
-    bytes: 737275,
-    sha256: '44b868dce44e8479bdd69023be44ac6c3dc977b625626250075147b64d24d251',
+    path: '/home/pdf-dark-a8aa63f53d.pdf',
+    bytes: 900126,
+    sha256: 'a8aa63f53d53cdc5f96f3749b74bb38d642988b36f1e9b908fdd3d59d27945c9',
     width: null,
     height: null,
     pixelsSha256: null,
     partSha256: null,
-    pages: 8,
+    pages: 9,
   },
 ];
 

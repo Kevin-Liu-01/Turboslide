@@ -5,13 +5,13 @@ import { EXPORT } from './copy';
 import { HOME_EXPORT_FACTS } from './deck.generated';
 import { HOME_FACTS } from './facts';
 import { HomeLink } from './HomeLink';
-import { BandHead, HomeSection } from './HomeSection';
+import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { ServerHtml } from './HomeSheet';
-import { HOME_EXPORT_EDITABLE } from './slides.generated';
 
 /**
- * Export to PDF and PowerPoint (docs/LANDING.md 2.8, band 6): slide 7 (the opener field's slide,
- * Kevin's answer 1) at the column's width, unframed, as the two files the CLI writes meet at a
+ * Export to PDF and PowerPoint (docs/LANDING.md 2.12, Kevin's picks "C: Export seam" and "B:
+ * Export loupe", the loupe V3#17's): slide 7 (the opener field's slide) at the column's width,
+ * unframed, in the band's reserved box, as the two files the CLI writes meet at a
  * seam: left of the cut, the Perfect file's one picture (its part, served as lossless WebP of the
  * same pixels); right of it, the Editable text file's slide drawn from its own parts (each text
  * frame at its `a:off` and `a:ext` with its runs, its picture parts and its hairlines), its text
@@ -31,49 +31,53 @@ export function HomeExport() {
   return (
     <HomeSection id="export">
       <BandHead id="export" heading={EXPORT.h2} lead={EXPORT.lead} span={7} />
-      <div
-        className="ts-seam-slide"
-        data-seam-root
-        style={{ '--seam-cut': '50%' } as CSSProperties}
-      >
-        <div className="ts-seam-labels" aria-hidden="true">
-          <span className="ts-seam-label">{EXPORT.labels.perfect}</span>
-          <span className="ts-seam-label">{EXPORT.labels.editable}</span>
-        </div>
-        <div className="ts-seam-box">
-          <ServerHtml
-            className="ts-seam-editable ts-home-sheet-box"
-            html={import.meta.env.SSR ? HOME_EXPORT_EDITABLE : ''}
-          />
-          <div className="ts-seam-perfect">
-            {(['light', 'dark'] as const).map((theme) => (
-              <img
-                key={theme}
-                className={`ts-only-${theme}`}
-                src={perfect[theme].path}
-                width={perfect[theme].width ?? undefined}
-                height={perfect[theme].height ?? undefined}
-                loading="lazy"
-                decoding="async"
-                alt={EXPORT.perfectAlt}
-              />
-            ))}
+      <Reserve band="export" className="ts-export-reserve">
+        <div
+          className="ts-seam-slide"
+          data-seam-root
+          style={{ '--seam-cut': '50%' } as CSSProperties}
+        >
+          <div className="ts-seam-labels" aria-hidden="true">
+            <span className="ts-seam-label">{EXPORT.labels.perfect}</span>
+            <span className="ts-seam-label">{EXPORT.labels.editable}</span>
           </div>
-          <div
-            className="ts-seam-handle"
-            role="slider"
-            tabIndex={0}
-            aria-label={EXPORT.sliderLabel}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={50}
-            aria-valuetext={EXPORT.slider(50)}
-            data-seam
-          >
-            <i className="ts-seam-knob" />
+          <div className="ts-seam-box">
+            {/* the Editable text side, written by the band's chunk after load (4.2) */}
+            <ServerHtml
+              className="ts-seam-editable ts-home-sheet-box"
+              data-fill="export-editable"
+              html=""
+            />
+            <div className="ts-seam-perfect">
+              {(['light', 'dark'] as const).map((theme) => (
+                <img
+                  key={theme}
+                  className={`ts-only-${theme}`}
+                  src={perfect[theme].path}
+                  width={perfect[theme].width ?? undefined}
+                  height={perfect[theme].height ?? undefined}
+                  loading="lazy"
+                  decoding="async"
+                  alt={EXPORT.perfectAlt}
+                />
+              ))}
+            </div>
+            <div
+              className="ts-seam-handle"
+              role="slider"
+              tabIndex={0}
+              aria-label={EXPORT.sliderLabel}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={50}
+              aria-valuetext={EXPORT.slider(50)}
+              data-seam
+            >
+              <i className="ts-seam-knob" />
+            </div>
           </div>
         </div>
-      </div>
+      </Reserve>
       <div className="ts-home-rows ts-export-rows">
         <div className="ts-row">
           <span className="ts-row-key">{EXPORT.rows.perfect.key}</span>

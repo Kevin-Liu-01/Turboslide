@@ -2,26 +2,48 @@
   "schemaVersion": 1,
   "id": "plan",
   "kind": "content",
-  "template": "one-column",
+  "template": "rows",
   "layout": {
-    "type": "stack",
-    "gap": 22
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
-    "main": [
+    "left": [
       {
         "id": "h",
         "type": "heading",
-        "level": "h1",
-        "text": "Onboarding plan for Northwind"
-      },
+        "level": "h2",
+        "text": "The four weeks"
+      }
+    ],
+    "right": [
       {
-        "id": "p1",
-        "type": "paragraph",
-        "role": "lead",
-        "text": "Four weeks from the first call to the first deck."
+        "id": "rows",
+        "type": "rows",
+        "key": 150,
+        "tight": true,
+        "items": [
+          {
+            "key": "Week 1",
+            "value": "The first call and access for the Northwind team"
+          },
+          {
+            "key": "Week 2",
+            "value": "The first deck in Northwind's colors"
+          },
+          {
+            "key": "Week 3",
+            "value": "Review with Northwind's sales leads"
+          },
+          {
+            "key": "Week 4",
+            "value": "The deck goes to every seller"
+          }
+        ]
       }
     ]
   },
-  "notes": "Open with the goals Northwind named on the call."
+  "notes": "Ask Northwind who reviews each week."
 }

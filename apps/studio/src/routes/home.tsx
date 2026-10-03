@@ -10,11 +10,12 @@ import { HomeAgents } from '../components/home/HomeAgents';
 import { HomeCanvas } from '../components/home/HomeCanvas';
 import { HomeClose } from '../components/home/HomeClose';
 import { HomeExport } from '../components/home/HomeExport';
+import { HomeFeatures } from '../components/home/HomeFeatures';
 import { HomeField } from '../components/home/HomeField';
 import { HomeFooter } from '../components/home/HomeFooter';
 import { HomeHero } from '../components/home/HomeHero';
 import { HomeNav } from '../components/home/HomeNav';
-import { HomeParts } from '../components/home/HomeParts';
+import { HomeNumbers } from '../components/home/HomeNumbers';
 import { HomePresent } from '../components/home/HomePresent';
 import { HomeTailor } from '../components/home/HomeTailor';
 import { HOME_META } from '../components/home/home-meta';
@@ -25,17 +26,20 @@ import '../components/home/icons.generated.css';
 import '../components/home/selection.css';
 import '../components/home/print.css';
 import './home.css';
+import '../components/home/motion.css';
 
 /**
- * The landing, /home (docs/LANDING.md, Kevin's ask of 2026-10-02: "inspired off of lovefrom and
- * openai brand ... much more interactive and showing off features"): the page is one eight slide
- * deck, rendered at build from `apps/studio/home-deck` after the agents run, and each band holds one
- * of its slides as a made object. The bands in the order of LANDING.md section 2: the navigation,
- * the hero (slide 1, the h1 its title), the field strip, Agents (slide 5), Tailor (slides 2 to 5),
- * the canvas (slide 6), Present (slide 3 and the list), Export (slide 7 from the two PowerPoint
- * files), the hatch strip and "Turboslide today", the close (slide 8), the footer. Every band's
- * markup is its end state, so without script, under reduced motion and for a crawler the page
- * reads whole.
+ * The landing, /home (docs/LANDING.md, the second pass for Kevin's picks of 2026-10-03 from
+ * directions A, B and C): the page is one nine slide deck, rendered at build from
+ * `apps/studio/home-deck` after the recorded run, and each band holds its slides as made objects.
+ * The bands in the order of LANDING.md section 2, each rendered from its push: the navigation, the
+ * hero (the 96 px h1 as page text over the editor frame and the agent's terminal), the numbers
+ * row, the first pass's field strip (until V4#18), the canvas (slide 6, the lighthouse), Tailor
+ * (slides 1 to 5), the agents band (slide 5), Present (slide 3 and the list), Export (slide 7 from
+ * the two PowerPoint files), the features table, the close (slide 9), the footer; the menus, kits,
+ * two people and patterns bands join in V2#11, V2#12, V4#20 and V4#19. The document carries the
+ * first screen and every band's words; each band's instrument arrives after `load` and one idle
+ * callback into its reserved box (4.2), so without script a crawler reads every word.
  *
  * Kept from the page before it: the prerender (the deploy config's `prerender` option; the route
  * has no loader and reads no storage except `gt-theme`), `main#top.ts-product[data-page="home"]`,
@@ -88,6 +92,11 @@ function HomePage() {
       });
     if (document.readyState === 'complete') go();
     else window.addEventListener('load', go, { once: true });
+    /* the features table's shortcuts: the server renders the Mac form; elsewhere the editor's
+       other form (LANDING.md 2.14, keys.ts) */
+    if (!/Mac|iPhone|iPad/.test(navigator.platform))
+      for (const key of main.querySelectorAll<HTMLElement>('kbd[data-shortcut-other]'))
+        key.textContent = key.dataset['shortcutOther'] ?? key.textContent;
   });
   return (
     <main ref={root} id="top" className="ts-product" data-page="home">
@@ -110,13 +119,14 @@ function HomePage() {
       <div className="ts-rails" aria-hidden="true" />
       <HomeNav nonce={nonce} />
       <HomeHero />
+      <HomeNumbers />
       <HomeField />
-      <HomeAgents />
-      <HomeTailor />
       <HomeCanvas />
+      <HomeTailor />
+      <HomeAgents />
       <HomePresent />
       <HomeExport />
-      <HomeParts />
+      <HomeFeatures />
       <HomeClose />
       <HomeFooter />
       <div className="ts-print-deck" data-print-deck />

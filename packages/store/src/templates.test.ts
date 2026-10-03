@@ -65,13 +65,6 @@ function countHtmlBlocks(value: unknown): number {
   );
 }
 
-/** The manifest without the fields deck.create resets, so two snapshots compare on content. */
-function contentOf(manifest: Record<string, unknown>): Record<string, unknown> {
-  const content = { ...manifest };
-  for (const key of ['revision', 'createdAt', 'updatedAt']) delete content[key];
-  return content;
-}
-
 function slideFiles(dir: string): string[] {
   return readdirSync(dir)
     .filter((file) => file.endsWith('.json'))

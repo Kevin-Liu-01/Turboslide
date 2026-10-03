@@ -1,10 +1,14 @@
 import { HOME_DECK } from '../deck.generated';
 import { startAgents } from './agents';
+import { startCanvasField, startStrip } from './field';
 import { renumber } from './filmstrip';
+import { startHero } from './hero';
 import { startHistory } from './history';
+import { startMark } from './mark';
+import { hintInView } from './motion';
 import { startObjects } from './objects';
 import { startPrint } from './print';
-import { startSeam } from './seam';
+import { armHint, hint, startSeam } from './seam';
 import { startShow } from './show';
 import { createHomeStore, restState } from './state';
 import type { Band, HomeStore, UndoBand } from './state';
@@ -44,6 +48,11 @@ const REGISTRATIONS: readonly Registration[] = [
   { band: 'present', start: startShow },
   { band: 'present', start: startPrint },
   { band: 'export', start: startSeam },
+  { band: 'hero', start: startHero },
+  { band: 'field', start: startStrip },
+  { band: 'canvas', start: startCanvasField },
+  { band: 'export', start: (ctx) => hintInView(ctx.band, armHint, hint) },
+  { band: 'close', start: startMark },
 ];
 
 const UNDO_BANDS: readonly UndoBand[] = ['hero', 'tailor', 'canvas'];

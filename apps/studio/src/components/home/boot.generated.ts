@@ -15,36 +15,38 @@ export type GapTable = {
 };
 
 /** The minified boot script; '' until L4's boot.ts lands. */
-export const BOOT_SCRIPT: string = '';
+export const BOOT_SCRIPT: string =
+  '(function(e){let t=document,n=t.documentElement.classList,r=matchMedia(`(prefers-reduced-motion:reduce)`),i=location.search.includes(`slow=10`)?10:1,[a,o,s,c,l,u]=e.t,d=[],f=()=>performance.now(),p=requestAnimationFrame,m=`ts-home-visit`,h=r.matches,g=0,_=0,v,y;try{g=+localStorage.getItem(m)%e.s.length||0,localStorage.setItem(m,`${(g+1)%e.s.length}`)}catch{}let b=e.s[g],x={ended:h,end:C},S=(e,t)=>d.push(setTimeout(t,e));window.tsHomeBoot=x,h||n.add(`ts-intro`);function C(){h||(x.ended=h=!0,d.forEach(clearTimeout),v&&(v.data=b),y?.remove(),n.remove(`ts-intro`,`ts-t0`))}function w(e){if(_||h)return;x.t0=_=e,n.add(`ts-t0`);let t=f()-e,r=a;[...b].forEach((e,n)=>{n&&(r+=c+(n*10+g*7)%l+ +(b[n-1]===` `)*u),S(r*i-t,()=>{v.data+=e,y.textContent=b.slice(n+1),y.style.boxShadow=`-.05em 0 0 -.01em`})}),S((r+o)*i-t,C)}function T(){let e=t.querySelector(`[data-object="title#lead"]`);if(!e)return t.readyState>`l`?p(T):C();if(v=t.createTreeWalker(e,4).nextNode(),!v||h)return v&&(v.data=b),C();v.data=``,y=t.createElement(`span`),y.style.webkitTextFillColor=`transparent`,y.textContent=b,v.after(y);for(let t of[`keydown`,`pointerdown`,`wheel`])(e.closest(`[data-band]`)??e).addEventListener(t,C,!0);t.onvisibilitychange=()=>t.hidden&&C(),r.onchange=C;let n=f();S(s,()=>w(n+s)),t.fonts.ready.then(()=>w(f()))}p(T)})({s:[`Turboslide is a slides editor in the browser.`,`Turboslide puts one customer name on every slide.`,`Turboslide downloads PDF and PowerPoint files.`],t:[700,400,800,34,27,30]});';
 
 /** sha256 of BOOT_SCRIPT, checked by `build-home-assets.ts --check` */
-export const BOOT_SHA256: string = '';
+export const BOOT_SHA256: string =
+  '26cb98829c200bdb844c93fafc72ecbc66a17628a050e9eab2abb4607e8460fa';
 
 /** The three sentences' tables in visit order (answer 9). */
 export const VISIT_GAPS: readonly GapTable[] = [
   {
     sentence: 'Turboslide is a slides editor in the browser.',
     gapsMs: [
-      0, 57, 56, 39, 52, 46, 39, 53, 49, 38, 45, 90, 39, 37, 90, 55, 80, 41, 35, 51, 60, 37, 35, 67,
-      54, 56, 34, 49, 45, 39, 90, 40, 43, 87, 40, 55, 55, 67, 48, 56, 44, 34, 48, 38, 55,
+      0, 44, 54, 37, 47, 57, 40, 50, 60, 43, 53, 66, 46, 56, 69, 49, 89, 42, 52, 35, 45, 55, 38, 78,
+      58, 41, 51, 34, 44, 54, 67, 47, 57, 70, 50, 60, 43, 83, 36, 46, 56, 39, 49, 59, 42,
     ],
-    lastKeyMs: 2968,
+    lastKeyMs: 2991,
   },
   {
     sentence: 'Turboslide puts one customer name on every slide.',
     gapsMs: [
-      0, 43, 51, 55, 40, 44, 35, 43, 50, 59, 60, 88, 42, 44, 51, 34, 87, 54, 45, 41, 71, 39, 36, 46,
-      35, 59, 41, 57, 58, 66, 50, 41, 42, 56, 78, 57, 56, 89, 58, 43, 49, 56, 36, 69, 48, 34, 43,
-      54, 58,
+      0, 51, 34, 44, 54, 37, 47, 57, 40, 50, 60, 73, 53, 36, 46, 56, 69, 49, 59, 42, 82, 35, 45, 55,
+      38, 48, 58, 41, 51, 64, 44, 54, 37, 47, 87, 40, 50, 90, 43, 53, 36, 46, 56, 69, 49, 59, 42,
+      52, 35,
     ],
-    lastKeyMs: 3191,
+    lastKeyMs: 3163,
   },
   {
     sentence: 'Turboslide downloads PDF and PowerPoint files.',
     gapsMs: [
-      0, 53, 48, 43, 51, 42, 38, 50, 54, 36, 56, 86, 50, 50, 48, 37, 51, 44, 56, 40, 56, 83, 40, 51,
-      59, 82, 42, 55, 59, 72, 59, 53, 37, 54, 60, 60, 50, 54, 36, 39, 85, 59, 60, 36, 40, 56,
+      0, 58, 41, 51, 34, 44, 54, 37, 47, 57, 40, 80, 60, 43, 53, 36, 46, 56, 39, 49, 59, 72, 52, 35,
+      45, 85, 38, 48, 58, 71, 51, 34, 44, 54, 37, 47, 57, 40, 50, 60, 73, 53, 36, 46, 56, 39,
     ],
-    lastKeyMs: 3070,
+    lastKeyMs: 2965,
   },
 ];

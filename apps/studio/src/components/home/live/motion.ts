@@ -204,3 +204,114 @@ export function runningCount(band?: SequenceBand): number {
   for (const entry of running) if (band === undefined || entry.band === band) n += 1;
   return n;
 }
+
+/* ---- push 7: the observer, input, the hidden tab and reduced motion (LANDING.md 3.5) ---- */
+
+/** The share of a motion's target in view that plays it (3.5). */
+export const IN_VIEW = 0.35;
+
+type Watched = { arm: () => void; play: () => void; first: boolean };
+const watched = new Map<Element, Watched>();
+let observer: IntersectionObserver | null = null;
+
+function observed(entries: IntersectionObserverEntry[]): void {
+  for (const entry of entries) {
+    const item = watched.get(entry.target);
+    if (item === undefined) continue;
+    if (item.first) {
+      item.first = false;
+      const viewport = entry.rootBounds?.height ?? window.innerHeight;
+      /* below the viewport: arm the hidden first pose and wait; in it or above it: the markup is
+         the end state and nothing plays, so nothing seen changes by itself */
+      if (!entry.isIntersecting && entry.boundingClientRect.top >= viewport) {
+        item.arm();
+        continue;
+      }
+      watched.delete(entry.target);
+      observer?.unobserve(entry.target);
+      continue;
+    }
+    if (entry.isIntersecting && entry.intersectionRatio >= IN_VIEW) {
+      watched.delete(entry.target);
+      observer?.unobserve(entry.target);
+      item.play();
+    }
+  }
+}
+
+/**
+ * Once, at 35 percent in view (3.5). `arm()` sets the hidden first pose and is called only when the
+ * element is wholly below the viewport at its first observation; then `play()` runs when 35
+ * percent of it is in view and the element is unobserved. An element in the viewport or above it
+ * at its first observation renders final and nothing plays. Under reduced motion nothing is armed.
+ */
+export function onceInView(el: Element, arm: () => void, play: () => void): void {
+  if (reduced() || typeof IntersectionObserver !== 'function') return;
+  installGuards();
+  observer ??= new IntersectionObserver(observed, { threshold: [0, IN_VIEW] });
+  watched.set(el, { arm, play, first: true });
+  observer.observe(el);
+}
+
+/**
+ * E1 (3.2): the export seam's hint. Its root is observed like every one shot motion: armed (the cut
+ * at 82 percent) only when it is below the viewport at its first observation, then played one beat
+ * (`--ts-d-beat`) after 35 percent of it is in view. The beat is a sequence of the band, so a press,
+ * a key or a hidden tab during it plays the hint's end state at once (the cut at 50).
+ */
+export function hintInView(band: HTMLElement, arm: () => void, hint: () => void): void {
+  const root =
+    band.querySelector('[data-seam-root]') ?? band.querySelector('[data-seam]')?.parentElement;
+  if (root == null) return;
+  onceInView(root, arm, () => {
+    let timer = 0;
+    const wait = sequence('export', () => {
+      window.clearTimeout(timer);
+      hint();
+      finishBand('export');
+    });
+    timer = window.setTimeout(() => {
+      wait.done();
+      hint();
+    }, ms('beat'));
+  });
+}
+
+const SEQUENCE_BANDS: ReadonlySet<string> = new Set<SequenceBand>([
+  'hero',
+  'field',
+  'agents',
+  'tailor',
+  'canvas',
+  'present',
+  'export',
+  'close',
+]);
+let guarded = false;
+
+/**
+ * The rules of 3.5 that end motions from outside a band, installed once: any new press or key on a
+ * band (and a wheel on the hero) finishes that band's running sequences at their end state before
+ * the band's own handlers run (the capture phase); a hidden tab and a change of reduced motion
+ * finish every one. From a change to reduced motion on, `ms` reads 0 and nothing new moves.
+ */
+export function installGuards(): void {
+  if (guarded || typeof document === 'undefined') return;
+  guarded = true;
+  const onInput = (event: Event): void => {
+    const target = event.target instanceof Element ? event.target : null;
+    const band = target?.closest<HTMLElement>('[data-band]')?.dataset['band'];
+    if (band === undefined || !SEQUENCE_BANDS.has(band)) return;
+    if (event.type === 'wheel' && band !== 'hero') return;
+    if (band === 'hero') window.tsHomeBoot?.end();
+    finishBand(band as SequenceBand);
+  };
+  for (const type of ['pointerdown', 'keydown', 'wheel'])
+    document.addEventListener(type, onInput, { capture: true, passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) finishAll();
+  });
+  window
+    .matchMedia('(prefers-reduced-motion: reduce)')
+    .addEventListener('change', () => finishAll());
+}

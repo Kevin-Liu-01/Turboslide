@@ -1,39 +1,73 @@
 import { FIELD_STILL_MS } from '../boot';
 import { createPrint, densitySchedule, fieldBox, targetOf } from './field';
 import type { LiveContext } from './index';
-import { installGuards, reduced, slowFactor } from './motion';
+import { installGuards, reduced } from './motion';
 
 /**
- * H5, the hero's Blue Marble developing over its inlined still (docs/LANDING.md 2.2, 3.2 H5 with
- * Kevin's answer 1; build/integrator.md "Landing, day 0" 2.2). L4's file.
+ * H5, the Blue Marble developing in the editor frame's slide 1 (docs/LANDING.md 2.2, 3.5 H5, with
+ * Kevin's answer 1). V4's file.
  *
- * The boot script built the rest of the hero sequence (H1 to H4) before this module loaded; the
- * still of the field stays hidden under `html.ts-intro` until either this develop starts or L1's
- * CSS shows it at T0 + 3.0 s. The develop starts after `load` and one idle callback (when the live
- * module starts) and never later than T0 + 3.0 s: past that, or once the boot sequence ended, the
- * still is the field and nothing prints. It runs `--ts-d-gather` (1,500 ms) on the tone curve, so
- * it ends by T0 + 4.5 s (3.7), and any key, press or wheel in the hero ends it at its still
- * (motion.ts). Nothing is requested for it: the cells are the still's own, read from the box's
- * `--ts-still` and `--ts-still-disc`.
+ * The frame's slide 1 holds the Blue Marble as a CSS still, which the boot script's `ts-intro`
+ * hides from the first paint until this develop starts or 3,000 ms have passed (`boot.ts`
+ * `FIELD_STILL_MS`). The develop starts when the live core starts, after `load` and one idle
+ * callback, and only while the boot has not ended: past 3,000 ms, on a hidden tab or under reduced
+ * motion the still is the field and nothing prints. It runs `--ts-d-gather` (1,500 ms) on the tone
+ * curve, and any key or press in the hero and a hidden tab end it at its still (motion.ts). Nothing is requested for it: the cells are the still's own, read
+ * from the box's `--ts-still` and `--ts-still-disc`.
  *
- * The field under a moved title or subtitle needs no reprint: each text object draws its clear
- * zone as its own paper ground, which moves with its `transform` (l2.md Q2), over the still.
+ * The develop is a one shot motion, so the hero's staged loop (L-H, V1's `live/stage.ts`) starts
+ * only once it ended; `heroDeveloped()` answers when.
  */
+
+let developed: Promise<void> = Promise.resolve();
+
+/** Resolves when H5 has ended (at once when it never ran): L-H's start waits for it (3.4). */
+export function heroDeveloped(): Promise<void> {
+  return developed;
+}
+
 export function startHero(ctx: LiveContext): void {
   installGuards();
-  const field = fieldBox(ctx.band, 'hero');
+  /* the frame's shown slide; the filmstrip's thumbnail of slide 1 carries a small print of its own */
+  const field = fieldBox(
+    ctx.band.querySelector<HTMLElement>('[data-sheet="hero"]') ?? ctx.band,
+    'hero',
+  );
   const boot = window.tsHomeBoot;
-  if (field === null || reduced() || boot === undefined || boot.ended) return;
+  if (field === null || reduced() || boot === undefined || boot.ended) {
+    boot?.end();
+    return;
+  }
   if (field.box.hasAttribute('data-field-state')) return;
   const late = (): boolean =>
     boot.ended ||
     field.box.hasAttribute('data-field-state') ||
-    (boot.t0 !== undefined && performance.now() >= boot.t0 + FIELD_STILL_MS * slowFactor());
-  if (late()) return;
-  void targetOf(field.box).then((read) => {
-    if (read === null || late()) return;
-    const print = createPrint(field, densitySchedule(read.target, read.dark), 'gather', 'hero');
-    print.arm();
-    print.play();
-  });
+    (boot.t0 !== undefined && performance.now() >= boot.t0 + FIELD_STILL_MS);
+  if (late()) {
+    boot.end();
+    return;
+  }
+  let done: () => void = () => undefined;
+  developed = new Promise((resolve) => (done = resolve));
+  void targetOf(field.box)
+    .then((read) => {
+      if (read === null || late()) {
+        boot.end();
+        done();
+        return;
+      }
+      const print = createPrint(
+        field,
+        densitySchedule(read.target, read.dark),
+        'gather',
+        'hero',
+        done,
+      );
+      print.arm();
+      print.play();
+    })
+    .catch(() => {
+      boot.end();
+      done();
+    });
 }

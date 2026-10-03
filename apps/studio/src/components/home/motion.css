@@ -1,0 +1,10 @@
+/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4, 2.10, 2.13; the second pass).
+   V4's file: H5's hidden still from V1#8; Pause Motion's button and its guard, the interludes, the
+   two people band and the patterns band join in V4's pushes. Imported after home.css, so the
+   reduced motion block sits last. */
+
+/* ---- H5 (3.5): the boot script's ts-intro hides the Blue Marble's still in the frame's slide 1
+   until the develop starts or the boot takes the class away 3,000 ms after it starts ---- */
+html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
+  visibility: hidden;
+}

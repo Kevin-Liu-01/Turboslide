@@ -6,34 +6,34 @@ import { installGuards, ms, onceInView, reduced, sequence, smoothstep } from './
 import type { DurationToken, SequenceBand } from './motion';
 
 /**
- * The Bayer printer of the page's three fields (docs/LANDING.md 2.2, 2.3, 2.6, 3.2 H5, F1 and C1,
- * 3.5; build/integrator.md "Landing, day 0" 2.2, 2.3 and 6, with Kevin's answer 1). L4's file.
+ * The Bayer printer of the page's fields (docs/LANDING.md 2.2, 2.6, 3.5 H5 and C1;
+ * the second pass; build/integrator.md "Landing, day 0" 2.2 and 6, with Kevin's answer 1). V4's
+ * file.
  *
- * Every field rests as a CSS still: a 1 bit picture of its cell grid used as a mask over a box
- * filled with the sheet's ink, so a kit or an appearance change prints it again with no script.
- * A motion prints the same cells on the field's canvas while `data-field-state="developing"`
+ * A picture field rests as a CSS still: a 1 bit picture of its cell grid used as a mask over a box
+ * filled with the sheet's ink, so a kit or an appearance change prints it again with no script. A
+ * one shot motion prints the same cells on the field's canvas while `data-field-state="developing"`
  * hides the still, frame by frame on the tone curve with every cell switching in Bayer order, and
  * hands back to the still at its end (`data-field-state="still"`). The canvas and the still share
  * the grid and the scaling, so the last frame is the still's own pixels and the hand back moves
  * nothing:
  *
- * - H5, the hero's Blue Marble develops over `--ts-d-gather` (1,500 ms): a cell of the still lights
- *   when the curve reaches its threshold divided by the ink density of its 8 by 8 neighbourhood,
- *   so every region reaches its own tone together and every inked cell is lit at the end.
- * - F1, the strip gathers over `--ts-d-gather`: from a sparse field at 6 percent tone (the cells
- *   whose threshold is under 0.06) into the selection frame of its still, each cell's tone moving
- *   from 6 percent to its still's 0 or 1 on the curve.
- * - C1, the Rosetta Stone develops over `--ts-d-develop` (2,400 ms) from its tone map, the
+ * - H5, the Blue Marble in the editor frame's slide 1 develops over `--ts-d-gather` (1,500 ms): a
+ *   cell of the still lights when the curve reaches its threshold divided by the ink density of
+ *   its 8 by 8 neighbourhood, so every region reaches its own tone together and every inked cell
+ *   is lit at the end.
+ * - F1, the first pass's field strip, gathers over `--ts-d-gather` from a sparse field at 6
+ *   percent tone into the selection frame of its still (until the interludes replace it, V4#18).
+ * - C1, the Louisbourg lighthouse develops over `--ts-d-develop` (2,400 ms) from its tone map, the
  *   picture's tone times the curve against each threshold (prototype A's develop), held to the
  *   still's cells so the last frame is the still.
  *
  * On a ground darker than its text (the dark appearance, a dark kit) the print is the light
- * print's twin of integrator.md 2.2: the hero draws the disc's cells XOR the ink still, the
- * Rosetta Stone (whose extent is its whole box) the still's complement, both through the
- * complementary screen 63 - m; the strip draws its ink cells in either appearance. Reduced motion
- * never prints: the still is the field. A frame is one pass over the cells into an `ImageData`
- * (147,456 cells at 512 by 288), `requestAnimationFrame` runs only while a field prints, and a
- * kit, an appearance or a width change ends every print at its still (N1, 3.5).
+ * print's twin of integrator.md 2.2: the disc's cells XOR the ink still for the hero, the still's
+ * complement for a field whose extent is its whole box, both through the complementary screen
+ * 63 - m. Reduced motion never prints: the still is the field. A frame is one pass over the cells
+ * into an `ImageData`, `requestAnimationFrame` runs only while a field prints, and a kit, an
+ * appearance or a width change ends every print at its still (N1).
  */
 
 /** The share of the cells the strip's scattered start inks (2.3: "6 percent tone"). */
@@ -386,6 +386,7 @@ export function createPrint(
   schedule: Schedule,
   token: DurationToken,
   band: SequenceBand,
+  onEnd?: () => void,
 ): Print {
   watch();
   const { box, canvas } = field;
@@ -419,6 +420,7 @@ export function createPrint(
     printing.delete(finish);
     running?.done();
     box.setAttribute('data-field-state', 'still');
+    onEnd?.();
   };
 
   return {
@@ -465,7 +467,7 @@ export async function canvasTone(
 ): Promise<{ width: number; height: number; ink: Float32Array } | null> {
   let url: string;
   try {
-    url = homeAsset('canvas-tone', null).path;
+    url = homeAsset('lighthouse-tone', null).path;
   } catch {
     return null;
   }
@@ -544,16 +546,17 @@ function armedPrint(
       });
     return pending;
   };
+  const still = (): void => {
+    print?.finish();
+    field.box.setAttribute('data-field-state', 'still');
+  };
   onceInView(
     field.box,
     () => {
       /* the hidden first pose: a blank canvas over the hidden still, until the print is read */
       field.canvas.getContext('2d')?.clearRect(0, 0, field.canvas.width, field.canvas.height);
       field.box.setAttribute('data-field-state', 'developing');
-      hold = sequence(band, () => {
-        print?.finish();
-        field.box.setAttribute('data-field-state', 'still');
-      });
+      hold = sequence(band, still);
       whenNear(field.box, () => void read());
     },
     () => void read().then((made) => made?.play()),
@@ -568,7 +571,7 @@ export function startStrip(ctx: LiveContext): void {
   armedPrint(field, async ({ target }) => gatherSchedule(target), 'gather', 'field');
 }
 
-/** C1: the Rosetta Stone develops once from its tone map (2.6; integrator.md 2.3). */
+/** C1: the Louisbourg lighthouse develops once from its tone map (LANDING.md 2.6, 3.5 C1). */
 export function startCanvasField(ctx: LiveContext): void {
   installGuards();
   const field = fieldBox(ctx.band, 'canvas');

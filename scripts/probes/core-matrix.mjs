@@ -108,6 +108,15 @@
 // the shape of the local rows. The ids of 2.1 are unchanged; the rows whose bound or mechanism
 // changes on the `do` tier say so in their notes.
 //
+// The landing round (docs/LANDING.md 6.7) entered 37 `home.*` rows of the decks feature on one
+// driver, `core/home.spec.ts`, over the lane modules of apps/studio/e2e/core/home/. Its second pass
+// (2026-10-03, pushes 8 to 20 of LANDING.md 6.8) restates rows in place under their ids, appends
+// its new rows in push order and retires four first pass ids in the push that enters their
+// replacements: `home.parts.table` for `home.features.table` (V1#8), `home.motion.hero` for
+// `home.motion.develop` (V4#9), `home.tailor.theme` for `home.kits.restyle` (V2#12) and
+// `home.agents.run` for `home.agents.chips` (V3#13). A retired id leaves the matrix with its
+// module's test, so the driver's coverage never reads it as a row with no test.
+//
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
@@ -288,8 +297,8 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
      row in the hosted agent surface's spec, which runs on every base like a core spec */
   'core/realtime.spec.ts',
   'e2e/agent-http.spec.ts',
-  /* the landing round (docs/LANDING.md 6.1, 6.7): the /home rows, one driver over the seven lane
-     modules of apps/studio/e2e/core/home/ */
+  /* the landing round (docs/LANDING.md 6.1, 6.7): the /home rows, one driver over the lane modules
+     of apps/studio/e2e/core/home/ */
   'core/home.spec.ts',
 ]);
 

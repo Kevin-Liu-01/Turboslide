@@ -7,17 +7,23 @@ import * as page from './home/page';
 import * as present from './home/present';
 import * as tailor from './home/tailor';
 
-// The driver of the landing's `home.*` rows (docs/LANDING.md 6.1, 6.7; build/integrator.md
-// "Landing, day 0" 4.9 and 5.1). L4 owns this file; each lane owns its module under home/ and
-// fills it in the push that enters its rows in core-matrix.json:
+// The driver of the landing's `home.*` rows (docs/LANDING.md 6.1, 6.7; the second pass, 6.4's
+// shared file table). V4 owns this file; each lane owns its module under home/ and fills it in the
+// push that enters its rows in core-matrix.json, and a module joins MODULES (its import and its
+// entry, as the lane's hunk) in the push that first commits it:
 //
-//   page.ts     L1, push 1       the still page, the budgets, the skip link and the contrast
-//   objects.ts  L2, push 2       the selection replica, the gestures, the keys, the live module
-//   tailor.ts   L2, push 3       Tailor, the example kits, the filmstrip
-//   agents.ts   L3, push 4       the recorded run, the typed line, the transports, Version history
-//   present.ts  L3, push 5       the show and the print
-//   export.ts   L3, push 6       the seam and the figure
-//   motion.ts   L4, push 7       the hero sequence, the in view motions, rest, reduced motion
+//   page.ts      V1, pushes 1, 8, 15   the page, the hero and its loop, the budgets, the features
+//   objects.ts   V2, pushes 2, 10      the selection replica, the gestures, the keys
+//   tailor.ts    V2, pushes 3, 12      Tailor and the filmstrip
+//   agents.ts    V3, pushes 4, 13      the agents band, its chips, its console, Version history
+//   present.ts   V3, pushes 5, 16      the show and the print
+//   export.ts    V3, pushes 6, 17      the seam, the figure, the loupe
+//   motion.ts    V4, pushes 7, 9, 18   the motion system, Pause Motion, the interludes, the loops
+//   menus.ts     V2, push 11           the miniature editor and its menus
+//   kits.ts      V2, push 12           the brand kits and the typed colour
+//   versions.ts  V2, push 14           the scrubber and Restore
+//   patterns.ts  V4, push 19           the animated patterns band
+//   people.ts    V4, push 20           the two people band
 //
 // Each module exports `ROWS`, the ids it drives, and `rows()`, which declares one test per row with
 // `test(title(id), ...)`. A module declares a row's test only in the push that enters the row,

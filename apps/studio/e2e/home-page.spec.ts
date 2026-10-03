@@ -8,25 +8,49 @@ import {
   CANVAS,
   CLOSE,
   EXPORT,
+  FEATURES,
   HERO,
-  PARTS,
+  KITS,
+  MENUS,
+  PATTERNS,
+  PEOPLE,
   PRESENT,
   REPORT_WORDS,
   TAILOR,
 } from '../src/components/home/copy';
 import { HOME_META } from '../src/components/home/home-meta';
 
-// The landing, /home (docs/LANDING.md section 2; restated for the landing in its push 1, L4's file
-// since the landing's day 0, build/integrator.md "Landing, day 0" 7). The page's own rows are the
-// `home.*` rows of core/home.spec.ts and the 13 `decks.home.*` rows of core/decks.spec.ts; this
-// spec keeps the checks of the page those rows do not hold: the server's HTML (main#top, the h1,
-// the head, the boot script as main's first child, the ten slide instances in the markup), the
-// appearance group pressed from the first paint, every same origin link and the buttons' routes,
-// the GitHub links, the footer lockup, the rendered copy's rules, the Speculation Rules script,
-// no shader on the page, and CLS 0 over the load and a full scroll at 1440 and 390. Runs against a
-// lane's server with PLAYWRIGHT_BASE_URL (AGENTS.md dev server rules) or the runner's 4321.
+// The landing, /home (docs/LANDING.md section 2; V4's file, restated for the second pass in V4's
+// hunk of V1#8). The page's own rows are the `home.*` rows of core/home.spec.ts and the
+// `decks.home.*` rows of core/decks.spec.ts; this spec keeps the checks of the page those rows do
+// not hold: the server's HTML (main#top, the h1 as page text, the visit sentence, the head, the
+// boot script as main's first child, the first screen's ten slide instances in the markup), the
+// bands' h2s in section 2's order for the bands the tree renders, the appearance group pressed
+// from the first paint, every same origin link and the buttons' routes, the GitHub links, the
+// footer lockup, the rendered copy's rules (2.17), the Speculation Rules script, the shader only in
+// the patterns band's chunk and only once the band nears, and CLS 0 over the load and a full
+// scroll at 1440 and 390. Runs against a lane's server with PLAYWRIGHT_BASE_URL (AGENTS.md dev
+// server rules) or the runner's 4321.
 
-const H2 = [AGENTS.h2, TAILOR.h2, CANVAS.h2, PRESENT.h2, EXPORT.h2, PARTS.h2, CLOSE.h2];
+/** Each band's h2 in section 2's order; a band joins the page in its push (LANDING.md 6.8). */
+const BAND_H2: readonly (readonly [string, string])[] = [
+  ['menus', MENUS.h2],
+  ['canvas', CANVAS.h2],
+  ['tailor', TAILOR.h2],
+  ['kits', KITS.h2],
+  ['agents', AGENTS.h2],
+  ['people', PEOPLE.h2],
+  ['present', PRESENT.h2],
+  ['export', EXPORT.h2],
+  ['patterns', PATTERNS.h2],
+  ['features', FEATURES.h2],
+  ['close', CLOSE.h2],
+];
+
+/** The h2s of the bands this page renders, in section 2's order. */
+function h2Of(bands: readonly string[]): string[] {
+  return BAND_H2.filter(([band]) => bands.includes(band)).map(([, h2]) => h2);
+}
 
 type Theme = 'light' | 'dark';
 
@@ -72,7 +96,11 @@ test("the server's HTML carries main#top, the h1, the head, the boot script and 
   expect(html).toMatch(/<main[^>]*\bclass="ts-product"[^>]*>/);
   expect(html).toMatch(/<main[^>]*\bdata-page="home"[^>]*>/);
   for (const line of HERO.h1Lines) expect(html).toContain(line);
-  expect(html).toContain(HERO.visit[0]);
+  /* the h1 is page text, in no slide (2.2) */
+  expect(html).toMatch(/<h1[^>]*>[\s\S]*?Build the pitch,/);
+  expect(/data-home-slides[^>]*>(?:(?!<\/section>)[\s\S])*<h1/.test(html)).toBe(false);
+  /* the lead's first sentence is the visit sentence, the first visit's in the markup */
+  expect(html).toMatch(new RegExp(`data-visit[^>]*>${HERO.visit[0]!.replace(/[.]/g, '\\.')}<`));
   expect(html).toContain(HERO.lead);
   expect(html).toContain(`<title>${HOME_META.title}</title>`);
   expect(html).toMatch(/property="og:url" content="[^"]*\/home"/);
@@ -88,7 +116,8 @@ test("the server's HTML carries main#top, the h1, the head, the boot script and 
     const first = /<main[^>]*>\s*<script[^>]*>([\s\S]*?)<\/script>/.exec(html);
     expect(first?.[1]).toBe(BOOT_SCRIPT);
   }
-  /* the ten slide instances of LANDING.md 2.0 are in the markup, rendered by the server */
+  /* the first screen's ten slide instances (the frame's slide 1 and its nine thumbnails) are in
+     the markup, rendered by the server; every other instance travels in its band's chunk (2.0) */
   expect((html.match(/\bdata-home-slides\b/g) ?? []).length).toBe(10);
   /* the pressed state script sits after the appearance group, before hydration */
   expect(html).toContain('data-theme-option');
@@ -98,7 +127,10 @@ test('the page holds one h1 and the bands h2s in the order of section 2', async 
   await openHome(page);
   await expect(page.locator('main h1')).toHaveCount(1);
   await expect(page.locator('main h1')).toHaveText(HERO.heading);
-  expect(await page.locator('main h2').allTextContents()).toEqual(H2);
+  const bands = await page
+    .locator('main [data-band]')
+    .evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset['band'] ?? ''));
+  expect(await page.locator('main h2').allTextContents()).toEqual(h2Of(bands));
   /* no icon before a heading (DECK-GRAMMAR 40) */
   await expect(page.locator('main h1 svg, main h2 svg')).toHaveCount(0);
 });
@@ -222,7 +254,7 @@ test('the footer lockup scrolls to the top', async ({ page }) => {
   await expect(page.locator('main#top')).toHaveCount(1);
 });
 
-test('the rendered copy follows the rules of LANDING.md 2.12', async ({ page }) => {
+test('the rendered copy follows the rules of LANDING.md 2.17', async ({ page }) => {
   await openHome(page);
   const copy = await page.evaluate(() => {
     const main = document.querySelector('main.ts-product')!;
@@ -232,7 +264,7 @@ test('the rendered copy follows the rules of LANDING.md 2.12', async ({ page }) 
     /* the page's own copy: no slide, no panel, no code, no Version history row */
     const clone = main.cloneNode(true) as HTMLElement;
     for (const el of clone.querySelectorAll(
-      'script, style, svg, code, pre, [data-home-slides], [data-transports], [role="tabpanel"], [data-panel], [data-log], [data-history], [data-sheet]',
+      'script, style, svg, code, pre, [data-home-slides], [data-transports], [role="tabpanel"], [data-panel], [data-log], [data-history], [data-sheet], .ts-home-panel, [aria-hidden="true"], [role="menubar"], [data-menubar]',
     ))
       el.remove();
     document.body.append(clone);
@@ -240,7 +272,10 @@ test('the rendered copy follows the rules of LANDING.md 2.12', async ({ page }) 
     clone.remove();
     return { headings, prose };
   });
-  expect(copy.headings.length).toBe(1 + H2.length);
+  const bands = await page
+    .locator('main [data-band]')
+    .evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset['band'] ?? ''));
+  expect(copy.headings.length).toBe(1 + h2Of(bands).length);
   for (const heading of copy.headings) {
     expect(/[.:;]$/.test(heading), heading).toBe(false);
     expect(/^[A-Z]/.test(heading), heading).toBe(true);
@@ -274,28 +309,50 @@ test('the speculation rules script names /new with moderate eagerness', async ({
   await expect(page.locator('script[type="speculationrules"]')).toHaveCount(1);
 });
 
-test('no script the page loads carries the shader mount (the page loads no shader)', async ({
+test("the shader is only in the patterns band's chunk, requested once the band nears (2.13)", async ({
   page,
 }) => {
-  const scripts: { url: string; body: string }[] = [];
+  const scripts: { url: string; at: number; shader: boolean }[] = [];
   page.on('response', (response) => {
     const type = response.headers()['content-type'] ?? '';
     const url = response.url();
     if (!/javascript|ecmascript/.test(type) && !/\.(m?js|tsx?)(\?|$)/.test(url)) return;
     void response
       .text()
-      .then((body) => scripts.push({ url, body }))
+      .then((body) =>
+        scripts.push({
+          url,
+          at: Date.now(),
+          /* the dithering fragment's own matrix, or any other shader of the package */
+          shader: /bayer8x8\[64\]|liquidMetalFragmentShader|ShaderMount\(/.test(body),
+        }),
+      )
       .catch(() => undefined);
   });
   await openHome(page);
   await page.waitForLoadState('networkidle');
   expect(scripts.length).toBeGreaterThan(0);
-  const offenders = scripts
-    .filter((s) => /ShaderMount|liquidMetalFragmentShader/.test(s.body))
-    .map((s) => s.url);
-  expect(offenders).toEqual([]);
-  const decoded = scripts.reduce((sum, s) => sum + s.body.length, 0);
-  test.info().annotations.push({ type: 'js-decoded-bytes', description: String(decoded) });
+  expect(
+    scripts.filter((s) => s.shader).map((s) => s.url),
+    'no shader in the first screen',
+  ).toEqual([]);
+  const decoded = scripts.length;
+  test.info().annotations.push({ type: 'js-scripts-first-screen', description: String(decoded) });
+  const patterns = page.locator('[data-band="patterns"]');
+  if ((await patterns.count()) === 0) {
+    /* before V4#19 the page loads no shader at all, after a full scroll too */
+    await humanScroll(page);
+    await page.waitForLoadState('networkidle');
+    expect(scripts.filter((s) => s.shader).map((s) => s.url)).toEqual([]);
+    return;
+  }
+  const before = Date.now();
+  await patterns.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(3_000);
+  await page.waitForLoadState('networkidle');
+  const shaders = scripts.filter((s) => s.shader);
+  expect(shaders.length, 'one script carries the shader').toBe(1);
+  expect(shaders[0]!.at).toBeGreaterThanOrEqual(before);
 });
 
 for (const width of [1440, 390] as const) {

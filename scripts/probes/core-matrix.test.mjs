@@ -1567,11 +1567,16 @@ describe('the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md section
   });
 });
 
-// The landing round (docs/LANDING.md 6.7; build/integrator.md "Landing, day 0" 5.1): the 37
-// `home.*` rows under the unparkable decks feature, one driver over the seven lane modules of
-// apps/studio/e2e/core/home/. Each push enters its own rows, so the file holds a prefix of the
-// push order at every push; the four measure rows carry `measure` and no severity.
-const LANDING_IDS = [
+// The landing round (docs/LANDING.md 6.7): the `home.*` rows under the unparkable decks feature,
+// one driver over the lane modules of apps/studio/e2e/core/home/. The first pass (pushes 1 to 7,
+// build/integrator.md "Landing, day 0" 5.1) entered 37 rows in push order; the second pass (pushes
+// 8 to 20) restates rows in place, keeping their ids, appends its new rows in its push order and
+// retires four first pass ids in the push that enters their replacements (RETIRED). So at every
+// push the matrix's home rows read, in order, the first pass's rows not yet replaced, then a prefix
+// of the second pass's new rows; a first pass row carries its first note until its push restates
+// it, and every second pass row reads "docs/LANDING.md 6.7 (second pass)". The four measure rows
+// carry `measure` and no severity.
+const LANDING_FIRST = [
   /* push 1 */
   'home.page.order',
   'home.page.markup-final',
@@ -1617,12 +1622,58 @@ const LANDING_IDS = [
   'home.budget.main-thread',
   'home.a11y.keyboard-walk',
 ];
+/* the second pass's new rows in push order (LANDING.md 6.7, 6.8) */
+const LANDING_SECOND = [
+  /* V1#8 */
+  'home.page.bands-after-load',
+  'home.hero.stage',
+  'home.lead.visit',
+  'home.numbers.row',
+  'home.features.table',
+  /* V4#9 */
+  'home.motion.pause',
+  'home.motion.develop',
+  /* V2#11 */
+  'home.menus.bar',
+  'home.menus.rows',
+  /* V2#12 */
+  'home.kits.restyle',
+  'home.kits.color',
+  /* V3#13 */
+  'home.agents.chips',
+  /* V2#14 */
+  'home.versions.scrub',
+  'home.versions.restore',
+  /* V1#15 */
+  'home.hero.run',
+  /* V3#17 */
+  'home.export.loupe',
+  /* V4#18 */
+  'home.interludes.glyphs',
+  'home.motion.loops',
+  'home.motion.offscreen',
+  /* V4#19 */
+  'home.patterns.pair',
+  /* V4#20 */
+  'home.people.loop',
+  'home.people.type',
+];
+/* a first pass id and the second pass row that replaces it (LANDING.md 6.7) */
+const RETIRED = {
+  'home.parts.table': 'home.features.table',
+  'home.tailor.theme': 'home.kits.restyle',
+  'home.agents.run': 'home.agents.chips',
+  'home.motion.hero': 'home.motion.develop',
+};
 const LANDING_MEASURE = [
   'home.budget.shared',
   'home.budget.lcp',
   'home.budget.frame',
   'home.budget.main-thread',
 ];
+const FIRST_NOTE =
+  /^docs\/LANDING\.md 6\.7; bound fixed in docs\/gslides-parity\/landing\/build\/integrator\.md/;
+const SECOND_NOTE = /^docs\/LANDING\.md 6\.7 \(second pass\)/;
 
 describe('the landing round', () => {
   it('holds the home area under the unparkable decks feature with its one driver', () => {
@@ -1632,23 +1683,31 @@ describe('the landing round', () => {
     expect(CORE_SPEC_DRIVERS).toContain('core/home.spec.ts');
     expect(specPathOf('core/home.spec.ts')).toBe('apps/studio/e2e/core/home.spec.ts');
     expect(rowsForDriver('home.spec.ts')).toEqual(rowsForDriver('core/home.spec.ts'));
-    expect(LANDING_IDS.length).toBe(37);
-    expect(new Set(LANDING_IDS).size).toBe(37);
+    expect(LANDING_FIRST.length).toBe(37);
+    const all = [...LANDING_FIRST, ...LANDING_SECOND];
+    expect(new Set(all).size).toBe(all.length);
+    for (const [old, next] of Object.entries(RETIRED)) {
+      expect(LANDING_FIRST).toContain(old);
+      expect(LANDING_SECOND).toContain(next);
+    }
   });
 
-  it('enters the home rows as a prefix of the push order, each on the driver with its note', () => {
-    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home');
-    expect(home.map((row) => row.id)).toEqual(LANDING_IDS.slice(0, home.length));
-    expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(
-      home.map((row) => row.id),
-    );
-    for (const row of home) {
+  it('enters the home rows in push order, each on the driver with its note', () => {
+    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home').map((row) => row.id);
+    const ids = new Set(home);
+    const second = home.filter((id) => LANDING_SECOND.includes(id));
+    /* the second pass's rows are a prefix of its push order, after every first pass row */
+    expect(second).toEqual(LANDING_SECOND.slice(0, second.length));
+    const firstKept = LANDING_FIRST.filter((id) => !(id in RETIRED && ids.has(RETIRED[id])));
+    expect(home).toEqual([...firstKept, ...second]);
+    expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
+    for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
       expect(row.feature, row.id).toBe('decks');
       expect(row.driver, row.id).toBe('core/home.spec.ts');
       expect(isCoreId(row.id), row.id).toBe(true);
-      expect(row.note, row.id).toMatch(
-        /^docs\/LANDING\.md 6\.7; bound fixed in docs\/gslides-parity\/landing\/build\/integrator\.md/,
-      );
+      if (LANDING_SECOND.includes(row.id)) expect(row.note, row.id).toMatch(SECOND_NOTE);
+      else
+        expect(row.note, row.id).toMatch(new RegExp(`${FIRST_NOTE.source}|${SECOND_NOTE.source}`));
       if (LANDING_MEASURE.includes(row.id)) {
         expect(isMeasureRow(row), row.id).toBe(true);
         expect(row.today, row.id).toBe('not driven');

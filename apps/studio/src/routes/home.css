@@ -1632,48 +1632,43 @@ html:has(.ts-product) {
   color: inherit;
 }
 
-/* ---- the hero's start pose and H1 (l4.md M3; LANDING.md 3.2): the boot script sets `ts-intro`
-   before the first paint and `ts-t0` at T0, never under reduced motion; the rails draw out of
-   their crosses; the field's still shows at T0 + 3.0 s unless the develop runs ---- */
-[data-band='hero'] .frame .rule.top {
-  transform-origin: 56px 50%;
+/* ---- the hero's start pose and H1 (l4.md M3 and M17; LANDING.md 3.2): the boot script sets
+   `ts-intro` before the first paint and `ts-t0` at T0, never under reduced motion; the rails and
+   rules draw out of their crosses by a clip-path inset (the ts-draw-* keyframes of the agents
+   band's A4): the hero sheet is scaled to 1,024 / 1,600, so a hairline is 0.64 device px at 1x
+   and Chrome's composited scale of it painted nothing until the sequence ended (M17, a recorded
+   deviation from 3.2's `transform` column); the field's still shows at T0 + 3.0 s unless the
+   develop runs ---- */
+html.ts-intro [data-band='hero'] .frame .rule.top {
+  clip-path: inset(0px calc(100% - 56px) 0px 56px);
 }
 
-[data-band='hero'] .frame::before {
-  transform-origin: 50% 56px;
+html.ts-intro [data-band='hero'] .frame::before {
+  clip-path: inset(56px 0px calc(100% - 56px) 0px);
 }
 
-[data-band='hero'] .frame::after {
-  transform-origin: 50% calc(100% - 56px);
-}
-
-[data-band='hero'] .frame .rule.bottom {
-  transform-origin: calc(100% - 56px) 50%;
-}
-
-html.ts-intro [data-band='hero'] .frame .rule {
-  transform: scaleX(0);
-}
-
-html.ts-intro [data-band='hero'] .frame::before,
 html.ts-intro [data-band='hero'] .frame::after {
-  transform: scaleY(0);
+  clip-path: inset(calc(100% - 56px) 0px 56px 0px);
+}
+
+html.ts-intro [data-band='hero'] .frame .rule.bottom {
+  clip-path: inset(0px 56px 0px calc(100% - 56px));
 }
 
 html.ts-intro.ts-t0 [data-band='hero'] .frame .rule.top {
-  animation: ts-draw-x var(--ts-d-line) var(--ts-ease-arrive) 0ms both;
+  animation: ts-draw-top var(--ts-d-line) var(--ts-ease-arrive) 0ms both;
 }
 
 html.ts-intro.ts-t0 [data-band='hero'] .frame::before {
-  animation: ts-draw-y var(--ts-d-line) var(--ts-ease-arrive) 60ms both;
+  animation: ts-draw-left var(--ts-d-line) var(--ts-ease-arrive) 60ms both;
 }
 
 html.ts-intro.ts-t0 [data-band='hero'] .frame::after {
-  animation: ts-draw-y var(--ts-d-line) var(--ts-ease-arrive) 120ms both;
+  animation: ts-draw-right var(--ts-d-line) var(--ts-ease-arrive) 120ms both;
 }
 
 html.ts-intro.ts-t0 [data-band='hero'] .frame .rule.bottom {
-  animation: ts-draw-x var(--ts-d-line) var(--ts-ease-arrive) 180ms both;
+  animation: ts-draw-bottom var(--ts-d-line) var(--ts-ease-arrive) 180ms both;
 }
 
 html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
@@ -1682,26 +1677,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
 html.ts-intro.ts-t0 [data-field='hero']:not([data-field-state]) > .ts-field-still {
   animation: ts-still-at 1ms 3000ms forwards;
-}
-
-@keyframes ts-draw-x {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: none;
-  }
-}
-
-@keyframes ts-draw-y {
-  from {
-    transform: scaleY(0);
-  }
-
-  to {
-    transform: none;
-  }
 }
 
 @keyframes ts-still-at {

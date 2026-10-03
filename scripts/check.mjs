@@ -230,6 +230,9 @@ const INNER_HTML_ALLOW = [
   // the agents band (L3#4): slide 5's states, the renderer's output rendered at build
   // (live-slides.generated.ts), parsed in a template element
   'apps/studio/src/components/home/live/agents.ts',
+  // the show and the print (L3#5): slide 7, the renderer's output rendered at build
+  // (live-slides.generated.ts), parsed in a template element
+  'apps/studio/src/components/home/live/show.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

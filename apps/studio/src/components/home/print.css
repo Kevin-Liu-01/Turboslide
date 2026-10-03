@@ -9,6 +9,14 @@
   margin: 0;
 }
 
+/* a named page, because the client build's one stylesheet also holds the /print route's unnamed
+   `@page { size: 13.333in 7.5in }` after this file, and the later unnamed rule wins (l3.md R23:
+   8 pages of 960 by 540 pt, 1,152 by 648 pt with the named page) */
+@page ts-home-slide {
+  size: 16in 9in;
+  margin: 0;
+}
+
 .ts-print-deck {
   display: none;
 }
@@ -22,6 +30,7 @@
 
   .ts-product .ts-rails,
   .ts-product .ts-skip,
+  .ts-product [data-band='hero'] > :not(.ts-col),
   .ts-product-nav,
   .ts-product-footer,
   .ts-product [data-band]:not([data-band='hero']),
@@ -48,6 +57,7 @@
   .ts-product .ts-hero-sheet {
     width: 16in;
     margin: 0;
+    page: ts-home-slide;
   }
 
   /* the visitor's deck, when the live module has filled the container */
@@ -60,6 +70,7 @@
   }
 
   .ts-print-deck > * {
+    page: ts-home-slide;
     position: relative;
     width: 16in;
     height: 9in;

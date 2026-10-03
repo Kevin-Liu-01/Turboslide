@@ -51,7 +51,8 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
 /* ---- reduced motion (3.9): Pause Motion is hidden, decided at the first paint ---- */
 @media (prefers-reduced-motion: reduce) {
-  .ts-motion-toggle {
+  /* the selector of the button's own display rule above, so this one wins by its place */
+  header .ts-motion-toggle.pt-ib {
     display: none;
   }
 }

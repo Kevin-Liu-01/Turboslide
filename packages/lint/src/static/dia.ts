@@ -6,6 +6,7 @@ import type { Diagram, Finding, Mutation } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 import { slotWidths } from '../context.ts';
 import { LABEL_CLEARANCE, labelClearance } from '@turboslide/render/dia/snap';
+import { withoutMasks } from './color.ts';
 
 export const LABEL_CLEARANCE_PX = LABEL_CLEARANCE;
 const ALLOWED_FILLS = new Set([
@@ -164,7 +165,9 @@ function checkRaw(
   if (/stroke-linecap\s*[:=]\s*["']?round/i.test(svg)) faults.push('round caps');
   if (/stroke-linejoin\s*[:=]\s*["']?round/i.test(svg)) faults.push('round joins');
   if (/<marker\b|marker-(?:end|start)\s*[:=]/i.test(svg)) faults.push('arrowhead marker');
-  for (const m of svg.matchAll(/fill\s*[:=]\s*["']?([^"';)\s>]+(?:\([^)]*\))?)/gi)) {
+  // a mask's white and black are its keep and its cut, never a fill the slide shows (the speed
+  // marks' plate, double cut and livery; round1/build/b4.md request 18)
+  for (const m of withoutMasks(svg).matchAll(/fill\s*[:=]\s*["']?([^"';)\s>]+(?:\([^)]*\))?)/gi)) {
     const v = (m[1] ?? '').toLowerCase();
     if (!ALLOWED_FILLS.has(v) && !v.startsWith('url(')) faults.push(`fill ${v}`);
   }

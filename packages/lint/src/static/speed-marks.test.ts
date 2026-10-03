@@ -1,8 +1,8 @@
 // The speed mark slides of the 95 slide GT deck (P:deck/slides/17 to 23, DECK-GRAMMAR.md:50 to 53)
-// import as html blocks carrying the mark files' markup. Two of the deck rules read that markup:
-// a mask's black is the cut of the plate, double cut and livery marks, and the ASCII mark's 10 px
-// rows are cells of the mark (round1/build/b4.md request 7). A colour or a label beside them is
-// still read.
+// import as html blocks carrying the mark files' markup, or as diagram blocks once typed. The deck
+// rules read that markup: a mask's white and black are the keep and the cut of the plate, double
+// cut and livery marks, and the ASCII mark's 10 px rows are cells of the mark (round1/build/b4.md
+// requests 7, 16 and 18). A colour or a label beside them is still read.
 import { describe, expect, test } from 'vitest';
 
 import type { Deck, DeckDocument, Slide } from '../contracts.ts';
@@ -25,6 +25,26 @@ function slide(id: string, html: string): Slide {
     kind: 'content',
     layout: { type: 'center' },
     slots: { main: [{ id: 'mark', type: 'html', note: 'a speed mark', css: '', html }] },
+  };
+}
+
+function diagram(id: string, svg: string): Slide {
+  return {
+    schemaVersion: 1,
+    id,
+    kind: 'content',
+    layout: { type: 'center' },
+    slots: {
+      main: [
+        {
+          id: 'dia1',
+          type: 'dia',
+          alt: 'a speed mark',
+          fit: { viewBox: [-4, -6, 357.9, 132] },
+          svg,
+        },
+      ],
+    },
   };
 }
 
@@ -56,6 +76,17 @@ describe('the speed mark slides under the deck rules', () => {
     );
     expect(rule(document([slide('speed-plate', painted)]), 'color/tokens-only')).toEqual([
       'speed-plate #ff3b6b',
+    ]);
+  });
+
+  test("dia/stroke-grammar reads no fill in a diagram's mask, and still reads one outside it (request 18)", () => {
+    expect(rule(document([diagram('speed-plate', PLATE)]), 'dia/stroke-grammar')).toEqual([]);
+    const painted = PLATE.replace(
+      '<path d="M337 0L12 120Z"/>',
+      '<path d="M337 0L12 120Z" fill="#ff3b6b"/>',
+    );
+    expect(rule(document([diagram('speed-plate', painted)]), 'dia/stroke-grammar')).toEqual([
+      'speed-plate fill #ff3b6b',
     ]);
   });
 

@@ -1,0 +1,164 @@
+{
+  "fetchedAt": "2026-10-02T08:57:56.274Z",
+  "status": 200,
+  "out": [
+    {
+      "title": "File:Tsunami by hokusai 19th century.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Tsunami_by_hokusai_19th_century.jpg",
+      "size": [
+        3859,
+        2594
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "Katsushika Hokusai",
+      "credit": "Metropolitan Museum of Art: entry 45434",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "First publication: between circa 1830 and circa 1832date QS:P571,+1830-00-00T00:"
+    },
+    {
+      "title": "File:Rosetta Stone.JPG",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Rosetta_Stone.JPG",
+      "size": [
+        3665,
+        4288
+      ],
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "usageTerms": "Creative Commons Attribution-Share Alike 4.0",
+      "copyrighted": "True",
+      "artist": "Hans Hillewaert",
+      "credit": "Own work",
+      "attributionRequired": "true",
+      "restrictions": "",
+      "date": "21 November 2007"
+    },
+    {
+      "title": "File:1901 Eastern Telegraph cables.png",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:1901_Eastern_Telegraph_cables.png",
+      "size": [
+        1800,
+        1458
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "Unknown authorUnknown author",
+      "credit": "A.B.C. Telegraphic Code 5th Edition, via Atlantic-cable",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "1901"
+    },
+    {
+      "title": "File:Ahmed Karahisari - Karalama (calligraphy exercise) - Google Art Project.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Ahmed_Karahisari_-_Karalama_(calligraphy_exercise)_-_Google_Art_Project.jpg",
+      "size": [
+        1937,
+        2601
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "Ahmed Karahisari 1470 Details on Google Art Project",
+      "credit": "dAFUaIXYbKd6Dg at Google Cultural Institute maximum zoom level",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "16th centurydate QS:P,+1550-00-00T00:00:00Z/7"
+    },
+    {
+      "title": "File:Blue Marble Western Hemisphere.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Blue_Marble_Western_Hemisphere.jpg",
+      "size": [
+        3718,
+        3718
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "NASA images by Reto Stöckli, based on data from NASA and NOAA. Instrument: Terra - MODIS",
+      "credit": "Earth Observatory: Twin Blue Marbles",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "2007-10-02 08:43:51"
+    },
+    {
+      "title": "File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Louisbourg_Lighthouse,_waves_breaking_in_a_fall_storm_1.jpg",
+      "size": [
+        3888,
+        2592
+      ],
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "usageTerms": "Creative Commons Attribution-Share Alike 4.0",
+      "copyrighted": "True",
+      "artist": "Ken Heaton",
+      "credit": "Own work",
+      "attributionRequired": "true",
+      "restrictions": "",
+      "date": "2007-11-04 17:19:44"
+    },
+    {
+      "title": "File:Prashna Upanishad sample manuscript page, Sanskrit, Devanagari script.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Prashna_Upanishad_sample_manuscript_page,_Sanskrit,_Devanagari_script.jpg",
+      "size": [
+        2350,
+        1048
+      ],
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "usageTerms": "Creative Commons Attribution-Share Alike 4.0",
+      "copyrighted": "True",
+      "artist": "Ms Sarah Welch",
+      "credit": "Own work",
+      "attributionRequired": "true",
+      "restrictions": "",
+      "date": "2018-10-24 09:21:19"
+    },
+    {
+      "title": "File:Compact Oxford English Dictionary 2.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Compact_Oxford_English_Dictionary_2.jpg",
+      "size": [
+        3794,
+        2595
+      ],
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "usageTerms": "Creative Commons Attribution-Share Alike 4.0",
+      "copyrighted": "True",
+      "artist": "Cullen328",
+      "credit": "Own work",
+      "attributionRequired": "true",
+      "restrictions": "",
+      "date": "24 January 2025 (according to Exif data)"
+    },
+    {
+      "title": "File:1748 Bowen Mariner's Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg",
+      "missing": true,
+      "size": null,
+      "license": "",
+      "licenseUrl": "",
+      "usageTerms": "",
+      "copyrighted": "",
+      "artist": "",
+      "credit": "",
+      "attributionRequired": "",
+      "restrictions": "",
+      "date": ""
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+# The two edits to a scratch copy of P:deck/slides at 4c23522 that the template's speed mark slides were imported from (round1/build/b4.md, correction 5).
+# Each <svg> line is cut after its opening tag; the drawing inside is unchanged.
+diff -u a/17-speed-monogram.html b/17-speed-monogram.html
+--- a/17-speed-monogram.html	2026-10-02 15:39:15
++++ b/17-speed-monogram.html	2026-10-02 15:39:15
+@@ -18,7 +18,7 @@
+           <p class="cap">Shown at 1100 px wide. The cap height is 120 units, the G's stem is 30 units and the cut is 8 units.</p>
+         </div>
+         <div class="body">
+-          <svg width="1100" height="282" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into speed b
++          <svg class="dia" width="1100" height="282" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed 
+         </div>
+       </div>
+     </div></section>
+diff -u a/18-speed-lockup.html b/18-speed-lockup.html
+--- a/18-speed-lockup.html	2026-10-02 15:39:15
++++ b/18-speed-lockup.html	2026-10-02 15:39:15
+@@ -9,8 +9,8 @@
+       .sp17 .set { display: grid; gap: 24px; justify-items: center; width: 100%; }
+       .sp17 .grounds { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; }
+       .sp17 .ground { display: grid; grid-template-columns: auto auto; align-items: end; justify-content: start; gap: 36px; padding: 24px; }
+-      .sp17 .ground.paper { background: var(--paper); color: var(--ink); border: 1px solid var(--hair); }
+-      .sp17 .ground.ink { background: var(--ink); color: var(--paper); }
++      .sp17 .ground.on-paper { background: var(--paper); color: var(--ink); border: 1px solid var(--hair); }
++      .sp17 .ground.on-ink { background: var(--ink); color: var(--paper); }
+       .sp17 .ground .small { display: grid; gap: 12px; justify-items: start; }
+     </style><div class="in">
+       <div class="split">
+@@ -23,20 +23,20 @@
+         </div>
+         <div class="body">
+           <div class="set">
+-            <svg width="580" height="228" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 196" fill="currentColor" role="img" aria-label="The bar monogram over the name General Translation
++            <svg class="dia" width="580" height="228" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 196" fill="currentColor" role="img" aria-label="The bar monogram over the name General
+             <div class="grounds">
+-              <div class="ground paper">
+-                <svg width="375" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into spe
++              <div class="ground on-paper">
++                <svg class="dia" width="375" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G com
+                 <div class="small">
+-                  <svg width="187" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into s
+-                  <svg width="94" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into sp
++                  <svg class="dia" width="187" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G c
++                  <svg class="dia" width="94" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G co
+                 </div>
+               </div>
+-              <div class="ground ink">
+-                <svg width="375" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into spe
++              <div class="ground on-ink">
++                <svg class="dia" width="375" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G com
+                 <div class="small">
+-                  <svg width="187" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into s
+-                  <svg width="94" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G combed into sp
++                  <svg class="dia" width="187" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G c
++                  <svg class="dia" width="94" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="-109.1 36 499.6 128" fill="currentColor" role="img" aria-label="The bar monogram: GT with the G co
+                 </div>
+               </div>
+             </div>
+diff -u a/19-speed-plate.html b/19-speed-plate.html
+--- a/19-speed-plate.html	2026-10-02 15:39:15
++++ b/19-speed-plate.html	2026-10-02 15:39:15
+@@ -18,7 +18,7 @@
+           <p class="cap">The plate is 320 by 120 units with a 12 unit corner radius, and the letters are set at 90 units. Shown at 920 px wide.</p>
+         </div>
+         <div class="body">
+-          <svg width="920" height="339" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -6 357.9 132" fill="currentColor" role="img" aria-label="GT cut out of a slanted plate with a hazard-striped end"
++          <svg class="dia" width="920" height="339" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -6 357.9 132" fill="currentColor" role="img" aria-label="GT cut out of a slanted plate with a hazard-
+         </div>
+       </div>
+     </div></section>
+diff -u a/20-speed-double-cut.html b/20-speed-double-cut.html
+--- a/20-speed-double-cut.html	2026-10-02 15:39:15
++++ b/20-speed-double-cut.html	2026-10-02 15:39:15
+@@ -15,7 +15,7 @@
+           </div>
+         </div>
+         <div class="body">
+-          <svg width="1326" height="53" xmlns="http://www.w3.org/2000/svg" viewBox="0 -72.2 1921.9 77" fill="currentColor" role="img" aria-label="GENERAL TRANSLATION in a wide upright black face with 
++          <svg class="dia" width="1326" height="53" xmlns="http://www.w3.org/2000/svg" viewBox="0 -72.2 1921.9 77" fill="currentColor" role="img" aria-label="GENERAL TRANSLATION in a wide upright blac
+         </div>
+       </div>
+     </div></section>
+diff -u a/21-speed-livery.html b/21-speed-livery.html
+--- a/21-speed-livery.html	2026-10-02 15:39:15
++++ b/21-speed-livery.html	2026-10-02 15:39:15
+@@ -15,7 +15,7 @@
+           </div>
+         </div>
+         <div class="body">
+-          <svg width="1240" height="246" xmlns="http://www.w3.org/2000/svg" viewBox="1.6 -106.3 1106.3 219.5" fill="currentColor" role="img" aria-label="GENERAL over TRANSLATION in a wide black italic
++          <svg class="dia" width="1240" height="246" xmlns="http://www.w3.org/2000/svg" viewBox="1.6 -106.3 1106.3 219.5" fill="currentColor" role="img" aria-label="GENERAL over TRANSLATION in a wide 
+         </div>
+       </div>
+     </div></section>
+diff -u a/22-speed-dithered.html b/22-speed-dithered.html
+--- a/22-speed-dithered.html	2026-10-02 15:39:15
++++ b/22-speed-dithered.html	2026-10-02 15:39:15
+@@ -15,7 +15,7 @@
+           </div>
+         </div>
+         <div class="body">
+-          <svg width="1200" height="295" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 59" fill="currentColor" role="img" aria-label="The bar monogram printed as dither cells, solid at the left 
++          <svg class="dia" width="1200" height="295" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 59" fill="currentColor" role="img" aria-label="The bar monogram printed as dither cells, solid 
+         </div>
+       </div>
+     </div></section>
+diff -u a/23-speed-ascii.html b/23-speed-ascii.html
+--- a/23-speed-ascii.html	2026-10-02 15:39:15
++++ b/23-speed-ascii.html	2026-10-02 15:39:15
+@@ -15,7 +15,7 @@
+           </div>
+         </div>
+         <div class="body">
+-          <svg width="1320" height="316" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 230" fill="currentColor" role="img" aria-label="The bar monogram as at signs, solid at the left and ditheri
++          <svg class="dia" width="1320" height="316" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 230" fill="currentColor" role="img" aria-label="The bar monogram as at signs, solid at the left
+         </div>
+       </div>
+     </div></section>

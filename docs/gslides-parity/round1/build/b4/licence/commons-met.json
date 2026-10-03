@@ -1,0 +1,24 @@
+{
+  "fetchedAt": "2026-10-02T09:00:22.132Z",
+  "status": 200,
+  "out": [
+    {
+      "title": "File:Cuneiform tablet- administrative account with entries concerning malt and barley groats MET DP293245.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Cuneiform_tablet-_administrative_account_with_entries_concerning_malt_and_barley_groats_MET_DP293245.jpg",
+      "size": [
+        1297,
+        923
+      ],
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "usageTerms": "Creative Commons Zero, Public Domain Dedication",
+      "copyrighted": "True",
+      "artist": "",
+      "credit": "This file was donated to Wikimedia Commons as part of a project by the Metropolitan Museum of Art. See the Image and Data Resources Open Access Policy",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "circa 3100date QS:P571,+3100-00-00T00:00:00Z/9,P1480,Q5727902–2900 B.C."
+    }
+  ]
+}

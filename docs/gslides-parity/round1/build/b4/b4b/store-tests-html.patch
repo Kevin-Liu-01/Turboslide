@@ -1,0 +1,123 @@
+--- a/packages/store/src/templates.test.ts	2026-10-01 18:32:16
++++ b/packages/store/src/templates.test.ts	2026-10-02 02:37:42
+@@ -239,50 +239,59 @@
+     expect([b, a].sort(byNewest).map((head) => head.id)).toEqual(['a', 'b']);
+   });
+ 
+-  it('the committed GT template record names an assets folder that exists and 85 slides', () => {
++  it('the committed GT template record names an assets folder that exists and 95 slides', () => {
+     const template = readTemplate(REPO_TEMPLATE);
+     expect(template.record.id).toBe('gt-brand');
+-    expect(template.record.sections.reduce((sum, section) => sum + section.slides, 0)).toBe(85);
++    expect(template.record.sections.reduce((sum, section) => sum + section.slides, 0)).toBe(95);
+     expect(existsSync(join(REPO_TEMPLATE, template.record.assets))).toBe(true);
+     expect(existsSync(join(REPO_TEMPLATE, template.record.deck))).toBe(true);
+     expect(template.record.archetypes.map((entry) => entry.id)).toContain('rows');
+   });
+ });
+ 
+-describe('the committed GT template is the working deck', () => {
+-  // decks/templates/gt-brand is a snapshot of decks/gt-brand (Kevin's directive: a full GT
+-  // template). The revision 13 cut still carried the four html escape blocks the M5 re-import
+-  // retired and lacked the liquid-metal-diamond record while copying its twins, so a deck created
+-  // from it failed the severity 3 gate (type/svg-label-min on goals#html) before anyone edited it.
+-  // Re-snapshot by copying decks/gt-brand/deck.json and slides/*.json over the template and
+-  // naming the revision in template.json; these tests fail on any other drift.
++/** The seven speed mark slides of the Prototemplate deck, html escape blocks in the import (no block for an inline svg). */
++const SPEED_SLIDES = [
++  'speed-ascii',
++  'speed-dithered',
++  'speed-double-cut',
++  'speed-livery',
++  'speed-lockup',
++  'speed-monogram',
++  'speed-plate',
++];
++
++describe('the committed GT template is the 95 slide import', () => {
++  // decks/templates/gt-brand is the Prototemplate deck imported on 2026-10-02 (docs/NEXT.md 4.1.3
++  // item 24; round1/build/b4.md); decks/gt-brand keeps the 85 slide deck, so production's stored
++  // copy and a fresh store's seed stay the same (question 29). The template names the seed deck's
++  // assets folder, so every twin it names lives there. The seven speed mark slides are html escape
++  // blocks until the importer maps an inline svg (b4.md request 6); every other slide is typed.
+   const templateManifest = readJsonFile<Manifest>(join(REPO_TEMPLATE, 'deck.json'));
+   const deckManifest = readJsonFile<Manifest>(join(REPO_DECK, 'deck.json'));
+ 
+-  it('slide files equal decks/gt-brand byte for byte and hold no html block', () => {
+-    const files = slideFiles(join(REPO_DECK, 'slides'));
+-    expect(files.length).toBe(85);
+-    expect(slideFiles(join(REPO_TEMPLATE, 'slides'))).toEqual(files);
+-    let html = 0;
+-    for (const file of files) {
+-      const text = readFileSync(join(REPO_TEMPLATE, 'slides', file), 'utf8');
+-      expect(text, file).toBe(readFileSync(join(REPO_DECK, 'slides', file), 'utf8'));
+-      html += countHtmlBlocks(JSON.parse(text));
+-    }
+-    expect(html).toBe(0);
++  it('holds 95 slides whose html blocks are the seven speed mark slides alone', () => {
++    const files = slideFiles(join(REPO_TEMPLATE, 'slides'));
++    expect(files.length).toBe(95);
++    expect(slideFiles(join(REPO_DECK, 'slides')).length).toBe(85);
++    const withHtml = files
++      .filter((file) => countHtmlBlocks(readJsonFile(join(REPO_TEMPLATE, 'slides', file))) > 0)
++      .map((file) => file.replace(/\.json$/, ''));
++    expect(withHtml).toEqual(SPEED_SLIDES);
+   });
+ 
+-  it('manifest equals decks/gt-brand apart from the revision and the stamps, and template.json names its revision', () => {
+-    expect(contentOf(templateManifest)).toEqual(contentOf(deckManifest));
++  it('names every twin under the seed deck and every section count in template.json', () => {
+     const { record } = readTemplate(REPO_TEMPLATE);
+-    const named = /cut from decks\/gt-brand at revision (\d+)/.exec(record.description);
+-    expect(named?.[1]).toBe(String(templateManifest.revision));
++    expect(record.assets).toBe('../../gt-brand/assets');
++    for (const asset of Object.values(templateManifest.assets))
++      for (const twin of Object.values(asset.twins))
++        expect(existsSync(join(REPO_DECK, twin)), twin).toBe(true);
+     expect(record.sections.map((section) => section.slides)).toEqual(
+       templateManifest.sections.map((section) => section.slideIds.length),
+     );
++    expect(Object.keys(deckManifest.assets).every((id) => id in templateManifest.assets)).toBe(true);
+   });
+ 
+-  it('deck.create over the committed record yields 85 slides, every asset twin and no html block', () => {
++  it('deck.create over the committed record yields 95 slides, every asset twin and the seven speed mark html blocks', () => {
+     const scratch = mkdtempSync(join(tmpdir(), 'turboslide-gt-template-'));
+     const decks = join(scratch, 'decks');
+     mkdirSync(join(decks, 'templates'), { recursive: true });
+@@ -298,12 +307,12 @@
+       );
+       expect(result.revision).toBe(0);
+       expect(result.counts).toEqual({
+-        slides: 85,
++        slides: 95,
+         sections: 8,
+-        assets: Object.keys(deckManifest.assets).length,
++        assets: Object.keys(templateManifest.assets).length,
+       });
+       const created = readJsonFile<Manifest>(join(result.dir, 'deck.json'));
+-      expect(created.assets).toEqual(deckManifest.assets);
++      expect(created.assets).toEqual(templateManifest.assets);
+       for (const asset of Object.values(created.assets)) {
+         for (const twin of Object.values(asset.twins)) {
+           expect(existsSync(join(result.dir, twin)), twin).toBe(true);
+@@ -313,7 +322,7 @@
+       for (const file of slideFiles(join(result.dir, 'slides'))) {
+         html += countHtmlBlocks(readJsonFile(join(result.dir, 'slides', file)));
+       }
+-      expect(html).toBe(0);
++      expect(html).toBe(SPEED_SLIDES.length);
+     } finally {
+       // the links first, by name, so the removal never reaches the repository folders
+       unlinkSync(join(decks, 'gt-brand'));
+--- a/packages/store/src/template-index.test.ts	2026-10-01 18:32:16
++++ b/packages/store/src/template-index.test.ts	2026-10-02 02:37:42
+@@ -105,7 +105,7 @@
+       name: 'General Translation brand deck',
+       organisation: true,
+       cover: 'opener-brand',
+-      slides: 85,
++      slides: 95,
+       theme: 'gt-ink-paper',
+     });
+     expect(gt?.name).not.toContain('GT brand deck');

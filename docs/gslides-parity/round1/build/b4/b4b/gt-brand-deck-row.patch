@@ -1,0 +1,22 @@
+--- a/apps/studio/e2e/core/decks.spec.ts	2026-10-02 02:43:18
++++ b/apps/studio/e2e/core/decks.spec.ts	2026-10-02 02:43:18
+@@ -390,7 +390,7 @@
+   scratch.add(id);
+   const slides = await slideOrder(page);
+   expect(Date.now() - t, 'within 15 s').toBeLessThan(15_000);
+-  expect(slides.length).toBe(85);
++  expect(slides.length).toBe(95);
+ });
+ 
+ test(title('decks.card.download'), async () => {
+--- a/docs/gslides-parity/focus/core-matrix.json	2026-10-02 02:43:18
++++ b/docs/gslides-parity/focus/core-matrix.json	2026-10-02 02:43:18
+@@ -247,7 +247,7 @@
+     {
+       "id": "decks.list.gt-brand-deck",
+       "feature": "decks",
+-      "interaction": "Click the GT brand deck card; a copy opens in the editor within 15 s with its 85 slides",
++      "interaction": "Click the GT brand deck card; a copy opens in the editor within 15 s with its 95 slides",
+       "driver": "core/decks.spec.ts",
+       "today": "works",
+       "evidence": "audit-decks row 45"

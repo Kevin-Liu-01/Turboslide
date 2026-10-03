@@ -1,0 +1,55 @@
+Proposed change for the integrator (request 1 of round1/build/b4.md), not applied by B4.
+packages/export/src/scene/measure.ts, the frame of each page (lines 1128 to 1143 at 0b6df8d4):
+
+-      // The frame (SPEC 2.1; head:39-49): two rails, two rules, four crosses.
+-      const hair = rootStyle.getPropertyValue('--hair').trim();
+-      const cross = rootStyle.getPropertyValue('--cross').trim();
+-      const frameRules: SceneRule[] = [
+-        { box: [56, 0, 1, H], color: hair, width: 1, role: 'frame' },
+-        { box: [W - 57, 0, 1, H], color: hair, width: 1, role: 'frame' },
+-        { box: [0, 56, W, 1], color: hair, width: 1, role: 'frame' },
+-        { box: [0, H - 57, W, 1], color: hair, width: 1, role: 'frame' },
+-      ];
+-      const crosses: Box[] = [
+-        [51, 51, 11, 11],
+-        [W - 62, 51, 11, 11],
+-        [51, H - 62, 11, 11],
+-        [W - 62, H - 62, 11, 11],
+-      ];
++      // The frame (SPEC 2.1; head:39-49): two rails, two rules, four crosses, each kept where the
++      // stage draws it, so a kit that turns a part off (render/theme-css.ts themeCss: the rails are
++      // `.frame::before` and `::after`, then `.frame .rule`, `.frame .cross`) exports none of it.
++      // A stage without a `.frame` keeps every part, as before.
++      const hair = rootStyle.getPropertyValue('--hair').trim();
++      const cross = rootStyle.getPropertyValue('--cross').trim();
++      const frameEl = stage.querySelector('.frame');
++      const framePart = (el: Element | null | undefined, pseudo?: '::before' | '::after') => {
++        if (frameEl === null) return true;
++        if (el === null || el === undefined) return false;
++        const c = getComputedStyle(el, pseudo);
++        if (c.display === 'none' || c.visibility === 'hidden') return false;
++        return pseudo === undefined || c.content !== 'none';
++      };
++      const frameRules: SceneRule[] = [
++        ...(framePart(frameEl, '::before') ? [{ box: [56, 0, 1, H] as Box }] : []),
++        ...(framePart(frameEl, '::after') ? [{ box: [W - 57, 0, 1, H] as Box }] : []),
++        ...(framePart(frameEl?.querySelector('.rule.top')) ? [{ box: [0, 56, W, 1] as Box }] : []),
++        ...(framePart(frameEl?.querySelector('.rule.bottom'))
++          ? [{ box: [0, H - 57, W, 1] as Box }]
++          : []),
++      ].map((rule) => ({ ...rule, color: hair, width: 1, role: 'frame' as const }));
++      const crosses: Box[] = (
++        [
++          ['tl', [51, 51, 11, 11]],
++          ['tr', [W - 62, 51, 11, 11]],
++          ['bl', [51, H - 62, 11, 11]],
++          ['br', [W - 62, H - 62, 11, 11]],
++        ] as const
++      )
++        .filter(([corner]) => framePart(frameEl?.querySelector(`.cross.${corner}`)))
++        .map(([, box]) => [...box] as Box);
+
+The PowerPoint masters (pptx/masters.ts 41 to 75) and the full picture slides (pptx/build.ts 475
+to 478) already draw only what scene.frame lists; build.ts 292 reads `scene.frame.rules[0]?.color
+?? scene.ink`, which holds for an empty list. The row brand.template.blank-plain reads the result:
+on 4507 at 09:19Z the PowerPoint carried 12 frame objects with the frame off and 12 with it on.

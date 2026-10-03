@@ -1,0 +1,42 @@
+{
+  "fetchedAt": "2026-10-02T08:58:13.669Z",
+  "status": 200,
+  "out": [
+    {
+      "title": "File:1748 Bowen Mariner’s Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:1748_Bowen_Mariner%E2%80%99s_Compass_and_Armillary_Sphere_-_Geographicus_-_CircleofWinds-bowen-1747.jpg",
+      "size": [
+        3866,
+        2449
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "http://www.geographicus.com/mm5/cartographers/bowen.txt",
+      "credit": "This file was provided to Wikimedia Commons by Geographicus Rare Antique Maps, a specialist dealer in rare maps and other cartography of the 15th, 16th, 17th, 18th and 19th centuries, as part of a coo",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "1747 (undated)"
+    },
+    {
+      "title": "File:Alexandreis with gloss - in Latin - DPLA - 98b56ea1ebec780d88ec0bdfa6750159 (page 69).jpg",
+      "missing": false,
+      "page": "https://commons.wikimedia.org/wiki/File:Alexandreis_with_gloss_-_in_Latin_-_DPLA_-_98b56ea1ebec780d88ec0bdfa6750159_(page_69).jpg",
+      "size": [
+        6696,
+        10057
+      ],
+      "license": "Public domain",
+      "licenseUrl": "",
+      "usageTerms": "Public domain",
+      "copyrighted": "False",
+      "artist": "Walter, of Châtillon, active 1170-1180; Louis II, Count of Flanders, 1330-1384; Barrois, Joseph, approximately 1785-1855; Eustace, F. H; Ashburnham, Bertram Ashburnham, Earl of, 1797-1878; Cockerell, ",
+      "credit": "This file was contributed to Wikimedia Commons by Boston Public Library as part of a cooperation project. The donation was facilitated by the Digital Public Library of America. Record in source catalo",
+      "attributionRequired": "false",
+      "restrictions": "",
+      "date": "1250date QS:P571,+1250-00-00T00:00:00Z/9"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+File:Alexandreis with gloss - in Latin - DPLA - 98b56ea1ebec780d88ec0bdfa6750159 (page 69).jpg 
+         | permission = {{NoC-US | Q894583}}
+
+File:1748 Bowen Mariner’s Compass and Armillary Sphere - Geographicus - CircleofWinds-bowen-1747.jpg 
+ |accession number={{Geographicus-link|CircleofWinds-bowen-1747}}
+|source= {{Geographicus-source}}
+|permission={{PD-Art|PD-old-100}}
+
+File:Tsunami by hokusai 19th century.jpg 
+  |source         = {{Met online|45434}}
+{{Met online|36491}} JP10<br>
+{{Met online|56353}} JP2972<br>
+{{Met online|39799}} JP2569
+== {{int:license-header}} ==
+{{PD-Art|PD-old-auto-expired|deathyear=1849}}
+
+File:1901 Eastern Telegraph cables.png 
+ == {{int:license-header}} ==
+{{PD-US}}
+
+File:Ahmed Karahisari - Karalama (calligraphy exercise) - Google Art Project.jpg 
+ =={{int:license-header}}==
+{{PD-Art|PD-old-auto-expired|deathyear=1556}}
+
+File:Blue Marble Western Hemisphere.jpg 
+ =={{int:license-header}}==
+{{PD-USGov-NASA}}
+
+File:Rosetta Stone.JPG 
+ 
+
+File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg 
+ =={{int:license-header}}==
+{{self|cc-by-sa-4.0}}
+
+File:Prashna Upanishad sample manuscript page, Sanskrit, Devanagari script.jpg 
+ =={{int:license-header}}==
+{{self|cc-by-sa-4.0}}
+
+File:Compact Oxford English Dictionary 2.jpg 
+ == {{int:license-header}} ==
+{{self|cc-by-sa-4.0}}
+

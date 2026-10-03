@@ -1507,24 +1507,13 @@ test(title('share.dialog.you-label'), async ({ browser }) => {
     await second.goto(links.edit);
     await second.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
     await waitEditor(second);
-    let named = await setDisplayName(second, 'Copper Lane');
-    if (!named) {
-      /* the prompt comes with the first Share on a browser with no name (PRODUCT.md rank 4) */
-      await ctl(second, 'share.open').click();
-      named = await setDisplayName(second, 'Copper Lane');
-      if (
-        await ctl(second, 'dialog.share')
-          .isVisible()
-          .catch(() => false)
-      )
-        await closeShare(second);
-    }
+    /* the first Share's prompt where a build asks one, else the own chip's Change name (B3b#13) */
+    const named = await nameSecond(second, 'Copper Lane');
     if (!named)
       test.skip(
         true,
-        'not on this build: dialog.namePrompt on the first Share (docs/archive/rounds/PRODUCT.md 7.1, B1)',
+        'not on this build: dialog.namePrompt from the first Share or the own chip (docs/archive/rounds/PRODUCT.md 7.1, B1)',
       );
-    await settled(second);
     /* the owner's roster: the presence chips and the Share dialog */
     await expect
       .poll(

@@ -1834,8 +1834,15 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       continue;
     }
     // the run rule (channel.ts runTieSide): an entry that continues its author's own text keeps
-    // the left of a landed insert at its offset, as the client that sent it moved it
-    const transformed = transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
+    // the left of a landed insert at its offset, as the client that sent it moved it; the
+    // running document lets a cover's conversion follow the slide as it stands (conversion.ts
+    // in @turboslide/realtime; the realtime round's fix round 3)
+    const transformed = transformEntry(
+      entry.mutations ?? [],
+      landedMutations,
+      entryRun(entry),
+      running,
+    );
     if (transformed === null) {
       rejected.push({ opId: entry.opId, reason: 'stale' });
       continue;
@@ -1885,7 +1892,12 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
         out.push(entry);
         continue;
       }
-      const transformed = transformEntry(entry.mutations, moreMutations, runOf.get(entry.opId));
+      const transformed = transformEntry(
+        entry.mutations,
+        moreMutations,
+        runOf.get(entry.opId),
+        document,
+      );
       if (transformed === null) {
         rejected.push({ opId: entry.opId, reason: 'stale' });
         continue;
@@ -2223,11 +2235,15 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
           });
         continue;
       }
-      // past what landed since the base (3.3), then past the undo of the refused (rank 13)
-      const moved =
-        landedMutations.length === 0
-          ? (entry.mutations ?? [])
-          : transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
+      // past what landed since the base (3.3), then past the undo of the refused (rank 13); the
+      // running document lets a cover's conversion follow the slide as it stands, whether rows
+      // landed or none did (conversion.ts in @turboslide/realtime; the realtime round's fix round 3)
+      const moved = transformEntry(
+        entry.mutations ?? [],
+        landedMutations,
+        entryRun(entry),
+        running,
+      );
       if (moved === null) {
         // a whole Text rewrite landed first: the op returns to its author with a sentence
         rejected.push({ opId: entry.opId, reason: 'stale', message: STALE_AFTER_REMOTE });
@@ -3451,7 +3467,7 @@ export async function admitServerWrite(
     }
     const out: NewEntry[] = [];
     for (const row of entries) {
-      const transformed = transformEntry(row.mutations ?? [], moreMutations);
+      const transformed = transformEntry(row.mutations ?? [], moreMutations, false, document);
       if (transformed === null) return null;
       const again = landCandidate(
         document,

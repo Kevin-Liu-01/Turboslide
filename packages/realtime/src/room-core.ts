@@ -29,10 +29,25 @@ import { touchedSlides } from '@turboslide/store/store';
 import { CAPS } from './admission.ts';
 import { entryRun, runTieSide } from './channel.ts';
 import type { Entry, NewEntry, RejectReason, RoomEvent, RosterEntry } from './channel.ts';
+import {
+  canvasFieldBlocks,
+  carryFieldText,
+  fieldRunsOnCanvas,
+  isFieldRun,
+  yieldConcurrentConversion,
+} from './conversion.ts';
 import { EDITING_TABS_MAX } from './protocol.ts';
 import type { OpsPost } from './protocol.ts';
 
-export { entryRun, runTieSide, touchedSlides };
+export {
+  canvasFieldBlocks,
+  carryFieldText,
+  entryRun,
+  fieldRunsOnCanvas,
+  runTieSide,
+  touchedSlides,
+  yieldConcurrentConversion,
+};
 
 // ---------------------------------------------------------------------------------------------
 // The answer's `between` (SPEC-3 3.4; the focus round, cycle 3 stream fix round two)
@@ -155,19 +170,31 @@ export function landedOwn(mutations: ReadonlyArray<Mutation>): Landed[] {
  * everything else unchanged. Null when nothing survives. Two inserts at one offset tie by each
  * landed row's `insertTie` (`landedOf`), and an entry that declares the run rule (`run`,
  * channel.ts `runTieSide`) keeps the left of every landed insert but its own POST's undo rows.
+ *
+ * `document` is the document the entry will be placed on (the admission's running document).
+ * With it a conversion that travels with its writes follows the slide as it stands
+ * (conversion.ts `yieldConcurrentConversion`, `carryFieldText`), and a cover's field run and the
+ * block the field became on its canvas are one text (`fieldRunsOnCanvas`; the realtime round, fix
+ * round 3). Without it the transform reads the landed rows alone.
  */
 export function transformEntry(
   mutations: readonly Mutation[],
   landed: ReadonlyArray<Landed>,
   run = false,
+  document?: DeckDocument,
 ): Mutation[] | null {
-  let out: Mutation[] = yieldConcurrentConversion(mutations, landed);
+  let out: Mutation[] = yieldConcurrentConversion(mutations, landed, document);
   if (out.length === 0) return null;
+  if (document !== undefined) out = carryFieldText(out, document);
+  const canvas = fieldRunsOnCanvas(out, landed, document);
+  out = out.map((mutation) => canvas.retarget(mutation));
   for (const row of landed) {
-    const against = row.mutation;
+    const onCanvas = canvas.read(row.mutation);
     const insertTie = row.own === true ? row.insertTie : runTieSide(run, row.insertTie);
     const next: Mutation[] = [];
     for (const mutation of out) {
+      // a field run the entry still carries is on a cover that is not a canvas before it
+      const against = isFieldRun(mutation) ? row.mutation : onCanvas;
       if (rewritesText(against, mutation)) continue;
       if (isTextOp(mutation) && isTextOp(against) && sameText(mutation, against)) {
         try {
@@ -184,41 +211,6 @@ export function transformEntry(
     if (out.length === 0) return null;
   }
   return out;
-}
-
-/**
- * Two tabs converting one slide at once (the realtime round, R1's two process run; the row
- * `realtime.title.two-typers`, and the mechanism behind the standing red
- * `sync.title.concurrent-both-kept`): a title that wraps while two people type into it converts
- * the cover to a canvas in both tabs within the same batch (viewer Editor.tsx 1786, 1812), so
- * each tab posts `slide.replace` with its own copy of the slide beside its `text.splice`. The
- * first lands; the second's `slide.replace` would put back a slide without the first's word and
- * its splice, moved past the first's by the transform, then falls outside its own copy's text
- * ("text.splice: 40 plus 0 is outside a text of 32 characters", the whole entry refused, the
- * second word lost). The rule: an entry that carries a `slide.replace` of a slide another
- * `slide.replace` of the same slide replaced since its base, together with a text op on that
- * slide, yields its own replacement and keeps the rest, so the first conversion stands and the
- * second typist's word rides onto it through the ordinary transform. A bare `slide.replace`
- * (the source drawer, `slide.toCanvas`) keeps the last writer wins rule as before. Pure.
- */
-export function yieldConcurrentConversion(
-  mutations: readonly Mutation[],
-  landed: ReadonlyArray<Landed>,
-): Mutation[] {
-  const replaced = new Set<string>();
-  for (const { mutation } of landed)
-    if (mutation.op === 'slide.replace') replaced.add(mutation.slideId);
-  if (replaced.size === 0) return [...mutations];
-  const typedOn = new Set<string>();
-  for (const mutation of mutations) if (isTextOp(mutation)) typedOn.add(mutation.slideId);
-  return mutations.filter(
-    (mutation) =>
-      !(
-        mutation.op === 'slide.replace' &&
-        replaced.has(mutation.slideId) &&
-        typedOn.has(mutation.slideId)
-      ),
-  );
 }
 
 /** `after` anchors of inserts and moves re-resolve to the end of the slot or section when the anchor left (SPEC-3 3.5). */

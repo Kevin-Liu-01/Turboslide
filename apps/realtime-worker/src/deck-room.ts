@@ -1003,8 +1003,15 @@ export class DeckRoom extends DurableObject<Env> {
         continue;
       }
       // the run rule (channel.ts runTieSide): an entry that continues its author's own text keeps
-      // the left of a landed insert at its offset, as the client that sent it moved it
-      const transformed = transformEntry(entry.mutations ?? [], landedMutations, entryRun(entry));
+      // the left of a landed insert at its offset, as the client that sent it moved it; the
+      // running document lets a cover's conversion follow the slide as it stands (conversion.ts
+      // in @turboslide/realtime; the realtime round's fix round 3)
+      const transformed = transformEntry(
+        entry.mutations ?? [],
+        landedMutations,
+        entryRun(entry),
+        running,
+      );
       if (transformed === null) {
         rejected.push({ opId: entry.opId, reason: 'stale' });
         continue;
@@ -1927,7 +1934,7 @@ export class DeckRoom extends DurableObject<Env> {
           moved.push(this.moveEntry(entry, meta.head, entry.mutations ?? null, meta.revision));
           continue;
         }
-        const transformed = transformEntry(entry.mutations, landed);
+        const transformed = transformEntry(entry.mutations, landed, false, running);
         if (transformed === null) {
           this.deleteEntry(entry);
           continue;

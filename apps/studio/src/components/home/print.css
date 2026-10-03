@@ -10,10 +10,12 @@
 }
 
 /* a named page, because the client build's one stylesheet also holds the /print route's unnamed
-   `@page { size: 13.333in 7.5in }` after this file, and the later unnamed rule wins (l3.md R23:
-   8 pages of 960 by 540 pt, 1,152 by 648 pt with the named page) */
+   `@page { size: 13.333in 7.5in }` after this file (l3.md R23: 8 pages of 960 by 540 pt).
+   Chromium cascades @page rules by order alone, so a named page earlier in the sheet loses to a
+   later unnamed one; `!important` holds the size wherever the build puts the two files (read
+   2026-10-03 on 4545: 960 by 540 pt as named, 1,152 by 648 pt with !important) */
 @page ts-home-slide {
-  size: 16in 9in;
+  size: 16in 9in !important;
   margin: 0;
 }
 
@@ -54,10 +56,24 @@
     padding: 0;
   }
 
+  /* the hero alone is one page: the sheet's 1,600 by 900 stage is scaled by a transform, which
+     Chromium's fragmentation does not see, so the stage's last 36 px of layout (the mark, the
+     credit and the counter) broke onto a second page; the sheet clips at its 9 in */
   .ts-product .ts-hero-sheet {
     width: 16in;
+    height: 9in;
     margin: 0;
+    overflow: hidden;
+    break-inside: avoid;
     page: ts-home-slide;
+  }
+
+  /* a slide prints its grounds, rails and dithered pictures (background colours and masks over
+     them), which the browser drops from a print unless the page asks */
+  .ts-product .ts-hero-sheet,
+  .ts-print-deck > * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* the visitor's deck, when the live module has filled the container */

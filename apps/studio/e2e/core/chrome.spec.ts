@@ -497,7 +497,8 @@ test(title('logos.picker.chrome-1280'), async () => {
  * judged by their own rows, never here.
  */
 const SHADER_GROUPS = [
-  'Shader',
+  /* the section's noun since B3b#13 (docs/NEXT.md question 10's default); "Shader" before it */
+  'Animated pattern',
   'Preset',
   'Colors',
   'Form',
@@ -549,7 +550,8 @@ test(title('shaders.panel.section-groups'), async () => {
     const section = await shaderSectionFacts(page);
     /* the nine groups appear in order among the headings read (a subsequence) */
     let at = 0;
-    for (const heading of headings) if (heading === SHADER_GROUPS[at]) at += 1;
+    for (const heading of headings)
+      if ((heading === 'Shader' ? 'Animated pattern' : heading) === SHADER_GROUPS[at]) at += 1;
     const p1 = headings.filter((h) => /^frame$/i.test(h) || /play in the show/i.test(h));
     facts.push(
       `${section?.viewport ?? 'unread'}: ${made.how}; headings ${headings.join(' | ') || 'none'}; ${at} of ${SHADER_GROUPS.length} groups in order; ${section?.fields ?? 0} fields, ${section?.past ?? 'unread'} past the panel (${section?.panel ?? 'unread'}), ${section?.scrollsX ?? 'unread'} horizontal scrollers; P1 groups drawn: ${p1.join(', ') || 'none'}`,

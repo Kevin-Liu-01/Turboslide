@@ -2473,7 +2473,11 @@ async function tipOf(
     };
   });
 }
-/** Names the second browser through the first Share's prompt (docs/archive/rounds/PRODUCT.md rank 4); false when no prompt came. */
+/**
+ * Names the second browser: the first Share's prompt on a build that still asks one
+ * (docs/archive/rounds/PRODUCT.md rank 4), else the own chip's Change name, since the Share dialog
+ * asks no name from Round 1 on (B3b#13, docs/NEXT.md 4.1.3 item 17); false when neither names it.
+ */
 async function nameSecond(p: Page, name: string): Promise<boolean> {
   let named = await setDisplayName(p, name);
   if (!named) {
@@ -2486,6 +2490,7 @@ async function nameSecond(p: Page, name: string): Promise<boolean> {
     )
       await closeShare(p);
   }
+  if (!named) named = (await nameSelf(p, name)).named;
   if (named) await settled(p);
   return named;
 }
@@ -2565,7 +2570,7 @@ test(title('people.chip-tooltip-trust'), async ({ browser }) => {
       'Not signed in. A generated label for this browser.',
     );
     const named = await nameSecond(second, 'Maya Chen');
-    expect(named, 'the second browser typed a name through the Share prompt').toBe(true);
+    expect(named, 'the second browser typed a name').toBe(true);
     const t = Date.now();
     await expect
       .poll(async () => (await tipOf(page, chipOf(page, guest)))?.name ?? null, {

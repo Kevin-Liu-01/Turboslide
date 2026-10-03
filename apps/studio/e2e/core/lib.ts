@@ -140,6 +140,36 @@ export async function waitEditor(page: Page): Promise<void> {
   );
 }
 
+/**
+ * Clicks the GT brand deck card on /decks (the page must be on /decks) and answers the copy's id
+ * once the address names the editor. The home page shows a refused copy in its snackbar as "GT
+ * brand deck: <sentence>" and stays on /decks, so the wait ends on that sentence at once and the
+ * error carries it. Before this the rows read a bare `waitForURL` timeout (the realtime round, R5
+ * fix 3; VERIFICATION.md realtime pass 3 P3-4): on the local node-server build the copy was
+ * refused with "The template names an assets folder that is missing" in every run of the round.
+ */
+export async function openGtBrandCopy(page: Page, timeout: number): Promise<string> {
+  await page.locator('[data-control="home.template.gt-brand"]').first().click();
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const id = page.url().match(/\/edit\/([^/?#]+)/)?.[1];
+    if (id !== undefined && id !== '') return id;
+    const said = await page.evaluate(() =>
+      (document.querySelector('[data-control="snackbar"] .ts-snackbar-text')?.textContent ?? '')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    );
+    if (said.startsWith('GT brand deck: ')) {
+      const twins = /assets folder that is missing/.test(said)
+        ? ": the overlay holds none of the GT deck's twins. The node-server build drops them from its bundle and a local server has no origin to fetch them from (apps/studio/src/server/root.ts seedAssetOrigins); core-gate.mjs places them when TURBOSLIDE_OVERLAY_DIR names the server's overlay"
+        : '';
+      throw new Error(`the copy was refused with "${said}"${twins}`);
+    }
+    await page.waitForTimeout(100);
+  }
+  throw new Error(`the copy's editor address did not come within ${timeout} ms`);
+}
+
 /** Waits until nothing is pending and the title row reads All changes saved. */
 export async function settled(page: Page, timeout = 20_000): Promise<EditorState> {
   const until = Date.now() + timeout;

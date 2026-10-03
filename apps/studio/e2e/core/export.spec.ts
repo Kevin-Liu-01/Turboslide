@@ -14,6 +14,7 @@ import {
   menuPath,
   newDeck,
   openEditor,
+  openGtBrandCopy,
   ownerContext,
   pdfImages,
   pdfPages,
@@ -1352,12 +1353,7 @@ async function largeDeck() {
   const scratch = new Scratch();
   await page.goto('/decks');
   await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
-  await page
-    .locator('[data-control="home.template.gt-brand"], [data-control="home.gt-brand"]')
-    .first()
-    .click();
-  await page.waitForURL(/\/edit\//, { timeout: 90_000 });
-  const deck = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
+  const deck = await openGtBrandCopy(page, 90_000);
   scratch.add(deck);
   await waitEditor(page);
   const slides = (await slideOrder(page)).length;

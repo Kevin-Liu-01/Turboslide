@@ -18,6 +18,7 @@ import {
   menuPath,
   newDeck,
   openEditor,
+  openGtBrandCopy,
   ownerContext,
   placeBlock,
   pngSize,
@@ -380,12 +381,10 @@ test(title('decks.list.gt-brand-deck'), async () => {
   test.setTimeout(120_000);
   await gotoDecks();
   const t = Date.now();
-  await ctl(page, 'home.template.gt-brand').click();
-  await page.waitForURL(/\/edit\//, { timeout: 30_000 });
-  await waitEditor(page);
-  const id = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
-  expect(id).not.toBe('gt-brand');
+  const id = await openGtBrandCopy(page, 30_000);
   scratch.add(id);
+  await waitEditor(page);
+  expect(id).not.toBe('gt-brand');
   const slides = await slideOrder(page);
   expect(Date.now() - t, 'within 15 s').toBeLessThan(15_000);
   expect(slides.length).toBe(85);
@@ -1788,12 +1787,7 @@ test(title('brand.appearance.default'), async () => {
   expect(lum ?? 0, 'and the sheet paints light').toBeGreaterThan(160);
   /* a deck from a template whose kit says dark: the General Translation brand deck */
   await gotoDecks();
-  const gtCard = page
-    .locator('[data-control="home.template.gt-brand"], [data-control="home.template.gt-brand"]')
-    .first();
-  await gtCard.click();
-  await page.waitForURL(/\/edit\//, { timeout: 60_000 });
-  const copy = page.url().match(/\/edit\/([^/?#]+)/)?.[1] ?? '';
+  const copy = await openGtBrandCopy(page, 60_000);
   scratch.add(copy);
   await waitEditor(page);
   const gt = await invoke<{ defaults?: { appearance?: string }; brand?: { appearance?: string } }>(

@@ -27,6 +27,10 @@
 // in every other run a local row is absent from the results and is listed apart under `local`
 // with the reason "no identity database on this base", never counted as passed, never "no step"
 // and never a reason to park, while a local row a run did record is judged like any row.
+// A localhost run whose environment names the server's overlay (`TURBOSLIDE_OVERLAY_DIR`) places
+// the GT deck's twins there before the drivers (scripts/probes/overlay-twins.mjs: a local
+// node-server build has no origin to fetch them from, so its copy of the GT brand deck is
+// refused); the summary's `seedTwins` names what was placed.
 // `--cost-rows` narrows the cost probe to the rows named and
 // `--cost-minutes` shortens each state's window for a smoke (the run of record keeps 3; the JSON
 // names the minutes it ran). On a deployment the cost probe reads the bearer for sync.status
@@ -160,6 +164,7 @@ import {
   tierRows,
 } from './core-matrix.mjs';
 import { declaredIds } from './core-walk/index.mjs';
+import { placeSeedTwins } from './overlay-twins.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const argv = process.argv.slice(2);
@@ -1028,6 +1033,8 @@ let health = null;
 let hand = null;
 /** The deployment's default template after the drivers, and whether this run put Blank back (the templates rows' side effect on a shared store). */
 let defaultTemplate = null;
+/* the seed twins the gate placed in a local server's overlay (placeOverlayTwins), or null */
+let seedTwins = null;
 let specs = null;
 let cost = null;
 /** The accounts spec's run (docs/PEOPLE.md 6.2): `--only accounts` alone runs it. */
@@ -1133,6 +1140,7 @@ if (REPORT !== null) {
   }
   const held = await takeLock();
   try {
+    if (LOCAL) seedTwins = placeOverlayTwins();
     if (runs('probe')) probe = runProbe();
     if (runs('specs')) specs = runSpecs();
     if (runs('cost')) cost = runCost();
@@ -1141,6 +1149,29 @@ if (REPORT !== null) {
     releaseLock(held);
   }
   defaultTemplate = await settleDefaultTemplate();
+}
+
+/**
+ * The GT deck's twins in the local server's overlay before the drivers (the realtime round, R5
+ * fix 3; scripts/probes/overlay-twins.mjs says why): a localhost run whose environment names the
+ * server's overlay (`TURBOSLIDE_OVERLAY_DIR`, as the accounts spec already reads it) gets the
+ * checkout's twins placed there, the files a deployment fetches from its CDN; a run without the
+ * variable places nothing and says so. Answers the reading for the summary.
+ */
+function placeOverlayTwins() {
+  const overlay = process.env.TURBOSLIDE_OVERLAY_DIR ?? '';
+  if (overlay === '') {
+    console.log(
+      "core-gate: TURBOSLIDE_OVERLAY_DIR is not set, so no seed twins were placed; a local node-server build's tmp overlay then refuses a copy of the GT brand deck (scripts/probes/overlay-twins.mjs)",
+    );
+    return { overlay: null, decks: [] };
+  }
+  const target = resolve(ROOT, overlay);
+  const decks = placeSeedTwins({ overlay: target, source: join(ROOT, 'decks') });
+  console.log(
+    `core-gate: the seed twins in ${target}: ${decks.map((d) => `${d.deck} ${d.placed} placed, ${d.present} present${d.source === null ? ' (no checkout folder)' : ''}`).join('; ')}`,
+  );
+  return { overlay: target, decks };
 }
 
 /**
@@ -1294,6 +1325,8 @@ const summary = {
           ids: tierRowsApart.map((r) => r.id),
         },
   defaultTemplate,
+  /* a localhost run: the GT deck's twins placed in the server's overlay before the drivers */
+  seedTwins,
   startedAt: new Date(startedAt).toISOString(),
   ms: Date.now() - startedAt,
   parked,

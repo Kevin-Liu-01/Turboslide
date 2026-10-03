@@ -291,16 +291,24 @@ const ROLE_OF_TYPE: Readonly<Record<string, string>> = {
   list: 'List',
 };
 
+/**
+ * The slides whose objects a band edits (LANDING.md 5): the hero frame's slide, the miniature's
+ * stage and the lighthouse on the canvas band.
+ */
+const EDITED_HOSTS = '[data-hero-slide], [data-mini-stage], [data-reserve="canvas"]';
+
 /** The block types a second click or Enter types in. */
 const TYPED_TYPES = new Set(['heading', 'paragraph', 'text']);
 
 /**
  * Marks every top level block of a slide root the build left unmarked as a selectable object
- * (`data-object="<slide>#<block>"`, a focusable group named by its role), so every slide the
- * miniature shows is editable (LANDING.md 2.5). A block inside an object (a plate's heading) keeps
- * its own mark; a thumbnail's objects are marked unfocusable.
+ * (`data-object="<slide>#<block>"`, a group named by its role), so every slide the miniature shows
+ * is editable (LANDING.md 2.5). A block inside an object (a plate's heading) keeps its own mark.
+ * The objects take Tab where a band edits them (`edited`) and hold text or a drawing; a band that
+ * only shows a slide gives its objects no Tab stop at first marking, which a band's own code may
+ * change (v4.md Q15); a thumbnail's, the print's and an overlay's (`live` false) never take one.
  */
-export function markObjects(root: HTMLElement, focusable: boolean): void {
+export function markObjects(root: HTMLElement, live: boolean, edited = live): void {
   const slide = root.dataset['slide'];
   if (slide === undefined) return;
   for (const el of root.querySelectorAll<HTMLElement>('[data-block]')) {
@@ -314,11 +322,24 @@ export function markObjects(root: HTMLElement, focusable: boolean): void {
     el.setAttribute('role', 'group');
     el.setAttribute('aria-roledescription', role === 'Shape' ? 'shape' : 'text box');
     el.setAttribute('aria-label', role);
-    el.tabIndex = focusable ? 0 : -1;
+    el.tabIndex = live && edited && drawn(el) ? 0 : -1;
     if (TYPED_TYPES.has(type)) el.dataset['typed'] = '';
   }
-  if (!focusable)
-    for (const el of root.querySelectorAll<HTMLElement>('[data-object]')) el.tabIndex = -1;
+  if (!live) for (const el of root.querySelectorAll<HTMLElement>('[data-object]')) el.tabIndex = -1;
+}
+
+/** An object that draws something: text, or an element (a plate's print, a shape's drawing). */
+const drawn = (el: HTMLElement): boolean =>
+  el.childElementCount > 0 || (el.textContent ?? '').trim() !== '';
+
+/**
+ * The Tab stops of a slide root's objects as the build marked them (every instance at rest carries
+ * `tabindex="0"`): kept where a band edits them and the object draws, removed elsewhere (v4.md
+ * Q15). Run once a root, at its first drawing, so a band's own code may set them after.
+ */
+function tabStops(root: HTMLElement, edited: boolean): void {
+  for (const el of root.querySelectorAll<HTMLElement>('[data-object]'))
+    el.tabIndex = edited && drawn(el) ? 0 : -1;
 }
 
 /** The chip word of an object: the build's role, else the marked role. */
@@ -920,15 +941,17 @@ export function paintSlide(
   state: HomeDeckState,
   options: PaintOptions = {},
 ): void {
+  // a thumbnail, the print and a view laid over the page (the scrubber's) are never edited
+  const live =
+    root.closest(THUMB_WRAPPERS) === null &&
+    root.closest('[data-print-deck], [data-live-overlay]') === null;
+  const edited = live && root.closest(EDITED_HOSTS) !== null;
   if (!seen.has(root)) {
     seen.add(root);
     heal(root);
+    tabStops(root, edited);
   }
-  // a thumbnail, the print and a view laid over the page (the scrubber's) are never edited
-  const focusable =
-    root.closest(THUMB_WRAPPERS) === null &&
-    root.closest('[data-print-deck], [data-live-overlay]') === null;
-  markObjects(root, focusable);
+  markObjects(root, live, edited);
   applyKit(root, state.kit, state.background);
   paintInserted(root, state);
   paintDeleted(root, state);

@@ -350,6 +350,32 @@ export function rows(): void {
       const t = await overlay(page);
       expect(t?.chip).toBe('Title');
       expect(t?.ring?.color).toBe(SELECT);
+
+      // any slide the frame shows takes the selection (2.2): slide 2's heading, from its filmstrip
+      const thumb = page.locator('[data-band="hero"] [data-hero-thumb="plan"]');
+      const heading = '[data-band="hero"] [data-hero-slide] [data-object="plan#h"]';
+      if ((await thumb.count()) > 0) await thumb.click();
+      // the frame's filmstrip shows a slide by a cut once V1#15's stage is on the tree
+      const shown = await page
+        .locator(heading)
+        .waitFor({ timeout: 2000 })
+        .then(
+          () => true,
+          () => false,
+        );
+      if (shown) {
+        const h = await geom(page, heading);
+        await page.mouse.click(h.cx, h.cy);
+        const o2 = await overlay(page);
+        expect(o2?.chip).toBe('Heading');
+        expect(o2?.ring?.color).toBe(SELECT);
+        expect(Math.abs((o2?.rect.w ?? 0) - h.w)).toBeLessThanOrEqual(1);
+      } else
+        test.info().annotations.push({
+          type: 'not reached',
+          description:
+            "another slide in the frame: the frame's filmstrip shows no other slide on this tree",
+        });
     } finally {
       await context.close();
     }
@@ -694,10 +720,13 @@ export function rows(): void {
   test(title('home.objects.keyboard'), async ({ browser }) => {
     const { context, page } = await openHome(browser);
     try {
-      // Tab reaches every object of slides 1 and 6, in reading order
+      // Tab reaches every object of the frame's slide, the miniature's stage and the lighthouse,
+      // in reading order (a band below the first screen once its chunk is in)
+      await bandReady(page, 'canvas');
+      if ((await page.locator('[data-band="menus"]').count()) > 0) await bandReady(page, 'menus');
       const want = await page
         .locator(
-          '[data-band="hero"] [data-object]:not([tabindex="-1"]), [data-band="canvas"] [data-object]:not([tabindex="-1"])',
+          '[data-band="hero"] [data-object]:not([tabindex="-1"]), [data-band="menus"] [data-mini-stage] [data-object]:not([tabindex="-1"]), [data-band="canvas"] [data-object]:not([tabindex="-1"])',
         )
         .evaluateAll((els) =>
           els

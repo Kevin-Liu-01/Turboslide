@@ -1,15 +1,9 @@
 import { HOME_DECK } from '../deck.generated';
-import { startAgents } from './agents';
 import { startCanvasField, startStrip } from './field';
 import { startHero } from './hero';
-import { startHistory } from './history';
-import { startMark } from './mark';
 import { hintInView } from './motion';
 import { startObjects } from './objects';
 import { paintSlide, paintSlides } from './paint';
-import { startPrint } from './print';
-import { armHint, hint, startSeam } from './seam';
-import { startShow } from './show';
 import { createHomeStore, restState, sourceOf, UNDO_BANDS } from './state';
 import type { HomeDeckState, HomeStore, SlideKey, UndoBand } from './state';
 
@@ -81,20 +75,22 @@ export function registerBand(band: BandId, load: () => Promise<BandModule>): voi
   entries.set(band, list);
 }
 
-/* The bands below the first screen, in the page's order (2.0); each entry is a chunk of its own
-   or a start of the core's (6.4: V3 and V4 add theirs). */
+/* The bands below the first screen, in the page's order (2.0). The core holds only the first
+   screen's code (4.1: the store, the motion system, the frame's selection, H5, the field printer,
+   the loader): every band's own code is a chunk of its own, imported when the band nears, and the
+   canvas band's two starts are the core's objects and field printer (6.4: V3 and V4 add theirs). */
 registerBand('canvas', async () => ({ start: (ctx) => void startObjects(ctx, 'canvas') }));
 registerBand('canvas', async () => ({ start: startCanvasField }));
 registerBand('tailor', () => import('./tailor'));
-registerBand('agents', async () => ({ start: startHistory }));
-registerBand('agents', async () => ({ start: startAgents }));
-registerBand('present', async () => ({ start: startShow }));
-registerBand('present', async () => ({ start: startPrint }));
-registerBand('export', async () => ({ start: startSeam }));
-registerBand('export', async () => ({
-  start: (ctx) => hintInView(ctx.band, armHint, hint),
-}));
-registerBand('close', async () => ({ start: startMark }));
+registerBand('agents', () => import('./history').then((m) => ({ start: m.startHistory })));
+registerBand('agents', () => import('./agents').then((m) => ({ start: m.startAgents })));
+registerBand('present', () => import('./show').then((m) => ({ start: m.startShow })));
+registerBand('present', () => import('./print').then((m) => ({ start: m.startPrint })));
+registerBand('export', () => import('./seam').then((m) => ({ start: m.startSeam })));
+registerBand('export', () =>
+  import('./seam').then((m) => ({ start: (ctx) => hintInView(ctx.band, m.armHint, m.hint) })),
+);
+registerBand('close', () => import('./mark').then((m) => ({ start: m.startMark })));
 
 /** How far ahead of the viewport a band's chunk is requested (4.2: two viewport heights). */
 const BAND_MARGIN = '200% 0px';
@@ -362,6 +358,12 @@ export function startLive(root: HTMLElement): void {
   recordPristine(root);
   const store = createHomeStore(restState(HOME_DECK, restRows(root)));
   live.store = store;
+  // the drivers read the page deck through the page (FOCUS.md 6.1): the state and the versions,
+  // read only, as `window.tsHomeMotion` gives the motion system's (LANDING.md 3.8)
+  (window as unknown as { tsHomeStore?: unknown }).tsHomeStore = {
+    get: () => store.get(),
+    versions: () => store.versions().map(({ state: _state, ...v }) => v),
+  };
   // every slide on the page draws the deck: the kit, the names, the counters, the objects; the
   // page's own ink follows an example kit (`main[data-page-kit]`, the fields' ink, integrator.md 4.1)
   const pageKit = (state: HomeDeckState): void => {

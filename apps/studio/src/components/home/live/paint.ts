@@ -1,3 +1,5 @@
+import { homeAsset } from '../assets';
+import type { HomeAssetRole } from '../assets';
 import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId, SheetBox } from '../deck.generated';
 import type {
@@ -438,6 +440,9 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
     cs: CSSStyleDeclaration,
   ): void => {
     it.css = it.el.style.cssText;
+    // the style the build wrote travels with the element, so a copy of a drawn slide can be put
+    // back (`heal`) before it is drawn again
+    it.el.dataset['liveCss'] = it.css;
     const w = r.width / k;
     const h = r.height / k;
     it.rest = { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w, h, rot: 0 };
@@ -458,6 +463,7 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
       if (m !== 0) {
         mt = collapse(mt, m);
         it.inner.push({ el: first, css: first.style.cssText });
+        first.dataset['liveCss'] = first.style.cssText;
         first.style.marginTop = '0px';
       }
     }
@@ -467,6 +473,7 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
         mb = collapse(mb, m);
         if (!it.inner.some((x) => x.el === last))
           it.inner.push({ el: last, css: last.style.cssText });
+        last.dataset['liveCss'] ??= last.style.cssText;
         last.style.marginBottom = '0px';
       }
     }
@@ -534,7 +541,11 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
         it.turned = 0;
         it.rest = null;
         it.el.style.cssText = it.css;
-        for (const x of it.inner) x.el.style.cssText = x.css;
+        for (const x of it.inner) {
+          x.el.style.cssText = x.css;
+          delete x.el.dataset['liveCss'];
+        }
+        delete it.el.dataset['liveCss'];
         it.inner = [];
       }
     },
@@ -657,7 +668,14 @@ function makeInserted(root: HTMLElement, block: InsertedBlock): HTMLElement | nu
   if (block.kind === 'copy') {
     const source = root.querySelector<HTMLElement>(`[data-object="${block.source ?? ''}"]`);
     if (source === null) return null;
-    inner = source.cloneNode(true) as Element;
+    // a copy of an inserted block copies the block inside its wrapper, not the wrapper
+    const from =
+      source.dataset['inserted'] !== undefined ? source.firstElementChild : (source as Element);
+    if (from === null) return null;
+    inner = from.cloneNode(true) as Element;
+    for (const name of ['data-inserted', 'data-free', 'data-typed', 'data-deleted', 'aria-hidden'])
+      inner.removeAttribute(name);
+    (inner as HTMLElement).style?.removeProperty('visibility');
     for (const el of [inner, ...inner.querySelectorAll('[data-object]')]) {
       el.removeAttribute('data-object');
       el.removeAttribute('tabindex');
@@ -776,7 +794,9 @@ const restingText = new WeakMap<HTMLElement, string>();
  * typing starts), so an Undo of the typed change puts the renderer's own markup back.
  */
 export function noteResting(text: HTMLElement): void {
-  if (!restingText.has(text)) restingText.set(text, text.innerHTML);
+  if (restingText.has(text)) return;
+  restingText.set(text, text.innerHTML);
+  text.dataset['liveRest'] = text.innerHTML;
 }
 
 /** Draws the typed words of every object: the typed text, or the markup it held at rest. */
@@ -787,7 +807,10 @@ export function paintTexts(root: HTMLElement, state: HomeDeckState): void {
     if (text.isContentEditable) continue;
     const typed = state.texts[id];
     if (typed !== undefined) {
-      if (!restingText.has(text)) restingText.set(text, text.innerHTML);
+      if (!restingText.has(text)) {
+        restingText.set(text, text.innerHTML);
+        text.dataset['liveRest'] = text.innerHTML;
+      }
       if (text.textContent !== typed || text.querySelector('[data-customer]') !== null) {
         // the visitor's words as plain text (the page never writes typed text as markup)
         text.textContent = typed;
@@ -798,6 +821,7 @@ export function paintTexts(root: HTMLElement, state: HomeDeckState): void {
         // the renderer's markup the box held at rest, read from the page before the first change
         text.innerHTML = html;
         restingText.delete(text);
+        delete text.dataset['liveRest'];
       }
     }
   }
@@ -848,6 +872,45 @@ export type PaintOptions = {
   thumbnails?: boolean;
 };
 
+/** Painters other lanes add (V3's slide 5 looks, v3.md R8), run on every root after the poses. */
+const painters: ((root: HTMLElement, state: HomeDeckState) => void)[] = [];
+
+/**
+ * Adds a painter `paintSlide` runs on every slide root it draws, after the poses (v3.md R8: V3's
+ * `paintNextSteps`, registered by the module that owns it, so the core never imports a file a later
+ * push lands).
+ */
+export function registerPainter(fn: (root: HTMLElement, state: HomeDeckState) => void): void {
+  if (!painters.includes(fn)) painters.push(fn);
+}
+
+/** The roots drawn on this page load: a root first seen is healed before it is drawn. */
+const seen = new WeakSet<HTMLElement>();
+
+/**
+ * Puts a copy of a drawn slide back as the build wrote it (a band that cloned a slide another band
+ * had drawn on: its freed boxes, spacers, inserted blocks, typed words and overlays), so the copy
+ * draws the state from its own rest. Every value it writes back is one the page read from the
+ * renderer's markup before it changed it (`data-live-css`, `data-live-rest`).
+ */
+function heal(root: HTMLElement): void {
+  for (const el of root.querySelectorAll(
+    '[data-live-spacer], [data-inserted], [data-live-overlay]',
+  ))
+    el.remove();
+  for (const el of root.querySelectorAll<HTMLElement>('[data-live-css]')) {
+    el.style.cssText = el.dataset['liveCss'] ?? '';
+    delete el.dataset['liveCss'];
+  }
+  for (const el of root.querySelectorAll<HTMLElement>('[data-live-rest]')) {
+    // the renderer's markup the box held before the visitor typed, recorded by the page
+    el.innerHTML = el.dataset['liveRest'] ?? '';
+    delete el.dataset['liveRest'];
+  }
+  for (const el of root.querySelectorAll('[contenteditable]'))
+    el.removeAttribute('contenteditable');
+}
+
 /** The customer each root last drew, so a rename finds the old name in it. */
 const drawnCustomer = new WeakMap<HTMLElement, string>();
 
@@ -857,7 +920,14 @@ export function paintSlide(
   state: HomeDeckState,
   options: PaintOptions = {},
 ): void {
-  const focusable = root.closest(THUMB_WRAPPERS) === null && !root.closest('[data-print-deck]');
+  if (!seen.has(root)) {
+    seen.add(root);
+    heal(root);
+  }
+  // a thumbnail, the print and a view laid over the page (the scrubber's) are never edited
+  const focusable =
+    root.closest(THUMB_WRAPPERS) === null &&
+    root.closest('[data-print-deck], [data-live-overlay]') === null;
   markObjects(root, focusable);
   applyKit(root, state.kit, state.background);
   paintInserted(root, state);
@@ -871,6 +941,13 @@ export function paintSlide(
     drawnCustomer.set(root, state.customer);
   }
   paintPoses(root, state);
+  for (const fn of painters) {
+    try {
+      fn(root, state);
+    } catch (error) {
+      console.error('a slide painter failed', error);
+    }
+  }
 }
 
 /** Draws the state on every slide root under `container` (the container itself included). */
@@ -892,4 +969,53 @@ export function paintSlides(
 /** Notes the root's customer as drawn (Tailor's band set the names itself). */
 export function noteCustomer(root: HTMLElement, customer: string): void {
   drawnCustomer.set(root, customer);
+}
+
+// ---------------------------------------------------------------------------------------------
+// The pictures of a slide a band placed itself (the miniature, the kits grid, the scrubber's view)
+
+/** The page's appearance, which picks a still's file (assets.ts). */
+const appearance = (): 'light' | 'dark' => {
+  const theme = document.documentElement.dataset['theme'];
+  if (theme === 'dark' || theme === 'light') return theme;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+/** The served still of a picture the document carries no still for, by its field box. */
+const ROLE_OF_FIELD: Readonly<Record<string, HomeAssetRole>> = {
+  'field-slide': 'field-still',
+  pattern: 'pattern-still',
+};
+
+/**
+ * Gives every picture box of a placed slide its dithered still (LANDING.md 2.0 "Slides"): a
+ * thumbnail takes the hero frame's thumbnail's inlined still of the same slide (no request); a
+ * large slide takes the served still of its role in the page's appearance, requested when it is
+ * first drawn (slide 7's and slide 8's pictures, 4.2). A box that has a still already is left.
+ */
+export function drawStills(root: HTMLElement, size: 'thumb' | 'large'): void {
+  for (const box of root.querySelectorAll<HTMLElement>('[data-field]')) {
+    const field = box.dataset['field'] ?? '';
+    const role = ROLE_OF_FIELD[field];
+    if (size === 'large' && role !== undefined) {
+      try {
+        const url = `url("${homeAsset(role, appearance()).path}")`;
+        if (box.style.getPropertyValue('--ts-still') !== url)
+          box.style.setProperty('--ts-still', url);
+      } catch {
+        /* the build has not written the still: the box keeps the thumbnail's */
+      }
+      if (box.style.getPropertyValue('--ts-still') !== '') continue;
+    }
+    if (box.style.getPropertyValue('--ts-still') !== '') continue;
+    if (getComputedStyle(box).getPropertyValue('--ts-still').trim() !== '') continue;
+    // each picture's field name is its slide's own, so a slide a menu row copied finds it too
+    const twin = document.querySelector<HTMLElement>(`[data-hero-thumb] [data-field="${field}"]`);
+    if (twin === null) continue;
+    const cs = getComputedStyle(twin);
+    for (const name of ['--ts-still', '--ts-still-disc']) {
+      const value = cs.getPropertyValue(name).trim();
+      if (value !== '') box.style.setProperty(name, value);
+    }
+  }
 }

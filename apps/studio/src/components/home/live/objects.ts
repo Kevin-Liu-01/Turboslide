@@ -87,6 +87,8 @@ export type ObjectsController = {
   onChange(fn: (sel: Selected | null, box: SheetBox | null) => void): void;
   /** places the overlay again (after the band moved the slide) */
   place(): void;
+  /** ends a typing at once (its words committed), the object staying selected */
+  finishTyping(): void;
 };
 
 type Drag = {
@@ -907,6 +909,12 @@ export function createObjects(
       listeners.push(fn);
     },
     place,
+    finishTyping() {
+      const e = editing;
+      if (e === null) return;
+      endEdit();
+      e.it.el.focus({ preventScroll: true });
+    },
   };
 }
 

@@ -10375,84 +10375,74 @@
       "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
     },
     {
-      "id": "home.motion.hero",
-      "feature": "decks",
-      "interaction": "The hero sequence plays once: rails 600 ms at 0, 60, 120 and 180 ms; the caret appears with the first key at T0 + 700 ms, holds solid with no blink and leaves by a cut 400 ms after the last key; the subtitle types; the Blue Marble develops from the inlined still over 1,500 ms, starting no later than T0 + 3.0 s, or its still shows at once at T0 + 3.0 s (answer 1); each of the three sentences ends by T0 + 4.5 s by its gap table and as measured; a key, press or wheel in the hero ends it at once; the h1 never moves; no visit sentence exceeds 50 characters; a return visit shows the next sentence with no text swapped after the first paint",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "hero-intro.png; b-strip-hero-field.png; critic 4, 6",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
-    },
-    {
       "id": "home.motion.in-view",
       "feature": "decks",
-      "interaction": "F1 (1,500 ms), C1 (the Rosetta Stone, 2,400 ms, answer 1), E1 (600 ms) and K1 (930 ms) play once at 35 percent in view and never again on scrolling back; a band above the viewport at first observation renders final",
+      "interaction": "C1 (the lighthouse, 2,400 ms), E1 (600 ms) and K1 (930 ms) play once at 35 percent in view, never again; a band above the viewport at first observation renders final; with Pause Motion each lands at its end state",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "mood-develop-light.png; close-mark.png",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.motion.rest",
       "feature": "decks",
-      "interaction": "After every band has played: 0 `requestAnimationFrame` calls in 2 s, `document.getAnimations()` empty and at most 2 ms of task time a second at the top, middle and bottom; no element animates `left`, `top`, `width` or `height`",
+      "interaction": "With Pause Motion pressed after every band played: 0 frame callbacks in 2 s, `document.getAnimations()` empty and at most 2 ms of task a second at the top, middle and bottom; no element animates `left`, `top`, `width` or `height` at any time",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "judge-1 6",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.motion.reduced",
       "feature": "decks",
-      "interaction": "Under reduce: `document.getAnimations()` empty after the load, a full scroll and each interaction; every field drawn at final tone at once; Undo, the show, the ring and the kit cut; every interaction works",
+      "interaction": "Under reduce: no `ts-intro`; `document.getAnimations()` empty after the load, a full scroll and each interaction; no loop starts and no shader chunk is requested; every field at its final tone, the people band's still, the pattern's still frame on both sides; Pause Motion hidden; every interaction works",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "direction-a reduced-result.json",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "evidence": "b-1440-light-reduced-full.jpg",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.motion.hidden-tab",
       "feature": "decks",
-      "interaction": "A sequence running when the tab hides finishes at its end state",
+      "interaction": "A hidden tab finishes a running one shot motion at its end state, and a visible tab leaves it there; its loop clauses (a hidden tab pauses every loop, a visible tab resumes the loops in view) are `home.motion.loops`'s from V4#18",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
-      "evidence": "research-motion 4.5",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "evidence": "4.1",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.budget.frame",
       "feature": "decks",
-      "interaction": "A field frame (the hero's develop, the gather, the Rosetta develop) at most 2 ms at 1x and 8 ms at 4x CPU; a band entering at most 10 ms at 1x and 35 ms at 4x; read at a load under 20",
+      "interaction": "4.1's lines: a field frame at most 2 ms at 1x and 8 ms at 4x, a band chunk's insert at most 10 ms at 1x and 35 ms at 4x, the hero's loop at most 12 ms of task a second, the shader at most 4 ms of main thread a frame; read at a load under 20",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "research-motion 4.9",
+      "evidence": "4.1",
       "measure": true,
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.budget.main-thread",
       "feature": "decks",
-      "interaction": "Before LCP no page code runs but the boot script (at most 1.5 KB, at most 5 ms at 1x) and script task time is at most 120 ms at 1x; the live module's boot at most 20 ms at 1x and 60 ms at 4x; task time from `load` to 6.5 s after at most 150 ms at 1x; no task over 50 ms from page code; read at a load under 20",
+      "interaction": "4.1's lines: the boot script at most 1 KB and 5 ms; script task time before LCP at most 120 ms at 1x; the live core's boot at most 20 ms at 1x and 60 ms at 4x; no task from page code over 50 ms; read at a load under 20",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "direction-a 7",
+      "evidence": "4.1",
       "measure": true,
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.a11y.keyboard-walk",
       "feature": "decks",
-      "interaction": "A Tab walk of the whole page reaches every control and object in reading order with a visible focus indicator and never enters a hidden control; no key without a modifier acts unless focus is on what it changes (SC 2.1.4); Cmd or Ctrl+Z with focus outside an editing band changes nothing",
+      "interaction": "A Tab walk of every control the tree renders, in reading order, each with a visible focus indicator, never entering a hidden control; Pause Motion reachable from the nav; no key without a modifier acts unless focus is on what it changes; Cmd or Ctrl+Z outside an editing band changes nothing",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "judge-3 2 (audit.mjs)",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 7 (L4)"
+      "evidence": "5",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     },
     {
       "id": "home.page.bands-after-load",
@@ -10503,6 +10493,26 @@
       "severity": 1,
       "evidence": "b-1440-light-full.jpg",
       "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+    },
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "interaction": "Pause Motion sits after Dark in the nav as a button with `aria-pressed`; pressing it, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; it reads \"Play Motion\"; the choice is in `localStorage` `ts-home-motion` and a reload paints with the button pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the button works for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "b-1440-light-first.png (the control); judge-1 (121 to 0 frame callbacks a second in B)",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+    },
+    {
+      "id": "home.motion.develop",
+      "feature": "decks",
+      "interaction": "The Blue Marble develops in the frame's slide 1 over 1,500 ms after `load` and one idle callback, started no later than the first paint plus 3.0 s or its still shown then; never under reduced motion or with Pause Motion stored (the still from the first paint); no CSS animation on the h1 or an element holding it",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "b-strip-hero-field.png",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
     }
   ]
 }

@@ -563,6 +563,11 @@ function armedPrint(
       whenNear(field.box, () => void read());
     },
     () => void read().then((made) => made?.play()),
+    /* Pause Motion when the band arrives: the still at once (3.2) */
+    () => {
+      hold?.done();
+      still();
+    },
   );
 }
 

@@ -7,8 +7,8 @@
 
 /** The minified boot script. */
 export const BOOT_SCRIPT: string =
-  '(function(e){let t=document,n=t.documentElement,r=`ts-home-visit`,i=e.s.length,a=0;try{a=+localStorage[r]%i||0,localStorage[r]=(a+1)%i}catch{}let o={ended:matchMedia(`(prefers-reduced-motion:reduce)`).matches,end:s};window.tsHomeBoot=o,o.ended||(n.classList.add(`ts-intro`),setTimeout(s,3e3));function s(){o.ended=!0,n.classList.remove(`ts-intro`)}function c(){let n=t.querySelector(`[data-visit]`);return n?(o.t0=performance.now(),a&&(n.textContent=e.s[a]),0):t.readyState>`l`&&requestAnimationFrame(c)}requestAnimationFrame(c)})({s:[``,`Turboslide puts one customer name on every slide.`,`Turboslide downloads PDF and PowerPoint files.`]});';
+  '(function(e){let t=document,n=t.documentElement,r=n.dataset,i=`paused`,a=`ts-home-motion`,o=`ts-home-visit`,s=e.s.length,c=0;try{c=+localStorage[o]%s||0,localStorage[o]=(c+1)%s,localStorage[a]==i&&(r.motion=i)}catch{}let l={ended:matchMedia(`(prefers-reduced-motion:reduce)`).matches||r.motion==i,end:u};window.tsHomeBoot=l,l.ended||(n.classList.add(`ts-intro`),setTimeout(u,3e3));function u(){l.ended=!0,n.classList.remove(`ts-intro`)}t.addEventListener(`click`,e=>{let t=e.target.closest?.(`[data-motion-toggle]`);if(!t)return;let n=r.motion!=i;n?(r.motion=i,u()):delete r.motion,t.ariaPressed=`${n}`;try{n?localStorage[a]=i:delete localStorage[a]}catch{}});function d(){let n=t.querySelector(`[data-visit]`);return n?(l.t0=performance.now(),c&&(n.textContent=e.s[c]),0):t.readyState>`l`&&requestAnimationFrame(d)}requestAnimationFrame(d)})({s:[``,`Turboslide puts one customer name on every slide.`,`Turboslide downloads PDF and PowerPoint files.`]});';
 
 /** sha256 of BOOT_SCRIPT, checked by `build-home-assets.ts --check` */
 export const BOOT_SHA256: string =
-  'b27945f1c546f9100a8adfc9632a2ab0ded7a71efab462d6a888f864fab5ac1b';
+  '92adfc7a009d8dd9b6fef8a149a6ffb9c3b508e0e0712e8ed168002891ec9516';

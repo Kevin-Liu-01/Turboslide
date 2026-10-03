@@ -3,9 +3,9 @@ import { loadavg } from 'node:os';
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
-import { BOOT_LIMIT_BYTES, FIELD_STILL_MS } from '../../../src/components/home/boot';
+import { BOOT_LIMIT_BYTES, FIELD_STILL_MS, MOTION_KEY } from '../../../src/components/home/boot';
 import { BOOT_SCRIPT } from '../../../src/components/home/boot.generated';
-import { HERO } from '../../../src/components/home/copy';
+import { HERO, NAV } from '../../../src/components/home/copy';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
 
@@ -25,6 +25,8 @@ import { rowsForDriver } from '../matrix';
 
 export const ROWS: readonly string[] = [
   'home.motion.hero',
+  'home.motion.pause',
+  'home.motion.develop',
   'home.motion.in-view',
   'home.motion.rest',
   'home.motion.reduced',
@@ -46,6 +48,8 @@ const INTERACTION_LOAD = 24;
 const MEASURE_LOAD = 20;
 /** A timer's lateness and one frame, the slack of a timing bound read at a quiet load. */
 const SLACK_MS = 60;
+/** One frame and the driver's own round trip, the bound of "within one frame". */
+const FRAME_SLACK_MS = 100;
 
 const DURATION = { gather: 1500, develop: 2400, line: 600, beat: 500 } as const;
 const MARK = { pieces: 7 } as const;
@@ -332,7 +336,15 @@ const firstPaintOf = (r: Rec): number =>
   NaN;
 
 const rec = (page: Page): Promise<Rec> =>
-  page.evaluate(() => (window as unknown as { __v4: Rec }).__v4);
+  page.evaluate(() => {
+    const r = (window as unknown as { __v4: Rec }).__v4;
+    /* the paint timing as the page holds it now (an observer's buffered entries may come late) */
+    const paints = performance
+      .getEntriesByType('paint')
+      .map((e) => [e.name, e.startTime] as [string, number]);
+    return { ...r, paints: paints.length > 0 ? paints : r.paints };
+  });
+const pageNow = (page: Page): Promise<number> => page.evaluate(() => performance.now());
 
 async function liveReady(page: Page): Promise<void> {
   await page.waitForSelector('main#top[data-live="ready"]', { timeout: 30_000 });
@@ -484,8 +496,6 @@ const motionState = (page: Page) =>
   }));
 
 const toggle = (page: Page) => page.locator('[data-motion-toggle]');
-/** Pause Motion's key (boot.ts from V4#9). */
-const MOTION_KEY = 'ts-home-motion';
 
 /** H5 in one visit: the hero field's develop, or its still shown by the first paint plus 3.0 s. */
 async function readDevelop(page: Page, label: string, quiet: boolean): Promise<void> {
@@ -569,8 +579,8 @@ export function rows(): void {
       } finally {
         await context.close();
       }
-      /* reduced motion: the still from the first paint, no develop */
-      for (const options of [{ reduce: true }] as const) {
+      /* reduced motion and Pause Motion stored: the still from the first paint, no develop */
+      for (const options of [{ reduce: true }, { paused: true }] as const) {
         const other = await open(browser, options);
         try {
           await visit(other.page);
@@ -582,6 +592,160 @@ export function rows(): void {
       test.skip(!quiet, `not read: load ${load()} (the functional checks passed)`);
     });
   }
+
+  /* ---- Pause Motion (3.2) ---- */
+  if (entered('home.motion.pause'))
+    test(title('home.motion.pause'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      let unread = load() >= INTERACTION_LOAD;
+      const { context, page } = await open(browser, { height: 700 });
+      try {
+        await visit(page, '?slow=10');
+        /* the button: after Dark in the navigation, a toggle reading Pause Motion */
+        await expect(toggle(page)).toHaveText(NAV.motion.pause, { useInnerText: true });
+        await expect(toggle(page)).toHaveAttribute('aria-pressed', 'false');
+        const order = await page.evaluate(() => {
+          const dark = document.querySelector('[data-theme-option="dark"]');
+          const button = document.querySelector('[data-motion-toggle]');
+          return dark !== null && button !== null
+            ? Boolean(dark.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+                button.closest('header') !== null
+            : false;
+        });
+        expect(order, 'after Dark, in the navigation').toBe(true);
+        await liveReady(page);
+        /* a running one shot motion lands at its end state within one frame: C1 at a tenth of
+           speed, pressed mid develop */
+        await loadBelow(page, 'canvas');
+        await wheelTo(page, await yToSee(page, SELECTORS.canvas));
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-band="canvas"] [data-field="canvas"]')
+              ?.getAttribute('data-field-state') === 'developing',
+          undefined,
+          { timeout: 30_000 },
+        );
+        await page.waitForTimeout(3_000);
+        expect(await page.locator(SELECTORS.canvas).getAttribute('data-field-state')).toBe(
+          'developing',
+        );
+        const pressedAt = await pageNow(page);
+        await toggle(page).click();
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-band="canvas"] [data-field="canvas"]')
+              ?.getAttribute('data-field-state') === 'still',
+          undefined,
+          { timeout: 5_000 },
+        );
+        const landed = (await rec(page)).states.find(
+          ([at, name, state]) => name === 'canvas' && state === 'still' && at >= pressedAt,
+        );
+        note('C1 at its end state after the press', (landed?.[0] ?? NaN) - pressedAt);
+        if (!unread)
+          expect((landed?.[0] ?? Infinity) - pressedAt).toBeLessThanOrEqual(FRAME_SLACK_MS);
+        await expect(toggle(page)).toHaveText(NAV.motion.play, { useInnerText: true });
+        await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+        expect(await page.evaluate((key) => localStorage.getItem(key), MOTION_KEY)).toBe('paused');
+        /* 0 frame callbacks in the next 2 s without input, at the top, the middle and the bottom */
+        const height = await page.evaluate(
+          () => document.documentElement.scrollHeight - innerHeight,
+        );
+        for (const [where, y] of [
+          ['top', 0],
+          ['middle', Math.round(height / 2)],
+          ['bottom', height],
+        ] as const) {
+          await page.evaluate((to) => window.scrollTo(0, to), y);
+          await page.waitForTimeout(1_500);
+          const quietReading = await idle(page, context);
+          note(`paused at the ${where}: frame callbacks in 2 s`, `${quietReading.raf}`);
+          expect(quietReading.raf, `frame callbacks at the ${where}`).toBe(0);
+          expect((await motionState(page)).running, `loops running at the ${where}`).toEqual([]);
+        }
+        /* visitor motions still run: a drag on the lighthouse and the show */
+        const heading = page.locator('[data-band="canvas"] [data-object="lighthouse#h"]');
+        if ((await heading.count()) > 0) {
+          await heading.scrollIntoViewIfNeeded();
+          const box = (await heading.boundingBox())!;
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2 + 30, {
+            steps: 6,
+          });
+          await page.mouse.up();
+          const moved = (await heading.boundingBox())!;
+          expect(Math.round(moved.x - box.x), 'the drag moved the heading').toBeGreaterThan(30);
+        }
+        const present = page.locator('[data-present]');
+        if ((await present.count()) > 0) {
+          await present.scrollIntoViewIfNeeded();
+          const props = (await rec(page)).props.length;
+          await present.click();
+          await expect(page.locator('[data-show]')).toBeVisible();
+          expect((await rec(page)).props.length, 'the show moved').toBeGreaterThan(props);
+          await page.keyboard.press('Escape');
+        }
+      } finally {
+        await context.close();
+      }
+      /* remembered: a reload paints with the button pressed, the still and nothing starting */
+      const again = await open(browser, { paused: true });
+      try {
+        await visit(again.page);
+        const first = await again.page.evaluate(() => ({
+          motion: document.documentElement.getAttribute('data-motion'),
+        }));
+        expect(first.motion).toBe('paused');
+        const r = await rec(again.page);
+        expect(
+          r.motion.filter(([, v]) => v !== 'paused'),
+          'never played',
+        ).toEqual([]);
+        await expect(toggle(again.page)).toHaveAttribute('aria-pressed', 'true');
+        await expect(toggle(again.page)).toHaveText(NAV.motion.play, { useInnerText: true });
+        await readNoDevelop(again.page);
+        await again.page.waitForTimeout(1_000);
+        const quietReading = await idle(again.page, again.context);
+        expect(quietReading.raf, 'no automatic motion starts').toBe(0);
+        expect((await motionState(again.page)).running).toEqual([]);
+        /* Play puts the key away */
+        await toggle(again.page).click();
+        await expect(toggle(again.page)).toHaveAttribute('aria-pressed', 'false');
+        expect(
+          await again.page.evaluate((key) => localStorage.getItem(key), MOTION_KEY),
+        ).toBeNull();
+      } finally {
+        await again.context.close();
+      }
+      /* storage that throws: the page plays and the button works for the visit */
+      const blind = await open(browser, { storageThrows: true });
+      try {
+        await visit(blind.page);
+        expect(
+          await blind.page.evaluate(() => document.documentElement.getAttribute('data-motion')),
+        ).toBeNull();
+        await toggle(blind.page).click();
+        expect(
+          await blind.page.evaluate(() => document.documentElement.getAttribute('data-motion')),
+        ).toBe('paused');
+        await expect(toggle(blind.page)).toHaveAttribute('aria-pressed', 'true');
+      } finally {
+        await blind.context.close();
+      }
+      /* hidden under reduced motion */
+      const reduced = await open(browser, { reduce: true });
+      try {
+        await visit(reduced.page);
+        await expect(toggle(reduced.page)).toBeHidden();
+      } finally {
+        await reduced.context.close();
+      }
+      if (load() >= INTERACTION_LOAD) unread = true;
+      test.skip(unread, `not read: load ${load()} (the functional checks passed)`);
+    });
 
   /* ---- the one shot motions at 35 percent in view (3.5) ---- */
   if (entered('home.motion.in-view'))
@@ -735,7 +899,7 @@ export function rows(): void {
           ['bottom', max],
         ] as const) {
           await page.evaluate((to) => window.scrollTo(0, to), y);
-          await page.waitForTimeout(1_500);
+          await page.waitForTimeout(2_500);
           const reading = await idle(page, context);
           const animations = await page.evaluate(() => document.getAnimations().length);
           note(`paused at the ${where}: frame callbacks in 2 s`, `${reading.raf}`);

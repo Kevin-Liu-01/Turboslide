@@ -1,10 +1,57 @@
-/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4, 2.10, 2.13; the second pass).
-   V4's file: H5's hidden still from V1#8; Pause Motion's button and its guard, the interludes, the
-   two people band and the patterns band join in V4's pushes. Imported after home.css, so the
-   reduced motion block sits last. */
+/* The page's motion surfaces (docs/LANDING.md section 3, 2.1; the second pass). V4's file: H5's
+   hidden still, Pause Motion's button and its guard; the interludes, the two people band and the
+   patterns band join in V4's later pushes. Imported after home.css, so the reduced motion block
+   sits last. */
+
+/* ---- Pause Motion (3.2): a 32 px text button with a 1 px hairline in the navigation; the word
+   follows html[data-motion], which the boot script sets before the first paint. Both words hold
+   one grid cell, so the button keeps the longer word's width and nothing in the bar moves when
+   it is pressed (3.7); pressed, its hairline is the ink, as the pressed appearance button's ---- */
+header .ts-motion-toggle.pt-ib {
+  display: inline-grid;
+  place-items: center;
+  height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--pt-edge);
+  border-radius: 0;
+  color: var(--pt-ink);
+  white-space: nowrap;
+}
+
+header .ts-motion-toggle.pt-ib[aria-pressed='true'] {
+  border-color: var(--pt-ink);
+  background: transparent;
+}
+
+.ts-motion-toggle > .pt-lb {
+  grid-area: 1 / 1;
+}
+
+.ts-motion-toggle .is-play,
+html[data-motion='paused'] .ts-motion-toggle .is-pause {
+  visibility: hidden;
+}
+
+html[data-motion='paused'] .ts-motion-toggle .is-play {
+  visibility: visible;
+}
+
+/* the guard: no CSS animation runs while motion is paused (3.2) */
+html[data-motion='paused'] *,
+html[data-motion='paused'] *::before,
+html[data-motion='paused'] *::after {
+  animation-play-state: paused !important;
+}
 
 /* ---- H5 (3.5): the boot script's ts-intro hides the Blue Marble's still in the frame's slide 1
    until the develop starts or the boot takes the class away 3,000 ms after it starts ---- */
 html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   visibility: hidden;
+}
+
+/* ---- reduced motion (3.9): Pause Motion is hidden, decided at the first paint ---- */
+@media (prefers-reduced-motion: reduce) {
+  .ts-motion-toggle {
+    display: none;
+  }
 }

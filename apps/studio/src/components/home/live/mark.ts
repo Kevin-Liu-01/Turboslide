@@ -2,10 +2,10 @@ import type { LiveContext } from './index';
 import { installGuards, onceInView, play, reduced } from './motion';
 
 /**
- * K1, the close slide signs the deck (docs/LANDING.md 2.10, 3.2 K1, 3.3): at 35 percent in view,
+ * K1, the close slide signs the deck (docs/LANDING.md 2.15, 3.5 K1, 3.3): at 35 percent in view,
  * once, the mark's seven pieces arrive from the left, each over 48 sheet units in 600 ms on the
  * arrive curve with its opacity over 120 ms, 55 ms apart from the leftmost (B's
- * `b-strip-mark.png`, A's `close-mark.png`), 930 ms in all. L4's file.
+ * `b-strip-mark.png`, A's `close-mark.png`), 930 ms in all. V4's file.
  *
  * The pieces are `[data-mark-piece="0"]` to `"6"`, numbered left to right, split at build from the
  * one path of `packages/theme/brand/mark.svg` (l4.md M5). They move by the individual `translate`
@@ -64,6 +64,13 @@ export function startMark(ctx: LiveContext): void {
         );
         play(piece, [{ opacity: 0 }, { opacity: 1 }], 'fast', 'fade', 'close', index * STAGGER_MS);
       });
+    },
+    /* Pause Motion when the close arrives: the mark drawn still at once (3.2) */
+    () => {
+      for (const piece of pieces) {
+        piece.style.removeProperty('translate');
+        piece.style.removeProperty('opacity');
+      }
     },
   );
 }

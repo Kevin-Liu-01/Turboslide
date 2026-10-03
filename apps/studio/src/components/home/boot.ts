@@ -9,16 +9,23 @@
  *
  * 1. The visit (`ts-home-visit` in localStorage holds the index, 0 to 2, of the next visit's
  *    sentence, so each visit shows the next sentence, wrapping after the third, and the first
- *    when storage throws).
- * 2. `ts-intro` on `html` unless reduced motion is set: it hides H5's still, the Blue Marble in
- *    the editor frame's slide 1, until the live core's develop starts. The script takes it away
- *    3,000 ms after it starts (H5's latest start, 3.5), so the still shows then unless a develop
- *    runs; once the live core runs, `live/motion.ts` also takes it away on a hidden tab, a press
- *    in the hero and a change of reduced motion. The script never draws a frame itself.
+ *    when storage throws) and Pause Motion's stored choice (`ts-home-motion`, `paused` or absent;
+ *    playing when storage throws or is empty). A paused visitor's `html` takes
+ *    `data-motion="paused"` here, before the first paint, so the page paints still (3.2).
+ * 2. `ts-intro` on `html` unless reduced motion is set or motion is paused: it hides H5's still,
+ *    the Blue Marble in the editor frame's slide 1, until the live core's develop starts. The
+ *    script takes it away 3,000 ms after it starts (H5's latest start, 3.5) and on a press of
+ *    Pause Motion, so the still shows then unless a develop runs; once the live core runs,
+ *    `live/motion.ts` also takes it away on a hidden tab and a change of reduced motion. The
+ *    script never draws a frame itself.
  * 3. In the first animation frame that finds the lead's `[data-visit]` element (which the browser
  *    runs before it paints that frame) it sets the visit's sentence there, so the sentence never
  *    changes after it paints. The markup holds the first sentence, so the script carries only the
  *    others.
+ * 4. One click listener on the document for `[data-motion-toggle]`, Pause Motion's button in the
+ *    navigation: a press toggles `html[data-motion]`, the stored choice and the button's
+ *    `aria-pressed`, so the button works from its first paint, before hydration and before the
+ *    live core loads; `live/motion.ts` follows the attribute from then on.
  *
  * It exposes `window.tsHomeBoot` (`t0`, `ended`, `end()`), which `live/hero.ts`, `live/motion.ts`
  * and the drivers read.
@@ -33,6 +40,8 @@ export const SENTENCE_MAX = 50;
  * develop.
  */
 export const FIELD_STILL_MS = 3000;
+/** The localStorage key of Pause Motion's stored choice (3.2). */
+export const MOTION_KEY = 'ts-home-motion';
 /** The localStorage key of the next visit's sentence (2.2). */
 export const VISIT_KEY = 'ts-home-visit';
 
@@ -43,7 +52,7 @@ export type BootData = { s: readonly string[] };
 export type HomeBootState = {
   /** the frame that first held the lead, in `performance.now()` ms; absent until it is read */
   t0?: number;
-  /** true once `ts-intro` left `html`, or from the start under reduced motion */
+  /** true once `ts-intro` left `html`, or from the start under reduced motion or Pause Motion */
   ended: boolean;
   /** takes `ts-intro` away at once, so H5's still shows unless a develop runs */
   end(): void;
@@ -80,6 +89,9 @@ export function bootSource(sentences: readonly string[]): { source: string } {
 export function homeBoot(data: BootData): void {
   const doc = document;
   const root = doc.documentElement;
+  const set = root.dataset;
+  const paused = 'paused';
+  const motionKey = 'ts-home-motion';
   const visitKey = 'ts-home-visit';
   const n = data.s.length;
   let visit = 0;
@@ -88,11 +100,12 @@ export function homeBoot(data: BootData): void {
        items, so a missing key reads undefined and the first sentence */
     visit = +localStorage[visitKey] % n || 0;
     localStorage[visitKey] = (visit + 1) % n;
+    if (localStorage[motionKey] == paused) set['motion'] = paused;
   } catch {
-    /* the first sentence when storage throws */
+    /* the first sentence, and playing, when storage throws */
   }
   const state: HomeBootState = {
-    ended: matchMedia('(prefers-reduced-motion:reduce)').matches,
+    ended: matchMedia('(prefers-reduced-motion:reduce)').matches || set['motion'] == paused,
     end,
   };
   window.tsHomeBoot = state;
@@ -105,6 +118,24 @@ export function homeBoot(data: BootData): void {
     state.ended = true;
     root.classList.remove('ts-intro');
   }
+
+  /* Pause Motion (3.2): the page's attribute, the stored choice and the button's state */
+  doc.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest?.('[data-motion-toggle]');
+    if (!button) return;
+    const pause = set['motion'] != paused;
+    if (pause) {
+      set['motion'] = paused;
+      end();
+    } else delete set['motion'];
+    button.ariaPressed = `${pause}`;
+    try {
+      if (pause) localStorage[motionKey] = paused;
+      else delete localStorage[motionKey];
+    } catch {
+      /* the choice holds for the visit when storage throws */
+    }
+  });
 
   function frame(): unknown {
     const lead = doc.querySelector('[data-visit]');

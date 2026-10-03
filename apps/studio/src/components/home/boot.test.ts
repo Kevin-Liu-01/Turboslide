@@ -3,13 +3,21 @@ import { createContext, runInContext } from 'node:vm';
 import { minifySync } from 'vite';
 import { describe, expect, it } from 'vitest';
 
-import { BOOT_LIMIT_BYTES, FIELD_STILL_MS, SENTENCE_MAX, VISIT_KEY, bootSource } from './boot';
+import {
+  BOOT_LIMIT_BYTES,
+  FIELD_STILL_MS,
+  MOTION_KEY,
+  SENTENCE_MAX,
+  VISIT_KEY,
+  bootSource,
+} from './boot';
 import type { HomeBootState } from './boot';
 
 // The page's boot script (docs/LANDING.md 2.2, 3.2, 3.5, 3.9; the second pass): the minified script
 // stays inside 1 KB and reads no layout, and the script run in a stand in browser turns the visits
-// in order, sets the visit's sentence in the lead's first frame and keeps `ts-intro` only while
-// H5's still may develop.
+// in order, sets the visit's sentence in the lead's first frame, paints a stored Pause Motion
+// before anything else, keeps `ts-intro` only while H5's still may develop, and toggles Pause
+// Motion from its button with no other script on the page.
 
 const SENTENCES = [
   'Turboslide is a slides editor in the browser.',
@@ -101,6 +109,15 @@ function run(stand: ReturnType<typeof standIn>): void {
   runInContext(bootSource(SENTENCES).source, stand.context);
 }
 
+/** A button the click listener finds by `closest`. */
+function toggleButton() {
+  const button = {
+    ariaPressed: 'false',
+    closest: (selector: string) => (selector === '[data-motion-toggle]' ? button : null),
+  };
+  return button;
+}
+
 describe('the boot script', () => {
   it('minifies to at most 1 KB and reads no layout', () => {
     const { source } = bootSource(SENTENCES);
@@ -110,6 +127,7 @@ describe('the boot script', () => {
       /getBoundingClientRect|offset(Width|Height|Top|Left)|getComputedStyle|scroll(Top|Height)/,
     );
     /* the serialised body writes its keys and its hold out; they are the module's constants */
+    expect(source).toMatch(new RegExp(`["'\`]${MOTION_KEY}["'\`]`));
     expect(source).toMatch(new RegExp(`["'\`]${VISIT_KEY}["'\`]`));
     expect(FIELD_STILL_MS).toBe(3000);
     expect(source).toMatch(/setTimeout\(end, 3e3\)/);
@@ -138,12 +156,17 @@ describe('the boot script', () => {
     expect(read).toEqual([SENTENCES[0], SENTENCES[1], SENTENCES[2], SENTENCES[0]]);
   });
 
-  it('reads the first sentence when storage throws', () => {
+  it('reads the first sentence and plays when storage throws, and the button still works', () => {
     const stand = standIn({ storage: 'throws' });
     run(stand);
     stand.frame(true);
     expect(stand.lead.textContent).toBe(SENTENCES[0]);
+    expect(stand.dataset['motion']).toBeUndefined();
     expect(stand.classes.has('ts-intro')).toBe(true);
+    const button = toggleButton();
+    stand.click(button);
+    expect(stand.dataset['motion']).toBe('paused');
+    expect(button.ariaPressed).toBe('true');
   });
 
   it('keeps ts-intro until H5 may no longer start, then shows the still', () => {
@@ -163,5 +186,33 @@ describe('the boot script', () => {
     expect(stand.classes.size).toBe(0);
     expect(stand.timers).toHaveLength(0);
     expect(stand.window.tsHomeBoot?.ended).toBe(true);
+  });
+
+  it('paints a stored Pause Motion still: the attribute before anything parses, no intro', () => {
+    const storage = new Map([[MOTION_KEY, 'paused']]);
+    const stand = standIn({ storage });
+    run(stand);
+    expect(stand.dataset['motion']).toBe('paused');
+    expect(stand.classes.size).toBe(0);
+    expect(stand.window.tsHomeBoot?.ended).toBe(true);
+  });
+
+  it('toggles Pause Motion from its button: the attribute, aria-pressed and the stored choice', () => {
+    const storage = new Map<string, string>();
+    const stand = standIn({ storage });
+    run(stand);
+    const button = toggleButton();
+    stand.click({ closest: () => null });
+    expect(stand.dataset['motion']).toBeUndefined();
+    stand.click(button);
+    expect(stand.dataset['motion']).toBe('paused');
+    expect(button.ariaPressed).toBe('true');
+    expect(storage.get(MOTION_KEY)).toBe('paused');
+    /* pausing shows H5's still at once */
+    expect(stand.classes.has('ts-intro')).toBe(false);
+    stand.click(button);
+    expect(stand.dataset['motion']).toBeUndefined();
+    expect(button.ariaPressed).toBe('false');
+    expect(storage.has(MOTION_KEY)).toBe(false);
   });
 });

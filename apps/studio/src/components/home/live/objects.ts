@@ -1,36 +1,37 @@
 import { HISTORY } from '../copy';
 import { HOME_DECK } from '../deck.generated';
-import type { HomeObject, HomeObjectId, HomeSlideId, SheetBox } from '../deck.generated';
+import type { HomeSlideId, SheetBox } from '../deck.generated';
 import type { LiveContext } from './index';
 import { createLog } from './log';
+import type { CommandLog } from './log';
 import { ease, finishBand, reduced, sequence, slowFactor } from './motion';
-import type { HomeDeckState, StoreEvent } from './state';
+import { CLEAR_ZONE, noteResting, roleOf, sheetLayout, textOf, typesIn, UNITS } from './paint';
+import type { LayoutItem } from './paint';
+import type { HomeDeckState, ObjectKey, SlideKey, StoreEvent } from './state';
 
 /**
- * The editor's selection on the page's slides (docs/LANDING.md 2.2 and 2.6, "Interaction"; a
- * replica of research-product.md 5.1 and `packages/chrome/src/Overlay.tsx`): a click or Tab on an
- * object draws the 1 px ring in `--pt-select`, eight squares, the rotation stem and knob and the
- * role chip; a drag moves it with no easing and snaps within 6 px of the sheet's centre lines and
- * content margins with a 1 px guide (Alt drags free); a square resizes in the object's own axes
- * with the opposite side fixed; the knob turns in whole degrees, 15 with Shift. The keys are the
- * editor's (`packages/viewer/src/keys.ts` 161 to 168; `packages/chrome/src/menus/keys.ts` 741 to
- * 799): the arrows nudge 1 unit and 10 with Shift, nudges within 700 ms are one undo step, Option
- * or Alt with Left or Right turns 15 degrees and 1 with Shift, Enter types, Escape ends the typing
- * and keeps focus on the object. A second click types at the pointer with the browser's caret.
+ * The editor's selection on the page's slides (docs/LANDING.md 2.2, 2.5 and 2.6 "Interaction"; a
+ * replica of research-product.md 5.1 and `packages/chrome/src/Overlay.tsx`), on the slide a band
+ * shows now: the hero frame's (whichever slide its filmstrip shows), the miniature's stage and the
+ * lighthouse. A click or Tab on an object draws the 1 px ring in `--pt-select`, eight squares, the
+ * rotation stem and knob and the role chip; a drag moves it with no easing and snaps within 6 px of
+ * the sheet's centre lines and content margins with a 1 px guide (Alt drags free); a square resizes
+ * in the object's own axes with the opposite side fixed; the knob turns in whole degrees, 15 with
+ * Shift. The keys are the editor's (`packages/viewer/src/keys.ts` 161 to 168;
+ * `packages/chrome/src/menus/keys.ts` 741 to 799): the arrows nudge 1 unit and 10 with Shift,
+ * nudges within 700 ms are one undo step, Option or Alt with Left or Right turns 15 degrees and 1
+ * with Shift, Enter types, Escape ends the typing and keeps focus on the object. A second click
+ * types at the pointer with the browser's caret.
  *
- * The store holds every pose (`poses`, sheet units) and every typed text (`texts`); this module
- * writes them on a gesture's release and draws them on every store event, so Undo (the band's
- * button, or Cmd or Ctrl+Z in `index.ts`) returns an object on the move curve by `transform`
- * (3.2 C5, 300 ms plus half the distance, at most 700 ms). The first change on a slide frees its
- * objects as the editor's "first drag turns the slide into a canvas": each keeps its place, held
- * by an empty spacer in the slide's flow, so a resized box never pushes another; the last Undo puts
- * the layout back. Nothing is drawn at rest (`decks.home.capture-plain`): the overlay is created
- * on the first selection, in `main#top`, outside every sheet (l3.md R14).
+ * The store holds every pose and every typed text; this module commits them on a gesture's release
+ * and draws a gesture's live pose on the band's own slide only. `paint.ts` draws the committed
+ * state on every slide of the page, so the frame's thumbnails, the miniature, the show and the
+ * print follow (1.2 item 3). Undo returns an object on the move curve by `transform` (3.6 C5, 300
+ * ms plus half the distance, at most 700 ms). Nothing is drawn at rest (`decks.home.capture-plain`):
+ * the overlay is created on the first selection, in `main#top`, outside every sheet (l3.md R14).
  */
 
-/** Sheet units across: 1 unit is 1/1,600 of the sheet's width (LANDING.md 2.0). */
-const UNITS = 1600;
-/** The sheet's centre lines and content margins (LANDING.md 2.2). */
+/** The sheet's centre lines and content margins, in units (LANDING.md 2.2). */
 const SNAP_X = [137, 800, 1463] as const;
 const SNAP_Y = [129, 450, 771] as const;
 /** Snap distance in screen pixels. */
@@ -44,11 +45,9 @@ const NUDGE = 1;
 const NUDGE_SHIFT = 10;
 const TURN = 15;
 const TURN_FINE = 1;
-/** The paper a moved text box draws around itself on a dithered slide, in units (integrator.md 2.2). */
-const CLEAR_ZONE = 24;
 /** The narrowest box a resize leaves, in units. */
 const MIN_SIDE = 40;
-/** Undo's return: 300 ms plus half the distance in px, at most 700 ms (3.2 C5). */
+/** Undo's return: 300 ms plus half the distance in px, at most 700 ms (3.6 C5). */
 const RETURN_BASE_MS = 300;
 const RETURN_MAX_MS = 700;
 
@@ -65,39 +64,34 @@ const DIRS: Readonly<Record<Handle, readonly [number, number]>> = {
   w: [-1, 0],
 };
 
-/** The words Version history names an object with (integrator.md 4.4). */
-const NAMES: Readonly<Record<HomeObject['role'], string>> = {
-  Title: 'the title',
-  Subtitle: 'the subtitle',
-  Heading: 'the heading',
-  Text: 'the text',
-  Credit: 'the credit',
-  Plate: 'the plate',
-};
+/** The words Version history names an object with (integrator.md 4.4), by its chip word. */
+export function objectName(role: string): string {
+  return `the ${role.toLowerCase()}`;
+}
 
-type Item = {
-  id: HomeObjectId;
-  el: HTMLElement;
-  role: HomeObject['role'];
-  editable: boolean;
-  block: string;
-  parent: Item | null;
-  /** the box at rest in sheet units, read when the slide's objects are freed */
-  rest: SheetBox | null;
-  /** the freed box's place in its containing block, in units; null when it was placed already */
-  at: { left: number; top: number } | null;
-  /** the freed box's size in the flow, in units */
-  flow: { w: number; h: number } | null;
-  spacer: HTMLElement | null;
-  /** the wrapper's own inline style before the slide was freed, put back by the last Undo */
-  css: string;
-  /** the rotation last drawn on the object, in degrees */
-  turned: number;
+/** The bands whose slides take the selection (2.0 "Undo"). */
+export type ObjectsBand = 'hero' | 'menus' | 'canvas';
+
+export type Selected = { id: ObjectKey; el: HTMLElement; role: string; root: HTMLElement };
+
+export type ObjectsController = {
+  /** the slide root the band edits now */
+  sheet(): HTMLElement | null;
+  selected(): Selected | null;
+  /** selects an object of the shown slide; with `type` it types at once (Insert > Text box) */
+  select(id: ObjectKey, options?: { type?: boolean }): boolean;
+  deselect(): void;
+  /** the box an object stands in now, in units: the store's pose, else its box at rest */
+  poseOf(id: ObjectKey): SheetBox | null;
+  /** called on every selection change and during a gesture with the live box */
+  onChange(fn: (sel: Selected | null, box: SheetBox | null) => void): void;
+  /** places the overlay again (after the band moved the slide) */
+  place(): void;
 };
 
 type Drag = {
   mode: 'move' | 'resize' | 'rotate';
-  item: Item;
+  item: LayoutItem;
   handle: Handle | null;
   pointer: number;
   x0: number;
@@ -112,10 +106,8 @@ type Drag = {
   target: Element;
 };
 
+/** An object's centre in units relative to its sheet, and its drawn rotation. */
 type Visual = { cx: number; cy: number; rot: number };
-
-const objectFacts = (slide: HomeSlideId, id: string): HomeObject | undefined =>
-  HOME_DECK.slides[slide]?.objects.find((o) => o.id === id);
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
@@ -126,204 +118,70 @@ const normalize = (deg: number): number => {
   return a;
 };
 
-/** Starts the selection replica on the hero or the canvas band's slide. */
-export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
-  const found = ctx.band.querySelector<HTMLElement>('[data-home-slides]');
-  if (found === null) return;
-  const sheet: HTMLElement = found;
-  const slide = sheet.dataset['slide'] as HomeSlideId;
+const slideOf = (root: HTMLElement): SlideKey => root.dataset['slide'] as SlideKey;
+
+/** The block id the CLI prints for an object after `slide to-canvas` (2.6), else its own. */
+const canvasBlock = (id: ObjectKey): string => {
+  const slide = id.slice(0, id.indexOf('#')) as HomeSlideId;
+  const facts = HOME_DECK.slides[slide]?.objects.find((o) => o.id === id);
+  return facts?.canvasBlock ?? id.slice(id.indexOf('#') + 1);
+};
+
+/**
+ * Starts the selection on a band's shown slide. `host` holds the band's editable slide root (the
+ * hero's `[data-hero-slide]`, the miniature's `[data-mini-stage]`, the canvas band's box); the
+ * root may be replaced (a filmstrip shows another slide), and every listener is on the host, so the
+ * selection follows whichever slide is there.
+ */
+export function createObjects(
+  ctx: LiveContext,
+  band: ObjectsBand,
+  host: HTMLElement,
+): ObjectsController {
   const store = ctx.store;
-  const log = band === 'canvas' ? createLog(ctx.band, slide, ctx.announce) : null;
+  const listeners: ((sel: Selected | null, box: SheetBox | null) => void)[] = [];
+  /** the canvas band's Command row, made for the slide it shows */
+  let log: CommandLog | null = null;
+  let logSlide: SlideKey | null = null;
 
-  const items: Item[] = [];
-  for (const el of sheet.querySelectorAll<HTMLElement>('[data-object]')) {
-    const id = el.dataset['object'] as HomeObjectId;
-    const facts = objectFacts(slide, id);
-    const block = facts?.canvasBlock ?? id.slice(id.indexOf('#') + 1);
-    let parent: Item | null = null;
-    for (const it of items) if (it.el.contains(el)) parent = it;
-    items.push({
-      id,
-      el,
-      role: facts?.role ?? 'Text',
-      editable:
-        facts?.editable ??
-        (el.matches('[data-block]') || el.querySelector('[data-block]') !== null),
-      block,
-      parent,
-      rest: null,
-      at: null,
-      flow: null,
-      spacer: null,
-      css: '',
-      turned: 0,
-    });
-  }
-  if (items.length === 0) return;
-  const byEl = (el: Element | null): Item | undefined => {
-    const o = el?.closest<HTMLElement>('[data-object]');
-    return o ? items.find((it) => it.el === o) : undefined;
-  };
-
-  // ---- geometry: screen px per unit (S) and local layout px per unit (L) ----
-  // The renderer's stage is 1,600 px wide inside the sheet, scaled to the sheet's width by
-  // `--k` or laid out in container units (HomeSheet.tsx); its layout width over its drawn width
-  // turns screen px into the local px the objects are placed in, whichever way it is scaled.
-  const frame = sheet.querySelector<HTMLElement>('.ts-stage') ?? sheet;
-  const S = (): number => sheet.getBoundingClientRect().width / UNITS;
-  const L = (): number => (S() * frame.offsetWidth) / (frame.getBoundingClientRect().width || 1);
-  const pose = (it: Item): SheetBox =>
-    store.get().poses[it.id] ?? it.rest ?? { x: 0, y: 0, w: 0, h: 0, rot: 0 };
-  /** the offset the object's ancestors' moves add, in units */
-  const offset = (it: Item): { x: number; y: number; rot: number } => {
-    let x = 0;
-    let y = 0;
-    let rot = 0;
-    for (let p = it.parent; p !== null; p = p.parent) {
-      const q = pose(p);
-      if (p.rest !== null) {
-        x += q.x - p.rest.x;
-        y += q.y - p.rest.y;
-      }
-      rot += q.rot;
+  const sheetEl = (): HTMLElement | null =>
+    host.matches('[data-home-slides]')
+      ? host
+      : host.querySelector<HTMLElement>('[data-home-slides]');
+  const logFor = (root: HTMLElement): CommandLog | null => {
+    if (band !== 'canvas') return null;
+    const slide = slideOf(root);
+    if (logSlide !== slide) {
+      log = createLog(ctx.band, slide as HomeSlideId, ctx.announce);
+      logSlide = slide;
     }
-    return { x, y, rot };
+    return log;
   };
-  /** the rotation drawn on the object with its ancestors' */
-  const turnedAll = (it: Item): number => {
+
+  // ---- geometry: screen px per unit ----
+  const S = (): number => (sheetEl()?.getBoundingClientRect().width ?? UNITS) / UNITS;
+  const turnedAll = (it: LayoutItem): number => {
     let rot = 0;
-    for (let p: Item | null = it; p !== null; p = p.parent) rot += p.turned;
+    for (let p: LayoutItem | null = it; p !== null; p = p.parent) rot += p.turned;
     return rot;
   };
-  const visual = (it: Item): Visual => {
+  const visual = (it: LayoutItem): Visual => {
+    const root = sheetEl();
     const r = it.el.getBoundingClientRect();
-    return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, rot: turnedAll(it) };
+    const sr = root?.getBoundingClientRect() ?? r;
+    const s = S();
+    return {
+      cx: (r.left + r.width / 2 - sr.left) / s,
+      cy: (r.top + r.height / 2 - sr.top) / s,
+      rot: turnedAll(it),
+    };
   };
   /** the object's box as the visitor sees it, in units: its centre and its own size */
-  const shown = (it: Item): SheetBox => {
+  const shown = (it: LayoutItem): SheetBox => {
     const v = visual(it);
-    const sr = sheet.getBoundingClientRect();
-    const s = S();
-    const l = L();
-    const w = it.el.offsetWidth / l;
-    const h = it.el.offsetHeight / l;
-    return { x: (v.cx - sr.left) / s - w / 2, y: (v.cy - sr.top) / s - h / 2, w, h, rot: v.rot };
-  };
-
-  // ---- freeing the slide's objects (the editor's to-canvas) and drawing a pose ----
-  let freed = false;
-  const free = (): void => {
-    if (freed) return;
-    freed = true;
-    const sr = sheet.getBoundingClientRect();
-    const s = S();
-    const l = L();
-    // sizes from the drawn boxes (nothing is turned at rest), so a fractional height is kept
-    // exactly and freeing moves nothing by a rounding
-    const k = l / s;
-    const read = items.map((it) => {
-      const r = it.el.getBoundingClientRect();
-      return { it, r, w: r.width * k, h: r.height * k, cs: getComputedStyle(it.el) };
-    });
-    for (const { it, r, w, h, cs } of read) {
-      it.css = it.el.style.cssText;
-      it.rest = { x: (r.left - sr.left) / s, y: (r.top - sr.top) / s, w: w / l, h: h / l, rot: 0 };
-      if (cs.position === 'absolute' || cs.position === 'fixed') continue;
-      const spacer = document.createElement('div');
-      spacer.setAttribute('data-live-spacer', '');
-      spacer.setAttribute('aria-hidden', 'true');
-      const sp = spacer.style;
-      sp.display = cs.display.startsWith('inline') ? 'inline-block' : 'block';
-      sp.flex = 'none';
-      sp.margin = `${cs.marginTop} ${cs.marginRight} ${cs.marginBottom} ${cs.marginLeft}`;
-      // the spacer holds the box's place before the box leaves the flow, so a container placed by
-      // its bottom edge (a mood slide's plate) keeps its height and the place read below is final
-      sp.width = `${w}px`;
-      sp.height = `${h}px`;
-      it.el.before(spacer);
-      it.spacer = spacer;
-      it.flow = { w: w / l, h: h / l };
-      const st = it.el.style;
-      st.position = 'absolute';
-      st.margin = '0';
-      st.boxSizing = 'border-box';
-      st.width = `${w}px`;
-      st.left = '0px';
-      st.top = '0px';
-      const r0 = it.el.getBoundingClientRect();
-      it.at = { left: (r.left - r0.left) / s, top: (r.top - r0.top) / s };
-      // placed now, before a child inside it reads its own containing block
-      lay(it);
-    }
-  };
-  /** writes the freed places and the spacers in local px, again after a resize */
-  const lay = (only?: Item): void => {
-    const l = L();
-    for (const it of only === undefined ? items : [only]) {
-      if (it.spacer !== null && it.flow !== null) {
-        it.spacer.style.width = `${it.flow.w * l}px`;
-        it.spacer.style.height = `${it.flow.h * l}px`;
-      }
-      if (it.at !== null) {
-        it.el.style.left = `${it.at.left * l}px`;
-        it.el.style.top = `${it.at.top * l}px`;
-      }
-    }
-  };
-  const unfree = (): void => {
-    if (!freed) return;
-    freed = false;
-    for (const it of items) {
-      it.spacer?.remove();
-      it.spacer = null;
-      it.at = null;
-      it.flow = null;
-      it.turned = 0;
-      it.el.style.cssText = it.css;
-      if (current === it) it.el.style.touchAction = 'none';
-    }
-  };
-  /** draws a pose on the object; with no pose, its rest */
-  /**
-   * A text box moved, resized or turned on a dithered slide draws the slide's paper 24 units beyond
-   * its box, the hero's clear zone (integrator.md 2.2), so type never sits on dither (LANDING.md 5
-   * "Contrast") when it leaves its plate; the editor draws none (a recorded deviation). An outline
-   * moves with the box's transform and takes no room. The plate is paper already.
-   */
-  const ground = (it: Item, on: boolean): void => {
-    if (band !== 'canvas' || it.role === 'Plate') return;
-    if (on) it.el.style.outline = `${round(CLEAR_ZONE * L())}px solid var(--paper)`;
-    else it.el.style.removeProperty('outline');
-  };
-  const draw = (it: Item, p: SheetBox | undefined): void => {
-    const st = it.el.style;
-    if (!freed || it.rest === null) return;
-    it.turned = p?.rot ?? 0;
-    ground(it, p !== undefined);
-    if (p === undefined) {
-      st.removeProperty('transform');
-      if (it.at !== null) st.width = `${round(it.rest.w * L())}px`;
-      else st.removeProperty('width');
-      st.removeProperty('min-height');
-      return;
-    }
-    const l = L();
-    const dx = round((p.x - it.rest.x) * l);
-    const dy = round((p.y - it.rest.y) * l);
-    st.transform =
-      dx === 0 && dy === 0 && p.rot === 0 ? '' : `translate(${dx}px, ${dy}px) rotate(${p.rot}deg)`;
-    // a box placed by its slide keeps its own width until a resize, so a typed word widens it as
-    // the slide drew it (its clear zone with it); a box freed from the flow holds its width
-    if (it.at !== null || Math.abs(p.w - it.rest.w) > 0.01) st.width = `${round(p.w * l)}px`;
-    else st.removeProperty('width');
-    if (Math.abs(p.h - it.rest.h) > 0.01) st.minHeight = `${round(p.h * l)}px`;
-    else st.removeProperty('min-height');
-  };
-  const drawState = (state: HomeDeckState): void => {
-    const posed = items.some((it) => state.poses[it.id] !== undefined);
-    if (posed) free();
-    for (const it of items) draw(it, state.poses[it.id]);
-    if (!posed) unfree();
+    const w = it.el.offsetWidth;
+    const h = it.el.offsetHeight;
+    return { x: v.cx - w / 2, y: v.cy - h / 2, w, h, rot: v.rot };
   };
 
   // ---- the overlay: ring, squares, stem, knob, chip, guides ----
@@ -338,14 +196,24 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     layer.className = 'ts-home-sel-layer';
     layer.setAttribute('data-live-overlay', '');
     layer.setAttribute('aria-hidden', 'true');
+    layer.dataset['selBand'] = band;
     box = document.createElement('div');
     box.className = 'ts-home-sel';
     box.hidden = true;
-    let inner = '<span class="ts-home-sel-ring"></span>';
-    for (const h of HANDLES) inner += `<span class="ts-home-sel-h" data-h="${h}"></span>`;
-    inner += '<span class="ts-home-sel-stem"></span><span class="ts-home-sel-knob"></span>';
-    inner += '<span class="ts-home-sel-chip"></span>';
-    box.innerHTML = inner;
+    const ring = document.createElement('span');
+    ring.className = 'ts-home-sel-ring';
+    box.append(ring);
+    for (const h of HANDLES) {
+      const sq = document.createElement('span');
+      sq.className = 'ts-home-sel-h';
+      sq.dataset['h'] = h;
+      box.append(sq);
+    }
+    for (const cls of ['ts-home-sel-stem', 'ts-home-sel-knob', 'ts-home-sel-chip']) {
+      const span = document.createElement('span');
+      span.className = cls;
+      box.append(span);
+    }
     chip = box.querySelector('.ts-home-sel-chip');
     guideV = document.createElement('i');
     guideH = document.createElement('i');
@@ -366,31 +234,46 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     return box;
   };
 
-  let current: Item | null = null;
-  let editing: { it: Item; text: HTMLElement; html: string } | null = null;
+  let current: LayoutItem | null = null;
+  let currentRoot: HTMLElement | null = null;
+  let editing: { it: LayoutItem; root: HTMLElement; text: HTMLElement; html: string } | null = null;
   let drag: Drag | null = null;
+
+  const selectedInfo = (): Selected | null =>
+    current === null || currentRoot === null
+      ? null
+      : { id: current.id, el: current.el, role: roleOf(current.el), root: currentRoot };
+  const tell = (live?: SheetBox): void => {
+    const sel = selectedInfo();
+    const root = currentRoot;
+    let b: SheetBox | null = null;
+    if (sel !== null && root !== null && current !== null)
+      b = live ?? sheetLayout(root).pose(current, store.get());
+    for (const fn of listeners) fn(sel, b);
+  };
 
   const place = (): void => {
     if (box === null) return;
-    if (current === null) {
+    if (current === null || currentRoot === null || !currentRoot.isConnected) {
       box.hidden = true;
       return;
     }
     const it = current;
-    const v = visual(it);
-    const k = S() / L();
+    const r = it.el.getBoundingClientRect();
+    const k = S();
     // the box with what its text overflows across (a typed word past a resized locked line), in
-    // its own axes; read on the text, so the hero's clear zone (the wrapper's ::before) never counts
+    // its own axes; read on the text, so a clear zone (the wrapper's outline) never counts
     const ow = it.el.offsetWidth;
     const oh = it.el.offsetHeight;
-    const t = textOf(it);
+    const t = textOf(it.el);
     const w = (ow + Math.max(0, t.scrollWidth - t.clientWidth)) * k;
     const h = oh * k;
-    const a = (v.rot * Math.PI) / 180;
+    const rot = turnedAll(it);
+    const a = (rot * Math.PI) / 180;
     const ex = (w - ow * k) / 2;
     const ey = (h - oh * k) / 2;
-    const cx = v.cx + ex * Math.cos(a) - ey * Math.sin(a);
-    const cy = v.cy + ex * Math.sin(a) + ey * Math.cos(a);
+    const cx = r.left + r.width / 2 + ex * Math.cos(a) - ey * Math.sin(a);
+    const cy = r.top + r.height / 2 + ex * Math.sin(a) + ey * Math.cos(a);
     const m = ctx.root.getBoundingClientRect();
     const st = box.style;
     box.hidden = false;
@@ -398,18 +281,22 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     st.top = `${round(cy - h / 2 - m.top)}px`;
     st.width = `${round(w)}px`;
     st.height = `${round(h)}px`;
-    st.transform = v.rot === 0 ? '' : `rotate(${v.rot}deg)`;
-    // on a box too small for its middle squares (a phone's subtitle), they step aside so a press
-    // inside it moves the box; the corners still resize it
+    st.transform = rot === 0 ? '' : `rotate(${rot}deg)`;
+    // on a box too small for its middle squares' hit areas (a title in the hero frame, a phone's
+    // subtitle), the eight squares are drawn and the middle ones take no press, so a press inside
+    // the box moves it; the corners still resize it
     for (const sq of box.querySelectorAll<HTMLElement>('.ts-home-sel-h')) {
       const d = sq.dataset['h'];
-      sq.hidden =
+      const small =
         ((d === 'n' || d === 's') && h < SMALL_PX) || ((d === 'e' || d === 'w') && w < SMALL_PX);
+      sq.style.pointerEvents = small ? 'none' : '';
     }
   };
   const guides = (x: number | null, y: number | null): void => {
     if (guideV === null || guideH === null) return;
-    const sr = sheet.getBoundingClientRect();
+    const root = sheetEl();
+    if (root === null) return;
+    const sr = root.getBoundingClientRect();
     const m = ctx.root.getBoundingClientRect();
     const s = S();
     guideV.hidden = x === null;
@@ -421,101 +308,110 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     if (y !== null) at(guideH, sr.left - m.left, sr.top - m.top + y * s, sr.width, 1);
   };
   const chipWord = (text?: string): void => {
-    if (chip !== null && current !== null) chip.textContent = text ?? current.role;
+    if (chip !== null && current !== null) chip.textContent = text ?? roleOf(current.el);
   };
 
-  const select = (it: Item): void => {
-    if (current === it) return place();
+  const select = (it: LayoutItem, root: HTMLElement): void => {
+    if (current === it && currentRoot === root) {
+      place();
+      return;
+    }
     if (editing !== null) endEdit();
     if (current !== null) current.el.style.removeProperty('touch-action');
     current = it;
+    currentRoot = root;
     overlay();
     it.el.style.touchAction = 'none';
     chipWord();
     place();
+    tell();
   };
   const deselect = (): void => {
     if (editing !== null) endEdit();
     if (current !== null) current.el.style.removeProperty('touch-action');
+    const had = current !== null;
     current = null;
+    currentRoot = null;
     drag = null;
     guides(null, null);
     place();
+    if (had) tell();
   };
 
   // ---- committing a pose ----
-  const slideNumber = (): number => store.get().order.indexOf(slide) + 1;
+  const slideNumber = (root: HTMLElement): number => store.get().order.indexOf(slideOf(root)) + 1;
   const commitPose = (
-    it: Item,
-    before: SheetBox | undefined,
+    root: HTMLElement,
+    it: LayoutItem,
     after: SheetBox,
     words: string,
     line: 'pos' | 'rotate',
     coalesce?: string,
   ): void => {
-    const toCanvas = band === 'canvas' && store.get().canvas[slide] !== true;
+    const slide = slideOf(root);
+    const toCanvas = store.get().canvas[slide] !== true;
     const id = it.id;
+    const log = logFor(root);
     store.commit({
       band,
       author: 'you',
       words,
+      slide,
       ...(coalesce !== undefined ? { coalesce } : {}),
       next: (s) => ({
         ...s,
         poses: { ...s.poses, [id]: after },
         canvas: toCanvas ? { ...s.canvas, [slide]: true } : s.canvas,
       }),
-      undo: (s) => {
-        const poses = { ...s.poses };
-        if (before === undefined) delete poses[id];
-        else poses[id] = before;
-        const canvas = { ...s.canvas };
-        if (toCanvas) delete canvas[slide];
-        return { ...s, poses, canvas };
-      },
+      undo: (s) => s,
     });
     log?.print(
-      it.block,
+      canvasBlock(it.id),
       () => {
         const b = shown(it);
         return line === 'pos' ? { kind: 'pos', box: b } : { kind: 'rotate', deg: b.rot };
       },
       coalesce !== undefined,
-      toCanvas,
+      toCanvas && band === 'canvas',
     );
   };
 
   // ---- pointer gestures ----
   function pointerDown(e: PointerEvent): void {
     if (e.button !== 0) return;
-    const it = byEl(e.target as Element);
-    if (it === undefined) {
+    const root = (e.target as Element).closest<HTMLElement>('[data-home-slides]');
+    if (root === null || root !== sheetEl()) return;
+    const layout = sheetLayout(root);
+    const it = layout.itemOf(e.target as Element);
+    if (it === undefined || it.el.hasAttribute('data-deleted')) {
       deselect();
       return;
     }
     if (editing?.it === it) return;
     finishBand(band);
     const wasSelected = current === it;
-    select(it);
+    select(it, root);
     it.el.focus({ preventScroll: true });
     // no compatibility mouse events, so the tap's mousedown never takes the focus off the box;
     // the page still scrolls under an unselected box, which keeps its touch-action
     e.preventDefault();
     // a first touch only selects (2.2)
     if (e.pointerType !== 'mouse' && !wasSelected) return;
-    begin(e, 'move', it, null, sheet, wasSelected);
+    begin(e, 'move', it, null, root, wasSelected);
   }
 
   /** a gesture down: the pose it starts from, captured on its target */
   const begin = (
     e: PointerEvent,
     mode: Drag['mode'],
-    it: Item,
+    it: LayoutItem,
     handle: Handle | null,
     target: Element,
     wasSelected: boolean,
   ): void => {
-    const p0 = pose(it);
+    const root = currentRoot;
+    if (root === null) return;
+    const p0 = sheetLayout(root).pose(it, store.get());
     drag = {
       mode,
       item: it,
@@ -539,14 +435,15 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
 
   function handleDown(e: PointerEvent): void {
     const it = current;
+    const root = currentRoot;
     const t = e.target as HTMLElement;
     const handle = (t.dataset['h'] as Handle | undefined) ?? null;
     const knob = t.classList.contains('ts-home-sel-knob');
-    if (it === null || e.button !== 0 || (handle === null && !knob)) return;
+    if (it === null || root === null || e.button !== 0 || (handle === null && !knob)) return;
     e.preventDefault();
     e.stopPropagation();
     finishBand(band);
-    free();
+    sheetLayout(root).free();
     begin(e, knob ? 'rotate' : 'resize', it, handle, t, true);
     box?.setAttribute('data-active', '');
     t.setAttribute('data-on', '');
@@ -554,13 +451,16 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
 
   function pointerMove(e: PointerEvent): void {
     const g = drag;
-    if (g === null || e.pointerId !== g.pointer) return;
+    const root = currentRoot;
+    if (g === null || root === null || e.pointerId !== g.pointer) return;
+    const layout = sheetLayout(root);
     const s = S();
+    const state = store.get();
     if (!g.moved) {
       if (Math.hypot(e.clientX - g.x0, e.clientY - g.y0) < DRAG_PX) return;
-      if (!freed) {
-        free();
-        g.p0 = pose(g.item);
+      if (!layout.freed()) {
+        layout.free();
+        g.p0 = layout.pose(g.item, state);
       }
     }
     g.moved = true;
@@ -573,7 +473,7 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     if (g.mode === 'move') {
       const p = { ...p0, x: p0.x + dx, y: p0.y + dy };
       if (!e.altKey) {
-        const off = offset(it);
+        const off = layout.offset(it, state);
         const tol = SNAP_PX / s;
         const fit = (
           v: number,
@@ -584,11 +484,13 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
           let best = tol;
           let to = v;
           let line: number | null = null;
-          const marks = rotated ? [size / 2] : [0, size / 2, size];
+          // the centre first, and it wins a tie within half a unit, so a box as wide as the
+          // content (the title of slide 1) draws the centre line when its edges meet the margins
+          const marks = rotated ? [size / 2] : [size / 2, 0, size];
           for (const mark of marks)
             for (const t of targets) {
               const d = Math.abs(v + mark - t);
-              if (d < best) {
+              if (d < best - (line === null || mark === size / 2 ? 0 : 0.5)) {
                 best = d;
                 to = t - mark;
                 line = t;
@@ -606,8 +508,8 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       }
       g.p = p;
     } else if (g.mode === 'rotate') {
-      const sr = sheet.getBoundingClientRect();
-      const off = offset(it);
+      const sr = root.getBoundingClientRect();
+      const off = layout.offset(it, state);
       const cx = p0.x + p0.w / 2 + off.x;
       const cy = p0.y + p0.h / 2 + off.y;
       const px = (e.clientX - sr.left) / s;
@@ -618,16 +520,17 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       chipWord(`${g.p.rot}°`);
     } else if (g.handle !== null) {
       const [hx, hy] = DIRS[g.handle];
-      const rad = ((p0.rot + offset(it).rot) * Math.PI) / 180;
+      const rad = ((p0.rot + layout.offset(it, state).rot) * Math.PI) / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
       const lx = dx * cos + dy * sin;
       const ly = -dx * sin + dy * cos;
       const w = hx !== 0 ? Math.max(MIN_SIDE, p0.w + hx * lx) : p0.w;
       const asked = hy !== 0 ? Math.max(MIN_SIDE, p0.h + hy * ly) : 0;
-      draw(it, { ...p0, w, h: 0 });
-      const natural = it.el.offsetHeight / L();
-      const h = Math.max(asked, natural);
+      const inserted = it.el.dataset['inserted'] !== undefined;
+      layout.draw(it, { ...p0, w, h: inserted ? Math.max(asked, MIN_SIDE) : 0 });
+      const natural = inserted ? 0 : it.el.offsetHeight;
+      const h = Math.max(asked, natural, hy === 0 ? p0.h : 0);
       // the opposite side stays where it was, in the slide's axes; a side handle keeps the top
       const ax = (-hx * p0.w) / 2;
       const ay = hy !== 0 ? (-hy * p0.h) / 2 : -p0.h / 2;
@@ -641,14 +544,16 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       const c1y = anchorY - (bx * sin + by * cos);
       g.p = { x: c1x - w / 2, y: c1y - h / 2, w, h, rot: p0.rot };
     }
-    draw(it, g.p);
+    layout.draw(it, g.p);
     guides(snapX, snapY);
     place();
+    tell(g.p);
   }
 
   function pointerUp(e: PointerEvent): void {
     const g = drag;
-    if (g === null || e.pointerId !== g.pointer) return;
+    const root = currentRoot;
+    if (g === null || root === null || e.pointerId !== g.pointer) return;
     drag = null;
     box?.removeAttribute('data-active');
     g.target.removeAttribute('data-on');
@@ -656,15 +561,15 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     chipWord();
     const it = g.item;
     if (!g.moved) {
-      if (g.mode === 'move' && g.wasSelected) startEdit(it, e.clientX, e.clientY);
-      else drawState(store.get());
+      if (g.mode === 'move' && g.wasSelected) startEdit(it, root, e.clientX, e.clientY);
+      else redraw();
       return;
     }
-    const n = slideNumber();
-    const name = NAMES[it.role];
-    if (g.mode === 'move') commitPose(it, g.before, g.p, HISTORY.moved(name, n), 'pos');
-    else if (g.mode === 'resize') commitPose(it, g.before, g.p, HISTORY.resized(name, n), 'pos');
-    else commitPose(it, g.before, g.p, HISTORY.turned(name, n, g.p.rot), 'rotate');
+    const n = slideNumber(root);
+    const name = objectName(roleOf(it.el));
+    if (g.mode === 'move') commitPose(root, it, g.p, HISTORY.moved(name, n), 'pos');
+    else if (g.mode === 'resize') commitPose(root, it, g.p, HISTORY.resized(name, n), 'pos');
+    else commitPose(root, it, g.p, HISTORY.turned(name, n, g.p.rot), 'rotate');
     place();
   }
 
@@ -674,13 +579,26 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     box?.removeAttribute('data-active');
     guides(null, null);
     chipWord();
-    drawState(store.get());
+    redraw();
     place();
   }
 
+  /** draws the store's poses on the band's slide again (a gesture that ended with no change) */
+  const redraw = (): void => {
+    const root = sheetEl();
+    if (root === null) return;
+    const layout = sheetLayout(root);
+    const state = store.get();
+    if (layout.freed()) for (const it of layout.items()) layout.draw(it, state.poses[it.id]);
+    tell();
+  };
+
   // ---- keys (the editor's: Google's nudge and rotate rows) ----
   function keyDown(e: KeyboardEvent): void {
-    const it = byEl(e.target as Element);
+    const root = (e.target as Element).closest<HTMLElement>('[data-home-slides]');
+    if (root === null || root !== sheetEl()) return;
+    const layout = sheetLayout(root);
+    const it = layout.itemOf(e.target as Element);
     if (it === undefined) return;
     if (editing !== null && editing.it === it) {
       if (e.key === 'Escape') {
@@ -701,9 +619,9 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     }
     if (e.metaKey || e.ctrlKey) return;
     finishBand(band);
-    if (e.key === 'Enter' && !e.altKey && !e.shiftKey && it.editable) {
+    if (e.key === 'Enter' && !e.altKey && !e.shiftKey && typesIn(it.el)) {
       e.preventDefault();
-      startEdit(it);
+      startEdit(it, root);
       return;
     }
     const arrow = e.key.startsWith('Arrow') ? e.key.slice(5) : '';
@@ -722,23 +640,19 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       else dy = step;
     }
     e.preventDefault();
-    free();
-    const before = store.get().poses[it.id];
-    const p0 = pose(it);
+    if (current !== it) select(it, root);
+    layout.free();
+    const p0 = layout.pose(it, store.get());
     const p = { ...p0, x: p0.x + dx, y: p0.y + dy, rot: normalize(p0.rot + turn) };
-    const n = slideNumber();
-    const name = NAMES[it.role];
+    const n = slideNumber(root);
+    const name = objectName(roleOf(it.el));
     if (turn !== 0)
-      commitPose(it, before, p, HISTORY.turned(name, n, p.rot), 'rotate', `turn:${it.id}`);
-    else commitPose(it, before, p, HISTORY.moved(name, n), 'pos', `nudge:${it.id}`);
+      commitPose(root, it, p, HISTORY.turned(name, n, p.rot), 'rotate', `turn:${it.id}`);
+    else commitPose(root, it, p, HISTORY.moved(name, n), 'pos', `nudge:${it.id}`);
     place();
   }
 
   // ---- typing (a second click or Enter; the browser's caret in the text's colour) ----
-  const textOf = (it: Item): HTMLElement =>
-    it.el.hasAttribute('data-block')
-      ? it.el
-      : (it.el.querySelector<HTMLElement>('[data-block]') ?? it.el);
 
   /** a paste into a box is its plain text (the editor's text boxes take no markup from outside) */
   function pastePlain(e: ClipboardEvent): void {
@@ -754,14 +668,15 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     place();
   }
 
-  function startEdit(it: Item, x?: number, y?: number): void {
-    if (!it.editable) return;
+  function startEdit(it: LayoutItem, root: HTMLElement, x?: number, y?: number): void {
+    if (!typesIn(it.el)) return;
     finishBand(band);
-    const text = textOf(it);
-    editing = { it, text, html: text.innerHTML };
+    const text = textOf(it.el);
+    noteResting(text);
+    editing = { it, root, text, html: text.innerHTML };
     // `true`, not `plaintext-only`: Chromium draws a plaintext-only box with `white-space:
-    // pre-wrap`, which turns the spaces between the hero's three line spans into lines of their
-    // own; a paste is taken as plain text below, so no markup enters either way
+    // pre-wrap`, which turns the spaces between a title's line spans into lines of their own; a
+    // paste is taken as plain text above, so no markup enters either way
     text.contentEditable = 'true';
     text.addEventListener('paste', pastePlain);
     box?.setAttribute('data-editing', '');
@@ -786,62 +701,60 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     const e = editing;
     if (e === null) return;
     editing = null;
-    const { it, text, html } = e;
+    const { it, root, text, html } = e;
     text.removeEventListener('input', place);
     text.removeEventListener('paste', pastePlain);
     text.removeAttribute('contenteditable');
     box?.removeAttribute('data-editing');
     if (current === it) it.el.style.touchAction = 'none';
-    const words = (text.textContent ?? '').trim();
+    const words = (text.textContent ?? '').replace(/\s+/g, ' ').trim();
     if (text.innerHTML === html) return place();
-    if (words === '') {
+    const inserted = it.el.dataset['inserted'] === 'text';
+    if (words === '' && !inserted) {
+      // the renderer's markup the box held before the typing began, read from the page
       text.innerHTML = html;
       return place();
     }
     const id = it.id;
-    const typed = text.textContent ?? '';
-    let restore = '';
     store.commit({
       band,
       author: 'you',
-      words: HISTORY.edited(NAMES[it.role], slideNumber()),
-      next: (s) => {
-        restore = s.texts[id] ?? '';
-        return { ...s, texts: { ...s.texts, [id]: typed } };
-      },
-      undo: (s) => {
-        const texts = { ...s.texts };
-        if (restore === '') delete texts[id];
-        else texts[id] = restore;
-        return { ...s, texts };
-      },
+      words: HISTORY.edited(objectName(roleOf(it.el)), slideNumber(root)),
+      slide: slideOf(root),
+      next: (s) => ({ ...s, texts: { ...s.texts, [id]: words } }),
+      undo: (s) => s,
     });
-    edits.set(store.get().history.at(-1)?.id ?? -1, { text, before: html });
     place();
   }
 
-  /** The markup before and after each typed change, by its Version history row. */
-  const edits = new Map<number, { text: HTMLElement; before: string }>();
-
-  // ---- the store: draw every pose; an Undo returns on the move curve ----
+  // ---- the store: an Undo returns on the move curve ----
+  /** the objects' last drawn centres on the band's slide, so an Undo returns from where they were */
+  let last = new Map<LayoutItem, Visual>();
+  const remember = (): void => {
+    const root = sheetEl();
+    if (root === null || root.getBoundingClientRect().width === 0) return;
+    last = new Map(
+      sheetLayout(root)
+        .items()
+        .map((it) => [it, visual(it)]),
+    );
+  };
   /** ends a running return at its end state */
   let stopReturn: (() => void) | null = null;
   const settle = (state: HomeDeckState): void => {
     stopReturn?.();
-    const s = S();
-    const l = L();
-    const before = new Map(items.map((it) => [it, visual(it)]));
-    const turnedBefore = new Map(items.map((it) => [it, it.turned]));
-    drawState(state);
-    const moves: { it: Item; from: string; to: string; dist: number }[] = [];
-    for (const it of items) {
-      const a = before.get(it);
+    const root = sheetEl();
+    if (root === null) return;
+    const layout = sheetLayout(root);
+    const moves: { it: LayoutItem; from: string; to: string; dist: number }[] = [];
+    for (const it of layout.items()) {
+      const a = last.get(it);
       if (a === undefined) continue;
       const b = visual(it);
       let dx = a.cx - b.cx;
       let dy = a.cy - b.cy;
       if (it.parent !== null) {
-        const pa = before.get(it.parent);
+        const pa = last.get(it.parent);
         if (pa !== undefined) {
           const pb = visual(it.parent);
           dx -= pa.cx - pb.cx;
@@ -850,23 +763,28 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       }
       if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && a.rot === b.rot) continue;
       const p = state.poses[it.id];
-      const tx = p !== undefined && it.rest !== null ? (p.x - it.rest.x) * l : 0;
-      const ty = p !== undefined && it.rest !== null ? (p.y - it.rest.y) * l : 0;
+      const tx = p !== undefined && it.rest !== null ? p.x - it.rest.x : 0;
+      const ty = p !== undefined && it.rest !== null ? p.y - it.rest.y : 0;
       const rot = p?.rot ?? 0;
-      const ownRot = turnedBefore.get(it) ?? 0;
       moves.push({
         it,
-        from: `translate(${round(tx + (dx * l) / s)}px, ${round(ty + (dy * l) / s)}px) rotate(${ownRot}deg)`,
+        from: `translate(${round(tx + dx)}px, ${round(ty + dy)}px) rotate(${a.rot - (b.rot - rot)}deg)`,
         to: `translate(${round(tx)}px, ${round(ty)}px) rotate(${rot}deg)`,
-        dist: Math.hypot(dx, dy),
+        dist: Math.hypot(dx, dy) * S(),
       });
     }
     // the returned object shows its selection while it returns, as the editor's Undo does
     const first = moves[0]?.it;
-    if (first !== undefined) select(first);
+    if (first !== undefined) select(first, root);
     if (moves.length === 0 || reduced() || typeof Element.prototype.animate !== 'function') return;
     const dist = Math.max(...moves.map((m) => m.dist));
     const duration = Math.min(RETURN_MAX_MS, RETURN_BASE_MS + dist / 2) * slowFactor();
+    const ground = (it: LayoutItem, on: boolean): void => {
+      if (root.querySelector('.ts-home-print, [data-field]') === null) return;
+      if (it.el.classList.contains('mood-plate')) return;
+      if (on) it.el.style.outline = `${CLEAR_ZONE}px solid var(--paper)`;
+      else it.el.style.removeProperty('outline');
+    };
     const animations = moves.map((m) =>
       m.it.el.animate([{ transform: m.from }, { transform: m.to }], {
         duration,
@@ -883,6 +801,7 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
       run.done();
       if (stopReturn === end) stopReturn = null;
       place();
+      remember();
     };
     const run = sequence(band, end);
     stopReturn = end;
@@ -894,52 +813,115 @@ export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): void {
     void Promise.all(animations.map((a) => a.finished)).then(end, () => undefined);
   };
 
-  store.subscribe((state: HomeDeckState, event: StoreEvent) => {
-    log?.layout(state.canvas[slide] === true);
-    if (event.change.band !== band) return;
-    if (event.kind === 'undo') {
-      const edit = event.row === null ? undefined : edits.get(event.row.id);
-      if (edit !== undefined) {
-        if (editing?.text === edit.text) endEdit();
-        edit.text.innerHTML = edit.before;
-        edits.delete(event.row?.id ?? -1);
-        const it = byEl(edit.text);
-        if (it !== undefined) select(it);
-      }
-      settle(state);
-    } else if (drag === null) drawState(state);
+  ctx.store.subscribe((state: HomeDeckState, event: StoreEvent) => {
+    const root = sheetEl();
+    if (root !== null && band === 'canvas')
+      logFor(root)?.layout(state.canvas[slideOf(root)] === true);
+    if (current !== null && (!current.el.isConnected || current.el.hasAttribute('data-deleted')))
+      deselect();
+    if (event.kind === 'undo' && event.change.band === band) settle(state);
+    else if (drag !== null) {
+      const layout = root === null ? null : sheetLayout(root);
+      if (layout !== null) layout.draw(drag.item, drag.p);
+    }
     place();
+    tell();
+    if (stopReturn === null) remember();
   });
 
-  // ---- wiring ----
-  sheet.addEventListener('pointerdown', pointerDown);
-  sheet.addEventListener('pointermove', pointerMove);
-  sheet.addEventListener('pointerup', pointerUp);
-  sheet.addEventListener('pointercancel', cancel);
-  sheet.addEventListener('keydown', keyDown);
-  sheet.addEventListener('focusin', (e) => {
-    const it = byEl(e.target as Element);
-    if (it !== undefined && editing?.it !== it) select(it);
+  // ---- wiring: every listener on the host, so a replaced slide keeps them ----
+  host.addEventListener('pointerdown', pointerDown);
+  host.addEventListener('pointermove', pointerMove);
+  host.addEventListener('pointerup', pointerUp);
+  host.addEventListener('pointercancel', cancel);
+  host.addEventListener('keydown', keyDown);
+  host.addEventListener('focusin', (e) => {
+    const root = (e.target as Element).closest<HTMLElement>('[data-home-slides]');
+    if (root === null || root !== sheetEl()) return;
+    const it = sheetLayout(root).itemOf(e.target as Element);
+    if (it !== undefined && editing?.it !== it && !it.el.hasAttribute('data-deleted'))
+      select(it, root);
   });
-  sheet.addEventListener('focusout', (e) => {
+  host.addEventListener('focusout', (e) => {
     const to = e.relatedTarget as Node | null;
     if (current === null) return;
     if (to !== null && (current.el.contains(to) || box?.contains(to))) return;
     if (editing !== null && to !== null && editing.text.contains(to)) return;
+    // a menu of the band keeps the selection while it is open (the miniature's rows act on it)
+    if (to instanceof Element && to.closest('[data-keeps-selection]') !== null) return;
     deselect();
   });
-  sheet.addEventListener('dragstart', (e) => e.preventDefault());
+  host.addEventListener('dragstart', (e) => e.preventDefault());
   document.addEventListener('pointerdown', (e) => {
-    const t = e.target as Node;
-    if (current !== null && !sheet.contains(t) && !(box?.contains(t) ?? false)) deselect();
+    const t = e.target as Element;
+    if (current === null || host.contains(t) || (box?.contains(t) ?? false)) return;
+    if (t.closest?.('[data-keeps-selection]') !== null) return;
+    deselect();
   });
+  // a replaced slide drops the selection made on the slide it replaced
+  new MutationObserver(() => {
+    if (currentRoot !== null && currentRoot !== sheetEl()) deselect();
+    remember();
+  }).observe(host, { childList: true });
   const relayout = (): void => {
-    if (freed) {
-      lay();
-      drawState(store.get());
+    const root = sheetEl();
+    if (root !== null) {
+      const layout = sheetLayout(root);
+      if (layout.freed()) layout.lay();
     }
     place();
   };
   window.addEventListener('resize', relayout);
-  if (typeof ResizeObserver === 'function') new ResizeObserver(relayout).observe(sheet);
+  if (typeof ResizeObserver === 'function') new ResizeObserver(relayout).observe(host);
+  remember();
+
+  return {
+    sheet: sheetEl,
+    selected: selectedInfo,
+    select(id, options = {}) {
+      const root = sheetEl();
+      if (root === null) return false;
+      const it = sheetLayout(root).item(id);
+      if (it === undefined) return false;
+      select(it, root);
+      it.el.focus({ preventScroll: true });
+      if (options.type === true) startEdit(it, root);
+      return true;
+    },
+    deselect,
+    poseOf(id) {
+      const root = sheetEl();
+      if (root === null) return null;
+      const layout = sheetLayout(root);
+      const it = layout.item(id);
+      if (it === undefined) return null;
+      const state = store.get();
+      const posed = state.poses[id];
+      if (posed !== undefined) return posed;
+      layout.free();
+      const rest = it.rest;
+      if (!Object.keys(state.poses).some((k) => k.startsWith(`${slideOf(root)}#`))) layout.unfree();
+      return rest;
+    },
+    onChange(fn) {
+      listeners.push(fn);
+    },
+    place,
+  };
+}
+
+/**
+ * Starts the selection on the hero frame's shown slide or the canvas band's lighthouse
+ * (registrations of `index.ts`). The hero's host is the frame's `[data-hero-slide]` (V1's,
+ * LANDING.md 2.2), else the band's first slide (the first pass's hero).
+ */
+export function startObjects(ctx: LiveContext, band: 'hero' | 'canvas'): ObjectsController | null {
+  const host =
+    (band === 'hero'
+      ? ctx.band.querySelector<HTMLElement>('[data-hero-slide]')
+      : (ctx.reserve ?? null)) ??
+    ctx.band.querySelector<HTMLElement>('[data-home-slides]')?.parentElement ??
+    null;
+  if (host === null) return null;
+  return createObjects(ctx, band, host);
 }

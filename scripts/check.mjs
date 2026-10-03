@@ -233,6 +233,14 @@ const INNER_HTML_ALLOW = [
   // the show and the print (L3#5): slide 7, the renderer's output rendered at build
   // (live-slides.generated.ts), parsed in a template element
   'apps/studio/src/components/home/live/show.ts',
+  // the live core's band loader (V1#8, V2's hunk): each band's markup, the renderer's output
+  // rendered at build (bands/<band>.generated.ts, bands/deck.generated.ts), written into the band's
+  // empty placeholders or parsed in a template element; never typed text
+  'apps/studio/src/components/home/live/index.ts',
+  // the deck drawn on every slide (V1#8, V2's hunk): an inserted block's markup rendered at build
+  // (menus.generated.ts), parsed in a template element, and a text box's own markup read before
+  // an edit and written back by an Undo; never typed text
+  'apps/studio/src/components/home/live/paint.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',

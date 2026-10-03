@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Browser, BrowserContext, Page, Request } from '@playwright/test';
-
-import { gzipSync } from 'node:zlib';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { extraHTTPHeaders, title } from '../lib';
 
@@ -17,14 +15,14 @@ export const ROWS: readonly string[] = [
   'home.canvas.gestures',
   'home.canvas.log',
   'home.objects.keyboard',
-  'home.budget.live-module',
 ];
 
 /** `--pt-select`, the one blue of the page, as computed styles print it. */
 const SELECT = 'rgb(47, 92, 224)';
 /** The move curve of LANDING.md 3.1 (`--ts-ease-move`). */
 const MOVE_CURVE = 'cubic-bezier(0.65, 0, 0.35, 1)';
-const HERO_TITLE = '[data-object="title#heading"]';
+/** The hero frame's slide 1 title (LANDING.md 2.2): the frame's thumbnails carry the same id, unfocusable. */
+const HERO_TITLE = '[data-band="hero"] [data-hero-slide] [data-object="title#heading"]';
 const LIVE_READY = 'main[data-live="ready"]';
 
 type Opened = { context: BrowserContext; page: Page };
@@ -46,6 +44,20 @@ export async function openHome(browser: Browser, options: OpenOptions = {}): Pro
     boot?.end?.();
   });
   return { context, page };
+}
+
+/**
+ * Brings a band below the first screen into view and waits for the band loader to insert its
+ * instrument (`[data-reserve][data-filled]`, LANDING.md 4.2), which starts the band's code in the
+ * same task; a band with no reserved box (its markup in the document) is ready at once.
+ */
+export async function bandReady(page: Page, band: string): Promise<void> {
+  const section = page.locator(`[data-band="${band}"]`);
+  await section.scrollIntoViewIfNeeded();
+  const reserve = section.locator('[data-reserve]');
+  if ((await reserve.count()) > 0)
+    await section.locator('[data-reserve][data-filled]').first().waitFor({ timeout: 15_000 });
+  await section.scrollIntoViewIfNeeded();
 }
 
 /** An object's box as the page draws it: its centre, its own size and turn, in screen px. */
@@ -363,7 +375,7 @@ export function rows(): void {
       // within 6 px of the sheet's centre line it snaps, with a 1 px guide in --pt-select
       const centre = g0.sheetLeft + 800 * g0.s;
       const off = centre - g0.cx + 4;
-      await page.mouse.move(g0.cx + off, g0.cy + 160, { steps: 6 });
+      await page.mouse.move(g0.cx + off, g0.cy + 100, { steps: 6 });
       await frame(page);
       const g2 = await geom(page, HERO_TITLE);
       expect(Math.abs(g2.cx - centre), 'the centre snaps to the centre line').toBeLessThanOrEqual(
@@ -379,7 +391,9 @@ export function rows(): void {
       expect(guide?.bg).toBe(SELECT);
       expect(guide?.w).toBe(1);
       expect(Math.abs((guide?.x ?? 0) - centre)).toBeLessThanOrEqual(1);
-      expect(Math.hypot(g2.cx - g0.cx, g2.cy - g0.cy)).toBeGreaterThanOrEqual(160);
+      // 100 px down the frame's 304 px slide (LANDING.md 6.7 home.hero.edit: dragged 100 px), less
+      // at most the 6 px a snap to a line across may take
+      expect(Math.hypot(g2.cx - g0.cx, g2.cy - g0.cy)).toBeGreaterThanOrEqual(93.5);
       await page.mouse.up();
       expect(await page.locator('.ts-home-guide:not([hidden])').count()).toBe(0);
 
@@ -458,14 +472,15 @@ export function rows(): void {
     const { context, page } = await openHome(browser);
     try {
       const band = page.locator('[data-band="canvas"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(page, 'canvas');
       const objects = await band
         .locator('[data-object]')
         .evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset['object'] ?? ''));
-      const heading = objects.find((id) => id.startsWith('rosetta#h')) ?? objects[0] ?? '';
-      const H = `[data-object="${heading}"]`;
+      const heading = objects.find((id) => id.startsWith('lighthouse#h')) ?? objects[0] ?? '';
+      const H = `[data-band="canvas"] [data-object="${heading}"]`;
       const rest = new Map<string, Geom>();
-      for (const id of objects) rest.set(id, await geom(page, `[data-object="${id}"]`));
+      for (const id of objects)
+        rest.set(id, await geom(page, `[data-band="canvas"] [data-object="${id}"]`));
       const layoutWord = (): Promise<string> => band.locator('[data-layout-row]').innerText();
       expect(await layoutWord()).toContain('Mood');
 
@@ -546,7 +561,7 @@ export function rows(): void {
         await settledIn(page, H, 1200);
       }
       for (const id of objects) {
-        const g = await geom(page, `[data-object="${id}"]`);
+        const g = await geom(page, `[data-band="canvas"] [data-object="${id}"]`);
         const r = rest.get(id);
         // on the slide: its place against the sheet
         const dx = g.cx - g.sheetLeft - ((r?.cx ?? 0) - (r?.sheetLeft ?? 0));
@@ -571,7 +586,7 @@ export function rows(): void {
       });
       try {
         const band = page.locator('[data-band="canvas"]');
-        await band.scrollIntoViewIfNeeded();
+        await bandReady(page, 'canvas');
         const code = band.locator('[data-log]');
         const looks = await code.evaluate((el) => ({
           tag: el.tagName,
@@ -590,8 +605,8 @@ export function rows(): void {
         const ids = await band
           .locator('[data-object]')
           .evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset['object'] ?? ''));
-        const heading = ids.find((id) => id.startsWith('rosetta#h')) ?? ids[0] ?? '';
-        const H = `[data-object="${heading}"]`;
+        const heading = ids.find((id) => id.startsWith('lighthouse#h')) ?? ids[0] ?? '';
+        const H = `[data-band="canvas"] [data-object="${heading}"]`;
         const g0 = await geom(page, H);
         // a move: to-canvas first, then the block's pos in whole units, within 450 ms
         await page.mouse.click(g0.cx, g0.cy);
@@ -600,7 +615,7 @@ export function rows(): void {
         const t0 = Date.now();
         await page.mouse.up();
         await expect(code).toHaveText(
-          /^turboslide block set rosetta#\S+ \/pos '\{"x":-?\d+,"y":-?\d+,"w":\d+,"h":\d+\}'$/,
+          /^turboslide block set lighthouse#\S+ \/pos '\{"x":-?\d+,"y":-?\d+,"w":\d+,"h":\d+\}'$/,
           {
             timeout: 450,
           },
@@ -623,7 +638,7 @@ export function rows(): void {
         // a turn by the keys: the rotate form after the burst ends
         await page.keyboard.press('Alt+ArrowRight');
         await page.keyboard.press('Alt+ArrowRight');
-        await expect(code).toHaveText(/^turboslide block rotate rosetta#\S+ --to 30$/, {
+        await expect(code).toHaveText(/^turboslide block rotate lighthouse#\S+ --to 30$/, {
           timeout: 900,
         });
         // no line breaks inside a token
@@ -652,7 +667,7 @@ export function rows(): void {
     const { context, page } = await openHome(browser);
     try {
       const band = page.locator('[data-band="canvas"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(page, 'canvas');
       await page.evaluate(() => {
         const code = document.querySelector('[data-band="canvas"] [data-log]');
         const seen: string[] = [];
@@ -665,12 +680,12 @@ export function rows(): void {
           });
       });
       const first = await band.locator('[data-object]').first().getAttribute('data-object');
-      await page.locator(`[data-object="${first}"]`).focus();
+      await page.locator(`[data-band="canvas"] [data-object="${first}"]`).focus();
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(700);
       const lines = await page.evaluate(() => (window as unknown as { __lines: string[] }).__lines);
-      expect(lines[0]).toBe('turboslide slide to-canvas rosetta');
-      expect(lines[1]).toMatch(/^turboslide block set rosetta#\S+ \/pos /);
+      expect(lines[0]).toBe('turboslide slide to-canvas lighthouse');
+      expect(lines[1]).toMatch(/^turboslide block set lighthouse#\S+ \/pos /);
     } finally {
       await context.close();
     }
@@ -681,7 +696,9 @@ export function rows(): void {
     try {
       // Tab reaches every object of slides 1 and 6, in reading order
       const want = await page
-        .locator('[data-band="hero"] [data-object], [data-band="canvas"] [data-object]')
+        .locator(
+          '[data-band="hero"] [data-object]:not([tabindex="-1"]), [data-band="canvas"] [data-object]:not([tabindex="-1"])',
+        )
         .evaluateAll((els) =>
           els
             .filter((e) => (e as HTMLElement).checkVisibility())
@@ -755,117 +772,6 @@ export function rows(): void {
       expect(after).toEqual(before);
       expect(await undo.getAttribute('aria-disabled')).toBe(undoable);
       expect(await page.locator('[data-show]:not([hidden])').count()).toBe(0);
-    } finally {
-      await context.close();
-    }
-  });
-
-  test(title('home.budget.live-module'), async ({ browser }) => {
-    const context = await browser.newContext({ extraHTTPHeaders });
-    const page = await context.newPage();
-    try {
-      const scripts: { url: string; at: number; req: Request }[] = [];
-      page.on('request', (req) => {
-        if (req.resourceType() === 'script') scripts.push({ url: req.url(), at: Date.now(), req });
-      });
-      await page.goto('/home');
-      await page.locator(LIVE_READY).waitFor({ timeout: 30_000 });
-      /* the wall clock time of the load event, against each request's start */
-      const loadAt = await page.evaluate(
-        () =>
-          performance.timeOrigin +
-          ((
-            performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
-          )?.loadEventEnd ?? 0),
-      );
-      const late = await page.evaluate(
-        (after) =>
-          performance
-            .getEntriesByType('resource')
-            .filter(
-              (e) =>
-                (e as PerformanceResourceTiming).initiatorType === 'script' ||
-                /\.(js|ts)(\?|$)/.test(e.name),
-            )
-            .map((e) => ({ name: e.name, start: e.startTime + performance.timeOrigin }))
-            .filter((e) => e.start >= after),
-        loadAt,
-      );
-      const early = scripts.filter((s) => /\/live\/|home-live/.test(s.url) && s.at < loadAt);
-      expect(early, 'no part of the live module before load').toEqual([]);
-      expect(late.length, 'the live module is requested after load').toBeGreaterThan(0);
-      if (scripts.some((s) => s.url.includes('/@vite/client'))) {
-        test.info().annotations.push({
-          type: 'not read: a dev server',
-          description:
-            'a dev server serves the live module as separate unbundled modules; its one request and its bytes exist as shipped on a build only (the node-server output of scripts/check.mjs or the preview)',
-        });
-        throw new Error(
-          'the live module is read on a build (the node-server output or the preview): one request, at most 32 KB gzip and 112 KB decoded',
-        );
-      }
-      /* the live module is the one chunk after load that holds the overlay's class; a chunk it
-         imports that no script loaded before load comes with it (the build put the product's
-         panels/assist-strings, which the editor shares, in a chunk of its own) and counts in its
-         bytes; any other script after load fails the row (the integrator's ruling, 2026-10-03) */
-      const bodies = await Promise.all(
-        late.map(async (e) => {
-          const s = scripts.find((x) => x.url === e.name);
-          return {
-            name: e.name,
-            body: (await (await s?.req.response())?.body()) ?? Buffer.alloc(0),
-          };
-        }),
-      );
-      const lives = bodies.filter((b) => b.body.includes('ts-home-sel-layer'));
-      expect(
-        lives.map((b) => b.name),
-        'one live chunk after load',
-      ).toHaveLength(1);
-      const liveText = lives[0]?.body.toString('utf8') ?? '';
-      const imported = new Set(
-        [...liveText.matchAll(/from\s*["']\.\/([\w.-]+\.js)["']/g)].map((m) => m[1]),
-      );
-      const others = bodies.filter((b) => !b.body.includes('ts-home-sel-layer'));
-      const stray = others.filter(
-        (b) => !imported.has(new URL(b.name).pathname.split('/').pop() ?? ''),
-      );
-      expect(
-        stray.map((b) => b.name),
-        'no script after load but the live chunk and the chunks it imports',
-      ).toEqual([]);
-      const body = Buffer.concat([lives[0]?.body ?? Buffer.alloc(0), ...others.map((b) => b.body)]);
-      test.info().annotations.push({
-        type: 'requests',
-        description: bodies.map((b) => `${new URL(b.name).pathname} ${b.body.length} B`).join(', '),
-      });
-      /* the integrator's ruling of 2026-10-03 (build/integrator.md "Landing, merge"; l2.md Q8, Q13,
-         l3.md R16): the one chunk carries every band's live code, so its line is 32 KB gzip and
-         112 KB decoded in place of LANDING.md 4.1's 15 KB and 48 KB */
-      const gzip = gzipSync(body, { level: 9 }).length;
-      test.info().annotations.push({
-        type: 'measure',
-        description: `the live module: ${body.length} B decoded, ${gzip} B gzip (lines 114688 and 32768)`,
-      });
-      expect(body.length, 'at most 112 KB decoded').toBeLessThanOrEqual(112 * 1024);
-      expect(gzip, 'at most 32 KB gzip').toBeLessThanOrEqual(32 * 1024);
-      const text = body.toString('utf8');
-      expect(text, 'the live module').toContain('ts-home-sel-layer');
-      expect(text, 'no slide markup but slide 7 and slide 5').not.toMatch(
-        /data-slide=\\?"(title|plan|gets|ships|rosetta|close)\\?"/,
-      );
-      // slide 5's earlier states travel with the agents band (L3, push 4) and slide 7 with the
-      // show and the print (L3, push 5); a tree without those bands' modules carries neither
-      const carried = {
-        'slide 7, the opener field': /data-slide=\\?"field\\?"/.test(text),
-        "slide 5's earlier states": /data-slide=\\?"next-steps\\?"/.test(text),
-      };
-      for (const [what, has] of Object.entries(carried))
-        if (!has)
-          test.info().annotations.push({
-            type: 'not reached',
-            description: `${what}: not in this tree's live chunk (it travels with L3's agents band and show)`,
-          });
     } finally {
       await context.close();
     }

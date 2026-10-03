@@ -1,8 +1,9 @@
 import { ANNOUNCE, HISTORY } from '../copy';
-import type { HomeSlideId } from '../deck.generated';
+import { cloneSlide } from './index';
 import type { LiveContext } from './index';
 import { ease, finishBand, ms, play } from './motion';
-import type { HomeDeckState } from './state';
+import { paintSlide, renumber } from './paint';
+import type { HomeDeckState, SlideKey } from './state';
 import type { Snackbar } from './tailor';
 
 /**
@@ -23,24 +24,9 @@ const PRESS_MS = 350;
 const LIFT_PX = 4;
 const SWIPE_PX = 8;
 
-/** Rewrites every slide root's counter, and the filmstrip's numbers, from the deck's order. */
-export function renumber(root: HTMLElement, state: HomeDeckState): void {
-  const total = state.order.length;
-  for (const el of root.querySelectorAll<HTMLElement>('[data-home-slides][data-slide]')) {
-    const n = state.order.indexOf(el.dataset['slide'] as HomeSlideId) + 1;
-    if (n === 0) continue;
-    const text = `${n} / ${total}`;
-    if (el.dataset['counter'] !== text) el.dataset['counter'] = text;
-    for (const c of el.querySelectorAll('[data-counter-text]'))
-      if (c.textContent !== text) c.textContent = text;
-  }
-  for (const thumb of root.querySelectorAll<HTMLElement>('[data-thumb]')) {
-    const n = state.order.indexOf(thumb.dataset['thumb'] as HomeSlideId) + 1;
-    thumb.hidden = n === 0;
-    const label = thumb.querySelector('[data-thumb-n]');
-    if (label !== null && n > 0 && label.textContent !== String(n)) label.textContent = String(n);
-  }
-}
+/* the counters, the numbers and the skipped mark are drawn by paint.ts on every change; kept here
+   for the bands that imported it from the filmstrip in the first pass (l3.md R11) */
+export { renumber };
 
 /** Ends at once the renderer's CSS animations an inserted slide starts (its `.slide.is-on` cut). */
 function settleCuts(el: Element): void {
@@ -49,11 +35,11 @@ function settleCuts(el: Element): void {
 
 /** The order with `id` moved to `index` among the filmstrip's slides (the others keep places). */
 function reorder(
-  order: readonly HomeSlideId[],
-  strip: readonly HomeSlideId[],
-  id: HomeSlideId,
+  order: readonly SlideKey[],
+  strip: readonly SlideKey[],
+  id: SlideKey,
   index: number,
-): HomeSlideId[] {
+): SlideKey[] {
   const inStrip = order.filter((s) => strip.includes(s));
   const from = inStrip.indexOf(id);
   if (from < 0) return [...order];
@@ -69,8 +55,8 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
   const stage = band.querySelector<HTMLElement>('[data-stage]');
   if (strip === null) return;
   const thumbs = [...strip.querySelectorAll<HTMLElement>('[data-thumb]')];
-  const ids = thumbs.map((t) => t.dataset['thumb'] as HomeSlideId);
-  const thumbOf = (id: HomeSlideId): HTMLElement | undefined =>
+  const ids = thumbs.map((t) => t.dataset['thumb'] as SlideKey);
+  const thumbOf = (id: SlideKey): HTMLElement | undefined =>
     thumbs.find((t) => t.dataset['thumb'] === id);
   const visible = (): HTMLElement[] => {
     const order = store.get().order;
@@ -83,8 +69,8 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
 
   // ---- the stage shows the chosen slide (a cut) ----
   const stageSlide = stage?.querySelector<HTMLElement>('[data-home-slides]')?.dataset['slide'];
-  let chosen: HomeSlideId = (stageSlide as HomeSlideId | undefined) ?? ids[0] ?? 'plan';
-  const choose = (id: HomeSlideId): void => {
+  let chosen: SlideKey = (stageSlide as SlideKey | undefined) ?? ids[0] ?? 'plan';
+  const choose = (id: SlideKey): void => {
     chosen = id;
     for (const t of thumbs) {
       const on = t.dataset['thumb'] === id;
@@ -95,18 +81,22 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     const source = thumbOf(id)?.querySelector<HTMLElement>('[data-home-slides]');
     if (shown === null || shown === undefined || source === null || source === undefined) return;
     if (shown.dataset['slide'] === id) return;
-    const clone = source.cloneNode(true) as HTMLElement;
+    // a fresh root of the slide as the build wrote it, with the deck's state drawn on it (a clone
+    // of the thumbnail would carry the thumbnail's drawn poses as if they were its rest)
+    const clone =
+      cloneSlide(id, store.get(), 'tailor-stage') ?? (source.cloneNode(true) as HTMLElement);
     clone.dataset['instance'] = 'tailor-stage';
     for (const el of clone.querySelectorAll('[id]')) el.removeAttribute('id');
     shown.replaceWith(clone);
-    // the stage changes by a cut (3.2 T6): the renderer's slide cut ends at once
+    paintSlide(clone, store.get());
+    // the stage changes by a cut (3.6 T6): the renderer's slide cut ends at once
     settleCuts(clone);
   };
   choose(chosen);
 
   // ---- a move: one change of the order ----
-  const placeOf = (id: HomeSlideId): number => store.get().order.indexOf(id) + 1;
-  const move = (id: HomeSlideId, index: number): void => {
+  const placeOf = (id: SlideKey): number => store.get().order.indexOf(id) + 1;
+  const move = (id: SlideKey, index: number): void => {
     const before = store.get().order;
     const from = placeOf(id);
     const next = reorder(before, ids, id, index);
@@ -117,6 +107,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
       band: 'tailor',
       author: 'you',
       words: HISTORY.slideMoved(from, to),
+      slide: id,
       next: (s) => ({ ...s, order: reorder(s.order, ids, id, index) }),
       undo: (s) => ({ ...s, order: reorder(s.order, ids, id, stripFrom) }),
     });
@@ -127,7 +118,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     const list = visible();
     const i = list.indexOf(thumb);
     if (i < 0) return;
-    move(thumb.dataset['thumb'] as HomeSlideId, i + by);
+    move(thumb.dataset['thumb'] as SlideKey, i + by);
   };
 
   // ---- drawing the order: the thumbnails take their places (FLIP) ----
@@ -169,7 +160,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
 
   store.subscribe((state, event) => {
     arrange(state);
-    if (!state.order.includes(chosen)) choose(visible()[0]?.dataset['thumb'] as HomeSlideId);
+    if (!state.order.includes(chosen)) choose(visible()[0]?.dataset['thumb'] as SlideKey);
     if (event.change.band === 'tailor' && event.kind === 'undo') finishBand('tailor');
   });
 
@@ -317,7 +308,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     window.clearTimeout(g.timer);
     lift = null;
     if (!g.on) {
-      if (e.type === 'pointerup') choose(g.thumb.dataset['thumb'] as HomeSlideId);
+      if (e.type === 'pointerup') choose(g.thumb.dataset['thumb'] as SlideKey);
       return;
     }
     const held = g.thumb.getBoundingClientRect();
@@ -327,7 +318,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     }
     endLift(g);
     flipNext = false;
-    if (g.to !== g.from) move(g.thumb.dataset['thumb'] as HomeSlideId, g.to);
+    if (g.to !== g.from) move(g.thumb.dataset['thumb'] as SlideKey, g.to);
     flipNext = true;
     const home = g.thumb.getBoundingClientRect();
     play(
@@ -340,7 +331,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
       'arrive',
       'tailor',
     );
-    choose(g.thumb.dataset['thumb'] as HomeSlideId);
+    choose(g.thumb.dataset['thumb'] as SlideKey);
   };
   strip.addEventListener('pointerup', drop);
   strip.addEventListener('pointercancel', drop);
@@ -349,7 +340,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
   strip.addEventListener('keydown', (e) => {
     const thumb = (e.target as Element).closest<HTMLElement>('[data-thumb]');
     if (thumb === null || (e.target as Element).closest('[data-thumb-move]')) return;
-    const id = thumb.dataset['thumb'] as HomeSlideId;
+    const id = thumb.dataset['thumb'] as SlideKey;
     if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
       e.preventDefault();
       finishBand('tailor');
@@ -370,7 +361,7 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     e.preventDefault();
     finishBand('tailor');
     step(thumb, button.dataset['thumbMove'] === 'up' ? -1 : 1);
-    choose(thumb.dataset['thumb'] as HomeSlideId);
+    choose(thumb.dataset['thumb'] as SlideKey);
     button.focus({ preventScroll: true });
   });
 }

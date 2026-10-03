@@ -6,7 +6,7 @@ import { TAILOR as PRODUCT } from '@turboslide/chrome/panels/assist-strings';
 import { ANNOUNCE, TAILOR } from '../../../src/components/home/copy';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { title } from '../lib';
-import { openHome, played, recordAnimations } from './objects';
+import { bandReady, openHome, played, recordAnimations } from './objects';
 
 // A lane module of core/home.spec.ts (docs/LANDING.md 2.5, 6.7; build/integrator.md "Landing,
 // day 0" 3, 4.9 and 5.1), L2's, push 3: Tailor, the example kits and the filmstrip. Every
@@ -189,7 +189,7 @@ export function rows(): void {
     const { context, page } = await openHome(browser);
     try {
       const band = page.locator('[data-band="tailor"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(page, 'tailor');
       const field = band.locator('[data-tailor-to]');
       const countCell = band.locator('[data-tailor-count]');
       const apply = band.locator('[data-tailor-apply]');
@@ -254,27 +254,25 @@ export function rows(): void {
       await field.type('A customer name over twenty four characters', { delay: 5 });
       expect((await field.inputValue()).length).toBeLessThanOrEqual(24);
 
-      // without slide 5 (the agents band's Run Again cuts to the run's start, A8; step 1's
-      // placeholders hold no name) the count is the fixture's recording. The page holds that deck
-      // only once the run is live (L3, push 4); before it, every deck the page can hold has slide
-      // 5, and the clause is recorded as not reached rather than passed
-      const run = page.locator('[data-agent-run]');
-      await run.scrollIntoViewIfNeeded();
-      await run.click();
-      const cut = await page
-        .waitForFunction(
+      // without slide 5 the count is the fixture's recording. The page reaches that deck by
+      // restoring version 1 (Version history's scrubber, V2#14) or a typed `version restore 1`
+      // (V3#13); a tree without either records the clause as not reached rather than passed
+      const restore = page.locator('[data-version-restore]');
+      const slider = page.locator('[data-version-slider][role="slider"]');
+      if ((await slider.count()) > 0 && (await restore.count()) > 0) {
+        await slider.scrollIntoViewIfNeeded();
+        await slider.focus();
+        await page.keyboard.press('Home');
+        await restore.click();
+        await page.waitForFunction(
           () =>
             [...document.querySelectorAll<HTMLElement>('[data-home-slides][data-counter]')].some(
-              (el) => (el.dataset['counter'] ?? '').endsWith('/ 7'),
+              (el) => (el.dataset['counter'] ?? '').endsWith('/ 8'),
             ),
           undefined,
           { timeout: 3000 },
-        )
-        .then(
-          () => true,
-          () => false,
         );
-      if (cut) {
+        await band.scrollIntoViewIfNeeded();
         const start = HOME_RUN.tailorCounts.start;
         await expect(countCell).toHaveText(PRODUCT.count(start.places, start.slides));
         await field.fill('Globex');
@@ -286,7 +284,7 @@ export function rows(): void {
         test.info().annotations.push({
           type: 'not reached',
           description:
-            'the deck without slide 5: Run Again did not cut to the run start, so this tree has no live run (L3, push 4)',
+            'the deck without slide 5: no Restore This Version on this tree (the scrubber is V2#14)',
         });
     } finally {
       await context.close();
@@ -297,7 +295,7 @@ export function rows(): void {
     const { context, page } = await openHome(browser);
     try {
       const band = page.locator('[data-band="tailor"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(page, 'tailor');
       // at rest: no --pt-select, and the one colour outside paper and ink is Fenwick's swatch
       const hues = await page.evaluate(() => {
         const out = new Set<string>();
@@ -342,12 +340,12 @@ export function rows(): void {
           accent: KITS.kestrel.ink,
         });
       await expect(page.locator('main')).toHaveAttribute('data-page-kit', 'kestrel');
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('kestrel', 8));
+      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('kestrel', 9));
       expect(await band.locator('[data-kit="kestrel"]').getAttribute('aria-pressed')).toBe('true');
 
       // the show then draws Kestrel (L3's show, push 5)
       const present = page.locator('[data-present]');
-      await present.scrollIntoViewIfNeeded();
+      await bandReady(page, 'present');
       await present.click();
       const shown = page.locator('[data-show-stage] [data-home-slides]').first();
       const opened = await shown.waitFor({ timeout: 3000 }).then(
@@ -390,7 +388,7 @@ export function rows(): void {
         return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
       });
       expect(ring).toBeGreaterThanOrEqual(3);
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('fenwick', 8));
+      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('fenwick', 9));
 
       // GT restores the deck's own kit
       await band.locator('[data-kit="gt"]').click();
@@ -404,7 +402,7 @@ export function rows(): void {
       );
       expect(inline).toBe(false);
       expect(await page.locator('main').getAttribute('data-page-kit')).toBeNull();
-      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('gt', 8));
+      await expect(band.locator('[data-snackbar-text]')).toHaveText(TAILOR.kitStatus('gt', 9));
     } finally {
       await context.close();
     }
@@ -414,7 +412,7 @@ export function rows(): void {
     const { context, page } = await openHome(browser);
     try {
       const band = page.locator('[data-band="tailor"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(page, 'tailor');
       const order = () =>
         band
           .locator('[data-filmstrip] [data-thumb]:not([hidden])')
@@ -429,7 +427,7 @@ export function rows(): void {
           ),
         );
       const o0 = await order();
-      expect(o0.slice(0, 4)).toEqual(['plan', 'gets', 'ships', 'next-steps']);
+      expect(o0).toEqual(['title', 'plan', 'gets', 'ships', 'next-steps']);
       const thumb = (id: string) => band.locator(`[data-thumb="${id}"]`);
       const box = async (id: string) => {
         const b = await thumb(id).boundingBox();
@@ -460,36 +458,36 @@ export function rows(): void {
       const settle = (await played(page)).filter((p) => p.target === 'plan');
       expect(settle.map((p) => [p.duration, p.props])).toEqual([[240, ['transform']]]);
       await page.waitForTimeout(300);
-      expect((await order()).slice(0, 4)).toEqual(['gets', 'ships', 'plan', 'next-steps']);
+      expect(await order()).toEqual(['title', 'gets', 'ships', 'plan', 'next-steps']);
       // every counter on the page renumbers
       const cs = await counters();
       for (const [instance, counter] of Object.entries(cs)) {
         if (instance.includes('plan') || instance === 'tailor-stage') continue;
         if (instance.includes('gets') || instance === 'present')
-          expect(counter, instance).toBe('2 / 8');
-        if (instance.includes('ships')) expect(counter, instance).toBe('3 / 8');
+          expect(counter, instance).toBe('2 / 9');
+        if (instance.includes('ships')) expect(counter, instance).toBe('3 / 9');
       }
-      expect(cs['tailor-thumb-plan']).toBe('4 / 8');
+      expect(cs['tailor-thumb-plan']).toBe('4 / 9');
       await expect(band.locator('[data-announce]')).toHaveText(ANNOUNCE.slideMoved(2, 4));
 
       // Undo returns it (the move's sentence holds the snackbar's Undo)
       await expect(band.locator('[data-snackbar-text]')).toHaveText(ANNOUNCE.slideMoved(2, 4));
       await band.locator('[data-snackbar-undo]').click();
       await page.waitForTimeout(300);
-      expect((await order()).slice(0, 4)).toEqual(o0.slice(0, 4));
-      expect((await counters())['tailor-thumb-plan']).toBe('2 / 8');
+      expect(await order()).toEqual(o0);
+      expect((await counters())['tailor-thumb-plan']).toBe('2 / 9');
 
       // Cmd or Ctrl with Down moves the focused slide; Move Up moves it back
       await thumb('gets').focus();
       await page.keyboard.press('ControlOrMeta+ArrowDown');
-      expect((await order()).slice(0, 4)).toEqual(['plan', 'ships', 'gets', 'next-steps']);
+      expect(await order()).toEqual(['title', 'plan', 'ships', 'gets', 'next-steps']);
       await thumb('gets').click();
       const up = thumb('gets').locator('[data-thumb-move="up"]');
       await expect(up).toBeVisible();
       await up.click();
-      expect((await order()).slice(0, 4)).toEqual(o0.slice(0, 4));
+      expect(await order()).toEqual(o0);
       await thumb('gets').locator('[data-thumb-move="down"]').click();
-      expect((await order()).slice(0, 4)).toEqual(['plan', 'ships', 'gets', 'next-steps']);
+      expect(await order()).toEqual(['title', 'plan', 'ships', 'gets', 'next-steps']);
     } finally {
       await context.close();
     }
@@ -498,7 +496,7 @@ export function rows(): void {
     const touch = await openHome(browser, { touch: true, width: 390, height: 844 });
     try {
       const band = touch.page.locator('[data-band="tailor"]');
-      await band.scrollIntoViewIfNeeded();
+      await bandReady(touch.page, 'tailor');
       const t = band.locator('[data-thumb="plan"]');
       const b = await t.boundingBox();
       if (b === null) throw new Error('no plan thumbnail');

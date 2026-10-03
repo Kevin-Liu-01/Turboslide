@@ -1,12 +1,11 @@
 import { TAILOR as PRODUCT } from '@turboslide/chrome/panels/assist-strings';
 
 import { HISTORY, TAILOR } from '../copy';
-import { HOME_DECK } from '../deck.generated';
-import type { HomeSlideId } from '../deck.generated';
 import { startFilmstrip } from './filmstrip';
 import type { LiveContext } from './index';
 import { ms, play, reduced, sequence, slowFactor } from './motion';
-import type { AgentStep, HomeDeckState } from './state';
+import { applyCustomer, customerText, markCustomer, noteCustomer } from './paint';
+import type { AgentStep, HomeDeckState, SlideKey } from './state';
 import { startTheme } from './theme';
 
 /**
@@ -33,48 +32,9 @@ const LIT_MS = 900;
 /** The product's maximum (the field's `maxlength`, LANDING.md 2.4). */
 const NAME_MAX = 24;
 
-const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** The notes or any text with the fixture's customer replaced by `to`. */
-export function customerText(text: string, to: string): string {
-  return text.split(HOME_DECK.customer).join(to);
-}
-
-/**
- * Wraps every occurrence of the fixture's name, or of `from`, in the element's text in a
- * `span[data-customer]` once, and returns every such span in document order.
- */
-export function markCustomer(el: Element, from: string): HTMLElement[] {
-  const names = [...new Set([HOME_DECK.customer, from])].filter((n) => n !== '');
-  const re = new RegExp(`(${names.map(escapeRe).join('|')})`);
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-  const hits: Text[] = [];
-  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
-    const parent = node.parentElement;
-    if (parent === null || parent.closest('[data-customer], svg, script, style') !== null) continue;
-    if (re.test((node as Text).data)) hits.push(node as Text);
-  }
-  for (const text of hits) {
-    const parts = text.data.split(re);
-    const frag = document.createDocumentFragment();
-    for (const [i, part] of parts.entries()) {
-      if (part === '') continue;
-      if (i % 2 === 1) {
-        const span = document.createElement('span');
-        span.setAttribute('data-customer', '');
-        span.textContent = part;
-        frag.append(span);
-      } else frag.append(part);
-    }
-    text.replaceWith(frag);
-  }
-  return [...el.querySelectorAll<HTMLElement>('[data-customer]')];
-}
-
-/** Sets the customer in markup inserted after the page loaded (l3.md R12). */
-export function applyCustomer(el: Element, from: string, to: string): void {
-  for (const span of markCustomer(el, from)) span.textContent = to;
-}
+/* the customer's name on any slide is drawn by paint.ts; these are kept here for the bands that
+   imported them from Tailor in the first pass (l3.md R12) */
+export { applyCustomer, customerText, markCustomer };
 
 /**
  * The CLI's answer to `tailor --replace=Northwind=Globex` on each deck the page can hold: slide 5
@@ -86,10 +46,10 @@ export function applyCustomer(el: Element, from: string, to: string): void {
  * build writes it (l2.md Q9).
  */
 const PLACES: Readonly<Record<AgentStep, { places: number; slides: number }>> = {
-  0: { places: 6, slides: 3 },
-  1: { places: 6, slides: 3 },
-  2: { places: 7, slides: 4 },
-  3: { places: 8, slides: 4 },
+  0: { places: 11, slides: 5 },
+  1: { places: 11, slides: 5 },
+  2: { places: 12, slides: 6 },
+  3: { places: 13, slides: 6 },
 };
 
 /** The places and slides of the customer's name in the deck the page holds (LANDING.md 2.5). */
@@ -213,11 +173,12 @@ export function startTailor(ctx: LiveContext): void {
       thumb.setAttribute('aria-label', label.split(from).join(to));
     }
     const order = store.get().order;
-    const offsets = new Map<HomeSlideId, number>();
+    const offsets = new Map<SlideKey, number>();
     const marked: { span: HTMLElement; at: number }[] = [];
     for (const el of holders()) {
+      if (el instanceof HTMLElement && el.matches('[data-home-slides]')) noteCustomer(el, to);
       const spans = markCustomer(el, from);
-      const slide = (el as HTMLElement).dataset['slide'] as HomeSlideId | undefined;
+      const slide = (el as HTMLElement).dataset['slide'] as SlideKey | undefined;
       if (!animate || slide === undefined) {
         for (const span of spans) span.textContent = to;
         continue;
@@ -227,7 +188,7 @@ export function startTailor(ctx: LiveContext): void {
     }
     if (!animate) return;
     // reading order: the slide's place in the deck, then the name's place on the slide
-    const before = new Map<HomeSlideId, number>();
+    const before = new Map<SlideKey, number>();
     let sum = 0;
     for (const id of order) {
       before.set(id, sum);
@@ -257,7 +218,7 @@ export function startTailor(ctx: LiveContext): void {
     let last = 0;
     for (const { span, at } of marked) {
       const slide = (span.closest<HTMLElement>('[data-home-slides]')?.dataset['slide'] ??
-        'title') as HomeSlideId;
+        'title') as SlideKey;
       const place = (before.get(slide) ?? 0) + at;
       // under reduced motion the names are set at once and lit and unlit by cuts (2.5, 3.6)
       const delay = reduced() ? 0 : Math.min(place, NAME_GROUP - 1) * NAME_STAGGER_MS * k;
@@ -291,3 +252,6 @@ export function startTailor(ctx: LiveContext): void {
   startTheme(ctx, snack);
   startFilmstrip(ctx, snack);
 }
+
+/** The band entry the loader starts (LANDING.md 6.3 "The band loader"). */
+export const start = startTailor;

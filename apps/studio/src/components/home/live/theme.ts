@@ -3,92 +3,38 @@ import { bayer8 } from '@turboslide/effects/bayer';
 import { HISTORY, TAILOR } from '../copy';
 import type { LiveContext } from './index';
 import { ms, sequence, smoothstep } from './motion';
+import { applyKit, DERIVED_ALPHAS, KITS, kitProperties as propertiesOf } from './paint';
+import type { KitColors } from './paint';
 import type { HomeDeckState, KitId } from './state';
 import type { Snackbar } from './tailor';
 
 /**
- * The example kits (docs/LANDING.md 2.5 "Kits", a replica; integrator.md 3 with Kevin's answer 4).
- * The product's Slide > Change theme opens the Brand kit panel, whose six colour fields set the
- * deck's colours (`packages/chrome/src/menus/model.ts` 2244); it has no named presets. Each swatch
- * fills those six fields at once: it sets the six variables `packages/render/src/theme-css.ts`
+ * The example kits (docs/LANDING.md 2.8, a replica; integrator.md 3 with Kevin's answer 4). The
+ * product's Slide > Change theme opens the Brand kit panel, whose six colour fields set the deck's
+ * colours (`packages/chrome/src/menus/model.ts` 2244); it has no named presets. Each swatch fills
+ * those six fields at once: `paint.ts` sets the six variables `packages/render/src/theme-css.ts`
  * writes (Text, Background, Captions, Hints, Primary, Accent, as `--ink`, `--paper`, `--ink-2`,
  * `--titanium`, `--blue`, `--accent`) with the alpha forms theme-css.ts derives from the text
  * colour, inline on every slide on the page, so every slide, the show and the print follow; GT
- * removes them, and the deck draws its own kit in the page's appearance. Primary and Accent take
- * the kit's text colour, so no third hue enters a slide; Kestrel and Fenwick are example
- * customers' kits and fix their colours in both appearances, as a customer theme does.
+ * removes them, and the deck draws its own kit in the page's appearance.
  *
  * A change sets the words, the ground under every text box and the printed inks at once, and the
- * old ground outside the boxes clears in Bayer order over 500 ms on the tone curve (3.2 T3), so no
- * frame shows text under its kit's contrast. Under reduced motion it is a cut.
+ * old ground outside the boxes clears in Bayer order over 500 ms on the tone curve (3.6 T3), so no
+ * frame shows text under its kit's contrast. Under reduced motion it is a cut. `clearGround` is
+ * the clear, which the kits band (`kits.ts`) and Tailor's first pass row (`startTheme`) run.
  */
 
-type Kit = { paper: string; ink: string; ink2: string; titanium: string };
+export { applyKit, DERIVED_ALPHAS, KITS };
 
-/** integrator.md 3: Kestrel (C's values) and Fenwick (C's navy, one step darker). */
-export const KITS: Readonly<Record<Exclude<KitId, 'gt'>, Kit>> = {
-  kestrel: { paper: '#f3efe6', ink: '#1f1b16', ink2: '#4d463c', titanium: '#6e665a' },
-  fenwick: { paper: '#0a1b38', ink: '#f4f1ea', ink2: '#c9cbd3', titanium: '#8d97ab' },
-};
-
-/**
- * The alphas of the ink's derived tokens (`packages/theme/src/tokens.ts` TOKENS, the light set
- * for a light ground and the dark set for a dark one; theme-css.ts THEME_DERIVED_TOKENS and the
- * plate), which `theme.test.ts` holds equal to the theme's.
- */
-export const DERIVED_ALPHAS: Readonly<Record<'light' | 'dark', Readonly<Record<string, number>>>> =
-  {
-    light: { hair: 0.18, 'hair-soft': 0.09, plate: 0.035, cross: 0.38, edge: 0.62, thumb: 0.32 },
-    dark: { hair: 0.22, 'hair-soft': 0.1, plate: 0.05, cross: 0.34, edge: 0.55, thumb: 0.32 },
-  };
-
-const hexRgb = (hex: string): [number, number, number] => {
-  const n = Number.parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-};
-
-const luminance = (hex: string): number =>
-  hexRgb(hex).reduce((sum, c, i) => {
-    const v = c / 255;
-    const lin = v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-    return sum + lin * ([0.2126, 0.7152, 0.0722][i] ?? 0);
-  }, 0);
-
-/** The custom properties a kit sets on a sheet, by name with its `--`. */
+/** The custom properties a kit sets on a sheet, by name with its `--` (kept for theme.test.ts). */
 export function kitProperties(kit: Exclude<KitId, 'gt'>): Record<string, string> {
-  const k = KITS[kit];
-  const dark = luminance(k.paper) < luminance(k.ink);
-  const [r, g, b] = hexRgb(k.ink);
-  const props: Record<string, string> = {
-    '--ink': k.ink,
-    '--paper': k.paper,
-    '--ink-2': k.ink2,
-    '--titanium': k.titanium,
-    '--blue': k.ink,
-    '--accent': k.ink,
-  };
-  for (const [name, alpha] of Object.entries(DERIVED_ALPHAS[dark ? 'dark' : 'light']))
-    props[`--${name}`] = `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  return props;
+  return propertiesOf(KITS[kit]);
 }
 
-const PROPERTY_NAMES = Object.keys(kitProperties('kestrel'));
-
-/** The elements a kit writes on: the slide root and the renderer's sheets inside it. */
-const sheetsOf = (el: HTMLElement): HTMLElement[] => [
-  el,
-  ...el.querySelectorAll<HTMLElement>('.ts-sheet'),
-];
-
-/** Sets a kit on a slide root and its sheets; GT removes the properties (l3.md R13). */
-export function applyKit(el: HTMLElement, kit: KitId): void {
-  const props = kit === 'gt' ? null : kitProperties(kit);
-  for (const sheet of sheetsOf(el))
-    for (const name of PROPERTY_NAMES) {
-      const value = props?.[name];
-      if (value === undefined) sheet.style.removeProperty(name);
-      else sheet.style.setProperty(name, value);
-    }
+/** A swatch's kit: the first pass's Fenwick swatch is Globex (2.8, Kevin's pick of C's name). */
+export function kitOfSwatch(el: HTMLElement): KitId {
+  const id = el.dataset['kit'];
+  return id === 'fenwick' ? 'globex' : ((id ?? 'gt') as KitId);
 }
 
 const inView = (el: Element): boolean => {
@@ -98,8 +44,7 @@ const inView = (el: Element): boolean => {
 
 /**
  * The box of every element on a slide that holds text of its own: a text box, a row's cell, the
- * counter. Most of the page's slides carry no `data-block` (only the bands that edit their blocks
- * do), so the boxes are read from the text itself.
+ * counter, read from the text itself so a slide without block attributes is covered too.
  */
 function textBoxes(root: HTMLElement): DOMRect[] {
   const boxes: DOMRect[] = [];
@@ -176,89 +121,109 @@ function veil(
   return { el: canvas, draw };
 }
 
-/** Starts the three swatches; the status sentence takes the snackbar's row. */
+/** ends a running clear at its end state: the veils removed, the frames stopped */
+let stopClearing: (() => void) | null = null;
+
+/**
+ * The kit's clear (3.6 T3): reads the old ground of every slide in view, lets `change` set the new
+ * colours at once, then clears the old ground outside the text boxes in Bayer order over 500 ms
+ * on the tone curve. With `animate` false, or under reduced motion, it is a cut.
+ */
+export function clearGround(root: HTMLElement, change: () => void, animate: boolean): void {
+  stopClearing?.();
+  const slides = [...root.querySelectorAll<HTMLElement>('[data-home-slides]')];
+  const duration = animate ? ms('beat') : 0;
+  const veils: { el: HTMLCanvasElement; draw(p: number): void; root: HTMLElement; was: string }[] =
+    [];
+  if (duration > 0)
+    for (const slide of slides) {
+      if (!inView(slide) || slide.closest('[data-live-overlay]') !== null) continue;
+      const paper = getComputedStyle(slide.querySelector('.ts-sheet') ?? slide)
+        .getPropertyValue('--paper')
+        .trim();
+      const v = paper === '' ? null : veil(slide, paper);
+      if (v === null) continue;
+      const was = slide.style.position;
+      if (getComputedStyle(slide).position === 'static') slide.style.position = 'relative';
+      slide.append(v.el);
+      veils.push({ ...v, root: slide, was });
+    }
+  change();
+  if (veils.length === 0) return;
+  let frame = 0;
+  const end = (): void => {
+    cancelAnimationFrame(frame);
+    for (const v of veils) {
+      v.el.remove();
+      v.root.style.position = v.was;
+    }
+    run.done();
+    if (stopClearing === end) stopClearing = null;
+  };
+  const run = sequence('kits', end);
+  stopClearing = end;
+  const t0 = performance.now();
+  const tick = (now: number): void => {
+    const t = (now - t0) / duration;
+    if (t >= 1) {
+      end();
+      return;
+    }
+    const p = smoothstep(t);
+    for (const v of veils) v.draw(p);
+    frame = requestAnimationFrame(tick);
+  };
+  frame = requestAnimationFrame(tick);
+}
+
+/** The colours of a kit by id, null for GT. */
+export const colorsOfKit = (kit: KitId): KitColors | null => (kit === 'gt' ? null : KITS[kit]);
+
+/**
+ * The first pass's kit row in the Tailor band (until `V2#12` moves the kits to their own band):
+ * the three swatches, the status sentence in the snackbar's row.
+ */
 export function startTheme(ctx: LiveContext, snack: Snackbar): void {
   const { band, root, store } = ctx;
   const swatches = [...band.querySelectorAll<HTMLElement>('[data-kit]')];
+  if (swatches.length === 0) return;
   let shown: KitId = store.get().kit;
 
   const paint = (kit: KitId): void => {
-    for (const s of swatches) s.setAttribute('aria-pressed', String(s.dataset['kit'] === kit));
+    for (const s of swatches) s.setAttribute('aria-pressed', String(kitOfSwatch(s) === kit));
     if (kit === 'gt') delete root.dataset['pageKit'];
     else root.dataset['pageKit'] = kit;
   };
 
-  /** ends a running clear at its end state: the veils removed, the frames stopped */
-  let stopClearing: (() => void) | null = null;
-  const change = (kit: KitId, animate: boolean): void => {
-    stopClearing?.();
-    const slides = [...root.querySelectorAll<HTMLElement>('[data-home-slides]')];
-    const duration = animate ? ms('beat') : 0;
-    const veils: {
-      el: HTMLCanvasElement;
-      draw(p: number): void;
-      root: HTMLElement;
-      was: string;
-    }[] = [];
-    if (duration > 0)
-      for (const slide of slides) {
-        if (!inView(slide)) continue;
-        const paper = getComputedStyle(slide.querySelector('.ts-sheet') ?? slide)
-          .getPropertyValue('--paper')
-          .trim();
-        const v = paper === '' ? null : veil(slide, paper);
-        if (v === null) continue;
-        const was = slide.style.position;
-        if (getComputedStyle(slide).position === 'static') slide.style.position = 'relative';
-        slide.append(v.el);
-        veils.push({ ...v, root: slide, was });
-      }
-    for (const slide of slides) applyKit(slide, kit);
-    paint(kit);
-    if (veils.length === 0) return;
-    let frame = 0;
-    const end = (): void => {
-      cancelAnimationFrame(frame);
-      for (const v of veils) {
-        v.el.remove();
-        v.root.style.position = v.was;
-      }
-      run.done();
-      if (stopClearing === end) stopClearing = null;
-    };
-    const run = sequence('tailor', end);
-    stopClearing = end;
-    const t0 = performance.now();
-    const tick = (now: number): void => {
-      const t = (now - t0) / duration;
-      if (t >= 1) return end();
-      const p = smoothstep(t);
-      for (const v of veils) v.draw(p);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-  };
-
   for (const swatch of swatches)
     swatch.addEventListener('click', () => {
-      const kit = swatch.dataset['kit'] as KitId;
-      const before = store.get().kit;
-      if (kit === before) return;
-      store.commit({
-        band: 'tailor',
-        author: 'you',
-        words: HISTORY.kit(TAILOR.kits[kit].name),
-        next: (s) => ({ ...s, kit }),
-        undo: (s) => ({ ...s, kit: before }),
-      });
+      const kit = kitOfSwatch(swatch);
+      if (kit === store.get().kit) return;
+      const id = swatch.dataset['kit'] as keyof typeof TAILOR.kits;
+      // the veils read the old ground first; the commit's paint sets the new kit under them
+      clearGround(
+        root,
+        () =>
+          store.commit({
+            band: 'tailor',
+            author: 'you',
+            words: HISTORY.kit(TAILOR.kits[id].name),
+            next: (s) => ({ ...s, kit }),
+            undo: (s) => s,
+          }),
+        true,
+      );
     });
 
   store.subscribe((state: HomeDeckState, event) => {
     if (state.kit === shown) return;
     shown = state.kit;
-    change(state.kit, event.kind === 'commit');
-    if (event.kind === 'commit' && event.change.band === 'tailor')
-      snack.show(TAILOR.kitStatus(state.kit, state.order.length));
+    paint(state.kit);
+    if (event.kind === 'commit' && event.change.band === 'tailor') {
+      const swatch = swatches.find((s) => kitOfSwatch(s) === state.kit);
+      const id = (swatch?.dataset['kit'] ?? 'gt') as Parameters<typeof TAILOR.kitStatus>[0];
+      snack.show(TAILOR.kitStatus(id, state.order.length));
+    }
   });
   paint(shown);
 }

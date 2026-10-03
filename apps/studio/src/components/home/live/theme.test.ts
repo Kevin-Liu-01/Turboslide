@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  contrastRatio as productRatio,
+  readableHint as productHint,
+} from '@turboslide/render/theme-css';
 import { TOKENS } from '@turboslide/theme/tokens';
 
+import { backgroundColors, contrastRatio, readableHint, SLIDE_TOKENS } from './paint';
 import { DERIVED_ALPHAS, KITS, kitProperties } from './theme';
 
 /* The example kits (docs/LANDING.md 2.5; integrator.md 3, Kevin's answer 4): the derived alphas are
@@ -43,7 +48,7 @@ describe('the example kits', () => {
   });
 
   it('sets the six roles with Primary and Accent in the text colour, so no third hue enters', () => {
-    const k = kitProperties('fenwick');
+    const k = kitProperties('globex');
     expect(k['--paper']).toBe('#0a1b38');
     expect(k['--ink']).toBe('#f4f1ea');
     expect(k['--ink-2']).toBe('#c9cbd3');
@@ -52,5 +57,34 @@ describe('the example kits', () => {
     expect(k['--accent']).toBe('#f4f1ea');
     expect(k['--hair']).toBe('rgba(244, 241, 234, 0.22)');
     expect(kitProperties('kestrel')['--hair']).toBe('rgba(31, 27, 22, 0.18)');
+  });
+
+  it('copies theme-css.ts contrastRatio and readableHint exactly (LANDING.md 6.2)', () => {
+    const colors = ['#ffffff', '#070707', '#e6e0d2', '#0a1b38', '#777777', '#3d2b1f', '#8a8f98'];
+    for (const a of colors)
+      for (const b of colors) {
+        expect(contrastRatio(a, b)).toBe(productRatio(a, b));
+        expect(readableHint(a, b, '#8a8f98')).toBe(productHint(a, b, '#8a8f98'));
+      }
+  });
+
+  it('reads the slide tokens of the GT theme for a typed background', () => {
+    expect(SLIDE_TOKENS.light.ink).toBe(TOKENS.light.ink);
+    expect(SLIDE_TOKENS.light.ink2).toBe(TOKENS.light['ink-2']);
+    expect(SLIDE_TOKENS.light.titanium).toBe(TOKENS.light.titanium);
+    expect(SLIDE_TOKENS.dark.ink).toBe(TOKENS.dark.ink);
+    expect(SLIDE_TOKENS.dark.ink2).toBe(TOKENS.dark['ink-2']);
+    expect(SLIDE_TOKENS.dark.titanium).toBe(TOKENS.dark.titanium);
+  });
+
+  it('gives a typed background the ink that reads higher and refuses one under 4.5:1', () => {
+    const sand = backgroundColors('#e6e0d2');
+    expect(sand.colors.ink).toBe(TOKENS.light.ink);
+    expect(sand.ratio).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(sand.colors.ink2, '#e6e0d2')).toBeGreaterThanOrEqual(4.5);
+    const brown = backgroundColors('#3d2b1f');
+    expect(brown.colors.ink).toBe(TOKENS.dark.ink);
+    expect(ratio(brown.colors.titanium, '#3d2b1f')).toBeGreaterThanOrEqual(3);
+    expect(backgroundColors('#777777').ratio).toBeLessThan(4.5);
   });
 });

@@ -14,6 +14,7 @@ import { HomeFeatures } from '../components/home/HomeFeatures';
 import { HomeField } from '../components/home/HomeField';
 import { HomeFooter } from '../components/home/HomeFooter';
 import { HomeHero } from '../components/home/HomeHero';
+import { HomeKits } from '../components/home/HomeKits';
 import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
 import { HomeNumbers } from '../components/home/HomeNumbers';
@@ -126,6 +127,7 @@ function HomePage() {
       <HomeMenus />
       <HomeCanvas />
       <HomeTailor />
+      <HomeKits />
       <HomeAgents />
       <HomePresent />
       <HomeExport />

@@ -1291,10 +1291,6 @@ html:has(.ts-product) {
   --ts-kit-ink: #1f1b16;
 }
 
-.ts-home-kit[data-kit='fenwick'] {
-  --ts-kit-paper: #0a1b38;
-  --ts-kit-ink: #f4f1ea;
-}
 
 .ts-tailor-editor {
   display: grid;

@@ -7,13 +7,13 @@ import { HomeSheet } from './HomeSheet';
 /**
  * One name on every slide (docs/LANDING.md 2.7, Kevin's pick "A: One name on every slide, Tailor
  * with a reorderable filmstrip"): the Tailor dialog as ruled rows (Replace, With, the count and
- * Apply; the example kits until V2#12 moves them to their own band), then the editor in part: a
+ * Apply; the example kits have their own band since V2#12), then the editor in part: a
  * filmstrip of slides 1 to 5, the slides that carry the customer's name, as framed 144 by 81
  * thumbnails and, beside it, a stage of 856 by 481 showing the chosen slide unframed, with a row
  * reserved under it for the snackbar. The filmstrip and the stage are the band's reserved box: the
  * slides are written by its chunk after `load` (4.2), into the placeholders the document holds at
  * their final sizes. At rest the dialog holds the deck's customer and the count of the CLI's
- * recorded answer; the stage shows slide 2. Tailor, the kits and the filmstrip are V2's; the
+ * recorded answer; the stage shows slide 2. Tailor and the filmstrip are V2's; the
  * dialog's own words are the product's (`HOME_TAILOR_WORDS`, copied from @turboslide/chrome's
  * TAILOR). Hooks: integrator.md 4.1 and l2.md Q3.
  */
@@ -23,12 +23,6 @@ const THUMBS = [
   ['tailor-thumb-gets', 'gets'],
   ['tailor-thumb-ships', 'ships'],
   ['tailor-thumb-next-steps', 'next-steps'],
-] as const;
-
-const KITS = [
-  { id: 'gt', pressed: true },
-  { id: 'kestrel', pressed: false },
-  { id: 'fenwick', pressed: false },
 ] as const;
 
 export function HomeTailor() {
@@ -71,26 +65,6 @@ export function HomeTailor() {
             <button type="submit" className="pt-ib is-solid ts-button" data-tailor-apply>
               {HOME_TAILOR_WORDS.apply}
             </button>
-          </div>
-          <div className="ts-row">
-            <span className="ts-row-key">{TAILOR.examplesKey}</span>
-            <span className="ts-home-kits" role="group" aria-label={TAILOR.examplesKey}>
-              {KITS.map((kit) => (
-                <button
-                  key={kit.id}
-                  type="button"
-                  className="ts-home-kit"
-                  data-kit={kit.id}
-                  aria-pressed={kit.pressed}
-                  data-tip={TAILOR.kits[kit.id].tip}
-                >
-                  <span className="ts-home-kit-swatch" aria-hidden="true">
-                    <i />
-                  </span>
-                  {TAILOR.kits[kit.id].name}
-                </button>
-              ))}
-            </span>
           </div>
         </form>
       </div>

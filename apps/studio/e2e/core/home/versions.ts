@@ -9,8 +9,11 @@ import { bandReady, openHome } from './objects';
 // V2's, push V2#14: Version history's scrubber and Restore This Version. home.versions.scrub reads
 // the slider's versions, ticks and keys, the slide above showing the chosen version's slide by a
 // cut, the caption, and nothing else on the page changing; home.versions.restore restores an
-// earlier version as one change by You and reads every band equal to it. Every observation is
-// through the page (the versions through `window.tsHomeStore`, read only); /home writes no store.
+// earlier version as one change by You and reads every band equal to it, a version made on the
+// page and the recorded versions 2 and 3, whose slide 5 every band draws as the run's first and
+// second steps left it (verify1 F1), by Restore This Version and by a typed `version restore`.
+// Every observation is through the page (the versions through `window.tsHomeStore`, read only);
+// /home writes no store.
 
 export const ROWS: readonly string[] = ['home.versions.scrub', 'home.versions.restore'];
 
@@ -50,6 +53,48 @@ const slider = (page: Page): Locator => band(page).locator('[data-version-slider
 const restore = (page: Page): Locator => band(page).locator('[data-version-restore]');
 const caption = (page: Page): Locator => band(page).locator('[data-version-caption]');
 const view = (page: Page): Locator => band(page).locator('[data-version-view]');
+
+type Slide5 = { instance: string; title: string; rows: string[] };
+
+/** Slide 5 as every band draws it on the page (the scrubber's view aside): its title and rows. */
+const slide5 = (page: Page): Promise<Slide5[]> =>
+  page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('[data-home-slides][data-slide="next-steps"]')]
+      .filter((el) => el.closest('[data-live-overlay]') === null)
+      .map((el) => ({
+        instance: el.dataset['instance'] ?? '',
+        title: el.querySelector('[data-run="h/text"]')?.textContent ?? '',
+        rows: [...el.querySelectorAll('[data-run^="rows/items/"]')].map((x) => x.textContent ?? ''),
+      })),
+  );
+
+/** The layout's prompts of slide 5's title and text runs (the recorded render of the run's step 1). */
+const PROMPT_TITLE = 'Click to add title';
+const PROMPT_TEXT = 'Click to add text';
+
+/** Every drawing of slide 5 reads `title` and `rows`; at least the agents band's and the hero's. */
+async function expectSlide5(page: Page, title: string, rows: readonly string[], what: string) {
+  await expect
+    .poll(async () => {
+      const all = await slide5(page);
+      return (
+        all.length >= 2 &&
+        all.some((s) => s.instance === 'agents') &&
+        all.some((s) => s.instance.startsWith('hero')) &&
+        all.every((s) => s.title === title && s.rows.join('|') === rows.join('|'))
+      );
+    }, what)
+    .toBe(true);
+}
+
+/** Chooses version n on the scrubber by its keys and presses Restore This Version. */
+async function restoreVersion(page: Page, n: number): Promise<void> {
+  await slider(page).focus();
+  await page.keyboard.press('Home');
+  for (let i = 1; i < n; i += 1) await page.keyboard.press('ArrowRight');
+  await expect(slider(page)).toHaveAttribute('aria-valuenow', String(n));
+  await restore(page).click();
+}
 
 /** Three changes made on the page: a move in the hero frame, a kit, and Tailor's name. */
 async function makeChanges(page: Page): Promise<void> {
@@ -241,11 +286,36 @@ export function rows(): void {
         ),
       ).toBe(false);
 
+      // slide 5 filled, as version 5 holds it, in every band that draws it (the menus band too)
+      await bandReady(page, 'menus');
+      const filled = (await slide5(page)).find((x) => x.instance === 'agents');
+      expect(filled?.title).toBe('Next steps with Northwind');
+      expect(filled?.rows.some((r) => r === PROMPT_TEXT)).toBe(false);
+      await expectSlide5(page, filled?.title ?? '', filled?.rows ?? [], 'slide 5 at version 5');
+      const prompts = (filled?.rows ?? []).map(() => PROMPT_TEXT);
+
+      // version 2, recorded: slide 5 as the run's first step inserted it, the layout's placeholders
+      // in every band (the title and every row, the chips' row included), nine slides
+      await restoreVersion(page, 2);
+      s = await state(page);
+      expect(s.agentStep).toBe(1);
+      expect(s.order).toContain('next-steps');
+      expect(s.history.at(-1)?.words).toBe('Restored version 2');
+      expect(s.history.at(-1)?.author).toBe('you');
+      await expectSlide5(page, PROMPT_TITLE, prompts, 'slide 5 at version 2');
+      await expect(page.locator('[data-hero-slide] [data-home-slides]').first()).toHaveAttribute(
+        'data-counter',
+        '1 / 9',
+      );
+      // version 3, recorded: the title written, the rows still placeholders
+      await restoreVersion(page, 3);
+      s = await state(page);
+      expect(s.agentStep).toBe(2);
+      expect(s.history.at(-1)?.words).toBe('Restored version 3');
+      await expectSlide5(page, filled?.title ?? '', prompts, 'slide 5 at version 3');
+
       // version 1: the deck before the run; slide 5 leaves every counter (Restore kept focus)
-      await slider(page).focus();
-      await page.keyboard.press('Home');
-      await expect(slider(page)).toHaveAttribute('aria-valuenow', '1');
-      await restore(page).click();
+      await restoreVersion(page, 1);
       s = await state(page);
       expect(s.order).not.toContain('next-steps');
       expect(s.agentStep).toBe(0);
@@ -254,13 +324,32 @@ export function rows(): void {
         'data-counter',
         '1 / 8',
       );
-      // a typed `version restore <n>` does the same by Agent (V3's console)
+      // a typed `version restore <n>` does the same by Agent (V3's console): version 2's
+      // placeholders, then version 4's rows
       const input = band(page).locator('[data-cmd]');
       if ((await input.count()) > 0) {
+        await input.fill('version restore 2');
+        await input.press('Enter');
+        await expect
+          .poll(async () => (await state(page)).history.at(-1)?.words)
+          .toBe('Restored version 2');
+        expect((await state(page)).history.at(-1)?.author).toBe('agent');
+        expect((await state(page)).agentStep).toBe(1);
+        await expectSlide5(page, PROMPT_TITLE, prompts, 'slide 5 after a typed restore of 2');
         await input.fill('version restore 4');
         await input.press('Enter');
-        await expect.poll(async () => (await state(page)).history.at(-1)?.author).toBe('agent');
+        await expect
+          .poll(async () => (await state(page)).history.at(-1)?.words)
+          .toBe('Restored version 4');
+        expect((await state(page)).history.at(-1)?.author).toBe('agent');
         expect((await state(page)).order).toContain('next-steps');
+        expect((await state(page)).agentStep).toBe(3);
+        await expectSlide5(
+          page,
+          filled?.title ?? '',
+          filled?.rows ?? [],
+          'slide 5 after a typed restore of 4',
+        );
       } else
         test.info().annotations.push({
           type: 'not reached',

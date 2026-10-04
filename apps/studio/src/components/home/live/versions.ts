@@ -1,10 +1,20 @@
 import { AGENTS, HISTORY, VERSIONS } from '../copy';
 import { HOME_SLIDE_MARKUP } from '../bands/deck.generated';
 import { LIVE_SLIDE_HTML } from '../bands/live.generated';
+import { HOME_DECK } from '../deck.generated';
+import { HOME_NEXT_STEPS } from '../loop.generated';
 import { cloneSlide, registerDeckSlides } from './index';
 import type { LiveContext } from './index';
-import { drawStills, paintSlide, renumber } from './paint';
-import type { HomeDeckState, SlideKey, Version } from './state';
+import {
+  applyCustomer,
+  customerText,
+  drawStills,
+  paintSlide,
+  registerPainter,
+  renumber,
+} from './paint';
+import { sourceOf } from './state';
+import type { HomeDeckState, ObjectKey, SlideKey, Version } from './state';
 
 import '../editing.css';
 
@@ -20,6 +30,14 @@ import '../editing.css';
  * enters; it is `aria-disabled` on the newest. The thumb is an ink square, the ticks ink for You and
  * titanium for Agent and the recorded versions (2.0 "Colour": nothing blue at rest). V2's file,
  * started with the agents band's chunk.
+ *
+ * Slide 5 as each recorded version left it (2.9 "every band then equals version k"): `paintStep`
+ * draws slide 5 from the state's `agentStep` on every slide root `paintSlide` draws, the page's
+ * bands, the scrubber's view, the show and the print: the layout's placeholders after the run's
+ * first step, the title alone after its second, the rows after its third (the recorded renders of
+ * `bands/live.generated.ts` and the slide at rest). A restore of version 2 or 3 is the only way the
+ * page deck reaches those states, and only this band's chunk restores (the scrubber and V3's typed
+ * `version restore`), so the painter travels here and the live core carries none of it (4.1).
  */
 
 /** Page Up and Page Down move this many versions (2.9). */
@@ -48,6 +66,87 @@ export function start(ctx: LiveContext): void {
   startVersions(ctx);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Slide 5 by the recorded run's step (verify1 F1)
+
+const SLIDE5 = 'next-steps';
+
+/** The row V3's `paintNextSteps` writes on slide 5 (the chips' Rewrite a Row). */
+const CHIP_ROW = `rows/items/${HOME_NEXT_STEPS.row.index}/value`;
+
+/** A slide's text runs by `data-run`: the renderer's markup of each and its text. */
+type Runs = ReadonlyMap<string, { html: string; text: string }>;
+
+const runsOf = (template: HTMLTemplateElement, html: string): Runs => {
+  // the renderer's output rendered at build (bands/live.generated.ts, bands/deck.generated.ts)
+  template.innerHTML = html;
+  return new Map(
+    [...template.content.querySelectorAll<HTMLElement>('[data-run]')].map((el) => [
+      el.dataset['run'] ?? '',
+      { html: el.innerHTML, text: el.textContent ?? '' },
+    ]),
+  );
+};
+
+/** Slide 5's runs after each step of the recorded run, read on the first paint that needs them. */
+let stepRuns: Readonly<Record<1 | 2 | 3, Runs>> | null = null;
+const runsAt = (step: 1 | 2 | 3): Runs => {
+  if (stepRuns === null) {
+    const t = document.createElement('template');
+    stepRuns = {
+      1: runsOf(t, LIVE_SLIDE_HTML.nextSteps.placeholders),
+      2: runsOf(t, LIVE_SLIDE_HTML.nextSteps.titled),
+      3: runsOf(t, HOME_SLIDE_MARKUP[SLIDE5]),
+    };
+  }
+  return stepRuns[step];
+};
+
+/**
+ * Draws slide 5's text as the state's step of the recorded run left it, on a root of slide 5 or of
+ * a slide a menu row copied from it. At step 1 or 2 every run takes that step's recorded render; a
+ * root drawn so (`data-live-step`) takes the rest's runs again at step 3 (or 0, where slide 5 is
+ * out of the order). A run the visitor typed in, or types in now, is `paintTexts`'s, and the root
+ * keeps its mark until that run is drawn too. On slide 5 itself the chips' row is V3's
+ * `paintNextSteps`'s at rest and once rewritten. Registered after `paintNextSteps`, so it draws
+ * last on every root; a run whose text already reads as wanted is left as it is.
+ */
+function paintStep(root: HTMLElement, state: HomeDeckState): void {
+  const key = root.dataset['slide'] as SlideKey | undefined;
+  if (key === undefined || sourceOf(state, key) !== SLIDE5) return;
+  const step = state.agentStep;
+  const early = step === 1 || step === 2;
+  if (!early && root.dataset['liveStep'] === undefined) return;
+  let held = false;
+  for (const [run, want] of runsAt(early ? step : 3)) {
+    if (key === SLIDE5 && run === CHIP_ROW && (!early || state.nextSteps.rewritten)) continue;
+    const el = [...root.querySelectorAll<HTMLElement>(`[data-run="${run}"]`)].find(
+      (x) => x.closest('[data-inserted]') === null,
+    );
+    if (el === undefined) continue;
+    const object = el.closest<HTMLElement>('[data-object]')?.dataset['object'] as
+      ObjectKey | undefined;
+    if (el.isContentEditable || (object !== undefined && state.texts[object] !== undefined)) {
+      held = true;
+      continue;
+    }
+    // the name the run draws now (Tailor sets the names one by one, 3.6 T1)
+    const name = el.querySelector('[data-customer]')?.textContent ?? state.customer;
+    if (el.textContent === customerText(want.text, name)) continue;
+    // the renderer's output rendered at build, never typed text
+    el.innerHTML = want.html;
+    applyCustomer(el, HOME_DECK.customer, state.customer);
+  }
+  if (early || held) root.dataset['liveStep'] = String(step);
+  else delete root.dataset['liveStep'];
+}
+
+/** `paintStep` on every slide root under `container` but the views laid over the page. */
+const paintSteps = (container: ParentNode, state: HomeDeckState): void => {
+  for (const root of container.querySelectorAll<HTMLElement>('[data-home-slides][data-slide]'))
+    if (root.closest('[data-live-overlay]') === null) paintStep(root, state);
+};
+
 const h = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
   attrs: Record<string, string> = {},
@@ -64,6 +163,8 @@ export function startVersions(ctx: LiveContext): void {
   const { band, store } = ctx;
   const scope = ctx.reserve ?? band;
   registerDeckSlides(HOME_SLIDE_MARKUP);
+  // after V3's `paintNextSteps`, which agents.ts registered when its chunk loaded with this one
+  registerPainter(paintStep);
   const history = scope.querySelector<HTMLElement>('[data-history]');
 
   // ---- the scrubber row: the hooks V1's shell draws, else the row built before the list ----
@@ -158,21 +259,9 @@ export function startVersions(ctx: LiveContext): void {
       if (view !== null && !view.hidden) fit(view);
     }).observe(sheetAbove);
 
-  const templates = document.createElement('template');
-  /** a root of the version's slide as it stood: the recorded step's own render for slide 5 */
-  const rootFor = (v: Version): HTMLElement | null => {
-    const key = slideOf(v);
-    const step = v.state.agentStep;
-    if (key === 'next-steps' && (step === 1 || step === 2)) {
-      // the renderer's output rendered at build (bands.generated.ts LIVE_SLIDE_HTML)
-      templates.innerHTML =
-        step === 1 ? LIVE_SLIDE_HTML.nextSteps.placeholders : LIVE_SLIDE_HTML.nextSteps.titled;
-      const el = templates.content.firstElementChild as HTMLElement | null;
-      if (el !== null) el.dataset['instance'] = 'version-view';
-      return el;
-    }
-    return cloneSlide(key, v.state, 'version-view');
-  };
+  /** a root of the version's slide as it stood (`paintStep` draws slide 5's step on it) */
+  const rootFor = (v: Version): HTMLElement | null =>
+    cloneSlide(slideOf(v), v.state, 'version-view');
 
   // ---- the chosen version ----
   let versions = store.versions();
@@ -293,7 +382,9 @@ export function startVersions(ctx: LiveContext): void {
 
   // ---- the store: a new version moves a scrubber at the newest along with it ----
   let count = versions.length;
-  store.subscribe((_state: HomeDeckState) => {
+  store.subscribe((state: HomeDeckState) => {
+    // slide 5's step again after V3's subscriber drew the chips' looks on the page (agents.ts)
+    paintSteps(ctx.root, state);
     const total = store.versions().length;
     if (chosen === count || chosen > total) chosen = total;
     count = total;

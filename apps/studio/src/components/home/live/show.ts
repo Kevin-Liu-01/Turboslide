@@ -99,17 +99,34 @@ function urlOf(value: string): string | null {
 
 const stills = new Map<string, Promise<void>>();
 
-/** Requests a still once and resolves when it has loaded (or failed). */
-export function loadStill(url: string): Promise<void> {
-  let loaded = stills.get(url);
+/**
+ * A still's picture as a mask or a background requests it: a CSS mask in CORS mode (as
+ * `field.ts`'s `pixelsOf` does), a background without. A load in the other mode is a second request
+ * the mask does not wait for, and a print taken before the mask's own request answers draws the
+ * whole box in ink.
+ */
+function stillImage(url: string, mask: boolean): HTMLImageElement {
+  const img = new Image();
+  if (mask) img.crossOrigin = 'anonymous';
+  img.src = url;
+  return img;
+}
+
+/**
+ * Requests a still once in the mode its layer draws it (`mask`, the field stills; a background,
+ * slide 8's still frame) and resolves when it has loaded (or failed).
+ */
+export function loadStill(url: string, mask = true): Promise<void> {
+  const key = `${mask ? 'mask' : 'image'} ${url}`;
+  let loaded = stills.get(key);
   if (loaded === undefined) {
     loaded = new Promise<void>((resolve) => {
-      const img = new Image();
+      const img = stillImage(url, mask);
+      if (img.complete && img.naturalWidth > 0) resolve();
       img.onload = () => resolve();
       img.onerror = () => resolve();
-      img.src = url;
     });
-    stills.set(url, loaded);
+    stills.set(key, loaded);
   }
   return loaded;
 }
@@ -123,8 +140,7 @@ function holdStills(wrapper: HTMLElement): void {
   for (const box of wrapper.querySelectorAll<HTMLElement>('[data-field]')) {
     const url = urlOf(box.style.getPropertyValue('--ts-still'));
     if (url === null || url.startsWith('data:')) continue;
-    const img = new Image();
-    img.src = url;
+    const img = stillImage(url, true);
     if (img.complete && img.naturalWidth > 0) continue;
     const layers = [...box.querySelectorAll<HTMLElement>('.ts-field-still')];
     for (const layer of layers) layer.style.visibility = 'hidden';
@@ -142,6 +158,38 @@ function setFieldStill(clone: HTMLElement): void {
     } catch {
       /* the build has not written the still; the slide draws without its picture */
     }
+  }
+}
+
+/** The still frame of slide 8's Animated pattern in an appearance (the role `pattern-still`); null before the build writes it. */
+export function patternStillPath(shown: 'light' | 'dark'): string | null {
+  try {
+    return homeAsset('pattern-still', shown).path;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Slide 8's picture in a clone (LANDING.md 2.11, 2.13): the frame the exporter stores for the
+ * pattern, as the patterns band's right side draws it. The slide's own print box holds no still
+ * (its picture is a shader), so without this its masked layer prints a whole box of ink. Both
+ * appearances' files are named on the box and agents.css draws the shown one, so an appearance
+ * change reaches an open show; a duplicated slide 8 carries the box and takes the same frame.
+ */
+function setPatternStill(clone: HTMLElement): void {
+  const boxes = clone.querySelectorAll<HTMLElement>('[data-field="pattern"]');
+  const light = patternStillPath('light');
+  const dark = patternStillPath('dark');
+  if (boxes.length === 0 || light === null || dark === null) return;
+  for (const box of boxes) {
+    /* a copy of the patterns band's slide drops that band's states (the shader drawn, the frame
+       printed on its canvas), whose canvas the clone does not keep */
+    for (const name of box.getAttributeNames())
+      if (name.startsWith('data-pattern-')) box.removeAttribute(name);
+    box.style.setProperty('--ts-pattern-still-light', `url("${light}")`);
+    box.style.setProperty('--ts-pattern-still-dark', `url("${dark}")`);
+    box.setAttribute('data-still-frame', '');
   }
 }
 
@@ -217,6 +265,7 @@ export function cloneSlide(root: HTMLElement, state: HomeDeckState, id: HomeSlid
       applyKit(sheet, state.kit);
       setFieldStill(sheet);
     }
+    setPatternStill(sheet);
     /* the deck's customer on every name, also one Tailor's 55 ms stagger has not reached yet */
     applyCustomer(sheet, HOME_DECK.customer, state.customer);
     holdStills(wrapper);
@@ -304,6 +353,7 @@ export function showSlide(root: HTMLElement, state: HomeDeckState, key: SlideKey
   for (const heading of wrapper.querySelectorAll('h1, h2, h3'))
     heading.setAttribute('role', 'none');
   if (key === 'field') setFieldStill(fresh);
+  setPatternStill(fresh);
   holdStills(wrapper);
   return wrapper;
 }

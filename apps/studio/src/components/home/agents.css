@@ -257,6 +257,22 @@
   visibility: visible;
 }
 
+/* ---- 2.11, 2.13: slide 8 in the show, the Present display and the print draws the frame the
+   exporter stores for its pattern (show.ts names both appearances' files on the box), as the
+   patterns band's right side does; the moving pattern covers it once it has drawn (motion.css).
+   The 3,200 px frame is always drawn smaller, so it is scaled smoothly: a nearest pixel scale of
+   its dots draws squares of moiré at 390 ---- */
+[data-field='pattern'][data-still-frame] > .ts-field-still {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background: var(--ts-pattern-still-light) center / 100% 100% no-repeat;
+  image-rendering: auto;
+}
+
+:root[data-theme='dark'] [data-field='pattern'][data-still-frame] > .ts-field-still {
+  background-image: var(--ts-pattern-still-dark);
+}
+
 /* ---- 2.11: a skipped slide's row in the Present list says so in titanium ---- */
 .ts-slide-row-skip {
   margin-left: auto;

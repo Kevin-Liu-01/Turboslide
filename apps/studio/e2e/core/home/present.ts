@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { HOME_ASSETS } from '../../../src/components/home/assets';
 import { PRESENT } from '../../../src/components/home/copy';
 import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { title } from '../lib';
@@ -350,6 +351,8 @@ export function rows(): void {
     test.setTimeout(90_000);
     /* the deck as the visitor left it, one 16 by 9 page per slide */
     const page = await freshPage(browser);
+    const loaded = new Set<string>();
+    page.on('requestfinished', (request) => loaded.add(new URL(request.url()).pathname));
     await openHome(page);
     await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
@@ -378,6 +381,24 @@ export function rows(): void {
     await expect(deck.locator(':scope > *')).toHaveCount(N);
     await expect(deck).toContainText('Onboarding plan for Globex');
     await expect(deck).not.toContainText('Northwind');
+    /* slide 8 prints the still frame the exporter stores for its pattern, requested before the
+       button opened the print; its print box alone is a whole page of ink */
+    const frame = HOME_ASSETS.find((a) => a.role === 'pattern-still' && a.appearance === 'light');
+    if ((HOME_DECK.order as readonly string[]).includes('pattern') && frame !== undefined) {
+      const drawn = await deck
+        .locator(
+          '[data-home-slides][data-slide="pattern"] [data-field="pattern"] > .ts-field-still',
+        )
+        .evaluate((el, path) => {
+          const style = getComputedStyle(el);
+          return { background: style.backgroundImage.includes(path), mask: style.maskImage };
+        }, frame.path);
+      expect(drawn, "slide 8's print draws the pattern's still frame").toEqual({
+        background: true,
+        mask: 'none',
+      });
+      expect(loaded.has(frame.path), 'the still frame loaded before the print').toBe(true);
+    }
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
     await expect(deck.locator(':scope > *')).toHaveCount(0);
     /* Chromium's own print of the page under print emulation */

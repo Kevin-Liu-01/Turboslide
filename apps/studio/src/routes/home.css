@@ -2201,6 +2201,15 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     font-size: max(15px, calc(10px / var(--k)));
   }
 
+  /* the lighthouse's plate under the floor: lower left and wider, so its three lines fit under the
+     slide's top and the tower on the picture's right stays in view (the renderer's 560 units on
+     the right hide it at 358 px); the units are the sheet's (1 is 1/1,600 of its width) */
+  .ts-sheet[data-home-slides][data-slide='lighthouse']:not(.is-thumb) .mood-plate {
+    right: auto;
+    left: 0;
+    max-width: 1000px;
+  }
+
   .ts-tailor-top,
   :where(.ts-product) .ts-present {
     grid-template-columns: minmax(0, 1fr);

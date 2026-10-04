@@ -1,0 +1,7 @@
+start 2026-10-03T23:46:09Z 16:46  up 9 days,  6:43, 2 users, load averages: 47.64 47.21 40.63
+deck untitled-20261003-y4ah slide blank-1-eeee
+{"round":1,"narrowed":280,"grown":475,"tabAfter":475,"secondBrowser":475,"store":475,"agree":true,"revision":4}
+{"round":2,"narrowed":275,"grown":475,"tabAfter":475,"secondBrowser":475,"store":475,"agree":true,"revision":5}
+{"round":3,"narrowed":275,"grown":475,"tabAfter":475,"secondBrowser":475,"store":475,"agree":true,"revision":6}
+teardown 404
+end 2026-10-03T23:46:40Z 16:46  up 9 days,  6:43, 2 users, load averages: 47.86 47.25 40.86

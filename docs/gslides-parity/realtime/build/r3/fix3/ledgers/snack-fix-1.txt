@@ -1,0 +1,37 @@
+start 2026-10-03T22:35:57Z 15:35  up 9 days,  5:32, 2 users, load averages: 18.95 17.32 16.15
+deck untitled-20261003-l0jl throttle 6 prelude true
+slides 13
+{"n":1,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3365,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":2,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2822,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":3,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3019,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":4,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2906,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":5,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2880,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":6,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3107,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":7,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2894,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":8,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2884,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":9,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3044,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":10,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3046,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":11,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3248,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":12,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2975,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":13,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3159,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":14,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3013,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":15,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2903,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":16,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2938,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":17,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2793,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":18,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2682,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":19,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2712,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":20,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2785,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":21,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2891,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":22,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2754,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":23,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2868,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":24,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2743,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":25,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2948,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":26,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2703,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":27,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2465,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":28,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2458,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":29,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2712,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":30,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2200,"slideDeletedSaid":["before the prelude Undo"]}
+summary {"iterations":30,"failed":0,"throttle":6,"prelude":true}
+teardownError Error: page.evaluate: Error: baseRevision 42 is stale; untitled-20261003-l0jl is at revision 43
+    at Object.deserialize (http://localhost:4473/@fs/Users/kevinliu/repos/Turboslide-realtime/node_modul
+end 2026-10-03T22:40:47Z 15:40  up 9 days,  5:37, 2 users, load averages: 15.23 17.86 16.81

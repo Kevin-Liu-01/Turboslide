@@ -1,0 +1,37 @@
+start 2026-10-03T22:44:38Z 15:44  up 9 days,  5:41, 2 users, load averages: 21.81 17.85 16.92
+hook NOT installed: undo.answered
+deck untitled-20261003-k83k throttle 6 prelude true baseline true
+slides 13
+{"n":1,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3004,"slideDeletedSaid":[]}
+{"n":2,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2741,"slideDeletedSaid":[]}
+{"n":3,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2461,"slideDeletedSaid":[]}
+{"n":4,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2319,"slideDeletedSaid":[]}
+{"n":5,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2358,"slideDeletedSaid":[]}
+{"n":6,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2410,"slideDeletedSaid":[]}
+{"n":7,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2469,"slideDeletedSaid":[]}
+{"n":8,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2327,"slideDeletedSaid":[]}
+{"n":9,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2606,"slideDeletedSaid":[]}
+{"n":10,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2463,"slideDeletedSaid":[]}
+{"n":11,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2608,"slideDeletedSaid":[]}
+{"n":12,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2381,"slideDeletedSaid":[]}
+{"n":13,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2777,"slideDeletedSaid":[]}
+{"n":14,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2694,"slideDeletedSaid":[]}
+{"n":15,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2834,"slideDeletedSaid":[]}
+{"n":16,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2506,"slideDeletedSaid":[]}
+{"n":17,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2427,"slideDeletedSaid":[]}
+{"n":18,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2386,"slideDeletedSaid":[]}
+{"n":19,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2586,"slideDeletedSaid":[]}
+{"n":20,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2339,"slideDeletedSaid":[]}
+{"n":21,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2376,"slideDeletedSaid":[]}
+{"n":22,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2373,"slideDeletedSaid":[]}
+{"n":23,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2524,"slideDeletedSaid":[]}
+{"n":24,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2773,"slideDeletedSaid":[]}
+{"n":25,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2635,"slideDeletedSaid":[]}
+{"n":26,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2690,"slideDeletedSaid":[]}
+{"n":27,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2774,"slideDeletedSaid":[]}
+{"n":28,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2564,"slideDeletedSaid":[]}
+{"n":29,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2641,"slideDeletedSaid":[]}
+{"n":30,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2947,"slideDeletedSaid":[]}
+summary {"iterations":30,"failed":0,"throttle":6,"prelude":true,"baseline":true,"slideDeletedAfterTheDeleteKey":0,"slideDeletedAfterThePreludeUndo":0}
+teardown 404
+end 2026-10-03T22:49:05Z 15:49  up 9 days,  5:46, 2 users, load averages: 20.83 17.70 16.99

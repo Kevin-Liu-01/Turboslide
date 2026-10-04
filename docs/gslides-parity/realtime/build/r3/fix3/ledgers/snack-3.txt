@@ -1,0 +1,51 @@
+start 2026-10-03T22:12:07Z 15:12  up 9 days,  5:09, 2 users, load averages: 12.71 14.66 18.35
+deck untitled-20261003-704k throttle 6 prelude true
+slides 13
+{"n":1,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2887}
+{"n":2,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2884}
+{"n":3,"ok":false,"counts":"12 -> 10 -> 11","clicked":"Slide deleted","preMs":3491}
+   {"t":56263,"kind":"probe","data":"menu delete"}
+   {"t":56877,"kind":"history.push","data":{"id":22,"label":"slide.remove","depth":18,"inv":["slide.insert::title-2-4"]}}
+   {"t":57240,"kind":"entry","data":{"seq":31,"rev":15,"opId":"a7a545adb91d50eef66096e25fb7cb18:30","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.remove:title-2-3"],"pending":["a7a545adb91d50eef66096e25fb7cb18:30*"]}}
+   {"t":57370,"kind":"ops.answer","data":{"base":{"seq":30},"sent":["a7a545adb91d50eef66096e25fb7cb18:30"],"ok":true,"entries":["31:a7a545adb91d50eef66096e25fb7cb18:30"],"between":0,"rejected":[],"revision":15}}
+   {"t":57493,"kind":"probe","data":"toolbar undo"}
+   {"t":57584,"kind":"history.undo","data":{"id":22,"label":"slide.remove","depth":17,"inv":["slide.insert::title-2-4"]}}
+   {"t":57584,"kind":"undo.step","data":{"id":22,"label":"slide.remove","inverse":["slide.insert::title-2-4"],"serverRevision":15}}
+   {"t":57790,"kind":"entry","data":{"seq":32,"rev":15,"opId":"a7a545adb91d50eef66096e25fb7cb18:31","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.insert:"],"pending":["a7a545adb91d50eef66096e25fb7cb18:31*"]}}
+   {"t":57910,"kind":"undo.answered","data":{"id":22,"serverRevision":15}}
+   {"t":57935,"kind":"ops.answer","data":{"base":{"seq":31},"sent":["a7a545adb91d50eef66096e25fb7cb18:31"],"ok":true,"entries":["32:a7a545adb91d50eef66096e25fb7cb18:31"],"between":0,"rejected":[],"revision":15}}
+   {"t":58052,"kind":"probe","data":"edit redo"}
+   {"t":58821,"kind":"history.redo","data":{"id":22,"label":"slide.remove","depth":18,"inv":["slide.insert::title-2-4"]}}
+   {"t":59015,"kind":"entry","data":{"seq":33,"rev":15,"opId":"a7a545adb91d50eef66096e25fb7cb18:32","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.remove:title-2-3"],"pending":["a7a545adb91d50eef66096e25fb7cb18:32*"]}}
+   {"t":59175,"kind":"ops.answer","data":{"base":{"seq":32},"sent":["a7a545adb91d50eef66096e25fb7cb18:32"],"ok":true,"entries":["33:a7a545adb91d50eef66096e25fb7cb18:32"],"between":0,"rejected":[],"revision":15}}
+   {"t":60546,"kind":"probe","data":"Delete key"}
+   {"t":60553,"kind":"history.push","data":{"id":23,"label":"slide.remove","depth":19,"inv":["slide.insert::title"]}}
+   {"t":60557,"kind":"snackbar.show","data":{"text":"Deleted 2 slides","action":"Undo"}}
+   {"t":60767,"kind":"history.push","data":{"id":24,"label":"slide.remove","depth":20,"inv":["slide.insert::title"]}}
+   {"t":61180,"kind":"checkpoint","data":{"toSeq":33,"revision":16,"external":false}}
+   {"t":61337,"kind":"snackbar.show","data":{"text":"Slide deleted","action":"Undo"}}
+   {"t":61346,"kind":"entry","data":{"seq":34,"rev":16,"opId":"a7a545adb91d50eef66096e25fb7cb18:33","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.remove:title-2-2"],"pending":["a7a545adb91d50eef66096e25fb7cb18:33*","a7a545adb91d50eef66096e25fb7cb18:34*"]}}
+   {"t":61349,"kind":"entry","data":{"seq":35,"rev":16,"opId":"a7a545adb91d50eef66096e25fb7cb18:34","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.remove:title-2"],"pending":["a7a545adb91d50eef66096e25fb7cb18:34*"]}}
+   {"t":61647,"kind":"ops.answer","data":{"base":{"seq":33},"sent":["a7a545adb91d50eef66096e25fb7cb18:33","a7a545adb91d50eef66096e25fb7cb18:34"],"ok":true,"entries":["34:a7a545adb91d50eef66096e25fb7cb18:33","35:a7a545adb91d50eef66096e25fb7cb18:34"],"between":0,"rejected":[],"revision":16}}
+   {"t":61776,"kind":"probe","data":"click snackbar action: Slide deleted"}
+   {"t":61880,"kind":"history.undo","data":{"id":24,"label":"slide.remove","depth":19,"inv":["slide.insert::title"]}}
+   {"t":61880,"kind":"undo.step","data":{"id":24,"label":"slide.remove","inverse":["slide.insert::title"],"serverRevision":16}}
+   {"t":62404,"kind":"entry","data":{"seq":36,"rev":16,"opId":"a7a545adb91d50eef66096e25fb7cb18:35","client":"a7a545adb91d50eef66096e25fb7cb18","mine":true,"ops":["slide.insert:"],"pending":["a7a545adb91d50eef66096e25fb7cb18:35*"]}}
+   {"t":62525,"kind":"undo.answered","data":{"id":24,"serverRevision":16}}
+   {"t":62551,"kind":"ops.answer","data":{"base":{"seq":35},"sent":["a7a545adb91d50eef66096e25fb7cb18:35"],"ok":true,"entries":["36:a7a545adb91d50eef66096e25fb7cb18:35"],"between":0,"rejected":[],"revision":16}}
+   {"t":64412,"kind":"checkpoint","data":{"toSeq":36,"revision":17,"external":false}}
+{"n":4,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2853}
+{"n":5,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3000}
+{"n":6,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3557}
+{"n":7,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3334}
+{"n":8,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2609}
+{"n":9,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2771}
+{"n":10,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3235}
+{"n":11,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3136}
+{"n":12,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2736}
+{"n":13,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2661}
+{"n":14,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3239}
+{"n":15,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2924}
+summary {"iterations":15,"failed":1,"throttle":6,"prelude":true}
+teardown 404
+end 2026-10-03T22:15:10Z 15:15  up 9 days,  5:12, 2 users, load averages: 27.81 21.06 20.27

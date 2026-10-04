@@ -1,0 +1,13 @@
+start 2026-10-03T22:30:05Z 15:30  up 9 days,  5:27, 2 users, load averages: 14.07 12.76 14.74
+deck untitled-20261003-uyd3 slides 26 chars 12000
+saved {"n":2,"revision":1,"author":{"kind":"human","name":"Xenon 404","principalId":"anon_aad3621d-b548-49cd-bdc6-204658e865e6"},"note":"Early","createdAt":"2026-10-03T22:30:07.680Z","mutations":[]}
+versions 30 target 2 slides now 26 revision 29
+restored {"revision":30}
+restore changed the deck true slides 1 revision 30 deck bytes 329754
+console warning The resource http://localhost:4473/@fs/Users/kevinliu/repos/Turboslide-realtime/packages/fonts/assets/InterVariable.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentional
+Cmd+Z brought the current version back false slides 26 revision 30 pending 1 save words Saving…
+   {"t":61923,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":61939,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":62040,"kind":"undo.step","data":{"id":30,"label":"restore 2","count":25,"bytes":329456,"ops":["slide.insert"]}}
+teardown 404
+end 2026-10-03T22:31:28Z 15:31  up 9 days,  5:28, 2 users, load averages: 11.96 12.50 14.47

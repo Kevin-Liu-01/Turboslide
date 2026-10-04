@@ -1,0 +1,13 @@
+start 2026-10-03T22:19:24Z 15:19  up 9 days,  5:16, 2 users, load averages: 10.06 15.14 17.83
+deck untitled-20261003-wye6 slides 26 chars 9000
+saved {"n":2,"revision":1,"author":{"kind":"human","name":"Nylon 837","principalId":"anon_ef3befa3-edf8-4086-8290-9618a0b0221b"},"note":"Early","createdAt":"2026-10-03T22:19:27.282Z","mutations":[]}
+versions 30 target 2 slides now 26 revision 29
+restored {"revision":30}
+restore changed the deck true slides 1 revision 30 deck bytes 254754
+Cmd+Z brought the current version back true slides 26 revision 31 pending 0 save words All changes saved
+   {"t":61224,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":61241,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":61347,"kind":"undo.step","data":{"id":30,"label":"restore 2","count":25,"bytes":254456,"ops":["slide.insert"]}}
+   {"t":61476,"kind":"ops.answer","data":{"sent":1,"bytes":254607,"ok":true,"entries":1,"rejected":[],"revision":30}}
+teardown 404
+end 2026-10-03T22:20:29Z 15:20  up 9 days,  5:17, 2 users, load averages: 9.98 14.16 17.28

@@ -1,0 +1,7 @@
+start 2026-10-04T00:39:19Z 17:39  up 9 days,  7:36, 2 users, load averages: 34.32 33.82 33.55
+deck untitled-20261004-njri slide blank-1-1f5c
+{"round":1,"wrote":320,"asset":{"ok":true,"revision":null},"tab":320,"store":480,"agree":false,"revision":4}
+{"round":2,"wrote":340,"asset":{"ok":true,"revision":null},"tab":340,"store":480,"agree":false,"revision":5}
+{"round":3,"wrote":360,"asset":{"ok":true,"revision":null},"tab":360,"store":480,"agree":false,"revision":6}
+teardown 404
+end 2026-10-04T00:39:45Z 17:39  up 9 days,  7:36, 2 users, load averages: 31.15 33.07 33.28

@@ -1,0 +1,18 @@
+start 2026-10-04T00:40:19Z 17:40  up 9 days,  7:37, 2 users, load averages: 32.52 33.12 33.28
+deck untitled-20261004-63e7 slides 26 chars 12000
+saved {"n":2,"revision":1,"author":{"kind":"human","name":"Resin 361","principalId":"anon_23f90906-ad0b-4849-996d-c588d51a90d6"},"note":"Early","createdAt":"2026-10-04T00:40:24.176Z","mutations":[]}
+versions 30 target 2 slides now 26 revision 29
+restored {"revision":30}
+restore changed the deck true slides 1 revision 30 deck bytes 329754
+Cmd+Z brought the current version back true slides 26 revision 31 pending 0 save words All changes saved
+Cmd+Shift+Z took the restore again true then Cmd+Z brought the current version back true revision 33
+   {"t":69447,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":69468,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":69628,"kind":"undo.step","data":{"id":30,"label":"restore 2","count":25,"bytes":329456,"ops":["slide.insert"]}}
+   {"t":70076,"kind":"resync","data":{"at":31,"seq":30,"revision":31,"pending":0}}
+   {"t":70544,"kind":"resync","data":{"at":32,"seq":30,"revision":31,"pending":0}}
+   {"t":70563,"kind":"resync","data":{"at":32,"seq":30,"revision":31,"pending":0}}
+   {"t":70874,"kind":"undo.step","data":{"id":30,"label":"restore 2","count":25,"bytes":329456,"ops":["slide.insert"]}}
+   {"t":71403,"kind":"resync","data":{"at":33,"seq":31,"revision":33,"pending":0}}
+teardown 404
+end 2026-10-04T00:41:32Z 17:41  up 9 days,  7:38, 2 users, load averages: 32.74 32.84 33.15

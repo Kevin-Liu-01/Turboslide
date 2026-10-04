@@ -1,0 +1,13 @@
+start 2026-10-03T22:43:32Z 15:43  up 9 days,  5:40, 2 users, load averages: 14.00 16.39 16.39
+deck untitled-20261003-ltke slides 26 chars 12000
+saved {"n":2,"revision":1,"author":{"kind":"human","name":"Carbon 841","principalId":"anon_7e204b0b-45a0-4970-b1f5-132eadc2754b"},"note":"Early","createdAt":"2026-10-03T22:43:36.270Z","mutations":[]}
+versions 30 target 2 slides now 26 revision 29
+restored {"revision":30}
+restore changed the deck true slides 1 revision 30 deck bytes 329754
+Cmd+Z brought the current version back true slides 26 revision 31 pending 0 save words All changes saved
+   {"t":64284,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":64302,"kind":"resync","data":{"at":30,"seq":29,"revision":29,"pending":0}}
+   {"t":64427,"kind":"undo.step","data":{"id":30,"label":"restore 2","count":25,"bytes":329456,"ops":["slide.insert"]}}
+   {"t":64721,"kind":"resync","data":{"at":31,"seq":30,"revision":31,"pending":0}}
+teardown 404
+end 2026-10-03T22:44:38Z 15:44  up 9 days,  5:41, 2 users, load averages: 21.81 17.85 16.92

@@ -1,0 +1,21 @@
+start 2026-10-04T01:34:48Z 18:34  up 9 days,  8:31, 2 users, load averages: 45.51 42.15 43.21
+deck untitled-20261004-pwwi throttle 6 prelude true baseline false
+slides 13
+{"n":1,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3559,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":2,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3463,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":3,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3332,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":4,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2963,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":5,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2775,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":6,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3115,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":7,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2869,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":8,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2846,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":9,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":3041,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":10,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2962,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":11,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2869,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":12,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2812,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":13,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2991,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":14,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2843,"slideDeletedSaid":["before the prelude Undo"]}
+{"n":15,"ok":true,"counts":"12 -> 10 -> 12","clicked":"Deleted 2 slides","preMs":2794,"slideDeletedSaid":["before the prelude Undo"]}
+summary {"iterations":15,"failed":0,"throttle":6,"prelude":true,"baseline":false,"slideDeletedAfterTheDeleteKey":0,"slideDeletedAfterThePreludeUndo":0}
+teardown 404
+end 2026-10-04T01:39:34Z 18:39  up 9 days,  8:36, 2 users, load averages: 33.48 35.53 39.71

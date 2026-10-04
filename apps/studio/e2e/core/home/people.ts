@@ -90,11 +90,12 @@ type Sample = {
 
 async function open(
   browser: Browser,
-  options: { reduce?: boolean; paused?: boolean; sample?: boolean } = {},
+  options: { reduce?: boolean; paused?: boolean; sample?: boolean; phone?: boolean } = {},
 ): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({
     extraHTTPHeaders,
-    viewport: { width: 1440, height: 900 },
+    viewport: options.phone === true ? { width: 390, height: 844 } : { width: 1440, height: 900 },
+    ...(options.phone === true ? { hasTouch: true, isMobile: true } : {}),
     reducedMotion: options.reduce === true ? 'reduce' : 'no-preference',
   });
   await context.addInitScript(
@@ -260,6 +261,52 @@ export function rows(): void {
           await other.context.close();
         }
       }
+      /* on a touch phone a scroll that starts on a screen leaves the loop playing, and a tap on a
+         text box stops it for good and types (verify1 F5; v1.md's request of 05:15 on 2026-10-04) */
+      const phone = await open(browser, { phone: true });
+      try {
+        const playing = (): Promise<unknown> =>
+          phone.page.waitForFunction(
+            () => window.tsHomeMotion?.running().includes('P-L'),
+            undefined,
+            {
+              timeout: 10_000,
+            },
+          );
+        await bandInView(phone.page);
+        await playing();
+        const maya = await phone.page.locator('[data-screen="maya"]').boundingBox();
+        if (maya === null) throw new Error("no Maya's screen");
+        const y0 = await phone.page.evaluate(() => scrollY);
+        const cdp = await phone.context.newCDPSession(phone.page);
+        await cdp.send('Input.synthesizeScrollGesture', {
+          x: Math.round(maya.x + maya.width / 2),
+          y: Math.round(Math.min(Math.max(maya.y + maya.height / 2, 120), 844 - 120)),
+          yDistance: -300,
+          speed: 800,
+          gestureSourceType: 'touch',
+        });
+        await phone.page.waitForTimeout(1_000);
+        const scrolled = await phone.page.evaluate(() => ({
+          y: scrollY,
+          stopped: window.tsHomeMotion?.stopped() ?? [],
+        }));
+        note("touch: a scroll from Maya's screen", `${Math.round(scrolled.y - y0)} px`);
+        expect(scrolled.y - y0, 'the scroll moved the page').toBeGreaterThan(100);
+        expect(scrolled.stopped, 'a scroll leaves the loop').not.toContain('P-L');
+        await bandInView(phone.page);
+        await playing();
+        const heading = phone.page.locator(
+          '[data-screen="sam"] [data-slide="plan"] [data-run="h/text"]',
+        );
+        await heading.tap();
+        expect(await phone.page.evaluate(() => window.tsHomeMotion?.stopped() ?? [])).toContain(
+          'P-L',
+        );
+        await expect(heading).toHaveAttribute('contenteditable', /plaintext-only|true/);
+      } finally {
+        await phone.context.close();
+      }
       test.skip(!quiet, `not read: load ${load()} (the functional checks passed)`);
     });
 
@@ -319,6 +366,34 @@ export function rows(): void {
           PEOPLE.flags.maya,
         );
         await expect(page.locator('[data-screen="sam"] .ts-people-caret')).toHaveCount(1);
+        /* Home and End move the caret to the line's ends and leave the page where it is (verify1
+           F7: Chromium on macOS scrolled the document for them); the other screen's caret follows */
+        const caret = (): Promise<{ y: number; at: number; sam: number }> =>
+          page.evaluate(() => {
+            const at = (root: Element | null, end: Node | null, offset: number): number => {
+              if (root === null || end === null) return -1;
+              const range = document.createRange();
+              range.selectNodeContents(root);
+              range.setEnd(end, offset);
+              return range.toString().length;
+            };
+            const selection = getSelection();
+            const mark = document.querySelector('[data-screen="sam"] .ts-people-caret');
+            return {
+              y: Math.round(scrollY),
+              at: at(
+                document.activeElement,
+                selection?.focusNode ?? null,
+                selection?.focusOffset ?? 0,
+              ),
+              sam: mark === null ? -1 : at(mark.parentElement, mark, 0),
+            };
+          });
+        const typed = await caret();
+        await page.keyboard.press('Home');
+        await expect.poll(caret).toEqual({ y: typed.y, at: 0, sam: 0 });
+        await page.keyboard.press('End');
+        await expect.poll(caret).toEqual(typed);
         /* the visitor's own screen draws the live selection */
         const mine = await page.evaluate(() => {
           const outline = document.querySelector<HTMLElement>(

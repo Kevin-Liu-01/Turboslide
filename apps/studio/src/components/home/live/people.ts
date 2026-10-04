@@ -70,6 +70,17 @@ const TRAIL_MS = 140;
 export const PEOPLE_STILL_AT = 6000;
 /** The mirrored typing's delay (3.6 W1). */
 const MIRROR_MS = 120;
+/** A finger that moves further than this from its down is a scroll, not a tap (`hero-stage.ts`'s). */
+const TAP_SLOP_PX = 10;
+/** The keys that move the caret to an end of the line or the box while a person types. */
+const CARET_KEYS: Readonly<
+  Record<string, readonly ['backward' | 'forward', 'lineboundary' | 'documentboundary']>
+> = {
+  Home: ['backward', 'lineboundary'],
+  End: ['forward', 'lineboundary'],
+  PageUp: ['backward', 'documentboundary'],
+  PageDown: ['forward', 'documentboundary'],
+};
 
 type Screen = {
   who: Who;
@@ -230,15 +241,20 @@ export function start(ctx: LiveContext): void {
       if (!node.hidden) play(node, [{ opacity: 0 }, { opacity: 1 }], 'state', 'fade', 'people');
   };
 
-  /** Writes a text box's words on a screen, with a person's ink caret at their end when `caret`. */
-  const write = (who: Who, run: string, text: string, caret: boolean): void => {
+  /**
+   * Writes a text box's words on a screen, with a person's ink caret at their end when `caret` is
+   * true, at that many characters in when it is a number, and none when it is false.
+   */
+  const write = (who: Who, run: string, text: string, caret: boolean | number): void => {
     const box = target(who, run);
     if (box === null || box.isContentEditable) return;
     box.textContent = text;
-    if (caret) {
+    if (caret !== false) {
+      const at = caret === true ? text.length : Math.max(0, Math.min(caret, text.length));
       const mark = el('span', 'ts-people-caret');
       mark.setAttribute('aria-hidden', 'true');
-      box.append(mark);
+      if (at < text.length) box.replaceChildren(text.slice(0, at), mark, text.slice(at));
+      else box.append(mark);
       carets.add(mark);
     }
     place(who);
@@ -436,26 +452,51 @@ export function start(ctx: LiveContext): void {
     show(other, { of: who, run, mine: false }, false);
     clearCarets();
     write(other, run, box.textContent ?? '', true);
-    const onInput = (): void => {
+    /* the caret's place in the box's words, which the other screen draws with them */
+    const caretAt = (): number => {
+      const selection = window.getSelection();
       const words = box.textContent ?? '';
+      if (selection?.focusNode == null || !box.contains(selection.focusNode)) return words.length;
+      const range = document.createRange();
+      range.selectNodeContents(box);
+      range.setEnd(selection.focusNode, selection.focusOffset);
+      return range.toString().length;
+    };
+    /* each key's words and caret reach the other screen 120 ms after it (W1) */
+    const mirror = (): void => {
+      const words = box.textContent ?? '';
+      const at = caretAt();
       place(who);
       const timer = window.setTimeout(() => {
         mirrors.delete(timer);
         clearCarets();
-        write(other, run, words, true);
+        write(other, run, words, at);
       }, MIRROR_MS);
       mirrors.add(timer);
     };
+    const onSelection = (): void => {
+      if (document.activeElement === box) mirror();
+    };
     const onKey = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape' && event.key !== 'Enter') return;
+      if (event.key === 'Escape' || event.key === 'Enter') {
+        event.preventDefault();
+        end();
+        box.focus();
+        return;
+      }
+      /* Home and End take the line's ends and Page Up and Page Down the box's, as the editor's text
+         boxes do, with Shift extending; Chromium on macOS scrolls the page for these keys in an
+         editable and leaves the caret (verify1 F7) */
+      const ends = CARET_KEYS[event.key];
+      if (ends === undefined || event.metaKey || event.ctrlKey || event.altKey) return;
       event.preventDefault();
-      end();
-      box.focus();
+      window.getSelection()?.modify(event.shiftKey ? 'extend' : 'move', ends[0], ends[1]);
     };
     const end = (): void => {
-      box.removeEventListener('input', onInput);
+      box.removeEventListener('input', mirror);
       box.removeEventListener('blur', end);
       box.removeEventListener('keydown', onKey);
+      document.removeEventListener('selectionchange', onSelection);
       for (const timer of mirrors) window.clearTimeout(timer);
       mirrors.clear();
       box.contentEditable = 'false';
@@ -465,9 +506,10 @@ export function start(ctx: LiveContext): void {
       show(who, null, true);
       show(other, null, true);
     };
-    box.addEventListener('input', onInput);
+    box.addEventListener('input', mirror);
     box.addEventListener('blur', end);
     box.addEventListener('keydown', onKey);
+    document.addEventListener('selectionchange', onSelection);
   };
 
   const boxOf = (node: EventTarget | null): { who: Who; run: string } | null => {
@@ -477,12 +519,49 @@ export function start(ctx: LiveContext): void {
     if (box === null || who === undefined || box.isContentEditable) return null;
     return { who, run: box.dataset['peopleBox'] ?? '' };
   };
-  /* the first press or key on either screen stops the loop for good (3.4) */
-  const stopOn = (event: Event): void => {
-    if ((event.target as Element).closest?.('[data-screen]') != null) stopLoop();
-  };
-  pair.addEventListener('pointerdown', stopOn, { capture: true });
-  pair.addEventListener('keydown', stopOn, { capture: true });
+  /* the first press or key on either screen stops the loop for good (3.4). A mouse stops it on
+     its down; a finger or a pen only as a tap, a lift within TAP_SLOP_PX of its down, so a scroll
+     that starts on a screen leaves the loop playing as a wheel does (verify1 F5; the hero's rule,
+     `hero-stage.ts`) */
+  const onScreen = (event: Event): boolean =>
+    (event.target as Element).closest?.('[data-screen]') != null;
+  let tap: { id: number; x: number; y: number } | null = null;
+  pair.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!onScreen(event)) return;
+      if (event.pointerType === 'mouse') stopLoop();
+      else
+        tap = event.isPrimary ? { id: event.pointerId, x: event.clientX, y: event.clientY } : null;
+    },
+    { capture: true },
+  );
+  const away = (event: PointerEvent, from: { x: number; y: number }): boolean =>
+    Math.hypot(event.clientX - from.x, event.clientY - from.y) > TAP_SLOP_PX;
+  pair.addEventListener(
+    'pointermove',
+    (event) => {
+      if (tap !== null && event.pointerId === tap.id && away(event, tap)) tap = null;
+    },
+    { capture: true, passive: true },
+  );
+  pair.addEventListener('pointercancel', () => void (tap = null), { capture: true });
+  pair.addEventListener(
+    'pointerup',
+    (event) => {
+      const down = tap;
+      tap = null;
+      if (down !== null && event.pointerId === down.id && !away(event, down)) stopLoop();
+    },
+    { capture: true },
+  );
+  pair.addEventListener(
+    'keydown',
+    (event) => {
+      if (onScreen(event)) stopLoop();
+    },
+    { capture: true },
+  );
   pair.addEventListener('click', (event) => {
     const hit = boxOf(event.target);
     if (hit !== null) typeAs(hit.who, hit.run);

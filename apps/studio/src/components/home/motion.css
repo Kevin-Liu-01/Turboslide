@@ -296,6 +296,18 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     border-left: 0;
     border-right: 0;
   }
+
+  /* the Following plate sits at the title row's right, before the chip, and while it shows the
+     deck's title ends short of it (an ellipsis at 320 px, the whole title at 390) */
+  .ts-people-follow {
+    left: auto;
+    right: 36px;
+    transform: none;
+  }
+
+  .ts-people-screen:has(> .ts-people-follow:not([hidden])) .ts-people-deck {
+    max-width: calc(100% - 220px);
+  }
 }
 
 /* ---- animated patterns (2.13): slide 8 twice, 500 by 281 px, 24 px apart, each under its

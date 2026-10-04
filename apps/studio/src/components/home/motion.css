@@ -117,6 +117,20 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   visibility: visible;
 }
 
+/* the still frame printed on the screen's pixels (live/pattern.ts printStill) covers the served
+   file's layer once drawn, on both sides, until the shader draws on the left */
+[data-field='pattern'][data-pattern-printed] > .ts-field-still {
+  visibility: hidden;
+}
+
+[data-field='pattern'][data-pattern-printed] > canvas.ts-pattern-print {
+  visibility: visible;
+}
+
+[data-field='pattern'][data-pattern-live] > canvas.ts-pattern-print {
+  visibility: hidden;
+}
+
 @media (max-width: 719px) {
   .ts-patterns {
     grid-template-columns: minmax(0, 1fr);

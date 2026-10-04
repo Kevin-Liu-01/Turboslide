@@ -245,7 +245,9 @@ const INNER_HTML_ALLOW = [
   // rendered at build (bands/deck.generated.ts, menus.generated.ts), parsed in a template element
   'apps/studio/src/components/home/live/menus.ts',
   // the scrubber's view (V2#14): slide 5's earlier states, the renderer's output rendered at build
-  // (bands/live.generated.ts), parsed in a template element
+  // (bands/live.generated.ts), parsed in a template element; since the fix round (V2#14 fix) also
+  // those states' runs, the same build output, written into every slide 5 drawn at version 2 or 3;
+  // never typed text
   'apps/studio/src/components/home/live/versions.ts',
   // the hero's stage (V1#15): slide 5's recorded states, the renderer's output rendered at build
   // (bands/live.generated.ts), parsed in a template element

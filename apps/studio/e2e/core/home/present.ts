@@ -306,6 +306,49 @@ export function rows(): void {
       }
     }
     await page.context().close();
+
+    /* at 390, where the band runs taller than the screen, the show covers the screen: the slide
+       and the bar at its middle, the bar inside the column's 16 px gutter */
+    const phone = await freshPage(browser);
+    await openHome(phone, 'phone');
+    await bandReady(phone, 'present');
+    await phone.evaluate(() => {
+      const top = document.querySelector('[data-band="present"]')!.getBoundingClientRect().top;
+      window.scrollBy(0, top - 58);
+    });
+    await presentButton(phone).click();
+    await expect(stage(phone)).toBeFocused();
+    await phone.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-band="present"] [data-show]')
+          ?.getAnimations({ subtree: true }).length === 0,
+    );
+    const fit = await phone.evaluate(() => {
+      const show = document.querySelector('[data-band="present"] [data-show]')!;
+      const box = (sel: string) => show.querySelector(sel)!.getBoundingClientRect();
+      const stage = box('[data-show-stage]');
+      const bar = box('.ts-home-show-bar');
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        barLeft: bar.left,
+        barRight: bar.right,
+        top: stage.top,
+        bottom: bar.bottom,
+      };
+    });
+    test.info().annotations.push({
+      type: 'reading',
+      description: `the show at 390 by 844: the slide from y ${Math.round(fit.top)}, the bar to y ${Math.round(fit.bottom)}, the bar from x ${Math.round(fit.barLeft)} to ${Math.round(fit.barRight)}`,
+    });
+    expect(fit.barLeft).toBeGreaterThanOrEqual(16 - 0.5);
+    expect(fit.barRight).toBeLessThanOrEqual(fit.width - 16 + 0.5);
+    expect(Math.abs(fit.top - (fit.height - fit.bottom))).toBeLessThanOrEqual(2);
+    await phone.keyboard.press('Escape');
+    await expect(show(phone)).toHaveCount(0);
+    await expect(presentButton(phone)).toBeFocused();
+    await phone.context().close();
   });
 
   test(title('home.present.focus'), async ({ browser }) => {

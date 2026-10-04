@@ -257,6 +257,43 @@
   visibility: visible;
 }
 
+/* ---- 2.11: the show's bar keeps the column's 16 px gutter where the stage reaches the screen's
+   sides (home.css sets it as wide as the stage, min(1024px, 100%)) ---- */
+[data-band='present'] > .ts-home-show > .ts-home-show-bar {
+  width: min(1024px, 100% - 32px);
+}
+
+/* ---- 2.11 under 1,024 px, where the band holds its slide over the list and is taller than the
+   show: the show covers the screen, so the slide and the bar sit at its middle wherever the band
+   is scrolled. The slide is as wide as the screen while the screen leaves the bar its height (96
+   px of bar and space at 720 px and over, 160 px under 720 px, where the bar takes three rows),
+   and the bar as wide as the slide inside the 16 px gutter ---- */
+@media (max-width: 1023px) {
+  [data-band='present'] > .ts-home-show {
+    --ts-show-width: min(100%, (100svh - 96px) * 16 / 9);
+    position: fixed;
+    z-index: 20;
+  }
+
+  [data-band='present'] > .ts-home-show > .ts-home-show-stage {
+    width: var(--ts-show-width);
+  }
+
+  [data-band='present'] > .ts-home-show > .ts-home-show-bar {
+    width: min(100% - 32px, max(320px, var(--ts-show-width)));
+  }
+}
+
+@media (max-width: 719px) {
+  [data-band='present'] > .ts-home-show {
+    --ts-show-width: min(100%, (100svh - 160px) * 16 / 9);
+  }
+
+  [data-band='present'] > .ts-home-show > .ts-home-show-bar {
+    padding-top: 8px;
+  }
+}
+
 /* ---- 2.11, 2.13: slide 8 in the show, the Present display and the print draws the frame the
    exporter stores for its pattern (show.ts names both appearances' files on the box), as the
    patterns band's right side does; the moving pattern covers it once it has drawn (motion.css).

@@ -20,7 +20,9 @@ import { applyKit } from './theme';
  * menus/model.ts` 1236 to 1238) while the band is at least half in view and no text field has
  * focus, opens the show on the chosen slide: the band's ground turns ink over 300 ms while the slide
  * moves from its place to the stage over 500 ms (FLIP, by `transform`). The show is a modal dialog
- * inside the band, whose box reserves its height, so opening it moves nothing outside the band.
+ * inside the band, whose box reserves its height, so opening it moves nothing outside the band;
+ * under 1,024 px, where the band runs taller than the show, it covers the screen instead
+ * (agents.css), so the slide and its bar sit at the screen's middle.
  * Focus moves to the stage, named by its counter; Tab cycles among Previous, Next and Exit; the
  * keys page by cuts, as Slideshow does; Escape or Exit returns the slide over 400 ms and focus to
  * Present. The page has no single character shortcut (WCAG 2.2 SC 2.1.4).

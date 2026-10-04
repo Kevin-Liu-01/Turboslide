@@ -1,0 +1,193 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T10:57:40.868Z",
+  "ms": 622978,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 622948,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/r1fix-int/out-head-specs/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "images.insert.no-external-banner",
+      "export.refusal.sentence-and-retry",
+      "export.picture.progress-and-capture",
+      "shaders.export.missing-frame-row",
+      "sync.resend.idempotent",
+      "decks.recent.this-browser-sentence"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 6,
+  "passed": 0,
+  "failed": 4,
+  "notDriven": 2,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "026db8e4",
+  "origin": "http://localhost:4510",
+  "date": "2026-10-04",
+  "results": {
+    "decks.recent.this-browser-sentence": "not driven",
+    "shaders.export.missing-frame-row": "failed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.picture.progress-and-capture": "failed",
+    "images.insert.no-external-banner": "failed",
+    "sync.resend.idempotent": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.recent.this-browser-sentence",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "sync.resend.idempotent",
+        "feature": "sync",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.export.missing-frame-row",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "images.insert.no-external-banner",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.picture.progress-and-capture",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "result": "not driven"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: home.recent.sentence (docs/archive/rounds/PRODUCT.md 7.1, B1)"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: version.list answers no origin (packages/store/src/versions.ts toVersion drops the record's origin on every tier; docs/archive/rounds/SYNC.md 3.2 names it on the record, the sync owner's); the word landed once in both browsers; records above 2: 1 (the memory tier's checkpointer writes them, not one per POST)"
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the export started within 800 ms of the change"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the file within 4 s on an unchanged slide"
+    }
+  ]
+}

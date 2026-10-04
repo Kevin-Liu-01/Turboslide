@@ -1,0 +1,66 @@
+56431c76 H5: the formatter ignores the evidence folder as on
+41332b42 H6: the blank template draws no GT mark and no GT w
+58f82a30 H6 fix: the laser driver
+68a60bd3 H7: a deck's export, build and bundle copies leave 
+63fb0ec0 H8: the performance gate opens its browser contexts
+17869dda H9: server-timing on every document and server func
+f95169b7 H10: the logo refresh runs on the cron's GET with C
+6ac04388 H2: the deck listing is scoped to the viewer on /de
+df4f8ede H2 seam: /decks/trash lists the trashed decks the v
+f6829d70 H2 seam: the hosted smoke's /decks row reads that a
+71e42ab4 H2 seam: Restore on the trash page puts the deck ba
+ffd70351 H2 fix: the trash page reads this browser ids
+026db8e4 H2 fix: the Import slides tiles, six at a time
+40164663 H3: Sign out from the account menu ends this browse
+0b6df8d4 H4: the sign in dialog draws no passkey row until t
+96432f76 H2 fix: the import row driver (the HA fixer)
+ea5fec35 B6a#1: the binaries of the closed rounds leave the 
+db7f7ecc B5a#19: the brand lint reads the chrome sources, th
+5c1131b2 B4b#6 seam: the deck linter reads a mask's black an
+18632ba3 B6b#4: the docs index, the deviations and the statu
+71783b20 B6b#4 seam: the write probe loads the playwright of
+3263728a B2a#15: /home draws the deck's page grammar: one ra
+d85c7964 B3a#7: the cuts of the clutter audit leave the menu
+5bd0d5a9 B3a#7 seam: the finder and the studio skill's Assis
+bfc3888a B1#2: the Turboslide mark is the GT speed monogram 
+3274a686 B1#2 seam: the /decks bar and the print bar draw th
+a34b2ee9 B1#3: the CLI version is stamped from the release, 
+24cc125e B2b#16: /decks lists the viewer's presentations as 
+adf1fd75 B2b#16 seam
+247fe081 B2c#17: Not found, You need access and the refused 
+addedf48 B2c#17 seam: chrome.buttons.one-rule opens the refu
+c9380a14 B2d#18: a shared deck's page unfurls with the deck'
+9b70d0ae B3a#8: the default view's words in a seller's terms
+7976a38e B3a#8 seam: lane B3a's note, its day 0 read of the 
+2cbcada2 B3b#9: the title row keeps the deck name at 96 px o
+5ac00c5c B4b#6 seam: the rendered floor reads the ASCII mark
+c08ee017 B3b#10: the chrome's values follow the deck: square
+cabd481d B3b#11: the slide draws its deck's appearance on th
+53253fac B3b#12: one Turboslide mark in the chrome and no sp
+2a0da406 B3b#13: the Share dialog draws ruled rows and asks 
+2108dad4 B3b#14: the phone editor under 720 px: one Menus ke
+d05fc4b0 B3b#14 seam: a submenu on a phone drops under its r
+e8fdee8c B3b#14 seam: the core teardown widens a phone page 
+6b417c80 B3b#14 seam
+1adbc355 B4b#6 seam: the stroke grammar reads a diagram's ma
+e4d98663 B5b#20: the brand lint fails the check on a finding
+f20cf8ac B6c#21: the round specifications and parity files m
+84e2dee5 B6c#21 seam: docs/brand.md cites the round specific
+33b3aa98 B4a#5: a deck from Blank draws a plain white slide 
+21d484bb B3a#8 seam: the tmp store's banner in a seller's wo
+acf910e7 B3a#8 fix: the refusal row reads the product sentence
+df2d52a8 B3b#13 seam: every clock in the product writes 7:39
+c206823c B3b#13 seam: the people rows name the guest through
+1c821bbf B3b#13 seam: share.dialog.you-label names its secon
+e1ad28d4 B3b#13 seam: the accounts spec names a second brows
+5b2af959 B2a#15 seam: the /home pictures are captured again 
+a904ef00 B4b#6 seam: a deck made from the GT template on a h
+204226cf B4b#6 seam: lane B4's note with its requests, the l
+c17fd8bf B4b#6: the GT template is the 95 slide brand deck o
+0bebf711 B4b#6 seam: the store's template test drops the hel
+7d960104 B4b#6 seam: the store's template test is formatted
+7f340372 B4b#6 fix: the speed mark slides typed (the B4 fixer)
+85f002b1 B4b#6 fix: store tests, label rule, rows words
+717aabe9 note
+d7ac6431 note final
+8154b6f4 B6c#21 seam: the verifier pass 1

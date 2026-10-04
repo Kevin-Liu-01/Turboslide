@@ -1,0 +1,848 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T09:15:57.700Z",
+  "ms": 416619,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 416603,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/r1fix-int/out-decks/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": [
+      "decks"
+    ],
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 80,
+  "passed": 77,
+  "failed": 2,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: document 72224 B (budget 60000)",
+      "measures": [
+        "first byte 6 ms (budget 150)",
+        "LCP 116 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 493 ms (budget 500)",
+        "images before the first scroll 216540 B (budget 300000)",
+        "images after a full scroll 216540 B (budget 800000)",
+        "document 72224 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 10811483 B (reported against 600000)",
+        "first byte 6 ms (budget 150)",
+        "LCP 116 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 493 ms (budget 500)",
+        "images before the first scroll 216540 B (budget 300000)",
+        "images after a full scroll 216540 B (budget 800000)",
+        "document 72224 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 10811483 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "96432f76",
+  "origin": "http://localhost:4510",
+  "date": "2026-10-04",
+  "results": {
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.root.redirect": "passed",
+    "decks.list.read": "passed",
+    "decks.list.search": "passed",
+    "decks.list.open-thumbnail": "passed",
+    "decks.list.open-title": "passed",
+    "decks.list.open-recent": "passed",
+    "decks.card.menu-open-escape": "passed",
+    "decks.card.rename-enter": "passed",
+    "decks.card.rename-escape": "passed",
+    "decks.row.rename-enter": "passed",
+    "decks.card.make-a-copy": "passed",
+    "decks.card.open-in-new-tab": "passed",
+    "decks.card.present": "passed",
+    "decks.card.move-to-trash-undo": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.card.download": "passed",
+    "decks.file.make-a-copy": "passed",
+    "decks.file.template-gallery": "passed",
+    "decks.file.open-upload-bundle": "passed",
+    "decks.file.import-slides-bundle": "passed",
+    "help.improve-link": "passed",
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.nav.back-forward": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.paint": "passed",
+    "decks.access.sign-in-link": "passed",
+    "decks.access.unknown-deck": "passed",
+    "decks.notfound.page": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.recent.drops-trashed": "passed",
+    "decks.trash.editor-undo-snackbar": "passed",
+    "decks.recent.this-browser-sentence": "not driven",
+    "decks.home.seller-lead": "passed",
+    "decks.card.thumbnail-slide-1": "passed",
+    "decks.card.edited-relative-time": "passed",
+    "decks.card.more-glyph": "passed",
+    "decks.trash.button-heights": "passed",
+    "decks.trash.confirm-dialog-chrome": "passed",
+    "decks.new.skeleton-one-frame": "passed",
+    "decks.access.stranger-links": "passed",
+    "decks.notfound.sentence-case": "passed",
+    "templates.gallery.page": "failed",
+    "templates.gallery.strip-and-link": "passed",
+    "chrome.appearance.first-visit-follows-os": "passed",
+    "brand.appearance.default": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.copy-rules": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.links-and-card": "passed",
+    "decks.home.load-budget": "failed",
+    "decks.home.layout-shift": "passed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "decks.home.copy": "passed",
+    "decks.home.phone": "passed",
+    "decks.list.ruled-rows": "passed",
+    "decks.og.deck-card": "passed",
+    "decks.recent.keeps-new-deck": "passed",
+    "decks.card.rename-everywhere": "passed",
+    "decks.list.one-card-per-deck": "passed",
+    "decks.trash.leaves-at-once": "passed",
+    "decks.card.title-ellipsis": "passed",
+    "decks.card.download-powerpoint": "passed",
+    "decks.import.upload-drop-zone": "passed",
+    "decks.back.list-restored": "passed",
+    "decks.card.thumbnail-or-plate": "passed",
+    "decks.trash.enter-confirms": "passed",
+    "decks.card.rename-field-fits": "passed",
+    "decks.trash.empty-not-primary": "passed",
+    "decks.thumbnail.never-502": "passed",
+    "decks.polish.pages-sweep": "passed",
+    "decks.list.own-and-shared": "passed",
+    "decks.list.action-scoped": "passed",
+    "decks.manifest.paper": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.recent.this-browser-sentence",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "templates.gallery.page",
+        "feature": "templates",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "templates.gallery.page",
+      "parks": [
+        "home.gallery",
+        "file.new.templateGallery"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.root.redirect",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.read",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.search",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-thumbnail",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-title",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.open-recent",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.menu-open-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-escape",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.row.rename-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.open-in-new-tab",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.present",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.move-to-trash-undo",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.nav.back-forward",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.paint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.page",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.make-a-copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.template-gallery",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.open-upload-bundle",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.file.import-slides-bundle",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.improve-link",
+      "feature": "help",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.recent.drops-trashed",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.editor-undo-snackbar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.recent.this-browser-sentence",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: home.recent.sentence (docs/archive/rounds/PRODUCT.md 7.1, B1)"
+    },
+    {
+      "id": "decks.home.seller-lead",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.thumbnail-slide-1",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.edited-relative-time",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.more-glyph",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.confirm-dialog-chrome",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.new.skeleton-one-frame",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.stranger-links",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.sentence-case",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "templates.gallery.page",
+      "feature": "templates",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: browserContext.waitForEvent: Timeout 20000ms exceeded while waiting for event \"page\""
+    },
+    {
+      "id": "templates.gallery.strip-and-link",
+      "feature": "templates",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.appearance.first-visit-follows-os",
+      "feature": "chrome",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.recent.keeps-new-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-everywhere",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.one-card-per-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.own-and-shared",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.action-scoped",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.manifest.paper",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.leaves-at-once",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.title-ellipsis",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.download-powerpoint",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.import.upload-drop-zone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.back.list-restored",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.thumbnail-or-plate",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.enter-confirms",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.rename-field-fits",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.empty-not-primary",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.polish.pages-sweep",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.thumbnail.never-502",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy-rules",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: document 72224 B (budget 60000)"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.ruled-rows",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.og.deck-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

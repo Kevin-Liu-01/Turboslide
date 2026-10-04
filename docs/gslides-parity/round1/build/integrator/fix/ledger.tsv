@@ -1,0 +1,23 @@
+2026-10-04T09:10:42Z	trash	start	load 13.62
+2026-10-04T09:13:15Z	trash	end 1	load 15.32
+2026-10-04T09:13:15Z	present	start	load 15.32
+2026-10-04T09:15:47Z	present	end 0	load 12.32
+2026-10-04T09:15:57Z	decks	start	load 12.47
+2026-10-04T09:22:54Z	decks	end 1	load 12.38
+2026-10-04T09:25:25Z	rebased-walk	start	load 9.13
+2026-10-04T09:44:42Z	rebased-walk	end 1	load 26.81
+2026-10-04T09:44:42Z waiting, load 26.81
+2026-10-04T09:49:42Z	rebased-specs	start	load 21.47
+2026-10-04T09:53:48Z	rebased-specs	end 1	load 17.96
+2026-10-04T09:55:11Z	rebased-refusal	start	load 11.97
+2026-10-04T09:57:30Z	rebased-refusal	end 0	load 8.80
+2026-10-04T09:57:30Z	rebased-walk2	start	load 8.80
+2026-10-04T10:09:15Z	rebased-walk2	end 0	load 26.06
+2026-10-04T10:09:54Z waiting, load 26.79
+2026-10-04T10:14:54Z	head-slides	start	load 16.17
+2026-10-04T10:20:42Z	head-slides	end 0	load 25.16
+2026-10-04T10:20:42Z waiting, load 25.16
+2026-10-04T10:25:42Z	head-walk	start	load 15.34
+2026-10-04T10:57:40Z	head-walk	end 1	load 21.51
+2026-10-04T10:57:40Z	head-specs	start	load 21.51
+2026-10-04T11:08:03Z	head-specs	end 1	load 39.26

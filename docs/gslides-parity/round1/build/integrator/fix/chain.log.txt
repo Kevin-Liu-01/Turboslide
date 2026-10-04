@@ -1,0 +1,46 @@
+ok 899f07cc67a5436f2a05a56ccbf2efe3e9598f3b -> a0584e3413613c3e9ce0635a2a28c9d1b45d01ba R4 seam fix: a failed migration of the identity database runs again on a later read
+CONFLICT af81f49f5b304142c9dfc4974c26219bdc423232 R1 seam fix: the bearer's reach in docs/security.md names the comment route
+CONFLICT (content): Merge conflict in docs/security.md
+ok 6aaf0bf2cd8428d43b5a237cdda0efb7f4883147 -> c73a5fa7e81a7dfeaaecdb5a19d556a1b53949fa R2 seam fix: the sync status carries the committed seq the hello and the checkpoints name
+ok fae5cb5a1bb64da6782037f8449c1dc3d6c56b34 -> 591a37f8d70b701043a666ca9b88b8c65a7d0dcb R6 seam: the integrator's note of the merge, its ledgers and the people pictures
+ok f674ac840363710113a520a56b1250576f15a490 -> 348c462013cded196184d9284efd75f742a7ccc2 R1 fix: the object keeps its deck across a wake, falls back when it cannot reach the app, and the run rule's server half
+ok 1f590d837241bca8ef532367e911cdaba16df843 -> ff806e796b284af0efaaa3ed0aa7f8424aef9edf R2 fix: the socket transport raises the studio session's page events, and the undo and session patches for their owners
+CONFLICT 874a29c18e979fe29e7e0d0b0e78a0b9bea6f527 R6 seam: the verifier's passes 1 and 2 of the realtime round, their drives, ledgers and pictures
+CONFLICT (content): Merge conflict in docs/gslides-parity/focus/VERIFICATION.md
+ok c61c4f7e243179242ae3a75d32315237656de5a4 -> 5779c06061723a0d75f8571b96352b291c8a6af2 R1 fix 2: the asset actions write through the room on the do tier, so a picture lands in the object's order
+ok efa62c28e8a6b55c0bd92b8f1a7c0573d8892142 -> 9d4507e2024298f99b1d8e964660475bd2a65b3f R2 fix 2: the client half of the run rule, so two people typing at one point keep both words whole
+ok 48c2f410d122e1852a589be5e7b17b372a3974e5 -> b6a096c1117995623d8cd01e706640b91838d155 R2 fix 2: the studio session hears its commands on the room's socket on the do tier
+ok 3229141779a277c351f33c8bb7222ee7e583b434 -> 8f88e1e6eb6d19e7a035ed78ba1f85d065ce1eca R3 fix 2: undo and redo wait for each step's admission, not for the checkpoint
+ok a76892acff4345015c640f3d801180fa8da9b650 -> 723fd5b35faf29a8838ff0cdcb5d71dab8215c98 R4 fix 2: the accounts spec opens a closed Version history window and leaves the open one open
+CONFLICT 34c064ef18768ac4f2a945bf8b156be4935ec46d R4 fix 2: the Share dialog remembers the general link it minted, so a reload shows the address
+CONFLICT (content): Merge conflict in packages/chrome/src/dialogs/Share.tsx
+ok fbb02a144325d502b2ed06bfa4781da3f98c7593 -> 29b2f7a0f934642a6ca31b747ba623ca9d65e8c3 R5 fix 2: the cost probe counts the object's request units and takes its own samples off the do windows
+CONFLICT 2fb53c52a2ac92e9415a004909629e82aef69b3a R6 seam fix: the formatter's ignore rule for the gate tables of R1's fix round
+CONFLICT (content): Merge conflict in .prettierignore
+ok 697e8892d24ff4bb6560b5ccb04dea51d76ed1cc -> 0e91ed65c2b0c1b15e6add20a1d967beca5b4af6 R6 seam: the integrator's note of fix round 2 and its ledgers
+CONFLICT 85d5f7824707c82fab9e3ac82ce86a3bb8c77466 R5 fix 3: images.insert.no-external-banner reads the agent banner for an agent's write
+CONFLICT (content): Merge conflict in docs/FOCUS.md
+CONFLICT (content): Merge conflict in docs/gslides-parity/focus/core-matrix.json
+CONFLICT 4f4b412ad97d7258184f693f1a539b76203fc11b R5 fix 3: the GT brand deck rows read the copy's refusal, and the gate places the deck's twins in a local node server's overlay
+CONFLICT (content): Merge conflict in apps/studio/e2e/core/decks.spec.ts
+ok 30a7bfc49acd476f534932bfbf78c5371e99a9e4 -> fd525ab742b124db3d8c67678373e7b364c88582 integrator fix 3: the two export drivers start the export when their rows say, and match the export call by its payload
+CONFLICT 2f1aaa8452990c08670cd958f2c71b97161c6f0d R5 fix 3: decks.list.gt-brand-deck records the copy's id and its two times
+CONFLICT (content): Merge conflict in apps/studio/e2e/core/decks.spec.ts
+ok e5d31449c7850c84ec19bd16c416d6334c0ceb0b -> 6a6ffa757a5eea126b30d80500371e33c2171ea7 R5 fix 3: the lane's note of fix round 3 and its five ledgers
+ok d02d44570ffcb6e43132ad4b973b739dde5f9ddb -> f0f60285ff817608e37fb97b2324b4d3e19b53e6 integrator fix 3: the note of fix round 3 and its four export ledgers
+ok 355e0794bdaf76aacc8d3b3430e51bdbe490e90d -> 5d01b1ad34a30f01ac3ed97dc36dbfd3da5e4edf R1 fix 3: a cover's conversion follows the slide as the room holds it, so two typers keep both words
+ok 1b91a1263e744e2a0146f29b2b58249d673cc09c -> 56d3e5bab43658b4d08641200369ee532f85fcd2 R1 fix 3: the lane's note of fix round 3, its nine gate ledgers and its two hand title drives
+ok b0f86fe3cde5991d7f34b4071fa7f1da7c423159 -> 92fa6cd389480fb6c87247dfc2b8cc98dc4ac873 R2 fix 3: two people typing at one point of a text keep both words whole and their spaces
+CONFLICT fc6cfa11b173b1bcdf046a305c766899574f1107 R3 fix 3: the chrome's own writes answer at their admission, so a menu write's snackbar never replaces a later one
+CONFLICT (content): Merge conflict in apps/studio/src/editor/controller.tsx
+CONFLICT e67db5ef241593711f3f0dea02d008ed08acd735 R3 fix 3: the undo of a restore and any undo or redo step over an ops post go through the server function
+CONFLICT (content): Merge conflict in apps/studio/src/editor/controller.tsx
+ok 003a02d22a6f30d6994a74067389f2d2f5d38032 -> 930fb71c191c7a4bceb55746a980d194e7c0b584 R3 fix 3: the restore rows compare the deck with its keys sorted and name the slides still apart
+ok ef864f623154babc0665360cae585769ee935509 -> 87804ab1c7fa13c796e062bfa2a7d8f93fcc1f4e R2 fix 3: the lane's note of fix round 3, its typers drive, its Chromium space probe and its ledgers
+ok f88a5e3c61afe77462c25381e529491ec8115f17 -> bafe25d403051358930d2813fd133f8078df7574 R3 fix 3: the lane's note of fix round 3, its probes and ledgers
+ok 2477982bcc5396bc8f76e3b7932939f16b0561fe -> d76669ad840fd4c5ed135d2d62da62f5d537c69f R3 fix 3: the probes' text ledgers, which the repository's log rule left out
+CONFLICT 617cc2030736ef0cd8069fe54dcc7d27e6922021 R6 seam: the verifier's passes 3 and 4 of the realtime round, their drives, ledgers and pictures
+CONFLICT (modify/delete): docs/gslides-parity/cloudflare/verify/hand.mjs deleted in d76669ad840fd4c5ed135d2d62da62f5d537c69f and modified in 617cc2030736ef0cd8069fe54dcc7d27e6922021.  Version 617cc2030736ef0cd8069fe54dcc7d27e6922021 of docs/gslides-parity/cloudflare/verify/hand.mjs left in tree.
+CONFLICT (modify/delete): docs/gslides-parity/cloudflare/verify/signin.mjs deleted in d76669ad840fd4c5ed135d2d62da62f5d537c69f and modified in 617cc2030736ef0cd8069fe54dcc7d27e6922021.  Version 617cc2030736ef0cd8069fe54dcc7d27e6922021 of docs/gslides-parity/cloudflare/verify/signin.mjs left in tree.
+CONFLICT (content): Merge conflict in docs/gslides-parity/focus/VERIFICATION.md
+TIP d76669ad840fd4c5ed135d2d62da62f5d537c69f

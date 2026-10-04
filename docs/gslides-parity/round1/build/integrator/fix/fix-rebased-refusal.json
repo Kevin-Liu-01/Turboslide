@@ -1,0 +1,81 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T09:55:11.891Z",
+  "ms": 138360,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 138346,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/r1fix-int/out-rebased-refusal/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "export.refusal.sentence-and-retry"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 1,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": null,
+  "origin": "http://localhost:4510",
+  "date": "2026-10-04",
+  "results": {
+    "export.refusal.sentence-and-retry": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

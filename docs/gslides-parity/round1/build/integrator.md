@@ -764,3 +764,224 @@ closes the privacy defect, the ship step resolves one line at the pick: the matr
 `core-matrix.test.mjs` takes H2's terms without H5 to H10's. Either way the ship step rebases the
 branch onto the realtime round's final `main`, which this branch has not met (it was cut at
 `e8b20fec`; `realtime/round` stands at `071a9a34`), and that rebase is a merge of its own.
+
+## Round 1 fix round
+
+Written by the integrator's fixer on 2026-10-04 (times in UTC). The work is VERIFICATION.md "Round
+1, pass 1" findings 1, 3 and 4, which the verifier gave the integrator, and the requests the other
+fixers of this round addressed to the integrator (ha.md and b4.md, each under "Round 1 fix
+round"). The app was quit once at the start of this run, before any file changed; the run began
+again from `8154b6f4` at 08:53Z. Port 4510, one vite dev server at a time (the tmp store, the
+memory tier, the local open surface, an identity database of its own, secrets minted per start).
+The gate ledgers and the scripts are under `round1/build/integrator/fix/`; the raw runs are in the
+session scratch folder `r1fix-int/`. Nothing was pushed and no deployment was made.
+
+### Commits
+
+| Commit | Push | Finding or request |
+| --- | --- | --- |
+| `58f82a30` | H6 fix | finding 3, the laser row's driver |
+| `ffd70351` | H2 fix | finding 4, the trash page |
+| `85f002b1` | B4b#6 fix | b4.md requests 20, 21 and 24 |
+| `acf910e7` | B3a#8 fix | finding 1, the words of `export.refusal.sentence-and-retry` |
+| `026db8e4` | H2 fix | ha.md request 1, the Import slides tiles |
+| this note's commit | B6c#21 fix | the note and the ledgers |
+
+### Finding 4: the trash page lists the whole store for every visitor (severity 2)
+
+The cause was the one the verifier named. `trashScope()` asked `listingScope` with `page: false`,
+so a cookieless stranger's minted principal read as `own`, and `ownedTrash` listed every head of
+the store and read the access record of every trashed deck before it kept none.
+
+The fix gives the trash page the scope `/decks` takes (`pageScope`), and an anonymous visitor's
+trash is answered from this browser's own ids:
+
+- `listTrashedDecks` takes `deckIds` and answers `{ cards, gone }`. A signed in person, a key's
+  owner, the deployment's admin and a checkout keep the listing as before. A visitor with no
+  session cookie and no bearer gets `browserTrash`: one access record read per id and one head
+  per id the record makes the visitor's own, the trashed ones kept, at most 36 ids. No ids, or a
+  context with no principal, is no read at all. The two paths are named in `server-timing`
+  (`trash-ids`, `trash-listing`).
+- `HostedDecks.head(deckId)` reads one deck's head without a listing on the three backends (on
+  the blob tier one card of the listing: a head of `deck.json`, no body when the instance proved
+  the etag; a busy store throws, so it never reads as a deck that is gone).
+- This browser's trash record (`routes/-recent.ts`): localStorage `turboslide:in-trash` with the
+  cookie mirror `ts-trash` on `Path=/decks`, 24 ids. The editor's Move to trash marker, the
+  card's Move to trash and a Recent deck the store stopped answering enter it; Restore, Delete
+  forever, both Undo paths, a refused trash and the ids the server answers as `gone` leave it.
+  The page asks about the trash record's ids, the Recent record's ids and the editor's marker:
+  from the two cookie mirrors on the server's first render, and from storage in the page.
+
+The consequence: an anonymous visitor's trashed deck that neither record names (a deck trashed
+from another browser) is not listed. `/decks` has had the same rule since H2. Round 2's index
+object replaces the listing for every caller.
+
+Readings, on 4510 with the branch's tree and the fix (the tmp store's ownership is the anonymous
+creator's, as on a deployment):
+
+| Run | When and load | Reading |
+| --- | --- | --- |
+| The trash and listing rows, `core-gate.mjs --only specs --rows` (14 rows) | 09:10:42Z to 09:13:15Z, 13.62 to 15.32 | 13 passed. `decks.trash.editor-undo-snackbar` failed at its setup: the narrowing left out `decks.recent.drops-trashed`, which makes the file's deck again after `decks.trash.delete-forever-button` removes it |
+| The whole decks spec, `--only specs --spec decks` | 09:15:57Z to 09:22:54Z, 12.47 to 12.38 | 80 rows: 77 passed, 2 failed, 1 not driven, retries zero. Every `decks.trash.*` row, `decks.recent.drops-trashed`, `decks.card.move-to-trash-undo`, `decks.list.own-and-shared` and `decks.list.action-scoped` passed. The reds are the run of record's: `templates.gallery.page` (File > New's gallery tab did not open) and the measurement row `decks.home.load-budget` (the `/home` document 72,224 B against 60,000 on a dev server); `decks.recent.this-browser-sentence` is not driven by its rule |
+| The whole present spec, whose teardown deletes through the trash page | 09:13:15Z to 09:15:47Z, 15.32 to 12.32 | 34 of 34 |
+| A cookieless `GET /decks/trash` on 4510 (the replayed tree below, which carries the fix) | 09:35Z | 200 in 107 ms; the first HTML already holds the empty state, because the listing answers with no read |
+| Unit tests | any load | `deck-scope.test.ts` 19 (3 new), `-recent.test.ts` (3 new), `hosted.test.ts` 81 with the head test on the tmp and blob collections; the store package 269 passed, the studio's `src/server` and `src/routes` 532 passed; `tsc -b` exit 0 |
+
+The preview was not read again: no deployment is made in this fix round, and the round's preview
+serves `c17fd8bf`. The hosted smoke's `/decks/trash` row reads this on the next preview: a
+cookieless stranger costs the identity cookie's mint and no store read.
+
+### Finding 3: `present.laser.visible` red in the whole matrix runs (severity 3)
+
+The driver now captures the show before L is pressed and puts the laser on the first 48 px block
+of one colour on a 24 px grid over the slide's lower half (120 px from the sides, 160 px above the
+bottom), and the annotation names the point and the block's reading. The pixel measure is the
+same.
+
+Reading: the whole present spec on 4510 (`--only specs --spec present`, 09:13:15Z to 09:15:47Z,
+load 15.32 to 12.32): 34 rows, 34 passed, retries zero. The row read "at 1224,450 (0 of 576
+pixels off the block's colour); 14 by 14 px ...; drawn diameter 14". Every block from x 120 to
+1200 on the row at y 450 held more than one colour; the verifier's step 32 trace shows the earlier
+tests' title across that part of the slide.
+
+Why the realtime round's whole run met no ink at (700, 440) was not traced. One fact bears on it:
+H6 takes the GT mark out of the blank title slide's left middle stack, and H6 is on `main` as
+`a73db740` (2026-10-02 11:20, the same change as `41332b42` without hb.md). The fix is named for
+H6 for that reason; since the blank title already draws no mark on `main`, the fix can ride the
+first push of the round's ship.
+
+### Finding 1: the standing reds of the earlier rounds (severity 3)
+
+The fix the finding names, a rebase onto the realtime round's final `main`, was not made. This
+workflow never rebases, and that `main` does not exist yet: at 09:30Z `origin/main` stood at
+`5ce68a72` with R5, R1 and R2 of the realtime round on it and the guard deploying `1bafa66e`.
+R3 (which carries the undo fix as `32291417`, the rebased twin of `f8ec63ff`), R4 and R6 are not
+on `main`. The ship step makes the rebase. To tell the ship step what that rebase meets and
+whether these rows close with it, this run built the tree the rebase stands for and read the rows
+on it.
+
+The tree (`round1/build/integrator/fix/build-rebased.sh` with `chain.sh`): the branch's tip `ffd70351` with the realtime round's
+32 commits after `52c701f3` (the rebased twin of `e8b20fec`, where this branch was cut) replayed
+by `git merge-tree --merge-base` and `git commit-tree`, so no ref moved. 22 replays were clean.
+Ten conflicted:
+
+- code: `fc6cfa11` and `e67db5ef` (R3 fix 3, `controller.tsx`) conflict only on lines that
+  B6c#21's citation rewrite changed (`docs/X.md` to `docs/archive/rounds/X.md`); resolved by hand,
+  the result equals `realtime/round`'s `controller.tsx` but for those comments. `34c064ef` (R4
+  fix 2, `Share.tsx`) conflicts with B3b#13's dialog; `4f4b412a` and `2f1aaa84` (R5 fix 3,
+  `decks.spec.ts`) with H2's and B2b's driver edits. `85d5f782` (R5 fix 3) conflicts only in
+  `docs/FOCUS.md` and `core-matrix.json`; its `images.spec.ts` change applies clean.
+- docs: `af81f49f` (`security.md`), `874a29c1` and `617cc203` (`VERIFICATION.md`, two deleted
+  verify scripts), `2fb53c52` (`.prettierignore`).
+
+The two controller commits and the images driver were applied to the export; the Share dialog,
+the decks spec, the gate's node server twins and the docs were left out, since none of finding
+1's rows reads them on a vite dev server.
+
+The readings, on the replayed tree's vite dev server on 4510, each run from the export so its
+drivers are the realtime round's:
+
+| Run | When and load | Reading |
+| --- | --- | --- |
+| The walk areas text, images, arrange, share (the versions rows) and help, `--only probe` | 09:25:25Z to 09:44:42Z, 9.13 to 26.81 | 222 rows: 219 passed, 1 failed, 2 not driven, retries zero. The eight arrange rows and the five images rows of the undo class passed, each step reading "undo restored true"; `versions.undo-restore`, `images.border.drawn` and `text.select.shift-home-line` passed. Red: `versions.show-changes-marks` ("marks with Show changes on 0", the run of record's words). Not driven: `text.clipboard.paste-without-formatting` (manual) and `arrange.group.tail-text-controls` (parked) |
+| The walk areas polish-text and polish-chrome | 09:57:30Z to 10:09:15Z, 8.80 to 26.06 | 34 of 34. `text.paragraph.toolbar-live` ("moved within a frame true ... caret kept true" for Center, Double and Increase indent), `text.list.enter-tab-no-error` ("restored by Cmd+Z true"), `text.size.run-and-typed-value` ("Acme drawn at 36 px, the run at 20 px") and `help.check-slides.plain-sentence` ("The table has 9 empty cells") passed |
+| The six spec rows, `--only specs --rows` | 09:49:42Z to 09:53:48Z, 21.47 to 17.96 | 3 passed: `images.insert.no-external-banner`, `export.picture.progress-and-capture`, `shaders.export.missing-frame-row`. `export.refusal.sentence-and-retry` read red on its words alone (below). `sync.resend.idempotent` and `decks.recent.this-browser-sentence` were skipped by their rules |
+| `export.refusal.sentence-and-retry` with `acf910e7`'s sentence | 09:55:11Z to 09:57:30Z, 11.97 to 8.80 | passed: the plain export arrived in 4,184 ms, the export call was refused once, no file, "The PowerPoint file could not be made. Try again in a minute" |
+
+The same rows on the branch's own tree, for the comparison under the same conditions (4510, the
+branch at `026db8e4`, each run from the worktree):
+
+| Run | When and load | Reading |
+| --- | --- | --- |
+| The walk areas text, images, arrange, share, help, polish-text and polish-chrome | 10:25:42Z to 10:57:40Z, 15.34 to 21.51 | 258 rows: 238 passed, 18 failed, 2 not driven. The 18 are finding 1's walk rows with the run of record's words: the five images rows and the eight arrange rows ("undo restored false", "6 Cmd+Z returned the start false"), `versions.show-changes-marks`, the three polish text rows ("no text box", "restored by Cmd+Z false") and `help.check-slides.plain-sentence` ("no slide"). `versions.undo-restore` passed here, as on the two node server runs |
+| The six spec rows | 10:57:40Z to 11:08:03Z, 21.51 to 39.26 | 0 passed, 4 failed, 2 not driven: `shaders.export.missing-frame-row` ("the export started within 800 ms of the change"), `export.refusal.sentence-and-retry` (the 240 s limit), `export.picture.progress-and-capture` ("the file within 4 s", read at a load that rose past 24) and `images.insert.no-external-banner` |
+
+What this says to the ship step:
+
+- The rebase closes the undo class (13 rows), the three polish text rows,
+  `help.check-slides.plain-sentence`, `images.insert.no-external-banner`,
+  `export.picture.progress-and-capture` and `shaders.export.missing-frame-row`, and, with
+  `acf910e7`, `export.refusal.sentence-and-retry`: each read red on the branch and green on the
+  replayed tree, on one server type within two hours. `versions.undo-restore` passed on both
+  trees here; it read red only in the verifier's step 32. The finding's step stands: read these
+  rows on the rebased tree before the first push.
+- `versions.show-changes-marks` stays red after the rebase. It is in
+  `focus/ship-4300058d.json`'s `parkedRows` (its control `file.versionHistory.showChanges` is
+  behind Tools > Advanced tools), so it does not hold the ship. The realtime round's R1-F6 names
+  its owner, the Version history panel's marks.
+- `sync.resend.idempotent` ("version.list answers no origin", the sync owner's) and
+  `decks.recent.this-browser-sentence` (no `home.recent.sentence` since the polish round) are not
+  driven by their own rules, and a rebase does not change them. `realtime.agent.write-announced`
+  (agent-http.spec.ts) was not read here; the verifier's step 32 read it green.
+- The pick conflicts are the replay's: the citation paths B6c#21 rewrote, wherever a realtime
+  commit edits a line that carries one; `Share.tsx` against B3b#13; `decks.spec.ts` against H2's
+  and B2b's drivers; the docs. H6 is on `main` already as `a73db740`, so its pick carries hb.md
+  alone.
+
+### Requests answered
+
+- ha.md request 1 (the Import slides tiles): `026db8e4`. Each tile asks for its picture when it
+  comes within 200 px of the list's visible area, through a gate of six turns
+  (`packages/chrome/src/dialogs/picture-gate.ts`), at low fetch priority. The slides walk area on
+  4510 (10:14:54Z to 10:20:42Z, load 16.17 to 25.16): 83 of 83, and
+  `slides.import.none-preselected` read "landed 3 2183 ms after Import" over 95 tiles, where
+  HA's readings before the change were 12.6 s in the walk and 29.9 s and 21.2 s in its
+  diagnostic. Its hosted half (the Blob store's refusal under 95 cold renders) is request 2's and
+  is not read again here.
+- ha.md request 2 (Round 2) and question 3 (Kevin): not the integrator's; open.
+- b4.md request 20 (the store tests that pinned the speed slides as html blocks): `85f002b1`,
+  B4's patch as written; `templates.test.ts` and `template-index.test.ts` 30 passed.
+- b4.md request 21 (the rendered `type/svg-label-min` and glyph art; it names B5, which has no
+  fixer in this round): `85f002b1`, B4's patch as written; the lint package 115 passed.
+- b4.md request 22 (the importer writes an inline `<svg>` as a dia block and the residual rules of
+  correction 6): open, for Round 2's owner of `packages/import`. Until it lands, check step 24
+  reads the 14 pairs of the chain's import of `decks/gt-brand` over budget; the committed
+  template's pairs read within budget (b4.md).
+- b4.md notice 23 (a drawing nested in the lockup's group does not move by a press): open, for the
+  editor's owner. A press on a block nested in a composite selects that block (chip "Block") and
+  neither an arrow nor a drag moves it; a press on the composite's empty area selects and moves
+  the whole group. The change it implies, a first press on a nested block selecting the outer
+  composite and a second press or a double click entering it as hand made groups do through
+  `pos.group` (`objectPressPlan`'s `grouped`, `groupEnteredRef` in `Editor.tsx`), changes A1's
+  click model on every imported slide, the GT template's 95 among them, and the arrange, text and
+  slides rows read that model. It needs its own rows and a run of those areas, so a fix round did
+  not make it. Kevin's "we must be able to drag and move around ANYTHING" covers this case.
+- b4.md notice 24 (the large deck rows' words): `85f002b1`; the two rows name the template's 95
+  slides and 119 assets.
+
+### The ship order
+
+The integrator's pick simulation (`r1int/ship/simulate.mjs`) over
+`round1/build/integrator/fix/ship-order.txt` (section 8's clean order with the fix commits
+placed): 66 of 66 picks clean onto `f3e9cd86`, and the last tree equals HEAD's at `026db8e4`. Each fix commit sits after its push's last commit, and section 8's
+table takes these commits:
+
+| Push | Commits added after the push's own |
+| --- | --- |
+| H2 | `ffd70351`, `026db8e4`; HA's `96432f76` after H4's `0b6df8d4` (at H2's place its ha.md hunk conflicts with H4's note) |
+| H6 | `58f82a30` (it can ride the ship's first push instead, since H6 is on `main`) |
+| 8, B3a the words | `acf910e7` |
+| 6, B4b the template | B4's `7f340372`, then `85f002b1` |
+| 21, B6c | `8154b6f4` (the verifier's pass 1) and this note's commit |
+
+`ffd70351` holds its `readDeckHead` import on its own line in `tmp-store.ts`, so the pick at H2's
+place does not meet B4b#6's `a904ef00` in the same import list.
+
+### Deviations of the fix round
+
+1. Finding 1's fix, the rebase, was not made: this workflow never rebases, and the realtime round's
+   final `main` does not exist yet. The rows were read on a replayed tree instead.
+2. `58f82a30` is named for H6 by judgement. The cause of the laser row's ink was not traced.
+3. `85f002b1` changes `packages/lint` (B5's files) because request 21 asked B5, and B5 has no
+   fixer in this round.
+4. `acf910e7` moves an earlier round's row to the product's sentence, where the realtime
+   integrator's fix round 3 left the choice to the export owner or Kevin. If Kevin prefers "The
+   PowerPoint could not be made", the change is `downloadKindWord('pptx')` in
+   `packages/chrome/src/download.ts` with its two tests, and `acf910e7` is reverted.
+5. An anonymous visitor's trash page lists only the decks this browser's records name.
+6. Nothing was read on a deployment: the trash page's time and the Import tiles' Blob behaviour
+   wait for the ship's preview.
+7. Two of this fixer's commits were amended right after they were made, each while it was HEAD:
+   `58a79f73` became `58f82a30` (a reading sentence of the message), and `2b5bbe07` became
+   `ffd70351` (the import line above).
+8. b4.md request 22 and notice 23 are open, with their owners named above.

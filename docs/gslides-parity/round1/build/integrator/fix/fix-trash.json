@@ -1,0 +1,223 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T09:10:42.270Z",
+  "ms": 153592,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 153556,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/r1fix-int/out-trash/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.trash.listed-after-move",
+      "decks.trash.restore",
+      "decks.trash.lists-after-restore",
+      "decks.trash.delete-forever-cancel",
+      "decks.trash.delete-forever-button",
+      "decks.trash.delete-forever-enter",
+      "decks.trash.editor-undo-snackbar",
+      "decks.trash.button-heights",
+      "decks.trash.confirm-dialog-chrome",
+      "decks.list.own-and-shared",
+      "decks.list.action-scoped",
+      "decks.trash.leaves-at-once",
+      "decks.trash.enter-confirms",
+      "decks.trash.empty-not-primary"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 14,
+  "passed": 13,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "8154b6f4",
+  "origin": "http://localhost:4510",
+  "date": "2026-10-04",
+  "results": {
+    "decks.trash.listed-after-move": "passed",
+    "decks.trash.restore": "passed",
+    "decks.trash.lists-after-restore": "passed",
+    "decks.trash.delete-forever-cancel": "passed",
+    "decks.trash.delete-forever-enter": "passed",
+    "decks.trash.delete-forever-button": "passed",
+    "decks.trash.editor-undo-snackbar": "failed",
+    "decks.trash.button-heights": "passed",
+    "decks.trash.confirm-dialog-chrome": "passed",
+    "decks.trash.leaves-at-once": "passed",
+    "decks.trash.enter-confirms": "passed",
+    "decks.trash.empty-not-primary": "passed",
+    "decks.list.own-and-shared": "passed",
+    "decks.list.action-scoped": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.trash.editor-undo-snackbar",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.trash.editor-undo-snackbar",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.trash.listed-after-move",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.lists-after-restore",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-cancel",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-button",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.delete-forever-enter",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.editor-undo-snackbar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "decks.trash.button-heights",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.confirm-dialog-chrome",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.own-and-shared",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.action-scoped",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.leaves-at-once",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.enter-confirms",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.trash.empty-not-primary",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

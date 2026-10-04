@@ -1,0 +1,396 @@
+{
+  "base": "http://localhost:4510",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T09:57:30.359Z",
+  "ms": 705490,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 705477,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/r1fix-int/out-rebased-walk2/core-walk.json",
+    "deckId": "untitled-20261004-f8pk",
+    "steps": 55
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "polish-text",
+      "polish-chrome"
+    ],
+    "costRows": null
+  },
+  "rows": 34,
+  "passed": 34,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": null,
+  "origin": "http://localhost:4510",
+  "date": "2026-10-04",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "text.bold.toolbar-marks-run": "passed",
+    "slides.layout.blank-empty": "passed",
+    "text.paragraph.toolbar-live": "passed",
+    "text.list.enter-tab-no-error": "passed",
+    "text.size.run-and-typed-value": "passed",
+    "text.marks.whole-block-from-menu": "passed",
+    "text.tail.heading-takes-list-indent": "passed",
+    "text.heading.enter-keeps-session": "passed",
+    "text.link.chip-on-click": "passed",
+    "text.title.shrink-on-overflow": "passed",
+    "text.title.second-session-survives-reload": "passed",
+    "text.link.popover-anchored": "passed",
+    "text.link.detection-setting": "passed",
+    "text.tail.size-reads-heading": "passed",
+    "text.polish.highlight-console": "passed",
+    "chrome.format-options.fields-by-kind": "passed",
+    "chrome.plate.fits-viewport": "passed",
+    "formatting.spacing.table-cells": "passed",
+    "help.check-slides.plain-sentence": "passed",
+    "slides.background.picture-grid": "passed",
+    "menus.rows.icon-on-every-row": "passed",
+    "chrome.snackbar.refusal-sentence": "passed",
+    "chrome.handles.tooltip-words": "passed",
+    "chrome.tooltips.only-on-hover": "passed",
+    "chrome.chip.above-ring": "passed",
+    "chrome.dialog.no-loading-jump": "passed",
+    "chrome.dialog.focus-return-and-trap": "passed",
+    "comments.insert.needs-selection": "passed",
+    "chrome.context.escape-closes-submenu": "passed",
+    "formatting.border-weight.menu-opens": "passed",
+    "chrome.toolbar.select-glyph": "passed",
+    "chrome.words.one-spelling": "passed",
+    "chrome.menus.structure-sweep": "passed",
+    "slides.filmstrip.follows-every-move": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "text.bold.toolbar-marks-run",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.layout.blank-empty",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.paragraph.toolbar-live",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.list.enter-tab-no-error",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.size.run-and-typed-value",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.marks.whole-block-from-menu",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.heading-takes-list-indent",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.heading.enter-keeps-session",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.chip-on-click",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.shrink-on-overflow",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.title.second-session-survives-reload",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.popover-anchored",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.detection-setting",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.tail.size-reads-heading",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.polish.highlight-console",
+      "feature": "text",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.format-options.fields-by-kind",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.plate.fits-viewport",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.spacing.table-cells",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.check-slides.plain-sentence",
+      "feature": "help",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.background.picture-grid",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.rows.icon-on-every-row",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.snackbar.refusal-sentence",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.handles.tooltip-words",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tooltips.only-on-hover",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.chip.above-ring",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.dialog.no-loading-jump",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.dialog.focus-return-and-trap",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.insert.needs-selection",
+      "feature": "comments",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.context.escape-closes-submenu",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "formatting.border-weight.menu-opens",
+      "feature": "formatting",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.select-glyph",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.one-spelling",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.structure-sweep",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "slides.filmstrip.follows-every-move",
+      "feature": "slides",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

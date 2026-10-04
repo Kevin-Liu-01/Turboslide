@@ -22,13 +22,10 @@ import type { PlayableStep, Screen, StepHandle } from './step';
  */
 
 /** The page's words of 2.9 (V1's copy table); a recorded version's restore row reads its number. */
-const RESTORED_VERSION =
-  (HISTORY as unknown as { restoredVersion?: (n: number) => string }).restoredVersion ??
-  ((n: number): string => `Restored version ${n}`);
 const WORDS = {
   chips: AGENTS.chips,
   restored: HISTORY.restored,
-  restoredVersion: RESTORED_VERSION,
+  restoredVersion: HISTORY.restoredVersion,
   rewroteRow: HISTORY.rewroteRow,
   skipped: HISTORY.slideSkipped,
   unskipped: HISTORY.slideUnskipped,

@@ -387,6 +387,8 @@ export const PRESENT = {
   print: 'Print This Deck',
   listLabel: 'The slides of this page',
   show: { previous: 'Previous', next: 'Next', exit: 'Exit' },
+  /** the Present list's mark of a skipped slide, in titanium (2.11) */
+  skipped: 'Skipped',
   counter: (n: number, total: number): string => `${n} / ${total}`,
   stageName: (n: number, total: number): string => `Slide ${n} of ${total}`,
 } as const;
@@ -523,6 +525,8 @@ export const HISTORY = {
   kit: (name: string): string => `Set the ${name} kit`,
   slideMoved: (from: number, to: number): string => `Moved slide ${from} to place ${to}`,
   restored: (time: string): string => `Restored the version of ${time}`,
+  /** a restore of a recorded version, which has no time (2.9; v2.md R11, v3.md R19) */
+  restoredVersion: (n: number): string => `Restored version ${n}`,
   rewroteRow: (n: number): string => `Rewrote a row on slide ${n}`,
   background: (color: string): string => `Set the background to ${color}`,
   /* the menus band's rows (V2#11) */

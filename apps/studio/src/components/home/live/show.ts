@@ -317,8 +317,8 @@ export function shownSlides(state: HomeDeckState): SlideKey[] {
   return state.order.filter((id) => !isSkipped(state, id));
 }
 
-/** The page copy of 2.11 the copy table does not hold yet (v3.md R2), read from `copy.ts` first. */
-const SKIPPED_WORD = (PRESENT as unknown as { skipped?: string }).skipped ?? 'Skipped';
+/** The Present list's mark of a skipped slide (2.11, `PRESENT.skipped`). */
+const SKIPPED_WORD = PRESENT.skipped;
 
 /**
  * V4's moving pattern on slide 8 (2.11, 2.13; v3.md R11): `window.tsHomePattern.mount` once the

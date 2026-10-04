@@ -6,8 +6,8 @@ import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { title } from '../lib';
 import { bandReady, freshPage, loadReading, noteTiming, openHome, typeLine } from './agents';
 
-/** The Present list's word for a skipped slide (2.11), the copy's when it holds one. */
-const PRESENT_SKIPPED = (PRESENT as unknown as { skipped?: string }).skipped ?? 'Skipped';
+/** The Present list's word for a skipped slide (2.11, `PRESENT.skipped`). */
+const PRESENT_SKIPPED = PRESENT.skipped;
 
 // A lane module of core/home.spec.ts (docs/LANDING.md 2.11, 6.7, the second pass). V3's, push
 // V3#16: the show for the deck's nine slides with skipped slides left out (home.present.show), its

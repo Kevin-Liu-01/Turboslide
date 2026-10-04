@@ -283,7 +283,7 @@ export function startVersions(ctx: LiveContext): void {
     if (chosen >= list.length) return;
     const v = list[chosen - 1];
     if (v === undefined) return;
-    const words = v.recorded ? `Restored version ${v.n}` : HISTORY.restored(timeOf(v.at));
+    const words = v.recorded ? HISTORY.restoredVersion(v.n) : HISTORY.restored(timeOf(v.at));
     if (store.restore(v.n, 'you', words)) {
       chosen = store.versions().length;
       draw();

@@ -1,0 +1,2563 @@
+{
+ "run": "walk-a",
+ "base": "http://localhost:4473",
+ "startedAt": "2026-10-03T22:50:27.323Z",
+ "ms": 3103028,
+ "steps": 576,
+ "passed": 571,
+ "failed": 2,
+ "notDriven": 3,
+ "consoleErrors": 0,
+ "rows": [
+  {
+   "n": 1,
+   "id": "decks.new.draft",
+   "ok": true
+  },
+  {
+   "n": 2,
+   "id": "decks.new.ground-paint",
+   "ok": true
+  },
+  {
+   "n": 3,
+   "id": "decks.new.first-write",
+   "ok": true
+  },
+  {
+   "n": 4,
+   "id": "decks.name.follows-heading",
+   "ok": true
+  },
+  {
+   "n": 5,
+   "id": "decks.title.save-words",
+   "ok": true
+  },
+  {
+   "n": 6,
+   "id": "decks.title.rename-enter",
+   "ok": true
+  },
+  {
+   "n": 7,
+   "id": "decks.title.rename-escape",
+   "ok": true
+  },
+  {
+   "n": 8,
+   "id": "decks.title.rename-blur",
+   "ok": true
+  },
+  {
+   "n": 9,
+   "id": "decks.title.rename-empty",
+   "ok": true
+  },
+  {
+   "n": 10,
+   "id": "decks.title.file-rename",
+   "ok": true
+  },
+  {
+   "n": 11,
+   "id": "decks.title.tab-title-after-rename",
+   "ok": true
+  },
+  {
+   "n": 12,
+   "id": "decks.title.mark-to-list",
+   "ok": true
+  },
+  {
+   "n": 13,
+   "id": "decks.edit.reload-keeps-slide",
+   "ok": true
+  },
+  {
+   "n": 14,
+   "id": "decks.file.open-list-search",
+   "ok": true
+  },
+  {
+   "n": 15,
+   "id": "decks.file.import-slides-deck",
+   "ok": true
+  },
+  {
+   "n": 16,
+   "id": "decks.file.details",
+   "ok": true
+  },
+  {
+   "n": 17,
+   "id": "slides.new.toolbar",
+   "ok": true
+  },
+  {
+   "n": 18,
+   "id": "slides.new.arrow-layout",
+   "ok": true
+  },
+  {
+   "n": 19,
+   "id": "slides.new.menu",
+   "ok": true
+  },
+  {
+   "n": 20,
+   "id": "slides.new.ctrl-m-card",
+   "ok": true
+  },
+  {
+   "n": 21,
+   "id": "slides.new.ctrl-m-canvas",
+   "ok": true
+  },
+  {
+   "n": 22,
+   "id": "slides.new.context",
+   "ok": true
+  },
+  {
+   "n": 23,
+   "id": "slides.new.undo",
+   "ok": true
+  },
+  {
+   "n": 24,
+   "id": "slides.duplicate.context",
+   "ok": true
+  },
+  {
+   "n": 25,
+   "id": "slides.duplicate.menu",
+   "ok": true
+  },
+  {
+   "n": 26,
+   "id": "slides.duplicate.cmd-d",
+   "ok": true
+  },
+  {
+   "n": 27,
+   "id": "slides.duplicate.undo-toolbar",
+   "ok": true
+  },
+  {
+   "n": 28,
+   "id": "slides.duplicate.undo-redo-keys",
+   "ok": true
+  },
+  {
+   "n": 29,
+   "id": "slides.duplicate.two-selected-cmd-d",
+   "ok": true
+  },
+  {
+   "n": 30,
+   "id": "slides.duplicate.two-selected-menu",
+   "ok": true
+  },
+  {
+   "n": 31,
+   "id": "slides.delete.key",
+   "ok": true
+  },
+  {
+   "n": 32,
+   "id": "slides.delete.undo-snackbar",
+   "ok": true
+  },
+  {
+   "n": 33,
+   "id": "slides.delete.context",
+   "ok": true
+  },
+  {
+   "n": 34,
+   "id": "slides.delete.undo-cmd-z",
+   "ok": true
+  },
+  {
+   "n": 35,
+   "id": "slides.delete.menu-undo-redo",
+   "ok": true
+  },
+  {
+   "n": 36,
+   "id": "slides.delete.two-selected-key-undo",
+   "ok": true
+  },
+  {
+   "n": 37,
+   "id": "slides.delete.two-selected-menu",
+   "ok": true
+  },
+  {
+   "n": 38,
+   "id": "slides.delete.two-selected-edit-menu",
+   "ok": true
+  },
+  {
+   "n": 39,
+   "id": "slides.delete.canvas-focus-undo",
+   "ok": true
+  },
+  {
+   "n": 40,
+   "id": "slides.delete.undo-redo-saved",
+   "ok": true
+  },
+  {
+   "n": 42,
+   "id": "slides.select.click",
+   "ok": true
+  },
+  {
+   "n": 43,
+   "id": "slides.select.arrows-shift",
+   "ok": true
+  },
+  {
+   "n": 44,
+   "id": "slides.select.shift-cmd-click",
+   "ok": true
+  },
+  {
+   "n": 45,
+   "id": "slides.select.cmd-click-toggle",
+   "ok": true
+  },
+  {
+   "n": 47,
+   "id": "slides.reorder.drag-above",
+   "ok": true
+  },
+  {
+   "n": 48,
+   "id": "slides.reorder.undo-drag",
+   "ok": true
+  },
+  {
+   "n": 49,
+   "id": "slides.reorder.drag-below",
+   "ok": true
+  },
+  {
+   "n": 50,
+   "id": "slides.reorder.cmd-up-down",
+   "ok": true
+  },
+  {
+   "n": 51,
+   "id": "slides.reorder.menu-to-end-undo",
+   "ok": true
+  },
+  {
+   "n": 52,
+   "id": "slides.reorder.menu-up-down-beginning",
+   "ok": true
+  },
+  {
+   "n": 53,
+   "id": "slides.reorder.cmd-shift-up-down",
+   "ok": true
+  },
+  {
+   "n": 54,
+   "id": "slides.reorder.two-selected-drag",
+   "ok": true
+  },
+  {
+   "n": 56,
+   "id": "slides.skip.context",
+   "ok": true
+  },
+  {
+   "n": 57,
+   "id": "slides.skip.menu-unskip",
+   "ok": true
+  },
+  {
+   "n": 58,
+   "id": "slides.skip.context-two",
+   "ok": true
+  },
+  {
+   "n": 59,
+   "id": "slides.skip.menu-two",
+   "ok": true
+  },
+  {
+   "n": 61,
+   "id": "slides.layout.picker-open-escape",
+   "ok": true
+  },
+  {
+   "n": 62,
+   "id": "slides.layout.apply.title",
+   "ok": true
+  },
+  {
+   "n": 63,
+   "id": "slides.layout.apply.opener",
+   "ok": true
+  },
+  {
+   "n": 64,
+   "id": "slides.layout.apply.split",
+   "ok": true
+  },
+  {
+   "n": 65,
+   "id": "slides.layout.apply.cols",
+   "ok": true
+  },
+  {
+   "n": 66,
+   "id": "slides.layout.apply.title-only",
+   "ok": true
+  },
+  {
+   "n": 67,
+   "id": "slides.layout.apply.one-column",
+   "ok": true
+  },
+  {
+   "n": 68,
+   "id": "slides.layout.apply.statement",
+   "ok": true
+  },
+  {
+   "n": 69,
+   "id": "slides.layout.apply.section-description",
+   "ok": true
+  },
+  {
+   "n": 70,
+   "id": "slides.layout.apply.mood",
+   "ok": true
+  },
+  {
+   "n": 71,
+   "id": "slides.layout.apply.big-number",
+   "ok": true
+  },
+  {
+   "n": 72,
+   "id": "slides.layout.apply.blank",
+   "ok": true
+  },
+  {
+   "n": 73,
+   "id": "slides.layout.apply.rows",
+   "ok": true
+  },
+  {
+   "n": 74,
+   "id": "slides.layout.apply.plain",
+   "ok": true
+  },
+  {
+   "n": 75,
+   "id": "slides.layout.apply.table",
+   "ok": true
+  },
+  {
+   "n": 76,
+   "id": "slides.layout.apply.figure",
+   "ok": true
+  },
+  {
+   "n": 77,
+   "id": "slides.layout.apply.pair",
+   "ok": true
+  },
+  {
+   "n": 78,
+   "id": "slides.layout.apply.tiles",
+   "ok": true
+  },
+  {
+   "n": 79,
+   "id": "slides.layout.apply.details",
+   "ok": true
+  },
+  {
+   "n": 80,
+   "id": "slides.layout.apply.board",
+   "ok": true
+  },
+  {
+   "n": 81,
+   "id": "slides.layout.apply.matrix",
+   "ok": true
+  },
+  {
+   "n": 82,
+   "id": "slides.layout.apply.closing",
+   "ok": true
+  },
+  {
+   "n": 83,
+   "id": "slides.layout.reopen-ring",
+   "ok": true
+  },
+  {
+   "n": 84,
+   "id": "slides.layout.context-apply",
+   "ok": true
+  },
+  {
+   "n": 85,
+   "id": "slides.layout.menu-apply-undo",
+   "ok": true
+  },
+  {
+   "n": 86,
+   "id": "slides.layout.fresh-slide-two-picks-no-carry",
+   "ok": true
+  },
+  {
+   "n": 87,
+   "id": "slides.layout.typed-title-round-trip",
+   "ok": true
+  },
+  {
+   "n": 88,
+   "id": "slides.layout.snackbar-counts-typed-only",
+   "ok": true
+  },
+  {
+   "n": 89,
+   "id": "slides.layout.undo-typed",
+   "ok": true
+  },
+  {
+   "n": 91,
+   "id": "slides.notes.type",
+   "ok": true
+  },
+  {
+   "n": 92,
+   "id": "slides.notes.per-slide",
+   "ok": true
+  },
+  {
+   "n": 93,
+   "id": "slides.notes.resize-handle",
+   "ok": true
+  },
+  {
+   "n": 94,
+   "id": "slides.notes.reload",
+   "ok": true
+  },
+  {
+   "n": 95,
+   "id": "slides.notes.view-menu-toggle",
+   "ok": true
+  },
+  {
+   "n": 97,
+   "id": "slides.counter.footer-and-cards",
+   "ok": true
+  },
+  {
+   "n": 98,
+   "id": "slides.hash.click-and-reload",
+   "ok": true
+  },
+  {
+   "n": 99,
+   "id": "slides.context.empty-canvas",
+   "ok": true
+  },
+  {
+   "n": 100,
+   "id": "slides.numbers.apply",
+   "ok": true
+  },
+  {
+   "n": 101,
+   "id": "slides.layout.title-and-body-single",
+   "ok": true
+  },
+  {
+   "n": 102,
+   "id": "slides.layout.subtitle-prompt",
+   "ok": true
+  },
+  {
+   "n": 103,
+   "id": "slides.layout.new-slide-inherits",
+   "ok": true
+  },
+  {
+   "n": 104,
+   "id": "slides.layout.tile-sentences",
+   "ok": true
+  },
+  {
+   "n": 105,
+   "id": "slides.import.none-preselected",
+   "ok": true
+  },
+  {
+   "n": 106,
+   "id": "text.title.single-click",
+   "ok": true
+  },
+  {
+   "n": 107,
+   "id": "text.title.double-click",
+   "ok": true
+  },
+  {
+   "n": 108,
+   "id": "text.title.type-escape",
+   "ok": true
+  },
+  {
+   "n": 109,
+   "id": "text.selected.typing-replaces",
+   "ok": true
+  },
+  {
+   "n": 110,
+   "id": "text.selected.enter-appends",
+   "ok": true
+  },
+  {
+   "n": 111,
+   "id": "text.title.double-click-enters",
+   "ok": true
+  },
+  {
+   "n": 112,
+   "id": "text.caret.click-mid-word",
+   "ok": true
+  },
+  {
+   "n": 113,
+   "id": "text.caret.home-end",
+   "ok": true
+  },
+  {
+   "n": 114,
+   "id": "text.caret.shift-arrow-replace",
+   "ok": true
+  },
+  {
+   "n": 115,
+   "id": "text.caret.shift-home-end",
+   "ok": true
+  },
+  {
+   "n": 116,
+   "id": "text.caret.backspace-word",
+   "ok": true
+  },
+  {
+   "n": 117,
+   "id": "text.caret.option-backspace",
+   "ok": true
+  },
+  {
+   "n": 118,
+   "id": "text.caret.delete",
+   "ok": true
+  },
+  {
+   "n": 119,
+   "id": "text.caret.cmd-a",
+   "ok": true
+  },
+  {
+   "n": 120,
+   "id": "text.title.enter-commits",
+   "ok": true
+  },
+  {
+   "n": 121,
+   "id": "text.session.escape-twice",
+   "ok": true
+  },
+  {
+   "n": 122,
+   "id": "text.subtitle.double-click-type",
+   "ok": true
+  },
+  {
+   "n": 123,
+   "id": "text.subtitle.enter-new-line",
+   "ok": true
+  },
+  {
+   "n": 124,
+   "id": "text.subtitle.shift-enter",
+   "ok": true
+  },
+  {
+   "n": 125,
+   "id": "text.subtitle.arrows-backspace-join",
+   "ok": true
+  },
+  {
+   "n": 126,
+   "id": "text.subtitle.escape-commits",
+   "ok": true
+  },
+  {
+   "n": 128,
+   "id": "text.textbox.insert-click-type",
+   "ok": true
+  },
+  {
+   "n": 129,
+   "id": "text.textbox.insert-drag",
+   "ok": true
+  },
+  {
+   "n": 130,
+   "id": "text.textbox.drag-inside-moves",
+   "ok": true
+  },
+  {
+   "n": 131,
+   "id": "text.click.second-click-caret",
+   "ok": true
+  },
+  {
+   "n": 132,
+   "id": "text.textbox.toolbar-button",
+   "ok": true
+  },
+  {
+   "n": 133,
+   "id": "text.textbox.burst-reliability",
+   "ok": true
+  },
+  {
+   "n": 134,
+   "id": "text.toolbar.swaps-on-select",
+   "ok": true
+  },
+  {
+   "n": 135,
+   "id": "text.fontsize.type-enter",
+   "ok": true
+  },
+  {
+   "n": 136,
+   "id": "text.fontsize.plus-minus",
+   "ok": true
+  },
+  {
+   "n": 137,
+   "id": "text.bold.toolbar",
+   "ok": true
+  },
+  {
+   "n": 138,
+   "id": "text.bold.cmd-b-word",
+   "ok": true
+  },
+  {
+   "n": 139,
+   "id": "text.italic.toolbar-word",
+   "ok": true
+  },
+  {
+   "n": 140,
+   "id": "text.italic.cmd-i-word",
+   "ok": true
+  },
+  {
+   "n": 141,
+   "id": "text.underline.cmd-u-word",
+   "ok": true
+  },
+  {
+   "n": 142,
+   "id": "text.strikethrough.cmd-shift-x",
+   "ok": true
+  },
+  {
+   "n": 143,
+   "id": "text.underline.toolbar",
+   "ok": true
+  },
+  {
+   "n": 144,
+   "id": "text.strikethrough.menu",
+   "ok": true
+  },
+  {
+   "n": 145,
+   "id": "text.color.swatch-on-word",
+   "ok": true
+  },
+  {
+   "n": 146,
+   "id": "text.align.toolbar-and-key",
+   "ok": true
+  },
+  {
+   "n": 147,
+   "id": "text.spacing.toolbar",
+   "ok": true
+  },
+  {
+   "n": 148,
+   "id": "text.list.bulleted-toolbar",
+   "ok": true
+  },
+  {
+   "n": 149,
+   "id": "text.list.numbered-toolbar",
+   "ok": true
+  },
+  {
+   "n": 150,
+   "id": "text.list.bulleted-menu-preset",
+   "ok": true
+  },
+  {
+   "n": 151,
+   "id": "text.list.numbered-menu-preset",
+   "ok": true
+  },
+  {
+   "n": 152,
+   "id": "text.list.chords",
+   "ok": true
+  },
+  {
+   "n": 153,
+   "id": "text.indent.toolbar",
+   "ok": true
+  },
+  {
+   "n": 154,
+   "id": "text.indent.keys",
+   "ok": true
+  },
+  {
+   "n": 155,
+   "id": "text.link.cmd-k-enter",
+   "ok": true
+  },
+  {
+   "n": 156,
+   "id": "text.link.toolbar-button",
+   "ok": true
+  },
+  {
+   "n": 157,
+   "id": "text.clear-formatting",
+   "ok": true
+  },
+  {
+   "n": 158,
+   "id": "text.format-menu.rows-enabled",
+   "ok": true
+  },
+  {
+   "n": 159,
+   "id": "text.format-menu.size-increase",
+   "ok": true
+  },
+  {
+   "n": 160,
+   "id": "text.format-menu.size-decrease",
+   "ok": true
+  },
+  {
+   "n": 161,
+   "id": "text.format-menu.align-left",
+   "ok": true
+  },
+  {
+   "n": 162,
+   "id": "text.format-menu.align-indent-rows",
+   "ok": true
+  },
+  {
+   "n": 163,
+   "id": "text.format-menu.spacing-double",
+   "ok": true
+  },
+  {
+   "n": 164,
+   "id": "text.format-menu.spacing-single-1-15",
+   "ok": true
+  },
+  {
+   "n": 165,
+   "id": "text.format-menu.text-fitting",
+   "ok": true
+  },
+  {
+   "n": 166,
+   "id": "text.format-options.panel",
+   "ok": true
+  },
+  {
+   "n": 167,
+   "id": "text.autofit.title-wraps",
+   "ok": true
+  },
+  {
+   "n": 168,
+   "id": "text.autofit.textbox-grow",
+   "ok": true
+  },
+  {
+   "n": 169,
+   "id": "text.clipboard.within-box",
+   "ok": true
+  },
+  {
+   "n": 170,
+   "id": "text.clipboard.between-boxes",
+   "ok": true
+  },
+  {
+   "n": 171,
+   "id": "text.clipboard.paste-without-formatting",
+   "ok": null,
+   "observed": "not driven: manual: headless Chromium does not synthesize Cmd+Shift+V as a paste; the step is docs/gslides-parity/focus/manual-checklist.md"
+  },
+  {
+   "n": 172,
+   "id": "text.find-replace.replace-all",
+   "ok": true
+  },
+  {
+   "n": 173,
+   "id": "text.find-replace.shortcut",
+   "ok": true
+  },
+  {
+   "n": 174,
+   "id": "text.context.text-block",
+   "ok": true
+  },
+  {
+   "n": 175,
+   "id": "text.context.text-selection",
+   "ok": true
+  },
+  {
+   "n": 176,
+   "id": "text.context.inside-session",
+   "ok": true
+  },
+  {
+   "n": 177,
+   "id": "text.layout-runs.type",
+   "ok": true
+  },
+  {
+   "n": 178,
+   "id": "text.persistence.reload",
+   "ok": true
+  },
+  {
+   "n": 179,
+   "id": "text.title.one-click-tail",
+   "ok": true
+  },
+  {
+   "n": 180,
+   "id": "text.title.bold-menu",
+   "ok": true
+  },
+  {
+   "n": 181,
+   "id": "text.title.bold-cmd-b",
+   "ok": true
+  },
+  {
+   "n": 182,
+   "id": "text.title.align-menu",
+   "ok": true
+  },
+  {
+   "n": 183,
+   "id": "text.title.size-menu",
+   "ok": true
+  },
+  {
+   "n": 184,
+   "id": "text.title.format-options-marks",
+   "ok": true
+  },
+  {
+   "n": 185,
+   "id": "text.title.apply-layout-after-format",
+   "ok": true
+  },
+  {
+   "n": 186,
+   "id": "text.fontsize.type-one-undo",
+   "ok": true
+  },
+  {
+   "n": 187,
+   "id": "text.format-options.field-one-undo",
+   "ok": true
+  },
+  {
+   "n": 189,
+   "id": "text.link.detect-url",
+   "ok": true
+  },
+  {
+   "n": 190,
+   "id": "text.link.detect-email",
+   "ok": true
+  },
+  {
+   "n": 191,
+   "id": "text.select.double-click-address",
+   "ok": true
+  },
+  {
+   "n": 192,
+   "id": "text.select.shift-home-line",
+   "ok": true
+  },
+  {
+   "n": 193,
+   "id": "text.link.popover-apply-remove",
+   "ok": true
+  },
+  {
+   "n": 195,
+   "id": "text.format-options.padding-grid",
+   "ok": true
+  },
+  {
+   "n": 196,
+   "id": "text.format-options.remembers-section",
+   "ok": true
+  },
+  {
+   "n": 197,
+   "id": "text.autofit.shrink-on-overflow",
+   "ok": true
+  },
+  {
+   "n": 198,
+   "id": "text.find-replace.count-while-typing",
+   "ok": true
+  },
+  {
+   "n": 201,
+   "id": "formatting.superscript.chord",
+   "ok": true
+  },
+  {
+   "n": 202,
+   "id": "formatting.subscript.chord",
+   "ok": true
+  },
+  {
+   "n": 203,
+   "id": "formatting.superscript.menu-word",
+   "ok": true
+  },
+  {
+   "n": 204,
+   "id": "formatting.subscript.menu-word",
+   "ok": true
+  },
+  {
+   "n": 205,
+   "id": "formatting.italic.menu-word",
+   "ok": true
+  },
+  {
+   "n": 206,
+   "id": "formatting.context.selection-rows",
+   "ok": true
+  },
+  {
+   "n": 207,
+   "id": "formatting.capitalization.upper",
+   "ok": true
+  },
+  {
+   "n": 208,
+   "id": "formatting.capitalization.lower",
+   "ok": true
+  },
+  {
+   "n": 209,
+   "id": "formatting.capitalization.title",
+   "ok": true
+  },
+  {
+   "n": 210,
+   "id": "formatting.align.justified-menu",
+   "ok": true
+  },
+  {
+   "n": 211,
+   "id": "formatting.align.justified-chord",
+   "ok": true
+  },
+  {
+   "n": 212,
+   "id": "formatting.align.toolbar-justify",
+   "ok": true
+  },
+  {
+   "n": 213,
+   "id": "formatting.spacing.add-before-remove",
+   "ok": true
+  },
+  {
+   "n": 214,
+   "id": "formatting.spacing.add-after",
+   "ok": true
+  },
+  {
+   "n": 215,
+   "id": "formatting.spacing.custom-dialog",
+   "ok": true
+  },
+  {
+   "n": 216,
+   "id": "formatting.spacing.1-15-value",
+   "ok": true
+  },
+  {
+   "n": 217,
+   "id": "formatting.highlight.word",
+   "ok": true
+  },
+  {
+   "n": 219,
+   "id": "formatting.paint-format.button",
+   "ok": true
+  },
+  {
+   "n": 220,
+   "id": "formatting.paint-format.chords",
+   "ok": true
+  },
+  {
+   "n": 221,
+   "id": "formatting.clear.inline-marks",
+   "ok": true
+  },
+  {
+   "n": 222,
+   "id": "formatting.theme.panel-appearance",
+   "ok": true
+  },
+  {
+   "n": 223,
+   "id": "formatting.theme.toolbar-button",
+   "ok": true
+  },
+  {
+   "n": 224,
+   "id": "formatting.theme.import-hidden",
+   "ok": true
+  },
+  {
+   "n": 225,
+   "id": "formatting.persistence",
+   "ok": true
+  },
+  {
+   "n": 226,
+   "id": "formatting.alt-text.write-undo",
+   "ok": true
+  },
+  {
+   "n": 228,
+   "id": "formatting.numerals.tabular-row",
+   "ok": true
+  },
+  {
+   "n": 230,
+   "id": "images.insert.toolbar-sources",
+   "ok": true
+  },
+  {
+   "n": 232,
+   "id": "images.select.chip-handles-tail",
+   "ok": true
+  },
+  {
+   "n": 233,
+   "id": "images.delete.key",
+   "ok": true
+  },
+  {
+   "n": 234,
+   "id": "images.move.drag-frame",
+   "ok": true
+  },
+  {
+   "n": 236,
+   "id": "images.guides.edge-snap",
+   "ok": true
+  },
+  {
+   "n": 237,
+   "id": "images.guides.centre-y",
+   "ok": true
+  },
+  {
+   "n": 238,
+   "id": "images.guides.centre-x",
+   "ok": true
+  },
+  {
+   "n": 239,
+   "id": "images.nudge.arrows",
+   "ok": true
+  },
+  {
+   "n": 240,
+   "id": "images.resize.eight-handles",
+   "ok": true
+  },
+  {
+   "n": 241,
+   "id": "images.resize.eight-handles-shift",
+   "ok": true
+  },
+  {
+   "n": 242,
+   "id": "images.resize.alt-centre",
+   "ok": true
+  },
+  {
+   "n": 243,
+   "id": "images.resize.edge-fill",
+   "ok": true
+  },
+  {
+   "n": 244,
+   "id": "images.rotate.ring",
+   "ok": true
+  },
+  {
+   "n": 245,
+   "id": "images.crop.double-click",
+   "ok": true
+  },
+  {
+   "n": 246,
+   "id": "images.crop.east-edge",
+   "ok": true
+  },
+  {
+   "n": 247,
+   "id": "images.crop.south-edge",
+   "ok": true
+  },
+  {
+   "n": 248,
+   "id": "images.crop.enter",
+   "ok": true
+  },
+  {
+   "n": 249,
+   "id": "images.crop.undo",
+   "ok": true
+  },
+  {
+   "n": 250,
+   "id": "images.crop.redo",
+   "ok": true
+  },
+  {
+   "n": 251,
+   "id": "images.crop.menu-escape",
+   "ok": true
+  },
+  {
+   "n": 252,
+   "id": "images.crop.toolbar-escape-cancels",
+   "ok": true
+  },
+  {
+   "n": 253,
+   "id": "images.options.panel",
+   "ok": true
+  },
+  {
+   "n": 254,
+   "id": "images.options.transparency",
+   "ok": true
+  },
+  {
+   "n": 255,
+   "id": "images.options.reset",
+   "ok": true
+  },
+  {
+   "n": 256,
+   "id": "images.reset-image.menu",
+   "ok": true
+  },
+  {
+   "n": 257,
+   "id": "images.options.menu-row",
+   "ok": true
+  },
+  {
+   "n": 258,
+   "id": "images.context.image",
+   "ok": true
+  },
+  {
+   "n": 259,
+   "id": "images.background.colour",
+   "ok": true
+  },
+  {
+   "n": 260,
+   "id": "images.background.toolbar",
+   "ok": true
+  },
+  {
+   "n": 261,
+   "id": "images.background.hex-field",
+   "ok": true
+  },
+  {
+   "n": 262,
+   "id": "images.present.picture-and-ground",
+   "ok": true
+  },
+  {
+   "n": 263,
+   "id": "images.background.reset",
+   "ok": true
+  },
+  {
+   "n": 264,
+   "id": "images.caption.add",
+   "ok": true
+  },
+  {
+   "n": 265,
+   "id": "images.options.picture-sections-only",
+   "ok": true
+  },
+  {
+   "n": 266,
+   "id": "images.transparency.slider",
+   "ok": true
+  },
+  {
+   "n": 267,
+   "id": "images.border.drawn",
+   "ok": true
+  },
+  {
+   "n": 270,
+   "id": "arrange.select.click",
+   "ok": true
+  },
+  {
+   "n": 271,
+   "id": "arrange.select.shift-add",
+   "ok": true
+  },
+  {
+   "n": 272,
+   "id": "arrange.multi.drag-inside-moves-all",
+   "ok": true
+  },
+  {
+   "n": 273,
+   "id": "arrange.select.shift-remove",
+   "ok": true
+  },
+  {
+   "n": 274,
+   "id": "arrange.select.marquee",
+   "ok": true
+  },
+  {
+   "n": 275,
+   "id": "arrange.select.marquee-partial",
+   "ok": true
+  },
+  {
+   "n": 276,
+   "id": "arrange.select.click-away",
+   "ok": true
+  },
+  {
+   "n": 277,
+   "id": "arrange.select.cmd-a",
+   "ok": true
+  },
+  {
+   "n": 278,
+   "id": "arrange.select.escape",
+   "ok": true
+  },
+  {
+   "n": 279,
+   "id": "arrange.order.bring-to-front",
+   "ok": true
+  },
+  {
+   "n": 280,
+   "id": "arrange.order.send-to-back",
+   "ok": true
+  },
+  {
+   "n": 281,
+   "id": "arrange.order.bring-forward",
+   "ok": true
+  },
+  {
+   "n": 282,
+   "id": "arrange.order.send-backward",
+   "ok": true
+  },
+  {
+   "n": 283,
+   "id": "arrange.order.keys",
+   "ok": true
+  },
+  {
+   "n": 284,
+   "id": "arrange.align.left",
+   "ok": true
+  },
+  {
+   "n": 285,
+   "id": "arrange.align.center",
+   "ok": true
+  },
+  {
+   "n": 286,
+   "id": "arrange.align.right",
+   "ok": true
+  },
+  {
+   "n": 287,
+   "id": "arrange.align.top",
+   "ok": true
+  },
+  {
+   "n": 288,
+   "id": "arrange.align.middle",
+   "ok": true
+  },
+  {
+   "n": 289,
+   "id": "arrange.align.bottom",
+   "ok": true
+  },
+  {
+   "n": 290,
+   "id": "arrange.align.single-to-slide",
+   "ok": true
+  },
+  {
+   "n": 291,
+   "id": "arrange.center.horizontal",
+   "ok": true
+  },
+  {
+   "n": 292,
+   "id": "arrange.center.vertical",
+   "ok": true
+  },
+  {
+   "n": 293,
+   "id": "arrange.undo.toolbar-on-arrange",
+   "ok": true
+  },
+  {
+   "n": 294,
+   "id": "arrange.undo.menu-on-arrange",
+   "ok": true
+  },
+  {
+   "n": 295,
+   "id": "arrange.clipboard.copy-paste",
+   "ok": true
+  },
+  {
+   "n": 296,
+   "id": "arrange.clipboard.delete",
+   "ok": true
+  },
+  {
+   "n": 297,
+   "id": "arrange.clipboard.undo-redo-delete",
+   "ok": true
+  },
+  {
+   "n": 298,
+   "id": "arrange.clipboard.cut-paste-undo",
+   "ok": true
+  },
+  {
+   "n": 299,
+   "id": "arrange.clipboard.menu-copy-paste",
+   "ok": true
+  },
+  {
+   "n": 300,
+   "id": "arrange.clipboard.paste-after-new-slide-button",
+   "ok": true
+  },
+  {
+   "n": 301,
+   "id": "arrange.clipboard.paste-with-filmstrip-focus",
+   "ok": true
+  },
+  {
+   "n": 302,
+   "id": "arrange.clipboard.paste-keeps-position",
+   "ok": true
+  },
+  {
+   "n": 303,
+   "id": "arrange.duplicate.cmd-d",
+   "ok": true
+  },
+  {
+   "n": 304,
+   "id": "arrange.duplicate.menu-selects-copy",
+   "ok": true
+  },
+  {
+   "n": 305,
+   "id": "arrange.duplicate.nothing-selected",
+   "ok": true
+  },
+  {
+   "n": 306,
+   "id": "arrange.redo.after-undone-duplicate",
+   "ok": true
+  },
+  {
+   "n": 307,
+   "id": "arrange.keys.backspace-empty-selection",
+   "ok": true
+  },
+  {
+   "n": 308,
+   "id": "arrange.nudge.arrows",
+   "ok": true
+  },
+  {
+   "n": 309,
+   "id": "arrange.nudge.shift",
+   "ok": true
+  },
+  {
+   "n": 310,
+   "id": "arrange.nudge.undo",
+   "ok": true
+  },
+  {
+   "n": 311,
+   "id": "arrange.zoom.box-reads",
+   "ok": true
+  },
+  {
+   "n": 312,
+   "id": "arrange.zoom.type-percent",
+   "ok": true
+  },
+  {
+   "n": 313,
+   "id": "arrange.zoom.cmd-0",
+   "ok": true
+  },
+  {
+   "n": 314,
+   "id": "arrange.zoom.cmd-plus",
+   "ok": true
+  },
+  {
+   "n": 315,
+   "id": "arrange.zoom.cmd-minus",
+   "ok": true
+  },
+  {
+   "n": 316,
+   "id": "arrange.zoom.menu-in",
+   "ok": true
+  },
+  {
+   "n": 317,
+   "id": "arrange.zoom.menu-out",
+   "ok": true
+  },
+  {
+   "n": 318,
+   "id": "arrange.zoom.fit",
+   "ok": true
+  },
+  {
+   "n": 319,
+   "id": "arrange.zoom.arrow-menu",
+   "ok": true
+  },
+  {
+   "n": 320,
+   "id": "arrange.zoom.menu-presets",
+   "ok": true
+  },
+  {
+   "n": 321,
+   "id": "arrange.readout.fit",
+   "ok": true
+  },
+  {
+   "n": 322,
+   "id": "arrange.readout.200",
+   "ok": true
+  },
+  {
+   "n": 323,
+   "id": "arrange.selection-colour.dark",
+   "ok": true
+  },
+  {
+   "n": 324,
+   "id": "arrange.selection-colour.light",
+   "ok": true
+  },
+  {
+   "n": 325,
+   "id": "arrange.escape.text-then-selection",
+   "ok": true
+  },
+  {
+   "n": 326,
+   "id": "arrange.toolbar.select",
+   "ok": true
+  },
+  {
+   "n": 327,
+   "id": "arrange.distribute.horizontal",
+   "ok": true
+  },
+  {
+   "n": 328,
+   "id": "arrange.distribute.vertical",
+   "ok": true
+  },
+  {
+   "n": 329,
+   "id": "arrange.distribute.needs-three",
+   "ok": true
+  },
+  {
+   "n": 330,
+   "id": "arrange.rotate.quarter-turns",
+   "ok": true
+  },
+  {
+   "n": 331,
+   "id": "arrange.rotate.flips-menu",
+   "ok": true
+  },
+  {
+   "n": 332,
+   "id": "arrange.group.chords",
+   "ok": true
+  },
+  {
+   "n": 333,
+   "id": "arrange.group.menu-regroup",
+   "ok": true
+  },
+  {
+   "n": 334,
+   "id": "arrange.group.context-rows",
+   "ok": true
+  },
+  {
+   "n": 335,
+   "id": "arrange.context.rotate-distribute",
+   "ok": true
+  },
+  {
+   "n": 336,
+   "id": "arrange.ruler.show-hide",
+   "ok": true
+  },
+  {
+   "n": 337,
+   "id": "arrange.guides.from-ruler",
+   "ok": true
+  },
+  {
+   "n": 338,
+   "id": "arrange.guides.show-toggle",
+   "ok": true
+  },
+  {
+   "n": 339,
+   "id": "arrange.guides.add-vertical-horizontal",
+   "ok": true
+  },
+  {
+   "n": 340,
+   "id": "arrange.guides.drag",
+   "ok": true
+  },
+  {
+   "n": 341,
+   "id": "arrange.snap.guides-on-off",
+   "ok": true
+  },
+  {
+   "n": 342,
+   "id": "arrange.snap.grid-toggle",
+   "ok": true
+  },
+  {
+   "n": 343,
+   "id": "arrange.snap.grid-effect",
+   "ok": true
+  },
+  {
+   "n": 344,
+   "id": "arrange.guides.context",
+   "ok": true
+  },
+  {
+   "n": 345,
+   "id": "arrange.guides.clear",
+   "ok": true
+  },
+  {
+   "n": 346,
+   "id": "arrange.select-none.menu",
+   "ok": true
+  },
+  {
+   "n": 348,
+   "id": "arrange.insert.selected-after-menu",
+   "ok": true
+  },
+  {
+   "n": 349,
+   "id": "arrange.insert.free-rectangle",
+   "ok": true
+  },
+  {
+   "n": 352,
+   "id": "arrange.group.tail-text-controls",
+   "ok": null,
+   "observed": "not driven: not on this build: toolbar.group.text (docs/PRODUCT.md 7.1, B3); chip \"Group\"; the group tail lists toolbar.fillColor, toolbar.borderColor, toolbar.borderWeight, toolbar.borderDash, toolbar.formatOptions and none of the text controls (P1, FEATURES.md 2.3 item 6)"
+  },
+  {
+   "n": 355,
+   "id": "shapes.insert.rectangle-click",
+   "ok": true
+  },
+  {
+   "n": 356,
+   "id": "shapes.insert.rounded-click",
+   "ok": true
+  },
+  {
+   "n": 357,
+   "id": "shapes.insert.ellipse-click",
+   "ok": true
+  },
+  {
+   "n": 358,
+   "id": "shapes.insert.rectangle-drag",
+   "ok": true
+  },
+  {
+   "n": 359,
+   "id": "shapes.insert.ellipse-drag",
+   "ok": true
+  },
+  {
+   "n": 360,
+   "id": "shapes.insert.named-rows",
+   "ok": true
+  },
+  {
+   "n": 361,
+   "id": "shapes.default-look",
+   "ok": true
+  },
+  {
+   "n": 362,
+   "id": "shapes.select",
+   "ok": true
+  },
+  {
+   "n": 363,
+   "id": "shapes.move",
+   "ok": true
+  },
+  {
+   "n": 364,
+   "id": "shapes.resize.eight-handles",
+   "ok": true
+  },
+  {
+   "n": 365,
+   "id": "shapes.rotate",
+   "ok": true
+  },
+  {
+   "n": 366,
+   "id": "shapes.fill.colour",
+   "ok": true
+  },
+  {
+   "n": 367,
+   "id": "shapes.border.colour-weight-dash",
+   "ok": true
+  },
+  {
+   "n": 368,
+   "id": "shapes.text.type-align-bold",
+   "ok": true
+  },
+  {
+   "n": 369,
+   "id": "shapes.duplicate-delete-undo-redo",
+   "ok": true
+  },
+  {
+   "n": 370,
+   "id": "shapes.format-options.size-position",
+   "ok": true
+  },
+  {
+   "n": 371,
+   "id": "shapes.context.shape",
+   "ok": true
+  },
+  {
+   "n": 372,
+   "id": "shapes.reload-and-viewer",
+   "ok": true
+  },
+  {
+   "n": 373,
+   "id": "shapes.text.colour-toolbar",
+   "ok": true
+  },
+  {
+   "n": 374,
+   "id": "shapes.text.enter-opens-label",
+   "ok": true
+  },
+  {
+   "n": 375,
+   "id": "shapes.borders-lines.menu",
+   "ok": true
+  },
+  {
+   "n": 376,
+   "id": "shapes.label.centred-default",
+   "ok": true
+  },
+  {
+   "n": 378,
+   "id": "shapes.insert.grid-shapes",
+   "ok": true
+  },
+  {
+   "n": 379,
+   "id": "shapes.geometry.shapes.hexagon-sheet",
+   "ok": true
+  },
+  {
+   "n": 380,
+   "id": "shapes.geometry.shapes.star5-adjust",
+   "ok": true
+  },
+  {
+   "n": 381,
+   "id": "shapes.geometry.resize-keeps-adjust",
+   "ok": true
+  },
+  {
+   "n": 382,
+   "id": "shapes.geometry.shapes.pie-arc",
+   "ok": true
+  },
+  {
+   "n": 383,
+   "id": "shapes.geometry.shapes.multipath-can",
+   "ok": true
+  },
+  {
+   "n": 384,
+   "id": "shapes.geometry.shapes.flowchart-own-space",
+   "ok": true
+  },
+  {
+   "n": 385,
+   "id": "shapes.insert.grid-arrows",
+   "ok": true
+  },
+  {
+   "n": 386,
+   "id": "shapes.geometry.arrows.right-arrow",
+   "ok": true
+  },
+  {
+   "n": 387,
+   "id": "shapes.geometry.arrows.curved-right",
+   "ok": true
+  },
+  {
+   "n": 388,
+   "id": "shapes.insert.grid-callouts",
+   "ok": true
+  },
+  {
+   "n": 389,
+   "id": "shapes.geometry.callouts.wedge-rect",
+   "ok": true
+  },
+  {
+   "n": 390,
+   "id": "shapes.geometry.callouts.cloud",
+   "ok": true
+  },
+  {
+   "n": 391,
+   "id": "shapes.insert.grid-equation",
+   "ok": true
+  },
+  {
+   "n": 392,
+   "id": "shapes.geometry.equation.plus-divide",
+   "ok": true
+  },
+  {
+   "n": 393,
+   "id": "shapes.geometry.pinned-three",
+   "ok": true
+  },
+  {
+   "n": 395,
+   "id": "shapes.geometry.sites",
+   "ok": true
+  },
+  {
+   "n": 396,
+   "id": "shapes.icons.named-rows",
+   "ok": true
+  },
+  {
+   "n": 397,
+   "id": "shapes.change-shape.plate",
+   "ok": true
+  },
+  {
+   "n": 399,
+   "id": "shapes.mask-image.plate",
+   "ok": true
+  },
+  {
+   "n": 401,
+   "id": "lines.insert.line-drag",
+   "ok": true
+  },
+  {
+   "n": 402,
+   "id": "lines.insert.arrow-drag",
+   "ok": true
+  },
+  {
+   "n": 403,
+   "id": "lines.end-handle",
+   "ok": true
+  },
+  {
+   "n": 404,
+   "id": "lines.tail.colour-weight-dash-ends",
+   "ok": true
+  },
+  {
+   "n": 405,
+   "id": "lines.context.line",
+   "ok": true
+  },
+  {
+   "n": 407,
+   "id": "lines.connector.elbow",
+   "ok": true
+  },
+  {
+   "n": 408,
+   "id": "lines.connector.curved",
+   "ok": true
+  },
+  {
+   "n": 409,
+   "id": "lines.chip.kind-name",
+   "ok": true
+  },
+  {
+   "n": 410,
+   "id": "lines.connector.re-end",
+   "ok": true
+  },
+  {
+   "n": 411,
+   "id": "lines.insert.arrow-head",
+   "ok": true
+  },
+  {
+   "n": 412,
+   "id": "lines.tail.line-start-end-menu",
+   "ok": true
+  },
+  {
+   "n": 415,
+   "id": "tables.insert.grid",
+   "ok": true
+  },
+  {
+   "n": 416,
+   "id": "tables.cell.double-click-type",
+   "ok": true
+  },
+  {
+   "n": 417,
+   "id": "tables.cell.tab-from-written",
+   "ok": true
+  },
+  {
+   "n": 418,
+   "id": "tables.cell.tab-from-empty",
+   "ok": true
+  },
+  {
+   "n": 419,
+   "id": "tables.cell.shift-tab",
+   "ok": true
+  },
+  {
+   "n": 420,
+   "id": "tables.cell.tab-last-appends-row",
+   "ok": true
+  },
+  {
+   "n": 421,
+   "id": "tables.menu.format-table-with-session",
+   "ok": true
+  },
+  {
+   "n": 422,
+   "id": "tables.menu.format-table-selected",
+   "ok": true
+  },
+  {
+   "n": 423,
+   "id": "tables.menu.format-table-rows",
+   "ok": true
+  },
+  {
+   "n": 424,
+   "id": "tables.context.rows",
+   "ok": true
+  },
+  {
+   "n": 425,
+   "id": "tables.context.insert-delete",
+   "ok": true
+  },
+  {
+   "n": 426,
+   "id": "tables.column.insert-keeps-widths",
+   "ok": true
+  },
+  {
+   "n": 427,
+   "id": "tables.column.resize-seam",
+   "ok": true
+  },
+  {
+   "n": 428,
+   "id": "tables.cell.align-menu",
+   "ok": true
+  },
+  {
+   "n": 429,
+   "id": "tables.cell.align-toolbar",
+   "ok": true
+  },
+  {
+   "n": 430,
+   "id": "tables.select.resize",
+   "ok": true
+  },
+  {
+   "n": 431,
+   "id": "tables.cell.fill-border-tail",
+   "ok": true
+  },
+  {
+   "n": 432,
+   "id": "tables.cells.merge-unmerge",
+   "ok": true
+  },
+  {
+   "n": 433,
+   "id": "tables.tail.merge-unmerge-buttons",
+   "ok": true
+  },
+  {
+   "n": 434,
+   "id": "tables.distribute.rows-columns",
+   "ok": true
+  },
+  {
+   "n": 435,
+   "id": "tables.light-appearance",
+   "ok": true
+  },
+  {
+   "n": 436,
+   "id": "tables.present",
+   "ok": true
+  },
+  {
+   "n": 437,
+   "id": "tables.reload",
+   "ok": true
+  },
+  {
+   "n": 440,
+   "id": "tables.cell.click-places-caret",
+   "ok": true
+  },
+  {
+   "n": 442,
+   "id": "tables.cell.click-then-type",
+   "ok": true
+  },
+  {
+   "n": 443,
+   "id": "tables.range.drag-from-selected",
+   "ok": true
+  },
+  {
+   "n": 444,
+   "id": "tables.selected.typing-appends",
+   "ok": true
+  },
+  {
+   "n": 445,
+   "id": "tables.cell.arrows-cross-cells",
+   "ok": true
+  },
+  {
+   "n": 446,
+   "id": "tables.range.shift-arrows",
+   "ok": true
+  },
+  {
+   "n": 447,
+   "id": "tables.range.bold-italic",
+   "ok": true
+  },
+  {
+   "n": 448,
+   "id": "tables.range.size-color",
+   "ok": true
+  },
+  {
+   "n": 449,
+   "id": "tables.panel.table-first",
+   "ok": true
+  },
+  {
+   "n": 450,
+   "id": "tables.seam.row-drag",
+   "ok": true
+  },
+  {
+   "n": 451,
+   "id": "tables.edge.add-row-column",
+   "ok": true
+  },
+  {
+   "n": 452,
+   "id": "tables.heads.select-row-column",
+   "ok": true
+  },
+  {
+   "n": 453,
+   "id": "tables.bar.row-column-buttons",
+   "ok": null,
+   "observed": "not driven: not on this build: bar.table (docs/PRODUCT.md 7.1, B3); no bar under the selected table (P1, FEATURES.md 2.3 item 3)"
+  },
+  {
+   "n": 454,
+   "id": "tables.command.keeps-caret",
+   "ok": true
+  },
+  {
+   "n": 455,
+   "id": "tables.cells.tabular-figures",
+   "ok": true
+  },
+  {
+   "n": 460,
+   "id": "tables.insert.box-fits-rows",
+   "ok": true
+  },
+  {
+   "n": 462,
+   "id": "tables.select.ring-with-cell-open",
+   "ok": true
+  },
+  {
+   "n": 463,
+   "id": "tables.cell.ring-on-cell",
+   "ok": true
+  },
+  {
+   "n": 464,
+   "id": "tables.cells.empty-grid-guides",
+   "ok": true
+  },
+  {
+   "n": 465,
+   "id": "tables.light-appearance-guides",
+   "ok": true
+  },
+  {
+   "n": 467,
+   "id": "tables.rows.grow-with-text",
+   "ok": true
+  },
+  {
+   "n": 468,
+   "id": "tables.resize.rows-share-extra",
+   "ok": true
+  },
+  {
+   "n": 469,
+   "id": "tables.seam.visible-with-cell-open",
+   "ok": true
+  },
+  {
+   "n": 470,
+   "id": "tables.heads.header-toggle",
+   "ok": true
+  },
+  {
+   "n": 471,
+   "id": "tables.panel.section-words",
+   "ok": true
+  },
+  {
+   "n": 474,
+   "id": "charts.insert.bar",
+   "ok": true
+  },
+  {
+   "n": 475,
+   "id": "charts.insert.column",
+   "ok": true
+  },
+  {
+   "n": 476,
+   "id": "charts.insert.line",
+   "ok": true
+  },
+  {
+   "n": 477,
+   "id": "charts.insert.pie",
+   "ok": true
+  },
+  {
+   "n": 478,
+   "id": "charts.select.tail",
+   "ok": true
+  },
+  {
+   "n": 479,
+   "id": "charts.resize",
+   "ok": true
+  },
+  {
+   "n": 480,
+   "id": "charts.type.panel-legible",
+   "ok": true
+  },
+  {
+   "n": 481,
+   "id": "charts.type.toolbar",
+   "ok": true
+  },
+  {
+   "n": 482,
+   "id": "charts.type.menu",
+   "ok": true
+  },
+  {
+   "n": 483,
+   "id": "charts.data.add-series-category",
+   "ok": true
+  },
+  {
+   "n": 484,
+   "id": "charts.data.edit-cell",
+   "ok": true
+  },
+  {
+   "n": 485,
+   "id": "charts.data.toolbar-edit-data",
+   "ok": true
+  },
+  {
+   "n": 486,
+   "id": "charts.data.menu-edit-data",
+   "ok": true
+  },
+  {
+   "n": 487,
+   "id": "charts.legend.toolbar",
+   "ok": true
+  },
+  {
+   "n": 488,
+   "id": "charts.number-format.toolbar",
+   "ok": true
+  },
+  {
+   "n": 489,
+   "id": "charts.context",
+   "ok": true
+  },
+  {
+   "n": 490,
+   "id": "charts.light-appearance",
+   "ok": true
+  },
+  {
+   "n": 491,
+   "id": "charts.present",
+   "ok": true
+  },
+  {
+   "n": 492,
+   "id": "charts.reload",
+   "ok": true
+  },
+  {
+   "n": 493,
+   "id": "charts.grid.type-to-edit",
+   "ok": true
+  },
+  {
+   "n": 494,
+   "id": "charts.grid.escape-stays",
+   "ok": true
+  },
+  {
+   "n": 495,
+   "id": "charts.double-click.opens-data",
+   "ok": true
+  },
+  {
+   "n": 496,
+   "id": "charts.mark.click-selects-cell",
+   "ok": true
+  },
+  {
+   "n": 497,
+   "id": "charts.legend.none-from-toolbar",
+   "ok": true
+  },
+  {
+   "n": 498,
+   "id": "charts.panel.no-duplicate-controls",
+   "ok": true
+  },
+  {
+   "n": 499,
+   "id": "charts.grid.remove-visible",
+   "ok": true
+  },
+  {
+   "n": 502,
+   "id": "charts.pie.add-series-refused",
+   "ok": true
+  },
+  {
+   "n": 506,
+   "id": "diagrams.panel",
+   "ok": true
+  },
+  {
+   "n": 507,
+   "id": "diagrams.insert.group",
+   "ok": true
+  },
+  {
+   "n": 508,
+   "id": "diagrams.select-move",
+   "ok": true
+  },
+  {
+   "n": 509,
+   "id": "diagrams.edit-label",
+   "ok": true
+  },
+  {
+   "n": 510,
+   "id": "diagrams.light-appearance",
+   "ok": true
+  },
+  {
+   "n": 511,
+   "id": "diagrams.present",
+   "ok": true
+  },
+  {
+   "n": 512,
+   "id": "diagrams.reload",
+   "ok": true
+  },
+  {
+   "n": 513,
+   "id": "diagrams.label.double-click-opens",
+   "ok": true
+  },
+  {
+   "n": 514,
+   "id": "diagrams.label.tab-next",
+   "ok": true
+  },
+  {
+   "n": 515,
+   "id": "diagrams.step.one-object",
+   "ok": true
+  },
+  {
+   "n": 517,
+   "id": "diagrams.member.duplicate-delete",
+   "ok": true
+  },
+  {
+   "n": 520,
+   "id": "wordart.insert",
+   "ok": true
+  },
+  {
+   "n": 521,
+   "id": "wordart.edit",
+   "ok": true
+  },
+  {
+   "n": 522,
+   "id": "wordart.light-appearance",
+   "ok": true
+  },
+  {
+   "n": 523,
+   "id": "wordart.resize.scales-letters",
+   "ok": true
+  },
+  {
+   "n": 524,
+   "id": "wordart.tail.fill-outline",
+   "ok": true
+  },
+  {
+   "n": 527,
+   "id": "gestures.draw.shape-fill-at-step5",
+   "ok": true
+  },
+  {
+   "n": 528,
+   "id": "gestures.draw.click-at-press",
+   "ok": true
+  },
+  {
+   "n": 529,
+   "id": "gestures.draw.text-box-frame",
+   "ok": true
+  },
+  {
+   "n": 531,
+   "id": "gestures.draw.grammar-slide-converts",
+   "ok": true
+  },
+  {
+   "n": 534,
+   "id": "gestures.resize.shape-follows",
+   "ok": true
+  },
+  {
+   "n": 536,
+   "id": "gestures.resize.text-reflows",
+   "ok": true
+  },
+  {
+   "n": 538,
+   "id": "gestures.resize.picture-follows",
+   "ok": true
+  },
+  {
+   "n": 541,
+   "id": "gestures.resize.table-follows",
+   "ok": true
+  },
+  {
+   "n": 542,
+   "id": "gestures.seam.table-follows",
+   "ok": true
+  },
+  {
+   "n": 543,
+   "id": "gestures.resize.chart-follows",
+   "ok": true
+  },
+  {
+   "n": 544,
+   "id": "gestures.resize.wordart-scales",
+   "ok": true
+  },
+  {
+   "n": 546,
+   "id": "gestures.resize.diagram-follows",
+   "ok": true
+  },
+  {
+   "n": 549,
+   "id": "gestures.move.connector-follows-live",
+   "ok": true
+  },
+  {
+   "n": 552,
+   "id": "gestures.rotate.ring-turns-live",
+   "ok": true
+  },
+  {
+   "n": 553,
+   "id": "gestures.rotate.ring-after-release",
+   "ok": true
+  },
+  {
+   "n": 556,
+   "id": "gestures.frame.one-render-per-frame",
+   "ok": true
+  },
+  {
+   "n": 557,
+   "id": "gestures.frame.cost-budget",
+   "ok": true
+  },
+  {
+   "n": 558,
+   "id": "gestures.readout.stays",
+   "ok": true
+  },
+  {
+   "n": 560,
+   "id": "gestures.watch.chart-se-after-mark-click",
+   "ok": true
+  },
+  {
+   "n": 561,
+   "id": "share.file-menu-share-with-others",
+   "ok": true
+  },
+  {
+   "n": 562,
+   "id": "versions.open-from-last-edit",
+   "ok": true
+  },
+  {
+   "n": 563,
+   "id": "versions.pick",
+   "ok": true
+  },
+  {
+   "n": 564,
+   "id": "versions.name-current",
+   "ok": true
+  },
+  {
+   "n": 565,
+   "id": "versions.undo-restore",
+   "ok": false,
+   "observed": "restore wrote true (revision 593 -> 594) and changed the deck true (read after 25 ms of a 35 s bound; versionHistory.533.restore; snackbar Saved the version Before the customer copy; panel notice Restored the version of Oct 3, 04:36 PM; state.error none); Cmd+Z brought the current version back false"
+  },
+  {
+   "n": 566,
+   "id": "versions.show-changes-toggle",
+   "ok": true
+  },
+  {
+   "n": 567,
+   "id": "versions.show-changes-marks",
+   "ok": false,
+   "observed": "picked versionHistory.594.pick (named row versionHistory.594.pick); marks with Show changes on 0 (); off 0"
+  },
+  {
+   "n": 569,
+   "id": "versions.panel.author-you",
+   "ok": true
+  },
+  {
+   "n": 570,
+   "id": "versions.field.square",
+   "ok": true
+  },
+  {
+   "n": 571,
+   "id": "comments.panel.empty-gesture",
+   "ok": true
+  },
+  {
+   "n": 572,
+   "id": "versions.window-mark-column",
+   "ok": true
+  },
+  {
+   "n": 573,
+   "id": "versions.restore-in-more",
+   "ok": true
+  },
+  {
+   "n": 574,
+   "id": "decks.save.acknowledged",
+   "ok": true
+  },
+  {
+   "n": 575,
+   "id": "decks.editor.move-to-trash",
+   "ok": true
+  },
+  {
+   "n": 576,
+   "id": "surface.cleanup",
+   "ok": true
+  }
+ ]
+}

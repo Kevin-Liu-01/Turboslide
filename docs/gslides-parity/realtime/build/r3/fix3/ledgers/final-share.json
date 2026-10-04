@@ -1,0 +1,160 @@
+{
+ "run": "final-share",
+ "base": "http://localhost:4473",
+ "startedAt": "2026-10-04T01:32:45.773Z",
+ "ms": 123164,
+ "steps": 30,
+ "passed": 29,
+ "failed": 1,
+ "notDriven": 0,
+ "consoleErrors": 0,
+ "rows": [
+  {
+   "n": 1,
+   "id": "decks.new.draft",
+   "ok": true
+  },
+  {
+   "n": 2,
+   "id": "decks.new.ground-paint",
+   "ok": true
+  },
+  {
+   "n": 3,
+   "id": "decks.new.first-write",
+   "ok": true
+  },
+  {
+   "n": 4,
+   "id": "decks.name.follows-heading",
+   "ok": true
+  },
+  {
+   "n": 5,
+   "id": "decks.title.save-words",
+   "ok": true
+  },
+  {
+   "n": 6,
+   "id": "decks.title.rename-enter",
+   "ok": true
+  },
+  {
+   "n": 7,
+   "id": "decks.title.rename-escape",
+   "ok": true
+  },
+  {
+   "n": 8,
+   "id": "decks.title.rename-blur",
+   "ok": true
+  },
+  {
+   "n": 9,
+   "id": "decks.title.rename-empty",
+   "ok": true
+  },
+  {
+   "n": 10,
+   "id": "decks.title.file-rename",
+   "ok": true
+  },
+  {
+   "n": 11,
+   "id": "decks.title.tab-title-after-rename",
+   "ok": true
+  },
+  {
+   "n": 12,
+   "id": "decks.title.mark-to-list",
+   "ok": true
+  },
+  {
+   "n": 13,
+   "id": "decks.edit.reload-keeps-slide",
+   "ok": true
+  },
+  {
+   "n": 14,
+   "id": "decks.file.open-list-search",
+   "ok": true
+  },
+  {
+   "n": 15,
+   "id": "decks.file.import-slides-deck",
+   "ok": true
+  },
+  {
+   "n": 16,
+   "id": "decks.file.details",
+   "ok": true
+  },
+  {
+   "n": 17,
+   "id": "share.file-menu-share-with-others",
+   "ok": true
+  },
+  {
+   "n": 18,
+   "id": "versions.open-from-last-edit",
+   "ok": true
+  },
+  {
+   "n": 19,
+   "id": "versions.pick",
+   "ok": true
+  },
+  {
+   "n": 20,
+   "id": "versions.name-current",
+   "ok": true
+  },
+  {
+   "n": 21,
+   "id": "versions.undo-restore",
+   "ok": true,
+   "observed": "restore wrote true (revision 10 -> 11) and changed the deck true (read after 9 ms of a 35 s bound; versionHistory.1.restore; snackbar Saved the version Before the customer copy; panel notice Restored the version of Oct 3, 06:32 PM; state.error none); Cmd+Z brought the current version back true"
+  },
+  {
+   "n": 22,
+   "id": "versions.show-changes-toggle",
+   "ok": true
+  },
+  {
+   "n": 23,
+   "id": "versions.show-changes-marks",
+   "ok": false,
+   "observed": "picked versionHistory.11.pick (named row versionHistory.11.pick); marks with Show changes on 0 (); off 0"
+  },
+  {
+   "n": 25,
+   "id": "versions.panel.author-you",
+   "ok": true
+  },
+  {
+   "n": 26,
+   "id": "versions.field.square",
+   "ok": true
+  },
+  {
+   "n": 27,
+   "id": "comments.panel.empty-gesture",
+   "ok": true
+  },
+  {
+   "n": 28,
+   "id": "versions.window-mark-column",
+   "ok": true
+  },
+  {
+   "n": 29,
+   "id": "versions.restore-in-more",
+   "ok": true
+  },
+  {
+   "n": 30,
+   "id": "decks.save.acknowledged",
+   "ok": true
+  }
+ ]
+}

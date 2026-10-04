@@ -1,0 +1,523 @@
+{
+ "run": "final-slides",
+ "base": "http://localhost:4473",
+ "startedAt": "2026-10-04T01:26:58.117Z",
+ "ms": 346941,
+ "steps": 106,
+ "passed": 106,
+ "failed": 0,
+ "notDriven": 0,
+ "consoleErrors": 0,
+ "rows": [
+  {
+   "n": 1,
+   "id": "decks.new.draft",
+   "ok": true
+  },
+  {
+   "n": 2,
+   "id": "decks.new.ground-paint",
+   "ok": true
+  },
+  {
+   "n": 3,
+   "id": "decks.new.first-write",
+   "ok": true
+  },
+  {
+   "n": 4,
+   "id": "decks.name.follows-heading",
+   "ok": true
+  },
+  {
+   "n": 5,
+   "id": "decks.title.save-words",
+   "ok": true
+  },
+  {
+   "n": 6,
+   "id": "decks.title.rename-enter",
+   "ok": true
+  },
+  {
+   "n": 7,
+   "id": "decks.title.rename-escape",
+   "ok": true
+  },
+  {
+   "n": 8,
+   "id": "decks.title.rename-blur",
+   "ok": true
+  },
+  {
+   "n": 9,
+   "id": "decks.title.rename-empty",
+   "ok": true
+  },
+  {
+   "n": 10,
+   "id": "decks.title.file-rename",
+   "ok": true
+  },
+  {
+   "n": 11,
+   "id": "decks.title.tab-title-after-rename",
+   "ok": true
+  },
+  {
+   "n": 12,
+   "id": "decks.title.mark-to-list",
+   "ok": true
+  },
+  {
+   "n": 13,
+   "id": "decks.edit.reload-keeps-slide",
+   "ok": true
+  },
+  {
+   "n": 14,
+   "id": "decks.file.open-list-search",
+   "ok": true
+  },
+  {
+   "n": 15,
+   "id": "decks.file.import-slides-deck",
+   "ok": true
+  },
+  {
+   "n": 16,
+   "id": "decks.file.details",
+   "ok": true
+  },
+  {
+   "n": 17,
+   "id": "slides.new.toolbar",
+   "ok": true
+  },
+  {
+   "n": 18,
+   "id": "slides.new.arrow-layout",
+   "ok": true
+  },
+  {
+   "n": 19,
+   "id": "slides.new.menu",
+   "ok": true
+  },
+  {
+   "n": 20,
+   "id": "slides.new.ctrl-m-card",
+   "ok": true
+  },
+  {
+   "n": 21,
+   "id": "slides.new.ctrl-m-canvas",
+   "ok": true
+  },
+  {
+   "n": 22,
+   "id": "slides.new.context",
+   "ok": true
+  },
+  {
+   "n": 23,
+   "id": "slides.new.undo",
+   "ok": true
+  },
+  {
+   "n": 24,
+   "id": "slides.duplicate.context",
+   "ok": true
+  },
+  {
+   "n": 25,
+   "id": "slides.duplicate.menu",
+   "ok": true
+  },
+  {
+   "n": 26,
+   "id": "slides.duplicate.cmd-d",
+   "ok": true
+  },
+  {
+   "n": 27,
+   "id": "slides.duplicate.undo-toolbar",
+   "ok": true
+  },
+  {
+   "n": 28,
+   "id": "slides.duplicate.undo-redo-keys",
+   "ok": true
+  },
+  {
+   "n": 29,
+   "id": "slides.duplicate.two-selected-cmd-d",
+   "ok": true
+  },
+  {
+   "n": 30,
+   "id": "slides.duplicate.two-selected-menu",
+   "ok": true
+  },
+  {
+   "n": 31,
+   "id": "slides.delete.key",
+   "ok": true,
+   "observed": "15 -> 14; snackbar \"Slide deletedUndo\""
+  },
+  {
+   "n": 32,
+   "id": "slides.delete.undo-snackbar",
+   "ok": true,
+   "observed": "title,title-2,title-2-2-2,title-2-2-4,title-2-2-2-2-2,title-2-2-3,title-2-2-2-2,title-2-2,split-1-a919,split-4-a919,split-2-a919,split-3-a919,title-only-1-a919,title-only-2-a919 -> title,title-2,title-2-2-2,title-2-2-4,title-2-2-2-2-2,title-2-2-3,title-2-2-2-2,title-2-2,split-1-a919,split-4-a919,split-2-a919,split-3-a919,title-only-1-a919,title-only-2-a919"
+  },
+  {
+   "n": 33,
+   "id": "slides.delete.context",
+   "ok": true,
+   "observed": "14 -> 13"
+  },
+  {
+   "n": 34,
+   "id": "slides.delete.undo-cmd-z",
+   "ok": true,
+   "observed": "13 -> 14"
+  },
+  {
+   "n": 35,
+   "id": "slides.delete.menu-undo-redo",
+   "ok": true,
+   "observed": "14 -> 13 -> 14 -> 13"
+  },
+  {
+   "n": 36,
+   "id": "slides.delete.two-selected-key-undo",
+   "ok": true,
+   "observed": "selected title-2,title-2-2-2; 13 -> 11 -> 13; after reload same"
+  },
+  {
+   "n": 37,
+   "id": "slides.delete.two-selected-menu",
+   "ok": true,
+   "observed": "selected title-2,title-2-2-2; 13 -> 11"
+  },
+  {
+   "n": 38,
+   "id": "slides.delete.two-selected-edit-menu",
+   "ok": true,
+   "observed": "selected title-2,title-2-2-2; 13 -> 11"
+  },
+  {
+   "n": 39,
+   "id": "slides.delete.canvas-focus-undo",
+   "ok": true,
+   "observed": "the canvas Delete removed nothing (rank 4); the delete was made from the focused card; 13 -> 12 -> 13; after reload same order; snackbar Slide deletedUndo"
+  },
+  {
+   "n": 40,
+   "id": "slides.delete.undo-redo-saved",
+   "ok": true,
+   "observed": "13 -> 12 -> 13 -> 12; server after reload matches the screen; snackbar Slide deletedUndo"
+  },
+  {
+   "n": 42,
+   "id": "slides.select.click",
+   "ok": true
+  },
+  {
+   "n": 43,
+   "id": "slides.select.arrows-shift",
+   "ok": true
+  },
+  {
+   "n": 44,
+   "id": "slides.select.shift-cmd-click",
+   "ok": true
+  },
+  {
+   "n": 45,
+   "id": "slides.select.cmd-click-toggle",
+   "ok": true
+  },
+  {
+   "n": 47,
+   "id": "slides.reorder.drag-above",
+   "ok": true
+  },
+  {
+   "n": 48,
+   "id": "slides.reorder.undo-drag",
+   "ok": true
+  },
+  {
+   "n": 49,
+   "id": "slides.reorder.drag-below",
+   "ok": true
+  },
+  {
+   "n": 50,
+   "id": "slides.reorder.cmd-up-down",
+   "ok": true
+  },
+  {
+   "n": 51,
+   "id": "slides.reorder.menu-to-end-undo",
+   "ok": true
+  },
+  {
+   "n": 52,
+   "id": "slides.reorder.menu-up-down-beginning",
+   "ok": true
+  },
+  {
+   "n": 53,
+   "id": "slides.reorder.cmd-shift-up-down",
+   "ok": true
+  },
+  {
+   "n": 54,
+   "id": "slides.reorder.two-selected-drag",
+   "ok": true
+  },
+  {
+   "n": 56,
+   "id": "slides.skip.context",
+   "ok": true
+  },
+  {
+   "n": 57,
+   "id": "slides.skip.menu-unskip",
+   "ok": true
+  },
+  {
+   "n": 58,
+   "id": "slides.skip.context-two",
+   "ok": true
+  },
+  {
+   "n": 59,
+   "id": "slides.skip.menu-two",
+   "ok": true
+  },
+  {
+   "n": 61,
+   "id": "slides.layout.picker-open-escape",
+   "ok": true
+  },
+  {
+   "n": 62,
+   "id": "slides.layout.apply.title",
+   "ok": true
+  },
+  {
+   "n": 63,
+   "id": "slides.layout.apply.opener",
+   "ok": true
+  },
+  {
+   "n": 64,
+   "id": "slides.layout.apply.split",
+   "ok": true
+  },
+  {
+   "n": 65,
+   "id": "slides.layout.apply.cols",
+   "ok": true
+  },
+  {
+   "n": 66,
+   "id": "slides.layout.apply.title-only",
+   "ok": true
+  },
+  {
+   "n": 67,
+   "id": "slides.layout.apply.one-column",
+   "ok": true
+  },
+  {
+   "n": 68,
+   "id": "slides.layout.apply.statement",
+   "ok": true
+  },
+  {
+   "n": 69,
+   "id": "slides.layout.apply.section-description",
+   "ok": true
+  },
+  {
+   "n": 70,
+   "id": "slides.layout.apply.mood",
+   "ok": true
+  },
+  {
+   "n": 71,
+   "id": "slides.layout.apply.big-number",
+   "ok": true
+  },
+  {
+   "n": 72,
+   "id": "slides.layout.apply.blank",
+   "ok": true
+  },
+  {
+   "n": 73,
+   "id": "slides.layout.apply.rows",
+   "ok": true
+  },
+  {
+   "n": 74,
+   "id": "slides.layout.apply.plain",
+   "ok": true
+  },
+  {
+   "n": 75,
+   "id": "slides.layout.apply.table",
+   "ok": true
+  },
+  {
+   "n": 76,
+   "id": "slides.layout.apply.figure",
+   "ok": true
+  },
+  {
+   "n": 77,
+   "id": "slides.layout.apply.pair",
+   "ok": true
+  },
+  {
+   "n": 78,
+   "id": "slides.layout.apply.tiles",
+   "ok": true
+  },
+  {
+   "n": 79,
+   "id": "slides.layout.apply.details",
+   "ok": true
+  },
+  {
+   "n": 80,
+   "id": "slides.layout.apply.board",
+   "ok": true
+  },
+  {
+   "n": 81,
+   "id": "slides.layout.apply.matrix",
+   "ok": true
+  },
+  {
+   "n": 82,
+   "id": "slides.layout.apply.closing",
+   "ok": true
+  },
+  {
+   "n": 83,
+   "id": "slides.layout.reopen-ring",
+   "ok": true
+  },
+  {
+   "n": 84,
+   "id": "slides.layout.context-apply",
+   "ok": true
+  },
+  {
+   "n": 85,
+   "id": "slides.layout.menu-apply-undo",
+   "ok": true
+  },
+  {
+   "n": 86,
+   "id": "slides.layout.fresh-slide-two-picks-no-carry",
+   "ok": true
+  },
+  {
+   "n": 87,
+   "id": "slides.layout.typed-title-round-trip",
+   "ok": true
+  },
+  {
+   "n": 88,
+   "id": "slides.layout.snackbar-counts-typed-only",
+   "ok": true
+  },
+  {
+   "n": 89,
+   "id": "slides.layout.undo-typed",
+   "ok": true
+  },
+  {
+   "n": 91,
+   "id": "slides.notes.type",
+   "ok": true
+  },
+  {
+   "n": 92,
+   "id": "slides.notes.per-slide",
+   "ok": true
+  },
+  {
+   "n": 93,
+   "id": "slides.notes.resize-handle",
+   "ok": true
+  },
+  {
+   "n": 94,
+   "id": "slides.notes.reload",
+   "ok": true
+  },
+  {
+   "n": 95,
+   "id": "slides.notes.view-menu-toggle",
+   "ok": true
+  },
+  {
+   "n": 97,
+   "id": "slides.counter.footer-and-cards",
+   "ok": true
+  },
+  {
+   "n": 98,
+   "id": "slides.hash.click-and-reload",
+   "ok": true
+  },
+  {
+   "n": 99,
+   "id": "slides.context.empty-canvas",
+   "ok": true
+  },
+  {
+   "n": 100,
+   "id": "slides.numbers.apply",
+   "ok": true
+  },
+  {
+   "n": 101,
+   "id": "slides.layout.title-and-body-single",
+   "ok": true
+  },
+  {
+   "n": 102,
+   "id": "slides.layout.subtitle-prompt",
+   "ok": true
+  },
+  {
+   "n": 103,
+   "id": "slides.layout.new-slide-inherits",
+   "ok": true
+  },
+  {
+   "n": 104,
+   "id": "slides.layout.tile-sentences",
+   "ok": true
+  },
+  {
+   "n": 105,
+   "id": "slides.import.none-preselected",
+   "ok": true
+  },
+  {
+   "n": 106,
+   "id": "decks.save.acknowledged",
+   "ok": true
+  }
+ ]
+}

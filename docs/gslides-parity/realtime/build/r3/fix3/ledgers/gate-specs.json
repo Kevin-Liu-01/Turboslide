@@ -1,0 +1,348 @@
+{
+ "run": "gate-specs",
+ "base": "http://localhost:4473",
+ "tier": "memory",
+ "startedAt": "2026-10-04T01:39:52.159Z",
+ "counts": {
+  "passed": 80,
+  "not driven": 1,
+  "failed": 2
+ },
+ "rows": [
+  {
+   "id": "decks.home.new-presentation",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.your-presentations",
+   "result": "passed"
+  },
+  {
+   "id": "decks.root.redirect",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.read",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.search",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.open-thumbnail",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.open-title",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.open-recent",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.menu-open-escape",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.rename-enter",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.rename-escape",
+   "result": "passed"
+  },
+  {
+   "id": "decks.row.rename-enter",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.make-a-copy",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.open-in-new-tab",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.present",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.move-to-trash-undo",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.gt-brand-deck",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.listed-after-move",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.restore",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.lists-after-restore",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.delete-forever-cancel",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.delete-forever-button",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.delete-forever-enter",
+   "result": "passed"
+  },
+  {
+   "id": "decks.nav.back-forward",
+   "result": "passed"
+  },
+  {
+   "id": "decks.access.unknown-edit",
+   "result": "passed"
+  },
+  {
+   "id": "decks.access.paint",
+   "result": "passed"
+  },
+  {
+   "id": "decks.access.sign-in-link",
+   "result": "passed"
+  },
+  {
+   "id": "decks.access.unknown-deck",
+   "result": "passed"
+  },
+  {
+   "id": "decks.notfound.page",
+   "result": "passed"
+  },
+  {
+   "id": "decks.file.make-a-copy",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.download",
+   "result": "passed"
+  },
+  {
+   "id": "slides.clipboard.copy-paste-card",
+   "result": "passed"
+  },
+  {
+   "id": "charts.data.paste-rows",
+   "result": "passed"
+  },
+  {
+   "id": "decks.file.template-gallery",
+   "result": "passed"
+  },
+  {
+   "id": "decks.file.open-upload-bundle",
+   "result": "passed"
+  },
+  {
+   "id": "decks.file.import-slides-bundle",
+   "result": "passed"
+  },
+  {
+   "id": "help.improve-link",
+   "result": "passed"
+  },
+  {
+   "id": "slides.layout.plate-four-columns",
+   "result": "passed"
+  },
+  {
+   "id": "share.dialog.more-row",
+   "result": "passed"
+  },
+  {
+   "id": "decks.recent.drops-trashed",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.editor-undo-snackbar",
+   "result": "passed"
+  },
+  {
+   "id": "decks.recent.this-browser-sentence",
+   "result": "not driven",
+   "reason": "not on this build: home.recent.sentence (docs/PRODUCT.md 7.1, B1)"
+  },
+  {
+   "id": "decks.home.seller-lead",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.thumbnail-slide-1",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.edited-relative-time",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.more-glyph",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.button-heights",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.confirm-dialog-chrome",
+   "result": "passed"
+  },
+  {
+   "id": "decks.new.skeleton-one-frame",
+   "result": "passed"
+  },
+  {
+   "id": "decks.access.stranger-links",
+   "result": "passed"
+  },
+  {
+   "id": "decks.notfound.sentence-case",
+   "result": "passed"
+  },
+  {
+   "id": "templates.gallery.page",
+   "result": "failed",
+   "reason": "TimeoutError: browserContext.waitForEvent: Timeout 20000ms exceeded while waiting for event \"page\""
+  },
+  {
+   "id": "templates.gallery.strip-and-link",
+   "result": "passed"
+  },
+  {
+   "id": "chrome.appearance.first-visit-follows-os",
+   "result": "passed"
+  },
+  {
+   "id": "chrome.toolbar.fold-any-width",
+   "result": "passed"
+  },
+  {
+   "id": "brand.appearance.default",
+   "result": "passed"
+  },
+  {
+   "id": "tables.paste.tsv-makes-table",
+   "result": "passed"
+  },
+  {
+   "id": "tables.paste.into-cell-spreads",
+   "result": "passed"
+  },
+  {
+   "id": "logos.picker.chrome-1280",
+   "result": "passed"
+  },
+  {
+   "id": "shaders.panel.section-groups",
+   "result": "passed"
+  },
+  {
+   "id": "decks.recent.keeps-new-deck",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.rename-everywhere",
+   "result": "passed"
+  },
+  {
+   "id": "decks.list.one-card-per-deck",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.leaves-at-once",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.title-ellipsis",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.download-powerpoint",
+   "result": "passed"
+  },
+  {
+   "id": "decks.import.upload-drop-zone",
+   "result": "passed"
+  },
+  {
+   "id": "decks.back.list-restored",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.thumbnail-or-plate",
+   "result": "passed"
+  },
+  {
+   "id": "versions.panel.rows-read-clean",
+   "result": "passed"
+  },
+  {
+   "id": "versions.title-row.last-edit-inline",
+   "result": "passed"
+  },
+  {
+   "id": "comments.marker.one-per-anchor",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.enter-confirms",
+   "result": "passed"
+  },
+  {
+   "id": "decks.card.rename-field-fits",
+   "result": "passed"
+  },
+  {
+   "id": "decks.trash.empty-not-primary",
+   "result": "passed"
+  },
+  {
+   "id": "decks.polish.pages-sweep",
+   "result": "passed"
+  },
+  {
+   "id": "decks.thumbnail.never-502",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.pictures-three-widths",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.copy-rules",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.product-pictures",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.links-and-card",
+   "result": "passed"
+  },
+  {
+   "id": "decks.home.load-budget",
+   "result": "failed",
+   "reason": "Error: ready 1117 ms (budget 500)"
+  },
+  {
+   "id": "decks.home.layout-shift",
+   "result": "passed"
+  }
+ ]
+}

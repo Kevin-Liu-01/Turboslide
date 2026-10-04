@@ -101,10 +101,10 @@ import {
 import { agentAuth } from './auth';
 import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
+import { sessionOf } from './auth/better-auth';
 import {
-  accountSession,
+  accountFacts,
   bindIdentityRedis,
-  forgetAccountFacts,
   identityRuntime,
   linkAnonymous,
   principalKvOf,
@@ -612,13 +612,11 @@ async function sessionIdentity(
   const runtime = identityRuntime();
   if (runtime.auth === null) return null;
   try {
-    // the session and its facts through R4's per instance cache (auth/identity.ts
-    // `accountSession`; docs/CLOUDFLARE.md 4.1: 300 s under the session token's hash on the D1
-    // engine, one retry on a refused proxy call, null to anonymous), so a signed in request on
-    // the function pays the four reads once per cache life and not once per request (R4-R1c)
-    const found = await accountSession(runtime, request);
+    await runtime.ready;
+    const found = await sessionOf(runtime.auth, request);
     if (found === null) return null;
-    const facts = found.account;
+    const facts = await accountFacts(runtime, found.user.id);
+    if (facts === null || facts.profile.deletedAt !== null) return null;
     if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, facts.userId);
     const now = new Date();
     const record =
@@ -638,7 +636,7 @@ async function sessionIdentity(
     /* the verified address, so a pending grant by email admits the invitee (identity/access.ts
        isPendingEmailGrantFor), and the anonymous ids linked to the account, so a deck made
        before the sign in keeps its creator as the owner (standingOf; b1.md R3) */
-    const aliases = found.aliases;
+    const aliases = await runtime.aliases.aliasesOf(facts.userId).catch(() => []);
     const principal: Principal = {
       id: facts.principalId,
       kind: 'account',
@@ -2405,8 +2403,6 @@ function identityCacheMs(): number {
 export function forgetIdentity(identity: string): void {
   identityCache.delete(identity);
   emailMemory.delete(identity);
-  // the cached session facts of the account go with the row (R4-R1d; docs/CLOUDFLARE.md 4.1)
-  forgetAccountFacts(identity);
   void realtimeChannel()
     .bus?.publish('identity', identity)
     .catch((error: unknown) =>

@@ -23,6 +23,37 @@ export const IDS = [
   'versions.restore-in-more',
 ];
 
+/**
+ * A value's JSON with every object's keys in sorted order. After a restore the tab reads the
+ * room's normalized copy of the deck, whose keys come in the schema's order, while the tab's own
+ * edits kept the order they were written in ("typography":{"weight":700,"size":32} against
+ * {"size":32,"weight":700}): one document, two strings, and Cmd+Z after a restore read "brought
+ * the current version back false" on three slides that differed in key order alone
+ * (docs/gslides-parity/realtime/build/r3.md "Realtime round, fix round 3", walk A's trace).
+ */
+export const canonical = (value) =>
+  JSON.stringify(value, (_key, v) =>
+    v !== null && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(
+          Object.keys(v)
+            .sort()
+            .map((k) => [k, v[k]]),
+        )
+      : v,
+  );
+
+/** The deck as the restore rows compare it: the order and every slide's JSON, by id, keys sorted. */
+const deckRead = async (t) => {
+  const ids = await t.slideOrder();
+  const slides = {};
+  for (const id of ids) slides[id] = canonical(await t.slideJson(id));
+  return { ids, slides };
+};
+const fingerprintOf = (read) => canonical(read);
+/** The slides whose JSON differs between two reads, and the ids one has and the other lacks. */
+export const slidesApart = (a, b) =>
+  [...new Set([...a.ids, ...b.ids])].filter((id) => a.slides[id] !== b.slides[id]);
+
 export async function run(t) {
   const { page } = t;
   await t.clickCard(t.deck.titleSlide);
@@ -167,14 +198,11 @@ export async function run(t) {
          slide alone: in a walk of a few areas the title slide can stand as the first version
          saved it, so a restore of that version changed nothing the old read looked at while the
          panel said "Restored the version of ..." (return/build/integrator.md item 12); the
-         revision moving proves the restore wrote, and the fingerprint says what it changed */
-      const fingerprint = async () => {
-        const ids = await t.slideOrder();
-        const slides = [];
-        for (const id of ids) slides.push(await t.slideJson(id));
-        return JSON.stringify({ ids, slides });
-      };
-      const current = await fingerprint();
+         revision moving proves the restore wrote, and the fingerprint says what it changed; the
+         slides' keys are compared in sorted order (`canonical`) */
+      const fingerprint = async () => fingerprintOf(await deckRead(t));
+      const before = await deckRead(t);
+      const current = fingerprintOf(before);
       const revisionBefore = (await t.state()).revision;
       await expandWindows();
       /* the row's Restore button is drawn on the row's hover and focus since the people round
@@ -265,12 +293,14 @@ export async function run(t) {
         )
         .catch(() => false);
       await t.settled();
+      /* on a miss, the slides that still differ from the read before the restore */
+      const apart = back ? [] : slidesApart(before, await deckRead(t));
       if (await t.visible('panel.versionHistory.close'))
         await t.clickControl('panel.versionHistory.close');
       else await t.press('Escape');
       return {
         ok: restored && back,
-        observed: `restore wrote ${wrote} (revision ${revisionBefore} -> ${revisionAfter}) and changed the deck ${changed} (read after ${resyncMs} ms of a 35 s bound; ${restoreCtl}; snackbar ${said ?? 'none'}; panel notice ${notice ?? 'none'}; state.error ${stateError ?? 'none'}); Cmd+Z brought the current version back ${back}`,
+        observed: `restore wrote ${wrote} (revision ${revisionBefore} -> ${revisionAfter}) and changed the deck ${changed} (read after ${resyncMs} ms of a 35 s bound; ${restoreCtl}; snackbar ${said ?? 'none'}; panel notice ${notice ?? 'none'}; state.error ${stateError ?? 'none'}); Cmd+Z brought the current version back ${back}${apart.length > 0 ? ` (slides apart: ${apart.join(', ')})` : ''}`,
       };
     },
   );
@@ -695,12 +725,7 @@ async function peopleRound(t) {
     "Version history; a row's More menu; Restore this version; Cmd+Z; the row's Restore button at rest and on hover; every meta line's scrollWidth",
     "More lists Restore this version first and a click restores (the revision moves) and Cmd+Z returns; the Restore button is drawn on hover and focus only; no meta line is clipped at the panel's 320 px",
     async () => {
-      const fingerprint = async () => {
-        const ids = await t.slideOrder();
-        const slides = [];
-        for (const id of ids) slides.push(await t.slideJson(id));
-        return JSON.stringify({ ids, slides });
-      };
+      const fingerprint = async () => fingerprintOf(await deckRead(t));
       const current = await fingerprint();
       const revisionBefore = (await t.state()).revision;
       await openHistory();

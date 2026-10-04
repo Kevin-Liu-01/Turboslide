@@ -10623,6 +10623,26 @@
       "severity": 2,
       "evidence": "b-strip-pattern.png",
       "note": "docs/LANDING.md 6.7 (second pass), V4#19"
+    },
+    {
+      "id": "home.people.loop",
+      "feature": "decks",
+      "interaction": "Half in view, the staged loop plays B's sequence with the person's uneven key gaps, Follow and Stop, its length within 1 s of the caption's figure; the marks are ink; nothing reaches the page deck or Version history",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "b-strip-people.png",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#20"
+    },
+    {
+      "id": "home.people.type",
+      "feature": "decks",
+      "interaction": "Typing in a text box of either screen shows the words on the other within 200 ms with the person's flag and caret; the first press stops the loop for good; Escape ends; Tab and Enter reach each text box",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "b-strip-people-typing.png",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#20"
     }
   ]
 }

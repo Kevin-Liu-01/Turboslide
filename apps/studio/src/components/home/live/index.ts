@@ -89,6 +89,7 @@ registerBand('kits', () => import('./kits'));
 registerBand('agents', () => import('./history').then((m) => ({ start: m.startHistory })));
 registerBand('agents', () => import('./agents').then((m) => ({ start: m.startAgents })));
 registerBand('agents', () => import('./versions'));
+registerBand('people', () => import('./people'));
 registerBand('present', () => import('./show').then((m) => ({ start: m.startShow })));
 registerBand('present', () => import('./print').then((m) => ({ start: m.startPrint })));
 registerBand('export', () => import('./seam').then((m) => ({ start: m.startSeam })));
@@ -226,6 +227,7 @@ const FILL_MODULES: Partial<Record<BandId, () => Promise<FillsModule>>> = {
   canvas: () => import('../bands/canvas.generated'),
   tailor: () => import('../bands/tailor.generated'),
   agents: () => import('../bands/agents.generated'),
+  people: () => import('../bands/people.generated'),
   present: () => import('../bands/present.generated'),
   export: () => import('../bands/export.generated'),
   patterns: () => import('../bands/patterns.generated'),

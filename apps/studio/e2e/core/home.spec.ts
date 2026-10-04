@@ -9,6 +9,7 @@ import * as motion from './home/motion';
 import * as objects from './home/objects';
 import * as page from './home/page';
 import * as patterns from './home/patterns';
+import * as people from './home/people';
 import * as present from './home/present';
 import * as tailor from './home/tailor';
 import * as versions from './home/versions';
@@ -55,6 +56,7 @@ const MODULES = [
   kits,
   versions,
   patterns,
+  people,
 ] as const;
 
 /* the runner's trace keeps its actions, network and console but not its DOM snapshots or its

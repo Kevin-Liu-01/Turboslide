@@ -1,7 +1,7 @@
-/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4, 2.13; the second pass). V4's
-   file: H5's hidden still, Pause Motion's button and its guard, the interludes and the patterns
-   band; the two people band joins in V4#20. Imported after home.css, so the reduced motion block
-   sits last. */
+/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4, 2.10, 2.13; the second pass).
+   V4's file: H5's hidden still, Pause Motion's button and its guard, the interludes, the two
+   people band and the patterns band. Imported after home.css, so the reduced motion block sits
+   last. */
 
 /* ---- Pause Motion (3.2): a 32 px text button with a 1 px hairline in the navigation; the word
    follows html[data-motion], which the boot script sets before the first paint. Both words hold
@@ -76,6 +76,217 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 @media print {
   .ts-product .ts-interlude {
     display: none;
+  }
+}
+
+/* ---- two people edit the same slide (2.10): two screens of 500 px, 24 px apart, each the
+   editor's title row over the slide; the labels pinned to the column's two sides; the presence
+   marks in ink (question 20), the visitor's own selection in the live selection's blue ---- */
+.ts-people {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'label-maya label-sam'
+    'maya sam';
+  column-gap: 24px;
+  row-gap: 12px;
+  margin-top: 40px;
+}
+
+.ts-people-label {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-people-label[data-label='maya'] {
+  grid-area: label-maya;
+}
+
+.ts-people-label[data-label='sam'] {
+  grid-area: label-sam;
+  text-align: right;
+}
+
+.ts-people-screen {
+  position: relative;
+  display: grid;
+  grid-template-rows: 32px auto;
+  min-width: 0;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+}
+
+.ts-people-screen[data-screen='maya'] {
+  grid-area: maya;
+}
+
+.ts-people-screen[data-screen='sam'] {
+  grid-area: sam;
+}
+
+.ts-people-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 4px 0 10px;
+  border-bottom: 1px solid var(--pt-edge);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--pt-ink);
+}
+
+.ts-people-deck {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ts-people-chip {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  border: 1px solid var(--pt-ink);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-people-chip.is-followed {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-people-chip[hidden] {
+  display: none;
+}
+
+.ts-people-slides {
+  position: relative;
+  min-width: 0;
+}
+
+.ts-people-slides > .ts-home-sheet[hidden] {
+  display: none;
+}
+
+.ts-people-marks {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ts-people-outline,
+.ts-people-flag {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ts-people-outline {
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+}
+
+.ts-people-outline.is-mine {
+  border-color: var(--pt-select);
+}
+
+.ts-people-flag {
+  margin-top: -18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-people-outline[hidden],
+.ts-people-flag[hidden] {
+  display: none;
+}
+
+/* a person's caret: a bar in the text's colour where their words end, 2 px on the page */
+.ts-people-caret {
+  display: inline-block;
+  width: 0;
+  height: 1em;
+  margin-left: calc(1px / var(--k, 1));
+  border-left: calc(2px / var(--k, 1)) solid currentColor;
+  vertical-align: -0.12em;
+}
+
+/* a text box reached by Tab: the page's focus ring, 2 px of the selection blue 2 px out, in the
+   screen's pixels (the slide is drawn at its 1,600 px stage and scaled by --k); a slide object
+   elsewhere draws the editor's selection instead, which these boxes do not, so the ring is theirs */
+.ts-people [data-people-box]:focus-visible {
+  outline: calc(2px / var(--k, 1)) solid var(--pt-select);
+  outline-offset: calc(2px / var(--k, 1));
+}
+
+/* while the visitor types, the screen's own selection outline marks the box */
+.ts-people [data-people-box][contenteditable],
+.ts-people [data-people-box][contenteditable]:focus-visible {
+  outline: none;
+}
+
+/* the Following plate on Maya's screen (B's), over the title row's middle */
+.ts-people-follow {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  transform: translateX(-50%);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ts-people-follow > span {
+  padding: 0 10px;
+}
+
+.ts-people-follow > span + span {
+  border-left: 1px solid color-mix(in srgb, var(--pt-paper) 40%, transparent);
+}
+
+.ts-people-follow[hidden] {
+  display: none;
+}
+
+.ts-people + .ts-caption {
+  margin-top: 16px;
+}
+
+@media (max-width: 719px) {
+  .ts-people {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'label-maya'
+      'maya'
+      'label-sam'
+      'sam';
+    row-gap: 8px;
+  }
+
+  .ts-people-label[data-label='sam'] {
+    margin-top: 16px;
+    text-align: left;
   }
 }
 

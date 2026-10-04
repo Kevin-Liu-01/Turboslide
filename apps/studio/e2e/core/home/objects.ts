@@ -21,6 +21,15 @@ export const ROWS: readonly string[] = [
 const SELECT = 'rgb(47, 92, 224)';
 /** The move curve of LANDING.md 3.1 (`--ts-ease-move`). */
 const MOVE_CURVE = 'cubic-bezier(0.65, 0, 0.35, 1)';
+
+/**
+ * A curve's text with the zero before every decimal point written: the build's CSS minifier writes
+ * the token as `cubic-bezier(.65, 0, .35, 1)`, the same curve, and a Web Animation keeps the text
+ * it was given.
+ */
+const curveText = (text: string | undefined): string =>
+  (text ?? '').replace(/(^|[(\s,])\.(?=\d)/g, '$10.');
+
 /** The hero frame's slide 1 title (LANDING.md 2.2): the frame's thumbnails carry the same id, unfocusable. */
 const HERO_TITLE = '[data-band="hero"] [data-hero-slide] [data-object="title#heading"]';
 const LIVE_READY = 'main[data-live="ready"]';
@@ -466,7 +475,7 @@ export function rows(): void {
       expect(anim).toBeDefined();
       expect(anim?.duration).toBeGreaterThan(0);
       expect(anim?.duration).toBeLessThanOrEqual(700);
-      expect(anim?.easing).toBe(MOVE_CURVE);
+      expect(curveText(anim?.easing)).toBe(MOVE_CURVE);
       expect(anim?.props).toEqual(['transform']);
       expect(await settledIn(page, HERO_TITLE, 900)).toBeLessThanOrEqual(800);
       const g3 = await geom(page, HERO_TITLE);

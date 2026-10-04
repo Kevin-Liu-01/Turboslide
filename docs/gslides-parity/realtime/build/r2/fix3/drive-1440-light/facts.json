@@ -1,0 +1,98 @@
+{
+  "startedAt": "2026-10-03T22:34:24.259Z",
+  "baseA": "http://127.0.0.1:4472",
+  "baseB": "http://127.0.0.1:4482",
+  "width": 1440,
+  "appearance": "light",
+  "pictures": [
+    "box-round3-a.png",
+    "box-round3-b.png",
+    "cover-round3-a.png",
+    "cover-round3-b.png"
+  ],
+  "deck.id": "untitled-20261003-ajfb",
+  "setup": {
+    "slides": [
+      "title",
+      "title-1-09d7"
+    ],
+    "coverId": "title-1-09d7",
+    "syncA": {
+      "tier": "do",
+      "transport": "ws"
+    }
+  },
+  "box.rounds": [
+    {
+      "round": 1,
+      "delayB": 15,
+      "load": "25.25",
+      "bothMsAfterEscape": 102,
+      "a": "Two people type here tb1 ub1 ta1 ua1",
+      "b": "Two people type here tb1 ub1 ta1 ua1",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 2,
+      "delayB": 147,
+      "load": "24.35",
+      "bothMsAfterEscape": 140,
+      "a": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "b": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 3,
+      "delayB": 121,
+      "load": "24.35",
+      "bothMsAfterEscape": 45,
+      "a": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "b": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "equal": true,
+      "lost": []
+    }
+  ],
+  "cover.rounds": [
+    {
+      "round": 1,
+      "delayB": 1,
+      "load": "23.36",
+      "bothMsAfterEscape": 110,
+      "a": "Two typers ca1 da1 cb1 db1",
+      "b": "Two typers ca1 da1 cb1 db1",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 2,
+      "delayB": 10,
+      "load": "22.45",
+      "bothMsAfterEscape": 82,
+      "a": "Two typers ca1 da1 cb1 db1 cb2 db2 ca2 da2",
+      "b": "Two typers ca1 da1 cb1 db1 cb2 db2 ca2 da2",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 3,
+      "delayB": 66,
+      "load": "21.61",
+      "bothMsAfterEscape": 54,
+      "a": "Two typers ca1 da1 cb1 db1 cb2 db2 ca2 da2 cb3 db3 ca3 da3",
+      "b": "Two typers ca1 da1 cb1 db1 cb2 db2 ca2 da2 cb3 db3 ca3 da3",
+      "equal": true,
+      "lost": []
+    }
+  ],
+  "cover.kind": {
+    "a": "content",
+    "b": "content"
+  },
+  "teardown": {
+    "id": "untitled-20261003-ajfb",
+    "editStatus": 404
+  },
+  "endedAt": "2026-10-03T22:34:57.233Z"
+}

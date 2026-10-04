@@ -808,6 +808,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                 blockId: selection.blockId,
                 path: `/${selection.pointer}`,
                 range: caret.range,
+                seq: presenceSeqRef.current,
               },
             }
           : {}),
@@ -815,31 +816,6 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       presenting: snap.view.present,
     });
   }, [controller, snap.activeSlide, selection, multiSelection, caret, snap.view.present]);
-  const now = new Date().toISOString();
-  const ownClientId = snap.sync?.clientId ?? null;
-  const rosterRows = useMemo(
-    () => snap.roster.map((entry) => participantOf(entry, now)),
-    [snap.roster],
-  );
-  /* this tab is every id it was issued (hotfix 2 cause B3), so a roster row of its earlier id after
-     a reload or a remount is never a chip, a mark, an outline, a caret or a roster row */
-  const { self: ownRow, others: otherRows } = useMemo(
-    () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
-    [rosterRows, snap.ownClientIds, ownClientId],
-  );
-  /* the last answer of Change name or Change avatar, with the own row's key at the moment it
-     arrived; read by the account block below (docs/PEOPLE.md 3.11; own-identity.ts) */
-  const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
-  /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
-  const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
-                seq: presenceSeqRef.current,
-  const ownRowRef = useRef<PresenceParticipant | null>(null);
-  ownRowRef.current = ownRow;
-  /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
-     the merged map (docs/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
-     map's text replaces the row's own, the row's live facts stay */
-  const suffixed = controller.identities();
-  const withText = (row: PresenceParticipant): PresenceParticipant => {
   /* the pointer (REALTIME.md 3.5; Google's rule, audit-people.md section 2): sampled from the
      stage's pointer moves in sheet units once per presence batch while View > Live pointers >
      Show my pointer is on and the tab may edit; outside the sheet, or when the switch goes off,
@@ -890,6 +866,30 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       controller.reportPresence({ pointer: undefined });
     };
   }, [controller, publishPointer]);
+  const now = new Date().toISOString();
+  const ownClientId = snap.sync?.clientId ?? null;
+  const rosterRows = useMemo(
+    () => snap.roster.map((entry) => participantOf(entry, now)),
+    [snap.roster],
+  );
+  /* this tab is every id it was issued (hotfix 2 cause B3), so a roster row of its earlier id after
+     a reload or a remount is never a chip, a mark, an outline, a caret or a roster row */
+  const { self: ownRow, others: otherRows } = useMemo(
+    () => partitionRoster(rosterRows, new Set(snap.ownClientIds), ownClientId),
+    [rosterRows, snap.ownClientIds, ownClientId],
+  );
+  /* the last answer of Change name or Change avatar, with the own row's key at the moment it
+     arrived; read by the account block below (docs/PEOPLE.md 3.11; own-identity.ts) */
+  const [me, setMe] = useState<{ facts: MeAnswerFacts; rosterKey: string } | null>(null);
+  /* the choice the last answer carried: the roster never carries it, so it outlives the overlay */
+  const [chosenAvatar, setChosenAvatar] = useState<AvatarChoiceView | null | undefined>(undefined);
+  const ownRowRef = useRef<PresenceParticipant | null>(null);
+  ownRowRef.current = ownRow;
+  /* the "(2)" suffix of a colliding label reaches the roster rows and the chip tooltips through
+     the merged map (docs/PEOPLE.md 3.17, default 4; the row people.labels-disambiguated): the
+     map's text replaces the row's own, the row's live facts stay */
+  const suffixed = controller.identities();
+  const withText = (row: PresenceParticipant): PresenceParticipant => {
     const view = suffixed[row.principalId];
     if (view === undefined) return row;
     return { ...row, label: view.label, ...(view.name !== undefined ? { name: view.name } : {}) };
@@ -1982,6 +1982,24 @@ type EditorStageProps = {
 /** A right-click on a grid tile (SPEC 4.4): the card menu at the pointer. */
 type GridMenu = { slideId: string; x: number; y: number; element: HTMLElement };
 
+/**
+ * The presence `drag` field of a viewer drag frame (docs/REALTIME.md 3.4; the realtime round,
+ * R2): the dragged block's box in whole sheet units, so the 2,048 byte cap holds; undefined at
+ * the session's end, which takes the field out of the state that follows the release.
+ */
+function dragFieldOf(
+  frame: DragFrame | null,
+): { blockId: string; x: number; y: number; w: number; h: number } | undefined {
+  if (frame === null) return undefined;
+  return {
+    blockId: frame.blockId,
+    x: Math.round(frame.box[0]),
+    y: Math.round(frame.box[1]),
+    w: Math.max(0, Math.round(frame.box[2])),
+    h: Math.max(0, Math.round(frame.box[3])),
+  };
+}
+
 function EditorStage({
   controller,
   snap,
@@ -2006,24 +2024,6 @@ function EditorStage({
   const [canvasMenu, setCanvasMenu] = useState<EditorContextMenu | null>(null);
   const [gridMenu, setGridMenu] = useState<GridMenu | null>(null);
   const [tile, setTile] = useState<GridTileSize>(GRID_DEFAULT_TILE);
-/**
- * The presence `drag` field of a viewer drag frame (docs/REALTIME.md 3.4; the realtime round,
- * R2): the dragged block's box in whole sheet units, so the 2,048 byte cap holds; undefined at
- * the session's end, which takes the field out of the state that follows the release.
- */
-function dragFieldOf(
-  frame: DragFrame | null,
-): { blockId: string; x: number; y: number; w: number; h: number } | undefined {
-  if (frame === null) return undefined;
-  return {
-    blockId: frame.blockId,
-    x: Math.round(frame.box[0]),
-    y: Math.round(frame.box[1]),
-    w: Math.max(0, Math.round(frame.box[2])),
-    h: Math.max(0, Math.round(frame.box[3])),
-  };
-}
-
   const slide =
     viewerDeck.slides.find((entry) => entry.id === shell.active) ?? viewerDeck.slides[0];
   const record = snap.document.slides[shell.active];
@@ -2119,6 +2119,11 @@ function dragFieldOf(
           /* the objects round (docs/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
              frame record reaches describe().state.gesture through the controller */
           onGesture={(report) => controller.setGestureRecord(report)}
+          /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
+             the viewer's move and resize sessions tell the dragged block's box at every preview
+             frame and null at the release, reported as the presence `drag` field; the state
+             that follows the release carries no drag, and the `pos` write lands as before */
+          onDragFrame={(frame) => controller.reportPresence({ drag: dragFieldOf(frame) })}
           selection={toStageSelection(snap.selection, slide.id)}
           onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
           onMultiSelectionChange={onMultiSelection}
@@ -2143,11 +2148,6 @@ function dragFieldOf(
             void controller
               .invoke('deck.guides', {
                 ...input,
-          /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
-             the viewer's move and resize sessions tell the dragged block's box at every preview
-             frame and null at the release, reported as the presence `drag` field; the state
-             that follows the release carries no drag, and the `pos` write lands as before */
-          onDragFrame={(frame) => controller.reportPresence({ drag: dragFieldOf(frame) })}
                 baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
               })
               .catch((error: unknown) => controller.say(errorMessage(error)));

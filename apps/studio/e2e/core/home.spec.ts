@@ -1,3 +1,5 @@
+import { test } from '@playwright/test';
+
 import { coverage } from './lib';
 import * as agents from './home/agents';
 import * as exportBand from './home/export';
@@ -54,6 +56,15 @@ const MODULES = [
   versions,
   patterns,
 ] as const;
+
+/* the runner's trace keeps its actions, network and console but not its DOM snapshots or its
+   screencast: together they take 2 to 3 ms of the page's main thread a second at rest (read
+   2026-10-03 19:15 to 19:25 on home.motion.offscreen's spot: 2.1 to 3.0 ms with them, 0.1 ms with
+   --trace off, 0 ms with this setting), which the rows that bound the page's own task time at rest
+   would read as the page's */
+test.use({
+  trace: { mode: 'retain-on-failure', screenshots: false, snapshots: false, sources: true },
+});
 
 for (const module of MODULES) module.rows();
 

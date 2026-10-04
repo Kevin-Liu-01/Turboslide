@@ -1,0 +1,234 @@
+{
+  "base": "http://localhost:4477",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "seedTwins": {
+    "overlay": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/ship/overlay",
+    "decks": [
+      {
+        "deck": "gt-brand",
+        "placed": 202,
+        "present": 0,
+        "source": "/Users/kevinliu/repos/Turboslide-realtime/decks/gt-brand/assets"
+      }
+    ]
+  },
+  "startedAt": "2026-10-04T08:38:21.234Z",
+  "ms": 171093,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": null,
+  "cost": null,
+  "accounts": {
+    "exit": 0,
+    "ms": 170844,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/ship/gate-accounts/accounts.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "accounts",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 16,
+  "passed": 15,
+  "failed": 0,
+  "notDriven": 1,
+  "manual": [
+    "accounts.google-roundtrip"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [
+    "accounts.google-roundtrip"
+  ],
+  "commit": "f2e648f1",
+  "origin": "http://localhost:4477",
+  "date": "2026-10-04",
+  "results": {
+    "people.verified-badge": "passed",
+    "people.versions-author-account": "passed",
+    "people.labels-disambiguated": "passed",
+    "share.dialog.grant-email-line": "passed",
+    "people.avatar-upload": "passed",
+    "people.avatar-cap-refusal": "passed",
+    "people.avatar-rotation": "passed",
+    "people.avatar-fallback-plate": "passed",
+    "people.avatar-link-visitor": "passed",
+    "people.avatar-metadata-stripped": "passed",
+    "accounts.google-button": "passed",
+    "accounts.google-error-sentence": "passed",
+    "accounts.google-leaves": "passed",
+    "accounts.email-hidden-without-mail": "passed",
+    "accounts.sign-out-clean": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": [
+      {
+        "id": "accounts.google-roundtrip",
+        "feature": "share",
+        "reason": "no identity database on this base"
+      }
+    ]
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "people.verified-badge",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.versions-author-account",
+      "feature": "versions",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.labels-disambiguated",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.grant-email-line",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-upload",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-cap-refusal",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-rotation",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-fallback-plate",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-link-visitor",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "people.avatar-metadata-stripped",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.sign-out-clean",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-button",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-leaves",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-error-sentence",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.email-hidden-without-mail",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-roundtrip",
+      "feature": "share",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "no identity database on this base"
+    }
+  ]
+}

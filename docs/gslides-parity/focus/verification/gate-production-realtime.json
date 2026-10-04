@@ -1,0 +1,466 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": "blob",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is blob",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T11:04:13.255Z",
+  "ms": 817398,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 101549,
+    "json": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/ship/gate-production-realtime/core-walk.json",
+    "deckId": "untitled-20261004-m0ib",
+    "steps": 20
+  },
+  "specs": {
+    "exit": 1,
+    "ms": 714973,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/ship/gate-production-realtime/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "realtime",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 16,
+  "passed": 1,
+  "failed": 15,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "7d5f961c",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-04",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "realtime.card.chip-painted": "failed",
+    "realtime.agent.write-announced": "failed",
+    "realtime.keystroke.within-300ms": "failed",
+    "realtime.caret.within-300ms": "failed",
+    "realtime.caret.offset-after-merge": "failed",
+    "realtime.selection.outline-within-300ms": "failed",
+    "realtime.block.drag-live": "failed",
+    "realtime.title.two-typers": "failed",
+    "realtime.join.chip-within-1s": "failed",
+    "realtime.follow.for-everyone": "failed",
+    "realtime.reload.loses-nothing": "failed",
+    "realtime.reconnect.loses-nothing": "failed",
+    "realtime.pointer.second-browser": "failed",
+    "realtime.caret.dims-and-leaves": "failed",
+    "realtime.share-link.every-instance": "failed",
+    "realtime.departed-guest.name-stable": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "realtime.keystroke.within-300ms",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.caret.within-300ms",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.caret.offset-after-merge",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.selection.outline-within-300ms",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.block.drag-live",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.title.two-typers",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.join.chip-within-1s",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.follow.for-everyone",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.agent.write-announced",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.share-link.every-instance",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.reload.loses-nothing",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.reconnect.loses-nothing",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.pointer.second-browser",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.caret.dims-and-leaves",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.card.chip-painted",
+        "feature": "realtime",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "realtime.keystroke.within-300ms",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.caret.within-300ms",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.caret.offset-after-merge",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.selection.outline-within-300ms",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.block.drag-live",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.follow.for-everyone",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.share-link.every-instance",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.reconnect.loses-nothing",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.pointer.second-browser",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.caret.dims-and-leaves",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "realtime.keystroke.within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: ten of ten within 300 ms of the keystroke in one region (A 1404 ms, B 1865 ms, C 850 ms, D 1166 ms, E 6653 ms, F 5645 ms, G 4637 ms, H 3628 ms, I 2623 ms, J 3958 ms)"
+    },
+    {
+      "id": "realtime.caret.within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "realtime.caret.offset-after-merge",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "realtime.selection.outline-within-300ms",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the outline follows B's clicks within 300 ms, eight of eight (rt-sel-x 4624 ms, rt-sel-y 6600 ms, rt-sel-x 2424 ms, rt-sel-y 4446 ms, rt-sel-y 2266 ms)"
+    },
+    {
+      "id": "realtime.block.drag-live",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: A sees the block's box follow while the drag runs (at least three positions at 80 ms steps)"
+    },
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "realtime.follow.for-everyone",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: within 1 s of their click"
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: within 1 s of the write"
+    },
+    {
+      "id": "realtime.share-link.every-instance",
+      "feature": "realtime",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "failed",
+      "reason": "Error: ten of ten links open the editor within a second of the mint"
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: every word in both browsers within 3 s of A's last keystroke"
+    },
+    {
+      "id": "realtime.reconnect.loses-nothing",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "realtime.pointer.second-browser",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: B's pointer is drawn in A"
+    },
+    {
+      "id": "realtime.caret.dims-and-leaves",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    },
+    {
+      "id": "realtime.card.chip-painted",
+      "feature": "realtime",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "B clicks card 2; A's card 2 shows B's 16 px chip in the pixels at the card's top right: B in A's roster true; .ts-card-marks (data-count 1) on card 2 in the DOM 2137 ms after B's click (bound 2000); the pixel read at 2155 ms over 74x20: 139 pixel(s) differ with the marks hidden (first at 56,2; 57,2; 58,2); painted"
+    },
+    {
+      "id": "realtime.departed-guest.name-stable",
+      "feature": "realtime",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

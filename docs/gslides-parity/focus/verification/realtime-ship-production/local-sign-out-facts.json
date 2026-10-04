@@ -1,0 +1,214 @@
+{
+  "startedAt": "2026-10-04T08:41:40.429Z",
+  "baseA": "http://localhost:4477",
+  "baseB": "http://localhost:4487",
+  "width": 1440,
+  "appearance": "light",
+  "label": "ship-sqlite",
+  "deck.id": "untitled-20261004-zd63",
+  "dialog.capture": {
+    "account": true,
+    "rows": [
+      "account.sentence",
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signIn",
+      "account.forget"
+    ],
+    "signIn": true,
+    "box": [
+      400,
+      320
+    ],
+    "methods": [
+      {
+        "id": "dialog.signIn.close",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.email",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.google",
+        "text": "Continue with Google",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.passkey",
+        "text": "Use a passkeyPasskeys arrive once the ad",
+        "disabled": true
+      },
+      {
+        "id": "dialog.signIn.error",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.cancel",
+        "text": "Cancel",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.continue",
+        "text": "Continue",
+        "disabled": true
+      }
+    ],
+    "text": "Sign inEmailContinue with GoogleUse a passkeyPasskeys arrive once the address is finalCancelContinue",
+    "emailField": true,
+    "theme": "light"
+  },
+  "dialog.mailOff": {
+    "account": true,
+    "rows": [
+      "account.sentence",
+      "account.changeName",
+      "account.changeAvatar",
+      "account.signIn",
+      "account.forget"
+    ],
+    "signIn": true,
+    "box": [
+      400,
+      320
+    ],
+    "methods": [
+      {
+        "id": "dialog.signIn.close",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.google",
+        "text": "Continue with Google",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.passkey",
+        "text": "Use a passkeyPasskeys arrive once the ad",
+        "disabled": true
+      },
+      {
+        "id": "dialog.signIn.error",
+        "text": "",
+        "disabled": false
+      },
+      {
+        "id": "dialog.signIn.cancel",
+        "text": "Cancel",
+        "disabled": false
+      }
+    ],
+    "text": "Sign inContinue with GoogleUse a passkeyPasskeys arrive once the address is finalCancel",
+    "emailField": false,
+    "theme": "light"
+  },
+  "errorSentence": {
+    "sentence": "Sign in did not complete (account not linked). Try again or use another method",
+    "url": "http://localhost:4477/edit/untitled-20261004-zd63",
+    "paramGone": true
+  },
+  "google.capture": {
+    "socialStatus": 200,
+    "leftAfterMs": 76,
+    "host": "accounts.google.com",
+    "path": "/o/oauth2/v2/auth",
+    "redirectUri": "http://localhost:4477/api/auth/callback/google",
+    "scope": "email profile openid",
+    "prompt": "select_account",
+    "responseType": "code",
+    "codeChallenge": true,
+    "codeChallengeMethod": "S256",
+    "accessType": null,
+    "state": true,
+    "clientIdPrefix": "fake"
+  },
+  "google.mailOff": {
+    "socialStatus": 200,
+    "leftAfterMs": 93,
+    "host": "accounts.google.com",
+    "path": "/o/oauth2/v2/auth",
+    "redirectUri": "http://localhost:4487/api/auth/callback/google",
+    "scope": "email profile openid",
+    "prompt": "select_account",
+    "responseType": "code",
+    "codeChallenge": true,
+    "codeChallengeMethod": "S256",
+    "accessType": null,
+    "state": true,
+    "clientIdPrefix": "fake"
+  },
+  "email.signIn": {
+    "before": {
+      "account": true,
+      "words": "OOsmium 389Not signed in",
+      "badge": null,
+      "rows": [
+        "account.sentence",
+        "account.changeName",
+        "account.changeAvatar",
+        "account.signIn",
+        "account.forget"
+      ]
+    },
+    "codeShape": true,
+    "reloadMs": 975,
+    "after": {
+      "account": true,
+      "words": "N5Neon 510Signed in as verifier4-mutko18k@example.test",
+      "badge": {
+        "label": "signed in",
+        "size": 14
+      },
+      "rows": [
+        "account.sentence",
+        "account.changeName",
+        "account.changeAvatar",
+        "account.signOut",
+        "account.forget",
+        "account.sessions"
+      ]
+    },
+    "session": {
+      "user": true,
+      "email": "verifier4-mutko18k@example.test"
+    }
+  },
+  "signOut": {
+    "signOutRow": true,
+    "reloadedByItself": true,
+    "reloadedMs": 169,
+    "calls": [
+      {
+        "url": "Zm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+        "status": 200
+      },
+      {
+        "url": "Zm4tc3BsaXQiLCJleHBvcnQiOiJydW5EZWNrQWN0aW9uRm5fY3JlYXRlU2VydmVyRm5faGFuZGxlciJ9",
+        "status": 200
+      }
+    ],
+    "head": {
+      "account": true,
+      "words": "GGraphite 467Not signed in",
+      "badge": null,
+      "rows": [
+        "account.sentence",
+        "account.changeName",
+        "account.changeAvatar",
+        "account.signIn",
+        "account.forget"
+      ]
+    },
+    "session": {
+      "user": false,
+      "email": null
+    },
+    "identity": null
+  },
+  "teardown.error": "Error: page.evaluate: RangeError: You can view this presentation. Request edit access to change it.\n    at invoke (http://localhost:4477/src/editor/controller.tsx:3714:11)\n    at Object.<anonymous> (http://localhost:4477/@fs/Users/kevinliu/repos/Turboslide-realtime/packages/agent/src/window/adapter.",
+  "endedAt": "2026-10-04T08:41:59.469Z"
+}

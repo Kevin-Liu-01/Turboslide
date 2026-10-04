@@ -1,0 +1,3 @@
+check against https://www.turboslide.com: green
+numbers: smoke 42/42; walk 127 2 2 0 (decks.file.open-list-search standing (failed: File > Open; read the list; type in the search; clear it: 1 decks listed after 1 ms, first untitled-20261004-cs6l; filtered by nonsense 0; cleared 148); fonts.table.takes-family standing (not driven: not on this build: toolbar.font (docs/PRODUCT.md 7.1, B1); the Font control on a selected table is drawn disabled ("Inter"); takesFamily is P1 (FEAT)) in 754s; specs 9 0 0 0 in 401s (realtime rows skipped: the tree expects the blob tier (scripts/hosting/production.json)); decks: untitled-20261004-cs6l gone (deck.info 404); check 1181s; load 25.51
+exit 0

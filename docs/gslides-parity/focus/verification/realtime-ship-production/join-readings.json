@@ -1,0 +1,259 @@
+{
+ "row": "collab.presence.join-within-2s",
+ "bound": "B's chip within 2000 ms plus 1500 ms of B's navigation",
+ "readings": [
+  {
+   "origin": "production 7d5f961c",
+   "run": "gate-production-realtime-sync",
+   "result": "failed",
+   "bMs": 6130,
+   "cMs": "10021"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "gate-production-realtime-join-rerun",
+   "result": "failed",
+   "bMs": 4462,
+   "cMs": "1874"
+  },
+  {
+   "origin": "preview deac61a1",
+   "run": "join-old-1",
+   "result": "passed",
+   "bMs": 1906,
+   "cMs": "2140"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "join-prod-2",
+   "result": "failed",
+   "bMs": 4262,
+   "cMs": "1739"
+  },
+  {
+   "origin": "preview deac61a1",
+   "run": "join-old-2",
+   "result": "passed",
+   "bMs": 1688,
+   "cMs": "1477"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "join-prod-3",
+   "result": "passed",
+   "bMs": 1807,
+   "cMs": "1937"
+  },
+  {
+   "origin": "preview f2e648f1 (R4)",
+   "run": "join-r4-1",
+   "result": "passed",
+   "bMs": 2161,
+   "cMs": "2227"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3)",
+   "run": "join-r3-1",
+   "result": "passed",
+   "bMs": 1885,
+   "cMs": "1496"
+  },
+  {
+   "origin": "preview f2e648f1 (R4)",
+   "run": "join-r4-2",
+   "result": "failed",
+   "bMs": 4229,
+   "cMs": "2013"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3)",
+   "run": "join-r3-2",
+   "result": "passed",
+   "bMs": 1670,
+   "cMs": "1609"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "join-prod-4",
+   "result": "failed",
+   "bMs": 10758,
+   "cMs": "2272"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3)",
+   "run": "join-r3-3",
+   "result": "failed",
+   "bMs": 4039,
+   "cMs": "1726"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "join-prod-5",
+   "result": "failed",
+   "bMs": 6512,
+   "cMs": "10285"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3)",
+   "run": "join-r3-4",
+   "result": "failed",
+   "bMs": 7073,
+   "cMs": "4229"
+  },
+  {
+   "origin": "production 7d5f961c",
+   "run": "join-prod-6",
+   "result": "failed",
+   "bMs": 7692,
+   "cMs": "11787"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3)",
+   "run": "join-r3-5",
+   "result": "failed",
+   "bMs": 9976,
+   "cMs": "5122"
+  },
+  {
+   "origin": "preview deac61a1",
+   "run": "join-old-3",
+   "result": "passed",
+   "bMs": 1689,
+   "cMs": "3318"
+  },
+  {
+   "origin": "preview 1bafa66e (R1)",
+   "run": "join-r1-1",
+   "result": "passed",
+   "bMs": 1595,
+   "cMs": "1670"
+  },
+  {
+   "origin": "preview deac61a1",
+   "run": "join-old-4",
+   "result": "passed",
+   "bMs": 1889,
+   "cMs": "1710"
+  },
+  {
+   "origin": "preview 1bafa66e (R1)",
+   "run": "join-r1-2",
+   "result": "passed",
+   "bMs": 2393,
+   "cMs": "1549"
+  },
+  {
+   "origin": "preview deac61a1",
+   "run": "join-old-5",
+   "result": "passed",
+   "bMs": 3325,
+   "cMs": "3179"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2)",
+   "run": "join-r2-1",
+   "result": "passed",
+   "bMs": 1740,
+   "cMs": "1626"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2)",
+   "run": "join-r2-2",
+   "result": "passed",
+   "bMs": 2006,
+   "cMs": "1527"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2)",
+   "run": "join-r2-3",
+   "result": "passed",
+   "bMs": 2435,
+   "cMs": "1744"
+  },
+  {
+   "origin": "production 5ce68a72 (after the rollback)",
+   "run": "join-prod-r2-1",
+   "result": "passed",
+   "bMs": 1732,
+   "cMs": "2172"
+  },
+  {
+   "origin": "production 5ce68a72 (after the rollback)",
+   "run": "join-prod-r2-2",
+   "result": "passed",
+   "bMs": 2728,
+   "cMs": "3408"
+  },
+  {
+   "origin": "production 5ce68a72 (after the rollback)",
+   "run": "join-prod-r2-3",
+   "result": "passed",
+   "bMs": 1861,
+   "cMs": "2242"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3), marks",
+   "run": "marks-r3-1",
+   "result": "passed",
+   "bMs": 1612,
+   "cMs": "1596",
+   "marks": "goto 1147, url 1148, studio 1278, settled 1297, hello 1417, rosterA 1594, chip 1612"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2), marks",
+   "run": "marks-r2-1",
+   "result": "passed",
+   "bMs": 1609,
+   "cMs": "3230",
+   "marks": "goto 1148, url 1149, studio 1265, settled 1286, hello 1416, rosterA 1596, chip 1608"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3), marks",
+   "run": "marks-r3-2",
+   "result": "failed",
+   "bMs": 6804,
+   "cMs": "1706",
+   "marks": "goto 1218, url 1219, studio 1335, settled 1354, hello 1479, rosterA 6651, chip 6804"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2), marks",
+   "run": "marks-r2-2",
+   "result": "failed",
+   "bMs": 3833,
+   "cMs": "3197",
+   "marks": "goto 1172, url 1173, studio 1359, settled 1382, hello 1507, rosterA 3757, chip 3833"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3), marks",
+   "run": "marks-r3-3",
+   "result": "failed",
+   "bMs": 7171,
+   "cMs": "1465",
+   "marks": "goto 1288, url 1289, studio 1407, settled 1426, hello 1824, rosterA 6720, chip 7171"
+  },
+  {
+   "origin": "preview 5ce68a72 (R2), marks",
+   "run": "marks-r2-3",
+   "result": "failed",
+   "bMs": 7638,
+   "cMs": "2927",
+   "marks": "goto 1897, url 1898, studio 2062, settled 2109, hello 2262, rosterA 7380, chip 7638"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3), marks",
+   "run": "marks-r3-4",
+   "result": "passed",
+   "bMs": 1948,
+   "cMs": "3303",
+   "marks": "goto 1267, url 1270, studio 1426, settled 1467, hello 1870, chip 1906, rosterA 1948"
+  },
+  {
+   "origin": "preview eb7cebe5 (R3), marks",
+   "run": "marks-r3-5",
+   "result": "failed",
+   "bMs": 4073,
+   "cMs": "2053",
+   "marks": "goto 1273, url 1279, studio 1444, settled 1495, hello 1687, rosterA 3767, chip 4073"
+  }
+ ]
+}

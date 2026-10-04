@@ -1,0 +1,58 @@
+{
+  "startedAt": "2026-10-04T10:17:11.933Z",
+  "base": "https://www.turboslide.com",
+  "appearance": "light",
+  "editorReadyMs": 1383,
+  "commit": null,
+  "menuRows": [
+    "account.sentence",
+    "account.changeName",
+    "account.changeAvatar",
+    "account.signIn",
+    "account.forget"
+  ],
+  "methods": [
+    {
+      "id": "dialog.signIn.close",
+      "text": ""
+    },
+    {
+      "id": "dialog.signIn.google",
+      "text": "Continue with Google"
+    },
+    {
+      "id": "dialog.signIn.passkey",
+      "text": "Use a passkeyPasskeys arrive once the ad"
+    },
+    {
+      "id": "dialog.signIn.error",
+      "text": ""
+    },
+    {
+      "id": "dialog.signIn.cancel",
+      "text": "Cancel"
+    }
+  ],
+  "dialogText": "Sign inContinue with GoogleUse a passkeyPasskeys arrive once the address is finalCancel",
+  "socialStatus": 200,
+  "socialMethod": "POST",
+  "socialBody": {
+    "provider": "google",
+    "callbackURL": "https://www.turboslide.com/new"
+  },
+  "leftForGoogleAfterMs": 288,
+  "authorization": {
+    "host": "accounts.google.com",
+    "path": "/o/oauth2/v2/auth",
+    "redirectUri": "https://www.turboslide.com/api/auth/callback/google",
+    "scope": "email profile openid",
+    "prompt": "select_account",
+    "responseType": "code",
+    "codeChallengeMethod": "S256",
+    "state": true,
+    "clientIdPrefix": "194391774294",
+    "sameAsNavigation": true
+  },
+  "deckPath": "/",
+  "endedAt": "2026-10-04T10:17:15.416Z"
+}

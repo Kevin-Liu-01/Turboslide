@@ -601,6 +601,10 @@ export type HomeMotionState = {
   running(): string[];
   /** every loop id registered with `loop` on the page */
   registered(): string[];
+  /** the loop ids stopped for good (`LoopHandle.stop`: a press in the hero's or the people's stage) */
+  stopped(): string[];
+  /** each registered loop's last read share in view, 0 to 1 */
+  visible(): Record<string, number>;
 };
 
 declare global {
@@ -668,5 +672,7 @@ export function installGuards(): void {
     },
     running: () => loops.filter((item) => item.running).map((item) => item.id),
     registered: () => loops.map((item) => item.id),
+    stopped: () => loops.filter((item) => item.stopped).map((item) => item.id),
+    visible: () => Object.fromEntries(loops.map((item) => [item.id, item.vis])),
   };
 }

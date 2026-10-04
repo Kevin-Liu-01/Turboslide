@@ -148,6 +148,17 @@ export type SharedPresenceOptions<T extends PresenceRow> = {
 export type SharedPresence<T extends PresenceRow> = {
   /** writes a row, alive for `ttlMs` at most `maxTtlMs`, announces it here and pushes it when due */
   set: (deckId: string, clientId: string, state: T, ttlMs: number) => Promise<void>;
+  /**
+   * The join row of a client whose stream opened on this instance, before any state of the client
+   * landed here: announced here at once and listed in this instance's roster, never pushed, no
+   * store call. The stream route makes it from the identity it resolved, so the tabs streaming
+   * here see the joiner without waiting for the joiner's first presence POST, which the platform
+   * may land on another instance that this one reads only at its next tick. The row stands until
+   * the client's own state lands here (`set`, which pushes it as a join), the record carries the
+   * client's row, the client leaves, or it runs out (`maxTtlMs`). False when nothing was
+   * announced: the client has a row here or in the record already, or left.
+   */
+  join: (deckId: string, clientId: string, state: T, ttlMs: number) => boolean;
   /** the live rows of every instance, this instance's own pointer included */
   roster: (deckId: string) => Promise<T[]>;
   /**
@@ -224,8 +235,13 @@ type PendingChange =
   { kind: 'set'; n: number } | { kind: 'leave'; n: number; at: number; clock?: number };
 
 type DeckPresence<T> = {
-  /** this instance's rows, from the posts that landed here */
+  /** this instance's rows, from the posts that landed here and the join rows of `join` */
   local: Map<string, StoredRow<T>>;
+  /**
+   * the clients whose row in `local` is a join row (`join`): neither pending nor in the record,
+   * and kept by a proven read all the same until the client's own state or the record replaces it
+   */
+  joined: Set<string>;
   /** the changes not yet in the record */
   pending: Map<string, PendingChange>;
   remote: RemoteRecord<T>;
@@ -364,6 +380,7 @@ export function sharedPresence<T extends PresenceRow>(
     if (d === undefined) {
       d = {
         local: new Map(),
+        joined: new Set(),
         pending: new Map(),
         remote: emptyRemote(),
         announced: new Map(),
@@ -522,10 +539,12 @@ export function sharedPresence<T extends PresenceRow>(
       const local = d.local.get(clientId);
       if (alive(local, t) && local.state.clock >= row.state.clock) continue;
       if (d.announced.get(clientId) === row.state.clock) continue;
-      // the client moved to another instance: its row here is behind the record's
+      // the client moved to another instance: its row here is behind the record's (a join row
+      // here is replaced by the client's own state, pushed from the instance its POST landed on)
       if (local !== undefined) {
         d.local.delete(clientId);
         d.pending.delete(clientId);
+        d.joined.delete(clientId);
       }
       d.announced.set(clientId, row.state.clock);
       options.publish(deckId, {
@@ -555,14 +574,20 @@ export function sharedPresence<T extends PresenceRow>(
       if (alive(local, t)) continue;
       d.local.delete(clientId);
       d.pending.delete(clientId);
+      d.joined.delete(clientId);
       if (!rows.has(clientId)) options.publish(deckId, { type: 'leave', clientId });
     }
     if (!d.remote.proven) return;
     for (const [clientId, local] of [...d.local]) {
       if (d.pending.has(clientId) && !buried(local, d.remote.left)) continue;
       if (rows.has(clientId) && !buried(local, d.remote.left)) continue;
+      // a join row (`join`) is in no record by design: the client's own state reaches the record
+      // from whichever instance its POST lands on, and a read made before that push lands must
+      // not take the joiner's chip away again; a tombstone of the client still does
+      if (d.joined.has(clientId) && !buried(local, d.remote.left)) continue;
       d.local.delete(clientId);
       d.pending.delete(clientId);
+      d.joined.delete(clientId);
       options.publish(deckId, { type: 'leave', clientId });
     }
   };
@@ -645,6 +670,7 @@ export function sharedPresence<T extends PresenceRow>(
           d.goneAt = now();
           d.pending.clear();
           d.local.clear();
+          d.joined.clear();
           return;
         }
       }
@@ -756,6 +782,7 @@ export function sharedPresence<T extends PresenceRow>(
         if (d.goneAt + PRESENCE_GONE_MEMORY_MS > t) {
           d.pending.clear();
           d.local.clear();
+          d.joined.clear();
           return;
         }
         d.goneAt = undefined;
@@ -830,9 +857,26 @@ export function sharedPresence<T extends PresenceRow>(
       if (tomb !== undefined && state.clock <= tomb) return;
       d.seq += 1;
       d.local.set(clientId, { at: t, expiresAt: t + Math.min(ttlMs, maxTtl), state });
+      // the client's own state replaces a join row; the record holds no row of the client yet,
+      // so this set pushes at once as the join (joinPending)
+      d.joined.delete(clientId);
       d.pending.set(clientId, { kind: 'set', n: d.seq });
       options.publish(deckId, { type: 'presence', clientId, clock: state.clock, state });
       await pushIfDue(deckId);
+    },
+
+    join(deckId, clientId, state, ttlMs) {
+      if (closed) return false;
+      const d = deckOf(deckId);
+      const t = now();
+      // the client's own state is here or in the record already (its POST came first), or the
+      // client left (a pending leave, a tombstone): a join row would only take a step back
+      if (alive(d.local.get(clientId), t) || alive(d.remote.rows.get(clientId), t)) return false;
+      if (d.pending.has(clientId) || d.remote.left.has(clientId)) return false;
+      d.local.set(clientId, { at: t, expiresAt: t + Math.min(ttlMs, maxTtl), state });
+      d.joined.add(clientId);
+      options.publish(deckId, { type: 'presence', clientId, clock: state.clock, state });
+      return true;
     },
 
     async roster(deckId) {
@@ -850,6 +894,7 @@ export function sharedPresence<T extends PresenceRow>(
         alive(d.remote.rows.get(clientId), t);
       d.seq += 1;
       d.local.delete(clientId);
+      d.joined.delete(clientId);
       d.announced.delete(clientId);
       d.pending.set(clientId, {
         kind: 'leave',

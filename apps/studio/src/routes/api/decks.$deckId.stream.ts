@@ -8,6 +8,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { accessStore } from '../../server/access';
 import { denialBody } from '../../server/authorize';
 import {
+  announceJoin,
   bindClient,
   createReaderLiveness,
   createStreamCloser,
@@ -234,12 +235,13 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         );
         const roster = await room.channel.presence.roster(deckId);
         const live = await room.live();
+        const role = overEditingCeiling(roster, decision.role) ? 'viewer' : decision.role;
         const hello: RoomEvent = {
           type: 'hello',
           seq: live.seq,
           revision: room.revision(),
           clientId,
-          role: overEditingCeiling(roster, decision.role) ? 'viewer' : decision.role,
+          role,
           clients: roster.map((entry) => rosterEntryForReader(entry, reader)),
           editing: editingCount(roster),
           tier: room.tier,
@@ -247,6 +249,15 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         };
         write(sseRetry(retry));
         write(sseFrame(hello, live.seq));
+        // the joiner's row on this instance now, beside the replay (room.ts announceJoin): the
+        // tabs streaming here see the joiner without waiting for its first presence POST, which
+        // the platform may land on another instance
+        void announceJoin(room, identity, role, clientId, roster, () => !closer.closed()).catch(
+          (error: unknown) =>
+            logLine(
+              `the join row of ${deckId} was not announced: ${error instanceof Error ? error.message : String(error)}`,
+            ),
+        );
         const replay = await replayFor(
           room,
           Number.isFinite(position) ? position : live.seq,

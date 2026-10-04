@@ -750,6 +750,86 @@ describe('the shared presence roster, two instances over one Blob store', () => 
     expect([...a.errors, ...b.errors]).toEqual([]);
   });
 
+  it("announces a joiner's row at its stream's open with no store call, keeps it through a proven read that does not hold it, and yields it to the joiner's own state from either instance (hotfix/join-latency)", async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    // a holds the owner's stream and the joiner's stream; the joiner's POST lands on b
+    const a = instance(client, time.now);
+    const b = instance(client, time.now);
+    await a.presence.set(DECK, C1, row(C1, 1, 'Cobalt 12'), TTL);
+    const calls = client.calls.length;
+    expect(a.presence.join(DECK, C2, row(C2, 0, 'Titanium 471'), TTL)).toBe(true);
+    expect(client.calls.length).toBe(calls);
+    expect(a.seen.at(-1)).toEqual({
+      type: 'presence',
+      clientId: C2,
+      clock: 0,
+      state: row(C2, 0, 'Titanium 471'),
+    });
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId).sort()).toEqual([C1, C2]);
+    // a's tick reads the record before b's push lands: the joiner's chip stays
+    await a.presence.poll(DECK);
+    expect(a.presence.proven(DECK)).toBe(true);
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([]);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId).sort()).toEqual([C1, C2]);
+    // the joiner's first state on b is a join there and pushes at once; a's next read takes it
+    await b.presence.set(DECK, C2, row(C2, 1, 'Titanium 471', 'content-rule'), TTL);
+    const stored = parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes);
+    expect(stored.rows.get(C2)?.state.clock).toBe(1);
+    await a.presence.poll(DECK);
+    expect(a.seen.at(-1)).toMatchObject({ type: 'presence', clientId: C2, clock: 1 });
+    expect(a.seen.filter((e) => e.type === 'leave')).toEqual([]);
+    expect((await a.presence.roster(DECK)).find((r) => r.clientId === C2)?.slideId).toBe(
+      'content-rule',
+    );
+    // the record holds the client now: a second join row is refused
+    expect(a.presence.join(DECK, C2, row(C2, 0, 'Titanium 471'), TTL)).toBe(false);
+    // the joiner's first state landing on the stream's own instance pushes as a join as well
+    const c = instance(client, time.now, { pushSpacingMs: 60_000 });
+    const C3 = 'cccccccccccccccccccccccccccccccc';
+    await c.presence.set(DECK, C1, row(C1, 2, 'Cobalt 12'), TTL);
+    expect(c.presence.join(DECK, C3, row(C3, 0, 'Linen 383'), TTL)).toBe(true);
+    const before = puts(client);
+    await c.presence.set(DECK, C3, row(C3, 1, 'Linen 383'), TTL);
+    expect(puts(client)).toBe(before + 3);
+    expect(
+      parsePresenceRecord<Row>(client.blobs.get(presencePath(DECK))!.bytes).rows.get(C3)?.state
+        .clock,
+    ).toBe(1);
+    expect([...a.errors, ...b.errors, ...c.errors]).toEqual([]);
+  });
+
+  it('never announces a join row for a client that left, lets a tombstone from another instance bury one, and lets one run out at 30 s without a state', async () => {
+    const client = memoryBlobClient();
+    const time = fakeClock();
+    const a = instance(client, time.now);
+    const b = instance(client, time.now);
+    await a.presence.set(DECK, C1, row(C1, 1, 'Cobalt 12'), TTL);
+    // the stream closed before the join row was built: the pending leave refuses it
+    await a.presence.leave(DECK, C2);
+    expect(a.presence.join(DECK, C2, row(C2, 0, 'Titanium 471'), TTL)).toBe(false);
+    expect(a.seen.filter((e) => e.clientId === C2 && e.type === 'presence')).toEqual([]);
+    // a join row whose tab's beacon lands on b: a's next read announces the leave
+    const C3 = 'cccccccccccccccccccccccccccccccc';
+    time.advance(10);
+    expect(a.presence.join(DECK, C3, row(C3, 0, 'Linen 383'), TTL)).toBe(true);
+    time.advance(10);
+    await b.presence.leave(DECK, C3, 1);
+    await a.presence.poll(DECK);
+    expect(a.seen.at(-1)).toEqual({ type: 'leave', clientId: C3 });
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).toEqual([C1]);
+    // a join row whose tab never posts leaves at the row's 30 s on the tick
+    const C4 = 'dddddddddddddddddddddddddddddddd';
+    expect(a.presence.join(DECK, C4, row(C4, 0, 'Pewter 9'), TTL)).toBe(true);
+    time.advance(29_000);
+    a.presence.confirm(DECK);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId).sort()).toContain(C4);
+    time.advance(1_500);
+    a.presence.confirm(DECK);
+    expect(a.seen.filter((e) => e.type === 'leave' && e.clientId === C4)).toHaveLength(1);
+    expect((await a.presence.roster(DECK)).map((r) => r.clientId)).not.toContain(C4);
+  });
+
   it('keeps presence per instance when there is no Blob client', async () => {
     const seen: SharedPresenceEvent<Row>[] = [];
     const a = sharedPresence<Row>({

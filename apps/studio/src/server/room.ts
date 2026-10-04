@@ -445,6 +445,42 @@ export async function leavePresence(
   else await room.channel.presence.leave(room.deckId, clientId, clock);
 }
 
+/**
+ * The clock of the join row (`announceJoin`): under every state of the tab, whose first post
+ * carries 1 (room-client.ts `postPresence` counts up before it posts), so the tab's own state
+ * always replaces it.
+ */
+export const JOIN_ROW_CLOCK = 0;
+
+/**
+ * The joiner's row at its stream's open, on the blob tier (hotfix/join-latency): the stream route
+ * holds the joiner's identity, role and the roster when it writes `hello`, so the instance that
+ * holds the stream announces the joiner to the other tabs streaming there at once
+ * (presence-store.ts `join`: no push, no store call). Before this the joiner reached those tabs
+ * only through its first presence POST: when the platform landed that POST on another instance,
+ * this one read the row at its next pulse tick, 2 s after the stream's wake or up to 10 s when
+ * the tab here was alone and quiet, and the joiner's chip came 3.7 to 11 s after the navigation
+ * against the 3.5 s of `collab.presence.join-within-2s`. The row carries no slide, selection or
+ * pointer; the tab's first POST replaces it. The memory and redis tiers have no shared roster
+ * and announce every set to every stream already: nothing to do there. `open` is the stream's,
+ * read after the entry is built so a stream closed meanwhile announces nothing.
+ */
+export async function announceJoin(
+  room: Room,
+  identity: RequestIdentity,
+  role: Role,
+  clientId: string,
+  roster: readonly RosterEntry[],
+  open: () => boolean,
+  shared: SharedPresence<RosterEntry> | null = sharedRoster() ?? null,
+): Promise<boolean> {
+  if (shared === null) return false;
+  const post = { clientId, clock: JOIN_ROW_CLOCK, pointerOn: false, presenting: false };
+  const entry = await rosterEntryFor(room, identity, role, post, roster);
+  if (!open()) return false;
+  return shared.join(room.deckId, clientId, entry, PRESENCE_EXPIRY_MS);
+}
+
 /** The raw Redis commands of the redis tier (B3 R6: `get`, `set ... PX`, `del` ride `call`), null on the other tiers. */
 export function redisCommands(): RedisCommands | null {
   return state().redis;

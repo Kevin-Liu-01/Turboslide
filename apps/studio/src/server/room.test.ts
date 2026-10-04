@@ -11,11 +11,16 @@ import type { AccountProfile } from '@turboslide/identity/resolve';
 import type { RosterEntry } from '@turboslide/realtime/channel';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { indexUpdates, principalFolder } from '@turboslide/store/access-store';
+import { memoryBlobClient } from '@turboslide/store/blob-fake';
+import { sharedPresence } from '@turboslide/store/presence-store';
+import type { SharedPresenceEvent } from '@turboslide/store/presence-store';
 
 import { indexStore } from './access';
 import { buildIdentityRuntime, setIdentityRuntime } from './auth/identity';
 import type { IdentityRuntime } from './auth/identity';
 import {
+  JOIN_ROW_CLOCK,
+  announceJoin,
   authorOf,
   identityViewsFor,
   requestIdentity,
@@ -453,6 +458,52 @@ describe('resolvePrincipalId', () => {
       await (await indexStore()).update(anon, indexUpdates.name('Noor Haddad'));
       const after = await resolvePrincipalId(anon);
       expect(after).toMatchObject({ displayName: 'Noor Haddad', trust: 'guest' });
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("the joiner's row at the stream's open (hotfix/join-latency)", () => {
+  it('announces the roster entry the route resolved, at the join clock and the hello role, to the shared roster alone and with no store call', async () => {
+    const minted = await requestIdentity(
+      request('/api/decks/q4/stream', { cookie: 'ts.session_token=nonsense' }),
+    );
+    const folder = join(stateDir(), 'users', principalFolder(minted.principalId ?? ''));
+    try {
+      const client = memoryBlobClient();
+      const seen: SharedPresenceEvent<RosterEntry>[] = [];
+      const shared = sharedPresence<RosterEntry>({ client, publish: (_d, e) => seen.push(e) });
+      const room = { deckId: 'q4' } as Room;
+      const clientId = 'c'.repeat(32);
+      expect(await announceJoin(room, minted, 'viewer', clientId, [], () => true, shared)).toBe(
+        true,
+      );
+      expect(seen).toHaveLength(1);
+      const state = (seen[0] as Extract<SharedPresenceEvent<RosterEntry>, { type: 'presence' }>)
+        .state;
+      expect(state).toMatchObject({
+        clientId,
+        clock: JOIN_ROW_CLOCK,
+        pointerOn: false,
+        presenting: false,
+        principalId: minted.identity,
+        role: 'viewer',
+        kind: 'human',
+      });
+      expect(state.slideId).toBeUndefined();
+      expect(state.label).toBe((await resolveRequestIdentity(minted)).displayName);
+      expect((await shared.roster('q4')).map((row) => row.clientId)).toEqual([clientId]);
+      expect(client.calls.filter((call) => call.op === 'put')).toEqual([]);
+      // a stream closed while the entry was built announces nothing; nor does a tier without a
+      // shared roster (memory, redis: every set reaches every stream there)
+      const other = 'd'.repeat(32);
+      expect(await announceJoin(room, minted, 'editor', other, [], () => false, shared)).toBe(
+        false,
+      );
+      expect(await announceJoin(room, minted, 'editor', other, [], () => true, null)).toBe(false);
+      expect(seen).toHaveLength(1);
+      await shared.close();
     } finally {
       rmSync(folder, { recursive: true, force: true });
     }

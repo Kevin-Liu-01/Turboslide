@@ -574,9 +574,13 @@
 /* ---- under 720 px: one Menus key, the stage over a horizontal filmstrip (C's phone editor) ---- */
 
 @media (max-width: 719.98px) {
-  /* the status row holds two lines, so the longest sentence reads whole at 390 */
+  /* the status row holds two lines, so the longest sentence reads whole at 390. The column's
+     rails are the miniature's sides under 720 px (the gutter is 0), so it draws its top and bottom
+     rules alone, as the hero frame does (check step 18's chrome lint: one owner a seam) */
   .ts-mini-editor {
     grid-template-rows: 36px 44px auto 48px 56px;
+    border-left: 0;
+    border-right: 0;
   }
 
   .ts-mini-title {

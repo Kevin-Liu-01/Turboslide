@@ -80,6 +80,32 @@
       "pages": null
     },
     {
+      "role": "export-browser",
+      "appearance": "light",
+      "variant": null,
+      "path": "/home/export-browser-light-8694d3dfc8.webp",
+      "bytes": 37844,
+      "sha256": "8694d3dfc84525b7c9493edcc61d660155b7f7d1a1ad75f3bfbf86cc30955b13",
+      "width": 3200,
+      "height": 1800,
+      "pixelsSha256": "c5753103dbe3198e016a1b50faaffacba3ec7b0e39bb2bfcd41abe4457f1baab",
+      "partSha256": null,
+      "pages": null
+    },
+    {
+      "role": "export-browser",
+      "appearance": "dark",
+      "variant": null,
+      "path": "/home/export-browser-dark-98372edb70.webp",
+      "bytes": 37964,
+      "sha256": "98372edb70992687a7ffd555d61b4f613457129084ae44f97dcdbc99fc284b00",
+      "width": 3200,
+      "height": 1800,
+      "pixelsSha256": "0d90bf811b20e6d9a32ef985af4ed24df33456acdfbd3b0862bf66ed2f187565",
+      "partSha256": null,
+      "pages": null
+    },
+    {
       "role": "export-perfect",
       "appearance": "light",
       "variant": null,
@@ -183,5 +209,15 @@
       "partSha256": null,
       "pages": 9
     }
-  ]
+  ],
+  "loupe": {
+    "light": {
+      "differing": 0,
+      "total": 5760000
+    },
+    "dark": {
+      "differing": 1,
+      "total": 5760000
+    }
+  }
 }

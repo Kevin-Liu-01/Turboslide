@@ -18,6 +18,8 @@ export type HomeAssetRole =
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */
   | 'export-editable'
+  /** the CLI's browser render of slide 7 at scale 2, lossless WebP, at most 60 KB (the loupe, V3's) */
+  | 'export-browser'
   /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
   | 'pdf';
 
@@ -119,6 +121,32 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     width: 3200,
     height: 1800,
     pixelsSha256: 'bc9b3344743459f8a8a1ddcbb7e5834d074c7b43d8dc20f68fa6c8d11129efb2',
+    partSha256: null,
+    pages: null,
+  },
+  {
+    role: 'export-browser',
+    appearance: 'light',
+    variant: null,
+    path: '/home/export-browser-light-8694d3dfc8.webp',
+    bytes: 37844,
+    sha256: '8694d3dfc84525b7c9493edcc61d660155b7f7d1a1ad75f3bfbf86cc30955b13',
+    width: 3200,
+    height: 1800,
+    pixelsSha256: 'c5753103dbe3198e016a1b50faaffacba3ec7b0e39bb2bfcd41abe4457f1baab',
+    partSha256: null,
+    pages: null,
+  },
+  {
+    role: 'export-browser',
+    appearance: 'dark',
+    variant: null,
+    path: '/home/export-browser-dark-98372edb70.webp',
+    bytes: 37964,
+    sha256: '98372edb70992687a7ffd555d61b4f613457129084ae44f97dcdbc99fc284b00',
+    width: 3200,
+    height: 1800,
+    pixelsSha256: '0d90bf811b20e6d9a32ef985af4ed24df33456acdfbd3b0862bf66ed2f187565',
     partSha256: null,
     pages: null,
   },

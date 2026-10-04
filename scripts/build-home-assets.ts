@@ -94,6 +94,7 @@ import type { PanelWidth } from '../apps/studio/src/components/home/panel-format
 /* the lanes' build modules (docs/LANDING.md 6.1, 6.4): V3's chips and loop, V4's boot script and
    slide 8's still frame; the entry calls them and writes what they return */
 import { deriveChips, recordChips } from './home/run.ts';
+import { deriveLoupe } from './home/export.ts';
 import { deriveBoot } from './home/boot.ts';
 import { deriveMenus } from './home/menus.ts';
 import { derivePattern } from './home/pattern.ts';
@@ -542,6 +543,7 @@ type AssetRole =
   | 'pattern-still'
   | 'export-perfect'
   | 'export-editable'
+  | 'export-browser'
   | 'pdf';
 type AssetVariant = 'wide' | 'narrow' | null;
 type ServedAsset = {
@@ -2648,6 +2650,7 @@ async function deriveServed(
   stills: Stills,
   exportRec: RecordedExport | null,
   patternFiles: Awaited<ReturnType<typeof derivePattern>>['files'],
+  loupeFiles: Awaited<ReturnType<typeof deriveLoupe>>['files'],
 ): Promise<{ assets: ServedAsset[]; files: { name: string; bytes: Uint8Array }[] }> {
   const made = [
     await served('lighthouse-still', null, 'wide', await bitsWebp(stills.canvas.wide), 'webp'),
@@ -2659,12 +2662,16 @@ async function deriveServed(
         served(file.role, file.appearance, file.variant, file.bytes, file.ext),
       ),
     )),
+    ...(await Promise.all(
+      loupeFiles.map((file) => served(file.role, file.appearance, null, file.bytes, 'webp')),
+    )),
   ];
   const budgets: Partial<Record<AssetRole, number>> = {
     'lighthouse-still': 24_000,
     'lighthouse-tone': 26_000,
     'field-still': 24_000,
     'pattern-still': 48_000,
+    'export-browser': 60_000,
   };
   for (const m of made) {
     const limit = budgets[m.asset.role];
@@ -2678,10 +2685,15 @@ async function deriveServed(
   };
 }
 
-function assetsSources(assets: ServedAsset[]): { json: string; ts: string } {
+function assetsSources(
+  assets: ServedAsset[],
+  loupe: Awaited<ReturnType<typeof deriveLoupe>>['loupe'],
+): { json: string; ts: string } {
   const json = jsonText({
     generator: 'scripts/build-home-assets.ts --stills --export',
     assets,
+    /* the whole slide's differing pixels between the browser raster and the Perfect picture (2.12) */
+    loupe,
   });
   const ts = `${GENERATED_HEADER('--stills and --export', 'docs/LANDING.md 2.6, 2.8, 4.1, 6.1')}
 // assets.json is its JSON twin; assets.test.ts checks every file under public/home/ against it.
@@ -2702,6 +2714,8 @@ export type HomeAssetRole =
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */
   | 'export-editable'
+  /** the CLI's browser render of slide 7 at scale 2, lossless WebP, at most 60 KB (the loupe, V3's) */
+  | 'export-browser'
   /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
   | 'pdf';
 
@@ -2777,10 +2791,11 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
   const slides = deriveSlides();
   const pattern = await derivePattern();
   const chips = await deriveChips();
-  const { assets, files } = await deriveServed(stills, exportRec, pattern.files);
+  const loupe = await deriveLoupe();
+  const { assets, files } = await deriveServed(stills, exportRec, pattern.files, loupe.files);
   const run = deriveRun({ pageDeck: page });
   const slideSources = await deriveSlidesSource(slides, stills, exportRec, assets, run.transcript);
-  const assetSources = assetsSources(assets);
+  const assetSources = assetsSources(assets, loupe.loupe);
   const outputs: Output[] = [
     { path: `${FIXTURE}/assets/field-light.png`, content: stills.fieldPicture.light },
     { path: `${FIXTURE}/assets/field-dark.png`, content: stills.fieldPicture.dark },

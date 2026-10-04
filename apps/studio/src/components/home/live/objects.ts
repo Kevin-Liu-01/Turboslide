@@ -849,6 +849,17 @@ export function createObjects(
     deselect();
   });
   host.addEventListener('dragstart', (e) => e.preventDefault());
+  // typing in a box that reaches past the slide's edge (a turned title) scrolls the caret into
+  // view, and the browser scrolls the slide root, whose overflow is hidden: a slide never scrolls,
+  // so a scroll inside one is put back in the same frame, before it paints (verify1 F6)
+  host.addEventListener(
+    'scroll',
+    (e) => {
+      const t = e.target as Element;
+      if (t.closest('[data-home-slides]') !== null) t.scrollTop = t.scrollLeft = 0;
+    },
+    true,
+  );
   document.addEventListener('pointerdown', (e) => {
     const t = e.target as Element;
     if (current === null || host.contains(t) || (box?.contains(t) ?? false)) return;

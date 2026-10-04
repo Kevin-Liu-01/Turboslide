@@ -501,6 +501,36 @@ export function rows(): void {
     } finally {
       await touch.context.close();
     }
+
+    // typing in a turned title that runs past the slide's edge never scrolls the slide inside the
+    // frame (verify1 F6): nothing in the frame leaves scroll 0 and the lead stays where it was
+    const turned = await openHome(browser);
+    try {
+      const { page } = turned;
+      const lead = page.locator('[data-hero-slide] [data-object="title#lead"]');
+      const before = await lead.boundingBox();
+      await page.locator(HERO_TITLE).click();
+      for (let i = 0; i < 5; i += 1) await page.keyboard.press('Alt+ArrowRight');
+      await page.keyboard.press('Enter');
+      await page.keyboard.press('End');
+      await page.keyboard.type(' and a longer line of words', { delay: 30 });
+      await frame(page);
+      const scrolled = await page.evaluate(
+        () =>
+          [...document.querySelectorAll('[data-hero-slide], [data-hero-slide] *')].filter(
+            (el) => el.scrollTop !== 0 || el.scrollLeft !== 0,
+          ).length,
+      );
+      expect(scrolled, 'nothing in the frame scrolls while the turned title is typed in').toBe(0);
+      const after = await lead.boundingBox();
+      expect(
+        Math.abs((after?.y ?? 0) - (before?.y ?? -9)),
+        'the lead stays put',
+      ).toBeLessThanOrEqual(0.5);
+      await page.keyboard.press('Escape');
+    } finally {
+      await turned.context.close();
+    }
   });
 
   test(title('home.canvas.gestures'), async ({ browser }) => {

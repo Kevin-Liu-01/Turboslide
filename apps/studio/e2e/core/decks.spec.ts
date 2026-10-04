@@ -2318,11 +2318,64 @@ test(title('decks.home.links-and-card'), async ({ browser, request }) => {
   }
 });
 
+/* A cold load of /home at 1440 by 900 in the dark appearance in a node process of its own, through
+   playwright-core, which the runner does not trace: the pictures requested and the long animation
+   frames before the first scroll. The runner's trace (`trace: 'retain-on-failure'`, which this
+   file keeps) snapshots the page by reading every element's computed style, which resolves the
+   canvas band's mask under `content-visibility: auto` and requests its still. Read on 2026-10-04
+   against the node-server build of d6f02a18: traced, the lighthouse's still (4,592 B) at 201 to
+   209 ms from the CSS in 3 of 3 loads; untraced, or traced without DOM snapshots, none in 3 of 3
+   (the integrator's fixer, build/integrator.md "Landing second pass, fix round"). */
+const COLD_HOME = `
+const { chromium } = await import('playwright-core');
+const oidc = process.env.VERCEL_OIDC_TOKEN;
+const browser = await chromium.launch();
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 },
+  extraHTTPHeaders: oidc ? { 'x-vercel-trusted-oidc-idp-token': oidc } : {} });
+await context.addInitScript(() => {
+  try { localStorage.setItem('gt-theme', 'dark'); } catch {}
+  window.__loaf = [];
+  try {
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) window.__loaf.push(Math.round(entry.duration));
+    }).observe({ type: 'long-animation-frame', buffered: true });
+  } catch {}
+});
+const page = await context.newPage();
+await page.goto(new URL('/home', process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321').href);
+await page.locator('main#top[data-hydrated]').waitFor({ timeout: 30000 });
+await page.evaluate(() => document.fonts.ready);
+await page.waitForTimeout(1500);
+const facts = await page.evaluate(() => {
+  const pictures = performance.getEntriesByType('resource')
+    .filter((r) => r.initiatorType === 'img' || /\\.(png|jpe?g|webp|avif|svg)(\\?|$)/.test(r.name));
+  return {
+    pictures: pictures.reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0),
+    paths: pictures.map((r) => new URL(r.name).pathname),
+    longFrames: window.__loaf.filter((d) => d > 100),
+  };
+});
+await browser.close();
+process.stdout.write(JSON.stringify(facts));
+`;
+
+function coldHome(): { pictures: number; paths: string[]; longFrames: number[] } {
+  const run = spawnSync(process.execPath, ['--input-type=module', '-e', COLD_HOME], {
+    cwd: resolve(import.meta.dirname, '..', '..', '..', '..'),
+    encoding: 'utf8',
+    timeout: 120_000,
+  });
+  if (run.status !== 0) throw new Error(`the cold load exited ${run.status}: ${run.stderr}`);
+  return JSON.parse(run.stdout) as { pictures: number; paths: string[]; longFrames: number[] };
+}
+
 test(title('decks.home.load-budget'), async ({ browser }) => {
   test.setTimeout(240_000);
   /* a measure row (docs/LANDING.md 4.1, the budgets of the landing): its numbers are recorded
      beside their lines; the document is reported against 60 KB until audit item 13 serves the
-     renderer's CSS as a file (Kevin's answer 10), and the gating lines are home.budget.* */
+     renderer's CSS as a file (Kevin's answer 10), and the gating lines are home.budget.*; the
+     pictures and the long frames before the first scroll are read cold (`coldHome`) */
+  const cold = coldHome();
   const { context: fresh, page: p } = await homeContext(
     browser,
     { width: 1440, height: 900 },
@@ -2370,20 +2423,21 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
       `first byte ${before.ttfb} ms (line 150)`,
       `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (line 400 cold, the h1)`,
       `ready ${readyMs} ms (line 500)`,
-      `pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests (line 0)`,
+      `pictures before the first scroll ${cold.pictures} B in ${cold.paths.length} requests, read cold (line 0)${cold.paths.length > 0 ? `: ${cold.paths.join(', ')}` : ''}`,
       `pictures after a full scroll ${after} B (line 200000)`,
       `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)`,
-      `long animation frames over 100 ms ${before.longFrames.length}`,
+      `long animation frames over 100 ms ${cold.longFrames.length}, read cold${cold.longFrames.length > 0 ? ` (${cold.longFrames.join(', ')} ms)` : ''}`,
       `JavaScript decoded ${before.js} B (reported against 600000)`,
+      `under the runner's trace: pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests; long animation frames over 100 ms ${before.longFrames.length}`,
     ];
     for (const line of lines) test.info().annotations.push({ type: 'measure', description: line });
     expect(before.ttfb ?? 9999, lines[0]).toBeLessThanOrEqual(150);
     expect(before.lcp, lines[1]).toBeLessThanOrEqual(400);
     expect(/^h1/.test(before.lcpElement), lines[1]).toBe(true);
     expect(readyMs, lines[2]).toBeLessThanOrEqual(500);
-    expect(before.pictureCount, lines[3]).toBe(0);
+    expect(cold.paths, lines[3]).toEqual([]);
     expect(after, lines[4]).toBeLessThanOrEqual(200_000);
-    expect(before.longFrames, lines[6]).toEqual([]);
+    expect(cold.longFrames, lines[6]).toEqual([]);
   } finally {
     await fresh.close();
   }

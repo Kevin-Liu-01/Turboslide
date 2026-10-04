@@ -1,0 +1,253 @@
+{
+  "startedAt": "2026-10-04T07:20:20.583Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4479",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "reload"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-x4xi",
+  "slides": [
+    "title",
+    "split-1-c91d",
+    "split-2-c91d"
+  ],
+  "setup": {
+    "clients": {
+      "a": "36467892f0698791a8c9bd32ebfac91d",
+      "b": "8da2b3d179af1e1b49bd52e4fb59649b"
+    },
+    "syncA": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 8,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 8,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791098434032,
+      "connectedAt": 1791098434036,
+      "navMs": 633
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791098435080,
+      "navMs": 620,
+      "bChipInAms": 49,
+      "aChipInBms": 51,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791098435902,
+      "navMs": 704,
+      "bChipInAms": 62,
+      "aChipInBms": 63,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791098436782,
+      "navMs": 754,
+      "bChipInAms": 68,
+      "aChipInBms": 70,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 8,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 3.4,
+  "reload": {
+    "equalMsAfterLastKey": 3,
+    "textA": "A writes here ra1 ra2 ra3 ra4 ra5",
+    "textB": "B writes here rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 26,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "reload.seconds": 7.1,
+  "sync.end": {
+    "a": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 26,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 26,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 0,
+      "durable": false,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "total": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "head": 0,
+      "covered": 0,
+      "revision": 0,
+      "months": [],
+      "sockets": 0,
+      "members": 0,
+      "awakeSince": 1791098444959,
+      "alarmAt": null,
+      "databaseSize": 24576,
+      "colo": "SJC",
+      "object": "9cc9df01"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-x4xi",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T07:20:45.022Z"
+}

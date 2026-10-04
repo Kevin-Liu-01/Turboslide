@@ -1,0 +1,352 @@
+{
+  "startedAt": "2026-10-04T07:16:06.019Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4479",
+  "width": 1280,
+  "appearance": "dark",
+  "sections": [
+    "join",
+    "title",
+    "merge",
+    "reload",
+    "agent"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png",
+    "09-agent-banner-a.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-qia6",
+  "slides": [
+    "title",
+    "split-1-f88b",
+    "split-2-f88b"
+  ],
+  "setup": {
+    "clients": {
+      "a": "36c944cc643a43082b472e4ddbeff88b",
+      "b": "7b76809d83e2d4fea7694936d201fd65"
+    },
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 9,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 9,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "dark",
+      "b": "dark"
+    },
+    "bJoin": {
+      "ready": 1791098175895,
+      "connectedAt": 1791098175900,
+      "navMs": 813
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791098177003,
+      "navMs": 662,
+      "bChipInAms": 61,
+      "aChipInBms": 63,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791098177821,
+      "navMs": 686,
+      "bChipInAms": 61,
+      "aChipInBms": 63,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791098178656,
+      "navMs": 706,
+      "bChipInAms": 60,
+      "aChipInBms": 61,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 3.3,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here b al1",
+      "bCaretInA": "21",
+      "bWordEnd": null,
+      "aCaretInB": "21",
+      "aWordEnd": 19,
+      "textB": "B writes here br1 a"
+    },
+    {
+      "round": 2,
+      "text": "B writes here br1 al1 al2 br2",
+      "bCaretInA": "29",
+      "bWordEnd": 29,
+      "aCaretInB": "25",
+      "aWordEnd": 25,
+      "textB": "B writes here br1 al1 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here br1 al1 al2 br2 al3",
+      "bCaretInA": "33",
+      "bWordEnd": null,
+      "aCaretInB": "37",
+      "aWordEnd": 33,
+      "textB": "B writes here br1 al1 al2 br2 br3 al3"
+    }
+  ],
+  "merge.seconds": 10.2,
+  "title.cover": {
+    "id": "title-1-f88b",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 18
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 33,
+      "bothMsAfterEscape": null,
+      "a": "Two typers tb1 ub1 ta1 ua1",
+      "b": "Two typers tb1 ub1 ta1 ua1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 35,
+      "bothMsAfterEscape": null,
+      "a": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "b": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 76,
+      "bothMsAfterEscape": null,
+      "a": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 ta3 ua3 tb3 ub3",
+      "b": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 ta3 ua3 tb3 ub3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 26.7,
+  "agent": {
+    "status": 200,
+    "answerMs": 33,
+    "bannerMs": null,
+    "bannerText": null,
+    "textInAms": 10082,
+    "afterUndoAgentTextStays": true,
+    "afterUndoOwnWordStays": false,
+    "versions": "Error: page.evaluate: TypeError: version.list: invalid input at /id: Unrecognized key: \"id\"\n    at Object.dispatch (http://localhost:4479/@fs/Users/kevinliu/repos/Turboslide-realtime/packages/agent/sr"
+  },
+  "agent.seconds": 13.8,
+  "reload": {
+    "equalMsAfterLastKey": null,
+    "textA": "A writes here ra1 ra4 ra5",
+    "textB": "B writes here br1 al1 al2 br2 br3 al3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 50,
+      "revision": 50,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "reload.seconds": 17.2,
+  "sync.end": {
+    "a": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 50,
+      "revision": 50,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 50,
+      "revision": 50,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 0,
+      "durable": false,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "total": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "head": 0,
+      "covered": 0,
+      "revision": 0,
+      "months": [],
+      "sockets": 0,
+      "members": 0,
+      "awakeSince": 1791098247614,
+      "alarmAt": null,
+      "databaseSize": 24576,
+      "colo": "SJC",
+      "object": "7172b03f"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-qia6",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T07:17:28.085Z"
+}

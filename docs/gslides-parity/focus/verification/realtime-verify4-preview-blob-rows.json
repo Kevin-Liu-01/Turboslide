@@ -1,0 +1,230 @@
+{
+  "base": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "tier": "blob",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is blob",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T07:32:55.254Z",
+  "ms": 246068,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 245299,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier4/gate-preview-blob-rows/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "realtime.agent.write-announced",
+      "realtime.reload.loses-nothing",
+      "realtime.title.two-typers",
+      "sync.title.concurrent-both-kept",
+      "sync.reload.same-document"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 5,
+  "passed": 2,
+  "failed": 3,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "2477982b",
+  "origin": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "date": "2026-10-04",
+  "results": {
+    "realtime.agent.write-announced": "failed",
+    "realtime.title.two-typers": "failed",
+    "realtime.reload.loses-nothing": "failed",
+    "sync.title.concurrent-both-kept": "passed",
+    "sync.reload.same-document": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "realtime.title.two-typers",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.agent.write-announced",
+        "feature": "realtime",
+        "result": "failed"
+      },
+      {
+        "id": "realtime.reload.loses-nothing",
+        "feature": "realtime",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "result": "failed"
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.title.two-typers",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error:  ua2 once, no word lost"
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: within 1 s of the write"
+    },
+    {
+      "id": "realtime.reload.loses-nothing",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: every word in both browsers within 3 s of A's last keystroke"
+    }
+  ]
+}

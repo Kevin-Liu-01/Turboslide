@@ -1,0 +1,883 @@
+{
+  "startedAt": "2026-10-03T12:22:39.394Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "caret",
+    "merge",
+    "title",
+    "image",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow",
+    "agent",
+    "reload",
+    "offline",
+    "dims",
+    "share"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png",
+    "04-image-inserted-a.png",
+    "04-image-inserted-b.png",
+    "04-image-replaced-a.png",
+    "04-image-replaced-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png",
+    "09-agent-banner-a.png",
+    "10-caret-dimmed-a.png",
+    "12-share-minted-a.png",
+    "12-share-after-reload-a.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261003-c59n",
+  "slides": [
+    "title",
+    "split-1-4ce9",
+    "split-2-4ce9"
+  ],
+  "setup": {
+    "clients": {
+      "a": "1aac33047edab16306602ebd0b3f4ce9",
+      "b": "20f9a11f4cfae7a8186e31f3305ff7bc"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791030171886,
+      "connectedAt": 1791030171890,
+      "navMs": 335
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791030172504,
+      "navMs": 223,
+      "bChipInAms": 50,
+      "aChipInBms": 51,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791030172956,
+      "navMs": 303,
+      "bChipInAms": 34,
+      "aChipInBms": 35,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791030173314,
+      "navMs": 265,
+      "bChipInAms": 52,
+      "aChipInBms": 53,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "979d38ef",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.1,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1229
+      },
+      {
+        "ch": "a",
+        "ms": 222
+      },
+      {
+        "ch": "b",
+        "ms": 215
+      },
+      {
+        "ch": "c",
+        "ms": 215
+      },
+      {
+        "ch": "d",
+        "ms": 219
+      },
+      {
+        "ch": "e",
+        "ms": 228
+      },
+      {
+        "ch": "f",
+        "ms": 211
+      },
+      {
+        "ch": "g",
+        "ms": 217
+      },
+      {
+        "ch": "h",
+        "ms": 217
+      },
+      {
+        "ch": "i",
+        "ms": 218
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefghi",
+    "load": null
+  },
+  "keystroke.seconds": 11.2,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1100,
+        "offset": "25",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 94,
+        "offset": "25",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 90,
+        "offset": "26",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 91,
+        "offset": "27",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 89,
+        "offset": "28",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 94,
+        "offset": "29",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 91,
+        "offset": "30",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 90,
+        "offset": "31",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 89,
+        "offset": "32",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 92,
+        "offset": "33",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(120, 144, 0)",
+      "caretHue": "#789000",
+      "chipHue": "",
+      "flagText": "BBasalt"
+    },
+    "textB": "A writes here abcdefghi jklmnopqr",
+    "drawnLength": 33
+  },
+  "caret.seconds": 11.4,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here br1 al1",
+      "bCaretInA": "17",
+      "bWordEnd": 17,
+      "aCaretInB": "21",
+      "aWordEnd": 21,
+      "textB": "B writes here br1 al1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here br1 al1 al2 br2",
+      "bCaretInA": "29",
+      "bWordEnd": 29,
+      "aCaretInB": "25",
+      "aWordEnd": 25,
+      "textB": "B writes here br1 al1 al2 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here br1 al1 al2 br2 br3 al3",
+      "bCaretInA": "33",
+      "bWordEnd": 33,
+      "aCaretInB": "37",
+      "aWordEnd": 37,
+      "textB": "B writes here br1 al1 al2 br2 br3 al3"
+    }
+  ],
+  "merge.seconds": 9.1,
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 132,
+      "bothMsAfterEscape": null,
+      "a": "Hand drive",
+      "b": "Hand drive",
+      "equal": true,
+      "lost": [
+        " ta1",
+        " tb1",
+        " ua1",
+        " ub1"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 40,
+      "bothMsAfterEscape": null,
+      "a": "Hand drive",
+      "b": "Hand drive",
+      "equal": true,
+      "lost": [
+        " ta2",
+        " tb2",
+        " ua2",
+        " ub2"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 134,
+      "bothMsAfterEscape": null,
+      "a": "Hand drive",
+      "b": "Hand drive",
+      "equal": true,
+      "lost": [
+        " ta3",
+        " tb3",
+        " ua3",
+        " ub3"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 19.4,
+  "image": {
+    "slide": "split-2-4ce9",
+    "insertInAMs": 59,
+    "insertInBMs": 115,
+    "refusedInsert": false,
+    "placed": {
+      "id": "shot",
+      "asset": "hand-a"
+    },
+    "replace": {
+      "inAMs": 115,
+      "inBMs": 116,
+      "refused": false
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 46,
+      "revision": 29,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "image.seconds": 4.7,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 105
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 97
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 112
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 99
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 97
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 100
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 97
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 101
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.3,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "BBasalt · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 111,
+    "blockMovedInAms": 56,
+    "blockA": [
+      {
+        "dt": -2352,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 56,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 4.8,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 176
+      },
+      {
+        "i": 1,
+        "ms": 178
+      },
+      {
+        "i": 2,
+        "ms": 1
+      },
+      {
+        "i": 3,
+        "ms": 171
+      },
+      {
+        "i": 4,
+        "ms": 173
+      },
+      {
+        "i": 5,
+        "ms": 183
+      },
+      {
+        "i": 6,
+        "ms": 2
+      },
+      {
+        "i": 7,
+        "ms": 178
+      },
+      {
+        "i": 8,
+        "ms": 175
+      },
+      {
+        "i": 9,
+        "ms": 181
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.1,
+  "card": {
+    "drawnMs": 207,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 51
+    }
+  },
+  "card.seconds": 1,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "LLithium 615owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "LFollowing Lithium 615·Stop",
+      "stop": true
+    },
+    "followedMs": 120,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 7
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "BBasalt 344editor · slide 3Follow"
+    },
+    "aFollowedMs": 127
+  },
+  "follow.seconds": 54.9,
+  "agent": {
+    "status": 200,
+    "answerMs": 55,
+    "bannerMs": 57,
+    "bannerText": "Assistant changed slide 1: Before became Written byUndo",
+    "textInAms": 60,
+    "afterUndoAgentTextStays": true,
+    "afterUndoOwnWordStays": false,
+    "versions": "Error: page.evaluate: TypeError: version.list: invalid input at /id: Unrecognized key: \"id\"\n    at Object.dispatch (http://localhost:4479/assets/SlideList-purf4O45.js:1:1479)\n    at dn (http://localho"
+  },
+  "agent.seconds": 3.5,
+  "reload": {
+    "equalMsAfterLastKey": 3,
+    "textA": "A writes here abcdefghi jklmnopqr tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3 ra1 ra2 ra3 ra4 ra5",
+    "textB": "B writes here br1 al1 al2 br2 br3 al3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 62,
+      "revision": 34,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "reload.seconds": 6.1,
+  "offline": {
+    "offlineSeconds": 35.6,
+    "whileOff": {
+      "connected": false,
+      "plate": null
+    },
+    "everyWordBothMsAfterReconnect": 602,
+    "textA": "A writes here abcdefghi jklmnopqr tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3 ra1 ra2 ra3 ra4 ra5 oa1 oa2 oa3 oa4",
+    "textB": "B writes here br1 al1 al2 br2 br3 al3 rb1 rb2 rb3 rb4 rb5 ob1 ob2 ob3",
+    "ws": [
+      {
+        "at": 1791030340292,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261003-c59n",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1791030348294,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261003-c59n",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1791030356298,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261003-c59n",
+        "code": 1006,
+        "reason": ""
+      }
+    ],
+    "records": {
+      "revision": 42
+    }
+  },
+  "offline.seconds": 39.1,
+  "dims": {
+    "dimMs": 30671,
+    "goneMs": 10
+  },
+  "dims.seconds": 32.9,
+  "share": {
+    "modeBefore": "link",
+    "minted": {
+      "route": "edit",
+      "digest": "7df119002d20"
+    },
+    "afterReload": {
+      "route": "s",
+      "digest": "bfe849ff353e"
+    },
+    "afterCopy": {
+      "route": "s",
+      "digest": "bfe849ff353e"
+    },
+    "sameAfterReload": false,
+    "sameAfterCopy": false,
+    "opens": {
+      "url": "http://localhost:4489/edit/untitled-20261003-c59n",
+      "role": null
+    }
+  },
+  "share.seconds": 4.5,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 71,
+      "revision": 47,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 71,
+      "revision": 47,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "979d38ef",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 20,
+        "messages": 10,
+        "opsFrames": 0,
+        "presenceFrames": 4,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 75,
+        "rowsWritten": 1,
+        "wakes": 1,
+        "requestUnits": 20.5
+      },
+      "total": {
+        "requests": 65,
+        "messages": 366,
+        "opsFrames": 65,
+        "presenceFrames": 288,
+        "alarms": 45,
+        "checkpoints": 25,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 466,
+        "rowsWritten": 251,
+        "wakes": 4,
+        "requestUnits": 128.3
+      },
+      "head": 71,
+      "covered": 71,
+      "revision": 47,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1791030393462,
+      "alarmAt": 1791030404934,
+      "databaseSize": 73728,
+      "colo": "SJC",
+      "object": "979d38ef"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261003-c59n",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-03T12:26:38.455Z"
+}

@@ -1,0 +1,98 @@
+{
+  "startedAt": "2026-10-04T07:17:28.494Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4479",
+  "width": 1440,
+  "appearance": "light",
+  "pictures": [
+    "box-round3-a.png",
+    "box-round3-b.png",
+    "cover-round3-a.png",
+    "cover-round3-b.png"
+  ],
+  "deck.id": "untitled-20261004-grqu",
+  "setup": {
+    "slides": [
+      "title",
+      "title-1-3096"
+    ],
+    "coverId": "title-1-3096",
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse"
+    }
+  },
+  "box.rounds": [
+    {
+      "round": 1,
+      "delayB": 72,
+      "load": "14.97",
+      "bothMsAfterEscape": null,
+      "a": "Two people type here tb1 ub1 ta1 ua1",
+      "b": "Two people type here tb1 ub1 ta1 ua1",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 2,
+      "delayB": 101,
+      "load": "15.13",
+      "bothMsAfterEscape": null,
+      "a": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "b": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 3,
+      "delayB": 75,
+      "load": "14.35",
+      "bothMsAfterEscape": null,
+      "a": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "b": "Two people type here tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "equal": true,
+      "lost": []
+    }
+  ],
+  "cover.rounds": [
+    {
+      "round": 1,
+      "delayB": 119,
+      "load": "13.92",
+      "bothMsAfterEscape": null,
+      "a": "Two typers cb1 db1 ca1 da1",
+      "b": "Two typers cb1 db1 ca1 da1",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 2,
+      "delayB": 82,
+      "load": "13.11",
+      "bothMsAfterEscape": 2893,
+      "a": "Two typers cb1 db1 ca1 da1 ca2 da2 cb2 db2",
+      "b": "Two typers cb1 db1 ca1 da1 ca2 da2 cb2 db2",
+      "equal": true,
+      "lost": []
+    },
+    {
+      "round": 3,
+      "delayB": 71,
+      "load": "13.18",
+      "bothMsAfterEscape": null,
+      "a": "Two typers cb1 db1 ca1 da1 ca2 da2 cb2 db2 cb3 db3 ca3 da3",
+      "b": "Two typers cb1 db1 ca1 da1 ca2 da2 cb2 db2 cb3 db3 ca3 da3",
+      "equal": true,
+      "lost": []
+    }
+  ],
+  "cover.kind": {
+    "a": "content",
+    "b": "content"
+  },
+  "teardown": {
+    "id": "untitled-20261004-grqu",
+    "editStatus": 404
+  },
+  "endedAt": "2026-10-04T07:18:21.955Z"
+}

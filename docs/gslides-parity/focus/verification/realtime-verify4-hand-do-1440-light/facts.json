@@ -1,0 +1,878 @@
+{
+  "startedAt": "2026-10-04T03:46:40.532Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "caret",
+    "merge",
+    "title",
+    "image",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow",
+    "agent",
+    "reload",
+    "offline",
+    "dims",
+    "share"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png",
+    "04-image-inserted-a.png",
+    "04-image-inserted-b.png",
+    "04-image-replaced-a.png",
+    "04-image-replaced-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png",
+    "09-agent-banner-a.png",
+    "10-caret-dimmed-a.png",
+    "12-share-minted-a.png",
+    "12-share-after-reload-a.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-oros",
+  "slides": [
+    "title",
+    "split-1-abf4",
+    "split-2-abf4"
+  ],
+  "setup": {
+    "clients": {
+      "a": "8a51470cb716ed0dd50bce360667abf4",
+      "b": "66c42a1f418bd5e185e46cfb6a91b628"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 10,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 10,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791085614759,
+      "connectedAt": 1791085614784,
+      "navMs": 908
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791085615979,
+      "navMs": 761,
+      "bChipInAms": 70,
+      "aChipInBms": 73,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791085616951,
+      "navMs": 806,
+      "bChipInAms": 40,
+      "aChipInBms": 42,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791085617843,
+      "navMs": 712,
+      "bChipInAms": 65,
+      "aChipInBms": 66,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 10,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "58f2dad4",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 3.7,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1282
+      },
+      {
+        "ch": "a",
+        "ms": 233
+      },
+      {
+        "ch": "b",
+        "ms": 244
+      },
+      {
+        "ch": "c",
+        "ms": 251
+      },
+      {
+        "ch": "d",
+        "ms": 230
+      },
+      {
+        "ch": "e",
+        "ms": 230
+      },
+      {
+        "ch": "f",
+        "ms": 235
+      },
+      {
+        "ch": "g",
+        "ms": 230
+      },
+      {
+        "ch": "h",
+        "ms": 229
+      },
+      {
+        "ch": "i",
+        "ms": 228
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefghi",
+    "load": null
+  },
+  "keystroke.seconds": 11.6,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1169,
+        "offset": "25",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 154,
+        "offset": "25",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 146,
+        "offset": "26",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 118,
+        "offset": "27",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 121,
+        "offset": "28",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 124,
+        "offset": "29",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 118,
+        "offset": "30",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 120,
+        "offset": "31",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 119,
+        "offset": "32",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 120,
+        "offset": "33",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(47, 92, 224)",
+      "caretHue": "#2f5ce0",
+      "chipHue": "",
+      "flagText": "LLacquer"
+    },
+    "textB": "A writes here abcdefghi jklmnopqr",
+    "drawnLength": 33
+  },
+  "caret.seconds": 11.9,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1 br1",
+      "bCaretInA": "21",
+      "bWordEnd": 21,
+      "aCaretInB": "17",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 br2 al2",
+      "bCaretInA": "25",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 br2 al2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 al3 br3",
+      "bCaretInA": "37",
+      "bWordEnd": 37,
+      "aCaretInB": "33",
+      "aWordEnd": 33,
+      "textB": "B writes here al1 br1 br2 al2 al3 br3"
+    }
+  ],
+  "merge.seconds": 10.7,
+  "title.cover": {
+    "id": "title-1-abf4",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 17
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 134,
+      "bothMsAfterEscape": 90,
+      "a": "Two typers tb1 ub1 ta1 ua1",
+      "b": "Two typers tb1 ub1 ta1 ua1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 58,
+      "bothMsAfterEscape": 62,
+      "a": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "b": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 139,
+      "bothMsAfterEscape": 62,
+      "a": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "b": "Two typers tb1 ub1 ta1 ua1 ta2 ua2 tb2 ub2 tb3 ub3 ta3 ua3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 16,
+  "image": {
+    "slide": "split-2-abf4",
+    "insertInAMs": 112,
+    "insertInBMs": 118,
+    "refusedInsert": false,
+    "placed": {
+      "id": "shot",
+      "asset": "hand-a"
+    },
+    "replace": {
+      "inAMs": 125,
+      "inBMs": 168,
+      "refused": false
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 74,
+      "revision": 36,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "image.seconds": 5.1,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 125
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 130
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 129
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 123
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 147
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 146
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 175
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 145
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.6,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "LLacquer · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 146,
+    "blockMovedInAms": 54,
+    "blockA": [
+      {
+        "dt": -2827,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 54,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 5.5,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 185
+      },
+      {
+        "i": 1,
+        "ms": 187
+      },
+      {
+        "i": 2,
+        "ms": 3
+      },
+      {
+        "i": 3,
+        "ms": 0
+      },
+      {
+        "i": 4,
+        "ms": 5
+      },
+      {
+        "i": 5,
+        "ms": 2
+      },
+      {
+        "i": 6,
+        "ms": 4
+      },
+      {
+        "i": 7,
+        "ms": 190
+      },
+      {
+        "i": 8,
+        "ms": 3
+      },
+      {
+        "i": 9,
+        "ms": 188
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.7,
+  "card": {
+    "drawnMs": 281,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 29
+    }
+  },
+  "card.seconds": 1.2,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "CChrome 172owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "CFollowing Chrome 172·Stop",
+      "stop": true
+    },
+    "followedMs": 177,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 29
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "LLacquer 711editor · slide 1Follow"
+    },
+    "aFollowedMs": 183
+  },
+  "follow.seconds": 56.6,
+  "agent": {
+    "status": 200,
+    "answerMs": 75,
+    "bannerMs": 78,
+    "bannerText": "Assistant changed slide 1: Before became Written byUndo",
+    "textInAms": 86,
+    "afterUndoAgentTextStays": true,
+    "afterUndoOwnWordStays": false,
+    "versions": "Error: page.evaluate: TypeError: version.list: invalid input at /id: Unrecognized key: \"id\"\n    at Object.dispatch (http://localhost:4479/@fs/Users/kevinliu/repos/Turboslide-realtime/packages/agent/sr"
+  },
+  "agent.seconds": 3.9,
+  "reload": {
+    "equalMsAfterLastKey": 13,
+    "textA": "A writes here abcdefghi jklmnopqr ra1 ra2 ra3 ra4 ra5",
+    "textB": "B writes here al1 br1 br2 al2 al3 br3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 101,
+      "revision": 41,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "reload.seconds": 7.7,
+  "offline": {
+    "offlineSeconds": 35.9,
+    "whileOff": {
+      "connected": false,
+      "plate": null
+    },
+    "everyWordBothMsAfterReconnect": 575,
+    "textA": "A writes here abcdefghi jklmnopqr ra1 ra2 ra3 ra4 ra5 oa1 oa2 oa3 oa4",
+    "textB": "B writes here al1 br1 br2 al2 al3 br3 rb1 rb2 rb3 rb4 rb5 ob1 ob2 ob3",
+    "ws": [
+      {
+        "at": 1791085790100,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261004-oros",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1791085798108,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261004-oros",
+        "code": 1006,
+        "reason": ""
+      },
+      {
+        "at": 1791085806111,
+        "url": "ws://127.0.0.1:8799/rooms/untitled-20261004-oros",
+        "code": 1006,
+        "reason": ""
+      }
+    ],
+    "records": {
+      "revision": 51
+    }
+  },
+  "offline.seconds": 39.8,
+  "dims": {
+    "dimMs": 30098,
+    "goneMs": 21
+  },
+  "dims.seconds": 33,
+  "share": {
+    "modeBefore": "link",
+    "minted": {
+      "route": "s",
+      "digest": "56e88e5c3b2c"
+    },
+    "afterReload": {
+      "route": "s",
+      "digest": "56e88e5c3b2c"
+    },
+    "afterReloadField": {
+      "route": "s",
+      "digest": "56e88e5c3b2c"
+    },
+    "afterCopy": {
+      "route": "s",
+      "digest": "56e88e5c3b2c"
+    },
+    "sameAfterReload": true,
+    "sameAfterCopy": true,
+    "opens": {
+      "url": "http://localhost:4489/edit/untitled-20261004-oros",
+      "role": null
+    }
+  },
+  "share.seconds": 5.8,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 115,
+      "revision": 56,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 115,
+      "revision": 56,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "58f2dad4",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 21,
+        "messages": 10,
+        "opsFrames": 0,
+        "presenceFrames": 5,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 119,
+        "rowsWritten": 1,
+        "wakes": 1,
+        "requestUnits": 21.5
+      },
+      "total": {
+        "requests": 67,
+        "messages": 423,
+        "opsFrames": 104,
+        "presenceFrames": 307,
+        "alarms": 54,
+        "checkpoints": 24,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 712,
+        "rowsWritten": 377,
+        "wakes": 4,
+        "requestUnits": 142.15
+      },
+      "head": 115,
+      "covered": 115,
+      "revision": 56,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1791085843063,
+      "alarmAt": 1791085855122,
+      "databaseSize": 94208,
+      "colo": "SJC",
+      "object": "58f2dad4"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-oros",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T03:50:49.927Z"
+}

@@ -4,8 +4,17 @@
 // one appearance and one width; the methods, the email field and the box are recorded with a
 // picture; then `/edit/<deck>?error=account_not_linked` is opened and the snackbar's sentence and the
 // address are read. The deck is made from /new on `--a` and trashed and removed by its id.
+// Pass 4 adds three sections (`--account`, on by default; `--no-account` drops them): Continue with
+// Google on each server with the fake client pair, every request to accounts.google.com aborted and
+// recorded, read up to the provider redirect (the parameters the button's navigation carries); a
+// sign in by email on `--a` with the captured code (read through apps/studio/e2e/identity-seed.mts
+// `mail` in this process's environment: `TURBOSLIDE_AUTH_DB` for the sqlite mode, or
+// `TURBOSLIDE_ACCOUNTS=d1` with the room host and bearer for the d1 mode, which a wrapper sets and
+// nothing here prints), the badge on the account head after it; then the account menu's Sign out,
+// a reload, and the account head, the menu rows and /api/auth/get-session read again.
 //   node docs/gslides-parity/cloudflare/verify/signin.mjs --a http://localhost:4479 --b http://localhost:4489 \
-//     --out <dir> [--width 1440] [--appearance light|dark] [--label sqlite]
+//     --out <dir> [--width 1440] [--appearance light|dark] [--label sqlite] [--no-account]
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
@@ -24,6 +33,8 @@ const WIDTH = Number(arg('width', '1440'));
 const APPEARANCE = arg('appearance', 'light') === 'dark' ? 'dark' : 'light';
 const LABEL = arg('label', 'local');
 const OUT = resolve(arg('out', `signin-${LABEL}-${WIDTH}-${APPEARANCE}`));
+const ACCOUNT_SECTIONS = !argv.includes('--no-account');
+const ROOT = resolve(new URL('../../../../', import.meta.url).pathname);
 mkdirSync(OUT, { recursive: true });
 const facts = {
   startedAt: new Date().toISOString(),
@@ -119,6 +130,166 @@ async function dialog(page, name) {
     theme,
   };
 }
+
+/** Opens the account menu and returns its rows and the head's words and badge. */
+async function accountHead(page) {
+  await page.keyboard.press('Escape');
+  const own = ctl(page, 'title.account');
+  if ((await own.count()) === 0) return { account: false };
+  await own.click();
+  await page.locator('#ts-menu-account').waitFor({ timeout: 8000 });
+  await sleep(250);
+  const head = await page.locator('#ts-menu-account').evaluate((menu) => {
+    const h = menu.querySelector('.ts-account-head');
+    const badge = h?.querySelector('.ts-trust-mark, [data-trust-mark], [data-badge="check-badge"]');
+    return {
+      words: (h?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 200),
+      badge: badge
+        ? {
+            label: badge.getAttribute('aria-label') ?? badge.getAttribute('data-trust-mark'),
+            size: Math.round(badge.getBoundingClientRect().width),
+          }
+        : null,
+      rows: [...menu.querySelectorAll('[data-control]')].map((e) => e.getAttribute('data-control')),
+    };
+  });
+  return { account: true, ...head };
+}
+async function openSignIn(page) {
+  await page.keyboard.press('Escape');
+  await ctl(page, 'title.account').click();
+  await page.locator('#ts-menu-account').waitFor({ timeout: 8000 });
+  await page.locator('#ts-menu-account [data-control="account.signIn"]').first().click();
+  await page.locator('[data-control="dialog.signIn"]').waitFor({ timeout: 10_000 });
+  await sleep(300);
+}
+/** Continue with Google up to the provider redirect: the request to accounts.google.com is aborted and read. */
+async function googleLeaves(page, deckPath, label) {
+  const seen = [];
+  const pattern = /^https:\/\/accounts\.google\.com\//;
+  await page.context().route(pattern, (route) => {
+    seen.push(route.request().url());
+    return route.abort();
+  });
+  try {
+    await page.goto(deckPath);
+    await waitEditor(page);
+    await openSignIn(page);
+    const social = page
+      .waitForResponse((r) => /\/api\/auth\/sign-in\/social/.test(r.url()), { timeout: 20_000 })
+      .catch(() => null);
+    const t0 = Date.now();
+    await ctl(page, 'dialog.signIn.google').click();
+    const answer = await social;
+    const until = Date.now() + 20_000;
+    while (seen.length === 0 && Date.now() < until) await sleep(50);
+    const url = seen[0] ? new URL(seen[0]) : null;
+    const q = (k) => url?.searchParams.get(k) ?? null;
+    const reading = {
+      socialStatus: answer?.status() ?? null,
+      leftAfterMs: seen.length > 0 ? Date.now() - t0 : null,
+      host: url?.host ?? null,
+      path: url?.pathname ?? null,
+      redirectUri: q('redirect_uri'),
+      scope: q('scope'),
+      prompt: q('prompt'),
+      responseType: q('response_type'),
+      codeChallenge: q('code_challenge') !== null,
+      codeChallengeMethod: q('code_challenge_method'),
+      accessType: q('access_type'),
+      state: q('state') !== null,
+      clientIdPrefix: (q('client_id') ?? '').split('-')[0] || null,
+    };
+    await page.screenshot({ path: join(OUT, `${label}-google-left.png`) }).catch(() => {});
+    return reading;
+  } finally {
+    await page.context().unroute(pattern);
+  }
+}
+/** A sign in by email with the captured code, then the account head; the code is read and never printed. */
+async function emailSignIn(page, deckPath, email) {
+  await page.goto(deckPath);
+  await waitEditor(page);
+  const before = await accountHead(page);
+  await page.keyboard.press('Escape');
+  await openSignIn(page);
+  await ctl(page, 'dialog.signIn.email').fill(email);
+  await ctl(page, 'dialog.signIn.continue').click();
+  await ctl(page, 'dialog.signIn.code').waitFor({ timeout: 20_000 });
+  const out = execFileSync(
+    'node',
+    ['apps/studio/e2e/identity-seed.mts', 'mail', process.env.TURBOSLIDE_AUTH_DB ?? '-', email],
+    { cwd: ROOT, env: process.env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+  );
+  const mail = JSON.parse(out.trim().split('\n').pop() ?? '{}');
+  const codeShape = /^\d{6}$/.test(mail.code ?? '');
+  await ctl(page, 'dialog.signIn.code').fill(mail.code ?? '');
+  const t0 = Date.now();
+  const reloaded = page.waitForEvent('load', { timeout: 30_000 }).catch(() => null);
+  await ctl(page, 'dialog.signIn.verify').click();
+  await reloaded;
+  await waitEditor(page);
+  const reloadMs = Date.now() - t0;
+  const after = await accountHead(page);
+  await page.screenshot({ path: join(OUT, 'a-signed-in-account-menu.png') });
+  await page.keyboard.press('Escape');
+  const session = await page.evaluate(() =>
+    fetch('/api/auth/get-session', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((j) => ({ user: Boolean(j?.user), email: j?.user?.email ?? null }))
+      .catch((e) => ({ error: String(e) })),
+  );
+  return { before, codeShape, reloadMs, after, session };
+}
+/** The account menu's Sign out, the reload, and what the browser reads after it. */
+async function signOut(page) {
+  await page.keyboard.press('Escape');
+  await ctl(page, 'title.account').click();
+  await page.locator('#ts-menu-account').waitFor({ timeout: 8000 });
+  const row = page.locator('#ts-menu-account [data-control="account.signOut"]').first();
+  if ((await row.count()) === 0) return { signOutRow: false };
+  const calls = [];
+  const listen = (r) => {
+    if (/\/api\/auth\/sign-out|account\.signOut|_serverFn|\/api\/actions\//.test(r.url()))
+      calls.push({ url: r.url().replace(/\?.*$/, '').slice(-80), status: r.status() });
+  };
+  page.on('response', listen);
+  const reload = page.waitForEvent('load', { timeout: 15_000 }).catch(() => null);
+  const t0 = Date.now();
+  await row.click();
+  const reloadedAt = await reload;
+  page.off('response', listen);
+  const reloadedMs = reloadedAt === null ? null : Date.now() - t0;
+  await sleep(1500);
+  if (reloadedAt === null) {
+    await page.reload();
+  }
+  await waitEditor(page);
+  const head = await accountHead(page);
+  await page.screenshot({ path: join(OUT, 'a-after-sign-out-account-menu.png') });
+  await page.keyboard.press('Escape');
+  const session = await page.evaluate(() =>
+    fetch('/api/auth/get-session', { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((j) => ({ user: Boolean(j?.user), email: j?.user?.email ?? null }))
+      .catch((e) => ({ error: String(e) })),
+  );
+  const identity = await page.evaluate(() => {
+    const d = window.turboslide?.studio?.describe?.();
+    const me = d?.identity ?? d?.state?.identity ?? null;
+    return me ? { kind: me.kind ?? null, trust: me.trust ?? null } : null;
+  });
+  return {
+    signOutRow: true,
+    reloadedByItself: reloadedAt !== null,
+    reloadedMs,
+    calls,
+    head,
+    session,
+    identity,
+  };
+}
+
 const ctxA = await mk(BASE_A);
 const ctxB = await mk(BASE_B);
 const A = await ctxA.newPage();
@@ -163,6 +334,26 @@ try {
   })();
   await A.screenshot({ path: join(OUT, 'a-error-sentence.png') });
   say('errorSentence', { sentence, url: A.url(), paramGone: !/error=/.test(A.url()) });
+  if (ACCOUNT_SECTIONS) {
+    try {
+      say('google.capture', await googleLeaves(A, `/edit/${deckId}`, 'a-capture'));
+    } catch (error) {
+      say('google.capture.error', String(error?.stack ?? error).slice(0, 600));
+    }
+    try {
+      say('google.mailOff', await googleLeaves(B, '/new', 'b-mail-off'));
+    } catch (error) {
+      say('google.mailOff.error', String(error?.stack ?? error).slice(0, 600));
+    }
+    const email = `verifier4-${Date.now().toString(36)}@example.test`;
+    try {
+      say('email.signIn', await emailSignIn(A, `/edit/${deckId}`, email));
+      say('signOut', await signOut(A));
+    } catch (error) {
+      say('account.error', String(error?.stack ?? error).slice(0, 900));
+      await A.screenshot({ path: join(OUT, 'A-account-error.png') }).catch(() => {});
+    }
+  }
 } catch (error) {
   say('error', String(error?.stack ?? error).slice(0, 1500));
   await A.screenshot({ path: join(OUT, 'A-error.png') }).catch(() => {});

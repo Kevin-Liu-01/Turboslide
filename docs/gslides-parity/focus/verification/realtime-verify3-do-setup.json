@@ -1,0 +1,192 @@
+{
+  "base": "http://localhost:4479",
+  "tier": "do",
+  "secondBase": "http://localhost:4489",
+  "roomHost": "127.0.0.1:8799",
+  "health": {
+    "host": "127.0.0.1:8799",
+    "scheme": "http",
+    "knownSkew": null,
+    "status": 200,
+    "ms": 94,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    },
+    "baseCommit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+    "commitWord": "commit 697e8892d24f equal to the base's",
+    "result": "passed",
+    "reason": ""
+  },
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": null,
+  "startedAt": "2026-10-03T12:21:21.906Z",
+  "ms": 17145,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 17023,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier3/gate-setup/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "setup",
+    "spec": null,
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 2,
+  "failed": 0,
+  "notDriven": 2,
+  "manual": [
+    "setup.free-plan.caps",
+    "setup.do.memory"
+  ],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "697e8892",
+  "origin": "http://localhost:4479",
+  "date": "2026-10-03",
+  "results": {
+    "setup.do.two-instances": "passed",
+    "setup.worker.health": "passed",
+    "setup.free-plan.caps": "not driven",
+    "setup.do.memory": "not driven"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "setup.worker.health",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "setup.do.two-instances",
+      "feature": "setup",
+      "driver": "core/realtime.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "setup.free-plan.caps",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the dashboard's figures before and after the run were not given (--caps-before <json> and --caps-after <json>, each { readAt, doRequests, doRowsWritten, workerRequests })"
+    },
+    {
+      "id": "setup.do.memory",
+      "feature": "setup",
+      "driver": "core-gate",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "the verifier's hand reading was not given (--memory-reading <json> with result, reason and the dashboard's memory percentiles)"
+    }
+  ]
+}

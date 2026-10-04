@@ -1,0 +1,343 @@
+{
+  "startedAt": "2026-10-04T07:25:25.503Z",
+  "baseA": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "baseB": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "merge",
+    "title",
+    "reload"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-uxz5",
+  "slides": [
+    "title",
+    "split-1-b76b",
+    "split-2-b76b"
+  ],
+  "setup": {
+    "clients": {
+      "a": "e3b09f91c2a4d6a8e8a8a800583ab76b",
+      "b": "4301ffff80c02f78d077531218c2b3ba"
+    },
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791098737554,
+      "connectedAt": 1791098737720,
+      "navMs": 1676
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791098739243,
+      "navMs": 1135,
+      "bChipInAms": 252,
+      "aChipInBms": 254,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791098740600,
+      "navMs": 942,
+      "bChipInAms": 1033,
+      "aChipInBms": 1034,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791098742634,
+      "navMs": 804,
+      "bChipInAms": 287,
+      "aChipInBms": 288,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 5.8,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1836
+      },
+      {
+        "ch": "a",
+        "ms": 829
+      },
+      {
+        "ch": "b",
+        "ms": 1156
+      },
+      {
+        "ch": "c",
+        "ms": 1407
+      },
+      {
+        "ch": "d",
+        "ms": 1688
+      },
+      {
+        "ch": "e",
+        "ms": 1920
+      },
+      {
+        "ch": "f",
+        "ms": 2186
+      },
+      {
+        "ch": "g",
+        "ms": 2456
+      },
+      {
+        "ch": "h",
+        "ms": 1465
+      },
+      {
+        "ch": "i",
+        "ms": 1726
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefghi",
+    "load": null
+  },
+  "keystroke.seconds": 11.2,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1",
+      "bCaretInA": "20",
+      "bWordEnd": null,
+      "aCaretInB": "21",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 br2 al2",
+      "bCaretInA": "29",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 al3",
+      "bCaretInA": "36",
+      "bWordEnd": null,
+      "aCaretInB": "37",
+      "aWordEnd": 33,
+      "textB": "B writes here al1 br1 br2 br3"
+    }
+  ],
+  "merge.seconds": 9.2,
+  "title.cover": {
+    "id": "title-1-b76b",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 21
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 37,
+      "bothMsAfterEscape": 2310,
+      "a": "Two typers ta1 ua1 tb1 ub1",
+      "b": "Two typers ta1 ua1 tb1 ub1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 60,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 ua1 tb1 ub1 ta2 tb2 ub2",
+      "b": "Two typers ta1 ua1 tb1 ub1 ta2 tb2 ub2",
+      "equal": true,
+      "lost": [
+        " ua2"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 31,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 ua1 tb1 ub1 ta2 tb2 ub2 tb3 ta3 ua3 ub3",
+      "b": "Two typers ta1 ua1 tb1 ub1 ta2 tb2 ub2 tb3 ta3 ua3 ub3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 23.1,
+  "reload": {
+    "equalMsAfterLastKey": null,
+    "textA": "A writes here abcdefghi ra1 ra4 ra5",
+    "textB": "B writes here al1 br1 br2 al2 al3 br3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 39,
+      "revision": 39,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "reload.seconds": 16.5,
+  "sync.end": {
+    "a": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 39,
+      "revision": 39,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 39,
+      "revision": 39,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-uxz5",
+    "editStatus": 302
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T07:26:45.985Z"
+}

@@ -1,0 +1,449 @@
+{
+  "base": "http://localhost:4479",
+  "tier": "do",
+  "secondBase": "http://localhost:4489",
+  "roomHost": "127.0.0.1:8799",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": null,
+  "defaultTemplate": null,
+  "seedTwins": {
+    "overlay": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier4/overlay",
+    "decks": [
+      {
+        "deck": "gt-brand",
+        "placed": 0,
+        "present": 202,
+        "source": "/Users/kevinliu/repos/Turboslide-realtime/decks/gt-brand/assets"
+      }
+    ]
+  },
+  "startedAt": "2026-10-04T03:32:13.093Z",
+  "ms": 544516,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 544477,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier4/gate-sync/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "collab.edit-from-second-browser",
+      "collab.edit-from-owner",
+      "collab.slide-added-appears",
+      "collab.presence-chips",
+      "collab.rename-reaches-second-browser",
+      "collab.roster.go-to-slide",
+      "sync.serial.order-and-latency",
+      "sync.title.concurrent-both-kept",
+      "sync.title.offline-both-kept",
+      "sync.block.concurrent-same-offset-order",
+      "sync.structural.concurrent",
+      "sync.block.offline-replay-converges",
+      "sync.viewer.live-updates",
+      "sync.reload.same-document",
+      "sync.undo.after-remote",
+      "sync.resend.idempotent",
+      "collab.caret-hue-matches-chip",
+      "sync.slide.concurrent-add-both-kept",
+      "sync.title-row.save-words-truthful",
+      "sync.reject.sentence-below-toolbar",
+      "collab.follow.anonymous-editor",
+      "sync.write.5xx-keeps-document",
+      "sync.recovered.no-plate-for-held-writes",
+      "collab.presence.join-within-2s",
+      "collab.polish.session-sweep"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 25,
+  "passed": 20,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "2477982b",
+  "origin": "http://localhost:4479",
+  "date": "2026-10-04",
+  "results": {
+    "collab.edit-from-second-browser": "passed",
+    "collab.edit-from-owner": "passed",
+    "collab.slide-added-appears": "passed",
+    "collab.presence-chips": "passed",
+    "collab.rename-reaches-second-browser": "passed",
+    "collab.roster.go-to-slide": "passed",
+    "collab.follow.anonymous-editor": "passed",
+    "collab.presence.join-within-2s": "passed",
+    "collab.polish.session-sweep": "passed",
+    "collab.caret-hue-matches-chip": "passed",
+    "sync.serial.order-and-latency": "failed",
+    "sync.title.concurrent-both-kept": "passed",
+    "sync.title.offline-both-kept": "passed",
+    "sync.block.concurrent-same-offset-order": "passed",
+    "sync.structural.concurrent": "passed",
+    "sync.block.offline-replay-converges": "failed",
+    "sync.viewer.live-updates": "passed",
+    "sync.reload.same-document": "passed",
+    "sync.undo.after-remote": "passed",
+    "sync.resend.idempotent": "failed",
+    "sync.slide.concurrent-add-both-kept": "passed",
+    "sync.title-row.save-words-truthful": "passed",
+    "sync.reject.sentence-below-toolbar": "failed",
+    "sync.write.5xx-keeps-document": "failed",
+    "sync.recovered.no-plate-for-held-writes": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "sync.serial.order-and-latency",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.block.offline-replay-converges",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.resend.idempotent",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.reject.sentence-below-toolbar",
+        "feature": "sync",
+        "result": "failed"
+      },
+      {
+        "id": "sync.write.5xx-keeps-document",
+        "feature": "sync",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "sync.serial.order-and-latency",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "result": "failed"
+    },
+    {
+      "id": "sync.write.5xx-keeps-document",
+      "feature": "sync",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "collab.edit-from-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.edit-from-owner",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.slide-added-appears",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence-chips",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.rename-reaches-second-browser",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.roster.go-to-slide",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.serial.order-and-latency",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    },
+    {
+      "id": "sync.title.concurrent-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.title.offline-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.block.concurrent-same-offset-order",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.structural.concurrent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.block.offline-replay-converges",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: A's first attempt carried a text.splice"
+    },
+    {
+      "id": "sync.viewer.live-updates",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reload.same-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.undo.after-remote",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.resend.idempotent",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "collab.caret-hue-matches-chip",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.slide.concurrent-add-both-kept",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.title-row.save-words-truthful",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.reject.sentence-below-toolbar",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the slide add was refused once"
+    },
+    {
+      "id": "collab.follow.anonymous-editor",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "sync.write.5xx-keeps-document",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: one ops POST was answered 503"
+    },
+    {
+      "id": "sync.recovered.no-plate-for-held-writes",
+      "feature": "sync",
+      "driver": "core/sync.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "collab.polish.session-sweep",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

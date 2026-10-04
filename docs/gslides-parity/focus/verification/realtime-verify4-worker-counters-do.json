@@ -1,0 +1,25 @@
+{
+  "readAt": "2026-10-04T04:53:13.116Z",
+  "health": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "db": {
+    "status": 200,
+    "body": {
+      "queries": 1942,
+      "batches": 3,
+      "statements": 1997,
+      "rowsRead": 768,
+      "rowsWritten": 427
+    }
+  },
+  "rooms": {}
+}

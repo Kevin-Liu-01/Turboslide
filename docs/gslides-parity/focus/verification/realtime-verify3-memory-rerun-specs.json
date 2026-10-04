@@ -1,0 +1,360 @@
+{
+  "base": "http://localhost:4479",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": "127.0.0.1:8799",
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-03T21:08:56.211Z",
+  "ms": 1008389,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 1008364,
+    "report": "/Users/kevinliu/repos/Turboslide-realtime/.turboslide/verifier3/gate-rerun-specs/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.list.gt-brand-deck",
+      "brand.appearance.default",
+      "present.laser.visible",
+      "export.picture.progress-and-capture",
+      "shaders.export.missing-frame-row",
+      "decks.home.load-budget",
+      "images.insert.no-external-banner",
+      "export.refusal.sentence-and-retry",
+      "realtime.agent.write-announced",
+      "export.download.large-deck-pdf",
+      "export.download.large-deck-pptx"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 11,
+  "passed": 3,
+  "failed": 8,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded.",
+      "measures": []
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded.",
+      "measures": []
+    },
+    {
+      "id": "decks.home.load-budget",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "first byte 15 ms (budget 150)",
+        "LCP 204 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 216 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 55897 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1237448 B (reported against 600000)",
+        "first byte 15 ms (budget 150)",
+        "LCP 204 ms on img[hero-dark] (budget 500, the hero picture or the h1)",
+        "ready 216 ms (budget 500)",
+        "images before the first scroll 261883 B (budget 300000)",
+        "images after a full scroll 261883 B (budget 800000)",
+        "document 55897 B (budget 60000)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1237448 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "697e8892",
+  "origin": "http://localhost:4479",
+  "date": "2026-10-03",
+  "results": {
+    "realtime.agent.write-announced": "passed",
+    "decks.list.gt-brand-deck": "failed",
+    "brand.appearance.default": "failed",
+    "decks.home.load-budget": "passed",
+    "export.download.large-deck-pdf": "failed",
+    "export.download.large-deck-pptx": "failed",
+    "shaders.export.missing-frame-row": "failed",
+    "export.refusal.sentence-and-retry": "failed",
+    "export.picture.progress-and-capture": "failed",
+    "images.insert.no-external-banner": "failed",
+    "present.laser.visible": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.list.gt-brand-deck",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "brand.appearance.default",
+        "feature": "brand",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.export.missing-frame-row",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "images.insert.no-external-banner",
+        "feature": "images",
+        "result": "failed"
+      },
+      {
+        "id": "export.refusal.sentence-and-retry",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.picture.progress-and-capture",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "export.download.large-deck-pdf",
+        "feature": "export",
+        "result": "failed"
+      },
+      {
+        "id": "export.download.large-deck-pptx",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [
+    "brand"
+  ],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "result": "failed"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "result": "failed"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 30000ms exceeded."
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 90000ms exceeded."
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "TimeoutError: page.waitForURL: Timeout 60000ms exceeded."
+    },
+    {
+      "id": "shaders.export.missing-frame-row",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "Error: the export started within 800 ms of the change"
+    },
+    {
+      "id": "images.insert.no-external-banner",
+      "feature": "images",
+      "driver": "core/images.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "\u001b[31mTest timeout of 240000ms exceeded.\u001b[39m"
+    },
+    {
+      "id": "export.picture.progress-and-capture",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the file within 4 s on an unchanged slide"
+    },
+    {
+      "id": "present.laser.visible",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.agent.write-announced",
+      "feature": "realtime",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

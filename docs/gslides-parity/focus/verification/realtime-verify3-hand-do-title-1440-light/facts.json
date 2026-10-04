@@ -1,0 +1,376 @@
+{
+  "startedAt": "2026-10-03T21:40:37.395Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "title",
+    "merge"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261003-cpcc",
+  "slides": [
+    "title",
+    "split-1-cb1c",
+    "split-2-cb1c"
+  ],
+  "setup": {
+    "clients": {
+      "a": "aa9d00bc21e6b557cbe40c85a14acb1c",
+      "b": "8de1a2cbfec1d6ec8f29ebd278b8ac2b"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "c18b9ace",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "c18b9ace",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791063649660,
+      "connectedAt": 1791063649664,
+      "navMs": 275
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791063650196,
+      "navMs": 151,
+      "bChipInAms": 72,
+      "aChipInBms": 73,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791063650493,
+      "navMs": 179,
+      "bChipInAms": 72,
+      "aChipInBms": 73,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791063650786,
+      "navMs": 178,
+      "bChipInAms": 73,
+      "aChipInBms": 74,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "c18b9ace",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 1.8,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1 br1",
+      "bCaretInA": "21",
+      "bWordEnd": 21,
+      "aCaretInB": "17",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 br2 al2",
+      "bCaretInA": "25",
+      "bWordEnd": 25,
+      "aCaretInB": "29",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 br2 al2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 al3 br3",
+      "bCaretInA": "37",
+      "bWordEnd": 37,
+      "aCaretInB": "33",
+      "aWordEnd": 33,
+      "textB": "B writes here al1 br1 br2 al2 al3 br3"
+    }
+  ],
+  "merge.seconds": 9,
+  "title.cover": {
+    "id": "title-1-cb1c",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 13
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 16,
+      "bothMsAfterEscape": 128,
+      "a": "Two typers ta1 ua1 tb1 ub1",
+      "b": "Two typers ta1 ua1 tb1 ub1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 73,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 ua1 tb1 ub1 tb2 ta2 ua2",
+      "b": "Two typers ta1 ua1 tb1 ub1 tb2 ta2 ua2",
+      "equal": true,
+      "lost": [
+        " ub2"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 61,
+      "bothMsAfterEscape": 45,
+      "a": "Two typers ta1 ua1 tb1 ub1 tb2 ta2 ua2 ta3 ua3 tb3 ub3",
+      "b": "Two typers ta1 ua1 tb1 ub1 tb2 ta2 ua2 ta3 ua3 tb3 ub3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 16.5,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 26,
+      "revision": 20,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "c18b9ace",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 26,
+      "revision": 20,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "c18b9ace",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 26,
+        "messages": 156,
+        "opsFrames": 25,
+        "presenceFrames": 126,
+        "alarms": 15,
+        "checkpoints": 10,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 110,
+        "rowsWritten": 102,
+        "wakes": 1,
+        "requestUnits": 48.8
+      },
+      "total": {
+        "requests": 26,
+        "messages": 156,
+        "opsFrames": 25,
+        "presenceFrames": 126,
+        "alarms": 15,
+        "checkpoints": 10,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 109,
+        "rowsWritten": 102,
+        "wakes": 1,
+        "requestUnits": 48.8
+      },
+      "head": 26,
+      "covered": 22,
+      "revision": 20,
+      "months": [
+        "202610"
+      ],
+      "sockets": 2,
+      "members": 2,
+      "awakeSince": 1791063638955,
+      "alarmAt": 1791063678079,
+      "databaseSize": 53248,
+      "colo": "SJC",
+      "object": "c18b9ace"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261003-cpcc",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "697e8892d24ff4bb6560b5ccb04dea51d76ed1cc",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-03T21:41:17.395Z"
+}

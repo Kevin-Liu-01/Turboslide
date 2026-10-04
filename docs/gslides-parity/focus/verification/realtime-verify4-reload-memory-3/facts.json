@@ -1,0 +1,227 @@
+{
+  "startedAt": "2026-10-04T07:23:10.708Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4479",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "reload"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-ka24",
+  "slides": [
+    "title",
+    "split-1-67e3",
+    "split-2-67e3"
+  ],
+  "setup": {
+    "clients": {
+      "a": "b749af5a4ef856993d2b308f846d67e3",
+      "b": "8cfacd4a5b945d88ec379ab4d142286c"
+    },
+    "syncA": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791098606394,
+      "connectedAt": 1791098606398,
+      "navMs": 591
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791098607326,
+      "navMs": 514,
+      "bChipInAms": 52,
+      "aChipInBms": 54,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791098608047,
+      "navMs": 601,
+      "bChipInAms": 53,
+      "aChipInBms": 54,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791098608784,
+      "navMs": 623,
+      "bChipInAms": 37,
+      "aChipInBms": 49,
+      "syncA": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "memory",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 3,
+  "reload.error": "TypeError: Cannot read properties of null (reading 'x')\n    at openRunEnd (file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:168:17)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1477:9\n    at async section (file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:428:5)\n    at async file:///Users/kevinliu/repos/Turboslide-realtime/docs/gslides-parity/cloudflare/verify/hand.mjs:1453:3",
+  "reload.seconds": 5.2,
+  "sync.end": {
+    "a": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 19,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "memory",
+      "transport": "sse",
+      "connected": true,
+      "seq": 19,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 0,
+      "durable": false,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "total": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "head": 0,
+      "covered": 0,
+      "revision": 0,
+      "months": [],
+      "sockets": 0,
+      "members": 0,
+      "awakeSince": 1791098614982,
+      "alarmAt": null,
+      "databaseSize": 24576,
+      "colo": "SJC",
+      "object": "b1826fb0"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-ka24",
+    "editStatus": 404
+  }
+}

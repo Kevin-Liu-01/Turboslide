@@ -1,0 +1,343 @@
+{
+  "startedAt": "2026-10-04T07:24:03.498Z",
+  "baseA": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "baseB": "https://turboslide-jhkh6e7m8-kl01s-projects.vercel.app",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "merge",
+    "title",
+    "reload"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-imbd",
+  "slides": [
+    "title",
+    "split-1-c26e",
+    "split-2-c26e"
+  ],
+  "setup": {
+    "clients": {
+      "a": "0150d676270cb47bebce08729c86c26e",
+      "b": "88c1a12060c9573c3694fe40b9e147ff"
+    },
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 6,
+      "revision": 6,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791098657943,
+      "connectedAt": 1791098658055,
+      "navMs": 1392
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791098659371,
+      "navMs": 924,
+      "bChipInAms": 498,
+      "aChipInBms": 499,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791098661249,
+      "navMs": 1186,
+      "bChipInAms": 370,
+      "aChipInBms": 371,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791098662994,
+      "navMs": 1180,
+      "bChipInAms": 294,
+      "aChipInBms": 295,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 6,
+        "revision": 6,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 5.8,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1614
+      },
+      {
+        "ch": "a",
+        "ms": 610
+      },
+      {
+        "ch": "b",
+        "ms": 903
+      },
+      {
+        "ch": "c",
+        "ms": 1242
+      },
+      {
+        "ch": "d",
+        "ms": 1530
+      },
+      {
+        "ch": "e",
+        "ms": 1988
+      },
+      {
+        "ch": "f",
+        "ms": 2279
+      },
+      {
+        "ch": "g",
+        "ms": 2654
+      },
+      {
+        "ch": "h",
+        "ms": 1662
+      },
+      {
+        "ch": "i",
+        "ms": null
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefgh",
+    "load": null
+  },
+  "keystroke.seconds": 11.2,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1",
+      "bCaretInA": "21",
+      "bWordEnd": null,
+      "aCaretInB": "20",
+      "aWordEnd": 17,
+      "textB": "B writes here al1 br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 al2",
+      "bCaretInA": "29",
+      "bWordEnd": null,
+      "aCaretInB": "28",
+      "aWordEnd": 25,
+      "textB": "B writes here al1 br1 al2 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 al2 al3",
+      "bCaretInA": "37",
+      "bWordEnd": null,
+      "aCaretInB": "35",
+      "aWordEnd": 29,
+      "textB": "B writes here al1 br1 al2 br2 br3"
+    }
+  ],
+  "merge.seconds": 9.1,
+  "title.cover": {
+    "id": "title-1-c26e",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 20
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 143,
+      "bothMsAfterEscape": 2988,
+      "a": "Two typers ta1 tb1 ua1 ub1",
+      "b": "Two typers ta1 tb1 ua1 ub1",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 26,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 tb1 ua1 ub1 ta2 tb2 ub2",
+      "b": "Two typers ta1 tb1 ua1 ub1 ta2 tb2 ub2",
+      "equal": true,
+      "lost": [
+        " ua2"
+      ],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 8,
+      "bothMsAfterEscape": 2681,
+      "a": "Two typers ta1 tb1 ua1 ub1 ta2 tb2 ub2 ta3 tb3 ub3 ua3",
+      "b": "Two typers ta1 tb1 ua1 ub1 ta2 tb2 ub2 ta3 tb3 ub3 ua3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 22.3,
+  "reload": {
+    "equalMsAfterLastKey": null,
+    "textA": "A writes here abcdefghi ra4 ra5",
+    "textB": "B writes here al1 br1 al2 br2 br3 al3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 37,
+      "revision": 37,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "reload.seconds": 16.5,
+  "sync.end": {
+    "a": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 37,
+      "revision": 37,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 37,
+      "revision": 37,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-imbd",
+    "editStatus": 302
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T07:25:25.210Z"
+}

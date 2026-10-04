@@ -10,12 +10,15 @@
 //   node docs/gslides-parity/cloudflare/verify/hand.mjs --a http://localhost:4479 --b http://localhost:4489 \
 //     --out <dir> [--width 1440] [--appearance light|dark] [--sections a,b,c] [--room-host 127.0.0.1:8799]
 //
-// Sections (default: every one but `ticket`): join, keystroke, caret, merge, outline, drag, pointer,
-// card, follow, agent, reload, offline, dims, revoke, ticket. `ticket` holds both tabs open for
+// Sections (default: every one but `ticket`, `title`, `image` and `share`): join, keystroke, caret,
+// merge, title, image, outline, drag, pointer, card, follow, agent, reload, offline, dims, share,
+// revoke, ticket. `title`, `image` and `share` are pass 3's (the two typers in the cover title, a
+// picture inserted and replaced by upload, the Share dialog's general link across a reload). `ticket` holds both tabs open for
 // `--ticket-wait` seconds (default 630, past the 600 s ticket and its refresh at 480 s) and reads the
 // sockets' frames. The Worker's /health and, with TURBOSLIDE_ROOM_BEARER in the environment (a
 // wrapper sets it; nothing here prints it), the object's counters are read before and after.
 // Playwright is the worktree's playwright-core, resolved from the repository's package.json.
+import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
@@ -740,6 +743,245 @@ try {
     say('merge.rounds', rounds);
   });
 
+  // ---- two people type into the cover title at once, three rounds (pass 3: the run rule's client
+  // half and the wrapped title's conversion, realtime.title.two-typers by hand); the heading wraps
+  // in round 2 or 3 at both widths, so each tab's Escape may convert the cover to a freeform slide
+  await section('title', async () => {
+    const headingRunOf = (page) =>
+      page.evaluate(() => {
+        const runs = [
+          ...document.querySelectorAll(
+            '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]',
+          ),
+        ];
+        const ids = runs.map((el) => el.getAttribute('data-run') ?? '');
+        /* the heading's run, as the spec's headingRun reads it (lib.ts): the run whose id names the heading */
+        return ids.find((r) => /heading/.test(r)) ?? ids[0] ?? null;
+      });
+    let coverId = null;
+    const headingOf = async (page) => {
+      const first = coverId ?? (await slideOrder(page))[0];
+      const slide = await slideJson(page, first);
+      if (slide?.kind === 'title') return String(slide.heading ?? '').replace(/ /g, ' ');
+      const id = slide?.grammar?.slots?.main?.[1] ?? 'heading';
+      const block = (slide?.slots?.main ?? []).find((b) => b.id === id);
+      return String(block?.text ?? '').replace(/ /g, ' ');
+    };
+    const editingNow = (page) => isEditing(page);
+    async function openHeadingEnd(page) {
+      await escapeAll(page);
+      const run = await poll(() => headingRunOf(page), 10_000, 100);
+      const el = page
+        .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+        .first();
+      const box = await el.boundingBox();
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await page.mouse.move(x - 120, y + 80);
+      await page.mouse.move(x, y, { steps: 12 });
+      await sleep(80);
+      await page.mouse.dblclick(x, y);
+      if (!(await poll(() => editingNow(page), 5000, 50))) {
+        await page.keyboard.press('Escape');
+        await el.dblclick();
+        await poll(() => editingNow(page), 5000, 50);
+      }
+      await page.keyboard.press('Meta+ArrowDown');
+      await page.keyboard.press('End');
+    }
+    const count = (text, w) => text.split(w).length - 1;
+    /* a cover of its own at the deck's end, so no placed block lies over its heading (the setup's
+       hand-a block sits over slide 1's heading and took the double click in the first drives) */
+    {
+      const order = await slideOrder(A);
+      const st = await state(A);
+      await invoke(A, 'slide.new', {
+        layout: 'title',
+        after: order[order.length - 1],
+        baseRevision: st.revision,
+      });
+      await quiet(A);
+      const after = await slideOrder(A);
+      coverId = after.find((id) => !order.includes(id)) ?? null;
+      await poll(async () => (await slideOrder(B)).includes(coverId), 8000, 100);
+      const cover = await slideJson(A, coverId);
+      await clickCard(A, coverId);
+      await clickCard(B, coverId);
+      const st2 = await state(A);
+      const run = await headingRunOf(A);
+      await A.locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
+        .first()
+        .dblclick();
+      await sleep(150);
+      await A.keyboard.press('Meta+a');
+      await A.keyboard.type('Two typers', { delay: HUMAN });
+      await A.keyboard.press('Escape');
+      await escapeAll(A);
+      await quiet(A);
+      say('title.cover', { id: coverId, kind: cover?.kind ?? null, run, revision: st2.revision });
+    }
+    const rounds = [];
+    for (let round = 1; round <= 3; round += 1) {
+      const pair1 = [` ta${round}`, ` tb${round}`];
+      const pair2 = [` ua${round}`, ` ub${round}`];
+      await openHeadingEnd(A);
+      await openHeadingEnd(B);
+      const delay = Math.floor(Math.random() * 150);
+      await Promise.all([typeWord(A, pair1[0]), sleep(delay).then(() => typeWord(B, pair1[1]))]);
+      await sleep(700);
+      await Promise.all([typeWord(A, pair2[0]), sleep(delay).then(() => typeWord(B, pair2[1]))]);
+      await Promise.all([A.keyboard.press('Escape'), B.keyboard.press('Escape')]);
+      const escapeAt = Date.now();
+      const four = [...pair1, ...pair2];
+      const settled = await poll(
+        async () => {
+          const [a, b] = await Promise.all([headingOf(A), headingOf(B)]);
+          return four.every((w) => count(a, w) === 1 && count(b, w) === 1) ? Date.now() : null;
+        },
+        3000,
+        40,
+      );
+      await Promise.all([quiet(A), quiet(B)]);
+      const [a, b] = await Promise.all([headingOf(A), headingOf(B)]);
+      const kinds = await Promise.all(
+        [A, B].map(
+          async (p) => (await slideJson(p, coverId ?? (await slideOrder(p))[0]))?.kind ?? null,
+        ),
+      );
+      rounds.push({
+        round,
+        delayB: delay,
+        bothMsAfterEscape: settled ? settled - escapeAt : null,
+        a,
+        b,
+        equal: a === b,
+        lost: four.filter((w) => count(a, w) !== 1 || count(b, w) !== 1),
+        slideKind: { a: kinds[0], b: kinds[1] },
+      });
+      if (round >= 2) {
+        await shot(A, `02-title-round${round}-a`, await stageClip(A));
+        await shot(B, `02-title-round${round}-b`, await stageClip(B));
+      }
+      await escapeAll(A);
+      await escapeAll(B);
+    }
+    say('title.rounds', rounds);
+    await clickCard(A, slides[0]);
+    await clickCard(B, slides[0]);
+  });
+
+  // ---- a picture inserted and replaced by upload on A, read on B (pass 3: pictures on the do
+  // tier, images.insert.upload and images.replace.upload by hand)
+  await section('image', async () => {
+    const png = (r, g, b) =>
+      sharp({ create: { width: 240, height: 160, channels: 3, background: { r, g, b } } })
+        .png()
+        .toBuffer();
+    const picturesOf = async (page, slideId) => {
+      const slide = await slideJson(page, slideId);
+      const out = [];
+      const walk = (node) => {
+        if (Array.isArray(node)) node.forEach(walk);
+        else if (node && typeof node === 'object') {
+          if ((node.type === 'shot' || node.type === 'picture') && node.id)
+            out.push({ id: node.id, asset: node.asset ?? node.src ?? null });
+          for (const v of Object.values(node)) if (v && typeof v === 'object') walk(v);
+        }
+      };
+      walk(slide);
+      return out;
+    };
+    const refusal = (page) =>
+      page.evaluate(() => /was not added|Try again/.test(document.body.innerText));
+    const target = slides[2];
+    await escapeAll(A);
+    await escapeAll(B);
+    await clickCard(A, target);
+    await clickCard(B, target);
+    const before = (await picturesOf(A, target)).length;
+    const chooser = A.waitForEvent('filechooser', { timeout: 10_000 });
+    await ctl(A, 'menubar.insert').click();
+    await A.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    await ctl(A, 'menu.insert.image').hover();
+    await A.locator('[data-control="menu.insert.image.upload"]').first().waitFor({ timeout: 6000 });
+    await sleep(250);
+    await ctl(A, 'menu.insert.image.upload').click();
+    const fc = await chooser;
+    await fc.setFiles({
+      name: 'hand-a.png',
+      mimeType: 'image/png',
+      buffer: await png(200, 40, 40),
+    });
+    const setAt = Date.now();
+    const inA = await poll(
+      async () => ((await picturesOf(A, target)).length > before ? Date.now() : null),
+      15_000,
+      50,
+    );
+    const inB = await poll(
+      async () => ((await picturesOf(B, target)).length > before ? Date.now() : null),
+      15_000,
+      50,
+    );
+    const pics = await picturesOf(A, target);
+    const placed = pics[pics.length - 1] ?? null;
+    const refusedInsert = await refusal(A);
+    await sleep(600);
+    await shot(A, '04-image-inserted-a', await stageClip(A));
+    await shot(B, '04-image-inserted-b', await stageClip(B));
+    let replace = null;
+    if (placed) {
+      await A.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${placed.id}"]`)
+        .first()
+        .click();
+      await A.locator(`.ts-overlay [data-control="handle.${placed.id}.move"]`)
+        .waitFor({ state: 'attached', timeout: 5000 })
+        .catch(() => undefined);
+      const chooser2 = A.waitForEvent('filechooser', { timeout: 10_000 });
+      await ctl(A, 'toolbar.replaceImage').click();
+      const row = A.locator('[data-control="menu.format.image.replaceImage.upload"]').first();
+      if (await row.isVisible().catch(() => false)) await row.click();
+      const fc2 = await chooser2;
+      await fc2.setFiles({
+        name: 'hand-a2.png',
+        mimeType: 'image/png',
+        buffer: await png(40, 40, 200),
+      });
+      const t2 = Date.now();
+      const changed = (page) =>
+        poll(
+          async () =>
+            (await picturesOf(page, target)).find((p) => p.id === placed.id)?.asset !== placed.asset
+              ? Date.now()
+              : null,
+          15_000,
+          50,
+        );
+      const [rA, rB] = await Promise.all([changed(A), changed(B)]);
+      replace = {
+        inAMs: rA ? rA - t2 : null,
+        inBMs: rB ? rB - t2 : null,
+        refused: await refusal(A),
+      };
+      await sleep(600);
+      await shot(A, '04-image-replaced-a', await stageClip(A));
+      await shot(B, '04-image-replaced-b', await stageClip(B));
+    }
+    say('image', {
+      slide: target,
+      insertInAMs: inA ? inA - setAt : null,
+      insertInBMs: inB ? inB - setAt : null,
+      refusedInsert,
+      placed,
+      replace,
+      syncA: await syncOf(A),
+    });
+    await escapeAll(A);
+    await escapeAll(B);
+    await clickCard(A, slides[0]);
+    await clickCard(B, slides[0]);
+  });
+
   // ---- the selection outline: B clicks blocks, A draws the outline; both hold one block
   await section('outline', async () => {
     await escapeAll(A);
@@ -1365,6 +1607,112 @@ try {
     B = await ctxB.newPage();
     await joinB(B);
     bId = await clientIdOf(B);
+  });
+
+  // ---- the Share dialog keeps the general link it minted across a reload, and Copy link keeps it
+  // (pass 3: R4 fix 2, rememberGeneral in Share.tsx; share.dialog.grant-email-line's address half)
+  await section('share', async () => {
+    const openShare = async (page) => {
+      await escapeAll(page);
+      await ctl(page, 'share.open').click();
+      const skip = ctl(page, 'dialog.namePrompt.skip');
+      if (await skip.isVisible({ timeout: 1500 }).catch(() => false)) await skip.click();
+      await ctl(page, 'dialog.share').waitFor({ timeout: 10_000 });
+      await poll(
+        async () =>
+          (await page.locator('[data-control="dialog.share.loading"]').count()) === 0 &&
+          (await page.locator('[data-control="dialog.share"] [aria-busy="true"]').count()) === 0,
+        10_000,
+        100,
+      );
+    };
+    const idle = (page) =>
+      poll(
+        async () =>
+          (await page.locator('[data-control="dialog.share"] [aria-busy="true"]').count()) === 0,
+        10_000,
+        100,
+      );
+    const addressOf = (page) =>
+      ctl(page, 'dialog.share.address')
+        .inputValue({ timeout: 2000 })
+        .catch(() => null);
+    const closeShare = async (page) => {
+      const done = ctl(page, 'dialog.share.done');
+      if (await done.isVisible().catch(() => false)) await done.click();
+      else await page.keyboard.press('Escape');
+      await sleep(300);
+    };
+    await openShare(A);
+    const mode = ctl(A, 'dialog.share.mode');
+    const modeBefore = await mode.inputValue().catch(() => null);
+    if (modeBefore === 'link') {
+      await mode.selectOption('restricted');
+      await idle(A);
+    }
+    await mode.selectOption('link');
+    await idle(A);
+    /* the field reads the deck's own edit address until the mode change's write answers; the
+       minted general link is the tokenized /s/ address that replaces it */
+    const minted = await poll(async () => {
+      const v = await addressOf(A);
+      return v && /^https?:\/\/[^/]+\/s\//.test(v) ? v : null;
+    }, 10_000);
+    await shot(A, '12-share-minted-a');
+    await closeShare(A);
+    await quiet(A);
+    await A.reload();
+    await waitEditor(A);
+    await poll(() => connected(A), 20_000, 100);
+    await openShare(A);
+    const afterReload = await poll(async () => {
+      const v = await addressOf(A);
+      return v && /^https?:\/\/[^/]+\/s\//.test(v) ? v : null;
+    }, 8000);
+    const afterReloadField = await addressOf(A);
+    await shot(A, '12-share-after-reload-a');
+    await ctl(A, 'dialog.share.copy')
+      .click({ timeout: 5000 })
+      .catch(() => undefined);
+    await idle(A);
+    await sleep(500);
+    const afterCopy = await addressOf(A);
+    await closeShare(A);
+    /* the minted address opens the editor in a fresh context on B's origin */
+    let opens = null;
+    if (minted) {
+      const ctxD = await mk(BASE_B);
+      const D = await ctxD.newPage();
+      try {
+        await D.goto(minted.replace(/^https?:\/\/[^/]+/, BASE_B));
+        await D.waitForURL(new RegExp(`/edit/${deckId}`), { timeout: 30_000 });
+        await waitEditor(D);
+        opens = { url: D.url().replace(/[?#].*$/, ''), role: (await state(D)).role ?? null };
+      } catch (error) {
+        opens = { error: String(error).slice(0, 200) };
+      } finally {
+        await ctxD.close().catch(() => {});
+      }
+    }
+    /* a link carries its grant in the path: the facts keep a digest and the path's first segment, never the link */
+    const shape = (v) =>
+      v
+        ? {
+            route: v.replace(/^https?:\/\/[^/]+/, '').split('/')[1] ?? null,
+            digest: createHash('sha256').update(v).digest('hex').slice(0, 12),
+          }
+        : null;
+    say('share', {
+      modeBefore,
+      minted: shape(minted),
+      afterReload: shape(afterReload),
+      afterReloadField: shape(afterReloadField),
+      afterCopy: shape(afterCopy),
+      sameAfterReload: Boolean(minted) && minted === afterReload,
+      sameAfterCopy: Boolean(minted) && minted === afterCopy,
+      opens,
+    });
+    aId = await clientIdOf(A);
   });
 
   // ---- the access revocation: C a viewer by the link, then Restricted, C's socket within the grace

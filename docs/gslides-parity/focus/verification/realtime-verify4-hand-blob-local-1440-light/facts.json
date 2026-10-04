@@ -1,0 +1,740 @@
+{
+  "startedAt": "2026-10-04T07:00:38.643Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4479",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "keystroke",
+    "caret",
+    "merge",
+    "title",
+    "outline",
+    "drag",
+    "pointer",
+    "card",
+    "follow",
+    "agent",
+    "reload",
+    "offline",
+    "dims"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "02-caret-a.png",
+    "03-merge-a.png",
+    "03-merge-b.png",
+    "02-title-round2-a.png",
+    "02-title-round2-b.png",
+    "02-title-round3-a.png",
+    "02-title-round3-b.png",
+    "04-outline-inside-ring-a.png",
+    "04-outline-inside-ring-b.png",
+    "05-drag-ghost-a.png",
+    "05-drag-after-release-a.png",
+    "06-view-menu-b.png",
+    "06-pointer-a.png",
+    "07-card-chip-a.png",
+    "08-following-plate-b.png",
+    "08-following-moved-b.png",
+    "08-version-history-b.png",
+    "09-agent-banner-a.png",
+    "10-caret-dimmed-a.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-ke4v",
+  "slides": [
+    "title",
+    "split-1-89c6",
+    "split-2-89c6"
+  ],
+  "setup": {
+    "clients": {
+      "a": "74b4e02f74e0a3fed69db872b21389c6",
+      "b": "1e965776cef7abb13403fe0ed5b9cb2e"
+    },
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 9,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "syncB": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 9,
+      "revision": 9,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791097250016,
+      "connectedAt": 1791097250026,
+      "navMs": 1706
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791097251685,
+      "navMs": 1229,
+      "bChipInAms": 39,
+      "aChipInBms": 42,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791097252948,
+      "navMs": 1093,
+      "bChipInAms": 214,
+      "aChipInBms": 219,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791097254692,
+      "navMs": 1307,
+      "bChipInAms": 110,
+      "aChipInBms": 129,
+      "syncA": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      },
+      "syncB": {
+        "tier": "blob",
+        "transport": "sse",
+        "connected": true,
+        "seq": 9,
+        "revision": 9,
+        "colo": null,
+        "room": null,
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 5.5,
+  "keystroke": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1328
+      },
+      {
+        "ch": "a",
+        "ms": 273
+      },
+      {
+        "ch": "b",
+        "ms": 254
+      },
+      {
+        "ch": "c",
+        "ms": 257
+      },
+      {
+        "ch": "d",
+        "ms": 259
+      },
+      {
+        "ch": "e",
+        "ms": 257
+      },
+      {
+        "ch": "f",
+        "ms": 252
+      },
+      {
+        "ch": "g",
+        "ms": 244
+      },
+      {
+        "ch": "h",
+        "ms": 246
+      },
+      {
+        "ch": "i",
+        "ms": 264
+      }
+    ],
+    "finalA": "A writes here abcdefghi",
+    "finalB": "A writes here abcdefghi",
+    "load": null
+  },
+  "keystroke.seconds": 11.9,
+  "caret": {
+    "readings": [
+      {
+        "ch": " ",
+        "ms": 1225,
+        "offset": "25",
+        "i": 0
+      },
+      {
+        "ch": "j",
+        "ms": 194,
+        "offset": "25",
+        "i": 1
+      },
+      {
+        "ch": "k",
+        "ms": 170,
+        "offset": "26",
+        "i": 2
+      },
+      {
+        "ch": "l",
+        "ms": 198,
+        "offset": "27",
+        "i": 3
+      },
+      {
+        "ch": "m",
+        "ms": 168,
+        "offset": "28",
+        "i": 4
+      },
+      {
+        "ch": "n",
+        "ms": 182,
+        "offset": "29",
+        "i": 5
+      },
+      {
+        "ch": "o",
+        "ms": 187,
+        "offset": "30",
+        "i": 6
+      },
+      {
+        "ch": "p",
+        "ms": 172,
+        "offset": "31",
+        "i": 7
+      },
+      {
+        "ch": "q",
+        "ms": 164,
+        "offset": "32",
+        "i": 8
+      },
+      {
+        "ch": "r",
+        "ms": 169,
+        "offset": "33",
+        "i": 9
+      }
+    ],
+    "hue": {
+      "caret": "rgb(120, 144, 0)",
+      "caretHue": "#789000",
+      "chipHue": "",
+      "flagText": "SSteel"
+    },
+    "textB": "A writes here abcdefghi jklmnopqr",
+    "drawnLength": 33
+  },
+  "caret.seconds": 12,
+  "merge.rounds": [
+    {
+      "round": 1,
+      "text": "B writes here al1 b",
+      "bCaretInA": "21",
+      "bWordEnd": null,
+      "aCaretInB": "21",
+      "aWordEnd": 17,
+      "textB": "B writes here a br1"
+    },
+    {
+      "round": 2,
+      "text": "B writes here al1 br1 b al2",
+      "bCaretInA": "29",
+      "bWordEnd": null,
+      "aCaretInB": "29",
+      "aWordEnd": 27,
+      "textB": "B writes here al1 br1 br2"
+    },
+    {
+      "round": 3,
+      "text": "B writes here al1 br1 br2 al2 al3 b",
+      "bCaretInA": "37",
+      "bWordEnd": null,
+      "aCaretInB": "35",
+      "aWordEnd": 33,
+      "textB": "B writes here al1 br1 br2 al2 br3"
+    }
+  ],
+  "merge.seconds": 10.7,
+  "title.cover": {
+    "id": "title-1-89c6",
+    "kind": "title",
+    "run": "heading/text",
+    "revision": 39
+  },
+  "title.rounds": [
+    {
+      "round": 1,
+      "delayB": 119,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 ua t1b1 ub1",
+      "b": "Two typers ta1 ua t1b1 ub1",
+      "equal": true,
+      "lost": [
+        " tb1",
+        " ua1"
+      ],
+      "slideKind": {
+        "a": "title",
+        "b": "title"
+      }
+    },
+    {
+      "round": 2,
+      "delayB": 91,
+      "bothMsAfterEscape": 2607,
+      "a": "Two typers ta1 ua t1b1 ub1 tb2 ub2 ta2 ua2",
+      "b": "Two typers ta1 ua t1b1 ub1 tb2 ub2 ta2 ua2",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    },
+    {
+      "round": 3,
+      "delayB": 38,
+      "bothMsAfterEscape": null,
+      "a": "Two typers ta1 ua t1b1 ub1 tb2 ub2 ta2 ua2 tb3 ub3 ta3 ua3",
+      "b": "Two typers ta1 ua t1b1 ub1 tb2 ub2 ta2 ua2 tb3 ub3 ta3 ua3",
+      "equal": true,
+      "lost": [],
+      "slideKind": {
+        "a": "content",
+        "b": "content"
+      }
+    }
+  ],
+  "title.seconds": 26.9,
+  "outline": {
+    "readings": [
+      {
+        "blockId": "hand-a",
+        "ms": 129
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 138
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 140
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 155
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 127
+      },
+      {
+        "blockId": "hand-agent",
+        "ms": 135
+      },
+      {
+        "blockId": "hand-a",
+        "ms": 131
+      },
+      {
+        "blockId": "hand-b",
+        "ms": 135
+      }
+    ],
+    "bothHold": {
+      "outline": [
+        399,
+        596,
+        898,
+        95
+      ],
+      "inside": "true",
+      "insideClass": true,
+      "block": [
+        397,
+        594,
+        902,
+        23
+      ]
+    }
+  },
+  "outline.seconds": 12.5,
+  "drag": {
+    "mid": {
+      "ghost": true,
+      "state": "moving",
+      "flags": [
+        {
+          "text": "SSteel · moving",
+          "state": "moving"
+        }
+      ]
+    },
+    "ghostPositions": 19,
+    "firstGhostMs": 201,
+    "blockMovedInAms": 70,
+    "blockA": [
+      {
+        "dt": -2702,
+        "v": "[397,735,902,23]"
+      },
+      {
+        "dt": 70,
+        "v": "[557,735,902,23]"
+      }
+    ],
+    "blockB": {
+      "x": 556.8349609375,
+      "y": 735.0999755859375,
+      "width": 902.4000244140625,
+      "height": 23.2650146484375
+    },
+    "ghostAfterRelease": null
+  },
+  "drag.seconds": 5.3,
+  "pointer": {
+    "mineRow": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "othersRow": {
+      "present": true,
+      "checkedBefore": "true"
+    },
+    "othersBack": {
+      "present": true,
+      "checkedBefore": "false"
+    },
+    "settingsB": {
+      "pointerMine": true
+    },
+    "settingsA": {
+      "pointerOthers": true
+    },
+    "readings": [
+      {
+        "i": 0,
+        "ms": 186
+      },
+      {
+        "i": 1,
+        "ms": 189
+      },
+      {
+        "i": 2,
+        "ms": 0
+      },
+      {
+        "i": 3,
+        "ms": 10
+      },
+      {
+        "i": 4,
+        "ms": 0
+      },
+      {
+        "i": 5,
+        "ms": 5
+      },
+      {
+        "i": 6,
+        "ms": 3
+      },
+      {
+        "i": 7,
+        "ms": 3
+      },
+      {
+        "i": 8,
+        "ms": 1
+      },
+      {
+        "i": 9,
+        "ms": 5
+      }
+    ],
+    "hiddenWithOthersOff": true
+  },
+  "pointer.seconds": 9.3,
+  "card": {
+    "drawnMs": 161,
+    "marks": {
+      "x": 164,
+      "y": 257.1875,
+      "width": 70,
+      "height": 16
+    },
+    "pixels": {
+      "box": [
+        164,
+        17,
+        70,
+        16
+      ],
+      "total": 1120,
+      "coloured": 24,
+      "dark": 47
+    }
+  },
+  "card.seconds": 1,
+  "follow": {
+    "bFollowsA": {
+      "offered": true,
+      "on": true,
+      "text": "PPaper 924owner · slide 1Follow"
+    },
+    "plate": {
+      "text": "PFollowing Paper 924·Stop",
+      "stop": true
+    },
+    "followedMs": 166,
+    "ends": [
+      {
+        "what": "B's own click (first follow)",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's own edit",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's comment",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Slideshow",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "B's Version history",
+        "refollowed": true,
+        "ended": true
+      },
+      {
+        "what": "A's leave",
+        "refollowed": true,
+        "ended": true,
+        "ms": 24
+      }
+    ],
+    "aFollowsB": {
+      "offered": true,
+      "on": true,
+      "text": "SSteel 249editor · slide 1Follow"
+    },
+    "aFollowedMs": 209
+  },
+  "follow.seconds": 56.6,
+  "agent": {
+    "status": 200,
+    "answerMs": 24,
+    "bannerMs": null,
+    "bannerText": null,
+    "textInAms": null,
+    "afterUndoAgentTextStays": true,
+    "afterUndoOwnWordStays": false,
+    "versions": "Error: page.evaluate: TypeError: version.list: invalid input at /id: Unrecognized key: \"id\"\n    at Object.dispatch (http://localhost:4479/@fs/Users/kevinliu/repos/Turboslide-realtime/packages/agent/sr"
+  },
+  "agent.seconds": 19.9,
+  "reload": {
+    "equalMsAfterLastKey": null,
+    "textA": "A writes here abcdefghi jklmnopqr ra1 ra ra4 ra5",
+    "textB": "B writes here al1 br1 br2 al2 al3 br3 rb1 rb2 rb3 rb4 rb5",
+    "syncA": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 72,
+      "revision": 72,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "reload.seconds": 18.1,
+  "offline": {
+    "offlineSeconds": 36,
+    "whileOff": {
+      "connected": false,
+      "plate": null
+    },
+    "everyWordBothMsAfterReconnect": 2179,
+    "textA": "A writes here abcdefghi jklmnopqr ra1 ra ra4 ra5 oa1 oa2 oa3 oa4",
+    "textB": "B writes here al1 br1 br2 al2 al3 br3 rb1 rb2 rb3 rb4 rb5 ob1 ob2 ob3",
+    "ws": [],
+    "records": {
+      "revision": 84
+    }
+  },
+  "offline.seconds": 41.7,
+  "dims": {
+    "dimMs": null,
+    "goneMs": 24
+  },
+  "dims.seconds": 43.2,
+  "sync.end": {
+    "a": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 85,
+      "revision": 85,
+      "colo": null,
+      "room": null,
+      "instance": null
+    },
+    "b": {
+      "tier": "blob",
+      "transport": "sse",
+      "connected": true,
+      "seq": 85,
+      "revision": 85,
+      "colo": null,
+      "room": null,
+      "instance": null
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 0,
+      "durable": false,
+      "sinceWake": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "total": {
+        "requests": 1,
+        "messages": 0,
+        "opsFrames": 0,
+        "presenceFrames": 0,
+        "alarms": 0,
+        "checkpoints": 0,
+        "seeds": 0,
+        "upgradesRefused": 0,
+        "rowsRead": 3,
+        "rowsWritten": 5,
+        "wakes": 1,
+        "requestUnits": 1
+      },
+      "head": 0,
+      "covered": 0,
+      "revision": 0,
+      "months": [],
+      "sockets": 0,
+      "members": 0,
+      "awakeSince": 1791097525031,
+      "alarmAt": null,
+      "databaseSize": 24576,
+      "colo": "SJC",
+      "object": "b7c8c768"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-ke4v",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T07:05:25.126Z"
+}

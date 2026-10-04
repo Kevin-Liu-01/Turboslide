@@ -1,0 +1,8 @@
+{"label":"4 s after the first word","at":"2026-10-03T12:43:23.016Z","seq":2,"covered":null,"revision":2,"connected":true}
+{"label":"after 240 s idle","at":"2026-10-03T12:47:23.022Z","seq":2,"covered":null,"revision":2,"connected":true}
+{"label":"3 s after the word after the idle","at":"2026-10-03T12:47:26.624Z","seq":3,"covered":null,"revision":3,"connected":true}
+{"label":"10 s after","at":"2026-10-03T12:47:33.628Z","seq":3,"covered":null,"revision":3,"connected":true}
+{"label":"30 s after","at":"2026-10-03T12:47:53.630Z","seq":3,"covered":null,"revision":3,"connected":true}
+{"total":{"requests":6,"messages":13,"opsFrames":2,"presenceFrames":11,"alarms":2,"checkpoints":3,"seeds":1,"upgradesRefused":0,"rowsRead":27,"rowsWritten":26,"wakes":3,"requestUnits":8.65},"sinceWake":{"requests":1,"messages":0,"opsFrames":0,"presenceFrames":0,"alarms":0,"checkpoints":0,"seeds":0,"upgradesRefused":0,"rowsRead":2,"rowsWritten":1,"wakes":1,"requestUnits":1},"head":3,"covered":3,"revision":3,"alarmAt":null}
+{"label":"15 s after the counters read (a fetch to the object)","at":"2026-10-03T12:48:08.655Z","seq":3,"covered":null,"revision":3,"connected":true}
+{"teardown":404}

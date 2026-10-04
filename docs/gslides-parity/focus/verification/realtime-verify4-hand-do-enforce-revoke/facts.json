@@ -1,0 +1,312 @@
+{
+  "startedAt": "2026-10-04T04:50:05.239Z",
+  "baseA": "http://localhost:4479",
+  "baseB": "http://localhost:4489",
+  "width": 1440,
+  "appearance": "light",
+  "sections": [
+    "join",
+    "revoke"
+  ],
+  "pictures": [
+    "00-a-after-setup.png",
+    "01-join-title-row-a.png",
+    "01-join-title-row-b.png",
+    "11-revoked-c.png",
+    "11-revoked-c-reload.png"
+  ],
+  "worker.health.before": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "deck.id": "untitled-20261004-irv6",
+  "slides": [
+    "title",
+    "split-1-39ad",
+    "split-2-39ad"
+  ],
+  "setup": {
+    "clients": {
+      "a": "4d748090d68db571fb1801a3f0c039ad",
+      "b": "c967f57b08e5fac28a4db0d4a0e98120"
+    },
+    "syncA": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 9,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "9fb38cbb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "syncB": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 9,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "9fb38cbb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "drawnTheme": {
+      "a": "light",
+      "b": "light"
+    },
+    "bJoin": {
+      "ready": 1791089422740,
+      "connectedAt": 1791089422743,
+      "navMs": 2925
+    }
+  },
+  "join.rounds": [
+    {
+      "round": 1,
+      "bReadyAt": 1791089423667,
+      "navMs": 519,
+      "bChipInAms": 17,
+      "aChipInBms": 42,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 2,
+      "bReadyAt": 1791089424316,
+      "navMs": 548,
+      "bChipInAms": 50,
+      "aChipInBms": 51,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    },
+    {
+      "round": 3,
+      "bReadyAt": 1791089424984,
+      "navMs": 566,
+      "bChipInAms": 50,
+      "aChipInBms": 52,
+      "syncA": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      },
+      "syncB": {
+        "tier": "do",
+        "transport": "ws",
+        "connected": true,
+        "seq": 9,
+        "revision": 6,
+        "colo": null,
+        "room": {
+          "colo": "SJC",
+          "object": "9fb38cbb",
+          "idleMs": 2000,
+          "maxMs": 10000
+        },
+        "instance": null
+      }
+    }
+  ],
+  "join.seconds": 2.8,
+  "revoke.viewerUrlKind": "the setup link, role viewer",
+  "revoke.reload": {
+    "status": 404,
+    "url": "http://localhost:4489/edit/untitled-20261004-irv6",
+    "title": "Turboslide",
+    "editor": false,
+    "role": null,
+    "text": "You need access This presentation is not available to you, or does not exist. Your presentations New presentation Ask for access Access Viewer Commenter Editor Message Email Request access If you were",
+    "ms": 2570
+  },
+  "revoke": {
+    "cConnected": true,
+    "cRole": "viewer",
+    "answeredMs": 11,
+    "closeMsAfterRevoke": 10013,
+    "close": {
+      "at": 1791089436679,
+      "url": "ws://127.0.0.1:8799/rooms/untitled-20261004-irv6",
+      "code": 4403,
+      "reason": "reauth timed out"
+    },
+    "cAfter": {
+      "connected": false,
+      "url": "http://localhost:4489/edit/untitled-20261004-irv6",
+      "error": null
+    },
+    "sentAfter": [
+      "ping@4893",
+      "ping@9896"
+    ],
+    "opensAfter": 0
+  },
+  "revoke.seconds": 15.6,
+  "sync.end": {
+    "a": {
+      "tier": "do",
+      "transport": "ws",
+      "connected": true,
+      "seq": 9,
+      "revision": 6,
+      "colo": null,
+      "room": {
+        "colo": "SJC",
+        "object": "9fb38cbb",
+        "idleMs": 2000,
+        "maxMs": 10000
+      },
+      "instance": null
+    },
+    "b": {
+      "error": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:31)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n  "
+    }
+  },
+  "object.counters": {
+    "status": 200,
+    "body": {
+      "countsSelf": true,
+      "selfRowsWritten": 1,
+      "durable": true,
+      "sinceWake": {
+        "requests": 44,
+        "messages": 34,
+        "opsFrames": 8,
+        "presenceFrames": 17,
+        "alarms": 8,
+        "checkpoints": 6,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 50,
+        "rowsWritten": 47,
+        "wakes": 1,
+        "requestUnits": 53.7
+      },
+      "total": {
+        "requests": 44,
+        "messages": 34,
+        "opsFrames": 8,
+        "presenceFrames": 17,
+        "alarms": 8,
+        "checkpoints": 6,
+        "seeds": 1,
+        "upgradesRefused": 0,
+        "rowsRead": 49,
+        "rowsWritten": 47,
+        "wakes": 1,
+        "requestUnits": 53.7
+      },
+      "head": 9,
+      "covered": 9,
+      "revision": 6,
+      "months": [
+        "202610"
+      ],
+      "sockets": 1,
+      "members": 1,
+      "awakeSince": 1791089408325,
+      "alarmAt": 1791089451641,
+      "databaseSize": 45056,
+      "colo": "SJC",
+      "object": "9fb38cbb"
+    }
+  },
+  "teardown": {
+    "id": "untitled-20261004-irv6",
+    "editStatus": 404
+  },
+  "worker.health.after": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "protocol": 1,
+      "commit": "2477982bcc5396bc8f76e3b7932939f16b0561fe",
+      "realtime": "on",
+      "appOrigin": "http://127.0.0.1:4479",
+      "callbacks": "ok"
+    }
+  },
+  "endedAt": "2026-10-04T04:50:41.656Z"
+}

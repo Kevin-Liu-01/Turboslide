@@ -308,7 +308,6 @@ export const FEATURES = [
       "**Realtime.** Two people on one deck see each other's keystrokes, caret, selection outline and pointer within a third of a second in one region, a dragged block moves in the other browser while the drag runs, a joiner's chip is in the title row within a second, and Follow is offered on every chip for every editor and owner, including by link. A reload or a reconnect loses nothing. An agent's write over HTTP is announced in the open tab and cannot be undone by the person typing. Two people typing one title keep both words.",
     shots: [],
   },
-  {
   /* the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md 2.3): the setup rows of the do
      tier, judged by a gate run on that tier alone; unparkable */
   {
@@ -318,6 +317,7 @@ export const FEATURES = [
       "**Setup.** The realtime Worker answers its health check with the commit it was built from and the app it calls back; two people on one deck through two app instances read one Durable Object and byte equal documents; the account's daily Durable Object and Worker figures, read before and after a release run, stay under the Free plan's caps; and a deck of about 20 MB opened beside three other open decks costs no isolate restart.",
     shots: [],
   },
+  {
     key: 'logos',
     heading: 'Logos',
     paragraph:

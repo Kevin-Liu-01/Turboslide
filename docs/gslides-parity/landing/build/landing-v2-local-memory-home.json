@@ -1,0 +1,912 @@
+{
+  "base": "http://localhost:4555",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T09:22:11.765Z",
+  "ms": 885355,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 885333,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/integ2/home-rerun/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.home.new-presentation",
+      "decks.home.your-presentations",
+      "decks.home.seller-lead",
+      "decks.home.pictures-three-widths",
+      "decks.home.copy-rules",
+      "decks.home.product-pictures",
+      "decks.home.links-and-card",
+      "decks.home.load-budget",
+      "decks.home.layout-shift",
+      "decks.home.grammar",
+      "decks.home.capture-plain",
+      "decks.home.copy",
+      "decks.home.phone",
+      "home.page.order",
+      "home.page.markup-final",
+      "home.hero.type",
+      "home.budget.bytes-first",
+      "home.budget.bytes-page",
+      "home.budget.shared",
+      "home.budget.lcp",
+      "home.a11y.skip-and-contrast",
+      "home.hero.select",
+      "home.hero.edit",
+      "home.canvas.gestures",
+      "home.canvas.log",
+      "home.objects.keyboard",
+      "home.menus.bar",
+      "home.menus.rows",
+      "home.budget.live-module",
+      "home.tailor.apply",
+      "home.tailor.filmstrip",
+      "home.kits.restyle",
+      "home.kits.color",
+      "home.agents.rest",
+      "home.agents.typed",
+      "home.agents.transports",
+      "home.agents.history",
+      "home.agents.recorded",
+      "home.agents.chips",
+      "home.versions.scrub",
+      "home.versions.restore",
+      "home.present.show",
+      "home.present.focus",
+      "home.present.print",
+      "home.export.seam",
+      "home.export.figure",
+      "home.export.loupe",
+      "home.motion.in-view",
+      "home.motion.rest",
+      "home.motion.reduced",
+      "home.motion.hidden-tab",
+      "home.budget.frame",
+      "home.budget.main-thread",
+      "home.a11y.keyboard-walk",
+      "home.page.bands-after-load",
+      "home.hero.stage",
+      "home.lead.visit",
+      "home.numbers.row",
+      "home.features.table",
+      "home.motion.pause",
+      "home.motion.develop",
+      "home.hero.run",
+      "home.interludes.glyphs",
+      "home.motion.loops",
+      "home.motion.offscreen",
+      "home.patterns.pair",
+      "home.people.loop",
+      "home.people.type"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 68,
+  "passed": 65,
+  "failed": 3,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: pictures before the first scroll 4592 B in 1 requests (line 0)",
+      "measures": [
+        "first byte 4 ms (line 150)",
+        "LCP 120 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 252 ms (line 500)",
+        "pictures before the first scroll 4592 B in 1 requests (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 95311 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1390292 B (reported against 600000)",
+        "first byte 4 ms (line 150)",
+        "LCP 120 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 252 ms (line 500)",
+        "pictures before the first scroll 4592 B in 1 requests (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 95311 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 0",
+        "JavaScript decoded 1390292 B (reported against 600000)"
+      ]
+    },
+    {
+      "id": "home.budget.shared",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "shared entry chunk /assets/index-_ge7ccOz.js 1183913 B decoded (reported against 600000); all shared script 1337316 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)",
+        "shared entry chunk /assets/index-_ge7ccOz.js 1183913 B decoded (reported against 600000); all shared script 1337316 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)"
+      ]
+    },
+    {
+      "id": "home.budget.lcp",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "1440 x1: LCP cold 88 ms on h1#ts-product-h1, warm 44 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6",
+        "1440 x2: LCP cold 80 ms on h1#ts-product-h1, warm 44 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6",
+        "390 x1: LCP cold 96 ms on h1#ts-product-h1, warm 40 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6",
+        "1440 x1: LCP cold 88 ms on h1#ts-product-h1, warm 44 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6",
+        "1440 x2: LCP cold 80 ms on h1#ts-product-h1, warm 44 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6",
+        "390 x1: LCP cold 96 ms on h1#ts-product-h1, warm 40 ms on h1#ts-product-h1 (lines 400 and 200) at load 5.6"
+      ]
+    },
+    {
+      "id": "home.budget.frame",
+      "result": "passed",
+      "reason": "",
+      "measures": []
+    },
+    {
+      "id": "home.budget.main-thread",
+      "result": "passed",
+      "reason": "",
+      "measures": []
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "b44a6d6f",
+  "origin": "http://localhost:4555",
+  "date": "2026-10-04",
+  "results": {
+    "decks.home.new-presentation": "passed",
+    "decks.home.your-presentations": "passed",
+    "decks.home.seller-lead": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.copy-rules": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.links-and-card": "passed",
+    "decks.home.load-budget": "failed",
+    "decks.home.layout-shift": "passed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "decks.home.copy": "passed",
+    "decks.home.phone": "passed",
+    "home.page.order": "passed",
+    "home.page.markup-final": "passed",
+    "home.page.bands-after-load": "passed",
+    "home.hero.type": "passed",
+    "home.hero.stage": "passed",
+    "home.lead.visit": "passed",
+    "home.numbers.row": "passed",
+    "home.features.table": "passed",
+    "home.budget.bytes-first": "failed",
+    "home.budget.bytes-page": "failed",
+    "home.budget.live-module": "passed",
+    "home.budget.shared": "passed",
+    "home.budget.lcp": "passed",
+    "home.a11y.skip-and-contrast": "passed",
+    "home.hero.run": "passed",
+    "home.hero.select": "passed",
+    "home.hero.edit": "passed",
+    "home.canvas.gestures": "passed",
+    "home.canvas.log": "passed",
+    "home.objects.keyboard": "passed",
+    "home.tailor.apply": "passed",
+    "home.tailor.filmstrip": "passed",
+    "home.agents.rest": "passed",
+    "home.agents.chips": "passed",
+    "home.agents.typed": "passed",
+    "home.agents.transports": "passed",
+    "home.agents.history": "passed",
+    "home.agents.recorded": "passed",
+    "home.present.show": "passed",
+    "home.present.focus": "passed",
+    "home.present.print": "passed",
+    "home.export.seam": "passed",
+    "home.export.figure": "passed",
+    "home.export.loupe": "passed",
+    "home.motion.develop": "passed",
+    "home.motion.pause": "passed",
+    "home.motion.in-view": "passed",
+    "home.motion.rest": "passed",
+    "home.motion.reduced": "passed",
+    "home.motion.hidden-tab": "passed",
+    "home.budget.frame": "passed",
+    "home.budget.main-thread": "passed",
+    "home.a11y.keyboard-walk": "passed",
+    "home.interludes.glyphs": "passed",
+    "home.motion.loops": "passed",
+    "home.motion.offscreen": "passed",
+    "home.menus.bar": "passed",
+    "home.menus.rows": "passed",
+    "home.kits.restyle": "passed",
+    "home.kits.color": "passed",
+    "home.versions.scrub": "passed",
+    "home.versions.restore": "passed",
+    "home.patterns.pair": "passed",
+    "home.people.loop": "passed",
+    "home.people.type": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.budget.bytes-first",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.bytes-page",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.your-presentations",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.seller-lead",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy-rules",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: pictures before the first scroll 4592 B in 1 requests (line 0)"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.order",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.markup-final",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.type",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.shared",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.lcp",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.a11y.skip-and-contrast",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.select",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.canvas.gestures",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.canvas.log",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.objects.keyboard",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.menus.bar",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.menus.rows",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.live-module",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.tailor.apply",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.tailor.filmstrip",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.kits.restyle",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.kits.color",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.rest",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.typed",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.transports",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.history",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.recorded",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.chips",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.versions.scrub",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.versions.restore",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.show",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.focus",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.print",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.seam",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.figure",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.loupe",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.in-view",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.rest",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.reduced",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.hidden-tab",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.frame",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.main-thread",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.a11y.keyboard-walk",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.bands-after-load",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.stage",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.lead.visit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.numbers.row",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.features.table",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.develop",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.run",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.loops",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.offscreen",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.patterns.pair",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.people.loop",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.people.type",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

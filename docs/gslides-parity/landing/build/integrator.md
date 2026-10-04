@@ -399,3 +399,202 @@ The size, restated: LANDING.md 6.5's 9 lane days, plus about half a day for answ
 2. Fenwick's navy is `#0a1b38`, one step darker than C's `#0b1d3a`, so the blue selection ring keeps 3:1 on it (3.04 against 2.98).
 3. Slide 7's plate words ("The opener field", one sentence, "Drawn in Turboslide") are this note's default and L1 may change them.
 4. Slide 1 in the downloaded PDF and PowerPoint files has no Earth, because the title layout has no picture; the page, the show and the print draw it.
+
+## Landing second pass, merge
+
+Written by the integrator of the second pass from 19:58 PDT on 2026-10-03 to 02:37 PDT on 2026-10-04 in `/Users/kevinliu/repos/Turboslide-landing` on `landing/redesign`, which stood at `c4dd5816` (V4's closing seam) when it began. Read before anything else: `docs/LANDING.md` (every section), `AGENTS.md` (dev servers, hosting, installs, ownership), `docs/FOCUS.md` 6.2, the four lane notes `v1.md` to `v4.md` with their requests and closing states, and the orchestrator's reports of V1 to V4. The integrator's ports were 4545 (a dev server on `vite.no-watch.config.ts`, the memory tier, a tmp store) and 4555 (the node-server output of check step 31, the memory tier, a tmp store). Nothing was pushed and nothing changed on Vercel, Cloudflare, GitHub or Google but the one preview deployment below, to Kevin's personal project, never `--prod`. Times are PDT; loads are one minute load averages.
+
+### 1. The requests and their answers
+
+Every request open when its lane closed, the readings each lane sent to Kevin (section 8), and what the integrator's own runs found. A seam commit is named for the push it serves.
+
+| Request | From, to | Answer | Commit |
+| --- | --- | --- | --- |
+| Q13: `"@paper-design/shaders": "catalog:"` in `apps/studio/package.json` with its lockfile importer line | V4, the integrator | Done. The importer line is written by hand in pnpm's format beside `packages/materials`' line. Check step 1 (`pnpm install --frozen-lockfile`) accepted it at 20:15 and replaced V4's uncommitted link with pnpm's own; the preview's build accepted it ("Lockfile passes supply-chain policies") | `47160fda` V4#19 seam |
+| Q20: `people-timing.ts` out of `live/`, so the route imports no live module and `home.present.print`'s bare page hydrates on a dev server | V4, V1 or the integrator | Done: the file is `src/components/home/people-timing.ts` with its four importers. `home.present.print` passed on 4545 at 20:11 and in the run of record | `44858636` V4#20 seam |
+| R12 and R13: LANDING.md 2.2 and 2.9 name the build's `version save` before the run (four recorded versions) and the turn chip's `layout/freeform` finding | V3, the integrator | Done in LANDING.md alone; the build has done both since `02b67cb7` | `17da98d1` V3#13 seam |
+| R19: copy keys `PRESENT.skipped` and `HISTORY.restoredVersion(n)` | V3, V1 | Done; `agents.ts`, `show.ts`, `versions.ts` and the present driver read the keys, and the casts and fallbacks leave. The words are the fallbacks' | `3b85fbc7` V3#16 seam |
+| The export band's seam knob moves by a layout property (CLS 0.000001 to 0.000022 at 1440 in `home.page.bands-after-load`) | V1 and V4, V3 | Done: the handle is as wide as the slide and moves by `transform: translateX(var(--seam-cut))`; it takes no pointer but the knob's. A probe read 0 layout shift entries on the whole page through E1 at 1440 and 390; CLS 0.000000 at both widths in the run of record and on the preview | `fdc961c8` V1#8 seam |
+| The push order of the rows entered in V2#11 to V2#14 in `core-matrix.json` | V1, V2 and V3 | Closed by V4 in `35012ebe`; `core-matrix.test.mjs` 37 of 37 at 20:13 | none |
+| R16: the day 0 contract (`V0#0`) did not land | V2, the integrator | Closed by record: no `V0#0` commit exists and none is made now. The store's and the band loader's interfaces are V2's hunk of V1#8 (`172b3bda`, `bc3d1242`, `11df4c10`). LANDING.md 6.3's split never happened: the Tailor, canvas, Present and export rules stay in `home.css` beside `editing.css`, `agents.css` and `motion.css`, and `--run` and `--export` live in `scripts/home/run.ts` and `export.ts` called from the entry | none |
+| The stage's registration in V1's commit of V1#15 | V2, V1 | Done by V1 in `a8dfb2fc` | none |
+| Found by the chain: 15 of V3's files unformatted (check step 19) | the integrator | Formatted, no other change | `8b631835` V3#17 seam |
+| Found by the run of record: `home.budget.live-module` red, the core 21,639 B gzip (line 20,480) | the integrator, for V4 and V2 | The interludes' glyphs leave the core for a chunk of their own, imported when the core starts (as V1#15 moved the hero's stage). The core reads 20,365 B gzip on the client build of check step 30; section 5 | `c699900b` V4#18 seam |
+| Found by the run of record: `home.hero.edit` red on the build only (the minified `--ts-ease-move` reads `cubic-bezier(.65, 0, .35, 1)`) | the integrator, for V2 | The driver compares the curve with its zeros written | `af9febac` V2#10 seam |
+| Found by the run of record: `decks.home.capture-plain` red, "2 selection overlays at rest" | the integrator, for V1 and V4 | A probe named them: the two people band's `.ts-people-marks` layers, the staged presence marks 2.10 draws at rest. The driver leaves them out of the overlay count; the blue check still reads them | `36a2108f` V4#20 seam |
+| Found by the chrome lint of `/home` (check step 18's audit, never reached by the chain): two owners on the rails at 390, the miniature's and the two people screens' 1 px sides | the integrator, for V2 and V4 | Their side rules leave under 720 px, as V1 did for the hero frame | `491bab1d` V2#11 seam, `5e08fe48` V4#20 seam |
+| Found on the preview: `home.patterns.pair` presses Globex before the kits band's chunk has started | the integrator, for V4 | The press waits for the kits band's box to fill; passed on the preview at 01:46 | `b44a6d6f` V4#19 seam |
+| Found by the chrome lint of `/home`: a junction at every hero step tab, `::before` and `::after` of `.ts-hero-step` on one seam | to V1 and Kevin | Not changed; section 8 |  |
+
+### 2. The commits in push order (the ship order)
+
+`07e2811b..b44a6d6f` on `landing/redesign`, by push, each push's commits in history order. "Ships at" is the push's last commit before the next push's first, the sha the guard deploys for that push (LANDING.md 6.6 item 4). The history is linear and nothing was rebased or amended.
+
+| Push | Commits | Ships at |
+| --- | --- | --- |
+| the specification | `e3708837` V0, `dbe5405a` V0 fix | with V1#8 |
+| `V1#8` | `172b3bda` V2's hunk, `bc3d1242` V2's hunk 2, `c0c5ddc0` V3's hunk, `54b07b88` V4's hunk, `1f406d25` V1, `a7672dca` README, `11df4c10` V2's hunk 3 | `11df4c10` |
+| `V4#9` | `5ee64cf2` the CORS line, `8ec0ad23` V1's hunk, `c48f8198` V4, `79001704` README, `89e28076` fix | `89e28076` |
+| `V2#10` | `a6042ce6` | `a6042ce6` |
+| `V2#11` | `e05c78f4` V1's line, `1beea439` V2, `dce46267` README | `dce46267` |
+| `V2#12` | `5d4293dc` V1's line, `fb712451` V2, `56acc6a2` README | `56acc6a2` |
+| `V3#13` | `1804d0b8` V1's hunk, `02b67cb7` V3, `5ae47130` README | `5ae47130` |
+| `V2#14` | `af334525` V2, `eea3c570` README, `6e6004f3` the V2#11 fix, `d154d8b8` V2 seam | `d154d8b8` |
+| `V1#15` | `a8dfb2fc` V1, `47cc9e39` README | `47cc9e39` |
+| `V3#16` | `56897de0` | `56897de0` |
+| `V3#17` | `178ea588` V1's line, `3c431b3e` V3, `11e20a4d` README, `89f9e459` V3 seam | `89f9e459` |
+| `V4#18` | `ac44ef60` V1's line, `35012ebe` V4, `70fe3545` README | `70fe3545` |
+| `V4#19` | `d8662fca` V1's line, `64546416` V4, `133b81f6` README | not at `133b81f6` (below) |
+| `V4#20` | `e33fa9cf` V1's line, `0fe63aa0` V1 seam, `7abbd47e` the V4#18 fix (drivers only), `69469bcf` V4, `8274881e` README, `c4dd5816` V4 seam | held until 2.10's six presence rows read green on production (6.8, question 13) |
+| the integrator's seams, in history order | `47160fda` V4#19, `44858636` V4#20, `3b85fbc7` V3#16, `17da98d1` V3#13 (LANDING.md), `fdc961c8` V1#8, `8b631835` V3#17 (Prettier), `c699900b` V4#18, `af9febac` V2#10 (driver), `36a2108f` V4#20 (driver), `491bab1d` V2#11, `5e08fe48` V4#20, `b44a6d6f` V4#19 (driver), then this note's commit | below |
+
+The ship order has one break, for the shipper to decide. V4#19 cannot ship at `133b81f6`: its shader chunk imports `@paper-design/shaders`, which `apps/studio` declares only from `47160fda`, so Vercel's `pnpm install --frozen-lockfile` and build fail there; and every seam above lands after V4#20's commits, which hold the people band (`e33fa9cf` mounts it). Two ways, neither taken here (the integrator does not switch or create branches):
+
+1. Ship V1#8 to V4#18 at their shas, then hold V4#19 with V4#20 until the presence rows read green, and ship `b44a6d6f` (or this note's commit) as one push. The seams for V1#8 to V4#18 (`fdc961c8` the seam's CLS, `3b85fbc7`, `17da98d1`, `8b631835`, `c699900b` the live core's line, `af9febac`, `491bab1d`) then ship with it, so those pushes go live with the reds they fix.
+2. A ship branch from `133b81f6` with the nine seams that do not need V4#20 cherry-picked in history order: `47160fda`, `3b85fbc7`, `17da98d1`, `fdc961c8`, `8b631835`, `c699900b`, `af9febac`, `491bab1d`, `b44a6d6f`. `git merge-tree --write-tree` applied all nine onto `133b81f6` with no conflict at 01:48 (tree `1e66172f`, unreferenced commit objects only; no ref moved). That tree was not built or driven; it is V4#19 as the guard would read it. V4#20 then ships from `landing/redesign` when its rows are green, carrying `44858636`, `36a2108f`, `5e08fe48`.
+
+### 3. The chain
+
+On the merged tree at `8b631835` (before the seams the run of record found), loads in brackets.
+
+| Check | Reading |
+| --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0 at 20:08 (44) in 40 s; again at 01:00 after the check chain's builds left the project references' outputs stale for `tsc -p` (17 s, exit 0); `tsc -p apps/studio --noEmit` clean after each seam |
+| vitest, each changed package | `apps/studio` 107 files, 825 of 825; `packages/lint` 15 files, 111 of 111; `scripts/probes/core-matrix.test.mjs` 37 of 37 (20:12 to 20:13, 35 to 42); `src/components/home` 85 of 85 again after the formatting seam and after `c699900b`. Outside the home surface the second pass changes `decks.spec.ts`, `apps/studio/package.json` (Q13), `packages/chrome/package.json` (the first pass's export line) and `packages/lint/src/brand/config.ts` with its `css.test.ts` |
+| `node scripts/build-home-assets.ts --check` | exit 0: 33 outputs match their sources, 10 slide instances, 2,356 B of inlined stills, 16 served files (20:14, again after the formatting seam) |
+| The brand lint in enforce mode | `node packages/lint/src/brand/main.ts --enforce`: exit 1 on 22 findings in 17 files, none under `/home` and none in a file the branch changed since `2108dad4` (16 `gt-ui/cta-title-case`, 3 `css/mono-outside-code`, 2 `css/no-eyebrow`, 1 `gt-ui/no-smooth-scroll`): the tree's own. Check step 33 (report mode) ok |
+| Prettier on every file of the build | the 352 files of `07e2811b..8b631835` that exist: 15 of V3's unformatted, formatted in `8b631835`, then clean; each later seam's files clean |
+| `node scripts/check.mjs` | run whole in segments from 20:15 to 21:34 (`--from` the step after each red, since the chain stops at its first red; the tree put back after step 7); below |
+
+| Step | Reading |
+| --- | --- |
+| 1 | ok in 10.9 s: the lockfile with Q13's line |
+| 2 | ok |
+| 3 | red, the tree's own: `pnpm generate:contracts` rewrites `packages/lint/fixtures/index.json` for `packages/lint/src/static/speed-marks.test.ts`, which the declutter round's B4b#6 seams (`5c1131b2`, `5ac00c5c`, before the branch's base) added without the index. The generated change was put back |
+| 4 | ok (`tsc -b`) |
+| 5 | red: 8 of 5,162 tests in 5 files, each the tree's own and each red in the first pass's run of this step: `import.test.ts` (Kevin's Prototemplate checkout holds 95 slides, the test wants 85), `brand.test.ts` "counts the check steps" (`facts.json` 32, the chain 33), `contracts.test.ts` (step 3's index), `brand-actions.test.ts` (3: the CLI's brand kit on a deck folder reads a footer record), `evidence-policy.test.mjs` (2: section 8, to Kevin) |
+| 6 | ok (the client build, `check-client-bundle.mjs`, the source greps) |
+| 7, 8 | 7 imported Kevin's Prototemplate deck into `decks/gt-brand` (95 slides; 27 tracked files changed, 18 new); 8 red on its 95. The tree was put back (`git checkout -- decks/gt-brand`, the 18 new files moved to the integrator's scratchpad) before step 9, so no later step read the import |
+| 9 to 11 | ok |
+| 12 | red, the tree's own: `compare-to-shoot` 144 of 170 pairs over budget against the 95 slide deck's shoot |
+| 13 to 16 | ok |
+| 17 | red, the tree's own: `viewer.spec.ts` 1 of 8 ("the grid mounts clones for the tiles near the viewport alone"), as in the first pass's run |
+| 18 | red, the tree's own: the `/edit/gt-brand` audit's `editorMenu` state times out on a click, as in the first pass's run, so the chain never reaches `/home`. The integrator ran the `/home` and Not found audits on 4545 (section 5) |
+| 19 | ok: `pnpm format:check` and `what-works.mjs --check` |
+| 20 | red, the tree's own: the editor's parity audit, the same 80 failure lines as the first pass's run |
+| 21 | red: 23 failed, 35 passed (15.3 min, 25 to 41), the editor's specs; the first pass read 24 and 34 with the same failures and one filmstrip test more |
+| 22, 24 | ok; 23 and 25 skipped by the runner (no fonts venv, no Docker) |
+| 26 | red: 13 failed, 46 passed, 2 skipped (17.3 min, 25 to 45): accounts (7), comments, dither, presence, security, share, versions-by-author. `home-page.spec.ts` 12 of 12 passed. No code those specs drive changed in the second pass |
+| 27 | skipped (nothing on 4344) |
+| 28 | ok |
+| 29 | red at its first command, the tree's own: `build-brand --check` reads `facts.json` `checkSteps` 32 against 33. The rest of the step run alone: `build-home-assets --check` 33 outputs, `build-definitions --check` current, `check-record` 4 outputs match |
+| 30 | ok in 34.0 s (40 of 40 Vercel output assertions); again on the seams' tree at 00:59, 57.2 s |
+| 31 | red: `perf-budget` 107 of 148 at loads 39 to 45, so its times are not read: load. Every route's `js decoded` and `largest js` lines read the shared entry chunk (`index-*.js` 1,156 KB; LANDING.md 7 answer 7, Round 2's split); `/home`'s own lines: LCP 128 ms cold and 124 warm on `H1.ts-h1`, CLS 0, pictures 0 KB before ready and 57 KB after a full scroll. Its node-server build is the one the run of record served |
+| 32 | stopped at its start at 21:34, when the load fell to 14, and replaced by the run of record on the node-server build (the same driver over every row, section 4), so two whole matrices did not run back to back; recorded as not run in the chain |
+| 33 | ok (report mode) |
+
+### 4. The run of record: the whole matrix on the local memory tier
+
+`node scripts/probes/core-gate.mjs --base http://localhost:4555 --tier memory --lock <scratch> --parked docs/gslides-parity/focus/ship-4300058d.json --matrix docs/gslides-parity/landing/build/landing-v2-local-memory.json`, with `.turboslide/e2e.lock` held around it, against check step 31's node-server build of `8b631835` served on 4555 (`node apps/studio/.output/server/index.mjs` with the check runner's server environment: the memory tier, a tmp store, its own overlay and auth database, the build commit stamped). Started 21:34:56 at load 13.7, ended 00:57:23 at load 26.9 (12,147 s): the walk 21:35 to 22:48 (load 10 to 58), the specs 22:48 to 00:27 (load 8 to 37; the `home.*` rows ran from 00:15 to 00:27 at loads 7.5 to 15.9, so every time they judged was read), the cost probe to 00:57.
+
+| Ledger | Rows | Passed | Failed | Not driven | Verdict |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `landing-v2-local-memory.json` (the walk 711, the specs 432, the cost probe 13) | 1,156 | 970 | 91 | 95 (2 manual), 17 local rows not recorded (no identity database) | failed, retries 0 |
+
+The 68 `home.*` and `decks.home.*` rows: 62 passed and 6 failed.
+
+| Row | Reading in the run of record |
+| --- | --- |
+| `home.page.order`, `markup-final`, `bands-after-load` | passed: the order with the eleven interludes; without script the first screen differs in 404 of 1,296,000 pixels (0.031 percent) at 1440 and 404 of 329,160 (0.123) at 390, every reserved box the same size; 0 band requests before `load`, no unfilled box in view, CLS 0.000000 at 1440 and 390 |
+| `home.hero.type`, `stage`, `lead.visit`, `numbers.row`, `features.table`, `a11y.skip-and-contrast` | passed (the h1 96.00 px, weight 500, -0.0420 em; the frame 644 by 408 and the terminal 364 by 408 at y 488; the visit sentences set 116, 51 and 48 ms before first paints of 136, 68 and 68 ms; 237 and 290 text elements, none under their line) |
+| `home.hero.run` | passed: L-H ran 8 ms after it registered (line 500); cycles of 18,786, 18,789 and 18,781 ms against the caption's 19 s |
+| `home.hero.select`, `canvas.gestures`, `canvas.log`, `objects.keyboard` | passed |
+| `home.hero.edit` | failed on the build alone: the easing text `cubic-bezier(.65, 0, .35, 1)` against `cubic-bezier(0.65, 0, 0.35, 1)` (`af9febac`) |
+| `home.menus.bar`, `rows` | passed (Insert > Text box 56 ms, Arrange > Rotate clockwise 74 ms at loads 10 to 11; line 300) |
+| `home.tailor.apply`, `filmstrip`, `home.kits.restyle`, `color`, `home.versions.scrub`, `restore` | passed (Kestrel on every slide 41 ms at 10.4; line 500) |
+| `home.agents.rest`, `chips`, `typed`, `transports`, `history`, `recorded` | passed (the four chips 3,268 to 4,080 ms from press to the flag leaving, line 5,000; the ring 370 to 692 ms, line 700; at loads 8.7 to 9.5) |
+| `home.present.show`, `focus`, `print` | passed (Present to the stage 521 ms, Escape back 415 ms, at 9.1) |
+| `home.export.seam`, `figure`, `loupe` | passed (the loupe 0 of 196 at two places in light, 0 and 1 of 196 in dark) |
+| `home.motion.develop`, `pause`, `in-view`, `rest`, `reduced`, `hidden-tab`, `home.a11y.keyboard-walk` | passed (the develop 1,507, 1,501 ms; C1 2,400.6 ms, E1 1,103.5 ms; paused: 0 frame callbacks and 0 ms of task a second at the top, middle and bottom; 82 of 82 Tab stops; loads 8.3 to 9.6) |
+| `home.interludes.glyphs`, `home.motion.loops`, `offscreen` | passed (eleven interludes; the hold 5,597 ms at 1440 and 5,608 at 390; fourteen loops registered; offscreen 0 frames, 0 timers, 0 ms of task; loads 7.5 to 12.1) |
+| `home.patterns.pair` | passed (the shader chunk 7,283 B gzip) |
+| `home.people.loop`, `type` | passed (a cycle 14,005 ms; the other screen 122 ms after the last key, line 200; at 8.4 to 8.6) |
+| `home.budget.shared`, `lcp`, `frame`, `main-thread` | passed (LCP cold 108 ms and warm 64 at 1440 ×1 on `h1#ts-product-h1` at 15.3; the longest frame callback 0.4 ms at 1x and 1.7 ms at 4x; the boot script 954 B, 3 ms of script before LCP) |
+| `home.budget.bytes-first` | failed on the document alone, to Kevin: 95,311 B decoded (line 80,000) and 18,505 B brotli; the route chunk 52,976 B decoded and 13,436 B brotli; the page CSS 14,918 B brotli; own bytes 46,859 B; 0 pictures before `load` |
+| `home.budget.bytes-page` | failed on the script alone, to Kevin: the page's own script 335,377 B decoded (line 300,000) and 111,290 B gzip (line 90,000) after a full scroll; 6 pictures, 57,133 B; nothing requested twice |
+| `home.budget.live-module` | failed: the core with its imports 61,111 B decoded and 21,639 B gzip (line 20,480); every band chunk under its lines (the largest, `menus`, 48,152 B and 15,870 B gzip) (`c699900b`) |
+| `decks.home.new-presentation`, `your-presentations`, `seller-lead`, `copy-rules` (676 words, 12 headings), `product-pictures`, `links-and-card`, `layout-shift` (CLS 0.0000 everywhere), `grammar`, `copy`, `phone`, `pictures-three-widths` (13,053 px at 1440) | passed |
+| `decks.home.capture-plain` | failed: "2 selection overlays at rest", the people band's presence marks (`36a2108f`) |
+| `decks.home.load-budget` (measure) | failed on its pictures line, to Kevin: the lighthouse's still, 4,592 B in 1 request before the first scroll (line 0); first byte 7 ms, LCP 132 ms on the h1, ready 275 ms, 58,619 B of pictures after a full scroll |
+
+The other 85 reds and 95 not driven rows are the editor's, outside every file the second pass changed (the walk's 45 failures in text, images, arrange, shapes, lines, versions, formatting, decks, inbox, slides, assist, brand, logos, shaders and help, its 48 not driven table rows; the specs' 40 more in assist, chrome, decks, export, images, logos, present, shaders, share, svg and sync, with the assist rows' fixture absent from a local server and the do tier's cost rows not driven on the memory tier). They are for the ship's guard to read on the preview of its commit.
+
+### 5. The seams the run of record found, read after it
+
+- **`home.budget.live-module`** (`c699900b`): the client build of check step 30 at 00:59 on the seam's tree, measured as the row measures (the chunk holding `ts-home-sel-layer` and its static imports, concatenated, gzip level 9; the same method gives the run of record's 61,111 B and 21,639 B on step 31's build of `8b631835`): the core 57,762 B decoded and 20,365 B gzip, 115 B under its line; `glyphs-*.js` 3,856 B and 1,714 B gzip. The core has almost no room left; V2's offer of 15:58 (the kit painter out of the core into the kits chunk through `registerPainter`) is the next way to make some.
+- **`home.hero.edit`** (`af9febac`): passed on 4545 at 01:05 (load 43, with the row's own time bounds judged; the row reads no load; `af9febac`'s body says the bounds were not judged, which is wrong).
+- **`decks.home.capture-plain`** (`36a2108f`): passed on 4545 at 01:10 (load 37 to 42).
+- **The rail junctions at 390** (`491bab1d`, `5e08fe48`): the chrome lint of `/home` at 1440, 1280 and 390 in both appearances on 4545 at 01:14 reads one junction a width, the step tabs' (section 8), and no rail junction; `home.menus.bar`, `rows`, `home.page.markup-final` passed and `home.people.loop`, `type` passed their functional checks with their times not read: load 34 to 38; `decks.home.pictures-three-widths`, `layout-shift`, `grammar` and `phone` passed (01:15 to 01:19). The Not found page's audit: 0 findings.
+- **The interludes from their chunk** (`c699900b`) on 4545 at 01:02 to 01:08 (load 37 to 50): `home.page.order`, `bands-after-load`, `home.motion.reduced`, `hidden-tab` passed; `home.motion.develop`, `pause`, `rest`, `home.interludes.glyphs`, `home.motion.loops`, `offscreen` passed their functional checks with their times not read: load.
+- **Every home row again, on a build of the seams** (ledger `landing-v2-local-memory-home.json`): once another worktree's dev server had left 4321, check step 31 rebuilt the node-server output from `b44a6d6f` (02:18 to 02:22, load 9 to 15: `perf-budget` 108 of 148, `/home` LCP 88 ms cold and 84 ms warm on the h1, CLS 0, every route's shared entry lines red as before). Served on 4555, `core-gate.mjs --only specs --rows` over the 68 `home.*` and `decks.home.*` rows ran from 02:22:11 to 02:36:57 at loads 6 to 18, a narrowed rerun after the code changes named above: 65 passed and 3 failed, the three of section 8 for Kevin (`home.budget.bytes-first`, the document 95,311 B decoded; `home.budget.bytes-page`, the own script 335,884 B decoded and 111,687 B gzip; `decks.home.load-budget`, the lighthouse's still of 4,592 B before the first scroll). `home.budget.live-module` passed (the core 57,762 B decoded and 20,363 B gzip; `glyphs-*.js` 3,856 B and 1,704 B gzip), and so did `home.hero.edit` and `decks.home.capture-plain` (0 overlays). Times read: `home.budget.lcp` 88, 80 and 96 ms cold and 44, 44 and 40 ms warm at load 5.6; `home.hero.run` cycles of 18,791, 18,793 and 18,790 ms; `home.interludes.glyphs`, the glyphs now from their chunk, holds of 5,622 and 5,603 ms; `home.people.loop` a cycle of 14,006 ms; `home.budget.frame` 0.7 ms at 1x and 2.1 ms at 4x.
+
+### 6. The narrowed preview
+
+**https://turboslide-rmh40rynx-kl01s-projects.vercel.app**, deployed from `8b631835` (the merged tree before the seams the run of record found) with `vercel deploy --yes --archive=tgz` from the worktree's root to `kl01s-projects/turboslide`, Kevin's personal project, as a preview (never `--prod`), 21:35:06 to 21:37:03 PDT, with `TURBOSLIDE_AUTHORIZE=enforce`, `TURBOSLIDE_ASSIST=fixture`, `TURBOSLIDE_LOGO_UPSTREAM=fixture`, `TURBOSLIDE_MAIL=off`, `TURBOSLIDE_REALTIME=blob`, `TURBOSLIDE_PUBLIC_STORE_HOST=ggmycvj7j6224ay5.public.blob.vercel-storage.com` and two per deployment secrets minted inside the command with `openssl rand -hex 32` and never printed. Its build ran `pnpm install --frozen-lockfile` on Q13's lockfile and completed. It is protected: `/home` answers 302 to the login without the header and 200 with `VERCEL_OIDC_TOKEN` (from `vercel env pull .turboslide/vercel-dev.env --environment development --yes`, read through a wrapper, never printed) as `x-vercel-trusted-oidc-idp-token`. Each ledger's `commit` field names the checkout's head when the run started (the drivers' tree), not the deployment's.
+
+| Reading (LANDING.md 6.6 item 3) | When, load | Result |
+| --- | --- | --- |
+| `home.budget.*`, `home.page.bands-after-load`, `home.patterns.pair`, `decks.home.load-budget`, `decks.home.links-and-card`: `core-gate.mjs --only specs --rows ...`, ledger `landing-v2-preview-narrowed.json` | 01:25:40 to 01:28:58, 15 to 20 | 11 rows, 6 passed, 5 failed. Passed: `decks.home.links-and-card` (10 links, `og:url` www.turboslide.com/home), `home.page.bands-after-load` (0 band requests before `load`, CLS 0.000000 at 1440 and 390), `home.budget.shared` (entry 1,183,913 B decoded, one font of 352,240 B), `home.budget.lcp` (cold 272, 288 and 264 ms and warm 108, 112 and 84 ms on `h1#ts-product-h1` at 1440 ×1, ×2 and 390, at 12 to 12.8; lines 400 and 200), `home.budget.frame` (the longest frame callback 0.4 ms at 1x and 1.9 at 4x, a band entering 0.9 and 3.2 ms, at 15.4 to 15.9), `home.budget.main-thread` (954 B, 4 ms of script before LCP, the longest task 10.4 ms, at 15.4 to 16.9). Failed: `home.budget.bytes-first` (the document 95,311 B decoded, 18,535 B brotli; to Kevin), `home.budget.bytes-page` (the own script 335,377 B decoded and 111,290 B gzip; to Kevin), `home.budget.live-module` (61,111 B and 21,713 B gzip: the deployment predates `c699900b`), `decks.home.load-budget` (measure: first byte 154 ms over its 150 line; LCP 320 ms, ready 461 ms, 0 pictures before the first scroll, 58,619 B after a full scroll, one long animation frame over 100 ms, JavaScript 1,378,179 B decoded reported), `home.patterns.pair` (Globex pressed before the kits band's chunk had started) |
+| `home.patterns.pair` again after `b44a6d6f` (the driver; the deployment unchanged), ledger `landing-v2-preview-patterns-rerun.json` | 01:46:00 to 01:46:28, 33 to 38 | passed |
+| The `immutable` header on the new `/home/**` files | 21:38 | the 16 files of `assets.json` (the lighthouse's still and tone map, the pattern's two still frames, the two browser rasters, the Perfect and Editable text parts, the two PDFs) answer 200 with `public, max-age=31536000, immutable`, each the bytes `assets.json` records; every `/assets/*` chunk the document names the same; the document `public, max-age=0, must-revalidate`, brotli |
+| The speculation rules | 21:38 | `{"prerender":[{"source":"list","urls":["/new"],"eagerness":"moderate"}],"prefetch":[{"source":"list","urls":["/decks","/deck/gt-brand"]}]}` in the document, read by fetch: `home-page.spec.ts`'s test of it sends no OIDC header, so it cannot read a protected preview |
+| The hosted smoke (`scripts/hosted-smoke.mjs --base`) | 22:48 to 22:49, 13 to 20 | 38 of 39: `/decks` red ("expected a 200 list naming the deck; 0 card(s)"), the anonymous fetch under `TURBOSLIDE_AUTHORIZE=enforce` lists no deck (`accounts.decks-list-scoped`); `/home` passed (3 of 3 marks), every header, CDN and enforce row passed; the bearer rows skipped (no token on the preview) |
+| The guard's seller path: `gt-follow.sh`'s `SPEC_ROWS` and `WALK_AREAS` (decks, text, fonts, versions), run from this worktree with `core-gate.mjs` (the guard's script checks out a worktree of its own) | specs 01:28:58 to 01:33:54; walk 01:33:54 to 01:45:38, 13 to 28 | specs (`landing-v2-preview-seller-specs.json`): 9 rows, 8 passed, `decks.list.open-title` failed (a card's title hidden on `/decks`, red in the run of record too). Walk (`landing-v2-preview-seller-walk.json`): 130 rows, 124 passed, 3 failed (`decks.file.import-slides-deck`, red in the run of record; `versions.show-changes-marks`, a parked row of `ship-4300058d.json`; `fonts.agent.font-list`, whose HTTP half needs a bearer the preview does not hold), 3 not driven (`text.clipboard.paste-without-formatting` manual, `fonts.table.takes-family` a standing row of the guard, `fonts.field.own-face`) |
+
+The hand walk on the seller path (6.6 item 4) is the ship's and was not done here.
+
+### 7. Pictures
+
+`build/integrator/v2-*.jpg`, 32 JPEGs, each under 195,000 B, shot on the preview (`8b631835`) from 01:46 to 02:16 with `.turboslide/integ2-specs/shoot2.mjs` and composed by the integrator's scratch composer, each under its reference picture. The first pass's integrator pictures in the same folder (36 files without the prefix, untracked since 2026-10-03 09:48) are left as they are.
+
+- `v2-page-{light,dark}-{1440,390}.jpg`: the whole page stitched from viewport shots after a full native scroll (13,053 px at 1440, 13,331 at 390), beside prototype B's `b-{1440,390}-{light,dark}-full.jpg`. Every band in section 2's order with its interlude, the instruments filled.
+- `v2-strip-hero-*`: L-H at a tenth of speed, a frame every 2 s of loop time beside B's `b-strip-hero-agent.png`: H5 developing at 0.1 s, the rest on slide 1, Restore clearing the terminal at 6 s, slide 5 gone from the filmstrip at "1 / 8", New Slide, Set the Title and Set the Rows on slide 5 with the ink ring and the "Agent" flag, the step tab's countdown filling.
+- `v2-strip-field-*`: I1 on the interlude before the canvas band at a tenth of speed beside B's `b-strip-field-gather.png`: the sparse field, the gather into the selection frame's glyph by 1.6 s, the hold, the thinning at 7.5 to 8 s, the field again at 10 s. Where B holds its glyph inside the field, the page's gathered still is the glyph alone (2.4: "the gathered still equals its glyph's cells").
+- `v2-strip-agents-*`: Turn the Title at a tenth of speed beside C's `strip-agents.jpg`: the command typed in the console, the answer, the ink ring on slide 5, the title turned under the flag, the Version history row.
+- `v2-strip-tailor-*`: Tailor for Globex at a tenth of speed beside A's `tailor-apply.png`: each name lit in reading order and the snackbar.
+- `v2-strip-drag-*`: the lighthouse's heading at full speed beside A's `canvas-edit.png`: selected, dragged off the plate with its paper ground, released, Undo's return at 33, 252, 453 and 752 ms.
+- `v2-strip-show-*`, `v2-strip-exit-*`: Present at a tenth of speed beside A's `present-show.png`, then Escape back to the band.
+
+### 8. Findings by owner
+
+**To Kevin.**
+
+1. `home.budget.bytes-first` (gate) is red: the document is 95,311 B decoded against the 80,000 line (18,505 to 18,535 B brotli, under its 20,000) on the build and on the preview. It was 85,908 B at V1#8 and 92,173 B at V1#15; the two people and patterns bands' words, boxes and interludes added the rest. The renderer's CSS is 29,283 B of it (audit item 13, question 10: 52 KB once that CSS is a file). 4.1's line was not moved.
+2. `home.budget.bytes-page` (gate) is red: the page's own script after a full scroll is 335,377 B decoded (line 300,000) and 111,290 B gzip (line 90,000) on the build and the preview, from V1's 273,460 B and 91,855 B at V1#15. The interludes, the people band (`people-*.js`) and the shader chunk (7,283 B gzip) came after. The largest part is the menus chunk, 48,152 B decoded and 15,870 B gzip, most of it the rows' `doc` sentences that 2.5 requires (V2's proposal: load them on a row's first press). Either 4.1's line moves or the chunks shrink.
+3. 4.1 and 4.2 disagree on pictures before the first scroll: in the run of record `decks.home.load-budget` read the lighthouse's still (4,592 B, one request) before the first scroll, as 4.2's one viewport rule requests it with the canvas band fourth in the page; on the preview it read 0 (the request fell after the row's window). Either 4.1 says "0 before `load`" (`home.budget.bytes-first` reads that and passes) or the canvas band's margin is made smaller than one viewport (V4's `field.ts`).
+4. The evidence policy (check step 5, `docs/readme/evidence-policy.test.mjs`; NEXT.md 5.3: each tracked picture under 200,000 B, a round folder under 25 MB): `docs/gslides-parity/landing` tracks 477 pictures, 75.3 MB, 158 of them over 200,000 B (the first pass's tree: 281, 40.3 MB, 81 over; the research and direction pictures, then `l2` to `l4`, `v2` to `v4` under the orchestrator's 400 KB rule). This note adds 32 pictures, each under 195,000 B. The policy's way is Round 1's B6a: after the ship, prune the folder's pictures to the ones the notes name and keep the rest in the history.
+5. The ship order (section 2): V4#19 cannot ship at `133b81f6` without `47160fda`; choose one of the two ways there.
+6. V4#20 stays held until the six presence rows of 2.10 read green on production (6.8, question 13). This merge read none of them on production.
+7. The live core is 117 B under its 20 KB gzip line after `c699900b` (20,363 B on the node-server build of `b44a6d6f`); the next feature in the core pushes it over.
+
+**To V1.**
+
+1. The chrome lint of `/home` (check step 18's audit) reads one junction at every width in both appearances: `::before` and `::after` of `.ts-hero-step` draw one seam (the hair track and the ink countdown of 2.2's step tabs). The lint reads them as two owners of one line; its allow list (`CHROME_ALLOW`, pinned by `packages/lint/src/chrome.test.ts`) has no entry for a track with its fill, and drawing the countdown alone (no track) changes 2.2's look. Not changed; a decision for V1 with Kevin. Step 18 never reaches `/home` while its `/edit/gt-brand` audit is red.
+2. Your files the integrator changed: `home.css` (`fdc961c8`, the export seam's handle), `copy.ts` (`3b85fbc7`, two keys), `HomePeople.tsx` (`44858636`, the timing import) and `decks.spec.ts` (`36a2108f`, the people marks out of capture-plain's overlay count).
+
+**To V2.** `af9febac` (`home.hero.edit`'s curve text), `491bab1d` (the miniature's side rules under 720 px) and `3b85fbc7` (`versions.ts` reads `HISTORY.restoredVersion`) changed your files. The live core has 117 B of room: your offer of 15:58 (the kit painter into the kits chunk) is the next way to make room. The menus chunk is 15,870 B gzip, 514 B under its 16 KB band line.
+
+**To V3.** Every request to V3 is answered (`fdc961c8` the seam's handle, `3b85fbc7` the copy keys, `17da98d1` R12 and R13, `8b631835` the formatting of fifteen files). Read `fdc961c8`: the handle now spans the slide with `pointer-events: none` and only the knob takes the pointer.
+
+**To V4.** `c699900b` moved the glyphs out of the core (`field.ts` imports `./glyphs` when the core starts); `5e08fe48` (the people screens' side rules under 720 px), `36a2108f` and `b44a6d6f` (`patterns.ts` waits for the kits band) changed your areas. At hold the gathered interlude is the glyph alone, where B's keeps its field (2.4 reads as built).
+
+**To the ship.** Read on the preview of the ship's commit: the editor's reds outside the landing (85 in the run of record, section 4), `decks.list.open-title` (red locally and on this preview), the hosted smoke's `/decks` row under enforce, and the hand walk on the seller path.
+
+**Standing outside the landing.** Check steps 3, 5, 8, 12, 17, 18, 20, 21, 26, 29 and 31's shared entry (section 3); the brand lint's 22 findings; the first pass's untracked `build/integrator/*` pictures and `build/landing-preview-narrowed.json`, which LANDING.md 8 and its sources cite, left untracked.
+
+### 9. At the close
+
+- The integrator's servers on 4545 and 4555 are stopped; the check runner stopped its own on 4321. No `.turboslide/git.lock` or `.turboslide/e2e.lock` is left.
+- Scratch decks the chain's runs left under `decks/` (`e2e-comments-musmrsai` from before this merge, `untitled-20261004-3veb`, `-hsb2`, `-0zyz`) and the 18 new files of step 7's import were moved to the integrator's scratchpad, not deleted, so the gate's scratch check passes; `decks/` holds `fixture`, `gt-brand` and `templates`.
+- Left untracked as found: `docs/gslides-parity/landing/.overlay-current/`, the first pass's integrator pictures and `build/landing-preview-narrowed.json`.
+- The preview deployment stays on Kevin's personal project, behind Vercel Authentication. Nothing was pushed.

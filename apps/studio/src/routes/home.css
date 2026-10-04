@@ -665,6 +665,12 @@ html:has(.ts-product) {
   cursor: pointer;
 }
 
+/* a slide the frame's order does not hold (a deleted slide, slide 5 while the loop stages the
+   run's start or in version 1): the grid above outranks the browser's own [hidden] rule */
+.ts-hero-thumb[hidden] {
+  display: none;
+}
+
 .ts-hero-thumb-n {
   padding-top: 1px;
   font-size: 9px;

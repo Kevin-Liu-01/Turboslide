@@ -1,6 +1,5 @@
 import { ANNOUNCE } from '../copy';
 import type { LoopStep } from '../loop.generated';
-import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId } from '../deck.generated';
 import type { StepHandle } from './step';
 import { heroDeveloped } from './hero';
@@ -22,8 +21,11 @@ import type { HomeDeckState, SlideKey } from './state';
  * fresh root of the slide as the build wrote it (V2's `cloneSlide`, never a copy of the thumbnail,
  * whose drawn poses would read as the copy's rest), which `paintSlide` draws with the deck's state
  * and makes selectable, or slide 1's own instance with its Blue Marble. Up and Down move focus
- * among the thumbnails (a roving tab stop). The title row's counter follows the shown slide. A
- * slide a menu row adds gets a thumbnail of its own in the deck's order (v2.md R21).
+ * among the thumbnails (a roving tab stop). The title row's counter follows the shown slide. On
+ * every change of the store the thumbnails take the deck's order (a Tailor or miniature move, a
+ * restore) and a slide the deck does not hold is hidden (a deleted slide, slide 5 in version 1); a
+ * slide a menu row adds gets a thumbnail of its own (v2.md R21). While the loop stages the run's
+ * start, the frame reads the deck's order without slide 5.
  *
  * The loop. A cycle holds slide 1 for 3 s; Restore clears the terminal, types `turboslide version
  * restore 1` and prints its answer, and slide 5 leaves the frame's filmstrip (the counters read
@@ -56,6 +58,8 @@ type SlideState = 'absent' | 'placeholders' | 'titled' | 'filled';
 
 const STEP_IDS: readonly StepId[] = ['restore', 'new', 'title', 'rows'];
 const BEAT_MS = 500;
+/** Slide 5, which the loop's Restore takes out of the frame's order. */
+const SLIDE_5 = 'next-steps' as HomeSlideId;
 
 /** The state slide 5 holds after each step of the run, and Restore's. */
 const AFTER: Readonly<Record<StepId, SlideState>> = {
@@ -92,9 +96,12 @@ export function startStage(ctx: LiveContext): void {
 
   /* ---- the frame: which slide it shows, and the order its filmstrip reads ---- */
   let shown: string = 'title';
-  /** the frame's own order while the loop stages the run's start (slide 5 absent); null: the deck's */
-  let stagedOrder: readonly string[] | null = null;
-  const orderNow = (): readonly string[] => stagedOrder ?? ctx.store.get().order;
+  /** true while the loop stages the run's start: the deck's order without slide 5 */
+  let staged = false;
+  const orderNow = (): readonly string[] => {
+    const order = ctx.store.get().order;
+    return staged ? order.filter((id) => id !== SLIDE_5) : order;
+  };
 
   const paintCounter = (): void => {
     const order = orderNow();
@@ -102,17 +109,35 @@ export function startStage(ctx: LiveContext): void {
     const text = `${n} / ${order.length}`;
     if (counter !== null && n > 0 && counter.textContent !== text) counter.textContent = text;
   };
-  /** The frame's thumbnails and slide counters as the staged order reads them. */
-  const paintStaged = (): void => {
-    if (stagedOrder === null) return;
-    const order = stagedOrder;
-    for (const thumb of strip.querySelectorAll<HTMLElement>('[data-hero-thumb]')) {
+  /**
+   * The frame's thumbnails in the order the frame reads, each numbered by it, a slide the order
+   * does not hold hidden after them; while the loop stages its order, the slide counters too.
+   * `renumber` (paint.ts) has numbered them by the deck's order already; this puts the elements
+   * in that order, which it never does, and applies the staged order over it.
+   */
+  const paintOrder = (): void => {
+    const order = orderNow();
+    const items = [...strip.querySelectorAll<HTMLElement>(':scope > [data-hero-thumb]')];
+    const inOrder = order.flatMap((id) => {
+      const thumb = thumbOf(id);
+      return thumb === null ? [] : [thumb];
+    });
+    const want = [...inOrder, ...items.filter((t) => !inOrder.includes(t))];
+    // moveBefore keeps a moved thumbnail's focus and its slide's state where the browser has it
+    const parent = strip as HTMLElement & { moveBefore?: (n: Node, r: Node | null) => void };
+    if (!want.every((t, i) => items[i] === t))
+      for (const thumb of want) {
+        if (typeof parent.moveBefore === 'function') parent.moveBefore(thumb, null);
+        else strip.append(thumb);
+      }
+    for (const thumb of want) {
       const id = thumb.dataset['heroThumb'] ?? '';
       const n = order.indexOf(id) + 1;
-      thumb.hidden = n === 0;
+      if (thumb.hidden !== (n === 0)) thumb.hidden = n === 0;
       const label = thumb.querySelector('[data-thumb-n]');
-      if (label !== null && n > 0) label.textContent = String(n);
+      if (label !== null && n > 0 && label.textContent !== String(n)) label.textContent = String(n);
     }
+    if (!staged) return;
     for (const root of [
       ...strip.querySelectorAll<HTMLElement>('[data-home-slides]'),
       ...host.querySelectorAll<HTMLElement>('[data-home-slides]'),
@@ -166,7 +191,7 @@ export function startStage(ctx: LiveContext): void {
       place(root);
       paintSlide(root, state);
       paintSlides(strip, state);
-      paintStaged();
+      paintOrder();
     }
     paintCounter();
   };
@@ -191,10 +216,8 @@ export function startStage(ctx: LiveContext): void {
       sheet.dataset['sheet'] = `hero-thumb-${key}`;
       sheet.append(root);
       item.append(n, sheet);
-      const before = state.order[state.order.indexOf(key) - 1];
-      const after = before === undefined ? null : thumbOf(before);
-      if (after === null) strip.append(item);
-      else after.after(item);
+      // placed at the end here; `paintOrder` puts every thumbnail in the deck's order
+      strip.append(item);
       thumbRoots.set(key, root);
       paintSlide(root, state);
     }
@@ -282,14 +305,14 @@ export function startStage(ctx: LiveContext): void {
     root.classList.remove('is-thumb');
     place(root);
     paintSlide(root, now);
-    paintStaged();
+    paintOrder();
     paintCounter();
     return root;
   };
 
   /** The frame at the deck as the store holds it: slide 1 shown, slide 5 filled, the transcript. */
   const toRest = (): void => {
-    stagedOrder = null;
+    staged = false;
     slide5('filled', false);
     paintSlides(strip, ctx.store.get());
     show('title');
@@ -303,14 +326,14 @@ export function startStage(ctx: LiveContext): void {
   /** Lands a step's change on the frame (the recorded state after it); returns the ring's target. */
   const land = (id: StepId): HTMLElement | null => {
     if (id === 'restore') {
-      stagedOrder = HOME_DECK.startOrder;
+      staged = true;
       slide5('absent', false);
       show('title');
-      paintStaged();
+      paintOrder();
       paintCounter();
       return null;
     }
-    stagedOrder = null;
+    staged = false;
     paintSlides(strip, ctx.store.get());
     const root = slide5(AFTER[id], true);
     if (root === null) return null;
@@ -403,7 +426,7 @@ export function startStage(ctx: LiveContext): void {
       await wait(loop.HOME_LOOP.holdLastMs);
       if (stoppedForGood) return;
       /* the cut back to slide 1, the deck as the store holds it */
-      stagedOrder = null;
+      staged = false;
       paintSlides(strip, ctx.store.get());
       show('title');
     }
@@ -495,7 +518,8 @@ export function startStage(ctx: LiveContext): void {
       });
     });
 
-  /* a change to slide 5 or its place (a chip, a menu row, the filmstrip, a restore) stops it */
+  /* a change to slide 5 or its place (a chip, a menu row, the filmstrip, a restore) stops it, at
+     the rest state, so the frame never keeps a staged slide 5 or order the deck does not hold */
   const signature = (state: HomeDeckState): string =>
     JSON.stringify([
       state.order.indexOf('next-steps' as HomeSlideId),
@@ -513,10 +537,14 @@ export function startStage(ctx: LiveContext): void {
     const now = signature(state);
     if (now !== last) {
       last = now;
-      stopForGood(false);
+      // at the deck's own state: no staged order, slide 5 as the deck holds it, slide 1 shown
+      stopForGood(true);
     }
-    if (shown === 'title' || stoppedForGood) paintCounter();
-    paintStaged();
+    paintOrder();
+    // a slide that left the deck leaves the frame: the first slide of the order shows by a cut
+    const order = orderNow();
+    if (!order.includes(shown) && order[0] !== undefined) show(order[0]);
+    else if (shown === 'title' || stoppedForGood) paintCounter();
   });
 
   show('title');

@@ -263,8 +263,10 @@ async function record(page: Page): Promise<void> {
           'slide'
         ] ?? '';
       const counter = document.querySelector('[data-hero-counter]')?.textContent ?? '';
+      // a thumbnail the frame does not draw: hidden and laid out as nothing (a rule that sets
+      // its display outranks the browser's [hidden], which the verifier's pass 1 found)
       const hidden = [...document.querySelectorAll<HTMLElement>('[data-hero-thumb]')]
-        .filter((t) => t.hidden)
+        .filter((t) => t.getClientRects().length === 0)
         .map((t) => t.dataset['heroThumb'])
         .join(',');
       const running = (w.tsHomeMotion?.running() ?? []).includes('L-H');
@@ -1171,6 +1173,86 @@ export function rows(): void {
           await context.close();
         }
       }
+    /* the frame's filmstrip draws the deck's order (2.2 "The frame's slides are the store's";
+       verifier pass 1's finding 1): after a Tailor move of slide 1 to place 3, after Slide >
+       Delete slide on slide 2 and after a restore of version 1, the thumbnails the frame draws
+       are the deck's slides in its order, numbered 1 to n, and the counter reads n */
+    {
+      const { context, page } = await homeContext(browser, DESKTOP, 'light');
+      try {
+        await openHome(page);
+        await page.locator('main#top[data-live="ready"]').waitFor({ timeout: 30_000 });
+        // a press on the terminal stops the loop at rest, so the frame reads the deck itself
+        await page.locator('[data-hero-terminal]').click({ position: { x: 20, y: 60 } });
+        const strip = () =>
+          page.evaluate(() => {
+            const items = [
+              ...document.querySelectorAll<HTMLElement>(
+                '[data-hero-filmstrip] > [data-hero-thumb]',
+              ),
+            ];
+            const order = (
+              window as unknown as { tsHomeStore: { get(): { order: string[] } } }
+            ).tsHomeStore.get().order;
+            return {
+              drawn: items
+                .filter((t) => t.getClientRects().length > 0)
+                .map(
+                  (t) =>
+                    `${t.querySelector('[data-thumb-n]')?.textContent ?? ''}:${t.dataset['heroThumb'] ?? ''}`,
+                ),
+              want: order.map((id, i) => `${i + 1}:${id}`),
+              counter: document.querySelector('[data-hero-counter]')?.textContent ?? '',
+            };
+          });
+        const check = async (when: string, counter: string): Promise<void> => {
+          const r = await strip();
+          notes.push(`filmstrip ${when}: ${r.drawn.join(' ')} at ${r.counter}`);
+          if (r.drawn.join() !== r.want.join())
+            failures.push(
+              `filmstrip ${when}: drawn ${r.drawn.join(' ')}, the deck ${r.want.join(' ')}`,
+            );
+          if (r.counter !== counter)
+            failures.push(`filmstrip ${when}: the counter reads ${r.counter}`);
+        };
+        const ready = async (band: string): Promise<void> => {
+          await page.locator(`[data-band="${band}"]`).scrollIntoViewIfNeeded();
+          await page
+            .locator(`[data-reserve="${band}"][data-filled]`)
+            .first()
+            .waitFor({ timeout: 30_000 });
+        };
+        await ready('tailor');
+        await page.locator('[data-band="tailor"] [data-thumb="title"]').focus();
+        await page.keyboard.press('ControlOrMeta+ArrowDown');
+        await page.keyboard.press('ControlOrMeta+ArrowDown');
+        await page.waitForTimeout(400);
+        await check('after slide 1 moved to place 3', '3 / 9');
+        await ready('menus');
+        await page.locator('[data-band="menus"] [data-mini-thumb="plan"]').click();
+        await page
+          .locator('[data-band="menus"] .ts-mini-menu', { hasText: /^Slide$/ })
+          .first()
+          .click();
+        await page
+          .locator('[data-band="menus"] .ts-mini-row')
+          .filter({ has: page.locator('.ts-mini-row-label', { hasText: /^Delete slide$/ }) })
+          .first()
+          .click();
+        await page.waitForTimeout(400);
+        await check('after Slide > Delete slide on plan', '2 / 8');
+        await ready('agents');
+        await page.locator('[data-version-slider]').focus();
+        await page.keyboard.press('Home');
+        await page.locator('[data-version-restore]').click();
+        await page.waitForTimeout(400);
+        await check('after restoring version 1', '1 / 8');
+      } catch (error) {
+        failures.push(`filmstrip: ${String(error).split('\n')[0]}`);
+      } finally {
+        await context.close();
+      }
+    }
     test.info().annotations.push({ type: 'stage', description: notes.join(' | ') });
     expect(failures).toEqual([]);
   });

@@ -1,7 +1,6 @@
 import { bayer8 } from '@turboslide/effects/bayer';
 
 import { homeAsset } from '../assets';
-import { INTERLUDE_BANDS, glyphFor, glyphTone } from './glyphs';
 import type { InterludeBand } from './glyphs';
 import type { LiveContext } from './index';
 import {
@@ -651,7 +650,8 @@ const INTERLUDE_CELL = 2;
  * view, and holds its frame otherwise. It sleeps through the hold and the rest on one timer, so a
  * running interlude draws frames only while it gathers or thins.
  */
-function startInterlude(el: HTMLElement): void {
+function startInterlude(el: HTMLElement, glyphs: Glyphs): void {
+  const { INTERLUDE_BANDS, glyphFor, glyphTone } = glyphs;
   const next = el.dataset['interlude'] as InterludeBand | undefined;
   const box = el.querySelector<HTMLElement>('.ts-interlude-box') ?? el;
   const canvas = box.querySelector('canvas');
@@ -790,14 +790,28 @@ function startInterlude(el: HTMLElement): void {
   });
 }
 
-/** I1 on every interlude of the page (2.4), registered once the live core starts. */
+/** The glyphs module (`live/glyphs.ts`), a chunk of its own. */
+type Glyphs = typeof import('./glyphs');
+
+/**
+ * I1 on every interlude of the page (2.4), registered once the live core starts. The eleven
+ * glyphs travel in a chunk of their own, imported here when the core starts, so the core and the
+ * chunks it imports at once stay inside 4.1's 20 KB gzip (`home.budget.live-module`; the
+ * integrator's V4#18 seam, as V1#15 moved the hero's stage into `hero-stage.ts`). Until it
+ * arrives an interlude's canvas is empty, as it is before the core starts.
+ */
 export function startInterludes(root: HTMLElement): void {
   installGuards();
-  for (const el of root.querySelectorAll<HTMLElement>('[data-interlude]')) {
-    try {
-      startInterlude(el);
-    } catch (error) {
-      console.error('an interlude did not start', error);
-    }
-  }
+  void import('./glyphs').then(
+    (glyphs) => {
+      for (const el of root.querySelectorAll<HTMLElement>('[data-interlude]')) {
+        try {
+          startInterlude(el, glyphs);
+        } catch (error) {
+          console.error('an interlude did not start', error);
+        }
+      }
+    },
+    (error: unknown) => console.error('the interludes did not load', error),
+  );
 }

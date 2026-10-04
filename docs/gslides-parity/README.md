@@ -26,6 +26,8 @@ On 2026-10-02 lane B6 of Round 1 removed every picture (PNG, JPEG and one WebP),
 
 The pictures of `realtime/`, `cloudflare/` and `next/` stay, because those rounds were still open on that day. The notes, ledgers and drivers of every folder stay.
 
+The realtime round's verifier committed 515 more pictures (17.0 MiB) under `focus/verification/realtime-*/` on `main` after that day. They left the tree when Round 1 was replayed onto `main` on 2026-10-04, after that round closed. Each one is in the history at `4aa32718` on `main`, and `focus/README.md` names that commit.
+
 ## The policy from Round 1 on
 
 These rules are `docs/NEXT.md` 5.3.

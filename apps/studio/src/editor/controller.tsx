@@ -22,6 +22,8 @@ import {
 import { refusalSentence } from './refusal';
 import { refusedText, refusedWriteSentence, structuralRefusalSentence } from './refused-write';
 import { serialChain } from './serial-chain';
+import { createAnswerScope } from './commit-answer';
+import type { CommitAnswer } from './commit-answer';
 import { refusalText } from '@turboslide/chrome/error-text';
 import {
   OWN_WRITE_LANDED_MAX_MS,
@@ -2450,20 +2452,23 @@ export function createEditorController(init: {
    * one Text inside 400 ms fold into one, SPEC 7.2.15); the promise resolves when the room
    * admitted the op, or rejects with the room's reason and the op's content returned.
    *
-   * `answer` says what the promise waits for once the room admitted the op. `acknowledged` (every
-   * edit, the window API's writes): the revision the write made, which the next write bases on
-   * (SPEC-3 3.10), so on the memory tier and the do tier the answer waits for the room's
+   * `answer` says what the promise waits for once the room admitted the op (commit-answer.ts).
+   * `acknowledged` (the window API's writes): the revision the write made, which the next write
+   * bases on (SPEC-3 3.10), so on the memory tier and the do tier the answer waits for the room's
    * checkpoint (2 s idle, 10 s under activity; ack-wait.ts caps it at 15 s). `admitted` (undo, redo
-   * and undoTo, which hand no revision to anyone): the admission alone, with the revision the page
-   * reports at that moment. The undo chain (serial-chain.ts) waits for each step's promise, and
-   * a step that waited for the checkpoint held every later Cmd+Z and Cmd+Shift+Z 2 to 15 s
-   * (VERIFICATION.md "Realtime round, pass 1" finding 4; build/r2.md R2-F1).
+   * and undoTo, and the writes of the chrome's own dispatch, none of which hands its revision to a
+   * next write): the admission alone, with the revision the page reports at that moment. The undo
+   * chain (serial-chain.ts) waits for each step's promise, and a step that waited for the
+   * checkpoint held every later Cmd+Z and Cmd+Shift+Z 2 to 15 s (VERIFICATION.md "Realtime round,
+   * pass 1" finding 4; build/r2.md R2-F1); the shell says a write's sentence with its Undo when the
+   * dispatch answers, and an answer at the checkpoint said it over a later write's (pass 3 P3-1).
    */
+  const chromeAnswer = createAnswerScope();
   const commitAs = (
     mutations: Mutation[],
     label: string,
     kind: 'edit' | 'undo' | 'redo',
-    answer: 'acknowledged' | 'admitted' = 'acknowledged',
+    answer: CommitAnswer = chromeAnswer.answer(),
   ): Promise<Committed> => {
     if (room === null) {
       // a burst typed while the first write is in flight waits for the room (hotfix 2 cause A1)
@@ -2607,22 +2612,24 @@ export function createEditorController(init: {
      size, a mark, a colour, Clear formatting) converts the slide to a canvas in the same write,
      the way the Align rows do through the store's withCanvas (docs/RETURN.md 2.14 item 1; SPEC-2
      1.6): the measured slide.replace travels in front of the write's mutations, so one revision
-     and one undo step hold both. Every other write keeps its synchronous local apply. */
+     and one undo step hold both. Every other write keeps its synchronous local apply. The answer
+     is the one the write took when it was made (commit-answer.ts), before the measure's await. */
   const convertThenCommit = async (
     slideId: string,
     mutations: Mutation[],
     label: string,
+    answer: CommitAnswer,
   ): Promise<Committed> => {
     const current = snapshot.document;
     const slide = current.slides[slideId];
-    if (slide === undefined) return commitAs(withAutoTitle(mutations), label, 'edit');
+    if (slide === undefined) return commitAs(withAutoTitle(mutations), label, 'edit', answer);
     const canvas = await withCanvas(storeDeps('slide.toCanvas'), current, slide);
     /* the document moved while the sheet was measured (a collaborator's write, a burst): the
        conversion is measured again on the document as it stands now */
     if (snapshot.document !== current) {
       const again = slideToConvertFor(snapshot.document, mutations);
-      if (again !== null) return convertThenCommit(again, mutations, label);
-      return commitAs(withAutoTitle(mutations), label, 'edit');
+      if (again !== null) return convertThenCommit(again, mutations, label, answer);
+      return commitAs(withAutoTitle(mutations), label, 'edit', answer);
     }
     /* the write's text runs on the slide's fields follow the conversion to the canvas's blocks
        (convert-first.ts `retargetFieldRuns`): the reducer resolves a run by the slide's kind, and
@@ -2633,9 +2640,11 @@ export function createEditorController(init: {
       withAutoTitle([...canvas.prefix, ...retargetFieldRuns(slide, canvas.slide, mutations)]),
       label,
       'edit',
+      answer,
     );
   };
   const commit = (rawMutations: Mutation[], label: string): Promise<Committed> => {
+    const answer = chromeAnswer.answer();
     /* the seller's edit of an assisted block clears its mark (docs/PRODUCT.md 6.1) */
     const mutations = withAssistClear(snapshot.document, rawMutations);
     /* a text run on a title or statement slide's field names the field as its blockId (docs/
@@ -2656,8 +2665,8 @@ export function createEditorController(init: {
           !isSlideFieldTextRun(snapshot.document, mutation),
       ),
     );
-    if (convert !== null) return convertThenCommit(convert, mutations, label);
-    return commitAs(withAutoTitle(mutations), label, 'edit');
+    if (convert !== null) return convertThenCommit(convert, mutations, label, answer);
+    return commitAs(withAutoTitle(mutations), label, 'edit', answer);
   };
 
   /**
@@ -4341,8 +4350,9 @@ export function createEditorController(init: {
     return output;
   });
 
+  /** The chrome's own dispatch: its writes answer at their admission (commit-answer.ts). */
   const invoke = (action: string, input?: unknown): Promise<unknown> =>
-    dispatcher.dispatch(action, input ?? {}, chromeContext);
+    chromeAnswer.during(() => dispatcher.dispatch(action, input ?? {}, chromeContext));
   /** The window API's dispatch: an agent's or a driver's run, with the strict contract (build/b3.md). */
   const invokeAsAgent = (action: string, input?: unknown): Promise<unknown> =>
     dispatcher.dispatch(action, input ?? {}, agentContext);

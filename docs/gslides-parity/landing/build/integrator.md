@@ -655,3 +655,188 @@ Rows through `core-gate.mjs --only specs` on 4545, 06:47 to 06:50 (load 19.6 to 
 - The servers on 4545 (dev) and 4555 (the node-server output) are stopped. No `.turboslide/git.lock` or `.turboslide/e2e.lock` of this fixer is left.
 - Commits: `32520fc3`, `191476a6` (V1#8 fix), `ea57d690` (V1#15 fix), `f00fe0d6` (V3#16 fix), `a6eccdac` (V2#14 fix), then this note with question 22's new figures. Nothing pushed; nothing deployed.
 - Left untracked: `.turboslide/intfix/` (the probes, ignored), `.turboslide/intfix-overlay/`, `.turboslide/intfix-dev-overlay/` and `.turboslide/intfix-auth.sqlite` (ignored); the ledgers and logs of this round's runs are in the session scratchpad. The untracked files found at the start are left as found.
+
+## Landing, ship order
+
+Written by the fixer of the landing's last fixes from 08:49 to 10:56 PDT on 2026-10-04 in `/Users/kevinliu/repos/Turboslide-landing` on `landing/redesign`, which stood at `d2a74cd2` (the integrator's fix round note) when it began. Read first: `build/verification.md` "Landing, pass 2" (findings N1 to N8), this file's "Landing second pass, merge" (sections 2 and 8) and "fix round", `docs/LANDING.md` 2.2, 2.8, 2.11, 2.13, 4, 6.6, 6.8 and 7. The orchestrator's steps: N1, N2 and N3, each with its row and pictures; V4#19's dependency moved into V4#19's group so every push builds on its own, and this ship order; the budgets, its decision on LANDING.md 7 questions 21 to 23 for Kevin's picks. Ports: 4547 (a dev server from `apps/studio` until 09:46, then a copy of V4#19's node-server output) and 4557 (the node-server output of check step 31's build command, `NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy`, served with the runner's server environment: the memory tier, a tmp store, `.turboslide/fix3-overlay`, `.turboslide/fix3-auth.sqlite`, `TURBOSLIDE_LOCAL_OPEN=1`, the build commit stamped). Every Playwright run held `.turboslide/e2e.lock` (the gate a scratch `--lock`), every commit and ref change `.turboslide/git.lock`. Nothing was pushed or deployed and no other worktree was touched. Times are PDT; loads are one minute load averages. Other checkouts' jobs held the machine at loads of 26 to 101 from 09:38 to 10:16, so the rows were read again once it fell under 17. The probes are in `.turboslide/fix3/` (ignored); their output, the ledgers and the raw pictures are in the session scratchpad.
+
+### 1. What was done
+
+The commits are named by their hashes on the branch after the rewrite (section 3); "was" is the hash before it.
+
+| Item | Answer | Commit |
+| --- | --- | --- |
+| N1 (V4): `home.budget.bytes-page` read "requested twice: /home/pattern-still-light-7a43233af0.webp" | `frameOf` made its `new Image()` before the still layer's CSS background had requested the file (the layer sits in the print box under `content-visibility: auto`, so it resolves later), and the layer then requested it again from the HTTP cache. `frameOf` now waits for the layer's own request (`fetched`, the file's resource timing entry read through a `PerformanceObserver`) and decodes the file from the memory cache the layer's style holds. Read on the build at 09:21 (load 10 to 13): 12 loads (light and dark, ×1 and ×2) each read one request, initiator `css`, and both boxes printed | `25e74f62` V4#19 fix (was `4964bf2e`) |
+| N3, the patterns band's half | `printStill` prints the frame's cells in the slide's `--ink` on its `--paper` (under GT those are the frame's own `#070707` on `#ffffff` and `#f2f2f0` on `#070707`, read equal), and prints again when a kit or a typed background changes them, so the right side follows a kit as the left side's shader does; `home.patterns.pair` reads the print's two colours under GT and after Globex | `25e74f62` |
+| N3 (V3 with V4): under a kit, slide 8 printed in the GT colours | A served file of the role `pattern-mask` (`scripts/home/pattern.ts`): the still frame's dots as one alpha mask for both appearances, refused unless the light and dark twins hold the same dots (481,392 of 5,760,000 pixels) and unless it decodes to them; 1,788 B. The show, the Present display, the print (`show.ts`) and the miniature and the scrubber's view (`paint.ts` `drawStills`) draw slide 8's still through it as every other still is drawn, in the slide's ink over its paper. A browser's print draws no luminance mask and no mask composite (Chromium's PDF of a test page at 09:12 printed both as a whole box of ink, while an alpha mask printed as on the screen), so the exporter's file under a luminance mask was not an answer. `home.present.print` presses Globex first and reads slide 8's printed layer: the mask, `rgb(244, 241, 234)` on `#0a1b38`, loaded before the print | `52500369` V3#16 fix (was `db3aa8f8`), `44e735e5` V3#16 fix (comments) |
+| Found while fixing N3: the miniature's slide 8 | `drawStills` gave a large slide 8 the exporter's picture as an alpha mask, so wherever the miniature (or the scrubber's view) showed slide 8 it drew a whole box of ink (`fix3/n3-mini8-before-light-1440.jpg`, reproduced at 09:28 by putting the old still back on the box); it now draws the mask | `52500369` |
+| N2 (V1): a stop during the staged Restore left the frame mixed | `paintOrder` writes every root's counter in the filmstrip and the stage by the frame's order, staged or not, and `show` repaints the order for slide 1 as for any slide, so every stop (`toRest`) lands the deck's order with "1 / 9" on the title row and on slide 1's own counter. The cycle's cut back had the same fault on every cycle (slide 1's own counter read "1 / 8" until the next Restore; read at 09:01 on `d2a74cd2`). A loop step whose modules were still loading at a stop no longer starts over the rest state. `home.hero.run` records the shown slide's own counter and gains the stop in the staged Restore by a mouse press (1440 light), a key (1440 dark) and a tap (390 by 844 with touch) | `93c44574` V1#15 fix (was `37b8ef37`) |
+| Questions 21 to 23, the budgets | The document's line to 100,000 B decoded; the page's own script's to 360,000 B decoded and 120,000 B gzip; the first lines (80,000; 300,000 and 90,000) kept in LANDING.md as Round 2's goals after its entry chunk split and Inter subset; `decks.home.load-budget` stays a measure row. `page.ts` names the lines with the reason, `core-matrix.json` carries them in the two rows' interactions and notes, LANDING.md 4.1, 6.7 and 7 | `d2fb0dd5` V1#8 fix (was `73b1311d`), `189b5c92` V1#8 fix (section 7, was `de00ebea`) |
+| The ship order: V4#19's dependency | The declaration of `@paper-design/shaders` and its lockfile hunk moved to the first commit after V4#19's README, so V4#19's group declares what its shader chunk imports | `f2d513e9` V4#19 seam (was `47160fda`) |
+| Found by building V4#19's group alone | `home.hero.run`'s touch case (a V1#15 fix in V4#19's group) reads `tsHomeMotion.stopped()`, which V4#20's commit added: on the first rewrite's V4#19 commit (`9a95db14`, unreferenced now) the row read "m.stopped is not a function" (09:49 to 09:54). The two probe accessors (`stopped()`, `visible()`) are split from V4#20's commit into a V4#19 seam | `62b9fb5b` V4#19 seam (from `69469bcf`) |
+| The ship order: one more split | `4c97e47d` (V1#15 fix, the touch tap) carried a build/v1.md hunk written under V4#20's paragraph; its code ships with V4#19's group and the v1.md hunk is a commit of its own in V4#20's group | `d17254dc`, `983fc8a3` |
+| This note | build/integrator.md "Landing, ship order" and the pictures under `build/integrator/fix3/` | this note's commit |
+
+### 2. The push list (the ship order)
+
+`07e2811b..189b5c92` on `landing/redesign`, by push, each push's commits in history order. "Ships at" is the push's last commit before the next push's first, the commit the guard deploys for it (LANDING.md 6.6 item 4). Nothing up to `133b81f6` (V4#19's README) was rewritten: pushes V1#8 to V4#18 keep the commits and the ship commits of the merge note's section 2, the trees their lanes built and read. Every commit after `133b81f6` was placed again (section 3): first V4#19's group, which holds V4#19's dependency, the probe seam and every seam and fix that serves a push up to V4#19, then V4#20's group. A seam or fix of pushes V1#8 to V4#18 cannot join its own push's commits without rewriting the thirteen trees before it, so it sits in V4#19's group, the first group after them, and ships with V4#19 at the latest; none waits behind V4#20's presence gate. If the presence rows are red when V4#20's turn comes (6.8, question 13), the ship ends at `44e735e5` with every fix of pushes V1#8 to V4#19 shipped.
+
+| Push | Commits | Ships at |
+| --- | --- | --- |
+| the specification | `e3708837` V0, `dbe5405a` V0 fix | with V1#8 |
+| `V1#8` | `172b3bda` V2's hunk, `bc3d1242` V2's hunk 2, `c0c5ddc0` V3's hunk, `54b07b88` V4's hunk, `1f406d25` V1, `a7672dca` README, `11df4c10` V2's hunk 3 | `11df4c10` |
+| `V4#9` | `5ee64cf2` the CORS line, `8ec0ad23` V1's hunk, `c48f8198` V4, `79001704` README, `89e28076` fix | `89e28076` |
+| `V2#10` | `a6042ce6` | `a6042ce6` |
+| `V2#11` | `e05c78f4` V1's line, `1beea439` V2, `dce46267` README | `dce46267` |
+| `V2#12` | `5d4293dc` V1's line, `fb712451` V2, `56acc6a2` README | `56acc6a2` |
+| `V3#13` | `1804d0b8` V1's hunk, `02b67cb7` V3, `5ae47130` README | `5ae47130` |
+| `V2#14` | `af334525` V2, `eea3c570` README, `6e6004f3` the V2#11 fix, `d154d8b8` V2 seam | `d154d8b8` |
+| `V1#15` | `a8dfb2fc` V1, `47cc9e39` README | `47cc9e39` |
+| `V3#16` | `56897de0` | `56897de0` |
+| `V3#17` | `178ea588` V1's line, `3c431b3e` V3, `11e20a4d` README, `89f9e459` V3 seam | `89f9e459` |
+| `V4#18` | `ac44ef60` V1's line, `35012ebe` V4, `70fe3545` README | `70fe3545` |
+| `V4#19` | `d8662fca` V1's line, `64546416` V4, `133b81f6` README, then the 32 commits of 2.1 | `44e735e5` |
+| `V4#20` | the 15 commits of 2.2, then this note's commit | held until 2.10's six presence rows read green on production (6.8, question 13); then this note's commit |
+
+#### 2.1 V4#19's group after its README
+
+"Serves" is the push the commit's key names (a lane note serves its lane). The first two are the integrator's and this round's seams for V4#19 itself; the order after them is the history's.
+
+| # | Commit | Was | Serves | Subject |
+| --: | --- | --- | --- | --- |
+| 1 | `f2d513e9` | `47160fda` | V4#19 | apps/studio depends on @paper-design/shaders, so a clean install resolves the pattern's shader chunk |
+| 2 | `62b9fb5b` | `69469bcf (first piece)` | V4#19 | tsHomeMotion names the loops stopped for good and each loop's share in view |
+| 3 | `b289f6dd` | `7abbd47e` | V4#18 | the motion rows read the page's main thread, not the runner's trace or V8's memory reducer |
+| 4 | `ebb03484` | `3b85fbc7` | V3#16 | the copy keys PRESENT.skipped and HISTORY.restoredVersion land, and their readers drop the fallbacks |
+| 5 | `656fc7ff` | `17da98d1` | V3#13 | LANDING.md 2.2 and 2.9 name the build's version save before the run and the turn chip's layout/freeform finding |
+| 6 | `2047922d` | `fdc961c8` | V1#8 | the export seam's handle moves by a transform, so E1 and a drag shift no layout |
+| 7 | `50b60a26` | `8b631835` | V3#17 | V3's files formatted with the repository's Prettier, so check step 19 reads the build clean |
+| 8 | `084d619e` | `c699900b` | V4#18 | the interludes' glyphs travel in a chunk of their own, so the live core stays within 4.1's 20 KB gzip |
+| 9 | `370d9da9` | `af9febac` | V2#10 | home.hero.edit reads the move curve with its zeros written, so the build's minified token passes |
+| 10 | `1077f0e4` | `491bab1d` | V2#11 | the miniature draws no side rules under 720 px, where the column's rails are its sides |
+| 11 | `15c17bc5` | `b44a6d6f` | V4#19 | home.patterns.pair presses Globex once the kits band's chunk has filled its box |
+| 12 | `de135861` | `32520fc3` | V1#8 | decks.home.load-budget reads the pictures and long frames before the first scroll in a process the runner does not trace |
+| 13 | `a8aa72ee` | `191476a6` | V1#8 | LANDING.md 4.2 reads with 4.1 on pictures before the first scroll, and 7 puts the document, the own script and the load row's long frame to Kevin as questions 21 to 23 |
+| 14 | `cf068042` | `e9509f6f` | V1#15 | the hero frame's filmstrip draws the deck's order, a slide the deck does not hold hidden |
+| 15 | `d17254dc` | `4c97e47d (first piece)` | V1#15 | a scroll on a touch phone leaves the hero's loop playing, and a tap stops it |
+| 16 | `63d72fbc` | `5db85768` | V1#8 | the lighthouse's plate sits lower left under 720 px, so the tower shows at 390 |
+| 17 | `9e6a82a4` | `c218504e` | V1#15 | one pseudo element draws the step tab's rule, so the chrome lint reads one owner |
+| 18 | `4c1ca9e1` | `d2df00fb` | V2#10 | typing in a box that runs past the slide's edge no longer scrolls the slide inside the hero frame |
+| 19 | `0eed1a5c` | `ed3c2351` | V2#11 | a submenu that leads to a row the page runs reads in ink |
+| 20 | `4774c650` | `61c98a95` | V2#14 | Restore This Version and a typed version restore bring back recorded versions 2 and 3 on every slide 5 |
+| 21 | `9c892eef` | `f1393b00` | V2 seam | build/v2.md's fix round of verifier pass 1: F1, F6 and F10, the requests R26 to R28, the rows and the pictures |
+| 22 | `3d1feb51` | `13f5486e` | V3#16 | Print This Deck prints slide 8's still frame and loads every picture it prints first |
+| 23 | `290f8c92` | `6e345953` | V3#16 | under 1,024 px the show covers the screen, centred, with its bar in the 16 px gutter |
+| 24 | `eef7528c` | `a0be34b9` | V4#19 | the patterns band draws both sides on the screen's pixels, so the still frame no longer reads as a moire grid |
+| 25 | `14631355` | `ea57d690` | V1#15 | a restore of version 2 or 3 stops the hero's loop for good, as a restore of version 1 does |
+| 26 | `700c2b5b` | `f00fe0d6` | V3#16 | the show, the print and the Present list draw slide 5 as a restore of version 2 or 3 left it |
+| 27 | `cf98583e` | `a6eccdac` | V2#14 | check.mjs's INNER_HTML_ALLOW comment for versions.ts names the runs it now writes |
+| 28 | `25e74f62` | `4964bf2e` | V4#19 | the pattern's still frame is requested once, and the band prints it in the slide's ink and paper |
+| 29 | `52500369` | `db3aa8f8` | V3#16 | under a kit, slide 8 prints, shows and edits in the kit's colours through the frame's dots |
+| 30 | `93c44574` | `37b8ef37` | V1#15 | any stop of the hero's loop lands the frame at rest, in the deck's order with its own counters |
+| 31 | `d2fb0dd5` | `73b1311d` | V1#8 | the document's line rises to 100 KB decoded and the page's own script's to 360 KB and 120 KB gzip |
+| 32 | `44e735e5` | `ad008c6e` | V3#16 | the comments on slide 8's mask say who requests it, at 100 columns |
+
+#### 2.2 V4#20's group
+
+The two people band and everything that needs it: V4#20's commits and seams, and the notes whose text follows V4#20's paragraphs (the lane notes' closing states after V4#20 and their fix round sections, the integrator's merge and fix round notes, LANDING.md 7's answers, which follow the fix round note's edit of question 22).
+
+| # | Commit | Was | Serves | Subject |
+| --: | --- | --- | --- | --- |
+| 1 | `8ab8badc` | `e33fa9cf` | V4#20 | V1's line: the two people band on the page after the agents band, with its interlude |
+| 2 | `464bdd17` | `0fe63aa0` | V1 seam | v1.md's closing state after V4#20: V1's commits, the readings that go to Kevin and the open requests |
+| 3 | `983fc8a3` | `4c97e47d (second piece)` | V1#15 | build/v1.md asks V4 for the two people band's half of verifier pass 1 finding 2 |
+| 4 | `4388bd56` | `69469bcf (second piece)` | V4#20 | two people edit the same slide: Maya's and Sam's screens play B's staged loop with ink presence marks, and a visitor types as either person |
+| 5 | `578956ab` | `8274881e` | V4#20 | "What works today" reads the matrix with V4#20's two people rows |
+| 6 | `6fdda010` | `c4dd5816` | V4 seam | v4.md's closing state after V4#20: V4's commits, the open requests and the readings for Kevin |
+| 7 | `ef392cf1` | `44858636` | V4#20 | people-timing.ts leaves live/, so the route imports no live module and the bare print page hydrates |
+| 8 | `3f291d15` | `36a2108f` | V4#20 | decks.home.capture-plain leaves out the two people band's presence marks, which 2.10 draws at rest |
+| 9 | `b3b7e23f` | `5e08fe48` | V4#20 | the two people screens draw no side rules under 720 px, where the column's rails are their sides |
+| 10 | `865ae528` | `d6f02a18` | V4#20 | build/integrator.md "Landing second pass, merge": the requests answered, the ship order, the chain, the runs and ledgers, the preview, the findings by owner |
+| 11 | `5818fdfb` | `b7e74736` | V1#15 | build/v1.md's fix round after verifier pass 1: the four findings, their readings and the request to V4 |
+| 12 | `10727c00` | `d97fdc70` | V4#20 | Home and End move the caret in a people screen, and a touch scroll no longer stops the loop |
+| 13 | `8b62df11` | `793c0bd8` | V4 fix | build/v4.md's fix round 1: F9, F7 and F5's people half, their causes, readings, rows and pictures |
+| 14 | `244dc4fb` | `d2a74cd2` | V1#8 | build/integrator.md "Landing second pass, fix round", and LANDING.md 7 question 22 reads the own script after the fix round |
+| 15 | `189b5c92` | `de00ebea` | V1#8 | LANDING.md 7 answers questions 21 to 23 as the orchestrator decided them for Kevin's picks |
+
+#### 2.3 The integrator's seams, by the push they serve
+
+The merge note's thirteen seams and this round's two, each placed with the push it serves: in its push's group for V4#19 and V4#20, and in V4#19's group for the pushes before it (above).
+
+| Serves | Seam | Was | Ships with | What |
+| --- | --- | --- | --- | --- |
+| V1#8 | `2047922d` | `fdc961c8` | V4#19 (its group) | the export seam's handle moves by a transform, so E1 and a drag shift no layout |
+| V2#10 | `370d9da9` | `af9febac` | V4#19 (its group) | home.hero.edit reads the move curve with its zeros written, so the build's minified token passes |
+| V2#11 | `1077f0e4` | `491bab1d` | V4#19 (its group) | the miniature draws no side rules under 720 px, where the column's rails are its sides |
+| V3#13 | `656fc7ff` | `17da98d1` | V4#19 (its group) | LANDING.md 2.2 and 2.9 name the build's version save before the run and the turn chip's layout/freeform finding |
+| V3#16 | `ebb03484` | `3b85fbc7` | V4#19 (its group) | the copy keys PRESENT.skipped and HISTORY.restoredVersion land, and their readers drop the fallbacks |
+| V3#17 | `50b60a26` | `8b631835` | V4#19 (its group) | V3's files formatted with the repository's Prettier, so check step 19 reads the build clean |
+| V4#18 | `084d619e` | `c699900b` | V4#19 (its group) | the interludes' glyphs travel in a chunk of their own, so the live core stays within 4.1's 20 KB gzip |
+| V4#19 | `f2d513e9` | `47160fda` | V4#19 (its group) | apps/studio depends on @paper-design/shaders, so a clean install resolves the pattern's shader chunk |
+| V4#19 | `15c17bc5` | `b44a6d6f` | V4#19 (its group) | home.patterns.pair presses Globex once the kits band's chunk has filled its box |
+| V4#19 | `62b9fb5b` | `69469bcf (first piece)` | V4#19 (its group) | tsHomeMotion names the loops stopped for good and each loop's share in view |
+| V4#20 | `ef392cf1` | `44858636` | V4#20 (its group) | people-timing.ts leaves live/, so the route imports no live module and the bare print page hydrates |
+| V4#20 | `3f291d15` | `36a2108f` | V4#20 (its group) | decks.home.capture-plain leaves out the two people band's presence marks, which 2.10 draws at rest |
+| V4#20 | `b3b7e23f` | `5e08fe48` | V4#20 (its group) | the two people screens draw no side rules under 720 px, where the column's rails are their sides |
+| V4#20 | `865ae528` | `d6f02a18` | V4#20 (its group) | build/integrator.md "Landing second pass, merge": the requests answered, the ship order, the chain, the runs and ledgers, the preview, the findings by owner |
+
+### 3. How the history was rewritten
+
+- By plumbing, with no checkout (`.turboslide/fix3/rewrite2.py`): each commit after `133b81f6` was applied as a cherry-pick (`git merge-tree --write-tree --merge-base=<its parent> <new tip> <commit>`) and written by `git commit-tree` with its own message, author and author date; the committer is Kevin Liu with the time of the rewrite. Every commit applied with no conflict. Two commits are split by path (`4c97e47d` and `69469bcf`, above); each piece's message says so, and the pieces' content is the original's.
+- `landing/redesign` moved by `git update-ref` from `ad008c6e` (the last commit before the rewrite) to `6cb0f4d3` at 09:47 (the first rewrite, without the probe seam) and to `189b5c92` at 09:55. The final tree is `e5071705` before and after, so the working tree never changed; `git diff ad008c6e 189b5c92` is empty. No other branch or worktree holds any of these commits (only `landing/redesign` contains `133b81f6`), and nothing was pushed. The commits before the rewrite stay in the reflog (`git reflog landing/redesign`); `git branch <name> ad008c6e` brings them back.
+- The notes written before the rewrite (`v1.md` to `v4.md`, `verification.md`, this file's merge and fix round sections, some commit bodies) cite the commits after `133b81f6` by their old hashes. The "Was" columns of 2.1 and 2.2 map each to its commit on the branch; the notes are not edited.
+
+### 4. Every push builds on its own
+
+- **The declarations.** For each push's ship commit (`11df4c10`, `89e28076`, `a6042ce6`, `dce46267`, `56acc6a2`, `5ae47130`, `d154d8b8`, `47cc9e39`, `56897de0`, `89f9e459`, `70fe3545`, the old V4#19 commit `133b81f6` and the new `44e735e5`), the package names imported under `apps/studio/src` against `apps/studio/package.json` (`.turboslide/fix3/declared.py`): every commit reads the same standing set, the root dev dependencies of a few test files and some false matches in SQL strings; `133b81f6` alone adds `@paper-design/shaders` undeclared, and `44e735e5` declares it. `pnpm-lock.yaml`, `package.json`, `pnpm-workspace.yaml` and `apps/studio/package.json` at `44e735e5` are the branch head's, which check step 1 (`pnpm install --frozen-lockfile`) accepted at 20:15 on 2026-10-03 and the preview's build accepted at 21:35.
+- **V4#19's ship commit, built alone.** `44e735e5` checked out detached in this worktree at 09:56 (load 47): `node_modules/.bin/tsc -b` exit 0; the home vitest files 13 of 13 (87 tests); `core-matrix.test.mjs` 37 of 37; `what-works.mjs --check` current; `build-home-assets.ts --check` 34 outputs match their sources; Prettier clean on every file the group changes; check step 30 ok (the Vercel build, 40 of 40 output assertions, the shader's `dithering` chunk 7.30 kB gzip); the node-server build exit 0. Its `/home` renders the twelve bands without the two people band, the document 93,606 B.
+- **Its rows.** On V4#19's node-server build served on 4557, the 66 home rows of its own matrix at 09:58 to 10:12 (load 48 to 80): 57 passed, 2 failed, 7 not driven ("not read: load", their functional checks passed). Read again at 10:25 to 10:27 (load 6.3 to 8.9) from `44e735e5`'s own drivers against a copy of its build served on 4547: `home.motion.in-view` passed (C1 2,404.8 ms, E1 1,095.8 ms) and `home.interludes.glyphs` passed (ten interludes, the people band's not yet on the page; holds of 5,607.5 ms at 1440 and 5,649.8 ms at 390); at 09:58 to 10:12 the first read a 60 s timeout on the export band's chunk and the second a hold cut by the window, both at loads of 56 to 80. Its other timed rows were not read at a load under 20: a run of them waited for a load under 15 from 10:43 to 10:53 while other checkouts' jobs held 23 to 54, and was stopped.
+- **The first attempt.** The first rewrite's V4#19 commit `9a95db14` built and read 10 of 11 narrowed rows at 09:49 to 09:54 (load 38 to 48); `home.hero.run` read "m.stopped is not a function" in its touch case, which the probe seam answers.
+
+### 5. Readings on the branch's tree
+
+The tree of `189b5c92` is the tree the rows below read (`e5071705`; every row ran before or after the rewrite on the same product code: the node-server build of 09:20 served on 4557 until 10:12, and the build of `189b5c92` at 10:13 from then).
+
+| Check | Reading |
+| --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0 at 09:19 and again on `44e735e5` at 09:56 |
+| The home vitest files (`apps/studio`, `vitest run src/components/home`) | 13 files, 87 of 87 (09:20) |
+| `node scripts/build-home-assets.ts --check` | exit 0: 34 outputs match their sources, 10 slide instances, 2,356 B of inlined stills, 17 served files (the mask is the seventeenth) |
+| The brand lint, enforce (`node packages/lint/src/brand/main.ts --enforce`) | exit 1 on the same 22 findings in 17 files as the verifier's pass 2 (16 `gt-ui/cta-title-case`, 3 `css/mono-outside-code`, 2 `css/no-eyebrow`, 1 `gt-ui/no-smooth-scroll`), none under `/home` (09:35) |
+| `scripts/probes/core-matrix.test.mjs`, `what-works.mjs --check`, Prettier on the changed files | 37 of 37; current; clean |
+
+**Every home row on the node-server build.** `core-gate.mjs --only specs --rows <the 68 home.* and decks.home.* ids> --tier memory` against 4557, 09:31:44 to 09:46:19 (ledger `landing-fix3-local-home.json` in the scratchpad), load 15.5 at the start and 43 at the end as other checkouts' jobs began: 56 passed, 1 failed, 11 not driven. `home.lead.visit` failed once on visit 3 ("first paint at null ms": the paint entry was not recorded) and passed at 10:15 (load 34: the visit sentences set at 104.4, 60.6 and 40.8 ms before first paints at 120, 80 and 60 ms). The 11 not driven are the rows that read no time above their load line and say so (`home.motion.in-view`, `rest`, `pause`, `develop`, `home.interludes.glyphs`, `home.motion.loops`, `offscreen`, `home.budget.frame`, `main-thread`, `home.people.loop`, `type`; loads 26 to 46), each with its functional checks passed. The 56 passed include `home.hero.run` (cycles 18,788, 18,792 and 18,791 ms; the cut back "1 / 9" on its own counter; the three stops in the staged Restore at rest), `home.patterns.pair` (the shader chunk 7,283 B gzip; the right side's print in the slide's two colours under GT and Globex's after the press), `home.present.print`, `home.present.show` (its Escape bound read later, below), `decks.home.layout-shift` (CLS 0.0000 at 1440, 1280 and 390 in both appearances) and `decks.home.pictures-three-widths` (13,053 px at 1440).
+
+**The timed rows at a load under 20.** `core-gate.mjs --only specs` over the twenty timed and byte rows (the seven `home.budget.*` rows and `decks.home.load-budget`, the motion and interlude rows, the two people rows, `home.hero.run` and `home.present.show`), 10:17:01 to 10:25:41 at loads 16.2 falling to 8.6 (ledger `landing-fix3-local-timed.json` in the scratchpad): **20 passed**. `home.budget.lcp` cold 128, 168 and 128 ms and warm 72, 76 and 64 ms on the h1 at 1440 ×1, ×2 and 390 (lines 400 and 200, load 16.2 to 16.4); `decks.home.load-budget` (measure) first byte 4 ms, LCP 100 ms, ready 199 ms, 0 pictures before the first scroll read cold, 0 long frames over 100 ms, 58,619 B after a full scroll; `home.budget.frame` the longest frame callback 0.4 ms at 1x and 1.5 ms at 4x, a band entering 1.3 and 3.3 ms (load 10.7 and 8.8); `home.budget.main-thread` the boot script 954 B, 2.3 ms of script before LCP, the longest script task 5.6 ms (8.6); `home.hero.run` L-H 7 ms after it registered, cycles 18,798, 18,785 and 18,794 ms, the cut back "1 / 9" on its own counter, the press, key and tap in the staged Restore at rest; `home.motion.develop` 1,509, 1,504.9 and 1,500.5 ms; `home.motion.in-view` C1 2,403.2 ms and E1 1,098.4 ms; `home.motion.pause` and `rest` 0 frame callbacks and 0 ms of task at the top, middle and bottom; `home.interludes.glyphs` eleven interludes, holds of 5,626.2 and 5,618.9 ms; `home.motion.loops` fourteen loops, each paused 2.5 to 18.1 ms after leaving the view; `home.motion.offscreen` 0 frames, 0 timers, 0 ms of task; `home.people.loop` a cycle of 14,000 ms, Sam's key gaps 81 to 326 ms, a 297 px touch scroll from Maya's screen; `home.people.type` 122 ms; `home.present.show` Present 520 ms and Escape 417 ms against 417 at load 21.7 (N7: 419.7 ms at 20.5 in the narrowed run of 09:23, 416 ms at 34.7 in a rerun at 10:15).
+
+**Every home row again, at the lower load.** The 68 rows at 10:27:12 to 10:42:17 (load 6.7 at the start, with spikes to 52 from other checkouts; ledger `landing-fix3-local-home-2.json`): **65 passed, 0 failed, 3 not driven** at the spikes (`home.budget.main-thread` at 51.9, `home.interludes.glyphs` at 24.6, `home.motion.loops` at 20.7, their functional checks passed), each of which passed in the timed run above. The interaction bounds it read: `home.agents.chips` 2,954 to 4,062 ms from a press to the flag leaving (line 5,000) and rings of 291 to 696 ms (line 700) at 15.1 to 18.8; `home.menus.rows` Insert > Text box 70 ms and Arrange > Rotate clockwise 79 ms (line 300) at 18.5; `home.kits.restyle` Kestrel on every slide 52 ms at 17.9; `home.present.show` Present 518 ms and Escape 415 ms at 12.2; `home.export.loupe` 0 of 196 pixels at two places in light, 0 and 1 of 196 in dark. So every `home.*` and `decks.home.*` row has passed on the branch's tree on the node-server build, the timed ones at a load under 20.
+
+### 6. The budgets
+
+The orchestrator's decision on LANDING.md 7 questions 21 to 23, for Kevin's picks (all seventeen elements of directions A, B and C, B's first screen and looping motion, and much more interaction than the first pass's lines counted): `home.budget.bytes-first` gates the document at 100,000 B decoded (20,000 brotli unchanged); `home.budget.bytes-page` gates the page's own script at 360,000 B decoded and 120,000 B gzip; 80,000, 300,000 and 90,000 stay in LANDING.md 4.1 as Round 2's goals after its entry chunk split and Inter subset; `decks.home.load-budget` stays a measure row, its long animation frame on a deployment reported against `docs/POLISH.md` 3.7's line. The reason is written beside the lines in `page.ts`, in the two rows' interactions and notes in `core-matrix.json`, in LANDING.md 4.1 (a paragraph after the table) and 6.7, and in 7's answers.
+
+Readings on the node-server build (`home.budget.bytes-first` and `bytes-page` read bytes, which do not move with load): the document 95,311 B decoded (line 100,000) and 18,534 to 18,543 B brotli; the route chunk 53,284 B decoded and 13,536 B brotli; the page CSS 15,129 B brotli; own first screen bytes about 47,200 B; 0 pictures before `load`; the page's own script after a full scroll 345,230 B decoded and 115,515 B gzip (lines 360,000 and 120,000) at 1440 ×1 and ×2; 6 pictures, 57,133 B; nothing under `/home/` requested twice; own bytes over the wire about 177,900 B. `home.budget.live-module`: the core with its imports 57,956 B decoded and **20,469 B gzip, 11 B under its 20,480 line** (the verifier's pass 2 read 20,395 B; this round adds to the core the mask's entry in `assets.ts` and `paint.ts`'s lines that give the miniature's slide 8 its mask); every band chunk under its lines (the largest, `menus`, 48,202 B and 15,903 B gzip). Read again at 10:17 (load 16.2 to 17): `home.budget.bytes-first` and `bytes-page` passed with the same bytes (the document 95,311 B decoded and 18,505 to 18,548 B brotli; the own script 345,230 B decoded and 115,515 B gzip); `home.budget.live-module` the core 57,956 B decoded and 20,414 B gzip (the row concatenates the core's three files in the order the page requested them, and that order moves the gzip by up to 55 B: 11 to 66 B of room); `home.budget.shared` the entry chunk 1,183,913 B decoded and one font of 352,240 B, reported.
+
+### 7. Pictures
+
+`build/integrator/fix3/`, 11 JPEGs, each under 200,000 B, shot on the node-server build of the branch's tree on 4557 at 10:14 (motion paused where the still frame is the subject), each looked at:
+
+- `n2-stop-press-light-1440.jpg`, `n2-stop-key-dark-1440.jpg`, `n2-stop-tap-light-390.jpg`: the hero's stage after a mouse press, a key and a tap during the staged Restore: the filmstrip 1 to 9 in the deck's order, slide 1 at "1 / 9", the transcript at rest.
+- `n3-print-globex-light-1440.jpg` (the nine printed pages under Globex, the PDF rasterized at 40 dpi; the dark appearance at 390 printed the same pixels) and `n3-print-page8-globex-light-1440.jpg` (page 8 at 100 dpi): slide 8's sphere in cream on navy among eight navy pages.
+- `n3-show8-globex-light-1440.jpg`, `n3-show8-globex-dark-390.jpg`: the show's slide 8 still under Globex.
+- `n3-patterns-globex-light-1440.jpg`, `n3-patterns-globex-dark-390.jpg`: the patterns band under Globex, both sides in the kit's colours.
+- `n3-mini8-before-light-1440.jpg` (the miniature's slide 8 with the old still: a box of ink) and `n3-mini8-globex-light-1440.jpg` (with the mask under Globex).
+
+### 8. What stands
+
+- **For Kevin.** The live core is 11 to 66 B under its 20 KB gzip line (by the order the row reads its three files in); the next line in the core (`live`, `paint`, `motion`) pushes `home.budget.live-module` red. V2's offer (the kit painter out of the core into the kits chunk through `registerPainter`, merge note 5) is the way to make room. V4#20 stays held until 2.10's six presence rows read green on production (6.8, question 13). `home.present.show`'s Escape bound (417 ms) read 416 to 419.7 ms on this round's builds at loads 20.5 to 34.7 and passed at 417 ms at 21.7 (N7, standing).
+- **Not in this round's ask, standing from the verifier's pass 2:** N4 (the menus band's lead on the miniature, `editing.css`), N5 (the show's slide moves 11 px at 390 as the notes change, `agents.css`), N6 (a turned title's ring past the frame, `objects.ts`, `selection.css`), N7 (`home.present.show`'s Escape bound of 417 ms has 1 to 3 ms of margin), N8 (the thumbnails' coarse cells), F15 to F22.
+- **For the ship.** No preview was deployed in this round: the integrator's preview (`8b631835`) predates every fix since the merge, so the hosted rows of LANDING.md 6.6 item 3 (the byte rows with their new lines, `home.patterns.pair`, `decks.home.load-budget`'s long frame as a measure) are read by the ship on the preview of each push's commit, V4#19's at `44e735e5`.
+- **The notes' hashes.** The lane notes and the earlier sections of this file cite the old hashes after `133b81f6`; 2.1 and 2.2 map them.
+
+### 9. At the close
+
+- My node server on 4557 and the copy of V4#19's build on 4547 are stopped by their PIDs; the dev server on 4547 was stopped at 09:46; no browser of mine runs; `.turboslide/e2e.lock` and `.turboslide/git.lock` are free.
+- `landing/redesign` is at this note's commit, after `189b5c92`; the worktree is on it with no tracked change. `apps/studio/.output` and `apps/studio/.vercel/output` (ignored) hold builds of the branch's tree (check step 30 ran on it again at 10:54: 40 of 40 output assertions).
+- Left untracked and ignored: `.turboslide/fix3/` (the probes, the rewrite scripts), `.turboslide/fix3-overlay*/`, `.turboslide/fix3-auth*.sqlite`. The untracked files found at the start are left as found. The ledgers, logs, raw pictures, the PDFs and the rewrite's maps are in the session scratchpad.
+- Nothing was pushed or deployed; no other worktree, port or branch was touched.

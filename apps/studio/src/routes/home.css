@@ -1636,28 +1636,46 @@ html:has(.ts-product) {
   height: 100%;
 }
 
+/* the handle moves by a transform, never by `left`, so E1's travel and a drag shift no layout
+   (CLS 0, home.page.bands-after-load): it is as wide as the slide and starts at its left edge, so a
+   translate of `--seam-cut` (a percentage of its own width) puts its left edge on the cut. It takes
+   no pointer of its own but the knob's, so the Editable text boxes under it stay selectable; the
+   box is `overflow: hidden`, so the part past the slide adds no scroll width. The 1 px ink line is
+   its `::after` at that edge. */
 .ts-seam-handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: var(--seam-cut, 50%);
-  width: 1px;
-  margin-left: -0.5px;
-  background: var(--pt-ink);
+  left: 0;
+  width: 100%;
+  transform: translateX(var(--seam-cut, 50%));
+  pointer-events: none;
   cursor: ew-resize;
   touch-action: none;
+}
+
+.ts-seam-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.5px;
+  width: 1px;
+  background: var(--pt-ink);
 }
 
 /* the knob: a paper square in a 1 px ink line (LANDING.md 2.8), drawn as an ink square under a
    paper one, so the chrome lint (check step 18) reads no ink border on a control at rest */
 .ts-seam-knob {
   position: absolute;
+  z-index: 1;
   left: -12px;
   top: calc(50% - 12px);
   width: 24px;
   height: 24px;
   box-sizing: border-box;
   background: var(--pt-ink);
+  pointer-events: auto;
 }
 
 .ts-seam-knob::before {

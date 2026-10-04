@@ -97,3 +97,47 @@ On `next/round1`, in this order, each staged by an explicit path list under `.tu
 3. H4 (the commit that carries this list): the sign in dialog draws no passkey row until the deployment offers passkeys, and the roadmap sentence leaves the product
 
 The dev server on 4501 was stopped after the last commit; port 4511 was not used.
+
+## Round 1 fix round
+
+Written by HA as Round 1's fixer on 2026-10-04 (times in UTC). The finding is VERIFICATION.md "Round 1, pass 1" finding 2: `slides.import.none-preselected` reads red since H2. The work is one driver change, two readings of the row and a diagnosis of the "landed 0" case. Evidence is under `round1/build/ha/`.
+
+### The product question stays open
+
+Kevin's question (VERIFICATION.md V.10 question 1) asks whether the Import slides picker should offer the deployment's example deck to every browser. This fix does not answer it, and the picker stays as H2 made it. An anonymous browser's picker lists this browser's Recent record, and the store adds nothing to it. A signed in person's picker lists their own and shared decks. That is NEXT.md 3.2 H2 under question 8's default ("Yes"). Google Slides' Import slides dialog also lists only the files in the person's Drive. The GT template is still offered as a template on `/decks`. If Kevin answers yes, the change goes in `apps/studio/src/server/decks.ts` `listDecks`, which would add the example deck's head for every caller, and the row's driver would keep its copy path for stores that refuse the example deck.
+
+### The driver
+
+`scripts/probes/core-walk/areas/slides.mjs`, the row's driver. After `deck.create` makes the copy of the brand deck, the walk opens the copy once in this browser with `t.reloadTo` and waits for its editor. Then it opens its own deck again. The editor records an open in the Recent record when it mounts. The old driver went back as soon as the tab's address changed, before that mount, so the copy was never in the record and the picker never offered it (the verifier's preview reading). `decks.file.import-slides-deck` got the same step in `df4f8ede`. The observation now names three more facts: whether the Recent record holds the copy, the time from the click on Import to the slides in the deck, and, when the slides do not land, what the dialog shows (open with or without its alert, or closed). The 30 s bound on the landing is unchanged.
+
+### Readings
+
+| Run | Base | When, load | Ledger | Reading |
+| --- | --- | --- | --- | --- |
+| The slides walk area, `core-gate.mjs --tier memory --only probe --areas slides` | HA's vite dev server on 4501, tmp store | 09:03:20Z to 09:09:07Z, 15.16 to 11.18 | `ha/fix-dev-slides-core-gate.json` | 83 rows: 83 passed. The row: "list settled after 1209 ms, the copy in this browser's Recent record, the copy offered after 1430 ms; 85 tiles; preselected 0; after three clicks 3, button "Import 3 slides"; after the Shift click 8 (8 expected); after None 0; landed 3 12598 ms after Import; the copy answers 404" |
+| The slides walk area, `--tier blob --only probe --areas slides`, OIDC header through `~/.config/turboslide/with-tokens.mjs` | the integrator's preview `turboslide-lp2z0cdl8` (`c17fd8bf`) | 09:09:44Z to 09:16:27Z, 9.97 to 11.70 | `ha/fix-preview-slides-core-gate.json` | 83 rows: 82 passed, 1 failed, this row. The copy is now in the Recent record and the picker offered it (15,911 ms, most of it the driver's `deck.list` wait). There were 95 tiles and every selection reading was right. Then "landed 0 30535 ms after Import, the dialog open with the alert "Vercel Blob: Too many requests please lower the number of concurrent requests - try again in 60 seconds."" |
+| The import diagnostic (`ha/fix-import-diagnostic.json`), four runs of one script: a fresh browser makes a Blank deck and a copy of the GT template, opens the copy once, picks three tiles and clicks Import | 4501, then the preview | 08:59:04Z to 09:17:57Z, 10.50 to 29.53 | `ha/fix-import-diagnostic.json` | below |
+
+### The "landed 0" case
+
+The cause differs by tier. Before H2 the walk imported from the seed deck `gt-brand`, whose tile pictures were already stored, so neither cause showed.
+
+- On a dev server: the dialog draws a fresh copy's tiles, and the browser asks for about 75 tile pictures at once. The local queue renders them one at a time, 2 to 3 s each. The server speaks HTTP/1.1, so the browser has six connections to it, and the import's request waits for one behind the visible tiles. Readings with the default priority: the slides landed 29.9 s after Import (08:59Z, load 19.85 to 29.53) and 21.2 s after it (09:01:42Z, 17.31 to 19.50). With `fetchPriority = 'low'` set on the tile pictures by an injected observer, they landed 1.5 s after Import (09:01:33Z, 16.78 to 17.31). The walk's own reading above was 12.6 s. The integrator's "landed 0" on vite dev (load 17.88 to 42.30) passed the 30 s bound this way.
+- On the preview (blob tier): with 95 cold tile pictures rendering, the import failed on the Blob store's concurrency refusal. With the tile pictures refused in the browser, the same import landed its 3 slides 3.0 s after Import (09:17:23Z, 12.29 to 10.50). I did not trace what each thumbnail function does with the store. The reading is only that the import succeeds with no tile pictures and fails while 95 cold ones are being made. NEXT.md 967 item 8 records the Blob store's limits. I did not rerun the failing case on the preview, because the preview shares its Blob store with `turboslide.vercel.app`, and each failing run refuses that store's requests for 60 s.
+
+The row therefore reads green on a dev server and red on a hosted tier, and the hosted red is a product defect: a person who imports from a fresh copy of the brand deck on a deployment gets the Blob alert. The row's feature is `slides`, which cannot be parked. It stays red on the preview until request 1 or request 2 lands.
+
+### Requests
+
+1. To the integrator, because `packages/chrome/src/dialogs/ImportSlides.tsx` has no Round 1 owner: give the tile `<img>` (line 348) `fetchPriority="low"`, so a write such as the import is never queued behind the pictures. Also have the dialog ask only for the tiles in or near its visible area, for example with an IntersectionObserver rooted at `.ts-dialog-slides` with a small margin, or with a limit of about six pictures in flight. Then a 95 slide source does not start 95 cold renders at once. The browser's own `loading="lazy"` margin covers most of the list inside the 640 px dialog.
+2. To Round 2's owner of the render route and the store (NEXT.md 4.2.2): a burst of cold thumbnails of one deck makes the Blob store refuse the other operations of the same store for 60 s. Bound the Blob concurrency of the thumbnail renders on each instance, or have a deck copied from a template start with the template's stored thumbnails.
+3. To Kevin (not a lane): V.10 question 1, above.
+
+### Checks
+
+- `node_modules/.bin/vitest run scripts/probes/core-walk.test.mjs scripts/probes/core-walk/toolkit.test.mjs`: 18 passed. `node --check` and prettier are clean on `slides.mjs`.
+- Every deck these runs made on the preview answered 404 at 09:18:40Z by id: the walk's `untitled-20261004-i4hi`, its import copies `import-source-20261004-i4hi` and `import-source-mutluofh`, and the diagnostic's `ha-import-target-mutlxptu` and `import-source-mutlxrhw`. Each was trashed and removed by its own driver through `deck.info`, `deck.trash` and `deck.remove`. The decks on 4501's tmp store were removed the same way.
+- The shared worktree: from about 09:02Z, uncommitted edits by another lane appeared in `deck-scope.ts`, `decks.ts`, `-recent.ts`, `decks.trash.tsx`, `decks.index.tsx`, the store package and the GT template's speed slides (finding 4 and B4's fix). The 4501 server runs without a watcher and had loaded the server modules at 08:59Z. Its readings are of the committed modules, except the template's slides, which a copy reads from disk (the walk's copy was made before their 09:09Z edit). This fix changes none of those files.
+- Finding 19 (the two H2 rows on a checkout's file store) was not in this round's list for HA and is not addressed here.
+
+The commit that carries this section is `H2 fix`. It stages `scripts/probes/core-walk/areas/slides.mjs`, this note and `round1/build/ha/` by path. The dev server on 4501 was stopped before the commit.

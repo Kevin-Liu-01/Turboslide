@@ -1971,6 +1971,8 @@ async function productRound(t) {
       let sourceName = 'the General Translation brand deck';
       /* a copy of the brand deck this principal makes when the brand deck is not listed for it or refuses the read */
       let importSource = null;
+      /* whether this browser's Recent record holds the copy after the copy's editor opened */
+      let recorded = null;
       let listMs = null;
       let offeredMs = null;
       let refused = null;
@@ -1982,6 +1984,9 @@ async function productRound(t) {
       let afterRange = null;
       let afterNone = null;
       let landed = [];
+      /* ms from the click on Import to the slides in the deck (or to the 30 s bound) */
+      let importMs = null;
+      let afterImport = null;
       let gone = null;
       let fault = null;
       /* TURBOSLIDE_WALK_IMPORT_COPY=1 skips the brand deck and drives the copy path on a store
@@ -2028,8 +2033,22 @@ async function productRound(t) {
             await page
               .waitForURL(new RegExp(`/edit/${id}`), { timeout: 15_000 })
               .catch(() => undefined);
-            await page.goto(`${BASE}/edit/${t.deck.id}`, { waitUntil: 'domcontentloaded' });
-            await t.editorReady();
+            /* the copy is opened once in this browser and its editor waited for, as a person who
+               made it opens it: since H2 (docs/NEXT.md 3.2) the picker offers an anonymous
+               visitor this browser's Recent record and no other deck of the store, and the editor
+               records an open when it mounts. The tab's move above can end before that mount,
+               and a walk that went back at once left the copy out of the record (the Round 1
+               verifier's preview reading, VERIFICATION.md "Round 1, pass 1" finding 2) */
+            await t.reloadTo(`${BASE}/edit/${id}`);
+            recorded = await page.evaluate((deckId) => {
+              try {
+                const raw = window.localStorage.getItem('turboslide:opened');
+                return raw !== null && Object.hasOwn(JSON.parse(raw), deckId);
+              } catch {
+                return false;
+              }
+            }, id);
+            await t.reloadTo(`${BASE}/edit/${t.deck.id}`);
             await t.settled();
             await t.clickCard(N ?? T);
             /* the listing first: deck.list through the page until it carries the copy (the store's
@@ -2106,12 +2125,26 @@ async function productRound(t) {
           await clickTile(0);
           await clickTile(1);
           await clickTile(2);
+          const clicked = Date.now();
           await t.clickControl('dialog.importSlides.ok');
           const order = await t.pollUntil(
             t.slideOrder,
             (o) => o.length === before.length + 3,
             30_000,
           );
+          importMs = Date.now() - clicked;
+          /* a miss names what the dialog showed: still open with or without its alert, or closed
+             (on a dev server the import's request waited behind the copy's tile pictures, about
+             2 s each, ha.md "Round 1 fix round") */
+          if (order.length !== before.length + 3)
+            afterImport = await page.evaluate(() => {
+              const dialog = document.querySelector('[data-control="dialog.importSlides"]');
+              if (dialog === null) return 'the dialog closed';
+              const alert = dialog.querySelector('.ts-dialog-error')?.textContent?.trim();
+              return alert
+                ? `the dialog open with the alert "${alert}"`
+                : 'the dialog open, no alert';
+            });
           await t.settled();
           landed = order.filter((x) => !before.includes(x));
         }
@@ -2183,7 +2216,14 @@ async function productRound(t) {
         if (cleanup.length > 0) fault = fault ?? `the cleanup failed: ${cleanup.join('; ')}`;
       }
       const copyWords = importSource === null ? '' : `; the copy answers ${gone}`;
-      const listWords = `list settled after ${listMs ?? 'n/a'} ms${offeredMs === null ? '' : `, the copy offered after ${offeredMs} ms`}`;
+      const listWords = `list settled after ${listMs ?? 'n/a'} ms${
+        recorded === null
+          ? ''
+          : `, the copy ${recorded ? 'in' : 'not in'} this browser's Recent record`
+      }${offeredMs === null ? '' : `, the copy offered after ${offeredMs} ms`}`;
+      const landedWords = `landed ${landed.length}${importMs === null ? '' : ` ${importMs} ms after Import`}${
+        afterImport === null ? '' : `, ${afterImport}`
+      }`;
       if (fault !== null)
         return {
           ok: false,
@@ -2199,7 +2239,7 @@ async function productRound(t) {
           afterNone === 0 &&
           landed.length === 3 &&
           (importSource === null || gone === 404),
-        observed: `source ${sourceName}; ${listWords}; ${total} tiles; preselected ${preselected}; after three clicks ${afterThree}, button "${label ?? 'none'}"; after the Shift click ${afterRange} (${expectedRange} expected); after None ${afterNone}; landed ${landed.length}${copyWords}`,
+        observed: `source ${sourceName}; ${listWords}; ${total} tiles; preselected ${preselected}; after three clicks ${afterThree}, button "${label ?? 'none'}"; after the Shift click ${afterRange} (${expectedRange} expected); after None ${afterNone}; ${landedWords}${copyWords}`,
       };
     },
   );

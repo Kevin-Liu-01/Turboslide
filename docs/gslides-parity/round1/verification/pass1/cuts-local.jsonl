@@ -1,0 +1,14 @@
+{"at":"2026-10-04T04:52:33.066Z","load":17.42,"created":"untitled-20261004-5bvn"}
+{"at":"2026-10-04T04:52:39.614Z","load":17.15,"cut":"notice","notices":["Edits on this copy of Turboslide are lost when it restarts."]}
+{"at":"2026-10-04T04:52:41.265Z","load":16.57,"cut":"home tooltip","tip":"Turboslide home Your presentations","label":"Turboslide home"}
+{"at":"2026-10-04T04:52:42.908Z","load":16.57,"cut":"own chip tooltip","tip":"You Your name and avatar; nothing else asks for an account","label":"Account"}
+{"at":"2026-10-04T04:52:47.768Z","load":16.77,"cut":"Insert > Image > Logo","dialog":["Logo"]}
+{"at":"2026-10-04T04:52:51.767Z","load":16.15,"cut":"Slide > Change theme","themeRows":["Change theme"],"head":["Theme","Appearance"]}
+{"at":"2026-10-04T04:52:58.161Z","load":15.33,"cut":"Text fitting from the right click menu","section":["Text fitting"],"formatHasTextFitting":false}
+{"at":"2026-10-04T04:53:01.809Z","load":15.07,"cut":"Tools > Preferences > Play animated patterns","sub":["On","In the show only (on)","Off"],"settingsKeys":["snapGuides","snapGrid","showRuler","showGuides","speakerNotes","filmstrip","spellcheck","viewing","compact","sections","appearance","sourceDrawer"]}
+{"at":"2026-10-04T04:53:10.217Z","load":14.66,"cut":"Tools > Preferences > Appearance > Dark","sub":["Light","Dark","Match the presentation"],"themeAfterDark":"dark"}
+{"at":"2026-10-04T04:53:13.929Z","load":14.21,"cut":"More formats > Turboslide file (.zip)","name":"untitled-20261004-5bvn.zip","ms":1071,"bytes":401037}
+{"at":"2026-10-04T04:53:17.657Z","load":13.87,"cut":"More formats > Web page (.html)","name":"untitled-20261004-5bvn.html","ms":1076,"bytes":577075}
+{"at":"2026-10-04T04:53:23.216Z","load":13.56,"cut":"Assist panel tailoring starter","starter":true,"dialog":["Tailor for a customer"]}
+{"at":"2026-10-04T04:53:24.968Z","load":13.56,"cut":"Help > Help Turboslide improve","opened":"https://github.com/login"}
+{"at":"2026-10-04T04:53:25.758Z","load":13.51,"teardown":"untitled-20261004-5bvn","editorAfter":404}

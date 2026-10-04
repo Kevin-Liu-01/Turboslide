@@ -1,0 +1,96 @@
+  ✘   1 apps/studio/e2e/accounts.spec.ts:252:1 › a share link from the address bar lands with no token in the address and a sealed identity cookie (5.5s)
+  ✘   2 apps/studio/e2e/accounts.spec.ts:279:1 › a cors fetch of a share link is 403, a dead link is the You need access page, a foreign origin lands (1.5s)
+  ✓   3 apps/studio/e2e/accounts.spec.ts:310:1 › sign in with the captured code links the anonymous id to the account; a stranger gets the same answer (2.5s)
+  ✓   4 apps/studio/e2e/accounts.spec.ts:351:1 › the device authorization flow: a code from the terminal, the /device page, the approval, the token (8.0s)
+  ✓   5 apps/studio/e2e/accounts.spec.ts:417:1 › a typed address opens /device (the CLI prints it): a top level navigation with Sec-Fetch-Site none is answered 200 (13ms)
+  ✓   6 apps/studio/e2e/accounts.spec.ts:432:1 › the avatar route serves a seeded picture with its headers and refuses a path outside the grammar (895ms)
+  ✘   7 apps/studio/e2e/accounts.spec.ts:453:3 › the chrome surfaces of section 7 (B6 days 3 to 6, B2 day 4) › the name prompt, the own chip menu, Forget this browser, the Picture tab sentence, the sessions list (1.0m)
+  ✓   8 apps/studio/e2e/accounts.spec.ts:1174:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.verified-badge: Local: A signs in with the captured code and names itself; B (an editor by email grant) reads on A's roster row, A's comment head, A's version row and, in A's own tab, the account head a 14 px check-badge after the name and the accessible word "signed in", with the tooltip "Signed in as <email>"; a guest row carries "guest" and no badge; an account without a typed name reads its label with the badge, never the address (20.8s)
+  ✘   9 apps/studio/e2e/accounts.spec.ts:1390:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.versions-author-account: Local: a record written before sign in and one written after: after a reload both read the account's name with no guest word and one mark (the alias), and A's own rows read "You" (19.4s)
+  -  10 apps/studio/e2e/accounts.spec.ts:1475:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.labels-disambiguated: Local, seeded: two principal records whose ids share a label, each with one version record on the deck; the version list and the roster (one of them present) read "<label>" and "<label> (2)" by first appearance, the tooltip carries the suffix, and the two chips' plates differ
+  ✘  11 apps/studio/e2e/accounts.spec.ts:1552:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › share.dialog.grant-email-line: Local: a grant by email to B; A (the owner) opens Share and the grant row prints B's email as a line under the name and carries no title; C, a viewer by link, opens the dialog and sees no email (18.2s)
+  ✓  12 apps/studio/e2e/accounts.spec.ts:1637:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-upload: Local, signed in: the builder's Picture tab takes a 1200 by 900 JPEG built by the seed, the crop box shows it, Apply closes the dialog, the own chip's <img src> matches /\/u\/[A-Za-z0-9_-]{22}\/[0-9a-f]{64}-64\.webp$/ with a srcset naming the 32 and 64 px files within 5 s, the Profile head reads the 128 px file, and B's chip for A draws the same URL within 10 s; the request's body was under 700 KB (8.3s)
+  ✓  13 apps/studio/e2e/accounts.spec.ts:1719:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-cap-refusal: Local, signed in: with toBlob stubbed to answer a 600 KB blob the dialog's error row reads the cap sentence and no account.setAvatar request leaves; a 600 KB WebP data URL through the window API answers the cap sentence from the server and writes nothing under u/ (17.8s)
+  ✓  14 apps/studio/e2e/accounts.spec.ts:1769:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-rotation: Local: a second upload answers a new key, the chip's URL changes within 5 s, and the first URL answers 404 on the checkout route within 5 s (2.6s)
+  ✓  15 apps/studio/e2e/accounts.spec.ts:1797:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-fallback-plate: Local: after the upload the key's folder under .turboslide/users/u/ is removed; after a reload the own chip draws the initials plate with no <img> and no empty box within 5 s (2.9s)
+  ✓  16 apps/studio/e2e/accounts.spec.ts:1860:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-link-visitor: Local: A signed in with a picture on a deck open to anyone with the link as editor, the owner's names switch off; C by link sees A's chip as the role initial ("E") on a plate that is not A's and no <img>, and the tooltip "An editor · slide 1"; with the switch on, A's name and picture (12.8s)
+  ✓  17 apps/studio/e2e/accounts.spec.ts:1960:3 › the people round: the local rows (docs/archive/rounds/PEOPLE.md 6.1, 6.2) › people.avatar-metadata-stripped: Local: the seed's orientation 6 JPEG uploaded; the served 256 px PNG and 64 px WebP carry no Exif bytes and the PNG's first row is the picture's left column (upright) (2.6s)
+  ✓  18 apps/studio/e2e/accounts.spec.ts:2116:3 › the realtime round: the Google sign in rows (docs/REALTIME.md 4.4) › accounts.google-button: Local: the Sign in dialog shows dialog.signIn.google above dialog.signIn.github and no passkey row while the deployment offers no passkeys; with the e2e mail mode capture the email field is present (2.3s)
+  ✓  19 apps/studio/e2e/accounts.spec.ts:2145:3 › the realtime round: the Google sign in rows (docs/REALTIME.md 4.4) › accounts.google-error-sentence: Local: /edit/<deck>?error=account_not_linked draws the dialog's failed sentence in the snackbar and the address loses the parameter (876ms)
+  ✓  20 apps/studio/e2e/accounts.spec.ts:2157:3 › the realtime round: the Google sign in rows (docs/REALTIME.md 4.4) › accounts.google-leaves: Local: accounts.google.com routes aborted; the button's navigation carries redirect_uri <origin>/api/auth/callback/google, the scopes openid email profile, prompt=select_account, a code_challenge and no access_type (2.7s)
+  -  21 apps/studio/e2e/accounts.spec.ts:2193:3 › the realtime round: the Google sign in rows (docs/REALTIME.md 4.4) › accounts.email-hidden-without-mail: Local, a second server with TURBOSLIDE_MAIL=off: no email field; the Google button is the first method
+  ✘  22 apps/studio/e2e/accounts.spec.ts:2268:3 › the next program's hotfixes: the local rows (docs/NEXT.md 3.2, 4.3.3) › accounts.decks-list-scoped: A signed in person's `/decks` and `deck.list` list the presentations they own and the ones shared with them, and no other (22.3s)
+  ✓  23 apps/studio/e2e/accounts.spec.ts:2329:3 › the next program's hotfix H3: sign out in one click (docs/NEXT.md 3.2) › accounts.sign-out-clean: Sign out from the menu ends the session in one click; the tab reloads with a fresh label and no badge; other tabs read the badge gone within 2 s (13.3s)
+  ✓  24 apps/studio/e2e/comments.spec.ts:140:1 › a comment with a mention reaches the other browser within 2 s: the marker, the filmstrip chip, the inbox plate and For you; reply, resolve, delete with Undo, the orphan and its revival (16.6s)
+  ✘  25 apps/studio/e2e/comments.spec.ts:413:1 › comments.on-title-placeholder, comments.toolbar-and-menu-routes, comments.resolve, comments.reaches-second-browser: the three routes land a comment on the cover, Resolve reads resolved on the first click, and a second browser lists them (4.0m)
+  -  26 apps/studio/e2e/comments.spec.ts:522:1 › a viewer link sees no marker until the owner turns on Viewers can see comments
+  ✓  27 apps/studio/e2e/dither.spec.ts:141:3 › the dither pipeline in the editor › Change background, Upload from computer with the Rosetta source lands the covering picture (5.8s)
+  ✘  28 apps/studio/e2e/dither.spec.ts:175:3 › the dither pipeline in the editor › Dither on writes the Photograph numbers and the live overlay draws; the Neutral chip switches them (2.0m)
+  -  29 apps/studio/e2e/dither.spec.ts:219:3 › the dither pipeline in the editor › Strength and Ink point over 200 slider events stay under 100 ms at the 95th percentile
+  -  30 apps/studio/e2e/dither.spec.ts:312:3 › the dither pipeline in the editor › the theme switch shows the inverse screen
+  -  31 apps/studio/e2e/dither.spec.ts:348:3 › the dither pipeline in the editor › Perfect and Editable text export with the variant materialized and the dither residual lines
+  ✓  32 apps/studio/e2e/home-page.spec.ts:107:1 › the server's HTML carries main#top, the hero and the head (112ms)
+  ✓  33 apps/studio/e2e/home-page.spec.ts:136:1 › the sections stand in order with one heading, one lead and one picture or diagram each (1.1s)
+  ✓  34 apps/studio/e2e/home-page.spec.ts:180:1 › the pictures carry width, height, srcset and sizes; the hidden appearance is never requested (2.7s)
+  ✓  35 apps/studio/e2e/home-page.spec.ts:232:3 › the spacing system of 3.4 reads from the boxes at 1440 (1.6s)
+  ✓  36 apps/studio/e2e/home-page.spec.ts:232:3 › the spacing system of 3.4 reads from the boxes at 1280 (1.4s)
+  ✓  37 apps/studio/e2e/home-page.spec.ts:316:1 › the narrow layout at 390: one column, the text first, the numbers of 3.4 (1.6s)
+  ✓  38 apps/studio/e2e/home-page.spec.ts:416:3 › the appearance group is pressed for the stored dark from the first paint and writes gt-theme (1.8s)
+  ✓  39 apps/studio/e2e/home-page.spec.ts:416:3 › the appearance group is pressed for the stored light from the first paint and writes gt-theme (1.4s)
+  ✓  40 apps/studio/e2e/home-page.spec.ts:474:1 › every same origin link answers 200 and the buttons route as 3.2 says (1.5s)
+  ✓  41 apps/studio/e2e/home-page.spec.ts:515:1 › the GitHub links answer 200 when the network is reachable (3.3s)
+  ✓  42 apps/studio/e2e/home-page.spec.ts:544:1 › the footer lockup scrolls to the top (1.9s)
+  ✓  43 apps/studio/e2e/home-page.spec.ts:556:1 › the rendered copy follows the rules of 3.1 (1.4s)
+  ✓  44 apps/studio/e2e/home-page.spec.ts:595:1 › the diagrams are inline, named, small and drawn from the tokens (1.2s)
+  ✓  45 apps/studio/e2e/home-page.spec.ts:624:1 › the speculation rules script names /new with moderate eagerness (1.2s)
+  ✓  46 apps/studio/e2e/home-page.spec.ts:637:1 › no script the page loads carries the shader mount (the page animates nothing) (1.6s)
+  ✓  47 apps/studio/e2e/home-page.spec.ts:662:3 › the layout shifts nothing over the load and a full scroll at 1440 (3.0s)
+  ✓  48 apps/studio/e2e/home-page.spec.ts:662:3 › the layout shifts nothing over the load and a full scroll at 390 (2.9s)
+  ✘  49 apps/studio/e2e/presence.spec.ts:218:1 › the five fixed slots exist at first paint with nobody present and the page loads with zero layout shift entries (10.1s)
+  -  50 apps/studio/e2e/presence.spec.ts:263:1 › a second person appears as a chip without moving the row; the roster lists them with Go to slide; a selection draws the outline and the flag; the words typed arrive (4.10)
+  -  51 apps/studio/e2e/presence.spec.ts:460:1 › twenty simulated participants fill four chips and +16, the filmstrip chips and twenty flags at 120 by 18, with zero layout shift entries
+  ✓  52 apps/studio/e2e/realtime.spec.ts:212:1 › two contexts open one deck as two labels and see each other in the roster (3.1s)
+  ✓  53 apps/studio/e2e/realtime.spec.ts:237:1 › two contexts type in one paragraph and converge byte for byte over 200 keystrokes, no character lost (7.3s)
+  ✓  54 apps/studio/e2e/realtime.spec.ts:290:1 › a keystroke reaches the other tab: the op to screen latency on the dev server (5.4s)
+  ✓  55 apps/studio/e2e/realtime.spec.ts:315:1 › a block change and a keystroke on one slide both apply (4.6s)
+  ✓  56 apps/studio/e2e/realtime.spec.ts:359:1 › an agent write through /api/actions appears in both tabs within 1 s (365ms)
+  ✓  57 apps/studio/e2e/realtime.spec.ts:377:1 › undo in A never reverts B’s later change (3.9s)
+  ✓  58 apps/studio/e2e/realtime.spec.ts:397:1 › a tab that lost its stream replays what landed and resends its pending queue (4.1s)
+  ✓  59 apps/studio/e2e/realtime.spec.ts:422:1 › a rejected op comes back to its author with its content (4.7s)
+  ✓  60 apps/studio/e2e/realtime.spec.ts:461:1 › a position more than 2,000 entries behind resyncs and rebases the pending ops (3.8m)
+  ✓  61 apps/studio/e2e/realtime.spec.ts:518:1 › a closed tab’s pending queue is offered on the next open and Apply lands it (5.1s)
+  ✓  62 apps/studio/e2e/realtime.spec.ts:546:1 › a refused stream (503 with retry-after) keeps the tab saving over POST, and the client reopens it after the wait with one roster row (C3-F1) (9.2s)
+  ✓  63 apps/studio/e2e/realtime.spec.ts:610:1 › a page whose every stream open is refused from the start writes under the id the refusal minted, and joins once a slot frees (C3S-F2) (9.4s)
+  ✓  64 apps/studio/e2e/realtime.spec.ts:733:1 › sync.status reads the same numbers through the window API and describe().state (2.6s)
+  ✓  65 apps/studio/e2e/realtime.spec.ts:767:1 › a re-send past the burst timer and a second remote insert: the keystrokes land once and the caret stays after them (C3S-F12) (10.0s)
+  ✓  66 apps/studio/e2e/security.spec.ts:177:1 › the eight html payloads are inert in the editor, the viewer and the print document (21.3s)
+  ✓  67 apps/studio/e2e/security.spec.ts:236:1 › the headers of 8.8 on four routes, the embed exception, and worker-src blob in the policy (1.6s)
+  ✓  68 apps/studio/e2e/security.spec.ts:278:1 › a cross site text/plain POST, a foreign Origin and a form body are refused on the agent surface and the JSON routes (195ms)
+  ✓  69 apps/studio/e2e/security.spec.ts:311:1 › the export cancel needs its token, the thumbnail its grant in enforce mode, and the CSP report endpoint answers 204 (9.5s)
+  ✘  70 apps/studio/e2e/security.spec.ts:352:1 › the upload path refuses an svg, a type mismatch and a body over the declared size, and writes nothing (637ms)
+  -  71 apps/studio/e2e/security.spec.ts:399:1 › a restricted deck answers one 404 to a stranger on the routes and the pages, in enforce mode
+  -  72 apps/studio/e2e/security.spec.ts:423:1 › the stream, ops and presence rows wait on the realtime routes
+  -  73 apps/studio/e2e/security.spec.ts:431:1 › the access route names the mode; a stranger on a restricted deck is 404 in enforce mode and the viewer floor in shadow mode (docs/FOCUS.md rank 1)
+  ✘  74 apps/studio/e2e/share.spec.ts:110:1 › the Share dialog opens on Restricted with the people field first and the footer sentence; the toolbar Copy link holds no token (10.8s)
+  -  75 apps/studio/e2e/share.spec.ts:152:1 › a stranger receives the You need access page on four routes and 403 on the writes; a viewer link lands on /deck without notes and /edit opens Viewing with View only; a commenter link lands in Commenting
+  -  76 apps/studio/e2e/share.spec.ts:242:1 › rotate and Stop sharing kill the link; publish gives the player, the embed answers and 410 after unpublish
+  -  77 apps/studio/e2e/share.spec.ts:331:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim
+  ✘  78 apps/studio/e2e/versions-by-author.spec.ts:142:1 › two labels editing two slides make one window with two marks; Show changes hatches with the author chip and underlines the run; Only named; Make a copy at a version; the delete rows are disabled with the clause (23.3s)
+      - Expect "toHaveURL" with timeout 5000ms
+           - unexpected value "http://localhost:4321/edit/e2e-accounts"
+      - waiting for locator('[data-control="menu.tools.advancedTools"]')
+    - Timeout 8000ms exceeded while waiting on the predicate
+    - Expected  - 0
+      - waiting for locator('[data-control="menubar.slide"]')
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('.ts-title-r').locator('> *')
+           - unexpected value "9"
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-control="dialog.share"]').locator('[data-control="dialog.share.emails"]')
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('[data-control="panel.versionHistory"]').locator('.ts-versions-list.is-window .ts-version')
+           - unexpected value "0"
+  12 failed
+  2 skipped
+  12 did not run
+  52 passed (17.9m)

@@ -1,0 +1,49 @@
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+skip  build commit: pass --token-env <VAR> (the row reads /api/agent with the bearer)
+skip  effects backend: pass --token-env <VAR> (the row reads /api/agent with the bearer)
+skip  template copy: pass --token-env <VAR> and --template-copy (the row writes one deck and removes it)
+path                                          status  ms     result  detail
+/                                             307     174    pass    location /new; x-robots-tag noindex
+/new                                          200     2823   pass    81386 chars; 3/3 shell marks; noindex
+/deck/gt-brand                                200     1165   pass    191481 chars; 0 notes key(s)
+/edit/<unknown> access                        404     190    pass    40830 chars; access page in the HTML false (drawn in the browser)
+/deck/<unknown> access                        404     195    pass    41306 chars; access page true
+/<no route> not found                         404     143    pass    38138 chars; 4 of 4 controls
+/edit/gt-brand                                200     1031   pass    304124 chars; 3/3 shell marks
+/decks                                        200     141    pass    0 card(s)
+/decks/trash                                  200     14120  pass    43299 chars
+/print/gt-brand                               200     541    pass    85 page(s)
+/present/gt-brand                             200     1029   pass    302575 chars
+/home                                         200     50     pass    57845 chars; 3/3 marks; no noindex meta; x-robots-tag noindex (the platform stamps it on every preview answer; reported)
+/decks/gt-brand/assets/cover-fumadocs.png     200     77     pass    image/png 335538 B
+/api/agent                                    401     196    pass    bearer rule
+headers /edit/gt-brand                        200     706    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                        200     485    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                       200     521    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                         200     45     pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                    415     166    pass    415
+unsigned thumbnail                            403     161    pass    enforce: refused without the grant (403)
+csp report endpoint                           204     130    pass    204
+cdn /favicon.ico                              200     43     pass    image/vnd.microsoft.icon 15086 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /icon.svg                                 200     160    pass    image/svg+xml 1201 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /apple-touch-icon.png                     200     38     pass    image/png 1381 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /manifest.webmanifest                     200     49     pass    application/manifest+json; charset=utf-8 955 B; first 200 HIT, second 200 HIT; public, max-age=86400
+cdn /icons/icon-512.png                       200     41     pass    image/png 3409 B; first 200 HIT, second 200 HIT; public, max-age=604800, stale-while-revalidate=2592000
+cdn /og/turboslide.png                        200     79     pass    image/png 173321 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-dark.png                      200     47     pass    image/png 13679 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-light.png                     200     36     pass    image/png 13689 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-dark.png                    200     38     pass    image/png 13873 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-light.png                   200     34     pass    image/png 13892 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-dark.png                  200     38     pass    image/png 13866 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-light.png                 200     50     pass    image/png 13862 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-dark.png                 200     47     pass    image/png 1885 B; first 200 MISS, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-light.png                200     43     pass    image/png 1887 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /home                                     200     45     pass    text/html; charset=utf-8 57845 B; first 200 HIT, second 200 HIT; public, max-age=0, must-revalidate
+thumbnail without r                           403     174    pass    enforce mode: refused without the grant
+thumbnail with r twice                        403     174    pass    enforce mode: not requested
+Tools > Preferences > Play animated patterns  200     302    pass    in /assets/index-DPEVpxEU.js; 1 module read from 4 shell scripts, 1156 KB
+39/39 passed against https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app/

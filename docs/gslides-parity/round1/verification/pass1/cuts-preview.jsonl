@@ -1,0 +1,14 @@
+{"at":"2026-10-03T22:31:48.134Z","load":12.19,"created":"untitled-20261003-esb7"}
+{"at":"2026-10-03T22:31:53.146Z","load":11.93,"cut":"notice","notices":[]}
+{"at":"2026-10-03T22:31:54.812Z","load":11.93,"cut":"home tooltip","tip":"Turboslide home Your presentations","label":"Turboslide home"}
+{"at":"2026-10-03T22:31:56.452Z","load":11.94,"cut":"own chip tooltip","tip":"You Your name and avatar; nothing else asks for an account","label":"Account"}
+{"at":"2026-10-03T22:32:01.323Z","load":11.62,"cut":"Insert > Image > Logo","dialog":["Logo"]}
+{"at":"2026-10-03T22:32:05.339Z","load":12.37,"cut":"Slide > Change theme","themeRows":["Change theme"],"head":["Theme","Appearance"]}
+{"at":"2026-10-03T22:32:11.811Z","load":12.74,"cut":"Text fitting from the right click menu","section":["Text fitting"],"formatHasTextFitting":false}
+{"at":"2026-10-03T22:32:15.506Z","load":13.16,"cut":"Tools > Preferences > Play animated patterns","sub":["On","In the show only (on)","Off"],"settingsKeys":["snapGuides","snapGrid","showRuler","showGuides","speakerNotes","filmstrip","spellcheck","viewing","compact","sections","appearance","sourceDrawer"]}
+{"at":"2026-10-03T22:32:23.996Z","load":16.19,"cut":"Tools > Preferences > Appearance > Dark","sub":["Light","Dark","Match the presentation"],"themeAfterDark":"dark"}
+{"at":"2026-10-03T22:32:27.763Z","load":16.9,"cut":"More formats > Turboslide file (.zip)","name":"untitled-20261003-esb7.zip","ms":1100,"bytes":401110}
+{"at":"2026-10-03T22:32:31.865Z","load":18.35,"cut":"More formats > Web page (.html)","name":"untitled-20261003-esb7.html","ms":1413,"bytes":577075}
+{"at":"2026-10-03T22:32:37.379Z","load":18.24,"cut":"Assist panel tailoring starter","starter":true,"dialog":["Tailor for a customer"]}
+{"at":"2026-10-03T22:32:38.920Z","load":18.24,"cut":"Help > Help Turboslide improve","opened":"https://github.com/login"}
+{"at":"2026-10-03T22:32:41.498Z","load":19.1,"teardown":"untitled-20261003-esb7","editorAfter":404}

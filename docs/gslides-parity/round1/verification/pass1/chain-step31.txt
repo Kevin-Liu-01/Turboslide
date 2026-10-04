@@ -1,0 +1,151 @@
+perf-budget: contexts open as Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36
+ok   routes      / cold ttfb                                                       10 ms  budget 60 ms
+ok   routes      / cold lcp                                                       304 ms  budget 450 ms
+ok   routes      / cold ready                                                     286 ms  budget 450 ms
+FAIL routes      / cold js decoded                                               2649 KB  budget 1953 KB
+FAIL routes      / cold largest js (index-BObWn308.js)                           1157 KB  budget 586 KB
+ok   routes      / cold longest animation frame                                    72 ms  budget 150 ms
+ok   routes      / cold cls                                                       0.0000  budget 0.0500
+ok   routes      / warm ttfb                                                        9 ms  budget 40 ms
+FAIL routes      / warm lcp                                                       280 ms  budget 250 ms
+FAIL routes      / warm ready                                                     266 ms  budget 250 ms
+FAIL routes      / warm js decoded                                               2649 KB  budget 1953 KB
+FAIL routes      / warm largest js (index-BObWn308.js)                           1157 KB  budget 586 KB
+ok   routes      / warm longest animation frame                                    76 ms  budget 150 ms
+ok   routes      / warm cls                                                       0.0000  budget 0.0500
+ok   routes      /home cold ttfb                                                   19 ms  budget 60 ms
+ok   routes      /home cold lcp                                                   200 ms  budget 400 ms
+ok   routes      /home cold ready                                                  93 ms  budget 400 ms
+FAIL routes      /home cold js decoded                                           1217 KB  budget 586 KB
+FAIL routes      /home cold largest js (index-BObWn308.js)                       1157 KB  budget 586 KB
+ok   routes      /home cold longest animation frame                                76 ms  budget 150 ms
+ok   routes      /home cold cls                                                   0.0000  budget 0.0500
+ok   routes      /home cold images before ready (decoded)                           0 KB  budget 488 KB
+ok   routes      /home cold images after a full scroll (decoded)                  212 KB  budget 1953 KB
+ok   routes      /home cold lcp element is the plate text or the twin (IMG.ts-product-shot-img)        yes  expected yes
+ok   routes      /home warm ttfb                                                    0 ms  budget 40 ms
+ok   routes      /home warm lcp                                                    80 ms  budget 200 ms
+ok   routes      /home warm ready                                                  33 ms  budget 200 ms
+FAIL routes      /home warm js decoded                                           1217 KB  budget 586 KB
+FAIL routes      /home warm largest js (index-BObWn308.js)                       1157 KB  budget 586 KB
+ok   routes      /home warm longest animation frame                                74 ms  budget 150 ms
+ok   routes      /home warm cls                                                   0.0000  budget 0.0500
+ok   routes      /home warm images before ready (decoded)                           0 KB  budget 488 KB
+ok   routes      /home warm images after a full scroll (decoded)                  212 KB  budget 1953 KB
+ok   routes      /home warm lcp element is the plate text or the twin (IMG.ts-product-shot-img)        yes  expected yes
+ok   routes      /new cold ttfb                                                    15 ms  budget 60 ms
+ok   routes      /new cold fcp                                                    152 ms  budget 250 ms
+ok   routes      /new cold lcp                                                    344 ms  budget 450 ms
+ok   routes      /new cold ready                                                  320 ms  budget 450 ms
+FAIL routes      /new cold js decoded                                            2649 KB  budget 1953 KB
+FAIL routes      /new cold largest js (index-BObWn308.js)                        1157 KB  budget 586 KB
+ok   routes      /new cold longest animation frame                                 72 ms  budget 150 ms
+ok   routes      /new cold cls                                                    0.0000  budget 0.0500
+ok   routes      /new warm ttfb                                                    10 ms  budget 40 ms
+ok   routes      /new warm fcp                                                     76 ms  budget 150 ms
+FAIL routes      /new warm lcp                                                    288 ms  budget 250 ms
+FAIL routes      /new warm ready                                                  269 ms  budget 250 ms
+FAIL routes      /new warm js decoded                                            2649 KB  budget 1953 KB
+FAIL routes      /new warm largest js (index-BObWn308.js)                        1157 KB  budget 586 KB
+ok   routes      /new warm longest animation frame                                 77 ms  budget 150 ms
+ok   routes      /new warm cls                                                    0.0000  budget 0.0500
+ok   routes      /decks cold ttfb                                                   8 ms  budget 150 ms
+ok   routes      /decks cold lcp                                                  228 ms  budget 500 ms
+ok   routes      /decks cold ready                                                241 ms  budget 500 ms
+FAIL routes      /decks cold js decoded                                          1276 KB  budget 586 KB
+FAIL routes      /decks cold largest js (index-BObWn308.js)                      1157 KB  budget 586 KB
+ok   routes      /decks cold longest animation frame                               79 ms  budget 150 ms
+ok   routes      /decks cold cls                                                  0.0000  budget 0.0500
+ok   routes      /decks cold images with 0 cards (decoded)                        187 KB  budget 1465 KB
+ok   routes      /decks warm ttfb                                                   4 ms  budget 100 ms
+ok   routes      /decks warm lcp                                                  144 ms  budget 300 ms
+ok   routes      /decks warm ready                                                177 ms  budget 300 ms
+FAIL routes      /decks warm js decoded                                          1276 KB  budget 586 KB
+FAIL routes      /decks warm largest js (index-BObWn308.js)                      1157 KB  budget 586 KB
+ok   routes      /decks warm longest animation frame                               73 ms  budget 150 ms
+ok   routes      /decks warm cls                                                  0.0000  budget 0.0500
+ok   routes      /decks warm images with 0 cards (decoded)                        187 KB  budget 1465 KB
+ok   routes      /decks/trash cold ttfb                                            14 ms  budget 150 ms
+ok   routes      /decks/trash cold lcp                                            164 ms  budget 500 ms
+ok   routes      /decks/trash cold ready                                          170 ms  budget 500 ms
+FAIL routes      /decks/trash cold js decoded                                    1222 KB  budget 586 KB
+FAIL routes      /decks/trash cold largest js (index-BObWn308.js)                1157 KB  budget 586 KB
+ok   routes      /decks/trash cold longest animation frame                         71 ms  budget 150 ms
+ok   routes      /decks/trash cold cls                                            0.0000  budget 0.0500
+ok   routes      /decks/trash warm ttfb                                             5 ms  budget 100 ms
+ok   routes      /decks/trash warm lcp                                             84 ms  budget 300 ms
+ok   routes      /decks/trash warm ready                                          140 ms  budget 300 ms
+FAIL routes      /decks/trash warm js decoded                                    1222 KB  budget 586 KB
+FAIL routes      /decks/trash warm largest js (index-BObWn308.js)                1157 KB  budget 586 KB
+ok   routes      /decks/trash warm longest animation frame                         62 ms  budget 150 ms
+ok   routes      /decks/trash warm cls                                            0.0000  budget 0.0500
+ok   routes      /deck/gt-brand cold ttfb                                          48 ms  budget 250 ms
+ok   routes      /deck/gt-brand cold lcp                                          184 ms  budget 500 ms
+ok   routes      /deck/gt-brand cold ready                                        303 ms  budget 600 ms
+FAIL routes      /deck/gt-brand cold js decoded                                  2156 KB  budget 977 KB
+FAIL routes      /deck/gt-brand cold largest js (index-BObWn308.js)              1157 KB  budget 586 KB
+ok   routes      /deck/gt-brand cold longest animation frame                       82 ms  budget 150 ms
+ok   routes      /deck/gt-brand cold cls                                          0.0021  budget 0.0500
+FAIL routes      /deck/gt-brand cold dom nodes (after GC; 1610 live elements)       2511  budget 1500
+ok   routes      /deck/gt-brand warm ttfb                                          50 ms  budget 150 ms
+ok   routes      /deck/gt-brand warm lcp                                          176 ms  budget 300 ms
+ok   routes      /deck/gt-brand warm ready                                        310 ms  budget 400 ms
+FAIL routes      /deck/gt-brand warm js decoded                                  2156 KB  budget 977 KB
+FAIL routes      /deck/gt-brand warm largest js (index-BObWn308.js)              1157 KB  budget 586 KB
+ok   routes      /deck/gt-brand warm longest animation frame                       63 ms  budget 150 ms
+ok   routes      /deck/gt-brand warm cls                                          0.0021  budget 0.0500
+FAIL routes      /deck/gt-brand warm dom nodes (after GC; 1610 live elements)       2510  budget 1500
+ok   routes      /edit/gt-brand cold ttfb                                          36 ms  budget 60 ms
+ok   routes      /edit/gt-brand cold fcp                                          120 ms  budget 250 ms
+ok   routes      /edit/gt-brand cold lcp                                          400 ms  budget 700 ms
+ok   routes      /edit/gt-brand cold ready                                        370 ms  budget 700 ms
+FAIL routes      /edit/gt-brand cold js decoded                                  2653 KB  budget 1953 KB
+FAIL routes      /edit/gt-brand cold largest js (index-BObWn308.js)              1157 KB  budget 586 KB
+ok   routes      /edit/gt-brand cold longest animation frame                      143 ms  budget 150 ms
+ok   routes      /edit/gt-brand cold cls                                          0.0000  budget 0.0500
+FAIL routes      /edit/gt-brand cold dom nodes (after GC; 1550 live elements)       2172  budget 1500
+ok   routes      /edit/gt-brand warm ttfb                                          31 ms  budget 40 ms
+ok   routes      /edit/gt-brand warm fcp                                          104 ms  budget 150 ms
+ok   routes      /edit/gt-brand warm lcp                                          372 ms  budget 450 ms
+ok   routes      /edit/gt-brand warm ready                                        347 ms  budget 450 ms
+FAIL routes      /edit/gt-brand warm js decoded                                  2653 KB  budget 1953 KB
+FAIL routes      /edit/gt-brand warm largest js (index-BObWn308.js)              1157 KB  budget 586 KB
+ok   routes      /edit/gt-brand warm longest animation frame                      139 ms  budget 150 ms
+ok   routes      /edit/gt-brand warm cls                                          0.0000  budget 0.0500
+FAIL routes      /edit/gt-brand warm dom nodes (after GC; 1550 live elements)       2172  budget 1500
+ok   routes      /present/gt-brand cold ttfb                                       40 ms  budget 60 ms
+ok   routes      /present/gt-brand cold lcp                                       136 ms  budget 500 ms
+ok   routes      /present/gt-brand cold ready                                     276 ms  budget 500 ms
+FAIL routes      /present/gt-brand cold js decoded                               1330 KB  budget 1172 KB
+FAIL routes      /present/gt-brand cold largest js (index-BObWn308.js)           1157 KB  budget 586 KB
+ok   routes      /present/gt-brand cold longest animation frame                    74 ms  budget 150 ms
+ok   routes      /present/gt-brand cold cls                                       0.0000  budget 0.0500
+FAIL routes      /present/gt-brand warm ttfb                                       44 ms  budget 40 ms
+ok   routes      /present/gt-brand warm lcp                                       132 ms  budget 300 ms
+ok   routes      /present/gt-brand warm ready                                     269 ms  budget 300 ms
+FAIL routes      /present/gt-brand warm js decoded                               1330 KB  budget 1172 KB
+FAIL routes      /present/gt-brand warm largest js (index-BObWn308.js)           1157 KB  budget 586 KB
+ok   routes      /present/gt-brand warm longest animation frame                    70 ms  budget 150 ms
+ok   routes      /present/gt-brand warm cls                                       0.0000  budget 0.0500
+ok   transitions trash->decks (in page)                                             8 ms  budget 300 ms
+ok   transitions home->new (wall, document navigation, no prerender activation)     237 ms  budget 300 ms
+ok   transitions slideChange (in page, painted frame)                              22 ms  budget 50 ms
+ok   transitions slideshow (in page, painted frame)                                35 ms  budget 50 ms
+ok   transitions layoutGrid (in page, painted frame)                               11 ms  budget 50 ms
+ok   filmstrip   first pass longest frame                                          33 ms  budget 100 ms
+ok   filmstrip   steady passes p95 frame                                           11 ms  budget 20 ms
+ok   filmstrip   steady passes longest frame                                       21 ms  budget 50 ms
+ok   filmstrip   steady passes fps                                                   124  floor 50
+FAIL filmstrip   dom nodes with 85 cards (after GC; 1825 live elements)             2703  budget 1500
+ok   idle        server function calls per minute (60 s window)                        3  budget 6
+ok   idle        stream connections per minute (/api/decks/*/stream, 60 s window)          0  budget 2
+ok   twins       twins re-fetched on the second visit (of 16; 0 revalidated with a 304)          0  budget 0
+ok   write       text burst: last keyup to local commit                            77 ms  budget 450 ms
+ok   write       text burst: last keyup to saved revision (acknowledged; memory channel)      77 ms  budget 600 ms
+ok   write       text burst: current card clone carries the text after the commit       0 ms  budget 50 ms
+FAIL write       new slide: pointerdown to painted card                            24 ms  budget 16 ms
+FAIL write       new slide: pointerdown to saved revision (acknowledged; memory channel)    2051 ms  budget 250 ms
+FAIL write       capture of the edited slide after the save (status 200, cached 0)    2275 ms  budget 2000 ms
+FAIL write       home card of the scratch deck on the next /decks visit          2239 ms  budget 1500 ms
+perf-budget: wrote /Users/kevinliu/repos/Turboslide-next/.turboslide/perf-budget.json
+perf-budget: 102 of 148 budgets met on http://localhost:4321 (local)

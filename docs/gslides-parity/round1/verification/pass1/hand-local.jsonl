@@ -1,0 +1,202 @@
+{"at":"2026-10-04T04:40:19.440Z","load":19.85,"start":"http://localhost:4521","tag":"local","oidc":false}
+{"at":"2026-10-04T04:40:19.593Z","load":19.85,"card":200,"bytes":173321,"type":"image/png"}
+{"at":"2026-10-04T04:40:19.595Z","load":19.85,"manifest":200,"background_color":"#ffffff","theme_color":"#ffffff","icons":5}
+{"at":"2026-10-04T04:40:21.415Z","load":21.71,"draftTitleRow":"Untitled presentation C Assist Slideshow Share Sign In"}
+{"at":"2026-10-04T04:40:21.447Z","load":21.71,"shot":"local-draft-1440-light.jpg","bytes":41462,"quality":72}
+{"at":"2026-10-04T04:40:51.619Z","load":19.36,"created":"untitled-20261004-avpx"}
+{"at":"2026-10-04T04:40:54.145Z","load":19.36,"shot":"local-firstwrite-1440-light.jpg","bytes":40167,"quality":72}
+{"at":"2026-10-04T04:40:54.147Z","load":19.36,"afterWriteTitleRow":"Untitled presentation Last edit just now All changes saved C Assist Slideshow Share Sign In"}
+{"at":"2026-10-04T04:41:04.528Z","load":18.38,"shot":"local-home-1440-light.jpg","bytes":108807,"quality":72}
+{"at":"2026-10-04T04:41:04.530Z","load":18.38,"home":"1440","theme":"light","title":"Turboslide is a slides editor in the browser","scrollWidth":1440,"nav":["Turboslide","Sign In","Documentation","Light","Dark","New Presentation"],"licence":0,"license":2}
+{"at":"2026-10-04T04:41:05.515Z","load":17.79,"shot":"local-home-numbers-1440-light.jpg","bytes":64833,"quality":72}
+{"at":"2026-10-04T04:41:06.498Z","load":17.79,"shot":"local-home-diagram-1440-light.jpg","bytes":131611,"quality":72}
+{"at":"2026-10-04T04:41:07.482Z","load":17.79,"shot":"local-home-command-1440-light.jpg","bytes":54487,"quality":72}
+{"at":"2026-10-04T04:41:08.397Z","load":17.79,"shot":"local-home-foot-1440-light.jpg","bytes":54487,"quality":72}
+{"at":"2026-10-04T04:41:11.070Z","load":17.88,"shot":"local-decks-1440-light.jpg","bytes":45762,"quality":72}
+{"at":"2026-10-04T04:41:11.072Z","load":17.88,"page":"decks","view":"1440","theme":"light","status":null,"buttons":["Sign In","GT brand deck"],"text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Name Last opened Slides Actions Untitled presentation Untitled presentation Opened just now 2 Trash","scrollWidth":1440}
+{"at":"2026-10-04T04:41:13.689Z","load":17.88,"shot":"local-notfound-1440-light.jpg","bytes":118858,"quality":72}
+{"at":"2026-10-04T04:41:13.690Z","load":17.88,"page":"notfound","view":"1440","theme":"light","status":null,"buttons":[],"text":"Turboslide Not found No page is at this address. Start a new presentation, open your presentations or read what Turboslide is. New Presentation Your Presentations About Turboslide The Blue Marble Image: NASA, Reto Stöckli, 2007, public domain","scrollWidth":1440}
+{"at":"2026-10-04T04:41:16.326Z","load":17.25,"shot":"local-refused-1440-light.jpg","bytes":23537,"quality":72}
+{"at":"2026-10-04T04:41:16.327Z","load":17.25,"page":"refused","view":"1440","theme":"light","status":null,"buttons":["Reload"],"text":"Turboslide This presentation could not be opened deckId must be a slug. Reload Your Presentations","scrollWidth":1440}
+{"at":"2026-10-04T04:41:17.979Z","load":17.25,"shot":"local-editor-1440-light.jpg","bytes":43381,"quality":72}
+{"at":"2026-10-04T04:41:17.982Z","load":17.25,"editor":"1440","theme":"light","rowWidth":1440,"scrollWidth":1440,"name":{"x":50,"w":157},"slideshow":{"x":1141,"w":133},"share":{"x":1282,"w":78},"more":{"x":0,"w":0},"words":"Untitled presentation Last edit just now All changes saved C Assist Slideshow Share Sign In","homeTip":"Turboslide home","banner":["Edits on this copy of Turboslide are lost when it restarts."],"stageBg":"rgba(7, 7, 7, 0.06)"}
+{"at":"2026-10-04T04:41:21.236Z","load":17.07,"shot":"local-select-1440-light.jpg","bytes":45647,"quality":72}
+{"at":"2026-10-04T04:41:21.237Z","load":17.07,"select":"1440","theme":"light","ring":null,"chipBg":"rgb(47, 92, 224)","chipText":"rgb(255, 255, 255)","chipWords":"Text box"}
+{"at":"2026-10-04T04:41:22.029Z","load":17.07,"contextText":"1440","theme":"light","rows":["Cut","Copy","Paste","Delete","Duplicate","Order","Rotate","Center on page","Align","Distribute","Group","Ungroup","Link","Text fitting","Format options","Alt text","Comment"]}
+{"at":"2026-10-04T04:41:22.044Z","load":17.07,"shot":"local-context-text-1440-light.jpg","bytes":58724,"quality":72}
+{"at":"2026-10-04T04:41:25.128Z","load":16.83,"shot":"local-menu-insert-1440-light.jpg","bytes":49754,"quality":72}
+{"at":"2026-10-04T04:41:25.128Z","load":16.83,"menu":"insert","view":"1440","theme":"light","rows":["Image","Text box","Shape","Table","Chart","Diagram","Word art","Line","Link","Comment","New slide","Slide numbers","Animated pattern"],"image":["Upload from computer","Logo","By URL"]}
+{"at":"2026-10-04T04:41:27.393Z","load":16.83,"shot":"local-menu-tools-1440-light.jpg","bytes":48880,"quality":72}
+{"at":"2026-10-04T04:41:31.370Z","load":16.68,"shot":"local-menu-tools-tip-1440-light.jpg","bytes":48369,"quality":72}
+{"at":"2026-10-04T04:41:31.370Z","load":16.68,"menu":"tools","view":"1440","theme":"light","rows":["Preferences","Tailor for a customer","Check slides","Advanced tools"],"preferences":["Link detection","Play animated patterns","Appearance","Turn on collaborator announcements"],"advancedTip":"Advanced tools Shows more tools in every menu, on the toolbar and in the right click menus. Some of them may not work yet."}
+{"at":"2026-10-04T04:41:34.388Z","load":16.68,"shot":"local-menu-file-download-1440-light.jpg","bytes":59180,"quality":72}
+{"at":"2026-10-04T04:41:34.388Z","load":16.68,"menu":"file","view":"1440","theme":"light","rows":["New presentation","Open","Import slides","Make a copy","Share","Download","Rename","Move to trash","Version history","Details","Print settings and preview","Print"],"download":["Microsoft PowerPoint (.pptx)","PDF Document (.pdf)","JPEG image (.jpg, current slide)","PNG image (.png, current slide)","More formats"],"more":["Web page (.html)","Turboslide file (.zip)","Download options"]}
+{"at":"2026-10-04T04:41:35.894Z","load":16.06,"shot":"local-menu-view-1440-light.jpg","bytes":48015,"quality":72}
+{"at":"2026-10-04T04:41:35.894Z","load":16.06,"menu":"view","view":"1440","theme":"light","rows":["Slideshow","Zoom","Show ruler","Guides","Snap to","Comments","Live pointers","Show speaker notes","Show filmstrip","Mode","Full screen"]}
+{"at":"2026-10-04T04:41:37.394Z","load":16.06,"shot":"local-menu-format-1440-light.jpg","bytes":47519,"quality":72}
+{"at":"2026-10-04T04:41:37.395Z","load":16.06,"menu":"format","view":"1440","theme":"light","rows":["Text","Align & indent","Line & paragraph spacing","Bullets & numbering","Table","Image","Borders & lines","Format options","Clear formatting","Alt text"]}
+{"at":"2026-10-04T04:41:38.894Z","load":16.06,"shot":"local-menu-slide-1440-light.jpg","bytes":46333,"quality":72}
+{"at":"2026-10-04T04:41:38.894Z","load":16.06,"menu":"slide","view":"1440","theme":"light","rows":["New slide","Duplicate slide","Delete slide","Skip slide","Move slide","Change background","Apply layout","Change theme"]}
+{"at":"2026-10-04T04:41:40.385Z","load":15.82,"shot":"local-menu-help-1440-light.jpg","bytes":44956,"quality":72}
+{"at":"2026-10-04T04:41:40.385Z","load":15.82,"menu":"help","view":"1440","theme":"light","rows":["Search the menus","Help","Help Turboslide improve","Keyboard shortcuts"]}
+{"at":"2026-10-04T04:41:42.780Z","load":15.82,"shot":"local-signin-1440-light.jpg","bytes":44773,"quality":72}
+{"at":"2026-10-04T04:41:45.478Z","load":15.43,"shot":"local-assist-1440-light.jpg","bytes":58161,"quality":72}
+{"at":"2026-10-04T04:41:45.479Z","load":15.43,"assist":"1440","theme":"light","assistLabel":"Assist","assistSvg":0}
+{"at":"2026-10-04T04:41:49.182Z","load":15.43,"shot":"local-palette-assist-1440-light.jpg","bytes":44303,"quality":72}
+{"at":"2026-10-04T04:41:51.694Z","load":15.08,"shot":"local-theme-panel-1440-light.jpg","bytes":59163,"quality":72}
+{"at":"2026-10-04T04:41:51.695Z","load":15.08,"themePanel":"1440","theme":"light","head":["Theme","Appearance","Logo","Colors"]}
+{"at":"2026-10-04T04:41:56.373Z","load":14.75,"shot":"local-share-1440-light.jpg","bytes":54268,"quality":72}
+{"at":"2026-10-04T04:41:59.079Z","load":14.75,"shot":"local-versions-1440-light.jpg","bytes":50648,"quality":72}
+{"at":"2026-10-04T04:41:59.080Z","load":14.75,"versions":"1440","theme":"light","times":[]}
+{"at":"2026-10-04T04:42:03.127Z","load":14.45,"shot":"local-present-1440-light.jpg","bytes":28812,"quality":72}
+{"at":"2026-10-04T04:42:03.128Z","load":14.45,"present":"1440","theme":"light","scrollWidth":1440,"clock":"Time 9:42 PM"}
+{"at":"2026-10-04T04:42:06.395Z","load":14.09,"shot":"local-view-1440-light.jpg","bytes":34599,"quality":72}
+{"at":"2026-10-04T04:42:06.396Z","load":14.09,"view":"1440","theme":"light","og":{"og:site_name":"Turboslide","og:type":"website","og:locale":"en_US","og:image":"https://www.turboslide.com/og/turboslide.png","og:image:type":"image/png","og:image:width":"1200","og:image:height":"630","og:image:alt":"The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither","og:title":"Untitled presentation","og:url":"https://www.turboslide.com/deck/untitled-20261004-avpx","og:description":"A presentation of 2 slides, opened in Turboslide in the browser."}}
+{"at":"2026-10-04T04:42:09.153Z","load":14.09,"shot":"local-access-1440-light.jpg","bytes":31987,"quality":72}
+{"at":"2026-10-04T04:42:09.154Z","load":14.09,"access":200,"view":"1440","theme":"light","text":"Untitled presentation Last edit 1 minute ago G Slideshow Share Sign In File View Tools Help View only 1 2 A selected box Edits on this copy of Turboslide are lost when it restarts."}
+{"at":"2026-10-04T04:42:11.845Z","load":13.69,"shot":"local-decks-empty-1440-light.jpg","bytes":45762,"quality":72}
+{"at":"2026-10-04T04:42:11.847Z","load":13.69,"decksEmpty":"1440","theme":"light","text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Name Last opened Slides Actions Untitled presentation Untitled presentation Opened just now 2 Trash"}
+{"at":"2026-10-04T04:42:14.645Z","load":13.69,"shot":"local-home-390-light.jpg","bytes":43784,"quality":72}
+{"at":"2026-10-04T04:42:14.647Z","load":13.69,"home":"390","theme":"light","title":"Turboslide is a slides editor in the browser","scrollWidth":390,"nav":["Turboslide","Sign In","Documentation","Light","Dark","New Presentation"],"licence":0,"license":2}
+{"at":"2026-10-04T04:42:15.625Z","load":13.55,"shot":"local-home-numbers-390-light.jpg","bytes":35433,"quality":72}
+{"at":"2026-10-04T04:42:16.598Z","load":13.55,"shot":"local-home-diagram-390-light.jpg","bytes":39456,"quality":72}
+{"at":"2026-10-04T04:42:17.573Z","load":13.55,"shot":"local-home-command-390-light.jpg","bytes":27707,"quality":72}
+{"at":"2026-10-04T04:42:18.482Z","load":13.55,"shot":"local-home-foot-390-light.jpg","bytes":30148,"quality":72}
+{"at":"2026-10-04T04:42:21.139Z","load":13.59,"shot":"local-decks-390-light.jpg","bytes":26121,"quality":72}
+{"at":"2026-10-04T04:42:21.140Z","load":13.59,"page":"decks","view":"390","theme":"light","status":null,"buttons":["Sign In","GT brand deck"],"text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Untitled presentation Untitled presentation Opened 1 minute ago Trash","scrollWidth":390}
+{"at":"2026-10-04T04:42:23.746Z","load":13.59,"shot":"local-notfound-390-light.jpg","bytes":48163,"quality":72}
+{"at":"2026-10-04T04:42:23.747Z","load":13.59,"page":"notfound","view":"390","theme":"light","status":null,"buttons":[],"text":"Turboslide Not found No page is at this address. Start a new presentation, open your presentations or read what Turboslide is. New Presentation Your Presentations About Turboslide The Blue Marble Image: NASA, Reto Stöckli, 2007, public domain","scrollWidth":390}
+{"at":"2026-10-04T04:42:26.364Z","load":13.38,"shot":"local-refused-390-light.jpg","bytes":17901,"quality":72}
+{"at":"2026-10-04T04:42:26.365Z","load":13.38,"page":"refused","view":"390","theme":"light","status":null,"buttons":["Reload"],"text":"Turboslide This presentation could not be opened deckId must be a slug. Reload Your Presentations","scrollWidth":390}
+{"at":"2026-10-04T04:42:28.027Z","load":13.38,"shot":"local-editor-390-light.jpg","bytes":16632,"quality":72}
+{"at":"2026-10-04T04:42:28.028Z","load":13.38,"editor":"390","theme":"light","rowWidth":390,"scrollWidth":390,"name":{"x":42,"w":138},"slideshow":{"x":270,"w":32},"share":{"x":310,"w":32},"more":{"x":350,"w":32},"words":"Untitled presentation","homeTip":"Turboslide home","banner":["Edits on this copy of Turboslide are lost when it restarts."],"stageBg":"rgba(7, 7, 7, 0.06)"}
+{"at":"2026-10-04T04:42:31.276Z","load":13.35,"shot":"local-select-390-light.jpg","bytes":18030,"quality":72}
+{"at":"2026-10-04T04:42:31.277Z","load":13.35,"select":"390","theme":"light","ring":null,"chipBg":"rgb(47, 92, 224)","chipText":"rgb(255, 255, 255)","chipWords":"Text box"}
+{"at":"2026-10-04T04:42:35.124Z","load":13,"shot":"local-menu-insert-390-light.jpg","bytes":24216,"quality":72}
+{"at":"2026-10-04T04:42:35.124Z","load":13,"menu":"insert","view":"390","theme":"light","rows":["Image","Text box","Shape","Table","Chart","Diagram","Word art","Line","Link","Comment","New slide","Slide numbers","Animated pattern"],"image":["Upload from computer","Logo","By URL"]}
+{"at":"2026-10-04T04:42:38.173Z","load":13,"shot":"local-menu-tools-390-light.jpg","bytes":22454,"quality":72}
+{"at":"2026-10-04T04:42:38.173Z","load":13,"menu":"tools","view":"390","theme":"light","rows":["Preferences","Tailor for a customer","Check slides","Advanced tools"],"preferences":["Link detection","Play animated patterns","Appearance","Turn on collaborator announcements"],"advancedTip":null}
+{"at":"2026-10-04T04:42:41.982Z","load":12.92,"shot":"local-menu-file-download-390-light.jpg","bytes":29142,"quality":72}
+{"at":"2026-10-04T04:42:41.982Z","load":12.92,"menu":"file","view":"390","theme":"light","rows":["New presentation","Open","Import slides","Make a copy","Share","Download","Rename","Move to trash","Version history","Details","Print settings and preview","Print"],"download":["Microsoft PowerPoint (.pptx)","PDF Document (.pdf)","JPEG image (.jpg, current slide)","PNG image (.png, current slide)","More formats"],"more":["Web page (.html)","Turboslide file (.zip)","Download options"]}
+{"at":"2026-10-04T04:42:44.265Z","load":12.92,"shot":"local-menu-view-390-light.jpg","bytes":22923,"quality":72}
+{"at":"2026-10-04T04:42:44.265Z","load":12.92,"menu":"view","view":"390","theme":"light","rows":["Slideshow","Zoom","Show ruler","Guides","Snap to","Comments","Live pointers","Show speaker notes","Show filmstrip","Mode","Full screen"]}
+{"at":"2026-10-04T04:42:46.539Z","load":13.09,"shot":"local-menu-format-390-light.jpg","bytes":23648,"quality":72}
+{"at":"2026-10-04T04:42:46.540Z","load":13.09,"menu":"format","view":"390","theme":"light","rows":["Text","Align & indent","Line & paragraph spacing","Bullets & numbering","Table","Image","Borders & lines","Format options","Clear formatting","Alt text"]}
+{"at":"2026-10-04T04:42:48.815Z","load":13.09,"shot":"local-menu-slide-390-light.jpg","bytes":22632,"quality":72}
+{"at":"2026-10-04T04:42:48.815Z","load":13.09,"menu":"slide","view":"390","theme":"light","rows":["New slide","Duplicate slide","Delete slide","Skip slide","Move slide","Change background","Apply layout","Change theme"]}
+{"at":"2026-10-04T04:42:51.086Z","load":12.92,"shot":"local-menu-help-390-light.jpg","bytes":20447,"quality":72}
+{"at":"2026-10-04T04:42:51.086Z","load":12.92,"menu":"help","view":"390","theme":"light","rows":["Search the menus","Help","Help Turboslide improve","Keyboard shortcuts"]}
+{"at":"2026-10-04T04:42:52.882Z","load":12.92,"shot":"local-title-more-390-light.jpg","bytes":21289,"quality":72}
+{"at":"2026-10-04T04:42:52.883Z","load":12.92,"titleMore":"390","theme":"light","rows":["Assist","Show all comments","Show side panel","Collaborators","Presenter view","Start from beginning","Sign in"]}
+{"at":"2026-10-04T04:42:53.678Z","load":12.92,"signin":"no visible Sign In at 390"}
+{"at":"2026-10-04T04:42:57.647Z","load":12.68,"shot":"local-theme-panel-390-light.jpg","bytes":27861,"quality":72}
+{"at":"2026-10-04T04:42:57.648Z","load":12.68,"themePanel":"390","theme":"light","head":["Theme","Appearance","Logo","Colors"]}
+{"at":"2026-10-04T04:43:02.316Z","load":12.47,"shot":"local-share-390-light.jpg","bytes":26107,"quality":72}
+{"at":"2026-10-04T04:43:05.010Z","load":12.47,"shot":"local-versions-390-light.jpg","bytes":22795,"quality":72}
+{"at":"2026-10-04T04:43:05.011Z","load":12.47,"versions":"390","theme":"light","times":[]}
+{"at":"2026-10-04T04:43:09.030Z","load":12.35,"shot":"local-present-390-light.jpg","bytes":15694,"quality":72}
+{"at":"2026-10-04T04:43:09.031Z","load":12.35,"present":"390","theme":"light","scrollWidth":390,"clock":"Time 9:43 PM"}
+{"at":"2026-10-04T04:43:12.281Z","load":12.32,"shot":"local-view-390-light.jpg","bytes":23565,"quality":72}
+{"at":"2026-10-04T04:43:12.282Z","load":12.32,"view":"390","theme":"light","og":{"og:site_name":"Turboslide","og:type":"website","og:locale":"en_US","og:image":"https://www.turboslide.com/og/turboslide.png","og:image:type":"image/png","og:image:width":"1200","og:image:height":"630","og:image:alt":"The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither","og:title":"Untitled presentation","og:url":"https://www.turboslide.com/deck/untitled-20261004-avpx","og:description":"A presentation of 2 slides, opened in Turboslide in the browser."}}
+{"at":"2026-10-04T04:43:15.065Z","load":12.32,"shot":"local-access-390-light.jpg","bytes":14854,"quality":72}
+{"at":"2026-10-04T04:43:15.066Z","load":12.32,"access":200,"view":"390","theme":"light","text":"Untitled presentation View only 1 2 A selected box Edits on this copy of Turboslide are lost when it restarts."}
+{"at":"2026-10-04T04:43:17.732Z","load":12.22,"shot":"local-decks-empty-390-light.jpg","bytes":25894,"quality":72}
+{"at":"2026-10-04T04:43:17.733Z","load":12.22,"decksEmpty":"390","theme":"light","text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Untitled presentation Untitled presentation Opened just now Trash"}
+{"at":"2026-10-04T04:43:20.525Z","load":12.2,"shot":"local-home-1440-dark.jpg","bytes":106968,"quality":72}
+{"at":"2026-10-04T04:43:20.526Z","load":12.2,"home":"1440","theme":"dark","title":"Turboslide is a slides editor in the browser","scrollWidth":1440,"nav":["Turboslide","Sign In","Documentation","Light","Dark","New Presentation"],"licence":0,"license":2}
+{"at":"2026-10-04T04:43:21.512Z","load":12.2,"shot":"local-home-numbers-1440-dark.jpg","bytes":64429,"quality":72}
+{"at":"2026-10-04T04:43:22.489Z","load":12.2,"shot":"local-home-diagram-1440-dark.jpg","bytes":128265,"quality":72}
+{"at":"2026-10-04T04:43:23.484Z","load":12.2,"shot":"local-home-command-1440-dark.jpg","bytes":52795,"quality":72}
+{"at":"2026-10-04T04:43:24.403Z","load":12.2,"shot":"local-home-foot-1440-dark.jpg","bytes":52795,"quality":72}
+{"at":"2026-10-04T04:43:27.078Z","load":12.26,"shot":"local-decks-1440-dark.jpg","bytes":46368,"quality":72}
+{"at":"2026-10-04T04:43:27.080Z","load":12.26,"page":"decks","view":"1440","theme":"dark","status":null,"buttons":["Sign In","GT brand deck"],"text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Name Last opened Slides Actions Untitled presentation Untitled presentation Opened 2 minutes ago 2 Trash","scrollWidth":1440}
+{"at":"2026-10-04T04:43:29.714Z","load":12.26,"shot":"local-notfound-1440-dark.jpg","bytes":118423,"quality":72}
+{"at":"2026-10-04T04:43:29.716Z","load":12.26,"page":"notfound","view":"1440","theme":"dark","status":null,"buttons":[],"text":"Turboslide Not found No page is at this address. Start a new presentation, open your presentations or read what Turboslide is. New Presentation Your Presentations About Turboslide The Blue Marble Image: NASA, Reto Stöckli, 2007, public domain","scrollWidth":1440}
+{"at":"2026-10-04T04:43:32.346Z","load":16.57,"shot":"local-refused-1440-dark.jpg","bytes":23311,"quality":72}
+{"at":"2026-10-04T04:43:32.347Z","load":16.57,"page":"refused","view":"1440","theme":"dark","status":null,"buttons":["Reload"],"text":"Turboslide This presentation could not be opened deckId must be a slug. Reload Your Presentations","scrollWidth":1440}
+{"at":"2026-10-04T04:43:34.019Z","load":16.57,"shot":"local-editor-1440-dark.jpg","bytes":43730,"quality":72}
+{"at":"2026-10-04T04:43:34.021Z","load":16.57,"editor":"1440","theme":"dark","rowWidth":1440,"scrollWidth":1440,"name":{"x":50,"w":157},"slideshow":{"x":1141,"w":133},"share":{"x":1282,"w":78},"more":{"x":0,"w":0},"words":"Untitled presentation Last edit 3 minutes ago All changes saved C Assist Slideshow Share Sign In","homeTip":"Turboslide home","banner":["Edits on this copy of Turboslide are lost when it restarts."],"stageBg":"rgba(242, 242, 240, 0.08)"}
+{"at":"2026-10-04T04:43:37.271Z","load":16.28,"shot":"local-select-1440-dark.jpg","bytes":46419,"quality":72}
+{"at":"2026-10-04T04:43:37.272Z","load":16.28,"select":"1440","theme":"dark","ring":null,"chipBg":"rgb(47, 92, 224)","chipText":"rgb(255, 255, 255)","chipWords":"Text box"}
+{"at":"2026-10-04T04:43:38.061Z","load":16.28,"contextText":"1440","theme":"dark","rows":["Cut","Copy","Paste","Delete","Duplicate","Order","Rotate","Center on page","Align","Distribute","Group","Ungroup","Link","Text fitting","Format options","Alt text","Comment"]}
+{"at":"2026-10-04T04:43:38.077Z","load":16.28,"shot":"local-context-text-1440-dark.jpg","bytes":59416,"quality":72}
+{"at":"2026-10-04T04:43:41.144Z","load":15.86,"shot":"local-menu-insert-1440-dark.jpg","bytes":50328,"quality":72}
+{"at":"2026-10-04T04:43:41.144Z","load":15.86,"menu":"insert","view":"1440","theme":"dark","rows":["Image","Text box","Shape","Table","Chart","Diagram","Word art","Line","Link","Comment","New slide","Slide numbers","Animated pattern"],"image":["Upload from computer","Logo","By URL"]}
+{"at":"2026-10-04T04:43:43.413Z","load":15.86,"shot":"local-menu-tools-1440-dark.jpg","bytes":49373,"quality":72}
+{"at":"2026-10-04T04:43:47.396Z","load":15.39,"shot":"local-menu-tools-tip-1440-dark.jpg","bytes":48844,"quality":72}
+{"at":"2026-10-04T04:43:47.396Z","load":15.39,"menu":"tools","view":"1440","theme":"dark","rows":["Preferences","Tailor for a customer","Check slides","Advanced tools"],"preferences":["Link detection","Play animated patterns","Appearance","Turn on collaborator announcements"],"advancedTip":"Advanced tools Shows more tools in every menu, on the toolbar and in the right click menus. Some of them may not work yet."}
+{"at":"2026-10-04T04:43:50.429Z","load":15.52,"shot":"local-menu-file-download-1440-dark.jpg","bytes":59566,"quality":72}
+{"at":"2026-10-04T04:43:50.430Z","load":15.52,"menu":"file","view":"1440","theme":"dark","rows":["New presentation","Open","Import slides","Make a copy","Share","Download","Rename","Move to trash","Version history","Details","Print settings and preview","Print"],"download":["Microsoft PowerPoint (.pptx)","PDF Document (.pdf)","JPEG image (.jpg, current slide)","PNG image (.png, current slide)","More formats"],"more":["Web page (.html)","Turboslide file (.zip)","Download options"]}
+{"at":"2026-10-04T04:43:51.928Z","load":15.52,"shot":"local-menu-view-1440-dark.jpg","bytes":48615,"quality":72}
+{"at":"2026-10-04T04:43:51.928Z","load":15.52,"menu":"view","view":"1440","theme":"dark","rows":["Slideshow","Zoom","Show ruler","Guides","Snap to","Comments","Live pointers","Show speaker notes","Show filmstrip","Mode","Full screen"]}
+{"at":"2026-10-04T04:43:53.418Z","load":15.52,"shot":"local-menu-format-1440-dark.jpg","bytes":48033,"quality":72}
+{"at":"2026-10-04T04:43:53.418Z","load":15.52,"menu":"format","view":"1440","theme":"dark","rows":["Text","Align & indent","Line & paragraph spacing","Bullets & numbering","Table","Image","Borders & lines","Format options","Clear formatting","Alt text"]}
+{"at":"2026-10-04T04:43:54.914Z","load":15.52,"shot":"local-menu-slide-1440-dark.jpg","bytes":46916,"quality":72}
+{"at":"2026-10-04T04:43:54.915Z","load":15.52,"menu":"slide","view":"1440","theme":"dark","rows":["New slide","Duplicate slide","Delete slide","Skip slide","Move slide","Change background","Apply layout","Change theme"]}
+{"at":"2026-10-04T04:43:56.411Z","load":15.16,"shot":"local-menu-help-1440-dark.jpg","bytes":45548,"quality":72}
+{"at":"2026-10-04T04:43:56.411Z","load":15.16,"menu":"help","view":"1440","theme":"dark","rows":["Search the menus","Help","Help Turboslide improve","Keyboard shortcuts"]}
+{"at":"2026-10-04T04:43:58.815Z","load":15.16,"shot":"local-signin-1440-dark.jpg","bytes":45280,"quality":72}
+{"at":"2026-10-04T04:44:01.521Z","load":14.98,"shot":"local-assist-1440-dark.jpg","bytes":57920,"quality":72}
+{"at":"2026-10-04T04:44:01.522Z","load":14.98,"assist":"1440","theme":"dark","assistLabel":"Assist","assistSvg":0}
+{"at":"2026-10-04T04:44:05.217Z","load":14.66,"shot":"local-palette-assist-1440-dark.jpg","bytes":44749,"quality":72}
+{"at":"2026-10-04T04:44:07.725Z","load":14.66,"shot":"local-theme-panel-1440-dark.jpg","bytes":58488,"quality":72}
+{"at":"2026-10-04T04:44:07.726Z","load":14.66,"themePanel":"1440","theme":"dark","head":["Theme","Appearance","Logo","Colors"]}
+{"at":"2026-10-04T04:44:12.407Z","load":14.61,"shot":"local-share-1440-dark.jpg","bytes":54117,"quality":72}
+{"at":"2026-10-04T04:44:15.112Z","load":14.61,"shot":"local-versions-1440-dark.jpg","bytes":50126,"quality":72}
+{"at":"2026-10-04T04:44:15.114Z","load":14.61,"versions":"1440","theme":"dark","times":[]}
+{"at":"2026-10-04T04:44:19.141Z","load":14.64,"shot":"local-present-1440-dark.jpg","bytes":29377,"quality":72}
+{"at":"2026-10-04T04:44:19.142Z","load":14.64,"present":"1440","theme":"dark","scrollWidth":1440,"clock":"Time 9:44 PM"}
+{"at":"2026-10-04T04:44:22.396Z","load":14.35,"shot":"local-view-1440-dark.jpg","bytes":35136,"quality":72}
+{"at":"2026-10-04T04:44:22.397Z","load":14.35,"view":"1440","theme":"dark","og":{"og:site_name":"Turboslide","og:type":"website","og:locale":"en_US","og:image":"https://www.turboslide.com/og/turboslide.png","og:image:type":"image/png","og:image:width":"1200","og:image:height":"630","og:image:alt":"The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither","og:title":"Untitled presentation","og:url":"https://www.turboslide.com/deck/untitled-20261004-avpx","og:description":"A presentation of 2 slides, opened in Turboslide in the browser."}}
+{"at":"2026-10-04T04:44:25.169Z","load":14.16,"shot":"local-access-1440-dark.jpg","bytes":32496,"quality":72}
+{"at":"2026-10-04T04:44:25.170Z","load":14.16,"access":200,"view":"1440","theme":"dark","text":"Untitled presentation Last edit 3 minutes ago B Slideshow Share Sign In File View Tools Help View only 1 2 A selected box Edits on this copy of Turboslide are lost when it restarts."}
+{"at":"2026-10-04T04:44:27.854Z","load":14.16,"shot":"local-decks-empty-1440-dark.jpg","bytes":46077,"quality":72}
+{"at":"2026-10-04T04:44:27.856Z","load":14.16,"decksEmpty":"1440","theme":"dark","text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Name Last opened Slides Actions Untitled presentation Untitled presentation Opened just now 2 Trash"}
+{"at":"2026-10-04T04:44:30.661Z","load":13.67,"shot":"local-home-390-dark.jpg","bytes":42944,"quality":72}
+{"at":"2026-10-04T04:44:30.662Z","load":13.67,"home":"390","theme":"dark","title":"Turboslide is a slides editor in the browser","scrollWidth":390,"nav":["Turboslide","Sign In","Documentation","Light","Dark","New Presentation"],"licence":0,"license":2}
+{"at":"2026-10-04T04:44:31.642Z","load":13.67,"shot":"local-home-numbers-390-dark.jpg","bytes":34864,"quality":72}
+{"at":"2026-10-04T04:44:32.616Z","load":13.67,"shot":"local-home-diagram-390-dark.jpg","bytes":37739,"quality":72}
+{"at":"2026-10-04T04:44:33.589Z","load":13.67,"shot":"local-home-command-390-dark.jpg","bytes":26885,"quality":72}
+{"at":"2026-10-04T04:44:34.495Z","load":13.67,"shot":"local-home-foot-390-dark.jpg","bytes":29551,"quality":72}
+{"at":"2026-10-04T04:44:37.148Z","load":13.29,"shot":"local-decks-390-dark.jpg","bytes":25984,"quality":72}
+{"at":"2026-10-04T04:44:37.149Z","load":13.29,"page":"decks","view":"390","theme":"dark","status":null,"buttons":["Sign In","GT brand deck"],"text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Untitled presentation Untitled presentation Opened 3 minutes ago Trash","scrollWidth":390}
+{"at":"2026-10-04T04:44:39.753Z","load":13.29,"shot":"local-notfound-390-dark.jpg","bytes":47830,"quality":72}
+{"at":"2026-10-04T04:44:39.755Z","load":13.29,"page":"notfound","view":"390","theme":"dark","status":null,"buttons":[],"text":"Turboslide Not found No page is at this address. Start a new presentation, open your presentations or read what Turboslide is. New Presentation Your Presentations About Turboslide The Blue Marble Image: NASA, Reto Stöckli, 2007, public domain","scrollWidth":390}
+{"at":"2026-10-04T04:44:42.381Z","load":13.19,"shot":"local-refused-390-dark.jpg","bytes":17652,"quality":72}
+{"at":"2026-10-04T04:44:42.382Z","load":13.19,"page":"refused","view":"390","theme":"dark","status":null,"buttons":["Reload"],"text":"Turboslide This presentation could not be opened deckId must be a slug. Reload Your Presentations","scrollWidth":390}
+{"at":"2026-10-04T04:44:44.049Z","load":13.19,"shot":"local-editor-390-dark.jpg","bytes":17248,"quality":72}
+{"at":"2026-10-04T04:44:44.050Z","load":13.19,"editor":"390","theme":"dark","rowWidth":390,"scrollWidth":390,"name":{"x":42,"w":138},"slideshow":{"x":270,"w":32},"share":{"x":310,"w":32},"more":{"x":350,"w":32},"words":"Untitled presentation","homeTip":"Turboslide home","banner":["Edits on this copy of Turboslide are lost when it restarts."],"stageBg":"rgba(242, 242, 240, 0.08)"}
+{"at":"2026-10-04T04:44:47.289Z","load":12.85,"shot":"local-select-390-dark.jpg","bytes":18724,"quality":72}
+{"at":"2026-10-04T04:44:47.290Z","load":12.85,"select":"390","theme":"dark","ring":null,"chipBg":"rgb(47, 92, 224)","chipText":"rgb(255, 255, 255)","chipWords":"Text box"}
+{"at":"2026-10-04T04:44:51.132Z","load":12.54,"shot":"local-menu-insert-390-dark.jpg","bytes":24132,"quality":72}
+{"at":"2026-10-04T04:44:51.132Z","load":12.54,"menu":"insert","view":"390","theme":"dark","rows":["Image","Text box","Shape","Table","Chart","Diagram","Word art","Line","Link","Comment","New slide","Slide numbers","Animated pattern"],"image":["Upload from computer","Logo","By URL"]}
+{"at":"2026-10-04T04:44:54.181Z","load":12.54,"shot":"local-menu-tools-390-dark.jpg","bytes":22453,"quality":72}
+{"at":"2026-10-04T04:44:54.181Z","load":12.54,"menu":"tools","view":"390","theme":"dark","rows":["Preferences","Tailor for a customer","Check slides","Advanced tools"],"preferences":["Link detection","Play animated patterns","Appearance","Turn on collaborator announcements"],"advancedTip":null}
+{"at":"2026-10-04T04:44:57.983Z","load":12.74,"shot":"local-menu-file-download-390-dark.jpg","bytes":28787,"quality":72}
+{"at":"2026-10-04T04:44:57.984Z","load":12.74,"menu":"file","view":"390","theme":"dark","rows":["New presentation","Open","Import slides","Make a copy","Share","Download","Rename","Move to trash","Version history","Details","Print settings and preview","Print"],"download":["Microsoft PowerPoint (.pptx)","PDF Document (.pdf)","JPEG image (.jpg, current slide)","PNG image (.png, current slide)","More formats"],"more":["Web page (.html)","Turboslide file (.zip)","Download options"]}
+{"at":"2026-10-04T04:45:00.256Z","load":12.6,"shot":"local-menu-view-390-dark.jpg","bytes":22936,"quality":72}
+{"at":"2026-10-04T04:45:00.257Z","load":12.6,"menu":"view","view":"390","theme":"dark","rows":["Slideshow","Zoom","Show ruler","Guides","Snap to","Comments","Live pointers","Show speaker notes","Show filmstrip","Mode","Full screen"]}
+{"at":"2026-10-04T04:45:02.536Z","load":12.6,"shot":"local-menu-format-390-dark.jpg","bytes":23513,"quality":72}
+{"at":"2026-10-04T04:45:02.536Z","load":12.6,"menu":"format","view":"390","theme":"dark","rows":["Text","Align & indent","Line & paragraph spacing","Bullets & numbering","Table","Image","Borders & lines","Format options","Clear formatting","Alt text"]}
+{"at":"2026-10-04T04:45:04.808Z","load":12.6,"shot":"local-menu-slide-390-dark.jpg","bytes":22667,"quality":72}
+{"at":"2026-10-04T04:45:04.808Z","load":12.6,"menu":"slide","view":"390","theme":"dark","rows":["New slide","Duplicate slide","Delete slide","Skip slide","Move slide","Change background","Apply layout","Change theme"]}
+{"at":"2026-10-04T04:45:07.074Z","load":12.47,"shot":"local-menu-help-390-dark.jpg","bytes":20502,"quality":72}
+{"at":"2026-10-04T04:45:07.074Z","load":12.47,"menu":"help","view":"390","theme":"dark","rows":["Search the menus","Help","Help Turboslide improve","Keyboard shortcuts"]}
+{"at":"2026-10-04T04:45:08.866Z","load":12.47,"shot":"local-title-more-390-dark.jpg","bytes":21686,"quality":72}
+{"at":"2026-10-04T04:45:08.867Z","load":12.47,"titleMore":"390","theme":"dark","rows":["Assist","Show all comments","Show side panel","Collaborators","Presenter view","Start from beginning","Sign in"]}
+{"at":"2026-10-04T04:45:09.665Z","load":12.47,"signin":"no visible Sign In at 390"}
+{"at":"2026-10-04T04:45:13.632Z","load":12.76,"shot":"local-theme-panel-390-dark.jpg","bytes":28325,"quality":72}
+{"at":"2026-10-04T04:45:13.633Z","load":12.76,"themePanel":"390","theme":"dark","head":["Theme","Appearance","Logo","Colors"]}
+{"at":"2026-10-04T04:45:18.292Z","load":12.69,"shot":"local-share-390-dark.jpg","bytes":26057,"quality":72}
+{"at":"2026-10-04T04:45:20.982Z","load":12.4,"shot":"local-versions-390-dark.jpg","bytes":22888,"quality":72}
+{"at":"2026-10-04T04:45:20.983Z","load":12.4,"versions":"390","theme":"dark","times":[]}
+{"at":"2026-10-04T04:45:24.982Z","load":12.4,"shot":"local-present-390-dark.jpg","bytes":15962,"quality":72}
+{"at":"2026-10-04T04:45:24.983Z","load":12.4,"present":"390","theme":"dark","scrollWidth":390,"clock":"Time 9:45 PM"}
+{"at":"2026-10-04T04:45:28.212Z","load":12.13,"shot":"local-view-390-dark.jpg","bytes":23344,"quality":72}
+{"at":"2026-10-04T04:45:28.212Z","load":12.13,"view":"390","theme":"dark","og":{"og:site_name":"Turboslide","og:type":"website","og:locale":"en_US","og:image":"https://www.turboslide.com/og/turboslide.png","og:image:type":"image/png","og:image:width":"1200","og:image:height":"630","og:image:alt":"The Turboslide mark and name with the sentence Turboslide is a slides editor in the browser, the address www.turboslide.com and the picture's credit, on a plate beside NASA's Blue Marble as a two tone dither","og:title":"Untitled presentation","og:url":"https://www.turboslide.com/deck/untitled-20261004-avpx","og:description":"A presentation of 2 slides, opened in Turboslide in the browser."}}
+{"at":"2026-10-04T04:45:30.949Z","load":11.72,"shot":"local-access-390-dark.jpg","bytes":15487,"quality":72}
+{"at":"2026-10-04T04:45:30.950Z","load":11.72,"access":200,"view":"390","theme":"dark","text":"Untitled presentation View only 1 2 A selected box Edits on this copy of Turboslide are lost when it restarts."}
+{"at":"2026-10-04T04:45:33.598Z","load":11.72,"shot":"local-decks-empty-390-dark.jpg","bytes":25701,"quality":72}
+{"at":"2026-10-04T04:45:33.599Z","load":11.72,"decksEmpty":"390","theme":"dark","text":"Turboslide Sign In Start a new presentation Template gallery Blank presentation GT brand deck Recent presentations Sort by Last opened by me Last modified Title Untitled presentation Untitled presentation Opened just now Trash"}
+{"at":"2026-10-04T04:45:35.405Z","load":11.9,"teardown":"untitled-20261004-avpx","trashed":"ok","removed":"ok","editorAfter":404}
+{"at":"2026-10-04T04:45:35.428Z","load":11.9,"end":"http://localhost:4521"}

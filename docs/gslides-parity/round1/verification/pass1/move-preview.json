@@ -1,0 +1,264 @@
+{
+  "base": "https://turboslide-lp2z0cdl8-kl01s-projects.vercel.app",
+  "deckId": "untitled-20261003-jl61",
+  "results": [
+    {
+      "kind": "text box",
+      "slide": "blank-1-8279",
+      "id": "text",
+      "type": "text",
+      "inserted": "300,300 500x120",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "300,300 500x120",
+        "to": "499,413 500x120",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.text.resize.se",
+      "resize": {
+        "from": "499,413 500x120",
+        "to": "499,413 628x205",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-text-box.jpg"
+    },
+    {
+      "kind": "rectangle",
+      "slide": "blank-2-8279",
+      "id": "shape",
+      "type": "shape",
+      "inserted": "300,300 400x260",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "300,300 400x260",
+        "to": "503,413 400x260",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.shape.resize.se",
+      "resize": {
+        "from": "503,413 400x260",
+        "to": "503,413 528x345",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-rectangle.jpg"
+    },
+    {
+      "kind": "ellipse",
+      "slide": "blank-3-8279",
+      "id": "shape",
+      "type": "shape",
+      "inserted": "300,300 320x260",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "300,300 320x260",
+        "to": "499,413 320x260",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.shape.resize.se",
+      "resize": {
+        "from": "499,413 320x260",
+        "to": "499,413 448x345",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-ellipse.jpg"
+    },
+    {
+      "kind": "line",
+      "slide": "blank-4-8279",
+      "id": "shape",
+      "type": "shape",
+      "inserted": "300,300 500x200",
+      "handles": 3,
+      "move": {
+        "how": "move handle",
+        "from": "300,300 500x200",
+        "to": "499,413 500x200",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.shape.end",
+      "resize": {
+        "from": "499,413 500x200",
+        "to": "499,413 628x285",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-line.jpg"
+    },
+    {
+      "kind": "arrow",
+      "slide": "blank-5-8279",
+      "id": "shape",
+      "type": "shape",
+      "inserted": "300,300 500x60",
+      "handles": 3,
+      "move": {
+        "how": "move handle",
+        "from": "300,300 500x60",
+        "to": "499,413 500x60",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.shape.end",
+      "resize": {
+        "from": "499,413 500x60",
+        "to": "499,413 628x145",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-arrow.jpg"
+    },
+    {
+      "kind": "table",
+      "slide": "blank-6-8279",
+      "id": "table",
+      "type": "table",
+      "inserted": "320,129 960x163",
+      "handles": 21,
+      "move": {
+        "how": "move handle",
+        "from": "320,129 960x163",
+        "to": "519,242 960x163",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.table.resize.se",
+      "resize": {
+        "from": "519,242 960x163",
+        "to": "519,242 1088x248",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-table.jpg"
+    },
+    {
+      "kind": "chart",
+      "slide": "blank-7-8279",
+      "id": "chart",
+      "type": "chart",
+      "inserted": "320,129 960x540",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "320,129 960x540",
+        "to": "519,242 960x540",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.chart.resize.se",
+      "resize": {
+        "from": "519,242 960x540",
+        "to": "519,242 1088x625",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-chart.jpg"
+    },
+    {
+      "kind": "diagram",
+      "slide": "blank-8-8279",
+      "id": "step-1",
+      "type": "shape",
+      "inserted": "320,370 197x160",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "320,370 197x160",
+        "to": "519,483 197x160",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.step-1.resize.se",
+      "resize": {
+        "from": "519,483 197x160",
+        "to": "519,483 223x245",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-diagram.jpg"
+    },
+    {
+      "kind": "word art",
+      "slide": "blank-9-8279",
+      "id": "text",
+      "type": "text",
+      "inserted": "400,390 800x120",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "400,390 800x120",
+        "to": "599,503 800x120",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.text.resize.se",
+      "resize": {
+        "from": "599,503 800x120",
+        "to": "599,503 928x205",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-word-art.jpg"
+    },
+    {
+      "kind": "picture",
+      "slide": "blank-10-8279",
+      "id": "shot",
+      "type": "shot",
+      "inserted": "560,290 480x320",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "560,290 480x320",
+        "to": "764,403 480x320",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.shot.resize.se",
+      "resize": {
+        "from": "764,403 480x320",
+        "to": "764,403 608x405",
+        "ok": true,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-picture.jpg"
+    },
+    {
+      "kind": "animated pattern",
+      "slide": "blank-11-8279",
+      "id": "material",
+      "type": "material",
+      "inserted": "137,129 1326x642",
+      "handles": 10,
+      "move": {
+        "how": "move handle",
+        "from": "137,129 1326x642",
+        "to": "336,242 1326x642",
+        "want": "+199,+113",
+        "ok": true
+      },
+      "resizeHandle": "handle.material.resize.se",
+      "resize": {
+        "from": "336,242 1326x642",
+        "to": "336,242 1326x642",
+        "ok": false,
+        "anchoredTopLeft": true
+      },
+      "shot": "preview-move-animated-pattern.jpg"
+    },
+    {
+      "kind": "icon",
+      "slide": "blank-12-8279",
+      "error": "TimeoutError: locator.click: Timeout 30000ms exceeded."
+    }
+  ]
+}

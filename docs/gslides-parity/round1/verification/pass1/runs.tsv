@@ -1,0 +1,43 @@
+2026-10-03T22:31:13Z	2026-10-03T22:32:41Z	cuts-preview	exit 0	load 12.21 to 19.10
+2026-10-03T22:29:51Z	2026-10-03T22:41:03Z	preview-specs	exit 0	load 14.57 to 14.37
+2026-10-03T22:41:03Z	2026-10-03T22:41:16Z	preview-smoke	exit 1	load 14.37 to 13.87
+2026-10-03T22:41:16Z	2026-10-03T22:41:58Z	preview-write	exit 0	load 13.87 to 14.59
+2026-10-03T22:43:36Z	2026-10-03T22:48:20Z	move-preview	exit 0	load 13.76 to 15.60
+2026-10-03T22:49:24Z	2026-10-03T22:53:48Z	move-preview-2	exit 0	load 20.59 to 20.86
+2026-10-04T02:24:00Z	2026-10-04T02:25:45Z	signin-hand	exit 0	load 20.23 to 25.00
+2026-10-04T02:25:53Z	wait	accounts	load 25.40
+2026-10-04T02:30:53Z	wait	accounts	load 36.54
+2026-10-04T02:35:53Z	wait	accounts	load 38.28
+2026-10-04T02:40:53Z	wait	accounts	load 27.94
+2026-10-04T02:45:53Z	wait	accounts	load 29.51
+2026-10-04T02:50:53Z	wait	accounts	load 41.27
+2026-10-04T02:55:53Z	wait	accounts	load 38.02
+2026-10-04T03:00:53Z	wait	accounts	load 32.26
+2026-10-04T03:05:53Z	wait	accounts	load 36.97
+2026-10-04T03:10:53Z	wait	accounts	load 38.95
+2026-10-04T03:15:53Z	wait	accounts	load 47.28
+2026-10-04T03:20:53Z	wait	accounts	load 65.51
+2026-10-04T03:25:53Z	wait	accounts	load 39.48
+2026-10-04T03:30:53Z	wait	accounts	load 37.74
+2026-10-04T03:35:53Z	wait	accounts	load 36.48
+2026-10-04T03:40:53Z	wait	accounts	load 45.54
+2026-10-04T03:45:53Z	wait	accounts	load 46.21
+2026-10-04T03:50:53Z	wait	accounts	load 36.22
+2026-10-04T03:55:53Z	wait	accounts	load 29.77
+2026-10-04T04:00:53Z	wait	accounts	load 29.87
+2026-10-04T04:05:54Z	wait	accounts	load 26.29
+2026-10-04T04:10:54Z	wait	accounts	load 29.73
+2026-10-04T04:15:54Z	2026-10-04T04:20:24Z	accounts	exit 1	load 18.99 to 35.46
+2026-10-04T04:20:33Z	wait	round-rows	load 38.46
+2026-10-04T04:25:33Z	wait	round-rows	load 39.55
+2026-10-04T04:30:33Z	wait	round-rows	load 42.25
+2026-10-04T04:35:33Z	2026-10-04T04:40:18Z	round-rows	exit 0	load 11.92 to 19.85
+2026-10-04T04:40:19Z	2026-10-04T04:45:35Z	hand-local	exit 0	load 19.85 to 11.90
+2026-10-04T04:45:35Z	2026-10-04T04:50:54Z	move-local	exit 0	load 11.90 to 14.73
+2026-10-04T04:50:54Z	2026-10-04T04:51:14Z	lint /new	exit 1	load 14.73 to 17.27
+2026-10-04T04:51:14Z	2026-10-04T04:51:18Z	lint /decks	exit 0	load 17.27 to 17.01
+2026-10-04T04:51:18Z	2026-10-04T04:51:30Z	lint /home	exit 0	load 17.01 to 17.94
+2026-10-04T04:51:30Z	2026-10-04T04:51:42Z	lint /no-such-page	exit 0	load 17.94 to 21.72
+2026-10-04T04:52:00Z	2026-10-04T04:53:26Z	cuts-local	exit 0	load 21.14 to 13.51
+2026-10-04T04:53:32Z	2026-10-04T04:53:56Z	accounts-narrowed	exit 0	load 12.99 to 14.47
+2026-10-04T04:54:00Z	2026-10-04T05:08:09Z	base21	exit 1	load 13.95 to 69.71

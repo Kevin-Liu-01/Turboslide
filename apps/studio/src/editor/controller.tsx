@@ -1574,7 +1574,14 @@ export function createEditorController(init: {
     }
   };
 
+  /* another author's entry in this tab's frame (room-client.ts onRemoteApplied), read by the
+     announce of the same entry: the session takes the point of each remote splice from it */
+  let remoteLocal: { opId: string; mutations: readonly Mutation[] } | null = null;
+
   const announceRemoteText = (entry: Entry): void => {
+    const local =
+      remoteLocal !== null && remoteLocal.opId === entry.opId ? remoteLocal.mutations : null;
+    remoteLocal = null;
     if (
       room === null ||
       entry.clientId === room.clientId() ||
@@ -1605,7 +1612,27 @@ export function createEditorController(init: {
       seen.add(key);
       const text = readRunText(slide, mutation.blockId, pointer);
       if (text === undefined) continue;
-      announceTextChanged({ slideId: mutation.slideId, blockId: mutation.blockId, pointer, text });
+      /* the splices of this run as this tab placed them, so the session reads where the other
+         person's text landed rather than diffing two strings (realtime.title.two-typers; the
+         realtime round's fix round 3) */
+      const splices =
+        local === null
+          ? undefined
+          : local.flatMap((row) =>
+              row.op === 'text.splice' &&
+              row.slideId === mutation.slideId &&
+              row.blockId === mutation.blockId &&
+              row.path === mutation.path
+                ? [{ at: row.at, remove: row.remove, insert: row.insert }]
+                : [],
+            );
+      announceTextChanged({
+        slideId: mutation.slideId,
+        blockId: mutation.blockId,
+        pointer,
+        text,
+        ...(splices === undefined ? {} : { splices }),
+      });
     }
   };
 
@@ -1891,6 +1918,9 @@ export function createEditorController(init: {
         if (next.deck.revision !== latest().serverRevision) {
           publish({ serverRevision: next.deck.revision });
         }
+      },
+      onRemoteApplied: (entry, local) => {
+        remoteLocal = { opId: entry.opId, mutations: local };
       },
       onStatus: (status) => {
         publish({

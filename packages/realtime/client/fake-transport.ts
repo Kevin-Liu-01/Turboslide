@@ -59,7 +59,38 @@ function transformPast(
   landed: readonly Mutation[],
   run = false,
 ): Mutation[] | null {
+  return movePast(mutations, landed, runTieSide(run, 'right'));
+}
+
+/**
+ * What landed since a POST's base, moved past one entry of that POST the admission placed (the
+ * entry's mutations as its client wrote them, `run` its declaration): the next entry of the POST
+ * was written after this one, so it meets what landed in that frame. The landed inserts take the
+ * other side of the entry's tie. Every mutation that landed stays; one the entry rewrote away is
+ * dropped from the frame (realtime.title.two-typers; the realtime round's fix round 3).
+ */
+function landedPast(
+  landed: readonly Mutation[],
+  entry: readonly Mutation[],
+  run = false,
+): Mutation[] {
   const tie = runTieSide(run, 'right');
+  const side = tie === 'left' ? 'right' : 'left';
+  // each landed row meets the entry as it stands after the rows before it
+  let written: Mutation[] = [...entry];
+  const out: Mutation[] = [];
+  for (const row of landed) {
+    out.push(...(movePast([row], written, side) ?? []));
+    written = movePast(written, [row], tie) ?? [];
+  }
+  return out;
+}
+
+function movePast(
+  mutations: readonly Mutation[],
+  landed: readonly Mutation[],
+  tie: 'left' | 'right',
+): Mutation[] | null {
   let out = [...mutations];
   for (const against of landed) {
     const next: Mutation[] = [];
@@ -270,7 +301,7 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             body.base.seq < head
               ? await channel.since(deckId, body.base.seq, head - body.base.seq)
               : [];
-          const landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
+          let landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
           const rejected: Rejected[] = [];
           const candidates: NewEntry[] = [];
           let running = live;
@@ -307,6 +338,8 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               });
               continue;
             }
+            // the next entry of this POST was written after this one: what landed meets it there
+            landedMutations = landedPast(landedMutations, entry.mutations ?? [], entryRun(entry));
             candidates.push({
               rev: live.deck.revision,
               kind: 'edit',
@@ -328,7 +361,7 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             head,
             candidates,
             (entries, more) => {
-              const moreMutations = more.flatMap((entry) => entry.mutations ?? []);
+              let moreMutations = more.flatMap((entry) => entry.mutations ?? []);
               const out: NewEntry[] = [];
               for (const entry of entries) {
                 if (entry.kind !== 'edit') {
@@ -344,6 +377,11 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
                   rejected.push({ opId: entry.opId, reason: 'stale' });
                   continue;
                 }
+                moreMutations = landedPast(
+                  moreMutations,
+                  entry.mutations ?? [],
+                  runOf.get(entry.opId),
+                );
                 out.push({ ...entry, mutations: moved });
               }
               return out;

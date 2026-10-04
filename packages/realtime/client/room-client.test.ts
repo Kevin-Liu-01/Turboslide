@@ -5,7 +5,8 @@
 // closed tab's queue is offered to the next open, and a refused op comes back with its content.
 import { describe, expect, it } from 'vitest';
 
-import type { DeckDocument } from '@turboslide/schema/deck';
+import { toCanvas } from '@turboslide/schema/canvas';
+import type { DeckDocument, TitleSlide } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { getAt } from '@turboslide/schema/pointer';
@@ -2905,5 +2906,244 @@ describe("the run rule's client half (build/r1.md R1-R2h; the row realtime.title
     );
     expect(runEnds.size).toBe(0);
     expect(advanceRunEnds(runEnds, [splice(3, 0, 'w')], true)).toBe(false);
+  });
+});
+
+describe('a remote entry in the tab’s frame (onRemoteApplied; the realtime round’s fix round 3)', () => {
+  it('names where another author’s insert landed beside a pending op that declared no run, before the op event', async () => {
+    const h = harness();
+    const base = tabTransport(h.server, kevin);
+    let hold: Promise<void> | null = null;
+    let release: () => void = () => undefined;
+    const gated: RoomTransport = {
+      ...base,
+      async postOps(body) {
+        if (hold !== null) await hold;
+        return base.postOps(body);
+      },
+    };
+    const seen: { opId: string; local: readonly Mutation[] }[] = [];
+    const order: string[] = [];
+    const a = h.client(kevin, {
+      transport: gated,
+      transform: undefined,
+      onRemoteApplied: (entry, local) => {
+        seen.push({ opId: entry.opId, local });
+        order.push('applied');
+      },
+      onEvent: (event) => {
+        if (event.type === 'op') order.push('op');
+      },
+    });
+    const b = h.client(maya, { transform: undefined });
+    a.room.start();
+    b.room.start();
+    await until(() => a.room.status().connected && b.room.status().connected);
+    const start = textOf(a.room.document());
+    const end = start.length;
+    // A's " xa" waits on the wire with no run end to continue; B's " xb" lands at the same offset
+    hold = new Promise((resolve) => {
+      release = resolve;
+    });
+    a.room.apply([splice(end, 0, ' xa')], 'type', 'now');
+    b.room.apply([splice(end, 0, ' xb')], 'type', 'now');
+    await settled([b.room]);
+    await until(() => textOf(a.room.document()).includes(' xb'));
+    // the server puts B's word first, A's copy moves its pending op past it, and the hook names
+    // B's insert at the offset it holds in A's copy: before A's own " xa", not after it
+    expect(textOf(a.room.document())).toBe(`${start} xb xa`);
+    const remote = seen.at(-1)!;
+    expect(remote.local).toEqual([splice(end, 0, ' xb')]);
+    expect(order.slice(-2)).toEqual(['applied', 'op']);
+    release();
+    hold = null;
+    await settled([a.room, b.room]);
+    expect(textOf(h.server.document())).toBe(`${start} xb xa`);
+    await a.room.stop();
+    await b.room.stop();
+  });
+});
+
+describe("a run of pending ops meets another author's insert in its own frame (realtime.title.two-typers; the realtime round's fix round 3)", () => {
+  for (const shape of ['one POST', 'two POSTs'] as const) {
+    it(`keeps two pending ops that continue one insert whole when another author's word lands at its start (${shape})`, async () => {
+      const h = harness();
+      const base = tabTransport(h.server, kevin);
+      const posts: OpsPost[] = [];
+      let hold: Promise<void> | null = null;
+      let release: () => void = () => undefined;
+      const gated: RoomTransport = {
+        ...base,
+        async postOps(body) {
+          posts.push(body);
+          if (hold !== null) await hold;
+          return base.postOps(body);
+        },
+      };
+      const a = h.client(kevin, { transport: gated, transform: undefined });
+      const b = h.client(maya, { transform: undefined });
+      a.room.start();
+      b.room.start();
+      await until(() => a.room.status().connected && b.room.status().connected);
+      const start = textOf(a.room.document());
+      const end = start.length;
+      a.room.apply([splice(end, 0, ' ta')], 'type', 'now');
+      await settled([a.room, b.room]);
+      await until(() => textOf(b.room.document()) === `${start} ta`);
+      hold = new Promise((resolve) => {
+        release = resolve;
+      });
+      const sent = posts.length;
+      // A's "1" and "2" continue " ta" as two ops: posted together (one POST, both entries) or the
+      // second behind the first in flight (two POSTs)
+      if (shape === 'one POST') {
+        a.room.apply([splice(end + 3, 0, '1')], 'type', 'text');
+        a.room.apply([splice(end + 4, 0, '2')], 'type', 'text');
+        await until(() => posts.length > sent);
+      } else {
+        a.room.apply([splice(end + 3, 0, '1')], 'type', 'now');
+        await until(() => posts.length > sent);
+        a.room.apply([splice(end + 4, 0, '2')], 'type', 'now');
+      }
+      // B appends " tb" at the same offset, and it lands first
+      b.room.apply([splice(end + 3, 0, ' tb')], 'type', 'now');
+      await settled([b.room]);
+      await until(() => textOf(a.room.document()).includes(' tb'));
+      // A's copy: both pending ops stay left of B's word; before the fix the second op met B's
+      // insert as the server wrote it and landed after it (" ta1 tb2")
+      expect(textOf(a.room.document())).toBe(`${start} ta12 tb`);
+      release();
+      hold = null;
+      await settled([a.room, b.room]);
+      const server = textOf(h.server.document());
+      expect(server).toBe(`${start} ta12 tb`);
+      expect(textOf(a.room.document())).toBe(server);
+      expect(textOf(b.room.document())).toBe(server);
+      expect(posts.slice(sent).map((post) => post.entries.length)).toEqual(
+        shape === 'one POST' ? [2] : [1, 1],
+      );
+      await a.room.stop();
+      await b.room.stop();
+    });
+  }
+});
+
+describe("a cover's conversion in the tab's frame (build/r1.md R1-R2k; the realtime round's fix round 3)", () => {
+  const COVER = 'title';
+  const fieldRun = (at: number, insert: string): Mutation => ({
+    op: 'text.splice',
+    slideId: COVER,
+    blockId: 'heading',
+    path: '/heading',
+    at,
+    remove: 0,
+    insert,
+  });
+  const headingOf = (document: DeckDocument): string => {
+    const slide = document.slides[COVER];
+    if (slide?.kind === 'title') return plainOf(slide.heading);
+    const text = slide === undefined ? undefined : getAt(slide, '/slots/main/1/text');
+    return plainOf(String(text ?? ''));
+  };
+
+  it("moves the op's word on the block its conversion made past the other person's word in the field, and draws that word", async () => {
+    const document = normalized();
+    document.slides[COVER] = { ...(document.slides[COVER] as TitleSlide), heading: 'Two typers' };
+    const server = fakeRoomServer({ deckId: 'gt-brand', channel: memoryChannel(), document });
+    const posts: OpsPost[] = [];
+    let hold: Promise<void> | null = null;
+    let release: () => void = () => undefined;
+    const base = tabTransport(server, maya);
+    const gated: RoomTransport = {
+      ...base,
+      async postOps(body) {
+        posts.push(body);
+        if (hold !== null) await hold;
+        return base.postOps(body);
+      },
+    };
+    const make = (transport: RoomTransport) =>
+      createRoomClient({
+        deckId: 'gt-brand',
+        transport,
+        document: server.document(),
+        seq: server.seq(),
+        onChange: () => undefined,
+        onResync: async () => server.document(),
+      });
+    const a = make(tabTransport(server, kevin));
+    const b = make(gated);
+    a.start();
+    b.start();
+    await until(() => a.status().connected && b.status().connected);
+    a.apply([fieldRun(10, ' ta')], 'type', 'now');
+    await settled([a, b]);
+    b.apply([fieldRun(13, ' tb')], 'type', 'now');
+    await settled([a, b]);
+    await until(() => headingOf(a.document()) === 'Two typers ta tb');
+    // B's Escape converts the cover from its copy and writes its last letter on the canvas block
+    const copy = { ...(b.document().slides[COVER] as TitleSlide) };
+    const converted = toCanvas(copy, {
+      blocks: { heading: [137, 300, 1646, 180], lead: [137, 520, 1200, 80] },
+      mark: [137, 137, 132, 84],
+      prompted: [],
+    });
+    if (converted === null) throw new Error('the cover did not convert');
+    // B's write on another slide waits on the wire, so B's Escape below queues behind it
+    hold = new Promise((resolve) => {
+      release = resolve;
+    });
+    const sent = posts.length;
+    b.apply([splice(0, 0, 'x')], 'type', 'now');
+    await until(() => posts.length > sent);
+    b.apply(
+      [
+        { op: 'slide.replace', slideId: COVER, slide: converted.slide },
+        {
+          op: 'text.splice',
+          slideId: COVER,
+          blockId: 'heading',
+          path: '/text',
+          at: 16,
+          remove: 0,
+          insert: '1',
+        },
+        {
+          op: 'block.set',
+          slideId: COVER,
+          blockId: 'heading',
+          path: '/typography',
+          value: { size: 72 },
+        },
+      ],
+      'type',
+      'now',
+    );
+    // A's "1" lands in the field while B's conversion waits in B's queue
+    a.apply([fieldRun(13, '1')], 'type', 'now');
+    await settled([a]);
+    await until(() => b.status().seq >= a.status().seq);
+    // B draws A's word on its canvas, and its own "1" after it; before the fix B drew its copy
+    // without A's word ("Two typers ta tb1")
+    expect(headingOf(b.document())).toBe('Two typers ta1 tb1');
+    release();
+    hold = null;
+    await until(() =>
+      posts.some((post) =>
+        post.entries.some((e) => (e.mutations ?? []).some((m) => m.op === 'slide.replace')),
+      ),
+    );
+    // the conversion goes out after B heard A's word, its "1" past it: before the fix it kept 16,
+    // inside A's word, and the room placed it there (" tb2b2 u" in fix round 3's memory reading)
+    const conversion = posts
+      .flatMap((post) => post.entries)
+      .find((e) => (e.mutations ?? []).some((m) => m.op === 'slide.replace'));
+    expect(
+      (conversion?.mutations ?? []).flatMap((m) =>
+        m.op === 'text.splice' ? [[m.path, m.at, m.insert]] : [],
+      ),
+    ).toEqual([['/text', 17, '1']]);
+    await a.stop();
+    await b.stop();
   });
 });

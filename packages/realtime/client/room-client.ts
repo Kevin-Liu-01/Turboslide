@@ -40,6 +40,7 @@ import type {
 } from '../src/channel.ts';
 import { runTieSide } from '../src/channel.ts';
 import { foldMutation } from '../src/coalesce.ts';
+import { carryFieldText, fieldRunsOnCanvas, yieldConcurrentConversion } from '../src/conversion.ts';
 import {
   CLIENT_ID_PATTERN,
   ENTRY_NOTE_MAX,
@@ -406,6 +407,14 @@ export type RoomClientOptions = {
   onStatus?: (status: SyncStatus) => void;
   /** every event of the stream after the client applied it (presence, checkpoint, inbox, access) */
   onEvent?: (event: RoomEvent) => void;
+  /**
+   * Another author's entry in this tab's frame, just before its `op` event: its mutations moved
+   * past the pending ops as the client placed them. A text session reads the point of a remote
+   * insertion from it rather than from a diff of two strings, which cannot tell an insertion
+   * before this person's own words from one after them when the two begin with the same
+   * characters (realtime.title.two-typers; the realtime round's fix round 3)
+   */
+  onRemoteApplied?: (entry: Entry, local: readonly Mutation[]) => void;
   onReject?: (rejected: Rejected & { mutations?: Mutation[]; comment?: CommentOp }) => void;
   /**
    * The document at a revision the server named (a `resync`); null keeps the current one.
@@ -814,6 +823,24 @@ export function transformPast(
   return out;
 }
 
+/**
+ * A pending op's mutations as the room will place them on the document they apply to (the
+ * admission's cover rules, conversion.ts; build/r1.md R1-R2k): its conversion of a cover that is
+ * a canvas of the same kind already yields (`yieldConcurrentConversion`), a conversion it keeps
+ * carries the document's field text (`carryFieldText`), and its field runs on a cover that is a
+ * canvas already address the block the field became (`fieldRunsOnCanvas` `retarget`). Every
+ * other op passes unchanged. The op keeps its own mutations for the post; the admission applies
+ * the same rules.
+ */
+export function placedOnDocument(
+  mutations: readonly Mutation[],
+  document: DeckDocument,
+): Mutation[] {
+  const kept = carryFieldText(yieldConcurrentConversion(mutations, [], document), document);
+  const { retarget } = fieldRunsOnCanvas(kept, [], document);
+  return kept.map(retarget);
+}
+
 /** The flush class of a mutation list: pos sets 50 ms, text ops 100 ms, anything else at once. */
 export function flushClassOf(mutations: readonly Mutation[]): FlushClass {
   let cls: FlushClass = 'text';
@@ -1070,7 +1097,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         continue;
       }
       try {
-        document = applyMutations(document, op.mutations).document;
+        // the cover rules the admission applies (conversion.ts; build/r1.md R1-R2k): a tab's own
+        // conversion of a cover another person converted first draws the room's slide, a kept
+        // one draws the words that landed since the tab measured it, and its words land on the
+        // block the field became
+        document = applyMutations(document, placedOnDocument(op.mutations, document)).document;
         kept.push(op);
         const slides = changedSlides(op.mutations);
         if (slides === 'all') changed = 'all';
@@ -1447,18 +1478,17 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       return;
     }
     // another author's op: the pending text ops move past it, then the local document re-derives.
-    // The run ends follow the entry into the local frame first: the entry moved past each pending
-    // op with the side that op leaves it (the inverse of the op's own side in a tie)
+    // Each pending op meets the entry in its own frame: the entry as it stands after the pending
+    // ops before it (`bridged`, moved past each with the side that op leaves it, the inverse of
+    // the op's own side in a tie). Before this every pending op was moved past the entry as the
+    // server wrote it, and an op that continued an earlier pending op's insert was pushed past
+    // another person's word that landed at the earlier op's point (" ua" then "1" read
+    // " ua tb1 u1": realtime.title.two-typers; the realtime round's fix round 3). The run ends
+    // follow the entry into the local frame.
     let bridged: Mutation[] = mutations;
-    for (const op of pending) {
-      if (op.kind !== 'edit' || op.mutations === undefined) continue;
-      const side: Side = runTieSide(op.run, 'right') === 'left' ? 'right' : 'left';
-      bridged =
-        transformPast(bridged, op.mutations, (mutation, against) =>
-          transform(mutation, against, side),
-        ) ?? [];
-    }
-    advanceRunEnds(runEnds, bridged, false);
+    // the document each pending op was written on (the server's before the entry, then each
+    // earlier pending op), for the cover rules below
+    let running = server;
     const next: PendingOp[] = [];
     for (const op of pending) {
       if (op.kind !== 'edit' || op.mutations === undefined) {
@@ -1468,8 +1498,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // an op that declares the run rule keeps the left of an insert at its offset, as the
       // server places it (room-core.ts transformEntry); every other op lands after it
       const tie = runTieSide(op.run, 'right');
-      const moved = transformPast(op.mutations, mutations, (mutation, against) =>
-        transform(mutation, against, tie),
+      const side: Side = tie === 'left' ? 'right' : 'left';
+      // a remote word in a cover's field and the op's words on the block its conversion made
+      // are one text (conversion.ts fieldRunsOnCanvas; build/r1.md R1-R2k): before this the
+      // op's word kept its offset past the other person's word and landed inside it
+      // (" tb2b2 u" for " tb2 ub2", the memory tier's two typers row in fix round 3)
+      const opMutations = op.mutations;
+      const onCanvas = (against: Mutation): Mutation =>
+        fieldRunsOnCanvas(opMutations, [{ mutation: against }], running).read(against);
+      const moved = transformPast(op.mutations, bridged, (mutation, against) =>
+        transform(mutation, onCanvas(against), tie),
       );
       if (moved === null) {
         runEnds.clear();
@@ -1479,8 +1517,19 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         op.settle?.({ rejected });
         continue;
       }
+      bridged =
+        transformPast(bridged, op.mutations, (mutation, against) =>
+          transform(onCanvas(mutation), against, side),
+        ) ?? [];
+      // the next op was written on this one, before the entry: its document carries this op
+      try {
+        running = applyMutations(running, placedOnDocument(opMutations, running)).document;
+      } catch {
+        // an op the fold below returns to its author: the next ops read the document without it
+      }
       next.push({ ...op, mutations: moved });
     }
+    advanceRunEnds(runEnds, bridged, false);
     pending = next;
     try {
       server = applyMutations(server, mutations, { now: entry.at }).document;
@@ -1504,6 +1553,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         : [...new Set([...changed, ...folded.changed])],
       'remote',
     );
+    options.onRemoteApplied?.(entry, bridged);
     options.onEvent?.({ type: 'op', entry });
     persist();
     emitStatus();

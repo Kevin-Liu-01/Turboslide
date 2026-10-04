@@ -416,7 +416,7 @@ export function textBurstMutation(
   const plainFrom = plainOf(base);
   const plainTo = plainOf(to);
   if (plainFrom !== plainTo) {
-    const diff = textDiff(plainFrom, plainTo);
+    const diff = caretPlaced(plainFrom, plainTo, textDiff(plainFrom, plainTo), sessionCaret(key));
     return [
       {
         op: 'text.splice',
@@ -461,7 +461,15 @@ export type TextChangedDetail = {
   pointer: string;
   /** the markup the document holds now */
   text: Markup;
+  /**
+   * The remote splices of this run in this tab's frame, in plain text offsets, when the route
+   * knows them (the controller's announce of another person's entry); absent for a re-send
+   */
+  splices?: ReadonlyArray<TextSplice>;
 };
+
+/** One plain text splice of a run: `remove` characters at `at` replaced by `insert`. */
+export type TextSplice = { at: number; remove: number; insert: string };
 
 /** The key of one run across the session and the burst: slide, block and pointer. */
 export function runKey(slideId: string, blockId: string, pointer: string): string {
@@ -732,12 +740,168 @@ export function handedText(key: string): Markup | undefined {
 export function forgetAbsorbed(key: string): void {
   absorbedBases.delete(key);
   handedTexts.delete(key);
+  sessionCarets.delete(key);
+}
+
+/* the collapsed caret of the session open on a run, per run, read when a write of the run diffs
+   the editable (realtime.title.two-typers). A typed insertion ends at the caret, so the caret
+   tells where the insertion is when the diff could read it at several points: A typed " ta1" at
+   the end of a title while B's " t" landed there and the session kept A's keys before it; the
+   diff of "title t" to "title ta1 t" reads "a1 t" after B's " t", which stitched A's word to B's
+   " t" and let B's next "b1" land inside it (" ta1" lost). A reader and not a value, so every
+   write reads the caret of the moment: the session's burst, its final write and the Editor's
+   re-send after a collaborator's change (text-fit.ts sessionReconcile 'resend'). The reader
+   answers in the plain offsets of the text a write sends (textFromNode, ends trimmed), or null
+   for a range. Forgotten with the session (forgetAbsorbed) */
+const sessionCarets = new Map<string, () => number | null>();
+
+/** Notes the reader of the caret of the session open on a run, or forgets it. */
+export function noteSessionCaret(key: string, read: (() => number | null) | null): void {
+  if (read === null) sessionCarets.delete(key);
+  else sessionCarets.set(key, read);
+}
+
+function sessionCaret(key: string): number | undefined {
+  return sessionCarets.get(key)?.() ?? undefined;
+}
+
+/**
+ * An offset of an editable's text with the white space at the paragraph ends kept (`raw`, the
+ * burst's raw form) carried into the same text with those ends trimmed (`trimmed`, what a write
+ * sends: textFromNode): paragraph by paragraph, less the white space trimmed at its start, never
+ * past its trimmed end. Both are plain texts with one `\n` per paragraph break. A caret after a
+ * space typed at a paragraph's end reads that paragraph's trimmed end, the end of the letters
+ * before the space.
+ */
+export function trimmedOffset(raw: string, trimmed: string, offset: number): number {
+  if (raw === trimmed) return Math.min(Math.max(0, offset), trimmed.length);
+  const rawParagraphs = raw.split('\n');
+  const trimmedParagraphs = trimmed.split('\n');
+  if (rawParagraphs.length !== trimmedParagraphs.length)
+    return Math.min(Math.max(0, offset), trimmed.length);
+  let rawStart = 0;
+  let trimmedStart = 0;
+  for (let index = 0; index < rawParagraphs.length; index += 1) {
+    const rawParagraph = rawParagraphs[index]!;
+    const trimmedParagraph = trimmedParagraphs[index]!;
+    const rawEnd = rawStart + rawParagraph.length;
+    if (offset <= rawEnd || index === rawParagraphs.length - 1) {
+      const lead =
+        trimmedParagraph === '' ? 0 : Math.max(0, rawParagraph.indexOf(trimmedParagraph));
+      const inside = Math.min(Math.max(0, offset - rawStart - lead), trimmedParagraph.length);
+      return trimmedStart + inside;
+    }
+    rawStart = rawEnd + 1;
+    trimmedStart += trimmedParagraph.length + 1;
+  }
+  return trimmed.length;
+}
+
+/**
+ * The white space a person typed at the end of a paragraph that the editable holds and its text
+ * does not (`raw` against `trimmed`, as trimmedOffset reads them), when the collapsed caret sits
+ * right after it: the space before the next word, which no write carries until a letter follows
+ * it (textFromNode trims it). Empty for any other caret.
+ */
+export function pendingWhitespace(raw: string, trimmed: string, caret: number): string {
+  if (raw === trimmed || caret <= 0 || caret > raw.length) return '';
+  const end = raw.indexOf('\n', caret);
+  if ((end === -1 ? raw.length : end) !== caret) return '';
+  const index = raw.slice(0, caret).split('\n').length - 1;
+  const rawParagraph = raw.split('\n')[index];
+  const trimmedParagraph = trimmed.split('\n')[index];
+  if (rawParagraph === undefined || trimmedParagraph === undefined) return '';
+  /* the trimmed paragraph keeps no white space at its end (a mark around the space keeps it in
+     the text, and then nothing is pending) */
+  if (trimmedParagraph.trimEnd() !== trimmedParagraph) return '';
+  return rawParagraph.slice(rawParagraph.trimEnd().length);
+}
+
+/**
+ * The editable after a collaborator's change, as the session takes it (absorbRemote): the
+ * editable's text (`trimmed`, what a write would send) with the white space typed before the
+ * caret at its paragraph's end put back as an unflushed keystroke of its own, absorbed against the
+ * document's text by absorbedText; the selection is the editable's (`raw` offsets). Before this
+ * the absorb read the trimmed text alone and the space a person had just typed before the next
+ * word was gone when the editable was written again: two people typing at one point of a text box
+ * joined each person's two words ("ta1ua1 tb1ub1", VERIFICATION.md "Realtime round, pass 3"
+ * finding 3).
+ */
+export function absorbedSession(input: {
+  base: Markup;
+  raw: Markup;
+  trimmed: Markup;
+  remote: Markup;
+  selection: [number, number] | null;
+  splices?: ReadonlyArray<TextSplice>;
+}): { text: Markup; selection: [number, number] | null } {
+  const { base, raw, trimmed, remote, selection, splices } = input;
+  const rawPlain = plainOf(raw);
+  const trimmedPlain = plainOf(trimmed);
+  const caret = selection !== null && selection[0] === selection[1] ? selection[0] : null;
+  const pending = caret === null ? '' : pendingWhitespace(rawPlain, trimmedPlain, caret);
+  if (pending !== '' && caret !== null) {
+    const at = trimmedOffset(rawPlain, trimmedPlain, caret);
+    let dom: Markup;
+    try {
+      dom = spliceText(trimmed, at, 0, pending);
+    } catch {
+      dom = trimmed;
+    }
+    const end = dom === trimmed ? at : at + pending.length;
+    return absorbedText(base, dom, remote, [end, end], splices);
+  }
+  const mapped: [number, number] | null =
+    selection === null
+      ? null
+      : [
+          trimmedOffset(rawPlain, trimmedPlain, selection[0]),
+          trimmedOffset(rawPlain, trimmedPlain, selection[1]),
+        ];
+  return absorbedText(base, trimmed, remote, mapped, splices);
+}
+
+/**
+ * A pure insertion the diff found, moved to end at the caret when the text it inserts there
+ * gives the same result: textDiff keeps the longest common prefix, so an insertion that begins
+ * with the characters after it, or ends with the ones before it, reads at several points and the
+ * diff takes the last. Any other change, or a caret no such insertion ends at, keeps the diff.
+ */
+export function caretPlaced(
+  from: string,
+  to: string,
+  diff: { start: number; end: number; text: string },
+  caret: number | undefined,
+): { start: number; end: number; text: string } {
+  if (caret === undefined || diff.end !== diff.start || diff.text === '') return diff;
+  const at = caret - diff.text.length;
+  if (at === diff.start || at < 0 || at > from.length) return diff;
+  const text = to.slice(at, caret);
+  if (from.slice(0, at) + text + from.slice(at) !== to) return diff;
+  return { start: at, end: at, text };
 }
 
 /** Tells every open inline session that a Text changed under it. */
 export function announceTextChanged(detail: TextChangedDetail): void {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent<TextChangedDetail>(TEXT_CHANGED_EVENT, { detail }));
+}
+
+/**
+ * The remote change as one splice of the base (`start`, `end`, the inserted `text`), when the
+ * route named exactly one splice of the run and it turns the base into the document's text;
+ * null otherwise, and the caller diffs the two texts.
+ */
+function knownChange(
+  base: string,
+  remote: string,
+  splices: ReadonlyArray<TextSplice> | undefined,
+): { start: number; end: number; text: string } | null {
+  if (splices === undefined || splices.length !== 1) return null;
+  const { at, remove, insert } = splices[0]!;
+  if (at < 0 || remove < 0 || at + remove > base.length) return null;
+  if (base.slice(0, at) + insert + base.slice(at + remove) !== remote) return null;
+  return { start: at, end: at + remove, text: insert };
 }
 
 /**
@@ -752,13 +916,44 @@ export function absorbedText(
   dom: Markup,
   remote: Markup,
   selection: [number, number] | null,
+  splices?: ReadonlyArray<TextSplice>,
 ): { text: Markup; selection: [number, number] | null } {
-  const local = textDiff(plainOf(base), plainOf(dom));
-  const change = textDiff(plainOf(base), plainOf(remote));
+  const plainBase = plainOf(base);
+  const plainDom = plainOf(dom);
+  /* the unflushed keystrokes end at a collapsed caret: the diff alone reads an insertion that
+     begins with the characters after it at its last possible point (A's " t" typed before B's
+     " tb" reads as " t" between B's " t" and B's "b") */
+  const local = caretPlaced(
+    plainBase,
+    plainDom,
+    textDiff(plainBase, plainDom),
+    selection !== null && selection[0] === selection[1] ? selection[0] : undefined,
+  );
+  /* the remote change: the route's one splice when it turns the base into the document's text,
+     so its point is where the room placed it; else the diff of the two texts */
+  const known = knownChange(plainBase, plainOf(remote), splices);
+  const change = known ?? textDiff(plainBase, plainOf(remote));
   const delta = change.text.length - (change.end - change.start);
   const shift = (offset: number): number =>
     change.start <= offset ? Math.max(change.start, offset + delta) : offset;
   const untouched = local.text === '' && local.end === local.start;
+  /* the point of a pure insertion is certain when the route named it, or when its text does not
+     end with the character before it. textDiff keeps the longest common prefix, so an insertion
+     that ends with that character reads the same one character earlier, and the change may have
+     landed before this person's own handed text rather than after it: B handed " t", A's " t"
+     landed before it, and the diff of "title t" to "title t t" is " t" at the end of B's " t"
+     (the realtime round's fix round 2: realtime.title.two-typers lost " ta1" when B's caret and
+     its "b" stayed at 16, inside A's word, and B's "b1" landed there). The two rules below that
+     keep a caret or keystrokes before an insertion at their point take only an insertion whose
+     point is certain; any other insertion moves them past it */
+  const pinned =
+    known !== null ||
+    !(
+      change.text !== '' &&
+      change.end === change.start &&
+      change.start > 0 &&
+      change.text.charCodeAt(change.text.length - 1) === plainBase.charCodeAt(change.start - 1)
+    );
   /* unflushed keystrokes that begin exactly where another person's pure insertion landed stay
      before it, and the caret with them (the realtime round's fix round 2, build/r1.md R1-R2h; the
      row realtime.title.two-typers). The room keeps the later arrival to the right of the text a
@@ -767,6 +962,7 @@ export function absorbedText(
      word: A's " ta" was handed, A's "3" still in the editable when B's " tb" landed at its end, and
      the "3" moved past " tb" and cut A's word (" ta tb3") */
   const keepsBefore =
+    pinned &&
     local.text !== '' &&
     local.end === local.start &&
     change.text !== '' &&
@@ -802,7 +998,7 @@ export function absorbedText(
      past the change (A's caret at 20 read 26 once B's " bravo" landed at 20) */
   const collapsed = selection !== null && selection[0] === selection[1];
   const staysBefore = (offset: number): boolean =>
-    collapsed && untouched && offset === change.start && change.end === change.start;
+    pinned && collapsed && untouched && offset === change.start && change.end === change.start;
   const carry = (offset: number): number => {
     if (staysBefore(offset)) return offset;
     /* the keystrokes kept before the insertion: an offset up to their end stands, one past them
@@ -1800,6 +1996,16 @@ export function InlineText({
     callbacks.current.onBurst?.(text);
   };
 
+  /* the caret a write of the run reads (noteSessionCaret): the live caret while the session is
+     open, the one it ended with after finish, which reads it before it takes the editable down */
+  const endCaret = useRef<number | null>(null);
+  const liveCaret = (): number | null => {
+    const range = currentRange();
+    if (range === null || range[0] !== range[1]) return null;
+    return trimmedOffset(plainOf(rawText()), plainOf(readText()), range[0]);
+  };
+  const writeCaret = (): number | null => (done.current ? endCaret.current : liveCaret());
+
   /** The selection's plain range, or the range the session parked with when the focus sits on a chrome control. */
   const currentRange = (): [number, number] | null =>
     selectionOffsets(element, options.current.multiline) ??
@@ -1883,17 +2089,24 @@ export function InlineText({
    * against the document's text (textBurstMutation), so nothing lands twice and nothing is lost.
    * The route announces every remote Text change through TEXT_CHANGED_EVENT.
    */
-  const absorbRemote = (remote: Markup) => {
+  const absorbRemote = (remote: Markup, splices?: ReadonlyArray<TextSplice>) => {
     if (done.current) return;
     const base = handed();
     if (remote === base) {
       lastBurst.current = remote;
       return;
     }
-    const dom = readText();
     const wasParked = parked.current;
-    const selection = currentRange();
-    const next = absorbedText(base, dom, remote, selection);
+    /* the editable's text as a write sends it and as it stands, with the space just typed before
+       the next word (absorbedSession keeps it; the trimmed text alone lost it) */
+    const next = absorbedSession({
+      base,
+      raw: rawText(),
+      trimmed: readText(),
+      remote,
+      selection: currentRange(),
+      ...(splices === undefined ? {} : { splices }),
+    });
     element.innerHTML = editableHtml(next.text, options.current.multiline);
     element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
       mark.contentEditable = 'false';
@@ -1904,6 +2117,7 @@ export function InlineText({
     else if (next.selection !== null && document.activeElement === element) {
       restoreSelection(element, options.current.multiline, next.selection);
     }
+    if (document.activeElement === element) keepSpaceBeforeCaret();
     setHanded(remote);
     callbacks.current.onInput?.();
     reportCaret();
@@ -1925,7 +2139,7 @@ export function InlineText({
       return;
     }
     noteAbsorbed(runKey(detail.slideId, detail.blockId, detail.pointer), detail.text);
-    absorbRemote(detail.text);
+    absorbRemote(detail.text, detail.splices);
   };
 
   const finish = (reason: InlineTextEndReason) => {
@@ -1934,6 +2148,8 @@ export function InlineText({
     window.clearTimeout(burstTimer.current);
     burstTimer.current = 0;
     const text = readText();
+    /* the final write diffs like a burst: the caret it ends at, read while the run is editable */
+    endCaret.current = liveCaret();
     element.removeAttribute('contenteditable');
     element.removeAttribute('spellcheck');
     element.classList.remove('ts-editing');
@@ -2034,6 +2250,32 @@ export function InlineText({
     selection.addRange(after);
   };
 
+  /**
+   * The space right before the caret after the editable was written again (absorbRemote) stays
+   * where layout would collapse it: at the end of its text node, or before another space (the
+   * person's space before the next word kept in front of another person's word that begins with
+   * one). It becomes the no break space Chromium writes itself, at the end of a text node of its
+   * own, which runsFromNode reads back as a space; Chromium turns it back into a space when the
+   * next letter lands. Measured on Chromium (build/r2.md "Realtime round fix round 3"): a plain
+   * space written at a text node's end was dropped by the next keystroke ("tb1u").
+   */
+  const keepSpaceBeforeCaret = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) return;
+    const node = range.startContainer;
+    if (node.nodeType !== TEXT_NODE || !element.contains(node)) return;
+    const value = node.nodeValue ?? '';
+    const at = range.startOffset;
+    if (at === 0 || value.charAt(at - 1) !== ' ') return;
+    if (at < value.length) {
+      if (!/\s/.test(value.charAt(at))) return;
+      (node as Text).splitText(at);
+    }
+    keepTrailingSpace();
+  };
+
   /** Removes the link of the whole linked span around a range or the caret (the chip's Remove, the popover's Remove). */
   const removeLinkAt = (range: [number, number] | null) => {
     if (done.current) return;
@@ -2086,6 +2328,9 @@ export function InlineText({
     originalHtml.current = element.innerHTML;
     originalText.current = readText();
     setHanded(originalText.current);
+    /* every write of the run reads this session's caret (textBurstMutation caretPlaced) */
+    const runKeyNow = keyOf();
+    if (runKeyNow !== null) noteSessionCaret(runKeyNow, writeCaret);
     // the prompt of an empty placeholder is not content: it leaves for the session (SPEC 5.4); a
     // caption keeps its wording as the open field's placeholder while the field is empty, since
     // Add a caption opens the field at once (docs/PRODUCT.md section 2 rank 10; Editor.css)

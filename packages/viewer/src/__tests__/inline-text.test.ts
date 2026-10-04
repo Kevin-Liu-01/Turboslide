@@ -7,10 +7,12 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 import { canonicalText, mergeRuns, parseText, serializeRuns } from '@turboslide/schema/text';
 
 import {
+  absorbedSession,
   absorbedText,
   blurVerdict,
   CHROME_TRANSIENT_SELECTOR,
   burstRewrite,
+  caretPlaced,
   clickEntry,
   entryCaret,
   forgetAbsorbed,
@@ -18,6 +20,8 @@ import {
   listAppendMutation,
   noteAbsorbed,
   noteHanded,
+  noteSessionCaret,
+  pendingWhitespace,
   runKey,
   listRemoveMutation,
   nextCellPointer,
@@ -31,6 +35,7 @@ import {
   textCommitMutation,
   textDiff,
   textFromNode,
+  trimmedOffset,
 } from '../InlineText';
 import type { ClickEntryInput, RunNode } from '../InlineText';
 
@@ -614,6 +619,61 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
     });
   });
 
+  it("moves the caret and the keystrokes past an insertion whose point is not certain (realtime.title.two-typers, ' ta1' lost)", () => {
+    // B handed " t" at the end of "Realtime title"; A's " t" and then " ta" landed before it, as
+    // the room placed them. The diff reads "a t" at 16, the end of B's " t", because its text
+    // ends with the " t" before 16; the caret and B's unflushed "b" follow B's own " t"
+    const base = 'Realtime title t';
+    expect(absorbedText(base, base, 'Realtime title t t', [16, 16])).toEqual({
+      text: 'Realtime title t t',
+      selection: [18, 18],
+    });
+    expect(absorbedText(base, 'Realtime title tb', 'Realtime title ta t', [17, 17])).toEqual({
+      text: 'Realtime title ta tb',
+      selection: [20, 20],
+    });
+    // an insertion whose text does not end with the character before its point keeps both rules
+    expect(absorbedText('Heading ta', 'Heading ta3', 'Heading ta tb', [11, 11])).toEqual({
+      text: 'Heading ta3 tb',
+      selection: [11, 11],
+    });
+    expect(
+      absorbedText('Alpha bravo', 'Alpha bravo', 'Alpha bravo charlie', [11, 11]).selection,
+    ).toEqual([11, 11]);
+  });
+
+  it('takes the point of the remote insertion from the splice the route names (realtime.title.two-typers, realtime.caret.offset-after-merge)', () => {
+    // the room placed A's " t" at 14, before B's handed " t": the splice says so, and B's caret
+    // and B's unflushed "b" follow B's own " t"
+    const base = 'Realtime title t';
+    const before = [{ at: 14, remove: 0, insert: ' t' }];
+    expect(absorbedText(base, base, 'Realtime title t t', [16, 16], before)).toEqual({
+      text: 'Realtime title t t',
+      selection: [18, 18],
+    });
+    expect(absorbedText(base, 'Realtime title tb', 'Realtime title t t', [17, 17], before)).toEqual(
+      {
+        text: 'Realtime title t tb',
+        selection: [19, 19],
+      },
+    );
+    // the room placed B's " cb1" at A's caret, after A's " ca1": the strings alone read it one
+    // character earlier (both words end in "1"), the splice keeps A's caret before B's word
+    const caret = 'Caret ca1';
+    const after = [{ at: 9, remove: 0, insert: ' cb1' }];
+    expect(absorbedText(caret, caret, 'Caret ca1 cb1', [9, 9]).selection).toEqual([13, 13]);
+    expect(absorbedText(caret, caret, 'Caret ca1 cb1', [9, 9], after).selection).toEqual([9, 9]);
+    expect(absorbedText(caret, 'Caret ca12', 'Caret ca1 cb1', [10, 10], after)).toEqual({
+      text: 'Caret ca12 cb1',
+      selection: [10, 10],
+    });
+    // a splice that does not turn the base into the document's text is not used: the diff reads
+    expect(
+      absorbedText(base, base, 'Realtime title t t', [16, 16], [{ at: 3, remove: 0, insert: 'x' }])
+        .selection,
+    ).toEqual([18, 18]);
+  });
+
   it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
     // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
     const base = 'Every line of copy';
@@ -658,6 +718,155 @@ describe('textBurstMutation diffs against the document when a collaborator moved
     expect(textBurstMutation(slide, 'p1', 'text', `AAA${before}BB`, `AAA${before}BB`)).toEqual([]);
     noteAbsorbed(runKey('content-rule', 'p1', 'text'), `AAA${before}`);
     expect(textBurstMutation(slide, 'p1', 'text', before, `AAA${before}`)).toEqual([]);
+  });
+});
+
+describe("a burst's insertion ends at the session's caret (realtime.title.two-typers, ' ta1' stitched to B's ' t')", () => {
+  it('moves a pure insertion the diff can read at several points to the one that ends at the caret', () => {
+    // A typed " ta1" before B's " t", which landed at the same point: the diff reads "a1 t" after
+    // B's " t"; the caret after "ta1" says the insertion is " ta1" before it
+    const from = 'Realtime title t';
+    const to = 'Realtime title ta1 t';
+    const diff = textDiff(from, to);
+    expect(diff).toEqual({ start: 16, end: 16, text: 'a1 t' });
+    expect(caretPlaced(from, to, diff, 18)).toEqual({ start: 14, end: 14, text: ' ta1' });
+    // the caret at the diff's own end, no caret, a caret no such insertion ends at, and a change
+    // that is not a pure insertion keep the diff
+    expect(caretPlaced(from, to, diff, 20)).toEqual(diff);
+    expect(caretPlaced(from, to, diff, undefined)).toEqual(diff);
+    expect(caretPlaced(from, to, diff, 17)).toEqual(diff);
+    const removal = textDiff('abc', 'ac');
+    expect(caretPlaced('abc', 'ac', removal, 1)).toEqual(removal);
+    // typed after B's " t": the caret at the end keeps the diff's " t" after it
+    expect(caretPlaced('X t', 'X t t', textDiff('X t', 'X t t'), 5)).toEqual({
+      start: 3,
+      end: 3,
+      text: ' t',
+    });
+  });
+
+  it('writes every burst at the caret the session reads, and diffs as before without a session', () => {
+    const slide = structuredClone(workedDocument().slides['content-rule']!);
+    const key = runKey('content-rule', 'p1', 'text');
+    forgetAbsorbed(key);
+    const from = 'Realtime title t';
+    const to = 'Realtime title ta1 t';
+    let caret: number | null = 18;
+    noteSessionCaret(key, () => caret);
+    const placed = {
+      op: 'text.splice',
+      slideId: 'content-rule',
+      blockId: 'p1',
+      path: '/text',
+      at: 14,
+      remove: 0,
+      insert: ' ta1',
+    };
+    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([placed]);
+    // the reader is read at each write (the Editor's re-send reads it too), not taken by one
+    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([placed]);
+    // a range reads no caret: the diff stands
+    caret = null;
+    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([
+      expect.objectContaining({ at: 16, insert: 'a1 t' }),
+    ]);
+    // the session ended: forgetAbsorbed drops the reader with the marker
+    caret = 18;
+    forgetAbsorbed(key);
+    expect(textBurstMutation(slide, 'p1', 'text', from, to)).toEqual([
+      expect.objectContaining({ at: 16, insert: 'a1 t' }),
+    ]);
+    forgetAbsorbed(key);
+  });
+});
+
+describe('the space typed before the next word survives a collaborator\'s change (realtime.title.two-typers, "ta1ua1 tb1ub1")', () => {
+  it('carries an offset of the editable into the text a write sends', () => {
+    // a space at the end is trimmed: a caret after it reads the end of the letters
+    expect(trimmedOffset('Heading ta1 ', 'Heading ta1', 12)).toBe(11);
+    expect(trimmedOffset('Heading ta1 ', 'Heading ta1', 4)).toBe(4);
+    expect(trimmedOffset('Heading', 'Heading', 9)).toBe(7);
+    // a multiline run trims each paragraph, its start too
+    const raw = 'one  \n  two \nthree';
+    const trimmed = 'one\ntwo\nthree';
+    expect(trimmedOffset(raw, trimmed, 5)).toBe(3);
+    expect(trimmedOffset(raw, trimmed, 6)).toBe(4);
+    expect(trimmedOffset(raw, trimmed, 9)).toBe(5);
+    expect(trimmedOffset(raw, trimmed, 12)).toBe(7);
+    expect(trimmedOffset(raw, trimmed, 13)).toBe(8);
+    expect(trimmedOffset(raw, trimmed, 18)).toBe(13);
+  });
+
+  it("reads the white space before a caret at its paragraph's end and nothing else", () => {
+    expect(pendingWhitespace('Heading ta1 ', 'Heading ta1', 12)).toBe(' ');
+    expect(pendingWhitespace('Heading ta1  ', 'Heading ta1', 13)).toBe('  ');
+    // the caret elsewhere, no white space, or a paragraph that keeps its end (a mark around it)
+    expect(pendingWhitespace('Heading ta1 ', 'Heading ta1', 11)).toBe('');
+    expect(pendingWhitespace('Heading ta1', 'Heading ta1', 11)).toBe('');
+    expect(pendingWhitespace('Heading ta1 ', 'Heading ta1 ', 12)).toBe('');
+    expect(pendingWhitespace('one \ntwo', 'one\ntwo', 4)).toBe(' ');
+    expect(pendingWhitespace('one \ntwo', 'one\ntwo', 8)).toBe('');
+  });
+
+  it("keeps the space and the caret after it when the other person's word lands elsewhere", () => {
+    // A typed " ta1" (handed) and a space; B's " tb1" landed at 8, before A's word
+    const next = absorbedSession({
+      base: 'Heading ta1',
+      raw: 'Heading ta1 ',
+      trimmed: 'Heading ta1',
+      remote: 'Heading tb1 ta1',
+      selection: [12, 12],
+      splices: [{ at: 7, remove: 0, insert: ' tb1' }],
+    });
+    expect(next).toEqual({ text: 'Heading tb1 ta1 ', selection: [16, 16] });
+    // before the fix the trimmed editable was absorbed: the space was gone and the next letter
+    // joined the two words
+    expect(absorbedText('Heading ta1', 'Heading ta1', 'Heading tb1 ta1', [12, 12]).text).toBe(
+      'Heading tb1 ta1',
+    );
+  });
+
+  it("keeps the space before the other person's word that lands at the caret, as a keystroke there", () => {
+    // B's " tb1" landed at A's run end, where A's caret and A's space stand: the space is A's
+    // unflushed keystroke at that point and stays before it, the caret after the space
+    const next = absorbedSession({
+      base: 'Heading ta1',
+      raw: 'Heading ta1 ',
+      trimmed: 'Heading ta1',
+      remote: 'Heading ta1 tb1',
+      selection: [12, 12],
+      splices: [{ at: 11, remove: 0, insert: ' tb1' }],
+    });
+    expect(next).toEqual({ text: 'Heading ta1  tb1', selection: [12, 12] });
+  });
+
+  it('absorbs as before when nothing is pending', () => {
+    expect(
+      absorbedSession({
+        base: 'Alpha bravo',
+        raw: 'Alpha bravo',
+        trimmed: 'Alpha bravo',
+        remote: 'Alpha bravo charlie',
+        selection: [11, 11],
+        splices: [{ at: 11, remove: 0, insert: ' charlie' }],
+      }),
+    ).toEqual({ text: 'Alpha bravo charlie', selection: [11, 11] });
+  });
+});
+
+describe("the unflushed keystrokes end at the caret (realtime.title.two-typers, a word typed into another's)", () => {
+  it("places a local insertion the diff can read inside the other person's word at the caret", () => {
+    // A's caret stood before B's " tb" (the caret rule); A typed " t" there: the diff alone reads
+    // " t" between B's " t" and "b", and B's "1" landing at its run end then moved A's keys past
+    // it ("X tb t1"); at the caret the keys stay before B's word and B's "1" finishes it
+    const next = absorbedText(
+      'X tb',
+      'X t tb',
+      'X tb1',
+      [3, 3],
+      [{ at: 4, remove: 0, insert: '1' }],
+    );
+    expect(next).toEqual({ text: 'X t tb1', selection: [3, 3] });
   });
 });
 

@@ -1,0 +1,32 @@
+{"at":"2026-10-04T12:02:59.657Z","load":14.23,"start":"http://localhost:4521","tag":"local"}
+{"at":"2026-10-04T12:02:59.678Z","load":14.23,"cookieless":1,"status":200,"ms":21,"serverTiming":"cold;dur=328340;desc=\"request 1697\", total;dur=1.5","emptyStateInHtml":true,"cardsInHtml":0,"bytes":43329}
+{"at":"2026-10-04T12:02:59.682Z","load":14.23,"cookieless":2,"status":200,"ms":4,"serverTiming":"cold;dur=328349;desc=\"request 1698\", total;dur=1.4","emptyStateInHtml":true,"cardsInHtml":0,"bytes":43329}
+{"at":"2026-10-04T12:02:59.686Z","load":14.23,"cookieless":3,"status":200,"ms":3,"serverTiming":"cold;dur=328352;desc=\"request 1699\", total;dur=1.4","emptyStateInHtml":true,"cardsInHtml":0,"bytes":43329}
+{"at":"2026-10-04T12:03:01.578Z","load":14.23,"aEmpty":true,"text":"Turboslide Trash Presentations moved to the trash stay here until they are restored or deleted forever. Recent presentations Empty trash Trash is empty Presentations moved to the trash appear here unt"}
+{"at":"2026-10-04T12:03:33.425Z","load":17.23,"created":"untitled-20261004-lx7f"}
+{"at":"2026-10-04T12:03:36.793Z","load":21.53,"fileRow":"Move to trash"}
+{"at":"2026-10-04T12:03:38.401Z","load":21.53,"afterMove":"http://localhost:4521/decks","record":{"stored":"{\"untitled-20261004-lx7f\":\"2026-10-04T12:03:36.894Z\"}","cookie":"ts-trash=[\"untitled-20261004-lx7f\"] | ts-recent=[]"},"snackbar":"Moved to trash\nUndo"}
+{"at":"2026-10-04T12:03:38.511Z","load":21.53,"listedMs":110,"cardInFirstHtml":true,"docServerTiming":"trash-ids;dur=0.1, cold;dur=367073;desc=\"request 1722\", total;dur=2.2"}
+{"at":"2026-10-04T12:03:40.033Z","load":23.25,"shot":"local-trash-listed-1440-light.jpg","bytes":24177}
+{"at":"2026-10-04T12:03:40.045Z","load":23.25,"cardText":"Untitled presentation Untitled presentation Trashed 5:03 AM · 2 slides Restore Delete forever","buttons":["Restore","Delete forever"]}
+{"at":"2026-10-04T12:03:41.842Z","load":23.25,"listed":"1440-dark","cardInFirstHtml":true,"scrollWidth":1440}
+{"at":"2026-10-04T12:03:41.852Z","load":23.25,"shot":"local-trash-listed-1440-dark.jpg","bytes":24409}
+{"at":"2026-10-04T12:03:43.662Z","load":23.25,"listed":"390-light","cardInFirstHtml":true,"scrollWidth":390}
+{"at":"2026-10-04T12:03:43.673Z","load":23.25,"shot":"local-trash-listed-390-light.jpg","bytes":16875}
+{"at":"2026-10-04T12:03:45.474Z","load":24.03,"listed":"390-dark","cardInFirstHtml":true,"scrollWidth":390}
+{"at":"2026-10-04T12:03:45.487Z","load":24.03,"shot":"local-trash-listed-390-dark.jpg","bytes":17124}
+{"at":"2026-10-04T12:03:47.235Z","load":24.03,"bFresh":{"empty":true,"cards":0}}
+{"at":"2026-10-04T12:03:47.246Z","load":24.03,"shot":"local-trash-stranger-1440-light.jpg","bytes":40987}
+{"at":"2026-10-04T12:03:49.909Z","load":25.15,"bForged":{"cardInFirstHtml":false,"cards":0,"empty":true,"recordAfter":"{}"},"timings":[{"url":"/decks/trash","status":200,"serverTiming":"trash-ids;dur=0, cold;dur=375919;desc=\"request 1731\", total;dur=1.8"}]}
+{"at":"2026-10-04T12:03:50.794Z","load":25.15,"restoreSnackbar":"Restored Untitled presentation"}
+{"at":"2026-10-04T12:03:52.298Z","load":25.15,"afterRestore":{"stored":"{}"}}
+{"at":"2026-10-04T12:03:54.407Z","load":26.26,"decksListsIt":1}
+{"at":"2026-10-04T12:03:57.765Z","load":26.26,"relisted":true}
+{"at":"2026-10-04T12:03:59.660Z","load":27.12,"shot":"local-trash-confirm-1440-light.jpg","bytes":34013}
+{"at":"2026-10-04T12:03:59.662Z","load":27.12,"confirmText":"Delete Untitled presentation forever? This cannot be undone. 2 slides and every version of Untitled presentation are deleted. Cancel Delete forever"}
+{"at":"2026-10-04T12:04:00.545Z","load":27.12,"afterCancel":true}
+{"at":"2026-10-04T12:04:03.847Z","load":27.12,"deletedForever":{"editor":404,"stored":"{}","cookie":"ts-trash=[]"}}
+{"at":"2026-10-04T12:04:03.867Z","load":27.12,"shot":"local-trash-after-delete-1440-light.jpg","bytes":40987}
+{"at":"2026-10-04T12:04:03.867Z","load":27.12,"aTimings":[{"url":"/decks/trash","status":200,"serverTiming":"trash-ids;dur=0.1, cold;dur=367073;desc=\"request 1722\", total;dur=2.2"},{"url":"/_serverFn/f742a2587f06d76c0eab1e068c7e04db1390b8f4eaf301619","status":200,"serverTiming":"trash-ids;dur=0.1, cold;dur=378613;desc=\"request 1733\", total;dur=0.7"},{"url":"/decks/trash","status":200,"serverTiming":"trash-ids;dur=0.1, cold;dur=386328;desc=\"request 1752\", total;dur=2.1"}]}
+{"at":"2026-10-04T12:04:03.870Z","load":27.12,"teardown":"untitled-20261004-lx7f","editor":404}
+{"at":"2026-10-04T12:04:03.946Z","load":27.12,"end":"http://localhost:4521"}

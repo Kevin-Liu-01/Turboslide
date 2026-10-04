@@ -1,0 +1,135 @@
+{
+  "decks": [
+    "decks/templates/gt-brand"
+  ],
+  "threshold": 0.1,
+  "maxMismatch": 0.005,
+  "rows": [
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-monogram",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-lockup",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-plate",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 33,
+      "fraction": 0.000022916666666666667,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-double-cut",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 303,
+      "fraction": 0.00021041666666666667,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-livery",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 1,
+      "fraction": 6.944444444444445e-7,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-dithered",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-ascii",
+      "kind": "content",
+      "theme": "light",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-monogram",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-lockup",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-plate",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 33,
+      "fraction": 0.000022916666666666667,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-double-cut",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 303,
+      "fraction": 0.00021041666666666667,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-livery",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 1,
+      "fraction": 6.944444444444445e-7,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-dithered",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    },
+    {
+      "deck": "gt-brand",
+      "slideId": "speed-ascii",
+      "kind": "content",
+      "theme": "dark",
+      "mismatch": 0,
+      "fraction": 0,
+      "status": "ok"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "deck": "/Users/kevinliu/repos/Turboslide-next/decks/templates/gt-brand",
+  "render": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/v2/typed/render",
+  "shoot": "/Users/kevinliu/repos/Prototemplate/deck",
+  "threshold": 0.1,
+  "maxMismatch": 0.005,
+  "rows": [
+    {
+      "n": 17,
+      "slideId": "speed-monogram",
+      "theme": "light",
+      "mismatch": 13,
+      "fraction": 0.000009027777777777777,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 17,
+      "slideId": "speed-monogram",
+      "theme": "dark",
+      "mismatch": 17,
+      "fraction": 0.000011805555555555555,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 18,
+      "slideId": "speed-lockup",
+      "theme": "light",
+      "mismatch": 18,
+      "fraction": 0.0000125,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 18,
+      "slideId": "speed-lockup",
+      "theme": "dark",
+      "mismatch": 24,
+      "fraction": 0.000016666666666666667,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 19,
+      "slideId": "speed-plate",
+      "theme": "light",
+      "mismatch": 13,
+      "fraction": 0.000009027777777777777,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 19,
+      "slideId": "speed-plate",
+      "theme": "dark",
+      "mismatch": 19,
+      "fraction": 0.000013194444444444444,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 20,
+      "slideId": "speed-double-cut",
+      "theme": "light",
+      "mismatch": 11,
+      "fraction": 0.000007638888888888888,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 20,
+      "slideId": "speed-double-cut",
+      "theme": "dark",
+      "mismatch": 18,
+      "fraction": 0.0000125,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 21,
+      "slideId": "speed-livery",
+      "theme": "light",
+      "mismatch": 18,
+      "fraction": 0.0000125,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 21,
+      "slideId": "speed-livery",
+      "theme": "dark",
+      "mismatch": 35,
+      "fraction": 0.000024305555555555554,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 22,
+      "slideId": "speed-dithered",
+      "theme": "light",
+      "mismatch": 5,
+      "fraction": 0.0000034722222222222224,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 22,
+      "slideId": "speed-dithered",
+      "theme": "dark",
+      "mismatch": 17,
+      "fraction": 0.000011805555555555555,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 23,
+      "slideId": "speed-ascii",
+      "theme": "light",
+      "mismatch": 51,
+      "fraction": 0.00003541666666666667,
+      "status": "ok",
+      "note": ""
+    },
+    {
+      "n": 23,
+      "slideId": "speed-ascii",
+      "theme": "dark",
+      "mismatch": 47,
+      "fraction": 0.00003263888888888889,
+      "status": "ok",
+      "note": ""
+    }
+  ]
+}

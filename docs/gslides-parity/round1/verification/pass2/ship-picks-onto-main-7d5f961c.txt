@@ -1,0 +1,114 @@
+CONFLICT 56431c76 H5: the formatter ignores the evidence folder as one line, so the chec
+  .prettierignore
+  CONFLICT (content): Merge conflict in .prettierignore
+CONFLICT 41332b42 H6: the blank template draws no GT mark and no GT wordmark band; GT_BA
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 68a60bd3 H7: a deck's export, build and bundle copies leave the store with the 
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 6ac04388 H2: the deck listing is scoped to the viewer on /decks and in the deck
+  README.md
+  apps/studio/e2e/accounts.spec.ts
+  apps/studio/e2e/core/decks.spec.ts
+  docs/gslides-parity/focus/core-matrix.json
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in README.md
+  CONFLICT (content): Merge conflict in apps/studio/e2e/accounts.spec.ts
+  CONFLICT (content): Merge conflict in apps/studio/e2e/core/decks.spec.ts
+  CONFLICT (content): Merge conflict in docs/gslides-parity/focus/core-matrix.json
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 40164663 H3: Sign out from the account menu ends this browser's session in one 
+  README.md
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in README.md
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 0b6df8d4 H4: the sign in dialog draws no passkey row until the deployment offer
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 18632ba3 B6b#4: the docs index, the deviations and the status documents archive
+  docs/FOCUS.md
+  docs/gslides-parity/focus/VERIFICATION.md
+  CONFLICT (content): Merge conflict in docs/FOCUS.md
+  CONFLICT (content): Merge conflict in docs/gslides-parity/focus/VERIFICATION.md
+CONFLICT 3263728a B2a#15: /home draws the deck's page grammar: one rail on each side of 
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT d85c7964 B3a#7: the cuts of the clutter audit leave the menus, with every row a
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT bfc3888a B1#2: the Turboslide mark is the GT speed monogram built from five rec
+  README.md
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in README.md
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 24cc125e B2b#16: /decks lists the viewer's presentations as ruled rows with a 6
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 247fe081 B2c#17: Not found, You need access and the refused page stand in the p
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT c9380a14 B2d#18: a shared deck's page unfurls with the deck's own title, its ad
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 2cbcada2 B3b#9: the title row keeps the deck name at 96 px on a phone, floats t
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT c08ee017 B3b#10: the chrome's values follow the deck: square corners outside Sl
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT cabd481d B3b#11: the slide draws its deck's appearance on the stage, the filmst
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 53253fac B3b#12: one Turboslide mark in the chrome and no sparkle for the assis
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 2a0da406 B3b#13: the Share dialog draws ruled rows and asks no name, Version hi
+  packages/chrome/src/dialogs/Share.tsx
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in packages/chrome/src/dialogs/Share.tsx
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 2108dad4 B3b#14: the phone editor under 720 px: one Menus key, the filmstrip un
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT f20cf8ac B6c#21: the round specifications and parity files moved
+  apps/studio/src/editor/controller.tsx
+  docs/FOCUS.md
+  docs/gslides-parity/focus/core-matrix.json
+  docs/security.md
+  packages/viewer/src/Editor.tsx
+  scripts/probes/core-matrix.test.mjs
+  CONFLICT (content): Merge conflict in apps/studio/src/editor/controller.tsx
+  CONFLICT (content): Merge conflict in docs/FOCUS.md
+  CONFLICT (content): Merge conflict in docs/gslides-parity/focus/core-matrix.json
+  CONFLICT (content): Merge conflict in docs/security.md
+  CONFLICT (content): Merge conflict in packages/viewer/src/Editor.tsx
+  CONFLICT (content): Merge conflict in scripts/probes/core-matrix.test.mjs
+CONFLICT 33b3aa98 B4a#5: a deck from Blank draws a plain white slide with no rails, rule
+  docs/FOCUS.md
+  CONFLICT (content): Merge conflict in docs/FOCUS.md
+CONFLICT df2d52a8 B3b#13 seam: every clock in the product writes 7:39 PM, and the first-
+  docs/FOCUS.md
+  CONFLICT (content): Merge conflict in docs/FOCUS.md
+CONFLICT c17fd8bf B4b#6: the GT template is the 95 slide brand deck of 2026-10-01 with t
+  apps/studio/e2e/core/decks.spec.ts
+  CONFLICT (content): Merge conflict in apps/studio/e2e/core/decks.spec.ts
+CONFLICT 8154b6f4 B6c#21 seam: the Round 1 verifier's pass 1, its ledgers and the pictur
+  docs/gslides-parity/focus/VERIFICATION.md
+  CONFLICT (content): Merge conflict in docs/gslides-parity/focus/VERIFICATION.md
+43 of 67 picks clean; final tree differs from HEAD's
+ packages/viewer/src/Selection.tsx                  |    41 +-
+ packages/viewer/src/__tests__/canvas.test.ts       |    33 +
+ .../src/__tests__/editor-second-click.test.ts      |   206 +
+ packages/viewer/src/__tests__/inline-text.test.ts  |   248 +
+ packages/viewer/src/__tests__/press-rules.test.ts  |   115 +
+ scripts/probes/core-gate.mjs                       |    33 +
+ scripts/probes/core-matrix.test.mjs                |    86 +
+ scripts/probes/core-walk/areas/share.mjs           |    55 +-
+ scripts/probes/core-walk/areas/share.test.mjs      |    25 +
+ scripts/probes/core-walk/areas/text.mjs            |    69 +-
+ scripts/probes/overlay-twins.mjs                   |    59 +
+ scripts/probes/overlay-twins.test.mjs              |    60 +
+ scripts/probes/sync-cost-probe.mjs                 |   131 +-
+ scripts/probes/sync-cost-probe.test.mjs            |    45 +
+ 1014 files changed, 221412 insertions(+), 362 deletions(-)

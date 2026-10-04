@@ -1,0 +1,451 @@
+{
+  "base": "http://localhost:4521",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T12:43:37.653Z",
+  "ms": 122848,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 122822,
+    "report": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/v2/local-present/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": [
+      "present"
+    ],
+    "rows": null,
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 34,
+  "passed": 34,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "fd81dcc6",
+  "origin": "http://localhost:4521",
+  "date": "2026-10-04",
+  "results": {
+    "present.slideshow.button": "passed",
+    "present.slideshow.cmd-enter": "passed",
+    "present.presenter-view.arrow": "passed",
+    "present.presenter-view.s-key": "passed",
+    "present.notes-in-presenter": "passed",
+    "present.slideshow.from-beginning": "passed",
+    "present.skipped-left-out": "passed",
+    "text.link.present-click": "passed",
+    "comments.on-slide": "passed",
+    "comments.on-object": "passed",
+    "comments.on-title-placeholder": "passed",
+    "comments.reply": "passed",
+    "comments.resolve": "passed",
+    "comments.toolbar-and-menu-routes": "passed",
+    "text.link.slide-target": "passed",
+    "present.show.no-white-block": "passed",
+    "present.show.bar-on-entry": "passed",
+    "present.presenter.sentence-case": "passed",
+    "brand.frame.toggles": "passed",
+    "present.bar.no-dead-control": "passed",
+    "present.laser.visible": "passed",
+    "present.link.first-paint-show": "passed",
+    "present.presenter.phone-head": "passed",
+    "present.keys.arrow-right": "passed",
+    "present.keys.arrow-left": "passed",
+    "present.keys.space": "passed",
+    "present.keys.digit-enter": "passed",
+    "present.keys.home": "passed",
+    "present.keys.end": "passed",
+    "present.click-advances": "passed",
+    "present.counter": "passed",
+    "present.laser": "passed",
+    "present.escape": "passed",
+    "present.keys.blank-black-white": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "text.link.present-click",
+      "feature": "text",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.button",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.cmd-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-right",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.arrow-left",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.space",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.digit-enter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.home",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.end",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.click-advances",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.counter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.laser",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.escape",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.arrow",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter-view.s-key",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.notes-in-presenter",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.slideshow.from-beginning",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.keys.blank-black-white",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.skipped-left-out",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-title-placeholder",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-slide",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.on-object",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.reply",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.resolve",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "comments.toolbar-and-menu-routes",
+      "feature": "comments",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "text.link.slide-target",
+      "feature": "text",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.show.no-white-block",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.show.bar-on-entry",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter.sentence-case",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.frame.toggles",
+      "feature": "brand",
+      "driver": "core/present.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter.phone-head",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.bar.no-dead-control",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.laser.visible",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.link.first-paint-show",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

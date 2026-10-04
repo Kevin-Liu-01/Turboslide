@@ -1,0 +1,454 @@
+{
+  "base": "http://localhost:4521",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T11:58:03.155Z",
+  "ms": 296200,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 296174,
+    "report": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/v2/local-round-rows/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "brand.template.blank-no-gt-mark",
+      "brand.template.blank-plain",
+      "share.dialog.ruled-rows",
+      "versions.panel.seam-and-time",
+      "present.presenter.phone-head",
+      "chrome.title-row.phone",
+      "chrome.phone.menus-key",
+      "chrome.title-row.name-after-first-write",
+      "chrome.title-row.one-status",
+      "chrome.stage.deck-appearance",
+      "chrome.mark.one-product-mark",
+      "chrome.ai.no-sparkle",
+      "chrome.selection.gt-blue",
+      "chrome.scroll.no-smooth",
+      "chrome.menus.one-logo-row",
+      "chrome.menus.preferences-named",
+      "chrome.menus.download-four-first",
+      "chrome.words.no-process-words",
+      "decks.list.own-and-shared",
+      "decks.list.action-scoped",
+      "decks.manifest.paper",
+      "export.remove.copies-gone",
+      "decks.home.grammar",
+      "decks.home.capture-plain",
+      "decks.home.copy",
+      "decks.home.phone",
+      "decks.list.ruled-rows",
+      "chrome.buttons.one-rule",
+      "share.access.true-sentence",
+      "decks.og.deck-card",
+      "accounts.no-dead-method"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 31,
+  "passed": 31,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "fd81dcc6",
+  "origin": "http://localhost:4521",
+  "date": "2026-10-04",
+  "results": {
+    "brand.template.blank-no-gt-mark": "passed",
+    "brand.template.blank-plain": "passed",
+    "chrome.menus.one-logo-row": "passed",
+    "chrome.menus.preferences-named": "passed",
+    "chrome.menus.download-four-first": "passed",
+    "chrome.words.no-process-words": "passed",
+    "chrome.buttons.one-rule": "passed",
+    "chrome.title-row.phone": "passed",
+    "chrome.title-row.name-after-first-write": "passed",
+    "chrome.title-row.one-status": "passed",
+    "chrome.scroll.no-smooth": "passed",
+    "chrome.selection.gt-blue": "passed",
+    "chrome.ai.no-sparkle": "passed",
+    "chrome.mark.one-product-mark": "passed",
+    "chrome.stage.deck-appearance": "passed",
+    "versions.panel.seam-and-time": "passed",
+    "chrome.phone.menus-key": "passed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "decks.home.copy": "passed",
+    "decks.home.phone": "passed",
+    "decks.list.ruled-rows": "passed",
+    "decks.og.deck-card": "passed",
+    "decks.list.own-and-shared": "passed",
+    "decks.list.action-scoped": "passed",
+    "decks.manifest.paper": "passed",
+    "export.remove.copies-gone": "passed",
+    "present.presenter.phone-head": "passed",
+    "accounts.no-dead-method": "passed",
+    "share.access.true-sentence": "passed",
+    "share.dialog.ruled-rows": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "brand.template.blank-no-gt-mark",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.template.blank-plain",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.ruled-rows",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.panel.seam-and-time",
+      "feature": "versions",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter.phone-head",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.phone",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.phone.menus-key",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.name-after-first-write",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.one-status",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.stage.deck-appearance",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.mark.one-product-mark",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.ai.no-sparkle",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.selection.gt-blue",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.scroll.no-smooth",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.one-logo-row",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.preferences-named",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.download-four-first",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.no-process-words",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.own-and-shared",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.action-scoped",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.manifest.paper",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.remove.copies-gone",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.ruled-rows",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.access.true-sentence",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.og.deck-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.no-dead-method",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+2026-10-04T11:40:43Z	wait	signin-hand	load 35.40
+2026-10-04T11:45:43Z	wait	signin-hand	load 44.32
+2026-10-04T11:50:43Z	wait	signin-hand	load 35.02
+2026-10-04T11:55:43Z	2026-10-04T11:57:26Z	signin-hand	exit 0	load 19.64 to 18.79
+2026-10-04T11:57:33Z	2026-10-04T11:58:03Z	accounts-narrowed	exit 0	load 18.57 to 23.08
+2026-10-04T11:58:03Z	2026-10-04T12:02:59Z	round-rows	exit 0	load 23.08 to 14.23
+2026-10-04T12:02:59Z	2026-10-04T12:04:04Z	trash-local	exit 0	load 14.23 to 27.12
+2026-10-04T12:04:04Z	wait	hand-local	load 27.12
+2026-10-04T12:09:04Z	wait	hand-local	load 37.91
+2026-10-04T12:14:04Z	2026-10-04T12:19:22Z	hand-local	exit 0	load 14.81 to 15.15
+2026-10-04T12:19:22Z	2026-10-04T12:20:47Z	cuts-local	exit 0	load 15.15 to 13.52
+2026-10-04T12:20:47Z	2026-10-04T12:26:29Z	move-local	exit 0	load 13.52 to 28.86
+2026-10-04T12:26:29Z	wait	decks-spec	load 28.86
+2026-10-04T12:31:29Z	wait	decks-spec	load 41.81
+2026-10-04T12:36:29Z	2026-10-04T12:43:37Z	decks-spec	exit 1	load 9.10 to 22.06
+2026-10-04T12:43:37Z	2026-10-04T12:45:40Z	present-spec	exit 0	load 22.06 to 17.88
+2026-10-04T12:45:57Z	2026-10-04T12:51:45Z	dev-slides	exit 0	load 17.62 to 19.58
+2026-10-04T12:51:45Z	2026-10-04T12:55:07Z	dev-template-rows	exit 0	load 19.58 to 22.08
+2026-10-04T12:55:07Z	2026-10-04T12:56:26Z	speed-light	exit 0	load 22.08 to 19.77
+2026-10-04T12:56:26Z	2026-10-04T12:57:05Z	speed-dark	exit 0	load 19.77 to 17.80
+2026-10-04T12:57:05Z	2026-10-04T12:59:08Z	import-dev	exit 0	load 17.80 to 20.84
+2026-10-04T12:59:38Z	2026-10-04T12:59:56Z	typed	exit 0	load 20.47 to 18.80
+2026-10-04T13:00:06Z	2026-10-04T13:37:28Z	speed-monogram-2	exit 3	load 18.98 to 34.47
+2026-10-04T13:37:28Z	wait	import-dev-2	load 34.47
+2026-10-04T13:42:28Z	wait	import-dev-2	load 46.76
+2026-10-04T13:47:28Z	wait	import-dev-2	load 24.86
+2026-10-04T13:52:28Z	2026-10-04T14:09:13Z	import-dev-2	exit 0	load 9.50 to 18.10
+2026-10-04T14:09:19Z	2026-10-04T14:09:22Z	canvas-keep	exit 0	load 17.45 to 17.45
+2026-10-04T14:09:29Z	2026-10-04T14:09:59Z	speed-monogram-3	exit 0	load 16.95 to 12.91

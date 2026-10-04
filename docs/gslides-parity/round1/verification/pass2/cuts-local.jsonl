@@ -1,0 +1,14 @@
+{"at":"2026-10-04T12:19:54.921Z","load":13.77,"created":"untitled-20261004-4uki"}
+{"at":"2026-10-04T12:20:01.473Z","load":14.1,"cut":"notice","notices":["Edits on this copy of Turboslide are lost when it restarts."]}
+{"at":"2026-10-04T12:20:03.125Z","load":14.1,"cut":"home tooltip","tip":"Turboslide home Your presentations","label":"Turboslide home"}
+{"at":"2026-10-04T12:20:04.780Z","load":14.1,"cut":"own chip tooltip","tip":"You Your name and avatar; nothing else asks for an account","label":"Account"}
+{"at":"2026-10-04T12:20:09.660Z","load":14.02,"cut":"Insert > Image > Logo","dialog":["Logo"]}
+{"at":"2026-10-04T12:20:13.683Z","load":14.01,"cut":"Slide > Change theme","themeRows":["Change theme"],"head":["Theme","Appearance"]}
+{"at":"2026-10-04T12:20:20.081Z","load":14.28,"cut":"Text fitting from the right click menu","section":["Text fitting"],"formatHasTextFitting":false}
+{"at":"2026-10-04T12:20:23.745Z","load":14.28,"cut":"Tools > Preferences > Play animated patterns","sub":["On","In the show only (on)","Off"],"settingsKeys":["snapGuides","snapGrid","showRuler","showGuides","speakerNotes","filmstrip","spellcheck","viewing","compact","sections","appearance","sourceDrawer"]}
+{"at":"2026-10-04T12:20:32.178Z","load":13.92,"cut":"Tools > Preferences > Appearance > Dark","sub":["Light","Dark","Match the presentation"],"themeAfterDark":"dark"}
+{"at":"2026-10-04T12:20:35.897Z","load":14.25,"cut":"More formats > Turboslide file (.zip)","name":"untitled-20261004-4uki.zip","ms":1077,"bytes":401044}
+{"at":"2026-10-04T12:20:39.618Z","load":14.25,"cut":"More formats > Web page (.html)","name":"untitled-20261004-4uki.html","ms":1076,"bytes":577075}
+{"at":"2026-10-04T12:20:45.127Z","load":13.52,"cut":"Assist panel tailoring starter","starter":true,"dialog":["Tailor for a customer"]}
+{"at":"2026-10-04T12:20:46.868Z","load":13.52,"cut":"Help > Help Turboslide improve","opened":"https://github.com/login"}
+{"at":"2026-10-04T12:20:47.663Z","load":13.52,"teardown":"untitled-20261004-4uki","editorAfter":404}

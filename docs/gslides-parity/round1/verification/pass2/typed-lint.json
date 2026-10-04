@@ -1,0 +1,504 @@
+[
+  {
+    "id": "contrast/both-themes|speed-monogram|p3|/slots/head/2|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-monogram",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        138,
+        375,
+        1326,
+        22
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p3",
+    "path": "/slots/head/2",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-monogram|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-monogram",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 499.6,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-monogram",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-monogram|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-monogram",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  },
+  {
+    "id": "numbers/contradiction|speed-monogram|p2||",
+    "rule": "numbers/contradiction",
+    "severity": 1,
+    "kind": "accuracy",
+    "slideId": "speed-monogram",
+    "evidence": {
+      "text": "12 degree (speed-monogram); 14 degree (speed-plate); 35 degree (speed-plate); 22 degree (speed-livery)"
+    },
+    "proposal": "The same noun carries different numerals across slides: 12 degree (speed-monogram); 14 degree (speed-plate); 35 degree (speed-plate); 22 degree (speed-livery). Confirm the right one. The accuracy judge reads it.",
+    "source": "lint",
+    "blockId": "p2"
+  },
+  {
+    "id": "numbers/contradiction|speed-monogram|p3||",
+    "rule": "numbers/contradiction",
+    "severity": 1,
+    "kind": "accuracy",
+    "slideId": "speed-monogram",
+    "evidence": {
+      "text": "120 unit (speed-monogram, speed-plate); 30 unit (speed-monogram); 8 unit (speed-monogram); 9 unit (speed-plate); 18 unit (speed-plate); 12 unit (speed-plate); 90 unit (speed-plate); 59 unit (speed-dithered)"
+    },
+    "proposal": "The same noun carries different numerals across slides: 120 unit (speed-monogram, speed-plate); 30 unit (speed-monogram); 8 unit (speed-monogram); 9 unit (speed-plate); 18 unit (speed-plate); 12 unit (speed-plate); 90 unit (speed-plate); 59 unit (speed-dithered). Confirm the right one. The accuracy judge reads it.",
+    "source": "lint",
+    "blockId": "p3"
+  },
+  {
+    "id": "contrast/both-themes|speed-lockup|p2|/slots/head/1/cells/1/blocks/0|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-lockup",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        837,
+        204,
+        627,
+        87
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/head/1/cells/1/blocks/0",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-lockup|dia1|/slots/body/0/cells/0/blocks/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-lockup",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 499.6,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/cells/0/blocks/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-lockup",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-lockup|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-lockup",
+    "evidence": {
+      "text": "dia1, dia2, dia3, dia4, dia5, dia6, dia7",
+      "measured": {
+        "rasterBlocks": 7,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode 7 diagrams export as 2x rasters.",
+    "source": "lint"
+  },
+  {
+    "id": "contrast/both-themes|speed-plate|p3|/slots/head/2|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-plate",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        138,
+        342,
+        1326,
+        22
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p3",
+    "path": "/slots/head/2",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-plate|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-plate",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 357.9,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-plate",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-plate|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-plate",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  },
+  {
+    "id": "contrast/both-themes|speed-double-cut|p2|/slots/head/1/cells/1/blocks/0|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-double-cut",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        837,
+        204,
+        627,
+        44
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/head/1/cells/1/blocks/0",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-double-cut|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-double-cut",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 1921.9,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-double-cut",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-double-cut|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-double-cut",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  },
+  {
+    "id": "contrast/both-themes|speed-livery|p2|/slots/head/1/cells/1/blocks/0|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-livery",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        837,
+        204,
+        627,
+        44
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/head/1/cells/1/blocks/0",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-livery|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-livery",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 1106.3,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-livery",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-livery|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-livery",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  },
+  {
+    "id": "contrast/both-themes|speed-dithered|p2|/slots/head/1/cells/1/blocks/0|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-dithered",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        837,
+        204,
+        627,
+        44
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/head/1/cells/1/blocks/0",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-dithered|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-dithered",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 240,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-dithered",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-dithered|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-dithered",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  },
+  {
+    "id": "contrast/both-themes|speed-ascii|p2|/slots/head/1/cells/1/blocks/0|light",
+    "rule": "contrast/both-themes",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "speed-ascii",
+    "evidence": {
+      "text": "rgb(138, 143, 152) on rgb(255, 255, 255)",
+      "box": [
+        837,
+        204,
+        627,
+        44
+      ],
+      "measured": {
+        "ratio": 3.25,
+        "floor": 4.5,
+        "fontSize": 15
+      }
+    },
+    "proposal": "Text at 15 px in rgb(138, 143, 152) on rgb(255, 255, 255) measures 3.25:1 in the light theme; the floor is 4.5:1 (4.5:1 under 26 px). Use a darker token or a larger size, and check the other theme (DECK-GRAMMAR.md:61).",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/head/1/cells/1/blocks/0",
+    "theme": "light"
+  },
+  {
+    "id": "dia/fit-slot|speed-ascii|dia1|/slots/body/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "speed-ascii",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 960,
+        "slotWidth": 1326
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel. The slot is 1326 px wide.",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "speed-ascii",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|speed-ascii|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "speed-ascii",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode a diagram exports as a 2x raster.",
+    "source": "lint"
+  }
+]

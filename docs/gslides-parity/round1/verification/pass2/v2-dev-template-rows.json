@@ -1,0 +1,203 @@
+{
+  "base": "http://localhost:4521",
+  "tier": "memory",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is memory",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": null,
+  "startedAt": "2026-10-04T12:51:45.278Z",
+  "ms": 202169,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 202136,
+    "report": "/Users/kevinliu/repos/Turboslide-next/.turboslide/round1/v2/dev-template/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.list.gt-brand-deck",
+      "brand.appearance.default",
+      "export.download.large-deck-pdf",
+      "export.download.large-deck-pptx"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 4,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "PDF: GT brand deck.pdf, 95 slides in 5.9 s, 0.06 s per slide",
+        "PDF: GT brand deck.pdf, 95 slides in 5.9 s, 0.06 s per slide"
+      ]
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 95 slides in 51.3 s, 0.54 s per slide",
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 95 slides in 51.3 s, 0.54 s per slide"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "fd81dcc6",
+  "origin": "http://localhost:4521",
+  "date": "2026-10-04",
+  "results": {
+    "decks.list.gt-brand-deck": "passed",
+    "brand.appearance.default": "passed",
+    "export.download.large-deck-pdf": "passed",
+    "export.download.large-deck-pptx": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.appearance.default",
+      "feature": "brand",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

@@ -343,3 +343,286 @@ Under `docs/gslides-parity/round1/verification/pass1/`. Each name is `<base>-<su
 3. The GT template's seven speed mark slides (finding 5) convert to a canvas 3.9 to 18.6 percent off their drawing. NEXT.md 4.1.3 item 24 accepted this for the import. A seller who drags anything on one of them sees the mark jump over the text. One option is to ship B4b with these slides as they are, and the other is to hold them out of the template until the importer maps an inline `<svg>` (B4's requests 6 and 17).
 4. The licences named in the integrator's note are unchanged: the 1897 dictionary page states no licence, and slide 13's eleven reference thumbnails are unread (check step 15 reads the live Prototemplate slide's credit).
 5. The ship order: by the integrator's simulation, which this pass did not run again, its 33 push order applies with no conflict and NEXT.md's order needs a one line merge at H2. Either order rebases onto the realtime round's final `main`, which carries the undo fix that finding 1 waits on.
+
+# Round 1, pass 2 (the verifier, 2026-10-01)
+
+This is the verifier's second pass on Round 1, after the fix round. The worktree is `/Users/kevinliu/repos/Turboslide-next` on `next/round1` at `fd81dcc6`, and the tree was clean at the start. Pass 1 read `d7ac6431` and wrote `8154b6f4`. The fix round added eight commits after that: `58f82a30` (H6 fix), `96432f76`, `ffd70351` and `026db8e4` (H2 fix), `7f340372` and `85f002b1` (B4b#6 fix), `acf910e7` (B3a#8 fix), and the integrator's note `fd81dcc6`. The pass ran on 2026-10-04 from 11:11Z to 14:30Z (every time below is UTC). Read first: `docs/NEXT.md` 4.0, 4.1 and 6; `docs/FOCUS.md` 6.2; every note under `docs/gslides-parity/round1/build/`, with the "Round 1 fix round" sections of `integrator.md`, `ha.md` and `b4.md` read in full; `git log 8154b6f4..HEAD` and each fix commit's diff. No claim of a fixer was taken as read. This pass measures the fixes. The chain was run again step by step. The integrator's fix ledgers were read by id. Every row the round entered and every row a fix touched was run again on this pass's own servers, and each fix was driven by hand. Ports: 4521 and 4522, and 4321 for the chain's own servers. No deployment was made and nothing was pushed. Nothing was created or changed on Vercel, Cloudflare, GitHub or Google. The one minute load read 6 to 56 over the pass, and it is written beside every run.
+
+The preview `turboslide-lp2z0cdl8` serves `c17fd8bf`. Server source files changed after that commit: `ffd70351` changes `apps/studio/src/server/decks.ts`, `deck-scope.ts` and three store backends, `026db8e4` changes the Import slides dialog, and `7f340372` changes the GT template that the server copies. The preview therefore cannot read any fix, so this pass did not drive it again. Its one use was the by-id check of the scratch decks (V2.3). Every hosted reading of a fix waits for the ship's preview (V2.8).
+
+The working files are in the session scratch folder `r1v2/`. The scripts are `chain/run.sh`, `seq.sh`, `after.sh`, `extra.sh`, `extra2.sh`, `servers.sh`, `dev.sh`, `gate.sh`, `gate-dev.sh`, `drive.sh`, `trash.mjs`, `importdlg.mjs`, `speed.mjs` and `typed.sh`, with pass 1's `hand.mjs`, `cuts.mjs`, `move.mjs` and `signin.mjs`. The raw pictures are there too. The ledgers and the 24 pictures this section names are under `docs/gslides-parity/round1/verification/pass2/` (WebP, 0.68 MB in all, the largest 102 KB). The round's tracked pictures go from 23.67 MB to 24.35 MB, under NEXT.md 5.3's 25 MB.
+
+## V2.1 Verdict
+
+**The fix round's work holds on this pass's servers. Findings 2, 3, 4 and 5 read closed, and no severity 3 or 2 finding is open against Round 1's own work. The branch is not ready to push, for three reasons that belong to the ship step.**
+
+- The fixes. `slides.import.none-preselected` passed in the slides walk area on the dev server: "landed 3 1674 ms after Import" over the copy's 95 tiles, with at most 6 tile pictures in flight (finding 2). `present.laser.visible` passed in the whole present spec on the node-server build, after the tests that write the title (finding 3). The trash page answers a cookieless stranger in 3 to 21 ms with no store read. A browser's own trashed deck is in the page's first HTML, and another browser's id forged into the cookie lists nothing. Every trash row passed (finding 4). The GT template's seven speed mark slides convert to a canvas within 0.021 percent of their drawing. Each drawing moves by a drag and leaves the text where it was (finding 5).
+- No regression. The round's 33 rows passed again: 31 spec rows in one run and the two hotfix accounts rows narrowed. The divergence map and the clutter cuts read as in pass 1 at 1440 and 390 in both appearances. All eleven object kinds of the default Insert menu were resized and moved to the sheet pixel, and the PDF and the PowerPoint carry them where they were left. Sign in and sign out work on the local accounts server. The chain's red steps read as pass 1 read them: 15, 18, 20, 21 and 26 with the same failures, and 31 with its standing budgets. Step 24 went from 28 pairs over budget to 14, and those 14 are the chain's import of `decks/gt-brand` (b4.md request 22, Round 2).
+- The ship step's reasons. (1) Finding 1 is not fixed on the branch. The earlier rounds' undo class and the other standing rows close only on a tree that carries the realtime round's controller. `origin/main` now carries that undo fix as `277554da`. The rows are read on the ship's rebased tree before the first push. (2) The hosted halves of findings 2 and 4 wait for a preview of these commits: the import on the blob tier, where HA read a Blob concurrency refusal at `c17fd8bf`, and the trash page's time on a store of the preview's size. (3) The realtime round's ship stopped. `realtime/round`'s `5f9222d0` records that `collab.presence.join-within-2s` read red six times of seven on production at `7d5f961c`, and that production was rolled back by hand to `5ce68a72` at 12:11:54Z. NEXT.md 6.1 rule 3 holds Round 1's first push until that round's fix forward and its production table. `origin/main` at `7d5f961c` also carries H3 (`f2e648f1`) and H6 (`a73db740`). The 67 pick order applies clean onto `f3e9cd86`, and onto `origin/main` its first pick already conflicts (V2.2).
+
+Pass 2 adds three severity 1 findings: the Import slides tiles at the end of the list wait behind every tile scrolled past (P2-1, integrator), the trash page draws boxed cards (P2-2, B2), and a store test pins the seed deck at 85 slides, so check step 5 reads red while the chain's import is in the tree (P2-3, B4).
+
+## V2.2 The gates on the tree
+
+The chain was run one step at a time with `r1v2/chain/run.sh`. A browser step started only at a one minute load under 24, after five minute waits. A step that serves on 4321 also waited until the port was free, because another checkout's chain uses it. The steps that drive the chain's server ran under `.turboslide/e2e.lock`. The times and loads are in `pass2/chain-ledger.tsv`.
+
+The order was steps 1 to 16, 19 and 22 to 25 with step 7's import in place. The import was then put back from git, and steps 27 to 31 and 33 ran, so the node-server build carries the committed seed deck. Step 7 then ran again, followed by 17, 18, 20, 21 and 26. The import's untracked slides were moved to the scratch folder each time it was put back. Step 26 left two decks in `decks/` (`untitled-20261004-8oe0` and `-te3l`), as it did in pass 1, and they were moved to `r1v2/leftover-decks/`.
+
+At 11:11:50Z, before the chain, this pass ran `node scripts/check.mjs --help` once by mistake. The script has no `--help` flag, so it started its chain at step 1. It stopped after step 7 when its output pipe closed. Its orphaned vitest worker was stopped at 11:13Z, and step 7's import was put back from git. The nine untracked slides that import added were moved to `r1v2/accident-import/`. No reading of that run is used.
+
+| Step | When (UTC) and load | Reading |
+| --- | --- | --- |
+| 1 install, 2 routes, 3 contracts, 4 `tsc -b` | 11:15:03Z to 11:15:08Z, load 19.48 to 18.88 | ok, ok, ok (contracts current), ok |
+| 5 `pnpm test` | 11:15:08Z to 11:16:47Z, load 18.88 to 28.31 | ok: 487 files, 5,128 passed, 4 skipped, 2 todo, 97.4 s (pass 1: 486 and 5,117; the new tests are the fixes') |
+| 6 build, bundle check, greps | 11:16:47Z, load 28.31 | ok; the largest client chunk 1,185,879 B over its 600,000 B ceiling is reported (standing); 28 `innerHTML` and 26 `overwrite: true` call sites, all in the allowlist |
+| 7 to 9 import, counts, validate | 11:18:20Z to 11:18:23Z, load 14.76 | ok: 95 slides, 8 sections, 7 html blocks, 119 assets; validate 0 errors |
+| 10, 11 renders | 11:18:23Z to 11:18:47Z, load 14.30 | ok |
+| 12 `compare-to-shoot` at 0.5 percent | 11:18:47Z to 11:19:57Z, load 14.31 to 24.83 | ok: 190 pairs, 0 over budget, worst 0.408 percent, mean 0.017 |
+| 13, 14 the sheet | 11:24:57Z to 11:25:25Z, load 23.35 to 33.48 | ok |
+| 15 `turboslide lint all` | 11:25:25Z to 11:26:00Z, load 33.48 to 37.06 | red as standing: 221 findings, 1 at severity 3, `asset/credit-on-plate` on the live import's `mood-dictionary` (finding 11) |
+| 16 the brand deck build | 11:26:00Z | ok: 14.79 MiB of 16 |
+| 17 `viewer.spec.ts` | 12:59:57Z to 13:00:36Z, load 18.80 to 18.59 | ok: 8 of 8 |
+| 18 the chrome lint | 13:00:36Z to 13:01:46Z, load 18.59 to 13.97 | red as standing: `/deck/gt-brand` 24 audits clean; `/edit/gt-brand` "junction h@48 gap 0.5" and "h@79 gap 0.5" on the Menus key (finding 8) |
+| 19 prettier and the README ledger | 11:26:13Z to 11:28:12Z, load 35.01 to 34.72 | ok |
+| 20 the parity audit | 13:01:46Z to 13:20:54Z, load 13.97 to 22.92 | red as standing: 2,703 passed, 102 failed, 380 skipped, pass 1's counts to the row; the tracked report was put back from git |
+| 21 fifteen e2e specs | 13:20:55Z to 13:37:15Z, load 22.92 to 29.46 | red as standing: 35 passed, 23 failed, 14 did not run; the failure list equals pass 1's test by test (finding 12) |
+| 22 native and flatten exports | 11:28:12Z to 11:29:22Z, load 34.72 to 43.15 | ok, both valid, the flatten report perfect |
+| 23 fonts | 11:29:22Z | skip: no fonts venv (standing) |
+| 24 `canvas-fidelity.mjs` at 0.5 percent | 11:34:22Z to 11:36:08Z, load 17.16 to 17.22 | red: 191 slides, 382 pairs, 14 over budget (pass 1: 28). The 14 are the seven speed mark slides of the chain's import of `decks/gt-brand` in both themes, at pass 1's numbers (3.91 to 18.58 percent), which wait for b4.md request 22. The committed GT template's 14 speed mark pairs read 0.000 to 0.021 percent, and its worst pair is 0.143 percent (`directions`) |
+| 25 the render worker's container | 11:36:08Z | skip: no Docker daemon (standing) |
+| 26 nine e2e specs | 13:52:15Z to 14:06:48Z, load 9.68 to 8.62 | red as standing: 52 passed, 12 failed, 2 skipped, 12 did not run; the failure list equals pass 1's test by test |
+| 27 the layout shift audit | 11:36:11Z | skip: no preview on 4344 (standing) |
+| 28 the dependency audit | 11:36:12Z | ok: 2 advisories at high or above, both accepted, none expired |
+| 29 the brand build, home assets, definitions, native record | 11:36:12Z to 11:36:17Z, load 17.68 to 17.87 | ok: the mark's paths match their rectangles and rows; 32 files; 8 files of 4 pictures; 4 outputs match `BUILD-RECORD.json`, the Linux addon pending as recorded |
+| 30 the Vercel build and its output check | 11:36:17Z to 11:36:38Z, load 17.87 to 17.09 | ok: 40 of 40 assertions; the largest function 155.8 MB of the 250 MB cap |
+| 31 the node-server build and its perf budget | 11:36:38Z to 11:40:34Z, load 16.60 to 34.39 | red as standing: the build ok (this pass's local runs serve it); 107 of 148 budgets met. The 41 red are 32 JS size rows, 5 DOM counts and 4 timings read as the load passed 20 (finding 18); the person's user agent holds ("Chrome/147") |
+| 32 the core gate | not run | V2.8 |
+| 33 the brand lint | 11:40:34Z to 11:40:37Z, load 34.39 | ok in enforce mode: 450 scripts (one more, `picture-gate.ts`), 114 stylesheets, 28 mood pictures; 0 open, 22 accepted, 0 stale |
+
+The typed speed mark slides, read again outside the chain with B4's commands (`r1v2/typed.sh`, 12:59:38Z to 12:59:56Z, load 20.47 to 18.80, under the lock):
+- `turboslide render 17-23` of `decks/templates/gt-brand` in both themes exited 0.
+- `compare-to-shoot` against a fresh Prototemplate shoot of slides 17 to 23: 14 pairs, 0 over budget, worst 0.004 percent (`typed-compare.json`).
+- `canvas-fidelity` of the seven slides: 14 pairs, worst 0.021 percent (`speed-double-cut` light) (`typed-canvas.json`).
+- `turboslide lint 17-23 --layers both --render <that render>` exited 0 with 0 at severity 3. The 7 at severity 2 are `contrast/both-themes` on each caption at 3.25 to 1, which every caption of the deck reads (`typed-lint.json`). Request 21's rule change holds: the ASCII rows read no `type/svg-label-min`. Without `--render`, the lint reads the derived folder's last render. Here that was step 10's render of the chain's import, and it read `speed-ascii#html` at `type/floor-15`. B4's `typed-renders.sh` has no `--render`, so it reads whichever deck rendered last.
+- `canvas-fidelity --keep-renders` of `speed-plate` and `speed-monogram` (14:09:19Z, load 17.45): 4 pairs, worst 0.002 percent. The grammar render and the canvas of `speed-plate` side by side are `template-speed-plate-grammar-canvas.webp`, where pass 1's `chain-step24-speed-plate` showed the plate drawn over the body text.
+
+Checks outside the chain, at any load:
+- The fixes' unit tests on their own (11:24Z and 11:41Z): `-recent.test.ts`, `deck-scope.test.ts`, `picture-gate.test.ts`, `default-view-words.test.ts` (the default view words test), `speed-marks.test.ts`, `hosted.test.ts`, `template-index.test.ts` and `templates.test.ts`. All 8 files passed with the seed deck in place (35 tests in the last three alone). At 11:24Z, with step 7's import still in the tree, `templates.test.ts` read 1 red (P2-3).
+- The ship order: `r1int/ship/simulate.mjs` over the integrator's `ship-order.txt` plus `fd81dcc6` gives 67 of 67 picks clean onto `f3e9cd86`, and the last tree equals HEAD's. The order holds every one of the 67 commits of `f3e9cd86..HEAD`. The same order onto `origin/main` (`7d5f961c`) is not clean. Its first pick, H5 `56431c76`, conflicts in `.prettierignore`, and H6 conflicts in `scripts/probes/core-matrix.test.mjs`. Later picks conflict in `README.md`, `accounts.spec.ts`, `decks.spec.ts`, `Share.tsx`, `Editor.tsx`, `controller.tsx`, `docs/FOCUS.md`, `core-matrix.json`, `VERIFICATION.md` and `docs/security.md` (`ship-picks-onto-main-7d5f961c.txt`; a pick after a conflict carries its markers, so later counts overlap). `realtime/round` now has 71 commits after `52c701f3`, where the integrator replayed 32.
+- NEXT.md 5.6 check 1: 6,425 tracked files and 342.6 MB, against pass 1's 6,287 and 339.0 MB (finding 13 stands).
+
+## V2.3 The run ledger
+
+The local runs serve the node-server build that check step 31 wrote at `fd81dcc6`, copied to `r1v2/output`. It ran on the pair 4521 (`TURBOSLIDE_MAIL=capture`) and 4522 (`TURBOSLIDE_MAIL=off`). Each server had its own overlay on the tmp store, the memory tier, its own identity database, the local open surface, the fake Google pair, and the assist and logo fixtures, which is pass 1's recipe. Pair 1 served the sign in drive. Pair 2 started fresh for everything else, because a tmp store keeps the library's limit of 10 sign ins per IP per hour (finding 14). The rows and drives that copy the GT template ran on a vite dev server on 4521 (`r1v2/dev.sh`: the tmp store on a fresh overlay, the memory tier, the local open surface, mail captured), because the node-server build's tmp store cannot copy the template (finding 17). Each gate run used a scratch `--lock`, and each drive held `.turboslide/e2e.lock`. `pass2/runs.tsv` has every start, end and wait.
+
+| Run | Base | When (UTC) and load | Ledger | Reading |
+| --- | --- | --- | --- | --- |
+| Sign in and sign out by hand, light and dark | 4521, pair 1 | 11:55:43Z to 11:57:26Z, 19.64 to 18.79 | `signin-local.jsonl` | V2.6; decks `untitled-20261004-klvj` and `-ra5m` removed |
+| The two hotfix accounts rows, narrowed | pair 2 | 11:57:33Z to 11:58:03Z, 18.57 to 23.08 | `v2-local-accounts-narrowed.json` | 2 of 2 |
+| The round's 31 spec rows | pair 2 | 11:58:03Z to 12:02:59Z, 23.08 to 14.23 | `v2-local-round-rows.json` | 31 of 31, retries zero, 296 s |
+| The trash page drive | 4521 | 12:02:59Z to 12:04:04Z, 14.23 to 27.12 | `trash-local.jsonl` | V2.6; deck `untitled-20261004-lx7f` deleted forever through the page |
+| Hand drive, the divergence map | 4521 | 12:14:04Z to 12:19:22Z, 14.81 to 15.15 | `hand-local.jsonl` | 110 pictures; deck `untitled-20261004-fz89` removed |
+| The clutter cuts | 4521 | 12:19:22Z to 12:20:47Z, 15.15 to 13.52 | `cuts-local.jsonl` | pass 1's readings; deck `untitled-20261004-4uki` removed |
+| Drags, resizes and exports | 4521 | 12:20:47Z to 12:26:29Z, 13.52 to 28.86 | `move-local.txt` | V2.6; deck `untitled-20261004-dhr9` removed |
+| The whole decks spec | pair 2 | 12:36:29Z to 12:43:37Z, 9.10 to 22.06 | `v2-local-decks.json` | 80 rows: 76 passed, 3 failed, 1 not driven (V2.5) |
+| The whole present spec | pair 2 | 12:43:37Z to 12:45:40Z, 22.06 to 17.88 | `v2-local-present.json` | 34 of 34 |
+| The slides walk area | dev 4521 | 12:45:57Z to 12:51:45Z, 17.62 to 19.58 | `v2-dev-slides.json` | 100 rows driven, 100 passed, the 83 slides rows among them |
+| The four GT template rows | dev 4521 | 12:51:45Z to 12:55:07Z, 19.58 to 22.08 | `v2-dev-template-rows.json` | 4 of 4 |
+| The speed mark slides, light | dev 4521 | 12:55:07Z to 12:56:26Z, 22.08 to 19.77 | `speed-dev.jsonl` | V2.6; deck `gt-brand-muttpsq1` removed |
+| The speed mark slides, dark | dev 4521 | 12:56:26Z to 12:57:05Z, 19.77 to 17.80 | `speed-dev.jsonl` | V2.6; deck `gt-brand-muttrh7y` removed |
+| Import slides | dev 4521 | 12:57:05Z to 12:59:08Z, 17.80 to 20.84 | `import-dev.jsonl` | V2.6; decks `untitled-20261004-a8q7` and `gt-brand-muttsaxb` removed |
+| The typed readings | the CLI | 12:59:38Z to 12:59:56Z, 20.47 to 18.80 | `typed-*.json` | V2.2 |
+| The speed monogram again | dev 4521, second start | 13:00:06Z to 13:37:28Z | | refused to start: its lock came free at load 34.47, so the drive exited 3 without driving |
+| Import slides with the end of list reading | dev 4521, second start | 13:52:28Z to 14:09:13Z, 9.50 to 18.10 (the drive at 14:06:50Z, load 6.7) | `import-dev.jsonl` | P2-1; its two decks removed |
+| The kept canvas renders | the CLI | 14:09:19Z to 14:09:22Z, 17.45 | | V2.2 |
+| The speed monogram and plate again, every box logged | dev 4521, third start | 14:09:29Z to 14:09:59Z, 16.95 to 12.91 | `speed-dev.jsonl` | V2.6; its deck removed |
+
+Every local deck was trashed and removed by its own id, and its editor then answered 404 (13 decks; the spec runs' decks went with their teardowns and their overlays). The pair's and the dev server's overlays were removed at the end.
+
+The preview's scratch decks were checked by id at 11:17:36Z through `~/.config/turboslide/deck-check.mjs`, with the bearer and a fresh OIDC token pulled into this worktree's `.turboslide/vercel-dev.env` (`preview-ids.txt`). The fix round's five decks (`untitled-20261004-i4hi`, `import-source-20261004-i4hi`, `import-source-mutluofh`, `ha-import-target-mutlxptu` and `import-source-mutlxrhw`) and pass 1's seven (`untitled-20261003-zwel`, `-esb7`, `-jl61`, `-rzij` and `-din0`, `untitled-20261004-b2sk` and `-t8j4`) all answered `deck.info` 404. This pass made no deck on the preview.
+
+The integrator's fix ledgers were read by id (`round1/build/integrator/fix/`), and each matches the note's words. Each ledger's commit field is HEAD at the time of the run; a fix that was still uncommitted then is in the tree but not in the field.
+
+| Ledger | Commit field | When and load | Reading |
+| --- | --- | --- | --- |
+| `fix-trash.json` | `8154b6f4` | 09:10:42Z, 13.62 to 15.32 | 14 rows: 13 passed; `decks.trash.editor-undo-snackbar` failed at its narrowed setup |
+| `fix-present.json` | `8154b6f4` | 09:13:15Z, 15.32 to 12.32 | 34 of 34 |
+| `fix-decks.json` | `96432f76` | 09:15:57Z, 12.47 to 12.38 | 80 rows: 77 passed, 2 failed (`templates.gallery.page`, and `decks.home.load-budget` at 72,224 B), 1 not driven; retries zero |
+| `fix-rebased-walk.json`, `-walk2`, `-specs`, `-refusal` | none (the replayed tree) | 09:25:25Z to 10:09:15Z, 8.80 to 26.81 | 241 rows: 238 passed, `versions.show-changes-marks` red, 2 not driven; then 51 of 51; 3 of the 4 driven spec rows passed, with `export.refusal.sentence-and-retry` red on its words; then 1 of 1 with `acf910e7` |
+| `fix-head-slides.json` | `acf910e7` | 10:14:54Z, 16.17 to 25.16 | 100 of 100 |
+| `fix-head-walk.json` | `026db8e4` | 10:25:42Z, 15.34 to 21.51 | 275 rows: 255 passed, 18 failed (finding 1's walk rows with the run of record's words), 2 not driven |
+| `fix-head-specs.json` | `026db8e4` | 10:57:40Z, 21.51 to 39.26 | 6 rows: 4 failed, 2 not driven, read as the load rose past 24 |
+| `ha/fix-dev-slides-core-gate.json` | `8154b6f4` | 09:03:20Z, 15.16 to 11.18 | 100 of 100 |
+| `ha/fix-preview-slides-core-gate.json` | `58f82a30` (the preview serves `c17fd8bf`) | 09:09:44Z, 9.97 to 11.70 | 100 rows: 99 passed; `slides.import.none-preselected` "landed 0 ... Vercel Blob: Too many requests" |
+
+## V2.4 Pass 1's findings, one by one
+
+"Closed" means this pass read the fix on its own servers and the defect did not show. A hosted reading that only the ship's preview can give is named in V2.8.
+
+| # | Finding (owner, severity) | Fix | This pass | Status |
+| --- | --- | --- | --- | --- |
+| 1 | The earlier rounds' core rows red before the round (integrator, 3) | None on the branch. The integrator replayed the realtime round's 32 commits onto a scratch tree, and those rows read green there (V2.3) | Not run again on a replayed tree. The integrator's ledgers agree with its note row by row: 18 walk rows red on `026db8e4`, and the same rows green on the replayed tree, except `versions.show-changes-marks`, which is a parked row of `ship-4300058d.json`. `realtime/round` has moved since the replay, so the ship step's rebase is a different tree | open: the ship step reads these rows on the rebased tree before the first push |
+| 2 | `slides.import.none-preselected` red since H2 (HA, 3) | `96432f76` (the driver opens its copy of the brand deck) and `026db8e4` (the tile pictures, six at a time near the visible area, low priority) | The slides walk area on the dev server: 100 of 100. The row read "the copy in this browser's Recent record, the copy offered after 1306 ms; 95 tiles; preselected 0; after three clicks 3, button "Import 3 slides"; after the Shift click 8 (8 expected); after None 0; landed 3 1674 ms after Import". HA's reading on the same server type before `026db8e4` was 12,598 ms. The hand drive read 6 tile pictures in flight at most, `fetchpriority` low, and the three slides landed 621 ms after Import (V2.6) | closed locally; the blob tier waits for the ship's preview (V2.8) |
+| 3 | `present.laser.visible` red in both whole matrix runs (integrator, 3) | `58f82a30` (the driver reads the dot on an empty 48 px block) | The whole present spec on the node-server build, after the tests that write the title: 34 of 34. The row read "at 1224,450 (0 of 576 pixels off the block's colour); 14 by 14 px ...; drawn diameter 14" | closed; no whole matrix run was made this pass |
+| 4 | The trash page lists the whole store for every visitor (integrator, 2) | `ffd70351` (the `/decks` scope, this browser's ids, one record and one head per id) | All 12 `decks.trash.*` rows, `decks.recent.drops-trashed`, `decks.card.move-to-trash-undo` and both H2 list rows passed in the whole decks spec on the node-server build. A cookieless GET of `/decks/trash` answered in 21, 4 and 3 ms, with the empty state in the first HTML and no trash read in `server-timing`. A browser's own trashed deck was in the first HTML at both widths and in both appearances, and `server-timing` named `trash-ids;dur=0.1`. A fresh browser with the other browser's id forged into its `ts-trash` cookie and its storage listed nothing, and the page cleared the forged id from storage. Restore, Cancel and Delete forever each worked, and each cleared the id from the record and the cookie (V2.6) | closed locally; the time on a store of the preview's size waits for the ship's preview |
+| 5 | The GT template's speed mark slides move their drawing over their text on the first canvas write (B4, 2) | `7f340372` (the typed slides with correction 6) and `85f002b1` (the store tests and the rendered label rule) | Check step 24: the template's 14 speed mark pairs are 0.000 to 0.021 percent off. The 14 pairs over budget are the chain's import of `decks/gt-brand` (b4.md request 22, Round 2). `compare-to-shoot` of slides 17 to 23 against a fresh Prototemplate shoot: 14 pairs, worst 0.004 percent. The lint of the seven slides over that render reads 0 at severity 3. The hand drive moved the drawing on all six single drawing slides, 121 by 36 to 40 sheet px, with its size kept and no text covered. The text kept its place on all six. On the bar monogram the second paragraph's box grows to the first paragraph's height, and its words do not move (V2.6). On the lockup a press on the set group's empty area moved the group, and a press on a nested drawing moved nothing (b4.md notice 23, open) | closed for the template; the import's 14 pairs wait for request 22; notice 23 open |
+| 6 | The two link rows read both ways (integrator, 1) | none | not read again | open |
+| 7 | Two words of item 21: the pattern's chip and "Guest <label>" (B3a, 1) | none | The animated pattern's chip still reads "Shader" (`move-local`) | open |
+| 8 | The Menus key's focus outline at 390 (B3b, 1) | none | Check step 18 reads "junction h@48 gap 0.5" and "h@79 gap 0.5" again | open |
+| 9 | The presenter's Next slide card at 390 (B3b, 1) | none | `local-present-390-*` shows the card cut at the right edge | open |
+| 10 | The `/deck` view's hint and "r3" at 390 (B3b, 1) | none | `local-view-390-*` shows both | open |
+| 11 | Check step 15 on the live dictionary slide (B4, 1) | none (Kevin's question) | Step 15 reads the same single severity 3 finding | open |
+| 12 | Check step 21's attribution (integrator, 1) | none | Step 21 read 35 passed, 23 failed and 14 did not run, the same failure list as pass 1 test by test | open |
+| 13 | NEXT.md 5.6 check 1 (B6, 1) | none | 6,425 tracked files and 342.6 MB (pass 1: 6,287 and 339.0 MB) | open |
+| 14 | The accounts spec and the per IP limit (integrator, 1) | none | The two hotfix accounts rows passed narrowed on a fresh pair; the full spec was not run | open |
+| 15 | The smoke's thumbnail row and the cover's cache (B2, 1) | none | not driven (no preview run) | open |
+| 16 | The refused page's store words (B2, 1) | none | `local-refused-*` still reads "deckId must be a slug." | open |
+| 17 | The node-server build: the GT template rows and the gestures setup (integrator, 1) | none | `decks.list.gt-brand-deck` and `brand.appearance.default` read red on the node-server build again ("page.waitForURL: Timeout"), and passed on the dev server with the large deck rows (V2.5) | open |
+| 18 | Check step 31's standing reds (integrator, 1) | none | 107 of 148 budgets met: 32 JS size rows, 5 DOM counts and 4 timings red, read at a load of 16.60 to 34.39 | open |
+| 19 | The two H2 rows on the chain's file store (HA, 1) | none | not read (check step 32 was not run) | open |
+| 20 | The name prompt row's setup race (B3b, 1) | none | not read | open |
+| 21 | `cost.editor-editing.calls` on the dev server (integrator, 1) | none | not read | open |
+
+## V2.5 The rows
+
+The 33 rows the round entered (the diff of `f3e9cd86..HEAD` in `core-matrix.json`: 33 added, `share.name-prompt.first-share` retired, as pass 1 read it), and the rows the fixes touch. Every spec row was one test of one run, with retries zero.
+
+| Rows | Base and run | Reading |
+| --- | --- | --- |
+| The 31 spec rows the round entered | the node-server build, pair 2, `v2-local-round-rows.json` | 31 passed, 0 failed, 0 not driven, 296 s. The readings match pass 1's, for example: `decks.list.own-and-shared` "fresh browser: 0 cards (none); after its own deck ...: caption count 0; the file's deck ... listed: false"; `chrome.selection.gt-blue` ring and chip `rgb(47, 92, 224)`, chip text white, in both appearances; `chrome.scroll.no-smooth` 508, 418, 275 and 172 elements, none smooth; `decks.manifest.paper` `#ffffff` twice and `start_url` `/home`; `export.remove.copies-gone` "200, 200 before the removal; 404, 404 10 ms after it" |
+| `accounts.sign-out-clean`, `accounts.decks-list-scoped` | the node-server pair, `--only accounts --rows`, `v2-local-accounts-narrowed.json` | 2 passed |
+| The whole decks spec (H2's list and trash rows, the trash fix) | the node-server build, `v2-local-decks.json` | 80 rows: 76 passed, 3 failed, 1 not driven. Every `decks.trash.*` row (12), `decks.recent.drops-trashed`, `decks.card.move-to-trash-undo`, `decks.list.own-and-shared` and `decks.list.action-scoped` passed. Red: `decks.list.gt-brand-deck` and `brand.appearance.default` (the node-server build cannot copy the GT template, finding 17; both passed on the dev server below) and `templates.gallery.page` (red in the integrator's run of record and its fix run as well). Not driven: `decks.recent.this-browser-sentence` by its own rule. `decks.home.load-budget` passed here |
+| The whole present spec (the laser fix) | the node-server build, `v2-local-present.json` | 34 of 34; `present.laser.visible` read "at 1224,450 (0 of 576 pixels off the block's colour); 14 by 14 px ...; drawn diameter 14" |
+| The slides walk area (`slides.import.none-preselected`, `decks.file.import-slides-deck`) | the dev server, `v2-dev-slides.json` | 100 rows driven, 100 passed, the 83 slides rows among them. `slides.import.none-preselected`: "the copy in this browser's Recent record, the copy offered after 1306 ms; 95 tiles; preselected 0; after three clicks 3, button "Import 3 slides"; after the Shift click 8 (8 expected); after None 0; landed 3 1674 ms after Import; the copy answers 404" |
+| The four rows that copy the GT template (`decks.list.gt-brand-deck`, `brand.appearance.default`, `export.download.large-deck-pdf`, `-pptx`) | the dev server, `v2-dev-template-rows.json` | 4 of 4: the copy opens with its 95 slides; the copy opens dark and `/new` light; "PDF: GT brand deck.pdf, 95 slides in 5.9 s, 0.06 s per slide"; "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 95 slides in 51.3 s, 0.54 s per slide" |
+| `export.refusal.sentence-and-retry` (`acf910e7`'s words) | not run | On the branch the row is red with the undo class (finding 1). It reads green only on a tree with the realtime round's controller, which this pass did not build. The integrator's replayed tree read it green (`fix-rebased-refusal.json`) |
+
+## V2.6 Hand drives
+
+Each drive went through the product's own controls at a person's pace: Playwright with a 40 to 60 ms pause on every action and a 0.5 to 2.5 s wait after every open. Each drive logs the facts beside its pictures and refuses to start at a one minute load of 24 or more. The pictures were looked at in grids beside pass 1's and the audit's (`next/brand-surfaces/`).
+
+### The trash page (finding 4)
+
+`trash.mjs` on the node-server build (12:02:59Z to 12:04:04Z, load 14.23 to 27.12):
+- A cookieless GET of `/decks/trash`, three times: 200 in 21, 4 and 3 ms. The first HTML holds the empty state and no card, and `server-timing` names no trash read.
+- Browser A: `/decks/trash` is empty. A deck made from `/new` by its first write was moved to the trash with File > Move to trash. `/decks` showed "Moved to trash" with Undo. The trash record held the id in `turboslide:in-trash` and in the `ts-trash` cookie.
+- `/decks/trash` listed the card 110 ms after the click, and the card was already in the first HTML. The document's `server-timing` read `trash-ids;dur=0.1`. The card reads "Untitled presentation Trashed 5:03 AM · 2 slides" with Restore and Delete forever. At 1440 and 390 in both appearances, the card is in the first HTML and the page does not scroll sideways (`local-trash-listed-1440-light`, `local-trash-listed-390-dark`).
+- Browser B, fresh: "Trash is empty" with the figure and Empty trash disabled (`local-trash-stranger-1440-light`). With A's id forged into B's `ts-trash` cookie and its storage, the page listed nothing, put nothing in its first HTML, and cleared the forged id from B's storage.
+- A clicked Restore. The snackbar read "Restored Untitled presentation", the card left, the record emptied, and `/decks` listed the deck again. The row menu's Move to trash put it back in the trash.
+- Delete forever opened "Delete Untitled presentation forever? This cannot be undone. 2 slides and every version of Untitled presentation are deleted." with Cancel and Delete forever (`local-trash-confirm-1440-light`). Cancel kept the card. Delete forever removed it, the editor answered 404, and the record and the cookie emptied.
+
+### Import slides (finding 2)
+
+`importdlg.mjs` on the dev server:
+- First run, 12:57:05Z to 12:59:08Z, load 17.80 to 20.84. The GT template card on `/decks` made a copy with 95 slides. This browser's Recent record named the copy. A second deck was made from `/new`.
+- File > Import slides listed only the copy, 6 ms after the dialog opened. When the copy was picked, 6 tile pictures were asked for, with at most 6 in flight. 7 had been asked for 5 s later, and each tile reads `fetchpriority` low (`dev-import-dialog-1440-light`).
+- Three tiles were clicked, and the button read "Import 3 slides". The slides landed 621 ms after Import, with no alert (`dev-import-landed-1440-light`). The dialog also opened at 1440 dark and at 390 in both appearances, within the viewport: 16 to 374 px at 390 (`dev-import-dialog-390-dark`).
+- Second run, 14:06:50Z, load 6.7. The list was scrolled to its end over 8 s. The 8 tiles in view (87 to 94) had no picture, and the gate was at tile 19. 20 s later the same 8 tiles still had none, and the gate was at tile 29, which is P2-1 (`dev-import-scrolled-20s-1440-light`). The three slides landed 609 ms after Import.
+
+### The speed mark slides (finding 5) and "move around ANYTHING"
+
+`speed.mjs` on the dev server, on a deck made from the GT template card. Light ran at 12:55:07Z (load 22.08 to 19.77). Dark ran for the plate, the ASCII and the lockup at 12:56:26Z (load 19.77 to 17.80). The monogram and the plate ran again at 14:09:29Z (load 16.95 to 12.91), with every box logged:
+
+| Slide | Press | One arrow | Drag of 120 by 40 sheet px | The text |
+| --- | --- | --- | --- | --- |
+| `speed-monogram` | chip "Diagram" | the slide converts to freeform, the drawing moves 1 px | the drawing moves 121 by 40, at 1100 by 282 | heading, first paragraph and caption keep their boxes. The second paragraph keeps its place, and its box grows from 132 to 165 sheet px tall, the first paragraph's height. The canvas reads 0.000 percent off the grammar render, so its words do not move. No text is covered |
+| `speed-plate` | "Diagram" | converts, 1 px | 121 by 40, at 920 by 339, in both appearances | every box kept, none covered (`dev-speed-plate-dragged-1440-light`, `-dark`) |
+| `speed-double-cut` | "Diagram" | converts, 1 px | 121 by 40, at 1326 by 53 | kept, none covered |
+| `speed-livery` | "Diagram" | converts, 1 px | 124 by 40, at 1240 by 246 | kept, none covered |
+| `speed-dithered` | "Diagram" | converts, 1 px | 121 by 36, at 1200 by 295 | kept, none covered |
+| `speed-ascii` | "Diagram" | converts, 1 px | 121 by 37, at 1320 by 316, in both appearances; the glyph rows in the monospace face after the drag | kept, none covered (`dev-speed-ascii-dragged-1440-light`) |
+| `speed-lockup` | a nested drawing: chip "Block" | nothing moves, and the slide stays `split` (b4.md notice 23, open) | the set group pressed where no drawing is: chip "Group"; it moves 120 by 40 at 1326 by 398, and the slide converts | kept, none covered (`dev-speed-lockup-group-dragged-1440-light`) |
+
+`move.mjs` on the node-server build (12:20:47Z to 12:26:29Z, load 13.52 to 28.86) inserted every object kind of the default Insert menu, each on a blank slide of its own. The kinds were text box, rectangle, ellipse, line, arrow, table, chart, diagram, word art, picture and animated pattern. Each was resized by its corner or end handle with the opposite corner held, and then moved by its move handle. 11 of 11 grew from the dragged corner and kept the other corner, at pass 1's boxes to the unit (the picture kept its 1.5 ratio). 11 of 11 moved by the drag, -170 and -99 sheet px to the pixel, with the size kept (`local-move-picture`, `local-move-diagram`). Insert > Icon is behind Tools > Advanced tools, as in pass 1, and was not driven. File > Download > PDF Document saved a 14 page PDF at 960 by 540 pt in 4.0 s, and each page shows its object where the editor left it (`local-export-pdf-pages`). Microsoft PowerPoint (.pptx) saved a 14 slide file in 16.4 s: the shapes are `p:sp`, the table and the chart are graphic frames, the diagram is five shapes and three connectors, and the picture and the pattern's frame are `p:pic`.
+
+### The divergence map and the clutter cuts
+
+`hand.mjs` on the node-server build (12:14:04Z to 12:19:22Z, load 14.81 to 15.15) took 110 pictures of every surface at 1440 by 900 and 390 by 844 in both appearances, with no step error. In grids beside pass 1's pictures and the audit's, each ranked surface reads as pass 1 read it (pass 1's V.6 table). None reads as it did in the audit's pictures:
+- `/decks` shows ruled rows with the 64 by 36 framed capture, the hatch after "Start a new presentation", Sign In as text, and the GT brand deck card (`local-decks-1440-light`, `local-decks-390-dark`).
+- The blank deck draws no GT mark, rail, cross or counter, and its white slide sits on the dark workspace (`local-editor-1440-dark`). The selection ring and chip are blue with white words (`local-select-390-light`).
+- The title row at 390, the Menus key, the Share dialog's ruled rows, Version history's seam, the presenter head, the `/deck` view, the Theme panel, `/home` (`local-home-1440-light`) and Not found with the Blue Marble and its credit (`local-notfound-390-dark`) all read as in pass 1.
+
+The pictures also still show pass 1's open severity 1 findings: the presenter's Next slide card cut at 390 (finding 9), the `/deck` view's hint and "r3" at 390 (finding 10), and the refused page's "deckId must be a slug." (finding 16). `cuts.mjs` (12:19:22Z to 12:20:47Z, load 15.15 to 13.52) read every cut's new home exactly as pass 1 did:
+- Insert > Image > Logo opens the Logo dialog. Slide has one "Change theme" row, and the panel is "Theme".
+- Text fitting is in the right click menu, and Format has no Text fitting row.
+- Preferences holds Play animated patterns (On, In the show only, Off) and Appearance (Light, Dark, Match the presentation). Dark turned the chrome dark.
+- More formats downloaded the zip (401,044 bytes, 1.1 s) and the web page (577,075 bytes, 1.1 s).
+- Assist's "Tailor for a customer" opens the Tailor dialog, and Help > Help Turboslide improve opens GitHub.
+- The tmp store sentence reads "Edits on this copy of Turboslide are lost when it restarts.", the home tooltip reads "Turboslide home / Your presentations", and the own chip tooltip reads "You / Your name and avatar; nothing else asks for an account".
+
+### Sign in and sign out
+
+`signin.mjs` on pair 1 (11:55:43Z to 11:57:26Z, load 19.64 to 18.79) ran once in each appearance:
+- The `/decks` bar offers Sign In. After the first write the title row shows "Sign In" as text.
+- The dialog shows the email field and Continue with Google, with no passkey row (`local-signin-dialog-1440-dark`). The code was read from the server's captured mail, and the dialog closed signed in.
+- The account menu read Change name, Change avatar, Sign out, Forget this browser and Sessions.
+- One click on Sign out reloaded the page. `get-session` answered null, the identity cookie was new, and Sign In was back in the row (`local-signed-out-1440-light`). The deck then reads View only to the new anonymous browser, as in pass 1.
+
+## V2.7 Pictures
+
+These are under `docs/gslides-parity/round1/verification/pass2/`. Each name is `<base>-<surface>-<width>-<appearance>.webp`, with `local` for the node-server build on 4521 and `dev` for the dev server on 4521. I looked at every picture this pass took (110 from the hand drive, 7 from the trash drive, 14 from sign in, 11 drags, 8 from the cuts, 12 of the speed slides, 12 of Import slides, and the PDF pages), mostly in grids beside pass 1's and the audit's pictures of the same surface. The 24 tracked ones:
+- The trash page: `local-trash-listed-1440-light`, `local-trash-listed-390-dark`, `local-trash-stranger-1440-light`, `local-trash-confirm-1440-light`.
+- Import slides: `dev-import-dialog-1440-light`, `dev-import-dialog-390-dark`, `dev-import-landed-1440-light`, `dev-import-scrolled-20s-1440-light`.
+- The speed mark slides: `dev-speed-plate-dragged-1440-light`, `dev-speed-plate-dragged-1440-dark`, `dev-speed-ascii-dragged-1440-light`, `dev-speed-lockup-group-dragged-1440-light`, `template-speed-plate-grammar-canvas` (the grammar render and the canvas of the committed template's plate).
+- The surfaces: `local-decks-1440-light`, `local-decks-390-dark`, `local-editor-1440-dark`, `local-select-390-light`, `local-home-1440-light`, `local-notfound-390-dark`.
+- Drags, exports and sign in: `local-move-picture`, `local-move-diagram`, `local-export-pdf-pages`, `local-signin-dialog-1440-dark`, `local-signed-out-1440-light`.
+
+## V2.8 Not driven
+
+- Every hosted reading. The preview serves `c17fd8bf`, which carries none of the fixes, and the round makes one preview, so this pass made no deployment. The ship's preview reads these before the first push:
+  - `slides.import.none-preselected` on the blob tier, which HA read red with the Blob store's refusal at `c17fd8bf` (ha.md request 2 is Round 2's).
+  - The trash page's cold time on a store of the preview's size.
+  - The hosted smoke, including finding 15's thumbnail row.
+  - The round's 28 hosted rows, which pass 1 read 28 of 28 at `c17fd8bf`.
+- Check step 32, the whole matrix (3.5 hours in pass 1). This pass read the specs and walk areas the fixes touch instead: decks, present, slides and the four template rows. Findings 19, 20 and 21 were not read again for that reason.
+- Finding 1's rows on a replayed or rebased tree, and `export.refusal.sentence-and-retry` with `acf910e7`'s words, which reads green only on such a tree.
+- The full accounts spec (finding 14). The two hotfix accounts rows were run narrowed.
+- `text.link.cmd-k-enter` and `text.link.toolbar-button` (finding 6).
+- `accounts.google-roundtrip`: manual, with no Google client.
+- Insert > Icon: it is behind Tools > Advanced tools.
+- Check steps 23, 25 and 27: skipped as standing (no fonts venv, no Docker daemon, no preview on 4344).
+- The You need access page on the local server: a stranger reads a restricted deck as View only there, as in pass 1.
+
+## V2.9 Findings and owners
+
+Pass 1's findings with their status after this pass (V2.4 has the readings):
+
+| Finding | Severity | Owner | Status |
+| --- | ---: | --- | --- |
+| 1 The earlier rounds' core rows red before the round | 3 | integrator | open, for the ship step's rebased tree |
+| 2 `slides.import.none-preselected` since H2 | 3 | HA | closed locally; blob tier on the ship's preview |
+| 3 `present.laser.visible`'s driver over the title's ink | 3 | integrator | closed |
+| 4 The trash page lists the whole store | 2 | integrator | closed locally; time on the ship's preview |
+| 5 The speed mark slides on a first canvas write | 2 | B4 | closed for the template; the import's 14 pairs wait for request 22 |
+| 6 The link rows read both ways | 1 | integrator | open, not read |
+| 7 The pattern's chip and "Guest <label>" | 1 | B3a | open |
+| 8 The Menus key's focus outline at 390 | 1 | B3b | open |
+| 9 The presenter's Next slide card at 390 | 1 | B3b | open |
+| 10 The `/deck` view's hint and "r3" at 390 | 1 | B3b | open |
+| 11 Check step 15 on the live import | 1 | B4 | open (Kevin's question) |
+| 12 Check step 21's attribution | 1 | integrator | open; the failure list is unchanged |
+| 13 NEXT.md 5.6 check 1 | 1 | B6 | open (6,425 files, 342.6 MB) |
+| 14 The accounts spec and the per IP limit | 1 | integrator | open, not read |
+| 15 The smoke's thumbnail row | 1 | B2 | open, not read |
+| 16 The refused page's store words | 1 | B2 | open |
+| 17 The node-server build and the GT template rows | 1 | integrator | open |
+| 18 Check step 31's standing reds | 1 | integrator | open (107 of 148) |
+| 19 The two H2 rows on the chain's file store | 1 | HA | open, not read |
+| 20 The name prompt row's setup race | 1 | B3b | open, not read |
+| 21 `cost.editor-editing.calls` on the dev server | 1 | integrator | open, not read |
+
+New in pass 2:
+
+P2-1. **The Import slides tiles at the end of a long list wait behind every tile scrolled past (integrator, severity 1).** `026db8e4` puts each tile in the picture gate's queue when it first comes within 200 px of the list's visible area. A tile that scrolls away keeps its place, because the observer disconnects after the first sighting and the cancel runs only when the tile unmounts. A person who scrolls to the end of the copy's 95 tiles therefore sees the tiles in view stay blank until every tile above them has loaded. On the dev server at a load of 6.7, the 8 tiles in view were blank 20 s after the scroll, and the gate was at tile 29 (`dev-import-scrolled-20s-1440-light`). Their titles are drawn and the import itself works: 3 slides landed in 609 ms. The gate's limit and its low priority are what close finding 2. A tile that leaves the visible area could give its queue place back, or the waiting tiles could start nearest the visible area first. `ImportSlides.tsx` has no Round 1 owner, and `026db8e4` is the integrator's.
+
+P2-2. **The trash page draws its decks as boxed cards (B2, severity 1).** `/decks` lists ruled rows since B2b#16. `/decks/trash`, one click away, still draws each deck as a framed card with a framed capture and framed buttons (`local-trash-listed-1440-light`). The brand deck's grammar asks for ruled rows and not boxes. NEXT.md 4.1.3 item 10 names `/decks` alone, so no row of the round covers the trash page. It is recorded for the owner of the pages.
+
+P2-3. **A store test pins the seed deck at 85 slides, so check step 5 reads red while the chain's import is in the tree (B4, severity 1).** `packages/store/src/templates.test.ts` 269 (from `c17fd8bf`) expects `decks/gt-brand/slides` to hold 85 files. Check step 7 imports the live Prototemplate deck into that folder in place, with 95 slides, and nothing puts it back. A full chain runs step 5 before step 7 and passes. Step 5 on any later run in the same tree reads `expected 95 to be 85` (11:24Z, this pass). The test can read the template's own record, or the chain can import into a scratch folder.
+
+## V2.10 For Kevin
+
+1. Pass 1's question 1 is still open. HA kept H2's scope: the Import slides picker offers this browser's Recent record and the store's own and shared decks. The row now passes because its driver opens its copy of the brand deck first. Should the picker offer the deployment's example deck to every browser?
+2. The ship waits. The realtime round's ship stopped with production rolled back to `5ce68a72` at 12:11:54Z, so Round 1's first push waits for that round's fix forward and its production table (NEXT.md 6.1 rule 3). `origin/main` already holds H3 and H6. The 67 pick order is clean onto `f3e9cd86` and conflicts onto `origin/main` from its first pick, so the ship step needs its own rebase. Finding 1's rows and the fixes' hosted rows are read on that rebased tree and its preview before the first push.
+3. Two fixers chose where Kevin had been asked. B4 typed the seven speed mark slides in the template and kept all 95 slides, so pass 1's question 3 no longer needs an answer, and the slides read within 0.021 percent of their drawing after a drag. The integrator moved an earlier round's row to the product's words "The PowerPoint file could not be made" (its deviation 4). Either can be overruled.
+4. NEXT.md 5.6 check 1 (finding 13): the tree now holds 6,425 tracked files and 342.6 MB.
+5. The licences of pass 1's question 4 are unchanged (check step 15 still reads the live dictionary slide's 1897 credit).

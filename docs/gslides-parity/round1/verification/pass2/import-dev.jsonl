@@ -1,0 +1,40 @@
+{"at":"2026-10-04T12:57:05.628Z","load":17.8,"start":"http://localhost:4521","tag":"dev"}
+{"at":"2026-10-04T12:57:12.603Z","load":17.81,"copy":"gt-brand-muttsaxb","slides":95,"recent":"{\"gt-brand-muttsaxb\":{\"at\":\"2026-10-04T12:57:09.208Z\",\"title\":\"GT brand deck\",\"appearance\":\"dark\",\"firstSlide\":\"opener-brand\",\"revision\":0}}"}
+{"at":"2026-10-04T12:57:47.940Z","load":23.52,"target":"untitled-20261004-a8q7"}
+{"at":"2026-10-04T12:57:49.123Z","load":23.52,"offeredMs":6,"rows":["gt-brand-muttsaxb"]}
+{"at":"2026-10-04T12:57:54.423Z","load":23.08,"beforeScroll":{"samples":[{"tiles":95,"withSrc":6,"done":0},{"tiles":95,"withSrc":6,"done":0},{"tiles":95,"withSrc":7,"done":1},{"tiles":95,"withSrc":7,"done":1}],"requestsAsked":7,"maxInFlight":6,"fetchpriority":"low"}}
+{"at":"2026-10-04T12:57:54.457Z","load":23.08,"shot":"dev-import-dialog-1440-light.jpg","bytes":56258}
+{"at":"2026-10-04T12:58:06.003Z","load":21.09,"afterScroll":{"tiles":95,"withSrc":12,"done":6},"requestsAsked":12,"maxInFlight":6}
+{"at":"2026-10-04T12:58:38.612Z","load":16.97,"importLabel":"Import 3 slides","slidesBefore":2,"slidesAfter":5,"landedMs":621,"dialogOpen":false,"alert":null}
+{"at":"2026-10-04T12:58:40.260Z","load":16.97,"shot":"dev-import-landed-1440-light.jpg","bytes":197308}
+{"at":"2026-10-04T12:58:48.805Z","load":20.53,"dialog":[400,197,640,507],"scrollWidth":1440}
+{"at":"2026-10-04T12:58:48.835Z","load":20.53,"shot":"dev-import-dialog-1440-dark.jpg","bytes":72512}
+{"at":"2026-10-04T12:58:58.326Z","load":21.1,"dialog":[16,169,358,507],"scrollWidth":390}
+{"at":"2026-10-04T12:58:58.356Z","load":21.1,"shot":"dev-import-dialog-390-light.jpg","bytes":32298}
+{"at":"2026-10-04T12:59:07.705Z","load":20.84,"dialog":[16,169,358,507],"scrollWidth":390}
+{"at":"2026-10-04T12:59:07.723Z","load":20.84,"shot":"dev-import-dialog-390-dark.jpg","bytes":32692}
+{"at":"2026-10-04T12:59:08.221Z","load":20.84,"teardown":"untitled-20261004-a8q7","trashed":"ok","removed":"ok","editorAfter":404}
+{"at":"2026-10-04T12:59:08.820Z","load":20.84,"teardown":"gt-brand-muttsaxb","trashed":"ok","removed":"ok","editorAfter":404}
+{"at":"2026-10-04T12:59:08.851Z","load":20.84,"end":"http://localhost:4521"}
+{"at":"2026-10-04T14:06:49.598Z","load":8.62,"start":"http://localhost:4521","tag":"dev2"}
+{"at":"2026-10-04T14:06:58.347Z","load":8.08,"copy":"gt-brand-mutwa0aq","slides":95,"recent":"{\"gt-brand-mutwa0aq\":{\"at\":\"2026-10-04T14:06:55.228Z\",\"title\":\"GT brand deck\",\"appearance\":\"dark\",\"firstSlide\":\"opener-brand\",\"revision\":0}}"}
+{"at":"2026-10-04T14:07:32.953Z","load":6.53,"target":"untitled-20261004-6c28"}
+{"at":"2026-10-04T14:07:34.067Z","load":6.53,"offeredMs":3,"rows":["gt-brand-mutwa0aq"]}
+{"at":"2026-10-04T14:07:39.339Z","load":6.72,"beforeScroll":{"samples":[{"tiles":95,"withSrc":6,"done":0},{"tiles":95,"withSrc":7,"done":1},{"tiles":95,"withSrc":8,"done":2},{"tiles":95,"withSrc":9,"done":3}],"requestsAsked":9,"maxInFlight":6,"fetchpriority":"low"}}
+{"at":"2026-10-04T14:07:39.370Z","load":6.72,"shot":"dev2-import-dialog-1440-light.jpg","bytes":59410}
+{"at":"2026-10-04T14:07:50.838Z","load":6.85,"afterScroll":{"tiles":95,"withSrc":16,"done":10},"requestsAsked":16,"maxInFlight":6}
+{"at":"2026-10-04T14:07:50.861Z","load":6.85,"shot":"dev2-import-dialog-scrolled-1440-light.jpg","bytes":53677}
+{"at":"2026-10-04T14:07:50.862Z","load":6.85,"atEnd":{"inView":[87,88,89,90,91,92,93,94],"inViewLoaded":0,"withSrcIndices":[0,1,2,3,4,5,6,7,8,9,10,11,13,16,17,19]}}
+{"at":"2026-10-04T14:08:10.866Z","load":6.77,"atEndAfter20s":{"inView":[87,88,89,90,91,92,93,94],"inViewLoaded":0,"withSrcIndices":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]},"requestsAsked":30}
+{"at":"2026-10-04T14:08:10.887Z","load":6.77,"shot":"dev2-import-dialog-scrolled-20s-1440-light.jpg","bytes":53677}
+{"at":"2026-10-04T14:08:43.452Z","load":8.83,"importLabel":"Import 3 slides","slidesBefore":2,"slidesAfter":5,"landedMs":609,"dialogOpen":false,"alert":null}
+{"at":"2026-10-04T14:08:45.030Z","load":8.83,"shot":"dev2-import-landed-1440-light.jpg","bytes":197315}
+{"at":"2026-10-04T14:08:53.581Z","load":14.43,"dialog":[400,197,640,507],"scrollWidth":1440}
+{"at":"2026-10-04T14:08:53.624Z","load":14.43,"shot":"dev2-import-dialog-1440-dark.jpg","bytes":72530}
+{"at":"2026-10-04T14:09:02.969Z","load":18.07,"dialog":[16,169,358,507],"scrollWidth":390}
+{"at":"2026-10-04T14:09:02.988Z","load":18.07,"shot":"dev2-import-dialog-390-light.jpg","bytes":34605}
+{"at":"2026-10-04T14:09:12.234Z","load":18.54,"dialog":[16,169,358,507],"scrollWidth":390}
+{"at":"2026-10-04T14:09:12.246Z","load":18.54,"shot":"dev2-import-dialog-390-dark.jpg","bytes":32692}
+{"at":"2026-10-04T14:09:12.722Z","load":18.54,"teardown":"untitled-20261004-6c28","trashed":"ok","removed":"ok","editorAfter":404}
+{"at":"2026-10-04T14:09:13.413Z","load":18.1,"teardown":"gt-brand-mutwa0aq","trashed":"ok","removed":"ok","editorAfter":404}
+{"at":"2026-10-04T14:09:13.444Z","load":18.1,"end":"http://localhost:4521"}

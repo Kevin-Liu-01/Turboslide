@@ -79,13 +79,16 @@ function plateRows(page: Page, depth: number): Promise<Drawn[]> {
   }, depth);
 }
 
+/** A row the page runs, or a submenu with such a row under it, which reads in ink (2.5, F10). */
+const runsUnder = (r: MiniRow): boolean => r.run === true || (r.items ?? []).some(runsUnder);
+
 const expected = (rows: readonly MiniRow[], mac: boolean): Drawn[] =>
   rows.map((r, i) => ({
     label: r.label,
     rule: r.rule === true && i > 0,
     key: r.items === undefined ? ((mac ? r.mac : r.win) ?? '') : '',
     sub: r.items !== undefined,
-    run: r.run === true,
+    run: runsUnder(r),
   }));
 
 /** Opens a row's plate by its path of labels; the last label is hovered or clicked. */
@@ -240,6 +243,32 @@ export function rows(): void {
       });
       expect(looks.off).toBe(looks.titanium);
       expect(looks.run).not.toBe(looks.titanium);
+      // a submenu that leads to a row the page runs reads in ink, as the rows it leads to (File >
+      // Download for PDF document, File > Version history for Name current version, Insert >
+      // Shape for the rectangle and the ellipse); a submenu with none under it reads titanium
+      const parents = MINI_MENUS.flatMap((m) =>
+        m.rows
+          .filter((r) => r.items !== undefined)
+          .map((r) => ({ menu: m.label, row: r.label, run: runsUnder(r) })),
+      );
+      expect(parents.filter((p) => p.run).map((p) => `${p.menu} > ${p.row}`)).toEqual(
+        expect.arrayContaining(['File > Download', 'File > Version history', 'Insert > Shape']),
+      );
+      for (const parent of [
+        ...parents.filter((p) => p.run).slice(0, 3),
+        ...parents.filter((p) => !p.run).slice(0, 1),
+      ]) {
+        await openPath(page, [parent.menu], true);
+        const color = await band(page)
+          .locator('[data-mini-plate="0"] .ts-mini-row.is-sub')
+          .filter({ has: page.locator('.ts-mini-row-label', { hasText: parent.row }) })
+          .first()
+          .evaluate((el) => getComputedStyle(el).color);
+        if (parent.run)
+          expect(color, `${parent.menu} > ${parent.row} in ink`).not.toBe(looks.titanium);
+        else expect(color, `${parent.menu} > ${parent.row} in titanium`).toBe(looks.titanium);
+        await page.keyboard.press('Escape');
+      }
       await openPath(page, ['File', notRun?.label ?? ''], true);
       await expect(band(page).locator('[data-mini-status]')).toHaveText(
         MENUS.editorRow(notRun?.doc ?? '').trim(),

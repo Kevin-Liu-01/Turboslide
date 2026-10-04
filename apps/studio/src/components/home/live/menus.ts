@@ -160,6 +160,13 @@ function walk(menus: readonly MiniMenu[]): { row: MiniRow; path: string[]; menu:
 const ALL_ROWS = walk(MINI_MENUS);
 const rowById = (id: string): MiniRow | undefined => ALL_ROWS.find((r) => r.row.id === id)?.row;
 
+/**
+ * True when the row runs on the page, or is a submenu with a row under it that does (File >
+ * Download for Download > PDF document): the editor draws such a submenu available, so it reads in
+ * ink beside the rows it leads to (2.5, verify1 F10).
+ */
+const runsUnder = (row: MiniRow): boolean => row.run === true || (row.items ?? []).some(runsUnder);
+
 // ---------------------------------------------------------------------------------------------
 
 /** The band entry the loader starts (LANDING.md 6.3 "The band loader"). */
@@ -1389,10 +1396,13 @@ export function startMenus(ctx: LiveContext): void {
         plate.append(h('div', { class: 'ts-mini-rule', role: 'separator' }));
       const check = checkOf(row);
       const ok = available(row);
+      const sub = row.items !== undefined;
+      // a submenu leading to a row the page runs reads in ink with the run rows (verify1 F10)
+      const run = runsUnder(row);
       const el = h(
         'div',
         {
-          class: `ts-mini-row${row.run === true ? ' is-run' : ''}${ok ? '' : ' is-off'}${row.items !== undefined ? ' is-sub' : ''}`,
+          class: `ts-mini-row${run ? ' is-run' : ''}${ok || (sub && run) ? '' : ' is-off'}${sub ? ' is-sub' : ''}`,
           role: check === undefined ? 'menuitem' : 'menuitemcheckbox',
           tabindex: -1,
           'data-menu-item': row.id === '' ? undefined : row.id,

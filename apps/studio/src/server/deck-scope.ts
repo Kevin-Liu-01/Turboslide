@@ -13,6 +13,8 @@
 //   the deck. A deck whose general access alone admits them (the legacy open mode) is neither.
 // - An anonymous visitor's `/decks` reads this browser's Recent record alone (routes/-recent.ts):
 //   the page asks the store for nothing, so a fresh browser lists no deck and costs no store read.
+//   Its trash page reads the same browser's ids (its trash record and its Recent record), and the
+//   store answers for those ids alone (`browserTrash`).
 //   The `deck.list` action, which has no Recent record to read, answers the anonymous principal's
 //   own and shared decks by the rule above.
 //
@@ -149,9 +151,8 @@ export async function scopeHeads(
 /**
  * The trashed heads a scope lists on `/decks/trash` (round1/build/ha.md request 1): every one for
  * `every`; for `own`, the ones whose record makes the caller the owner, since only the owner
- * restores or deletes a deck forever; nothing otherwise. The trash has no browser record to draw,
- * so the trash page answers an anonymous visitor through its principal (`listingScope` with
- * `page: false`), never `browser`.
+ * restores or deletes a deck forever; nothing otherwise. An anonymous visitor's trash page takes
+ * the `browser` scope /decks takes and is answered by `browserTrash` from this browser's ids.
  */
 export async function ownedTrash(
   heads: readonly DeckHead[],
@@ -166,6 +167,71 @@ export async function ownedTrash(
       .map((row) => row.id),
   );
   return trashed.filter((head) => owned.has(head.id));
+}
+
+/** The most ids an anonymous visitor's trash page asks about: its trash record's 24 and the Recent record's 12 (routes/-recent.ts). */
+export const BROWSER_TRASH_MAX = 36;
+
+/** What `browserTrash` answers: the trashed heads the caller owns, and the ids the browser can forget. */
+export type BrowserTrash = { heads: DeckHead[]; gone: string[] };
+
+/**
+ * An anonymous visitor's trash (the Round 1 fix round; VERIFICATION.md "Round 1, pass 1" finding
+ * 4): the decks among this browser's ids (its trash record and its Recent record, routes/-recent.ts)
+ * that are in the trash and whose record makes the caller the owner. Each id costs one record read
+ * and, for an owned deck, one head; the store is never listed. Before this, the page listed every
+ * head of the store and read the record of every trashed deck for every visitor, a cookieless
+ * stranger included (13.5 to 14.7 s cold on the preview's 172 decks). A context with no principal
+ * owns nothing and reads nothing. `gone` names the ids whose deck the store does not hold or whose
+ * record does not name the caller as the owner, so the page drops them from the trash record; an
+ * id whose record or head could not be read is in neither list.
+ */
+export async function browserTrash(
+  deckIds: readonly string[],
+  ctx: AuthContext,
+  deps: Pick<ScopeDeps, 'readRecord' | 'now' | 'concurrency'> & {
+    readHead: (deckId: string) => Promise<DeckHead | null>;
+  },
+): Promise<BrowserTrash> {
+  const ids = [...new Set(deckIds)].slice(0, BROWSER_TRASH_MAX);
+  if (ids.length === 0 || principalOf(ctx) === null) return { heads: [], gone: [] };
+  const now = (deps.now ?? Date.now)();
+  const kept: (DeckHead | null)[] = new Array<DeckHead | null>(ids.length).fill(null);
+  const gone = new Set<string>();
+  const width = Math.max(1, deps.concurrency ?? 8);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const index = next;
+      next += 1;
+      if (index >= ids.length) return;
+      const id = ids[index]!;
+      let record: AccessRecord | null;
+      try {
+        record = await deps.readRecord(id);
+      } catch {
+        continue;
+      }
+      /* only the owner restores a deck or deletes it forever, so only the owner lists it */
+      if (ownStanding(record, ctx, ctx.linkGrants, now)?.role !== 'owner') {
+        gone.add(id);
+        continue;
+      }
+      let head: DeckHead | null;
+      try {
+        head = await deps.readHead(id);
+      } catch {
+        continue;
+      }
+      if (head === null) gone.add(id);
+      else if (head.trashedAt !== undefined) kept[index] = head;
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(width, ids.length) }, () => worker()));
+  return {
+    heads: kept.filter((head): head is DeckHead => head !== null),
+    gone: ids.filter((id) => gone.has(id)),
+  };
 }
 
 /**

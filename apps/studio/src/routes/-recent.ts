@@ -311,6 +311,7 @@ export function markDeckTrashed(
     // no record to keep
   }
   forgetDeckOpened(deckId);
+  recordDeckTrashed(deckId, new Date(now));
   if (storage === null) return;
   try {
     const marker: TrashedMarker = { id: deckId, title, at: now, ...(facts ? { facts } : {}) };
@@ -392,4 +393,171 @@ export function forgetDeckOpened(deckId: string): void {
   } catch {
     // nothing to forget
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// This browser's trash record
+
+/**
+ * The decks this browser moved to the trash, or dropped from its Recent record because the store
+ * no longer answered them, by id with the time (the Round 1 fix round; VERIFICATION.md "Round 1,
+ * pass 1" finding 4). An anonymous visitor's /decks/trash asks the store about these ids and the
+ * Recent record's and never lists the store, the way /decks draws the Recent record
+ * (server/decks.ts listTrashedDecks, server/deck-scope.ts browserTrash). The page drops an id the
+ * store answers as gone; Restore and Delete forever drop theirs. localStorage under
+ * TRASH_RECORD_KEY, mirrored in the cookie TRASH_COOKIE (Path=/decks) so the server reads the ids
+ * for the trash page's first HTML, as RECENT_COOKIE serves /decks.
+ */
+export const TRASH_RECORD_KEY = 'turboslide:in-trash';
+
+/** the cookie mirror the server reads for /decks/trash (Path=/decks) */
+export const TRASH_COOKIE = 'ts-trash';
+
+/** the newest ids kept in both copies; with the Recent record's 12, server/deck-scope.ts BROWSER_TRASH_MAX */
+export const TRASH_RECORD_MAX = 24;
+
+const TRASH_COOKIE_MAX_BYTES = 2_000;
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** deck id to the ISO time it entered the record */
+type TrashRecord = Record<string, string>;
+
+function readTrashStored(): TrashRecord {
+  try {
+    const raw = window.localStorage.getItem(TRASH_RECORD_KEY);
+    const parsed: unknown = raw === null ? {} : JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    const out: TrashRecord = {};
+    for (const [id, at] of Object.entries(parsed as Record<string, unknown>))
+      if (SLUG.test(id) && typeof at === 'string') out[id] = at;
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/** The record's ids, newest first, capped at TRASH_RECORD_MAX. */
+function trashIdsOf(map: TrashRecord): string[] {
+  return Object.entries(map)
+    .sort((a, b) => b[1].localeCompare(a[1]))
+    .slice(0, TRASH_RECORD_MAX)
+    .map(([id]) => id);
+}
+
+/** The Set-Cookie value of the mirror: the ids newest first, the oldest leaving until it fits. */
+export function trashCookieValue(ids: ReadonlyArray<string>): string {
+  let kept = ids.slice(0, TRASH_RECORD_MAX);
+  let encoded = encodeURIComponent(JSON.stringify(kept));
+  while (kept.length > 0 && encoded.length > TRASH_COOKIE_MAX_BYTES) {
+    kept = kept.slice(0, kept.length - 1);
+    encoded = encodeURIComponent(JSON.stringify(kept));
+  }
+  return `${TRASH_COOKIE}=${encoded}; Path=/decks; Max-Age=${RECENT_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+}
+
+/** The ids of a cookie header's trash mirror, newest first; an unreadable cookie is none. */
+export function parseTrashCookie(header: string | null | undefined): string[] {
+  if (!header) return [];
+  for (const part of header.split(';')) {
+    const [name, ...rest] = part.trim().split('=');
+    if (name !== TRASH_COOKIE) continue;
+    try {
+      const ids: unknown = JSON.parse(decodeURIComponent(rest.join('=')));
+      if (!Array.isArray(ids)) return [];
+      return ids
+        .filter((id): id is string => typeof id === 'string' && SLUG.test(id))
+        .slice(0, TRASH_RECORD_MAX);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function writeTrashStored(map: TrashRecord): void {
+  const ids = trashIdsOf(map);
+  const kept: TrashRecord = {};
+  for (const id of ids) kept[id] = map[id]!;
+  try {
+    window.localStorage.setItem(TRASH_RECORD_KEY, JSON.stringify(kept));
+  } catch {
+    // private mode or storage full: the trash page reads the Recent record alone
+  }
+  try {
+    document.cookie = trashCookieValue(ids);
+  } catch {
+    // a cookie the browser refuses: localStorage still carries the record for this browser
+  }
+}
+
+/** Puts a deck in this browser's trash record (Move to trash, or a deck the store stopped answering). */
+export function recordDeckTrashed(deckId: string, now: Date = new Date()): void {
+  if (!SLUG.test(deckId)) return;
+  try {
+    const map = readTrashStored();
+    map[deckId] = now.toISOString();
+    writeTrashStored(map);
+  } catch {
+    // nothing recorded: the Recent record may still name the deck
+  }
+}
+
+/** Takes decks out of this browser's trash record (Restore, Delete forever, Undo, a deck gone). */
+export function forgetDeckTrashed(...deckIds: ReadonlyArray<string>): void {
+  try {
+    const map = readTrashStored();
+    let changed = false;
+    for (const id of deckIds)
+      if (id in map) {
+        delete map[id];
+        changed = true;
+      }
+    if (changed) writeTrashStored(map);
+  } catch {
+    // nothing to forget
+  }
+}
+
+/** The trash record's ids, newest first. */
+export function readTrashRecord(): string[] {
+  return trashIdsOf(readTrashStored());
+}
+
+/** The id of the editor's trashed marker when one waits for /decks, read without taking it. */
+function peekTrashedMarkerId(storage: MarkerStorage | null = sessionStore()): string | null {
+  if (storage === null) return null;
+  try {
+    const raw = storage.getItem(TRASHED_KEY);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    const id =
+      typeof parsed === 'object' && parsed !== null ? (parsed as { id?: unknown }).id : undefined;
+    return typeof id === 'string' && SLUG.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The ids an anonymous visitor's trash page asks the store about, in the browser: the editor's
+ * trashed marker, the trash record, then the Recent record (a deck trashed through the window API
+ * or the /decks card stays there until /decks reads it again); each id once.
+ */
+export function browserTrashIds(): string[] {
+  const ids = [
+    peekTrashedMarkerId(),
+    ...readTrashRecord(),
+    ...Object.keys(readStored()).filter((id) => SLUG.test(id)),
+  ].filter((id): id is string => id !== null);
+  return [...new Set(ids)];
+}
+
+/** The same ids on the server, from the two cookie mirrors of the document request. */
+export function browserTrashIdsOfCookies(header: string | null | undefined): string[] {
+  return [
+    ...new Set([
+      ...parseTrashCookie(header),
+      ...parseRecentCookie(header).map((entry) => entry.id),
+    ]),
+  ];
 }

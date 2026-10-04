@@ -9,6 +9,9 @@
 import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
+
+import { readDeckHead } from './templates.ts';
 import { loadDeckDir, openFileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { LOCAL_TEMPLATES, assetPathWithin, checkRevision, factsFor } from './hosted.ts';
@@ -191,6 +194,11 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
     async has(deckId) {
       await overlay.ready();
       return existsSync(join(decksDir, deckId, 'deck.json'));
+    },
+    async head(deckId) {
+      if (!SLUG_PATTERN.test(deckId)) return null;
+      await overlay.ready();
+      return readDeckHead(decksDir, deckId);
     },
     async open(deckId) {
       await overlay.ready();

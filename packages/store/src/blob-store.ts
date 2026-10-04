@@ -36,6 +36,7 @@ import { dirname, extname, join, posix } from 'node:path';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson } from '@turboslide/schema/json';
 import { ConflictError } from '@turboslide/schema/errors';
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author, Lease, Version } from '@turboslide/schema/mutations';
 import { applyWrite } from '@turboslide/schema/reduce';
 
@@ -2612,9 +2613,14 @@ export function blobDecks(options: HostedOptions): HostedDecks {
    * `isStoreBusy`) for one deck answers the card this instance proved last, or leaves the deck
    * out of this listing when it never proved one, and logs one line; before this it failed the
    * whole listing and the Open dialog listed nothing (R1-F3, run 1: "0 decks listed after
-   * 30028 ms"). Any other error is the caller's.
+   * 30028 ms"). Any other error is the caller's. `strict` (one deck's `head`) throws the store's
+   * "not now" as well, so a caller never reads a busy store as a deck that is gone.
    */
-  const cardOf = async (c: BlobClient, deckId: string): Promise<DeckHead | null> => {
+  const cardOf = async (
+    c: BlobClient,
+    deckId: string,
+    options: { strict?: boolean } = {},
+  ): Promise<DeckHead | null> => {
     const pathname = `${deckPrefix(deckId)}deck.json`;
     const kept = listed.get(deckId);
     try {
@@ -2634,7 +2640,7 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         listed.set(deckId, { version: head.version, head: card, facts });
       return card;
     } catch (error) {
-      if (!isStoreBusy(error)) throw error;
+      if (!isStoreBusy(error) || options.strict === true) throw error;
       log(
         `blob: the listing's read of ${deckId} met ${error instanceof Error ? error.message : String(error)}; ${kept === undefined ? 'the deck is left out of this listing' : 'the card proven last is listed'}`,
       );
@@ -2761,6 +2767,12 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         if (isStoreBusy(error) && existsSync(join(decksDir, deckId, 'deck.json'))) return true;
         throw error;
       }
+    },
+    async head(deckId) {
+      if (!SLUG_PATTERN.test(deckId)) return null;
+      await ready();
+      // one card of the listing: a head of deck.json, no body when this instance proved the etag
+      return cardOf(await listingClient(), deckId, { strict: true });
     },
     async open(deckId) {
       await ready();

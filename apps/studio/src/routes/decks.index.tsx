@@ -56,10 +56,12 @@ import { RouterLinkSlot } from './-link-slot';
 import {
   TRASH_REFUSED_EVENT,
   forgetDeckOpened,
+  forgetDeckTrashed,
   parseRecentCookie,
   readOpened,
   readRecent,
   recordDeckOpened,
+  recordDeckTrashed,
   takeTrashedMarker,
   updateDeckFacts,
 } from './-recent';
@@ -535,6 +537,9 @@ function HomePage() {
        snackbar offers Undo, which restores the deck and its Recent entry */
     const trashed = takeTrashedMarker();
     if (trashed !== null) {
+      /* the trash page of an anonymous visitor reads this browser's trash record (the Round 1 fix
+         round, VERIFICATION.md "Round 1, pass 1" finding 4) */
+      recordDeckTrashed(trashed.id);
       setHidden((current) => new Set([...current, trashed.id]));
       setRecentRow((current) => current.filter((entry) => entry.id !== trashed.id));
       snackbar.show(SNACKBARS.movedToTrash, {
@@ -545,6 +550,7 @@ function HomePage() {
               await restoreStoredDeck({ deckId: trashed.id });
               if (trashed.facts !== undefined) recordDeckOpened(trashed.id, trashed.facts);
               else recordDeckOpened(trashed.id);
+              forgetDeckTrashed(trashed.id);
               setHidden((current) => {
                 const next = new Set(current);
                 next.delete(trashed.id);
@@ -573,6 +579,7 @@ function HomePage() {
         return next;
       });
       recordDeckOpened(detail.id);
+      forgetDeckTrashed(detail.id);
       setRecentRow(readRecent());
       snackbar.show(`Move to trash: ${detail.message}`);
     };
@@ -683,12 +690,14 @@ function HomePage() {
       snackbar.show(`Move to trash: ${errorMessage(error)}`);
       return;
     }
+    recordDeckTrashed(card.id);
     snackbar.show(SNACKBARS.movedToTrash, {
       label: SNACKBARS.undo,
       run: () => {
         void (async () => {
           try {
             await restoreStoredDeck({ deckId: card.id });
+            forgetDeckTrashed(card.id);
             setHidden((current) => {
               const next = new Set(current);
               next.delete(card.id);
@@ -758,7 +767,10 @@ function HomePage() {
       void readDeckCard({ deckId: id })
         .then((card) => {
           if (card === null) {
+            /* missing, in the trash or no longer the caller's: the trash page asks about it once
+               more and drops it unless it is this visitor's deck in the trash */
             forgetDeckOpened(id);
+            recordDeckTrashed(id);
             setRecentRow((current) => current.filter((entry) => entry.id !== id));
             return;
           }

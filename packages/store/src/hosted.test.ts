@@ -1075,6 +1075,24 @@ describe('hosted stores', () => {
       expect(await decks.assetFile('gt-brand', 'missing.png')).toBeNull();
     });
 
+    it('reads one deck\'s head with its trash stamp, without a listing (the Round 1 fix round, VERIFICATION.md "Round 1, pass 1" finding 4)', async () => {
+      await decks.ready();
+      expect(await decks.head('gt-brand')).toMatchObject({ id: 'gt-brand', revision: 412 });
+      expect(await decks.head('gt-brand')).not.toHaveProperty('trashedAt');
+      expect(await decks.head('nope')).toBeNull();
+      expect(await decks.head('../gt-brand')).toBeNull();
+      clock = '2026-09-12T05:10:00.000Z';
+      await decks.trash('gt-brand');
+      expect((await decks.head('gt-brand'))?.trashedAt).toBe(clock);
+      if (fake !== null) {
+        // another instance, which never listed the store, reads the stamp from the store
+        const other = collection('blob', join(root, 'overlay-head'), fake);
+        expect((await other.head('gt-brand'))?.trashedAt).toBe(clock);
+      }
+      await decks.restore('gt-brand');
+      expect(await decks.head('gt-brand')).not.toHaveProperty('trashedAt');
+    });
+
     it.skipIf(kind !== 'blob')(
       "keeps the card's appearance and first slide from the manifest bytes a listing proved, so an instance without the deck's mirror draws the same card (the sync and costs round's ship, VERIFICATION.md pass 2 F3)",
       async () => {

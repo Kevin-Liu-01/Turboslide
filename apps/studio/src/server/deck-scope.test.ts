@@ -3,7 +3,15 @@ import { describe, expect, test } from 'vitest';
 import type { AccessRecord, AuthContext, LinkGrant } from '@turboslide/identity/access';
 import type { DeckHead } from '@turboslide/store/templates';
 
-import { listingScope, ownStanding, ownedTrash, principalOf, scopeHeads } from './deck-scope';
+import {
+  BROWSER_TRASH_MAX,
+  browserTrash,
+  listingScope,
+  ownStanding,
+  ownedTrash,
+  principalOf,
+  scopeHeads,
+} from './deck-scope';
 
 // The deck listing scoped to the viewer (docs/NEXT.md 3.2 H2): who lists what, and which decks a
 // principal's own listing keeps, read against records written the way the studio writes them.
@@ -314,5 +322,78 @@ describe('the trash page (round1/build/ha.md request 1)', () => {
     ]);
     expect(await ownedTrash(heads, { kind: 'browser' }, deps)).toEqual([]);
     expect(await ownedTrash(heads, { kind: 'none' }, deps)).toEqual([]);
+  });
+});
+
+describe('an anonymous visitor\'s trash page (VERIFICATION.md "Round 1, pass 1" finding 4)', () => {
+  const trashed = (id: string, at = '2026-10-01T11:30:00.000Z'): DeckHead => ({
+    ...head(id),
+    trashedAt: at,
+  });
+  const records: Record<string, AccessRecord> = {
+    mine: record('mine', { owner: ANON }),
+    'mine-live': record('mine-live', { owner: ANON }),
+    'mine-removed': record('mine-removed', { owner: ANON }),
+    'mine-busy': record('mine-busy', { owner: ANON }),
+    theirs: record('theirs'),
+    open: record('open', { generalAccess: { mode: 'open', role: 'editor' } }),
+  };
+  const heads: Record<string, DeckHead | null> = {
+    mine: trashed('mine'),
+    'mine-live': head('mine-live'),
+    'mine-removed': null,
+    theirs: trashed('theirs'),
+    open: trashed('open'),
+  };
+  const reads: string[] = [];
+  const deps = {
+    readRecord: async (id: string) => {
+      reads.push(`record ${id}`);
+      if (id === 'refused') throw new Error('the store refused');
+      return records[id] ?? null;
+    },
+    readHead: async (id: string) => {
+      reads.push(`head ${id}`);
+      if (id === 'mine-busy') throw new Error('429');
+      return heads[id] ?? null;
+    },
+    now: () => NOW,
+  };
+
+  test('keeps the trashed decks the visitor owns and names the ids it can forget', async () => {
+    reads.length = 0;
+    const found = await browserTrash(
+      ['mine', 'mine-live', 'mine-removed', 'mine-busy', 'theirs', 'open', 'nobody', 'refused'],
+      anonymous,
+      deps,
+    );
+    expect(found.heads.map((h) => h.id)).toEqual(['mine']);
+    /* gone: no deck under the id, another's, an open deck it does not own, no record at all;
+       kept in the record: a live deck of its own, and the two the store would not answer */
+    expect(found.gone).toEqual(['mine-removed', 'theirs', 'open', 'nobody']);
+    /* a head is read only for a deck the record makes the visitor's own */
+    expect(reads.filter((r) => r.startsWith('head ')).sort()).toEqual([
+      'head mine',
+      'head mine-busy',
+      'head mine-live',
+      'head mine-removed',
+    ]);
+  });
+
+  test('a context with no principal, or no ids, reads nothing', async () => {
+    reads.length = 0;
+    expect(await browserTrash(['mine'], { principal: null, linkGrants: [] }, deps)).toEqual({
+      heads: [],
+      gone: [],
+    });
+    expect(await browserTrash([], anonymous, deps)).toEqual({ heads: [], gone: [] });
+    expect(reads).toEqual([]);
+  });
+
+  test('asks about each id once and about BROWSER_TRASH_MAX ids at most', async () => {
+    reads.length = 0;
+    const ids = Array.from({ length: BROWSER_TRASH_MAX + 10 }, (_, n) => `deck-${n}`);
+    await browserTrash([...ids, 'deck-0', 'deck-1'], anonymous, deps);
+    expect(reads.filter((r) => r.startsWith('record ')).length).toBe(BROWSER_TRASH_MAX);
   });
 });

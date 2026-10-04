@@ -1,6 +1,8 @@
-import { Suspense, useCallback, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { getRequest } from '@tanstack/react-start/server';
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { DeleteForeverDialog } from '@turboslide/chrome/dialogs/DeleteForever';
@@ -13,10 +15,17 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { useMountEffect } from '../components/useMountEffect';
 import { listTrashedDecks, removeStoredDeck, restoreStoredDeck } from '../server/decks';
 import { clearRestoringMarker, sessionMarkerStorage, writeRestoringMarker } from './-restoring';
-import type { DeckCard } from '../server/decks';
+import type { DeckCard, TrashListing } from '../server/decks';
 import { Thumb, openFactsOf, shortDate, useStreamedList } from './decks.index';
 import { RouterLinkSlot } from './-link-slot';
-import { forgetDeckOpened, forgetTrashedMarker, recordDeckOpened } from './-recent';
+import {
+  browserTrashIds,
+  browserTrashIdsOfCookies,
+  forgetDeckOpened,
+  forgetDeckTrashed,
+  forgetTrashedMarker,
+  recordDeckOpened,
+} from './-recent';
 
 import './decks.css';
 
@@ -45,10 +54,34 @@ import './decks.css';
  * its glyph, and Empty trash is the page's one solid button, since it is the page's act.
  */
 export const Route = createFileRoute('/decks/trash')({
-  loader: () => ({ decks: listTrashedDecks() }),
+  loader: () => ({ decks: loadTrash() }),
   head: () => ({ meta: [{ title: `${HOME.trash}, Turboslide` }] }),
   component: TrashPage,
 });
+
+/**
+ * This browser's ids for the trash listing on the server's first render: the document request
+ * carries the trash and Recent cookie mirrors (Path=/decks), which a server function call from
+ * the page does not, so the page sends the ids it reads from its own storage instead.
+ */
+const readTrashCookies = createServerFn({ method: 'GET' }).handler((): string[] => {
+  try {
+    return browserTrashIdsOfCookies(getRequest().headers.get('cookie'));
+  } catch {
+    return [];
+  }
+});
+
+/**
+ * The listing in the scope /decks takes (server/decks.ts listTrashedDecks; the Round 1 fix round,
+ * VERIFICATION.md "Round 1, pass 1" finding 4): a signed in person's or the admin's trash from the
+ * store, an anonymous visitor's from this browser's ids. The ids come from the cookies on the
+ * server and from localStorage and sessionStorage in the page.
+ */
+async function loadTrash(): Promise<TrashListing> {
+  const deckIds = typeof window === 'undefined' ? await readTrashCookies() : browserTrashIds();
+  return listTrashedDecks({ data: { deckIds } });
+}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -121,6 +154,7 @@ function TrashPage() {
          since H2 an anonymous visitor's /decks lists that record alone, so the restored deck goes
          back into it; a signed in owner's listing holds it either way */
       recordDeckOpened(card.id, openFactsOf(card));
+      forgetDeckTrashed(card.id);
       snackbar.show(`Restored ${card.title}`);
       refresh();
     } catch (error) {
@@ -145,6 +179,7 @@ function TrashPage() {
       for (const card of pending) {
         await removeStoredDeck({ deckId: card.id, baseRevision: card.revision });
         forgetDeckOpened(card.id);
+        forgetDeckTrashed(card.id);
         removed += 1;
       }
     } catch (error) {
@@ -224,13 +259,19 @@ type TrashBodyProps = {
   onEmpty: (cards: ReadonlyArray<DeckCard>) => void;
 };
 
-/** The listing once it lands, kept across refetches (decks.index.tsx useStreamedList). */
+/**
+ * The listing once it lands, kept across refetches (decks.index.tsx useStreamedList). The ids the
+ * store answered as gone (no such deck, or not the caller's) leave this browser's trash record.
+ */
 function TrashList({
   promise,
   ...props
-}: Omit<TrashBodyProps, 'cards'> & { promise: Promise<DeckCard[]> }) {
-  const cards = useStreamedList(promise);
-  return <TrashBody cards={cards} {...props} />;
+}: Omit<TrashBodyProps, 'cards'> & { promise: Promise<TrashListing> }) {
+  const listing = useStreamedList(promise);
+  useEffect(() => {
+    if (listing.gone.length > 0) forgetDeckTrashed(...listing.gone);
+  }, [listing]);
+  return <TrashBody cards={listing.cards} {...props} />;
 }
 
 /**

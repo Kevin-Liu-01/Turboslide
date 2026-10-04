@@ -8,6 +8,8 @@
 import { existsSync } from 'node:fs';
 import { join, normalize, resolve, sep } from 'node:path';
 
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
+
 import type { BlobClient, DeckCardFacts } from './blob-store.ts';
 import { blobDecks } from './blob-store.ts';
 import { loadDeckDir, openFileStore } from './file-store.ts';
@@ -20,6 +22,7 @@ import {
   copyDeck,
   createDeck,
   listDeckHeads,
+  readDeckHead,
   removeDeck,
   restoreDeck,
   trashDeck,
@@ -96,6 +99,14 @@ export type HostedDecks = {
    */
   cardFacts?: (deckId: string) => DeckCardFacts | null;
   has: (deckId: string) => Promise<boolean>;
+  /**
+   * One deck's head, the trash stamp included, without a listing and without opening the deck
+   * (blob: the manifest's head and its proven body, as one card of `list`); null when the store
+   * holds no deck under that id or the id is not a slug. The trash page of an anonymous visitor
+   * reads its browser's ids through it (the Round 1 fix round, VERIFICATION.md "Round 1, pass 1"
+   * finding 4).
+   */
+  head: (deckId: string) => Promise<DeckHead | null>;
   /** the store for a deck; a RangeError when the deck is missing */
   open: (deckId: string) => Promise<DeckStore>;
   create: (input: CreateDeckInput) => Promise<CreateDeckResult>;
@@ -212,6 +223,9 @@ export function fileDecks(
     },
     async has(deckId) {
       return existsSync(join(decksDir, deckId, 'deck.json'));
+    },
+    async head(deckId) {
+      return SLUG_PATTERN.test(deckId) ? readDeckHead(decksDir, deckId) : null;
     },
     async open(deckId) {
       const dir = join(decksDir, deckId);

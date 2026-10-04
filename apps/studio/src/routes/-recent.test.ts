@@ -3,9 +3,14 @@ import { describe, expect, it } from 'vitest';
 import {
   RECENT_COOKIE,
   RECENT_MAX,
+  TRASH_COOKIE,
+  TRASH_RECORD_MAX,
+  browserTrashIdsOfCookies,
   encodeRecentCookie,
   parseRecentCookie,
+  parseTrashCookie,
   recentCookieValue,
+  trashCookieValue,
 } from './-recent';
 import type { RecentEntry } from './-recent';
 
@@ -112,5 +117,31 @@ describe('the trashed marker', () => {
     expect(takeTrashedMarker(TRASHED_MAX_AGE_MS + 1, store)).toBeNull();
     store.setItem(TRASHED_KEY, 'not json');
     expect(takeTrashedMarker(10, store)).toBeNull();
+  });
+});
+
+describe('the trash record\'s cookie (VERIFICATION.md "Round 1, pass 1" finding 4)', () => {
+  const pair = (value: string): string => value.split(';')[0]!;
+
+  it('round trips the ids newest first, scoped to /decks', () => {
+    const value = trashCookieValue(['deck-3', 'deck-2']);
+    expect(value).toMatch(/; Path=\/decks; /);
+    expect(parseTrashCookie(`other=1; ${pair(value)}`)).toEqual(['deck-3', 'deck-2']);
+  });
+
+  it('keeps TRASH_RECORD_MAX ids and drops what is not a slug', () => {
+    const ids = Array.from({ length: TRASH_RECORD_MAX + 5 }, (_, n) => `deck-${n}`);
+    expect(parseTrashCookie(pair(trashCookieValue(ids)))).toEqual(ids.slice(0, TRASH_RECORD_MAX));
+    const forged = `${TRASH_COOKIE}=${encodeURIComponent(JSON.stringify(['ok-1', '../etc', 7, 'Up']))}`;
+    expect(parseTrashCookie(forged)).toEqual(['ok-1']);
+    expect(parseTrashCookie(`${TRASH_COOKIE}=not%20json`)).toEqual([]);
+    expect(parseTrashCookie(null)).toEqual([]);
+  });
+
+  it('the server reads the trash ids, then the Recent ids, each once', () => {
+    const recent = encodeRecentCookie([entry(1), entry(2)]);
+    const header = `${pair(trashCookieValue(['deck-9', 'deck-1']))}; ${RECENT_COOKIE}=${recent}`;
+    expect(browserTrashIdsOfCookies(header)).toEqual(['deck-9', 'deck-1', 'deck-2']);
+    expect(browserTrashIdsOfCookies(null)).toEqual([]);
   });
 });

@@ -323,46 +323,57 @@ export const listHomeDecks = createServerFn({ method: 'GET' })
     return { cards: listed.map(cardOf), admin };
   });
 
-/**
- * The trash page's scope: the action's (`page: false`), so an anonymous visitor lists the trashed
- * decks its own principal owns; the trash has no browser record to draw (round1/build/ha.md
- * request 1, the same defect H2 closed for /decks).
- */
-async function trashScope(): Promise<ListingScope> {
-  if (storeSelection().kind === 'file') return { kind: 'every' };
-  const [{ listingScope }, { requestIdentity }] = await Promise.all([
-    import('./deck-scope'),
-    import('./auth/identity'),
-  ]);
-  try {
-    const identity = await requestIdentity(getRequest());
-    return listingScope(
-      { kind: identity.kind, ctx: identity.ctx },
-      { fileStore: false, page: false },
-    );
-  } catch {
-    return { kind: 'none' };
-  }
-}
+/** What /decks/trash draws: the cards, and the ids this browser's trash record can forget. */
+export type TrashListing = { cards: DeckCard[]; gone: string[] };
 
 /**
- * The decks in the trash, newest stamp first, for /decks/trash (gslides-parity SPEC 6.4): the ones
- * the viewer owns, every one for a checkout and the admin bearer (deck-scope.ts `ownedTrash`).
+ * The decks in the trash, newest stamp first, for /decks/trash (gslides-parity SPEC 6.4), in the
+ * scope /decks takes (`pageScope`): every one for a checkout and the admin bearer, the ones a
+ * signed in person or a key's owner owns (deck-scope.ts `ownedTrash`, one listing), and for an
+ * anonymous visitor the trashed decks it owns among this browser's ids (`deckIds`: its trash record
+ * and its Recent record, routes/-recent.ts), read one id at a time and never by a listing
+ * (deck-scope.ts `browserTrash`). The Round 1 fix round (VERIFICATION.md "Round 1, pass 1" finding
+ * 4): the page took the action's scope, so a cookieless stranger's minted principal read as `own`
+ * and every visit listed the whole store (13.5 to 14.7 s cold on the preview's 172 decks).
  */
-export const listTrashedDecks = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<DeckCard[]> => {
-    const scope = await trashScope();
-    if (scope.kind === 'browser' || scope.kind === 'none') return [];
-    const { ownedTrash, studioScopeDeps } = await import('./deck-scope');
-    const heads = await (await ensureDecks()).list({ includeTrashed: true });
-    const kept = await ownedTrash(
-      heads,
-      scope,
-      scope.kind === 'every' ? { readRecord: async () => null } : await studioScopeDeps(),
-    );
-    return kept.sort((a, b) => (b.trashedAt ?? '').localeCompare(a.trashedAt ?? '')).map(cardOf);
-  },
-);
+export const listTrashedDecks = createServerFn({ method: 'GET' })
+  .validator((input: { deckIds?: readonly string[] } | undefined): { deckIds: string[] } => ({
+    deckIds: Array.isArray(input?.deckIds)
+      ? input.deckIds.filter((id): id is string => typeof id === 'string' && SLUG_PATTERN.test(id))
+      : [],
+  }))
+  .handler(async ({ data }): Promise<TrashListing> => {
+    const scope = await pageScope();
+    if (scope.kind === 'none') return { cards: [], gone: [] };
+    const newest = (heads: DeckHead[]): DeckCard[] =>
+      heads.sort((a, b) => (b.trashedAt ?? '').localeCompare(a.trashedAt ?? '')).map(cardOf);
+    const [{ BROWSER_TRASH_MAX, browserTrash, ownedTrash, studioScopeDeps }, { timed }] =
+      await Promise.all([import('./deck-scope'), import('./server-timing')]);
+    if (scope.kind === 'browser') {
+      const ids = data.deckIds.slice(0, BROWSER_TRASH_MAX);
+      if (ids.length === 0) return { cards: [], gone: [] };
+      const [{ requestContext }, { readRecord }, decks] = await Promise.all([
+        import('./authorize'),
+        studioScopeDeps(),
+        ensureDecks(),
+      ]);
+      const ctx = await requestContext();
+      /* one record read per id and one head per owned id, named in server-timing (H9) */
+      const found = await timed('trash-ids', () =>
+        browserTrash(ids, ctx, { readRecord, readHead: (deckId) => decks.head(deckId) }),
+      );
+      return { cards: newest(found.heads), gone: found.gone };
+    }
+    const kept = await timed('trash-listing', async () => {
+      const heads = await (await ensureDecks()).list({ includeTrashed: true });
+      return ownedTrash(
+        heads,
+        scope,
+        scope.kind === 'every' ? { readRecord: async () => null } : await studioScopeDeps(),
+      );
+    });
+    return { cards: newest(kept), gone: [] };
+  });
 
 /** The store facts the deck list and the editor show (the hosting round). */
 export const getHostingFacts = createServerFn({ method: 'GET' }).handler(

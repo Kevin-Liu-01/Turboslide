@@ -1,0 +1,38 @@
+{
+  "generator": "scripts/home/export.ts --record",
+  "pageDeckSha256": "feec7490c43f3895fe8914ad7fb80ff238b348c8307db13fd7e9b75ba7ac69de",
+  "renderer": "Chrome for Testing 147.0.7727.15",
+  "rasters": {
+    "light": {
+      "file": "browser-light.webp",
+      "bytes": 37844,
+      "sha256": "8694d3dfc84525b7c9493edcc61d660155b7f7d1a1ad75f3bfbf86cc30955b13",
+      "pixelsSha256": "c5753103dbe3198e016a1b50faaffacba3ec7b0e39bb2bfcd41abe4457f1baab"
+    },
+    "dark": {
+      "file": "browser-dark.webp",
+      "bytes": 37964,
+      "sha256": "98372edb70992687a7ffd555d61b4f613457129084ae44f97dcdbc99fc284b00",
+      "pixelsSha256": "0d90bf811b20e6d9a32ef985af4ed24df33456acdfbd3b0862bf66ed2f187565"
+    }
+  },
+  "loupe": {
+    "light": {
+      "differing": 0,
+      "total": 5760000,
+      "perfect": "c2b3ddbf8d116a7cc9508a0fc851f3b8df67e7087a2edcfe6241f5cecf5f38ac",
+      "where": []
+    },
+    "dark": {
+      "differing": 1,
+      "total": 5760000,
+      "perfect": "51b954599c6e1880013d20e87ee38cc5ed778c5328802053957693ea154bbf37",
+      "where": [
+        [
+          161,
+          1731
+        ]
+      ]
+    }
+  }
+}

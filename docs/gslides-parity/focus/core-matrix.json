@@ -10415,14 +10415,24 @@
       "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
     },
     {
-      "id": "home.export.figure",
       "feature": "decks",
-      "interaction": "The Perfect row's figure equals `facts.json` `export` and its sentence compares the picture with its screenshot; the link goes to `docs/pptx.md`; Download the PDF downloads a PDF of 8 pages whose sha256 is in `assets.json`, requested only on the click; no text on the page reads \"pixel for pixel\"",
       "driver": "core/home.spec.ts",
       "today": "broken",
+      "id": "home.export.figure",
       "severity": 1,
+      "interaction": "The Perfect row's figure equals `facts.json` `export` and its sentence compares the picture with its screenshot; the link goes to `docs/pptx.md`; Download the PDF downloads a PDF of nine pages whose sha256 is in `assets.json`, requested only on the click; no text on the page reads \"pixel for pixel\"",
       "evidence": "judge-1 4; judge-2 2",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
+      "note": "docs/LANDING.md 6.7 (second pass); push 17 (V3)"
+    },
+    {
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "id": "home.export.loupe",
+      "severity": 2,
+      "interaction": "A pointer held 350 ms on slide 7 shows the loupe with both windows at ten times at the pointer's place; its count equals the driver's count of differing pixels in the same window of the two decoded files at pixelmatch's threshold 0.1; with focus on `[data-loupe]` the arrows move it by 14 px and Escape hides it; the two rasters are requested only on the first use and hash to `assets.json`; no text reads \"pixel for pixel\"",
+      "evidence": "b-strip-export-compare.png; judge-1 (the loupe on two real rasters)",
+      "note": "docs/LANDING.md 6.7 (second pass); push 17 (V3)"
     },
     {
       "id": "home.motion.in-view",

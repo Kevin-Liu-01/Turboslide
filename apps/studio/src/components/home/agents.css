@@ -263,3 +263,60 @@
   font-weight: 400;
   color: var(--pt-titanium);
 }
+
+/* ---- 2.12: the loupe, two 140 px windows of the two rasters at ten times, 312 px in all, square,
+   ink on paper; it follows the pointer by its transform and appears and leaves by cuts (U1) ---- */
+.ts-loupe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  width: 312px;
+  padding: 8px 11px 6px;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-ink);
+  color: var(--pt-ink);
+  pointer-events: none;
+}
+
+.ts-loupe[hidden] {
+  display: none;
+}
+
+.ts-loupe-pair {
+  display: flex;
+  gap: 8px;
+}
+
+.ts-loupe-window {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-loupe-label {
+  font: 500 13px / 16px var(--pt-text);
+}
+
+.ts-loupe canvas {
+  display: block;
+  width: 140px;
+  height: 140px;
+  image-rendering: pixelated;
+  outline: 1px solid var(--pt-hair);
+  outline-offset: -1px;
+}
+
+.ts-loupe-readout {
+  margin: 6px 0 0;
+  font: 13px / 16px var(--pt-text);
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-loupe]:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}

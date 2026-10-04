@@ -573,9 +573,12 @@ export function startStage(ctx: LiveContext): void {
     });
 
   /* a change to slide 5 or its place (a chip, a menu row, the filmstrip, a restore) stops it, at
-     the rest state, so the frame never keeps a staged slide 5 or order the deck does not hold */
+     the rest state, so the frame never keeps a staged slide 5 or order the deck does not hold; the
+     recorded run's step is part of it, since a restore of version 2 or 3 keeps slide 5's place and
+     draws its placeholders (v2.md R27) */
   const signature = (state: HomeDeckState): string =>
     JSON.stringify([
+      state.agentStep,
       state.order.indexOf('next-steps' as HomeSlideId),
       state.order.length,
       state.skipped['next-steps' as HomeSlideId] === true,

@@ -794,7 +794,10 @@ html:has(.ts-product) {
 }
 
 /* the step tabs (V1#15): four across the content width, 8 px apart, each a 2 px ink rule on top
-   (the countdown, filled by `--ts-step-progress` while its step plays), its label and its CLI words */
+   (the countdown, filled by `--ts-step-progress` while its step plays), its label and its CLI words.
+   One pseudo element draws the rule: the hair track is its ground and the ink countdown a solid
+   layer over it sized by the progress (grammar.css draws its crosses with the same one colour
+   layers), so the chrome lint reads one owner of the line, not two at one seam (check step 18) */
 .ts-hero-steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -815,24 +818,17 @@ html:has(.ts-product) {
   cursor: pointer;
 }
 
-.ts-hero-step::before,
-.ts-hero-step::after {
+.ts-hero-step::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 2px;
-}
-
-.ts-hero-step::before {
-  background: var(--pt-hair);
-}
-
-.ts-hero-step::after {
-  background: var(--pt-ink);
-  transform: scaleX(var(--ts-step-progress, 0));
-  transform-origin: 0 0;
+  background:
+    linear-gradient(var(--pt-ink), var(--pt-ink)) 0 0 / calc(var(--ts-step-progress, 0) * 100%) 100%
+      no-repeat,
+    var(--pt-hair);
 }
 
 .ts-hero-step-label {

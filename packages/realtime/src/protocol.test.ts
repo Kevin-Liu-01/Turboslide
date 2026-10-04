@@ -9,6 +9,8 @@ import {
   ENTRY_NOTE_MAX,
   OPS_POST_MAX_ENTRIES,
   PRESENCE_MAX_BYTES,
+  caretSeqOf,
+  dragOf,
   entrySchema,
   opsPostSchema,
   parseSseBlock,
@@ -220,6 +222,45 @@ describe('presencePostSchema', () => {
     expect(presencePostSchema.safeParse({ ...minimal, clock: -1 }).success).toBe(false);
     expect(presencePostSchema.safeParse({ ...minimal, follow: OTHER }).success).toBe(true);
     expect(presencePostSchema.safeParse({ ...minimal, follow: 'someone' }).success).toBe(false);
+  });
+
+  it('carries the caret’s stream position and the drag box, both optional, and bounds them (docs/REALTIME.md 3.4; R2)', () => {
+    /* an older client sends neither; the roster entry round trips without them */
+    expect(presencePostSchema.parse(minimal)).not.toHaveProperty('drag');
+    expect(caretSeqOf(roster.selection?.caret)).toBeNull();
+    expect(dragOf(roster)).toBeNull();
+    const withSeq = {
+      ...minimal,
+      selection: { blockIds: ['p1'], caret: { blockId: 'p1', path: '/text', offset: 4, seq: 12 } },
+    };
+    const parsedSeq = presencePostSchema.parse(withSeq);
+    expect(parsedSeq.selection?.caret?.seq).toBe(12);
+    expect(caretSeqOf(parsedSeq.selection?.caret)).toBe(12);
+    expect(caretSeqOf({ blockId: 'p1', path: '/text', seq: -1 })).toBeNull();
+    expect(
+      presencePostSchema.safeParse({
+        ...minimal,
+        selection: { blockIds: ['p1'], caret: { blockId: 'p1', path: '/text', seq: -1 } },
+      }).success,
+    ).toBe(false);
+    /* the drag box in sheet units, one sheet past every edge at most */
+    const drag = { blockId: 'p1', x: 120.5, y: -40, w: 300, h: 80 };
+    const parsedDrag = presencePostSchema.parse({ ...minimal, drag });
+    expect(parsedDrag.drag).toEqual(drag);
+    expect(dragOf(parsedDrag)).toEqual(drag);
+    expect(rosterEntrySchema.parse({ ...roster, drag }).drag).toEqual(drag);
+    expect(presencePostSchema.safeParse({ ...minimal, drag: { ...drag, w: -1 } }).success).toBe(
+      false,
+    );
+    expect(
+      presencePostSchema.safeParse({ ...minimal, drag: { ...drag, x: 2 * 1600 + 1 } }).success,
+    ).toBe(false);
+    expect(
+      presencePostSchema.safeParse({ ...minimal, drag: { x: 0, y: 0, w: 1, h: 1 } }).success,
+    ).toBe(false);
+    expect(dragOf({ drag: { blockId: 'p1', x: 0, y: 0, w: 1 } })).toBeNull();
+    /* the identity fields stay refused beside the new ones */
+    expect(presencePostSchema.safeParse({ ...minimal, drag, label: 'Kevin' }).success).toBe(false);
   });
 
   it('parses a roster entry with the server’s identity fields', () => {

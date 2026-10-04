@@ -223,12 +223,66 @@ export const opsPostSchema = z
 
 export type OpsPost = z.infer<typeof opsPostSchema>;
 
+/**
+ * The caret a tab reports (SPEC-3 3.8; docs/REALTIME.md 3.4): the block, the Text path and the
+ * plain offset or range, plus `seq`, the tab's stream position when the state was taken, so the
+ * receiver can move the offset past the entries that landed since (3.5, the caret transform;
+ * `audit-people.md` defect 4). Optional on the wire: a client from before the round sends none
+ * and its caret is drawn where it says.
+ */
 const caretSchema = z.strictObject({
   blockId: blockIdSchema,
   path: pointer,
   offset: nonNegativeInt.optional(),
   range: z.tuple([nonNegativeInt, nonNegativeInt]).optional(),
+  seq: nonNegativeInt.optional(),
 });
+
+/**
+ * The box of a block the tab is moving or resizing (docs/REALTIME.md 3.4), in sheet units,
+ * present only while the pointer is down; the receiver draws it as the drag ghost (3.5, row
+ * `realtime.block.drag-live`). A block may be dragged past the sheet's edge, so the range is one
+ * sheet beyond it on every side; the client rounds the numbers so the 2,048 byte cap holds.
+ */
+export const presenceDragSchema = z.strictObject({
+  blockId: blockIdSchema,
+  x: z
+    .number()
+    .min(-SHEET_WIDTH)
+    .max(2 * SHEET_WIDTH),
+  y: z
+    .number()
+    .min(-SHEET_HEIGHT)
+    .max(2 * SHEET_HEIGHT),
+  w: z
+    .number()
+    .min(0)
+    .max(2 * SHEET_WIDTH),
+  h: z
+    .number()
+    .min(0)
+    .max(2 * SHEET_HEIGHT),
+});
+
+export type PresenceDrag = z.infer<typeof presenceDragSchema>;
+
+/**
+ * The `drag` field of a value that may carry one (a roster entry, a presence state), or null:
+ * read structurally, since the channel's `PresenceState` type is R1's and a server from before
+ * the round writes none (docs/REALTIME.md 5.2).
+ */
+export function dragOf(value: unknown): PresenceDrag | null {
+  if (typeof value !== 'object' || value === null || !('drag' in value)) return null;
+  const parsed = presenceDragSchema.safeParse((value as { drag: unknown }).drag);
+  return parsed.success ? parsed.data : null;
+}
+
+/** The `seq` of a caret that carries one (the caret transform's start), or null. */
+export function caretSeqOf(caret: unknown): number | null {
+  if (typeof caret !== 'object' || caret === null || !('seq' in caret)) return null;
+  const seq = (caret as { seq: unknown }).seq;
+  return typeof seq === 'number' && Number.isInteger(seq) && seq >= 0 ? seq : null;
+}
 
 /**
  * The presence fields a client owns (SPEC-3 3.8). The identity fields are the server's and are
@@ -251,6 +305,8 @@ const presenceFields = {
       y: z.number().min(0).max(SHEET_HEIGHT),
     })
     .optional(),
+  /* the box of a block this tab is moving or resizing, while the pointer is down (REALTIME.md 3.4) */
+  drag: presenceDragSchema.optional(),
   follow: clientIdSchema.optional(),
   pointerOn: z.boolean(),
   presenting: z.boolean(),

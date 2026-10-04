@@ -10613,6 +10613,16 @@
       "severity": 2,
       "evidence": "4.1",
       "note": "docs/LANDING.md 6.7 (second pass), V4#18"
+    },
+    {
+      "id": "home.patterns.pair",
+      "feature": "decks",
+      "interaction": "The right slide's picture hashes to the exporter's captured frame in `assets.json`; the left draws the shader in the slide's ink and paper only; the shader chunk is requested only once the band is within one viewport height, at most 8 KB gzip, and never under reduce or with Pause Motion stored; off screen no frame is drawn; a kit recolours the left side; `home-page.spec.ts`'s shader test reads the same chunk rule",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "b-strip-pattern.png",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#19"
     }
   ]
 }

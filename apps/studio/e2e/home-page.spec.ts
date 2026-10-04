@@ -323,8 +323,10 @@ test("the shader is only in the patterns band's chunk, requested once the band n
         scripts.push({
           url,
           at: Date.now(),
-          /* the dithering fragment's own matrix, or any other shader of the package */
-          shader: /bayer8x8\[64\]|liquidMetalFragmentShader|ShaderMount\(/.test(body),
+          /* a fragment shader's own source (the dithering fragment's matrix, or another of the
+             package's), which no caller carries: a dev server serves the package and
+             pattern-mount.ts as two modules, and only the package's holds the source */
+          shader: /bayer8x8\[64\]|liquidMetalFragmentShader/.test(body),
         }),
       )
       .catch(() => undefined);

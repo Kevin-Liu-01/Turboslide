@@ -6,6 +6,7 @@ import * as menus from './home/menus';
 import * as motion from './home/motion';
 import * as objects from './home/objects';
 import * as page from './home/page';
+import * as patterns from './home/patterns';
 import * as present from './home/present';
 import * as tailor from './home/tailor';
 import * as versions from './home/versions';
@@ -51,6 +52,7 @@ const MODULES = [
   menus,
   kits,
   versions,
+  patterns,
 ] as const;
 
 for (const module of MODULES) module.rows();

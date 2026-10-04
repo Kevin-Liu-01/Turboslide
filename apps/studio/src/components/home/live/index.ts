@@ -96,6 +96,7 @@ registerBand('export', () =>
   import('./seam').then((m) => ({ start: (ctx) => hintInView(ctx.band, m.armHint, m.hint) })),
 );
 registerBand('export', () => import('./loupe').then((m) => ({ start: m.startLoupe })));
+registerBand('patterns', () => import('./pattern'));
 registerBand('close', () => import('./mark').then((m) => ({ start: m.startMark })));
 
 /** How far ahead of the viewport a band's chunk is requested (4.2: two viewport heights). */
@@ -227,6 +228,7 @@ const FILL_MODULES: Partial<Record<BandId, () => Promise<FillsModule>>> = {
   agents: () => import('../bands/agents.generated'),
   present: () => import('../bands/present.generated'),
   export: () => import('../bands/export.generated'),
+  patterns: () => import('../bands/patterns.generated'),
   close: () => import('../bands/close.generated'),
 };
 

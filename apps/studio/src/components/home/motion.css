@@ -1,7 +1,7 @@
-/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4; the second pass). V4's file:
-   H5's hidden still, Pause Motion's button and its guard, the interludes; the two people band
-   and the patterns band join in V4#20 and V4#19. Imported after home.css, so the reduced motion
-   block sits last. */
+/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4, 2.13; the second pass). V4's
+   file: H5's hidden still, Pause Motion's button and its guard, the interludes and the patterns
+   band; the two people band joins in V4#20. Imported after home.css, so the reduced motion block
+   sits last. */
 
 /* ---- Pause Motion (3.2): a 32 px text button with a 1 px hairline in the navigation; the word
    follows html[data-motion], which the boot script sets before the first paint. Both words hold
@@ -76,6 +76,51 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 @media print {
   .ts-product .ts-interlude {
     display: none;
+  }
+}
+
+/* ---- animated patterns (2.13): slide 8 twice, 500 by 281 px, 24 px apart, each under its
+   label; the right slide's picture is the exporter's still frame of the shown appearance ---- */
+.ts-patterns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 24px;
+  margin-top: 40px;
+}
+
+.ts-pattern-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pt-ink-2);
+}
+
+[data-band='patterns'][data-pattern-stills] [data-field='pattern'] > .ts-field-still {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background: var(--ts-pattern-still-light) center / 100% 100% no-repeat;
+}
+
+:root[data-theme='dark']
+  [data-band='patterns'][data-pattern-stills]
+  [data-field='pattern']
+  > .ts-field-still {
+  background-image: var(--ts-pattern-still-dark);
+}
+
+[data-field='pattern'][data-pattern-live] > .ts-field-still {
+  visibility: hidden;
+}
+
+/* the shader's canvas (Paper's mount prepends it to the picture box) shows once it has drawn */
+[data-field='pattern'][data-pattern-live] > canvas {
+  visibility: visible;
+}
+
+@media (max-width: 719px) {
+  .ts-patterns {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
   }
 }
 

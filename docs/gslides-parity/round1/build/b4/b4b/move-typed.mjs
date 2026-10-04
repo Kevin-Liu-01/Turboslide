@@ -5,8 +5,9 @@
 // after the drag, with pictures. The deck is trashed and deleted forever by id before it returns.
 import { chromium } from '/Users/kevinliu/repos/Turboslide-next/node_modules/playwright-core/index.mjs';
 const [base, outDir, slide, theme = 'light'] = process.argv.slice(2);
-const surface = async (action, input) => {
-  const r = await fetch(`${base}/api/actions/${action}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input) });
+// the open surface of a local server; the deck is named by the query, as deck.info's input is empty
+const surface = async (action, deck, input) => {
+  const r = await fetch(`${base}/api/actions/${action}?deck=${encodeURIComponent(deck)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input) });
   return { status: r.status, body: await r.json().catch(() => null) };
 };
 const browser = await chromium.launch();
@@ -62,11 +63,11 @@ try {
 } finally {
   await browser.close();
   if (deckId !== null) {
-    const info = await surface('deck.info', { deckId });
+    const info = await surface('deck.info', deckId, {});
     const rev = info.body?.revision ?? 0;
-    const trash = await surface('deck.trash', { id: deckId, baseRevision: rev });
-    const info2 = await surface('deck.info', { deckId });
-    const remove = await surface('deck.remove', { id: deckId, confirm: true, baseRevision: info2.body?.revision ?? rev });
+    const trash = await surface('deck.trash', deckId, { id: deckId, baseRevision: rev });
+    const info2 = await surface('deck.info', deckId, {});
+    const remove = await surface('deck.remove', deckId, { id: deckId, confirm: true, baseRevision: info2.body?.revision ?? rev });
     const after = await fetch(`${base}/edit/${deckId}`).then((r) => r.status);
     console.log(`teardown ${deckId}: info ${info.status} trash ${trash.status} remove ${remove.status} /edit after ${after}`);
   }

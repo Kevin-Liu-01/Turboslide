@@ -1,0 +1,50 @@
+--- a/packages/lint/src/rendered/rules.ts
++++ b/packages/lint/src/rendered/rules.ts
+@@ -195,7 +195,12 @@
+         }),
+       );
+     }
+-    if (block.type === 'dia' && block.fontSize !== undefined && block.fontSize < SVG_LABEL_MIN) {
++    if (
++      block.type === 'dia' &&
++      block.fontSize !== undefined &&
++      block.fontSize < SVG_LABEL_MIN &&
++      !(markup && onlyGlyphArtUnder(markup, SVG_LABEL_MIN))
++    ) {
+       out.push(
+         ctx.finding('type/svg-label-min', record.slideId, {
+           blockId,
+--- a/packages/lint/src/static/speed-marks.test.ts
++++ b/packages/lint/src/static/speed-marks.test.ts
+@@ -2,7 +2,7 @@
+ // import as html blocks carrying the mark files' markup, or as diagram blocks once typed. The deck
+ // rules read that markup: a mask's white and black are the keep and the cut of the plate, double
+ // cut and livery marks, and the ASCII mark's 10 px rows are cells of the mark (round1/build/b4.md
+-// requests 7, 16 and 18). A colour or a label beside them is still read.
++// requests 7, 16, 18 and 21). A colour or a label beside them is still read.
+ import { describe, expect, test } from 'vitest';
+ 
+ import type { Deck, DeckDocument, Slide } from '../contracts.ts';
+@@ -122,5 +122,22 @@
+       floor(ASCII.replace('</svg>', '<text x="0" y="220" font-size="12">Mark</text></svg>')),
+     ).toBe(1);
+     expect(floor(ASCII.replace(/font-family="[^"]*"/, 'font-family="Inter"'))).toBe(1);
++  });
++
++  test("type/svg-label-min reads the ASCII diagram's 10 px rows as cells of the mark when rendered, and still reads a small label (request 21)", () => {
++    const labelMin = (svg: string): number => {
++      const doc = document([diagram('speed-ascii', svg)]);
++      const r = record('speed-ascii', 'light', {
++        blocks: { dia1: { type: 'dia', box: [141, 414, 1320, 316], fontSize: 10 } },
++      });
++      return lintRecord(createContext(doc), r, { bitmap: null }).filter(
++        (f) => f.rule === 'type/svg-label-min',
++      ).length;
++    };
++    expect(labelMin(ASCII)).toBe(0);
++    expect(
++      labelMin(ASCII.replace('</svg>', '<text x="0" y="220" font-size="12">Mark</text></svg>')),
++    ).toBe(1);
++    expect(labelMin(ASCII.replace(/font-family="[^"]*"/, 'font-family="Inter"'))).toBe(1);
+   });
+ });

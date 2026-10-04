@@ -1,0 +1,85 @@
+--- a/packages/store/src/templates.test.ts
++++ b/packages/store/src/templates.test.ts
+@@ -52,16 +52,16 @@
+   return JSON.parse(readFileSync(file, 'utf8')) as T;
+ }
+ 
+-/** Counts every object with `type: 'html'` in a document, composite cells included. */
+-function countHtmlBlocks(value: unknown): number {
++/** Counts every object with the given `type` in a document, composite cells included. */
++function countBlocks(value: unknown, type: string): number {
+   if (Array.isArray(value)) {
+-    return value.reduce<number>((sum, item) => sum + countHtmlBlocks(item), 0);
++    return value.reduce<number>((sum, item) => sum + countBlocks(item, type), 0);
+   }
+   if (typeof value !== 'object' || value === null) return 0;
+   const record = value as Record<string, unknown>;
+   return Object.values(record).reduce<number>(
+-    (sum, item) => sum + countHtmlBlocks(item),
+-    record.type === 'html' ? 1 : 0,
++    (sum, item) => sum + countBlocks(item, type),
++    record.type === type ? 1 : 0,
+   );
+ }
+ 
+@@ -242,7 +242,7 @@
+   });
+ });
+ 
+-/** The seven speed mark slides of the Prototemplate deck, html escape blocks in the import (no block for an inline svg). */
++/** The seven speed mark slides of the Prototemplate deck; the template draws their marks as diagram blocks. */
+ const SPEED_SLIDES = [
+   'speed-ascii',
+   'speed-dithered',
+@@ -257,19 +257,25 @@
+   // decks/templates/gt-brand is the Prototemplate deck imported on 2026-10-02 (docs/NEXT.md 4.1.3
+   // item 24; round1/build/b4.md); decks/gt-brand keeps the 85 slide deck, so production's stored
+   // copy and a fresh store's seed stay the same (question 29). The template names the seed deck's
+-  // assets folder, so every twin it names lives there. The seven speed mark slides are html escape
+-  // blocks until the importer maps an inline svg (b4.md request 6); every other slide is typed.
++  // assets folder, so every twin it names lives there. Every slide is typed: the seven speed mark
++  // slides draw their marks as diagram blocks (b4.md correction 5). The chain's import of the live
++  // deck keeps them as html blocks until the importer maps an inline svg (b4.md request 6).
+   const templateManifest = readJsonFile<Manifest>(join(REPO_TEMPLATE, 'deck.json'));
+   const deckManifest = readJsonFile<Manifest>(join(REPO_DECK, 'deck.json'));
+ 
+-  it('holds 95 slides whose html blocks are the seven speed mark slides alone', () => {
++  it('holds 95 slides with no html block, and the speed mark slides draw diagram blocks', () => {
+     const files = slideFiles(join(REPO_TEMPLATE, 'slides'));
+     expect(files.length).toBe(95);
+     expect(slideFiles(join(REPO_DECK, 'slides')).length).toBe(85);
+     const withHtml = files
+-      .filter((file) => countHtmlBlocks(readJsonFile(join(REPO_TEMPLATE, 'slides', file))) > 0)
++      .filter((file) => countBlocks(readJsonFile(join(REPO_TEMPLATE, 'slides', file)), 'html') > 0)
+       .map((file) => file.replace(/\.json$/, ''));
+-    expect(withHtml).toEqual(SPEED_SLIDES);
++    expect(withHtml).toEqual([]);
++    for (const id of SPEED_SLIDES)
++      expect(
++        countBlocks(readJsonFile(join(REPO_TEMPLATE, 'slides', `${id}.json`)), 'dia'),
++        id,
++      ).toBeGreaterThan(0);
+   });
+ 
+   it('names every twin under the seed deck and every section count in template.json', () => {
+@@ -286,7 +292,7 @@
+     );
+   });
+ 
+-  it('deck.create over the committed record yields 95 slides, every asset twin and the seven speed mark html blocks', () => {
++  it('deck.create over the committed record yields 95 slides, every asset twin and no html block', () => {
+     const scratch = mkdtempSync(join(tmpdir(), 'turboslide-gt-template-'));
+     const decks = join(scratch, 'decks');
+     mkdirSync(join(decks, 'templates'), { recursive: true });
+@@ -315,9 +321,9 @@
+       }
+       let html = 0;
+       for (const file of slideFiles(join(result.dir, 'slides'))) {
+-        html += countHtmlBlocks(readJsonFile(join(result.dir, 'slides', file)));
++        html += countBlocks(readJsonFile(join(result.dir, 'slides', file)), 'html');
+       }
+-      expect(html).toBe(SPEED_SLIDES.length);
++      expect(html).toBe(0);
+     } finally {
+       // the links first, by name, so the removal never reaches the repository folders
+       unlinkSync(join(decks, 'gt-brand'));

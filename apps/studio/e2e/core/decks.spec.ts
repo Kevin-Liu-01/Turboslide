@@ -2425,7 +2425,7 @@ test(title('decks.home.load-budget'), async ({ browser }) => {
       `ready ${readyMs} ms (line 500)`,
       `pictures before the first scroll ${cold.pictures} B in ${cold.paths.length} requests, read cold (line 0)${cold.paths.length > 0 ? `: ${cold.paths.join(', ')}` : ''}`,
       `pictures after a full scroll ${after} B (line 200000)`,
-      `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)`,
+      `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)`,
       `long animation frames over 100 ms ${cold.longFrames.length}, read cold${cold.longFrames.length > 0 ? ` (${cold.longFrames.join(', ')} ms)` : ''}`,
       `JavaScript decoded ${before.js} B (reported against 600000)`,
       `under the runner's trace: pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests; long animation frames over 100 ms ${before.longFrames.length}`,

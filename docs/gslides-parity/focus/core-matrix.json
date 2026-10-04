@@ -9648,7 +9648,7 @@
     {
       "id": "decks.home.load-budget",
       "feature": "decks",
-      "interaction": "Measure: the first byte, the LCP on the h1, the pictures before the first scroll (0) and after a full scroll (line 200 KB), the document against 60 KB until audit item 13 (gated at 80 KB by home.budget.bytes-first) and the JavaScript, with docs/LANDING.md 4.1's numbers beside their lines",
+      "interaction": "Measure: the first byte, the LCP on the h1, the pictures before the first scroll (0) and after a full scroll (line 200 KB), the document against 60 KB until audit item 13 (gated at 100 KB by home.budget.bytes-first) and the JavaScript, with docs/LANDING.md 4.1's numbers beside their lines",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
@@ -10127,22 +10127,22 @@
     {
       "id": "home.budget.bytes-first",
       "feature": "decks",
-      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture and no chunk but the route's before `load`; the document at most 80 KB decoded and 20 KB brotli (52 KB decoded once audit item 13 lands); the page CSS at most 16 KB brotli; the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides`; the page's own bytes at most 70 KB over the wire",
+      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture and no chunk but the route's before `load`; the document at most 100 KB decoded (80 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 21) and 20 KB brotli (52 KB decoded once audit item 13 lands); the page CSS at most 16 KB brotli; the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides`; the page's own bytes at most 70 KB over the wire",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "docs/LANDING.md 4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the document line raised from 80 KB to 100 KB decoded on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 21), the first lines kept as Round 2's goals"
     },
     {
       "id": "home.budget.bytes-page",
       "feature": "decks",
-      "interaction": "After a full native scroll with motion playing: the pictures of 4.1 at most 200 KB at ×1 and ×2, the page's own script at most 300 KB decoded and 90 KB gzip, the page's own bytes at most 400 KB over the wire; nothing under `/home/` requested twice; no PDF, browser raster or slide 7 still requested",
+      "interaction": "After a full native scroll with motion playing: the pictures of 4.1 at most 200 KB at ×1 and ×2, the page's own script at most 360 KB decoded and 120 KB gzip (300 KB and 90 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 22), the page's own bytes at most 400 KB over the wire; nothing under `/home/` requested twice; no PDF, browser raster or slide 7 still requested",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "docs/LANDING.md 4.1; field.ts's CORS hunk",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the own script lines raised from 300 KB and 90 KB gzip to 360 KB and 120 KB gzip on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 22), the first lines kept as Round 2's goals"
     },
     {
       "id": "home.budget.shared",

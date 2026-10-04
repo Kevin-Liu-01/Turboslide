@@ -228,6 +228,16 @@ function measureLoad(): { load: number; read: boolean } {
   return { load, read: load < MEASURE_LOAD_LINE };
 }
 
+/* ---- the byte lines of home.budget.bytes-first and bytes-page (LANDING.md 4.1, 7 questions 21 and
+   22): raised on 2026-10-04 for Kevin's picks, every element of directions A, B and C and much more
+   interaction, which the first lines did not count: the document to 100,000 B decoded (read
+   95,311) and the page's own script to 360,000 B decoded and 120,000 B gzip (read 344,520 and
+   115,243). The first lines, 80,000, 300,000 and 90,000, are Round 2's goals after its entry chunk
+   split and Inter subset ---- */
+const DOCUMENT_LINE = 100_000;
+const OWN_SCRIPT_LINE = 360_000;
+const OWN_SCRIPT_GZIP_LINE = 120_000;
+
 /* ---- home.hero.run (V1#15): the hero's loop L-H, read through the page ---- */
 
 const INTERACTION_LOAD_LINE = 24;
@@ -1735,8 +1745,10 @@ export function rows(): void {
         notes.push(
           `${label}: document ${docBytes.length} B decoded, ${docBr} B brotli; pictures before load ${cold.length}`,
         );
-        if (docBytes.length > 80_000)
-          failures.push(`${label}: the document is ${docBytes.length} B decoded (line 80000)`);
+        if (docBytes.length > DOCUMENT_LINE)
+          failures.push(
+            `${label}: the document is ${docBytes.length} B decoded (line ${DOCUMENT_LINE})`,
+          );
         if (docBr > 20_000)
           failures.push(`${label}: the document is ${docBr} B brotli (line 20000)`);
         if (await isDevServer(page)) {
@@ -1870,10 +1882,14 @@ export function rows(): void {
         notes.push(
           `${label}: own script ${ownDecoded} B decoded, ${ownGzip} B gzip; own bytes over the wire about ${wire} B`,
         );
-        if (ownDecoded > 300_000)
-          failures.push(`${label}: the page's own script is ${ownDecoded} B decoded (line 300000)`);
-        if (ownGzip > 90_000)
-          failures.push(`${label}: the page's own script is ${ownGzip} B gzip (line 90000)`);
+        if (ownDecoded > OWN_SCRIPT_LINE)
+          failures.push(
+            `${label}: the page's own script is ${ownDecoded} B decoded (line ${OWN_SCRIPT_LINE})`,
+          );
+        if (ownGzip > OWN_SCRIPT_GZIP_LINE)
+          failures.push(
+            `${label}: the page's own script is ${ownGzip} B gzip (line ${OWN_SCRIPT_GZIP_LINE})`,
+          );
         if (wire > 400_000)
           failures.push(`${label}: the page's own bytes are ${wire} B over the wire`);
       } finally {

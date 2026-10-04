@@ -1,6 +1,13 @@
 import { homeAsset } from '../assets';
 import type { LiveContext } from './index';
-import { appearance, endHeroSequence, loadStill, settleEntrance, showSlide, shownSlides } from './show';
+import {
+  appearance,
+  endHeroSequence,
+  loadStill,
+  settleEntrance,
+  showSlide,
+  shownSlides,
+} from './show';
 
 /**
  * Print This Deck (docs/LANDING.md 2.7, 5 "Print"; row home.present.print). L3's file. The button

@@ -22,7 +22,9 @@ type Pixelmatch = (
 ) => number;
 
 async function pixelmatch(): Promise<Pixelmatch> {
-  const require = createRequire(resolve(import.meta.dirname, '../../../../../../packages/export/package.json'));
+  const require = createRequire(
+    resolve(import.meta.dirname, '../../../../../../packages/export/package.json'),
+  );
   const path = require.resolve('pixelmatch');
   return ((await import(pathToFileURL(path).href)) as { default: Pixelmatch }).default;
 }
@@ -68,7 +70,9 @@ describe('the loupe measure', () => {
           b[k + 3] = 255;
         }
       }
-      expect(countDiffering(a, b)).toBe(match(a, b, null, w, h, { threshold: THRESHOLD, includeAA: true }));
+      expect(countDiffering(a, b)).toBe(
+        match(a, b, null, w, h, { threshold: THRESHOLD, includeAA: true }),
+      );
     }
   });
 

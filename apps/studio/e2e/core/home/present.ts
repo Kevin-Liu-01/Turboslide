@@ -126,7 +126,9 @@ export function rows(): void {
     await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(2, N));
     await expect(show(page)).toContainText(PRESENT.counter(2, N));
     /* slide 2 as the deck holds it, the name Tailor set on it */
-    await expect(stage(page)).toContainText(HOME_DECK.slides.plan.title.split(HOME_DECK.customer).join('Globex'));
+    await expect(stage(page)).toContainText(
+      HOME_DECK.slides.plan.title.split(HOME_DECK.customer).join('Globex'),
+    );
     await expect(stage(page)).toContainText('Globex');
     await expect(stage(page)).not.toContainText(HOME_DECK.customer);
     await expect(show(page)).toContainText(/\d:\d\d/);
@@ -180,14 +182,22 @@ export function rows(): void {
     await expect(row).toContainText(PRESENT_SKIPPED);
     await band(page).locator('[data-slide-row="ships"]').click();
     await presentButton(page).click();
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(placeOf('ships'), N - 1));
+    await expect(stage(page)).toHaveAttribute(
+      'aria-label',
+      PRESENT.stageName(placeOf('ships'), N - 1),
+    );
     await page.keyboard.press('ArrowRight');
     /* the slide after slide 5 comes next, counted among the slides the show shows */
     const after = HOME_DECK.order[placeOf('next-steps')] as string;
     await expect(stage(page).locator(`[data-home-slides][data-slide="${after}"]`)).toHaveCount(1);
-    await expect(stage(page)).toHaveAttribute('aria-label', PRESENT.stageName(placeOf('ships') + 1, N - 1));
+    await expect(stage(page)).toHaveAttribute(
+      'aria-label',
+      PRESENT.stageName(placeOf('ships') + 1, N - 1),
+    );
     for (let i = 0; i < N; i += 1) {
-      await expect(stage(page).locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(0);
+      await expect(stage(page).locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(
+        0,
+      );
       await page.keyboard.press('ArrowRight');
     }
     /* slide 8, the pattern: its still frame unless the pattern chunk is in and motion is allowed */
@@ -197,17 +207,19 @@ export function rows(): void {
       );
       await page.keyboard.press('Home');
       for (let i = 0; i < N; i += 1) {
-        if ((await stage(page).locator('[data-home-slides][data-slide="pattern"]').count()) > 0) break;
+        if ((await stage(page).locator('[data-home-slides][data-slide="pattern"]').count()) > 0)
+          break;
         await page.keyboard.press('ArrowRight');
       }
       /* a drawing canvas: shown and sized (the print box's own empty canvas is hidden, V4's Q2) */
       const canvases = await stage(page)
         .locator('[data-home-slides][data-slide="pattern"] canvas')
-        .evaluateAll((els) =>
-          els.filter((el) => {
-            const r = el.getBoundingClientRect();
-            return getComputedStyle(el).visibility === 'visible' && r.width > 0 && r.height > 0;
-          }).length,
+        .evaluateAll(
+          (els) =>
+            els.filter((el) => {
+              const r = el.getBoundingClientRect();
+              return getComputedStyle(el).visibility === 'visible' && r.width > 0 && r.height > 0;
+            }).length,
         );
       test.info().annotations.push({
         type: 'reading',
@@ -218,14 +230,19 @@ export function rows(): void {
     await page.keyboard.press('Escape');
     await expect(show(page)).toHaveCount(0);
     await pressChip(page, 'skip');
-    await expect(band(page).locator('[data-slide-row="next-steps"]')).not.toContainText(PRESENT_SKIPPED);
+    await expect(band(page).locator('[data-slide-row="next-steps"]')).not.toContainText(
+      PRESENT_SKIPPED,
+    );
 
     /* openShow: the same show in the miniature's stage (View > Slideshow, V2's menus band) */
     const menus = page.locator('[data-band="menus"]');
     if ((await menus.count()) > 0) {
       await menus.scrollIntoViewIfNeeded();
       await menus.locator('[data-menubar] [role="menuitem"]', { hasText: 'View' }).first().click();
-      await page.getByRole('menuitem', { name: /^Slideshow/ }).first().click();
+      await page
+        .getByRole('menuitem', { name: /^Slideshow/ })
+        .first()
+        .click();
       const mini = menus.locator('[data-show]');
       await expect(mini).toHaveCount(1);
       await expect(mini.locator('[data-show-stage]')).toBeFocused();
@@ -233,7 +250,8 @@ export function rows(): void {
       await expect(mini).toHaveCount(0);
       test.info().annotations.push({
         type: 'reading',
-        description: "openShow through the menus band's View > Slideshow: the show in the miniature's stage, focus on its stage, Escape closes it",
+        description:
+          "openShow through the menus band's View > Slideshow: the show in the miniature's stage, focus on its stage, Escape closes it",
       });
     } else {
       /* no menus band in the tree: openShow called on a container of the page's own, through the
@@ -260,7 +278,8 @@ export function rows(): void {
       if (opened === null)
         test.info().annotations.push({
           type: 'not driven',
-          description: 'openShow: the tree holds no menus band and the server does not serve the module by its path',
+          description:
+            'openShow: the tree holds no menus band and the server does not serve the module by its path',
         });
       else {
         expect(opened).toBe(true);
@@ -280,7 +299,8 @@ export function rows(): void {
         await expect(page.locator('[data-test-show-opener]')).toBeFocused();
         test.info().annotations.push({
           type: 'reading',
-          description: 'openShow driven on a container of the page (the tree holds no menus band): the show inside it, focus on its stage, Escape back to the opener',
+          description:
+            'openShow driven on a container of the page (the tree holds no menus band): the show inside it, focus on its stage, Escape back to the opener',
         });
       }
     }
@@ -370,7 +390,9 @@ export function rows(): void {
     /* a skipped slide leaves the print, as the product's print leaves it (2.11) */
     await page.emulateMedia({ media: 'screen' });
     await pressChip(page, 'skip');
-    await expect(band(page).locator('[data-slide-row="next-steps"]')).toContainText(PRESENT_SKIPPED);
+    await expect(band(page).locator('[data-slide-row="next-steps"]')).toContainText(
+      PRESENT_SKIPPED,
+    );
     await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
     await expect(deck.locator(':scope > *')).toHaveCount(N - 1);
     await expect(deck.locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(0);

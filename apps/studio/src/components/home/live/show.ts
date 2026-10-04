@@ -263,7 +263,9 @@ function isTextField(el: Element | null): boolean {
 function factsOf(state: HomeDeckState, key: SlideKey): { title: string; notes: string } {
   const source = sourceKey(state, key);
   const facts = source === 'blank' ? undefined : HOME_DECK.slides[source];
-  const typed = (state as HomeDeckState & { notes?: Readonly<Record<string, string>> }).notes?.[key];
+  const typed = (state as HomeDeckState & { notes?: Readonly<Record<string, string>> }).notes?.[
+    key
+  ];
   return { title: facts?.title ?? '', notes: typed ?? facts?.notes ?? '' };
 }
 
@@ -299,7 +301,8 @@ export function showSlide(root: HTMLElement, state: HomeDeckState, key: SlideKey
   for (const el of [...wrapper.querySelectorAll<HTMLElement>('*')])
     for (const name of EDIT_ATTRS) el.removeAttribute(name);
   for (const el of wrapper.querySelectorAll('[data-live-overlay], [data-live-spacer]')) el.remove();
-  for (const heading of wrapper.querySelectorAll('h1, h2, h3')) heading.setAttribute('role', 'none');
+  for (const heading of wrapper.querySelectorAll('h1, h2, h3'))
+    heading.setAttribute('role', 'none');
   if (key === 'field') setFieldStill(fresh);
   holdStills(wrapper);
   return wrapper;
@@ -575,7 +578,10 @@ function mountShow(options: ShowOptions): ShowHandle {
   if (options.from !== null)
     play(
       stage,
-      [flip(options.from, stage.getBoundingClientRect()), { transform: 'none', transformOrigin: '0 0' }],
+      [
+        flip(options.from, stage.getBoundingClientRect()),
+        { transform: 'none', transformOrigin: '0 0' },
+      ],
       'beat',
       'move',
       'present',
@@ -658,7 +664,9 @@ export function startShow(ctx: LiveContext): void {
     const model = list.querySelector<HTMLElement>('[data-slide-row]');
     if (model === null) return undefined;
     const item = itemOf(model).cloneNode(true) as HTMLElement;
-    const row = (item.matches('[data-slide-row]') ? item : item.querySelector<HTMLElement>('[data-slide-row]'))!;
+    const row = (
+      item.matches('[data-slide-row]') ? item : item.querySelector<HTMLElement>('[data-slide-row]')
+    )!;
     row.dataset['slideRow'] = id;
     row.removeAttribute('aria-current');
     list.append(item);
@@ -678,7 +686,8 @@ export function startShow(ctx: LiveContext): void {
       const n = cells[0];
       const title = cells[1];
       if (n !== undefined) n.textContent = String(state.order.indexOf(id) + 1);
-      if (title !== undefined) title.textContent = customerText(factsOf(state, id).title, state.customer);
+      if (title !== undefined)
+        title.textContent = customerText(factsOf(state, id).title, state.customer);
       /* a skipped slide's row says so in titanium (2.11), as the editor's filmstrip marks it */
       let mark = button.querySelector<HTMLElement>('.ts-slide-row-skip');
       const skipped = isSkipped(state, id);
@@ -732,7 +741,9 @@ export function startShow(ctx: LiveContext): void {
     const at = rows.indexOf(document.activeElement as HTMLElement);
     if (at < 0) return;
     event.preventDefault();
-    rows[Math.max(0, Math.min(rows.length - 1, at + (event.key === 'ArrowDown' ? 1 : -1)))]?.focus();
+    rows[
+      Math.max(0, Math.min(rows.length - 1, at + (event.key === 'ArrowDown' ? 1 : -1)))
+    ]?.focus();
   });
 
   /* ---------- the show ---------- */

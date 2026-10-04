@@ -107,11 +107,19 @@ export type LoupeRecord = {
   renderer: string;
   rasters: Record<Theme, { file: string; bytes: number; sha256: string; pixelsSha256: string }>;
   /** the whole slide's differing pixels against the Perfect picture of the same appearance */
-  loupe: Record<Theme, { differing: number; total: number; perfect: string; where: [number, number][] }>;
+  loupe: Record<
+    Theme,
+    { differing: number; total: number; perfect: string; where: [number, number][] }
+  >;
 };
 
-async function pixels(bytes: Uint8Array): Promise<{ data: Uint8Array; width: number; height: number }> {
-  const { data, info } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+async function pixels(
+  bytes: Uint8Array,
+): Promise<{ data: Uint8Array; width: number; height: number }> {
+  const { data, info } = await sharp(bytes)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
   return { data: new Uint8Array(data), width: info.width, height: info.height };
 }
 
@@ -136,7 +144,9 @@ async function countAgainstPerfect(
   if (!existsSync(file)) fail(`${file} is missing; run the entry's --export`);
   const [a, b] = await Promise.all([pixels(raster), pixels(new Uint8Array(readFileSync(file)))]);
   if (a.width !== b.width || a.height !== b.height)
-    fail(`the browser raster is ${a.width} by ${a.height}, the Perfect picture ${b.width} by ${b.height}`);
+    fail(
+      `the browser raster is ${a.width} by ${a.height}, the Perfect picture ${b.width} by ${b.height}`,
+    );
   /* the count, and the first 32 differing pixels by place, so a driver can hold the loupe on one */
   let differing = 0;
   const where: [number, number][] = [];
@@ -178,7 +188,9 @@ export async function recordLoupe(): Promise<void> {
       const png = readFileSync(join(out, `07-${SLIDE}-${theme}@2x.png`));
       const meta = await sharp(png).metadata();
       if (meta.width !== SIZE.width || meta.height !== SIZE.height)
-        fail(`the ${theme} render is ${meta.width} by ${meta.height}, not ${SIZE.width} by ${SIZE.height}`);
+        fail(
+          `the ${theme} render is ${meta.width} by ${meta.height}, not ${SIZE.width} by ${SIZE.height}`,
+        );
       const webp = new Uint8Array(await sharp(png).webp({ lossless: true, effort: 6 }).toBuffer());
       /* lossless: the WebP decodes to the render's pixels */
       const [p1, p2] = await Promise.all([pixels(new Uint8Array(png)), pixels(webp)]);
@@ -221,7 +233,9 @@ export async function deriveLoupe(): Promise<{
     if (counted.perfect !== record.loupe[theme].perfect)
       fail(`the ${theme} Perfect picture changed since --record; run --record`);
     if (counted.differing !== record.loupe[theme].differing)
-      fail(`the ${theme} count reads ${counted.differing}, loupe.json ${record.loupe[theme].differing}`);
+      fail(
+        `the ${theme} count reads ${counted.differing}, loupe.json ${record.loupe[theme].differing}`,
+      );
     files.push({ role: 'export-browser' as const, appearance: theme, bytes });
     loupe[theme] = { differing: counted.differing, total: counted.total };
   }

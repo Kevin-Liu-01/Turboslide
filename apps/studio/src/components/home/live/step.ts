@@ -111,7 +111,9 @@ function boxIn(el: HTMLElement, sheet: HTMLElement): Box {
   const s = sheet.getBoundingClientRect();
   const root = el.closest<HTMLElement>('[data-home-slides]');
   const scale =
-    root !== null && root.offsetWidth > 0 ? root.getBoundingClientRect().width / root.offsetWidth : 1;
+    root !== null && root.offsetWidth > 0
+      ? root.getBoundingClientRect().width / root.offsetWidth
+      : 1;
   const unscaled = root === el;
   return {
     cx: r.left + r.width / 2 - s.left,
@@ -298,7 +300,9 @@ export function playStep(target: StepTarget, step: PlayableStep, options: StepOp
   const answerAt = still ? 0 : typeEnd + ANSWER_DELAY_MS;
   const fade = still ? 0 : ms('fast') / slow;
   const answerEnd =
-    step.answer.length === 0 ? answerAt : answerAt + fade + (step.answer.length - 1) * ANSWER_STAGGER_MS;
+    step.answer.length === 0
+      ? answerAt
+      : answerAt + fade + (step.answer.length - 1) * ANSWER_STAGGER_MS;
   const landAt = still ? 0 : answerEnd + ms('beat') / slow;
   /* the landing's length is known once the ring's distance is: set at the landing */
   let landLength = 0;
@@ -309,7 +313,9 @@ export function playStep(target: StepTarget, step: PlayableStep, options: StepOp
     landAt +
     Math.max(
       RING_MAX_MS,
-      step.landing.kind === 'words' ? step.landing.chars * CLOCK_MS : ms('line') / slow + 3 * RAIL_STAGGER_MS,
+      step.landing.kind === 'words'
+        ? step.landing.chars * CLOCK_MS
+        : ms('line') / slow + 3 * RAIL_STAGGER_MS,
     ) +
     FLAG_HOLD_MS +
     flagFade;
@@ -324,8 +330,10 @@ export function playStep(target: StepTarget, step: PlayableStep, options: StepOp
   let toBox: Box | null = null;
   let landed = false;
   /* what the landing animates, set at the landing */
-  let words: { parts: { shown: HTMLElement; rest: HTMLElement; text: string }[]; total: number } | null =
-    null;
+  let words: {
+    parts: { shown: HTMLElement; rest: HTMLElement; text: string }[];
+    total: number;
+  } | null = null;
   let rows: HTMLElement[] = [];
   let rails: HTMLElement | null = null;
   let turn: { el: HTMLElement; from: number; to: number } | null = null;
@@ -476,7 +484,8 @@ export function playStep(target: StepTarget, step: PlayableStep, options: StepOp
       const box = mixBox(fromBox, toBox, p);
       drawRing(ring, box);
       if (flag !== null) placeFlag(flag, box);
-      if (turn !== null && !still) turn.el.style.rotate = `${turn.from + (turn.to - turn.from) * p}deg`;
+      if (turn !== null && !still)
+        turn.el.style.rotate = `${turn.from + (turn.to - turn.from) * p}deg`;
     }
     if (words !== null) paintWords(Math.floor(lt / CLOCK_MS));
     if (rows.length > 0) {
@@ -518,7 +527,8 @@ export function playStep(target: StepTarget, step: PlayableStep, options: StepOp
       land();
     }
     for (const entry of answers)
-      for (const els of Object.values(entry.lines)) for (const el of els ?? []) el.style.opacity = '';
+      for (const els of Object.values(entry.lines))
+        for (const el of els ?? []) el.style.opacity = '';
     if (typed > 0) setEntry(terminal, command, `$ ${step.command}`);
     unsplitWords();
     for (const row of rows) row.style.removeProperty('opacity');

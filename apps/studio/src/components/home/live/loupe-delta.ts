@@ -16,7 +16,12 @@ export const MAX_DELTA = 35215 * THRESHOLD * THRESHOLD;
  * translucent pair blended over pixelmatch's checkerboard at the first pixel's byte offset `i`
  * (both rasters the loupe reads are opaque, so the blend never applies to them).
  */
-export function colorDelta(a: ArrayLike<number>, i: number, b: ArrayLike<number>, j: number): number {
+export function colorDelta(
+  a: ArrayLike<number>,
+  i: number,
+  b: ArrayLike<number>,
+  j: number,
+): number {
   const r1 = a[i] as number;
   const g1 = a[i + 1] as number;
   const b1 = a[i + 2] as number;
@@ -49,4 +54,3 @@ export function countDiffering(a: ArrayLike<number>, b: ArrayLike<number>): numb
   for (let k = 0; k + 3 < a.length; k += 4) if (colorDelta(a, k, b, k) > MAX_DELTA) n += 1;
   return n;
 }
-

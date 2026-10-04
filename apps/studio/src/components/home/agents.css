@@ -116,20 +116,22 @@
    at rest (the first pass's ts-draw-* keyframes, as variables) ---- */
 .ts-sheet .frame[data-rails] .rule.top {
   clip-path: inset(
-    0px calc((100% - 56px) * (1 - var(--ts-rail-top, 1))) 0px calc(56px * (1 - var(--ts-rail-top, 1)))
+    0px calc((100% - 56px) * (1 - var(--ts-rail-top, 1))) 0px
+      calc(56px * (1 - var(--ts-rail-top, 1)))
   );
 }
 
 .ts-sheet .frame[data-rails]::before {
   clip-path: inset(
-    calc(56px * (1 - var(--ts-rail-left, 1))) 0px calc((100% - 56px) * (1 - var(--ts-rail-left, 1))) 0px
+    calc(56px * (1 - var(--ts-rail-left, 1))) 0px calc((100% - 56px) * (1 - var(--ts-rail-left, 1)))
+      0px
   );
 }
 
 .ts-sheet .frame[data-rails]::after {
   clip-path: inset(
-    calc((100% - 56px) * (1 - var(--ts-rail-right, 1))) 0px calc(56px * (1 - var(--ts-rail-right, 1)))
-      0px
+    calc((100% - 56px) * (1 - var(--ts-rail-right, 1))) 0px
+      calc(56px * (1 - var(--ts-rail-right, 1))) 0px
   );
 }
 

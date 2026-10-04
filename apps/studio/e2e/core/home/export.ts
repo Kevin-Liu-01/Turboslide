@@ -22,7 +22,11 @@ import { bandReady, freshPage, openHome } from './agents';
 // bytes, sha256 and size); the loupe's count is checked against pixelmatch itself, resolved from
 // the exporter's own dependency, over the same window of the two decoded files.
 
-export const ROWS: readonly string[] = ['home.export.seam', 'home.export.figure', 'home.export.loupe'];
+export const ROWS: readonly string[] = [
+  'home.export.seam',
+  'home.export.figure',
+  'home.export.loupe',
+];
 
 const ROOT = resolve(import.meta.dirname, '../../../../..');
 /** The slides of the page deck: the PDF has one page each. */
@@ -38,8 +42,9 @@ type Pixelmatch = (
 ) => number;
 async function pixelmatch(): Promise<Pixelmatch> {
   const require = createRequire(resolve(ROOT, 'packages/export/package.json'));
-  return ((await import(pathToFileURL(require.resolve('pixelmatch')).href)) as { default: Pixelmatch })
-    .default;
+  return (
+    (await import(pathToFileURL(require.resolve('pixelmatch')).href)) as { default: Pixelmatch }
+  ).default;
 }
 
 /** A 14 by 14 window of a decoded raster, RGBA. */
@@ -50,7 +55,11 @@ async function windowOf(bytes: Buffer, x: number, y: number): Promise<Uint8Array
       ensureAlpha(): { raw(): { toBuffer(): Promise<Buffer> } };
     };
   };
-  const raw = await sharp(bytes).extract({ left: x, top: y, width: 14, height: 14 }).ensureAlpha().raw().toBuffer();
+  const raw = await sharp(bytes)
+    .extract({ left: x, top: y, width: 14, height: 14 })
+    .ensureAlpha()
+    .raw()
+    .toBuffer();
   return new Uint8Array(raw);
 }
 
@@ -203,15 +212,24 @@ export function rows(): void {
     const fetchRaster = async (path: string): Promise<Buffer> =>
       Buffer.from(await (await page.request.get(path)).body());
     const browserPath = browserPaths.find((p) => /light/.test(p)) ?? browserPaths[0]!;
-    const perfectPath = HOME_ASSETS.find((a) => a.role === 'export-perfect' && a.appearance === 'light')!.path;
-    const [browserBytes, perfectBytes] = await Promise.all([fetchRaster(browserPath), fetchRaster(perfectPath)]);
+    const perfectPath = HOME_ASSETS.find(
+      (a) => a.role === 'export-perfect' && a.appearance === 'light',
+    )!.path;
+    const [browserBytes, perfectBytes] = await Promise.all([
+      fetchRaster(browserPath),
+      fetchRaster(perfectPath),
+    ]);
     const rec = HOME_ASSETS.find((a) => a.path === browserPath);
     if (rec !== undefined && rec.sha256 !== '')
       expect(createHash('sha256').update(browserBytes).digest('hex')).toBe(rec.sha256);
     /* the places the build found a differing pixel, and two of the slide's own */
     const loupeJson = resolve(ROOT, 'apps/studio/home-deck/recorded-loupe/loupe.json');
     const where: [number, number][] = existsSync(loupeJson)
-      ? (JSON.parse(readFileSync(loupeJson, 'utf8')) as { loupe: { light: { where: [number, number][] } } }).loupe.light.where
+      ? (
+          JSON.parse(readFileSync(loupeJson, 'utf8')) as {
+            loupe: { light: { where: [number, number][] } };
+          }
+        ).loupe.light.where
       : [];
     const points: [number, number][] = [[1210, 640], [400, 1500], ...where.slice(0, 2)];
     for (const [rx, ry] of points) {
@@ -228,19 +246,33 @@ export function rows(): void {
       /* the window is at the pointer's place, both rasters at ten times */
       expect(Math.abs(x - rx)).toBeLessThanOrEqual(3);
       expect(Math.abs(y - ry)).toBeLessThanOrEqual(3);
-      const [a, b] = await Promise.all([windowOf(browserBytes, x, y), windowOf(perfectBytes, x, y)]);
-      expect(differ, `the count at x ${x}, y ${y}`).toBe(pm(a, b, null, 14, 14, { threshold: 0.1, includeAA: true }));
+      const [a, b] = await Promise.all([
+        windowOf(browserBytes, x, y),
+        windowOf(perfectBytes, x, y),
+      ]);
+      expect(differ, `the count at x ${x}, y ${y}`).toBe(
+        pm(a, b, null, 14, 14, { threshold: 0.1, includeAA: true }),
+      );
       await expect(loupe.locator('.ts-loupe-readout')).toHaveText(
         `${differ} of 196 pixels differ at x ${x + 7}, y ${y + 7}.`,
       );
-      const sizes = await loupe.locator('canvas').evaluateAll((els) =>
-        els.map((e) => [e.getBoundingClientRect().width, e.getBoundingClientRect().height, getComputedStyle(e).imageRendering]),
-      );
+      const sizes = await loupe
+        .locator('canvas')
+        .evaluateAll((els) =>
+          els.map((e) => [
+            e.getBoundingClientRect().width,
+            e.getBoundingClientRect().height,
+            getComputedStyle(e).imageRendering,
+          ]),
+        );
       expect(sizes).toEqual([
         [140, 140, 'pixelated'],
         [140, 140, 'pixelated'],
       ]);
-      test.info().annotations.push({ type: 'reading', description: `loupe at x ${x}, y ${y}: ${differ} of 196 differ` });
+      test.info().annotations.push({
+        type: 'reading',
+        description: `loupe at x ${x}, y ${y}: ${differ} of 196 differ`,
+      });
     }
     /* the pointer leaves the slide: the loupe leaves */
     await page.mouse.move(box.x + box.width / 2, box.y - 80);
@@ -276,11 +308,21 @@ export function rows(): void {
     const darkTarget = band(dark).locator('[data-loupe]');
     const darkBox = (await darkTarget.boundingBox())!;
     const darkBrowserPath = browserPaths.find((p) => /dark/.test(p)) ?? browserPaths[1]!;
-    const darkPerfectPath = HOME_ASSETS.find((a) => a.role === 'export-perfect' && a.appearance === 'dark')!.path;
-    const darkFetch = async (path: string): Promise<Buffer> => Buffer.from(await (await dark.request.get(path)).body());
-    const [darkBrowser, darkPerfect] = await Promise.all([darkFetch(darkBrowserPath), darkFetch(darkPerfectPath)]);
+    const darkPerfectPath = HOME_ASSETS.find(
+      (a) => a.role === 'export-perfect' && a.appearance === 'dark',
+    )!.path;
+    const darkFetch = async (path: string): Promise<Buffer> =>
+      Buffer.from(await (await dark.request.get(path)).body());
+    const [darkBrowser, darkPerfect] = await Promise.all([
+      darkFetch(darkBrowserPath),
+      darkFetch(darkPerfectPath),
+    ]);
     const darkWhere: [number, number][] = existsSync(loupeJson)
-      ? (JSON.parse(readFileSync(loupeJson, 'utf8')) as { loupe: { dark: { where: [number, number][] } } }).loupe.dark.where
+      ? (
+          JSON.parse(readFileSync(loupeJson, 'utf8')) as {
+            loupe: { dark: { where: [number, number][] } };
+          }
+        ).loupe.dark.where
       : [];
     for (const [rx, ry] of [[1210, 640], ...darkWhere.slice(0, 1)] as [number, number][]) {
       /* the window's top left corner seven pixels up and left of the place, so the place is inside */
@@ -295,11 +337,19 @@ export function rows(): void {
       const y = Number(await darkLoupe.getAttribute('data-y'));
       const differ = Number(await darkLoupe.getAttribute('data-differ'));
       const [a, b] = await Promise.all([windowOf(darkBrowser, x, y), windowOf(darkPerfect, x, y)]);
-      expect(differ, `the dark count at x ${x}, y ${y}`).toBe(pm(a, b, null, 14, 14, { threshold: 0.1, includeAA: true }));
+      expect(differ, `the dark count at x ${x}, y ${y}`).toBe(
+        pm(a, b, null, 14, 14, { threshold: 0.1, includeAA: true }),
+      );
       const inside = rx >= x && rx < x + 14 && ry >= y && ry < y + 14;
       if (darkWhere.some(([wx, wy]) => wx === rx && wy === ry) && inside)
-        expect(differ, 'the window over the pixel the build found differing').toBeGreaterThanOrEqual(1);
-      test.info().annotations.push({ type: 'reading', description: `dark loupe at x ${x}, y ${y}: ${differ} of 196 differ` });
+        expect(
+          differ,
+          'the window over the pixel the build found differing',
+        ).toBeGreaterThanOrEqual(1);
+      test.info().annotations.push({
+        type: 'reading',
+        description: `dark loupe at x ${x}, y ${y}: ${differ} of 196 differ`,
+      });
       await dark.mouse.move(darkBox.x + darkBox.width / 2, darkBox.y - 80);
       await expect(darkLoupe).toBeHidden();
     }

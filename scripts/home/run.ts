@@ -175,7 +175,9 @@ function humanOf(answer: CliAnswer): string[] {
 
 function must(answer: CliAnswer, what: string): CliAnswer {
   if (answer.code !== 0)
-    fail(`the CLI refused ${what} (turboslide ${answer.argv.join(' ')}): ${humanOf(answer).join(' | ')}`);
+    fail(
+      `the CLI refused ${what} (turboslide ${answer.argv.join(' ')}): ${humanOf(answer).join(' | ')}`,
+    );
   return answer;
 }
 
@@ -464,7 +466,11 @@ export function recordChips(): void {
       must(run(join(work, 'absent-tailored'), CHIPS.tailor.on.argv), 'tailor before the run');
       return [
         first,
-        { chip, dir: 'off' as const, answer: on(join(work, 'absent-tailored'), CHIPS.tailor.off.argv) },
+        {
+          chip,
+          dir: 'off' as const,
+          answer: on(join(work, 'absent-tailored'), CHIPS.tailor.off.argv),
+        },
       ];
     });
     const chipVersionLists = CHIP_IDS.map((chip) => ({
@@ -552,14 +558,19 @@ function validate(value: unknown, schema: Schema, root: Schema, path = ''): stri
     !new RegExp(schema['pattern']).test(value)
   )
     errors.push(`${path}: "${value}" misses ${schema['pattern']}`);
-  if (typeof value === 'string' && typeof schema['minLength'] === 'number' && value.length < schema['minLength'])
+  if (
+    typeof value === 'string' &&
+    typeof schema['minLength'] === 'number' &&
+    value.length < schema['minLength']
+  )
     errors.push(`${path}: shorter than ${schema['minLength']}`);
   if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
     const props = (schema['properties'] ?? {}) as Record<string, Schema>;
     for (const key of (schema['required'] ?? []) as string[])
       if (!(key in value)) errors.push(`${path}/${key}: required`);
     for (const [key, each] of Object.entries(value)) {
-      if (key in props) errors.push(...validate(each, props[key] as Schema, root, `${path}/${key}`));
+      if (key in props)
+        errors.push(...validate(each, props[key] as Schema, root, `${path}/${key}`));
       else if (schema['additionalProperties'] === false) errors.push(`${path}/${key}: not allowed`);
     }
   }
@@ -619,7 +630,11 @@ function splitAnswer(answer: CliAnswer): { summary: string[]; findings: string[]
 function checkFindings(findings: readonly string[], freeform: boolean, what: string): void {
   for (const f of findings) {
     if (/ copy\/empty-placeholder /.test(f)) continue;
-    if (/ copy\/sentence-case \(2\): Sentence case: lowercase "[^"]+" unless it is a proper noun/.test(f))
+    if (
+      / copy\/sentence-case \(2\): Sentence case: lowercase "[^"]+" unless it is a proper noun/.test(
+        f,
+      )
+    )
       continue;
     if (freeform && /^next-steps layout\/freeform \(1\): /.test(f)) continue;
     fail(`${what}: a finding of a kind the page does not record: ${f}`);
@@ -665,7 +680,11 @@ export function versionLine(v: {
 
 const VERSION_LINE = /^\s*(\d+)\s+r(\d+)\s+(\S+)\s+(\S+)\s+(.*)$/;
 
-export async function deriveChips(): Promise<{ source: string; loopSource: string; loopMs: number }> {
+export async function deriveChips(): Promise<{
+  source: string;
+  loopSource: string;
+  loopMs: number;
+}> {
   const recordedPath = `${RECORDED}/chips.json`;
   if (!existsSync(resolve(ROOT, recordedPath))) fail(`${recordedPath} is missing; run --record`);
   const rec = readJson<RecordedChips>(recordedPath);
@@ -695,12 +714,17 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
   } => {
     const tool = toolOf(action);
     const mcpErrors = validate(args, tool.inputSchema, mcp as Schema);
-    if (mcpErrors.length > 0) fail(`${what}: the MCP body misses ${tool.name}: ${mcpErrors.join('; ')}`);
+    if (mcpErrors.length > 0)
+      fail(`${what}: the MCP body misses ${tool.name}: ${mcpErrors.join('; ')}`);
     const path = `/api/actions/${action}`;
     const op = openapi.paths[path]?.post ?? fail(`openapi.json has no ${path}`);
     const httpErrors = validate(args, op.requestBody.content['application/json'].schema, openapi);
-    if (httpErrors.length > 0) fail(`${what}: the HTTP body misses ${path}: ${httpErrors.join('; ')}`);
-    return { mcp: { name: tool.name, arguments: args }, http: { method: 'POST', path, body: args } };
+    if (httpErrors.length > 0)
+      fail(`${what}: the HTTP body misses ${path}: ${httpErrors.join('; ')}`);
+    return {
+      mcp: { name: tool.name, arguments: args },
+      http: { method: 'POST', path, body: args },
+    };
   };
 
   /* ---- the recorded versions: the save and the run's three writes ---- */
@@ -773,7 +797,12 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
         command: step.command,
         typedChars,
         answer: [summary[0] as string],
-        target: step.id === 'new' ? 'next-steps' : step.id === 'title' ? 'next-steps#h' : 'next-steps#rows',
+        target:
+          step.id === 'new'
+            ? 'next-steps'
+            : step.id === 'title'
+              ? 'next-steps#h'
+              : 'next-steps#rows',
         landing,
         schedule: scheduleOf(typedChars, 1, RING_MAX, land),
       };
@@ -792,9 +821,11 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
       const form = CHIPS[chip][dir];
       const all = rec.chips.filter((r) => r.chip === chip && r.dir === dir);
       if (all.length !== 4) fail(`${all.length} recordings of the ${chip} chip (${dir}), not 4`);
-      const freeformOf = (r: ChipRecording): boolean =>
-        chip === 'turn' || r.after === 'turn';
-      const variants = new Map<boolean, { summary: string; revision: number; after: ChipId | null }>();
+      const freeformOf = (r: ChipRecording): boolean => chip === 'turn' || r.after === 'turn';
+      const variants = new Map<
+        boolean,
+        { summary: string; revision: number; after: ChipId | null }
+      >();
       for (const r of all) {
         const what = `the ${chip} chip (${dir}) after ${r.after ?? 'nothing'}`;
         const { summary, findings } = splitAnswer(r.answer);
@@ -804,9 +835,15 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
         const line = summary[0] as string;
         const known = variants.get(freeform);
         if (known === undefined)
-          variants.set(freeform, { summary: line, revision: revisionOf(line, what), after: r.after });
+          variants.set(freeform, {
+            summary: line,
+            revision: revisionOf(line, what),
+            after: r.after,
+          });
         else if (normal(known.summary) !== normal(line))
-          fail(`${what} answered "${line}", where ${known.after ?? 'rest'} answered "${known.summary}": the answers differ in more than the revision`);
+          fail(
+            `${what} answered "${line}", where ${known.after ?? 'rest'} answered "${known.summary}": the answers differ in more than the revision`,
+          );
       }
       const plain = variants.get(false);
       const free = variants.get(true);
@@ -829,7 +866,11 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
               ? { kind: 'words', chars: (dir === 'on' ? ROW_AFTER : ROW_BEFORE).length }
               : { kind: 'mark' };
       const land =
-        landing.kind === 'words' ? landing.chars * AGENT_CLOCK : landing.kind === 'turn' ? RING_MAX : 0;
+        landing.kind === 'words'
+          ? landing.chars * AGENT_CLOCK
+          : landing.kind === 'turn'
+            ? RING_MAX
+            : 0;
       const split = splitWords(form.command.replace(/^turboslide /, ''));
       if (!split.ok || JSON.stringify(split.words) !== JSON.stringify(form.argv))
         fail(`the ${chip} chip's printed command does not split to its arguments`);
@@ -843,7 +884,9 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
         /** the answer as recorded at rest, and on a slide 5 arranged by hand when that differs */
         answer: [normal(restLine) === normal(base.summary) ? restLine : base.summary],
         answerFreeform:
-          free !== undefined && plain !== undefined && normal(free.summary) !== normal(plain.summary)
+          free !== undefined &&
+          plain !== undefined &&
+          normal(free.summary) !== normal(plain.summary)
             ? [free.summary.replace(REVISION, `revision ${restRev}`)]
             : null,
         revision: restRev,
@@ -854,7 +897,8 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
               : { from: CHIP_CUSTOMER, to: CUSTOMER }
             : null,
         ...request(form.action, args, `the ${chip} chip (${dir})`),
-        target: chip === 'skip' ? 'next-steps' : chip === 'row' ? 'next-steps#rows' : 'next-steps#h',
+        target:
+          chip === 'skip' ? 'next-steps' : chip === 'row' ? 'next-steps#rows' : 'next-steps#h',
         row: chip === 'row' ? ROW_INDEX : null,
         landing,
         schedule: scheduleOf(typedChars, 1, RING_MAX, land),
@@ -903,7 +947,10 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
             formatLines([`$ ${command}`], width, {
               overlong: chip === 'tailor' && name === LONG_NAME ? 'break' : 'throw',
             }).length +
-            formatLines(c.answer.map((l) => substituteAnswer(l, CUSTOMER, name)), width).length;
+            formatLines(
+              c.answer.map((l) => substituteAnswer(l, CUSTOMER, name)),
+              width,
+            ).length;
           if (n > PANEL_WIDTHS[width].slots)
             fail(`the ${chip} chip (${dir}) needs ${n} lines at ${width} width`);
         }
@@ -916,9 +963,11 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
     CHIP_IDS.map((chip) => {
       const of = (dir: 'on' | 'off'): CliAnswer | undefined =>
         (rec.absentChips ?? []).find((r) => r.chip === chip && r.dir === dir)?.answer;
-      const onAnswer = of('on') ?? fail(`no recording of the ${chip} chip on the deck before the run`);
+      const onAnswer =
+        of('on') ?? fail(`no recording of the ${chip} chip on the deck before the run`);
       const offAnswer = of('off');
-      if (chip === 'tailor' && onAnswer.code !== 0) fail('tailor was refused on the deck before the run');
+      if (chip === 'tailor' && onAnswer.code !== 0)
+        fail('tailor was refused on the deck before the run');
       if (chip !== 'tailor' && onAnswer.code === 0)
         fail(`the ${chip} chip ran on the deck before the run, where slide 5 is absent`);
       return [
@@ -943,12 +992,19 @@ export async function deriveChips(): Promise<{ source: string; loopSource: strin
     versions,
     versionList: { command: 'turboslide version list', authorAgent: RUN_AUTHOR },
     restore: {
-      ...request('version.restore', { n: RESTORE_TO, baseRevision: restRevision }, 'version restore'),
+      ...request(
+        'version.restore',
+        { n: RESTORE_TO, baseRevision: restRevision },
+        'version restore',
+      ),
       absent: restoreAbsent,
     },
     list: request('version.list', {}, 'version list'),
     tailorAbsent,
-    tailorCounts: { start: parseCount(rec.tailorCounts.start), rest: parseCount(rec.tailorCounts.rest) },
+    tailorCounts: {
+      start: parseCount(rec.tailorCounts.start),
+      rest: parseCount(rec.tailorCounts.rest),
+    },
     help,
     cliCommands,
     refusal: `This page runs 6 of the CLI's ${cliCommands} commands.`,
@@ -1099,7 +1155,10 @@ export const HOME_NEXT_STEPS: { turnTo: number; row: { index: number; before: st
   const options = (await prettier.resolveConfig(resolve(ROOT, OUT))) ?? {};
   return {
     source: await prettier.format(source, { ...options, filepath: resolve(ROOT, OUT) }),
-    loopSource: await prettier.format(loopSource, { ...options, filepath: resolve(ROOT, OUT_LOOP) }),
+    loopSource: await prettier.format(loopSource, {
+      ...options,
+      filepath: resolve(ROOT, OUT_LOOP),
+    }),
     loopMs: cycleMs,
   };
 }
@@ -1123,7 +1182,9 @@ async function main(argv: string[]): Promise<void> {
       if (!existsSync(file) || readFileSync(file, 'utf8') !== text)
         fail(`${path} differs from its sources; run node scripts/home/run.ts --write`);
     }
-    console.log(`home/run --check: ${OUT} and ${OUT_LOOP} match their recordings; the loop is ${loopMs} ms`);
+    console.log(
+      `home/run --check: ${OUT} and ${OUT_LOOP} match their recordings; the loop is ${loopMs} ms`,
+    );
     return;
   }
   for (const [path, text] of outputs) {

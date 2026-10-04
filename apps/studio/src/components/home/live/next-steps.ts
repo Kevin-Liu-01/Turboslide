@@ -38,7 +38,9 @@ export function paintNextSteps(root: ParentNode, state: HomeDeckState): void {
   const { turned, rewritten } = looksOf(state);
   const value = rewritten ? HOME_NEXT_STEPS.row.after : HOME_NEXT_STEPS.row.before;
   const rotate = turned ? `${HOME_NEXT_STEPS.turnTo}deg` : '';
-  const slides = [...root.querySelectorAll<HTMLElement>(`[data-home-slides][data-slide="${SLIDE5}"]`)];
+  const slides = [
+    ...root.querySelectorAll<HTMLElement>(`[data-home-slides][data-slide="${SLIDE5}"]`),
+  ];
   if (root instanceof HTMLElement && root.matches(`[data-home-slides][data-slide="${SLIDE5}"]`))
     slides.push(root);
   for (const slide of slides) {

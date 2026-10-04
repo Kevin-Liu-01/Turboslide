@@ -80,7 +80,9 @@ export function startLoupe(ctx: LiveContext): void {
           };
           const [perfect, browser] = await Promise.all([
             createImageBitmap(img, options),
-            fetch(url).then((r) => r.blob()).then((blob) => createImageBitmap(blob, options)),
+            fetch(url)
+              .then((r) => r.blob())
+              .then((blob) => createImageBitmap(blob, options)),
           ]);
           if (perfect.width !== browser.width || perfect.height !== browser.height) return null;
           return { browser, perfect, width: perfect.width, height: perfect.height };
@@ -173,7 +175,10 @@ export function startLoupe(ctx: LiveContext): void {
   };
 
   /** The raster point under a point on the slide. */
-  const rasterOf = async (clientX: number, clientY: number): Promise<{ x: number; y: number } | null> => {
+  const rasterOf = async (
+    clientX: number,
+    clientY: number,
+  ): Promise<{ x: number; y: number } | null> => {
     const r = await rasters();
     if (r === null) return null;
     const box = slide.getBoundingClientRect();

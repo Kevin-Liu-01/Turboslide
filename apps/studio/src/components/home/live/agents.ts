@@ -52,7 +52,10 @@ function withSkip(state: HomeDeckState, on: boolean): HomeDeckState {
   const skipped = state.skipped as unknown;
   if (Array.isArray(skipped)) {
     const rest = skipped.filter((id) => id !== SLIDE5);
-    return { ...state, skipped: (on ? [...rest, SLIDE5] : rest) as unknown as HomeDeckState['skipped'] };
+    return {
+      ...state,
+      skipped: (on ? [...rest, SLIDE5] : rest) as unknown as HomeDeckState['skipped'],
+    };
   }
   const next = { ...(skipped as Record<string, true>) };
   if (on) next[SLIDE5] = true;
@@ -76,7 +79,9 @@ function chipOn(state: HomeDeckState, chip: ChipId): boolean {
 
 /** The page deck's revision: the recorded one and one for every version made on the page. */
 function revisionOf(store: HomeStore): number {
-  return HOME_CHIPS.restRevision + Math.max(0, store.versions().length - HOME_CHIPS.versions.length);
+  return (
+    HOME_CHIPS.restRevision + Math.max(0, store.versions().length - HOME_CHIPS.versions.length)
+  );
 }
 
 /** Two argument lists are one command when every word matches, a JSON value by its value. */
@@ -164,7 +169,8 @@ export function startAgents(ctx: LiveContext): void {
     const current = order.findIndex((key) => tabs.get(key) === document.activeElement);
     if (current < 0) return;
     let next = current;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (current + 1) % order.length;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown')
+      next = (current + 1) % order.length;
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp')
       next = (current - 1 + order.length) % order.length;
     else if (event.key === 'Home') next = 0;
@@ -213,9 +219,9 @@ export function startAgents(ctx: LiveContext): void {
   const versionLines = (): string[] => {
     const all = store.versions();
     const recorded = HOME_CHIPS.versions;
-    const lines = recorded.slice(0, Math.min(recorded.length, all.length)).map((v) =>
-      versionLine(v),
-    );
+    const lines = recorded
+      .slice(0, Math.min(recorded.length, all.length))
+      .map((v) => versionLine(v));
     all.slice(recorded.length).forEach((v: Version, i) => {
       lines.push(
         versionLine({
@@ -270,8 +276,7 @@ export function startAgents(ctx: LiveContext): void {
     }
   };
   /** The slide's place in the deck, for the row's words. */
-  const placeOf = (state: HomeDeckState): number =>
-    state.order.indexOf(SLIDE5) + 1;
+  const placeOf = (state: HomeDeckState): number => state.order.indexOf(SLIDE5) + 1;
   /** The command a chip runs on the deck as it stands, its answer and its change. */
   const chipStep = (
     chip: ChipId,
@@ -338,7 +343,10 @@ export function startAgents(ctx: LiveContext): void {
             undo: null,
             slide: SLIDE5,
             /* the CLI arranges the slide by hand in the same write, and it stays so (v3.md) */
-            next: (s) => ({ ...withLooks(s, { turned: on }), canvas: { ...s.canvas, [SLIDE5]: true } }),
+            next: (s) => ({
+              ...withLooks(s, { turned: on }),
+              canvas: { ...s.canvas, [SLIDE5]: true },
+            }),
           });
           return;
         }
@@ -380,9 +388,15 @@ export function startAgents(ctx: LiveContext): void {
   };
   /** The row's value cell, where Rewrite a Row's words land at 24 ms (A5). */
   const rowCell = (): HTMLElement | null =>
-    slideOf()?.querySelector<HTMLElement>(`[data-run="rows/items/${HOME_CHIPS.row.index}/value"]`) ?? null;
+    slideOf()?.querySelector<HTMLElement>(
+      `[data-run="rows/items/${HOME_CHIPS.row.index}/value"]`,
+    ) ?? null;
 
-  const run = (chip: ChipId | null, built: NonNullable<ReturnType<typeof chipStep>>, echoOnly = false): void => {
+  const run = (
+    chip: ChipId | null,
+    built: NonNullable<ReturnType<typeof chipStep>>,
+    echoOnly = false,
+  ): void => {
     const sheet = sheetOf();
     finishBand('agents');
     select('cli', false);
@@ -479,7 +493,10 @@ export function startAgents(ctx: LiveContext): void {
     const words = split.words[0] === 'turboslide' ? split.words.slice(1) : split.words;
     const state = store.get();
     const refuse = (): void => printTyped(echo, [HOME_CHIPS.refusal]);
-    if (words.length === 0 || (words.length === 1 && ['help', '--help', '-h'].includes(words[0] as string)))
+    if (
+      words.length === 0 ||
+      (words.length === 1 && ['help', '--help', '-h'].includes(words[0] as string))
+    )
       return printTyped(echo, HOME_CHIPS.help);
     const revision = revisionOf(store);
 
@@ -536,7 +553,9 @@ export function startAgents(ctx: LiveContext): void {
         if (!sameWords(words, rec.argv)) continue;
         /* a command the deck is already in prints the CLI's answer and changes nothing new */
         if ((dir === 'on') !== chipOn(state, chip)) {
-          const answer = rec.answer.map((l) => l.replace(/revision \d+/, `revision ${revision + 1}`));
+          const answer = rec.answer.map((l) =>
+            l.replace(/revision \d+/, `revision ${revision + 1}`),
+          );
           return printTyped(echo, answer);
         }
         const built = chipStep(chip, state, null);

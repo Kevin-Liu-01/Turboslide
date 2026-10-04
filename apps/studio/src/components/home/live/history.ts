@@ -21,7 +21,9 @@ import type { HistoryRow, HomeDeckState, StoreEvent } from './state';
 
 /** The rows the list reserves (2.9 "Layout"): ten at 720 px and over, five under. */
 const visible = (): number =>
-  typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 719px)').matches ? 5 : 10;
+  typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 719px)').matches
+    ? 5
+    : 10;
 
 /** The key cell's Heroicon 20 solid per author (LANDING.md 2.4). */
 const ICONS: Readonly<Record<HistoryRow['author'], string>> = {

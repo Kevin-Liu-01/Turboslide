@@ -1,7 +1,7 @@
-/* The page's motion surfaces (docs/LANDING.md section 3, 2.1; the second pass). V4's file: H5's
-   hidden still, Pause Motion's button and its guard; the interludes, the two people band and the
-   patterns band join in V4's later pushes. Imported after home.css, so the reduced motion block
-   sits last. */
+/* The page's motion surfaces (docs/LANDING.md section 3, 2.1, 2.4; the second pass). V4's file:
+   H5's hidden still, Pause Motion's button and its guard, the interludes; the two people band
+   and the patterns band join in V4#20 and V4#19. Imported after home.css, so the reduced motion
+   block sits last. */
 
 /* ---- Pause Motion (3.2): a 32 px text button with a 1 px hairline in the navigation; the word
    follows html[data-motion], which the boot script sets before the first paint. Both words hold
@@ -47,6 +47,36 @@ html[data-motion='paused'] *::after {
    until the develop starts or the boot takes the class away 3,000 ms after it starts ---- */
 html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   visibility: hidden;
+}
+
+/* ---- the interludes (2.4): 128 px between two seams, 80 px under 720 px; one canvas pixel per
+   2 px cell, scaled with no smoothing, in the page's ink ---- */
+.ts-interlude-box {
+  position: relative;
+  height: 128px;
+  color: var(--pt-ink);
+}
+
+.ts-interlude-box > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 719px) {
+  .ts-interlude-box {
+    height: 80px;
+  }
+}
+
+/* the print is the deck alone (2.11, print.css): an interlude is none of the page's bands, which
+   print.css takes out by `[data-band]`, so it leaves the print here */
+@media print {
+  .ts-product .ts-interlude {
+    display: none;
+  }
 }
 
 /* ---- reduced motion (3.9): Pause Motion is hidden, decided at the first paint ---- */

@@ -10583,6 +10583,36 @@
       "severity": 2,
       "evidence": "b-strip-hero-agent.png; b-strip-hero-step.png",
       "note": "docs/LANDING.md 6.7 (second pass), V1#15"
+    },
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "interaction": "Eleven interludes, one between every two sections from the numbers row to the close, `aria-hidden`, 128 px tall at 1440 and 80 px at 390, printed at 2 px cells; each one's gathered still equals its glyph's cells; a cycle gathers over 1,500 ms, holds to 7 s, thins over 1,500 ms and rests to 12 s; at most two draw at once; the still under reduce and with Pause Motion stored",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "b-strip-field-gather.png; b-strip-field-glyphs.png (drawn finer)",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
+    },
+    {
+      "id": "home.motion.loops",
+      "feature": "decks",
+      "interaction": "Read over every loop `tsHomeMotion.registered()` lists on the tree (L-H from V1#15 and I1 from V4#18; V4#19 and V4#20 add P-T and P-L to the reading in their own pushes): each loop starts within 500 ms of its band reaching its threshold (a demonstration half in view, an interlude any part in view and among the two most in view) and pauses within one frame of leaving it; at most one demonstration and two interludes draw at once (`tsHomeMotion.running()`); Pause Motion holds every running loop's frame within one frame and Play resumes each from that frame; a hidden tab pauses every loop and a visible tab resumes the loops in view",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "direction-b landing.js 155 to 215",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
+    },
+    {
+      "id": "home.motion.offscreen",
+      "feature": "decks",
+      "interaction": "Over every loop `tsHomeMotion.registered()` lists, as `home.motion.loops`: scrolled so no loop's band is in view, and anywhere with Pause Motion pressed, 0 frame callbacks in 2 s, no timer firing, at most 2 ms of task a second",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "4.1",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { HOME_DECK } from '../deck.generated';
-import { startCanvasField, startStrip } from './field';
+import { startCanvasField, startInterludes } from './field';
 import { startHero } from './hero';
 import { hintInView } from './motion';
 import { startObjects } from './objects';
@@ -62,7 +62,7 @@ const REGISTRATIONS: readonly Registration[] = [
   { band: 'hero', start: (ctx) => void startObjects(ctx, 'hero') },
   { band: 'hero', start: startStage },
   { band: 'hero', start: startHero },
-  { band: 'field', start: startStrip },
+  { band: 'hero', start: (ctx) => startInterludes(ctx.root) },
 ];
 
 const entries = new Map<BandId, (() => Promise<BandModule>)[]>();

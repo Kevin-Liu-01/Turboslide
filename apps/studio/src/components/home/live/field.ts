@@ -1,12 +1,25 @@
 import { bayer8 } from '@turboslide/effects/bayer';
 
 import { homeAsset } from '../assets';
+import { INTERLUDE_BANDS, glyphFor, glyphTone } from './glyphs';
+import type { InterludeBand } from './glyphs';
 import type { LiveContext } from './index';
-import { installGuards, ms, onceInView, reduced, sequence, smoothstep } from './motion';
+import {
+  installGuards,
+  loop,
+  motionPaused,
+  ms,
+  onFrame,
+  onceInView,
+  reduced,
+  sequence,
+  slowFactor,
+  smoothstep,
+} from './motion';
 import type { DurationToken, SequenceBand } from './motion';
 
 /**
- * The Bayer printer of the page's fields (docs/LANDING.md 2.2, 2.6, 3.5 H5 and C1;
+ * The Bayer printer of the page's fields (docs/LANDING.md 2.2, 2.4, 2.6, 3.4 I1, 3.5 H5 and C1;
  * the second pass; build/integrator.md "Landing, day 0" 2.2 and 6, with Kevin's answer 1). V4's
  * file.
  *
@@ -22,8 +35,6 @@ import type { DurationToken, SequenceBand } from './motion';
  *   cell of the still lights when the curve reaches its threshold divided by the ink density of
  *   its 8 by 8 neighbourhood, so every region reaches its own tone together and every inked cell
  *   is lit at the end.
- * - F1, the first pass's field strip, gathers over `--ts-d-gather` from a sparse field at 6
- *   percent tone into the selection frame of its still (until the interludes replace it, V4#18).
  * - C1, the Louisbourg lighthouse develops over `--ts-d-develop` (2,400 ms) from its tone map, the
  *   picture's tone times the curve against each threshold (prototype A's develop), held to the
  *   still's cells so the last frame is the still.
@@ -36,7 +47,7 @@ import type { DurationToken, SequenceBand } from './motion';
  * appearance or a width change ends every print at its still (N1).
  */
 
-/** The share of the cells the strip's scattered start inks (2.3: "6 percent tone"). */
+/** The share of the cells an interlude's sparse field inks (2.4: "6 percent tone"). */
 export const SCATTER_TONE = 0.06;
 /** The neighbourhood of the hero's develop: an 8 by 8 window, the screen's own size. */
 const WINDOW = 8;
@@ -135,35 +146,6 @@ export function toneSchedule(
   return { cols, rows, on, off: null };
 }
 
-/**
- * F1: each cell's tone moves from SCATTER_TONE to its still's 0 or 1 as `w + (g - w) s`, lit while
- * it passes the cell's threshold: a drawn cell switches on once, a scattered cell outside the
- * frame switches off once.
- */
-export function gatherSchedule(target: CellGrid): Schedule {
-  const { cols, rows, ink } = target;
-  const on = new Float32Array(cols * rows);
-  const off = new Float32Array(cols * rows);
-  const w = SCATTER_TONE;
-  for (let y = 0; y < rows; y += 1) {
-    for (let x = 0; x < cols; x += 1) {
-      const i = y * cols + x;
-      const t = threshold(y, x, false);
-      if (ink[i] === 1) {
-        on[i] = t < w ? 0 : (t - w) / (1 - w);
-        off[i] = Infinity;
-      } else if (t < w) {
-        on[i] = 0;
-        off[i] = 1 - t / w;
-      } else {
-        on[i] = Infinity;
-        off[i] = Infinity;
-      }
-    }
-  }
-  return { cols, rows, on, off };
-}
-
 /** The cells lit at the curve's value `s`, as 0 and 1 (the tests' and the drivers' reading). */
 export function cellsAt(schedule: Schedule, s: number): Uint8Array {
   const out = new Uint8Array(schedule.on.length);
@@ -236,7 +218,7 @@ export function inkOf(box: Element): [number, number, number, number] {
 /** A field's box and its canvas, the markup L1 renders (l4.md M4). */
 export type FieldBox = { box: HTMLElement; canvas: HTMLCanvasElement };
 
-export function fieldBox(root: HTMLElement, name: 'hero' | 'strip' | 'canvas'): FieldBox | null {
+export function fieldBox(root: HTMLElement, name: 'hero' | 'canvas'): FieldBox | null {
   const selector = `[data-field="${name}"]`;
   const box = root.matches(selector) ? root : root.querySelector<HTMLElement>(selector);
   const canvas = box?.querySelector<HTMLCanvasElement>(':scope > canvas') ?? null;
@@ -571,14 +553,6 @@ function armedPrint(
   );
 }
 
-/** F1: the field strip gathers into the selection frame once (2.3). */
-export function startStrip(ctx: LiveContext): void {
-  installGuards();
-  const field = fieldBox(ctx.band, 'strip');
-  if (field === null || reduced()) return;
-  armedPrint(field, async ({ target }) => gatherSchedule(target), 'gather', 'field');
-}
-
 /** C1: the Louisbourg lighthouse develops once from its tone map (LANDING.md 2.6, 3.5 C1). */
 export function startCanvasField(ctx: LiveContext): void {
   installGuards();
@@ -593,4 +567,237 @@ export function startCanvasField(ctx: LiveContext): void {
     'develop',
     'canvas',
   );
+}
+
+/* ---- I1: the eleven interludes (LANDING.md 2.4, 3.4; the second pass) ---- */
+
+/** I1's cycle (3.4): gather over 1,500 ms, hold to 7,000, thin over 1,500 ms, rest to 12,000. */
+export const INTERLUDE_CYCLE = { gather: 1500, hold: 7000, thin: 8500, length: 12000 } as const;
+
+/** The curve's value at a cycle time: 0 the sparse field, 1 the gathered glyph (the tone curve). */
+export function gatherAt(t: number): number {
+  const p = ((t % INTERLUDE_CYCLE.length) + INTERLUDE_CYCLE.length) % INTERLUDE_CYCLE.length;
+  if (p < INTERLUDE_CYCLE.gather) return smoothstep(p / INTERLUDE_CYCLE.gather);
+  if (p < INTERLUDE_CYCLE.hold) return 1;
+  if (p < INTERLUDE_CYCLE.thin)
+    return (
+      1 - smoothstep((p - INTERLUDE_CYCLE.hold) / (INTERLUDE_CYCLE.thin - INTERLUDE_CYCLE.hold))
+    );
+  return 0;
+}
+
+/** The cycle time at which the curve next changes after `t`, for a loop that sleeps through a hold. */
+function nextChange(t: number): number {
+  const base = t - (t % INTERLUDE_CYCLE.length);
+  const p = t - base;
+  if (p < INTERLUDE_CYCLE.gather) return t;
+  if (p < INTERLUDE_CYCLE.hold) return base + INTERLUDE_CYCLE.hold;
+  if (p < INTERLUDE_CYCLE.thin) return t;
+  return base + INTERLUDE_CYCLE.length;
+}
+
+/**
+ * The sparse field's tone at a cell of an interlude: SCATTER_TONE on average, raised and lowered by
+ * B's low wave across the strip (`direction-b/landing.js` 2338, held still: the page's field does
+ * not drift) and faded to paper over the strip's last seventh at each end, so the screen prints a
+ * lattice of uneven density rather than a flat grid.
+ */
+export function scatterTone(x: number, y: number, cols: number, rows: number): number {
+  const u = (x + 0.5) / cols;
+  const v = (y + 0.5) / rows;
+  const wave = 1 + 0.5 * Math.sin(u * 10.5 + Math.sin(v * 3 + u * 2) * 0.7);
+  const edge = Math.min(1, Math.min(u, 1 - u) * 7);
+  return SCATTER_TONE * wave * (0.3 + 0.7 * edge);
+}
+
+/** Every cell's sparse tone of a strip of `cols` by `rows`. */
+export function scatterField(cols: number, rows: number): Float32Array {
+  const out = new Float32Array(cols * rows);
+  for (let y = 0; y < rows; y += 1)
+    for (let x = 0; x < cols; x += 1) out[y * cols + x] = scatterTone(x, y, cols, rows);
+  return out;
+}
+
+/**
+ * The cells of an interlude at the curve's value `s`: each cell's tone moves from the sparse
+ * field's tone `w` to its glyph's tone `g` as `w + (g - w) s`, printed through the 8 by 8 screen
+ * (lit while it passes the cell's threshold), so a cell switches once, in Bayer order, and the
+ * gathered still (s = 1) is exactly the glyph's print (row home.interludes.glyphs).
+ */
+export function interludeCells(
+  tone: Float32Array,
+  cols: number,
+  rows: number,
+  s: number,
+  scatter: Float32Array = scatterField(cols, rows),
+): Uint8Array {
+  const out = new Uint8Array(cols * rows);
+  for (let y = 0; y < rows; y += 1)
+    for (let x = 0; x < cols; x += 1) {
+      const i = y * cols + x;
+      const w = scatter[i] ?? SCATTER_TONE;
+      out[i] = w + ((tone[i] ?? 0) - w) * s > threshold(y, x, false) ? 1 : 0;
+    }
+  return out;
+}
+
+/** The cell's size on the page (2.4: the deck's 2 px cell). */
+const INTERLUDE_CELL = 2;
+
+/**
+ * One interlude: a canvas of one pixel per 2 px cell, scaled to its box with no smoothing, drawn in
+ * the page's `--pt-ink` (the appearance and the page's kit, never a slide's). Registered with the
+ * scheduler as a field (3.4): it plays while any part is in view and it is among the two most in
+ * view, and holds its frame otherwise. It sleeps through the hold and the rest on one timer, so a
+ * running interlude draws frames only while it gathers or thins.
+ */
+function startInterlude(el: HTMLElement): void {
+  const next = el.dataset['interlude'] as InterludeBand | undefined;
+  const box = el.querySelector<HTMLElement>('.ts-interlude-box') ?? el;
+  const canvas = box.querySelector('canvas');
+  if (next === undefined || !INTERLUDE_BANDS.includes(next) || canvas === null) return;
+  const ctx = canvas.getContext('2d');
+  if (ctx === null) return;
+  let cols = 0;
+  let rows = 0;
+  let tone: Float32Array = new Float32Array(0);
+  let scatter: Float32Array = new Float32Array(0);
+  let thresholds: Float32Array = new Float32Array(0);
+  let image: ImageData | null = null;
+  let words: Uint32Array | null = null;
+  let inkWord = 0;
+  /* the cycle's clock in ms and the curve's value it drew last */
+  let t: number = INTERLUDE_CYCLE.gather;
+  let drawn = -1;
+  let stopFrames: (() => void) | null = null;
+  let timer = 0;
+  let playing = false;
+
+  const readInk = (): void => {
+    const [r, g, b, a] = rgbaOf(getComputedStyle(box).color);
+    inkWord = ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  };
+  const layout = (): boolean => {
+    const width = box.clientWidth;
+    const height = box.clientHeight;
+    const c = Math.max(1, Math.round(width / INTERLUDE_CELL));
+    const r = Math.max(1, Math.round(height / INTERLUDE_CELL));
+    if (width === 0 || (c === cols && r === rows)) return false;
+    cols = c;
+    rows = r;
+    canvas.width = cols;
+    canvas.height = rows;
+    tone = glyphTone(glyphFor(next, width < 720), cols, rows);
+    scatter = scatterField(cols, rows);
+    thresholds = new Float32Array(cols * rows);
+    for (let y = 0; y < rows; y += 1)
+      for (let x = 0; x < cols; x += 1) thresholds[y * cols + x] = threshold(y, x, false);
+    image = ctx.createImageData(cols, rows);
+    words = new Uint32Array(image.data.buffer);
+    drawn = -1;
+    return true;
+  };
+  const draw = (s: number): void => {
+    if (image === null || words === null) return;
+    if (s === drawn) return;
+    drawn = s;
+    for (let i = 0; i < words.length; i += 1) {
+      const w = scatter[i] ?? SCATTER_TONE;
+      words[i] = w + ((tone[i] ?? 0) - w) * s > (thresholds[i] ?? 1) ? inkWord : 0;
+    }
+    ctx.putImageData(image, 0, 0);
+  };
+  const redraw = (): void => {
+    const s = drawn < 0 ? gatherAt(t) : drawn;
+    drawn = -1;
+    draw(s);
+  };
+
+  const sleep = (): void => {
+    stopFrames?.();
+    stopFrames = null;
+    window.clearTimeout(timer);
+    timer = 0;
+  };
+  /* runs frames while the curve moves and one timer through a hold or a rest */
+  const wake = (): void => {
+    sleep();
+    if (!playing) return;
+    const until = nextChange(t);
+    if (until > t) {
+      const started = performance.now();
+      const from = t;
+      timer = window.setTimeout(
+        () => {
+          timer = 0;
+          t = Math.max(until, from + (performance.now() - started) / slowFactor());
+          wake();
+        },
+        (until - t) * slowFactor(),
+      );
+      return;
+    }
+    stopFrames = onFrame((dt) => {
+      t += dt;
+      draw(gatherAt(t));
+      if (nextChange(t) > t) wake();
+    });
+  };
+
+  readInk();
+  layout();
+  /* the first pose: the gathered still, or the sparse field when the strip is below the viewport
+     and motion is allowed, so its first view gathers (B's arming) */
+  const below = el.getBoundingClientRect().top >= window.innerHeight;
+  if (below && !reduced() && !motionPaused()) t = 0;
+  draw(gatherAt(t));
+
+  new ResizeObserver(() => {
+    if (layout()) redraw();
+  }).observe(box);
+  const recolor = (): void => {
+    readInk();
+    redraw();
+  };
+  new MutationObserver(recolor).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
+  const main = document.querySelector('main');
+  if (main !== null)
+    new MutationObserver(recolor).observe(main, {
+      attributes: true,
+      attributeFilter: ['data-page-kit', 'style'],
+    });
+
+  loop('interlude', el, {
+    kind: 'field',
+    id: `I1:${next}`,
+    play() {
+      playing = true;
+      wake();
+    },
+    pause() {
+      playing = false;
+      sleep();
+    },
+    still() {
+      playing = false;
+      sleep();
+      t = INTERLUDE_CYCLE.gather;
+      draw(1);
+    },
+  });
+}
+
+/** I1 on every interlude of the page (2.4), registered once the live core starts. */
+export function startInterludes(root: HTMLElement): void {
+  installGuards();
+  for (const el of root.querySelectorAll<HTMLElement>('[data-interlude]')) {
+    try {
+      startInterlude(el);
+    } catch (error) {
+      console.error('an interlude did not start', error);
+    }
+  }
 }

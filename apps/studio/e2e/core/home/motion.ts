@@ -6,13 +6,16 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 import { BOOT_LIMIT_BYTES, FIELD_STILL_MS, MOTION_KEY } from '../../../src/components/home/boot';
 import { BOOT_SCRIPT } from '../../../src/components/home/boot.generated';
 import { HERO, NAV } from '../../../src/components/home/copy';
+import { bayer8 } from '../../../../../packages/effects/src/bayer';
+import { INTERLUDE_BANDS, glyphFor, glyphTone } from '../../../src/components/home/live/glyphs';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
 
 // A lane module of core/home.spec.ts (docs/LANDING.md section 3, 2.4, 6.7; the second pass). V4's:
 // the motion system (V4#9: Pause Motion, H5, the one shot motions in view, rest, reduced motion,
-// the hidden tab, the frame and main thread budgets, the keyboard walk; the loops join in V4#18).
-// Every observation is through the page: an init script records, before any page script runs, `html`'s classes and `data-motion`,
+// the hidden tab, the frame and main thread budgets, the keyboard walk) and the loops (V4#18: the
+// eleven interludes, the scheduler's rule, nothing off screen). Every observation is through the
+// page: an init script records, before any page script runs, `html`'s classes and `data-motion`,
 // the fields' `data-field-state`, every `requestAnimationFrame` call and its callback's length,
 // every timer that fires, every Web Animation's properties, every CSS animation and transition,
 // every crossing of 35 percent in view of a one shot motion's target and the first paint, and the
@@ -34,6 +37,9 @@ export const ROWS: readonly string[] = [
   'home.budget.frame',
   'home.budget.main-thread',
   'home.a11y.keyboard-walk',
+  'home.interludes.glyphs',
+  'home.motion.loops',
+  'home.motion.offscreen',
 ];
 
 /** Whether the matrix on this tree holds a row: a test is declared only for an entered row. */
@@ -43,6 +49,8 @@ function entered(id: string): boolean {
 
 /** Pause Motion is on the tree from V4#9, the push that enters its row. */
 const PAUSE = entered('home.motion.pause');
+/** The interludes and the scheduler's rows are on the tree from V4#18. */
+const LOOPS = entered('home.motion.loops');
 
 const INTERACTION_LOAD = 24;
 const MEASURE_LOAD = 20;
@@ -55,6 +63,7 @@ const DURATION = { gather: 1500, develop: 2400, line: 600, beat: 500 } as const;
 const MARK = { pieces: 7 } as const;
 const SEAM = { from: 82, to: 50 } as const;
 const MOVED = ['left', 'top', 'width', 'height', 'right', 'bottom', 'inset'];
+const INTERLUDE = { gather: 1500, hold: 7000, thin: 8500, length: 12000, tone: 0.06 } as const;
 
 /** The one minute load average. */
 function load(): number {
@@ -477,8 +486,9 @@ async function idle(
   const before = await rec(page);
   const task0 = await task();
   await page.waitForTimeout(ms);
-  const after = await rec(page);
+  /* the task time is read before the recorder's own read, whose serialisation is a task too */
   const task1 = await task();
+  const after = await rec(page);
   await cdp.detach();
   return {
     raf: after.raf - before.raf,
@@ -496,6 +506,10 @@ const motionState = (page: Page) =>
   }));
 
 const toggle = (page: Page) => page.locator('[data-motion-toggle]');
+
+/** Presses Pause Motion without scrolling the page to the nav (the button's own click). */
+const pressInPlace = (page: Page): Promise<void> =>
+  page.evaluate(() => document.querySelector<HTMLButtonElement>('[data-motion-toggle]')?.click());
 
 /** H5 in one visit: the hero field's develop, or its still shown by the first paint plus 3.0 s. */
 async function readDevelop(page: Page, label: string, quiet: boolean): Promise<void> {
@@ -543,6 +557,89 @@ async function readNoDevelop(page: Page): Promise<void> {
     [],
   );
   expect(await stillShown(page, 'hero')).toBe(true);
+}
+
+/** The expected gathered cells of an interlude's canvas (the glyph's print at s = 1). */
+function gatheredCells(
+  next: (typeof INTERLUDE_BANDS)[number],
+  cols: number,
+  rows: number,
+): number[] {
+  const tone = glyphTone(glyphFor(next, cols * 2 < 720), cols, rows);
+  const out: number[] = [];
+  for (let y = 0; y < rows; y += 1)
+    for (let x = 0; x < cols; x += 1)
+      out.push((tone[y * cols + x] ?? 0) > (bayer8(y, x) + 0.5) / 64 ? 1 : 0);
+  return out;
+}
+
+/** The interludes the page renders, in its order (eleven from V4#20; one before each band till then). */
+function renderedInterludes(page: Page): Promise<(typeof INTERLUDE_BANDS)[number][]> {
+  return page.evaluate(
+    (known) =>
+      [...document.querySelectorAll<HTMLElement>('main > [data-interlude]')]
+        .map((el) => el.dataset['interlude'] ?? '')
+        .filter((name): name is (typeof known)[number] => (known as string[]).includes(name)),
+    [...INTERLUDE_BANDS],
+  );
+}
+
+/** An interlude canvas's inked cells, read in the page. */
+function inkedCells(
+  page: Page,
+  next: string,
+): Promise<{ cols: number; rows: number; ink: number[] }> {
+  return page.evaluate((name) => {
+    const canvas = document.querySelector<HTMLCanvasElement>(`[data-interlude="${name}"] canvas`);
+    if (canvas === null) return { cols: 0, rows: 0, ink: [] };
+    const ctx = canvas.getContext('2d');
+    const data = ctx?.getImageData(0, 0, canvas.width, canvas.height).data;
+    const ink: number[] = [];
+    for (let i = 0; i < canvas.width * canvas.height; i += 1)
+      ink.push((data?.[i * 4 + 3] ?? 0) > 0 ? 1 : 0);
+    return { cols: canvas.width, rows: canvas.height, ink };
+  }, next);
+}
+
+/** The element a loop id registers on (3.8): the hero's stage, an interlude, the people, the patterns. */
+function loopSelector(id: string): string {
+  if (id === 'L-H') return '[data-hero-stage]';
+  if (id === 'P-L') return '[data-reserve="people"]';
+  if (id === 'P-T') return '[data-reserve="patterns"]';
+  if (id.startsWith('I1:')) return `[data-interlude="${id.slice(3)}"]`;
+  return `[data-band="${id}"]`;
+}
+
+/** Scrolls a loop's element to the middle of the viewport, natively. */
+async function bringToView(page: Page, id: string): Promise<void> {
+  await wheelTo(page, await yToSee(page, loopSelector(id)), 900, 80);
+}
+
+/** A scroll position where no registered loop's element is in view, or null. */
+function quietSpot(page: Page): Promise<number | null> {
+  return page.evaluate(() => {
+    const ids = window.tsHomeMotion?.registered() ?? [];
+    const sel = (id: string): string =>
+      id === 'L-H'
+        ? '[data-hero-stage]'
+        : id === 'P-L'
+          ? '[data-reserve="people"]'
+          : id === 'P-T'
+            ? '[data-reserve="patterns"]'
+            : id.startsWith('I1:')
+              ? `[data-interlude="${id.slice(3)}"]`
+              : `[data-band="${id}"]`;
+    const boxes = ids
+      .map((id) => document.querySelector(sel(id))?.getBoundingClientRect())
+      .filter((r): r is DOMRect => r !== undefined)
+      .map((r) => [r.top + scrollY, r.bottom + scrollY] as const)
+      .sort((a, b) => a[0] - b[0]);
+    const vh = innerHeight;
+    const max = document.documentElement.scrollHeight - vh;
+    for (let y = 0; y <= max; y += 20)
+      if (boxes.every(([top, bottom]) => bottom <= y || top >= y + vh)) return y;
+    return null;
+  });
 }
 
 export function rows(): void {
@@ -940,6 +1037,14 @@ export function rows(): void {
         expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
         for (const field of ['canvas', 'hero']) expect(await stillShown(page, field)).toBe(true);
         expect((await motionState(page)).running, 'no loop runs').toEqual([]);
+        /* every interlude at its gathered glyph */
+        for (const next of LOOPS ? INTERLUDE_BANDS : []) {
+          const read = await inkedCells(page, next);
+          if (read.cols === 0) continue;
+          expect(read.ink, `the ${next} interlude gathered`).toEqual(
+            gatheredCells(next, read.cols, read.rows),
+          );
+        }
         /* the patterns band: no shader chunk, both sides the still frame */
         expect(requests.filter((url) => /pattern-mount|home-pattern/.test(url))).toEqual([]);
         /* the hero's title nudged and put back by cuts */
@@ -1171,5 +1276,258 @@ export function rows(): void {
       } finally {
         await context.close();
       }
+    });
+
+  /* ---- the interludes (2.4; V4#18) ---- */
+  if (entered('home.interludes.glyphs'))
+    test(title('home.interludes.glyphs'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      const quiet = load() < INTERACTION_LOAD;
+      for (const width of [1440, 390]) {
+        const { context, page } = await open(browser, { width, height: width === 390 ? 844 : 900 });
+        try {
+          await visit(page);
+          await liveReady(page);
+          /* one between every two sections from the numbers row to the close: eleven once the
+             tree renders all twelve (V4#20), one before each band the tree renders until then */
+          const order = await page.evaluate(() =>
+            [
+              ...document.querySelectorAll<HTMLElement>(
+                'main > [data-band], main > [data-interlude]',
+              ),
+            ].map((el) => el.dataset['band'] ?? `|${el.dataset['interlude']}`),
+          );
+          const numbers = order.indexOf('numbers');
+          const tail = order.slice(numbers, order.indexOf('close') + 1);
+          const shown = INTERLUDE_BANDS.filter((band) => tail.includes(band));
+          const expectedTail: string[] = ['numbers'];
+          for (const next of shown) expectedTail.push(`|${next}`, next);
+          expect(tail).toEqual(expectedTail);
+          note(`${width}: interludes`, shown.length);
+          for (const next of shown) {
+            const strip = page.locator(`[data-interlude="${next}"]`);
+            await expect(strip).toHaveAttribute('aria-hidden', 'true');
+            const box = await strip.locator('.ts-interlude-box').boundingBox();
+            expect(box?.height, `${next} height`).toBe(width === 390 ? 80 : 128);
+            const read = await inkedCells(page, next);
+            expect(read.cols, `${next} at 2 px cells`).toBe(Math.round((box?.width ?? 0) / 2));
+            expect(read.rows).toBe(Math.round((box?.height ?? 0) / 2));
+          }
+          /* a cycle on the canvas: bring one interlude into view, read its ink over 19 s, which
+             holds one whole hold (5.5 s of a 12 s cycle) wherever the cycle stands at the start */
+          const next = 'agents';
+          await wheelTo(page, await yToSee(page, `[data-interlude="${next}"]`));
+          const samples = await page.evaluate(async (name) => {
+            const canvas = document.querySelector<HTMLCanvasElement>(
+              `[data-interlude="${name}"] canvas`,
+            )!;
+            const ctx = canvas.getContext('2d')!;
+            const out: [number, number][] = [];
+            const t0 = performance.now();
+            while (performance.now() - t0 < 19_000) {
+              const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+              let n = 0;
+              for (let i = 3; i < data.length; i += 4) if (data[i]! > 0) n += 1;
+              out.push([performance.now() - t0, n]);
+              await new Promise((r) => setTimeout(r, 50));
+            }
+            return out;
+          }, next);
+          const read = await inkedCells(page, next);
+          const gathered = gatheredCells(next, read.cols, read.rows).reduce((a, b) => a + b, 0);
+          /* the holds the window saw whole: runs of samples at the gathered ink with a sample
+             off it on both sides */
+          const holds: number[] = [];
+          let runStart = -1;
+          let runEnd = -1;
+          let opened = false;
+          for (const [t, n] of samples) {
+            if (n === gathered) {
+              if (runStart < 0) runStart = t;
+              runEnd = t;
+            } else {
+              if (runStart >= 0 && opened) holds.push(runEnd - runStart);
+              runStart = -1;
+              opened = true;
+            }
+          }
+          expect(holds.length, 'a whole hold in the window').toBeGreaterThan(0);
+          const held = holds[0]!;
+          note(`${width}: the glyph held for`, held);
+          if (quiet)
+            expect(Math.abs(held - (INTERLUDE.hold - INTERLUDE.gather))).toBeLessThanOrEqual(300);
+          /* at most two interludes draw at once, anywhere on the page */
+          const max = await page.evaluate(
+            () => document.documentElement.scrollHeight - innerHeight,
+          );
+          for (let y = 0; y <= max; y += Math.round(max / 12)) {
+            await page.evaluate((to) => window.scrollTo(0, to), y);
+            await page.waitForTimeout(150);
+            const running = (await motionState(page)).running.filter((id) => id.startsWith('I1:'));
+            expect(running.length, `interludes running at ${y}`).toBeLessThanOrEqual(2);
+          }
+        } finally {
+          await context.close();
+        }
+      }
+      /* the gathered still under reduced motion and with Pause Motion stored */
+      for (const options of [{ reduce: true }, { paused: true }] as const) {
+        const { context, page } = await open(browser, options);
+        try {
+          await visit(page);
+          await liveReady(page);
+          const shown = await renderedInterludes(page);
+          expect(shown.length).toBeGreaterThan(0);
+          for (const next of shown) {
+            const read = await inkedCells(page, next);
+            expect(read.ink, `${JSON.stringify(options)} ${next}`).toEqual(
+              gatheredCells(next, read.cols, read.rows),
+            );
+          }
+        } finally {
+          await context.close();
+        }
+      }
+      test.skip(!quiet, `not read: load ${load()} (the functional checks passed)`);
+    });
+
+  /* ---- the scheduler's rule over every registered loop (3.1, 3.8; V4#18) ---- */
+  if (entered('home.motion.loops'))
+    test(title('home.motion.loops'), async ({ browser }) => {
+      test.setTimeout(300_000);
+      const quiet = load() < INTERACTION_LOAD;
+      const { context, page } = await open(browser);
+      try {
+        await visit(page);
+        await liveReady(page);
+        await loadEveryBand(page);
+        const ids = (await motionState(page)).registered;
+        note('loops registered', ids.join(', '));
+        const shown = await renderedInterludes(page);
+        expect(ids.filter((id) => id.startsWith('I1:')).sort()).toEqual(
+          shown.map((next) => `I1:${next}`).sort(),
+        );
+        for (const id of ids) {
+          await bringToView(page, id);
+          const started = await page
+            .waitForFunction(
+              (loopId) => window.tsHomeMotion?.running().includes(loopId) === true,
+              id,
+              {
+                timeout: 5_000,
+              },
+            )
+            .then(() => true)
+            .catch(() => false);
+          expect(started, `${id} plays in view`).toBe(true);
+          const state = await motionState(page);
+          const demos = state.running.filter((r) => !r.startsWith('I1:'));
+          const fields = state.running.filter((r) => r.startsWith('I1:'));
+          expect(demos.length, `demonstrations at ${id}`).toBeLessThanOrEqual(1);
+          expect(fields.length, `interludes at ${id}`).toBeLessThanOrEqual(2);
+          /* out of view: paused within one frame */
+          await page.evaluate((sel) => {
+            const el = document.querySelector(sel)!;
+            const r = el.getBoundingClientRect();
+            window.scrollTo(0, r.bottom + scrollY + 50);
+          }, loopSelector(id));
+          const left = await pageNow(page);
+          await page.waitForFunction(
+            (loopId) => !window.tsHomeMotion!.running().includes(loopId),
+            id,
+            {
+              timeout: 5_000,
+            },
+          );
+          note(`${id} paused after leaving the view`, (await pageNow(page)) - left);
+        }
+        /* Pause Motion holds every running loop's frame; Play resumes the loops in view */
+        const held1 = shown[Math.min(3, shown.length - 1)]!;
+        await bringToView(page, `I1:${held1}`);
+        await page.waitForTimeout(800);
+        const running = (await motionState(page)).running;
+        expect(running.length).toBeGreaterThan(0);
+        /* pressed where the page stands: the nav scrolls with the page, and a click through the
+           locator would scroll it into view and take the loops out of it first */
+        await pressInPlace(page);
+        await page.waitForTimeout(FRAME_SLACK_MS);
+        expect((await motionState(page)).running).toEqual([]);
+        const held = await inkedCells(page, held1);
+        const frozen = await idle(page, context, 1_000);
+        expect(frozen.raf, 'no frame while paused').toBe(0);
+        expect((await inkedCells(page, held1)).ink).toEqual(held.ink);
+        await pressInPlace(page);
+        await page.waitForFunction(
+          () => (window.tsHomeMotion?.running().length ?? 0) > 0,
+          undefined,
+          {
+            timeout: 5_000,
+          },
+        );
+        expect((await motionState(page)).running.sort()).toEqual([...running].sort());
+        /* a hidden tab pauses every loop, a visible tab resumes the loops in view */
+        await setTabHidden(page, true);
+        expect((await motionState(page)).running).toEqual([]);
+        await setTabHidden(page, false);
+        await page.waitForFunction(
+          () => (window.tsHomeMotion?.running().length ?? 0) > 0,
+          undefined,
+          {
+            timeout: 5_000,
+          },
+        );
+      } finally {
+        await context.close();
+      }
+      test.skip(!quiet, `not read: load ${load()} (the functional checks passed)`);
+    });
+
+  /* ---- nothing off screen or paused (4.1; V4#18) ---- */
+  if (entered('home.motion.offscreen'))
+    test(title('home.motion.offscreen'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      let unread = load() >= INTERACTION_LOAD;
+      for (const height of [900, 500, 300]) {
+        const { context, page } = await open(browser, { height });
+        try {
+          await visit(page);
+          await liveReady(page);
+          await loadEveryBand(page);
+          const spot = await quietSpot(page);
+          if (spot === null) {
+            note(`${height} px tall`, 'no place without a loop in view');
+            continue;
+          }
+          await page.evaluate((y) => window.scrollTo(0, y), spot);
+          await page.waitForTimeout(1_000);
+          expect((await motionState(page)).running).toEqual([]);
+          const reading = await idle(page, context);
+          note(
+            `${height} px tall, at y ${spot}: frames, timers, task a second`,
+            `${reading.raf}, ${reading.timers}, ${Math.round(reading.taskPerSecond * 10) / 10} ms`,
+          );
+          expect(reading.raf).toBe(0);
+          expect(reading.timers).toBe(0);
+          if (!unread) expect(reading.taskPerSecond).toBeLessThanOrEqual(2);
+          /* anywhere with Pause Motion pressed */
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await toggle(page).click();
+          for (const y of [0.25, 0.5, 0.75]) {
+            await page.evaluate(
+              (f) => window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * f),
+              y,
+            );
+            await page.waitForTimeout(1_000);
+            const paused = await idle(page, context);
+            expect(paused.raf, `paused at ${y}`).toBe(0);
+            expect(paused.timers, `timers paused at ${y}`).toBe(0);
+          }
+          break;
+        } finally {
+          await context.close();
+        }
+      }
+      if (load() >= INTERACTION_LOAD) unread = true;
+      test.skip(unread, `not read: load ${load()} (the counts passed)`);
     });
 }

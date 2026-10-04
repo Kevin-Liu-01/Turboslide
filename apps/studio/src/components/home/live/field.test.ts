@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  SCATTER_TONE,
   cellsAt,
   compositeCells,
   densitySchedule,
-  gatherSchedule,
   splitLayers,
   targetCells,
   threshold,
@@ -14,7 +12,7 @@ import {
 } from './field';
 import type { CellGrid } from './field';
 
-// The Bayer printer's schedules (docs/LANDING.md 3.2 H5, F1 and C1): every print starts from its
+// The Bayer printer's schedules (docs/LANDING.md 3.5 H5 and C1): every print starts from its
 // first pose and ends on its still's exact cells, cells switch in the screen's order, and a dark
 // ground prints the light print's twin (build/integrator.md "Landing, day 0" 2.2).
 
@@ -90,35 +88,6 @@ describe('the develop of H5 (density) and C1 (tone)', () => {
     const schedule = densitySchedule(dark, true);
     expect(same(cellsAt(schedule, 1), dark.ink)).toBe(true);
     expect(threshold(0, 0, true)).toBe(1 - threshold(0, 0, false));
-  });
-});
-
-describe('the gather of F1', () => {
-  it('starts as the sparse field at 6 percent tone and ends on the still', () => {
-    /* the still: a frame of ink across the strip */
-    const ink = new Uint8Array(COLS * ROWS);
-    for (let x = 10; x < 54; x += 1) {
-      ink[8 * COLS + x] = 1;
-      ink[24 * COLS + x] = 1;
-    }
-    for (let y = 8; y <= 24; y += 1) {
-      ink[y * COLS + 10] = 1;
-      ink[y * COLS + 53] = 1;
-    }
-    const grid: CellGrid = { cols: COLS, rows: ROWS, ink };
-    const schedule = gatherSchedule(grid);
-    const start = cellsAt(schedule, 0);
-    for (let y = 0; y < ROWS; y += 1)
-      for (let x = 0; x < COLS; x += 1)
-        if (ink[y * COLS + x] === 0)
-          expect(start[y * COLS + x]).toBe(threshold(y, x, false) < SCATTER_TONE ? 1 : 0);
-    expect(count(start.filter((_v, i) => ink[i] === 0))).toBeGreaterThan(0);
-    expect(same(cellsAt(schedule, 1), ink)).toBe(true);
-    /* half way the frame is partly drawn and the scatter partly gone */
-    const mid = cellsAt(schedule, 0.5);
-    const frame = count(mid.filter((_v, i) => ink[i] === 1));
-    expect(frame).toBeGreaterThan(0);
-    expect(frame).toBeLessThan(count(ink));
   });
 });
 

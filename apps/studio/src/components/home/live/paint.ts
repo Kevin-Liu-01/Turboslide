@@ -1020,10 +1020,13 @@ const appearance = (): 'light' | 'dark' => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
-/** The served still of a picture the document carries no still for, by its field box. */
+/**
+ * The served still of a picture the document carries no still for, by its field box: slide 8's is
+ * the dots of the exporter's frame as a mask, which `data-still-frame` scales smoothly (agents.css).
+ */
 const ROLE_OF_FIELD: Readonly<Record<string, HomeAssetRole>> = {
   'field-slide': 'field-still',
-  pattern: 'pattern-still',
+  pattern: 'pattern-mask',
 };
 
 /**
@@ -1041,6 +1044,7 @@ export function drawStills(root: HTMLElement, size: 'thumb' | 'large'): void {
         const url = `url("${homeAsset(role, appearance()).path}")`;
         if (box.style.getPropertyValue('--ts-still') !== url)
           box.style.setProperty('--ts-still', url);
+        if (role === 'pattern-mask') box.setAttribute('data-still-frame', '');
       } catch {
         /* the build has not written the still: the box keeps the thumbnail's */
       }

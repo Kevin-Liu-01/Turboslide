@@ -102,33 +102,31 @@ function urlOf(value: string): string | null {
 const stills = new Map<string, Promise<void>>();
 
 /**
- * A still's picture as a mask or a background requests it: a CSS mask in CORS mode (as
- * `field.ts`'s `pixelsOf` does), a background without. A load in the other mode is a second request
- * the mask does not wait for, and a print taken before the mask's own request answers draws the
- * whole box in ink.
+ * A still's picture as its CSS mask requests it, in CORS mode (as `field.ts`'s `pixelsOf` does). A
+ * load in the other mode is a second request the mask does not wait for, and a print taken before
+ * the mask's own request answers draws the whole box in ink.
  */
-function stillImage(url: string, mask: boolean): HTMLImageElement {
+function stillImage(url: string): HTMLImageElement {
   const img = new Image();
-  if (mask) img.crossOrigin = 'anonymous';
+  img.crossOrigin = 'anonymous';
   img.src = url;
   return img;
 }
 
 /**
- * Requests a still once in the mode its layer draws it (`mask`, the field stills; a background,
- * slide 8's still frame) and resolves when it has loaded (or failed).
+ * Requests a still once in the mode its layer draws it (a mask: the field stills and slide 8's
+ * dots) and resolves when it has loaded (or failed).
  */
-export function loadStill(url: string, mask = true): Promise<void> {
-  const key = `${mask ? 'mask' : 'image'} ${url}`;
-  let loaded = stills.get(key);
+export function loadStill(url: string): Promise<void> {
+  let loaded = stills.get(url);
   if (loaded === undefined) {
     loaded = new Promise<void>((resolve) => {
-      const img = stillImage(url, mask);
+      const img = stillImage(url);
       if (img.complete && img.naturalWidth > 0) resolve();
       img.onload = () => resolve();
       img.onerror = () => resolve();
     });
-    stills.set(key, loaded);
+    stills.set(url, loaded);
   }
   return loaded;
 }
@@ -142,7 +140,7 @@ function holdStills(wrapper: HTMLElement): void {
   for (const box of wrapper.querySelectorAll<HTMLElement>('[data-field]')) {
     const url = urlOf(box.style.getPropertyValue('--ts-still'));
     if (url === null || url.startsWith('data:')) continue;
-    const img = stillImage(url, true);
+    const img = stillImage(url);
     if (img.complete && img.naturalWidth > 0) continue;
     const layers = [...box.querySelectorAll<HTMLElement>('.ts-field-still')];
     for (const layer of layers) layer.style.visibility = 'hidden';
@@ -163,34 +161,37 @@ function setFieldStill(clone: HTMLElement): void {
   }
 }
 
-/** The still frame of slide 8's Animated pattern in an appearance (the role `pattern-still`); null before the build writes it. */
-export function patternStillPath(shown: 'light' | 'dark'): string | null {
+/**
+ * The dots of slide 8's still frame as one mask for both appearances (the role `pattern-mask`);
+ * null before the build writes it.
+ */
+export function patternMaskPath(): string | null {
   try {
-    return homeAsset('pattern-still', shown).path;
+    return homeAsset('pattern-mask', null).path;
   } catch {
     return null;
   }
 }
 
 /**
- * Slide 8's picture in a clone (LANDING.md 2.11, 2.13): the frame the exporter stores for the
- * pattern, as the patterns band's right side draws it. The slide's own print box holds no still
- * (its picture is a shader), so without this its masked layer prints a whole box of ink. Both
- * appearances' files are named on the box and agents.css draws the shown one, so an appearance
- * change reaches an open show; a duplicated slide 8 carries the box and takes the same frame.
+ * Slide 8's picture in a clone (LANDING.md 2.8, 2.11, 2.13): the frame the exporter stores for the
+ * pattern, drawn as every other still is, through its dots' mask (the role `pattern-mask`) in the
+ * slide's own ink over its paper, so a kit restyles it as it restyles every other slide (verify2
+ * N3; the exporter's file is a picture in the GT colours, which a kit never reached). The slide's
+ * own print box holds no still (its picture is a shader), so without this its masked layer prints
+ * a whole box of ink. `holdStills` and the print's `loadStills` wait for the mask as for the other
+ * stills; a duplicated slide 8 carries the box and takes the same frame.
  */
 function setPatternStill(clone: HTMLElement): void {
   const boxes = clone.querySelectorAll<HTMLElement>('[data-field="pattern"]');
-  const light = patternStillPath('light');
-  const dark = patternStillPath('dark');
-  if (boxes.length === 0 || light === null || dark === null) return;
+  const mask = patternMaskPath();
+  if (boxes.length === 0 || mask === null) return;
   for (const box of boxes) {
     /* a copy of the patterns band's slide drops that band's states (the shader drawn, the frame
        printed on its canvas), whose canvas the clone does not keep */
     for (const name of box.getAttributeNames())
       if (name.startsWith('data-pattern-')) box.removeAttribute(name);
-    box.style.setProperty('--ts-pattern-still-light', `url("${light}")`);
-    box.style.setProperty('--ts-pattern-still-dark', `url("${dark}")`);
+    box.style.setProperty('--ts-still', `url("${mask}")`);
     box.setAttribute('data-still-frame', '');
   }
 }

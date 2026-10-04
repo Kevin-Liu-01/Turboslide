@@ -40,6 +40,7 @@ const BUDGET: Readonly<Record<string, number>> = {
   'lighthouse-tone': 26_000,
   'field-still': 24_000,
   'pattern-still': 48_000,
+  'pattern-mask': 48_000,
   'export-perfect': 60_000,
   'export-editable': 32_000,
 };

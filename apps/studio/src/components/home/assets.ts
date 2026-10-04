@@ -14,6 +14,8 @@ export type HomeAssetRole =
   | 'field-still'
   /** slide 8's still frame: the exporter's capture of the pattern, lossless WebP, at most 48 KB (V4's) */
   | 'pattern-still'
+  /** the still frame's dots as one mask for both appearances, which the show, the print and the miniature draw in the slide's ink, at most 48 KB */
+  | 'pattern-mask'
   /** slide 7's picture part from the Perfect file, at most 60 KB */
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */
@@ -121,6 +123,19 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     width: 3200,
     height: 1800,
     pixelsSha256: 'bc9b3344743459f8a8a1ddcbb7e5834d074c7b43d8dc20f68fa6c8d11129efb2',
+    partSha256: null,
+    pages: null,
+  },
+  {
+    role: 'pattern-mask',
+    appearance: null,
+    variant: null,
+    path: '/home/pattern-mask-406a3839a2.webp',
+    bytes: 1788,
+    sha256: '406a3839a2976eb88049dfe076395c7962c3f3ad4cbb4bf88e69420eb3b29e2a',
+    width: 3200,
+    height: 1800,
+    pixelsSha256: 'ee05b93adaed14196dd92cfc6a8ca608db2cbd8e519f4a0c0eeccf76291d9299',
     partSha256: null,
     pages: null,
   },

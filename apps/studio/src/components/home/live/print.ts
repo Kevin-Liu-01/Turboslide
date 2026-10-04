@@ -4,7 +4,7 @@ import {
   appearance,
   endHeroSequence,
   loadStill,
-  patternStillPath,
+  patternMaskPath,
   settleEntrance,
   showSlide,
   shownSlides,
@@ -27,8 +27,8 @@ import type { HomeDeckState } from './state';
 /**
  * The stills the print draws that the page may not have requested yet: slide 7's (requested only
  * by the show and the print, LANDING.md 4.2), slide 6's (requested when its band nears the
- * viewport, and in its narrow variant on a phone) and slide 8's still frame in the shown appearance
- * when the print holds slide 8 (the patterns band requests it only near the viewport), loaded
+ * viewport, and in its narrow variant on a phone) and slide 8's still frame (its dots' mask, which
+ * the print draws in the slide's ink over its paper) when the print holds slide 8 (the patterns band requests it only near the viewport), loaded
  * before the button opens the print dialog so no page prints a still missing.
  */
 function loadStills(root: HTMLElement, state: HomeDeckState): Promise<void> {
@@ -49,12 +49,12 @@ function loadStills(root: HTMLElement, state: HomeDeckState): Promise<void> {
     const url = match?.[1];
     if (url !== undefined && !url.startsWith('data:')) urls.push(url);
   }
-  const loads = [...new Set(urls)].map((url) => loadStill(url));
-  /* slide 8's still frame is a background, requested without CORS (show.ts `loadStill`) */
-  const pattern = patternStillPath(appearance());
+  /* slide 8's still frame: its dots' mask, drawn as the other stills are (show.ts
+     `setPatternStill`) */
+  const pattern = patternMaskPath();
   if (pattern !== null && shownSlides(state).some((key) => sourceOf(state, key) === 'pattern'))
-    loads.push(loadStill(pattern, false));
-  return Promise.all(loads).then(() => undefined);
+    urls.push(pattern);
+  return Promise.all([...new Set(urls)].map((url) => loadStill(url))).then(() => undefined);
 }
 
 export function startPrint(ctx: LiveContext): void {

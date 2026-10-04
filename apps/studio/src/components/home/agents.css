@@ -294,20 +294,14 @@
   }
 }
 
-/* ---- 2.11, 2.13: slide 8 in the show, the Present display and the print draws the frame the
-   exporter stores for its pattern (show.ts names both appearances' files on the box), as the
-   patterns band's right side does; the moving pattern covers it once it has drawn (motion.css).
-   The 3,200 px frame is always drawn smaller, so it is scaled smoothly: a nearest pixel scale of
-   its dots draws squares of moiré at 390 ---- */
+/* ---- 2.8, 2.11, 2.13: slide 8 in the show, the Present display, the print and the miniature draws
+   the frame the exporter stores for its pattern through the frame's dots (show.ts and paint.ts name
+   the mask as the box's still), in the slide's own ink over its paper, so a kit restyles it as it
+   restyles every other slide (verify2 N3). The moving pattern covers it once it has drawn
+   (motion.css). The 3,200 px mask is always drawn smaller, so it is scaled smoothly: a nearest
+   pixel scale of its dots draws squares of moiré at 390 ---- */
 [data-field='pattern'][data-still-frame] > .ts-field-still {
-  -webkit-mask-image: none;
-  mask-image: none;
-  background: var(--ts-pattern-still-light) center / 100% 100% no-repeat;
   image-rendering: auto;
-}
-
-:root[data-theme='dark'] [data-field='pattern'][data-still-frame] > .ts-field-still {
-  background-image: var(--ts-pattern-still-dark);
 }
 
 /* ---- 2.11: a skipped slide's row in the Present list says so in titanium ---- */

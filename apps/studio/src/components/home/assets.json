@@ -80,6 +80,19 @@
       "pages": null
     },
     {
+      "role": "pattern-mask",
+      "appearance": null,
+      "variant": null,
+      "path": "/home/pattern-mask-406a3839a2.webp",
+      "bytes": 1788,
+      "sha256": "406a3839a2976eb88049dfe076395c7962c3f3ad4cbb4bf88e69420eb3b29e2a",
+      "width": 3200,
+      "height": 1800,
+      "pixelsSha256": "ee05b93adaed14196dd92cfc6a8ca608db2cbd8e519f4a0c0eeccf76291d9299",
+      "partSha256": null,
+      "pages": null
+    },
+    {
       "role": "export-browser",
       "appearance": "light",
       "variant": null,

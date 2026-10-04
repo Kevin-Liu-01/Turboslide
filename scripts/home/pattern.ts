@@ -1,6 +1,7 @@
 // The patterns band's build module (docs/LANDING.md 2.13, 4.1, 6.1, 6.4; the second pass). V4 owns
 // this file and the `pattern.generated.ts` it writes. `scripts/build-home-assets.ts --stills` calls
-// `derivePattern()` and serves the files it returns as the role `pattern-still` (assets.json), and
+// `derivePattern()` and serves the files it returns as the roles `pattern-still` and `pattern-mask`
+// (assets.json), and
 // `--check` compares the generated source and the files with what it returns.
 //
 // Slide 8's picture in the fixture (`apps/studio/home-deck/deck.json` asset `pattern`) is the frame
@@ -12,6 +13,11 @@
 //   pixels when that is smaller than the PNG (it is: about 1.8 KB against 26 KB), checked to decode
 //   to the same pixels, at most 48 KB, so the right slide of the band is the picture the PDF and the
 //   PowerPoint file carry (row home.patterns.pair reads its pixels' hash against assets.json);
+// - the frame's dots as one mask for both appearances (the role `pattern-mask`, about 1.8 KB): every
+//   pixel that is not the twin's ground opaque, the rest transparent, checked to be the same cells
+//   in both twins. The show, the Present display, the print and the miniature draw slide 8's still
+//   through it as every other still is drawn, in the slide's own ink over its paper, so a kit
+//   restyles it (verify2 N3; a browser's print draws no luminance mask or mask composite);
 // - `pattern.generated.ts`: the recipe's uniforms converted at build by the materials package's own
 //   `toShaderUniforms` (enum names to numbers, the sizing controls), without the two colours, which
 //   the page maps by hand to the slide's `--ink` and `--paper` (2.13), so `live/pattern-mount.ts`
@@ -53,8 +59,9 @@ type FixtureAsset = {
 
 /** One served file the entry writes under public/home and lists in assets.json. */
 export type PatternFile = {
-  role: 'pattern-still';
-  appearance: 'light' | 'dark';
+  role: 'pattern-still' | 'pattern-mask';
+  /** null for the mask, which both appearances share */
+  appearance: 'light' | 'dark' | null;
   variant: null;
   bytes: Uint8Array;
   ext: 'webp' | 'png';
@@ -111,7 +118,45 @@ async function stillOf(path: string): Promise<{ bytes: Uint8Array; ext: 'webp' |
   return chosen;
 }
 
-/** The two still frames and `pattern.generated.ts`'s text (unformatted). */
+/**
+ * A twin's dots as an alpha mask: RGBA with every pixel that differs from the twin's ground (its
+ * first pixel, the sphere's paper) opaque black and the rest transparent.
+ */
+async function dotsOf(path: string): Promise<Uint8Array> {
+  const { data, info } = await sharp(resolve(ROOT, FIXTURE, path))
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const mask = new Uint8Array(info.width * info.height * 4);
+  for (let i = 0; i < info.width * info.height; i += 1)
+    if (data[i * 4] !== data[0] || data[i * 4 + 1] !== data[1] || data[i * 4 + 2] !== data[2])
+      mask[i * 4 + 3] = 255;
+  return mask;
+}
+
+/**
+ * The frame's dots as the one mask both appearances draw (the role `pattern-mask`): a lossless
+ * WebP, refused unless the two twins hold the same dots and the file decodes to them.
+ */
+async function maskOf(light: string, dark: string): Promise<Uint8Array> {
+  const dots = await dotsOf(light);
+  if (sha256(dots) !== sha256(await dotsOf(dark)))
+    throw new Error(`${light} and ${dark} do not hold the same dots`);
+  const [width, height] = FRAME;
+  const webp = new Uint8Array(
+    await sharp(dots, { raw: { width, height, channels: 4 } })
+      .webp({ lossless: true, effort: 6 })
+      .toBuffer(),
+  );
+  const decoded = await sharp(webp).ensureAlpha().raw().toBuffer();
+  if (sha256(decoded) !== sha256(dots))
+    throw new Error('the pattern mask does not decode to its dots');
+  if (webp.length > PATTERN_STILL_LIMIT)
+    throw new Error(`the pattern mask is ${webp.length} B, over ${PATTERN_STILL_LIMIT}`);
+  return webp;
+}
+
+/** The two still frames, the mask and `pattern.generated.ts`'s text (unformatted). */
 export async function derivePattern(): Promise<{ files: PatternFile[]; source: string }> {
   const asset = readAsset();
   const files: PatternFile[] = [];
@@ -119,6 +164,13 @@ export async function derivePattern(): Promise<{ files: PatternFile[]; source: s
     const still = await stillOf(asset.twins![appearance]!);
     files.push({ role: 'pattern-still', appearance, variant: null, ...still });
   }
+  files.push({
+    role: 'pattern-mask',
+    appearance: null,
+    variant: null,
+    bytes: await maskOf(asset.twins!.light!, asset.twins!.dark!),
+    ext: 'webp',
+  });
   const entry = requireMaterial(MATERIAL);
   const converted = toShaderUniforms(entry, asset.source.uniforms!);
   const uniforms: Record<string, number> = {};

@@ -400,6 +400,9 @@ export function rows(): void {
     await bandReady(page, 'agents');
     await typeLine(page, `tailor --replace=${HOME_DECK.customer}=Globex`);
     await agentsIdle(page);
+    /* the Globex kit, which every printed slide takes, slide 8 with the rest (2.8; verify2 N3) */
+    await bandReady(page, 'kits');
+    await page.locator('[data-band="kits"] [data-kit="globex"]').first().click();
     /* the button opens the browser's print after it loads slide 7's still */
     await page.evaluate(() => {
       (window as unknown as { __printed: number }).__printed = 0;
@@ -424,9 +427,10 @@ export function rows(): void {
     await expect(deck.locator(':scope > *')).toHaveCount(N);
     await expect(deck).toContainText('Onboarding plan for Globex');
     await expect(deck).not.toContainText('Northwind');
-    /* slide 8 prints the still frame the exporter stores for its pattern, requested before the
-       button opened the print; its print box alone is a whole page of ink */
-    const frame = HOME_ASSETS.find((a) => a.role === 'pattern-still' && a.appearance === 'light');
+    /* slide 8 prints the still frame the exporter stores for its pattern through the frame's dots
+       (the mask, requested before the button opened the print) in the kit's ink over its paper,
+       as every other slide takes the kit; its print box alone is a whole page of ink */
+    const frame = HOME_ASSETS.find((a) => a.role === 'pattern-mask');
     if ((HOME_DECK.order as readonly string[]).includes('pattern') && frame !== undefined) {
       const drawn = await deck
         .locator(
@@ -434,13 +438,19 @@ export function rows(): void {
         )
         .evaluate((el, path) => {
           const style = getComputedStyle(el);
-          return { background: style.backgroundImage.includes(path), mask: style.maskImage };
+          const sheet = getComputedStyle(el.closest('[data-home-slides]')!);
+          return {
+            mask: style.maskImage.includes(path),
+            ink: style.backgroundColor,
+            paper: sheet.getPropertyValue('--paper').trim(),
+          };
         }, frame.path);
-      expect(drawn, "slide 8's print draws the pattern's still frame").toEqual({
-        background: true,
-        mask: 'none',
+      expect(drawn, "slide 8's print draws the pattern's dots in the kit's ink").toEqual({
+        mask: true,
+        ink: 'rgb(244, 241, 234)',
+        paper: '#0a1b38',
       });
-      expect(loaded.has(frame.path), 'the still frame loaded before the print').toBe(true);
+      expect(loaded.has(frame.path), 'the mask loaded before the print').toBe(true);
     }
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
     await expect(deck.locator(':scope > *')).toHaveCount(0);

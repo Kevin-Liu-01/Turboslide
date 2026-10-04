@@ -541,6 +541,7 @@ type AssetRole =
   | 'lighthouse-tone'
   | 'field-still'
   | 'pattern-still'
+  | 'pattern-mask'
   | 'export-perfect'
   | 'export-editable'
   | 'export-browser'
@@ -2624,6 +2625,7 @@ async function deriveServed(
     'lighthouse-tone': 26_000,
     'field-still': 24_000,
     'pattern-still': 48_000,
+    'pattern-mask': 48_000,
     'export-browser': 60_000,
   };
   for (const m of made) {
@@ -2663,6 +2665,8 @@ export type HomeAssetRole =
   | 'field-still'
   /** slide 8's still frame: the exporter's capture of the pattern, lossless WebP, at most 48 KB (V4's) */
   | 'pattern-still'
+  /** the still frame's dots as one mask for both appearances, which the show, the print and the miniature draw in the slide's ink, at most 48 KB */
+  | 'pattern-mask'
   /** slide 7's picture part from the Perfect file, at most 60 KB */
   | 'export-perfect'
   /** the Editable text file's picture part for slide 7, at most 32 KB */

@@ -117,9 +117,11 @@ export function startStage(ctx: LiveContext): void {
   };
   /**
    * The frame's thumbnails in the order the frame reads, each numbered by it, a slide the order
-   * does not hold hidden after them; while the loop stages its order, the slide counters too.
-   * `renumber` (paint.ts) has numbered them by the deck's order already; this puts the elements
-   * in that order, which it never does, and applies the staged order over it.
+   * does not hold hidden after them, and the slide counters of every root in the filmstrip and
+   * the stage by the same order. `renumber` (paint.ts) numbers the filmstrip by the deck's order
+   * but never moves its elements, and never reaches the stage's root, which a staged Restore
+   * numbered "n / 8": slide 1's own root comes back to the stage at the cycle's cut back or at a
+   * stop, so the counters are written on every call, staged or not.
    */
   const paintOrder = (): void => {
     const order = orderNow();
@@ -143,15 +145,15 @@ export function startStage(ctx: LiveContext): void {
       const label = thumb.querySelector('[data-thumb-n]');
       if (label !== null && n > 0 && label.textContent !== String(n)) label.textContent = String(n);
     }
-    if (!staged) return;
     for (const root of [
       ...strip.querySelectorAll<HTMLElement>('[data-home-slides]'),
       ...host.querySelectorAll<HTMLElement>('[data-home-slides]'),
     ]) {
       const n = order.indexOf(root.dataset['slide'] ?? '') + 1;
       if (n === 0) continue;
+      const text = `${n} / ${order.length}`;
       for (const c of root.querySelectorAll('[data-counter-text]'))
-        c.textContent = `${n} / ${order.length}`;
+        if (c.textContent !== text) c.textContent = text;
     }
   };
   const select = (id: string): void => {
@@ -182,7 +184,10 @@ export function startStage(ctx: LiveContext): void {
     for (const el of root.querySelectorAll('[id]')) el.removeAttribute('id');
     return root;
   };
-  /** Shows a slide of the deck in the frame (the filmstrip's cut). */
+  /**
+   * Shows a slide of the deck in the frame (the filmstrip's cut), the filmstrip and the shown
+   * root numbered by the order the frame reads.
+   */
   const show = (id: string): void => {
     shown = id;
     select(id);
@@ -197,8 +202,8 @@ export function startStage(ctx: LiveContext): void {
       place(root);
       paintSlide(root, state);
       paintSlides(strip, state);
-      paintOrder();
     }
+    paintOrder();
     paintCounter();
   };
 
@@ -316,7 +321,10 @@ export function startStage(ctx: LiveContext): void {
     return root;
   };
 
-  /** The frame at the deck as the store holds it: slide 1 shown, slide 5 filled, the transcript. */
+  /**
+   * The frame at the deck as the store holds it: slide 1 shown, slide 5 filled, the filmstrip in
+   * the deck's order with every counter by it (`show` repaints the order), the transcript.
+   */
   const toRest = (): void => {
     staged = false;
     slide5('filled', false);
@@ -387,6 +395,9 @@ export function startStage(ctx: LiveContext): void {
   const playOne = async (id: StepId, track: boolean): Promise<void> => {
     if (id === 'new' || id === 'title' || id === 'rows') await loadStates();
     const { step: steps, loop } = await loadLoop();
+    /* a stop while the step's modules loaded (the first cycle's New Slide waits for the recorded
+       states' chunk) left the frame at rest; the loop's step does not start over it */
+    if (!track && stoppedForGood) return;
     const step = steps.loopStep(stepOf(loop, id), ctx.store.get().customer);
     playing = id;
     const button = stepButtons.get(id);

@@ -237,6 +237,8 @@ type LoopSample = {
   step: string;
   shown: string;
   counter: string;
+  /** the shown slide's own counter, which the stage's root draws */
+  own: string;
   hidden: string;
   running: boolean;
   screen: string[];
@@ -258,11 +260,10 @@ async function record(page: Page): Promise<void> {
     const tick = (): void => {
       const tab = document.querySelector<HTMLElement>('[data-hero-step][aria-current="step"]');
       const step = tab?.dataset['heroStep'] ?? '';
-      const shown =
-        document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
-          'slide'
-        ] ?? '';
+      const root = document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]');
+      const shown = root?.dataset['slide'] ?? '';
       const counter = document.querySelector('[data-hero-counter]')?.textContent ?? '';
+      const own = root?.querySelector('[data-counter-text]')?.textContent ?? '';
       // a thumbnail the frame does not draw: hidden and laid out as nothing (a rule that sets
       // its display outranks the browser's [hidden], which the verifier's pass 1 found)
       const hidden = [...document.querySelectorAll<HTMLElement>('[data-hero-thumb]')]
@@ -272,7 +273,7 @@ async function record(page: Page): Promise<void> {
       const running = (w.tsHomeMotion?.running() ?? []).includes('L-H');
       if (w.__hero.registeredAt < 0 && (w.tsHomeMotion?.registered() ?? []).includes('L-H'))
         w.__hero.registeredAt = performance.now();
-      const key = [step, shown, counter, hidden, running].join('|');
+      const key = [step, shown, counter, own, hidden, running].join('|');
       const now = performance.now();
       if (key !== last) {
         last = key;
@@ -281,6 +282,7 @@ async function record(page: Page): Promise<void> {
           step,
           shown,
           counter,
+          own,
           hidden,
           running,
           screen: [...document.querySelectorAll('[data-hero-screen] > *')].map(
@@ -447,10 +449,12 @@ async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: s
           i > 0 && s.shown === 'title' && samples[i - 1]?.shown === 'next-steps' && s.step === '',
       );
       if (back === undefined) failures.push('the frame never cut back to slide 1');
-      else if (back.counter !== '1 / 9' || back.hidden !== '')
-        failures.push(`back on slide 1: counter "${back.counter}", hidden "${back.hidden}"`);
+      else if (back.counter !== '1 / 9' || back.own !== '1 / 9' || back.hidden !== '')
+        failures.push(
+          `back on slide 1: counter "${back.counter}", the slide's own "${back.own}", hidden "${back.hidden}"`,
+        );
       notes.push(
-        `frame: after Restore ${restoreEnd?.counter ?? '-'} hidden ${restoreEnd?.hidden || '-'}; slide 5 at ${fiveShown?.counter ?? '-'}; back ${back?.counter ?? '-'}`,
+        `frame: after Restore ${restoreEnd?.counter ?? '-'} hidden ${restoreEnd?.hidden || '-'}; slide 5 at ${fiveShown?.counter ?? '-'}; back ${back?.counter ?? '-'} (the slide's own ${back?.own ?? '-'})`,
       );
       /* each tab's rule fills, linear, from 0 toward 1 */
       for (const id of STEP_IDS) {
@@ -587,6 +591,106 @@ async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: s
         failures.push(`after a press the frame is on ${rest.shown} at ${rest.counter}`);
     } finally {
       await close();
+    }
+  }
+
+  /* ---- a press, a key or a tap while the loop stages its Restore (slide 5 out of the frame,
+     "1 / 8") stops it at rest: the filmstrip in the deck's order, numbered 1 to 9, nothing hidden,
+     slide 1 and its own counter at "1 / 9" (verifier pass 2, N2) ---- */
+  for (const how of ['press', 'key', 'tap'] as const) {
+    const touch = how === 'tap';
+    const context = await browser.newContext({
+      extraHTTPHeaders,
+      viewport: touch ? PHONE : DESKTOP,
+      deviceScaleFactor: 1,
+      hasTouch: touch,
+      isMobile: touch,
+      colorScheme: how === 'key' ? 'dark' : 'light',
+    });
+    try {
+      await context.addInitScript(
+        (theme) => {
+          try {
+            localStorage.setItem('gt-theme', theme);
+          } catch {
+            /* private mode */
+          }
+        },
+        how === 'key' ? 'dark' : 'light',
+      );
+      const page = await context.newPage();
+      await page.goto('/home');
+      await page.locator('main#top[data-live="ready"]').waitFor({ timeout: 30_000 });
+      /* at 390 the stage is under half in view at the top (F17); in view it plays */
+      if (touch)
+        await page.evaluate(() =>
+          document.querySelector('[data-hero-stage]')?.scrollIntoView({ block: 'center' }),
+        );
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[data-hero-counter]')?.textContent === '1 / 8' &&
+          document.querySelector('[data-hero-step="new"][aria-current="step"]') === null,
+        undefined,
+        { timeout: 60_000, polling: 50 },
+      );
+      const frame = await page.locator('[data-hero-slide]').boundingBox();
+      if (frame === null) throw new Error('no hero frame');
+      if (how === 'press') await page.mouse.click(frame.x + frame.width - 40, frame.y + 30);
+      else if (how === 'tap') await page.touchscreen.tap(frame.x + frame.width - 30, frame.y + 20);
+      else {
+        await page
+          .locator('[data-hero-thumb]')
+          .first()
+          .evaluate((el) => el.focus());
+        await page.keyboard.press('Shift');
+      }
+      await page.waitForTimeout(300);
+      const read = () =>
+        page.evaluate(() => {
+          const store = (window as unknown as { tsHomeStore?: { get(): { order: string[] } } })
+            .tsHomeStore;
+          const thumbs = [...document.querySelectorAll<HTMLElement>('[data-hero-thumb]')];
+          const root = document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]');
+          return {
+            order: (store?.get().order ?? []).join(','),
+            strip: thumbs.map((t) => t.dataset['heroThumb'] ?? '').join(','),
+            numbers: thumbs
+              .map((t) => t.querySelector('[data-thumb-n]')?.textContent ?? '')
+              .join(','),
+            hidden: thumbs.filter((t) => t.getClientRects().length === 0).length,
+            shown: root?.dataset['slide'] ?? '',
+            own: root?.querySelector('[data-counter-text]')?.textContent ?? '',
+            counter: document.querySelector('[data-hero-counter]')?.textContent ?? '',
+            step: document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+          };
+        });
+      const rest = await read();
+      await page.waitForTimeout(3000);
+      const later = await read();
+      notes.push(
+        `${how} in the staged Restore: filmstrip ${rest.strip} numbered ${rest.numbers}, ${rest.hidden} hidden; ${rest.shown} at ${rest.counter}, its own ${rest.own}; a tab playing ${later.step}`,
+      );
+      const want = Array.from({ length: rest.order.split(',').length }, (_, i) => i + 1).join(',');
+      for (const [when, r] of [
+        ['at once', rest],
+        ['3 s later', later],
+      ] as const)
+        if (
+          r.strip !== r.order ||
+          r.numbers !== want ||
+          r.hidden !== 0 ||
+          r.shown !== 'title' ||
+          r.counter !== '1 / 9' ||
+          r.own !== '1 / 9' ||
+          r.step
+        )
+          failures.push(
+            `${how} in the staged Restore, ${when}: filmstrip ${r.strip} numbered ${r.numbers} (${r.hidden} hidden) against ${r.order}; ${r.shown} at ${r.counter}, its own ${r.own}; a tab playing ${r.step}`,
+          );
+    } catch (error) {
+      failures.push(`${how} in the staged Restore: ${String(error).split('\n')[0]}`);
+    } finally {
+      await context.close();
     }
   }
 

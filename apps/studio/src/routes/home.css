@@ -901,16 +901,6 @@ html:has(.ts-product) {
   box-shadow: inset 0 0 0 1px var(--pt-hair-soft);
 }
 
-/* ---- the field strip (LANDING.md 2.3): 1,024 by 160 px, 512 by 80 cells ---- */
-.ts-home-strip {
-  padding: 24px 0;
-}
-
-.ts-home-strip-box {
-  position: relative;
-  height: 160px;
-}
-
 /* the one monospace on the page (SPEC-4 0.20; DECK-GRAMMAR 31): the #101010 panel, the same in
    both appearances; 14 px on 20 px lines with 20 px a side (64 columns), 12 px on 18 px with 12 px
    a side under 720 px (44 columns); lines break only where panel-format.ts broke them */
@@ -2185,14 +2175,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-sheet[data-home-slides]:not(.is-thumb) :is(.credit, .cap, .counter) {
     font-size: max(15px, calc(10px / var(--k)));
-  }
-
-  .ts-home-strip {
-    padding: 24px 0;
-  }
-
-  .ts-home-strip-box {
-    height: 96px;
   }
 
   .ts-tailor-top,

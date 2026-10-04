@@ -99,18 +99,11 @@ describe('public/home', () => {
 });
 
 describe('the inlined stills and the slide markup', () => {
-  it("inlines four 1 bit stills at their cell grids: the hero frame's slide and the strip", async () => {
-    const stills = [
-      HOME_FIELD_STILLS.hero.wide,
-      HOME_FIELD_STILLS.hero.narrow,
-      HOME_FIELD_STILLS.strip.wide,
-      HOME_FIELD_STILLS.strip.narrow,
-    ];
+  it("inlines two 1 bit stills at their cell grids: the hero frame's slide at both widths", async () => {
+    const stills = [HOME_FIELD_STILLS.hero.wide, HOME_FIELD_STILLS.hero.narrow];
     expect(stills.map((s) => [s.cols, s.rows])).toEqual([
       [270, 152],
       [163, 92],
-      [512, 80],
-      [179, 48],
     ]);
     for (const still of stills) {
       expect(still.ink).toMatch(/^data:image\/png;base64,/);

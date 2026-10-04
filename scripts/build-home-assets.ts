@@ -954,7 +954,6 @@ const GRID_SIZE = (grid: { cols: number; rows: number }): { width: number; heigh
   width: grid.cols,
   height: grid.rows,
 });
-const STRIP_GRID = { wide: { cols: 512, rows: 80 }, narrow: { cols: 179, rows: 48 } } as const;
 
 /**
  * The hero frame's slide (docs/LANDING.md 2.2): 540 by 304 px at 1,024 px and over, 326 by 183
@@ -1150,51 +1149,11 @@ function openerTone(x: number, y: number): number {
   return 0.3 * Math.exp(-d * 4.5);
 }
 
-/** The field strip (docs/LANDING.md 2.3): a 6 percent field gathered into the selection frame, in px of the strip. */
-function stripBits(width: 'wide' | 'narrow'): Bits {
-  const { cols, rows } = STRIP_GRID[width];
-  const W = cols * 2;
-  const H = rows * 2;
-  /* the frame: 280 by 96 px at 1,024 px, 200 by 64 px under 720 px, centred, with the chip above its top left */
-  const fw = width === 'wide' ? 280 : 200;
-  const fh = width === 'wide' ? 96 : 64;
-  const fx = Math.round((W - fw) / 2 / 2) * 2;
-  const fy = Math.round((H - fh) / 2 / 2) * 2 + (width === 'wide' ? 16 : 10);
-  const handle = 10;
-  const hx = [fx, fx + fw / 2, fx + fw];
-  const hy = [fy, fy + fh / 2, fy + fh];
-  const solid: Box[] = [
-    { x: fx, y: fy, w: fw, h: 2 },
-    { x: fx, y: fy + fh - 2, w: fw, h: 2 },
-    { x: fx, y: fy, w: 2, h: fh },
-    { x: fx + fw - 2, y: fy, w: 2, h: fh },
-    /* the rotation stem and its knob over the top edge's middle */
-    { x: fx + fw / 2 - 1, y: fy - 18, w: 2, h: 18 },
-    { x: fx + fw / 2 - 5, y: fy - 28, w: 10, h: 10 },
-    /* the chip at the top left, on the frame's edge */
-    { x: fx, y: fy - 18, w: 40, h: 16 },
-  ];
-  for (const x of hx)
-    for (const y of hy)
-      if (!(x === hx[1] && y === hy[1]))
-        solid.push({ x: x - handle / 2, y: y - handle / 2, w: handle, h: handle });
-  const inside: Box = { x: fx + 2, y: fy + 2, w: fw - 4, h: fh - 4 };
-  const tone: Tone = (x, y) => {
-    if (solid.some((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h)) return 1;
-    if (inBox(inside, x, y)) return 0;
-    /* a clear margin of 4 px round the frame, so the frame reads apart from the field */
-    if (inBox(grow({ x: fx, y: fy - 28, w: fw, h: fh + 28 }, 6), x, y)) return 0;
-    return 0.0625;
-  };
-  return ditherSheet(cols, rows, tone, [], { w: W, h: H });
-}
-
 /** The thumbnails' grid in the hero frame's filmstrip (56 by 31.5 px, 64 by 36 under 720 px). */
 const MINI_GRID = { cols: 32, rows: 18 } as const;
 
 type Stills = {
   hero: { wide: Bits; narrow: Bits };
-  strip: { wide: Bits; narrow: Bits };
   canvas: { wide: Bits; narrow: Bits };
   field: Bits;
   /** the hero frame's filmstrip: each picture slide's print at the thumbnails' grid, inlined */
@@ -1331,7 +1290,6 @@ async function deriveStills(): Promise<Stills> {
   const mini = (tone: Tone): Bits => ditherSheet(MINI_GRID.cols, MINI_GRID.rows, tone);
   return {
     hero: { wide: heroWide, narrow: heroNarrow },
-    strip: { wide: stripBits('wide'), narrow: stripBits('narrow') },
     canvas: { wide: canvasWide, narrow: canvasNarrow },
     field: ditherSheet(GRID.wide.cols, GRID.wide.rows, openerTone),
     mini: {
@@ -2270,7 +2228,6 @@ async function deriveSlidesSource(
   });
   const fieldStills = {
     hero: { wide: await still(stills.hero.wide), narrow: await still(stills.hero.narrow) },
-    strip: { wide: await still(stills.strip.wide), narrow: await still(stills.strip.narrow) },
   };
   const mini = {
     hero: await still(stills.mini.hero),
@@ -2281,8 +2238,6 @@ async function deriveSlidesSource(
   const stillsBytes = [
     fieldStills.hero.wide,
     fieldStills.hero.narrow,
-    fieldStills.strip.wide,
-    fieldStills.strip.narrow,
     ...Object.values(mini),
   ].reduce((n, s) => n + s.ink.length, 0);
   const pathOf = (
@@ -2294,18 +2249,16 @@ async function deriveSlidesSource(
       assets.find((a) => a.role === role && a.appearance === appearance && a.variant === variant) ??
       fail(`no asset ${role} ${appearance} ${variant}`)
     ).path;
-  /* the server only stylesheet: the inlined stills (slide 1 in the hero frame, the strip and the
-     frame filmstrip's thumbnails, which are in the first screen and request nothing), then the
-     band stills' files, requested only when a box that draws them comes near the viewport */
+  /* the server only stylesheet: the inlined stills (slide 1 in the hero frame and the frame
+     filmstrip's thumbnails, which are in the first screen and request nothing), then the band
+     stills' files, requested only when a box that draws them comes near the viewport */
   const hero = '[data-field="hero"],[data-field="hero-print"]';
-  const strip = '[data-field="strip"]';
   const canvas = '[data-field="canvas"]';
   const thumb = (field: string): string => `[data-hero-filmstrip] [data-field="${field}"]`;
   const css = [
     `${hero}{--ts-still:url("${fieldStills.hero.wide.ink}")}`,
-    `${strip}{--ts-still:url("${fieldStills.strip.wide.ink}")}`,
     `${canvas}{--ts-still:url("${pathOf('lighthouse-still', null, 'wide')}")}`,
-    `@media (max-width:719px){${hero}{--ts-still:url("${fieldStills.hero.narrow.ink}")}${strip}{--ts-still:url("${fieldStills.strip.narrow.ink}")}${canvas}{--ts-still:url("${pathOf('lighthouse-still', null, 'narrow')}")}}`,
+    `@media (max-width:719px){${hero}{--ts-still:url("${fieldStills.hero.narrow.ink}")}${canvas}{--ts-still:url("${pathOf('lighthouse-still', null, 'narrow')}")}}`,
     `${thumb('hero-print')}{--ts-still:url("${mini.hero.ink}")}`,
     `${thumb('canvas')}{--ts-still:url("${mini.canvas.ink}")}`,
     `${thumb('field-slide')}{--ts-still:url("${mini.field.ink}")}`,
@@ -2435,10 +2388,10 @@ export type FieldStillPair = { wide: FieldStill; narrow: FieldStill };
 export const HOME_SLIDE_HTML: Readonly<Record<HomeInstanceId, HomeSlideInstance>> = ${JSON.stringify(instances, null, 2)};
 
 /**
- * The inlined stills: the Blue Marble on the hero frame's slide 1 (270 by 152 cells at 540 px, 163
- * by 92 at 326 px) and the field strip, each at both widths.
+ * The inlined stills: the Blue Marble on the hero frame's slide 1, 270 by 152 cells at 540 px and
+ * 163 by 92 at 326 px.
  */
-export const HOME_FIELD_STILLS: Readonly<{ hero: FieldStillPair; strip: FieldStillPair }> = ${JSON.stringify(fieldStills, null, 2)};
+export const HOME_FIELD_STILLS: Readonly<{ hero: FieldStillPair }> = ${JSON.stringify(fieldStills, null, 2)};
 
 /** The server only stylesheet that gives every field box on the page its still. */
 export const HOME_STILLS_CSS: string = ${JSON.stringify(css)};

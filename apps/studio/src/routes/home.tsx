@@ -11,9 +11,9 @@ import { HomeCanvas } from '../components/home/HomeCanvas';
 import { HomeClose } from '../components/home/HomeClose';
 import { HomeExport } from '../components/home/HomeExport';
 import { HomeFeatures } from '../components/home/HomeFeatures';
-import { HomeField } from '../components/home/HomeField';
 import { HomeFooter } from '../components/home/HomeFooter';
 import { HomeHero } from '../components/home/HomeHero';
+import { HomeInterlude } from '../components/home/HomeInterlude';
 import { HomeKits } from '../components/home/HomeKits';
 import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
@@ -124,15 +124,23 @@ function HomePage() {
       <HomeNav nonce={nonce} />
       <HomeHero />
       <HomeNumbers />
-      <HomeField />
+      <HomeInterlude next="menus" />
       <HomeMenus />
+      <HomeInterlude next="canvas" />
       <HomeCanvas />
+      <HomeInterlude next="tailor" />
       <HomeTailor />
+      <HomeInterlude next="kits" />
       <HomeKits />
+      <HomeInterlude next="agents" />
       <HomeAgents />
+      <HomeInterlude next="present" />
       <HomePresent />
+      <HomeInterlude next="export" />
       <HomeExport />
+      <HomeInterlude next="features" />
       <HomeFeatures />
+      <HomeInterlude next="close" />
       <HomeClose />
       <HomeFooter />
       <div className="ts-print-deck" data-print-deck />

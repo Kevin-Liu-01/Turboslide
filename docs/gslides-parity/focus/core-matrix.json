@@ -5074,7 +5074,7 @@
     {
       "id": "export.download.large-deck-pdf",
       "feature": "export",
-      "interaction": "On a copy of the General Translation brand deck (85 slides, 115 assets) File > Download > PDF Document saves a file of 85 pages within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
+      "interaction": "On a copy of the General Translation brand deck template (95 slides, 119 assets) File > Download > PDF Document saves a file of 95 pages within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "evidence": "audit-brand 25 (brand-walk-2.json row 17, c-17-download-pdf-dialog.png: no file within 180 s)",
@@ -5085,7 +5085,7 @@
     {
       "id": "export.download.large-deck-pptx",
       "feature": "export",
-      "interaction": "On the same copy, Download options > Editable text with Embed fonts checked saves a file of 85 slides within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
+      "interaction": "On the same copy, Download options > Editable text with Embed fonts checked saves a file of 95 slides within 600 s; the seconds per slide are recorded; a measurement row (8.2)",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "evidence": "audit-brand 25 (brand-walk-2.json row 16, c-16-download-native-embed-dialog.png: none within 240 s)",

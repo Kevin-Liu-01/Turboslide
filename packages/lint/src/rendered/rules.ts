@@ -195,7 +195,12 @@ export function lintRecord(
         }),
       );
     }
-    if (block.type === 'dia' && block.fontSize !== undefined && block.fontSize < SVG_LABEL_MIN) {
+    if (
+      block.type === 'dia' &&
+      block.fontSize !== undefined &&
+      block.fontSize < SVG_LABEL_MIN &&
+      !(markup && onlyGlyphArtUnder(markup, SVG_LABEL_MIN))
+    ) {
       out.push(
         ctx.finding('type/svg-label-min', record.slideId, {
           blockId,

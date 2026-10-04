@@ -23,7 +23,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author } from '@turboslide/schema/mutations';
 
 import { studioSessionSecret } from './auth/middleware';
-import { authContextFor } from './auth/session';
+import { authContextFor, readLinkGrantCookie } from './auth/session';
 import { logSecurityEvent } from './log';
 import { deckDir } from './root';
 
@@ -369,8 +369,16 @@ export async function requestContext(request?: Request): Promise<AuthContext> {
     const runId = req.headers.get('x-turboslide-author')?.trim() || undefined;
     return bootstrapAgentContext('token', runId?.replace(/^agent:/, ''));
   }
+  const request_ = req;
   try {
-    return await withLinkGrants(await authContextFor(req, studioSessionSecret()), linkGrantsOf);
+    return await withLinkGrants(
+      await authContextFor(request_, studioSessionSecret()),
+      async (principalId) =>
+        unionLinkGrants(
+          await linkGrantsOf(principalId),
+          await cookieLinkGrants(request_, principalId),
+        ),
+    );
   } catch {
     return anonymousContext();
   }
@@ -418,6 +426,44 @@ export async function linkGrantsFor(
     }
   } catch {
     // the index is a second source; the record's grants stand on their own
+  }
+  return grants;
+}
+
+/** The grants of `first`, then those of `second` whose link `first` does not hold. */
+export function unionLinkGrants(
+  first: readonly LinkGrant[],
+  second: readonly LinkGrant[],
+): LinkGrant[] {
+  const out = [...first];
+  for (const grant of second) {
+    if (!out.some((held) => held.linkId === grant.linkId)) out.push(grant);
+  }
+  return out;
+}
+
+/**
+ * The grants the request's link grant cookie carries for the principal (auth/session.ts: the
+ * exchange's last 120 s), after this instance's record of each deck is brought up to the
+ * grant's link (access.ts `settleHeldLinks`). Empty when there is no cookie, it belongs to
+ * another principal or it does not verify; a failed read adds nothing, which is the refusal.
+ */
+export async function cookieLinkGrants(
+  request: Request,
+  principalId: string,
+): Promise<LinkGrant[]> {
+  let grants: LinkGrant[];
+  try {
+    grants = await readLinkGrantCookie(request, principalId, studioSessionSecret());
+  } catch {
+    return [];
+  }
+  if (grants.length === 0) return grants;
+  try {
+    const { settleHeldLinks } = await import('./access');
+    await settleHeldLinks(grants);
+  } catch {
+    // the reads only refresh the cache; the decision reads the record either way
   }
   return grants;
 }

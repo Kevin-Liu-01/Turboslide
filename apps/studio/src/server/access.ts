@@ -419,6 +419,55 @@ export function dropLinkGrantCache(principalId?: string): void {
   else grantCache.delete(principalId);
 }
 
+/** How many times a record that misses a link the caller exchanged seconds ago is read past the cache. */
+export const HELD_LINK_READS = 3;
+/** The wait between those reads, in ms. */
+export const HELD_LINK_WAIT_MS = 250;
+
+export type HeldLinkReads = {
+  read: (deckId: string) => Promise<AccessRecord | null>;
+  readFresh: (deckId: string) => Promise<AccessRecord | null>;
+  sleep?: (ms: number) => Promise<void>;
+};
+
+const heldLinkReads: HeldLinkReads = {
+  read: (deckId) => readAccess(deckId),
+  readFresh: async (deckId) => (await readStoredAccessFresh(deckId))?.record ?? null,
+};
+
+/**
+ * Brings this instance's cached record of each deck up to the links of grants the caller
+ * exchanged within the last 120 s (the link grant cookie, auth/session.ts). The record cache
+ * holds a deck for 60 s, and an instance that cached it before the owner minted the link decided
+ * on a record with no links: the visitor of a fresh editor link was a viewer through the legacy
+ * open standing. A record that does not list the link is read past the cache up to three times,
+ * 250 ms apart; the fresh read refills the cache `authorize()` reads next. A record that still
+ * misses the link after that keeps the decision it gives, so a revoked link admits nobody.
+ */
+export async function settleHeldLinks(
+  grants: readonly LinkGrant[],
+  reads: HeldLinkReads = heldLinkReads,
+): Promise<void> {
+  const sleep = reads.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const byDeck = new Map<string, Set<string>>();
+  for (const grant of grants) {
+    const ids = byDeck.get(grant.deckId) ?? new Set<string>();
+    ids.add(grant.linkId);
+    byDeck.set(grant.deckId, ids);
+  }
+  await Promise.all(
+    [...byDeck].map(async ([deckId, linkIds]) => {
+      const lists = (record: AccessRecord | null): boolean =>
+        record !== null && record.links.some((link) => linkIds.has(link.id));
+      let record = await reads.read(deckId);
+      for (let attempt = 0; attempt < HELD_LINK_READS && !lists(record); attempt += 1) {
+        if (attempt > 0) await sleep(HELD_LINK_WAIT_MS);
+        record = await reads.readFresh(deckId);
+      }
+    }),
+  );
+}
+
 /** The record `decide()` reads: the stored one, or null (the legacy synthesis is the decider's). */
 export async function readAccess(deckId: string): Promise<AccessRecord | null> {
   const stored = await readStoredAccess(deckId);

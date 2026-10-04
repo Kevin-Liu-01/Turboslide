@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { identityRuntime, requestIdentity } from '../server/auth/identity';
+import { studioSessionSecret } from '../server/auth/middleware';
+import { linkGrantSetCookie } from '../server/auth/session';
 import {
   COOKIES_NEEDED,
   EXCHANGE_HEADERS,
@@ -100,15 +102,27 @@ async function serve(request: Request, token: string): Promise<Response> {
   const cookie: Record<string, string> =
     identity.minted?.setCookie !== undefined ? { 'set-cookie': identity.minted.setCookie } : {};
   switch (outcome.kind) {
-    case 'redirect':
-      return new Response(null, {
-        status: 303,
-        headers: {
-          location: withPresent(outcome.location, request, outcome.grant),
-          ...EXCHANGE_HEADERS,
-          ...cookie,
-        },
+    case 'redirect': {
+      const headers = new Headers({
+        location: withPresent(outcome.location, request, outcome.grant),
+        ...EXCHANGE_HEADERS,
+        ...cookie,
       });
+      // the grant rides the redirect for 120 s (auth/session.ts, the link grant cookie): the
+      // landing and its server functions run on instances whose stores have not seen it yet
+      if (identity.principalId !== null) {
+        headers.append(
+          'set-cookie',
+          await linkGrantSetCookie(
+            request,
+            identity.principalId,
+            outcome.grant,
+            studioSessionSecret(),
+          ),
+        );
+      }
+      return new Response(null, { status: 303, headers });
+    }
     case 'not_navigation':
       return new Response(
         JSON.stringify({

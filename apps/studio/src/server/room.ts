@@ -99,7 +99,14 @@ import {
   refreshIndexFacts,
 } from './access';
 import { agentAuth } from './auth';
-import { authorize, bootstrapAgentContext, denialBody, linkGrantsFor } from './authorize';
+import {
+  authorize,
+  bootstrapAgentContext,
+  cookieLinkGrants,
+  denialBody,
+  linkGrantsFor,
+  unionLinkGrants,
+} from './authorize';
 import type { Capability, ShadowedDecision } from './authorize';
 import {
   accountSession,
@@ -622,8 +629,15 @@ export async function requestIdentity(
   return {
     /* the link grants are the union of the principal record's and the deck index's, so a grant
        exchanged on another instance admits the visitor on the ops, stream, presence and comments
-       routes too (b6 R1; authorize.ts linkGrantsFor) */
-    ctx: { principal, linkGrants: await linkGrantsFor(principal.id, record) },
+       routes too (b6 R1; authorize.ts linkGrantsFor), and the link grant cookie's for the
+       seconds before either store shows the exchange (authorize.ts cookieLinkGrants) */
+    ctx: {
+      principal,
+      linkGrants: unionLinkGrants(
+        await linkGrantsFor(principal.id, record),
+        await cookieLinkGrants(request, principal.id),
+      ),
+    },
     principalId: principal.id,
     identity: principal.id,
     kind: principal.kind === 'account' ? 'signedIn' : 'anonymous',
@@ -683,7 +697,13 @@ async function sessionIdentity(
       ...(aliases.length > 0 ? { aliases } : {}),
     };
     return {
-      ctx: { principal, linkGrants: await linkGrantsFor(facts.principalId, record) },
+      ctx: {
+        principal,
+        linkGrants: unionLinkGrants(
+          await linkGrantsFor(facts.principalId, record),
+          await cookieLinkGrants(request, facts.principalId),
+        ),
+      },
       principalId: facts.principalId,
       identity: facts.principalId,
       kind: 'signedIn',

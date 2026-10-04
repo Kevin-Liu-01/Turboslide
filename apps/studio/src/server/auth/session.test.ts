@@ -9,10 +9,16 @@ import {
   ensurePrincipal,
   expireAnonymousCookie,
   isSecureRequest,
+  LINK_GRANT_COOKIE,
+  LINK_GRANT_COOKIE_MAX_AGE_S,
+  linkGrantSetCookie,
   parseCookies,
+  readLinkGrantCookie,
   readPrincipal,
+  sealLinkGrantCookie,
   sealPrincipalCookie,
   serializeAnonymousCookie,
+  unsealLinkGrantCookie,
   unsealPrincipalCookie,
 } from './session.ts';
 
@@ -172,5 +178,62 @@ describe('readPrincipal and ensurePrincipal', () => {
       principal: null,
       linkGrants: [],
     });
+  });
+});
+
+describe('the link grant cookie', () => {
+  const GRANT = { linkId: 'lnk_edit01', deckId: 'q4-review', role: 'editor' as const };
+  const T = 1_790_000_000_000;
+
+  test('round trips for 120 s and carries nothing after', async () => {
+    const value = await sealLinkGrantCookie(ID, [GRANT], SECRET, T);
+    expect(await unsealLinkGrantCookie(value, SECRET, T + 1000)).toEqual({
+      principalId: ID,
+      grants: [GRANT],
+      issuedAt: T,
+    });
+    expect(
+      await unsealLinkGrantCookie(value, SECRET, T + LINK_GRANT_COOKIE_MAX_AGE_S * 1000 + 1),
+    ).toBeNull();
+  });
+
+  test('refuses another secret, an edited payload and an identity cookie value', async () => {
+    const value = await sealLinkGrantCookie(ID, [GRANT], SECRET, T);
+    expect(await unsealLinkGrantCookie(value, OTHER, T)).toBeNull();
+    const [version, payload, mac] = value.split('.');
+    const edited = Buffer.from(
+      Buffer.from(payload ?? '', 'base64url')
+        .toString()
+        .replace('editor', 'viewer'),
+    ).toString('base64url');
+    expect(await unsealLinkGrantCookie(`${version}.${edited}.${mac}`, SECRET, T)).toBeNull();
+    expect(
+      await unsealLinkGrantCookie(await sealPrincipalCookie(ID, SECRET, T), SECRET, T),
+    ).toBeNull();
+  });
+
+  test("a request reads only its own principal's grants", async () => {
+    const value = await sealLinkGrantCookie(ID, [GRANT], SECRET, T);
+    const req = request('https://www.turboslide.com/edit/q4-review', {
+      cookie: `${LINK_GRANT_COOKIE}=${value}`,
+    });
+    expect(await readLinkGrantCookie(req, ID, SECRET, T)).toEqual([GRANT]);
+    expect(
+      await readLinkGrantCookie(req, 'anon_00000000-0000-4000-8000-000000000001', SECRET, T),
+    ).toEqual([]);
+  });
+
+  test('the exchange keeps the grants still held and replaces the same link', async () => {
+    const first = { linkId: 'lnk_view01', deckId: 'other', role: 'viewer' as const };
+    const held = await sealLinkGrantCookie(ID, [first, { ...GRANT, role: 'viewer' }], SECRET, T);
+    const req = request('https://www.turboslide.com/s/token', {
+      cookie: `${LINK_GRANT_COOKIE}=${held}`,
+    });
+    const header = await linkGrantSetCookie(req, ID, GRANT, SECRET, T + 1000);
+    expect(header).toMatch(/^__Host-ts_lg=g1\./);
+    expect(header).toContain(`Max-Age=${LINK_GRANT_COOKIE_MAX_AGE_S}`);
+    expect(header).toContain('Secure');
+    const value = header.split(';')[0]?.slice(`${LINK_GRANT_COOKIE}=`.length) ?? '';
+    expect((await unsealLinkGrantCookie(value, SECRET, T + 1000))?.grants).toEqual([first, GRANT]);
   });
 });

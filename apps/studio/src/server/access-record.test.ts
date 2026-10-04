@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { memoryAccessStore } from '@turboslide/store/access-store';
 
-import { creatorOf, recordNewDeck } from './access';
+import { HELD_LINK_READS, creatorOf, recordNewDeck, settleHeldLinks } from './access';
 import type { AuthContext } from './authorize';
 import { anonymousContext, bootstrapAgentContext, contextForIdentity } from './authorize';
 
@@ -71,5 +71,46 @@ describe('recordNewDeck', () => {
     const store = memoryAccessStore();
     expect(await recordNewDeck('q4-review', anonymousContext(), { now: NOW, store })).toBeNull();
     expect(await store.read('q4-review')).toBeNull();
+  });
+});
+
+describe('settleHeldLinks', () => {
+  const grant = { linkId: 'lnk_edit01', deckId: 'q4-review', role: 'editor' as const };
+  const withLinks = (ids: string[]) => ({ links: ids.map((id) => ({ id })) }) as never;
+
+  it('reads past the cache until the record lists the link', async () => {
+    const fresh = [withLinks([]), withLinks(['lnk_edit01'])];
+    let freshReads = 0;
+    await settleHeldLinks([grant], {
+      read: async () => withLinks([]),
+      readFresh: async () => fresh[freshReads++] ?? null,
+      sleep: async () => undefined,
+    });
+    expect(freshReads).toBe(2);
+  });
+
+  it('reads nothing more when the cached record lists the link', async () => {
+    let freshReads = 0;
+    await settleHeldLinks([grant], {
+      read: async () => withLinks(['lnk_edit01']),
+      readFresh: async () => {
+        freshReads += 1;
+        return null;
+      },
+    });
+    expect(freshReads).toBe(0);
+  });
+
+  it('stops after three fresh reads of a record that never lists it (a revoked link)', async () => {
+    let freshReads = 0;
+    await settleHeldLinks([grant], {
+      read: async () => null,
+      readFresh: async () => {
+        freshReads += 1;
+        return withLinks(['lnk_other']);
+      },
+      sleep: async () => undefined,
+    });
+    expect(freshReads).toBe(HELD_LINK_READS);
   });
 });

@@ -15,8 +15,9 @@
 // localhost. A dev server reached over plain http from another machine cannot set it, so the
 // name falls back to `ts_id` there with the same attributes minus `Secure`; the reader accepts
 // both names and the hosted deployment only ever sees the prefixed one.
-import type { AuthContext, Principal } from '@turboslide/identity/access';
+import type { AuthContext, LinkGrant, Principal } from '@turboslide/identity/access';
 import { anonymousPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
+import { GRANT_ROLES } from '@turboslide/schema/access';
 
 export const ANON_COOKIE = '__Host-ts_id';
 export const ANON_COOKIE_INSECURE = 'ts_id';
@@ -116,6 +117,138 @@ export async function unsealPrincipalCookie(
   const parsed = parsePrincipalId(principalId);
   if (parsed === null || parsed.kind !== 'anonymous' || !Number.isFinite(issuedAt)) return null;
   return { principalId, issuedAt };
+}
+
+// The link grant cookie (the realtime round's fix forward, 2026-10-04). The exchange at
+// `/s/<token>` writes the grant on the principal record of its own instance and on the deck index
+// on the Blob store, and the next request lands on another instance, whose index read and access
+// record can be seconds old: on production a visitor who opened a fresh editor link was a viewer
+// for more than 10 s (`realtime.join.chip-within-1s`, B's loader answered `via: "open"` over a
+// record with no links). The exchange's redirect therefore carries the grant itself for 120 s,
+// sealed like the identity cookie and bound to the same principal id; the readers add it to the
+// grants they load, and `decide()` still admits it only through a link the deck's record lists,
+// so a revoked link admits nobody.
+
+export const LINK_GRANT_COOKIE = '__Host-ts_lg';
+export const LINK_GRANT_COOKIE_INSECURE = 'ts_lg';
+/** How long the cookie carries a grant: the cross instance lag is seconds, the record cache 60 s. */
+export const LINK_GRANT_COOKIE_MAX_AGE_S = 120;
+/** The most grants one cookie carries; the newest are kept. */
+export const LINK_GRANT_COOKIE_MAX_GRANTS = 8;
+/** The seal version of the grant cookie, distinct from the identity cookie's. */
+const GRANT_SEAL_VERSION = 'g1';
+
+export type SealedLinkGrants = { principalId: string; grants: LinkGrant[]; issuedAt: number };
+
+/** `g1.<payload>.<mac>`, the payload the JSON `{ p, g: [[linkId, deckId, role]], t }`. */
+export async function sealLinkGrantCookie(
+  principalId: string,
+  grants: readonly LinkGrant[],
+  secret: string,
+  issuedAt: number = Date.now(),
+): Promise<string> {
+  const kept = grants.slice(-LINK_GRANT_COOKIE_MAX_GRANTS);
+  const payload = encoder.encode(
+    JSON.stringify({
+      p: principalId,
+      g: kept.map((grant) => [grant.linkId, grant.deckId, grant.role]),
+      t: Math.trunc(issuedAt),
+    }),
+  );
+  const signed = `${GRANT_SEAL_VERSION}.${toBase64Url(payload)}`;
+  const mac = await crypto.subtle.sign('HMAC', await hmacKey(secret), encoder.encode(signed));
+  return `${signed}.${toBase64Url(new Uint8Array(mac))}`;
+}
+
+/** The grants inside a sealed value, or null when it is malformed, forged or older than 120 s. */
+export async function unsealLinkGrantCookie(
+  value: string,
+  secret: string,
+  now: number = Date.now(),
+): Promise<SealedLinkGrants | null> {
+  const parts = value.split('.');
+  if (parts.length !== 3 || parts[0] !== GRANT_SEAL_VERSION) return null;
+  const payloadText = parts[1] ?? '';
+  const mac = fromBase64Url(parts[2] ?? '');
+  const payload = fromBase64Url(payloadText);
+  if (mac === null || payload === null || mac.length !== 32) return null;
+  const verified = await crypto.subtle.verify(
+    'HMAC',
+    await hmacKey(secret),
+    mac,
+    encoder.encode(`${GRANT_SEAL_VERSION}.${payloadText}`),
+  );
+  if (!verified) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(decoder.decode(payload));
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== 'object' || parsed === null) return null;
+  const { p, g, t } = parsed as { p?: unknown; g?: unknown; t?: unknown };
+  if (typeof p !== 'string' || parsePrincipalId(p) === null) return null;
+  if (typeof t !== 'number' || !Number.isFinite(t)) return null;
+  // a value from the future past a minute of clock skew, or past its life, carries nothing
+  if (t > now + 60_000 || now - t > LINK_GRANT_COOKIE_MAX_AGE_S * 1000) return null;
+  if (!Array.isArray(g)) return null;
+  const grants: LinkGrant[] = [];
+  for (const row of g.slice(-LINK_GRANT_COOKIE_MAX_GRANTS)) {
+    if (!Array.isArray(row) || row.length !== 3) return null;
+    const [linkId, deckId, role] = row as unknown[];
+    if (typeof linkId !== 'string' || typeof deckId !== 'string') return null;
+    if (!(GRANT_ROLES as readonly unknown[]).includes(role)) return null;
+    grants.push({ linkId, deckId, role: role as LinkGrant['role'] });
+  }
+  return { principalId: p, grants, issuedAt: t };
+}
+
+/** `__Host-ts_lg` on a secure request, `ts_lg` on plain http off localhost. */
+export function linkGrantCookieName(request: Request): string {
+  return isSecureRequest(request) ? LINK_GRANT_COOKIE : LINK_GRANT_COOKIE_INSECURE;
+}
+
+/** The grants a request's cookie carries for the principal; empty for another principal's cookie. */
+export async function readLinkGrantCookie(
+  request: Request,
+  principalId: string,
+  secret: string,
+  now: number = Date.now(),
+): Promise<LinkGrant[]> {
+  const cookies = parseCookies(request.headers.get('cookie'));
+  for (const name of [LINK_GRANT_COOKIE, LINK_GRANT_COOKIE_INSECURE]) {
+    const value = cookies.get(name);
+    if (value === undefined) continue;
+    const sealed = await unsealLinkGrantCookie(value, secret, now);
+    if (sealed !== null && sealed.principalId === principalId) return sealed.grants;
+  }
+  return [];
+}
+
+/**
+ * The Set-Cookie value the exchange sends: the grants the request's cookie still carries for the
+ * principal with `grant` last (a grant of the same link replaced), sealed for 120 s.
+ */
+export async function linkGrantSetCookie(
+  request: Request,
+  principalId: string,
+  grant: LinkGrant,
+  secret: string,
+  now: number = Date.now(),
+): Promise<string> {
+  const held = await readLinkGrantCookie(request, principalId, secret, now);
+  const grants = [...held.filter((g) => g.linkId !== grant.linkId), grant];
+  const value = await sealLinkGrantCookie(principalId, grants, secret, now);
+  const name = linkGrantCookieName(request);
+  const attributes = [
+    `${name}=${value}`,
+    'Path=/',
+    `Max-Age=${LINK_GRANT_COOKIE_MAX_AGE_S}`,
+    'HttpOnly',
+    'SameSite=Lax',
+  ];
+  if (name === LINK_GRANT_COOKIE) attributes.push('Secure');
+  return attributes.join('; ');
 }
 
 /** The cookies of a `Cookie` header by name; the first value wins when a name repeats. */

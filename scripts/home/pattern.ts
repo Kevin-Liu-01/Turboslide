@@ -7,17 +7,17 @@
 // Slide 8's picture in the fixture (`apps/studio/home-deck/deck.json` asset `pattern`) is the frame
 // the exporter stores for the Animated pattern: the CLI's `material capture paper:dithering` at the
 // recipe's anchor, 3200 by 1800, one twin for each appearance (the same cells, the theme's ink on
-// its paper). This module reads it and gives the page two things:
+// its paper). This module reads it and gives the page three things:
 //
 // - the still frame of each appearance as the page serves it: a lossless WebP of the twin's own
 //   pixels when that is smaller than the PNG (it is: about 1.8 KB against 26 KB), checked to decode
 //   to the same pixels, at most 48 KB, so the right slide of the band is the picture the PDF and the
 //   PowerPoint file carry (row home.patterns.pair reads its pixels' hash against assets.json);
-// - the frame's dots as one mask for both appearances (the role `pattern-mask`, about 1.8 KB): every
-//   pixel that is not the twin's ground opaque, the rest transparent, checked to be the same cells
-//   in both twins. The show, the Present display, the print and the miniature draw slide 8's still
-//   through it as every other still is drawn, in the slide's own ink over its paper, so a kit
-//   restyles it (verify2 N3; a browser's print draws no luminance mask or mask composite);
+// - the frame's dots as one mask for both appearances (the role `pattern-mask`, about 1.8 KB):
+//   every pixel that is not the twin's ground opaque, the rest transparent, checked to be the same
+//   cells in both twins. The show, the Present display, the print and the miniature draw slide 8's
+//   still through it as every other still is drawn, in the slide's own ink over its paper, so a
+//   kit restyles it (verify2 N3; a browser's print draws no luminance mask or mask composite);
 // - `pattern.generated.ts`: the recipe's uniforms converted at build by the materials package's own
 //   `toShaderUniforms` (enum names to numbers, the sizing controls), without the two colours, which
 //   the page maps by hand to the slide's `--ink` and `--paper` (2.13), so `live/pattern-mount.ts`

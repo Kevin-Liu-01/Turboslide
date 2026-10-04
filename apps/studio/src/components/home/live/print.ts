@@ -27,9 +27,10 @@ import type { HomeDeckState } from './state';
 /**
  * The stills the print draws that the page may not have requested yet: slide 7's (requested only
  * by the show and the print, LANDING.md 4.2), slide 6's (requested when its band nears the
- * viewport, and in its narrow variant on a phone) and slide 8's still frame (its dots' mask, which
- * the print draws in the slide's ink over its paper) when the print holds slide 8 (the patterns band requests it only near the viewport), loaded
- * before the button opens the print dialog so no page prints a still missing.
+ * viewport, and in its narrow variant on a phone) and, when the print holds slide 8, its still
+ * frame's dots (the mask the print draws in the slide's ink over its paper, requested only by the
+ * show, the print and the miniature), loaded before the button opens the print dialog so no page
+ * prints a still missing.
  */
 function loadStills(root: HTMLElement, state: HomeDeckState): Promise<void> {
   const urls: string[] = [];

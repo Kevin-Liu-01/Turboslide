@@ -1022,7 +1022,8 @@ const appearance = (): 'light' | 'dark' => {
 
 /**
  * The served still of a picture the document carries no still for, by its field box: slide 8's is
- * the dots of the exporter's frame as a mask, which `data-still-frame` scales smoothly (agents.css).
+ * the dots of the exporter's frame as a mask, which `data-still-frame` scales smoothly
+ * (agents.css).
  */
 const ROLE_OF_FIELD: Readonly<Record<string, HomeAssetRole>> = {
   'field-slide': 'field-still',

@@ -18,6 +18,7 @@ import { HomeKits } from '../components/home/HomeKits';
 import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
 import { HomeNumbers } from '../components/home/HomeNumbers';
+import { HomePatterns } from '../components/home/HomePatterns';
 import { HomePresent } from '../components/home/HomePresent';
 import { HomeTailor } from '../components/home/HomeTailor';
 import { HOME_META } from '../components/home/home-meta';
@@ -138,6 +139,8 @@ function HomePage() {
       <HomePresent />
       <HomeInterlude next="export" />
       <HomeExport />
+      <HomeInterlude next="patterns" />
+      <HomePatterns />
       <HomeInterlude next="features" />
       <HomeFeatures />
       <HomeInterlude next="close" />

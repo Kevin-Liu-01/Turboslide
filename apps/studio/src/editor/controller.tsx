@@ -24,6 +24,7 @@ import { refusedText, refusedWriteSentence, structuralRefusalSentence } from './
 import { serialChain } from './serial-chain';
 import { createAnswerScope } from './commit-answer';
 import type { CommitAnswer } from './commit-answer';
+import { stepTravelsServerFirst } from './undo-route';
 import { refusalText } from '@turboslide/chrome/error-text';
 import {
   OWN_WRITE_LANDED_MAX_MS,
@@ -455,6 +456,9 @@ function inboxItemViewOf(
  * checkpoint), the stream seq, and a record shaped answer for the callers that print one.
  */
 type Committed = { revision: number; entry: VersionRecord; seq?: number };
+
+/** What the history does with a server first write (`commitServerFirst`). */
+type ServerFirstStep = { kind: 'edit' } | { kind: 'redo'; entry: HistoryEntry } | { kind: 'undo' };
 
 /**
  * An operation the room returned to its author with its content (SPEC-3 3.5, 3.6): the reject
@@ -2810,12 +2814,19 @@ export function createEditorController(init: {
       return;
     }
     try {
-      await commitAs(inverse, `undo ${entry.label}`, 'undo', 'admitted');
+      await undoStep(entry, inverse);
     } catch (error) {
       say(`Undo failed: ${errorMessage(error)}`);
     }
   };
   const undo = (): Promise<void> => undoRedoChain(undoOnce);
+  /* an undo step goes the way its entry's write went: a restore's undo, and any step larger than
+     one ops post, through the server function (undo-route.ts; pass 3 P3-3), the rest through the
+     room */
+  const undoStep = (entry: HistoryEntry, inverse: Mutation[]): Promise<Committed> =>
+    stepTravelsServerFirst(entry.mutations, inverse)
+      ? commitServerFirst(inverse, `undo ${entry.label}`, { kind: 'undo' })
+      : commitAs(inverse, `undo ${entry.label}`, 'undo', 'admitted');
 
   const redoOnce = async (): Promise<void> => {
     const entry = history.redo();
@@ -2826,9 +2837,10 @@ export function createEditorController(init: {
       // a restore is a server first write (the reducer needs the version log): its redo goes the
       // same way, and the entry keeps its place with the inverse the answer carries; through the
       // room the client's reducer threw "No version n to restore" and the entry sat on the undo
-      // stack with nothing applied (the product round fix round, beside finding 4)
-      if (forward.some((mutation) => mutation.op === 'version.restore'))
-        await commitServerFirst(forward, `redo ${entry.label}`, entry);
+      // stack with nothing applied (the product round fix round, beside finding 4). A step larger
+      // than one ops post goes the same way (undo-route.ts)
+      if (stepTravelsServerFirst(entry.mutations, forward))
+        await commitServerFirst(forward, `redo ${entry.label}`, { kind: 'redo', entry });
       else await commitAs(forward, `redo ${entry.label}`, 'redo', 'admitted');
     } catch (error) {
       say(`Redo failed: ${errorMessage(error)}`);
@@ -2841,12 +2853,7 @@ export function createEditorController(init: {
     const entries = history.undoTo(id);
     for (const entry of entries) {
       try {
-        await commitAs(
-          stepMutations(entry, entry.inverse, 'inverse'),
-          `undo ${entry.label}`,
-          'undo',
-          'admitted',
-        );
+        await undoStep(entry, stepMutations(entry, entry.inverse, 'inverse'));
       } catch (error) {
         say(`Undo failed: ${errorMessage(error)}`);
         return;
@@ -2879,15 +2886,17 @@ export function createEditorController(init: {
   };
 
   /**
-   * A write the server applies first (version.restore needs the version log); the room announces
-   * it. `redoOf` is the history entry a redo brings back: it keeps its place on the undo stack and
-   * takes the inverse this write's answer carries, since a restore's inverse is the diff from the
-   * document it applied to and the deck may have moved since the entry was recorded.
+   * A write the server applies first (version.restore needs the version log; an undo or redo step
+   * of a restore, or one larger than an ops post, undo-route.ts); the room announces it. `step`
+   * says what the history does with it: an edit pushes its entry; a redo brings `entry` back, which
+   * keeps its place on the undo stack and takes the inverse this write's answer carries, since a
+   * restore's inverse is the diff from the document it applied to and the deck may have moved
+   * since the entry was recorded; an undo leaves the stacks as `history.undo()` left them.
    */
   const commitServerFirst = async (
     mutations: Mutation[],
     label: string,
-    redoOf?: HistoryEntry,
+    step: ServerFirstStep = { kind: 'edit' },
   ): Promise<Committed> => {
     await idle();
     const write: Write = { baseRevision: latest().serverRevision, author, mutations };
@@ -2903,14 +2912,13 @@ export function createEditorController(init: {
       publish({ error: result.message });
       throw new TypeError(result.message);
     }
-    let entry: HistoryEntry;
-    if (redoOf === undefined) {
-      entry = history.push({ mutations, inverse: result.entry.inverse, label });
-    } else {
-      redoOf.inverse = result.entry.inverse;
-      entry = redoOf;
+    if (step.kind === 'edit') {
+      const entry = history.push({ mutations, inverse: result.entry.inverse, label });
+      revisionOf.set(entry.id, result.revision);
+    } else if (step.kind === 'redo') {
+      step.entry.inverse = result.entry.inverse;
+      revisionOf.set(step.entry.id, result.revision);
     }
-    revisionOf.set(entry.id, result.revision);
     const { baseRevision: _base, inverse: _inverse, ...version } = result.entry;
     publish({ serverRevision: result.revision, versions: [...snapshot.versions, version] });
     if (result.document) {

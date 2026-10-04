@@ -1,0 +1,297 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide-vector/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/realtime.spec.ts",
+      "--reporter=list,json",
+      "--output",
+      "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright",
+      "--grep",
+      "(^| )(realtime\\.title\\.two-typers|realtime\\.caret\\.within-300ms|realtime\\.join\\.chip-within-1s): "
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide-vector/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/realtime.spec.ts",
+      "file": "core/realtime.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "realtime.caret.within-300ms: B types in a block A has open; A draws B's caret and name flag in B's hue within 300 ms of the first keystroke and moves it within 300 ms of each later keystroke, ten of ten, whichever instance answers B's POST",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                },
+                {
+                  "type": "measure",
+                  "description": "B's caret in A 161 ms after B's first keystroke; moved 200, 197, 199, 198, 206, 196, 195, 197, 198 ms after keystrokes 2 to 10; the flag \"CClay\"; data-offset 12"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 46870,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T16:40:41.467Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "B's caret in A 161 ms after B's first keystroke; moved 200, 197, 199, 198, 206, 196, 195, 197, 198 ms after keystrokes 2 to 10; the flag \"CClay\"; data-offset 12"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-0d567f01e6dc6d5a4271",
+          "file": "core/realtime.spec.ts",
+          "line": 737,
+          "column": 1
+        },
+        {
+          "title": "realtime.title.two-typers: A and B type a word each into one title within 200 ms, then append a word each, three rounds; both words in both browsers within 500 ms of the later Escape, no word lost, and each browser shows the other's word within 500 ms of its keystrokes",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 53821,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-w5hm\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-w5hm\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n\n    at joinB (/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:195:67)\n    at /Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:1010:25",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                      "column": 67,
+                      "line": 195
+                    },
+                    "snippet": "  193 |   await connected(B);\n  194 |   await dismissPrompt(B);\n> 195 |   await expect(B.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(\n      |                                                                   ^\n  196 |     'data-edit-mode',\n  197 |     'editing',\n  198 |     { timeout: 10_000 },"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                        "column": 67,
+                        "line": 195
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-w5hm\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n\n\n  193 |   await connected(B);\n  194 |   await dismissPrompt(B);\n> 195 |   await expect(B.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(\n      |                                                                   ^\n  196 |     'data-edit-mode',\n  197 |     'editing',\n  198 |     { timeout: 10_000 },\n    at joinB (/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:195:67)\n    at /Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:1010:25"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T16:41:28.488Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright/core-realtime-realtime-tit-0e0de-in-500-ms-of-its-keystrokes/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright/core-realtime-realtime-tit-0e0de-in-500-ms-of-its-keystrokes/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                    "column": 67,
+                    "line": 195
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-351d1b47152cb6ed16e0",
+          "file": "core/realtime.spec.ts",
+          "line": 1006,
+          "column": 1
+        },
+        {
+          "title": "realtime.join.chip-within-1s: B opens the link; B's chip is in A's title row within 1 s of B's editor being ready and A's chip in B's within 1 s, three of three, the two tabs on different instances (sync.status names the instance); on the do tier sync.status also names the object's colo, one across both tabs",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 32487,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-58oh\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-58oh\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n\n    at joinB (/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:195:67)\n    at /Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:1097:42",
+                    "location": {
+                      "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                      "column": 67,
+                      "line": 195
+                    },
+                    "snippet": "  193 |   await connected(B);\n  194 |   await dismissPrompt(B);\n> 195 |   await expect(B.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(\n      |                                                                   ^\n  196 |     'data-edit-mode',\n  197 |     'editing',\n  198 |     { timeout: 10_000 },"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                        "column": 67,
+                        "line": 195
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.pt-viewer:not(.ts-skeleton)').first()\nExpected: \u001b[32m\"\u001b[7medit\u001b[27ming\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7mview\u001b[27ming\"\u001b[39m\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveAttribute\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('.pt-viewer:not(.ts-skeleton)').first()\u001b[22m\n\u001b[2m    24 × locator resolved to <div data-index=\"0\" data-total=\"1\" data-dir=\"next\" data-settled=\"\" data-sb=\"thumbs\" data-mode=\"slide\" data-spellcheck=\"\" data-active=\"title\" data-density=\"thumbs\" data-edit-mode=\"viewing\" class=\"pt-viewer is-editor\" data-shell=\"edit:untitled-20261004-58oh\">…</div>\u001b[22m\n\u001b[2m       - unexpected value \"viewing\"\u001b[22m\n\n\n  193 |   await connected(B);\n  194 |   await dismissPrompt(B);\n> 195 |   await expect(B.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(\n      |                                                                   ^\n  196 |     'data-edit-mode',\n  197 |     'editing',\n  198 |     { timeout: 10_000 },\n    at joinB (/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:195:67)\n    at /Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts:1097:42"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T16:42:22.860Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright/core-realtime-realtime-joi-72621-s-colo-one-across-both-tabs/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/kevinliu/.config/turboslide/guard/20261004T161853Z-ce2e5411/realtime-production/playwright/core-realtime-realtime-joi-72621-s-colo-one-across-both-tabs/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e/core/realtime.spec.ts",
+                    "column": 67,
+                    "line": 195
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-230ff0ac0aa16077d8c8",
+          "file": "core/realtime.spec.ts",
+          "line": 1087,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T16:40:40.554Z",
+    "duration": 135282.611,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,342 @@
+{
+  "base": "https://turboslide-a6rbku4iu-general-translation.vercel.app",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T18:05:21.344Z",
+  "ms": 226414,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 225704,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/realtime/held-eba/run1/core-walk.json",
+    "deckId": "untitled-20261004-2wzr",
+    "steps": 47
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "fonts",
+      "versions"
+    ],
+    "costRows": null
+  },
+  "rows": 25,
+  "passed": 23,
+  "failed": 1,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "eba01af4",
+  "origin": "https://turboslide-a6rbku4iu-general-translation.vercel.app",
+  "date": "2026-10-04",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "failed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "passed",
+    "versions.show-changes-marks": "failed",
+    "comments.panel.empty-gesture": "passed",
+    "versions.panel.author-you": "passed",
+    "versions.field.square": "passed",
+    "fonts.dropdown.opens": "passed",
+    "fonts.dropdown.apply-selection": "passed",
+    "fonts.dropdown.search": "passed",
+    "fonts.format-menu.row": "passed",
+    "fonts.more-fonts.licence": "passed",
+    "fonts.face.reload-and-show": "passed",
+    "fonts.agent.font-list": "passed",
+    "fonts.links.licence-v4-1": "passed",
+    "fonts.fallback.in-stack": "passed",
+    "fonts.display-features.inter-only": "passed",
+    "fonts.catalog.geist": "passed",
+    "fonts.catalog.six-families": "passed",
+    "fonts.picker.search-category": "passed",
+    "fonts.table.takes-family": "not driven",
+    "fonts.field.own-face": "passed",
+    "versions.window-mark-column": "passed",
+    "versions.restore-in-more": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "versions.show-changes-marks",
+        "feature": "versions",
+        "result": "failed"
+      },
+      {
+        "id": "fonts.table.takes-family",
+        "feature": "fonts",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "fonts"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.11.pick (named row versionHistory.11.pick); marks with Show changes on 0 (); off 0"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.opens",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.apply-selection",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.search",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.format-menu.row",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.more-fonts.licence",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.face.reload-and-show",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.agent.font-list",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.links.licence-v4-1",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.fallback.in-stack",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.display-features.inter-only",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.geist",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.picker.search-category",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.table.takes-family",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: toolbar.font (docs/PRODUCT.md 7.1, B1); the Font control on a selected table is drawn disabled (\"Inter\"); takesFamily is P1 (FEATURES.md 3.5)"
+    },
+    {
+      "id": "fonts.field.own-face",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

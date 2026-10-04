@@ -1,0 +1,85 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": "blob",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is blob",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T16:01:34.291Z",
+  "ms": 55164,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 54133,
+    "report": "/Users/kevinliu/repos/Turboslide-joinfix/.turboslide/core-gate/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "collab.presence.join-within-2s"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 1,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "b1737654",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-04",
+  "results": {
+    "collab.presence.join-within-2s": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

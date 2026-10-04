@@ -1,0 +1,243 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide-vector/node_modules/@playwright/test/cli.js",
+      "test",
+      "apps/studio/e2e/core/realtime.spec.ts",
+      "--reporter=list,json",
+      "--output",
+      "/Users/kevinliu/.config/turboslide/guard/20261004T181423Z-eba01af4/realtime-production/playwright",
+      "--grep",
+      "(^| )(realtime\\.title\\.two-typers|realtime\\.caret\\.within-300ms|realtime\\.join\\.chip-within-1s): "
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide-vector/playwright.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/.config/turboslide/guard/20261004T181423Z-eba01af4/realtime-production/playwright",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide-vector/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "core/realtime.spec.ts",
+      "file": "core/realtime.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "realtime.caret.within-300ms: B types in a block A has open; A draws B's caret and name flag in B's hue within 300 ms of the first keystroke and moves it within 300 ms of each later keystroke, ten of ten, whichever instance answers B's POST",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                },
+                {
+                  "type": "measure",
+                  "description": "B's caret in A 124 ms after B's first keystroke; moved 193, 166, 199, 185, 183, 267, 185, 172, 202 ms after keystrokes 2 to 10; the flag \"GGallium\"; data-offset 12"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 136152,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T18:37:43.567Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "B's caret in A 124 ms after B's first keystroke; moved 193, 166, 199, 185, 183, 267, 185, 172, 202 ms after keystrokes 2 to 10; the flag \"GGallium\"; data-offset 12"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-0d567f01e6dc6d5a4271",
+          "file": "core/realtime.spec.ts",
+          "line": 737,
+          "column": 1
+        },
+        {
+          "title": "realtime.title.two-typers: A and B type a word each into one title within 200 ms, then append a word each, three rounds; both words in both browsers within 500 ms of the later Escape, no word lost, and each browser shows the other's word within 500 ms of its keystrokes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                },
+                {
+                  "type": "measure",
+                  "description": "round 1: both words in both browsers 96 ms after the later Escape; B's words in A tb1 356, ub1 296 ms after B's keystrokes; A's words in B ta1 304, ua1 226 ms | round 2: both words in both browsers 25 ms after the later Escape; B's words in A tb2 250, ub2 342 ms after B's keystrokes; A's words in B ta2 309, ua2 285 ms | round 3: both words in both browsers 40 ms after the later Escape; B's words in A tb3 251, ub3 308 ms after B's keystrokes; A's words in B ta3 252, ua3 309 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 62112,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T18:39:59.984Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "round 1: both words in both browsers 96 ms after the later Escape; B's words in A tb1 356, ub1 296 ms after B's keystrokes; A's words in B ta1 304, ua1 226 ms | round 2: both words in both browsers 25 ms after the later Escape; B's words in A tb2 250, ub2 342 ms after B's keystrokes; A's words in B ta2 309, ua2 285 ms | round 3: both words in both browsers 40 ms after the later Escape; B's words in A tb3 251, ub3 308 ms after B's keystrokes; A's words in B ta3 252, ua3 309 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-351d1b47152cb6ed16e0",
+          "file": "core/realtime.spec.ts",
+          "line": 1006,
+          "column": 1
+        },
+        {
+          "title": "realtime.join.chip-within-1s: B opens the link; B's chip is in A's title row within 1 s of B's editor being ready and A's chip in B's within 1 s, three of three, the two tabs on different instances (sync.status names the instance); on the do tier sync.status also names the object's colo, one across both tabs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "origins",
+                  "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                },
+                {
+                  "type": "measure",
+                  "description": "round 1: B's chip in A 934 ms, A's chip in B 934 ms after B's editor was ready; round 2: B's chip in A 462 ms, A's chip in B 461 ms after B's editor was ready; round 3: B's chip in A 463 ms, A's chip in B 462 ms after B's editor was ready; instances: https://www.turboslide.com answered 50cd8516, https://www.turboslide.com answered bc4b7de7 (one origin: the instance of each request is the deployment's choice and is recorded, not asserted); tier do; the object's colo IAD and IAD (one object on the do tier)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 45314,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-04T18:41:02.151Z",
+                  "annotations": [
+                    {
+                      "type": "origins",
+                      "description": "A on https://www.turboslide.com, B on https://www.turboslide.com (one origin); the editor link minted"
+                    },
+                    {
+                      "type": "measure",
+                      "description": "round 1: B's chip in A 934 ms, A's chip in B 934 ms after B's editor was ready; round 2: B's chip in A 462 ms, A's chip in B 461 ms after B's editor was ready; round 3: B's chip in A 463 ms, A's chip in B 462 ms after B's editor was ready; instances: https://www.turboslide.com answered 50cd8516, https://www.turboslide.com answered bc4b7de7 (one origin: the instance of each request is the deployment's choice and is recorded, not asserted); tier do; the object's colo IAD and IAD (one object on the do tier)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c1fe30b9939bf26c507-230ff0ac0aa16077d8c8",
+          "file": "core/realtime.spec.ts",
+          "line": 1087,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-04T18:37:41.383Z",
+    "duration": 246353.94799999997,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

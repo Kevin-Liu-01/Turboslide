@@ -1,0 +1,95 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T17:16:36.757Z",
+  "ms": 122641,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 121477,
+    "report": "/Users/kevinliu/repos/Turboslide-joinfix/.turboslide/core-gate/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "collab.presence.join-within-2s",
+      "realtime.join.chip-within-1s"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 2,
+  "passed": 2,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "ce2e5411",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-04",
+  "results": {
+    "realtime.join.chip-within-1s": "passed",
+    "collab.presence.join-within-2s": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

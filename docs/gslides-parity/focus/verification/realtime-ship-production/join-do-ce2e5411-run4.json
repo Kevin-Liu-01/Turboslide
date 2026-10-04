@@ -1,0 +1,107 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T17:22:27.639Z",
+  "ms": 116705,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 115668,
+    "report": "/Users/kevinliu/repos/Turboslide-joinfix/.turboslide/core-gate/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "collab.presence.join-within-2s",
+      "realtime.join.chip-within-1s"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 2,
+  "passed": 1,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "ce2e5411",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-04",
+  "results": {
+    "realtime.join.chip-within-1s": "failed",
+    "collab.presence.join-within-2s": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "realtime.join.chip-within-1s",
+        "feature": "realtime",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+    }
+  ]
+}

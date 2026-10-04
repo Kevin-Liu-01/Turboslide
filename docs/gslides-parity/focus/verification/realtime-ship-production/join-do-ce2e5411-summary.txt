@@ -1,0 +1,5 @@
+run1 start 17:16:36Z load  20.80 47.52 49.01  exit 0 2/2 tier null join-within-2s=passed chip-within-1s=passed end 17:18:39Z load  16.00 36.56 44.42 
+run2 start 17:18:39Z load  16.00 36.56 44.42  exit 0 2/2 tier null join-within-2s=passed chip-within-1s=passed end 17:20:51Z load  17.87 30.16 40.69 
+run3 start 17:20:51Z load  17.87 30.16 40.69  exit 1 1/2 tier null join-within-2s=passed chip-within-1s=failed end 17:22:27Z load  11.41 24.60 37.41 
+run4 start 17:22:27Z load  11.41 24.60 37.41  exit 1 1/2 tier null join-within-2s=passed chip-within-1s=failed end 17:24:24Z load  11.10 20.02 33.97 
+run5 start 17:24:24Z load  11.10 20.02 33.97  exit 1 1/2 tier null join-within-2s=passed chip-within-1s=failed end 17:26:22Z load  6.90 15.95 30.54 

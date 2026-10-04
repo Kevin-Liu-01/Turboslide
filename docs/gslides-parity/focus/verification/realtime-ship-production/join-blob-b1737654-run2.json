@@ -1,0 +1,97 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": "blob",
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is blob",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-04T15:56:47.533Z",
+  "ms": 90686,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 90344,
+    "report": "/Users/kevinliu/repos/Turboslide-joinfix/.turboslide/core-gate/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "collab.presence.join-within-2s"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 1,
+  "passed": 0,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "b1737654",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-04",
+  "results": {
+    "collab.presence.join-within-2s": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "collab.presence.join-within-2s",
+        "feature": "share",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "collab.presence.join-within-2s",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: B's chip within 2 s of the join"
+    }
+  ]
+}

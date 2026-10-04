@@ -362,6 +362,9 @@ importers:
 
   apps/studio:
     dependencies:
+      '@paper-design/shaders':
+        specifier: 'catalog:'
+        version: 0.0.78
       '@simplewebauthn/browser':
         specifier: 'catalog:'
         version: 14.0.0

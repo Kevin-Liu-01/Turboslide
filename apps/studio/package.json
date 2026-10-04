@@ -15,6 +15,7 @@
     "preview": "vite preview --port 4321 --strictPort"
   },
   "dependencies": {
+    "@paper-design/shaders": "catalog:",
     "@simplewebauthn/browser": "catalog:",
     "@simplewebauthn/server": "catalog:",
     "@tanstack/react-devtools": "catalog:",

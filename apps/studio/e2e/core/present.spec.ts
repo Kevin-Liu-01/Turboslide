@@ -1101,10 +1101,37 @@ test(title('present.laser.visible'), async () => {
   await openEditor(page, deck);
   await clickCard(page, slides[0]!);
   await startShow();
+  const { decodePng } = await import('../../../../scripts/probes/core-walk/toolkit.mjs');
+  /* the laser is read where the slide is empty: the earlier tests leave the title slide's words
+     across its middle, and at the old fixed point (700, 440) the dot sat on the title's ink, so
+     the read met no ground and gave a diameter of 1 (VERIFICATION.md "Round 1, pass 1" finding
+     3). The show is captured before the laser is on, and the dot goes to the first 48 px block
+     of one colour on a grid over the slide's lower half, away from the edges and the show's bar */
+  const target = await (async () => {
+    const view = page.viewportSize() ?? { width: 1440, height: 900 };
+    const img = decodePng(await page.screenshot({ scale: 'css' }));
+    const px = (x: number, y: number) => img.pixel(x, y) as number[];
+    const plain = (cx: number, cy: number): number => {
+      const ref = px(cx, cy);
+      let off = 0;
+      for (let y = cy - 24; y < cy + 24; y += 2)
+        for (let x = cx - 24; x < cx + 24; x += 2)
+          if (px(x, y).some((v, i) => Math.abs(v - ref[i]!) > 12)) off += 1;
+      return off;
+    };
+    let best = { x: 700, y: 440, off: Number.POSITIVE_INFINITY };
+    for (let y = Math.round(view.height * 0.5); y <= view.height - 160; y += 24)
+      for (let x = 120; x <= view.width - 120; x += 24) {
+        const off = plain(x, y);
+        if (off < best.off) best = { x, y, off };
+        if (off === 0) return best;
+      }
+    return best;
+  })();
   await page.keyboard.press('l');
   await expect(show()).toHaveAttribute('data-laser', 'true');
-  await page.mouse.move(640, 400);
-  await page.mouse.move(700, 440);
+  await page.mouse.move(target.x - 60, target.y - 40);
+  await page.mouse.move(target.x, target.y);
   await page.waitForTimeout(300);
   const dot = await page.evaluate(() => {
     const el = document.querySelector('[data-control="present.laserDot"], .ts-present-laser');
@@ -1132,7 +1159,6 @@ test(title('present.laser.visible'), async () => {
       },
       scale: 'css',
     });
-    const { decodePng } = await import('../../../../scripts/probes/core-walk/toolkit.mjs');
     const img = decodePng(shot);
     const cx = Math.round(12 + dot.w / 2);
     const cy = Math.round(12 + dot.h / 2);
@@ -1153,7 +1179,7 @@ test(title('present.laser.visible'), async () => {
   await leaveShow();
   test.info().annotations.push({
     type: 'laser',
-    description: `${dot ? `${dot.w} by ${dot.h} px, ${dot.background}, shadow ${dot.shadow}` : 'no dot'}; pixels ${read ? `core ${read.core}, ring ${read.ring}, drawn diameter ${read.diameter}` : 'unread'}`,
+    description: `at ${target.x},${target.y} (${target.off} of 576 pixels off the block's colour); ${dot ? `${dot.w} by ${dot.h} px, ${dot.background}, shadow ${dot.shadow}` : 'no dot'}; pixels ${read ? `core ${read.core}, ring ${read.ring}, drawn diameter ${read.diameter}` : 'unread'}`,
   });
   expect(dot, 'the laser dot is drawn').not.toBeNull();
   expect(read?.diameter ?? 0, 'the drawn diameter is 14 px with its ring').toBeGreaterThanOrEqual(

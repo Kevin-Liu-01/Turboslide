@@ -9231,7 +9231,7 @@
     {
       "id": "export.refusal.sentence-and-retry",
       "feature": "export",
-      "interaction": "The export call's answer refused through `page.route` with the store's own words in its body: no file, and the dialog and the snackbar read \"The PowerPoint could not be made. Try again in a minute\" and never \"Vercel\"; the plain export before it arrives; the blob put's retry on a 429 is the function's and apps/studio/src/server/download.test.ts judges it",
+      "interaction": "The export call's answer refused through `page.route` with the store's own words in its body: no file, and the dialog and the snackbar read \"The PowerPoint file could not be made. Try again in a minute\" and never \"Vercel\"; the plain export before it arrives; the blob put's retry on a 429 is the function's and apps/studio/src/server/download.test.ts judges it",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "severity": 3,

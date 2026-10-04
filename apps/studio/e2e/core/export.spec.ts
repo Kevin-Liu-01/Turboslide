@@ -3326,7 +3326,12 @@ test(title('export.refusal.sentence-and-retry'), async () => {
   expect('name' in arrived, 'the PowerPoint arrives with no fault').toBe(true);
   expect(refusedCalls, 'the export call was refused').toBeGreaterThan(0);
   expect('name' in refused, 'no file after the refusal').toBe(false);
-  expect(words, 'the sentence').toMatch(/The PowerPoint could not be made\. Try again in a minute/);
+  /* the product's word for the file is "PowerPoint file" (packages/chrome/src/download.ts
+     downloadKindWord, the polish round's item 80), as the Download dialog's progress line and the
+     export report read it */
+  expect(words, 'the sentence').toMatch(
+    /The PowerPoint file could not be made\. Try again in a minute/,
+  );
   expect(words, 'no Vercel').not.toMatch(/Vercel/);
 });
 

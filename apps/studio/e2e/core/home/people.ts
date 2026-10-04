@@ -5,7 +5,7 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { MOTION_KEY } from '../../../src/components/home/boot';
 import { PEOPLE } from '../../../src/components/home/copy';
-import { PEOPLE_LOOP_MS } from '../../../src/components/home/live/people-timing';
+import { PEOPLE_LOOP_MS } from '../../../src/components/home/people-timing';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
 

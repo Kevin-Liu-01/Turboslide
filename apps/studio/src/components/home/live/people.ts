@@ -3,7 +3,7 @@ import type { LiveContext } from './index';
 import { finishBand, installGuards, loop, onFrame, play, timeline } from './motion';
 import type { LoopHandle, Timeline } from './motion';
 import { paintSlide } from './paint';
-import { keyGaps, PEOPLE_LOOP_MS } from './people-timing';
+import { keyGaps, PEOPLE_LOOP_MS } from '../people-timing';
 
 /**
  * Two people edit the same slide (docs/LANDING.md 2.10, 3.4 P-L, 3.6 W1; B's band,

@@ -1,7 +1,9 @@
 /**
  * The two people band's clock (docs/LANDING.md 2.10, 3.4 P-L). V4's file, kept apart from
  * `live/people.ts` so the band's shell (`HomePeople.tsx`, V1's) writes the caption's figure from it
- * without carrying the band's code: "A staged loop of 14 seconds".
+ * without carrying the band's code: "A staged loop of 14 seconds". It sits outside `live/`, so the
+ * route's chunk imports no module under `live/` (v4.md Q20: a driver that blocks `/live/` to load
+ * the bare page, `home.present.print`'s, then still hydrates it).
  */
 
 /** One cycle of the staged loop (B's 14 s, `direction-b/landing.js` 1735). */

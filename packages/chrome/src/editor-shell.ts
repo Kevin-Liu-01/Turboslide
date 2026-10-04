@@ -336,8 +336,8 @@ export type EditorPresence = {
   showNames?: boolean;
   /** the collaborator announcements of 4.9 */
   announce?: boolean;
-  /** the room's tier, for the admin's sentence of 6.8 on the blob tier */
-  tier?: 'redis' | 'memory' | 'blob';
+  /** the room's tier, for the admin's sentence of 6.8 on the blob tier (`do` since docs/CLOUDFLARE.md 3.6.1) */
+  tier?: 'redis' | 'memory' | 'blob' | 'do';
   onFollow?: (clientId: string) => void;
   onUnfollow?: () => void;
   onGoTo?: (clientId: string) => void;
@@ -623,7 +623,7 @@ export type EditorSync = {
   revision: number;
   pending: number;
   retained: number;
-  tier: 'redis' | 'memory' | 'blob';
+  tier: 'redis' | 'memory' | 'blob' | 'do';
   transport: 'sse' | 'poll' | 'none';
   connected: boolean;
   offline?: boolean;

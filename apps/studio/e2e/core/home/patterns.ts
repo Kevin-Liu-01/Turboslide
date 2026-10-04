@@ -83,15 +83,19 @@ async function open(
 
 const band = (page: Page) => page.locator('[data-band="patterns"]');
 
-/** The left canvas's colours in the frame the shader draws, as `#rrggbb` with their counts. */
-function shaderColours(page: Page): Promise<Record<string, number>> {
+/**
+ * The left canvas's colours in the frame the shader draws, as `#rrggbb` with their counts; with a
+ * selector, that canvas's (the right side's print of the still frame).
+ */
+function shaderColours(
+  page: Page,
+  selector = '[data-pattern="moving"] [data-field="pattern"] > canvas',
+): Promise<Record<string, number>> {
   return page.evaluate(
-    () =>
+    (sel) =>
       new Promise<Record<string, number>>((resolve) => {
         requestAnimationFrame(() => {
-          const canvas = document.querySelector<HTMLCanvasElement>(
-            '[data-pattern="moving"] [data-field="pattern"] > canvas',
-          );
+          const canvas = document.querySelector<HTMLCanvasElement>(sel);
           if (canvas === null || canvas.width === 0) return resolve({});
           const copy = document.createElement('canvas');
           copy.width = 320;
@@ -108,8 +112,12 @@ function shaderColours(page: Page): Promise<Record<string, number>> {
           resolve(out);
         });
       }),
+    selector,
   );
 }
+
+/** The right side's print of the still frame (live/pattern.ts `printStill`). */
+const STILL_PRINT = '[data-pattern="still"] [data-field="pattern"] > canvas.ts-pattern-print';
 
 /** The slide's paper and ink on the left, as the page computes them, in `#rrggbb`. */
 function slideColours(page: Page): Promise<{ paper: string; ink: string }> {
@@ -196,8 +204,14 @@ export function rows(): void {
       expect(createHash('sha256').update(bytes).digest('hex')).toBe(record!.sha256);
       expect(record!.width).toBe(3200);
       expect(record!.height).toBe(1800);
-      /* the left draws the shader in the slide's ink and paper only, and moves */
+      /* the left draws the shader in the slide's ink and paper only, and moves; the right's print
+         of the still frame takes the same two colours, which under GT are the frame's own */
       const colours = await slideColours(page);
+      const printed = await shaderColours(page, STILL_PRINT);
+      expect(Object.keys(printed).length, 'the still frame printed').toBe(2);
+      expect(onlyColours(printed, [colours.paper, colours.ink]), JSON.stringify(printed)).toBe(
+        true,
+      );
       const frame = await shaderColours(page);
       expect(Object.keys(frame).length, 'the shader drew').toBeGreaterThan(0);
       expect(onlyColours(frame, [colours.paper, colours.ink]), JSON.stringify(frame)).toBe(true);
@@ -225,6 +239,11 @@ export function rows(): void {
         expect(onlyColours(recoloured, [kit.paper, kit.ink]), JSON.stringify(recoloured)).toBe(
           true,
         );
+        /* and the right side's still frame, as the exporter would capture slide 8 in the kit
+           (verify2 N3): its print in the kit's two colours */
+        const still = await shaderColours(page, STILL_PRINT);
+        expect(Object.keys(still).length, 'the still frame printed').toBe(2);
+        expect(onlyColours(still, [kit.paper, kit.ink]), JSON.stringify(still)).toBe(true);
         await page.locator('[data-kit="gt"]').first().click();
       }
     } finally {

@@ -30,8 +30,10 @@ import type { PatternFit, PatternMount, ShaderColor } from './pattern-mount';
  * drawn device pixels with its cell rounded to whole pixels (`fitOf`), and the still frame is
  * printed on that grid (`printFrame`): each cell takes the exporter's frame's tone under it
  * (`frameCells`) against the threshold the shader gives the same cell, on a 2D canvas in the
- * frame's own two colours, so at the anchor the two sides print the same cells. The served file
- * stays the exporter's frame (the `.ts-field-still` layer the driver hashes), under the print.
+ * slide's ink and paper (the frame's own two colours under GT), so at the anchor the two sides
+ * print the same cells and a kit restyles both (verify2 N3). The served file stays the exporter's
+ * frame (the `.ts-field-still` layer the driver hashes), under the print, and is requested once,
+ * by that layer (verify2 N1).
  */
 
 /** The pixels a pattern canvas holds at most: the slide's own 1,600 by 900 (pattern-mount.ts). */
@@ -231,16 +233,28 @@ function requestChunk(): Promise<Chunk | null> {
   return requested;
 }
 
+/** The slide's paper and ink as CSS colours, read where the picture sits. */
+function slideColors(el: Element): { paper: string; ink: string } {
+  const style = getComputedStyle(el);
+  const paper = style.getPropertyValue('--paper').trim() || style.getPropertyValue('--pt-paper');
+  const ink = style.getPropertyValue('--ink').trim() || style.getPropertyValue('--pt-ink');
+  return { paper: paper.trim() || '#fff', ink: ink.trim() || '#000' };
+}
+
 /** The slide's paper and ink as the shader takes them, read where the picture sits. */
 function colorsOf(el: Element): { paper: ShaderColor; ink: ShaderColor } {
-  const style = getComputedStyle(el);
   const vec = (value: string): ShaderColor => {
     const [r, g, b, a] = rgbaOf(value);
     return [r / 255, g / 255, b / 255, a / 255];
   };
-  const paper = style.getPropertyValue('--paper').trim() || style.getPropertyValue('--pt-paper');
-  const ink = style.getPropertyValue('--ink').trim() || style.getPropertyValue('--pt-ink');
-  return { paper: vec(paper.trim() || '#fff'), ink: vec(ink.trim() || '#000') };
+  const { paper, ink } = slideColors(el);
+  return { paper: vec(paper), ink: vec(ink) };
+}
+
+/** A CSS colour as one RGBA pixel of an `ImageData`'s 32 bit view (little endian). */
+function pixelOf(color: string): number {
+  const [r, g, b, a] = rgbaOf(color);
+  return ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
 }
 
 /** The shader's canvas covers the still frame once it has drawn a frame (two frames later). */
@@ -299,21 +313,46 @@ const shownAppearance = (): 'light' | 'dark' => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
-type Frame = { cells: FrameCells; paper: number; front: number };
+type Frame = { cells: FrameCells };
 const frames = new Map<'light' | 'dark', Promise<Frame | null>>();
 
 /**
- * The still frame of an appearance as its cells, read once: the served file (the request the
- * still layer's background made, so the memory cache answers) drawn one pixel a cell at the cells'
- * centres with no smoothing.
+ * Resolves once the page has fetched `path` (a resource timing entry names it). The still layer's
+ * CSS background makes the one request for a still frame; an image made after it is answered from
+ * the memory cache, which the layer's style holds. An image made first was a second request
+ * (verify2 N1): the layer's background, resolved later under the print box's
+ * `content-visibility: auto`, requested the file again.
+ */
+function fetched(path: string): Promise<void> {
+  const url = new URL(path, document.baseURI).href;
+  return new Promise<void>((resolve) => {
+    if (performance.getEntriesByName(url, 'resource').length > 0) {
+      resolve();
+      return;
+    }
+    const seen = new PerformanceObserver((list) => {
+      if (list.getEntriesByName(url).length === 0) return;
+      seen.disconnect();
+      resolve();
+    });
+    seen.observe({ type: 'resource', buffered: true });
+  });
+}
+
+/**
+ * The still frame of an appearance as its cells, read once: the served file, after the still
+ * layer's background has fetched it (`fetched`), drawn one pixel a cell at the cells' centres with
+ * no smoothing.
  */
 function frameOf(shown: 'light' | 'dark'): Promise<Frame | null> {
   let found = frames.get(shown);
   if (found === undefined) {
     found = (async () => {
       try {
+        const { path } = homeAsset('pattern-still', shown);
+        await fetched(path);
         const image = new Image();
-        image.src = homeAsset('pattern-still', shown).path;
+        image.src = path;
         await image.decode();
         const { naturalWidth: width, naturalHeight: height } = image;
         const grid = frameGrid(width, height);
@@ -335,10 +374,7 @@ function frameOf(shown: 'light' | 'dark'): Promise<Frame | null> {
           grid.rows,
         );
         const data = ctx.getImageData(0, 0, grid.cols, grid.rows).data;
-        const cells = frameCells(data, grid, width, height);
-        const view = new Uint32Array(data.buffer);
-        const at = cells.ink.indexOf(1);
-        return { cells, paper: view[0] ?? 0, front: at < 0 ? (view[0] ?? 0) : (view[at] ?? 0) };
+        return { cells: frameCells(data, grid, width, height) };
       } catch {
         /* no still frame (no role written, or no decode): the still layer stays */
         return null;
@@ -352,18 +388,27 @@ function frameOf(shown: 'light' | 'dark'): Promise<Frame | null> {
 /**
  * Prints the still frame on each box at the fit (the boxes share it, so the print is computed
  * once): a canvas over the still layer, which `data-pattern-printed` hides (motion.css); until it
- * is drawn the layer shows.
+ * is drawn the layer shows. The cells take the slide's ink on its paper, as the shader's do: under
+ * GT those are the frame's own two colours, and a kit or a typed background restyles slide 8 as it
+ * restyles every other slide (2.8; verify2 N3), as the exporter's capture of a deck in that kit
+ * would draw it.
  */
 let printing = 0;
+/** The colours of the print last drawn, so a style change that keeps them prints nothing. */
+let printedColors = '';
 async function printStill(boxes: HTMLElement[], fit: PatternFit): Promise<void> {
   const token = (printing += 1);
   const frame = await frameOf(shownAppearance());
-  /* a later print (an appearance change, a resize) wins */
-  if (frame === null || token !== printing) return;
+  /* a later print (an appearance change, a resize, a kit) wins */
+  if (frame === null || token !== printing || boxes[0] === undefined) return;
+  const colors = slideColors(boxes[0]);
+  printedColors = `${colors.paper} ${colors.ink}`;
+  const paper = pixelOf(colors.paper);
+  const ink = pixelOf(colors.ink);
   const lit = printFrame(frame.cells, fit);
   const image = new ImageData(fit.width, fit.height);
   const pixels = new Uint32Array(image.data.buffer);
-  for (let i = 0; i < lit.length; i += 1) pixels[i] = lit[i] === 1 ? frame.front : frame.paper;
+  for (let i = 0; i < lit.length; i += 1) pixels[i] = lit[i] === 1 ? ink : paper;
   for (const box of boxes) {
     let canvas = box.querySelector<HTMLCanvasElement>(':scope > canvas.ts-pattern-print');
     if (canvas === null) {
@@ -471,12 +516,16 @@ export function start(ctx: LiveContext): void {
   onMotionChange(ensure);
   new ResizeObserver(() => refit(false)).observe(band);
 
-  /* a kit or an appearance change restyles the shader (the still frame is the export's, and an
-     appearance change prints the other appearance's frame) */
+  /* a kit or a typed background restyles the shader and the print (an appearance change prints
+     the other appearance's frame, below) */
   const recolor = (): void => {
-    if (mount === null) return;
-    const { paper, ink } = colorsOf(box);
-    mount.recolor(paper, ink);
+    if (mount !== null) {
+      const { paper, ink } = colorsOf(box);
+      mount.recolor(paper, ink);
+    }
+    const now = slideColors(box);
+    if (near && fit !== null && `${now.paper} ${now.ink}` !== printedColors)
+      void printStill([box, stillBox], fit);
   };
   new MutationObserver(() => {
     recolor();

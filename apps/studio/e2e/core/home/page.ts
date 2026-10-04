@@ -605,6 +605,12 @@ async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: s
       const chip = page.locator('[data-chip="turn"]');
       await chip.scrollIntoViewIfNeeded({ timeout: 20_000 });
       await chip.waitFor({ state: 'visible', timeout: 20_000 });
+      // the shell draws the chips from the first paint; the band's chunk answers them once it has
+      // filled its box (a cold dev server compiles the chunk after the scroll)
+      await page
+        .locator('[data-reserve="agents"][data-filled]')
+        .first()
+        .waitFor({ timeout: 30_000 });
       await chip.click({ timeout: 20_000 });
       await page.waitForTimeout(5000);
       await page.evaluate(() => window.scrollTo(0, 0));
@@ -621,6 +627,104 @@ async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: s
       failures.push(`chip: ${String(error).split('\n')[0]}`);
     } finally {
       await close();
+    }
+  }
+
+  /* ---- on a touch phone a scroll that starts on the frame leaves the loop playing, and a tap on
+     the frame stops it at rest, selecting what it touched (2.2: a press stops it, a wheel or a
+     scroll does not; verifier pass 1's finding 2) ---- */
+  {
+    const context = await browser.newContext({
+      extraHTTPHeaders,
+      viewport: PHONE,
+      deviceScaleFactor: 1,
+      hasTouch: true,
+      isMobile: true,
+      colorScheme: 'light',
+    });
+    try {
+      await context.addInitScript(() => {
+        try {
+          localStorage.setItem('gt-theme', 'light');
+        } catch {
+          /* private mode */
+        }
+      });
+      const page = await context.newPage();
+      await page.goto('/home');
+      await page.locator('main#top[data-live="ready"]').waitFor({ timeout: 30_000 });
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { tsHomeMotion?: { registered(): string[] } }).tsHomeMotion
+            ?.registered()
+            .includes('L-H') === true,
+        undefined,
+        { timeout: 30_000 },
+      );
+      const motion = () =>
+        page.evaluate(() => {
+          const m = (
+            window as unknown as { tsHomeMotion: { running(): string[]; stopped(): string[] } }
+          ).tsHomeMotion;
+          return { running: m.running(), stopped: m.stopped(), y: Math.round(scrollY) };
+        });
+      const cdp = await context.newCDPSession(page);
+      const frame = await page.locator('[data-hero-slide]').boundingBox();
+      if (frame === null) throw new Error('no hero frame');
+      await cdp.send('Input.synthesizeScrollGesture', {
+        x: Math.round(frame.x + frame.width / 2),
+        y: Math.round(Math.min(frame.y + frame.height / 2, PHONE.height - 40)),
+        yDistance: -300,
+        speed: 800,
+        gestureSourceType: 'touch',
+      });
+      await page.waitForTimeout(1000);
+      const scrolled = await motion();
+      const ran = await page
+        .waitForFunction(
+          () =>
+            (window as unknown as { tsHomeMotion: { running(): string[] } }).tsHomeMotion
+              .running()
+              .includes('L-H'),
+          undefined,
+          { timeout: 10_000 },
+        )
+        .then(() => true)
+        .catch(() => false);
+      notes.push(
+        `touch: a scroll from the frame moved the page to y ${scrolled.y}; L-H stopped ${scrolled.stopped.includes('L-H')}, then running ${ran}`,
+      );
+      if (scrolled.y < 100) failures.push(`touch: the scroll moved the page to y ${scrolled.y}`);
+      if (scrolled.stopped.includes('L-H') || !ran)
+        failures.push('touch: a scroll from the frame stopped the loop');
+      await page.waitForFunction(
+        () =>
+          document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
+            'slide'
+          ] === 'title',
+        undefined,
+        { timeout: 30_000 },
+      );
+      const title = await page
+        .locator('[data-hero-slide] [data-home-slides] [data-object="title#heading"]')
+        .boundingBox();
+      if (title === null) throw new Error('no title on the frame');
+      await page.touchscreen.tap(title.x + 20, title.y + title.height / 2);
+      await page.waitForTimeout(400);
+      const tapped = await motion();
+      const focus = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-object') ?? '',
+      );
+      notes.push(
+        `touch: a tap on the title: L-H stopped ${tapped.stopped.includes('L-H')}, focus on ${focus || 'nothing'}`,
+      );
+      if (!tapped.stopped.includes('L-H'))
+        failures.push('touch: a tap on the frame did not stop the loop');
+      if (focus !== 'title#heading') failures.push(`touch: the tap left focus on "${focus}"`);
+    } catch (error) {
+      failures.push(`touch: ${String(error).split('\n')[0]}`);
+    } finally {
+      await context.close();
     }
   }
 

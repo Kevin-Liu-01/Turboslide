@@ -35,8 +35,12 @@ import type { HomeDeckState, SlideKey } from './state';
  * play); slide 5 holds for 2 s; a cut back to slide 1. The playing step tab carries
  * `aria-current="step"` and its 2 px ink rule fills across the step's length. V4's `loop` plays
  * it when the stage is at least half in view and pauses it otherwise; it registers once H5 has
- * ended (`heroDeveloped`) and its first cycle waits one beat (500 ms, 3.4) before the hold. A press or a key in the stage stops it for good at its rest state before the press acts;
- * a step tab stops it for good, lands the steps before it at once and plays the pressed one; a
+ * ended (`heroDeveloped`) and its first cycle waits one beat (500 ms, 3.4) before the hold. A press
+ * or a key in the stage stops it for good at its rest state before the press acts: a mouse button
+ * at once, a finger or a pen only as a tap (lifted within the scroll slop), so a scroll that
+ * starts on the frame leaves it playing, as a wheel does (2.2); the tap then acts on the rest
+ * state, selecting the object under it as a first touch does. A step tab stops it for good, lands
+ * the steps before it at once and plays the pressed one; a
  * change to slide 5 or its place in the deck (other than the customer's name or the kit) stops it
  * for good. Under reduced motion it never registers, and a step tab lands its step at once.
  */
@@ -58,6 +62,8 @@ type SlideState = 'absent' | 'placeholders' | 'titled' | 'filled';
 
 const STEP_IDS: readonly StepId[] = ['restore', 'new', 'title', 'rows'];
 const BEAT_MS = 500;
+/** A finger or a pen that moves further than this before it lifts is a scroll, not a tap (px). */
+const TAP_SLOP_PX = 10;
 /** Slide 5, which the loop's Restore takes out of the frame's order. */
 const SLIDE_5 = 'next-steps' as HomeSlideId;
 
@@ -484,9 +490,57 @@ export function startStage(ctx: LiveContext): void {
   };
 
   /* a press or a key in the stage stops the loop for good at its rest state before it acts; the
-     capture phase runs first, so the press then acts on the rest state */
-  for (const type of ['pointerdown', 'keydown'])
-    stage.addEventListener(type, () => stopForGood(true), { capture: true });
+     capture phase runs first, so the press then acts on the rest state. A mouse button stops it
+     at once. A finger or a pen stops it only as a tap: until it lifts within the slop it may be
+     the page's scroll, which leaves the loop playing (2.2: a wheel does not stop it), so its down
+     goes no further than the stage while the loop plays (the replica selects nothing on a staged
+     slide), and the tap, once the frame is at rest, selects the object under it as a first touch
+     does (5 "Touch and zoom") and lets its click show a thumbnail */
+  let tap: { id: number; x: number; y: number } | null = null;
+  stage.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (stoppedForGood) return;
+      if (event.pointerType === 'mouse') {
+        stopForGood(true);
+        return;
+      }
+      tap = event.isPrimary ? { id: event.pointerId, x: event.clientX, y: event.clientY } : null;
+      event.stopPropagation();
+    },
+    { capture: true },
+  );
+  stage.addEventListener(
+    'pointermove',
+    (event) => {
+      if (tap === null || event.pointerId !== tap.id) return;
+      if (Math.hypot(event.clientX - tap.x, event.clientY - tap.y) > TAP_SLOP_PX) tap = null;
+    },
+    { capture: true, passive: true },
+  );
+  stage.addEventListener(
+    'pointercancel',
+    (event) => {
+      if (tap !== null && event.pointerId === tap.id) tap = null;
+    },
+    { capture: true },
+  );
+  stage.addEventListener(
+    'pointerup',
+    (event) => {
+      const t = tap;
+      tap = null;
+      if (t === null || event.pointerId !== t.id || stoppedForGood) return;
+      if (Math.hypot(event.clientX - t.x, event.clientY - t.y) > TAP_SLOP_PX) return;
+      stopForGood(true);
+      const hit = document.elementFromPoint(event.clientX, event.clientY);
+      const object = hit?.closest<HTMLElement>('[data-object]') ?? null;
+      if (object !== null && wrapper.contains(object) && object.tabIndex >= 0)
+        object.focus({ preventScroll: true });
+    },
+    { capture: true },
+  );
+  stage.addEventListener('keydown', () => stopForGood(true), { capture: true });
 
   /* a step tab: the steps before it land at once, the pressed one plays; Restore after the run
      takes the frame to the run's start */

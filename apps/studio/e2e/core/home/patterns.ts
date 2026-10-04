@@ -8,6 +8,7 @@ import { HOME_ASSETS } from '../../../src/components/home/assets';
 import { MOTION_KEY } from '../../../src/components/home/boot';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
+import { bandReady } from './objects';
 
 // A lane module of core/home.spec.ts (docs/LANDING.md 2.13, 3.4 P-T, 6.7; the second pass). V4's,
 // V4#19: the patterns band. The right slide's picture is read through the network and its bytes
@@ -212,7 +213,9 @@ export function rows(): void {
       /* a kit recolours the left side (2.8; the kits band's Globex) */
       const globex = page.locator('[data-kit="globex"]');
       if ((await globex.count()) > 0) {
-        await globex.first().scrollIntoViewIfNeeded();
+        /* the swatch acts once the kits band's chunk has filled its box: on a deployment the
+           chunk arrives after the scroll that brings the band near, later than the press would */
+        await bandReady(page, 'kits');
         await globex.first().click();
         await band(page).scrollIntoViewIfNeeded();
         await page.waitForTimeout(600);

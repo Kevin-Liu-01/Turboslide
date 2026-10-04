@@ -288,6 +288,14 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     margin-top: 16px;
     text-align: left;
   }
+
+  /* the column's rails are the two screens' sides under 720 px (the gutter is 0), so each screen
+     draws its top and bottom rules alone, as the hero frame does (check step 18's chrome lint:
+     one owner a seam) */
+  .ts-people-screen {
+    border-left: 0;
+    border-right: 0;
+  }
 }
 
 /* ---- animated patterns (2.13): slide 8 twice, 500 by 281 px, 24 px apart, each under its

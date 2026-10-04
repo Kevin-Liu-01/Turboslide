@@ -1,4 +1,4 @@
-import type { DragEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { DragEvent, MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { sectionOfSlide } from '@turboslide/schema/deck';
@@ -10,6 +10,8 @@ import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
+import { pictureGate } from './picture-gate';
+import type { PictureGate } from './picture-gate';
 import { recentRowsOf, withRecent } from './recent-rows';
 
 import './upload.css';
@@ -76,6 +78,9 @@ export function ImportSlidesDialog() {
   const [busy, setBusy] = useState(false);
   const [over, setOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  /* the tile pictures load near the list's visible area and six at a time (TilePicture) */
+  const tiles = useRef<HTMLDivElement>(null);
+  const [gate] = useState<PictureGate>(() => pictureGate());
 
   /* the Upload tab is a drop zone with a button (docs/POLISH.md item 88): a dropped or picked
      bundle is uploaded and its slides listed next */
@@ -323,6 +328,7 @@ export function ImportSlidesDialog() {
             </button>
           </div>
           <div
+            ref={tiles}
             className="ts-dialog-slides"
             role="listbox"
             aria-label="Slides"
@@ -345,10 +351,10 @@ export function ImportSlidesDialog() {
                 })}
               >
                 <span className="ts-dialog-slide-frame">
-                  <img
+                  <TilePicture
                     src={`/api/render/${encodeURIComponent(slide.id)}?deck=${encodeURIComponent(source.id)}&theme=dark&w=320`}
-                    alt=""
-                    loading="lazy"
+                    gate={gate}
+                    list={tiles}
                   />
                 </span>
                 <span className="ts-dialog-slide-title">
@@ -365,5 +371,80 @@ export function ImportSlidesDialog() {
         </p>
       ) : null}
     </Dialog>
+  );
+}
+
+/**
+ * One tile's picture (round1/build/ha.md "Round 1 fix round" request 1): asked for when the tile
+ * comes within 200 px of the list's visible area, then through the dialog's picture gate
+ * (picture-gate.ts, six at a time) at low fetch priority, so the import's own request never waits
+ * behind 95 tile renders. Before, every tile asked at once: the browser's lazy margin covers the
+ * whole 320 px list.
+ */
+function TilePicture({
+  src,
+  gate,
+  list,
+}: {
+  src: string;
+  gate: PictureGate;
+  list: RefObject<HTMLDivElement | null>;
+}) {
+  const ref = useRef<HTMLImageElement>(null);
+  const [shown, setShown] = useState<string | null>(null);
+  /* none, then waiting for a turn, then loading on a turn, then done (the turn given back) */
+  const turn = useRef<'none' | 'waiting' | 'loading' | 'done'>('none');
+  const finish = () => {
+    if (turn.current !== 'loading') return;
+    turn.current = 'done';
+    gate.done();
+  };
+  useEffect(() => {
+    const img = ref.current;
+    if (img === null) return;
+    let cancel: (() => void) | null = null;
+    const ask = () => {
+      if (turn.current !== 'none') return;
+      turn.current = 'waiting';
+      cancel = gate.ask(() => {
+        turn.current = 'loading';
+        setShown(src);
+      });
+    };
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === 'undefined') ask();
+    else {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer?.disconnect();
+          ask();
+        },
+        { root: list.current, rootMargin: '200px 0px' },
+      );
+      observer.observe(img);
+    }
+    return () => {
+      observer?.disconnect();
+      /* a tile that leaves gives its place in the queue or its turn back */
+      if (turn.current === 'waiting') {
+        cancel?.();
+        turn.current = 'none';
+      } else if (turn.current === 'loading') {
+        turn.current = 'done';
+        gate.done();
+      }
+    };
+  }, [src, gate, list]);
+  return (
+    <img
+      ref={ref}
+      src={shown ?? undefined}
+      alt=""
+      fetchPriority="low"
+      decoding="async"
+      onLoad={finish}
+      onError={finish}
+    />
   );
 }

@@ -33,9 +33,14 @@ export function withLooks(state: HomeDeckState, looks: Partial<NextStepsLooks>):
   return { ...state, nextSteps: { ...looksOf(state), ...looks } } as HomeDeckState;
 }
 
-/** Draws slide 5's looks on every slide 5 under `root` (and on `root` itself). */
+/**
+ * Draws slide 5's looks on every slide 5 under `root` (and on `root` itself). Before the recorded
+ * run's rows step (a restore of version 2 or 3, `agentStep` 1 or 2) the row is a placeholder,
+ * which V2's `paintStep` draws, so the row is left alone unless a chip rewrote it (v2.md R26).
+ */
 export function paintNextSteps(root: ParentNode, state: HomeDeckState): void {
   const { turned, rewritten } = looksOf(state);
+  const rowsWritten = rewritten || (state.agentStep !== 1 && state.agentStep !== 2);
   const value = rewritten ? HOME_NEXT_STEPS.row.after : HOME_NEXT_STEPS.row.before;
   const rotate = turned ? `${HOME_NEXT_STEPS.turnTo}deg` : '';
   const slides = [
@@ -49,7 +54,7 @@ export function paintNextSteps(root: ParentNode, state: HomeDeckState): void {
     const cell = slide.querySelector<HTMLElement>(
       `[data-run="rows/items/${HOME_NEXT_STEPS.row.index}/value"]`,
     );
-    if (cell !== null && cell.textContent !== value) cell.textContent = value;
+    if (cell !== null && rowsWritten && cell.textContent !== value) cell.textContent = value;
   }
 }
 

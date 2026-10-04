@@ -317,7 +317,9 @@ function factsOf(state: HomeDeckState, key: SlideKey): { title: string; notes: s
   const typed = (state as HomeDeckState & { notes?: Readonly<Record<string, string>> }).notes?.[
     key
   ];
-  return { title: facts?.title ?? '', notes: typed ?? facts?.notes ?? '' };
+  /* slide 5 before the recorded run set its title (a restore of version 2) has none (v2.md R26) */
+  const untitled = source === 'next-steps' && state.agentStep === 1;
+  return { title: untitled ? '' : (facts?.title ?? ''), notes: typed ?? facts?.notes ?? '' };
 }
 
 /**

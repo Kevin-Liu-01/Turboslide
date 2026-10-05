@@ -28,6 +28,7 @@ import {
   FILES,
   NEVER_NAMES,
   RETIRED,
+  readExpectation,
   ROOM_NAMES,
   SUBCOMMANDS,
   TIERS,
@@ -979,7 +980,8 @@ describe('the command', () => {
       'room.env: mode 600, keys TURBOSLIDE_ROOM_SECRET, TURBOSLIDE_ROOM_BEARER',
     );
     expect(r.stdout).toContain('mail.env: absent');
-    expect(r.stdout).toContain(`${EXPECTATION_REL}: realtime blob`);
+    // the tree's own expectation, whatever the last flip or rollback wrote (ce2e5411 wrote do)
+    expect(r.stdout).toContain(`${EXPECTATION_REL}: realtime ${readExpectation()}`);
     expect(r.stdout).not.toContain(ROOM_SECRET);
   });
 });

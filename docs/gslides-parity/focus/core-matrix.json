@@ -10643,6 +10643,16 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 9; Round 1 pass 1 finding 16 (production 2026-10-05: \"deckId must be a slug.\" under \"This presentation could not be opened\", surf-refused-*.jpg)",
       "note": "Round 1 follow-up, lane C item 3: apps/studio/src/routes/-refused-page.tsx isAddressRefusal (the route's deck id is not a slug, or the store's sentence for one); /deck's own refusal page draws the same page for it (deck.$deckId.tsx DeckRefused). The answer's status stays 500, the route's error status"
+    },
+    {
+      "id": "view.book.hint-clear",
+      "feature": "view",
+      "interaction": "A first visit to /deck/gt-brand?mode=book at 1440, 1280 and 390 in both appearances: the hint \"Arrow keys move. Press ? for every shortcut.\" shows and its box never meets the book's title",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-r1.md finding 10; Round 1 pass 1 finding 10 (production 2026-10-05: surf-view-390-dark.jpg, the hint over \"Untitled presentation\")",
+      "note": "Round 1 follow-up, lane C item 4: on a phone the hint hangs 8 px under the toolbar (chrome Toast.css), so the book's head starts 48 px down under 600 px (packages/viewer/src/BookView.css); wider, the hint sits above the bottom edge. The row reads gt-brand and writes nothing"
     }
   ]
 }

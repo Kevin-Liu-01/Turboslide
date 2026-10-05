@@ -297,3 +297,14 @@
     margin: 0;
   }
 }
+
+/* The first visit hint ("Arrow keys move. Press ? for every shortcut.", chrome Toast.css) hangs
+   8 px under the toolbar on a phone and is 32 px tall, so it covered the head's title at 390 px
+   (the Round 1 follow-up, lane C item 4). The book starts at the toolbar's foot, so on a phone its
+   head starts 48 px down: the hint's 8 px, its 32 px and 8 px between them. Wider than 600 px the
+   hint sits above the bottom edge and the head keeps its padding. */
+@media (max-width: 600px) {
+  .pt-book-in {
+    padding-top: 48px;
+  }
+}

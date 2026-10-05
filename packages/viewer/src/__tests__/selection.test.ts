@@ -132,6 +132,28 @@ describe('display names and pointers', () => {
     expect(blockDisplayName(slide, 'missing')).toBe('Block');
   });
 
+  it('names a shader block Animated pattern, the noun Insert and Format options use', () => {
+    // the Round 1 follow-up, lane C item 2: the chip read "Shader" under Insert's "Animated pattern"
+    const patterned: Slide = {
+      schemaVersion: 1,
+      id: 'p',
+      kind: 'content',
+      layout: { type: 'center' },
+      slots: {
+        main: [
+          {
+            id: 'pattern',
+            type: 'material',
+            materialId: 'paper:liquid-metal',
+            alt: 'A liquid metal pattern',
+          },
+        ],
+      },
+    };
+    expect(blockDisplayName(patterned, 'pattern')).toBe('Animated pattern');
+    expect(blockDisplayName(patterned, 'pattern')).not.toMatch(/shader/i);
+  });
+
   it("sorts block types into the menu model's families", () => {
     expect(blockFamily('text')).toBe('text');
     expect(blockFamily('shape')).toBe('shape');

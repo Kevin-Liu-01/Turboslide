@@ -421,8 +421,9 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
   pair: 'Images',
   tiles: 'Image grid',
   details: 'Detail grid',
-  /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.1): a shader block reads Shader */
-  material: 'Shader',
+  /* a shader block reads the seller's noun, as Insert > Animated pattern and the Format options
+     section do (docs/NEXT.md question 10's default; the Round 1 follow-up, lane C item 2) */
+  material: 'Animated pattern',
   table: 'Table',
   rows: 'List',
   plain: 'List',

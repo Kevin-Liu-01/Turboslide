@@ -513,6 +513,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         1 +
         /* the Round 1 follow-up, lane C item 4: view.book.hint-clear */
         1 +
+        /* the Round 1 follow-up, lane C item 2: shaders.insert.chip-noun */
+        1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order */
         CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,
@@ -795,7 +797,8 @@ describe('the features round, ship two (docs/archive/rounds/FEATURES.md section 
     /* the shaders feature holds the 24 rows whose area and feature agree; the export rows and the
        View row count under their own features */
     /* the polish round adds three shaders rows (docs/archive/rounds/POLISH.md 2.5 items 36, 47, 48) */
-    expect(rowsForFeature('shaders').length).toBe(24 + 3);
+    /* the Round 1 follow-up, lane C item 2: shaders.insert.chip-noun */
+    expect(rowsForFeature('shaders').length).toBe(24 + 3 + 1);
     expect(ship.filter((row) => row.feature === 'export').length).toBe(4);
     expect(ship.filter((row) => row.feature === 'view').length).toBe(1);
     expect(ship.filter((row) => row.today === 'broken').length).toBe(11);

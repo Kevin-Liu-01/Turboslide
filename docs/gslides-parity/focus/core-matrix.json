@@ -10653,6 +10653,16 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 10; Round 1 pass 1 finding 10 (production 2026-10-05: surf-view-390-dark.jpg, the hint over \"Untitled presentation\")",
       "note": "Round 1 follow-up, lane C item 4: on a phone the hint hangs 8 px under the toolbar (chrome Toast.css), so the book's head starts 48 px down under 600 px (packages/viewer/src/BookView.css); wider, the hint sits above the bottom edge. The row reads gt-brand and writes nothing"
+    },
+    {
+      "id": "shaders.insert.chip-noun",
+      "feature": "shaders",
+      "interaction": "A selected animated pattern's chip reads \"Animated pattern\", the noun of Insert > Animated pattern and of Format options; the chip never reads Shader",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-r1.md finding 8; Round 1 pass 1 finding 7 (production 2026-10-05: obj-*-kind-animated-pattern.jpg, the chip \"Shader\")",
+      "note": "Round 1 follow-up, lane C item 2: the chip's noun is packages/viewer/src/Selection.tsx DISPLAY_NAMES (blockDisplayName), which the overlay's chip and the accessible names read"
     }
   ]
 }

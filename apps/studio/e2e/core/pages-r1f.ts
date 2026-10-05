@@ -297,7 +297,8 @@ export function pagesR1f(): string[] {
           return { h: Math.round(r.height), right: r.right, framed: frame(el) };
         };
         const thumb = row?.querySelector('.ts-row-thumb')?.getBoundingClientRect();
-        const titleText = row?.querySelector('.ts-hm-card-title-text')?.getBoundingClientRect();
+        /* the title's room: the label beside the thumbnail, whatever the title's length */
+        const titleText = row?.querySelector('.ts-row-label')?.getBoundingClientRect();
         return {
           tag: row?.tagName ?? null,
           inRows: Boolean(row?.closest('table.ts-rows')),

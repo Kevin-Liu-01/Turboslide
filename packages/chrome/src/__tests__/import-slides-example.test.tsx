@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
-import { act, cleanup, render } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { IMPORT_NONE_OF_YOURS, ImportSlidesDialog, rowMeta } from '../dialogs/ImportSlides';
 import { OpenDialog } from '../dialogs/Open';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
-import type { DeckHeadRow, EditorShellInput } from '../editor-shell';
+import type { DeckHeadRow, EditorShellInput, SourceDeckSlides } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
@@ -16,6 +16,9 @@ import { hideTooltip } from '../Tooltip';
 // and said "No other presentations on this Turboslide" while every browser can open the GT brand
 // deck; the listing now carries the example deck, marked, and the picker offers it after the
 // viewer's own decks under a sentence that is true of them, while File > Open leaves it out.
+// Item 2 (VERIFICATION.md "Round 1, pass 2" P2-1): a tile kept its place in the picture gate from
+// its first sighting until it unmounted, so the tiles in view at the end of a long list waited
+// behind every tile scrolled past; a tile that leaves now gives its place back.
 
 const doc = workedDocument();
 const SLIDE = 'content-rule';
@@ -76,9 +79,45 @@ function Host({ input: value, children }: { input: EditorShellInput; children: R
   return <EditorShellContext.Provider value={state}>{children}</EditorShellContext.Provider>;
 }
 
+/** An IntersectionObserver the test drives: `fire` reports tiles entering or leaving. */
+class FakeObserver {
+  static all: FakeObserver[] = [];
+  readonly targets = new Set<Element>();
+  readonly callback: IntersectionObserverCallback;
+  readonly options: IntersectionObserverInit;
+  constructor(callback: IntersectionObserverCallback, options: IntersectionObserverInit = {}) {
+    this.callback = callback;
+    this.options = options;
+    FakeObserver.all.push(this);
+  }
+  observe(target: Element) {
+    this.targets.add(target);
+  }
+  unobserve(target: Element) {
+    this.targets.delete(target);
+  }
+  disconnect() {
+    this.targets.clear();
+  }
+  takeRecords() {
+    return [];
+  }
+  fire(changes: ReadonlyArray<readonly [Element, boolean]>) {
+    const entries = changes
+      .filter(([target]) => this.targets.has(target))
+      .map(([target, isIntersecting]) => ({ target, isIntersecting }) as IntersectionObserverEntry);
+    if (entries.length > 0) this.callback(entries, this as unknown as IntersectionObserver);
+  }
+}
+
+beforeEach(() => {
+  FakeObserver.all = [];
+  vi.stubGlobal('IntersectionObserver', FakeObserver);
+});
 afterEach(() => {
   hideTooltip();
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 const ids = (container: HTMLElement, prefix: string) =>
@@ -158,5 +197,102 @@ describe('the example deck in Import slides (item 1)', () => {
       await listing;
     });
     expect(ids(opened.container, 'dialog.open.deck.')).toEqual(['gt-brand', 'mine']);
+  });
+});
+
+describe('the tile pictures of a long list (item 2, P2-1)', () => {
+  const SOURCE: SourceDeckSlides = {
+    id: 'gt-brand',
+    title: 'GT brand deck',
+    slides: Array.from({ length: 95 }, (_, n) => ({ id: `s${n}`, title: `Slide ${n + 1}`, n: n + 1 })),
+  };
+
+  async function openTiles() {
+    const listing = Promise.resolve([EXAMPLE]);
+    const read = Promise.resolve(SOURCE);
+    const rendered = render(
+      <Host
+        input={input({ recentDecks: () => [], listDecks: () => listing, readDeck: () => read })}
+      >
+        <ImportSlidesDialog />
+      </Host>,
+    );
+    await act(async () => {
+      await listing;
+    });
+    await act(async () => {
+      fireEvent.click(
+        rendered.container.querySelector('[data-control="dialog.importSlides.deck.gt-brand"]')!,
+      );
+      await read;
+    });
+    const imgs = [
+      ...rendered.container.querySelectorAll<HTMLImageElement>(
+        '[data-control^="dialog.importSlides.slide."] img',
+      ),
+    ];
+    const view = FakeObserver.all.find((o) => o.options.rootMargin === undefined)!;
+    const near = FakeObserver.all.find((o) => o.options.rootMargin !== undefined)!;
+    /** tiles [from, to) entering (true) or leaving (false) the view and the near area */
+    const move = (from: number, to: number, inView: boolean, isNear: boolean) =>
+      act(() => {
+        const range = imgs.slice(from, to);
+        view.fire(range.map((img) => [img, inView] as const));
+        near.fire(range.map((img) => [img, isNear] as const));
+      });
+    const asked = () => imgs.flatMap((img, n) => (img.getAttribute('src') ? [n] : []));
+    return { imgs, view, near, move, asked };
+  }
+
+  it('two observers watch the list: the view first, then 200 px around it; six pictures at once', async () => {
+    const { imgs, view, near, move, asked } = await openTiles();
+    expect(imgs).toHaveLength(95);
+    expect(FakeObserver.all.indexOf(view)).toBeLessThan(FakeObserver.all.indexOf(near));
+    expect(near.options.rootMargin).toBe('200px 0px');
+    move(0, 6, true, true);
+    move(6, 12, false, true);
+    expect(asked()).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(imgs[0]!.getAttribute('src')).toBe('/api/render/s0?deck=gt-brand&theme=dark&w=320');
+    expect(imgs[0]!.getAttribute('fetchpriority')).toBe('low');
+    act(() => {
+      fireEvent.load(imgs[0]!);
+    });
+    expect(asked()).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  });
+
+  it('a tile coming into view takes the turn of a loading tile that is only near, which drops its picture', async () => {
+    const { move, asked } = await openTiles();
+    move(0, 6, true, true);
+    move(6, 12, false, true);
+    expect(asked()).toEqual([0, 1, 2, 3, 4, 5]);
+    /* one row down: 0 to 2 stay near and loading, 3 to 5 stay in view, 6 to 8 come into view */
+    move(0, 3, false, true);
+    move(6, 9, true, true);
+    expect(asked()).toEqual([3, 4, 5, 6, 7, 8]);
+  });
+
+  it('a list scrolled to its end draws the tiles in view next, and a tile scrolled away drops its picture', async () => {
+    const { imgs, move, asked } = await openTiles();
+    move(0, 6, true, true);
+    move(6, 12, false, true);
+    /* the wheel passes every row: each row comes near, into view, out of view and leaves */
+    for (let n = 12; n < 87; n += 3) {
+      move(n, n + 3, true, true);
+      move(n - 12, n - 9, false, false);
+    }
+    move(75, 87, false, false);
+    /* the 8 tiles in view at the end */
+    move(87, 95, true, true);
+    expect(asked()).toEqual([87, 88, 89, 90, 91, 92]);
+    act(() => {
+      fireEvent.load(imgs[87]!);
+      fireEvent.error(imgs[88]!);
+    });
+    expect(asked()).toEqual([87, 88, 89, 90, 91, 92, 93, 94]);
+    /* a drawn tile keeps its picture when it leaves; one still loading drops it and asks again on its return */
+    move(87, 90, false, false);
+    expect(asked()).toEqual([87, 90, 91, 92, 93, 94]);
+    move(89, 90, true, true);
+    expect(asked()).toContain(89);
   });
 });

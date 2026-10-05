@@ -1,4 +1,4 @@
-import type { DragEvent, MouseEvent as ReactMouseEvent, RefObject } from 'react';
+import type { DragEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { sectionOfSlide } from '@turboslide/schema/deck';
@@ -11,7 +11,7 @@ import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { formatWhen } from '../VersionsPanel';
 import { pictureGate } from './picture-gate';
-import type { PictureGate } from './picture-gate';
+import type { PictureGate, PictureTurn } from './picture-gate';
 import { recentRowsOf, withRecent } from './recent-rows';
 
 import './upload.css';
@@ -78,9 +78,6 @@ export function ImportSlidesDialog() {
   const [busy, setBusy] = useState(false);
   const [over, setOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  /* the tile pictures load near the list's visible area and six at a time (TilePicture) */
-  const tiles = useRef<HTMLDivElement>(null);
-  const [gate] = useState<PictureGate>(() => pictureGate());
 
   /* the Upload tab is a drop zone with a button (docs/archive/rounds/POLISH.md item 88): a dropped or picked
      bundle is uploaded and its slides listed next */
@@ -330,42 +327,7 @@ export function ImportSlidesDialog() {
               <span className="pt-lb">{DIALOGS.importSlides.none}</span>
             </button>
           </div>
-          <div
-            ref={tiles}
-            className="ts-dialog-slides"
-            role="listbox"
-            aria-label="Slides"
-            aria-multiselectable="true"
-          >
-            {source.slides.map((slide) => (
-              <button
-                key={slide.id}
-                type="button"
-                role="option"
-                aria-selected={picked.has(slide.id)}
-                className={cn('ts-dialog-slide', picked.has(slide.id) && 'is-on')}
-                data-control={`dialog.importSlides.slide.${slide.id}`}
-                onClick={(event) => toggle(slide.id, event)}
-                {...tipProps({
-                  name: slide.title,
-                  doc: picked.has(slide.id)
-                    ? 'Picked; click to leave it out'
-                    : 'Click to pick it; Shift and click to pick every slide up to here',
-                })}
-              >
-                <span className="ts-dialog-slide-frame">
-                  <TilePicture
-                    src={`/api/render/${encodeURIComponent(slide.id)}?deck=${encodeURIComponent(source.id)}&theme=dark&w=320`}
-                    gate={gate}
-                    list={tiles}
-                  />
-                </span>
-                <span className="ts-dialog-slide-title">
-                  {slide.n}. {slide.title}
-                </span>
-              </button>
-            ))}
-          </div>
+          <SlideTiles key={source.id} source={source} picked={picked} onToggle={toggle} />
         </>
       )}
       {error !== null ? (
@@ -387,67 +349,181 @@ export function rowMeta(deck: Pick<DeckHeadRow, 'slides' | 'example'>): string {
 }
 
 /**
- * One tile's picture (round1/build/ha.md "Round 1 fix round" request 1): asked for when the tile
- * comes within 200 px of the list's visible area, then through the dialog's picture gate
- * (picture-gate.ts, six at a time) at low fetch priority, so the import's own request never waits
- * behind 95 tile renders. Before, every tile asked at once: the browser's lazy margin covers the
- * whole 320 px list.
+ * Step 2's grid of the source's slides. One picture gate and one watch per source, so Back and
+ * another deck start from nothing and every turn of the last source goes back when it unmounts.
  */
-function TilePicture({
-  src,
-  gate,
-  list,
+function SlideTiles({
+  source,
+  picked,
+  onToggle,
 }: {
-  src: string;
-  gate: PictureGate;
-  list: RefObject<HTMLDivElement | null>;
+  source: SourceDeckSlides;
+  picked: ReadonlySet<string>;
+  onToggle: (id: string, event?: ReactMouseEvent<HTMLButtonElement>) => void;
 }) {
+  const list = useRef<HTMLDivElement>(null);
+  const [gate] = useState<PictureGate>(() => pictureGate());
+  const [watch] = useState<TileWatch>(() => tileWatch(() => list.current));
+  useEffect(() => () => watch.stop(), [watch]);
+  return (
+    <div
+      ref={list}
+      className="ts-dialog-slides"
+      role="listbox"
+      aria-label="Slides"
+      aria-multiselectable="true"
+    >
+      {source.slides.map((slide) => (
+        <button
+          key={slide.id}
+          type="button"
+          role="option"
+          aria-selected={picked.has(slide.id)}
+          className={cn('ts-dialog-slide', picked.has(slide.id) && 'is-on')}
+          data-control={`dialog.importSlides.slide.${slide.id}`}
+          onClick={(event) => onToggle(slide.id, event)}
+          {...tipProps({
+            name: slide.title,
+            doc: picked.has(slide.id)
+              ? 'Picked; click to leave it out'
+              : 'Click to pick it; Shift and click to pick every slide up to here',
+          })}
+        >
+          <span className="ts-dialog-slide-frame">
+            <TilePicture
+              src={`/api/render/${encodeURIComponent(slide.id)}?deck=${encodeURIComponent(source.id)}&theme=dark&w=320`}
+              gate={gate}
+              watch={watch}
+            />
+          </span>
+          <span className="ts-dialog-slide-title">
+            {slide.n}. {slide.title}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** What a tile hears from the list: near its visible area (within 200 px) or not, in view or not. */
+type TileHandlers = { near: (yes: boolean) => void; view: (yes: boolean) => void };
+
+/** Watches the tiles of one list; `observe` answers the stop for one tile. */
+export type TileWatch = {
+  observe: (tile: Element, handlers: TileHandlers) => () => void;
+  stop: () => void;
+};
+
+/** How far past the list's visible area a tile's picture is asked for. */
+export const TILE_NEAR_MARGIN = '200px 0px';
+
+/**
+ * Two IntersectionObservers for a whole list, made on the first tile (the list's element exists
+ * by then): one for the visible area, made first so a tile knows it is in view before it asks,
+ * and one for the visible area and 200 px around it. Both report every change, so a tile that
+ * leaves is heard; the old observer disconnected after a tile's first sighting. Without
+ * IntersectionObserver every tile is near and in view.
+ */
+export function tileWatch(root: () => Element | null): TileWatch {
+  const handlers = new Map<Element, TileHandlers>();
+  let view: IntersectionObserver | null = null;
+  let near: IntersectionObserver | null = null;
+  const ensure = (): void => {
+    if (near !== null) return;
+    const options = { root: root() };
+    view = new IntersectionObserver((entries) => {
+      for (const entry of entries) handlers.get(entry.target)?.view(entry.isIntersecting);
+    }, options);
+    near = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) handlers.get(entry.target)?.near(entry.isIntersecting);
+      },
+      { ...options, rootMargin: TILE_NEAR_MARGIN },
+    );
+  };
+  return {
+    observe(tile, on) {
+      if (typeof IntersectionObserver === 'undefined') {
+        on.view(true);
+        on.near(true);
+        return () => undefined;
+      }
+      ensure();
+      handlers.set(tile, on);
+      view?.observe(tile);
+      near?.observe(tile);
+      return () => {
+        handlers.delete(tile);
+        view?.unobserve(tile);
+        near?.unobserve(tile);
+      };
+    },
+    stop() {
+      handlers.clear();
+      view?.disconnect();
+      near?.disconnect();
+    },
+  };
+}
+
+/**
+ * One tile's picture (round1/build/ha.md "Round 1 fix round" request 1; the Round 1 follow-up,
+ * lane A item 2): asked for through the list's picture gate (picture-gate.ts, six at a time) when
+ * the tile comes within 200 px of the list's visible area, in the in-view rank while it is in
+ * view, at low fetch priority so the import's own request never waits behind the tile renders. A
+ * tile that leaves before its picture is drawn gives its place back: a waiting tile leaves the
+ * queue, and a loading one drops its `src`, which ends the browser's request, and frees its turn.
+ * It asks again when it comes back. A loading tile only near the view drops its `src` the same way
+ * when a tile in view takes its turn, and loads again on its next turn. A drawn picture stays. A
+ * picture that fails gives its turn back and is asked for again after the tile leaves and
+ * returns.
+ */
+function TilePicture({ src, gate, watch }: { src: string; gate: PictureGate; watch: TileWatch }) {
   const ref = useRef<HTMLImageElement>(null);
   const [shown, setShown] = useState<string | null>(null);
-  /* none, then waiting for a turn, then loading on a turn, then done (the turn given back) */
-  const turn = useRef<'none' | 'waiting' | 'loading' | 'done'>('none');
-  const finish = () => {
-    if (turn.current !== 'loading') return;
-    turn.current = 'done';
-    gate.done();
-  };
   useEffect(() => {
     const img = ref.current;
     if (img === null) return;
-    let cancel: (() => void) | null = null;
-    const ask = () => {
-      if (turn.current !== 'none') return;
-      turn.current = 'waiting';
-      cancel = gate.ask(() => {
-        turn.current = 'loading';
-        setShown(src);
-      });
+    let turn: PictureTurn | null = null;
+    let inView = false;
+    let drawn = false;
+    const giveBack = (): void => {
+      turn?.release();
+      turn = null;
     };
-    let observer: IntersectionObserver | null = null;
-    if (typeof IntersectionObserver === 'undefined') ask();
-    else {
-      observer = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.isIntersecting)) return;
-          observer?.disconnect();
-          ask();
-        },
-        { root: list.current, rootMargin: '200px 0px' },
-      );
-      observer.observe(img);
-    }
+    const onLoad = (): void => {
+      drawn = true;
+      giveBack();
+    };
+    img.addEventListener('load', onLoad);
+    img.addEventListener('error', giveBack);
+    const unwatch = watch.observe(img, {
+      view: (yes) => {
+        inView = yes;
+        turn?.see(yes);
+      },
+      near: (yes) => {
+        if (drawn) return;
+        if (yes) {
+          /* a tile in view may take this tile's turn while it is only near: it drops its src */
+          turn ??= gate.ask(
+            () => setShown(src),
+            inView,
+            () => setShown(null),
+          );
+          return;
+        }
+        giveBack();
+        setShown(null);
+      },
+    });
     return () => {
-      observer?.disconnect();
-      /* a tile that leaves gives its place in the queue or its turn back */
-      if (turn.current === 'waiting') {
-        cancel?.();
-        turn.current = 'none';
-      } else if (turn.current === 'loading') {
-        turn.current = 'done';
-        gate.done();
-      }
+      unwatch();
+      img.removeEventListener('load', onLoad);
+      img.removeEventListener('error', giveBack);
+      giveBack();
     };
-  }, [src, gate, list]);
+  }, [src, gate, watch]);
   return (
     <img
       ref={ref}
@@ -455,8 +531,6 @@ function TilePicture({
       alt=""
       fetchPriority="low"
       decoding="async"
-      onLoad={finish}
-      onError={finish}
     />
   );
 }

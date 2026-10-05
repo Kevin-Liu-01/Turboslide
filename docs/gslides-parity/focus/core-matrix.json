@@ -4807,6 +4807,15 @@
       "note": "Round 1 follow-up, lane A item 1: the listing of the editor's Open and Import slides dialogs carries the deployment's example deck after the viewer's own, marked example (apps/studio/src/server/deck-scope.ts exampleHead, decks.ts listDecks); Import slides offers it to every browser and Open leaves it out (packages/chrome/src/dialogs/recent-rows.ts withRecent). The default of the Round 1 verifier's pass 2 question 1."
     },
     {
+      "id": "slides.import.tiles-in-view-first",
+      "feature": "slides",
+      "interaction": "File > Import slides, the GT brand deck, its tile pictures fetched once before (a warm server) and then answered 1 s late by the page's route (the scroll outruns the answers, as production's renders did), the list again from Back, the tile list scrolled to its end over 8 s with the wheel: every tile in view at the end draws its picture within 3 s of the scroll, no tile the scroll left more than 200 px behind keeps a picture request out, and the requests of tiles the scroll left end (net::ERR_ABORTED)",
+      "driver": "core/slides.spec.ts",
+      "today": "works",
+      "evidence": "verify-r1.md finding 6; VERIFICATION.md Round 1 pass 2 P2-1 (the 8 tiles in view at the end blank 20 s after the scroll). Lane A's readings on its dev server (port 4601, tmp store) 2026-10-05: the dialog and gate of 9c8df2f2 put back for one run, 18:58:29Z at load 112.4, red with 0 of 7 tiles in view drawn at 3095 ms; the fix passed at 19:06:53Z to 19:11:42Z (two runs, load 90.8 to 113.1) and at 19:12:50Z (load 91.6 to 109.8, 7 of 7 drawn 1280 ms after the scroll, 68 of 81 tile requests ended by a leave)",
+      "note": "Round 1 follow-up, lane A item 2: a tile that leaves the list's visible area and its 200 px margin gives its place in the picture gate back, waiting or loading (a loading tile drops its src and the browser ends the request), and the waiting tiles in view start before the tiles only near the view (packages/chrome/src/dialogs/picture-gate.ts, ImportSlides.tsx TilePicture and tileWatch). A timing row: a red reading at a one minute load over 24 with nothing lost is read again before it is called red."
+    },
+    {
       "id": "share.dialog.one-link",
       "feature": "share",
       "interaction": "Share opens with the General access select, the role select, the address in a read only field and one Copy link; the clipboard equals the field; no Copy link row elsewhere in the first stage; the sentence under the select reads the selected access",

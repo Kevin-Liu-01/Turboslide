@@ -519,6 +519,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         1 +
         /* the Round 1 follow-up, lane B (verify-r1.md finding 4): brand.template.blank-mark-not-an-object */
         1 +
+        /* the Round 1 follow-up, lane A item 2 (verify-r1.md finding 6): slides.import.tiles-in-view-first */
+        1 +
         /* the Round 1 follow-up, lane B (verify-r1.md finding 12): export.pptx.rotated-frames */
         1 +
         /* the Round 1 follow-up, lane A item 1 (verify-r1.md finding 2): slides.import.example-deck */

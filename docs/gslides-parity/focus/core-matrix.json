@@ -4876,7 +4876,7 @@
       "today": "broken",
       "evidence": "audit-home section 1 and items 1, 2, 12 (the h1 today ends \", in one place\" and the buttons are Start from a template and Open the GT Deck)",
       "severity": 2,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
     },
     {
       "id": "decks.card.thumbnail-slide-1",
@@ -9613,7 +9613,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 1, 2, 11, 13, 22",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
     },
     {
       "id": "decks.home.copy-rules",
@@ -9623,7 +9623,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 4, 5, 14, 16, 19",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.product-pictures",
@@ -9633,7 +9633,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 3, 20, 24",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The test no longer runs `shots.test.ts`. Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The test no longer runs `shots.test.ts`. Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
     },
     {
       "id": "decks.home.links-and-card",
@@ -9654,7 +9654,7 @@
       "severity": 1,
       "evidence": "audit-home items 30, 31",
       "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.layout-shift",
@@ -9664,7 +9664,7 @@
       "today": "broken",
       "severity": 1,
       "evidence": "audit-collab item 20",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Each later push holds its own motions and interactions to this row. Before: Polish round; docs/POLISH.md 3.7 (section 3, the home page remade); B7"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Each later push holds its own motions and interactions to this row. Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.grammar",

@@ -14,7 +14,8 @@
    at each rail (.ts-seam), the hatch strip after Start a new presentation, and the recent list as
    ruled rows with a 64 by 36 framed thumbnail by default; the cards stay under Grid view. Corners
    are square except --pt-radius on the search field, the view control and the sort field. The
-   trash keeps its layout. */
+   Round 1 follow-up (lane C item 5) puts the trash on the same grammar and the same ruled rows
+   (`.ts-decks-page.ts-trash-page`), its buttons drawn as text. */
 .ts-home-page {
   max-width: 1120px;
   padding-top: 24px;
@@ -740,14 +741,20 @@ html:has(.ts-home-page) {
   color: var(--pt-titanium);
 }
 
-/* ---- the trash (SPEC 6.4; docs/archive/rounds/PRODUCT.md 3.6): the same cards, two 32 px buttons under each,
-   Delete forever in ink with its glyph, Empty trash the page's one solid button ---- */
+/* ---- the trash (SPEC 6.4; docs/archive/rounds/PRODUCT.md 3.6; the Round 1 follow-up, lane C item 5): the page
+   grammar of /decks and its ruled rows, the band's head with the page's two acts at its end, each
+   row the 64 by 36 thumbnail and the title, the trashed date, the slide count, then Restore and
+   Delete forever as 32 px text buttons, Delete forever in ink with its glyph. No frame on a row or
+   a button: the rows own their rules, as on /decks ---- */
+.ts-decks-page .ts-trash {
+  padding: 32px 0 40px;
+}
+
 .ts-trash-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  padding: 24px 0 16px;
 }
 
 .ts-trash-head h1 {
@@ -755,44 +762,69 @@ html:has(.ts-home-page) {
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
-  font-size: 22px;
-  letter-spacing: -0.02em;
+  font-size: var(--ts-title, 1.125rem);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
 }
 
 .ts-trash-head p {
   margin: 4px 0 0;
-  font-size: 12.5px;
+  font-size: var(--ts-small);
   color: var(--pt-ink-2);
 }
 
+/* the head's acts end on the column's content edge, as Sign In's ink does (the 8 px padding is
+   given back) */
 .ts-trash-actions {
   display: inline-flex;
-  gap: 8px;
+  gap: 4px;
+  margin-right: -8px;
 }
 
-.ts-trash-actions .pt-ib:not(.is-solid),
+/* text buttons: no frame at rest; a disabled one keeps the disabled token of tokens.css */
+.ts-trash-actions .pt-ib,
 .ts-trash-card-actions .pt-ib {
-  border-color: var(--pt-hair);
+  border-color: transparent;
   text-decoration: none;
 }
 
-.ts-trash-actions .pt-ib:not(.is-solid):hover,
-.ts-trash-card-actions .pt-ib:hover {
-  border-color: var(--pt-ink-2);
+.ts-trash-actions .pt-ib:not(:disabled),
+.ts-trash-card-actions .pt-ib:not(:disabled) {
+  color: var(--pt-ink-2);
+}
+
+.ts-trash-actions .pt-ib:not(:disabled):hover,
+.ts-trash-card-actions .pt-ib:not(:disabled):hover {
+  color: var(--pt-ink);
+  border-color: transparent;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-trash-row-actions {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.ts-decks-page .ts-rows td.ts-trash-row-actions {
+  padding-right: 0;
 }
 
 .ts-trash-card-actions {
-  display: flex;
-  gap: 8px;
-  padding: 0 8px 10px;
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-right: -8px;
 }
 
 .ts-trash-card-actions .pt-ib {
   height: 32px;
 }
 
-/* the one irreversible act on a card reads in ink with its glyph */
-.ts-trash-card-actions .ts-trash-delete {
+/* the one irreversible act on a row reads in ink with its glyph */
+.ts-trash-card-actions .ts-trash-delete:not(:disabled) {
   color: var(--pt-ink);
 }
 
@@ -858,6 +890,55 @@ html:has(.ts-home-page) {
   .ts-trash-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* the trash's head acts start on the column's edge under the sentence */
+  .ts-trash-actions {
+    margin: 0 0 0 -8px;
+  }
+
+  /* a trash row takes two lines: the thumbnail, the title and its date line, then Restore and
+     Delete forever under the title, so both keep their words at 390 px */
+  .ts-decks-page .ts-trash .ts-rows,
+  .ts-decks-page .ts-trash .ts-rows tbody {
+    display: block;
+  }
+
+  .ts-decks-page .ts-trash .ts-rows tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+    padding: 10px 0 4px;
+    border-bottom: 1px solid var(--pt-hair-soft);
+  }
+
+  .ts-decks-page .ts-trash .ts-rows tr:last-child {
+    border-bottom-color: var(--pt-hair);
+  }
+
+  .ts-decks-page .ts-trash .ts-rows td {
+    display: block;
+    height: auto;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .ts-decks-page .ts-trash .ts-rows td:nth-child(2),
+  .ts-decks-page .ts-trash .ts-rows td:nth-child(3) {
+    display: none;
+  }
+
+  .ts-decks-page .ts-trash .ts-row-title {
+    max-width: none;
+  }
+
+  .ts-decks-page .ts-trash .ts-rows td.ts-trash-row-actions {
+    width: auto;
+    padding-left: 80px;
+  }
+
+  .ts-decks-page .ts-trash .ts-trash-card-actions {
+    margin: 0 0 0 -8px;
   }
 
   .ts-rows th:nth-child(2),

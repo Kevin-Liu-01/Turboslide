@@ -515,6 +515,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         1 +
         /* the Round 1 follow-up, lane C item 2: shaders.insert.chip-noun */
         1 +
+        /* the Round 1 follow-up, lane C item 5: decks.trash.ruled-rows */
+        1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order */
         CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,

@@ -16,7 +16,7 @@ import { useMountEffect } from '../components/useMountEffect';
 import { listTrashedDecks, removeStoredDeck, restoreStoredDeck } from '../server/decks';
 import { clearRestoringMarker, sessionMarkerStorage, writeRestoringMarker } from './-restoring';
 import type { DeckCard, TrashListing } from '../server/decks';
-import { Thumb, openFactsOf, shortDate, useStreamedList } from './decks.index';
+import { DECKS_PAGE, Thumb, openFactsOf, shortDate, useStreamedList } from './decks.index';
 import { RouterLinkSlot } from './-link-slot';
 import {
   browserTrashIds,
@@ -52,6 +52,13 @@ import './decks.css';
  * one Dialog (DeleteForeverDialog: the 18 px title, the lead "This cannot be undone.", Delete
  * forever focused), the card's Restore and Delete forever are 32 px with Delete forever in ink and
  * its glyph, and Empty trash is the page's one solid button, since it is the page's act.
+ *
+ * The Round 1 follow-up (lane C item 5): /decks draws ruled rows on the page grammar since Round 1
+ * (decks.index.tsx DeckRowView), and this page, one click away, still drew boxed cards with framed
+ * buttons. It now stands on the same grammar (the rails, the 58 px bar with a seam, the column)
+ * and lists the trashed decks in the same ruled rows: the 64 by 36 framed thumbnail and the title,
+ * the trashed date, the slide count, then Restore and Delete forever as 32 px text buttons. The
+ * data-control ids stay (`trash.card.<id>` is the row), so every reader of the page reads it.
  */
 export const Route = createFileRoute('/decks/trash')({
   loader: () => ({ decks: loadTrash() }),
@@ -197,39 +204,46 @@ function TrashPage() {
   const now = new Date();
 
   return (
-    <main ref={page} className="ts-home ts-home-page ts-trash-page">
-      <header className="ts-appbar">
-        <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
-        <span />
+    <main ref={page} className="ts-home ts-home-page ts-decks-page ts-trash-page">
+      {/* the column's two rails, drawn once for the page (grammar.css .ts-rails), as on /decks */}
+      <div className="ts-rails" aria-hidden="true" />
+      <header className="ts-appbar ts-seam">
+        <div className="ts-col ts-appbar-row">
+          <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
+        </div>
       </header>
 
-      {/* the listing streams behind the shell (SPEC-4 0.29): the frames stand in until it lands,
+      <section className="ts-trash ts-seam" aria-labelledby="ts-trash-heading">
+        <div className="ts-col">
+          {/* the listing streams behind the shell (SPEC-4 0.29): the frames stand in until it lands,
           and a refetch keeps the cards on the page (decks.index.tsx useStreamedList) */}
-      <Suspense
-        fallback={
-          <TrashBody
-            cards={null}
-            mounted={mounted}
-            now={now}
-            hidden={hidden}
-            busy={busy}
-            onRestore={(card) => void restore(card)}
-            onDelete={(card) => setConfirm({ kind: 'one', card })}
-            onEmpty={(cards) => setConfirm({ kind: 'all', cards })}
-          />
-        }
-      >
-        <TrashList
-          promise={decks}
-          mounted={mounted}
-          now={now}
-          hidden={hidden}
-          busy={busy}
-          onRestore={(card) => void restore(card)}
-          onDelete={(card) => setConfirm({ kind: 'one', card })}
-          onEmpty={(cards) => setConfirm({ kind: 'all', cards })}
-        />
-      </Suspense>
+          <Suspense
+            fallback={
+              <TrashBody
+                cards={null}
+                mounted={mounted}
+                now={now}
+                hidden={hidden}
+                busy={busy}
+                onRestore={(card) => void restore(card)}
+                onDelete={(card) => setConfirm({ kind: 'one', card })}
+                onEmpty={(cards) => setConfirm({ kind: 'all', cards })}
+              />
+            }
+          >
+            <TrashList
+              promise={decks}
+              mounted={mounted}
+              now={now}
+              hidden={hidden}
+              busy={busy}
+              onRestore={(card) => void restore(card)}
+              onDelete={(card) => setConfirm({ kind: 'one', card })}
+              onEmpty={(cards) => setConfirm({ kind: 'all', cards })}
+            />
+          </Suspense>
+        </div>
+      </section>
 
       {confirm !== null ? (
         <DeleteForeverDialog
@@ -275,10 +289,10 @@ function TrashList({
 }
 
 /**
- * The head and the cards: with `cards` null the listing is on its way and the grid's frames
- * stand in (`aria-busy`); with the list the cards a click took out stay hidden until the loader
- * confirms it. The Empty trash button counts the cards on the page, so a card that just left is
- * not deleted twice.
+ * The head and the rows: with `cards` null the listing is on its way and the rows' frames stand in
+ * (`aria-busy`); with the list the rows a click took out stay hidden until the loader confirms
+ * it. The Empty trash button counts the rows on the page, so a deck that just left is not deleted
+ * twice.
  */
 function TrashBody({
   cards,
@@ -295,7 +309,7 @@ function TrashBody({
     <>
       <div className="ts-trash-head">
         <div>
-          <h1>{HOME.trash}</h1>
+          <h1 id="ts-trash-heading">{HOME.trash}</h1>
           <p>
             Presentations moved to the trash stay here until they are restored or deleted forever.
           </p>
@@ -327,46 +341,84 @@ function TrashBody({
       </div>
 
       {shown === null ? (
-        <ul
-          className="ts-cards ts-cards-pending"
+        <table
+          className="ts-rows ts-rows-pending"
           data-control="trash.pending"
           aria-busy="true"
           aria-label={`${HOME.trash}, loading`}
         >
-          {[0, 1, 2, 3].map((i) => (
-            <li key={i} className="ts-hm-card ts-hm-card-frame" aria-hidden="true">
-              <span className="ts-hm-card-thumb" />
-              <div className="ts-hm-card-body">
-                <span className="ts-frame-line" />
-                <span className="ts-frame-line is-short" />
-              </div>
-            </li>
-          ))}
-        </ul>
+          <TrashRowsHead />
+          <tbody>
+            {[0, 1, 2, 3].map((i) => (
+              <tr key={i} className="ts-row ts-row-frame" aria-hidden="true">
+                <td className="ts-row-title">
+                  <span className="ts-row-name">
+                    <span className="ts-hm-card-thumb ts-row-thumb" />
+                    <span className="ts-frame-line" />
+                  </span>
+                </td>
+                <td className="ts-row-when" />
+                <td className="ts-row-count" />
+                <td className="ts-trash-row-actions" />
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : shown.length === 0 ? (
         <div className="ts-home-empty-figure" data-control="trash.empty-state">
           <EmptyFigure figure="figure" title={TRASH_EMPTY.title} sentence={TRASH_EMPTY.sentence} />
         </div>
       ) : (
-        <ul className="ts-cards" data-control="trash.cards">
-          {shown.map((card) => (
-            <TrashCard
-              key={card.id}
-              card={card}
-              mounted={mounted}
-              now={now}
-              busy={busy.has(card.id)}
-              onRestore={() => onRestore(card)}
-              onDelete={() => onDelete(card)}
-            />
-          ))}
-        </ul>
+        <table className="ts-rows" data-control="trash.cards">
+          <TrashRowsHead />
+          <tbody>
+            {shown.map((card) => (
+              <TrashRow
+                key={card.id}
+                card={card}
+                mounted={mounted}
+                now={now}
+                busy={busy.has(card.id)}
+                onRestore={() => onRestore(card)}
+                onDelete={() => onDelete(card)}
+              />
+            ))}
+          </tbody>
+        </table>
       )}
     </>
   );
 }
 
-function TrashCard({
+/** The words of the trash's column heads: the name and the count as /decks says them. */
+export const TRASH_ROWS = {
+  trashed: 'Trashed',
+  trashedOn: (when: string) => `Trashed ${when}`,
+} as const;
+
+/** The column heads, as /decks draws them (decks.index.tsx RowsHead), with Trashed for the date. */
+function TrashRowsHead() {
+  return (
+    <thead>
+      <tr>
+        <th scope="col">{DECKS_PAGE.name}</th>
+        <th scope="col">{TRASH_ROWS.trashed}</th>
+        <th scope="col">{DECKS_PAGE.slides}</th>
+        <th scope="col">
+          <span className="ts-visually-hidden">{DECKS_PAGE.actions}</span>
+        </th>
+      </tr>
+    </thead>
+  );
+}
+
+/**
+ * One ruled row of the trash: the first slide in the 64 by 36 frame and the title, the trashed
+ * date (under the title below 720 px), the slide count, and Restore and Delete forever as 32 px
+ * text buttons, Delete forever in ink with its glyph. The row is `trash.card.<id>`, the id the
+ * card had.
+ */
+function TrashRow({
   card,
   mounted,
   now,
@@ -382,48 +434,62 @@ function TrashCard({
   onDelete: () => void;
 }) {
   const trashed = card.trashedAt ?? card.updatedAt;
+  const when = mounted ? shortDate(trashed, now) : trashed.slice(0, 10);
   return (
-    <li
-      className="ts-hm-card ts-trash-card"
+    <tr
+      className="ts-row ts-trash-row"
       data-deck={card.id}
       data-control={`trash.card.${card.id}`}
+      data-busy={busy ? '' : undefined}
     >
-      <Thumb card={card} />
-      <div className="ts-hm-card-body">
-        <span className="ts-hm-card-title">
-          <span className="ts-hm-card-title-text">{card.title}</span>
+      <td className="ts-row-title">
+        <span className="ts-row-name">
+          <span className="ts-row-open">
+            <Thumb card={card} size="row" />
+          </span>
+          <span className="ts-row-label">
+            <span className="ts-hm-card-title">
+              <span className="ts-hm-card-title-text">{card.title}</span>
+            </span>
+            <span className="ts-row-when-under" suppressHydrationWarning>
+              {`${TRASH_ROWS.trashedOn(when)} · ${card.slides} slide${card.slides === 1 ? '' : 's'}`}
+            </span>
+          </span>
         </span>
-        <span className="ts-hm-card-when" suppressHydrationWarning>
-          {`Trashed ${mounted ? shortDate(trashed, now) : trashed.slice(0, 10)} · ${card.slides} slide${card.slides === 1 ? '' : 's'}`}
+      </td>
+      <td className="ts-row-when ts-hm-card-when" suppressHydrationWarning>
+        {when}
+      </td>
+      <td className="ts-row-count">{card.slides}</td>
+      <td className="ts-trash-row-actions">
+        <span className="ts-trash-card-actions">
+          <button
+            type="button"
+            className="pt-ib is-text"
+            data-control={`trash.restore.${card.id}`}
+            disabled={busy}
+            onClick={onRestore}
+            {...tipProps({ name: HOME.restore, doc: 'Puts the presentation back in your list.' })}
+          >
+            <Icon name="sync" />
+            <span className="pt-lb">{HOME.restore}</span>
+          </button>
+          <button
+            type="button"
+            className="pt-ib is-text ts-trash-delete"
+            data-control={`trash.delete.${card.id}`}
+            disabled={busy}
+            onClick={onDelete}
+            {...tipProps({
+              name: HOME.deleteForever,
+              doc: 'Deletes the presentation after asking; nothing brings it back.',
+            })}
+          >
+            <Icon name="trash" />
+            <span className="pt-lb">{HOME.deleteForever}</span>
+          </button>
         </span>
-      </div>
-      <div className="ts-trash-card-actions">
-        <button
-          type="button"
-          className="pt-ib is-text"
-          data-control={`trash.restore.${card.id}`}
-          disabled={busy}
-          onClick={onRestore}
-          {...tipProps({ name: HOME.restore, doc: 'Puts the presentation back in your list.' })}
-        >
-          <Icon name="sync" />
-          <span className="pt-lb">{HOME.restore}</span>
-        </button>
-        <button
-          type="button"
-          className="pt-ib is-text ts-trash-delete"
-          data-control={`trash.delete.${card.id}`}
-          disabled={busy}
-          onClick={onDelete}
-          {...tipProps({
-            name: HOME.deleteForever,
-            doc: 'Deletes the presentation after asking; nothing brings it back.',
-          })}
-        >
-          <Icon name="trash" />
-          <span className="pt-lb">{HOME.deleteForever}</span>
-        </button>
-      </div>
-    </li>
+      </td>
+    </tr>
   );
 }

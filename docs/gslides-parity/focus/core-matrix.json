@@ -10663,6 +10663,16 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 8; Round 1 pass 1 finding 7 (production 2026-10-05: obj-*-kind-animated-pattern.jpg, the chip \"Shader\")",
       "note": "Round 1 follow-up, lane C item 2: the chip's noun is packages/viewer/src/Selection.tsx DISPLAY_NAMES (blockDisplayName), which the overlay's chip and the accessible names read"
+    },
+    {
+      "id": "decks.trash.ruled-rows",
+      "feature": "decks",
+      "interaction": "/decks/trash at 1440 and 390 stands on the rails of /decks and lists a trashed deck as a ruled row of the rows table (a table row owning its 1 px rule at 1440, two lines under 720 px) with the 64 by 36 framed thumbnail and no frame on the row; Restore and Delete forever are 32 px text buttons without a frame, Recent presentations and Empty trash too; the title keeps 96 px; nothing crosses the viewport",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-r1.md finding 11; Round 1 pass 2 P2-2 (production 2026-10-05: trash-trash-listed-*.jpg, a framed card with framed Restore and Delete forever)",
+      "note": "Round 1 follow-up, lane C item 5: apps/studio/src/routes/decks.trash.tsx TrashRow on the page grammar (.ts-decks-page), decks.css; the data-control ids stay (trash.card.<id> is the row)"
     }
   ]
 }

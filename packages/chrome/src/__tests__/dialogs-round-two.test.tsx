@@ -37,7 +37,15 @@ function input(extra: Partial<EditorShellInput> = {}): EditorShellInput {
   return { deckId: doc.deck.id, document: doc, slideId: SLIDE, revision: 412, dispatch, ...extra };
 }
 
-function Host({ input: value, children }: { input: EditorShellInput; children: React.ReactNode }) {
+function Host({
+  input: value,
+  children,
+  closeDialog = vi.fn(),
+}: {
+  input: EditorShellInput;
+  children: React.ReactNode;
+  closeDialog?: () => void;
+}) {
   const state = {
     input: value,
     platform: 'mac',
@@ -57,7 +65,7 @@ function Host({ input: value, children }: { input: EditorShellInput; children: R
     setGuideUnderPointer: vi.fn(),
     dialog: null,
     openDialog: vi.fn(),
-    closeDialog: vi.fn(),
+    closeDialog,
     layoutGrid: null,
     openLayoutGrid: vi.fn(),
     closeLayoutGrid: vi.fn(),
@@ -160,6 +168,52 @@ describe('BackgroundDialog', () => {
     await flush();
     expect(dispatch).not.toHaveBeenCalled();
     noTitles();
+  });
+
+  it('closes on its write’s answer only while it is still the dialog on screen (brand.background.enter-keeps-open)', async () => {
+    /* the Round 1 follow-up, lane D: a seller closed the dialog while Done's write was in flight
+       and opened Change background again; the first write's answer called the shell's closeDialog,
+       which closes whatever dialog is open, and the second dialog closed under them */
+    let answer: (value: { revision: number }) => void = () => undefined;
+    const slow = vi.fn(
+      () =>
+        new Promise<{ revision: number }>((resolve) => {
+          answer = resolve;
+        }),
+    );
+    const closeDialog = vi.fn();
+    const first = render(
+      <Host input={input({ dispatch: slow })} closeDialog={closeDialog}>
+        <BackgroundDialog />
+      </Host>,
+    );
+    fireEvent.click(
+      document.querySelector('[data-control="dialog.background.color.plate"]') as HTMLElement,
+    );
+    fireEvent.click(
+      document.querySelector('[data-control="dialog.background.done"]') as HTMLElement,
+    );
+    expect(slow).toHaveBeenCalledTimes(1);
+    /* the seller closes this dialog before the write answers */
+    first.unmount();
+    answer({ revision: 413 });
+    await flush();
+    expect(closeDialog, 'a dialog no longer on screen closes nothing').not.toHaveBeenCalled();
+    /* the control: the dialog still on screen closes when its write answers */
+    render(
+      <Host input={input({ dispatch: slow })} closeDialog={closeDialog}>
+        <BackgroundDialog />
+      </Host>,
+    );
+    fireEvent.click(
+      document.querySelector('[data-control="dialog.background.color.plate"]') as HTMLElement,
+    );
+    fireEvent.click(
+      document.querySelector('[data-control="dialog.background.done"]') as HTMLElement,
+    );
+    answer({ revision: 414 });
+    await flush();
+    expect(closeDialog).toHaveBeenCalledTimes(1);
   });
 
   it('Choose from this presentation inserts the picture object at the bottom of the stack through the editor’s handle when wired, else two writes', async () => {

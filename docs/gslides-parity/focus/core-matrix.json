@@ -5667,7 +5667,8 @@
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-brand 17",
-      "severity": 2
+      "severity": 2,
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 1): production read \"Add to theme: locator.boundingBox: Timeout 30000ms\" and group 3's walk \"locator.waitFor: Timeout 8000ms\". Done closed the dialog when its write answered, and the shell's closeDialog closes whatever dialog is open then: on a deployment the write answered after the walk's Escape at 400 ms and after the second Change background had opened, and it closed that second dialog. dialogs/Background.tsx closes on a write's answer only while its own dialog is mounted (dialogs-round-two.test.tsx). By hand with every POST held 2.5 s (lane D's background-race.mjs) the reopened dialog closed between 3 s and 5 s before the fix and stayed open at 5 s after it, at 1440 and 390 in both appearances; the local walk, whose writes answer at once, read the row green before the fix."
     },
     {
       "id": "brand.fonts.roles",

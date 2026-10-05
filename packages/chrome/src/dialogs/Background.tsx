@@ -163,6 +163,22 @@ export function BackgroundDialog() {
   const [placingSeconds, setPlacingSeconds] = useState(0);
   const placingTimer = useRef(0);
   useEffect(() => () => window.clearInterval(placingTimer.current), []);
+  /* whether this dialog is still the one on screen (the Round 1 follow-up, lane D; the row
+     `brand.background.enter-keeps-open`): Done, Choose and Place close the dialog when their write
+     answers, and the shell's closeDialog closes whatever dialog is open then. On production a
+     seller who closed the dialog while Done's write was in flight and opened Change background
+     again saw the second dialog close under them when the first write answered. A write's answer
+     closes the dialog only while this one is mounted */
+  const onScreen = useRef(true);
+  useEffect(() => {
+    onScreen.current = true;
+    return () => {
+      onScreen.current = false;
+    };
+  }, []);
+  const closeAfterWrite = () => {
+    if (onScreen.current) shell.closeDialog();
+  };
   /* the presigned upload's reserved line (SPEC-3 8.5, 9.3): the route reports the size it is sending */
   const uploading = (input as { uploadingBytes?: number }).uploadingBytes;
 
@@ -256,7 +272,7 @@ export function BackgroundDialog() {
         background: chosen === undefined ? null : { color: chosen },
         baseRevision: input.revision,
       })
-      .then(() => shell.closeDialog())
+      .then(closeAfterWrite)
       .catch(fail);
   };
   const done = () => apply(color);
@@ -356,7 +372,7 @@ export function BackgroundDialog() {
           dither: rememberedDither(),
           baseRevision: input.revision,
         })
-        .then(() => shell.closeDialog())
+        .then(closeAfterWrite)
         .catch(fail);
       return;
     }
@@ -393,7 +409,7 @@ export function BackgroundDialog() {
           baseRevision: revision,
         });
       })
-      .then(() => shell.closeDialog())
+      .then(closeAfterWrite)
       .catch(fail);
   };
 
@@ -453,7 +469,7 @@ export function BackgroundDialog() {
     (clientPath ? backgroundFrameFor(recipe, input.document.deck).then(write) : write(null))
       .then(() => {
         stop();
-        shell.closeDialog();
+        closeAfterWrite();
       })
       .catch((err: unknown) => {
         stop();

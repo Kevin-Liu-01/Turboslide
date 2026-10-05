@@ -10633,6 +10633,16 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 7 (production 2026-10-05: Continue with Google over an empty band of about 150 px in a 400 by 320 box, signin-editor-dialog-390-*.jpg, signin2-editor-dialog-1440-*.jpg)",
       "note": "Round 1 follow-up, lane C item 1: the dialog takes its content's height (packages/chrome/src/dialogs/accounts.css); the email method's two steps hold the code step's 125 px between them, and the reserved error row is drawn where an answer can arrive inside the dialog, the email method or a passkey (SignIn.tsx)"
+    },
+    {
+      "id": "decks.refused.address-words",
+      "feature": "decks",
+      "interaction": "/edit/Not_A_Slug at 1440 and 390 and /deck/Not_A_Slug at 1440 draw \"This address is not a presentation\" and the sentence that a presentation's address ends in lower case letters, digits and hyphens, with Your Presentations to /decks and no Reload; no store words (deckId, slug) on the page; nothing crosses the viewport",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-r1.md finding 9; Round 1 pass 1 finding 16 (production 2026-10-05: \"deckId must be a slug.\" under \"This presentation could not be opened\", surf-refused-*.jpg)",
+      "note": "Round 1 follow-up, lane C item 3: apps/studio/src/routes/-refused-page.tsx isAddressRefusal (the route's deck id is not a slug, or the store's sentence for one); /deck's own refusal page draws the same page for it (deck.$deckId.tsx DeckRefused). The answer's status stays 500, the route's error status"
     }
   ]
 }

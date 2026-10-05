@@ -12,6 +12,7 @@ import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
 import { AccessPage } from './-access-page';
 import { deckCardMeta } from './-deck-card';
+import { REFUSED_PAGE, RouteRefused, isAddressRefusal } from './-refused-page';
 
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
 // the keys; #NN and #s/<slideId> hashes; the sidebar tree, the toolbar, the
@@ -203,7 +204,19 @@ function DeckMissing() {
  * own words, and the page shows the product's.
  */
 function DeckRefused({ error }: { error: unknown }) {
+  const { deckId } = Route.useParams();
   const gone = isNoLongerPublished(error);
+  /* an address whose id is not a slug names no presentation: the product's refused page says so
+     with Your Presentations, where this page showed the store's sentence alone (the Round 1
+     follow-up, lane C item 3) */
+  if (!gone && isAddressRefusal(error, deckId))
+    return (
+      <RouteRefused
+        error={error}
+        loaderHeading={REFUSED_PAGE.notOpened}
+        renderHeading={REFUSED_PAGE.notOpened}
+      />
+    );
   return (
     <main className="ts-home ts-access-page">
       <h1>{gone ? REFUSALS.noLongerPublished : 'This presentation could not be opened'}</h1>

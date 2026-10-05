@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 
-import { Link, useMatch, useRouter } from '@tanstack/react-router';
+import { Link, useMatch, useParams, useRouter } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import type { LinkComponent } from '@turboslide/chrome/editor-shell';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { PageFrame } from '../components/home/PageFrame';
 import { refusalSentence } from '../editor/refusal';
@@ -31,11 +32,19 @@ import { RouterLinkSlot } from './-link-slot';
  * 1104 px column, its rails and the 58 px bar with the lockup), its heading and sentence at the
  * ladder's sizes, its two buttons Title Case (DECK-GRAMMAR 22); the dithered figure and its mark
  * left, so the lockup is the page's one mark.
+ *
+ * The Round 1 follow-up (lane C item 3): an address whose deck id is not a slug (/edit/Not_A_Slug)
+ * drew the store's words, "deckId must be a slug.", under "This presentation could not be opened".
+ * Such an address names no presentation, so the page says that in the product's words, drops
+ * Reload (the same address refuses the same way) and makes Your Presentations its one action.
  */
 export const REFUSED_PAGE = {
   editorStopped: 'The editor stopped',
   notOpened: 'This presentation could not be opened',
   pageNotShown: 'This page could not be shown',
+  notAnAddress: 'This address is not a presentation',
+  addressSentence:
+    'A presentation’s address ends in lower case letters, digits and hyphens. Open the presentation from Your Presentations.',
   reload: 'Reload',
   reloadDoc: 'Reads the page again and draws it in place.',
   decks: 'Your Presentations',
@@ -43,9 +52,25 @@ export const REFUSED_PAGE = {
 } as const;
 
 /**
+ * True when the refusal is the address itself: the route's deck id is not a slug, or the server
+ * answered the store's sentence for one ("deckId must be a slug"). Such an address names no
+ * presentation, and reading it again refuses the same way.
+ */
+export function isAddressRefusal(error: unknown, deckId: unknown): boolean {
+  if (typeof deckId === 'string' && !SLUG_PATTERN.test(deckId)) return true;
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as { message?: unknown }).message)
+        : '';
+  return /\bmust be a slug\b/i.test(message);
+}
+
+/**
  * The page's fixed part: the frame with the lockup, the heading, the sentence and the Reload
- * button, with the caller's other actions after it. It reads no router unless the caller hands it
- * the router's link, so a test renders it alone.
+ * button when a read again can help, with the caller's other actions after it. It reads no
+ * router unless the caller hands it the router's link, so a test renders it alone.
  */
 export function RefusedPage({
   heading,
@@ -56,7 +81,8 @@ export function RefusedPage({
 }: {
   heading: string;
   sentence: string;
-  onReload: () => void;
+  /** Reload's handler; without it the page draws no Reload (an address that names no presentation) */
+  onReload?: () => void;
   children?: ReactNode;
   /** the router's link for the lockup; plain anchors without it (a test renders the page alone) */
   linkComponent?: LinkComponent;
@@ -70,15 +96,17 @@ export function RefusedPage({
       <h1 className="ts-page-title">{heading}</h1>
       <p className="ts-page-sentence">{sentence}</p>
       <div className="ts-page-actions ts-notfound-actions">
-        <button
-          type="button"
-          className="pt-ib is-solid"
-          data-control="refused.reload"
-          onClick={onReload}
-          {...tipProps({ name: REFUSED_PAGE.reload, doc: REFUSED_PAGE.reloadDoc })}
-        >
-          {REFUSED_PAGE.reload}
-        </button>
+        {onReload === undefined ? null : (
+          <button
+            type="button"
+            className="pt-ib is-solid"
+            data-control="refused.reload"
+            onClick={onReload}
+            {...tipProps({ name: REFUSED_PAGE.reload, doc: REFUSED_PAGE.reloadDoc })}
+          >
+            {REFUSED_PAGE.reload}
+          </button>
+        )}
         {children}
       </div>
     </PageFrame>
@@ -102,19 +130,23 @@ export function RouteRefused({
 }) {
   const router = useRouter();
   const status = useMatch({ strict: false, select: (match) => match.status });
+  const deckId: unknown = useParams({ strict: false, select: (params) => params.deckId });
+  const address = isAddressRefusal(error, deckId);
   const onReload = (): void => {
     void router.invalidate();
   };
   return (
     <RefusedPage
-      heading={status === 'error' ? loaderHeading : renderHeading}
-      sentence={refusalSentence(error)}
-      onReload={onReload}
+      heading={
+        address ? REFUSED_PAGE.notAnAddress : status === 'error' ? loaderHeading : renderHeading
+      }
+      sentence={address ? REFUSED_PAGE.addressSentence : refusalSentence(error)}
+      {...(address ? {} : { onReload })}
       linkComponent={RouterLinkSlot}
     >
       <Link
         to="/decks"
-        className="pt-ib"
+        className={address ? 'pt-ib is-solid' : 'pt-ib'}
         data-control="refused.decks"
         {...tipProps({ name: REFUSED_PAGE.decks, doc: REFUSED_PAGE.decksDoc })}
       >

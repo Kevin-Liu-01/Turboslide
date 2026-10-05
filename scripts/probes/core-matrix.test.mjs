@@ -1695,11 +1695,14 @@ describe('the landing round', () => {
   it('enters the home rows in push order, each on the driver with its note', () => {
     const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home').map((row) => row.id);
     const ids = new Set(home);
-    const second = home.filter((id) => LANDING_SECOND.includes(id));
-    /* the second pass's rows are a prefix of its push order, after every first pass row */
+    /* the second pass's rows entered are a prefix of its push order (no push's row before an
+       earlier push's), wherever in the home rows a lane placed them (beside its band's first
+       pass rows, as V2 and V3 do), and every first pass row is kept but the retired */
+    const second = LANDING_SECOND.filter((id) => ids.has(id));
     expect(second).toEqual(LANDING_SECOND.slice(0, second.length));
     const firstKept = LANDING_FIRST.filter((id) => !(id in RETIRED && ids.has(RETIRED[id])));
-    expect(home).toEqual([...firstKept, ...second]);
+    expect([...home].sort()).toEqual([...firstKept, ...second].sort());
+    expect(home.length).toBe(firstKept.length + second.length);
     expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
     for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
       expect(row.feature, row.id).toBe('decks');

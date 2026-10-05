@@ -7108,7 +7108,7 @@
       "evidence": "audit-shaders 14 (s04-material-block-inserted.png, walk-run2.json row 5)",
       "parks": ["insert.shader"],
       "setup": "slide.new with the title layout through the window API, the slide the insert lands on; never a driven step",
-      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it; the kind clause of 7.1 (\"the title slide keeps its kind\") was dropped in the fix round of ship two: an object insert through insertBlockPlan converts a fixed kind slide to a canvas first (SPEC-2 1.6, slide.toCanvas), as a table's and a chart's do, and no objects row asserts the kind (the integrator's ship two finding 1)"
+      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it; the kind clause of 7.1 (\"the title slide keeps its kind\") was dropped in the fix round of ship two: an object insert through insertBlockPlan converts a fixed kind slide to a canvas first (SPEC-2 1.6, slide.toCanvas), as a table's and a chart's do, and no objects row asserts the kind (the integrator's ship two finding 1) Round 1 follow-up, lane D (lane C's request 1): since lane C item 2 the chip reads Animated pattern; the step reads Shader or Animated pattern, as shaders.insert.words does; read green locally (13:00Z): chip \"Animated pattern\"."
     },
     {
       "id": "shaders.insert.words",

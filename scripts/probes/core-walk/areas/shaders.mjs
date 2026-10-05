@@ -599,7 +599,10 @@ export async function run(t) {
         ok:
           facts.selected &&
           facts.resize === 8 &&
-          facts.chip === 'Shader' &&
+          /* the chip's noun (lane C's request of the Round 1 follow-up): "Animated pattern" since
+             lane C item 2 (packages/viewer/src/Selection.tsx DISPLAY_NAMES), "Shader" before it,
+             the two words `shaders.insert.words` takes */
+          /^(Shader|Animated pattern)$/.test(facts.chip ?? '') &&
           hit.length === 0 &&
           onSheet,
         observed: `${card.title} inserted ${obj.id} at ${t.posStr(obj.pos)} (${obj.block.materialId}, preset ${obj.block.preset ?? 'none'}); ${t.describeSelection(facts)}; overlaps ${hit.join(', ') || 'no text box'} of ${texts.length}; kind ${kindBefore} -> ${kindAfter} (recorded)`,

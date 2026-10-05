@@ -13,7 +13,9 @@
 // merged cell travels as `rowspan` and `colspan` on its anchor with the covered cells left out of
 // the row arrays, a cell's own fill and border per cell (`type: 'none'` at weight 0, `dash` for
 // the six dashes), the table border's dash on every rule, and the table's rotation, shadow and
-// alt text on the frame.
+// alt text on the frame. pptxgenjs writes none of the three on a frame; the builder's
+// post-process writes the rotation and the mirror on the frame's p:xfrm (Round 1 verification
+// finding 12).
 import type PptxGenJS from 'pptxgenjs';
 
 import type { SceneDash, SceneTable, SceneTableCell, SceneText } from '../scene/types.ts';
@@ -169,14 +171,14 @@ export function normalisedColumnWidths(table: Pick<SceneTable, 'columns' | 'box'
 
 /**
  * Adds one measured table to a slide as `a:tbl`. `texts` are the scene's texts; the cells find
- * theirs by `textId`. Returns the rows and columns written.
+ * theirs by `textId`. Returns the rows and columns written and the frame's object name.
  */
 export function addSceneTable(
   slide: PptxGenJS.Slide,
   table: SceneTable,
   texts: readonly SceneText[],
   options: TableEmitOptions,
-): { rows: number; columns: number; merged: number; rotated: boolean } {
+): { rows: number; columns: number; merged: number; rotated: boolean; name: string } {
   const byId = new Map(texts.map((text) => [text.id, text]));
   let merged = 0;
   const rows: PptxGenJS.TableRow[] = table.rows.map((row, r) =>
@@ -188,8 +190,10 @@ export function addSceneTable(
   const colW = normalisedColumnWidths(table).map((w) => pxToIn(w));
   const rowH = table.rows.map((row) => pxToIn(row.h));
   const [x, y] = table.box;
-  // pptxgenjs's TableProps carry no rotate, shadow or altText (4.0.1 declarations): a rotated
-  // table travels upright at its box and the residual says so (the builder reads `rotated`)
+  // pptxgenjs's TableProps carry no rotate, shadow or altText (4.0.1 declarations), and its
+  // writer puts no rotation on a table's p:xfrm: the builder writes the rotation and the mirror
+  // on the frame named `name` after the write (ooxml/shapes.ts writeFrameTransform)
+  const name = `${options.namePrefix}#${table.blockId}${table.userGroup ? `@g:${table.userGroup}` : ''}`;
   slide.addTable(rows, {
     x: pxToIn(x),
     y: pxToIn(y),
@@ -199,13 +203,14 @@ export function addSceneTable(
     rowH,
     margin: 0,
     fontSize: pxToPt(table.size),
-    objectName: `${options.namePrefix}#${table.blockId}${table.userGroup ? `@g:${table.userGroup}` : ''}`,
+    objectName: name,
   });
   return {
     rows: table.rows.length,
     columns: table.columns.length,
     merged,
     rotated: table.rotate !== undefined && table.rotate !== 0,
+    name,
   };
 }
 

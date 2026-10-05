@@ -5047,6 +5047,17 @@
       "severity": 3
     },
     {
+      "id": "export.pptx.rotated-frames",
+      "feature": "export",
+      "interaction": "A table, a chart and a rectangle rotated 45 degrees on one slide: the Editable text PowerPoint writes the rectangle's a:xfrm with rot=\"2700000\" and each graphic frame's p:xfrm as <p:xfrm rot=\"2700000\">; the file arrives within 30 s",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-r1.md finding 12 (production 2026-10-05: a table and a chart rotated 45 degrees in the editor and the PDF carried no rot on their graphic frames)",
+      "note": "Round 1 follow-up, lane B item 2: pptxgenjs 4.0.1 writes rot, flipH and flipV on a shape's a:xfrm and nothing on a graphic frame's p:xfrm; the builder's post-process writes them on the frame in the shape's units (packages/export/src/ooxml/shapes.ts writeFrameTransform, pptx/build.ts). Setup: block.insert of the three objects through the window API. The driver lives in apps/studio/e2e/core/canvas-r1f.ts.",
+      "setup": "block.insert of the rotated table, chart and rectangle through the window API"
+    },
+    {
       "id": "export.download.options-dialog",
       "feature": "export",
       "interaction": "File > Download > More formats > Download options opens the dialog with the modes, Include skipped slides and Include speaker notes; the dialog closes when the file is saved",

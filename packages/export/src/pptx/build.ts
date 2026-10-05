@@ -37,7 +37,13 @@ import type { EmbedFont } from '../ooxml/fonts.ts';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
-import { toConnector, writeAdjustValues, writeAltText, writeColumns } from '../ooxml/shapes.ts';
+import {
+  toConnector,
+  writeAdjustValues,
+  writeAltText,
+  writeColumns,
+  writeFrameTransform,
+} from '../ooxml/shapes.ts';
 import { looksLikeSvg, writeSvgBlip } from '../ooxml/svg.ts';
 import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
 import type { HiddenTitle } from '../ooxml/titles.ts';
@@ -63,7 +69,7 @@ import { addSceneNotes } from './notes.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { describeFormats, encodePageRaster } from './page-raster.ts';
 import type { PageRaster } from './page-raster.ts';
-import { objectName } from './shapes.ts';
+import { objectName, transformProps } from './shapes.ts';
 import { addSceneTable } from './table.ts';
 import { addSceneText, addShapeText, familyFor } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
@@ -276,8 +282,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   let vectorsLeftOut = 0;
   /**
    * The post-process rewrites per slide index: connectors, adjust values, columns, the alt text
-   * of shapes and text boxes (SPEC-2 2.2.10, 2.3.2, 2.4.7, 2.5.6) and the vector of every svg
-   * picture placed on the slide (VECTOR.md 4.6).
+   * of shapes and text boxes (SPEC-2 2.2.10, 2.3.2, 2.4.7, 2.5.6), the vector of every svg
+   * picture placed on the slide (VECTOR.md 4.6) and the rotation and mirror of a table's or a
+   * chart's graphic frame (SPEC-2 2.1.1, 2.1.2; Round 1 verification finding 12).
    */
   const rewrites: {
     connectors: { name: string; ends: NonNullable<Scene['lines']>[number]['connect'] }[];
@@ -285,6 +292,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     columns: { name: string; columns: number }[];
     alts: { name: string; alt: string }[];
     svgs: { name: string; file: string }[];
+    frames: { name: string; transform: ReturnType<typeof transformProps> }[];
   }[] = [];
 
   for (const [sceneIndex, scene] of scenes.entries()) {
@@ -308,6 +316,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       columns: [],
       alts: [],
       svgs: [],
+      frames: [],
     };
     rewrites.push(slideRewrites);
     // a placed picture whose raster carries the asset's vector file joins the post-process,
@@ -539,9 +548,14 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           residual.add(
             `table: ${key} written as a:tbl (${written.rows} by ${written.columns}${written.merged > 0 ? `, ${written.merged} merged cell(s)` : ''}); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it`,
           );
+          // pptxgenjs writes no rotation on a table's frame; the post-process writes it on the
+          // frame's p:xfrm as pptxgenjs writes a shape's (ooxml/shapes.ts writeFrameTransform)
+          const frame = transformProps(table);
+          if (Object.keys(frame).length > 0)
+            slideRewrites.frames.push({ name: written.name, transform: frame });
           if (written.rotated)
             residual.add(
-              `table: ${key} is rotated on the sheet; pptxgenjs writes no rotation on a table, so the file holds it upright at its box`,
+              `table: ${key} is rotated on the sheet; its graphic frame carries the rotation on p:xfrm`,
             );
         } else {
           tables.push({
@@ -629,6 +643,12 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           pptx,
         );
         counts.charts += 1;
+        const chartFrame = transformProps(chart);
+        if (Object.keys(chartFrame).length > 0)
+          slideRewrites.frames.push({
+            name: objectName(namePrefix, chart.blockId, chart.userGroup),
+            transform: chartFrame,
+          });
         residual.add(
           `chart: ${scene.slideId}#${chart.blockId} written as a ${chart.kind} chart part (addChart); its box is a picture region in the verify loop, reported and never gated`,
         );
@@ -725,6 +745,16 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         xml = out.xml;
         if (out.written) counts.svgBlips += 1;
       }
+      // a rotated or mirrored table or chart: its frame's p:xfrm, before grouping, since the
+      // writer finds the frame by its own name (Round 1 verification finding 12)
+      for (const frame of slideRewrites.frames) {
+        const out = writeFrameTransform(xml, frame.name, frame.transform);
+        xml = out.xml;
+        if (!out.written)
+          warnings.push(
+            `${scene?.slideId ?? part}: ${frame.name}: the graphic frame was not found, so its rotation is not written`,
+          );
+      }
     }
     const grouped = groupShapes(xml);
     groups += grouped.groups.length;
@@ -734,7 +764,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet));
     }
     counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
-    counts.rotated += (xml.match(/<a:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
+    counts.rotated += (xml.match(/<[ap]:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
     writePart(zip, part, xml);
   }
   if (counts.connectors > 0)

@@ -5,6 +5,7 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import {
   Scratch,
+  addSlide,
   clickCard,
   ctl,
   download,
@@ -16,6 +17,7 @@ import {
   settled,
   slideJson,
   slideOrder,
+  state,
   teardownAll,
   title,
   waitEditor,
@@ -24,15 +26,17 @@ import {
 import { isCoreId } from './matrix';
 
 // Lane B's rows of the Round 1 follow-up (the canvas and the export the production verification
-// of Round 1 found, finding 4), driven against one deck from Blank made by its own identity: the
-// first write is a text box drawn on the title slide through Insert > Text box, so the title slide
-// is a canvas holding the template's mark block, which draws nothing. The mark row drives the
-// stage (a click on the title slide's empty top band, Tab from nothing, Select all) and reads the
-// Editable text PowerPoint it downloads. core/export.spec.ts calls `canvasR1f(browser)` once and
-// spreads its ids into its coverage list. A row's test is declared only once its row is in the
-// matrix. The deck is torn down through the product.
+// of Round 1 found, findings 4 and 12), driven against one deck from Blank made by its own
+// identity: the first write is a text box drawn on the title slide through Insert > Text box, so
+// the title slide is a canvas holding the template's mark block, which draws nothing; a second
+// slide holds a table, a chart and a rectangle rotated 45 degrees (setup writes). The mark row
+// drives the stage (a click on the title slide's empty top band, Tab from nothing, Select all);
+// both rows read the one Editable text PowerPoint the first of them downloads. core/export.spec.ts
+// calls `canvasR1f(browser)` once and spreads its ids into its coverage list. A row's test is
+// declared only once its row is in the matrix. The deck is torn down through the product.
 
 const MARK_ROW = 'brand.template.blank-mark-not-an-object';
+const FRAMES_ROW = 'export.pptx.rotated-frames';
 
 type BlankDeck = {
   context: BrowserContext;
@@ -40,6 +44,7 @@ type BlankDeck = {
   scratch: Scratch;
   deck: string;
   titleSlide: string;
+  turnedSlide: string;
   pptx?: { bytes: Buffer; ms: number; load: number };
 };
 
@@ -102,7 +107,43 @@ async function blankDeck(browser: Browser): Promise<BlankDeck> {
       .catch(() => undefined);
   const deck = scratch.add(info.id);
   const titleSlide = (await slideOrder(page))[0] ?? '';
-  made = { context, page, scratch, deck, titleSlide };
+  const turnedSlide = await addSlide(page);
+  await clickCard(page, turnedSlide);
+  let revision = (await state(page)).revision;
+  for (const block of [
+    {
+      id: 'turned-table',
+      type: 'table',
+      columns: [{ align: 'left' }, { align: 'right' }],
+      rows: [{ cells: ['Region', 'Q1'], header: true }, { cells: ['North', '1,200'] }],
+      pos: { x: 160, y: 300, w: 560, h: 160, rotate: 45 },
+    },
+    {
+      id: 'turned-chart',
+      type: 'chart',
+      kind: 'bar',
+      categories: ['Q1', 'Q2', 'Q3'],
+      series: [{ name: 'Revenue', values: [12, 18, 9] }],
+      pos: { x: 860, y: 240, w: 560, h: 360, rotate: 45 },
+    },
+    {
+      id: 'turned-shape',
+      type: 'shape',
+      shape: 'rectangle',
+      fill: 'plate',
+      stroke: 'ink',
+      pos: { x: 640, y: 660, w: 320, h: 120, rotate: 45 },
+    },
+  ]) {
+    await invoke(page, 'block.insert', {
+      baseRevision: revision,
+      slideId: turnedSlide,
+      slot: 'main',
+      block,
+    });
+    revision = (await settled(page)).revision;
+  }
+  made = { context, page, scratch, deck, titleSlide, turnedSlide };
   return made;
 }
 
@@ -148,6 +189,13 @@ function slidePart(bytes: Buffer, n: number): string {
   return name === undefined ? '' : (zipEntries(bytes).get(name)?.() ?? '');
 }
 
+/** The `p:xfrm` or `a:xfrm` start tag of the object named `name` in a slide part. */
+function xfrmOf(xml: string, name: string): string | null {
+  const at = xml.indexOf(`name="${name}"`);
+  if (at < 0) return null;
+  return /<[ap]:xfrm\b[^>]*>/.exec(xml.slice(at))?.[0] ?? null;
+}
+
 export function canvasR1f(browser: () => Browser): string[] {
   const ids: string[] = [];
 
@@ -189,6 +237,25 @@ export function canvasR1f(browser: () => Browser): string[] {
       const xml = slidePart((await editablePptx(blank)).bytes, 1);
       expect(xml, 'slide 1 holds the first write').toContain('The first write');
       expect(xml).not.toContain(`name="ts:${blank.titleSlide}#mark`);
+    });
+  }
+
+  if (isCoreId(FRAMES_ROW)) {
+    ids.push(FRAMES_ROW);
+    test(title(FRAMES_ROW), async () => {
+      test.setTimeout(240_000);
+      const blank = await blankDeck(browser());
+      const file = await editablePptx(blank);
+      expect(file.ms, 'the file arrives within 30 s').toBeLessThan(30_000);
+      const xml = slidePart(file.bytes, 2);
+      const shape = xfrmOf(xml, `ts:${blank.turnedSlide}#turned-shape`);
+      expect(shape, 'the rotated rectangle').toMatch(/^<a:xfrm\b[^>]*\srot="2700000"/);
+      for (const id of ['turned-table', 'turned-chart']) {
+        const frame = xfrmOf(xml, `ts:${blank.turnedSlide}#${id}`);
+        expect(frame, `${id}'s graphic frame`).toBe('<p:xfrm rot="2700000">');
+      }
+      expect(xml).toContain('<a:tbl>');
+      expect(xml).toContain('<c:chart ');
     });
   }
 

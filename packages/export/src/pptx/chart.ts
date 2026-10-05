@@ -3,7 +3,9 @@
 // title, the series colours as the theme resolved them, the number format on the value axis and
 // the shown values, the export faces on the labels, and the object's alt text. The chart's box is a
 // picture region in the verify loop (never gated): PowerPoint and LibreOffice lay a chart out
-// with their own axes, ticks and label placement, so its pixels are the viewer's.
+// with their own axes, ticks and label placement, so its pixels are the viewer's. pptxgenjs writes
+// no rotation on a chart's p:xfrm; the builder's post-process writes the rotation and the mirror
+// on the frame (ooxml/shapes.ts writeFrameTransform; Round 1 verification finding 12).
 import type PptxGenJS from 'pptxgenjs';
 
 import type { SceneChart } from '../scene/types.ts';

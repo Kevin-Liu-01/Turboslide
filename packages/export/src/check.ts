@@ -123,7 +123,8 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     slideNames.push(readSlideName(xml) ?? '');
     if (hasTitlePlaceholder(xml)) titledSlides += 1;
     counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
-    counts.rotated += (xml.match(/<a:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
+    /* a shape's a:xfrm and a table's or a chart's p:xfrm (Round 1 verification finding 12) */
+    counts.rotated += (xml.match(/<[ap]:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
     counts.groups += (xml.match(/<p:grpSp>/g) ?? []).length;
     counts.connectors += (xml.match(/<p:cxnSp>[\s\S]*?<a:(?:stCxn|endCxn)\b/g) ?? []).length;
     counts.numCol += (xml.match(/<a:bodyPr\b[^>]*\snumCol="/g) ?? []).length;

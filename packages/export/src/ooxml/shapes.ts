@@ -23,7 +23,7 @@ function encodeEntities(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** The `p:sp` (or `p:cxnSp`) element named `name`, with its bounds in the part, or null. */
+/** The `p:sp` (or `p:cxnSp`, `p:pic`, `p:graphicFrame`) element named `name`, with its bounds in the part, or null. */
 function findShape(
   xml: string,
   name: string,
@@ -188,6 +188,35 @@ export function writeAltText(
   );
   if (next === shape.xml) return { xml, written: false };
   return { xml: replaceAt(xml, shape.start, shape.end, next), written: true };
+}
+
+/**
+ * Writes a rotation and a mirror on the named graphic frame's `p:xfrm` (a table's `a:tbl` or a
+ * chart part; SPEC-2 2.1.1, 2.1.2): pptxgenjs 4.0.1 writes `rot`, `flipH` and `flipV` on a
+ * shape's `a:xfrm` from its options and writes a frame's `p:xfrm` with none, so a table or a
+ * chart rotated on the sheet opened upright. The attributes are the ones pptxgenjs writes on a
+ * shape, in its order and units: `flipH="1"`, `flipV="1"`, `rot` in 60000ths of a degree. A
+ * frame with no rotation and no flip is left as written. Returns the XML and whether a frame
+ * was rewritten.
+ */
+export function writeFrameTransform(
+  xml: string,
+  name: string,
+  transform: { rotate?: number; flipH?: boolean; flipV?: boolean },
+): { xml: string; written: boolean } {
+  const rot = Math.round((transform.rotate ?? 0) * 60000);
+  if (rot === 0 && transform.flipH !== true && transform.flipV !== true)
+    return { xml, written: false };
+  const frame = findShape(xml, name);
+  if (!frame || !frame.xml.startsWith('<p:graphicFrame>')) return { xml, written: false };
+  const next = frame.xml.replace(/<p:xfrm\b([^>]*)>/, (_m, attrs: string) => {
+    const cleaned = attrs.replace(/\s(rot|flipH|flipV)="[^"]*"/g, '');
+    return `<p:xfrm${cleaned}${transform.flipH === true ? ' flipH="1"' : ''}${
+      transform.flipV === true ? ' flipV="1"' : ''
+    }${rot !== 0 ? ` rot="${rot}"` : ''}>`;
+  });
+  if (next === frame.xml) return { xml, written: false };
+  return { xml: replaceAt(xml, frame.start, frame.end, next), written: true };
 }
 
 /** The number of shapes and text boxes with a `descr` in a slide part, for the read-back. */

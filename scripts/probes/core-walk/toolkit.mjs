@@ -723,7 +723,12 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     const kk = sheet.w / 1600;
     return { x: sheet.x + sx * kk, y: sheet.y + sy * kk };
   };
-  /** The first object of a slide that was not there before, or null after `timeout`. */
+  /**
+   * The first object of a slide that was not there before, or null after `timeout`. `before` is
+   * best `t.allBlockIds` read before the write: on a layout slide an insert or a paste converts the
+   * slide and its placeholders gain a pos, so a list of positioned objects alone answers a
+   * placeholder for the new object (verify-r1.md finding 13: the paste row took the heading).
+   */
   t.newObjectAfter = async (slideId, before, timeout = 20_000) => {
     const objs = await t.pollUntil(
       () => t.objectsOf(slideId),
@@ -790,7 +795,9 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
    * the sheet at a sheet point, or drags between two. Never throws: `{ obj, error, route }`.
    */
   t.insertByTool = async (slideId, rows, at, dragTo = null, { text = 'Text' } = {}) => {
-    const before = await t.objectIds(slideId);
+    /* every block id, positioned or not: an insert converts a layout slide and its placeholders
+       gain a pos in the same write (`t.allBlockIds`), which is not the new object */
+    const before = await t.allBlockIds(slideId);
     let route = 'menu';
     try {
       await t.openMenu('insert');
@@ -976,6 +983,51 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     }
     return mine() ? ctrls : null;
   };
+  /**
+   * Removes an object the walk made (a pasted or inserted copy) and nothing else (the Round 1
+   * follow-up, lane D; verify-r1.md finding 13: the paste row read the text slide's heading as its
+   * copy and its Delete removed the heading; the filmstrip paste row's Delete removed the slide).
+   * Delete is pressed only while the object's own move handle is on the overlay and the focus is
+   * not on the filmstrip, because Delete with the filmstrip focused removes the current slide
+   * (after a paste there the copy is drawn selected and the card keeps the focus) and with another
+   * object selected removes that one; otherwise the object goes through `block.remove` on the
+   * window API. Answers how it went, for the observed line.
+   */
+  t.removeOwnObject = async (slideId, id) => {
+    const slides = (await t.slideOrder()).length;
+    await t.selectObject(id).catch(() => null);
+    /* the focus as well as the handles: a paste with the filmstrip focused draws the copy
+       selected while the card keeps the focus, and Delete there removes the slide */
+    let filmstripFocused = false;
+    try {
+      filmstripFocused = await page.evaluate(() =>
+        Boolean(document.activeElement?.closest?.('[data-control^="filmstrip."]')),
+      );
+    } catch {
+      filmstripFocused = false;
+    }
+    if (!filmstripFocused && (await t.handleControls()).includes(`handle.${id}.move`)) {
+      await t.press('Delete');
+      await t.settled();
+      const left = await t.pollUntil(
+        () => t.blockOf(slideId, id),
+        (b) => b === null,
+        6000,
+      );
+      const now = (await t.slideOrder()).length;
+      if (now !== slides)
+        return `deleted with Delete, and the deck went ${slides} -> ${now} slides`;
+      if (left === null) return 'deleted with Delete';
+    }
+    try {
+      const s = await t.settled();
+      await t.invoke('block.remove', { baseRevision: s.revision, slideId, blockId: id });
+      await t.settled();
+      return 'removed through block.remove (its handles were not on the overlay)';
+    } catch (error) {
+      return `not removed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`;
+    }
+  };
   /** The overlay control of a handle: the object's own, else the one handle of that kind. */
   t.findHandle = async (id, suffix) => {
     const ctrls = await t.handleControls();
@@ -1142,7 +1194,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   };
   /** Places a block on a slide through the window API; returns the object or null. */
   t.placeBlock = async (slideId, block, slot = 'main') => {
-    const before = await t.objectIds(slideId);
+    const before = await t.allBlockIds(slideId);
     const s = await t.state();
     await t.invoke('block.insert', { baseRevision: s.revision, slideId, slot, block });
     const obj = await t.newObjectAfter(slideId, before);
@@ -1195,7 +1247,7 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
     });
     await t.settled();
     const s2 = await t.state();
-    const before = await t.objectIds(slideId);
+    const before = await t.allBlockIds(slideId);
     await t.invoke('block.insert', {
       slideId,
       slot: 'main',

@@ -2222,7 +2222,8 @@
       "driver": "probe --core",
       "today": "broken",
       "severity": 2,
-      "evidence": "audit-arrange row 42"
+      "evidence": "audit-arrange row 42",
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 13): the step's cleanup pressed Delete after the paste, and the filmstrip card keeps the focus while the copy is drawn selected, so Delete removed the other slide (lane D's filmstrip-paste.mjs by hand, 12:31Z, load 95: handle.a1.move drawn, focus filmstrip.slide.blank-1, the slide gone after Delete); with no images area that was the text slide the chrome row needs. The copy goes through toolkit removeOwnObject, which presses Delete only with the copy's handles drawn and the focus off the filmstrip; read green locally (12:49Z, load 168): \"objects on the other slide 8 -> 9; the copy deleted with Delete\". The focus a paste leaves on the card is the integrator's request of followup/requests.md (Lane D 5)."
     },
     {
       "id": "arrange.clipboard.paste-keeps-position",
@@ -2230,7 +2231,8 @@
       "interaction": "A paste onto another slide keeps the source position",
       "driver": "probe --core",
       "today": "works",
-      "evidence": "audit-arrange row 43"
+      "evidence": "audit-arrange row 43",
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 13): red on production and in lane D's local walk of text, arrange and chrome with the drivers of 419d3941 (11:38Z to 12:01Z, load 76 to 130), \"h at 761.5,161.7 77x76.3 (source 152,150 240x150)\": with no images area the other slide is the text slide, the paste converts it to a canvas and its heading gains a pos, and the step read the heading as the copy from a list of positioned objects and deleted it. The step reads every block id before the paste (toolkit allBlockIds) and removes the copy through toolkit removeOwnObject; read green twice locally (12:20Z and 12:49Z, load 94 and 168): \"a1 at 152,150 240x150 (source 152,150 240x150); the copy deleted with Delete\"."
     },
     {
       "id": "arrange.duplicate.cmd-d",
@@ -5545,7 +5547,8 @@
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-interface 14",
-      "severity": 2
+      "severity": 2,
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 13): red on production and in lane D's local walk with the drivers of 419d3941 (\"no filmstrip card blank-1-3d60\"): the arrange area's filmstrip paste row removed the text slide with its cleanup's Delete when no images area ran. With that cleanup fixed the row read green on the text slide (12:59Z, load about 100): \"on the bold word aria-pressed true; on plain text false\"; the step uses the title slide and says so when the deck holds no text slide."
     },
     {
       "id": "menus.icons.insert-rows",

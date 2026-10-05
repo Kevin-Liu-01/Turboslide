@@ -221,3 +221,152 @@ describe('the box reads', () => {
     expect(boxGap(a, null)).toBeNull();
   });
 });
+
+// The paste row and the chrome row of the Round 1 follow-up, lane D (verify-r1.md finding 13): a
+// paste onto a layout slide converts it in the same write and its placeholders gain a pos, so a
+// list of positioned objects read before the paste answered the slide's heading `h` as the copy,
+// and the step's Delete removed the heading. `before` is every block id now, and an object the
+// walk made is deleted with Delete only while its own handles are drawn, else through
+// block.remove.
+function slidesToolkit(slides, { handles = [], filmstripFocused = false } = {}) {
+  const calls = { press: [], invoke: [] };
+  const read = (slideId) => slides.current[slideId];
+  const positioned = (slideId) => {
+    const out = [];
+    const walk = (node) => {
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (node && typeof node === 'object') {
+        if (typeof node.id === 'string' && typeof node.type === 'string' && node.pos)
+          out.push({ id: node.id, type: node.type, pos: node.pos, block: node });
+        Object.values(node).forEach(walk);
+      }
+    };
+    walk(read(slideId));
+    return out;
+  };
+  const lib = {
+    sleep: async () => undefined,
+    rand: () => 0,
+    pollUntil: async (readFn, test) => {
+      for (let i = 0; i < 5; i += 1) {
+        const v = await readFn();
+        if (test(v)) return v;
+      }
+      return readFn();
+    },
+    settled: async () => ({ revision: 7, sync: { pending: 0 } }),
+    state: async () => ({ revision: 7, sync: { pending: 0 } }),
+    slideJson: async (_page, slideId) => read(slideId),
+    objectsOf: async (_page, slideId) => positioned(slideId),
+    blockOf: async (_page, slideId, id) => positioned(slideId).find((o) => o.id === id) ?? null,
+    slideOrder: async () => Object.keys(slides.current),
+    handleControls: async () => handles,
+    press: async (_page, key) => {
+      calls.press.push(key);
+      if (key === 'Delete' && slides.onDelete) slides.onDelete();
+    },
+    invoke: async (_page, action, input) => {
+      calls.invoke.push({ action, input });
+      return {};
+    },
+  };
+  const t = createToolkit({
+    page: { evaluate: async () => filmstripFocused },
+    context: {},
+    browser: {},
+    BASE: 'http://localhost:0',
+    headers: {},
+    lib,
+    report: { rows: [], results: new Map(), consoleErrors: [], isProbeId: () => true },
+    options: {},
+  });
+  t.selectObject = async () => null;
+  return { t, calls };
+}
+
+describe('the copy of a paste onto a layout slide', () => {
+  const layout = {
+    id: 'blank-1-6fdb',
+    slots: {
+      main: [
+        { id: 'h', type: 'heading', text: '' },
+        { id: 'b', type: 'text', text: 'x' },
+      ],
+    },
+  };
+  const converted = {
+    id: 'blank-1-6fdb',
+    slots: {
+      main: [
+        { id: 'h', type: 'heading', text: '', pos: { x: 761.5, y: 161.7, w: 77, h: 76.3 } },
+        { id: 'b', type: 'text', text: 'x', pos: { x: 80, y: 300, w: 600, h: 80 } },
+        { id: 'a1-3', type: 'text', text: 'a1', pos: { x: 152, y: 150, w: 240, h: 150 } },
+      ],
+    },
+  };
+
+  it('reads the placeholder as the copy when `before` lists positioned objects alone', async () => {
+    const slides = { current: { 'blank-1-6fdb': layout } };
+    const { t } = slidesToolkit(slides);
+    const before = await t.objectIds('blank-1-6fdb');
+    slides.current = { 'blank-1-6fdb': converted };
+    expect((await t.newObjectAfter('blank-1-6fdb', before, 10))?.id).toBe('h');
+  });
+
+  it('answers the pasted copy when `before` is every block id', async () => {
+    const slides = { current: { 'blank-1-6fdb': layout } };
+    const { t } = slidesToolkit(slides);
+    const before = await t.allBlockIds('blank-1-6fdb');
+    expect(before).toEqual(['h', 'b']);
+    slides.current = { 'blank-1-6fdb': converted };
+    const copy = await t.newObjectAfter('blank-1-6fdb', before, 10);
+    expect(copy?.id).toBe('a1-3');
+    expect(copy?.pos).toEqual({ x: 152, y: 150, w: 240, h: 150 });
+  });
+});
+
+describe('t.removeOwnObject', () => {
+  const slide = {
+    id: 's',
+    slots: { main: [{ id: 'copy', type: 'text', pos: { x: 0, y: 0, w: 10, h: 10 } }] },
+  };
+
+  it('never presses Delete when the object has no handles of its own on the overlay', async () => {
+    const slides = { current: { s: slide, t2: { id: 't2' } } };
+    const { t, calls } = slidesToolkit(slides, { handles: ['handle.other.move'] });
+    const said = await t.removeOwnObject('s', 'copy');
+    expect(calls.press).toEqual([]);
+    expect(calls.invoke).toEqual([
+      { action: 'block.remove', input: { baseRevision: 7, slideId: 's', blockId: 'copy' } },
+    ]);
+    expect(said).toMatch(/block\.remove/);
+  });
+
+  it('never presses Delete while the filmstrip holds the focus, though the copy is drawn selected', async () => {
+    /* lane D's filmstrip-paste.mjs: after Cmd+V with a card focused the copy's handles are drawn,
+       the card keeps the focus, and Delete removes the slide */
+    const slides = { current: { s: slide } };
+    slides.onDelete = () => {
+      slides.current = {};
+    };
+    const { t, calls } = slidesToolkit(slides, {
+      handles: ['handle.copy.move'],
+      filmstripFocused: true,
+    });
+    const said = await t.removeOwnObject('s', 'copy');
+    expect(calls.press).toEqual([]);
+    expect(calls.invoke.map((c) => c.action)).toEqual(['block.remove']);
+    expect(said).toMatch(/block\.remove/);
+  });
+
+  it('deletes with Delete while its own move handle is drawn', async () => {
+    const slides = { current: { s: slide } };
+    slides.onDelete = () => {
+      slides.current = { s: { id: 's', slots: { main: [] } } };
+    };
+    const { t, calls } = slidesToolkit(slides, { handles: ['handle.copy.move'] });
+    expect(await t.removeOwnObject('s', 'copy')).toBe('deleted with Delete');
+    expect(calls.press).toEqual(['Delete']);
+    expect(calls.invoke).toEqual([]);
+  });
+});

@@ -862,23 +862,29 @@ export async function run(t) {
       const other = await otherSlide();
       await t.clickCard(other);
       await t.sleep(400);
-      const before = (await t.allBlockIds(other)).length;
+      const ids = await t.allBlockIds(other);
+      const before = ids.length;
       await t.press('Meta+v');
-      const after = (
-        await t.pollUntil(
-          () => t.allBlockIds(other),
-          (o) => o.length === before + 1,
-          6000,
-        )
-      ).length;
+      const now = await t.pollUntil(
+        () => t.allBlockIds(other),
+        (o) => o.length === before + 1,
+        6000,
+      );
+      const after = now.length;
       await t.settled();
       const ok = after === before + 1;
-      if (ok) {
-        await t.press('Delete');
-        await t.settled();
-      }
+      /* the copy goes, never the slide (the Round 1 follow-up, lane D; verify-r1.md finding 13):
+         after the paste the copy is drawn selected while the focus stays on the filmstrip card,
+         and the step's Delete removed the other slide, the text slide when no images area ran,
+         so the chrome row read "no filmstrip card" for it (lane D's filmstrip-paste.mjs by hand:
+         handle.a1.move drawn, focus filmstrip.slide.<id>, Delete took the slide) */
+      const copyId = now.find((id) => !ids.includes(id)) ?? null;
+      const removed = copyId ? await t.removeOwnObject(other, copyId) : 'not removed: no copy id';
       await t.clickCard(A);
-      return { ok, observed: `objects on the other slide ${before} -> ${after}` };
+      return {
+        ok,
+        observed: `objects on the other slide ${before} -> ${after}; the copy ${removed}`,
+      };
     },
   );
   await t.step(
@@ -895,21 +901,21 @@ export async function run(t) {
       await t.sleep(300);
       const p = await t.emptySheetPoint();
       await t.clickAt(p.x, p.y);
-      const before = await t.objectIds(other);
+      /* every block id before the paste, positioned or not (the Round 1 follow-up, lane D;
+         verify-r1.md finding 13): on a layout slide the paste converts it to a canvas in the same
+         write and its placeholders gain a pos, so a list of positioned objects alone read the
+         text slide's heading `h` as the copy, and the step then selected and deleted it */
+      const before = await t.allBlockIds(other);
       await t.press('Meta+v');
       const copy = await t.newObjectAfter(other, before, 8000);
       await t.settled();
       const ok = Boolean(copy) && copy.pos.x === HOMES.a1.x && copy.pos.y === HOMES.a1.y;
-      if (copy) {
-        await t.selectObject(copy.id);
-        await t.press('Delete');
-        await t.settled();
-      }
+      const removed = copy ? await t.removeOwnObject(other, copy.id) : 'no copy';
       await t.clickCard(A);
       return {
         ok,
         observed: copy
-          ? `${copy.id} at ${t.posStr(copy.pos)} (source ${t.posStr(HOMES.a1)})`
+          ? `${copy.id} at ${t.posStr(copy.pos)} (source ${t.posStr(HOMES.a1)}); the copy ${removed}`
           : 'no copy',
       };
     },

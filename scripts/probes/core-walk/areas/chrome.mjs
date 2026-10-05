@@ -1514,7 +1514,12 @@ async function productRound(t) {
     'aria-pressed true on the bold word, false on plain text',
     async () => {
       await t.clearAll();
-      const X = t.deck.textSlide ?? T;
+      /* the text area's slide while the deck holds it, else the title slide (the Round 1
+         follow-up, lane D; verify-r1.md finding 13): the arrange area's filmstrip paste row
+         removed that slide with its cleanup's Delete when no images area ran, and this row read
+         "no filmstrip card" and nothing of the toolbar */
+      const order = await t.slideOrder();
+      const X = [t.deck.textSlide, T].find((id) => id && order.includes(id)) ?? T;
       await t.clickCard(X);
       const obj = await t.placeBlock(X, {
         id: 'bold-box',
@@ -1543,7 +1548,7 @@ async function productRound(t) {
       await t.clickCard(T);
       return {
         ok: onBold === 'true' && onPlain === 'false',
-        observed: `on the bold word aria-pressed ${onBold}; on plain text ${onPlain}`,
+        observed: `on the bold word aria-pressed ${onBold}; on plain text ${onPlain}${X === t.deck.textSlide ? '' : ` (on the title slide: the text slide ${t.deck.textSlide ?? 'was never made'} is not in the deck)`}`,
       };
     },
   );

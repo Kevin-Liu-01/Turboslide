@@ -59,6 +59,18 @@ import {
 // the teardown, and a read after each says whether it is. The row never writes what the run
 // cannot put back.
 //
+// The saved template (Round 1 follow-up, lane D; verify-r1.md finding 3): a run of this file on a
+// deployment on 2026-10-01T01:28:41Z saved the template core-spec-template-muouve9u, listed as
+// "Core spec", and its teardown did not remove it (the gallery drew no card for it and the sweep
+// matches names, and the name had lost the run's stamp), so production's Template gallery listed
+// it for every visitor until it was removed by its id. A template is a deployment wide record, and the previews share production's
+// store, so the four rows that save one run on localhost alone and are not driven on any
+// deployment (`DEPLOYMENT_TEMPLATE_SKIP`). The teardown puts the default back, then removes the
+// template, and runs each step in a finally block of the step before with its own time bound, so
+// a step that throws or hangs no longer skips the steps after it; the template goes through the
+// gallery's card menu and, when the list still names it, through `template.delete` by its id, and
+// `template.list` is read after.
+//
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/brand.spec.ts
 
 const scratch = new Scratch();
@@ -72,6 +84,8 @@ const STAMP = Date.now().toString(36);
 /** The name every run of this file gives its template, before the run's stamp; the sweep at the end reads it. */
 const TEMPLATE_PREFIX = 'Core spec template ';
 const TEMPLATE_NAME = `${TEMPLATE_PREFIX}${STAMP}`;
+/** The template id the save makes: the slug of the name (template.create). */
+const TEMPLATE_SLUG = `core-spec-template-${STAMP}`;
 /** The slug of the template this file saved, for its removal at the end. */
 let savedSlug: string | null = null;
 /** The store's default template id as this file found it before its write, to put back; null while this file set none or once it is back. */
@@ -79,6 +93,15 @@ let defaultToRestore: string | null = null;
 /** The reason the default row is not driven where the agent surface cannot put the default back. */
 const DEFAULT_NO_RESET_SKIP =
   'not driven: the row sets the default template of a store every deployment shares and puts it back through the agent surface, which did not answer; off localhost that needs a bearer for this origin (TURBOSLIDE_TOKEN or ~/.config/turboslide/hosts.json)';
+/**
+ * The reason the rows that save a template are not driven on a deployment (any base that is not
+ * localhost): the template is a deployment wide record every visitor's gallery lists, and the
+ * previews share production's store, so a preview run's template is production's too.
+ */
+const DEPLOYMENT_TEMPLATE_SKIP =
+  'not driven on a deployment: the row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production’s store (a run on 2026-10-01 left one in production’s gallery); its reading is a localhost run’s';
+/** The time bound of one teardown step, so a hung step cannot take the steps after it. */
+const TEARDOWN_STEP_MS = 60_000;
 const PRIMARY = '#0b3d91';
 
 test.beforeAll(async ({ browser }) => {
@@ -164,47 +187,117 @@ async function putDefaultBack(): Promise<string | null> {
   return `the deployment default reads ${now.id ?? `unread (${now.reason})`}, not ${target}`;
 }
 
+/** The first line of an error, for the failures list. */
+function firstLine(error: unknown): string {
+  return error instanceof Error ? (error.message.split('\n')[0] ?? '') : String(error);
+}
+/** Runs one teardown step within `TEARDOWN_STEP_MS`; a throw or the bound becomes a failures line. */
+async function boundedStep(
+  name: string,
+  failures: string[],
+  run: () => Promise<void>,
+): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const bound = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`did not finish within ${TEARDOWN_STEP_MS / 1000} s`)),
+      TEARDOWN_STEP_MS,
+    );
+  });
+  try {
+    await Promise.race([run(), bound]);
+  } catch (error) {
+    failures.push(`${name}: ${firstLine(error)}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+/** The organisation templates through `template.list`, or null where the surface does not answer. */
+async function organisationTemplates(): Promise<{ id: string; name: string }[] | null> {
+  const r = await surfacePost('template.list', {});
+  if (r.status !== 200) return null;
+  const rows = (r.body?.['templates'] ??
+    (r.body?.['output'] as { templates?: unknown } | undefined)?.templates ??
+    []) as { id: string; name: string; organisation?: true }[];
+  return rows.filter((x) => x.organisation === true);
+}
+/**
+ * The template this file saved, removed: the gallery's card menu first (the product's path), then
+ * `template.delete` by its id through the surface when the list still names it (a card the
+ * gallery did not draw, an index behind the store), then `template.list` read again; a template
+ * still listed throws. Where the surface does not answer, the card menu's own read is the reading.
+ */
+async function removeSavedTemplate(): Promise<void> {
+  const before = await organisationTemplates();
+  /* by the run's id as well as its name: the id is the slug of the name the save typed, and the
+     template production kept listed a name without the stamp (core-spec-template-muouve9u) */
+  const slug =
+    savedSlug ??
+    before?.find(
+      (x) =>
+        x.id === TEMPLATE_SLUG || x.name === TEMPLATE_NAME || x.name === `${TEMPLATE_NAME} renamed`,
+    )?.id ??
+    null;
+  if (slug === null) return;
+  const viaPage = await deleteTemplate(slug).then(
+    () => null,
+    (error: unknown) => firstLine(error),
+  );
+  if (before === null) {
+    if (viaPage !== null) throw new Error(`the card menu: ${viaPage}`);
+    savedSlug = null;
+    return;
+  }
+  if ((await organisationTemplates())?.some((x) => x.id === slug)) {
+    const gone = await surfacePost('template.delete', { id: slug, confirm: true });
+    if (gone.status !== 200) throw new Error(`template.delete ${slug}: ${gone.reason}`);
+  }
+  if ((await organisationTemplates())?.some((x) => x.id === slug))
+    throw new Error(`template.list still lists ${slug}`);
+  savedSlug = null;
+}
+
+/*
+ * The teardown (Round 1 follow-up, lane D): the deployment wide records first, the default and
+ * then the saved template (`template.delete` refuses the template new presentations start from,
+ * so the default goes back before it), then the leftovers of earlier runs and the decks. Each
+ * step runs in a finally block of the step before and within its own time bound, so a step that
+ * throws or hangs no longer takes the steps after it (a run on 2026-10-01 left its template on
+ * production); the context closes last whatever happened.
+ */
 test.afterAll(async () => {
   test.setTimeout(300_000);
   const failures: string[] = [];
   try {
-    if (defaultToRestore !== null) {
-      try {
+    if (defaultToRestore !== null)
+      await boundedStep('the deployment default', failures, async () => {
         const left = await putDefaultBack();
-        if (left !== null) failures.push(left);
-      } catch (error) {
-        failures.push(
-          `the deployment default: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
-        );
-      }
-    }
-    if (savedSlug !== null) {
-      try {
-        await deleteTemplate(savedSlug);
-      } catch (error) {
-        failures.push(
-          `the template ${savedSlug}: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
-        );
-      }
-    }
-    /* the templates earlier runs of this file left on the shared store, cut between their save
-       and their delete (VERIFICATION.md "Vector round, pass 1" finding 3): every card of this
-       file's name older than the sweep's age, and this run's own whatever its age (the card menu
-       step above finds no card on an instance whose index is behind the store), through the
-       agent surface; best effort, one line */
-    const swept = await sweepTemplateLeftovers(
-      (process.env['PLAYWRIGHT_BASE_URL'] ?? '').replace(/\/$/, ''),
-      TEMPLATE_PREFIX,
-      { own: STAMP },
-    );
-    if (swept.removed.length > 0 || swept.reason !== null) {
-      console.log(
-        `brand.spec: leftover templates ${swept.removed.length > 0 ? `removed ${swept.removed.join(', ')}` : 'none removed'}${swept.reason === null ? '' : ` (${swept.reason})`}`,
-      );
-    }
-    await teardownAll(page, scratch);
+        if (left !== null) throw new Error(left);
+      });
   } finally {
-    await context.close();
+    try {
+      await boundedStep('the template this file saved', failures, removeSavedTemplate);
+    } finally {
+      try {
+        /* the templates earlier runs of this file left on the shared store, cut between their
+           save and their delete (VERIFICATION.md "Vector round, pass 1" finding 3): every card of
+           this file's name older than the sweep's age, and this run's own whatever its age,
+           through the agent surface; best effort, one line */
+        await boundedStep('the leftover templates', failures, async () => {
+          const swept = await sweepTemplateLeftovers(BASE, TEMPLATE_PREFIX, { own: STAMP });
+          if (swept.removed.length > 0 || swept.reason !== null)
+            console.log(
+              `brand.spec: leftover templates ${swept.removed.length > 0 ? `removed ${swept.removed.join(', ')}` : 'none removed'}${swept.reason === null ? '' : ` (${swept.reason})`}`,
+            );
+        });
+      } finally {
+        try {
+          await teardownAll(page, scratch);
+        } finally {
+          await context.close();
+        }
+      }
+    }
   }
   expect(failures, 'the template and the default this file made are gone').toEqual([]);
 });
@@ -678,7 +771,7 @@ async function blankPlainRow(page: Page, ownScratch: Scratch): Promise<void> {
 
 test(title('templates.save.as-template'), async () => {
   test.setTimeout(180_000);
-  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
+  if (!isLocalBase(BASE)) test.skip(true, DEPLOYMENT_TEMPLATE_SKIP);
   await openEditor(page, deck);
   /* the deck carries a kit, so the template's copy proves it travels */
   const actions = await page.evaluate(() =>
@@ -738,7 +831,7 @@ test(title('templates.save.as-template'), async () => {
 
 test(title('templates.save.same-name-replaces'), async () => {
   test.setTimeout(180_000);
-  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
+  if (!isLocalBase(BASE)) test.skip(true, DEPLOYMENT_TEMPLATE_SKIP);
   if (!(await reachRow(page, 'file', 'file.saveAsTemplate')))
     test.skip(
       true,
@@ -760,7 +853,7 @@ test(title('templates.save.same-name-replaces'), async () => {
 
 test(title('templates.card.rename-and-delete'), async () => {
   test.setTimeout(180_000);
-  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
+  if (!isLocalBase(BASE)) test.skip(true, DEPLOYMENT_TEMPLATE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
     test.skip(true, 'not on this build: templates.page (docs/archive/rounds/PRODUCT.md 7.1, B5b)');
@@ -806,7 +899,7 @@ test(title('templates.card.rename-and-delete'), async () => {
 
 test(title('templates.default.use-for-new'), async () => {
   test.setTimeout(240_000);
-  if (isProductionBase(BASE)) test.skip(true, PRODUCTION_WRITE_SKIP);
+  if (!isLocalBase(BASE)) test.skip(true, DEPLOYMENT_TEMPLATE_SKIP);
   await gotoGallery();
   if (!(await drawn(page, 'templates.page')))
     test.skip(true, 'not on this build: templates.page (docs/archive/rounds/PRODUCT.md 7.1, B5b)');

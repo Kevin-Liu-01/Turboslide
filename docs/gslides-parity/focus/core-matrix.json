@@ -4998,7 +4998,8 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "audit-brand 13",
-      "parks": ["file.saveAsTemplate"]
+      "parks": ["file.saveAsTemplate"],
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
       "id": "templates.save.same-name-replaces",
@@ -5007,7 +5008,8 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "judge-seller addition 4; audit-brand 13",
-      "parks": ["file.saveAsTemplate"]
+      "parks": ["file.saveAsTemplate"],
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
       "id": "templates.card.rename-and-delete",
@@ -5017,7 +5019,7 @@
       "today": "not driven",
       "evidence": "judge-seller addition 4",
       "parks": ["templates.card.menu"],
-      "note": "The parks id names the card menu family templates.card.<id>.menu of PRODUCT.md 7.1, one control per template card on the gallery page."
+      "note": "The parks id names the card menu family templates.card.<id>.menu of PRODUCT.md 7.1, one control per template card on the gallery page. Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
       "id": "templates.default.use-for-new",
@@ -5027,7 +5029,7 @@
       "today": "not driven",
       "evidence": "judge-seller addition 3; audit-brand section 3",
       "parks": ["panel.brand.template.useForNew"],
-      "note": "The polish fix round (VERIFICATION.md polish pass 1 finding 3): the row reads the store's default through the agent surface (template.list) before its write and puts that default back through template.setDefault after the page's own restore, in the row and again in the teardown, with a read after each; a base the surface does not answer on (no bearer for the origin off localhost) is not driven with the reason, never a write the run cannot undo. On 2026-09-28 a preview run without a bearer left this file's template as production's default until a hand reset."
+      "note": "The polish fix round (VERIFICATION.md polish pass 1 finding 3): the row reads the store's default through the agent surface (template.list) before its write and puts that default back through template.setDefault after the page's own restore, in the row and again in the teardown, with a read after each; a base the surface does not answer on (no bearer for the origin off localhost) is not driven with the reason, never a write the run cannot undo. On 2026-09-28 a preview run without a bearer left this file's template as production's default until a hand reset. Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
       "id": "templates.deck.read-only",

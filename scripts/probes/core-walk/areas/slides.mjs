@@ -92,6 +92,14 @@ export const IDS = [
   'slides.import.none-preselected',
 ];
 
+/**
+ * The Import slides picker's empty sentence (lane A's request of the Round 1 follow-up): "No other
+ * presentations" before lane A item 1, "You have no other presentations yet" since
+ * (packages/chrome/src/dialogs/ImportSlides.tsx IMPORT_NONE_OF_YOURS, above the example deck's
+ * row). slides-area.test.mjs pins it against the dialog's constant.
+ */
+export const IMPORT_EMPTY_WORDS = /^(No other presentations|You have no other presentations)/;
+
 const LAYOUTS = [
   'title',
   'opener',
@@ -1906,7 +1914,7 @@ async function productRound(t) {
        * on the empty sentence, and the alert when a read was refused.
        */
       const listing = () =>
-        page.evaluate(() => {
+        page.evaluate((emptyWords) => {
           const dialog = document.querySelector('[data-control="dialog.importSlides"]');
           if (!dialog) return { open: false, rows: [], loading: false, empty: false, error: null };
           const rows = [
@@ -1919,10 +1927,11 @@ async function productRound(t) {
             open: true,
             rows,
             loading: words.some((w) => /^Loading/.test(w)),
-            empty: words.some((w) => /^No other presentations/.test(w)),
+            /* the empty sentence of either build (IMPORT_EMPTY_WORDS) */
+            empty: words.some((w) => new RegExp(emptyWords).test(w)),
             error: dialog.querySelector('.ts-dialog-error')?.textContent?.trim() ?? null,
           };
-        });
+        }, IMPORT_EMPTY_WORDS.source);
       const isSettled = (l) => l.open && (l.rows.length > 0 || l.empty || l.error !== null);
       const closeDialog = async () => {
         await t.press('Escape');
@@ -2032,7 +2041,7 @@ async function productRound(t) {
                 : refused === null
                   ? l.loading
                     ? 'the list was still loading at 15 s twice'
-                    : 'the brand deck is not listed for it'
+                    : 'the brand deck is not listed for it (since lane A item 1 of the Round 1 follow-up the picker lists the example deck to every browser of a store that holds it)'
                   : `the brand deck refused: ${refused}`
             })`;
             await page

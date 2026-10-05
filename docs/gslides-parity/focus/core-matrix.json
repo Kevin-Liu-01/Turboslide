@@ -4795,7 +4795,8 @@
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-brand 19",
-      "severity": 2
+      "severity": 2,
+      "note": "Round 1 follow-up, lane D (lane A's request 1): since lane A item 1 the picker lists the GT brand deck to every browser under \"You have no other presentations yet\", and the step settles on that sentence as well as the older one (slides.mjs IMPORT_EMPTY_WORDS, slides-area.test.mjs). Read again on lane D's server (12:10Z, load about 100): \"source the General Translation brand deck; 85 tiles; preselected 0; after three clicks 3, button Import 3 slides; after the Shift click 8; after None 0; landed 3 22653 ms after Import\"; again with the sentence read through IMPORT_EMPTY_WORDS (12:39Z, load 121): settled after 1463 ms, landed 3 8204 ms after Import."
     },
     {
       "id": "slides.import.example-deck",

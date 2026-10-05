@@ -521,6 +521,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         1 +
         /* the Round 1 follow-up, lane B (verify-r1.md finding 12): export.pptx.rotated-frames */
         1 +
+        /* the Round 1 follow-up, lane A item 1 (verify-r1.md finding 2): slides.import.example-deck */
+        1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order */
         CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,

@@ -253,14 +253,18 @@ export async function run(t) {
       const skipBox = `dialog.tailor.skip.${PRICING}`;
       const hasSkip = await t.visible(skipBox);
       if (hasSkip) await t.clickControl(skipBox);
-      const revBefore = (await t.state()).revision;
+      /* the revisions once they stop moving (the Round 1 follow-up, lane D; verify-r1.md finding
+         1): on the memory, redis and do tiers the tab's revision follows the room's checkpoint 2 s
+         after the last op, so a read right after the write had settled read "251 -> 251" on
+         production while the deck had changed, and the undo's checkpoint then took both writes
+         as one (252) */
+      const revBefore = await t.stableRevision();
       await t.clickControl('dialog.tailor.apply');
       const { said, undo } = await snackbarUndo();
       const after = await t
         .pollUntil(deckFacts, (f) => f.acme === 0 && f.globex >= 2, 15_000)
         .catch(deckFacts);
-      await t.settled();
-      const revAfter = (await t.state()).revision;
+      const revAfter = await t.stableRevision();
       await t.clearAll();
       await t.press('Meta+z');
       const restored = await t
@@ -270,7 +274,7 @@ export async function run(t) {
       /* the room acknowledges the undo about two seconds after the chord on the memory tier
          (build/b3.md R7): the next row's HTTP tailor reads the server, so the undo lands first */
       await t.waitRevision(revAfter + 1, 15_000).catch(() => undefined);
-      const revUndo = (await t.state()).revision;
+      const revUndo = await t.stableRevision();
       await t.advancedBack('Tools > Tailor for a customer');
       return {
         ok:

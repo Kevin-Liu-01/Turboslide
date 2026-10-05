@@ -5863,7 +5863,8 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-gaps 16 (surface-01-insert-menu-default.png, no assist row)",
-      "parks": ["tools.tailor"]
+      "parks": ["tools.tailor"],
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 1): the row read red on production for \"revision 251 -> 251 -> 252\" with every Acme renamed, the slide skipped and one Cmd+Z restoring both: the tab's revision follows the room's checkpoint 2 s after the last op, so the read after Apply was the revision before it and the undo's checkpoint then carried both writes. The driver reads the revision once it has stopped moving (toolkit stableRevision) before Apply, after it and after Cmd+Z; lane D's local walk read \"revision 84 -> 85 -> 86\"."
     },
     {
       "id": "assist.tailor.agent-deck-tailor",
@@ -6971,7 +6972,7 @@
       "evidence": "audit-logos 3",
       "setup": "block.insert of a picture whose alt names Acme and a text naming Acme through the window API",
       "parks": ["dialog.tailor.logo.find"],
-      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.5 (B1 the button's slot, B6 the handler and the cache match; merge order B1 then B6)"
+      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.5 (B1 the button's slot, B6 the handler and the cache match; merge order B1 then B6) Round 1 follow-up, lane D (verify-r1.md finding 1): the row read red on production for \"revision 224 -> 224\" with the picture swapped, the text renamed and one Cmd+Z restoring both. On the memory, redis and do tiers the tab's revision follows the room's checkpoint 2 s after the last op, so the read right after the write had settled was the revision before it. The driver reads the revision once it has stopped moving (toolkit stableRevision) before Apply, after it and after Cmd+Z; lane D's local walk read \"revision 60 -> 61; Cmd+Z -> 62, restored true\"."
     },
     {
       "id": "logos.replace-image.row",

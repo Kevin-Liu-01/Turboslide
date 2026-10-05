@@ -1234,13 +1234,15 @@ export async function run(t) {
       /* Apply as soon as the stored line reads, the seller's gesture: the store's own answer
          waits until the record has come back over the channel (`logo.insert` announces,
          controller.tsx; the fix round's R13 and R17), so no wait for the revision sits here */
-      await t.settled();
-      const rev0 = (await t.state()).revision;
+      /* the revisions once they stop moving (the Round 1 follow-up, lane D; verify-r1.md finding
+         1): on the memory, redis and do tiers the tab's revision follows the room's checkpoint 2 s
+         after the last op, so a read right after the write had settled read "224 -> 224" on
+         production while the picture had swapped and the text was renamed */
+      const rev0 = await t.stableRevision();
       const apply = (await t.visible('dialog.tailor.apply')) ? 'dialog.tailor.apply' : null;
       if (apply) await t.clickControl(apply);
       await t.waitGone('[data-control="dialog.tailor"]', 20_000);
-      await t.settled();
-      const rev1 = (await t.state()).revision;
+      const rev1 = await t.stableRevision();
       const objs = await t.objectsOf(L);
       const pic = objs.find((o) => o.id === 'acme-logo') ?? null;
       const swapped = pic !== null && pic.block.asset !== asset?.id;
@@ -1252,7 +1254,7 @@ export async function run(t) {
         await t.sleep(600);
         await t.settled();
       }
-      const rev2 = (await t.state()).revision;
+      const rev2 = await t.stableRevision();
       const objs2 = await t.objectsOf(L);
       const restored =
         objs2.find((o) => o.id === 'acme-logo')?.block?.asset === asset?.id &&

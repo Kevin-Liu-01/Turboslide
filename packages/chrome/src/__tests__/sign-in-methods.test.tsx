@@ -1,4 +1,7 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -91,5 +94,48 @@ describe('the sign in methods (docs/NEXT.md 3.2 H4)', () => {
     );
     expect(row?.disabled).toBe(false);
     expect(row?.getAttribute('aria-disabled')).toBeNull();
+  });
+});
+
+// The dialog is as tall as its content (the Round 1 follow-up, lane C item 1): production offers
+// Google alone (TURBOSLIDE_MAIL=off), and the fixed 400 by 320 box drew Continue with Google over
+// an empty band of about 150 px. The sheet holds no fixed height for the dialog, and the reserved
+// error row is drawn only where an answer can arrive inside the dialog.
+describe('the sign in dialog sizes to its content (Round 1 follow-up, lane C item 1)', () => {
+  const sheet = readFileSync(resolve(import.meta.dirname, '../dialogs/accounts.css'), 'utf8');
+
+  it('gives the dialog no fixed height and the body no minimum without the email method', () => {
+    expect(sheet).not.toMatch(/\.ts-sign-in\s*\{[^}]*\bheight\s*:/);
+    expect(sheet).not.toMatch(/\.ts-sign-in-body\s*\{[^}]*min-height/);
+  });
+
+  it('draws Google and no reserved error row where Google is the only method', () => {
+    const { container } = draw({ requestCode: undefined });
+    expect(methods(container)).toEqual(['dialog.signIn.google']);
+    expect(container.querySelector('[data-control="dialog.signIn.email"]')).toBeNull();
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
+    expect(container.querySelector('.ts-sign-in-body')?.getAttribute('data-email')).toBe('off');
+  });
+
+  it('keeps the reserved error row where the email method can answer inside the dialog', () => {
+    const { container } = draw();
+    expect(container.querySelector('[data-control="dialog.signIn.email"]')).not.toBeNull();
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')).not.toBeNull();
+  });
+
+  it('keeps the reserved error row where a passkey can answer inside the dialog', () => {
+    const { container } = draw({
+      requestCode: undefined,
+      passkeysAvailable: true,
+      passkey: vi.fn(() => Promise.resolve(null)),
+    });
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')).not.toBeNull();
+  });
+
+  it('says the standing sentence when no method is configured', () => {
+    const { container } = draw({ requestCode: undefined, googleAvailable: false });
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')?.textContent).toBe(
+      'No sign in method is configured on this deployment',
+    );
   });
 });

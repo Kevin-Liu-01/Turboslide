@@ -37,6 +37,7 @@ import {
   typeNote,
   waitEditor,
 } from './lib';
+import { pagesR1f } from './pages-r1f';
 
 // Decks and the home surfaces, the spec rows (docs/FOCUS.md 2.1, 6.4 `decks.*` with the driver
 // core/decks.spec.ts): /home and its calls to action, the root redirect, the /decks list, its
@@ -3779,6 +3780,9 @@ test(title('decks.manifest.paper'), async () => {
   expect(body.theme_color, 'theme_color is the paper').toBe('#ffffff');
 });
 
+/* lane C of the Round 1 follow-up: its rows live in pages-r1f.ts */
+const LANE_C_ROWS = pagesR1f();
+
 coverage(import.meta.filename, [
   'decks.home.new-presentation',
   'decks.home.your-presentations',
@@ -3867,4 +3871,5 @@ coverage(import.meta.filename, [
   'decks.list.ruled-rows',
   /* the next program's Round 1 push B2d#18 (docs/NEXT.md 4.1.3 item 12, 4.1.5) */
   'decks.og.deck-card',
+  ...LANE_C_ROWS,
 ]);

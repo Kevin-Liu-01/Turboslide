@@ -507,6 +507,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         2 +
         3 +
         1 +
+        /* the Round 1 follow-up, lane C item 1: accounts.sign-in-fits */
+        1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order */
         CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,

@@ -2078,7 +2078,11 @@ async function methodOrder(p: Page): Promise<string[]> {
   );
 }
 
-/** The open dialog's box, rounded: the one 400 by 320 box of SPEC-3 7.3. */
+/**
+ * The open dialog's box, rounded: 400 px wide and as tall as its content since the Round 1
+ * follow-up (lane C item 1; SPEC-3 7.3 named one 400 by 320 box, which left an empty band of about
+ * 150 px under Continue with Google where Google is the only method).
+ */
 async function dialogBox(p: Page): Promise<{ width: number; height: number }> {
   const box = await ctl(p, 'dialog.signIn').boundingBox();
   return { width: Math.round(box?.width ?? 0), height: Math.round(box?.height ?? 0) };
@@ -2141,7 +2145,10 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     /* the e2e mail mode is capture: the email field and Continue are present */
     await expect(ctl(A, 'dialog.signIn.email')).toHaveCount(1);
     await expect(ctl(A, 'dialog.signIn.continue')).toHaveCount(1);
-    expect(await dialogBox(A)).toEqual({ width: 400, height: 320 });
+    /* the field, the methods and the reserved error row: under the 320 px box it replaced */
+    const box = await dialogBox(A);
+    expect(box.width).toBe(400);
+    expect(box.height, `as tall as its content (${box.height} px)`).toBeLessThanOrEqual(320);
     await A.keyboard.press('Escape');
     await expect(ctl(A, 'dialog.signIn')).toHaveCount(0);
   });
@@ -2222,7 +2229,10 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
         () => document.activeElement?.getAttribute('data-control') ?? null,
       );
       expect(focused, 'the Google button holds the focus').toBe('dialog.signIn.google');
-      expect(await dialogBox(page)).toEqual({ width: 400, height: 320 });
+      /* the title, Continue with Google and the action bar: no empty band under the button */
+      const box = await dialogBox(page);
+      expect(box.width).toBe(400);
+      expect(box.height, `as tall as its content (${box.height} px)`).toBeLessThanOrEqual(200);
       await page.keyboard.press('Escape');
     } finally {
       await context.close();

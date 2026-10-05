@@ -10,8 +10,11 @@ import { tipProps } from '../Tooltip';
 import './accounts.css';
 
 /**
- * The sign in dialog (gslides-parity SPEC-3 7.3; research 11 8 P7; docs/REALTIME.md 4.1): one
- * 400 by 320 box for every state. The email method when the deployment has a mail sender (one
+ * The sign in dialog (gslides-parity SPEC-3 7.3; research 11 8 P7; docs/REALTIME.md 4.1): 400 px
+ * wide and as tall as its content. Before the Round 1 follow-up it was one 400 by 320 box for every
+ * state, which left an empty band of about 150 px under Continue with Google on a deployment with
+ * Google alone (lane C item 1); the email method's two steps still keep one height between them
+ * (accounts.css). The email method when the deployment has a mail sender (one
  * field, Continue; one mail with a magic link and a six digit code, the same answer whether or
  * not the address exists), then the code entry so the tab that asked can finish when the mail
  * opens on a phone. Under the field the methods list: Google first, then GitHub, each when its
@@ -21,8 +24,10 @@ import './accounts.css';
  * (`TURBOSLIDE_MAIL=off`, the production default of REALTIME.md 7.7) the field and Continue are
  * absent and Google is the primary action: first in the list, focused on open so Enter runs it,
  * and it may be the only method. No passwords. A reserved 20 px error row speaks without moving
- * the box. The exchanges run through the route's handlers over better-auth's own routes; without
- * them the dialog says sign in is not available on this deployment.
+ * the box where an answer can arrive inside the dialog (the email method, a passkey); a dialog of
+ * methods that leave the page draws no row. The exchanges run through the route's handlers over
+ * better-auth's own routes; without them the dialog says sign in is not available on this
+ * deployment.
  */
 type State = 'methods' | 'code' | 'passkey';
 
@@ -44,6 +49,16 @@ export function SignInDialog() {
   /* no mail sender: Google is the primary action (REALTIME.md 4.1) */
   const googlePrimary = googleOffered && !emailOffered;
   const noMethod = available && !emailOffered && !googleOffered && !githubOffered;
+  /* the sentence the error row says before any answer: sign in absent, or no method configured */
+  const standing = !available
+    ? 'Sign in is not available on this deployment'
+    : noMethod
+      ? 'No sign in method is configured on this deployment'
+      : '';
+  /* the row is reserved only where an answer can arrive inside the dialog (the email method's
+     request and code, a passkey's ceremony); Google and GitHub leave the page, so a dialog of
+     those alone draws no empty row under its buttons (the Round 1 follow-up, lane C item 1) */
+  const answers = showEmail || account?.passkeysAvailable === true;
 
   const fail = (err: unknown) => setError(err instanceof Error ? err.message : String(err));
 
@@ -245,14 +260,11 @@ export function SignInDialog() {
           </>
         )}
       </div>
-      <p className="ts-dialog-error-row" role="alert" data-control="dialog.signIn.error">
-        {error ??
-          (!available
-            ? 'Sign in is not available on this deployment'
-            : noMethod
-              ? 'No sign in method is configured on this deployment'
-              : '')}
-      </p>
+      {answers || error !== null || standing !== '' ? (
+        <p className="ts-dialog-error-row" role="alert" data-control="dialog.signIn.error">
+          {error ?? standing}
+        </p>
+      ) : null}
     </Dialog>
   );
 }

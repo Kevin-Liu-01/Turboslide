@@ -1,7 +1,8 @@
 /* The account dialogs (gslides-parity SPEC-3 7.2 to 7.6, 9.3; research 11 8 P6 to P9): fixed
-   boxes for every state (the name prompt 360 by 168, the sign in dialog 400 by 320, the profile
-   and the avatar builder 560 by 640), a reserved 20 px error row, the preview strip's eight fixed
-   boxes from first paint, the session list at 40 px rows with a three row minimum. Monochrome. */
+   boxes for every state (the name prompt 360 by 168, the profile and the avatar builder 560 by
+   640), the sign in dialog 400 px wide and as tall as its content, a reserved 20 px error row, the
+   preview strip's eight fixed boxes from first paint, the session list at 40 px rows with a three
+   row minimum. Monochrome. */
 
 /* the reserved error row: one line that speaks without moving anything */
 .ts-dialog-error-row {
@@ -65,13 +66,14 @@
   cursor: pointer;
 }
 
-/* ---- the sign in dialog: 400 by 320 ---- */
-.ts-sign-in {
-  height: 320px;
-}
-
-.ts-sign-in-body {
-  min-height: 180px;
+/* ---- the sign in dialog: 400 px wide, as tall as its content ---- */
+/* The fixed 320 px box and the body's 180 px minimum left an empty band of about 150 px under
+   Continue with Google where Google is the only method (production, TURBOSLIDE_MAIL=off; the Round
+   1 follow-up, lane C item 1). The box now takes its content's height. The email method's two
+   steps (the field over Google, 99 px; then the sentence, the code and Back, 125 px) hold the
+   code step's height between them, so Continue does not move the box. */
+.ts-sign-in-body[data-email='on'] {
+  min-height: 125px;
 }
 
 .ts-sign-in-methods {

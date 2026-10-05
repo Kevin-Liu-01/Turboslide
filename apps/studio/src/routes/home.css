@@ -35,7 +35,7 @@ html:has(.ts-product) {
   color: inherit;
 }
 
-.ts-sprite {
+:where(.ts-product) .ts-sprite {
   position: absolute;
   width: 0;
   height: 0;
@@ -223,7 +223,10 @@ html:has(.ts-product) {
   border-top: 1px solid var(--pt-hair);
 }
 
-.ts-row {
+/* The build puts this file in the stylesheet every page loads, and /decks draws its list rows as
+   tr.ts-row. A selector whose names other pages also draw is scoped to the landing through
+   :where(.ts-product), which adds no specificity (-home-css.test.ts). */
+:where(.ts-product) .ts-row {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -232,7 +235,7 @@ html:has(.ts-product) {
   font-size: 15px;
 }
 
-.ts-row:last-child {
+:where(.ts-product) .ts-row:last-child {
   border-bottom-color: var(--pt-hair);
 }
 
@@ -495,7 +498,7 @@ html:has(.ts-product) {
   image-rendering: pixelated;
 }
 
-[data-field] > canvas {
+:where(.ts-product) [data-field] > canvas {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1416,7 +1419,7 @@ html:has(.ts-product) {
   position: relative;
 }
 
-.ts-present {
+:where(.ts-product) .ts-present {
   display: grid;
   grid-template-columns: minmax(0, 412fr) minmax(0, 588fr);
   gap: 24px;
@@ -2195,7 +2198,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-agents,
   .ts-tailor-top,
-  .ts-present {
+  :where(.ts-product) .ts-present {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
@@ -2340,7 +2343,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     overflow-wrap: normal;
   }
 
-  .ts-present {
+  :where(.ts-product) .ts-present {
     min-height: 0;
   }
 
@@ -2348,7 +2351,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     height: 44px;
   }
 
-  .ts-row {
+  :where(.ts-product) .ts-row {
     flex-wrap: wrap;
     gap: 4px 12px;
     padding: 8px 0;

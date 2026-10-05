@@ -7141,7 +7141,7 @@
       "today": "not driven",
       "evidence": "audit-shaders 4, 5 (walk-run2.json row 13: 0 range inputs)",
       "parks": ["formatOptions.shader.strength"],
-      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5); the live half is read from the block's pixels with the mount at rest: the walk emulates prefers-reduced-motion: reduce for the drag (5.6's speed 0) and puts it back, so the change read is the slider's and not the animation's"
+      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5); the live half is read from the block's pixels with the mount at rest: the walk emulates prefers-reduced-motion: reduce for the drag (5.6's speed 0) and puts it back, so the change read is the slider's and not the animation's Round 1 follow-up, lane D (verify-r1.md finding 1): red on production in group 3's walk and in verify-r1's ten area walk (\"release: revision 234 -> 236; Cmd+Z: value 5.6\"), green in the shaders area alone on production and in lane D's local walk of brand, logos, shaders and assist on the memory tier (\"revision 70 -> 71; Cmd+Z: value 3.2\", 11:08Z, load about 160). Both production pictures draw the banner \"This presentation changed elsewhere\" with no author and Undo off: the controller's resync path cleared the undo history between the release and the chord. The panel writes one entry on release and Cmd+Z restores it; the reload on the do tier is the integrator's request of followup/requests.md (Lane D 1). The step records the banner and Undo before the chord."
     },
     {
       "id": "shaders.panel.preset-tiles",
@@ -7152,7 +7152,7 @@
       "severity": 3,
       "evidence": "audit-shaders 7 (walk-run2.json row 15: selectOption('chrome') found no option)",
       "parks": ["formatOptions.shader.preset"],
-      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.2, 5.3 (B5: formatOptions.shader.preset.<id> tiles labelled in sentence case); the canvas change is read as the mean luminance and the changed pixel fraction of the block's box before and after the click, against the entry's preset list from material.list"
+      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.2, 5.3 (B5: formatOptions.shader.preset.<id> tiles labelled in sentence case); the canvas change is read as the mean luminance and the changed pixel fraction of the block's box before and after the click, against the entry's preset list from material.list Round 1 follow-up, lane D (verify-r1.md finding 1): production read 692 to 3708 ms against the 500 ms bound, timed from before the walk's click helper to the first of several screenshots, each 100 to 300 ms on the loaded machine. The step times the change on the page's own clock: from the click's pointerdown to the first WebGL draw whose 64 points read with readPixels moved (core-walk shaders.mjs armWatch); read green locally (13:00Z, load about 140): \"the canvas changed 199 ms after the pointerdown\". By hand (lane D's shader-clock.mjs, 13:08Z to 13:14Z, load 74 to 102) the Chrome tile changed the canvas 26 and 108 ms after the pointerdown at 1440 (light, dark) and 99, 31 and 31 ms at 390 (light, dark, light); the first dark reading at 390 of each run read 1212 and 1549 ms, the second 31 ms."
     },
     {
       "id": "shaders.panel.control-sentences",
@@ -7240,7 +7240,7 @@
       "evidence": "audit-shaders 1 (s09c-background-material-chosen.png, s10-background-material-placed.png, walk-run2.json row 19)",
       "parks": ["dialog.background.shader"],
       "setup": "slide.new with the Title and body layout through the window API, the slide the ground is placed on; never a driven step",
-      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B7 the 30 s bound and the RenderError sentence; B1 the Shader row, the gallery, the Placing state and the sentence in dialogs/Background.tsx); on a build where the dialog still reads Material the walk drives that row and says so"
+      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B7 the 30 s bound and the RenderError sentence; B1 the Shader row, the gallery, the Placing state and the sentence in dialogs/Background.tsx); on a build where the dialog still reads Material the walk drives that row and says so Round 1 follow-up, lane D (verify-r1.md finding 1): still red, still parked. By hand on lane D's server the client's capture took 0.2 to 0.4 s on the GPU (ANGLE Metal) and 1.6 to 2.3 s on SwiftShader (the walk's browser); the one POST of slide.setBackgroundMaterial took 20.3 to 34.2 s, of which slide.toCanvas on a Title and body slide alone took 11.0 s through the server's measure (load 90 to 133). The product's own path is over the bound for a person on a GPU too; the request of followup/requests.md (Lane D 2) names the three changes."
     },
     {
       "id": "shaders.export.pdf-frame",
@@ -7294,7 +7294,7 @@
       "evidence": "audit-shaders 15 (walk-run1.json row 9, walk-run2.json rows 9, 12, 21)",
       "parks": ["insert.shader"],
       "setup": "a second shader block placed through the window API (block.insert of a material block) beside the inserted one; never a driven step",
-      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.6 (B5: MaterialMount mounts the selected block alone); the canvases are counted inside the stage's recipe roots and on the whole page"
+      "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.6 (B5: MaterialMount mounts the selected block alone); the canvases are counted inside the stage's recipe roots and on the whole page Round 1 follow-up, lane D (verify-r1.md finding 1): production read the swap 1379 to 4177 ms after the walk's selection helper started; the step times it on the page's own clock from the pointerdown that selected the second block to the frame the mount had swapped in (shaders.mjs armWatch); read green locally twice (11:12Z and 13:01Z, load about 150): \"swapped 54 ms\" and \"swapped 75 ms after the pointerdown that selected it\"; by hand (shader-clock.mjs) 34 and 29 ms at 1440 (light, dark) and 24, 26, 60 and 87 ms at 390."
     },
     {
       "id": "shaders.perf.hidden-pauses",

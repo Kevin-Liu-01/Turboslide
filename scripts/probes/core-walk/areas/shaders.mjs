@@ -415,6 +415,170 @@ export async function run(t) {
   const wakeMount = async () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
   };
+  /**
+   * The page's own clock for a row's time bound (the Round 1 follow-up, lane D; verify-r1.md
+   * finding 1). The walk timed `preset-tiles` and `one-context` from before its own click helper
+   * to the first screenshot or DOM read that showed the change, so the helper's box reads, the
+   * pointer steps and one 100 to 300 ms screenshot per poll on the loaded machine were counted as
+   * the product's time (692 to 3708 ms and 1379 to 4177 ms on production for changes the product
+   * draws in a frame or two). This arms a watch inside the page before the click: every
+   * pointerdown's `timeStamp` is kept, and the answer is the time from the last pointerdown before
+   * the condition first held to the moment it held, both on `performance.now()`'s clock.
+   * `kind` 'swap' reads the condition on every animation frame: the stage holds one canvas, inside
+   * `block`'s recipe root, and `other`'s root holds none. `kind` 'canvas' reads what the block's
+   * live canvas draws: a copy of a WebGL canvas without `preserveDrawingBuffer` reads empty once
+   * the frame is composited (the first version of this watch read a mean of 0 and alpha 0), so
+   * the draw calls of WebGL are wrapped and, after a draw into the default framebuffer of a
+   * canvas inside the block's root, 64 points of a grid are read with `readPixels` in the same
+   * task, once an animation frame; the last reading before the pointerdown is the base, and the
+   * condition holds at the first reading after it whose mean luminance moved over 20 or whose
+   * points moved by more than 40 in over 30 percent.
+   */
+  const armWatch = (kind, block, other = null, limitMs = 6000) =>
+    page.evaluate(
+      ([stage, kindIn, id, otherId, limit]) => {
+        const rootOf = (blockId) =>
+          [...document.querySelectorAll(`${stage} [data-recipe]`)].find(
+            (r) =>
+              (r.getAttribute('data-block') ??
+                r.closest('[data-block]')?.getAttribute('data-block')) === blockId,
+          ) ?? null;
+        const swapped = () => {
+          const mine = rootOf(id);
+          const theirs = otherId === null ? null : rootOf(otherId);
+          return (
+            mine !== null &&
+            mine.querySelectorAll('canvas').length > 0 &&
+            (theirs === null || theirs.querySelectorAll('canvas').length === 0) &&
+            document.querySelectorAll(`${stage} canvas`).length === 1
+          );
+        };
+        const w = {
+          kind: kindIn,
+          armedAt: performance.now(),
+          downs: [],
+          heldAt: null,
+          from: null,
+          lum: null,
+          diff: null,
+          baseMean: null,
+          reads: 0,
+          frames: 0,
+          heldBeforeDown: false,
+          limit,
+        };
+        window.__tsWalkWatch = w;
+        const onDown = (event) => {
+          if (w.heldAt === null) w.downs.push(event.timeStamp);
+        };
+        document.addEventListener('pointerdown', onDown, { capture: true });
+        const done = () => {
+          document.removeEventListener('pointerdown', onDown, { capture: true });
+          window.__tsGlHook = null;
+        };
+        const hold = () => {
+          w.heldAt = performance.now();
+          w.from = w.downs[w.downs.length - 1];
+          done();
+        };
+        if (kindIn === 'canvas') {
+          /* the draw calls of both WebGL contexts, wrapped once per page; the hook is this arm's */
+          if (!window.__tsGlWrapped) {
+            window.__tsGlWrapped = true;
+            for (const proto of [
+              window.WebGL2RenderingContext?.prototype,
+              window.WebGLRenderingContext?.prototype,
+            ]) {
+              if (!proto) continue;
+              for (const name of ['drawArrays', 'drawElements']) {
+                const original = proto[name];
+                proto[name] = function wrapped(...args) {
+                  const result = original.apply(this, args);
+                  if (window.__tsGlHook) window.__tsGlHook(this);
+                  return result;
+                };
+              }
+            }
+          }
+          let base = null;
+          let lastFrame = -1;
+          const px = new Uint8Array(4);
+          const read = (gl) => {
+            const lums = [];
+            const bw = gl.drawingBufferWidth;
+            const bh = gl.drawingBufferHeight;
+            for (let j = 0; j < 8; j += 1)
+              for (let i = 0; i < 8; i += 1) {
+                gl.readPixels(
+                  Math.floor(((i + 0.5) / 8) * bw),
+                  Math.floor(((j + 0.5) / 8) * bh),
+                  1,
+                  1,
+                  gl.RGBA,
+                  gl.UNSIGNED_BYTE,
+                  px,
+                );
+                lums.push(0.2126 * px[0] + 0.7152 * px[1] + 0.0722 * px[2]);
+              }
+            return lums;
+          };
+          window.__tsGlHook = (gl) => {
+            if (w.heldAt !== null || w.frames === lastFrame) return;
+            const root = rootOf(id);
+            if (!root || !root.contains(gl.canvas)) return;
+            if (gl.getParameter(gl.FRAMEBUFFER_BINDING) !== null) return;
+            lastFrame = w.frames;
+            const now = read(gl);
+            w.reads += 1;
+            if (w.downs.length === 0 || base === null) {
+              base = now;
+              w.baseMean = now.reduce((a, b) => a + b, 0) / now.length;
+              return;
+            }
+            const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+            w.lum = Math.abs(mean(now) - mean(base));
+            w.diff = now.filter((l, k) => Math.abs(l - base[k]) > 40).length / now.length;
+            if (w.lum > 20 || w.diff > 0.3) hold();
+          };
+        }
+        const tick = () => {
+          w.frames += 1;
+          if (w.heldAt !== null) return;
+          if (kindIn === 'swap') {
+            if (w.downs.length > 0 && swapped()) {
+              hold();
+              return;
+            }
+            if (w.downs.length === 0 && swapped()) w.heldBeforeDown = true;
+          }
+          if (performance.now() - w.armedAt < limit) requestAnimationFrame(tick);
+          else done();
+        };
+        requestAnimationFrame(tick);
+        return { armed: true };
+      },
+      [STAGE, kind, block, other, limitMs],
+    );
+  /** The armed watch's answer once the condition held or the limit passed: ms from the click, or null. */
+  const watchResult = async (limitMs = 6000) => {
+    const read = () =>
+      page.evaluate(() => {
+        const w = window.__tsWalkWatch;
+        if (!w) return null;
+        return {
+          done: w.heldAt !== null || performance.now() - w.armedAt >= w.limit,
+          ms: w.heldAt !== null && w.from !== null ? Math.round(w.heldAt - w.from) : null,
+          downs: w.downs.length,
+          frames: w.frames,
+          reads: w.reads,
+          lum: w.lum,
+          diff: w.diff,
+          baseMean: w.baseMean,
+          heldBeforeDown: w.heldBeforeDown,
+        };
+      });
+    return t.pollUntil(read, (x) => x === null || x.done, limitMs + 1000, 100);
+  };
   /** The dialog for Change background: opened on the current slide; answers whether it is drawn. */
   const openBackground = async () => {
     await t.clearAll();
@@ -781,6 +945,21 @@ export async function run(t) {
         /* Cmd+Z takes the release's write alone: with nothing written the undo would take the
            insert and leave the panel rows after this one with no block to read */
         const undone = rev1 > rev0;
+        /* what the tab shows before the Cmd+Z (the Round 1 follow-up, lane D): on production the
+           row read "Cmd+Z left 5.6" in the full walks with the banner "This presentation changed
+           elsewhere" drawn and Undo disabled, the undo history cleared by a reload of the deck
+           between the release and the chord; the shaders area alone read the row green there and
+           on the memory tier. The reading names it so the next pass can tell it from the panel */
+        const beforeUndo = await page.evaluate(() => {
+          const undo = document.querySelector('[data-control="toolbar.undo"]');
+          return {
+            external: document.querySelector('.ts-banner[data-state="external"]') !== null,
+            undoOff:
+              undo === null ||
+              undo.getAttribute('aria-disabled') === 'true' ||
+              (undo instanceof HTMLButtonElement && undo.disabled),
+          };
+        });
         if (undone) await t.press('Meta+z');
         await t.settled();
         const value2 = await t
@@ -805,7 +984,7 @@ export async function run(t) {
             value2 === slider.value &&
             after !== null &&
             after <= 0.01,
-          observed: `mount at rest ${motion === null ? 'unread' : `${(motion * 100).toFixed(2)} percent moving`}; during the drag the value read ${during.value} with ${during.diff === null ? 'no' : `${(during.diff * 100).toFixed(1)} percent of`} pixels changed and revision ${during.revision} (${rev0} before); release: revision ${rev1}, value ${slider.value} -> ${value1}${block1 ? ` (block controls ${JSON.stringify(block1.controls ?? null)})` : ''}; ${undone ? 'Cmd+Z' : 'no Cmd+Z (nothing was written)'}: value ${value2}, ${after === null ? 'canvas unread' : `${(after * 100).toFixed(2)} percent of pixels differ from rest`}${s.section ? '' : '; the section closed'}`,
+          observed: `mount at rest ${motion === null ? 'unread' : `${(motion * 100).toFixed(2)} percent moving`}; during the drag the value read ${during.value} with ${during.diff === null ? 'no' : `${(during.diff * 100).toFixed(1)} percent of`} pixels changed and revision ${during.revision} (${rev0} before); release: revision ${rev1}, value ${slider.value} -> ${value1}${block1 ? ` (block controls ${JSON.stringify(block1.controls ?? null)})` : ''}; before the chord the banner "changed elsewhere" ${beforeUndo.external ? 'drawn' : 'not drawn'} and Undo ${beforeUndo.undoOff ? 'off' : 'on'}; ${undone ? 'Cmd+Z' : 'no Cmd+Z (nothing was written)'}: value ${value2}, ${after === null ? 'canvas unread' : `${(after * 100).toFixed(2)} percent of pixels differ from rest`}${s.section ? '' : '; the section closed'}`,
         };
       } finally {
         await wakeMount();
@@ -871,20 +1050,24 @@ export async function run(t) {
       let preset1 = null;
       let change = null;
       let rev = null;
+      let watch = null;
       if (target) {
         const clip = await clipOf(id);
         const before = await t.shotPixels(clip);
         const rev0 = (await t.state()).revision;
-        const t0 = Date.now();
+        /* the time is the page's own, from the click's pointerdown to the frame the canvas
+           changed in (`armWatch`); the screenshots before and after read the size of the change */
+        await armWatch('canvas', id);
         await t.clickControl(target.id);
+        watch = await watchResult();
         const read = async () => {
           const shot = await t.shotPixels(clip);
           return { diff: diffOf(before, shot), lum: Math.abs(meanOf(before).l - meanOf(shot).l) };
         };
         change = await t
-          .pollUntil(read, (x) => x.lum > 20 || (x.diff !== null && x.diff > 0.3), 500, 60)
+          .pollUntil(read, (x) => x.lum > 20 || (x.diff !== null && x.diff > 0.3), 2000, 60)
           .catch(read);
-        ms = Date.now() - t0;
+        ms = watch?.ms ?? null;
         rev = await t
           .pollUntil(
             async () => (await t.state()).revision,
@@ -907,7 +1090,7 @@ export async function run(t) {
           (change.lum > 20 || change.diff > 0.3) &&
           ms !== null &&
           ms <= 500,
-        observed: `${tiles.length} tiles (${tiles.map((x) => `"${x.label}"${x.pressed ? ' pressed' : ''}`).join(', ')}) against ${entryPresets === null ? 'an unread preset list' : `${entryPresets.length} presets of ${block0?.materialId}`}; labels not in sentence case: ${badLabels.join(', ') || 'none'}; ${target ? `click on ${target.id}: preset ${block0?.preset ?? 'none'} -> ${preset1 ?? 'unchanged'} (revision ${rev}), canvas ${change ? `mean luminance moved ${change.lum.toFixed(1)}, ${change.diff === null ? 'diff unread' : `${(change.diff * 100).toFixed(0)} percent of pixels changed`}` : 'unread'} after ${ms} ms` : 'no unpressed tile to click'}`,
+        observed: `${tiles.length} tiles (${tiles.map((x) => `"${x.label}"${x.pressed ? ' pressed' : ''}`).join(', ')}) against ${entryPresets === null ? 'an unread preset list' : `${entryPresets.length} presets of ${block0?.materialId}`}; labels not in sentence case: ${badLabels.join(', ') || 'none'}; ${target ? `click on ${target.id}: preset ${block0?.preset ?? 'none'} -> ${preset1 ?? 'unchanged'} (revision ${rev}), canvas ${change ? `mean luminance moved ${change.lum.toFixed(1)}, ${change.diff === null ? 'diff unread' : `${(change.diff * 100).toFixed(0)} percent of pixels changed`}` : 'unread'}; on the page's clock the canvas changed ${ms === null ? `in no draw within the watch (${watch === null ? 'no watch' : `${watch.frames} frames, ${watch.reads} draws read, ${watch.downs} pointerdown, the base's mean ${watch.baseMean === null ? 'unread' : watch.baseMean.toFixed(1)}`})` : `${ms} ms after the pointerdown (${watch.reads} draws read, the mean luminance moved ${watch.lum?.toFixed(1)}, ${Math.round((watch.diff ?? 0) * 100)} percent of the points)`}` : 'no unpressed tile to click'}`,
       };
     },
   );
@@ -1378,8 +1561,11 @@ export async function run(t) {
       await t.selectObject(first);
       await t.sleep(600);
       const onFirst = await canvasFacts();
-      const t0 = Date.now();
+      /* the time is the page's own, from the pointerdown that selected the second block to the
+         frame the mount had swapped in (`armWatch`), not the walk's click helper and DOM reads */
+      await armWatch('swap', second.id, first);
       await t.selectObject(second.id);
+      const watch = await watchResult();
       const swapped = await t
         .pollUntil(
           canvasFacts,
@@ -1390,7 +1576,7 @@ export async function run(t) {
           50,
         )
         .catch(canvasFacts);
-      const ms = Date.now() - t0;
+      const ms = watch?.ms ?? null;
       const firstRoot = swapped.roots.find((r) => r.block === first) ?? null;
       const secondRoot = swapped.roots.find((r) => r.block === second.id) ?? null;
       await t.clearAll();
@@ -1402,8 +1588,9 @@ export async function run(t) {
           secondRoot?.canvas === 1 &&
           firstRoot?.canvas === 0 &&
           firstRoot?.imgDecoded === true &&
+          ms !== null &&
           ms <= 500,
-        observed: `with nothing selected ${idle.stage} canvas on the stage (${idle.page} on the page); first selected: ${onFirst.stage} on the stage, ${onFirst.page} on the page; second selected: ${swapped.stage} on the stage after ${ms} ms, the second's root ${secondRoot ? `${secondRoot.canvas} canvas` : 'absent'}, the first's root ${firstRoot ? `${firstRoot.canvas} canvas, frame img ${firstRoot.img ? (firstRoot.imgDecoded ? 'decoded' : 'not decoded') : 'none'}` : 'absent'}`,
+        observed: `with nothing selected ${idle.stage} canvas on the stage (${idle.page} on the page); first selected: ${onFirst.stage} on the stage, ${onFirst.page} on the page; second selected: ${swapped.stage} on the stage, ${ms === null ? `no swap seen on the page's clock (${watch === null ? 'no watch' : `${watch.frames} frames, ${watch.downs} pointerdown${watch.heldBeforeDown ? ', swapped before any pointerdown' : ''}`})` : `swapped ${ms} ms after the pointerdown that selected it (${watch.downs} pointerdown, ${watch.frames} frames)`}, the second's root ${secondRoot ? `${secondRoot.canvas} canvas` : 'absent'}, the first's root ${firstRoot ? `${firstRoot.canvas} canvas, frame img ${firstRoot.img ? (firstRoot.imgDecoded ? 'decoded' : 'not decoded') : 'none'}` : 'absent'}`,
       };
     },
   );

@@ -479,8 +479,10 @@
 
 /* ---- the Version history scrubber (2.9) ---- */
 
-/* the slider across the column, then Restore This Version, then the caption on one line (2.9) */
-.ts-versions {
+/* the slider across the column, then Restore This Version, then the caption on one line (2.9);
+   scoped to the landing, since .ts-versions is also the editor's Version history panel
+   (packages/chrome VersionsPanel.css) and this file is in the stylesheet every page loads */
+:where(.ts-product) .ts-versions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-items: start;

@@ -48,7 +48,9 @@
   margin-top: 16px;
 }
 
-.ts-chip {
+/* .ts-chip is also the editor's identity chip (packages/chrome presence.css), and this file is in
+   the stylesheet every page loads, so its rules are scoped to the landing (-home-css.test.ts) */
+:where(.ts-product) .ts-chip {
   appearance: none;
   flex: 0 0 auto;
   box-sizing: border-box;
@@ -71,20 +73,20 @@
   min-width: 0;
 }
 
-.ts-chip:hover {
+:where(.ts-product) .ts-chip:hover {
   background: var(--pt-hair-soft);
 }
 
-.ts-chip:active {
+:where(.ts-product) .ts-chip:active {
   transform: scale(0.98);
 }
 
-.ts-chip[aria-disabled='true'] {
+:where(.ts-product) .ts-chip[aria-disabled='true'] {
   color: var(--pt-ink-2);
   cursor: default;
 }
 
-.ts-chip:focus-visible {
+:where(.ts-product) .ts-chip:focus-visible {
   outline: 2px solid var(--pt-select);
   outline-offset: 2px;
 }
@@ -156,7 +158,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ts-chip {
+  :where(.ts-product) .ts-chip {
     height: 44px;
     padding: 0 8px;
   }
@@ -167,11 +169,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ts-chip {
+  :where(.ts-product) .ts-chip {
     transition: none;
   }
 
-  .ts-chip:active {
+  :where(.ts-product) .ts-chip:active {
     transform: none;
   }
 }

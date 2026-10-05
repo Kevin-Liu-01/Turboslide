@@ -235,6 +235,53 @@ export async function browserTrash(
 }
 
 /**
+ * The deployment's example deck: the GT brand deck, the deck a request without `?deck=` addresses
+ * (server/actions.ts DEFAULT_DECK) and the one the landing's Open the Example Deck opens.
+ */
+export const EXAMPLE_DECK_ID = 'gt-brand';
+
+/** The example deck's head as the Import slides picker lists it: marked, so File > Open leaves it out. */
+export type ExampleHead = DeckHead & { example: true };
+
+/**
+ * Whether any caller may read a deck by its record: no stored record (an unclaimed seed deck,
+ * which `decide()` reads as the legacy open record) or general access open (every role reads).
+ */
+export function readableByAnyone(record: AccessRecord | null): boolean {
+  return record === null || record.generalAccess.mode === 'open';
+}
+
+/**
+ * The example deck the Import slides picker offers every browser (the Round 1 follow-up, lane A
+ * item 1; VERIFICATION.md "Round 1, pass 2" question 1, taken at its default). Since H2 an
+ * anonymous browser's picker listed this browser's Recent record alone, so a fresh browser read
+ * "No other presentations on this Turboslide" while every browser could open the GT brand deck
+ * from /decks. The head is offered when the scope did not list the deck already (a checkout's
+ * `every`, the deck's owner), the store holds it outside the trash and anyone may read it; a
+ * caller with no identity at all is offered nothing. A record that cannot be read offers nothing.
+ * The cost is one head and one record read (the access store's cache) per listing.
+ */
+export async function exampleHead(
+  listedIds: ReadonlySet<string>,
+  scope: ListingScope,
+  deps: Pick<ScopeDeps, 'readRecord'> & {
+    readHead: (deckId: string) => Promise<DeckHead | null>;
+  },
+): Promise<ExampleHead | null> {
+  if (scope.kind === 'none' || listedIds.has(EXAMPLE_DECK_ID)) return null;
+  const [head, record] = await Promise.all([
+    deps.readHead(EXAMPLE_DECK_ID).catch(() => null),
+    deps.readRecord(EXAMPLE_DECK_ID).then(
+      (read) => ({ read }),
+      () => null,
+    ),
+  ]);
+  if (head === null || head.trashedAt !== undefined) return null;
+  if (record === null || !readableByAnyone(record.read)) return null;
+  return { ...head, example: true };
+}
+
+/**
  * The studio's dependencies of `scopeHeads`: the access store's record (its cache) and the link
  * grants the principal's deck index carries (server/access.ts `linkGrantsFromIndex`, the second
  * place a link exchange writes them). Loaded late: access.ts imports the room and the store.

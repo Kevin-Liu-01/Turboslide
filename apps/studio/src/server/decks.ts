@@ -66,6 +66,8 @@ export type DeckCard = DeckHead & {
   appearance: Appearance;
   /** the first slide's id, for the 320 by 180 thumbnail; null for a deck without slides */
   firstSlide: string | null;
+  /** the deployment's example deck, listed for Import slides alone (deck-scope.ts exampleHead) */
+  example?: true;
 };
 
 export type DeckPayload = {
@@ -294,12 +296,22 @@ async function pageScope(): Promise<ListingScope> {
  * and shared decks, an anonymous visitor's none (the page draws this browser's Recent record), a
  * checkout's every deck. The heads come through the collection (`HostedDecks.list`), which on
  * Blob syncs every deck so a title or a trash stamp written on another instance shows here at
- * once; an anonymous visitor's listing reads no store at all.
+ * once; an anonymous visitor's listing reads no store listing. The deployment's example deck
+ * follows the viewer's own, marked `example` (the Round 1 follow-up, lane A item 1): Import slides
+ * offers it to every browser and File > Open leaves it out.
  */
 export const listDecks = createServerFn({ method: 'GET' }).handler(
   async (): Promise<DeckCard[]> => {
-    const { listScoped } = await import('./deck-scope');
-    return (await listScoped(await pageScope())).map(cardOf);
+    const { exampleHead, listScoped, studioScopeDeps } = await import('./deck-scope');
+    const scope = await pageScope();
+    const listed = await listScoped(scope);
+    /* the example deck after the viewer's own, marked for Import slides (deck-scope.ts exampleHead) */
+    const decks = await ensureDecks();
+    const example = await exampleHead(new Set(listed.map((head) => head.id)), scope, {
+      readRecord: (await studioScopeDeps()).readRecord,
+      readHead: (deckId) => decks.head(deckId),
+    });
+    return [...listed, ...(example === null ? [] : [example])].map(cardOf);
   },
 );
 

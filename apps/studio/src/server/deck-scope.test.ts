@@ -5,13 +5,17 @@ import type { DeckHead } from '@turboslide/store/templates';
 
 import {
   BROWSER_TRASH_MAX,
+  EXAMPLE_DECK_ID,
   browserTrash,
+  exampleHead,
   listingScope,
   ownStanding,
   ownedTrash,
   principalOf,
+  readableByAnyone,
   scopeHeads,
 } from './deck-scope';
+import type { ListingScope } from './deck-scope';
 
 // The deck listing scoped to the viewer (docs/NEXT.md 3.2 H2): who lists what, and which decks a
 // principal's own listing keeps, read against records written the way the studio writes them.
@@ -395,5 +399,63 @@ describe('an anonymous visitor\'s trash page (VERIFICATION.md "Round 1, pass 1" 
     const ids = Array.from({ length: BROWSER_TRASH_MAX + 10 }, (_, n) => `deck-${n}`);
     await browserTrash([...ids, 'deck-0', 'deck-1'], anonymous, deps);
     expect(reads.filter((r) => r.startsWith('record ')).length).toBe(BROWSER_TRASH_MAX);
+  });
+});
+
+describe('the example deck in Import slides (the Round 1 follow-up, lane A item 1)', () => {
+  const browser: ListingScope = { kind: 'browser' };
+  const own: ListingScope = { kind: 'own', ctx: anonymous, admin: false };
+  const reads: string[] = [];
+  const deps = (
+    stored: DeckHead | null,
+    access: AccessRecord | null | 'unreadable',
+  ): Parameters<typeof exampleHead>[2] => ({
+    readHead: async (id) => {
+      reads.push(`head ${id}`);
+      return stored;
+    },
+    readRecord: async (id) => {
+      reads.push(`record ${id}`);
+      if (access === 'unreadable') throw new Error('the store refused');
+      return access;
+    },
+  });
+
+  test('is the GT brand deck, offered to a fresh browser and a principal who does not list it', async () => {
+    expect(EXAMPLE_DECK_ID).toBe('gt-brand');
+    const fresh = await exampleHead(new Set(), browser, deps(head('gt-brand'), null));
+    expect(fresh).toEqual({ ...head('gt-brand'), example: true });
+    const signedIn = await exampleHead(new Set(['mine']), own, deps(head('gt-brand'), null));
+    expect(signedIn?.example).toBe(true);
+  });
+
+  test('is read by anyone: an unclaimed seed or open general access, never a restricted or link record', () => {
+    expect(readableByAnyone(null)).toBe(true);
+    expect(
+      readableByAnyone(record('gt-brand', { generalAccess: { mode: 'open', role: 'viewer' } })),
+    ).toBe(true);
+    expect(readableByAnyone(record('gt-brand'))).toBe(false);
+    expect(
+      readableByAnyone(record('gt-brand', { generalAccess: { mode: 'link', role: 'viewer' } })),
+    ).toBe(false);
+  });
+
+  test('is not offered twice, to no identity, from the trash, when missing, restricted or unreadable', async () => {
+    reads.length = 0;
+    expect(await exampleHead(new Set(['gt-brand']), own, deps(head('gt-brand'), null))).toBeNull();
+    expect(
+      await exampleHead(new Set(), { kind: 'none' }, deps(head('gt-brand'), null)),
+    ).toBeNull();
+    expect(reads).toEqual([]);
+    expect(
+      await exampleHead(
+        new Set(),
+        browser,
+        deps({ ...head('gt-brand'), trashedAt: '2026-10-05T10:00:00.000Z' }, null),
+      ),
+    ).toBeNull();
+    expect(await exampleHead(new Set(), browser, deps(null, null))).toBeNull();
+    expect(await exampleHead(new Set(), browser, deps(head('gt-brand'), record('gt-brand')))).toBeNull();
+    expect(await exampleHead(new Set(), browser, deps(head('gt-brand'), 'unreadable'))).toBeNull();
   });
 });

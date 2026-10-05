@@ -6,7 +6,9 @@ import {
   addSlide,
   clickCard,
   coverage,
+  ctl,
   headingRun,
+  menuPath,
   newDeck,
   openEditor,
   ownerContext,
@@ -20,7 +22,9 @@ import {
 
 // Slides, the spec row (docs/FOCUS.md 2.2, 6.4 `slides.clipboard.copy-paste-card`, driver
 // core/slides.spec.ts): a slide copied from a filmstrip card's right click menu and pasted after
-// another card, within one deck and between two decks open in two tabs of one browser.
+// another card, within one deck and between two decks open in two tabs of one browser. The Round 1
+// follow-up, lane A, adds the Import slides row of the example deck a fresh browser is offered
+// (`slides.import.example-deck`, a second context of its own).
 //
 // PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/slides.spec.ts
 
@@ -105,4 +109,100 @@ test(title('slides.clipboard.copy-paste-card'), async () => {
   void b;
 });
 
-coverage(import.meta.filename, ['slides.clipboard.copy-paste-card']);
+/** What the open Import slides dialog lists: the deck rows, the sentences and whether it is busy. */
+async function importListing(p: Page) {
+  return p.evaluate(() => {
+    const dialog = document.querySelector('[data-control="dialog.importSlides"]');
+    if (dialog === null) return { open: false, busy: false, rows: [], metas: [], sentences: [] };
+    const buttons = [...dialog.querySelectorAll('[data-control^="dialog.importSlides.deck."]')];
+    return {
+      open: true,
+      busy: dialog.querySelector('[aria-busy="true"]') !== null,
+      rows: buttons.map((el) =>
+        (el.getAttribute('data-control') ?? '').replace('dialog.importSlides.deck.', ''),
+      ),
+      metas: buttons.map((el) => el.querySelector('.ts-dialog-row-meta')?.textContent ?? ''),
+      sentences: [...dialog.querySelectorAll('.ts-dialog-empty')].map(
+        (el) => el.textContent?.trim() ?? '',
+      ),
+    };
+  });
+}
+
+/** File > Import slides, waited until its listing has landed. */
+async function openImportSlides(p: Page) {
+  await menuPath(p, 'file', 'file.importSlides');
+  await ctl(p, 'dialog.importSlides').waitFor({ timeout: 8000 });
+  await expect
+    .poll(async () => (await importListing(p)).busy, { timeout: 30_000 })
+    .toBe(false);
+  return importListing(p);
+}
+
+/** The tile buttons of step 2. */
+const TILES = '[data-control^="dialog.importSlides.slide."]';
+
+test(title('slides.import.example-deck'), async ({ browser }) => {
+  test.setTimeout(240_000);
+  /* a fresh browser: a context of its own, whose one deck is the one it imports into */
+  const fresh = await ownerContext(browser);
+  const own = new Scratch();
+  try {
+    await newDeck(fresh.page, own, 'Import target');
+    /* File > Open lists this browser's decks: the example deck is not one of them */
+    await menuPath(fresh.page, 'file', 'file.open');
+    await ctl(fresh.page, 'dialog.open').waitFor({ timeout: 8000 });
+    await expect
+      .poll(
+        () =>
+          fresh.page.evaluate(
+            () =>
+              document.querySelector('[data-control="dialog.open"] [aria-busy="true"]') === null,
+          ),
+        { timeout: 30_000 },
+      )
+      .toBe(true);
+    expect(await ctl(fresh.page, 'dialog.open.deck.gt-brand').count()).toBe(0);
+    await fresh.page.keyboard.press('Escape');
+    await ctl(fresh.page, 'dialog.open').waitFor({ state: 'detached', timeout: 4000 });
+    /* File > Import slides offers the example deck under a sentence true of this browser's decks */
+    const listed = await openImportSlides(fresh.page);
+    expect(listed.rows, 'the example deck is the one presentation offered').toEqual(['gt-brand']);
+    expect(listed.metas[0]).toMatch(/^Example · \d+ slides$/);
+    expect(listed.sentences).toEqual(['You have no other presentations yet']);
+    const before = await slideOrder(fresh.page);
+    await ctl(fresh.page, 'dialog.importSlides.deck.gt-brand').click();
+    const tiles = fresh.page.locator(TILES);
+    await tiles.first().waitFor({ timeout: 30_000 });
+    expect(
+      await fresh.page.locator(`${TILES}[aria-selected="true"]`).count(),
+      'no tile is picked when the list opens',
+    ).toBe(0);
+    await tiles.nth(0).click();
+    await tiles.nth(1).click();
+    await expect(ctl(fresh.page, 'dialog.importSlides.ok')).toHaveText('Import 2 slides');
+    await ctl(fresh.page, 'dialog.importSlides.ok').click();
+    await expect
+      .poll(async () => (await slideOrder(fresh.page)).length, { timeout: 30_000 })
+      .toBe(before.length + 2);
+    const after = await slideOrder(fresh.page);
+    const landed = after.filter((id) => !before.includes(id));
+    expect(landed).toHaveLength(2);
+    expect(after.indexOf(landed[0]!), 'the slides land after the current one').toBe(
+      after.indexOf(before[0]!) + 1,
+    );
+    await settled(fresh.page);
+  } finally {
+    test.setTimeout(240_000);
+    try {
+      await teardownAll(fresh.page, own);
+    } finally {
+      await fresh.context.close();
+    }
+  }
+});
+
+coverage(import.meta.filename, [
+  'slides.clipboard.copy-paste-card',
+  'slides.import.example-deck',
+]);

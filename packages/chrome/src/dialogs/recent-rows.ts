@@ -32,15 +32,21 @@ export function recentRowsOf(
 
 /**
  * The listing once it lands, with the mirror's rows the listing does not hold folded in above it
- * (the listing's facts win for a deck both hold), newest first within each part.
+ * (the listing's facts win for a deck both hold), newest first within each part. The example
+ * deck the listing marks (`example`) comes last when `example` is asked for (Import slides offers
+ * it to every browser) and is left out otherwise (File > Open lists the viewer's own decks); a
+ * mirror row of the same deck then stands as one of the viewer's own.
  */
 export function withRecent(
   listed: ReadonlyArray<DeckHeadRow>,
   recentDecks: (() => ReadonlyArray<DeckHeadRow>) | undefined,
   except?: string,
+  options: { example?: boolean } = {},
 ): DeckHeadRow[] {
-  const rows = newestFirst(listed.filter((row) => row.id !== except));
-  const ids = new Set(rows.map((row) => row.id));
+  const kept = listed.filter((row) => row.id !== except);
+  const rows = newestFirst(kept.filter((row) => row.example !== true));
+  const examples = options.example === true ? kept.filter((row) => row.example === true) : [];
+  const ids = new Set([...rows, ...examples].map((row) => row.id));
   const mine = (recentRowsOf(recentDecks, except) ?? []).filter((row) => !ids.has(row.id));
-  return [...mine, ...rows];
+  return [...mine, ...rows, ...examples];
 }

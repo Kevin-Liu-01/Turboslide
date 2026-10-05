@@ -723,6 +723,11 @@ export type DeckHeadRow = {
   updatedAt: string;
   createdAt: string;
   trashedAt?: string;
+  /**
+   * the deployment's example deck, which the listing adds after the viewer's own: Import slides
+   * offers it to every browser and Open leaves it out (server/deck-scope.ts exampleHead)
+   */
+  example?: true;
 };
 
 /** What Import slides shows for a source deck: its slides in order with titles. */

@@ -4798,6 +4798,15 @@
       "severity": 2
     },
     {
+      "id": "slides.import.example-deck",
+      "feature": "slides",
+      "interaction": "A fresh browser on a deck made from /new: File > Open does not list the GT brand deck; File > Import slides lists it alone, its meta \"Example \u00b7 <n> slides\", under the sentence \"You have no other presentations yet\"; no tile is picked when its list opens, two clicks read \"Import 2 slides\" and Import brings two after the current slide",
+      "driver": "core/slides.spec.ts",
+      "today": "works",
+      "evidence": "verify-r1.md finding 2 (production 2026-10-05: a fresh browser read \"No other presentations on this Turboslide\" and was offered nothing); lane A's reading on its dev server (port 4601, tmp store) 2026-10-05 18:17:49Z to 18:18:37Z at a one minute load of 91.7 to 119.4: passed in 28.0 s",
+      "note": "Round 1 follow-up, lane A item 1: the listing of the editor's Open and Import slides dialogs carries the deployment's example deck after the viewer's own, marked example (apps/studio/src/server/deck-scope.ts exampleHead, decks.ts listDecks); Import slides offers it to every browser and Open leaves it out (packages/chrome/src/dialogs/recent-rows.ts withRecent). The default of the Round 1 verifier's pass 2 question 1."
+    },
+    {
       "id": "share.dialog.one-link",
       "feature": "share",
       "interaction": "Share opens with the General access select, the role select, the address in a read only field and one Copy link; the clipboard equals the field; no Copy link row elsewhere in the first stage; the sentence under the select reads the selected access",

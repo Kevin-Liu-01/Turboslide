@@ -116,7 +116,7 @@ export function ImportSlidesDialog() {
     list()
       .then((rows) => {
         if (!live) return;
-        setDecks(withRecent(rows, input.recentDecks, input.deckId));
+        setDecks(withRecent(rows, input.recentDecks, input.deckId, { example: true }));
         setListing(false);
       })
       .catch((err: unknown) => {
@@ -229,8 +229,10 @@ export function ImportSlidesDialog() {
               {decks === null && error === null ? (
                 <ul className="ts-dialog-list is-loading" aria-busy="true" aria-label="Loading" />
               ) : null}
-              {decks !== null && decks.length === 0 ? (
-                <p className="ts-dialog-empty">No other presentations on this Turboslide</p>
+              {/* the sentence is true of the viewer's own decks: the example deck after them is
+                  every browser's (the Round 1 follow-up, lane A item 1) */}
+              {decks !== null && !listing && decks.every((deck) => deck.example === true) ? (
+                <p className="ts-dialog-empty">{IMPORT_NONE_OF_YOURS}</p>
               ) : null}
               {decks !== null && decks.length > 0 ? (
                 <ul
@@ -251,13 +253,14 @@ export function ImportSlidesDialog() {
                         onClick={() => choose(deck.id)}
                         {...tipProps({
                           name: deck.title,
-                          doc: `${deck.slides} slide${deck.slides === 1 ? '' : 's'}, edited ${formatWhen(deck.updatedAt)}; click to pick its slides`,
+                          doc:
+                            deck.example === true
+                              ? `The example deck, ${deck.slides} slide${deck.slides === 1 ? '' : 's'}; click to pick its slides`
+                              : `${deck.slides} slide${deck.slides === 1 ? '' : 's'}, edited ${formatWhen(deck.updatedAt)}; click to pick its slides`,
                         })}
                       >
                         <span className="ts-dialog-row-title">{deck.title}</span>
-                        <span className="ts-dialog-row-meta">
-                          {deck.slides} slide{deck.slides === 1 ? '' : 's'}
-                        </span>
+                        <span className="ts-dialog-row-meta">{rowMeta(deck)}</span>
                       </button>
                     </li>
                   ))}
@@ -372,6 +375,15 @@ export function ImportSlidesDialog() {
       ) : null}
     </Dialog>
   );
+}
+
+/** The sentence over the example deck when the viewer has no other presentation to import from. */
+export const IMPORT_NONE_OF_YOURS = 'You have no other presentations yet';
+
+/** A row's meta: its slide count, and "Example" before it on the example deck. */
+export function rowMeta(deck: Pick<DeckHeadRow, 'slides' | 'example'>): string {
+  const count = `${deck.slides} slide${deck.slides === 1 ? '' : 's'}`;
+  return deck.example === true ? `Example · ${count}` : count;
 }
 
 /**

@@ -42,6 +42,25 @@ describe('the recent rows of the deck dialogs', () => {
     expect(withRecent(listed, mirror, 'a').map((r) => r.id)).toEqual(['fresh', 'x']);
   });
 
+  it('keeps the example deck the listing marks last for Import slides and leaves it out of Open (the Round 1 follow-up, lane A item 1)', () => {
+    const example = { ...row('gt-brand', '2026-10-05T12:00:00Z'), example: true as const };
+    const listed = [example, row('x', '2026-09-30T09:00:00Z')];
+    const mirror = () => [row('fresh', '2026-09-30T12:00:00Z')];
+    expect(withRecent(listed, mirror, 'own', { example: true }).map((r) => r.id)).toEqual([
+      'fresh',
+      'x',
+      'gt-brand',
+    ]);
+    expect(withRecent(listed, mirror).map((r) => r.id)).toEqual(['fresh', 'x']);
+    /* a browser that opened the example deck keeps it in Open as one of its own */
+    const opened = () => [row('gt-brand', '2026-10-05T13:00:00Z')];
+    expect(withRecent(listed, opened).map((r) => r.id)).toEqual(['gt-brand', 'x']);
+    expect(withRecent(listed, opened, undefined, { example: true }).map((r) => r.id)).toEqual([
+      'x',
+      'gt-brand',
+    ]);
+  });
+
   it('sorts newest first', () => {
     expect(
       newestFirst([row('old', '2026-09-01T00:00:00Z'), row('new', '2026-09-30T00:00:00Z')]).map(

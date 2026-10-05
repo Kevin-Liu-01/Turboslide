@@ -288,7 +288,7 @@ export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.T
           if (text.bullet.level > 1) runProps.indentLevel = Math.min(8, text.bullet.level - 1);
           if (text.bullet.substituted === true)
             options.residual?.add(
-              `numbering: ${options.namePrefix}#${text.blockId} uses the ${text.bullet.preset ?? 'digit-nested'} preset, whose "${text.bullet.glyph}" form has no OOXML numbering scheme; the file numbers it as arabicPeriod (gslides-parity SPEC-2 2.2.13)`,
+              `numbering: ${options.namePrefix}#${text.blockId} uses the ${text.bullet.preset ?? 'digit-nested'} preset, whose "${text.bullet.glyph}" form has no OOXML numbering scheme; the file numbers it as arabicPeriod`,
             );
         }
       }

@@ -66,7 +66,7 @@ export async function measureSlidesThroughWorker(
     const done = await local.wait(job.id, MEASURE_TIMEOUT_MS);
     if (done.status !== 'done') {
       throw new TypeError(
-        `Slides ${names} are not arranged by hand yet and could not be measured to convert them: the render worker's measure job failed${done.error?.message ? ` (${done.error.message})` : ''} (gslides-parity SPEC-2 1.3)`,
+        `Slides ${names} are not arranged by hand yet and could not be measured to convert them: the render worker's measure job failed${done.error?.message ? ` (${done.error.message})` : ''}`,
       );
     }
     return (done.result as MeasureJobResult).slides;
@@ -78,7 +78,7 @@ export async function measureSlidesThroughWorker(
   if (run.code !== 0) {
     const why = failureLines(run.stderr, 2).join('; ');
     throw new TypeError(
-      `Slides ${names} are not arranged by hand yet and could not be measured to convert them: turboslide slide measure exited ${run.code}${why ? ` (${why})` : ''} (gslides-parity SPEC-2 1.3); convert them with slide.toCanvas through the turboslide CLI on a checkout of the deck`,
+      `Slides ${names} are not arranged by hand yet and could not be measured to convert them: turboslide slide measure exited ${run.code}${why ? ` (${why})` : ''}; convert them with slide.toCanvas through the turboslide CLI on a checkout of the deck`,
     );
   }
   return parseJsonResult<Record<string, MeasuredSlide>>(run, 'slide measure');

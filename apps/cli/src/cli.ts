@@ -148,7 +148,7 @@ Commands
                                     block.flip, block.crop, block.mask, block.resetImage, block.adjust, block.setAlt,
                                     block.shadow, block.autofit); a slide not arranged by hand yet converts first
   table merge|unmerge|insert-rows|insert-columns|delete-rows|delete-columns|distribute|cell-style <slide>#<block> ...
-                                    Google's table menus (table.merge, table.unmerge, table.insertRows, table.insertColumns,
+                                    the table writes (table.merge, table.unmerge, table.insertRows, table.insertColumns,
                                     table.deleteRows, table.deleteColumns, table.distribute, table.cellStyle)
   chart set-data <slide>#<block> < data.json | chart set-kind <slide>#<block> bar|column|line|pie
                                     the chart's data and type (chart.setData, chart.setKind)

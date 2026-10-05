@@ -481,7 +481,7 @@ export function TableSection({
             }}
             {...tipProps({
               name: 'Border weight',
-              doc: cellDoc ?? 'The cell’s own rule; None is Google’s Transparent border',
+              doc: cellDoc ?? 'The cell’s own rule; None draws no border',
             })}
           >
             <option value="">Table’s</option>

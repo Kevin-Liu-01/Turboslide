@@ -997,7 +997,7 @@ export const HOME = {
 
 /** The PowerPoint import refusal (SPEC 12 "Import"). */
 export const IMPORT_PPTX =
-  'PowerPoint import is not available in Turboslide yet. Import a Turboslide file (.zip), or open the file in Google Slides and paste the text';
+  'PowerPoint import is not available in Turboslide yet. Import a Turboslide file (.zip), or copy the text from the file and paste it';
 
 /** Present mode and Presenter view (SPEC 12 "Present mode"). */
 export const PRESENT = {

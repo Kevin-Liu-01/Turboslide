@@ -97,7 +97,7 @@ export function verifySkippedNote(
   format: 'pptx' | 'pdf' = 'pptx',
 ): string {
   if (format === 'pdf')
-    return `${VERIFY_UNAVAILABLE} (neither pdftoppm nor pdftocairo on PATH; the raster gate of gslides-parity SPEC 7.6 runs where poppler is installed); the page count is the gate`;
+    return `${VERIFY_UNAVAILABLE} (neither pdftoppm nor pdftocairo on PATH; the raster gate runs where poppler is installed); the page count is the gate`;
   const missing = [
     tools.soffice ? '' : 'soffice',
     tools.pdftocairo || tools.pdftoppm ? '' : 'pdftocairo/pdftoppm',

@@ -62,7 +62,7 @@ const slideSet = mutationSchema.options.find(
 if (slideSet === undefined) throw new Error('mutationSchema has no slide.set option');
 const opsRangeSchema = slideSet.shape.value.refine(
   (value) => value === undefined || isOpsRange(value),
-  'ops names { fromSeq, toSeq }, two integers in order (gslides-parity SPEC-3 2.1)',
+  'ops names { fromSeq, toSeq }, two integers in order',
 );
 
 // Built from the schema package's own pieces so this package adds no schema dependency: the

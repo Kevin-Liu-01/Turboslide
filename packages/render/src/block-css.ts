@@ -286,8 +286,8 @@ export const BLOCK_CSS = `
 /* a picture object drawn as a shot (docs/FOCUS.md rank 18, the deferred W7 of hotfix 4): on the
    canvas the figure takes its box, the image row takes what the caption row leaves and the image
    takes the whole row in both axes (its border box, since the sheet sizes it border-box; the fit
-   form's auto width and its two caps are off), so a drag of one edge stretches the picture the way
-   Google's does while a corner drag keeps the aspect through the resize model. At the box the
+   form's auto width and its two caps are off), so a drag of one edge stretches the picture while
+   a corner drag keeps the aspect through the resize model. At the box the
    conversion measured (the figure's own rect: the image's border box, the gap and the caption) a
    converted shot therefore renders the pixels it rendered in the flow, which the fidelity gate
    measures. A trimmed, masked or dithered shot's frame takes the row the same way, its inline
@@ -313,7 +313,7 @@ export const BLOCK_CSS = `
 .ts-sheet svg.chart .value { font-size: 15px; fill: var(--ink); }
 .ts-sheet svg.chart .ink { stroke: var(--ink); }
 .ts-sheet svg.chart .hair { stroke: var(--hair-soft); }
-/* Google's bulleted and numbered list (2.2.12): the glyph or numeral in the 36 px key position,
+/* the bulleted and numbered list (2.2.12): the glyph or numeral in the 36 px key position,
    the item indented 36 px per level below the first */
 .ts-sheet .plain.marked > .item { display: grid; grid-template-columns: 36px minmax(0, 1fr); padding: 12px 0; border-bottom: 1px solid var(--hair-soft); }
 .ts-sheet .plain.marked > .item:last-child { border-bottom-color: var(--hair); }
@@ -328,8 +328,7 @@ export const BLOCK_CSS = `
 .ts-sheet .table.grid { display: grid; grid-template-columns: var(--table-cols); }
 .ts-sheet .table.grid > .tr { display: contents; }
 /* a cell fills its track in both forms (the theme's .ts-sheet .table .td rule, sheet.css): its rule
-   sits on the row's bottom edge and its fill covers the row, as in Google's table and the a:tbl
-   the export writes; the vertical alignment moves to the content */
+   sits on the row's bottom edge and its fill covers the row, as in the a:tbl the export writes; the vertical alignment moves to the content */
 /* the header's display weight draws with the ink rule, under a header row that holds text (docs/archive/rounds/POLISH.md item 3; B2's R8): the renderer writes has-text on such a row, and the editor's open session counts as text while its paragraph holds any */
 .ts-sheet .table.grid > .tr.header.has-text .td, .ts-sheet.ts-editor .table.grid > .tr.header:has(.td.ts-editing .para:not(:empty)) .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
 

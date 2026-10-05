@@ -102,8 +102,8 @@
       "kind": "built"
     },
     "apps/studio/public/manifest.webmanifest": {
-      "bytes": 955,
-      "sha256": "bae9bac846cf928239847d5274ff14146a684061a739ce2a6d28caf2acdbd1ce",
+      "bytes": 987,
+      "sha256": "527795383f721ad97eef3e8b568deaf9ec2691fcf165e15a143d3e037c12ece3",
       "kind": "built"
     },
     "apps/studio/public/og/turboslide.png": {

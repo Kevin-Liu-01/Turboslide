@@ -86,7 +86,7 @@ export function geometryResidual(check: GeometryCheck): string[] {
   }
   for (const shape of check.crossing) {
     out.push(
-      `${shape.part}: shape ${shape.id} "${shape.name}" crosses the page edge at ${shape.off[0]},${shape.off[1]} ${shape.ext[0]}x${shape.ext[1]} EMU; the show clips it (gslides-parity SPEC-2 0.96)`,
+      `${shape.part}: shape ${shape.id} "${shape.name}" crosses the page edge at ${shape.off[0]},${shape.off[1]} ${shape.ext[0]}x${shape.ext[1]} EMU; the show clips it`,
     );
   }
   if (check.normAutofitCount > 0)

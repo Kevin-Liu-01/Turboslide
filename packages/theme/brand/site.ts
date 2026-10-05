@@ -10,7 +10,7 @@
  * head, the manifest, the card and the README so the four never drift.
  */
 const DESCRIPTION =
-  "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.";
+  'Turboslide is a slides editor in the browser. It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.';
 
 /** The card's alt text (SPEC-4 1.6; docs/archive/rounds/POLISH.md 3.6; docs/NEXT.md 4.1.3 item 4). */
 const IMAGE_ALT =

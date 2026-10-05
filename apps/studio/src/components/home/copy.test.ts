@@ -265,7 +265,6 @@ function restingStrings(): string[] {
     CLOSE.buttons.openDeck.label,
     ...FOOTER.links.map((link) => link.label),
     `${FOOTER.maker.before} ${FOOTER.maker.company}${FOOTER.maker.after}`,
-    FOOTER.closing,
   ];
 }
 
@@ -274,7 +273,7 @@ describe('every string of the page', () => {
     expect(every.length).toBeGreaterThan(80);
     expect(every.some((e) => e.path === 'hero.heading')).toBe(true);
     expect(every.some((e) => e.path === 'hero.stage.caption')).toBe(true);
-    expect(every.some((e) => e.path === 'footer.closing')).toBe(true);
+    expect(every.some((e) => e.path === 'footer.maker.before')).toBe(true);
   });
 
   it('carries no em dash, en dash, exclamation mark, semicolon or colon', () => {

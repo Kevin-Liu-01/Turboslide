@@ -122,7 +122,7 @@ export function generateActionsReference(): string {
     '',
     '## Comment anchors',
     '',
-    'A comment thread names a place in the deck with an anchor (`comment.add`, `comment.list`, `comment.get`; gslides-parity SPEC-3 5.9). The CLI spells an anchor as one argument; the actions take the object form.',
+    'A comment thread names a place in the deck with an anchor (`comment.add`, `comment.list`, `comment.get`). The CLI spells an anchor as one argument; the actions take the object form.',
     '',
     markdownTable(
       ['CLI form', 'Object', 'Names'],

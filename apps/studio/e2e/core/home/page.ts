@@ -71,7 +71,7 @@ const SECTION_ORDER = [
   'footer',
 ] as const;
 const H2_OF: Readonly<Record<string, string>> = {
-  menus: "The menus are Google's",
+  menus: 'Menus and keyboard shortcuts',
   canvas: 'Everything on a slide moves',
   tailor: 'One name on every slide',
   kits: 'Brand kits restyle every slide',

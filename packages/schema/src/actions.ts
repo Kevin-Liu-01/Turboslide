@@ -458,7 +458,7 @@ export const slideResultSchema = z.strictObject({
   findings: z.array(findingSchema),
 });
 
-const layoutId = z.enum(LAYOUT_IDS).describe('One of the layout list (gslides-parity SPEC 5.2)');
+const layoutId = z.enum(LAYOUT_IDS).describe('One of the layout list');
 const slideIdList = z.array(slugSchema).min(1).describe('One or more slide ids');
 
 const slideListRow = z.strictObject({
@@ -1427,9 +1427,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       copyComments: z
         .boolean()
         .optional()
-        .describe(
-          'Carry the comment threads into the copy with their ids; off by default (gslides-parity SPEC-3 5.8)',
-        ),
+        .describe('Carry the comment threads into the copy with their ids; off by default'),
       baseRevision: baseRevision.describe(
         'The revision of the source deck the caller read; a stale value is rejected with 409',
       ),
@@ -1794,7 +1792,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'slide.setLayout': action({
     id: 'slide.setLayout',
     label: 'Set layout',
-    doc: 'Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured, gslides-parity SPEC-2 1.6); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).',
+    doc: 'Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).',
     group: 'slide',
     mutates: true,
     transports: A,
@@ -1982,7 +1980,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.insert': action({
     id: 'block.insert',
     label: 'Insert block',
-    doc: 'Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object (gslides-parity SPEC-2 1.6).',
+    doc: 'Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -2051,7 +2049,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.align': action({
     id: 'block.align',
     label: 'Align blocks',
-    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6; docs/FOCUS.md rank 14).",
+    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
     group: 'block',
     mutates: true,
     transports: A,
@@ -2144,7 +2142,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.duplicate': action({
     id: 'block.duplicate',
     label: 'Duplicate block',
-    doc: 'Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets (gslides-parity SPEC-2 section 3).',
+    doc: 'Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -2244,7 +2242,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe(
-          'Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB (gslides-parity SPEC-3 0.29)',
+          'Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB',
         ),
       replaceSource: slugSchema
         .optional()
@@ -2705,14 +2703,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       zoom: z
         .union([z.number().min(0.25).max(16), z.literal('fit')])
         .describe(
-          "A factor between 0.25 and 16 (Google's 25 to 1600 percent), or 'fit' for the stage's own fit",
+          "A factor between 0.25 and 16 (25 to 1600 percent), or 'fit' for the stage's own fit",
         ),
       center: z
         .strictObject({ x: z.number(), y: z.number() })
         .optional()
-        .describe(
-          'The sheet point kept under the stage centre; the sheet centre unless set (gslides-parity SPEC-2 0.81)',
-        ),
+        .describe('The sheet point kept under the stage centre; the sheet centre unless set'),
     }),
     output: viewStateSchema,
     mcp: 'deck_set_zoom',
@@ -2791,16 +2787,13 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       includeSkipped: z
         .boolean()
         .optional()
-        .describe('Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)'),
-      includeNotes: z
-        .boolean()
-        .optional()
-        .describe('Carry the speaker notes; left out by default (gslides-parity decision 15.2)'),
+        .describe('Export the skipped slides too; left out by default'),
+      includeNotes: z.boolean().optional().describe('Carry the speaker notes; left out by default'),
       includeComments: z
         .boolean()
         .optional()
         .describe(
-          'Write the comment threads as classic p:cm parts, editors and owners only; left out by default (gslides-parity SPEC-3 5.8)',
+          'Write the comment threads as classic p:cm parts, editors and owners only; left out by default',
         ),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
       batch: z
@@ -2811,7 +2804,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         })
         .optional()
         .describe(
-          'Hosted only (window and http): render one batch of slides of a batched export into the job (gslides-parity SPEC-2 8.1)',
+          'Hosted only (window and http): render one batch of slides of a batched export into the job',
         ),
       merge: z
         .strictObject({ jobId: z.string().min(1) })
@@ -2905,7 +2898,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       includeSkipped: z
         .boolean()
         .optional()
-        .describe('Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)'),
+        .describe('Build the skipped slides too; left out by default'),
       includeNotes: z.boolean().optional().describe('Carry the speaker notes into the file'),
     }),
     output: z.strictObject({
@@ -3414,7 +3407,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.shadow': action({
     id: 'block.shadow',
     label: 'Drop shadow',
-    doc: 'Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at Google’s defaults.',
+    doc: 'Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at their defaults.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -3882,7 +3875,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'table.cellStyle': action({
     id: 'table.cellStyle',
     label: 'Cell fill and border',
-    doc: 'Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.',
+    doc: 'Writes the fill and the border of cells in one write; null clears one; a border weight of 0 draws no border.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4104,7 +4097,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'font.list': action({
     id: 'font.list',
     label: 'Fonts',
-    doc: 'The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2).',
+    doc: 'The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence (docs/archive/rounds/PRODUCT.md 4.2).',
     group: 'render',
     mutates: false,
     transports: A,

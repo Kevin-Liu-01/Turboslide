@@ -5,7 +5,7 @@
   <img alt="The Turboslide mark, a slanted T with three bars under its left arm, beside the word Turboslide" src="docs/readme/brand/lockup-dark.png" width="477">
 </picture>
 
-Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.
+Turboslide is a slides editor in the browser. It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.
 
 - Live studio: [https://www.turboslide.com](https://www.turboslide.com), with the product page at [/home](https://www.turboslide.com/home) and the agent guide at [/llms.txt](https://www.turboslide.com/llms.txt)
 - Agents run the same 193 actions over the CLI, MCP and HTTP: [The CLI in brief](#the-cli-in-brief)
@@ -29,7 +29,7 @@ Turboslide is a slides editor in the browser. It has Google Slides' menus and sh
 
 ## Advanced tools
 
-Tools > Advanced tools is one check row in the Tools menu. Off, which is the default, the menu bar, the toolbar, the right click menus, Search the menus and the Keyboard shortcuts dialog show the core set of [docs/FOCUS.md](docs/FOCUS.md) section 2 and nothing else. On, every feature below appears in Google's position exactly as before, and the setting is remembered in the browser.
+Tools > Advanced tools is one check row in the Tools menu. Off, which is the default, the menu bar, the toolbar, the right click menus, Search the menus and the Keyboard shortcuts dialog show the core set of [docs/FOCUS.md](docs/FOCUS.md) section 2 and nothing else. On, every feature below appears in its place in the menus exactly as before, and the setting is remembered in the browser.
 
 A parked feature is hidden, never disabled and never deleted. A deck that carries one of its blocks (a chart, a table, a diagram, an icon, a material, a code panel, a word art block, a gallery shape) still draws it on the sheet, in the show, in the viewer and in every download, and the block can be selected, moved, resized, ordered, aligned, duplicated and deleted through the rows of the default view; only its own tail controls and menu rows are hidden. The keyboard shortcut of a parked row does nothing while the switch is off. One control is the exception to hidden: the Font box on the text tail stays visible and disabled with the sentence "The GT theme sets Inter", so a seller who pastes from an email and sees the font change finds the answer where they look.
 

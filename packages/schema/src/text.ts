@@ -74,7 +74,7 @@ export const multilineTextSchema = z
   .string()
   .refine(
     (value) => !/\r/.test(value),
-    'a multiline Text separates paragraphs with \\n and holds no \\r (gslides-parity SPEC 7.4)',
+    'a multiline Text separates paragraphs with \\n and holds no \\r',
   );
 
 /** The paragraphs of a Text: the string split on `\n`; a one line Text is one paragraph. */
@@ -148,7 +148,7 @@ export const blockLinkField = annotate(blockLinkSchema.optional(), {
   label: 'Link',
   control: 'json',
   group: 'Block',
-  help: 'A URL, or { "slide": "<id>" | "next" | "previous" | "first" | "last" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).',
+  help: 'A URL, or { "slide": "<id>" | "next" | "previous" | "first" | "last" }; active when presenting, in the shared view and in the downloads.',
 });
 
 /** The slide a block link points at, as a slide link target; null for a URL or no link. */

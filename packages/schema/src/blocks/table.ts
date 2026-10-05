@@ -108,7 +108,7 @@ export const tableRowSchema = z.strictObject({
     label: 'Row height',
     control: 'number',
     group: 'Layout',
-    help: 'The row height in px; the content height when absent (gslides-parity SPEC-2 2.7.4).',
+    help: 'The row height in px; the content height when absent.',
   }),
 }) satisfies z.ZodType<TableRow>;
 
@@ -126,7 +126,7 @@ export const cellBorderSchema = z.strictObject({
     control: 'select',
     snap: TABLE_BORDER_WEIGHTS,
     group: 'Block',
-    help: '0 draws no rule (Google’s Transparent border), 1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge.',
+    help: '0 draws no rule, 1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge.',
   }),
   dash: annotate(z.enum(DASHES).optional(), {
     label: 'Border dash',
@@ -156,7 +156,7 @@ export const tableBorderSchema = z.strictObject({
     control: 'select',
     snap: TABLE_BORDER_WEIGHTS,
     group: 'Block',
-    help: '1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge; 0 removes the table’s rules (gslides-parity SPEC-2 0.63).',
+    help: '1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge; 0 removes the table’s rules.',
   }),
   color: colorField('Border color', 'The rule color; the hairline token unless set.'),
   dash: annotate(z.enum(DASHES).optional(), {
@@ -200,13 +200,13 @@ export const tableFieldsShape = {
     label: 'Merged cells',
     control: 'json',
     group: 'Block',
-    help: 'Each entry is the anchor cell and how many rows and columns it spans; the covered cells keep their text (gslides-parity SPEC-2 2.7.1).',
+    help: 'Each entry is the anchor cell and how many rows and columns it spans; the covered cells keep their text.',
   }),
   cells: annotate(z.array(tableCellStyleSchema).optional(), {
     label: 'Cell styles',
     control: 'json',
     group: 'Block',
-    help: 'Fill and border per cell (gslides-parity SPEC-2 2.7.2).',
+    help: 'Fill and border per cell.',
   }),
 };
 

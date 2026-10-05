@@ -241,11 +241,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
       embedded: ['GT Inter Display', 'GT Inter Text 22'],
     });
     expect(report.fonts.requiredOnViewer).toEqual([]);
-    expect(report.fonts.substitutedIn).toEqual([
-      'Keynote',
-      'PowerPoint for the web',
-      'Google Slides',
-    ]);
+    expect(report.fonts.substitutedIn).toEqual(['Keynote', 'PowerPoint for the web']);
   });
 
   test('merge keeps the first theme, every file and every slide', () => {

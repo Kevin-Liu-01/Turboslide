@@ -1240,7 +1240,7 @@ const VIEW: Menu = {
     omit(
       'view.motion',
       'Motion',
-      'Section 0.5; the one Transition stub sits in Google’s three Transition positions',
+      'Section 0.5; the one Transition stub sits in the three Transition positions',
     ),
     omit(
       'view.themeBuilder',

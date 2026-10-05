@@ -67,7 +67,7 @@ import {
 
 const USAGE = `usage: turboslide block <set|insert|remove|move|duplicate|align|distribute|order|group|ungroup|regroup|rotate|flip|crop|mask|reset-image|adjust|alt|shadow|autofit|dither> ...
   block dither <slideId>#<blockId> [--pattern bayer8] [--black 120 --white 230 --gamma 0.9] [--photograph] [--off]
-                                    the deck's two tone screen over a picture (picture.dither, gslides-parity SPEC-3 10.5)
+                                    the deck's two tone screen over a picture (picture.dither)
   block set <slideId>#<blockId> <pointer> <value>     JSON when it parses (22, true, "x"), text otherwise (4/8)
   block set <slideId>#<blockId> <pointer> --delete    remove the property
   block insert <slideId> --slot <slot> [--after <blockId>] [--pos x,y,w,h] [--file block.json] < block.json

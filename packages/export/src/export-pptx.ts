@@ -294,7 +294,7 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
       ...(zipPath ? [`both: ${basename(zipPath)} holds the light and dark files`] : []),
       ...(materialized.written.length > 0
         ? [
-            `dither: ${materialized.written.length} variant file(s) written before the shoot; turboslide picture materialize records them on the deck (gslides-parity SPEC-3 10.4)`,
+            `dither: ${materialized.written.length} variant file(s) written before the shoot; turboslide picture materialize records them on the deck`,
           ]
         : []),
     ],

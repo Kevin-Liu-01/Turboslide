@@ -346,7 +346,7 @@
           "flag": "--copy-comments",
           "type": "boolean",
           "required": false,
-          "description": "Carry the comment threads into the copy with their ids; off by default (gslides-parity SPEC-3 5.8)"
+          "description": "Carry the comment threads into the copy with their ids; off by default"
         },
         {
           "key": "baseRevision",
@@ -943,7 +943,7 @@
           "flag": "--layout",
           "type": "\"title\" | \"opener\" | \"split\" | \"cols\" | \"title-only\" | \"one-column\" | \"statement\" | \"section-description\" | \"mood\" | \"big-number\" | \"blank\" | \"subtitle-body\" | \"rows\" | \"plain\" | \"table\" | \"figure\" | \"pair\" | \"tiles\" | \"details\" | \"board\" | \"matrix\" | \"closing\"",
           "required": true,
-          "description": "One of the layout list (gslides-parity SPEC 5.2)",
+          "description": "One of the layout list",
           "enum": [
             "title",
             "opener",
@@ -3188,7 +3188,7 @@
           "flag": "--upload",
           "type": "string",
           "required": false,
-          "description": "Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB (gslides-parity SPEC-3 0.29)"
+          "description": "Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB"
         },
         {
           "key": "replaceSource",
@@ -4131,21 +4131,21 @@
           "flag": "--include-skipped",
           "type": "boolean",
           "required": false,
-          "description": "Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)"
+          "description": "Export the skipped slides too; left out by default"
         },
         {
           "key": "includeNotes",
           "flag": "--include-notes",
           "type": "boolean",
           "required": false,
-          "description": "Carry the speaker notes; left out by default (gslides-parity decision 15.2)"
+          "description": "Carry the speaker notes; left out by default"
         },
         {
           "key": "includeComments",
           "flag": "--include-comments",
           "type": "boolean",
           "required": false,
-          "description": "Write the comment threads as classic p:cm parts, editors and owners only; left out by default (gslides-parity SPEC-3 5.8)"
+          "description": "Write the comment threads as classic p:cm parts, editors and owners only; left out by default"
         },
         {
           "key": "out",
@@ -4269,7 +4269,7 @@
           "flag": "--include-skipped",
           "type": "boolean",
           "required": false,
-          "description": "Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)"
+          "description": "Build the skipped slides too; left out by default"
         },
         {
           "key": "includeNotes",

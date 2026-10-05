@@ -165,7 +165,7 @@ export function lintRecord(
             box: block.box,
             measured: { lines: block.lines ?? 0 },
             proposal: isCell
-              ? `The cell at row ${rowIndex + 1}, column ${columnIndex + 1} wraps to ${block.lines} lines; cells are at most two lines (gslides-parity SPEC 7.3). Shorten the text or widen the column.`
+              ? `The cell at row ${rowIndex + 1}, column ${columnIndex + 1} wraps to ${block.lines} lines; cells are at most two lines. Shorten the text or widen the column.`
               : `Row ${rowIndex + 1} wraps to ${block.lines} lines; values are at most two lines (DECK-GRAMMAR.md:36). Shorten the value or widen the column.`,
           }),
         );

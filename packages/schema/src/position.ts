@@ -45,20 +45,20 @@ export const positionObjectSchema = z.strictObject({
     control: 'number',
     snap: [0, 15, 30, 45, 90, 180, 270],
     group: 'Layout',
-    help: 'Degrees clockwise about the centre of the box, 0 up to 360 (gslides-parity SPEC-2 2.1.1).',
+    help: 'Degrees clockwise about the centre of the box, 0 up to 360.',
   }),
   flip: annotate(z.enum(FLIPS).optional(), {
     label: 'Flip',
     control: 'select',
     snap: FLIPS,
     group: 'Layout',
-    help: 'h mirrors left to right, v top to bottom, hv both (gslides-parity SPEC-2 2.1.2).',
+    help: 'h mirrors left to right, v top to bottom, hv both.',
   }),
   group: annotate(slugSchema.optional(), {
     label: 'Group',
     control: 'readonly',
     group: 'Layout',
-    help: 'The tag the members of one group share; Group and Ungroup write it (gslides-parity SPEC-2 2.1.3).',
+    help: 'The tag the members of one group share; Group and Ungroup write it.',
   }),
 }) satisfies z.ZodType<Position>;
 
@@ -67,7 +67,7 @@ export const positionSchema = annotate(positionObjectSchema.optional(), {
   label: 'Position',
   control: 'position',
   group: 'Layout',
-  help: 'The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md; gslides-parity SPEC-2 section 1).',
+  help: 'The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).',
 });
 
 /** The z a block sorts by: its recorded z, or 0. */

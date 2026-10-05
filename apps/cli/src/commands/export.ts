@@ -83,7 +83,7 @@ export function parseExportTarget(ctx: CommandContext): {
   let format: ExportFormat | undefined;
   if (rest[0] === 'gslides') {
     throw new UsageError(
-      'export gslides was removed on 2026-09-11: PPTX is the one export target (docs/pptx.md); the other formats are pdf, txt and jpeg',
+      'that export format was removed on 2026-09-11: PPTX is the one export target (docs/pptx.md); the other formats are pdf, txt and jpeg',
     );
   }
   if (isFormatWord(rest[0])) {

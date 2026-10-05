@@ -32,7 +32,7 @@ export type ReportInput = {
 };
 
 /** Viewers known to ignore or bypass embedded fonts (SPEC 8.4). */
-export const SUBSTITUTING_VIEWERS = ['Keynote', 'PowerPoint for the web', 'Google Slides'];
+export const SUBSTITUTING_VIEWERS = ['Keynote', 'PowerPoint for the web'];
 
 // ---------------------------------------------------------------------------------------------
 // The shader frame row (docs/archive/rounds/FEATURES.md 5.5, the exporters; audit-shaders 9)

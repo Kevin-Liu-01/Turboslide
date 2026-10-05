@@ -44,7 +44,7 @@ export const FEATURES = [
     shots: [
       {
         file: '04-layout-grid.jpg',
-        alt: "The Apply layout grid with Google's eleven layouts and the ten GT layouts, each as a rendered thumbnail, with the Closing tile's tooltip.",
+        alt: "The Apply layout grid with eleven layouts above the GT layouts rule and the ten GT layouts under it, each as a rendered thumbnail, with the Closing tile's tooltip.",
         caption:
           "The layout grid from the toolbar's Layout button, applied to every selected slide.",
       },

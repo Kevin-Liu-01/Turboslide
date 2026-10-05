@@ -577,7 +577,7 @@
     },
     "slide.setLayout": {
       "label": "Set layout",
-      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured, gslides-parity SPEC-2 1.6); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
       "mutates": true,
       "milestone": "M6",
       "group": "slide"
@@ -647,7 +647,7 @@
     },
     "block.insert": {
       "label": "Insert block",
-      "doc": "Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object (gslides-parity SPEC-2 1.6).",
+      "doc": "Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object.",
       "mutates": true,
       "milestone": "M2",
       "group": "block"
@@ -668,7 +668,7 @@
     },
     "block.align": {
       "label": "Align blocks",
-      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6; docs/FOCUS.md rank 14).",
+      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
       "mutates": true,
       "milestone": "M6",
       "group": "block"
@@ -689,7 +689,7 @@
     },
     "block.duplicate": {
       "label": "Duplicate block",
-      "doc": "Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets (gslides-parity SPEC-2 section 3).",
+      "doc": "Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets.",
       "mutates": true,
       "milestone": "GS1",
       "group": "block"
@@ -766,7 +766,7 @@
     },
     "block.shadow": {
       "label": "Drop shadow",
-      "doc": "Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at Google’s defaults.",
+      "doc": "Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at their defaults.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -892,7 +892,7 @@
     },
     "table.cellStyle": {
       "label": "Cell fill and border",
-      "doc": "Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.",
+      "doc": "Writes the fill and the border of cells in one write; null clears one; a border weight of 0 draws no border.",
       "mutates": true,
       "milestone": "GS2",
       "group": "block"
@@ -1165,7 +1165,7 @@
     },
     "font.list": {
       "label": "Fonts",
-      "doc": "The font catalog: every face with the name PowerPoint and Google Slides use, its category, weights, italic and licence (gslides-parity SPEC-5-amendments A5; docs/archive/rounds/PRODUCT.md 4.2).",
+      "doc": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence (docs/archive/rounds/PRODUCT.md 4.2).",
       "mutates": false,
       "milestone": "P1",
       "group": "render"

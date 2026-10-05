@@ -816,7 +816,7 @@ type Positioned = { block: Block; pos: Position };
 function freeformBlocks(slide: Slide): Positioned[] {
   if (!isCanvasSlide(slide)) {
     throw new TypeError(
-      `Slide "${slide.id}" is not arranged by hand yet; slide.toCanvas converts it (docs/archive/gslides-parity/SPEC-2.md 1.6)`,
+      `Slide "${slide.id}" is not arranged by hand yet; slide.toCanvas converts it`,
     );
   }
   return (slide.slots.main ?? []).flatMap((block) =>
@@ -862,7 +862,7 @@ export async function withCanvas(
 async function measureOne(deps: StoreActionDeps, deck: Deck, slide: Slide): Promise<CanvasBoxes> {
   if (deps.measureCanvas === undefined) {
     throw new TypeError(
-      `Slide "${slide.id}" is not arranged by hand yet and this transport has no measurer to convert it; run the write through the turboslide CLI or the studio, or slide.toCanvas first (docs/archive/gslides-parity/SPEC-2.md 1.3)`,
+      `Slide "${slide.id}" is not arranged by hand yet and this transport has no measurer to convert it; run the write through the turboslide CLI or the studio, or slide.toCanvas first`,
     );
   }
   const measured = await deps.measureCanvas(deck, [slide]);
@@ -2282,7 +2282,7 @@ export async function slideToCanvas(
   if (pending.length > 0) {
     if (deps.measureCanvas === undefined)
       throw new TypeError(
-        'slide.toCanvas needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/archive/gslides-parity/SPEC-2.md 1.3)',
+        'slide.toCanvas needs a measurer on this transport; run it through the turboslide CLI or the studio',
       );
     // one sheet page for the call (SPEC-2 0.104)
     measured = await deps.measureCanvas(current.deck, pending);
@@ -2697,7 +2697,7 @@ export async function blockAutofit(
   if (input.apply === true && input.autofit !== 'none') {
     if (deps.measureFit === undefined)
       throw new TypeError(
-        'block.autofit with apply needs a measurer on this transport; run it through the turboslide CLI or the studio (docs/archive/gslides-parity/SPEC-2.md 0.64)',
+        'block.autofit with apply needs a measurer on this transport; run it through the turboslide CLI or the studio',
       );
     const measured = (await deps.measureFit(current.deck, slide))[input.blockId];
     const pos = block.pos;
@@ -2726,7 +2726,7 @@ export async function blockAutofit(
       }
     } else if (input.autofit === 'grow' && pos === undefined) {
       throw new TypeError(
-        `Block "${input.blockId}" has no position box; Resize shape to fit text works on an object of the canvas (docs/archive/gslides-parity/SPEC-2.md 0.41)`,
+        `Block "${input.blockId}" has no position box; Resize shape to fit text works on an object of the canvas`,
       );
     }
   }
@@ -3436,7 +3436,7 @@ export async function diagramInsert(
 ): Promise<SlideResult & { blockIds: string[]; group: string }> {
   if (deps.diagrams === undefined)
     throw new TypeError(
-      'diagram.insert needs the diagram templates, which this transport does not carry yet (docs/archive/gslides-parity/SPEC-2.md 2.8.3)',
+      'diagram.insert needs the diagram templates, which this transport does not carry yet',
     );
   const current = (await deps.store.read()).document;
   const canvas = await withCanvas(deps, current, requireSlide(current, input.slideId));
@@ -3787,7 +3787,7 @@ export async function pictureMaterialize(
     seen.add(`${row.asset.id}:${row.key}`);
     if (deps.materialize === undefined) {
       throw new TypeError(
-        'picture.materialize needs the dither pipeline (@turboslide/effects/dither, gslides-parity SPEC-3 10.2) bound on this transport; run it through the turboslide CLI once the pipeline lands, or pass dryRun to list the missing variants',
+        'picture.materialize needs the dither pipeline (@turboslide/effects/dither) bound on this transport; run it through the turboslide CLI once the pipeline lands, or pass dryRun to list the missing variants',
       );
     }
     const asset = assetOf(row.asset.id);

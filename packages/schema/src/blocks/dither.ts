@@ -53,7 +53,7 @@ export const pictureDitherSchema = z.strictObject({
     control: 'select',
     snap: DITHER_PATTERNS,
     group: DITHER_GROUP,
-    help: 'The threshold texture; Bayer 8 by 8 is the deck’s two tone screen (gslides-parity SPEC-3 10.1).',
+    help: 'The threshold texture; Bayer 8 by 8 is the deck’s two tone screen.',
   }),
   tone: annotate(z.enum(DITHER_TONES).optional(), {
     label: 'Tone',
@@ -153,5 +153,5 @@ export const pictureDitherField = annotate(pictureDitherSchema.optional(), {
   label: 'Dither',
   control: 'json',
   group: DITHER_GROUP,
-  help: 'The deck’s two tone screen over the picture’s continuous source; present means on (gslides-parity SPEC-3 10.1).',
+  help: 'The deck’s two tone screen over the picture’s continuous source; present means on.',
 });

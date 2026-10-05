@@ -344,11 +344,11 @@ const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 /**
  * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/archive/rounds/POLISH.md section 3,
  * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead's second
- * sentence as React escapes it (the apostrophe is `&#x27;`), the Speculation Rules script.
+ * sentence as React writes it, the Speculation Rules script.
  */
 const HOME_MARKS = [
   'class="ts-product"',
-  'It has Google Slides&#x27; menus and shortcuts.',
+  'It has menus and keyboard shortcuts for editing, arranging and presenting.',
   '<script type="speculationrules"',
 ];
 

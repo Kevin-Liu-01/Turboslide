@@ -218,7 +218,7 @@ function segmentLine(line: SceneSegment, options: LineEmitOptions): PptxGenJS.Sh
       else props.endArrowType = head;
       if (!exact)
         options.residual?.add(
-          `line heads: ${kind} on ${options.namePrefix}#${line.blockId} travels as ${head}; PowerPoint draws no ${kind} head (gslides-parity SPEC-2 2.4.5)`,
+          `line heads: ${kind} on ${options.namePrefix}#${line.blockId} travels as ${head}; PowerPoint draws no ${kind} head`,
         );
     }
     return props;
@@ -257,7 +257,7 @@ export function addSceneLine(
     const box = segmentBox(line);
     if (line.kind === 'curve' && (line.points?.length ?? 0) > 2)
       options.residual?.add(
-        `paths: ${options.namePrefix}#${line.blockId} is a curve through its points; the file holds the sheet's Catmull-Rom cubics as a:cubicBezTo segments (gslides-parity SPEC-2 2.4.3)`,
+        `paths: ${options.namePrefix}#${line.blockId} is a curve through its points; the file holds the sheet's Catmull-Rom cubics as a:cubicBezTo segments`,
       );
     slide.addShape(prst('custGeom'), {
       x: pxToIn(box.x),

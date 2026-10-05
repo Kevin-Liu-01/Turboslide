@@ -595,7 +595,7 @@ export function applyMutation(
       const root = mutation.path.split('/')[1] ?? '';
       if (root === 'trashedAt') {
         throw new TypeError(
-          'deck.set does not write trashedAt; deck.trash and deck.restore move a deck to and from the trash at the store level (gslides-parity SPEC 7.2.5)',
+          'deck.set does not write trashedAt; deck.trash and deck.restore move a deck to and from the trash at the store level',
         );
       }
       if (!DECK_SET_ROOTS.has(root)) {

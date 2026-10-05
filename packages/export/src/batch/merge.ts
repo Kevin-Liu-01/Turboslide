@@ -365,7 +365,7 @@ function themeReport(built: BuildResult, input: ThemeReportInput): ExportReport 
       plan.omitted.length > 0
         ? `skipped: ${plan.omitted.length} slide(s) left out (${plan.omitted.join(', ')}); pass includeSkipped to carry them`
         : 'skipped: none; every slide of the deck is in the file',
-      `batched: ${plan.batches.length} batch(es) of at most ${Math.max(...plan.batches.map((b) => b.length))} slides, merged from stored parts (gslides-parity SPEC-2 8.1); native types ${nativeTypes.length}`,
+      `batched: ${plan.batches.length} batch(es) of at most ${Math.max(...plan.batches.map((b) => b.length))} slides, merged from stored parts; native types ${nativeTypes.length}`,
       ...built.residual,
     ],
     warnings: [...input.extractWarnings, ...built.warnings],

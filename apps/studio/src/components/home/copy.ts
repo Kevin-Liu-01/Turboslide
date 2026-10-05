@@ -32,11 +32,7 @@ export const FORBIDDEN_WORDS: ReadonlyArray<string> = [
   'lightweight',
   'built on Rust',
 ];
-export const FORBIDDEN_PHRASES: ReadonlyArray<string> = [
-  'Slides clone',
-  'Google Slides alternative',
-  'pixel for pixel',
-];
+export const FORBIDDEN_PHRASES: ReadonlyArray<string> = ['Slides clone', 'pixel for pixel'];
 
 /** The report words of POLISH.md 3.1 that never appear on the page. */
 export const REPORT_WORDS: ReadonlyArray<string> = [
@@ -53,9 +49,6 @@ export const REPORT_WORDS: ReadonlyArray<string> = [
  * `PROPER_NOUNS`: the products the copy names as written.
  */
 export const HOME_PROPER_NOUNS: ReadonlyArray<string> = [
-  'Google Slides',
-  'Google',
-  'Google LLC',
   'PowerPoint',
   'PDF',
   'Vercel',
@@ -140,7 +133,7 @@ export const HERO = {
     'Turboslide downloads PDF and PowerPoint files.',
   ],
   /** the lead after its first sentence */
-  lead: "It has Google Slides' menus and shortcuts. No account is needed.",
+  lead: 'It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.',
   buttons: {
     newPresentation: { label: 'New Presentation', href: '/new' },
     openDeck: { label: 'Open the Example Deck', deckId: 'gt-brand' },
@@ -234,8 +227,8 @@ export type SectionIconName =
 
 export const MENUS = {
   id: 'menus',
-  h2: "The menus are Google's",
-  lead: "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help are in Google's order, with Google's shortcuts. The rows this page runs are in ink, and the others say what they do in the editor.",
+  h2: 'Menus and keyboard shortcuts',
+  lead: "File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help show a row's keyboard shortcut beside it. The rows this page runs are in ink, and the others say what they do in the editor.",
   /** the status row at rest */
   statusRest: 'Open a menu and choose a row. Undo puts the deck back.',
   /**
@@ -591,7 +584,6 @@ export const FOOTER = {
   ] as ReadonlyArray<FooterLink>,
   /** the sentence that names the company, the GT mark set inline before its name (brand-judge-3 graft 2) */
   maker: { before: 'Turboslide is made by', company: 'General Translation', after: '.' },
-  closing: 'Google Slides is a product of Google LLC.',
 } as const;
 
 /** Every string of the page, keyed, for the lints. */

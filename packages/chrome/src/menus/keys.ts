@@ -1056,7 +1056,7 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   },
   { google: 'animations-panel', status: 'later', reason: 'The GT theme presents still slides' },
   { google: 'animation-preview', status: 'omit', reason: 'No animations' },
-  { google: 'open-explore', status: 'later', reason: 'Google retired Explore in 2024' },
+  { google: 'open-explore', status: 'later', reason: 'Turboslide has no Explore panel' },
   {
     google: 'open-dictionary',
     status: 'omit',

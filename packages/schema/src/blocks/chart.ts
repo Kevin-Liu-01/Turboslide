@@ -87,7 +87,7 @@ export const chartFieldsShape = {
     control: 'select',
     snap: CHART_KINDS,
     group: 'Block',
-    help: 'Bar, Column, Line or Pie (gslides-parity SPEC-2 2.8.1); a pie keeps its first series.',
+    help: 'Bar, Column, Line or Pie; a pie keeps its first series.',
   }),
   categories: annotate(z.array(z.string()).min(1), {
     label: 'Categories',

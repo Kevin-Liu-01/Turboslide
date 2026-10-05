@@ -433,7 +433,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         )
       )
         residual.add(
-          'links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)',
+          'links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified',
         );
     } else {
       // The slide background colour (SPEC-2 2.6.1, 2.6.2): the layer the page measured, composite
@@ -453,12 +453,12 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
             // 1-bit file the store holds, not the raster the page shot
             slide.background = { data: dataUri(readFileSync(variantFile), 'image/png') };
             residual.add(
-              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background from its dither variant file (gslides-parity SPEC-3 10.4)`,
+              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background from its dither variant file`,
             );
           } else {
             addPictureBackground(slide, backgroundRaster);
             residual.add(
-              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)`,
+              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports`,
             );
           }
         } else {
@@ -541,7 +541,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           );
           if (written.rotated)
             residual.add(
-              `table: ${key} is rotated on the sheet; pptxgenjs writes no rotation on a table, so the file holds it upright at its box (gslides-parity SPEC-2 2.1.1)`,
+              `table: ${key} is rotated on the sheet; pptxgenjs writes no rotation on a table, so the file holds it upright at its box`,
             );
         } else {
           tables.push({
@@ -630,7 +630,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         );
         counts.charts += 1;
         residual.add(
-          `chart: ${scene.slideId}#${chart.blockId} written as a ${chart.kind} chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)`,
+          `chart: ${scene.slideId}#${chart.blockId} written as a ${chart.kind} chart part (addChart); its box is a picture region in the verify loop, reported and never gated`,
         );
       }
       for (const raster of scene.rasters) {
@@ -739,7 +739,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   }
   if (counts.connectors > 0)
     residual.add(
-      `connectors: ${counts.connectors} connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes (gslides-parity SPEC-2 2.4.7)`,
+      `connectors: ${counts.connectors} connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes`,
     );
   if (droppedEnds > 0)
     residual.add(
@@ -753,7 +753,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     residual.add(`svg: ${vectorsLeftOut} vector picture(s) travel as PNG alone (svgVector false)`);
   if (counts.rotated > 0)
     residual.add(
-      `rotation: ${counts.rotated} object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)`,
+      `rotation: ${counts.rotated} object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member`,
     );
   const contentTypes = await cleanContentTypes(zip);
   await setAppTitles(
@@ -812,7 +812,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   residual.add(
     options.includeNotes === true
       ? 'notes: the speaker notes travel as notes parts (includeNotes)'
-      : 'notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)',
+      : 'notes: left out; pass includeNotes to carry the speaker notes',
   );
   const geometry = await readGeometry(zip);
   const perfect =

@@ -813,7 +813,7 @@ export const plainItemSchema = z.strictObject({
     control: 'number',
     snap: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     group: 'Block',
-    help: 'The list level, 1 to 9; the preset’s glyphs cycle from level 4 (gslides-parity SPEC-2 0.58).',
+    help: 'The list level, 1 to 9; the preset’s glyphs cycle from level 4.',
   }),
 }) satisfies z.ZodType<PlainItem>;
 
@@ -893,7 +893,7 @@ const base = {
     label: 'Alt text',
     control: 'textarea',
     group: 'Text',
-    help: 'The description a screen reader and the export read; a picture keeps its description on the asset (gslides-parity SPEC-2 0.51).',
+    help: 'The description a screen reader and the export read; a picture keeps its description on the asset.',
   }),
 };
 
@@ -902,7 +902,7 @@ const autofitField = annotate(z.enum(AUTOFITS).optional(), {
   control: 'select',
   snap: AUTOFITS,
   group: 'Text',
-  help: 'Do not autofit, Shrink text on overflow (steps the size down the ladder) or Resize shape to fit text (writes the box height, positioned blocks only); an explicit write, never a render time fit (gslides-parity SPEC-2 0.23).',
+  help: 'Do not autofit, Shrink text on overflow (steps the size down the ladder) or Resize shape to fit text (writes the box height, positioned blocks only); an explicit write, never a render time fit.',
 });
 
 const valignField = annotate(z.enum(VALIGNS).optional(), {
@@ -910,7 +910,7 @@ const valignField = annotate(z.enum(VALIGNS).optional(), {
   control: 'select',
   snap: VALIGNS,
   group: 'Text',
-  help: 'Where the text sits in a positioned box; top when absent (gslides-parity SPEC-2 2.2.18).',
+  help: 'Where the text sits in a positioned box; top when absent.',
 });
 
 const paddingSidesSchema = z.strictObject({
@@ -925,7 +925,7 @@ const paddingField = annotate(z.union([z.number().nonnegative(), paddingSidesSch
   control: 'json',
   snap: [0, 8, 12, 16, 22, 26],
   group: 'Layout',
-  help: 'Padding in px: one number for every side, or { top, right, bottom, left } (gslides-parity SPEC-2 2.2.19).',
+  help: 'Padding in px: one number for every side, or { top, right, bottom, left }.',
 });
 
 const dashField = annotate(z.enum(DASHES).optional(), {
@@ -933,7 +933,7 @@ const dashField = annotate(z.enum(DASHES).optional(), {
   control: 'select',
   snap: DASHES,
   group: 'Block',
-  help: 'Solid, dot, dash, dash dot, long dash or long dash dot (gslides-parity SPEC-2 2.3.3).',
+  help: 'Solid, dot, dash, dash dot, long dash or long dash dot.',
 });
 
 export const shadowSchema = z.strictObject({
@@ -968,7 +968,7 @@ const shadowField = annotate(shadowSchema.optional(), {
   label: 'Drop shadow',
   control: 'json',
   group: 'Block',
-  help: 'Google’s Drop shadow: colour, transparency, angle, distance and blur (gslides-parity SPEC-2 2.3.4).',
+  help: 'The drop shadow: colour, transparency, angle, distance and blur.',
 });
 
 const captionSize = annotate(z.literal([16, 15]).optional(), {
@@ -1028,7 +1028,7 @@ export const paragraphBlockSchema = z.strictObject({
     label: 'Text',
     control: 'textarea',
     group: 'Text',
-    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+    help: 'Paragraphs separated by a line break.',
   }),
   role: annotate(z.enum(['body', 'lead', 'cap']).optional(), {
     label: 'Role',
@@ -1118,21 +1118,21 @@ export const plainBlockSchema = z
       label: 'Numbered',
       control: 'toggle',
       group: 'Block',
-      help: 'A tabular numeral in the key position of every row (gslides-parity SPEC 7.2.6).',
+      help: 'A tabular numeral in the key position of every row.',
     }),
     marker: annotate(z.enum(LIST_MARKERS).optional(), {
       label: 'Marker',
       control: 'select',
       snap: LIST_MARKERS,
       group: 'Block',
-      help: 'Ruled (the default), Bulleted or Numbered: glyphs or numerals per level instead of the ruled rows (gslides-parity SPEC-2 2.2.12).',
+      help: 'Ruled (the default), Bulleted or Numbered: glyphs or numerals per level instead of the ruled rows.',
     }),
     preset: annotate(z.enum([...BULLET_PRESETS, ...NUMBER_PRESETS]).optional(), {
       label: 'Preset',
       control: 'select',
       snap: [...BULLET_PRESETS, ...NUMBER_PRESETS],
       group: 'Block',
-      help: 'Google’s bullet or numbering preset; the first of its family unless set (gslides-parity SPEC-2 2.2.13).',
+      help: 'The bullet or numbering preset; the first of its family unless set.',
     }),
     typography: typographySchema,
     items: z.array(plainItemSchema).min(1),
@@ -1146,7 +1146,7 @@ export const plainBlockSchema = z
         (NUMBER_PRESETS as ReadonlyArray<string>).includes(value.preset)),
     {
       message:
-        'a list preset matches its marker: a bullet preset with marker bullet, a numbering preset with marker number (gslides-parity SPEC-2 2.2.12)',
+        'a list preset matches its marker: a bullet preset with marker bullet, a numbering preset with marker number',
       path: ['preset'],
     },
   ) satisfies z.ZodType<PlainBlock>;
@@ -1297,7 +1297,7 @@ const pictureToolFields = {
       label: 'Crop',
       control: 'json',
       group: 'Layout',
-      help: 'Google’s crop offsets as fractions of the picture: { left, right, top, bottom } (gslides-parity SPEC-2 2.5.1).',
+      help: 'The crop offsets as fractions of the picture: { left, right, top, bottom }.',
     },
   ),
   mask: annotate(
@@ -1310,7 +1310,7 @@ const pictureToolFields = {
       control: 'select',
       snap: SHAPE_PRESET_IDS,
       group: 'Layout',
-      help: 'A closed shape the picture is clipped to (gslides-parity SPEC-2 2.5.2).',
+      help: 'A closed shape the picture is clipped to.',
     },
   ),
   adjust: annotate(
@@ -1325,7 +1325,7 @@ const pictureToolFields = {
       label: 'Adjustments',
       control: 'json',
       group: 'Block',
-      help: 'Transparency 0 to 1, brightness and contrast -1 to 1 (gslides-parity SPEC-2 2.5.3).',
+      help: 'Transparency 0 to 1, brightness and contrast -1 to 1.',
     },
   ),
   frame: annotate(
@@ -1340,7 +1340,7 @@ const pictureToolFields = {
       label: 'Frame',
       control: 'json',
       group: 'Block',
-      help: 'The picture’s border: weight, colour and dash (gslides-parity SPEC-2 2.5.5).',
+      help: 'The picture’s border: weight, colour and dash.',
     },
   ),
   shadow: shadowField,
@@ -1413,7 +1413,7 @@ export const pictureBlockSchema = z.strictObject({
     control: 'select',
     snap: ['lower-left', 'lower-right', 'upper-left'],
     group: 'Layout',
-    help: 'The plate side a material recipe composes for, written when a picture slide is arranged by hand (gslides-parity SPEC-2 0.105).',
+    help: 'The plate side a material recipe composes for, written when a picture slide is arranged by hand.',
   }),
 }) satisfies z.ZodType<PictureBlock>;
 
@@ -1705,7 +1705,7 @@ export const htmlBlockSchema = z.strictObject({
     label: 'Sanitized',
     control: 'readonly',
     group: 'Advanced',
-    help: 'Set by the sanitizer once the markup passed DOMPurify and the CSS tokenizer (gslides-parity SPEC-3 8.4); the linter flags a block without it.',
+    help: 'Set by the sanitizer once the markup passed DOMPurify and the CSS tokenizer; the linter flags a block without it.',
   }),
 }) satisfies z.ZodType<HtmlBlock>;
 
@@ -1749,7 +1749,7 @@ export const boxBlockSchema = z.strictObject({
     label: 'Text',
     control: 'textarea',
     group: 'Text',
-    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+    help: 'Paragraphs separated by a line break.',
   }),
   typography: typographySchema,
   color: colorField(
@@ -1771,7 +1771,7 @@ export const shapeBlockSchema = z.strictObject({
     control: 'select',
     snap: SHAPE_KINDS,
     group: 'Block',
-    help: 'A closed shape (a preset of the shape picker by its ECMA name, or rectangle, rounded, ellipse) fills its box; line, arrow, elbow and curved run along it; curve, polyline and scribble follow their points (gslides-parity SPEC-2 2.3, 2.4).',
+    help: 'A closed shape (a preset of the shape picker by its ECMA name, or rectangle, rounded, ellipse) fills its box; line, arrow, elbow and curved run along it; curve, polyline and scribble follow their points.',
   }),
   fill: colorField('Fill', 'The inside of a closed shape; none unless set.'),
   stroke: colorField(
@@ -1811,7 +1811,7 @@ export const shapeBlockSchema = z.strictObject({
     label: 'Text',
     control: 'textarea',
     group: 'Text',
-    help: 'The text inside a closed shape, paragraphs separated by a line break (gslides-parity SPEC-2 2.2.17).',
+    help: 'The text inside a closed shape, paragraphs separated by a line break.',
   }),
   typography: typographySchema,
   color: colorField(
@@ -1826,7 +1826,7 @@ export const shapeBlockSchema = z.strictObject({
     label: 'Adjust',
     control: 'json',
     group: 'Block',
-    help: 'The preset’s adjust values as fractions of 100000 in guide order, such as a callout’s pointer or a rounded corner (gslides-parity SPEC-2 2.3.2).',
+    help: 'The preset’s adjust values as fractions of 100000 in guide order, such as a callout’s pointer or a rounded corner.',
   }),
   dash: dashField,
   shadow: shadowField,
@@ -1835,7 +1835,7 @@ export const shapeBlockSchema = z.strictObject({
     control: 'number',
     snap: [0.25, 0.5, 0.75],
     group: 'Block',
-    help: 'Where an elbow or curved connector turns, 0 to 1 along the box; 0.5 unless set (gslides-parity SPEC-2 2.4.1).',
+    help: 'Where an elbow or curved connector turns, 0 to 1 along the box; 0.5 unless set.',
   }),
   axis: annotate(z.enum(CONNECTOR_AXES).optional(), {
     label: 'Axis',
@@ -1853,7 +1853,7 @@ export const shapeBlockSchema = z.strictObject({
       label: 'Points',
       control: 'json',
       group: 'Block',
-      help: 'The points of a curve, polyline or scribble as fractions of the box, two or more (gslides-parity SPEC-2 2.4.3).',
+      help: 'The points of a curve, polyline or scribble as fractions of the box, two or more.',
     },
   ),
   closed: annotate(z.literal(true).optional(), {
@@ -1867,14 +1867,14 @@ export const shapeBlockSchema = z.strictObject({
     control: 'select',
     snap: LINE_ENDS,
     group: 'Block',
-    help: 'The decoration at the start of a line (gslides-parity SPEC-2 2.4.5).',
+    help: 'The decoration at the start of a line.',
   }),
   lineEnd: annotate(z.enum(LINE_ENDS).optional(), {
     label: 'Line end',
     control: 'select',
     snap: LINE_ENDS,
     group: 'Block',
-    help: 'The decoration at the end of a line (gslides-parity SPEC-2 2.4.5).',
+    help: 'The decoration at the end of a line.',
   }),
   connect: annotate(
     z
@@ -1891,7 +1891,7 @@ export const shapeBlockSchema = z.strictObject({
       label: 'Connections',
       control: 'json',
       group: 'Block',
-      help: 'The shapes the ends of a connector are attached to, each as the block id and the index of its connection site (gslides-parity SPEC-2 2.4.7).',
+      help: 'The shapes the ends of a connector are attached to, each as the block id and the index of its connection site.',
     },
   ),
 }) satisfies z.ZodType<ShapeBlock>;
@@ -1999,7 +1999,7 @@ export const textBlockSchema = z.strictObject({
     label: 'Text',
     control: 'textarea',
     group: 'Text',
-    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+    help: 'Paragraphs separated by a line break.',
   }),
   typography: typographySchema,
   color: colorField('Color', 'The text color; the ink unless set.', 'Text'),
@@ -2015,7 +2015,7 @@ export const textBlockSchema = z.strictObject({
       label: 'Outline',
       control: 'json',
       group: 'Text',
-      help: 'Word art: the stroke around the letters, { color, width } with the width 1, 1.5 or 2 px (gslides-parity SPEC-2 2.2.16).',
+      help: 'Word art: the stroke around the letters, { color, width } with the width 1, 1.5 or 2 px.',
     },
   ),
   valign: valignField,

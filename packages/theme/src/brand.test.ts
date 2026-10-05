@@ -502,7 +502,7 @@ describe('site.ts (SPEC-4 1.4, 1.6)', () => {
   it('states the description, the alt text and the manifest with start_url /home and one purpose per icon', () => {
     /* the polish round (docs/archive/rounds/POLISH.md 3.6): the hero's lead, shared by the head, the manifest and the card */
     expect(SITE.description).toBe(
-      "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed.",
+      'Turboslide is a slides editor in the browser. It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.',
     );
     expect(SITE.description).not.toMatch(/—|!/);
     /* the card of docs/archive/rounds/POLISH.md 3.6: the lead's first sentence and the address on the plate */

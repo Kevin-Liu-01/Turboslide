@@ -48,7 +48,7 @@ const USAGE = `usage: turboslide table <merge|unmerge|insert-rows|insert-columns
                                     equal heights or widths from a total, or the content's when none (table.distribute)
   table cell-style <slideId>#<blockId> --at <row,column>[;<row,column>] [--fill <color>|--no-fill]
              [--border-color <color>] [--border-weight 0|1|1.5|2] [--border-dash <dash>] [--no-border]
-                                    the fill and border of cells; weight 0 is Google's Transparent border (table.cellStyle)
+                                    the fill and border of cells; weight 0 draws no border (table.cellStyle)
 Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
 
 export async function table(ctx: CommandContext): Promise<number> {

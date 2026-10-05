@@ -262,7 +262,7 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
               3,
               file,
               `${pointer}/autofit`,
-              `Block "${block.id}" sets autofit to grow, which writes the box height and needs a position box; none and shrink work without one (gslides-parity SPEC-2 0.41)`,
+              `Block "${block.id}" sets autofit to grow, which writes the box height and needs a position box; none and shrink work without one`,
             ),
           );
         }
@@ -273,7 +273,7 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
               3,
               file,
               `${pointer}/valign`,
-              `Block "${block.id}" sets valign, which places text inside a position box; the block has none (gslides-parity SPEC-2 2.2.18)`,
+              `Block "${block.id}" sets valign, which places text inside a position box; the block has none`,
             ),
           );
         }
@@ -284,7 +284,7 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
               3,
               file,
               `${pointer}/padding`,
-              `Block "${block.id}" sets padding, which pads a position box; the block has none (gslides-parity SPEC-2 2.2.19)`,
+              `Block "${block.id}" sets padding, which pads a position box; the block has none`,
             ),
           );
         }
@@ -339,7 +339,7 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
             3,
             file,
             `${pointer}/link`,
-            `A ${block.type} block takes no whole-box link; write the link inside its Text as [text](url) (gslides-parity SPEC 7.2.7)`,
+            `A ${block.type} block takes no whole-box link; write the link inside its Text as [text](url)`,
           ),
         );
       }
@@ -363,7 +363,7 @@ function checkRunLinks(slide: Slide, file: string, issues: Issue[]): void {
         3,
         file,
         pointer,
-        `The link ${JSON.stringify(url)} is refused: a link is https:, http:, mailto:, tel: or a slide link (#s/<id>, #next, #previous, #first, #last) (gslides-parity SPEC-3 8.4)`,
+        `The link ${JSON.stringify(url)} is refused: a link is https:, http:, mailto:, tel: or a slide link (#s/<id>, #next, #previous, #first, #last)`,
       ),
     );
   };
@@ -409,7 +409,7 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
             3,
             file,
             `${pointer}/${which}/block`,
-            `Connector "${block.id}" is attached to "${attachment.block}", which is not on slide "${slide.id}" (gslides-parity SPEC-2 2.4.7)`,
+            `Connector "${block.id}" is attached to "${attachment.block}", which is not on slide "${slide.id}"`,
           ),
         );
         continue;
@@ -422,7 +422,7 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
             3,
             file,
             `${pointer}/${which}/block`,
-            `Connector "${block.id}" is attached to "${attachment.block}", which takes no connector: a target is a positioned block that is not a line (gslides-parity SPEC-2 2.4.7)`,
+            `Connector "${block.id}" is attached to "${attachment.block}", which takes no connector: a target is a positioned block that is not a line`,
           ),
         );
         continue;
@@ -439,7 +439,7 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
             2,
             file,
             `${pointer}/${which}/site`,
-            `Connector "${block.id}" names site ${attachment.site} of "${attachment.block}", which has ${count} connection site(s); the end reads as an unattached end (gslides-parity SPEC-2 2.4.7; docs/archive/rounds/VECTOR.md 2.2)`,
+            `Connector "${block.id}" names site ${attachment.site} of "${attachment.block}", which has ${count} connection site(s); the end reads as an unattached end (docs/archive/rounds/VECTOR.md 2.2)`,
           ),
         );
       }
@@ -452,7 +452,7 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
           2,
           file,
           `${pointer}/${off.end}`,
-          `Connector "${block.id}" has its ${off.end} ${Math.round(off.distance)} px off the site it is attached to; line.set with connect moves it back (gslides-parity SPEC-2 2.4.7)`,
+          `Connector "${block.id}" has its ${off.end} ${Math.round(off.distance)} px off the site it is attached to; line.set with connect moves it back`,
         ),
       );
     }
@@ -639,8 +639,8 @@ export function validateManifest(input: unknown): {
             DECK_FILE,
             `/guides/${axis}/${i}`,
             current === previous
-              ? `Guide ${current} is listed twice on the ${axis} axis; deck.guides writes each position once (gslides-parity SPEC-2 2.10)`
-              : `The ${axis} guides are not sorted: ${current} follows ${previous}; deck.guides writes them in order (gslides-parity SPEC-2 2.10)`,
+              ? `Guide ${current} is listed twice on the ${axis} axis; deck.guides writes each position once`
+              : `The ${axis} guides are not sorted: ${current} follows ${previous}; deck.guides writes them in order`,
           ),
         );
         break;
@@ -864,7 +864,7 @@ export function validateDeck(input: unknown): ValidationResult {
               2,
               file,
               ref.pointer,
-              `Slide link to "${ref.slideId}", which is not in the deck; link a listed slide id, or next, previous, first or last (gslides-parity SPEC 7.2.8)`,
+              `Slide link to "${ref.slideId}", which is not in the deck; link a listed slide id, or next, previous, first or last`,
             ),
           );
         }

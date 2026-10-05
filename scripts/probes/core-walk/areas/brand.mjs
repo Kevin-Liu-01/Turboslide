@@ -1221,8 +1221,9 @@ export async function run(t) {
  * `brand.objects.kit-colours-first`): the table's fill plate, the chart's series swatches and the
  * tail's plate list the kit's six roles first with the role's name and hex in the tooltip, and a
  * new chart's first two series are Primary and Accent. The table and the chart are the earlier
- * areas' inserts on their slides; a plate without kit swatches reads not built with the id of its
- * first swatch (docs/archive/rounds/PRODUCT.md 8.1).
+ * areas' inserts on their slides, or the row's own when those areas did not run
+ * (`ownTableAndChart`); a plate without kit swatches reads not built with the id of its first
+ * swatch (docs/archive/rounds/PRODUCT.md 8.1).
  */
 async function featuresRound(t) {
   const { page } = t;
@@ -1246,6 +1247,70 @@ async function featuresRound(t) {
           .filter((c) => !new RegExp(ex).test(c)),
       [prefix, exclude],
     );
+  /**
+   * The table and the chart `brand.objects.kit-colours-first` reads: the tables and charts areas'
+   * own while the deck holds them, else a blank slide of this area's with a 4 by 3 table from
+   * Insert > Table and a bar chart from Insert > Chart > Bar beside it, made through the menus as
+   * the row's setup and never judged (the switch goes on for a parked row and back off after).
+   * Answers the ids and, when this area made them, a sentence for the observed line; or the reason
+   * none could be made.
+   */
+  const ownTableAndChart = async () => {
+    const order = await t.slideOrder();
+    const held = async (slide, id) =>
+      Boolean(slide && id && order.includes(slide) && (await t.blockOf(slide, id)));
+    const out = {
+      tableSlide: t.deck.tableSlide ?? null,
+      table: t.deck.table ?? null,
+      chartSlide: t.deck.chartSlide ?? null,
+      chart: t.deck.chart ?? null,
+      made: null,
+      error: null,
+    };
+    const needTable = !(await held(out.tableSlide, out.table));
+    const needChart = !(await held(out.chartSlide, out.chart));
+    if (!needTable && !needChart) return out;
+    const slide = await t.setupSlide(t.deck.brandSlide ?? t.deck.titleSlide, 'blank');
+    if (!slide) return { ...out, error: 'no slide for the row’s own table and chart' };
+    await t.clickCard(slide);
+    await t.clearAll();
+    const made = [];
+    let switched = false;
+    if (needTable) {
+      const r = await t.reachRow('insert', 'insert.table');
+      switched = switched || r.switched;
+      const before = await t.allBlockIds(slide);
+      await t.openMenu('insert');
+      await t.hoverRow('insert.table', '[data-control="insert.table.plate"]');
+      const cell = await t.rectOf('[data-control="insert.table.pick.4x3"]');
+      if (cell) await t.clickAt(cell.x + cell.w / 2, cell.y + cell.h / 2);
+      else await t.closeMenus();
+      const table = cell ? await t.newObjectAfter(slide, before) : null;
+      await t.settled();
+      if (!table) return { ...out, error: 'Insert > Table made no table for the row' };
+      await t.setBlock(slide, table.id, '/pos', { ...table.pos, x: 60, y: 120 });
+      Object.assign(out, { tableSlide: slide, table: table.id });
+      made.push(`a 4 by 3 table (${table.id})`);
+    }
+    if (needChart) {
+      const r = await t.reachRow('insert', 'insert.chart', 'insert.chart.bar');
+      switched = switched || r.switched;
+      const before = await t.allBlockIds(slide);
+      await t.clearAll();
+      await t.menuPath('insert', 'insert.chart', 'insert.chart.bar').catch(() => undefined);
+      const chart = await t.newObjectAfter(slide, before);
+      await t.settled();
+      if (!chart) return { ...out, error: 'Insert > Chart > Bar made no chart for the row' };
+      await t.setBlock(slide, chart.id, '/pos', { x: 860, y: 420, w: 640, h: 360 });
+      Object.assign(out, { chartSlide: slide, chart: chart.id });
+      made.push(`a bar chart (${chart.id})`);
+    }
+    if (switched && (await t.setAdvanced(false))) t.deck.advanced = false;
+    await t.clearAll();
+    out.made = `the deck held no ${[needTable ? 'table of the tables area' : null, needChart ? 'chart of the charts area' : null].filter(Boolean).join(' and no ')}, so the row made its own ${made.join(' and ')} on ${slide}`;
+    return out;
+  };
+
   await t.step(
     'brand.objects.kit-colours-first',
     "the table cell's Fill color plate, the chart's series swatches, the text colour plate; a new chart's series",
@@ -1253,11 +1318,14 @@ async function featuresRound(t) {
     async () => {
       const facts = [];
       let ok = true;
-      /* the table's fill plate */
-      const tableSlide = t.deck.tableSlide;
-      const T = t.deck.table;
-      if (!tableSlide || !T)
-        return { ok: false, observed: 'no table from the tables area to read' };
+      /* the table's fill plate: the tables area's table, else one this row makes (the Round 1
+         follow-up, lane D; verify-r1.md finding 1): a walk without the tables and charts areas
+         read "no table from the tables area to read" and never reached a plate */
+      const own = await ownTableAndChart();
+      if (own.error) return { ok: false, observed: own.error };
+      const tableSlide = own.tableSlide;
+      const T = own.table;
+      if (own.made) facts.push(own.made);
       await t.clickCard(tableSlide);
       await t.clearAll();
       const cellRun = `${T}/rows/1/cells/1`;
@@ -1299,8 +1367,8 @@ async function featuresRound(t) {
       await t.press('Escape');
       await t.clearAll();
       /* the chart's series swatches */
-      const chartSlide = t.deck.chartSlide;
-      const C = t.deck.chart;
+      const chartSlide = own.chartSlide;
+      const C = own.chart;
       let seriesKit = null;
       if (chartSlide && C) {
         await t.clickCard(chartSlide);

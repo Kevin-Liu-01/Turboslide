@@ -6640,7 +6640,7 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 19 (t13 the tail's plate; inspector/table.tsx 92 to 135; inspector/chart.tsx 430 to 460)",
-      "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 4 (B3 owns it, judge-design rejection 3); lands only under the P1 condition"
+      "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 4 (B3 owns it, judge-design rejection 3); lands only under the P1 condition Round 1 follow-up, lane D (verify-r1.md finding 1): the walk read \"no table from the tables area to read\" on production because the row read the tables and charts areas' blocks and those areas did not run; it now makes its own 4 by 3 table and bar chart through the Insert menu when the deck holds none. Read on lane D's server (12:57Z, load 101 to 127): not driven, not on this build: the table's fill plate lists the six kit roles first (toolbar.fillColor.kit.*), and the chart's series swatches list the tokens (ink, paper, ink-2, titanium, hair, hair-soft) and no kit role, the control formatOptions.chart.swatches.primary of FEATURES.md 2.3 item 4 (P1, B3), which is not built."
     },
     {
       "id": "tables.paste.tsv-makes-table",

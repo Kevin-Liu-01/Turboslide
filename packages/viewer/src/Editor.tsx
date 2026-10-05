@@ -35,7 +35,7 @@ import { flushSync } from 'react-dom';
 /* the words of the hovered empty cell's prompt (docs/archive/rounds/OBJECTS.md 3.3 item 7; objects/build/b2.md
    request 1f, b1.md request 3): one click places the caret now, so the prompt says what to do next */
 import { slideCounter } from '@turboslide/render/deck';
-import { renderSlide } from '@turboslide/render/slide';
+import { renderSlide, undrawnObjectIds } from '@turboslide/render/slide';
 import { bandAssetResolver, bandForSlide, frameBandOf } from '@turboslide/render/stage';
 import type { ActionId } from '@turboslide/schema/actions';
 import { assetVector, vectorOf } from '@turboslide/schema/assets';
@@ -3150,8 +3150,10 @@ export function Editor({
         ...sheetSnapLines(),
         ...deckGuideLines(deckGuidesRef.current),
       );
+      /* an object the renderer draws nothing for (an empty title mark slot) offers no line */
+      const undrawn = undrawnObjectIds(docRef.current.deck, canvas);
       for (const block of freeformBlocks(canvas)) {
-        if (ids.includes(block.id)) continue;
+        if (ids.includes(block.id) || undrawn.has(block.id)) continue;
         const box = block.pos ? boundingBoxOf(block.pos) : boxesNow.blocks[block.id];
         if (box) {
           lines.push(...boxSnapLines(box));
@@ -4123,10 +4125,11 @@ export function Editor({
   const selectAll = () => {
     const slideNow = slideRef.current;
     if (!slideNow || !body.current) return;
-    const ids = objectIds(slideNow, boxesRef.current, blockOrder(body.current)).filter((id) =>
-      isFreeformSlide(slideNow) ? true : isObjectId(slideNow, boxesRef.current, id),
+    const undrawn = undrawnObjectIds(docRef.current.deck, slideNow);
+    const ids = objectIds(slideNow, boxesRef.current, blockOrder(body.current), undrawn).filter(
+      (id) => (isFreeformSlide(slideNow) ? true : isObjectId(slideNow, boxesRef.current, id)),
     );
-    const all = ids.length > 0 ? ids : allBlockIds(slideNow);
+    const all = ids.length > 0 ? ids : allBlockIds(slideNow).filter((id) => !undrawn.has(id));
     const picked = selectionOf(all);
     select(picked.selection, picked.extra);
   };
@@ -5596,7 +5599,12 @@ export function Editor({
           !stageOwnsTab({ selected: current !== null, fromControl, fromOverlay, inside, fromPage })
         )
           return;
-        const order = objectIds(slideNow, boxesRef.current, blockOrder(el));
+        const order = objectIds(
+          slideNow,
+          boxesRef.current,
+          blockOrder(el),
+          undrawnObjectIds(docRef.current.deck, slideNow),
+        );
         const next = cycleSelection(order, current, e.shiftKey ? -1 : 1);
         setGroupEntered(null);
         if (next) selectObjects([next.blockId]);
@@ -6541,7 +6549,12 @@ export function Editor({
       if (!live && !isMarquee(box)) return;
       live = true;
       setMarquee(box);
-      const order = objectIds(slideNow, boxesRef.current, blockOrder(el));
+      const order = objectIds(
+        slideNow,
+        boxesRef.current,
+        blockOrder(el),
+        undrawnObjectIds(docRef.current.deck, slideNow),
+      );
       const bounding: Record<string, Box> = {};
       for (const id of order) {
         const block = blockById(slideNow, id);

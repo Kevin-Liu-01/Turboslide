@@ -1,7 +1,8 @@
 // The canvas title's mark slot follows the brand kit (the features round's fix round, VERIFICATION.md
 // pass 1 F1; build/b6.md R15): once a title slide is a canvas, `toCanvas` makes a `mark` block of
 // its mark slot and `renderMark` draws there what `titleMarkSlot` drew before the conversion: the
-// kit's picture, nothing for `none`, the GT glyph for `default`. A `mark` block on any other slide
+// kit's picture, the GT glyph for `default`, and for `none` or a hidden position no element at
+// all, so the empty slot is not an object (Round 1 verification finding 4). A `mark` block on any other slide
 // (the brand deck's specimens) renders as before.
 import type { BrandKit } from '@turboslide/schema/brand';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
@@ -10,7 +11,7 @@ import type { Deck, Slide } from '@turboslide/schema/deck';
 import { TITLE } from '@turboslide/schema/fixtures';
 import { describe, expect, it } from 'vitest';
 
-import { renderSlide } from '../slide.ts';
+import { renderSlide, undrawnObjectIds } from '../slide.ts';
 import type { RenderOptions } from '../slide.ts';
 import { contentSlide, deck as testDeck } from './fixtures.ts';
 
@@ -65,12 +66,22 @@ describe('the canvas title mark block follows the brand kit', () => {
     expect(missing).toContain('<use href="#gt-mark"/>');
   });
 
-  it('draws nothing for none, as an empty mark block in the box', () => {
-    const none = renderSlide(deckWith({ mark: { kind: 'none' } }), canvasTitle, options).html;
-    expect(none).toContain('class="mark-block is-none"');
-    expect(none).toContain('aria-hidden="true"');
-    expect(none).not.toContain('#gt-mark');
-    expect(none).not.toContain('mark-picture');
+  it('writes no element at all for none or a hidden position: no block, no wrapper, no box to click', () => {
+    for (const brand of [
+      { mark: { kind: 'none' } },
+      { positions: { mark: 'hidden' } },
+      { mark: { kind: 'default' }, positions: { mark: 'hidden' } },
+    ] as BrandKit[]) {
+      const html = renderSlide(deckWith(brand), canvasTitle, options).html;
+      expect(html, JSON.stringify(brand)).not.toContain('data-free="mark"');
+      expect(html).not.toContain('data-block="mark"');
+      expect(html).not.toContain('mark-block');
+      expect(html).not.toContain('#gt-mark');
+      expect(html).not.toContain('mark-picture');
+      expect(html).toContain('data-free="heading"');
+      expect([...undrawnObjectIds(deckWith(brand), canvasTitle)]).toEqual(['mark']);
+    }
+    expect(undrawnObjectIds(deckWith(), canvasTitle).size).toBe(0);
   });
 
   it('leaves a mark block of a content slide to the glyph whatever the kit says', () => {

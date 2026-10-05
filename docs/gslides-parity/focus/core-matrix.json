@@ -8702,6 +8702,16 @@
       "note": "docs/NEXT.md 4.1.3 item 23 and 4.1.5 (B4a): the blank template's record turns the GT frame's rails, rules and crosses off and the counter off; the GT template keeps them"
     },
     {
+      "id": "brand.template.blank-mark-not-an-object",
+      "feature": "brand",
+      "interaction": "A deck from Blank after its first write (a text box drawn on the title slide through Insert > Text box): the title slide draws no element for the template's mark, a click on its empty top band selects nothing, Tab from nothing selects the title, Select all reads \"3 objects\", and the Editable text PowerPoint's slide 1 carries no object named for the mark",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "verify-r1.md finding 4 (production 2026-10-05, clicks.mjs dark at 12:20Z, load 28: the click on the top band selected a 1326 by 64 object named Mark with its ring and ten handles)",
+      "note": "Round 1 follow-up, lane B item 1: the canvas title keeps the mark block the schema requires (decks/templates/blank/slides/title.json), and while the kit's mark is none or its position hidden the renderer writes no element and no .free wrapper for it (packages/render/src/slide.ts undrawnObjectIds, blocks/misc.ts titleMarkDrawsNothing), so the click, the hover and the exporter's scene find nothing; the editor leaves it out of Tab, Select all, the marquee and the snap lines (packages/viewer/src/Freeform.tsx objectIds, Editor.tsx). The driver lives in apps/studio/e2e/core/canvas-r1f.ts."
+    },
+    {
       "id": "images.byurl.preview-contained",
       "feature": "images",
       "interaction": "A 180 px icon by URL: the preview img's box is inside the preview box with `object-fit: contain`",

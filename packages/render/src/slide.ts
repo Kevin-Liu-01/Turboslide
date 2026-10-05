@@ -3,6 +3,7 @@ import { markSvg, sizeAttrs, twinAttrs } from './blocks/context.ts';
 import type { BlockContext, HtmlFrameSource, RasterRef, ResolvedImage } from './blocks/context.ts';
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
+import { titleMarkDrawsNothing } from './blocks/misc.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
 import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
@@ -205,7 +206,27 @@ function titleMarkOf(deck: Deck, slide: Slide): BlockContext['titleMark'] {
   const record = grammarRecordOf(slide);
   if (record === null || record.kind !== 'title') return undefined;
   const blockId = record.slots?.main?.[0];
-  return blockId === undefined ? undefined : { blockId, mark: deck.brand?.mark };
+  return blockId === undefined
+    ? undefined
+    : { blockId, mark: deck.brand?.mark, empty: titleMarkEmpty(deck.brand) };
+}
+
+const NO_IDS: ReadonlySet<string> = new Set();
+
+/**
+ * The objects of a slide the renderer draws no element for, by id: the canvas title's mark block
+ * while the brand kit's slot is empty (titleMarkEmpty; a deck from Blank, whose record sets the
+ * mark to none, carries one on its title slide after the first write). A click finds nothing
+ * there because nothing is in the markup; the editor leaves these ids out of Tab, Select all,
+ * the marquee and the snap lines, which read the document (Round 1 verification finding 4).
+ */
+export function undrawnObjectIds(deck: Deck, slide: Slide): ReadonlySet<string> {
+  const slot = titleMarkOf(deck, slide);
+  if (slot === undefined || slot.empty !== true || slide.kind !== 'content') return NO_IDS;
+  const block = (slide.slots.main ?? []).find((each) => each.id === slot.blockId);
+  return block !== undefined && block.type === 'mark' && block.pos !== undefined
+    ? new Set([block.id])
+    : NO_IDS;
 }
 
 export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): RenderedSlide {
@@ -428,6 +449,17 @@ export function kitStyle(deck: Deck, slide: Slide, options: RenderOptions): stri
 }
 
 /**
+ * True when the brand kit's title mark slot draws nothing: a record whose mark is none or whose
+ * mark position is hidden. A deck without a record, or a record silent about the slot, draws the
+ * GT mark. titleMarkSlot (the title kind) and renderMark (the canvas title's mark block) share it.
+ */
+export function titleMarkEmpty(kit: Deck['brand']): boolean {
+  if (kit === undefined || (kit.mark === undefined && kit.positions?.mark === undefined))
+    return false;
+  return (kit.mark?.kind ?? 'default') === 'none' || kit.positions?.mark === 'hidden';
+}
+
+/**
  * The title slide's logo slot (docs/archive/rounds/PRODUCT.md 4.1, 4.4): the GT mark in the flow above the
  * heading for a deck without a record or with `mark.kind: 'default'`; a picture fitted into the
  * 132 by 84 box (or the record's box) for `'picture'`; nothing for `'none'` or a hidden position;
@@ -445,7 +477,7 @@ export function titleMarkSlot(
     return { inFlow: markSvg(ctx, 'mark', markBox.w, markBox.h), corner: '' };
   const position: SlotPosition = kit.positions?.mark ?? 'bottom-left';
   const kind = kit.mark?.kind ?? 'default';
-  if (kind === 'none' || position === 'hidden') return { inFlow: '', corner: '' };
+  if (titleMarkEmpty(kit)) return { inFlow: '', corner: '' };
   const box = kit.mark?.box ?? markBox;
   let logo: string;
   const assetId = kit.mark?.assetId;
@@ -616,6 +648,8 @@ function renderFreeform(blocks: Block[], ctx: BlockContext, chips: string = ''):
   const [contentX, contentY] = CONTENT;
   const ordered = sortByZ(blocks);
   ordered.forEach((block, order) => {
+    // an empty title mark slot has no element and no wrapper, so no box answers a click there
+    if (titleMarkDrawsNothing(block, ctx)) return;
     const pos = block.pos ?? { x: contentX, y: contentY, w: 1326, h: 642 };
     const inContent = insideContent(pos);
     const inline = style(

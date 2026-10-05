@@ -1,6 +1,6 @@
 // dither, mark, markSizes and matrix.
 import { attrs, classes, el, escapeText, escapeAttr } from '../html.ts';
-import type { BlockOf } from '@turboslide/schema/blocks';
+import type { Block, BlockOf } from '@turboslide/schema/blocks';
 import { dataAttrs, markSvg, raster, rootAttrs, runAttr, twinAttrs } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { renderTextOrPrompt } from './prompt.ts';
@@ -25,27 +25,40 @@ export function renderDither(block: BlockOf<'dither'>, ctx: BlockContext): strin
 }
 
 /**
+ * True for the canvas title's mark block while the brand kit's slot draws nothing (the mark none
+ * or its position hidden): the renderer writes no element for it, neither the block nor its
+ * `.free` wrapper (slide.ts renderFreeform), so nothing on the stage answers a click there and
+ * the exporter's scene holds nothing of it (Round 1 verification finding 4).
+ */
+export function titleMarkDrawsNothing(block: Block, ctx: BlockContext): boolean {
+  const slot = ctx.titleMark;
+  return (
+    block.type === 'mark' &&
+    block.pos !== undefined &&
+    slot !== undefined &&
+    slot.blockId === block.id &&
+    slot.empty === true
+  );
+}
+
+/**
  * `mark`: the standalone GT mark at a pixel size (s02:4, s15:4). A mark object of the canvas (a
  * block with `pos`) writes no size of its own: the glyph fills its box through block-css.ts, so a
  * resize handle scales it with the box (build-4/hotfix-4.md cause W2).
  */
 export function renderMark(block: BlockOf<'mark'>, ctx: BlockContext): string {
+  // the canvas title's mark slot follows the brand kit as the slot did before the conversion
+  // (slide.ts titleMarkSlot): the kit's picture fitted into the block's box, nothing at all for
+  // an empty slot, the GT glyph for default and for a picture whose asset the deck lacks (the fix
+  // round, F1)
+  if (titleMarkDrawsNothing(block, ctx)) return '';
   const attributes = rootAttrs(block, ctx, {});
   const extra: Record<string, string> = {};
   for (const [name, value] of Object.entries(attributes))
     if (value !== undefined) extra[name] = value;
-  // the canvas title's mark slot follows the brand kit as the slot did before the conversion
-  // (slide.ts titleMarkSlot): the kit's picture fitted into the block's box, nothing for none, the
-  // GT glyph for default and for a picture whose asset the deck lacks (the fix round, F1)
   const slot = ctx.titleMark;
   if (slot !== undefined && slot.blockId === block.id && block.pos !== undefined) {
     const kind = slot.mark?.kind ?? 'default';
-    if (kind === 'none')
-      return `<div${dataAttrs({
-        ...extra,
-        class: classes(extra['class'], 'mark-block', 'is-none') ?? 'mark-block is-none',
-        'data-slot': 'mark',
-      })} aria-hidden="true"></div>`;
     const assetId = slot.mark?.assetId;
     const image = kind === 'picture' && assetId !== undefined ? ctx.image(assetId) : undefined;
     if (image !== undefined)

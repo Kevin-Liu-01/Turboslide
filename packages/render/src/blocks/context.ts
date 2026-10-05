@@ -71,7 +71,16 @@ export type BlockContext = {
    * for default). Absent on every other slide, where a `mark` block is the brand deck's specimen
    * (the features round's fix round, VERIFICATION.md pass 1 F1; build/b6.md R15).
    */
-  titleMark?: { blockId: string; mark: BrandKit['mark'] | undefined };
+  titleMark?: {
+    blockId: string;
+    mark: BrandKit['mark'] | undefined;
+    /**
+     * True when the kit's slot draws nothing (slide.ts titleMarkEmpty: the mark is none or its
+     * position hidden). The block then has no element at all, so a click, Tab, Select all and
+     * the exporter's scene find nothing there (Round 1 verification finding 4).
+     */
+    empty?: boolean;
+  };
   /**
    * The stored size of the asset file at a twin path (`assets/x-light.jpg`), for the `width` and
    * `height` an escape block's `<img>` gains (gslides-parity SPEC-3 9.2 E12); undefined when the

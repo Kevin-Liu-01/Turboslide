@@ -145,13 +145,19 @@ function posSet(slide: Slide, blockId: string, pos: Position): Mutation {
  * order on a canvas; document order of the rendered slide on any other kind, where the kinds'
  * elements without a block (the title's mark, a picture kind's photograph, plate and mark) join
  * under the ids the conversion gives them, the photograph first as the bottom of the stack.
+ * `undrawn` names the objects the renderer draws no element for (render/slide.ts
+ * undrawnObjectIds: an empty title mark slot), which no walk reaches.
  */
 export function objectIds(
   slide: Slide,
   boxes: MeasuredBoxes,
   rendered: readonly string[],
+  undrawn: ReadonlySet<string> = new Set(),
 ): string[] {
-  if (isFreeformSlide(slide)) return paintOrder(slide).map((block) => block.id);
+  if (isFreeformSlide(slide))
+    return paintOrder(slide)
+      .map((block) => block.id)
+      .filter((id) => !undrawn.has(id));
   const virtual = virtualObjectIds(slide);
   const out: string[] = [];
   if (virtual.has('picture') && boxes.blocks['picture']) out.push('picture');

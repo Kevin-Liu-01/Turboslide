@@ -53,6 +53,7 @@ import {
   snackbarText,
 } from './lib';
 import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
+import { canvasR1f } from './canvas-r1f';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
 // `shapes.export.*` with the driver core/export.spec.ts): the PDF and the PowerPoint files
@@ -3572,7 +3573,11 @@ test(title('export.remove.copies-gone'), async () => {
   expect(after, 'every copy answers 404 within 5 s of the removal').toEqual(urls.map(() => 404));
 });
 
+/* lane B of the Round 1 follow-up: its rows live in canvas-r1f.ts */
+const canvasR1fIds = canvasR1f(() => browserRef);
+
 coverage(import.meta.filename, [
+  ...canvasR1fIds,
   'export.remove.copies-gone',
   'export.zip.bundle',
   'export.html.web-page',

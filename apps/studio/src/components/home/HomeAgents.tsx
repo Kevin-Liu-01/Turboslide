@@ -1,5 +1,5 @@
 import { AGENTS } from './copy';
-import { HOME_FACTS } from './facts';
+import { AGENTS_ROUND } from './design-copy';
 import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { HomeSheet, ServerHtml } from './HomeSheet';
 import { HOME_RUN } from './run.generated';
@@ -41,7 +41,7 @@ export function HomeAgents() {
   const ssr = import.meta.env.SSR;
   return (
     <HomeSection id="agents">
-      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS.lead(HOME_FACTS)} span={7} />
+      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS_ROUND.lead} span={7} />
       <Reserve band="agents" className="ts-agents-grid">
         <div className="ts-agents-left">
           <div className="ts-agents-stage" data-agents-stage>

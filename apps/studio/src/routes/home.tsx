@@ -98,11 +98,21 @@ function HomePage() {
       });
     if (document.readyState === 'complete') go();
     else window.addEventListener('load', go, { once: true });
-    /* the features table's shortcuts: the server renders the Mac form; elsewhere the editor's
-       other form (LANDING.md 2.14, keys.ts) */
+    /* the features' shortcuts: the server renders the Mac keys; elsewhere the editor's other
+       form, one key chip each (LANDING.md 2.14, DESIGN.md 8.13, keys.ts) */
     if (!/Mac|iPhone|iPad/.test(navigator.platform))
-      for (const key of main.querySelectorAll<HTMLElement>('kbd[data-shortcut-other]'))
-        key.textContent = key.dataset['shortcutOther'] ?? key.textContent;
+      for (const keys of main.querySelectorAll<HTMLElement>('[data-shortcut-other]')) {
+        const other = keys.dataset['shortcutOther'] ?? '';
+        if (other === '') continue;
+        keys.replaceChildren(
+          ...other.split('+').map((key) => {
+            const kbd = document.createElement('kbd');
+            kbd.className = 'pt-kbd';
+            kbd.textContent = key;
+            return kbd;
+          }),
+        );
+      }
   });
   return (
     <main ref={root} id="top" className="ts-product" data-page="home">

@@ -9,7 +9,7 @@ import type { Browser, BrowserContext, Page, Request } from '@playwright/test';
 import { HOME_LOOP_FACTS } from '../../../src/components/home/deck.generated';
 import { FACTS_DATA } from '../../../src/components/home/facts-data';
 import { HOME_LOOP } from '../../../src/components/home/loop.generated';
-import { HERO_ROUND } from '../../../src/components/home/design-copy';
+import { CLOSE_ROUND, HERO_ROUND } from '../../../src/components/home/design-copy';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { extraHTTPHeaders, title } from '../lib';
 
@@ -83,7 +83,7 @@ const H2_OF: Readonly<Record<string, string>> = {
   export: 'Export to PDF and PowerPoint',
   patterns: 'Animated patterns',
   features: 'Features and where to find them',
-  close: 'A new presentation needs no account',
+  close: CLOSE_ROUND.h2,
 };
 /** The bands every tree from V1#8 on renders, in order (the floor of home.page.order). */
 const V1_BANDS = [
@@ -1545,6 +1545,9 @@ export function rows(): void {
     expect(failures).toEqual([]);
   });
 
+  /* restated in the design round, DR-D4#3 (docs/DESIGN.md 8.3): each cell the menu model's
+     glyph, the figure at 44 px in tabular figures with its noun, and its menu path as crumbs; the
+     actions cell's CLI, MCP and HTTP chips; nothing moves */
   test(title('home.numbers.row'), async ({ browser }) => {
     const { context, page } = await homeContext(browser, DESKTOP, 'light');
     try {
@@ -1553,12 +1556,28 @@ export function rows(): void {
       const facts = await page.evaluate(() => {
         const band = document.querySelector<HTMLElement>('[data-band="numbers"]')!;
         return {
-          cells: [...band.querySelectorAll<HTMLElement>('[data-number]')].map((cell) => ({
-            id: cell.getAttribute('data-number') ?? '',
-            figure: (cell.querySelector('.ts-number-figure')?.textContent ?? '').trim(),
-            sentence: (cell.querySelector('.ts-number-sentence')?.textContent ?? '').trim(),
-            px: parseFloat(getComputedStyle(cell.querySelector('.ts-number-figure')!).fontSize),
-          })),
+          cells: [...band.querySelectorAll<HTMLElement>('[data-number]')].map((cell) => {
+            const figure = cell.querySelector<HTMLElement>('.ts-number-figure .pt-num');
+            const icon = cell.querySelector<HTMLElement>('.ts-number-well .ts-icon');
+            const ics = icon === null ? null : getComputedStyle(icon);
+            return {
+              id: cell.getAttribute('data-number') ?? '',
+              figure: (figure?.textContent ?? '').trim(),
+              noun: (cell.querySelector('.ts-number-noun')?.textContent ?? '').trim(),
+              px: figure === null ? 0 : parseFloat(getComputedStyle(figure).fontSize),
+              tabular:
+                figure !== null &&
+                getComputedStyle(figure).fontVariantNumeric.includes('tabular-nums'),
+              icon: icon?.dataset['icon'] ?? '',
+              masked: ics !== null && /url\(/.test(ics.maskImage || ics.webkitMaskImage),
+              path: [...cell.querySelectorAll('.ts-crumbs > span')].map((c) =>
+                (c.textContent ?? '').trim(),
+              ),
+              chips: [...cell.querySelectorAll('.ts-number-chips > li')].map((c) =>
+                (c.textContent ?? '').replace(/\s+/g, ' ').trim(),
+              ),
+            };
+          }),
           moving: document.getAnimations().filter((a) => {
             const target = (a.effect as KeyframeEffect | null)?.target;
             return target instanceof Element && band.contains(target);
@@ -1572,21 +1591,32 @@ export function rows(): void {
       });
       test.info().annotations.push({
         type: 'numbers',
-        description: facts.cells.map((c) => `${c.figure} (${c.px} px): ${c.sentence}`).join(' | '),
+        description: facts.cells
+          .map(
+            (c) =>
+              `${c.icon} ${c.figure} ${c.noun} (${c.px} px) ${c.path.join(' > ')}${c.chips.join(', ')}`,
+          )
+          .join(' | '),
       });
-      expect(facts.cells.map((c) => c.figure)).toEqual([
+      expect(facts.cells.map((c) => `${c.figure} ${c.noun}`)).toEqual([
         `${FACTS_DATA.actions} actions`,
         `${FACTS_DATA.layouts} layouts`,
         `${FACTS_DATA.materials} patterns`,
         `${FACTS_DATA.shapes} shapes`,
       ]);
-      expect(facts.cells.map((c) => c.sentence)).toEqual([
-        "Each is a named command in the editor's action table.",
-        'A new slide starts from one of these layouts.',
-        "Insert > Animated pattern draws one in the theme's colors.",
-        "Insert > Shape draws them from PowerPoint's preset definitions.",
+      expect(facts.cells.map((c) => [c.icon, c.path])).toEqual(
+        FACTS_DATA.numbers.map((n) => [n.icon, n.path]),
+      );
+      expect(facts.cells[0]?.chips).toEqual([
+        `CLI ${FACTS_DATA.cliCommands}`,
+        `MCP ${FACTS_DATA.mcpTools}`,
+        `HTTP ${FACTS_DATA.httpPaths}`,
       ]);
-      for (const c of facts.cells) expect(c.px, c.id).toBe(32);
+      for (const c of facts.cells) {
+        expect(c.px, c.id).toBe(44);
+        expect(c.tabular, c.id).toBe(true);
+        expect(c.masked, c.id).toBe(true);
+      }
       expect(facts.moving, 'nothing in the band animates').toBe(0);
       expect(facts.transitions, 'nothing in the band transitions').toBe(0);
     } finally {
@@ -1594,6 +1624,9 @@ export function rows(): void {
     }
   });
 
+  /* restated in the design round, DR-D4#3 (docs/DESIGN.md 8.13): ten rows in two columns of five
+     at 1440, each the model's glyph in a well, the name, the menu path as crumbs and the shortcut
+     as 4 px key chips, each platform's keys */
   test(title('home.features.table'), async ({ browser }) => {
     test.setTimeout(240_000);
     const failures: string[] = [];
@@ -1607,65 +1640,55 @@ export function rows(): void {
         await openHome(page);
         await page.waitForTimeout(500);
         const rows = await page.evaluate(() =>
-          [...document.querySelectorAll<HTMLElement>('[data-band="features"] tbody tr')].map(
+          [...document.querySelectorAll<HTMLElement>('[data-band="features"] [data-feature]')].map(
             (row) => {
-              const icon = row.querySelector<HTMLElement>('.ts-icon');
+              const icon = row.querySelector<HTMLElement>('.ts-feature-well .ts-icon');
               const ics = icon ? getComputedStyle(icon) : null;
+              const box = row.getBoundingClientRect();
               return {
                 id: row.getAttribute('data-feature') ?? '',
                 icon: icon?.getAttribute('data-icon') ?? '',
                 masked: ics !== null && /url\(/.test(ics.maskImage || ics.webkitMaskImage),
                 key: (row.querySelector('.ts-feature-key')?.textContent ?? '').trim(),
-                where: (row.querySelector('.ts-feature-where')?.textContent ?? '').trim(),
-                shortcut: (row.querySelector('.ts-feature-shortcut')?.textContent ?? '').trim(),
-                height: Math.round(row.getBoundingClientRect().height),
+                path: [...row.querySelectorAll('.ts-feature-where > span')].map((c) =>
+                  (c.textContent ?? '').trim(),
+                ),
+                keys: [...row.querySelectorAll<HTMLElement>('.ts-feature-keys > kbd')].map((k) => ({
+                  text: (k.textContent ?? '').trim(),
+                  radius: getComputedStyle(k).borderTopLeftRadius,
+                })),
+                x: Math.round(box.x),
               };
             },
           ),
         );
-        const heads = await page.evaluate(() =>
-          [...document.querySelectorAll('[data-band="features"] thead th')].map((th) =>
-            (th.textContent ?? '').trim(),
-          ),
-        );
         notes.push(
-          `${platform}: ${rows.map((r) => `${r.icon} ${r.key} | ${r.where} | ${r.shortcut}`).join('; ')}`,
+          `${platform}: ${rows.map((r) => `${r.icon} ${r.key} | ${r.path.join(' > ')} | ${r.keys.map((k) => k.text).join(' ')}`).join('; ')}`,
         );
         const want = FACTS_DATA.features;
-        if (JSON.stringify(heads) !== JSON.stringify(['Feature', 'Where', 'Shortcut']))
-          failures.push(`${platform}: the heads read ${heads.join(', ')}`);
         if (JSON.stringify(rows.map((r) => r.id)) !== JSON.stringify(want.map((f) => f.id)))
           failures.push(`${platform}: the rows read ${rows.map((r) => r.id).join(', ')}`);
-        if (
-          JSON.stringify(rows.map((r) => r.icon)) !==
-          JSON.stringify([
-            'bars-3',
-            'pencil-square',
-            'swatch',
-            'chat-bubble-left-right',
-            'clock',
-            'user-group',
-            'presentation-chart-bar',
-            'arrow-down-tray',
-            'cube',
-            'command-line',
-          ])
-        )
-          failures.push(`${platform}: the icons read ${rows.map((r) => r.icon).join(', ')}`);
+        const columns = new Set(rows.map((r) => r.x));
+        if (columns.size !== 2)
+          failures.push(`${platform}: the rows sit in ${columns.size} columns`);
         for (const [i, r] of rows.entries()) {
           const f = want[i];
-          if (!r.masked) failures.push(`${platform}: ${r.key} has no Heroicon`);
-          if (f && r.where !== f.where)
-            failures.push(`${platform}: ${r.key} is at "${r.where}", the model says "${f.where}"`);
-          const shortcut = f ? (platform === 'MacIntel' ? f.mac : f.other) : '';
-          if (r.shortcut !== shortcut)
+          if (f === undefined) continue;
+          if (r.icon !== f.icon || !r.masked)
+            failures.push(`${platform}: ${r.key} draws ${r.icon}, the model's glyph is ${f.icon}`);
+          if (JSON.stringify(r.path) !== JSON.stringify(f.path))
             failures.push(
-              `${platform}: ${r.key}'s shortcut reads "${r.shortcut}", not "${shortcut}"`,
+              `${platform}: ${r.key} is at "${r.path.join(' > ')}", the model says "${f.where}"`,
             );
-          if (/\d/.test(`${r.key} ${r.where}`))
+          const keys = platform === 'MacIntel' ? f.macKeys : f.otherKeys;
+          if (JSON.stringify(r.keys.map((k) => k.text)) !== JSON.stringify(keys))
+            failures.push(
+              `${platform}: ${r.key}'s keys read "${r.keys.map((k) => k.text).join(' ')}"`,
+            );
+          if (r.keys.some((k) => k.radius !== '4px'))
+            failures.push(`${platform}: ${r.key}'s key chips are not 4 px`);
+          if (/\d/.test(`${r.key} ${r.path.join(' ')}`))
             failures.push(`${platform}: a figure in ${r.key}'s row`);
-          if (Math.abs(r.height - 56) > 1)
-            failures.push(`${platform}: ${r.key}'s row is ${r.height} px`);
         }
       } finally {
         await context.close();

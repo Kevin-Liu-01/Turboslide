@@ -1133,7 +1133,9 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   color: var(--pt-panel-dim, rgba(255, 255, 255, 0.6));
 }
 
-/* ---- the numbers row (LANDING.md 2.3): four ruled cells, still on purpose ---- */
+/* ---- the numbers row (DESIGN.md 8.3; LANDING.md 2.3): four ruled cells, each the editor's glyph
+   in a well, the figure at 44 px in tabular figures with its noun, and its menu path as crumbs or
+   the agent surfaces' chips; still on purpose ---- */
 .ts-band-numbers {
   padding: 64px 0;
 }
@@ -1148,28 +1150,86 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 }
 
 .ts-number {
+  display: grid;
+  align-content: start;
+  gap: 12px;
   min-width: 0;
-  padding-top: 16px;
+  padding-top: 20px;
   box-shadow: inset 0 1px 0 var(--pt-hair);
+}
+
+/* a glyph's well: the plate ground at the control corner, 32 px (the features rows draw it too) */
+.ts-number-well,
+.ts-feature-well {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--pt-radius);
+  background: var(--pt-plate);
+  box-shadow: inset 0 0 0 1px var(--pt-hair-soft);
 }
 
 .ts-number-figure {
   margin: 0;
   font-family: var(--pt-display);
-  font-size: 32px;
+  font-size: 18px;
   font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: var(--pt-numerals);
+  line-height: 1;
   white-space: nowrap;
+  color: var(--pt-ink-2);
+}
+
+.ts-number-figure > .pt-num {
+  font-size: 44px;
+  letter-spacing: -0.035em;
   color: var(--pt-ink);
 }
 
-.ts-number-sentence {
-  margin: 10px 0 0;
-  font-size: 16px;
-  line-height: 1.5;
+/* a menu path as crumbs: each step in the secondary ink, the editor's chevron between */
+.ts-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
   color: var(--pt-ink-2);
+}
+
+.ts-crumbs > .ts-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--pt-titanium);
+}
+
+/* the agent surfaces' counts: three count chips at the chip corner (DESIGN.md 3.1), the figure
+   tabular */
+.ts-number-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-number-chips > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius-sm);
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-number-chips .pt-num {
+  font-weight: 500;
+  color: var(--pt-ink);
 }
 
 /* ---- a band's reserved instrument box (LANDING.md 4.2): its final size in the document ---- */
@@ -2006,80 +2066,82 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   --cross: rgba(255, 255, 255, 0.34);
 }
 
-/* ---- features and where to find them (LANDING.md 2.14): one table of ten ruled rows of 56 px,
-   the key cell 320 px, the where cell 480 px, the shortcut right aligned ---- */
+/* ---- features and where to find them (DESIGN.md 8.13; LANDING.md 2.14): ten ruled rows in two
+   columns of five, each the editor's glyph in a well, the name, the menu path as crumbs and the
+   shortcut as 4 px key chips ---- */
 .ts-features {
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(5, auto);
+  grid-auto-flow: column;
+  column-gap: 48px;
   margin: 32px 0 0;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.ts-features thead th {
-  height: 32px;
   padding: 0;
-  font-size: 13px;
-  font-weight: 400;
-  text-align: left;
-  vertical-align: bottom;
-  color: var(--pt-titanium);
-  box-shadow: inset 0 -1px 0 var(--pt-hair);
+  list-style: none;
+  box-shadow: inset 0 1px 0 var(--pt-hair);
 }
 
-.ts-features thead th:first-child {
-  width: 320px;
-}
-
-.ts-features thead th:nth-child(2) {
-  width: 480px;
-}
-
-.ts-features thead th:last-child {
-  text-align: right;
-}
-
-.ts-features tbody th,
-.ts-features tbody td {
-  height: 56px;
-  padding: 0;
-  vertical-align: middle;
+.ts-feature {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-areas: 'well key keys' 'well where where';
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 2px;
+  min-width: 0;
+  padding: 14px 0;
   box-shadow: inset 0 -1px 0 var(--pt-hair-soft);
 }
 
-.ts-features tbody tr:last-child > * {
-  box-shadow: inset 0 -1px 0 var(--pt-hair);
+.ts-feature-well {
+  grid-area: well;
 }
 
 .ts-feature-key {
-  text-align: left;
-}
-
-.ts-feature-key > span {
-  margin-left: 12px;
+  grid-area: key;
+  min-width: 0;
   font-size: 16px;
   font-weight: 500;
-  vertical-align: middle;
+  line-height: 22px;
   color: var(--pt-ink);
 }
 
-.ts-feature-key > .ts-icon {
-  vertical-align: middle;
-}
-
 .ts-feature-where {
-  font-size: 16px;
-  color: var(--pt-ink-2);
+  grid-area: where;
 }
 
-.ts-feature-shortcut {
-  text-align: right;
+.ts-feature-keys {
+  grid-area: keys;
+  display: inline-flex;
+  gap: 3px;
 }
 
-.ts-feature-shortcut kbd {
-  font-family: var(--pt-text);
-  font-size: 14px;
+/* a key chip: the shared .pt-kbd (4 px, tabular) drawn on the hairline */
+.ts-feature-keys > kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 1px solid var(--pt-hair);
+  font: 12px / 1 var(--pt-text);
   font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
+}
+
+/* the external glyph after a link that leaves the site (DESIGN.md 8.14): the editor's
+   arrow-up-right as a mask, from icons.generated.css's custom property */
+.ts-product-foot-link[target='_blank']::after,
+.ts-product-nav-link[target='_blank']::after {
+  content: '';
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  background: currentColor;
+  opacity: 0.7;
+  -webkit-mask: var(--ts-glyph-external) center / contain no-repeat;
+  mask: var(--ts-glyph-external) center / contain no-repeat;
 }
 
 /* a key cell's Heroicon: the text's colour through the icon's mask (icons.generated.css) */
@@ -2236,12 +2298,11 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     padding: 80px 0;
   }
 
-  .ts-features thead th:first-child {
-    width: 34%;
-  }
-
-  .ts-features thead th:nth-child(2) {
-    width: 46%;
+  /* the features in one column */
+  .ts-features {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-flow: row;
   }
 
   /* the lead and the buttons under the h1 */
@@ -2415,12 +2476,8 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     row-gap: 24px;
   }
 
-  .ts-number-figure {
-    font-size: 24px;
-  }
-
-  .ts-number-sentence {
-    font-size: 15px;
+  .ts-number-figure > .pt-num {
+    font-size: 34px;
   }
 
   /* the show's bar under 720 px: the counter and the timer, then Previous, Next and Exit at
@@ -2618,51 +2675,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-row-link {
     margin-left: 0;
-  }
-
-  /* the features table: the key and the shortcut on a row's first line, the where cell under */
-  .ts-features thead {
-    display: none;
-  }
-
-  .ts-features,
-  .ts-features tbody {
-    display: block;
-  }
-
-  .ts-features tbody tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'key shortcut' 'where where';
-    row-gap: 4px;
-    padding: 12px 0;
-    box-shadow: inset 0 -1px 0 var(--pt-hair-soft);
-  }
-
-  /* the cells draw no rule of their own under 720 px, the last row's cells included (that rule's
-     selector outranks a plain cell rule), so each row draws one line (research-landing F12) */
-  .ts-features tbody th,
-  .ts-features tbody td,
-  .ts-features tbody tr:last-child > * {
-    height: auto;
-    box-shadow: none;
-  }
-
-  .ts-features tbody tr:last-child {
-    box-shadow: inset 0 -1px 0 var(--pt-hair);
-  }
-
-  .ts-feature-key {
-    grid-area: key;
-  }
-
-  .ts-feature-where {
-    grid-area: where;
-    font-size: 15px;
-  }
-
-  .ts-feature-shortcut {
-    grid-area: shortcut;
   }
 
   .ts-close-text {

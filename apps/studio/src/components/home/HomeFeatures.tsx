@@ -1,58 +1,53 @@
+import { Fragment } from 'react';
+
 import { FEATURES } from './copy';
 import { FACTS_DATA } from './facts-data';
 import { BandHead, HomeSection } from './HomeSection';
-import { SectionIcon } from './SectionIcon';
 
 /**
- * Features and where to find them (docs/LANDING.md 2.14, Kevin's picks "A: Turboslide today" and
- * "B: Features and where to find them, ten rows with menu paths"): one table of ten ruled rows of
- * 56 px, the page's densest evidence and its last band before the close. Each row's key cell holds
- * its Heroicon 20 solid and the feature's name; the where cell and the shortcut are the editor's
- * own, read from `packages/chrome/src/menus/model.ts` and `keys.ts` at build (`facts-data.ts`
- * `features`). The server renders the Mac form of each shortcut; the route rewrites it to the
- * other platforms' form after hydration (`data-shortcut-other`). Every figure the first pass's
- * table carried is said once elsewhere on the page, so this table carries none. Nothing moves.
+ * Features and where to find them (docs/DESIGN.md 8.13; docs/LANDING.md 2.14): ten ruled rows in
+ * two columns of five at 1,024 px and over, one column under it. Each row is the editor's glyph for
+ * the feature in a well, its name, its place in the editor as crumbs and its shortcut as key chips
+ * (`.pt-kbd`); the glyph, the path and the keys are the editor's own, read from
+ * `packages/chrome/src/menus/model.ts` and `keys.ts` at build (`facts-data.ts` `features`), so the
+ * table cannot drift from the editor. The server renders the Mac keys; the route rewrites them to
+ * the other platforms' keys after hydration (`data-shortcut-other`). No figure here; nothing moves.
  */
 export function HomeFeatures() {
   return (
     <HomeSection id="features">
       <BandHead id="features" heading={FEATURES.h2} span={12} />
-      <table className="ts-features" data-features>
-        <thead>
-          <tr>
-            <th scope="col">{FEATURES.heads.feature}</th>
-            <th scope="col">{FEATURES.heads.where}</th>
-            <th scope="col">{FEATURES.heads.shortcut}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {FEATURES.rows.map((row) => {
-            const facts =
-              FACTS_DATA.features.find((f) => f.id === row.id) ??
-              ({ id: row.id, where: '', mac: '', other: '' } as const);
-            return (
-              <tr key={row.id} data-feature={row.id}>
-                <th scope="row" className="ts-feature-key">
-                  <SectionIcon name={row.icon} />
-                  <span>{row.key}</span>
-                </th>
-                <td className="ts-feature-where">{facts.where}</td>
-                <td className="ts-feature-shortcut">
-                  {facts.mac !== '' ? (
-                    <kbd
-                      className="pt-kbd"
-                      data-shortcut-mac={facts.mac}
-                      data-shortcut-other={facts.other}
-                    >
-                      {facts.mac}
+      <ul className="ts-features" data-features>
+        {FEATURES.rows.map((row) => {
+          const facts = FACTS_DATA.features.find((f) => f.id === row.id);
+          if (facts === undefined) return null;
+          return (
+            <li key={row.id} className="ts-feature" data-feature={row.id}>
+              <span className="ts-feature-well">
+                <i className="ts-icon" data-icon={facts.icon} />
+              </span>
+              <span className="ts-feature-key">{row.key}</span>
+              <span className="ts-feature-where ts-crumbs">
+                {facts.path.map((step, i) => (
+                  <Fragment key={step}>
+                    {i > 0 ? <i className="ts-icon" data-icon="next" /> : null}
+                    <span>{step}</span>
+                  </Fragment>
+                ))}
+              </span>
+              {facts.macKeys.length > 0 ? (
+                <span className="ts-feature-keys" data-shortcut-other={facts.otherKeys.join('+')}>
+                  {facts.macKeys.map((key, i) => (
+                    <kbd key={`${key}${i}`} className="pt-kbd">
+                      {key}
                     </kbd>
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  ))}
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
     </HomeSection>
   );
 }

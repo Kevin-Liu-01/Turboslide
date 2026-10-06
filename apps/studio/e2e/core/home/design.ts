@@ -260,13 +260,14 @@ async function navIcons(browser: Browser): Promise<void> {
 /** The numbers of docs/DESIGN.md 8.0 the tree draws: counters, slide numbers, the numbers row,
     times and versions, read wherever they exist on the page. */
 const NUMBER_SELECTORS = [
-  '.ts-number-figure',
+  '.ts-number-figure .pt-num',
+  '.ts-number-chips .pt-num',
+  '.ts-feature-keys kbd',
   '[data-hero-counter]',
   '[data-thumb-n]',
   '.ts-mini-thumb-n',
   '.ts-home-history time',
   '.ts-home-history [data-version]',
-  '.ts-feature-shortcut kbd',
 ] as const;
 
 async function defaultGlyphs(browser: Browser): Promise<void> {
@@ -321,7 +322,7 @@ async function defaultGlyphs(browser: Browser): Promise<void> {
         if (read.proportional.length > 0)
           failures.push(`${label}: proportional figures in ${read.proportional.join('; ')}`);
         if (
-          (read.counts['.ts-number-figure'] ?? 0) === 0 ||
+          (read.counts['.ts-number-figure .pt-num'] ?? 0) === 0 ||
           (read.counts['[data-thumb-n]'] ?? 0) === 0
         )
           failures.push(`${label}: the numbers row or the filmstrip numbers were not found`);
@@ -371,7 +372,11 @@ const LADDER: readonly {
     ],
   },
   { rung: 'dialogs', px: '8px', selectors: ['.ts-mini-dialog'] },
-  { rung: 'key chips', px: '4px', selectors: ['.ts-product kbd.pt-kbd'] },
+  {
+    rung: 'key and count chips',
+    px: '4px',
+    selectors: ['.ts-product kbd.pt-kbd', '.ts-number-chips > li'],
+  },
   {
     rung: 'slides, thumbnails, rails and seams',
     px: '0px',

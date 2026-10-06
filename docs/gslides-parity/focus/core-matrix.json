@@ -10884,22 +10884,22 @@
     {
       "id": "home.numbers.row",
       "feature": "decks",
-      "interaction": "Four cells whose figures equal `facts.json` `actions`, `layouts`, `materials` and `shapePresets` with 2.3's sentences; nothing in the band animates",
+      "interaction": "Four cells whose figures equal `facts.json` `actions`, `layouts`, `materials` and `shapePresets`, each the menu model's glyph in a well, the figure at 44 px in tabular figures with its noun and its menu path as crumbs (Slide > Apply layout, Insert > Animated pattern, Insert > Shape); the actions cell's chips read the CLI's, the MCP server's and the HTTP API's counts; nothing in the band animates",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#3"
     },
     {
       "id": "home.features.table",
       "feature": "decks",
-      "interaction": "A table of ten rows in 2.14's order with their Heroicons; each where cell equals the model's path and each shortcut cell `keys.ts`'s form for the platform (read in a Mac and a Linux context); no figure in the table",
+      "interaction": "Ten rows in 2.14's order in two columns of five at 1440, each the menu model's glyph in a well, the name, the model's path as crumbs and the shortcut as 4 px key chips in `keys.ts`'s form for the platform (read in a Mac and a Linux context); no figure in the rows",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#3"
     },
     {
       "id": "home.motion.pause",

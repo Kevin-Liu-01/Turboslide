@@ -37,8 +37,34 @@ export const HERO_ROUND = {
   },
 } as const;
 
+/**
+ * The numbers row (DESIGN.md 8.3): each cell's noun beside its figure, its place in the editor as
+ * crumbs, and the actions cell's chips, the CLI's, the MCP server's and the HTTP API's counts,
+ * said here once (they leave the agents band's lead). Replaces copy.ts `NUMBERS`'s sentences.
+ */
+export const NUMBERS_ROUND = {
+  label: 'Turboslide in four numbers',
+  nouns: { actions: 'actions', layouts: 'layouts', patterns: 'patterns', shapes: 'shapes' },
+  chips: { cli: 'CLI', mcp: 'MCP', http: 'HTTP' },
+  chipsLabel: 'The actions each agent surface runs',
+} as const;
+
+/** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
+export const AGENTS_ROUND = {
+  lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
+} as const;
+
+/** The close (DESIGN.md 8.14): the h2 and one line; replaces copy.ts `CLOSE.h2` and `CLOSE.lead`. */
+export const CLOSE_ROUND = {
+  h2: 'Start a presentation',
+  lead: 'No account is needed. The first edit saves it.',
+} as const;
+
 /** Every string of this module, keyed, for the lints of copy.test.ts. */
 export const DESIGN_COPY = {
   navIcons: NAV_ICONS,
   hero: HERO_ROUND,
+  numbers: NUMBERS_ROUND,
+  agents: AGENTS_ROUND,
+  close: CLOSE_ROUND,
 } as const;

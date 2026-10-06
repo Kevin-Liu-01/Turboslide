@@ -39,7 +39,14 @@ import {
   VERSIONS,
 } from './copy';
 import { HOME_DECK, HOME_EXPORT_FACTS, HOME_RUN_FACTS, HOME_TAILOR_WORDS } from './deck.generated';
-import { DESIGN_COPY, HERO_ROUND, NAV_ICONS } from './design-copy';
+import {
+  AGENTS_ROUND,
+  CLOSE_ROUND,
+  DESIGN_COPY,
+  HERO_ROUND,
+  NAV_ICONS,
+  NUMBERS_ROUND,
+} from './design-copy';
 import { FACTS_DATA } from './facts-data';
 import { HOME_FACTS, formatCount } from './facts';
 import type { HomeFacts } from './facts';
@@ -154,7 +161,11 @@ const isProduct = (path: string): boolean => path === 'menus.editorRow';
 const isCredit = (path: string): boolean => path === 'slides.heroCredit';
 /* the design round's hero names the CLI and the MCP server in its lead and its terminal
    (docs/DESIGN.md 8.2), as LANDING.md lets the hero's stage and the agents band */
-const DESIGN_VIEW_EXEMPT: ReadonlyArray<string> = ['design.hero'];
+const DESIGN_VIEW_EXEMPT: ReadonlyArray<string> = [
+  'design.hero',
+  'design.numbers',
+  'design.agents',
+];
 const isExempt = (path: string): boolean =>
   [...DEFAULT_VIEW_EXEMPT, ...DESIGN_VIEW_EXEMPT].some(
     (prefix) => path === prefix || path.startsWith(`${prefix}.`),
@@ -198,7 +209,12 @@ function restingStrings(): string[] {
     ...HERO.stage.steps.map((step) => step.label),
     HERO_ROUND.terminal.agent,
     HERO_ROUND.terminal.recorded(19),
-    ...NUMBERS.cells.flatMap((cell) => [cell.figure(HOME_FACTS), cell.sentence]),
+    /* the design round's numbers row (design-copy.ts): each figure's noun and menu path, the chips */
+    ...NUMBERS.cells.map((cell) => cell.figure(HOME_FACTS)),
+    ...FACTS_DATA.numbers.flatMap((cell) => cell.path),
+    NUMBERS_ROUND.chips.cli,
+    NUMBERS_ROUND.chips.mcp,
+    NUMBERS_ROUND.chips.http,
     MENUS.h2,
     MENUS.lead,
     MENUS.slides(9),
@@ -225,7 +241,7 @@ function restingStrings(): string[] {
     KITS.backgroundHelp,
     KITS.undo,
     AGENTS.h2,
-    AGENTS.lead(HOME_FACTS),
+    AGENTS_ROUND.lead,
     AGENTS.chips.tailor('Initech'),
     AGENTS.chips.turn,
     AGENTS.chips.row,
@@ -268,8 +284,8 @@ function restingStrings(): string[] {
     FEATURES.heads.shortcut,
     ...FEATURES.rows.map((row) => row.key),
     ...FACTS_DATA.features.map((row) => row.where),
-    CLOSE.h2,
-    CLOSE.lead,
+    CLOSE_ROUND.h2,
+    CLOSE_ROUND.lead,
     CLOSE.buttons.newPresentation.label,
     CLOSE.buttons.openDeck.label,
     ...FOOTER.links.map((link) => link.label),
@@ -449,6 +465,8 @@ describe('headings and buttons', () => {
       expect(wordCount(name), name).toBe(2);
     }
     expect(HERO_ROUND.heading).toBe('Presentations for people and agents');
+    expect(wordsOutsideSentenceCase(CLOSE_ROUND.h2, HOME_PROPER_NOUNS)).toEqual([]);
+    expect(/[.:;,]$/.test(CLOSE_ROUND.h2)).toBe(false);
     expect(HERO_ROUND.h1Lines.join(' ')).toBe(HERO_ROUND.heading);
     expect(wordsOutsideSentenceCase(HERO_ROUND.heading, HOME_PROPER_NOUNS)).toEqual([]);
     for (const text of [HERO_ROUND.heading, HERO_ROUND.lead])

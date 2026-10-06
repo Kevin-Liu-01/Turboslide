@@ -12,6 +12,7 @@ import {
   state,
   teardownAll,
   title,
+  waitEditor,
 } from './lib';
 import { isCoreId } from './matrix';
 
@@ -863,11 +864,13 @@ export function designDecks(): string[] {
   return declared;
 }
 
-/** The facts of one open Sign in dialog: its card, its methods and its buttons. */
+/** The facts of one open Sign in dialog: its card, its body's heights, its methods and buttons. */
 type SignInFacts = {
   found: boolean;
   classes: string;
   radius: string;
+  /** the body's scroll and client heights: a body that fits its content scrolls by 0 */
+  body: { scroll: number; client: number };
   methods: { label: string; radius: string; mark: boolean }[];
   actions: { label: string; radius: string }[];
 };
@@ -875,12 +878,22 @@ type SignInFacts = {
 async function signInFacts(page: Page, control: string): Promise<SignInFacts> {
   return page.evaluate((id) => {
     const card = document.querySelector<HTMLElement>(`[data-control="${id}"]`);
-    if (!card) return { found: false, classes: '', radius: '', methods: [], actions: [] };
+    if (!card)
+      return {
+        found: false,
+        classes: '',
+        radius: '',
+        body: { scroll: 0, client: 0 },
+        methods: [],
+        actions: [],
+      };
+    const body = card.querySelector<HTMLElement>('.ts-dialog-body');
     const label = (el: Element) => (el.textContent ?? '').replace(/\s+/g, ' ').trim();
     return {
       found: true,
       classes: card.className,
       radius: getComputedStyle(card).borderTopLeftRadius,
+      body: { scroll: body?.scrollHeight ?? 0, client: body?.clientHeight ?? 0 },
       methods: [...card.querySelectorAll<HTMLElement>('.ts-sign-in-method')].map((b) => ({
         label: label(b),
         radius: getComputedStyle(b).borderTopLeftRadius,
@@ -905,10 +918,30 @@ export function designSignIn(): string[] {
     test.setTimeout(900_000);
     const person = await personAt(baseURL, 1440, 900, 'light');
     const { page } = person;
+    /* each surface's Sign In is pressed once the page has hydrated: /decks draws the button from
+       its loader before React attaches the click (/home draws it after hydration) */
     const surfaces = [
-      { name: '/home', path: '/home', button: 'home.nav.signIn', dialog: 'page.signIn' },
-      { name: '/decks', path: '/decks', button: 'home.signIn', dialog: 'page.signIn' },
-      { name: 'the editor', path: '/new', button: 'title.signIn', dialog: 'dialog.signIn' },
+      {
+        name: '/home',
+        path: '/home',
+        button: 'home.nav.signIn',
+        dialog: 'page.signIn',
+        ready: '[data-control="home.nav.signIn"]',
+      },
+      {
+        name: '/decks',
+        path: '/decks',
+        button: 'home.signIn',
+        dialog: 'page.signIn',
+        ready: '.ts-home-page[data-hydrated]',
+      },
+      {
+        name: 'the editor',
+        path: '/new',
+        button: 'title.signIn',
+        dialog: 'dialog.signIn',
+        ready: '[data-control="title.signIn"]',
+      },
     ];
     const facts: string[] = [];
     const failures: string[] = [];
@@ -917,6 +950,8 @@ export function designSignIn(): string[] {
       for (const surface of surfaces) {
         const where = `${appearance} ${surface.name}`;
         await page.goto(surface.path);
+        await page.locator(surface.ready).first().waitFor({ timeout: 120_000 });
+        if (surface.path === '/new') await waitEditor(page);
         const button = page.locator(`[data-control="${surface.button}"]`).first();
         await button.waitFor({ state: 'visible', timeout: 120_000 });
         await button.click();
@@ -933,11 +968,15 @@ export function designSignIn(): string[] {
             .filter((c) => c.startsWith('ts-sign-in') || c === 'pt-window')
             .join(
               ' ',
-            )}); methods ${read.methods.map((m) => `"${m.label}" ${m.radius}${m.mark ? ' with its mark' : ''}`).join(', ')}; buttons ${read.actions.map((a) => `"${a.label}" ${a.radius}`).join(', ')}`,
+            )}); body ${read.body.scroll} over ${read.body.client}; methods ${read.methods.map((m) => `"${m.label}" ${m.radius}${m.mark ? ' with its mark' : ''}`).join(', ')}; buttons ${read.actions.map((a) => `"${a.label}" ${a.radius}`).join(', ')}`,
         );
         if (!read.classes.split(' ').includes('ts-sign-in'))
           failures.push(`${where}: the dialog is not the one Sign in dialog (${read.classes})`);
         if (read.radius !== '8px') failures.push(`${where}: the window computes ${read.radius}`);
+        if (read.body.scroll > read.body.client + 1)
+          failures.push(
+            `${where}: the body scrolls by ${read.body.scroll - read.body.client} px (${read.body.scroll} over ${read.body.client})`,
+          );
         if (google === undefined || !google.mark)
           failures.push(`${where}: no "Continue with Google" with the provider's mark`);
         for (const b of [...read.methods, ...read.actions]) {

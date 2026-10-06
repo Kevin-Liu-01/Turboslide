@@ -2,7 +2,9 @@
    boxes for every state (the name prompt 360 by 168, the profile and the avatar builder 560 by
    640), the sign in dialog 400 px wide and as tall as its content, a reserved 20 px error row, the
    preview strip's eight fixed boxes from first paint, the session list at 40 px rows with a three
-   row minimum. Monochrome. */
+   row minimum. Monochrome, but for the sign in providers' own marks. The design round (docs/DESIGN.md
+   3.1, 4.5; DR-D5#2b): the dialogs are the chrome's 8 px windows, the fields and the method buttons
+   take the 6 px control corner on the field boundary, the session list's times are tabular. */
 
 /* the reserved error row: one line that speaks without moving anything */
 .ts-dialog-error-row {
@@ -41,8 +43,8 @@
   box-sizing: border-box;
   height: 32px;
   padding: 0 9px;
-  border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);
@@ -85,22 +87,55 @@
   gap: 4px;
 }
 
+/* one method: a 40 px button at the control corner, the provider's mark before its words, both
+   centred, on every surface that draws the dialog (the editor, /home, /decks, the access page) */
 .ts-sign-in-method {
   appearance: none;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 36px;
-  padding: 6px 10px;
-  border: 1px solid var(--pt-hair);
-  background: none;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
   color: var(--pt-ink);
-  font: 13px/1.2 var(--pt-text);
-  text-align: left;
+  font: 500 13px/1.2 var(--pt-text);
+  text-align: center;
   cursor: pointer;
+}
+
+.ts-sign-in-method:hover:not(:disabled) {
+  border-color: var(--pt-ink);
+}
+
+.ts-sign-in-method:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-sign-in-method:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* the provider's mark, 18 px, in its own colours (the GitHub mark in the button's ink) */
+.ts-sign-in-mark {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+/* on the ink of the primary button the mark sits on a paper disc, so its colours keep their ground */
+.ts-sign-in-method.is-primary .ts-sign-in-mark {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--pt-paper);
 }
 
 .ts-sign-in-method.is-later {
@@ -183,8 +218,6 @@
   list-style: none;
   min-height: 120px;
   max-height: 200px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   border: 1px solid var(--pt-hair-soft);
 }
 
@@ -218,7 +251,7 @@
 .ts-profile-row-meta {
   color: var(--pt-ink-2);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

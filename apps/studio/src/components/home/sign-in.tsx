@@ -6,7 +6,6 @@ import { getRequest } from '@tanstack/react-start/server';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { useMountEffect } from '../useMountEffect';
-import { socialSignIn } from './sign-in-auth';
 import { SIGN_IN_WORDS } from './sign-in-words';
 
 /* the dialog loads on the first click (sign-in-dialog.tsx), so the pages' first paint carries
@@ -23,10 +22,10 @@ const PageSignInDialog = lazy(() =>
  * the same better-auth routes the editor posts to (`EditorRoot.tsx` `authPost`): Continue with
  * Google and with GitHub when the deployment has their clients, and the email field with its six
  * digit code when it has a mail sender. A deployment with no method draws no Sign In, so the page
- * never offers a control that cannot complete (the rule of docs/NEXT.md 3.2 H4). When the one
- * method is one provider, Sign In goes to that provider at once; otherwise it opens the dialog.
- * A signed in visitor sees no Sign In. Round 3's A2 draws the editor's dialog on the auth plate;
- * this dialog takes the plate with it (the request in docs/gslides-parity/round1/build/b2.md).
+ * never offers a control that cannot complete (the rule of docs/NEXT.md 3.2 H4). Sign In opens
+ * the one Sign in dialog the editor draws (the design round, DR-D5#2b: one dialog component on
+ * every surface), also where the one method is one provider, so /home, /decks and the editor
+ * answer Sign In the same way. A signed in visitor sees no Sign In.
  */
 export type SignInFacts = {
   google: boolean;
@@ -48,14 +47,6 @@ export { SIGN_IN_WORDS } from './sign-in-words';
 /** Whether the deployment offers any method a visitor can complete. */
 export function offersSignIn(facts: SignInFacts): boolean {
   return facts.google || facts.github || facts.email;
-}
-
-/** The one provider Sign In goes to at once, or null when the dialog has to choose. */
-export function soleProvider(facts: SignInFacts): 'google' | 'github' | null {
-  if (facts.email) return null;
-  if (facts.google && !facts.github) return 'google';
-  if (facts.github && !facts.google) return 'github';
-  return null;
 }
 
 /**
@@ -101,7 +92,6 @@ export function SignInButton({
 }) {
   const [facts, setFacts] = useState<SignInFacts | null>(given ?? null);
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   useMountEffect(() => {
     if (given !== undefined) return undefined;
     let live = true;
@@ -115,17 +105,7 @@ export function SignInButton({
     };
   });
   if (facts === null || facts.signedIn || !offersSignIn(facts)) return null;
-  const sole = soleProvider(facts);
-  const onClick = () => {
-    if (sole === null) {
-      setOpen(true);
-      return;
-    }
-    socialSignIn(sole).catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : String(err));
-      setOpen(true);
-    });
-  };
+  const onClick = () => setOpen(true);
   return (
     <>
       <button
@@ -139,14 +119,7 @@ export function SignInButton({
       </button>
       {open ? (
         <Suspense fallback={null}>
-          <PageSignInDialog
-            facts={facts}
-            initialError={error}
-            onClose={() => {
-              setOpen(false);
-              setError(null);
-            }}
-          />
+          <PageSignInDialog facts={facts} onClose={() => setOpen(false)} />
         </Suspense>
       ) : null}
     </>

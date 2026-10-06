@@ -1,24 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { NO_SIGN_IN, SIGN_IN_WORDS, offersSignIn, soleProvider } from './sign-in';
+import { NO_SIGN_IN, SIGN_IN_WORDS, offersSignIn } from './sign-in';
 
 // Sign In on the pages outside the editor (sign-in.tsx; docs/NEXT.md 4.1.2): drawn only where the
-// deployment offers a method, straight to the provider when it is the one method.
+// deployment offers a method; it opens the one Sign in dialog (the design round, DR-D5#2b).
 
 describe('the page Sign In', () => {
-  it('offers nothing without a method', () => {
+  it('offers nothing without a method, and something with any one', () => {
     expect(offersSignIn(NO_SIGN_IN)).toBe(false);
-    expect(soleProvider(NO_SIGN_IN)).toBeNull();
-  });
-
-  it('goes to the one provider at once', () => {
-    expect(soleProvider({ ...NO_SIGN_IN, google: true })).toBe('google');
-    expect(soleProvider({ ...NO_SIGN_IN, github: true })).toBe('github');
-  });
-
-  it('opens the dialog for the email method or two providers', () => {
-    expect(soleProvider({ ...NO_SIGN_IN, google: true, email: true })).toBeNull();
-    expect(soleProvider({ ...NO_SIGN_IN, google: true, github: true })).toBeNull();
+    expect(offersSignIn({ ...NO_SIGN_IN, google: true })).toBe(true);
+    expect(offersSignIn({ ...NO_SIGN_IN, github: true })).toBe(true);
     expect(offersSignIn({ ...NO_SIGN_IN, email: true })).toBe(true);
   });
 

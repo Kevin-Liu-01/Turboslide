@@ -37,6 +37,7 @@ import {
 } from './lib';
 import { shareRound1 } from './share-round1';
 import { shareChromeRows } from './b3b-dialogs';
+import { designSignIn } from './design-pages';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
 // `collab.*`, `comments.reaches-second-browser` and `versions.restore` with the driver
@@ -3066,9 +3067,13 @@ const ACCESS_ROWS = shareRound1();
 /* lane B3b of Round 1 (docs/NEXT.md 4.1.3 item 17): its row lives in b3b-dialogs.ts */
 const B3B_ROWS = shareChromeRows();
 
+/* lane D5 of the design round (docs/DESIGN.md 10.5, 11): its row lives in design-pages.ts */
+const DESIGN_D5_ROWS = designSignIn();
+
 coverage(import.meta.filename, [
   ...B3B_ROWS,
   ...ACCESS_ROWS,
+  ...DESIGN_D5_ROWS,
   'share.dialog.open',
   'share.copy-view-link',
   'share.copy-edit-link',

@@ -10949,6 +10949,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D5#1; the theme name clause is read once theme.list (DR-D3#1) is on the build"
     },
     {
+      "id": "accounts.signin.one-dialog",
+      "feature": "share",
+      "interaction": "Sign In from /home, /decks and the editor opens one dialog component: the 8 px window, 6 px buttons, \"Continue with Google\" with the provider's mark, Title Case buttons, a body as tall as its content that does not scroll, both appearances",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-surfaces 3.1; VERIFICATION.md design round pass 1 finding 6 (the editor's body scrolled 35 px)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#2"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

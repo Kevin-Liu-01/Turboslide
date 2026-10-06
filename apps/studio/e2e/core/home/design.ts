@@ -78,6 +78,7 @@ export const ROWS: readonly string[] = [
   'home.kits.themes',
   'home.agents.history-panel',
   'home.people.share-dialog',
+  'home.hero.font-swap',
 ];
 
 type Theme = 'light' | 'dark';
@@ -814,9 +815,11 @@ async function frameChrome(browser: Browser): Promise<void> {
           titleGlyphs: [...title.querySelectorAll('.ts-icon')].map(glyph),
           slideshow: text('.ts-hero-frame-split'),
           share: text('.ts-hero-frame-share'),
-          menus: [...frame.querySelectorAll('.ts-hero-frame-menus > span')].map((m) =>
-            (m.textContent ?? '').trim(),
-          ),
+          /* one run of words since the design round's finishing round 2 (no word moves when Inter
+             arrives after the first paint) */
+          menus: (frame.querySelector('.ts-hero-frame-menus')?.textContent ?? '')
+            .trim()
+            .split(/\s+/),
           tools,
           thumbs: frame.querySelectorAll('[data-hero-filmstrip] [data-hero-thumb]').length,
           slide: frame.querySelector('[data-hero-slide] [data-home-slides]') !== null,
@@ -1877,6 +1880,160 @@ async function exportDialog(browser: Browser): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// home.hero.font-swap (DESIGN.md 8.2; the design round's pass 3 finding 3)
+
+/** The hero's boxes and its words' lines, read from the page as it is painted. */
+async function heroBoxes(page: Page) {
+  return page.evaluate(() => {
+    const at = (el: Element | null) => {
+      if (el === null) return null;
+      const r = el.getBoundingClientRect();
+      return [r.left, r.top, r.width, r.height].map((n) => Math.round(n * 10) / 10);
+    };
+    /* the words on each line of an element's first text run, as counts: "6,7,6,4" */
+    const lines = (el: Element | null): string => {
+      const text = el === null ? null : document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode();
+      if (text === null || text === undefined) return '';
+      const data = text.textContent ?? '';
+      const tops: number[] = [];
+      for (const m of data.matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(text, m.index);
+        range.setEnd(text, m.index + m[0].length);
+        tops.push(Math.round(range.getClientRects()[0]?.top ?? -1));
+      }
+      const counts: number[] = [];
+      tops.forEach((top, i) => {
+        if (i === 0 || top !== tops[i - 1]) counts.push(1);
+        else counts[counts.length - 1]! += 1;
+      });
+      return counts.join(',');
+    };
+    const h1 = document.querySelector('h1#ts-product-h1');
+    return {
+      face: [...document.fonts].some((f) => f.family === 'Inter' && f.status === 'loaded'),
+      h1: at(h1)?.slice(1),
+      h1Lines: [...document.querySelectorAll('.ts-h1-line')].map(lines).join(' / '),
+      lead: at(document.querySelector('.ts-hero-lead'))?.slice(1),
+      leadLines: lines(document.querySelector('.ts-hero-lead')),
+      side: at(document.querySelector('.ts-hero-side'))?.slice(1),
+      /* where each button starts and its height: the last one's width may differ by face */
+      buttons: [...document.querySelectorAll('.ts-hero-side .ts-button')].map((el) => {
+        const b = at(el);
+        return b === null ? null : [b[0], b[1], b[3]];
+      }),
+      stage: at(document.querySelector('[data-hero-stage]'))?.slice(1, 2),
+    };
+  });
+}
+
+/**
+ * With Inter blocked the hero paints in 'Inter Fallback'; with Inter it paints in Inter. Every
+ * box of the hero (the h1, the lead, the side, the two buttons, the stage's top) and every line
+ * break of the h1 and of the lead must be the same in both, for each of the three visit sentences,
+ * at 1440, 390 and 320 px: then nothing moves when Inter arrives after the first paint. A second
+ * reading answers Inter 2.5 s late and reads no layout shift in the first screen.
+ */
+async function fontSwap(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const sizes: Size[] = [DESKTOP, PHONE, { width: 320, height: 640 }];
+  for (const size of sizes)
+    for (const visit of [0, 1, 2]) {
+      const reads: Awaited<ReturnType<typeof heroBoxes>>[] = [];
+      for (const block of [true, false]) {
+        const { context, page } = await homeContext(browser, size, 'light');
+        try {
+          await context.addInitScript((v) => {
+            try {
+              localStorage.setItem('ts-home-visit', String(v));
+            } catch {
+              /* private mode */
+            }
+          }, visit);
+          /* the face's files alone: the dev server also answers module imports of the woff2 */
+          if (block)
+            await context.route(/\.woff2(\?|$)/, (route) =>
+              route.request().resourceType() === 'font' ? route.abort() : route.continue(),
+            );
+          const response = await page.goto('/home');
+          expect(response?.status(), '/home answers 200').toBe(200);
+          await page.locator('main#top[data-hydrated]').waitFor({ timeout: 60_000 });
+          await page.evaluate(() => document.fonts.ready);
+          reads.push(await heroBoxes(page));
+        } finally {
+          await context.close();
+        }
+      }
+      const [fallback, inter] = reads;
+      const label = `${size.width} visit ${visit + 1}`;
+      if (fallback === undefined || inter === undefined) continue;
+      if (fallback.face || !inter.face)
+        failures.push(`${label}: Inter loaded ${fallback.face} blocked and ${inter.face} answered`);
+      for (const key of ['h1', 'h1Lines', 'lead', 'leadLines', 'side', 'buttons', 'stage'] as const)
+        if (JSON.stringify(fallback[key]) !== JSON.stringify(inter[key]))
+          failures.push(
+            `${label}: ${key} ${JSON.stringify(fallback[key])} in the fallback, ${JSON.stringify(inter[key])} in Inter`,
+          );
+      notes.push(
+        `${label}: h1 ${inter.h1Lines} (${inter.h1?.join(' ')}), lead ${inter.leadLines}, stage at ${inter.stage?.join('')}`,
+      );
+    }
+  /* Inter answered 2.5 s late: no layout shift in the first screen when it arrives */
+  for (const size of [DESKTOP, PHONE]) {
+    const { context, page } = await homeContext(browser, size, 'light');
+    try {
+      await context.route(/\.woff2(\?|$)/, async (route) => {
+        if (route.request().resourceType() === 'font')
+          await new Promise((done) => setTimeout(done, 2500));
+        await route.continue().catch(() => undefined);
+      });
+      await context.addInitScript(() => {
+        const w = window as unknown as { __shifts: string[] };
+        w.__shifts = [];
+        try {
+          new PerformanceObserver((list) => {
+            for (const e of list.getEntries() as (PerformanceEntry & {
+              value?: number;
+              hadRecentInput?: boolean;
+              sources?: { node?: Node | null }[];
+            })[])
+              if (!e.hadRecentInput)
+                w.__shifts.push(
+                  `${(e.value ?? 0).toFixed(6)} at ${Math.round(e.startTime)} ms on ${(e.sources ?? [])
+                    .map((src) => {
+                      const el = src.node instanceof Element ? src.node : src.node?.parentElement;
+                      return el ? `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}` : '?';
+                    })
+                    .join(' ')}`,
+                );
+          }).observe({ type: 'layout-shift', buffered: true });
+        } catch {
+          /* no layout shift entries */
+        }
+      });
+      await page.goto('/home');
+      await page.locator('main#top[data-hydrated]').waitFor({ timeout: 60_000 });
+      await page.waitForFunction(
+        () => [...document.fonts].some((f) => f.family === 'Inter' && f.status === 'loaded'),
+        undefined,
+        { timeout: 60_000 },
+      );
+      await page.waitForTimeout(1500);
+      const shifts = await page.evaluate(
+        () => (window as unknown as { __shifts: string[] }).__shifts,
+      );
+      notes.push(`${size.width}: Inter after 2.5 s, ${shifts.length} shifts${shifts.length > 0 ? ` (${shifts.join('; ')})` : ''}`);
+      if (shifts.length > 0) failures.push(`${size.width}: Inter after 2.5 s moved ${shifts.join('; ')}`);
+    } finally {
+      await context.close();
+    }
+  }
+  test.info().annotations.push({ type: 'font-swap', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
 // home.patterns.stills (DESIGN.md 8.12)
 
 async function patternsStills(browser: Browser): Promise<void> {
@@ -2394,6 +2551,12 @@ export function rows(): void {
     test(title('home.agents.history-panel'), async ({ browser }) => {
       test.setTimeout(360_000);
       await historyPanel(browser);
+    });
+  if (entered('home.hero.font-swap'))
+    test(title('home.hero.font-swap'), async ({ browser }) => {
+      test.setTimeout(480_000);
+      test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
+      await fontSwap(browser);
     });
   if (entered('home.patterns.stills'))
     test(title('home.patterns.stills'), async ({ browser }) => {

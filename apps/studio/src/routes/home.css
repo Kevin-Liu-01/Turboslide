@@ -374,8 +374,11 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   color: var(--pt-ink);
 }
 
-/* New Presentation, the one boxed text control: solid, 36 px, the control corner */
+/* New Presentation, the one boxed text control: solid, 36 px, the control corner; 150 px holds
+   its words in 'Inter Fallback' (148.7 px) and in Inter (147), so the right aligned row starts at
+   one place in both faces and nothing in it moves when Inter arrives (DESIGN.md 8.2) */
 .ts-product-nav .ts-product-nav-new {
+  min-width: 150px;
   height: 36px;
   padding: 0 14px;
   font-size: 14px;
@@ -612,8 +615,18 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   padding-bottom: 4px;
 }
 
+/* the lead's measure (docs/DESIGN.md 8.2): at 341 px each visit sentence with the lead wraps to
+   four lines with the same words on each in Inter and in 'Inter Fallback' (the faces draw the same
+   breaks from 340 to 342 px at 19 px and the same line counts from 326 to 374), so nothing in the
+   hero moves when Inter arrives after the first paint; the first button keeps one width in both
+   faces, so the second starts at one place (home.hero.font-swap) */
 .ts-hero-lead {
   min-width: 0;
+  max-width: 341px;
+}
+
+.ts-hero-side .ts-button:first-child {
+  min-width: 160px;
 }
 
 /* the stage: the frame 644 px and the terminal 364 px at 1,024 px of content */
@@ -682,10 +695,13 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   color: var(--pt-titanium);
 }
 
+/* the right aligned cells start at one place in both faces: 276 px holds them in 'Inter
+   Fallback' (274) and in Inter (271.5), 140 px under 720 (138.3 and 136.6) */
 .ts-hero-frame-r {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 276px;
   margin-left: auto;
   flex: 0 0 auto;
 }
@@ -765,15 +781,16 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   height: 12px;
 }
 
-/* the drawn menu row (aria-hidden; the working menus are the menus band's) */
+/* the drawn menu row (aria-hidden; the working menus are the menus band's): one run of words, 15 px
+   apart by its word spacing (a 13 px space is about 3.6 px) */
 .ts-hero-frame-menus {
   display: flex;
   align-items: center;
-  gap: 15px;
   min-width: 0;
   padding: 0 12px;
   overflow: hidden;
   font-size: 13px;
+  word-spacing: 11.4px;
   white-space: nowrap;
   color: var(--pt-ink-2);
   pointer-events: none;
@@ -1033,14 +1050,16 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 
 /* a clipped cell keeps its whole line box on the head's 13 px line of 1 */
 .ts-hero-terminal-recorded {
-  margin-left: auto;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* the head's motion toggle: the shell's icon square on the panel's ink */
+/* the head's motion toggle: the shell's icon square on the panel's ink, at the head's end; the
+   recording's words start after the agent's, so their place never depends on their own width
+   (a right aligned cell moved 3 px when Inter arrived) */
 .ts-hero-terminal .ts-motion-toggle.pt-ib {
+  margin-left: auto;
   width: 28px;
   height: 28px;
   color: var(--pt-panel-text);
@@ -2607,6 +2626,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     max-width: 560px;
     min-height: 0;
   }
+
+  /* at 560 px each lead wraps to three lines with the same breaks in both faces (they agree from
+     438 px) */
+  .ts-hero-lead {
+    max-width: none;
+  }
 }
 
 /* ---- under 720 px (LANDING.md 2.2 to 2.10 "Layout at 390"): one column, the gutter 0, the
@@ -2682,15 +2707,19 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     padding: 32px 0 64px;
   }
 
+  /* the h1's two lines never wrap (docs/DESIGN.md 8.2): 44 px while its longer line fits the
+     column in 'Inter Fallback' (8.27 em of Arial at this tracking against 7.6 em of Inter), else
+     the size at which it fits, so the first paint and Inter draw the same two lines at every
+     width from 320 px and nothing under the h1 moves when Inter arrives */
   .ts-h1 {
-    font-size: 44px;
+    font-size: min(44px, 100cqi / 8.4);
     line-height: 1;
     letter-spacing: -0.034em;
-    white-space: normal;
   }
 
   .ts-hero-head {
     gap: 24px;
+    container-type: inline-size;
   }
 
   .ts-hero-side {
@@ -2698,9 +2727,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 
   /* the lead at 16 px under 720 px, so the h1's two lines stay the largest text and the LCP
-     element on a warm visit as on a cold one */
+     element on a warm visit as on a cold one; at a measure of at most 349 px each visit sentence
+     wraps with the same breaks in both faces (they agree from 346 to 352 px, and from 286 to
+     292 px, which a 320 px screen's 288 px column falls in; the line counts agree from 326 to
+     352 px and from 274 to 318) */
   .ts-hero-lead {
     font-size: 16px;
+    max-width: 349px;
   }
 
   .ts-hero-stage {
@@ -2720,6 +2753,10 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   .ts-hero-frame-split .ts-hero-frame-word,
   .ts-hero-frame-tools {
     display: none;
+  }
+
+  .ts-hero-frame-r {
+    min-width: 140px;
   }
 
   .ts-hero-frame-split > .is-main {

@@ -95,10 +95,15 @@ export function HomeHero() {
           </h1>
           <div className="ts-hero-side">
             {/* the visit sentence is the boot script's to set before the first paint (boot.ts), so
-                React renders it from the server's markup alone and never writes it back */}
+                React renders it from the server's markup alone and never writes it back; the lead
+                is one run of text, the sentence then the rest, so no part of it starts where the
+                fallback face ended another when Inter arrives (DESIGN.md 8.2) */}
             <p className="ts-lead ts-hero-lead">
-              <ServerHtml as="span" data-visit="" html={ssr ? escapeHtml(visit ?? '') : ''} />{' '}
-              {HERO_ROUND.lead}
+              <ServerHtml
+                as="span"
+                data-visit=""
+                html={ssr ? escapeHtml(`${visit ?? ''} ${HERO_ROUND.lead}`) : ''}
+              />
             </p>
             <div className="ts-buttons">
               <HomeLink
@@ -158,10 +163,11 @@ export function HomeHero() {
                 </span>
               </span>
             </div>
+            {/* one run of words, spaced by the row's word spacing: a word's place never depends on
+                the width of the words before it in another face, so nothing moves when Inter
+                arrives after the first paint */}
             <div className="ts-hero-frame-menus" aria-hidden="true">
-              {HERO.stage.menus.map((menu) => (
-                <span key={menu}>{menu}</span>
-              ))}
+              {HERO.stage.menus.join(' ')}
             </div>
             <div
               className="ts-hero-frame-tools"

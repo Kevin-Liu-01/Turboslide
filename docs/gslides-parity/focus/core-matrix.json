@@ -11388,6 +11388,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
+      "id": "home.hero.font-swap",
+      "feature": "decks",
+      "interaction": "At 1440, 390 and 320 px, for each of the three visit sentences, /home painted with Inter blocked (in 'Inter Fallback') and with Inter draws the same hero: the h1's two lines with the same words on each and the same box, the lead's lines with the same words on each and the same box, the side, the two buttons and the stage's top at the same places, within 0.1 px; the lead is one run of text (the visit's sentence, then the rest); with Inter answered 2.5 s after the request, no layout shift is reported at 1440 or 390",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "VERIFICATION.md design round pass 3 finding 3: at 390 the h1 is three lines in the fallback and two in Inter and the stage moves 44 px (CLS 0.0369 with the font after 3 s); at 1440 the lead is four lines and three (0.0028); home.page.bands-after-load red in runs 1 and 4",
+      "note": "Design round (docs/DESIGN.md 11), finishing round 2 of DR-D4; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
       "id": "decks.pages.radius",
       "feature": "decks",
       "interaction": "On /decks, /decks/trash and /decks/templates at 1440 and 390 in both appearances: buttons, fields, the search pill, selects, the view switch and the card menus compute 6 px; dialogs 8 px; cards, thumbnails and rows 0",

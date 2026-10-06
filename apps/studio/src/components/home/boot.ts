@@ -21,7 +21,10 @@
  * 3. In the first animation frame that finds the lead's `[data-visit]` element (which the browser
  *    runs before it paints that frame) it sets the visit's sentence there, so the sentence never
  *    changes after it paints. The markup holds the first sentence, so the script carries only the
- *    others.
+ *    others. The element holds the whole lead as one run of text (the visit's sentence, then the
+ *    rest), so the rest never starts where another face ended the sentence when Inter arrives
+ *    after the first paint (docs/DESIGN.md 8.2); the script puts the visit's sentence in place of
+ *    the first one's `n` characters.
  * 4. One click listener on the document for `[data-motion-toggle]`, Pause Motion's button in the
  *    navigation: a press toggles `html[data-motion]`, the stored choice and the button's
  *    `aria-pressed`, so the button works from its first paint, before hydration and before the
@@ -45,8 +48,11 @@ export const MOTION_KEY = 'ts-home-motion';
 /** The localStorage key of the next visit's sentence (2.2). */
 export const VISIT_KEY = 'ts-home-visit';
 
-/** What the build bakes into the script: the visit sentences in order, the first blank. */
-export type BootData = { s: readonly string[] };
+/**
+ * What the build bakes into the script: the visit sentences in order, the first blank, and `n`,
+ * the first sentence's length, which the markup's lead begins with.
+ */
+export type BootData = { s: readonly string[]; n: number };
 
 /** The page's `window.tsHomeBoot`, written by the boot script. */
 export type HomeBootState = {
@@ -77,7 +83,10 @@ export function bootSource(sentences: readonly string[]): { source: string } {
         `the visit sentence "${sentence}" is not 1 to ${SENTENCE_MAX} characters`,
       );
   /* the markup holds the first sentence; the script carries an empty string in its place */
-  const data: BootData = { s: sentences.map((sentence, index) => (index === 0 ? '' : sentence)) };
+  const data: BootData = {
+    s: sentences.map((sentence, index) => (index === 0 ? '' : sentence)),
+    n: sentences[0]!.length,
+  };
   return { source: `(${homeBoot.toString()})(${JSON.stringify(data)});` };
 }
 
@@ -142,8 +151,9 @@ export function homeBoot(data: BootData): void {
     /* 'loading' is the one ready state after 'l' in code point order */
     if (!lead) return doc.readyState > 'l' && requestAnimationFrame(frame);
     state.t0 = performance.now();
-    /* the markup holds the first sentence, so the script carries the others only */
-    if (visit) lead.textContent = data.s[visit]!;
+    /* the markup holds the first sentence, so the script carries the others only; the rest of
+       the lead stays in the same run of text */
+    if (visit) lead.textContent = data.s[visit]! + lead.textContent!.slice(data.n);
     return 0;
   }
 

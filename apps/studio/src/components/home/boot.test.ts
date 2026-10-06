@@ -24,6 +24,8 @@ const SENTENCES = [
   'Turboslide puts one customer name on every slide.',
   'Turboslide downloads PDF and PowerPoint files.',
 ];
+/** The lead after its sentence, in the same run of text as the sentence (DESIGN.md 8.2). */
+const REST = ' It has a CLI and an MCP server, so agents edit the same deck. No account is needed.';
 
 type Listener = (event: { target: unknown }) => void;
 
@@ -34,7 +36,7 @@ function standIn(options: { reduce?: boolean; storage?: Map<string, string> | 't
   const classes = new Set<string>();
   const dataset: Record<string, string> = {};
   const clicks: Listener[] = [];
-  const lead = { textContent: SENTENCES[0]! };
+  const lead = { textContent: SENTENCES[0]! + REST };
   let leadParsed = false;
   const storage = options.storage;
   const store =
@@ -148,19 +150,20 @@ describe('the boot script', () => {
       run(stand);
       /* the parser has not reached the lead: the frame asks for the next one and sets nothing */
       expect(stand.frame(false)).toBe(1);
-      expect(stand.lead.textContent).toBe(SENTENCES[0]);
+      expect(stand.lead.textContent).toBe(SENTENCES[0] + REST);
       stand.frame(true);
       expect(stand.window.tsHomeBoot?.t0).toBe(1234);
       read.push(stand.lead.textContent);
     }
-    expect(read).toEqual([SENTENCES[0], SENTENCES[1], SENTENCES[2], SENTENCES[0]]);
+    /* the sentence changes and the rest of the lead stays in the same run of text */
+    expect(read).toEqual([SENTENCES[0], SENTENCES[1], SENTENCES[2], SENTENCES[0]].map((s) => s + REST));
   });
 
   it('reads the first sentence and plays when storage throws, and the button still works', () => {
     const stand = standIn({ storage: 'throws' });
     run(stand);
     stand.frame(true);
-    expect(stand.lead.textContent).toBe(SENTENCES[0]);
+    expect(stand.lead.textContent).toBe(SENTENCES[0] + REST);
     expect(stand.dataset['motion']).toBeUndefined();
     expect(stand.classes.has('ts-intro')).toBe(true);
     const button = toggleButton();

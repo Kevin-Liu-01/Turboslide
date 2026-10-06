@@ -1234,6 +1234,8 @@ export function rows(): void {
               });
             return {
               fontPx: parseFloat(cs.fontSize),
+              /* the hero head's width, the container the h1's size reads under 720 px */
+              head: (h1.parentElement as HTMLElement).clientWidth,
               weight: cs.fontWeight,
               tracking: parseFloat(cs.letterSpacing) / parseFloat(cs.fontSize),
               inSlide: h1.closest('[data-home-slides]') !== null,
@@ -1250,8 +1252,12 @@ export function rows(): void {
             `${label}: h1 ${facts.fontPx.toFixed(2)} px at weight ${facts.weight}, tracking ${facts.tracking.toFixed(4)} em, lines ${facts.lines.map((l) => l.text).join(' / ')}, h2 ${[...new Set(facts.h2)].join(', ')} px, weights ${facts.weights.join(', ')}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.width}`).join(', ')}`,
           );
           /* restated in the design round, DR-D4#2 (docs/DESIGN.md 8.2): clamp(40px, 5.28vw, 76px),
-             76 at 1,440 and over, 67.6 at 1,280, 44 under 720 */
-          const wantPx = narrow ? 44 : Math.min(76, Math.max(40, 0.0528 * size.width));
+             76 at 1,440 and over, 67.6 at 1,280; under 720 44 px while the longer line fits the
+             column in the fallback face, else the head's width over 8.4 (42.6 at 390; the finishing
+             round 2 of the design round, so the two lines never wrap in either face) */
+          const wantPx = narrow
+            ? Math.min(44, facts.head / 8.4)
+            : Math.min(76, Math.max(40, 0.0528 * size.width));
           if (Math.abs(facts.fontPx - wantPx) > 1)
             failures.push(
               `${label}: the h1 draws at ${facts.fontPx.toFixed(2)} px, not ${wantPx.toFixed(1)}`,
@@ -1489,8 +1495,12 @@ export function rows(): void {
       page.evaluate(() => {
         const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? null;
         const boot = (window as unknown as { tsHomeBoot?: { t0?: number } }).tsHomeBoot;
+        /* the lead is one run of text since the design round's finishing round 2 (DESIGN.md 8.2):
+           the visit's sentence, then the rest, all in [data-visit] */
+        const run = (document.querySelector('[data-visit]')?.textContent ?? '').trim();
         return {
-          sentence: (document.querySelector('[data-visit]')?.textContent ?? '').trim(),
+          sentence: run.slice(0, run.indexOf('.') + 1),
+          run,
           lead: (document.querySelector('.ts-hero-lead')?.textContent ?? '')
             .replace(/\s+/g, ' ')
             .trim(),
@@ -1516,6 +1526,8 @@ export function rows(): void {
           failures.push(`visit ${visit + 1}: ${facts.sentence.length} characters`);
         if (!facts.lead.startsWith(facts.sentence))
           failures.push(`visit ${visit + 1}: the lead does not begin with it`);
+        if (facts.run !== facts.lead)
+          failures.push(`visit ${visit + 1}: the lead is not one run of text ("${facts.run}")`);
       }
       const want = [
         'Turboslide is a slides editor in the browser.',

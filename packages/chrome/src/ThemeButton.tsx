@@ -4,7 +4,9 @@ import { readTheme, toggleTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { useMountEffect } from './lib/useMountEffect';
-import { ToolButton } from './ToolButton';
+import { tipOf, tipProps } from './Tooltip';
+
+import './ToolButton.css';
 
 /**
  * The light and dark switch, on the shell button. Ported from
@@ -21,6 +23,12 @@ import { ToolButton } from './ToolButton';
  * The glyph is the deck's (directive 8.4): the half discs ◐ in light mode
  * and ◑ in dark mode, rendered as text at 16px, the one place in chrome a
  * text glyph stands for an icon. ToolButton.css sizes it (.pt-theme-glyph).
+ *
+ * The button is the markup ToolButton draws for a text glyph (the .pt-ib,
+ * .pt-icon without a label, the shared tooltip), written here so the button
+ * imports no icon: ToolButton's `Icon` import brought the editor's whole icon
+ * table (51,136 B decoded) to /home, whose navigation draws this button
+ * (docs/DESIGN.md 8.1; build/d4.md request to D2).
  */
 const DEFAULT_THEME: Theme = 'dark';
 
@@ -46,20 +54,23 @@ export function ThemeButton({ className, label = className === undefined }: Them
     return () => observer.disconnect();
   });
 
+  const name = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
+  const classes = ['pt-ib', label ? '' : 'pt-icon', className ?? ''].filter(Boolean).join(' ');
   return (
-    <ToolButton
-      label={label ? 'Theme' : undefined}
-      title={label ? 'Dark or light (D)' : 'Dark or light'}
-      ariaLabel={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
-      className={className}
-      control="view.theme"
+    <button
+      type="button"
+      className={classes}
+      aria-label={name}
+      data-control="view.theme"
       onClick={() => {
         toggleTheme();
       }}
+      {...tipProps(tipOf(label ? 'Dark or light (D)' : 'Dark or light', label ? 'Theme' : name))}
     >
       <span className="pt-theme-glyph" aria-hidden="true">
         {GLYPH[theme]}
       </span>
-    </ToolButton>
+      {label ? <span className="pt-lb">Theme</span> : null}
+    </button>
   );
 }

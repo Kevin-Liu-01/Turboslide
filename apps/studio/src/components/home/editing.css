@@ -293,8 +293,9 @@
 }
 
 /* each row's glyph (the model's, the check of a checked row) and a submenu's next glyph: the
-   editor's icons.tsx drawn from the landing's sprite (live/sprite.ts), 16 px in the row's ink */
-.ts-glyph {
+   editor's icons.tsx drawn from the landing's sprite (live/sprite.ts), 16 px in the row's ink;
+   under the landing's root, since the editor's icon picker draws its own .ts-glyph */
+.ts-product .ts-glyph {
   display: block;
   flex: none;
   width: 16px;

@@ -4946,12 +4946,12 @@
     {
       "id": "decks.home.seller-lead",
       "feature": "decks",
-      "interaction": "The h1 reads \"Build the pitch, present it and send the link\" (page text in three locked lines); a fresh context's lead begins \"Turboslide is a slides editor in the browser.\"; the second hero button reads Open the Example Deck and opens /deck/gt-brand",
+      "interaction": "The h1 reads \"Presentations for people and agents\" (page text in two locked lines); a fresh context's lead begins \"Turboslide is a slides editor in the browser.\"; the second hero button reads Open the Example Deck and opens /deck/gt-brand",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "evidence": "audit-home section 1 and items 1, 2, 12 (the h1 today ends \", in one place\" and the buttons are Start from a template and Open the GT Deck)",
       "severity": 2,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7; restated in the design round, DR-D4#2 (the h1 of docs/DESIGN.md 8.2 in two lines; the integrator, build/d4.md request to D5)"
     },
     {
       "id": "decks.card.thumbnail-slide-1",

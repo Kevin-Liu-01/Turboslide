@@ -13,7 +13,7 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import interWoff2 from '@turboslide/fonts/assets/InterVariable-latin.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
 import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic-latin.woff2?url';
-import { BLOCK_CSS } from '@turboslide/render/block-css';
+import { PAGE_BLOCK_CSS } from '@turboslide/render/block-css-page';
 import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
@@ -286,11 +286,12 @@ function RootDocument({ children }: { children: ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOT_SCRIPT }}
         />
-        {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same .ts-sheet root */}
+        {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same
+            .ts-sheet root, without its comments (block-css-page.ts: 10,655 B less on every page) */}
         <style
           nonce={nonce}
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: BLOCK_CSS }}
+          dangerouslySetInnerHTML={{ __html: PAGE_BLOCK_CSS }}
         />
       </head>
       <body>

@@ -1359,9 +1359,10 @@ test(title('decks.recent.this-browser-sentence'), async () => {
 
 test(title('decks.home.seller-lead'), async ({ browser }) => {
   test.setTimeout(90_000);
-  /* the landing (docs/LANDING.md 2.2, 6.7, the second pass): the h1 is page text in three locked
-     lines, its text the standing sentence; in a fresh context (no visit recorded) the lead's first
-     sentence is the first visit sentence; the second hero button opens the GT brand deck */
+  /* the landing (docs/LANDING.md 2.2, 6.7, the second pass; docs/DESIGN.md 8.2 since DR-D4#2): the
+     h1 is page text in two locked lines, "Presentations for people and agents"; in a fresh context
+     (no visit recorded) the lead's first sentence is the first visit sentence; the second hero
+     button opens the GT brand deck */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
@@ -1378,11 +1379,7 @@ test(title('decks.home.seller-lead'), async ({ browser }) => {
     const h1 = await p.locator('main h1').first().textContent();
     expect(h1?.replace(/\s+/g, ' ').trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
     const lines = (await p.locator('main h1 .ts-h1-line').allTextContents()).map((l) => l.trim());
-    expect(lines, 'three locked lines').toEqual([
-      'Build the pitch,',
-      'present it and',
-      'send the link',
-    ]);
+    expect(lines, 'two locked lines').toEqual(['Presentations for', 'people and agents']);
     const lead = await p.locator('[data-band="hero"] .ts-hero-lead').first().textContent();
     expect(
       lead?.replace(/\s+/g, ' ').trim().startsWith('Turboslide is a slides editor in the browser.'),
@@ -1898,7 +1895,7 @@ test(title('brand.appearance.default'), async () => {
 // thumbnail or a plate on every card, Enter confirming Delete forever, the rename field, Empty
 // trash not primary, the thumbnail route never 502 and the pages' small words and states.
 
-const HOME_H1 = 'Build the pitch, present it and send the link';
+const HOME_H1 = 'Presentations for people and agents';
 /** The report words of 3.1 that never appear on the page. */
 const HOME_REPORT_WORDS = [
   'Advanced tools',

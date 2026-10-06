@@ -556,4 +556,28 @@ export const ACCEPTED: readonly Acceptance[] = [
       'The book view of the exported web page scrolls a page into view smoothly; B3b#10 removed the same in the studio. From before Round 1, outside every item; build/b5.md request 6.',
     owner: 'the integrator',
   },
+  {
+    rule: 'css/z-index',
+    file: 'apps/studio/src/components/home/live/paint.ts',
+    match: 'el.style.zIndex = z',
+    reason:
+      "A block of the landing's live slide brought to front (20) or sent to back (0) over the renderer's order + 1: local order inside the slide sheet's own stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
+    owner: 'D4',
+  },
+  {
+    rule: 'css/z-index',
+    file: 'apps/studio/src/components/home/live/theme.ts',
+    match: "zIndex: '10'",
+    reason:
+      "The printed field's canvas over the slide's own blocks (10): local order inside the slide sheet's stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
+    owner: 'D4',
+  },
+  {
+    rule: 'css/z-index',
+    file: 'packages/viewer/src/MaterialMount.tsx',
+    match: 'host.style.zIndex = style.zIndex',
+    reason:
+      "A live material's host copies the z-index of the material block it covers (the block's order on its slide): local order inside the slide's stacking context, never a floating surface. Read by the integrator of the design round.",
+    owner: 'the integrator',
+  },
 ];

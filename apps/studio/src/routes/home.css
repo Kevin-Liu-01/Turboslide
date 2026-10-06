@@ -1811,7 +1811,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   margin-top: 32px;
 }
 
-.ts-fo {
+.ts-product .ts-fo {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px 12px;
@@ -1821,7 +1821,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   color: var(--pt-ink-2);
 }
 
-.ts-fo-head {
+.ts-product .ts-fo-head {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -1830,7 +1830,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   margin: 0 -8px 0 0;
 }
 
-.ts-fo h3 {
+.ts-product .ts-fo h3 {
   margin: 0;
   font: 500 14px / 20px var(--pt-text);
   color: var(--pt-ink);
@@ -1838,7 +1838,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 
 /* a section's head as the panel draws it: the section's glyph (live/readout.ts writes it into the
    16 px the padding holds) and its name in ink, on the rule between sections */
-.ts-fo h4 {
+.ts-product .ts-fo h4 {
   position: relative;
   grid-column: 1 / -1;
   margin: 0 -16px;
@@ -1848,7 +1848,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   color: var(--pt-ink);
 }
 
-.ts-fo h4 > .ts-glyph {
+.ts-product .ts-fo h4 > .ts-glyph {
   position: absolute;
   left: 16px;
   top: 14px;
@@ -1888,7 +1888,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 }
 
 /* Layout: the section's head with the layout's name in a chip at the right */
-.ts-fo-row {
+.ts-product .ts-fo-row {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -1898,17 +1898,17 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   padding: 10px 16px 0 0;
 }
 
-.ts-fo-row h4 {
+.ts-product .ts-fo-row h4 {
   margin: 0;
   padding-top: 0;
   border-top: 0;
 }
 
-.ts-fo-row h4 > .ts-glyph {
+.ts-product .ts-fo-row h4 > .ts-glyph {
   top: 2px;
 }
 
-.ts-fo-row output {
+.ts-product .ts-fo-row output {
   padding: 0 8px;
   border-radius: var(--pt-radius-sm);
   background: var(--pt-plate);
@@ -2363,13 +2363,13 @@ code.ts-command:not([data-printed]) {
   padding-left: 14px;
 }
 
-.ts-present-keys {
+.ts-product .ts-present-keys {
   display: inline-flex;
   gap: 3px;
   margin-left: 4px;
 }
 
-.ts-present-keys > kbd {
+.ts-product .ts-present-keys > kbd {
   display: inline-grid;
   place-items: center;
   min-width: 20px;
@@ -2550,7 +2550,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ts-fo {
+  .ts-product .ts-fo {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
@@ -2585,7 +2585,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     font-size: 10.5px;
   }
 
-  .ts-fo {
+  .ts-product .ts-fo {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

@@ -6,18 +6,17 @@ import { BOOT_SCRIPT } from '../src/components/home/boot.generated';
 import {
   AGENTS,
   CANVAS,
-  CLOSE,
   EXPORT,
   FEATURES,
   HERO,
   KITS,
-  MENUS,
   PATTERNS,
   PEOPLE,
   PRESENT,
   REPORT_WORDS,
   TAILOR,
 } from '../src/components/home/copy';
+import { CLOSE_ROUND, HERO_ROUND, MENUS_ROUND } from '../src/components/home/design-copy';
 import { HOME_META } from '../src/components/home/home-meta';
 
 // The landing, /home (docs/LANDING.md section 2; V4's file, restated for the second pass in V4's
@@ -25,8 +24,8 @@ import { HOME_META } from '../src/components/home/home-meta';
 // `decks.home.*` rows of core/decks.spec.ts; this spec keeps the checks of the page those rows do
 // not hold: the server's HTML (main#top, the h1 as page text, the visit sentence, the head, the
 // boot script as main's first child, the first screen's ten slide instances in the markup), the
-// bands' h2s in section 2's order for the bands the tree renders, the appearance group pressed
-// from the first paint, every same origin link and the buttons' routes, the GitHub links, the
+// bands' h2s in section 2's order for the bands the tree renders, the shared theme button of the
+// navigation (docs/DESIGN.md 8.1) switching the appearance, every same origin link and the buttons' routes, the GitHub links, the
 // footer lockup, the rendered copy's rules (2.17), the Speculation Rules script, the shader only in
 // the patterns band's chunk and only once the band nears, and CLS 0 over the load and a full
 // scroll at 1440 and 390. Runs against a lane's server with PLAYWRIGHT_BASE_URL (AGENTS.md dev
@@ -34,7 +33,7 @@ import { HOME_META } from '../src/components/home/home-meta';
 
 /** Each band's h2 in section 2's order; a band joins the page in its push (LANDING.md 6.8). */
 const BAND_H2: readonly (readonly [string, string])[] = [
-  ['menus', MENUS.h2],
+  ['menus', MENUS_ROUND.h2],
   ['canvas', CANVAS.h2],
   ['tailor', TAILOR.h2],
   ['kits', KITS.h2],
@@ -44,7 +43,7 @@ const BAND_H2: readonly (readonly [string, string])[] = [
   ['export', EXPORT.h2],
   ['patterns', PATTERNS.h2],
   ['features', FEATURES.h2],
-  ['close', CLOSE.h2],
+  ['close', CLOSE_ROUND.h2],
 ];
 
 /** The h2s of the bands this page renders, in section 2's order. */
@@ -95,13 +94,13 @@ test("the server's HTML carries main#top, the h1, the head, the boot script and 
   expect(html).toMatch(/<main[^>]*\bid="top"[^>]*>/);
   expect(html).toMatch(/<main[^>]*\bclass="ts-product"[^>]*>/);
   expect(html).toMatch(/<main[^>]*\bdata-page="home"[^>]*>/);
-  for (const line of HERO.h1Lines) expect(html).toContain(line);
+  for (const line of HERO_ROUND.h1Lines) expect(html).toContain(line);
   /* the h1 is page text, in no slide (2.2) */
-  expect(html).toMatch(/<h1[^>]*>[\s\S]*?Build the pitch,/);
+  expect(html).toMatch(/<h1[^>]*>[\s\S]*?Presentations for/);
   expect(/data-home-slides[^>]*>(?:(?!<\/section>)[\s\S])*<h1/.test(html)).toBe(false);
   /* the lead's first sentence is the visit sentence, the first visit's in the markup */
   expect(html).toMatch(new RegExp(`data-visit[^>]*>${HERO.visit[0]!.replace(/[.]/g, '\\.')}<`));
-  expect(html).toContain(HERO.lead);
+  expect(html).toContain(HERO_ROUND.lead);
   expect(html).toContain(`<title>${HOME_META.title}</title>`);
   expect(html).toMatch(/property="og:url" content="[^"]*\/home"/);
   expect(html).toMatch(/property="og:image" content="[^"]*\/og\/turboslide\.png"/);
@@ -119,14 +118,14 @@ test("the server's HTML carries main#top, the h1, the head, the boot script and 
   /* the first screen's ten slide instances (the frame's slide 1 and its nine thumbnails) are in
      the markup, rendered by the server; every other instance travels in its band's chunk (2.0) */
   expect((html.match(/\bdata-home-slides\b/g) ?? []).length).toBe(10);
-  /* the pressed state script sits after the appearance group, before hydration */
-  expect(html).toContain('data-theme-option');
+  /* the navigation's theme button is the editor's (DESIGN.md 8.1), in the server's markup */
+  expect(html).toContain('data-control="view.theme"');
 });
 
 test('the page holds one h1 and the bands h2s in the order of section 2', async ({ page }) => {
   await openHome(page);
   await expect(page.locator('main h1')).toHaveCount(1);
-  await expect(page.locator('main h1')).toHaveText(HERO.heading);
+  await expect(page.locator('main h1')).toHaveText(HERO_ROUND.heading);
   const bands = await page
     .locator('main [data-band]')
     .evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset['band'] ?? ''));
@@ -136,31 +135,23 @@ test('the page holds one h1 and the bands h2s in the order of section 2', async 
 });
 
 for (const theme of ['dark', 'light'] as const) {
-  test(`the appearance group is pressed for the stored ${theme} from the first paint and writes gt-theme`, async ({
+  test(`the theme button switches the stored ${theme} appearance and writes gt-theme`, async ({
     page,
   }) => {
     await openHome(page, theme);
     const other: Theme = theme === 'dark' ? 'light' : 'dark';
-    await expect(page.locator(`[data-control="home.theme.${theme}"]`)).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
-    await expect(page.locator(`[data-control="home.theme.${other}"]`)).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    );
-    await page.locator(`[data-control="home.theme.${other}"]`).click();
+    /* the navigation's one control in place of the Light and Dark pair (DESIGN.md 8.1) */
+    const button = page.locator('header [data-control="view.theme"]');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await expect(button).toHaveAttribute('aria-label', `Switch to ${other}`);
+    await button.click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', other);
     expect(await page.evaluate(() => localStorage.getItem('gt-theme'))).toBe(other);
-    await expect(page.locator(`[data-control="home.theme.${other}"]`)).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    await expect(button).toHaveAttribute('aria-label', `Switch to ${theme}`);
     /* the meta follows the stored theme (SPEC-4 1.6); the first meta is the one a browser reads */
     expect(await page.locator('meta[name="theme-color"]').first().getAttribute('content')).toBe(
       other === 'light' ? '#ffffff' : '#070707',
     );
-    await expect(page.locator('[data-control="home.theme"]')).toHaveAttribute('role', 'group');
   });
 }
 

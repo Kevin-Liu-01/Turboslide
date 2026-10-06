@@ -18,6 +18,7 @@
     "./text": "./src/text.ts",
     "./html": "./src/html.ts",
     "./block-css": "./src/block-css.ts",
+    "./block-css-page": "./src/block-css-page.ts",
     "./runtime": "./src/runtime.ts",
     "./theme-node": "./src/theme-node.ts",
     "./collab": "./src/collab.ts",

@@ -4,7 +4,7 @@ import { bayer8 } from '@turboslide/effects/bayer';
 
 import { gatherAt, interludeCells, INTERLUDE_CYCLE, SCATTER_TONE, scatterField } from './field';
 import { GLYPH_BOX, INTERLUDE_BANDS, glyphBounds, glyphFor, glyphTone } from './glyphs';
-import { PEOPLE_LOOP_MS, PEOPLE_LOOP_SECONDS, keyGaps } from '../people-timing';
+import { PEOPLE_LOOP_MS, PEOPLE_LOOP_SECONDS, keyGaps } from './people-timing';
 
 // The interludes (docs/LANDING.md 2.4, 3.4 I1) and the people band's clock (2.10, 3.4 P-L): every
 // glyph fits its box at both sizes and draws something, the gathered still is the glyph's print

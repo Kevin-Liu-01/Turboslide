@@ -1316,3 +1316,151 @@ No `img` failed and no request answered 400 or more on this build at either widt
 
 1. The page's own script reads 116,900 B gzip against its 120,000 B line. The people band (about 4,500 B) and DR-D4#6 (about 1,200 B) do not fit under it together: the line rises to 124,000 B gzip and 370,000 B decoded, or a band's chunk is cut first.
 2. The order the ship needs: D5's theme name on the template cards (finding 1), the second seam with origin/main's people band (finding 2), DR-D4#6, then DR-D1#5 last.
+
+# Design round, pass 3 (2026-10-06)
+
+The design round's verifier, pass 3, after the rebase onto origin/main `0a79db8e` and finishing round 1, on `design/round` at `78110596` (tree `6ddb8487`, 64 commits over origin/main, which is its ancestor), in `/Users/kevinliu/repos/Turboslide-design`, from 13:24 to 15:45 PDT on 2026-10-06. Read first: `docs/DESIGN.md`, "Design round, pass 2" above, `docs/gslides-parity/design-round/integrator.md` and the finishing round sections of `d2.md`, `d3.md`, `d4.md` and `d5.md`. One node-server build of the head (`NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy`, exit 0 in 305 s at a load of 251 to 140, under `.turboslide/build.lock`) was served twice with the round's environment (a tmp store, the memory tier, the fake Google client pair of `apps/studio/playwright.config.ts`, secrets made per start and never printed): on 4671 for the gate runs (overlay `.turboslide/verify3-overlay`) and on 4681 for the hand drives and the narrowed readings (overlay `.turboslide/verify3b-overlay`). Hand drives ran in Playwright's Chromium with its scrollbars shown, at a pause of 20 to 40 ms between steps and typing at 50 to 70 ms a key, at 1440 by 900 and 390 by 844 in both appearances, with WebKit where named. Every drive made its own decks and removed each through `deck.trash` and `deck.remove` (every removal read 404 after). Production (`https://www.turboslide.com`) was read on `/home` at 1440 dark and 390 light, and at 390 dark in the editor with one scratch deck of this pass (`untitled-20261006-v21v`), removed by its id with `scratchpad/realtime/remove-deck.mjs` (trash 200, remove 200, `deck.info` 404 after). Nothing was pushed or deployed and no setting changed. Other sessions' jobs held the one minute load at 120 to 650 through the pass (never stopped), so no timing reading here is a verdict. Both servers were stopped and the build lock released before this note was written.
+
+## DR-V3.1 Verdict
+
+Not ready to ship. Each of Kevin's five items holds by hand on this build and every finding of pass 2 is fixed or restated, but three defects of severity 2 stand:
+
+1. `decks.home.pictures-three-widths`, a row of the unparkable `decks` feature, is red on the head in every reading: `/home` is 14,196 px tall at 1440 (line 14,000), 14,145 at 1280, 15,585 at 390 and 15,352 at 320 (line 15,000), in both appearances. Production reads 13,053 and 13,377.
+2. The colour pickers draw General Translation's palette on the other eight themes: on a Mint, Swiss or Night deck the text colour plate's brand kit row reads Text `#070707`, Background `#ffffff` and Primary `#2f5ce0`, the Background dialog's Paper swatch is the chrome's paper, and Add to Theme with Paper writes `#ffffff` and turns every Mint slide white.
+3. The hero reflows when Inter arrives after the first paint: at 390 the h1 sits on three lines in the fallback face and on two in Inter, so the lead, the buttons and the editor frame move up 44 px (CLS 0.0369 with the font answered after 3 s; production 0.0056), and at 1440 the lead goes from four lines to three (0.0028; production 0.0005). `home.page.bands-after-load` (unparkable) read it red in the run of record at both widths and in the second narrowed reading at 1440.
+
+| Kevin's item | Reading on the head |
+| --- | --- |
+| 1. Layering and corners | Done. At 1440 dark the name prompt bar is 1033,48 to 1428,76, 6 px, `bar` layer; the presence tooltip 751,44 to 1031,115 in the `tooltip` layer paints over it with its ring; File and its submenu 8,73 to 229,446 and 224,186 to 444,252, the Undo tooltip over the Insert menu, the context menu, Share (8 px, `dialog`), "Link copied" (6 px, `toast`, over the scrim) as passes 1 and 2 read. At 390 in both appearances the bar is 63,88 to 378,116 under the toolbar row, where production draws it 63,44 to 378,46 across the title row and the toolbar (`namebar-prod-390-dark.jpg`, `namebar-head-390-dark.jpg`). Slideshow and Share one 6 px corner. No radius off the ladder and no square boxed control in 24 states at 1440 light and 19 at 390 dark (the presenter view's Speaker notes tab, which the audit lists, is an underline tab with a transparent frame) |
+| 2. Themes | Done, with finding 2. `/new` and the Blank card are Simple; the picker lists the nine themes with Simple checked and General Translation as one tile; Swiss stays after a reload, an agent's `slide.new` over HTTP, Import slides from a Simple deck, a kit change and "Reset to Swiss"; the gallery's cards read "General Translation · 95 slides" and "Simple · 1 slide"; the GT brand template opens as `general-translation` (2.8 s). The 16 `themes.*` rows passed. The colour pickers do not follow the theme (finding 2) |
+| 3. The landing | Done in its figures, with findings 1 and 3. The navigation is one 59 px row at both widths (production 147 px at 390); 27 pictures, none broken, no answer of 400 or more, against production's 6; 8 `pt-window` frames of product UI (the hero editor, the miniature, Format options, Tailor, Version history, the Share dialog, the two screens, the captured presenter view) and the three B2a diagrams; no square boxed control (production 20). DESIGN.md 8.8 and 8.9 are drawn; 8.10's nine title rows stay as restated with question 33. The visible words do not fall: 896 at 1440 on both, 887 at 390 against 884, of which about 361 at 1440 are the product's own strings inside the frames |
+| 4. Colour and the face | Done. One font request on `/home`, `InterVariable-latin` 113,752 B; the served subset reads "Rasmus Andersson", "Version 4.001;git-9221beed3", the `opsz` and `wght` axes and `tnum`; the build serves only `InterVariable-*` files and names no Berkeley and no "GT Inter"; no element outside slides draws `cv11` or `ss01` in the editor, the pages or the landing (the landing's 10 are the page deck's GT slides); no text pair under its floor outside slides; the PowerPoint file names Inter Display Medium for Simple and Inter Display Alternates, Inter, Inter Display Medium for General Translation. Finding 2 concerns a theme's colours in the pickers; the chrome's own tokens hold their floors |
+| 5. Scrollbars | Done in Chromium and WebKit: every scroller on `/home`, `/decks`, the gallery, the editor, the Insert menu, Keyboard shortcuts and `/deck/gt-brand` draws an 8 px gutter or none; WebKit dark draws the 4 px thumb with round ends in the filmstrip's 8 px gutter |
+| Every page | Done: `/decks`, the trash, the gallery, `/deck/gt-brand`, Not found, You need access, Sign in from the editor and the pages, the show, its shortcuts card, the presenter view, Share, Keyboard shortcuts, the search card, Find and replace, Version history, Download options, Import slides, Format options and the Theme panel read clean in the corner, type and contrast audit at 1440 light and 390 dark (Download options and Import slides at 1440) |
+| No word names the competitor | Done. The guard test passes; the served HTML of `/home`, `/decks`, the gallery, the trash, `/new`, `/deck/gt-brand`, Not found, `/docs` and `/llms.txt` holds no Google word; `/home`'s title, description and keywords name no other product; the CLI's help (660 lines) holds none. The client build carries the name once in the deck lint's list of proper nouns, as pass 2 read |
+
+## DR-V3.2 Pass 2's findings on the head
+
+| Pass 2 # | Reading on this build | State |
+| --- | --- | --- |
+| 1 Template cards name no theme | The cards read "General Translation · 95 slides" and "Simple · 1 slide", the theme in ink and the count in ink-2 with tabular figures, at 1440 light and 390 dark. `decks.pages.pictures-load` reads the theme clause green in all three readings and stays red for another reason: in the light pass the `/decks` and trash thumbnails (`/api/render/title?...&w=160`) do not decode within the row's 30 s wait at a load of 122 to 650 (in the dark pass of the narrowed readings the same pictures decoded and answered 200; one render read 16.6 s and 21.3 s by `curl` at a load of 180). A missed bound at a load over 24 with nothing lost (finding 4) | Fixed |
+| 2 The people band | On the branch since the rebase, between agents and present (`home.page.order` passed at 1440 and 390 in both appearances, one h1) | Fixed |
+| 3 DESIGN.md 8.8, 8.9 and 8.10 | 8.8: Version history as the editor's panel (Today, "Recorded from the CLI", v4 to v1 with the agent chip, the chosen row on the plate, the scrubber with Restore This Version), the chips with `command-line`, `arrow-path`, `pencil` and `eye-slash`, the agent to deck diagram (`home.agents.history-panel` passed). 8.9: "Share a link and edit together" opens with the Share dialog (General access, Anyone with the link, Copy Link, You, Maya and Sam with their roles and slides, Done) beside two 8 px screens (`home.people.share-dialog` passed). 8.10: the nine title rows stay; D4 restated 8.10 and asks Kevin question 33 | Fixed for 8.8 and 8.9; 8.10 restated (finding 5) |
+| 4 The hero frame's title | 14 px on an 18.2 px line, scrollHeight 18 over clientHeight 18 at 1440 light and 390 dark; the g and p whole at device scale 2 (`hero-title-390-dark.jpg`) | Fixed |
+| 5 Proportional figures | Version history's window time "1:51 PM" and the Keyboard shortcuts dialog's chips "Cmd Shift 7" and "Cmd Shift 8" compute `tabular-nums`, the chips 4 px; `chrome.numerals.tabular` passed | Fixed |
+| 6 Sentence case buttons | The Background dialog: "Reset to Theme", "Add to Theme"; the trash: "Recent Presentations", "Empty Trash"; the gallery: "Recent Presentations"; the name prompt bar: "Sign In"; Share: "Copy Link" | Fixed |
+| 7 Tailor's glyph | Tools > Tailor for a customer draws the pencil (path `m5.433 13.917 1.262-3.155`), Insert > Comment the chat glyph (`M3.505 2.365`), at 1440 light and 390 dark; the landing's features row draws the pencil | Fixed |
+| 8 Import slides in dark | A light deck asks for `theme=light` tiles (mean luma 252) and a dark deck for `theme=dark` (luma 10), under "The copies take this presentation's theme" (`import-tiles-dark-deck-1440-light.jpg`). The first tile decoded 93 s and 63 s after the pick at a load of 205 to 280 (not a verdict) | Fixed |
+| 9 Perfect and Pictures | Download options reads "Pictures or Editable text" over the tiles Pictures and Editable text and holds no "Perfect"; File > Download > Microsoft PowerPoint (.pptx) says "Pictures by default, or Editable text."; the landing's seam reads Pictures | Fixed |
+
+## DR-V3.3 Gates and the run ledger
+
+| Gate or run | Reading | Load |
+| --- | --- | --- |
+| The node-server build | exit 0, 305 s (13:26:56 to 13:32:03) | 251 to 140 |
+| `tsc -b` | exit 0, 1,183 s (14:23 to 14:43) | 523 to 650 |
+| The competitor guard, `core-matrix.test.mjs`, `what-works.test.mjs`, `evidence-policy.test.mjs` | 4 files, 62 tests passed | 397 |
+| `what-works.mjs --check`, `build-colors.ts --check`, `build-home-assets.ts --check` | README.md current; tokens current; 67 outputs match, 43 files the page names, each in `assets.json` and on disk | 272 to 132 |
+| The brand lint (`main.ts --enforce`) | exit 0: 0 open, 19 accepted, 0 stale; reported by the round's rules: 3, all `css/z-index` (DR-D1#5 has not landed) | about 630 |
+| Run 1, 13:36 to 15:01, 4671, `core-gate --only specs --rows`: the round's 63 entered rows less the walk's, the 19 restated spec rows, the `home.budget.*`, `home.page.*` and `home.people.*` rows and eight rows the fix round touched (97) | 86 passed, 6 failed, 5 not driven, retries zero. Failed: `decks.home.pictures-three-widths` (the heights of finding 1), `home.page.bands-after-load` ("1440: CLS 0.002273 ... 390: CLS 0.036607 at 7577 ms on div.ts-hero-stage div.ts-hero-side", finding 3), `decks.pages.pictures-load` (the render wait, DR-V3.2 1), and three download rows that timed out waiting for the file at a load of 500 to 650 (`export.download.options-dialog` 60 s, `export.fonts.upstream-names` 90 s, `themes.export.pptx-token-colours` 120 s). Not driven: `home.budget.frame`, `home.budget.main-thread`, `home.motion.pause`, `home.people.loop`, `home.people.type`, each "not read: load" with its functional checks passed | 132 to 650 |
+| Run 2, 15:01 to 15:17, 4671, `core-gate --only probe --areas chrome,brand,fonts,share,polish-text` | 90 walk rows: 86 passed, 1 failed, 3 not driven, retries zero, no row of an unparkable feature blocking. Failed: `versions.show-changes-marks` ("marks with Show changes on 0"), the earlier round's red row passes 1 and 2 read. Not driven, "not on this build" as on main: `brand.logo.use-on-every-slide`, `brand.objects.kit-colours-first`, `fonts.table.takes-family`. The restated `chrome.split.one-box`, `chrome.cluster.gaps-heights`, `brand.panel.opens`, `brand.background.enter-keeps-open`, `fonts.display-features.inter-only` and `versions.field.corner` passed | 514 to 122 |
+| Run 3, 15:05 to 15:16, 4681, `--only specs --rows` the six red rows of run 1 | 4 passed, 2 failed, retries zero. Passed: the three download rows (Download options closed itself after `GT pitch for Acme.pptx` in 38 s; the typefaces "General Translation: Inter Display Alternates, Inter, Inter Display Medium; simple: Inter Display Medium"; Swiss dark shadow F4F4F2 and outline 434343 where the GT sheet gives F2F2F0 and 3B3B3A) and `home.page.bands-after-load` (CLS 0 at 1440 and 390). Failed: `decks.home.pictures-three-widths` (the same heights) and `decks.pages.pictures-load` (the light pass's two render thumbnails not decoded; the dark pass decoded every picture, each 200) | 314 to 131 |
+| Run 4, 15:16 to 15:29, the same | 3 passed, 3 failed, retries zero. The download rows passed again (the PowerPoint in 39 s and 53 s). Failed: the page heights, the light pass's thumbnails as run 3, and `home.page.bands-after-load` at 1440 ("CLS 0.002273 at 614 ms on p.ts-lead span.ts-hero-terminal-recorded"), 390 reading 0 | 154 to 122 |
+
+The budgets of DESIGN.md 8.16, read in run 1 (every byte line holds; no timing line is a verdict at these loads):
+
+| Measure | Reading | Line |
+| --- | --- | --- |
+| Document | 99,633 B decoded, 16,685 to 16,750 B brotli | 100,000 B (367 B of room); 20 KB |
+| Page CSS | 18,317 B brotli | 20 KB |
+| Route chunk | 67,820 B decoded, 15,985 B brotli | 70 KB; 22 KB |
+| Live core with its imports | 55,614 B decoded, 19,834 B gzip | 64 KB; 20,480 B (646 B of room) |
+| Largest band chunk | menus, 42,756 B decoded, 14,201 B gzip | 56 KB; 16 KB |
+| The page's own script after a full scroll | 359,402 B decoded, 119,067 B gzip | 360,000 B (598 B of room); 120,000 B (933 B) |
+| Pictures after a full scroll | 25 files, 152,025 B at x1; 0 before load | 200 KB |
+| Font | one request, `InterVariable-latin` 113,752 B | reported against 120 KB |
+| Shared script | entry 1,210,219 B; all shared 1,366,796 B | reported |
+| LCP | the h1, 124 to 236 ms cold (load 451 to 466, not a verdict) | 400 ms |
+| Page height | 14,196 px at 1440, 15,585 at 390 | 14,000 and 15,000 (finding 1) |
+
+## DR-V3.4 Hand drives
+
+**Layering**, Chromium at 1440 dark, 1440 light, 390 light and 390 dark (`layers.mjs`): the readings of DR-V3.1 item 1; the tooltip moved onto the bar paints over it with an unbroken ring; at 390 the Share dialog is 16,177 to 374,667 at 8 px and "Link copied" 8,796 to 139,836 in the `toast` layer over the scrim. A snackbar raised from the Background dialog ("The color is now the background of every slide") reads `toast`, open, opacity 1 over the dialog's scrim at 3 s (its fade in runs past 1.5 s at a load of 637). Production at 390 dark: the bar 63,44 to 378,46 with its field and buttons drawn over the title row and the toolbar.
+
+**Themes**, Chromium at 1440 light and 390 dark (`themes2.mjs`, then `tplopen.mjs`): as DR-V3.1 item 2. The template step of `themes2.mjs` timed out twice on 4681 before the GT deck's twins were placed in its overlay (`overlay-twins.mjs` `placeSeedTwins`, 210 files): a local node server's overlay holds no twins, the case that file describes; with them the GT template opened in 2.8 s as `general-translation` with its wordmark and `01 / 95`.
+
+**A theme's colours in the pickers**, Chromium at 1440 light and 390 dark (`fixes.mjs`, `colors2.mjs`), one deck from `/new` set to each theme by `deck.set /theme`:
+
+| Theme | Slide ground (pixel) | Theme panel: Background, Text, Primary | Text colour plate, brand kit row: Background, Text, Primary |
+| --- | --- | --- | --- |
+| Mint | `#e8f3ee` | `#e8f3ee`, `#0d271d`, `#11734f` | `#ffffff`, `#070707`, `#2f5ce0` |
+| Swiss | `#ffffff` | `#ffffff`, `#111111`, `#d7261e` | `#ffffff`, `#070707`, `#2f5ce0` |
+| Night | `#f2f5fa` | `#f2f5fa`, `#0c1424`, `#2856d0` | `#ffffff`, `#070707`, `#2f5ce0` |
+
+The plate's tooltips say "Background #ffffff the slide's ground; the token paper" and "Text #070707 headings and body text; the token ink" on the Mint deck, whose title draws `rgb(13, 39, 29)` (`colorplate-mint-1440-light.jpg`). Its token row paints the chrome's tokens. The Background dialog on the same deck: the Paper swatch is `rgb(255, 255, 255)` in the light chrome and `rgb(7, 7, 7)` in the dark chrome; Paper then Add to Theme writes the kit `{"colors":{"light":{"background":"#ffffff"}}}` and every slide turns white, snackbar "The color is now the background of every slide". The three code paths: `kitRoleHex` (`packages/chrome/src/pickers/ColorPlate.tsx` 48) falls back to `TOKENS[appearance]`, General Translation's sheet values; `swatchPaint` (`inspector/palette.tsx` 116) paints `var(--pt-<token>)`, the chrome's; `tokenHex` (`dialogs/Background.tsx` 852) holds a table of Simple's values. The Theme panel's own colour rows read the theme (`roleHex(..., deck.theme)`).
+
+**The landing**, this build at 1440 light, 1440 dark, 390 light and 390 dark, production at 1440 dark and 390 light (`landing.mjs`, `words.mjs`, `cls.mjs`, `slowfont.mjs`, `fontwrap.mjs`):
+
+| Band | This build | Production |
+| --- | --- | --- |
+| Navigation | 59 px at both widths; Documentation with its external glyph at 1440; the ◐ theme button and the pause toggle as 32 px icon buttons; Sign In; New Presentation solid; all 6 px | Documentation, Light, Dark and Pause Motion as square boxed words; 147 px at 390 |
+| Hero | "Presentations for people and agents"; the editor frame with its title row, menus, toolbar, filmstrip and `1 / 9`; the terminal with its transcript and four step rows with seconds; 154 words (`landing-first-prod-left-head-right-1440-dark.jpg`) | "Build the pitch, present it and send the link", a frame with the title row and menus and no toolbar, a terminal without step rows; 161 words |
+| Numbers | 194 actions with CLI 181, MCP 170, HTTP 178, 22 layouts, 17 patterns, 135 shapes, the menu paths as crumbs; 22 words | 46 words |
+| Menus, canvas, Tailor | 42, 32 and 40 words with the miniature, the Format options readout and the Tailor dialog | 66, 29 and 55 |
+| Themes and kits | Nine theme tiles, the three kits and the Background field; 48 words. No contrast readout and no six colours with hex values at rest (finding 6) | "Brand kits restyle every slide"; 42 |
+| Agents | DESIGN.md 8.8 as DR-V3.2 3; 145 words | 130 |
+| Two people | DESIGN.md 8.9; 92 words | 59, square screens |
+| Present | Present with its glyph and key chips, Print This Deck, the diagram, the slide, the nine title rows and the captured presenter view; 78 words | 62 |
+| Export | The diagram, the seam (Pictures and Editable text), the captured Download dialog and the readout with its done glyph; 78 words | 90 |
+| Patterns, features, close, footer | 68, 60, 18 and 19 words; the 17 stills | 34, 71, 32 and 19 |
+
+Visible words outside slides, code and terminals: 896 at 1440 (production 896) and 887 at 390 (884). Page height 14,196 and 15,568 (13,053 and 13,377); the bands that grew most against production at 1440 are Present (1,538 px against 829, the captured presenter view), export (1,731 against 1,073, the captured Download dialog), patterns (952 against 669, the stills) and agents (1,396 against 1,191), and at 390 Present (+573 px), export (+469), people (+417) and kits (+300). Cold at 390 with the font answered after 3 s: CLS 0.036891, one shift at 3,338 ms (`div.ts-hero-stage` 475 to 431, `div.ts-hero-side` 247 to 203); at 1440 0.002758 (`p.ts-lead` 91 to 121); production at 390 0.005582. With the font blocked the h1 at 390 is 132 px on three lines in "Inter Fallback" and 88 px on two in Inter, and the lead at 1440 is 118 px on four lines and 88 px on three; production's h1 at 390 is three lines in both faces (`hero-390-fallback-left-inter-right-light.jpg`). With no delay at a load of about 200, `cls.mjs` read 0 at 1440 and 0.036878 at 390: the same hero shift at 4,854 ms, and the people screens' `div.stack` twice, 9 px each, at a scroll of 8,800 px.
+
+**Surfaces, type, numbers and contrast**, the walk of pass 2 at 1440 light (24 states, now with Download options, Import slides and the presenter view) and 390 dark (19): no radius off the ladder; one square boxed element, the presenter view's Speaker notes tab, an underline tab; no alternates outside slides; every text element in Inter (`ui-monospace` on code); no text under its floor outside slides (the audit's two readings on `/deck/gt-brand` are the Slide segment's white label on its ink ground, misread, and the GT slide's own counter). Proportional figures outside slides: the deck name, the search card's hint sentences and the shortcut action "100%", none of them aligned numbers.
+
+**Scrollbars**: Chromium (`gutters.mjs`): the documents of `/home`, `/decks` and the gallery draw the 8 px gutter, the editor's document none, and no scroller on those pages, the Insert menu, Keyboard shortcuts or `/deck/gt-brand` draws another width. WebKit dark (`scroll.mjs`): the document's gutter 8 px, the filmstrip 8 px with the 4 px thumb (`scroll-filmstrip-webkit-dark.jpg` in the scratchpad).
+
+**The regression set**, Chromium at 1440:
+
+- Drag, resize and rotate, light (`drag2.mjs`, `objects.mjs`): a press and drag on the unselected body moved a rectangle and a text box 880,135 to 738,220, a table 320,218 to 180,303, a chart 320,218 to 180,304 and an uploaded picture 361,395 to 219,480; a line moved 992,108 to 864,178. After Escape the rectangle, the text box and the chart show the move handle, eight resize handles and the rotation handle; their south east handle took each to 437x223 (chart 1079x599) and the rotation handle to 20 degrees; the table went 960x109 to 1045x223 and 20 degrees and the picture 320x200 to 405x243 and 20 degrees in `objects.mjs`. A click on a selected box that holds text starts typing in it, as passes 1 and 2 read.
+- Export, dark (`export.mjs`, at a load of 120 to 220; the first attempt at a load of 592 to 620 waited 120 s for the PDF and is not a reading): File > Download > PDF Document wrote `Export dark.pdf`, 18,995 B, `%PDF-1.4`, 2 pages; Download options with PowerPoint wrote `Export dark.pptx`, 37,702 B, a zip naming Inter Display Medium and no GT family.
+- Present, dark: the show in the `show` layer, open, 1440 by 900; the presenter view at `/present/<id>` with "2 of 2" in tabular figures.
+- Share: Copy Link wrote "Link copied" in the four layering drives.
+- Sign in: `accounts.signin.one-dialog` passed; the walk read the editor's and the pages' dialogs clean.
+- `/decks`, the trash, the gallery, `/deck/gt-brand`, Not found and You need access drew in both widths; Import slides as DR-V3.2 8.
+
+## DR-V3.5 Findings and owners
+
+| # | Finding | Severity | Owner |
+| --- | --- | ---: | --- |
+| 1 | `decks.home.pictures-three-widths` (feature `decks`, unparkable) is red in all three readings: `/home` is 14,196 px at 1440 and 14,145 at 1280 against 14,000, 15,585 at 390 and 15,352 at 320 against 15,000, in both appearances; production reads 13,053 and 13,377. The Present, export, patterns and agents bands grew most (DR-V3.4). The ship holds on it | 2 | D4 (cut height), or Kevin (question 11's line) |
+| 2 | The colour pickers draw General Translation's palette on every other theme: the text colour plate's brand kit row (`kitRoleHex` falls back to the GT sheet's `TOKENS`), its token row (`swatchPaint`, the chrome's tokens), and the Background dialog's swatches with Add to Theme (`tokenHex`, Simple's values). On a Mint deck the plate offers Background `#ffffff`, Text `#070707` and Primary `#2f5ce0` beside a `#e8f3ee` slide, and Paper then Add to Theme turns every slide white. DESIGN.md 7.5: an absent kit field reads the theme's value | 2 | D3, with D2 for the picker files |
+| 3 | The hero reflows when Inter arrives after the first paint: at 390 the h1 wraps on three lines in "Inter Fallback" and two in Inter, so the lead, buttons and editor frame move up 44 px (CLS 0.0369 with the font answered after 3 s; production 0.0056); at 1440 the lead goes from four lines to three (0.0028; production 0.0005). `home.page.bands-after-load` (unparkable) read it red in run 1 at both widths and in run 4 at 1440, green in run 3: a person on a slow connection meets the jump | 2 | D4 (the h1's and the lead's wrap), D1 (the fallback's metrics) |
+| 4 | `decks.pages.pictures-load` is red in all three readings of this pass, never for its theme clause: the light pass's first `/api/render` thumbnails do not decode within the row's 30 s at a load of 122 to 650, and the dark pass decodes the same pictures (16.6 s and 21.3 s for one render by `curl` at a load of 180). A missed bound at a load over 24 with nothing lost; it needs one reading at a load under 24, or on the preview, before the ship | 1 | the integrator (the reading), D5 (the row's 30 s wait) |
+| 5 | DESIGN.md 8.10's nine title rows stay on the Present band: D4 restated 8.10 in the finishing round and asks Kevin question 33 | 1 | Kevin (question 33), D4 |
+| 6 | The kits band draws no contrast readout and no six colours with hex values at rest, which DESIGN.md 8.7 lists (the contrast sentence appears only for a typed colour under 4.5 to 1) | 1 | D4 |
+
+## DR-V3.6 Pictures
+
+`docs/gslides-parity/design-round/verify3/`, seven JPEGs of 119,143 B, each opened and looked at; the round folder's tracked pictures then hold 24,969,981 B of their 25,000,000 B line. The readings of this pass are in the session's scratchpad (`verify3/`, JSON per drive and the 199 full pictures they were cut from).
+
+- `namebar-prod-390-dark.jpg`, `namebar-head-390-dark.jpg`: production's name prompt bar across the title row and the toolbar at 390 dark, and the head's 6 px plate under the toolbar row.
+- `landing-first-prod-left-head-right-1440-dark.jpg`: the first screen at 1440 dark, production on the left and the head on the right, each 720 px wide.
+- `colorplate-mint-1440-light.jpg`: the text colour plate on a Mint deck: black, white, grey and blue swatches over the mint slide ground (finding 2).
+- `hero-390-fallback-left-inter-right-light.jpg`: the hero at 390 light with Inter blocked (three lines) and with Inter (two lines) (finding 3).
+- `hero-title-390-dark.jpg`: the hero frame's title row at device scale 2 with the g and p whole.
+- `import-tiles-dark-deck-1440-light.jpg`: Import slides in a dark deck from a light source: the tile in the dark appearance under "The copies take this presentation's theme".
+
+## DR-V3.7 Not driven
+
+- Firefox's drawn bar and layering in WebKit, for the reasons of passes 1 and 2.
+- `home.budget.frame`, `home.budget.main-thread`, the LCP line, `home.motion.pause`, `home.people.loop` and `home.people.type` as verdicts: the load stayed over 24. Their functional checks passed.
+- `decks.pages.pictures-load` at a load under 24 (finding 4).
+- The whole `pnpm test` on this head. The integrator's last whole run (08:33, before the rebase) read 5,510 passed and 2 failed for the environment, its finishing step's 151 files of the packages with a conflict read 1,202 passed and one timeout that passed alone, and each fix commit's own unit tests are in its note.
+- Production's editor beyond the name prompt bar at 390 dark.
+
+## DR-V3.8 For Kevin
+
+1. Question 11's page height line: the head's `/home` is 14,196 px at 1440 and 15,585 at 390. Either the bands lose about 200 px at 1440 and 590 px at 390, or the lines rise to 14,500 and 16,000.
+2. Question 33: the Present band's nine title rows stay as the show's chooser (D4's recommendation) or leave.
+3. The page's own script has 933 B of gzip room and the document 367 B: the next band's bytes need a cut or a raise.

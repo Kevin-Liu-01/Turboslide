@@ -1,14 +1,127 @@
 # The design round: the integrator
 
+## After the fix round of pass 1
+
+Written by the design round's integrator from 08:20 to 09:05 PDT on 2026-10-06 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`, which stood at `1b8ba95e` (DR-D4 fix: DR-D4#5) with 81 commits over `0d75ab90` (44 on the first parent) when it began. Read first: the verifier's pass 1 (`docs/gslides-parity/focus/VERIFICATION.md`, "Design round, pass 1") and the fix round sections of `d2.md`, `d3.md`, `d4.md` and `d5.md`. Port 4670 served the node-server output of the head with the round's environment (a tmp store in a new overlay, `.turboslide/integrator2-overlay`, the memory tier, secrets made per start and never printed); 4680 was not used. A scratch worktree in the session's scratchpad (`integrator2/wt`, detached, its own `pnpm install --offline`) held the reorder and the group typechecks. Nothing was pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and production was not read or written. Times are PDT and loads are one minute load averages; a timing read at a load over 24 is not a verdict. No picture was taken: the round folder's tracked pictures hold 24,965,217 B of their 25,000,000 B line.
+
+### 1. The state at the start
+
+- The fix round's commits sat in the order they landed: D2's two fixes over the verifier's note, then the seam `0c28197c` (made by D4's lane, origin/main at `f2b0b7a0`), DR-D4#1b, D5's four, D3's nine and D4's two. No lane process was running, the checkout was clean and no git lock was held.
+- origin/main reads `0a79db8e` ("Ship the people band (V4#20) again", 05:53), one commit past the seam's `f2b0b7a0`. It is not on `design/round` (section 7, blocker 2).
+
+### 2. The reorder
+
+The fix commits went into their lanes' groups in the lane order of the first pass (D1, D2, D5, D3, D4). A group that needs the seam stays after it, so D5's and D4's fix commits form groups of their own after the seam, and D2's two fixes, which need no file of the seam, join D2's group before it.
+
+- Every step ran in the scratch worktree with `-c rerere.enabled=false`, so the shared `rr-cache` neither resolved nor recorded anything.
+- Before the seam: from `5f94be30` (D1 and D2 unchanged), cherry-picks of D2's two fixes, then D5's six commits, D4's seven, the first pass's note and the verifier's note. 17 picks, no conflict. The new pre-seam head `189d6655` has the tree of `7f7c626c` (`9ba9fee2`).
+- The seam: made again with `git commit-tree` from `0c28197c`'s tree, its message and its author, on the parents `189d6655` and `f2b0b7a0`, so no merge ran twice: `b6ff2fc9`. Its message still says it merged at `7f7c626c`; `189d6655` holds the same tree.
+- After the seam: D5's four commits, D3's nine, then D4's three. DR-D4#1b moves from right after the seam to the head of D4's group. 16 picks, no conflict.
+- Checks before the branch moved: the new head's tree equals the old head's (`533e1c1a`); each of the 33 moved commits has the old commit's patch id, message and author.
+- The move: `git update-ref` under the git lock, after reading the branch at `1b8ba95e` and the checkout clean. The old order is kept as the local branch `design/round-prereorder2` (`1b8ba95e`); `design/round-prereorder` (`d9dc1f0e`) still keeps the order before the first pass's reorder.
+
+### 3. The groups
+
+| Group | Commits (was) | Head | `tsc -b` at the head (scratch worktree, routes generated) | Rows the group's fix commits entered or restated |
+| --- | --- | --- | --- | --- |
+| D1 | `53c6c9f2` DR-spec, `6fc14f09` DR-D1#1, `ccbe70f0` DR-D1#2, `af1139c5` DR-D1#3, `a2e4ede6` D1 notes (unchanged) | `a2e4ede6` | exit 0, 82 s, load 40 to 47 | none |
+| D2 | `7b67283e`, `4ba6688c`, `1b664daa`, `78780874`, `5f94be30` (unchanged); `f2210e03` (`bb38a436`) DR-D2 fix 1; `b9686651` (`7f7c626c`) DR-D2 fix 2 | `b9686651` | exit 0, 32 s, load 46 to 51 | restated `chrome.colors.pairs-at-floor`, `chrome.split.one-box`, `chrome.cluster.gaps-heights` |
+| D5 | `1b5ae8cc` (`c03a2649`) DR-D5#3, `a78751ce` (`55649d34`) DR-D5#2a, `081503d0` (`edc6199b`) DR-D5#1a, `be6e5f61` (`af6d8c9e`) D5 notes, `3fe484c8` (`14e6748c`) and `39d4799c` (`f14dea7d`) the integrator | `39d4799c` | exit 0, 17 s, load 51 to 47 | none |
+| D4 | `7d2b3181` (`0854dfb3`) DR-D4#1, `b034f5f9` (`3f2619e7`) DR-D4#2, `612d0946` (`db5f890f`) DR-D4#3, `a4ab2464` (`bfd1f20c`) DR-D4#4, `ab429737` (`96360a07`) DR-D4#7 part, `6da1f58d` (`8486df4f`) and `4b46b826` (`3e3654b8`) the integrator | `4b46b826` | exit 0, 30 s, load 47 to 45 | none |
+| Notes, docs only | `74d497eb` (`d863c179`) the first pass's note, `189d6655` (`9928cbba`) the verifier's pass 1 | `189d6655` | exit 0, no source change | none |
+| The seam | `b6ff2fc9` (`0c28197c`), origin/main at `f2b0b7a0` | `b6ff2fc9` | exit 0, 70 s, load 45 to 48 | main's rows as the seam's message gives them |
+| D5 fix | `a9b9515a` (`37ce503b`) DR-D5#1b and #3b, `48639f83` (`3634acd7`) DR-D5#2b, `75a10c07` (`a5c00b55`) DR-D1#4 made by D5, `769863e0` (`10afed49`) D5's fix notes | `769863e0` | exit 0, 41 s, load 48 to 44 | entered `decks.pages.radius`, `.numerals`, `.default-glyphs`, `.scrollbar`, `.pictures-load`, `accounts.signin.one-dialog`, `export.fonts.upstream-names` |
+| D3 | `96ffbcbd` (`d6fb0a24`) DR-D3#1, `ab3218bf` (`a11f46ce`) its driver, `506a2680` (`2c041b25`) DR-D3#2, `64d05da9` (`02097359`) DR-D3#3, `ff45eace` (`c4b7922d`) DR-D3#4, `0a5b192e` (`27a4a677`), `c893c616` (`0037e9f6`), `c851570a` (`57cb4c2f`), `b89d4bc4` (`a79a4eac`) D3's notes | `b89d4bc4`; the reader of DESIGN.md 7.9 is `ab3218bf` | exit 0, 45 s at `b89d4bc4` (load 51 to 42); exit 0, 54 s at `ab3218bf` (load 44 to 51) | entered the 16 `themes.*` rows; restated `fonts.display-features.inter-only`, `slides.layout.plate-four-columns`, `brand.panel.opens`, `brand.background.enter-keeps-open`, `themes.picker.lists-library`; retired `brand.reset.default-kit` |
+| D4 fix | `d386a0cf` (`7afda007`) DR-D4#1b, `5df84734` (`10002e21`) DR-D4#7, `3a2c216e` (`1b8ba95e`) DR-D4#5 | `3a2c216e` | exit 0, 26 s, load 42 to 47 | entered `home.present.figure`, `home.export.dialog`, `home.patterns.stills`, `home.kits.themes`; restated `home.export.pdf-appearance`, `decks.home.pictures-three-widths`, `home.page.order` |
+
+DR-D3#1 also writes the `parks` arrays of 146 other rows on several lines where they were on one; each of those rows reads the same values before and after (compared as JSON), so the change is layout only.
+
+At the D3 group's head, which no longer holds DR-D4#1b, the home component tests (`vitest run apps/studio/src/components/home`, the folder of DR-D4#1b's `copy.test.ts`) read 17 files, 100 tests passed (load 46).
+
+### 4. Dependencies between the groups
+
+- `home.export.pdf-appearance` (main's row) presses the navigation's Light and Dark pair at the seam, D5 fix and D3 heads, and DR-D4#1 replaced that pair with one theme button in the D4 group before the seam. The row's driver reads the theme button from DR-D4#1b (`d386a0cf`) on, where it passed on the head (section 6). It is a driver change; the page works at every head.
+- `decks.pages.pictures-load` passes at the D5 fix head, where the build has no theme library and the row skips its theme name clause, and fails from DR-D3#1 (`96ffbcbd`) on, where `theme.list` answers and no template card draws its theme's name (section 7, blocker 1). The reader ship of DESIGN.md 7.9 (`ab3218bf`) is the first tree that reads it red.
+- DR-D4#5 needs DR-D3#1, which the order keeps. The first pass's note on `decks.pages.access-plates` (red at D5's head before D4's group) still holds for the groups before the seam.
+
+### 5. The gates on the head
+
+| Gate | Reading | Load |
+| --- | --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0 at every group head (section 3) | 40 to 51 |
+| `pnpm test` (`vitest run` at the root), 08:33 to 08:35 | 534 files: 5,510 passed, 2 failed, 6 skipped, 2 todo. Failed: `packages/import` `import.test.ts` reads 93 slides from the read only Prototemplate checkout where it pins 95 (as every pass read); `apps/cli` `banner.test.ts` reads the CLI's 2026.1001.3 where `docs/updates.md` names 2026.1006.1, which is origin/main's state at `f2b0b7a0` and `0a79db8e` too (both keep `apps/cli/package.json` at 2026.1001.3). Neither file is this round's | 45 to 48 |
+| `core-matrix.test.mjs`, `what-works.test.mjs`, `evidence-policy.test.mjs`, the no Google guard `competitor.test.ts` | 4 files, 62 passed | 35 |
+| The brand lint (`main.ts --enforce`) | exit 0: 0 open, 19 accepted, 0 stale; reported by the round's rules: 3 findings in 3 files, all `css/z-index` (the first pass read 20 in 6 files: D5's fixes cleared `css/chrome-alternates` and `css/numerals`) | 53 |
+| `what-works.mjs --check`, `build-colors.ts --check`, `build-home-assets.ts --check`, `packages/agent` `generate --check` | README.md current; tokens current; 66 outputs match, 43 files the page names, each in `assets.json` and on disk; every committed contract current | 54 |
+| The node-server build (`NITRO_PRESET=node-server vite build -c vite.deploy.config.ts` in `apps/studio`) | exit 0, 25 s at 08:26 | 36 to 41 |
+
+### 6. Rows on the node-server build (port 4670)
+
+| Run | Rows | Result | Load |
+| --- | --- | --- | --- |
+| 1, 08:27 to 08:41, `core-gate --only specs --rows` | the 32 spec rows the fix round entered or restated, with the seven `home.budget.*` rows, `home.page.bands-after-load`, `home.kits.restyle`, `home.pictures.all-load`, `home.radius.ladder`, `decks.pages.access-plates` and `decks.home.product-pictures` (45 rows) | 40 passed, 3 failed, 2 not driven, retries zero. Not driven: `home.budget.frame` and `home.budget.main-thread` ("not read: load 32.4"). Failed: `themes.migration.gt-unchanged` and `accounts.signin.one-dialog` for this run's environment (run 3), and `decks.pages.pictures-load` for the head (run 3) | 45 to 29 |
+| 2, 08:41 to 08:47, `core-gate --only probe --areas chrome` | the walk's 35 chrome rows | 35 of 35 passed, retries zero. `chrome.split.one-box` and `chrome.cluster.gaps-heights` read 6 px, as DR-D2 fix 2 restated them (the first pass and the verifier read both red) | 29 to 40 |
+| 3, 08:47 to 08:48, the three red rows again, the server started with the fake Google client pair of `apps/studio/playwright.config.ts` and core-gate given `TURBOSLIDE_OVERLAY_DIR` so it places the GT deck's twins | `themes.migration.gt-unchanged`, `decks.pages.pictures-load`, `accounts.signin.one-dialog` | 2 passed, 1 failed, retries zero. `themes.migration.gt-unchanged`: theme general-translation, the wordmark, "01 / 95", 2 rails, both rules, 4 crosses, the GT mark with "cv11", "ss01", the panel names General Translation. `accounts.signin.one-dialog`: on /home, /decks and the editor in both appearances an 8 px window, the body 195 over 195, "Continue with Google" 6 px with its mark, Cancel and Continue 6 px. `decks.pages.pictures-load` failed: "light /decks/templates: a template card names no theme" and the same in dark; every picture on the three pages decoded and answered 200. core-gate: "rows of an unparkable feature blocking the ship: decks.pages.pictures-load" | 43 to 35 |
+| 4, 08:51 to 08:56, `core-gate --only probe --areas brand,fonts` with `TURBOSLIDE_OVERLAY_DIR` | the walk's 29 brand and fonts rows, among them D3's three restated rows | 26 passed, 0 failed, 3 not driven, retries zero. Passed: `brand.panel.opens`, `brand.background.enter-keeps-open`, `fonts.display-features.inter-only`. Not driven, "not on this build" as D3 and main read them: `brand.logo.use-on-every-slide`, `brand.objects.kit-colours-first`, `fonts.table.takes-family`. core-gate: no row of an unparkable feature blocks the ship | 32 to 46 |
+
+The landing's budgets (DESIGN.md 8.16), read in run 1:
+
+| Measure | Reading | Line |
+| --- | --- | --- |
+| Document | 95,429 B decoded, 16,141 to 16,165 B brotli | 100,000 B (4,571 B of room); 20 KB brotli |
+| Page CSS | 17,157 B brotli | 20 KB brotli |
+| Route chunk | 64,492 B decoded, 15,114 B brotli | 70 KB, 22 KB |
+| Live core with its imports | 55,310 B decoded, 19,683 B gzip | 64 KB, 20,480 B gzip (797 B of room) |
+| Largest band chunk | menus, 47,762 B decoded, 15,948 B gzip | 56 KB, 16 KB gzip |
+| Page's own script after a full scroll | 356,209 B decoded, 116,900 B gzip | 360,000 B (3,791 B of room), 120,000 B gzip (3,100 B of room) |
+| Pictures after a full scroll | 25 files, 152,147 B at x1 and 194,639 B at x2; 0 before load | 200 KB |
+| Font | one request, `InterVariable-latin` 113,752 B | reported against 120 KB |
+| Shared script | entry 1,210,065 B; all shared 1,371,151 B | reported |
+| CLS, LCP | CLS 0 at 1440 and 390 with every band filled; the h1, 172 to 196 ms cold (load 32, not a verdict) | 0; 400 ms |
+
+Other readings of run 1: `home.kits.themes` 9 tiles and Swiss on 41 slides and back in each appearance at 1440 and 390; `home.present.figure` the presenter view at 1022 px (356 px at 390) in an 8 px frame; `home.export.dialog` the Download dialog with the readout's done glyph; `home.patterns.stills` 17 cards in 2 rows at 1440 and 1 row at 390, CLS 0; `home.page.order` one h1 and the bands in DESIGN.md 8's order.
+
+### 7. Blockers and what remains
+
+1. `decks.pages.pictures-load` (feature `decks`, unparkable) fails on the head: DESIGN.md 9 asks each template card on `/decks/templates` to name its theme, D5 left the clause for after DR-D3#1 (`d5.md`, "Not done"), and DR-D3#1 is now on the branch. Owner D5: `TemplateCard` in `apps/studio/src/server/templates.ts` gains the theme's name (`themeName(document.deck.theme)` from `@turboslide/theme/themes`), and the card in `decks.templates.tsx` draws it in `.ts-gallery-theme` beside the slide count, with its rule in `decks.templates.css`. The commit lands after DR-D3#1, and the reader ship needs it.
+2. origin/main's `0a79db8e` (the people band again) is not on `design/round`. A trial `git merge-tree --write-tree` of the head with it reads three conflicted files: `README.md`, `apps/studio/e2e/core/home.spec.ts` and `apps/studio/src/components/home/live/index.ts` (the band registry the first seam moved to `live/bands.ts`). This is a second seam, the orchestrator's (DESIGN.md 10.0). D4's estimate puts the band at about 4,500 B gzip of the page's own script, which reads 116,900 B against 120,000 B today, so the line question below decides whether the band can join.
+3. DR-D1#5 (the round's six lint rules to enforce) has not landed and is the round's last push; DESIGN.md 10.0 places it after every other lane's last push. The lint reports 3 findings, all `css/z-index`: the three inline z-index lines accepted for DR-D1#5 in the first pass.
+
+### 8. Pass 1 findings after the fix round
+
+| # | State on the head |
+| --- | --- |
+| 1 Themes | Done: the 16 `themes.*` rows passed; `/new` and Blank are Simple, nine themes, Reset to the theme |
+| 2 Google Slides words | Done through the seam; the no Google guard's test passes |
+| 3 The landing's 8.7 to 8.12 | DR-D4#5 and the rest of DR-D4#7 done and read; DR-D4#6 (agents as Version history, the two people band) not done |
+| 4 General Translation's cuts | Done: `/decks`, the trash and the book view without the alternates; the PowerPoint file names the upstream Inter families |
+| 5 The Theme panel's square controls | Done: 6 px (`themes.picker.lists-library`) |
+| 6 The editor's Sign in scroll | Done: body 195 over 195 everywhere |
+| 7 The search card's key chips | Done: `chrome.colors.pairs-at-floor` passed |
+| 8 The split button's walk rows | Done: 35 of 35 chrome walk rows |
+| 9 to 14 | Not in the fix round: the hero frame's title still sets `line-height: 1` on 14 px text with `overflow: hidden` (9); the hero frame's dark Slideshow (10); proportional figures in Version history's row time and the shortcuts dialog's chips (11); "Copy link", "Reset to theme", "Add to theme", "Recent presentations", "Empty trash", "Delete forever", "Use a passkey" and the editor's "Sign in" still in sentence case in `menus/strings.ts` (12, with D5's request 7); Tailor's glyph (13); the two people band's frames (14, DR-D4#6) |
+
+### 9. For Kevin
+
+1. The landing's own script reads 116,900 B gzip against its 120,000 B line with every band of DR-D4#5 and #7 in. The people band (about 4,500 B, on main since 05:53) and DR-D4#6 (about 1,200 B, D4's estimate) do not fit under it together: either the line rises to 124,000 B gzip and 370,000 B decoded, or a band's chunk is cut first.
+
+### 10. Notes
+
+- The server on 4670 was stopped and `.turboslide/build.lock` released at 08:49, and again at 08:56 after run 4. The scratch worktree was removed after the last typecheck and test.
+- The commit ids in the first pass's record below are the ones before this reorder; the table of section 3 gives each new id beside the old one. Lane notes and commit messages written before 08:33 name the old ids as well.
+- The run logs are under `.turboslide/integrator2-gate-1` to `-4` of the worktree (ignored by git); the scripts are under `scratchpad/integrator2/`.
+
+## The first pass, before the verifier's pass 1
+
 Written by the design round's integrator from 03:15 to 04:45 PDT on 2026-10-06 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`, which stood at `59724eb2` (DR-D4#7, part) with 17 commits over `0d75ab90` when it began. Read first: `docs/DESIGN.md` (every section), the lane notes `d1.md`, `d2.md`, `d4.md` and `d5.md`, D3's note on its staging branch (`41bd5748:docs/gslides-parity/design-round/d3.md`) and `requests.md`. Port 4670 served the node-server output with the round's environment (a tmp store, the memory tier, secrets made per start and never printed); 4680 was not used. A scratch worktree in the session's scratchpad (`integrator/wt`, detached) held the reorders and the group typechecks. Nothing was pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and production was not read or written. Times are PDT and loads are one minute load averages; a timing read at a load over 24 is not a verdict.
 
-## 1. The state at the start
+### 1. The state at the start
 
 - The lanes' pushes sat in the order they landed: DR-spec, DR-D1#1 to #3 and D1's notes, then DR-D4#1, DR-D5#3, DR-D2#1, DR-D2#2, DR-D4#2, DR-D5#2a, DR-D4#3, DR-D2#3, DR-D5#1a, DR-D4#4, D5's notes and DR-D4#7 (part). No lane process was running. The working tree held one stale copy of `core-matrix.json` written at 02:56 (the same 1,194 rows in another order, read row by row against HEAD); it was put back to HEAD's text.
 - There is no "DR-seam: merge origin/main" commit. `git ls-remote` read origin/main at `bfba1963` (R1F-D integrator), 29 commits past `0d75ab90` and touching 278 files, 17 of which this round also changes. `followup/round` stands 7 commits further at `95808c36` (R1F-E's landing fixes and the R1F integrator's FOCUS.md). DESIGN.md 10.0 gives the seam to the orchestrator, once; the integrator did not make it.
 - D3's four pushes are not on `design/round`: they are `a640deb0`, `868ae672`, `3f86484b` and `2d95465d` on the local branch `d3/stage`, over a local merge of `followup/round` at `4e127c13`, with patches in `scratchpad/d3/ports/`.
 
-## 2. The requests and their answers
+### 2. The requests and their answers
 
 | Request | From, to | Answer | Commit |
 | --- | --- | --- | --- |
@@ -46,7 +159,7 @@ Found by the integrator's gates and fixed in the push they belong to:
 - `apps/studio/src/styles.css` (no lane's file) carried three alternates and four literal `tabular-nums`; it now reads Inter's defaults and `var(--pt-numerals)` (`14e6748c`).
 - `home.scroll.regions` failed on the build with every bar right: the build's minifier writes `rgba(255, 255, 255, 0.44)` as `#ffffff70`, and the driver compared the token's text. It now compares the two as colours (`3e3654b8`).
 
-## 3. The pushes
+### 3. The pushes
 
 One push per lane in the order D1, D2, D5, D3, D4, each with the integrator's answers to the requests on its files. The reorder ran `git rebase -i 0d75ab90` in the scratch worktree, the todo written by a `GIT_SEQUENCE_EDITOR` script from the list of commits in the new order. The steps that stopped were resolved by script: `core-matrix.json` by moving the picked commit's own rows (added, changed and removed by id, each row's text kept byte for byte, since the file is prettier-ignored and carries the lanes' layout), `README.md` regenerated by `docs/readme/what-works.mjs`, and `requests.md` by lane section. The new head's tree equalled the old head's (`git rev-parse <head>^{tree}`) before `git update-ref` moved `design/round` under the git lock; the order before is kept as the local branch `design/round-prereorder` (`d9dc1f0e`). A second reorder, the same way, placed the three fixes the gates found after the first one in their pushes (tree `dcfd9abe` equal before and after). Each commit's diff of the matrix and README is its own rows and its README line.
 
@@ -68,7 +181,7 @@ Dependencies between the pushes, read from the lanes' notes and the integrator's
 - `home.radius.ladder` (D4) reads the shared tooltip at 6 px, which D2's push draws; D2 goes first, as ordered.
 - DESIGN.md 7.9 and question 31: the tree through DR-D3#1 ships before the tree that holds DR-D3#2, and DR-D4#5 needs DR-D3#1.
 
-## 4. The gates on the head
+### 4. The gates on the head
 
 | Gate | Reading | Load |
 | --- | --- | --- |
@@ -81,7 +194,7 @@ Dependencies between the pushes, read from the lanes' notes and the integrator's
 | The node-server build | 40 s at 03:41 (load 340); 25 s at 04:28 after the show's stage box (load 48) | |
 | `check-client-bundle.mjs --base` on 4670 | exit 1 on the tree's standing readings: `/decks` 1,331,477 B (ceiling 600,000), `/deck/gt-brand` 1,223,437 B (1,000,000), `/edit/gt-brand` 1,728,293 B under 2,000,000; the shared entry chunk 1,208,204 B, reported. DR-D1#1 read 1,310,277, 1,202,101 and 1,186,868 before any of the round's script: the entry grew 21,336 B through the round | 270 |
 
-## 5. Rows on the node-server build (port 4670)
+### 5. Rows on the node-server build (port 4670)
 
 | Run | Rows | Result | Load |
 | --- | --- | --- | --- |
@@ -107,7 +220,7 @@ The landing's budgets (DESIGN.md 8.16), read in run 1 on the build:
 | Shared script | entry 1,208,204 B; all shared 1,369,377 B | reported |
 | CLS, LCP | CLS 0 at 1440 and 390; the h1, 188 to 228 ms cold (not read, load 62 to 64) | 0; 400 ms |
 
-## 6. What waits for the seam
+### 6. What waits for the seam
 
 The merge of origin/main into `design/round` (DESIGN.md 10.0) is the orchestrator's, and every push lands on main through it. Each part below touches a file of the seam list or needs DR-D3#1, and each lane prepared its part:
 
@@ -117,7 +230,7 @@ The merge of origin/main into `design/round` (DESIGN.md 10.0) is the orchestrato
 - D4: DR-D4#1b (the navigation's motion words and the footer's sentence that names another company's slides app, both in `copy.ts`); DR-D4#5 (themes and kits, after DR-D3#1); DR-D4#6 (agents and two people, after the people band: origin/main reverted the band in `14bd67d1`); the rest of DR-D4#7 (the captured presenter view, the Download dialog, the pattern stills: the document now has 11,419 B of room, the page's own script 101 B, section 8); `live/paint.ts` on the one contrast function after DR-D3#1.
 - D5: DR-D5#1b (`decks.css`, the five page rows, each template's theme name), DR-D5#2b (the one Sign in dialog; the chrome's export line is in), DR-D5#3b (`BookView.css`).
 
-## 7. Pictures
+### 7. Pictures
 
 Under `docs/gslides-parity/design-round/integrator/`, each a contact sheet of whole viewports at 1440 by 900 or 390 by 844 in Chromium with its scrollbars shown, taken on 4670 and opened and looked at:
 
@@ -126,11 +239,11 @@ Under `docs/gslides-parity/design-round/integrator/`, each a contact sheet of wh
 - `pages-{1440,390}-{light,dark}.jpg`: `/decks`, the templates gallery, the trash, `/deck/gt-brand`, the refused page, You need access and Not found. The trash's buttons and the gallery's Blank sentence keep main's words until DR-D5#1b, D5's request 7 and DR-D3#3.
 - `home-{1440,390}-{light,dark}.jpg`: the first screen and the menus, canvas, Tailor, agents, Present, export and features bands; the canvas band's Format options readout keeps its grid with its selectors under `.ts-product`.
 
-## 8. For Kevin
+### 8. For Kevin
 
 1. The landing's own script reads 119,899 B gzip against its 120,000 B line. DESIGN.md 8.10 to 8.12's remaining parts (the captured presenter view, the Download dialog, the 17 pattern stills) need about 2,000 B gzip more (D4's estimate). Either the line rises to 124,000 B or a band's chunk is cut first.
 
-## 9. Notes
+### 9. Notes
 
 - The server on 4670 was stopped and `.turboslide/build.lock` released at 04:47. The scratch worktree was removed after the last typecheck; `design/round-prereorder` (`d9dc1f0e`) keeps the order before the first reorder.
 - The `.turboslide/token` of this checkout is a new one (section 2).

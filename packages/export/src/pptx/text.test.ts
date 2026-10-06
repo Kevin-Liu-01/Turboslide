@@ -141,10 +141,10 @@ describe('the raster scale policy', () => {
 describe('the off-cut face advance', () => {
   it('reads the calibrated excess per family and size and returns 0 elsewhere', async () => {
     const { faceAdvanceExcess } = await import('./face-advance.ts');
-    const table = { 'GT Inter Text 26 Medium': { '30': 0.017, '27': 0.0082 } };
-    expect(faceAdvanceExcess('GT Inter Text 26 Medium', 30, table)).toBe(0.017);
-    expect(faceAdvanceExcess('GT Inter Text 26 Medium', 26, table)).toBe(0);
-    expect(faceAdvanceExcess('GT Inter Text 22', 22, table)).toBe(0);
+    const table = { 'Inter Text 26 Medium': { '30': 0.017, '27': 0.0082 } };
+    expect(faceAdvanceExcess('Inter Text 26 Medium', 30, table)).toBe(0.017);
+    expect(faceAdvanceExcess('Inter Text 26 Medium', 26, table)).toBe(0);
+    expect(faceAdvanceExcess('Inter Text 22', 22, table)).toBe(0);
   });
 
   it('takes the excess back as character spacing over the run', () => {
@@ -173,7 +173,42 @@ describe('the off-cut face advance', () => {
     const out = textRuns(text, options);
     // -0.6 px tracking minus 0.2 px per character is -0.8 px, -0.48 pt
     expect(out[0]?.options?.charSpacing).toBeCloseTo(-0.48, 2);
-    expect(options.families.has('GT Inter Text 26 Medium')).toBe(true);
+    expect(options.families.has('Inter Text 26 Medium')).toBe(true);
+  });
+
+  it('spaces a standard set run by the width its opsz 14 face adds over the browser', async () => {
+    const { loadFaceAdvance } = await import('./face-advance.ts');
+    const table = loadFaceAdvance();
+    // fonts.json spacing (scripts/build-fonts.py): about 4 percent at 22 px for Inter
+    const share = table['Inter']?.['22'] ?? 0;
+    expect(share).toBeCloseTo(0.04, 2);
+    // the calibrated measurement of the exact set stays beside it
+    expect(table['Inter Text 26 Medium']?.['30']).toBe(0.017);
+    const words = 'Forty characters of plain running text..';
+    const text: SceneText = {
+      id: 'p/text',
+      blockId: 'p',
+      box: [137, 129, 600, 33],
+      textBox: [137, 129, 600, 33],
+      style,
+      native: true,
+      lines: [{ box: [137, 129, 600, 33], runs: [{ text: words, box: [137, 129, 400, 33], style }] }],
+    };
+    const families = new Set<string>();
+    const out = textRuns(text, { ...options, fontSet: 'standard', families });
+    expect(out[0]?.options?.fontFace).toBe('Inter');
+    const perChar = (share * 400) / words.length;
+    expect(out[0]?.options?.charSpacing).toBeCloseTo(pxToPt(-perChar), 2);
+    // a display run at 44 px and over is drawn at the browser's optical size: no spacing
+    const big: SceneStyle = { ...style, size: 88, weight: 500, features: '"cv11", "ss01"' };
+    const heading: SceneText = {
+      ...text,
+      style: big,
+      lines: [{ box: [137, 129, 600, 96], runs: [{ text: 'Title', box: [137, 129, 220, 96], style: big }] }],
+    };
+    const display = textRuns(heading, { ...options, fontSet: 'standard', families });
+    expect(display[0]?.options?.fontFace).toBe('Inter Display Alternates');
+    expect(display[0]?.options?.charSpacing).toBeUndefined();
   });
 });
 

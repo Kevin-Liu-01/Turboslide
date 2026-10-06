@@ -29943,7 +29943,7 @@
           }
         },
         "fonts": {
-          "description": "The export font set (SPEC 8.4); defaults to exact",
+          "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
           "type": "string",
           "enum": [
             "exact",
@@ -61434,7 +61434,7 @@
             }
           },
           "fonts": {
-            "description": "The export font set (SPEC 8.4); defaults to exact",
+            "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
             "type": "string",
             "enum": [
               "exact",

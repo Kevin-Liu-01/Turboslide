@@ -7,7 +7,7 @@
 // else pptx; the deck is `--deck`, else a positional that names a directory holding deck.json
 // (the acceptance lines of MILESTONES B2 write `turboslide export decks/fixture/gslides ...`),
 // else the usual resolution; the remaining positionals select slides. PPTX: `--mode
-// flatten|native --theme light,dark|both --fonts exact|standard|embed [--embed-fonts] [--headings
+// flatten|native --theme light,dark|both --fonts standard|exact|embed [--embed-fonts] [--headings
 // raster] [--raster-scale auto|2|3] [--picture-scale 2|3] [--exclude-share-alike]
 // [--baseline-target libreoffice|none] [--tables auto|table|rows] [--include-skipped]
 // [--include-notes] [--no-jpeg] [--no-svg-vector] [--verify] --out <dir>`; the verify pass runs inside exportPptx so
@@ -22,6 +22,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { BAYER8 } from '@turboslide/effects/bayer';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
 import type { ExportMode } from '@turboslide/schema/export';
 import { deckAppearance } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
@@ -186,10 +187,10 @@ async function exportPptxCommand(
   const includeNotes = flagBoolean(ctx.args, 'include-notes');
   const mode = parseMode(ctx);
   const themes = parseThemes(ctx);
-  const fontsFlag = flagString(ctx.args, 'fonts') ?? 'exact';
+  const fontsFlag = flagString(ctx.args, 'fonts') ?? DEFAULT_EXPORT_FONT_SET;
   // `--fonts embed` is the exact set with the faces embedded, the shorthand Kevin's directive names
   if (fontsFlag !== 'exact' && fontsFlag !== 'standard' && fontsFlag !== 'embed')
-    throw new UsageError('--fonts wants exact, standard or embed (exact plus --embed-fonts)');
+    throw new UsageError('--fonts wants standard, exact or embed (exact plus --embed-fonts)');
   const fonts: FontSet = fontsFlag === 'embed' ? 'exact' : fontsFlag;
   const embedFonts = fontsFlag === 'embed' || flagBoolean(ctx.args, 'embed-fonts');
   const outDir = resolveOut(

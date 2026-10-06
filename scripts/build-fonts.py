@@ -6,12 +6,23 @@ The deck renders with InterVariable 4.001 and font-optical-sizing auto, so text 
 an optical size no static Inter file has (pptx report section 4.10). PPTX and LibreOffice want
 static faces, and DrawingML carries weight 500 only as a family name (pptx report section 1 item 2),
 so this script instances the variable font once per (optical size, weight) the deck uses and gives
-every instance its own family name:
+every instance a family name. Since the design round (docs/DESIGN.md 4.3, decision C8) the names
+are the ones the upstream Inter release installs under, so a file opens in Inter on any machine
+that has Inter, and no name carries a prefix of its own:
 
-  GT Inter Display                 opsz 32, wght 500, cv11 and ss01 frozen; h1 88, big 72, h2 44
-  GT Inter Text <size>             opsz <size>, wght 400; sizes 26, 24, 22, 20, 18, 15, 14
-  GT Inter Text <size> Medium      opsz <size>, wght 500 (the *display* run inside text, keys, plain)
-  Inter, Inter Medium              opsz 14, wght 400 and 500: the --fonts standard set
+  Inter, Inter Medium              opsz 14, wght 400 and 500: text in the standard set, the default
+  Inter Display                    opsz 32, wght 400: text at 44 px and over
+  Inter Display Medium             opsz 32, wght 500: headings at 44 px and over
+  Inter Display Alternates         opsz 32, wght 500, cv11 and ss01 frozen: the headings of a theme
+                                   that draws them (General Translation's)
+  Inter Text <size>                opsz <size>, wght 400; sizes 26, 24, 22, 20, 18, 15, 14: the
+                                   exact set, the second choice
+  Inter Text <size> Medium         opsz <size>, wght 500
+
+The standard set draws text at opsz 14, which is wider than the browser's optical size above
+14 px; fonts.json `spacing` records that difference per family and whole pixel size (the letter
+weighted advance at opsz 14 over the advance at the size's optical size, less one), and the
+PowerPoint writer takes it back as character spacing (packages/export/src/pptx/face-advance.ts).
 
 The parity round two adds an italic twin of every face (SPEC-2 7.1) cut from
 InterVariable-Italic.woff2 of the same release (the rsms/inter tag v4.1; the features round
@@ -40,7 +51,7 @@ the whole files. --check compares the subsets and the inter.css block too.
 Usage:
   build-fonts.py [--source packages/fonts/assets/InterVariable.woff2]
                  [--italic-source packages/fonts/assets/InterVariable-Italic.woff2]
-                 [--out packages/fonts/export] [--prefix "GT Inter"] [--check] [--json]
+                 [--out packages/fonts/export] [--check] [--json]
 
 Requires the packages of scripts/requirements.txt (fontTools with brotli for the woff2 source).
 Run it through `turboslide fonts build`, which creates .turboslide/venv from requirements.txt.
@@ -80,14 +91,23 @@ TEXT_WEIGHTS = [400, 500]
 # Display sizes all use the opsz 32 instance (the axis maximum).
 DISPLAY_SIZES = [44, 72, 88]
 DISPLAY_OPSZ = 32
-DISPLAY_WEIGHT = 500
+DISPLAY_WEIGHTS = [400, 500]
 DISPLAY_FEATURES = ["cv11", "ss01"]
 # The standard set: two families at the axis default optical size.
 STANDARD_OPSZ = 14
+# The family names (docs/DESIGN.md 4.3): the upstream release's, and the exact set's per size cuts.
+STANDARD_FAMILIES = {400: "Inter", 500: "Inter Medium"}
+DISPLAY_FAMILIES = {400: "Inter Display", 500: "Inter Display Medium"}
+ALTERNATES_FAMILY = "Inter Display Alternates"
+# The whole pixel sizes the spacing table covers: from the first size over the standard optical
+# size to the last size under the display sizes (a run at 44 px and over travels in a display face).
+SPACING_SIZES = list(range(STANDARD_OPSZ + 1, DISPLAY_SIZES[0]))
 
 # Bump when the naming or the instance list changes; part of ExportReport.fontSetVersion.
 # 2: the italic twins of the parity round two (gslides-parity SPEC-2 7.1).
-BUILD_VERSION = 2
+# 3: the upstream family names, the display faces at 400 and 500 and the spacing table of the
+#    design round (docs/DESIGN.md 4.3).
+BUILD_VERSION = 3
 
 WINDOWS = (3, 1, 0x409)
 MAC = (1, 0, 0)
@@ -251,7 +271,7 @@ def rename(font: TTFont, family: str, style: str, version: str) -> str:
     for record in list(name.names):
         if record.nameID in (1, 2, 3, 4, 6, 16, 17, 21, 22, 25):
             name.names.remove(record)
-    unique_id = f"{version};GT;{ps_name}"
+    unique_id = f"{version};Turboslide;{ps_name}"
     full_name = family if style == "Regular" else f"{family} {style}"
     for platform in (WINDOWS, MAC):
         name.setName(family, 1, *platform)
@@ -301,23 +321,35 @@ def build_face(
     return buffer.getvalue(), ps_name, remapped
 
 
-def upright_plan(prefix: str) -> list[dict]:
-    faces: list[dict] = []
-    faces.append(
+def upright_plan() -> list[dict]:
+    faces: list[dict] = [
         {
-            "family": f"{prefix} Display",
+            "family": ALTERNATES_FAMILY,
             "style": "Regular",
             "opsz": DISPLAY_OPSZ,
-            "weight": DISPLAY_WEIGHT,
+            "weight": 500,
             "display": True,
             "sizes": DISPLAY_SIZES,
             "frozen": DISPLAY_FEATURES,
             "sets": ["exact", "standard"],
         }
-    )
+    ]
+    for weight in DISPLAY_WEIGHTS:
+        faces.append(
+            {
+                "family": DISPLAY_FAMILIES[weight],
+                "style": "Regular",
+                "opsz": DISPLAY_OPSZ,
+                "weight": weight,
+                "display": True,
+                "sizes": DISPLAY_SIZES,
+                "frozen": [],
+                "sets": ["exact", "standard"],
+            }
+        )
     for size in TEXT_SIZES:
         for weight in TEXT_WEIGHTS:
-            family = f"{prefix} Text {size}" + (" Medium" if weight == 500 else "")
+            family = f"Inter Text {size}" + (" Medium" if weight == 500 else "")
             faces.append(
                 {
                     "family": family,
@@ -333,7 +365,7 @@ def upright_plan(prefix: str) -> list[dict]:
     for weight in TEXT_WEIGHTS:
         faces.append(
             {
-                "family": "Inter" if weight == 400 else "Inter Medium",
+                "family": STANDARD_FAMILIES[weight],
                 "style": "Regular",
                 "opsz": STANDARD_OPSZ,
                 "weight": weight,
@@ -346,10 +378,11 @@ def upright_plan(prefix: str) -> list[dict]:
     return faces
 
 
-def plan(prefix: str) -> list[dict]:
+def plan() -> list[dict]:
     """Every upright face, then its italic twin with the same family and style Italic (SPEC-2 7.1):
-    17 upright and 17 italic, 34 files. The display italic freezes cv11 and ss01 as the upright does."""
-    faces = upright_plan(prefix)
+    19 upright and 19 italic, 38 files. The alternates italic freezes cv11 and ss01 as the upright
+    does."""
+    faces = upright_plan()
     italics: list[dict] = []
     for face in faces:
         italics.append({**face, "style": "Italic", "italic": True})
@@ -370,8 +403,8 @@ def open_source(source_path: Path, what: str) -> tuple[TTFont, bytes, str]:
     if reserved is not None:
         raise SystemExit(
             f"build-fonts: the {what} source declares the Reserved Font Name {reserved!r}; the OFL "
-            "forbids a modified version under that name. Pass --prefix with a name that does not "
-            "contain it and record the decision (SPEC 11, open question 5; SPEC-2 7.1)."
+            "forbids a modified version under that name. The export set's names would have to change "
+            "(docs/DESIGN.md 4.3; SPEC 11, open question 5; SPEC-2 7.1)."
         )
     fs_type = source["OS/2"].fsType
     if fs_type != 0:
@@ -414,6 +447,44 @@ def weighted_average_width(font: TTFont) -> float:
         total += hmtx[glyph][0] * share
         weight += share
     return total / weight
+
+
+def spacing_table(source: TTFont) -> dict:
+    """The standard set's width difference from the browser (docs/DESIGN.md 4.3): per family and
+    whole pixel size from 15 to 43, the letter weighted advance of the opsz 14 instance over the
+    advance at the size's optical size (the axis clamps it at 32), less one, to five decimals. A
+    run of that size in that family is that much wider in the file than in the browser; the
+    PowerPoint writer spaces its characters by minus that share of the browser's width."""
+    letters = TTFont(io.BytesIO(subset_letters(source)), recalcTimestamp=False)
+    table: dict[str, dict[str, float]] = {}
+    for weight in TEXT_WEIGHTS:
+        base = weighted_average_width(
+            instancer.instantiateVariableFont(letters, {"opsz": STANDARD_OPSZ, "wght": weight})
+        )
+        row: dict[str, float] = {}
+        for size in SPACING_SIZES:
+            opsz = min(size, DISPLAY_OPSZ)
+            width = weighted_average_width(
+                instancer.instantiateVariableFont(letters, {"opsz": opsz, "wght": weight})
+            )
+            row[str(size)] = round(base / width - 1, 5)
+        table[STANDARD_FAMILIES[weight]] = row
+    return table
+
+
+def subset_letters(source: TTFont) -> bytes:
+    """The source cut to the letters of LETTER_FREQUENCY, so the spacing table's instances are quick."""
+    font = copy.deepcopy(source)
+    font.flavor = None
+    options = ft_subset.Options()
+    options.layout_features = []
+    options.notdef_outline = True
+    subsetter = ft_subset.Subsetter(options)
+    subsetter.populate(unicodes=[ord(char) for char in LETTER_FREQUENCY])
+    subsetter.subset(font)
+    buffer = io.BytesIO()
+    font.save(buffer)
+    return buffer.getvalue()
 
 
 def arial_metrics() -> dict:
@@ -587,7 +658,7 @@ def inter_css_with(block: str) -> str:
     return text[:start] + block + text[end + len(FACES_END):]
 
 
-def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, bytes]]:
+def build(source_path: Path, italic_path: Path, out: Path) -> tuple[dict, dict[str, bytes]]:
     source, source_bytes, version = open_source(source_path, "upright")
     italic, italic_bytes, italic_version = open_source(italic_path, "italic")
     version_short = re.sub(r"^Version\s+", "", version).split(";")[0]
@@ -597,7 +668,7 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
 
     files: dict[str, bytes] = {}
     faces: list[dict] = []
-    for spec in plan(prefix):
+    for spec in plan():
         is_italic = spec["italic"]
         data, ps_name, remapped = build_face(
             italic if is_italic else source,
@@ -634,9 +705,8 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
         files[f"web:{name}"] = data
     files["web:inter.css"] = inter_css_with(web_css).encode("utf-8")
     fonts_json = {
-        "version": f"{version_short}+gt.{BUILD_VERSION}",
+        "version": f"{version_short}+build.{BUILD_VERSION}",
         "generatedBy": "scripts/build-fonts.py",
-        "prefix": prefix,
         "source": {
             **source_record(source_path, source, source_bytes),
             # the italic source of the same release (gslides-parity SPEC-2 7.1, 0.66): the file the
@@ -653,13 +723,17 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
             "reservedFontName": None,
             "italicReservedFontName": None,
             "checked": ["name 0", "name 7", "name 13", "name 14", "THIRD_PARTY_NOTICES.md"],
-            "note": "No Reserved Font Name is declared by the upright or the italic source, so renamed instances are permitted (OFL 1.1 condition 3).",
+            "note": "No Reserved Font Name is declared by the upright or the italic source, so modified instances may carry the Inter names (OFL 1.1 condition 3).",
         },
         "textSizes": TEXT_SIZES,
         "weights": TEXT_WEIGHTS,
         "displaySizes": DISPLAY_SIZES,
         "displayOpsz": DISPLAY_OPSZ,
-        "standard": {"400": "Inter", "500": "Inter Medium"},
+        "standard": {str(weight): family for weight, family in STANDARD_FAMILIES.items()},
+        "display": {str(weight): family for weight, family in DISPLAY_FAMILIES.items()},
+        "alternates": ALTERNATES_FAMILY,
+        # the standard set's width difference from the browser, per family and size (DESIGN.md 4.3)
+        "spacing": spacing_table(source),
         # the metric matched fallback face of gslides-parity SPEC-3 9.2 G1 (packages/fonts/src/inter.css)
         "fallback": fallback_face(source),
         "faces": faces,
@@ -685,6 +759,9 @@ def target(out: Path, name: str) -> Path:
 def write(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
     out.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
+    for path in stale_faces(out, files):
+        path.unlink()
+        written.append(f"removed {path}")
     for name, data in files.items():
         path = target(out, name)
         if not path.exists() or path.read_bytes() != data:
@@ -698,8 +775,13 @@ def write(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
     return written
 
 
+def stale_faces(out: Path, files: dict[str, bytes]) -> list[Path]:
+    """The export faces under <out> that the plan no longer builds (a renamed family's old file)."""
+    return sorted(path for path in out.glob("*.ttf") if path.name not in files)
+
+
 def check(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
-    stale: list[str] = []
+    stale: list[str] = [f"extra {path}" for path in stale_faces(out, files)]
     for name, data in files.items():
         path = target(out, name)
         if not path.exists():
@@ -719,12 +801,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--italic-source", type=Path, default=DEFAULT_ITALIC_SOURCE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    parser.add_argument("--prefix", default="GT Inter")
     parser.add_argument("--check", action="store_true", help="exit 1 when the committed set differs")
     parser.add_argument("--json", action="store_true", help="machine result on stdout")
     args = parser.parse_args(argv)
 
-    fonts_json, files = build(args.source, args.italic_source, args.out, args.prefix)
+    fonts_json, files = build(args.source, args.italic_source, args.out)
     if args.check:
         stale = check(args.out, fonts_json, files)
         result = {"out": str(args.out), "faces": len(files), "stale": stale, "version": fonts_json["version"]}

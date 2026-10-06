@@ -29,7 +29,7 @@ import {
 import { entryMethods, openPackage, readPart, writePackage } from './zip.ts';
 
 const RUN =
-  '<a:r><a:rPr lang="en-US" sz="2640" spc="-66" kern="0" dirty="0"><a:solidFill><a:srgbClr val="070707"/></a:solidFill><a:latin typeface="GT Inter Display"/></a:rPr><a:t>Export fidelity</a:t></a:r>';
+  '<a:r><a:rPr lang="en-US" sz="2640" spc="-66" kern="0" dirty="0"><a:solidFill><a:srgbClr val="070707"/></a:solidFill><a:latin typeface="Inter Display Alternates"/></a:rPr><a:t>Export fidelity</a:t></a:r>';
 
 function sp(
   id: number,

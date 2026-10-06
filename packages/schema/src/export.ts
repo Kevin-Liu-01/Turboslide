@@ -12,6 +12,19 @@ export type ExportFormat = 'pptx' | 'pdf';
 export type ExportMode = 'native' | 'flatten';
 
 /**
+ * The PowerPoint font sets (SPEC 8.4; docs/DESIGN.md 4.3, decision C8). `standard` names the
+ * families the upstream Inter release installs under (Inter and Inter Medium for text, Inter
+ * Display and Inter Display Medium at 44 px and over) and writes the optical size difference as
+ * character spacing; `exact` names Inter cut at each text size (Inter Text 14 to Inter Text 26).
+ * In both a theme that draws Inter's alternate letters names Inter Display Alternates for its
+ * headings.
+ */
+export type ExportFontSet = 'standard' | 'exact';
+
+/** The font set an export takes when the caller names none. */
+export const DEFAULT_EXPORT_FONT_SET: ExportFontSet = 'standard';
+
+/**
  * How a flatten page raster is encoded (docs/pptx.md "The raster policy"): a two-color page as a
  * 1-bit palette PNG, a page whose colors fit 256 entries (or quantize within budget) as an 8-bit
  * palette PNG, a page with a continuous-tone block as a JPEG at quality 92 when it stays within
@@ -156,17 +169,17 @@ export const EXPORT_OPTIONS: readonly ExportOption[] = [
     id: 'fonts',
     label: 'Font set',
     kind: 'one',
-    default: 'exact',
+    default: DEFAULT_EXPORT_FONT_SET,
     choices: [
-      {
-        value: 'exact',
-        label: 'Exact',
-        doc: 'Per-size Inter instances renamed GT Inter (SPEC 8.4).',
-      },
       {
         value: 'standard',
         label: 'Standard',
-        doc: 'Inter, Inter Medium and GT Inter Display only.',
+        doc: 'The names Inter installs under: Inter and Inter Medium for text, Inter Display and Inter Display Medium at 44 px and over; character spacing keeps the browser widths (docs/DESIGN.md 4.3).',
+      },
+      {
+        value: 'exact',
+        label: 'Exact',
+        doc: 'Inter cut at each text size, named Inter Text 14 to Inter Text 26 (SPEC 8.4); a viewer needs the faces embedded or installed.',
       },
     ],
   },

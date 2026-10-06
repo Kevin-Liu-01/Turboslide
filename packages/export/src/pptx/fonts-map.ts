@@ -1,7 +1,13 @@
-// The export font set (SPEC 8.4): which family name a run travels under, and which file embeds it.
-// Weight 500 has no DrawingML attribute (only the bold flag), so the medium cut is its own family
-// (pptx report section 4.2). `exact` maps every size to a per-size Inter instance renamed GT Inter;
-// `standard` keeps Inter and Inter Medium under 44 px and the display instance above. The set
+// The export font set (SPEC 8.4; docs/DESIGN.md 4.3, decision C8): which family name a run
+// travels under, and which file embeds it. Weight 500 has no DrawingML attribute (only the bold
+// flag), so the medium cut is its own family (pptx report section 4.2). Every name is one the
+// upstream Inter release installs under or Inter followed by a size: `standard` (the default)
+// names Inter and Inter Medium under 44 px and Inter Display and Inter Display Medium from 44 px,
+// and takes the width the opsz 14 text faces add over the browser's optical size back as
+// character spacing (fonts.json `spacing`, face-advance.ts); `exact` names a per size cut, Inter
+// Text 14 to Inter Text 26, under 44 px. In both, a heading whose computed features carry cv11 or
+// ss01 (General Translation's theme) names Inter Display Alternates, the one face with those
+// letters frozen into its glyphs, because DrawingML cannot ask for a stylistic set. The set
 // carries Regular and Medium cuts only: a run at 600 or 700 (the inspector offers 300 to 700,
 // schema/typography.ts) travels as the Medium family plus the bold flag, a run under 400 as the
 // Regular family, and the report's residual names the substitution (docs/pptx.md). The files
@@ -10,20 +16,28 @@
 // and the report lists them under requiredOnViewer instead of embedded.
 //
 // Inter's LICENSE.txt (SIL OFL 1.1, THIRD_PARTY_NOTICES.md) declares no Reserved Font Name after
-// its copyright statement, so renamed instances are permitted (SPEC 11, open question 5). Should a
-// later Inter release declare one, RESERVED_FONT_NAME switches the prefix back to Inter.
+// its copyright statement, so modified instances may carry the Inter names (SPEC 11, open
+// question 5); scripts/build-fonts.py refuses to build if a later release declares one.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { FONT_NAMES } from '@turboslide/fonts/names';
+import type { ExportFontSet } from '@turboslide/schema/export';
 
-export type FontSet = 'exact' | 'standard';
+export type FontSet = ExportFontSet;
 
-/** Set when Inter's license declares a Reserved Font Name; the family prefix then stays 'Inter'. */
-export const RESERVED_FONT_NAME: string | null = null;
+/** The text families of the standard set by weight cut. */
+export const STANDARD_FAMILIES = { 400: 'Inter', 500: 'Inter Medium' } as const;
 
-export const FAMILY_PREFIX = RESERVED_FONT_NAME === null ? 'GT Inter' : 'Inter';
+/** The display families (opsz 32) by weight cut. */
+export const DISPLAY_FAMILIES = { 400: 'Inter Display', 500: 'Inter Display Medium' } as const;
+
+/** The display face with cv11 and ss01 frozen, for a theme that draws those letters. */
+export const ALTERNATES_FAMILY = 'Inter Display Alternates';
+
+/** Runs at and above this size travel in a display face (SPEC 8.4 table). */
+export const DISPLAY_FROM_PX = 44;
 
 /** The optical sizes the exact set is cut at (SPEC 8.4 table). */
 export const EXACT_OPSZ = [14, 15, 18, 20, 22, 24, 26] as const;
@@ -50,9 +64,10 @@ type FontsJsonFace = {
 /** scripts/build-fonts.py writes `faces`; `families` is accepted when it is the same array. */
 export type FontsJson = {
   version?: string;
-  prefix?: string;
   faces?: FontsJsonFace[];
   families?: FontsJsonFace[] | Record<string, unknown>;
+  /** family to whole pixel size to the share the run is wider than in the browser */
+  spacing?: Record<string, Record<string, number>>;
 };
 
 export type FontsCatalog = {
@@ -62,6 +77,8 @@ export type FontsCatalog = {
   dir: string;
   /** True when fonts.json was read. */
   built: boolean;
+  /** The standard set's width difference from the browser (fonts.json `spacing`); empty unbuilt. */
+  spacing: Record<string, Record<string, number>>;
 };
 
 function fontsExportDir(): string {
@@ -81,12 +98,12 @@ function fontsExportDir(): string {
 /** Reads packages/fonts/export/fonts.json when present. */
 export function loadFontsCatalog(dir: string = fontsExportDir()): FontsCatalog {
   const path = join(dir, 'fonts.json');
-  if (!existsSync(path)) return { version: 'unbuilt', entries: [], dir, built: false };
+  if (!existsSync(path)) return { version: 'unbuilt', entries: [], dir, built: false, spacing: {} };
   let parsed: FontsJson;
   try {
     parsed = JSON.parse(readFileSync(path, 'utf8')) as FontsJson;
   } catch {
-    return { version: 'unreadable', entries: [], dir, built: false };
+    return { version: 'unreadable', entries: [], dir, built: false, spacing: {} };
   }
   const faces: FontsJsonFace[] = Array.isArray(parsed.faces)
     ? parsed.faces
@@ -102,14 +119,13 @@ export function loadFontsCatalog(dir: string = fontsExportDir()): FontsCatalog {
       opsz: f.opsz ?? 14,
       display: f.display ?? false,
     }));
-  if (parsed.prefix !== undefined && parsed.prefix !== FAMILY_PREFIX)
-    return {
-      version: `${parsed.version ?? 'unknown'} (prefix ${parsed.prefix} differs from ${FAMILY_PREFIX})`,
-      entries,
-      dir,
-      built: entries.length > 0,
-    };
-  return { version: parsed.version ?? 'unknown', entries, dir, built: entries.length > 0 };
+  return {
+    version: parsed.version ?? 'unknown',
+    entries,
+    dir,
+    built: entries.length > 0,
+    spacing: parsed.spacing ?? {},
+  };
 }
 
 /** The nearest optical size of the exact set for a text size. */
@@ -137,37 +153,49 @@ export const EXPORT_WEIGHTS: readonly number[] = [400, 500];
 /** The bold flag stands in for the weights above the Medium cut. */
 export const BOLD_FROM = 600;
 
+/** Whether a computed `font-feature-settings` asks for General Translation's alternate letters. */
+export function drawsAlternates(features: string): boolean {
+  return /\b(cv11|ss01)\b/.test(features);
+}
+
 /**
- * The family a run travels under. Display text (weight 500 or more at 44 px and above, the h1, h2,
- * big and mood title) goes to the display instance with cv11 and ss01 frozen; everything else to
- * a text instance by optical size in the exact set, or to Inter and Inter Medium in the standard
- * set. A weight of 600 or more takes the Medium cut plus `bold`; a weight under 500 takes Regular.
+ * The family a run travels under. A run at 44 px and above (the h1, h2, big and mood title) goes
+ * to a display face (opsz 32): Inter Display or Inter Display Medium, or Inter Display Alternates
+ * for a run of weight 500 or more whose features draw cv11 and ss01. Under 44 px a run goes to
+ * Inter or Inter Medium in the standard set, or to the per size cut nearest its optical size in
+ * the exact set. A weight of 600 or more takes the Medium cut plus `bold`; a weight under 500
+ * takes Regular.
  */
-export function pickFamily(sizePx: number, weight: number, set: FontSet): FamilyPick {
+export function pickFamily(
+  sizePx: number,
+  weight: number,
+  set: FontSet,
+  alternates = false,
+): FamilyPick {
   const medium = weight >= 500;
   const bold = weight >= BOLD_FROM;
-  const display = medium && sizePx >= 44;
-  if (display)
+  const cut = medium ? 500 : 400;
+  if (sizePx >= DISPLAY_FROM_PX)
     return {
-      family: `${FAMILY_PREFIX} Display`,
+      family: medium && alternates ? ALTERNATES_FAMILY : DISPLAY_FAMILIES[cut],
       display: true,
       opsz: 32,
-      weight: 500,
+      weight: cut,
       requested: weight,
       bold,
     };
   if (set === 'standard')
     return {
-      family: medium ? 'Inter Medium' : 'Inter',
+      family: STANDARD_FAMILIES[cut],
       display: false,
       opsz: 14,
-      weight: medium ? 500 : 400,
+      weight: cut,
       requested: weight,
       bold,
     };
   const opsz = nearestOpsz(sizePx);
   return {
-    family: `${FAMILY_PREFIX} Text ${opsz}${medium ? ' Medium' : ''}`,
+    family: `Inter Text ${opsz}${medium ? ' Medium' : ''}`,
     display: false,
     opsz,
     weight: medium ? 500 : 400,
@@ -204,7 +232,7 @@ export function entryFor(catalog: FontsCatalog, pick: FamilyPick): FontEntry | u
   return catalog.entries.find((e) => e.family === pick.family);
 }
 
-/** The catalog's family names (docs/archive/rounds/PRODUCT.md 4.2), the words PowerPoint and Google Slides use. */
+/** The catalog's family names (docs/archive/rounds/PRODUCT.md 4.2), the words a PowerPoint file uses. */
 const CATALOG_NAMES: ReadonlySet<string> = new Set(Object.values(FONT_NAMES));
 
 /**
@@ -223,7 +251,7 @@ export function firstFamily(computed: string): string {
  * The catalog face a computed family names (docs/archive/rounds/PRODUCT.md 4.2, 4.5): the family name when the
  * first family of the stack is one of the catalog's, else null, so a run set in a catalog face
  * or drawn by the brand kit's Display or Text role travels under that name in `a:latin typeface`
- * and Inter keeps the export set's picks (`GT Inter Display`, `GT Inter Text 22`).
+ * and Inter keeps the export set's picks (`Inter Display Medium`, `Inter`, `Inter Text 22`).
  */
 export function catalogFamilyName(computed: string): string | null {
   const first = firstFamily(computed);

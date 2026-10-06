@@ -88,7 +88,7 @@ shapes verify. Measured cost in the image: 5 flatten pages convert in about 640 
 | Chrome for Testing | Playwright build `chromium-1217` (the Linux binary reports `Chromium 147.0.7727.0`; the macOS build of the same revision is Chrome for Testing 147.0.7727.15) | the build `shoot-slide.mjs` hard-codes; `TURBOSLIDE_CHROME` points at it, `TURBOSLIDE_GPU=swiftshader`; the headless package's renderer string reads `Chrome for Testing 147.0.7727.0, SwiftShader, Google` |
 | LibreOffice        | 25.2.3.2 (`4:25.2.3-2+deb13u6`)                                                                                                                               | the newest in Debian 13's repositories for arm64; TDF's 26.8 builds are x86_64 only, see below                                                                                                              |
 | poppler            | 25.03.0                                                                                                                                                       | `pdftocairo` (the rasterizer), `pdftoppm` (fallback), `pdfinfo`                                                                                                                                             |
-| Export fonts       | `packages/fonts/export/*.ttf`, 34 faces, 30 named `GT Inter` (round two adds the Italic and Medium Italic cuts of every size, SPEC-2 7.1)                     | installed under `/usr/local/share/fonts/turboslide`; `fc-list                                                                                                                                               | grep -c "GT Inter"` is 30; the Dockerfile asserts at least 30 at build time |
+| Export fonts       | `packages/fonts/export/*.ttf`, 38 faces under the upstream Inter names since the design round (docs/DESIGN.md 4.3), each upright and italic (SPEC-2 7.1)   | installed under `/usr/local/share/fonts/turboslide`; the Dockerfile asserts at least 38 files there at build time |
 | The repo           | `pnpm install` inside the image; `turboslide` on PATH                                                                                                         | the CLI runs its TypeScript source through Node's type stripping                                                                                                                                            |
 
 The default command is the job queue (`apps/render-worker/src/main.ts`) on port 4322: `render`,
@@ -401,12 +401,18 @@ gate anything.
 
 `scripts/build-fonts.py` (run through `turboslide fonts build`, which creates `.turboslide/venv`
 from `scripts/requirements.txt`) cuts the export set from `packages/fonts/assets/InterVariable.woff2`
-into `packages/fonts/export/`, committed with `fonts.json`: `GT Inter Display` (opsz 32, weight
-500, `cv11` and `ss01` frozen into the cmap), `GT Inter Text <size>` and `GT Inter Text <size>
-Medium` for 26, 24, 22, 20, 18, 15 and 14, and `Inter` and `Inter Medium` (opsz 14) for
-`--fonts standard`. Inter's license (SIL OFL 1.1) declares no Reserved Font Name (checked in name
-IDs 0, 7, 13, 14 and `THIRD_PARTY_NOTICES.md`; recorded in `fonts.json` `license`), so the renamed
-instances are permitted; the script refuses to rename if a later release declares one. The build
+into `packages/fonts/export/`, committed with `fonts.json`, under the names the upstream Inter
+release installs under (docs/DESIGN.md 4.3, decision C8): `Inter` and `Inter Medium` (opsz 14) for
+text in the standard set, the default; `Inter Display` and `Inter Display Medium` (opsz 32) at
+44 px and over in both sets; `Inter Display Alternates` (opsz 32, weight 500, `cv11` and `ss01`
+frozen into the cmap) for the headings of a theme that draws those letters; and `Inter Text <size>`
+and `Inter Text <size> Medium` for 26, 24, 22, 20, 18, 15 and 14 in `--fonts exact`. `fonts.json`
+`spacing` records how much wider the opsz 14 text faces draw than the browser's optical size per
+whole pixel size (4.1 percent at 22 px for Inter), which the writer takes back as character
+spacing. Files exported before the design round name `GT Inter` families; an import still maps
+them to Inter. Inter's license (SIL OFL 1.1) declares no Reserved Font Name (checked in name
+IDs 0, 7, 13, 14 and `THIRD_PARTY_NOTICES.md`; recorded in `fonts.json` `license`), so modified
+instances may carry the Inter names; the script refuses to build if a later release declares one. The build
 is deterministic (`head.modified` kept from the source); `turboslide fonts build --check` exits 1
 when the committed set differs from a fresh build. `fonts.json` lists the faces under `faces` and,
 for the PPTX builder's map, under `families` (the same rows).

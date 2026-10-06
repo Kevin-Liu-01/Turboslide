@@ -1,7 +1,6 @@
 {
-  "version": "4.001+gt.2",
+  "version": "4.001+build.3",
   "generatedBy": "scripts/build-fonts.py",
-  "prefix": "GT Inter",
   "source": {
     "file": "packages/fonts/assets/InterVariable.woff2",
     "family": "Inter Variable",
@@ -56,7 +55,7 @@
       "name 14",
       "THIRD_PARTY_NOTICES.md"
     ],
-    "note": "No Reserved Font Name is declared by the upright or the italic source, so renamed instances are permitted (OFL 1.1 condition 3)."
+    "note": "No Reserved Font Name is declared by the upright or the italic source, so modified instances may carry the Inter names (OFL 1.1 condition 3)."
   },
   "textSizes": [
     26,
@@ -80,6 +79,75 @@
   "standard": {
     "400": "Inter",
     "500": "Inter Medium"
+  },
+  "display": {
+    "400": "Inter Display",
+    "500": "Inter Display Medium"
+  },
+  "alternates": "Inter Display Alternates",
+  "spacing": {
+    "Inter": {
+      "15": 0.0049,
+      "16": 0.00987,
+      "17": 0.0149,
+      "18": 0.0197,
+      "19": 0.02508,
+      "20": 0.03007,
+      "21": 0.03525,
+      "22": 0.04052,
+      "23": 0.0457,
+      "24": 0.0513,
+      "25": 0.05674,
+      "26": 0.06219,
+      "27": 0.06755,
+      "28": 0.07344,
+      "29": 0.07881,
+      "30": 0.08455,
+      "31": 0.09035,
+      "32": 0.09617,
+      "33": 0.09617,
+      "34": 0.09617,
+      "35": 0.09617,
+      "36": 0.09617,
+      "37": 0.09617,
+      "38": 0.09617,
+      "39": 0.09617,
+      "40": 0.09617,
+      "41": 0.09617,
+      "42": 0.09617,
+      "43": 0.09617
+    },
+    "Inter Medium": {
+      "15": 0.00423,
+      "16": 0.00891,
+      "17": 0.01326,
+      "18": 0.0177,
+      "19": 0.02224,
+      "20": 0.0266,
+      "21": 0.03122,
+      "22": 0.03573,
+      "23": 0.04055,
+      "24": 0.04537,
+      "25": 0.05006,
+      "26": 0.05484,
+      "27": 0.05937,
+      "28": 0.06453,
+      "29": 0.06932,
+      "30": 0.07428,
+      "31": 0.0792,
+      "32": 0.08437,
+      "33": 0.08437,
+      "34": 0.08437,
+      "35": 0.08437,
+      "36": 0.08437,
+      "37": 0.08437,
+      "38": 0.08437,
+      "39": 0.08437,
+      "40": 0.08437,
+      "41": 0.08437,
+      "42": 0.08437,
+      "43": 0.08437
+    }
   },
   "fallback": {
     "family": "Inter Fallback",
@@ -138,11 +206,11 @@
   },
   "faces": [
     {
-      "file": "GTInterDisplay-Regular.ttf",
-      "family": "GT Inter Display",
+      "file": "InterDisplayAlternates-Regular.ttf",
+      "family": "Inter Display Alternates",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterDisplay-Regular",
+      "postScriptName": "InterDisplayAlternates-Regular",
       "opsz": 32,
       "weight": 500,
       "display": true,
@@ -160,15 +228,61 @@
         "exact",
         "standard"
       ],
-      "bytes": 342056,
-      "sha256": "6d599965fb9194eeed4cf82a46c97c1065c03c998db01402b6131a7eb9245591"
+      "bytes": 342152,
+      "sha256": "06791b3c9b36ea7b90b325154380b6975ef00cf24d04c4765ad260061000c227"
     },
     {
-      "file": "GTInterText26-Regular.ttf",
-      "family": "GT Inter Text 26",
+      "file": "InterDisplay-Regular.ttf",
+      "family": "Inter Display",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText26-Regular",
+      "postScriptName": "InterDisplay-Regular",
+      "opsz": 32,
+      "weight": 400,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
+      ],
+      "bytes": 340740,
+      "sha256": "4dc96eff311ec487ff3635519e822d7fa48f1668b8d7fe30d0c4bacfa21b83a1"
+    },
+    {
+      "file": "InterDisplayMedium-Regular.ttf",
+      "family": "Inter Display Medium",
+      "style": "Regular",
+      "italic": false,
+      "postScriptName": "InterDisplayMedium-Regular",
+      "opsz": 32,
+      "weight": 500,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
+      ],
+      "bytes": 341632,
+      "sha256": "bbbc608f87b2b304541735b4109670a4ec6362809a2115fc75fcbab70499dffd"
+    },
+    {
+      "file": "InterText26-Regular.ttf",
+      "family": "Inter Text 26",
+      "style": "Regular",
+      "italic": false,
+      "postScriptName": "InterText26-Regular",
       "opsz": 26,
       "weight": 400,
       "display": false,
@@ -181,14 +295,14 @@
         "exact"
       ],
       "bytes": 341988,
-      "sha256": "913f62ee2874897f005c1b93dd39641e02ad4f8e4c412bd6977ec65a0db1626f"
+      "sha256": "947fb3b94faf53a0f14b9869e552db8d7b022997c61121309231ea5f490b464c"
     },
     {
-      "file": "GTInterText26Medium-Regular.ttf",
-      "family": "GT Inter Text 26 Medium",
+      "file": "InterText26Medium-Regular.ttf",
+      "family": "Inter Text 26 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText26Medium-Regular",
+      "postScriptName": "InterText26Medium-Regular",
       "opsz": 26,
       "weight": 500,
       "display": false,
@@ -200,15 +314,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342292,
-      "sha256": "15d05dc4778438338898fed0b928b6efa3b1ff2e9970235ba154646ae1f8f331"
+      "bytes": 342296,
+      "sha256": "e68b7227254e992b021581ad33befb92a898775d0c0be81c9cf27614c50e80fe"
     },
     {
-      "file": "GTInterText24-Regular.ttf",
-      "family": "GT Inter Text 24",
+      "file": "InterText24-Regular.ttf",
+      "family": "Inter Text 24",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText24-Regular",
+      "postScriptName": "InterText24-Regular",
       "opsz": 24,
       "weight": 400,
       "display": false,
@@ -221,14 +335,14 @@
         "exact"
       ],
       "bytes": 342060,
-      "sha256": "2e14ed860f06acdf23d6fca08823d9d1f7b7f1c36f3c869994a6b7e31754381a"
+      "sha256": "f599047ed5b047c6165317b39e919e010f30dc6b9070e3ce37405f8f804abab1"
     },
     {
-      "file": "GTInterText24Medium-Regular.ttf",
-      "family": "GT Inter Text 24 Medium",
+      "file": "InterText24Medium-Regular.ttf",
+      "family": "Inter Text 24 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText24Medium-Regular",
+      "postScriptName": "InterText24Medium-Regular",
       "opsz": 24,
       "weight": 500,
       "display": false,
@@ -240,15 +354,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342496,
-      "sha256": "03aba80b951ec1654e55ff079c0b7eca9a33c182e32935da5513b2af4e606b0c"
+      "bytes": 342500,
+      "sha256": "6cf9cfa512105b1c7ef0570c1008fff17784b0aa093daf399d1c5ddaf3ae0518"
     },
     {
-      "file": "GTInterText22-Regular.ttf",
-      "family": "GT Inter Text 22",
+      "file": "InterText22-Regular.ttf",
+      "family": "Inter Text 22",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText22-Regular",
+      "postScriptName": "InterText22-Regular",
       "opsz": 22,
       "weight": 400,
       "display": false,
@@ -261,14 +375,14 @@
         "exact"
       ],
       "bytes": 341852,
-      "sha256": "0ba2e8d30860d267aa588bb80b4aa91b2c4077aed56b38d4c12ae4569ce98d1d"
+      "sha256": "001f35496067452751bf1a9aa8714d600d92820c04de011b24cca745b1879562"
     },
     {
-      "file": "GTInterText22Medium-Regular.ttf",
-      "family": "GT Inter Text 22 Medium",
+      "file": "InterText22Medium-Regular.ttf",
+      "family": "Inter Text 22 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText22Medium-Regular",
+      "postScriptName": "InterText22Medium-Regular",
       "opsz": 22,
       "weight": 500,
       "display": false,
@@ -280,15 +394,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342456,
-      "sha256": "65cb5c8e4fe3e4e65d7aeadffb92fb89408e9019ad8b2d74ea8da28ee52d7d27"
+      "bytes": 342460,
+      "sha256": "f8ff06bc32f791978b24243a5c29543bd0d12891b605ab564d6f8dcc9cc33c59"
     },
     {
-      "file": "GTInterText20-Regular.ttf",
-      "family": "GT Inter Text 20",
+      "file": "InterText20-Regular.ttf",
+      "family": "Inter Text 20",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText20-Regular",
+      "postScriptName": "InterText20-Regular",
       "opsz": 20,
       "weight": 400,
       "display": false,
@@ -301,14 +415,14 @@
         "exact"
       ],
       "bytes": 342132,
-      "sha256": "92c6681dd549ec15500fd566d657555d657655bedb11a84de667c2b7c892c179"
+      "sha256": "054a0c9da5a0e3baab83650166bed136835a6ea86d97be9c5c110df871967b41"
     },
     {
-      "file": "GTInterText20Medium-Regular.ttf",
-      "family": "GT Inter Text 20 Medium",
+      "file": "InterText20Medium-Regular.ttf",
+      "family": "Inter Text 20 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText20Medium-Regular",
+      "postScriptName": "InterText20Medium-Regular",
       "opsz": 20,
       "weight": 500,
       "display": false,
@@ -320,15 +434,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342660,
-      "sha256": "017430fa4d57ce5d1f6a84e65e7c2923621f87e076171b27da59c25aa519380e"
+      "bytes": 342664,
+      "sha256": "c8de137916b51ba9718b05198b742a5a26890b3469f176ff26b1b24018455983"
     },
     {
-      "file": "GTInterText18-Regular.ttf",
-      "family": "GT Inter Text 18",
+      "file": "InterText18-Regular.ttf",
+      "family": "Inter Text 18",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText18-Regular",
+      "postScriptName": "InterText18-Regular",
       "opsz": 18,
       "weight": 400,
       "display": false,
@@ -341,14 +455,14 @@
         "exact"
       ],
       "bytes": 341984,
-      "sha256": "7f7758c97629616358dcd8362512c5c73846b6244ae5e152669bae9663536fce"
+      "sha256": "4612e5b1191b8b214581f4eaf37aca2eea33c54c1675584ea8c36df4b42cd606"
     },
     {
-      "file": "GTInterText18Medium-Regular.ttf",
-      "family": "GT Inter Text 18 Medium",
+      "file": "InterText18Medium-Regular.ttf",
+      "family": "Inter Text 18 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText18Medium-Regular",
+      "postScriptName": "InterText18Medium-Regular",
       "opsz": 18,
       "weight": 500,
       "display": false,
@@ -360,15 +474,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342688,
-      "sha256": "e000ae6109e8ef077b64944ca074ea547e3f7ad1714f5f054cbc987d607005d6"
+      "bytes": 342692,
+      "sha256": "ff6fd3b4175e7601d3bce7428a5ec4800e352ba039a4708177c4f778a7b7e088"
     },
     {
-      "file": "GTInterText15-Regular.ttf",
-      "family": "GT Inter Text 15",
+      "file": "InterText15-Regular.ttf",
+      "family": "Inter Text 15",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText15-Regular",
+      "postScriptName": "InterText15-Regular",
       "opsz": 15,
       "weight": 400,
       "display": false,
@@ -381,14 +495,14 @@
         "exact"
       ],
       "bytes": 342016,
-      "sha256": "e9c3e7729708481c0f045901e3e03f275c56e80a6bb7e161eabe9b970062f3cc"
+      "sha256": "862cdf769f71cbc15cac94452157aad10286dfa905915fc2c8257520d294bb95"
     },
     {
-      "file": "GTInterText15Medium-Regular.ttf",
-      "family": "GT Inter Text 15 Medium",
+      "file": "InterText15Medium-Regular.ttf",
+      "family": "Inter Text 15 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText15Medium-Regular",
+      "postScriptName": "InterText15Medium-Regular",
       "opsz": 15,
       "weight": 500,
       "display": false,
@@ -400,15 +514,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342700,
-      "sha256": "4fed7aa4dfe9b22c6764f5a25954ea6056abfee949b900d311d8f6bbe91f8a2c"
+      "bytes": 342704,
+      "sha256": "9e8456e2827a405af4e69628c4868882010a09f2c74f1473de8bbdd189c83f33"
     },
     {
-      "file": "GTInterText14-Regular.ttf",
-      "family": "GT Inter Text 14",
+      "file": "InterText14-Regular.ttf",
+      "family": "Inter Text 14",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText14-Regular",
+      "postScriptName": "InterText14-Regular",
       "opsz": 14,
       "weight": 400,
       "display": false,
@@ -421,14 +535,14 @@
         "exact"
       ],
       "bytes": 342000,
-      "sha256": "a4b7ce19a5b1bfa8daad152083d4c6c515b413ed90f224f763134c0dd3b40e8a"
+      "sha256": "4e0b70e589faa92f1f82a3454a933e57eeca65d4d7df25e6482040154d0d524c"
     },
     {
-      "file": "GTInterText14Medium-Regular.ttf",
-      "family": "GT Inter Text 14 Medium",
+      "file": "InterText14Medium-Regular.ttf",
+      "family": "Inter Text 14 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText14Medium-Regular",
+      "postScriptName": "InterText14Medium-Regular",
       "opsz": 14,
       "weight": 500,
       "display": false,
@@ -440,8 +554,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342628,
-      "sha256": "8af7a07659fc4e23fe6937efc0e8569af6cbc2eedac7ed13ae5f09f2655529dd"
+      "bytes": 342632,
+      "sha256": "19e3496041e849ad965e61d45abe357b9aef415f0ccd3a5852f6cbeaa71b3104"
     },
     {
       "file": "Inter-Regular.ttf",
@@ -466,8 +580,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 341916,
-      "sha256": "4fcc3b475f3c1d9830bb07f43a935af770381d77335e0b73ab40872570181516"
+      "bytes": 341940,
+      "sha256": "1932911fcc918e34fc569c24e65d861d31905d136bee4fecaf2b3ae4cb4424f2"
     },
     {
       "file": "InterMedium-Regular.ttf",
@@ -492,15 +606,15 @@
       "sets": [
         "standard"
       ],
-      "bytes": 342548,
-      "sha256": "f844bf667a853091dbae8831474480b2dfd8fcdf411586b933f488b3b670fdb3"
+      "bytes": 342572,
+      "sha256": "48a011f8411cfee8c1173d61c38840272c5ef5e7831f6ff4fe106ec831b24e08"
     },
     {
-      "file": "GTInterDisplay-Italic.ttf",
-      "family": "GT Inter Display",
+      "file": "InterDisplayAlternates-Italic.ttf",
+      "family": "Inter Display Alternates",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterDisplay-Italic",
+      "postScriptName": "InterDisplayAlternates-Italic",
       "opsz": 32,
       "weight": 500,
       "display": true,
@@ -518,35 +632,81 @@
         "exact",
         "standard"
       ],
-      "bytes": 346036,
-      "sha256": "1ac6768e37d3ae71ee75dc23b640a5ff16bcd4033191082d14009a42229a9475"
+      "bytes": 346156,
+      "sha256": "b08c7811c7ae5be3a9018d8af477613acaa07cbff01fa9f694b42d95db241238"
     },
     {
-      "file": "GTInterText26-Italic.ttf",
-      "family": "GT Inter Text 26",
+      "file": "InterDisplay-Italic.ttf",
+      "family": "Inter Display",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText26-Italic",
-      "opsz": 26,
+      "postScriptName": "InterDisplay-Italic",
+      "opsz": 32,
       "weight": 400,
-      "display": false,
+      "display": true,
       "sizes": [
-        26
+        44,
+        72,
+        88
       ],
       "frozen": [],
       "remappedCodepoints": 0,
       "sets": [
-        "exact"
+        "exact",
+        "standard"
+      ],
+      "bytes": 344956,
+      "sha256": "a98a49a7f5373678a0c183c460daed12cd6db068bcc25677c8f4e573024f8ed3"
+    },
+    {
+      "file": "InterDisplayMedium-Italic.ttf",
+      "family": "Inter Display Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterDisplayMedium-Italic",
+      "opsz": 32,
+      "weight": 500,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
       ],
       "bytes": 345664,
-      "sha256": "bc54f24224b1a367514952c6c88040f97f63f979d7f9e92e05202fb9bd35b341"
+      "sha256": "8bef89c21af98ce018c6194ebe1cf55c13e56d33fa10159e34b4b397cf33a17c"
     },
     {
-      "file": "GTInterText26Medium-Italic.ttf",
-      "family": "GT Inter Text 26 Medium",
+      "file": "InterText26-Italic.ttf",
+      "family": "Inter Text 26",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText26Medium-Italic",
+      "postScriptName": "InterText26-Italic",
+      "opsz": 26,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        26
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345656,
+      "sha256": "72160ae6a6b7e4fbee5b41041fa3d2265d1681857fafe1b7169ebeb5b8d556c6"
+    },
+    {
+      "file": "InterText26Medium-Italic.ttf",
+      "family": "Inter Text 26 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText26Medium-Italic",
       "opsz": 26,
       "weight": 500,
       "display": false,
@@ -558,60 +718,20 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346136,
-      "sha256": "8f79eb4dde252b71ca87e2db36824c1dfd4d7a4932c5b62a64c23660d0b68963"
+      "bytes": 346132,
+      "sha256": "1c4c477817874887b6c757de77e66bf27ae30917173574132a05e91b2c974811"
     },
     {
-      "file": "GTInterText24-Italic.ttf",
-      "family": "GT Inter Text 24",
+      "file": "InterText24-Italic.ttf",
+      "family": "Inter Text 24",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText24-Italic",
+      "postScriptName": "InterText24-Italic",
       "opsz": 24,
       "weight": 400,
       "display": false,
       "sizes": [
         24
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 345788,
-      "sha256": "a740f1c7ab38a58a3eee4de25932734cc2ba4460bdb63d9f497730b5aee23319"
-    },
-    {
-      "file": "GTInterText24Medium-Italic.ttf",
-      "family": "GT Inter Text 24 Medium",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText24Medium-Italic",
-      "opsz": 24,
-      "weight": 500,
-      "display": false,
-      "sizes": [
-        24
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 346360,
-      "sha256": "b7dac8fe297d0b5366c7bb668789fecb36194d8667c5949bf69b60834af84c79"
-    },
-    {
-      "file": "GTInterText22-Italic.ttf",
-      "family": "GT Inter Text 22",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText22-Italic",
-      "opsz": 22,
-      "weight": 400,
-      "display": false,
-      "sizes": [
-        22
       ],
       "frozen": [],
       "remappedCodepoints": 0,
@@ -619,14 +739,54 @@
         "exact"
       ],
       "bytes": 345780,
-      "sha256": "9665673831dbe71a60eecb35df3b463342e9a153c4c9ec787164997e6658e018"
+      "sha256": "60f24214df04dcbe66717a6559ec5d1ef6a492b093dece1c363eb55a739b6915"
     },
     {
-      "file": "GTInterText22Medium-Italic.ttf",
-      "family": "GT Inter Text 22 Medium",
+      "file": "InterText24Medium-Italic.ttf",
+      "family": "Inter Text 24 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText22Medium-Italic",
+      "postScriptName": "InterText24Medium-Italic",
+      "opsz": 24,
+      "weight": 500,
+      "display": false,
+      "sizes": [
+        24
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 346356,
+      "sha256": "5d7fbaffd7cc52edd641ffda6a26866c0741d3312edc30e86f8b4641e8a50d61"
+    },
+    {
+      "file": "InterText22-Italic.ttf",
+      "family": "Inter Text 22",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText22-Italic",
+      "opsz": 22,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        22
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345772,
+      "sha256": "eb244705b986e98949104a2ab62b4cc908f9d06746647d8687442062e96eccfc"
+    },
+    {
+      "file": "InterText22Medium-Italic.ttf",
+      "family": "Inter Text 22 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText22Medium-Italic",
       "opsz": 22,
       "weight": 500,
       "display": false,
@@ -638,15 +798,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346284,
-      "sha256": "b9fb905be58f30f10a5199fa9ff43ba3fd2fcc430e30b00862459907399c1ed1"
+      "bytes": 346280,
+      "sha256": "051c5bdc950c1cd858008c41ec45e2170655d29392d360f3008579e6ce76723e"
     },
     {
-      "file": "GTInterText20-Italic.ttf",
-      "family": "GT Inter Text 20",
+      "file": "InterText20-Italic.ttf",
+      "family": "Inter Text 20",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText20-Italic",
+      "postScriptName": "InterText20-Italic",
       "opsz": 20,
       "weight": 400,
       "display": false,
@@ -658,15 +818,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345716,
-      "sha256": "24a64db26a99ddb0d4afa55ac9985ef94dcd88e4b6b75a64ee65c06a89d48064"
+      "bytes": 345708,
+      "sha256": "c36b011c07955687dcfa7628f1673fb9c868258717160dd620be88053bdb493b"
     },
     {
-      "file": "GTInterText20Medium-Italic.ttf",
-      "family": "GT Inter Text 20 Medium",
+      "file": "InterText20Medium-Italic.ttf",
+      "family": "Inter Text 20 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText20Medium-Italic",
+      "postScriptName": "InterText20Medium-Italic",
       "opsz": 20,
       "weight": 500,
       "display": false,
@@ -678,15 +838,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346268,
-      "sha256": "f3e283e017b07c1e1d6708e956ac24c5a1de97862cca8283457790b91cc677ab"
+      "bytes": 346264,
+      "sha256": "e18cb9ac580e60043e9a11936dbff8ba2715e4e5d41f295a945ba67781423a14"
     },
     {
-      "file": "GTInterText18-Italic.ttf",
-      "family": "GT Inter Text 18",
+      "file": "InterText18-Italic.ttf",
+      "family": "Inter Text 18",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText18-Italic",
+      "postScriptName": "InterText18-Italic",
       "opsz": 18,
       "weight": 400,
       "display": false,
@@ -698,60 +858,20 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345684,
-      "sha256": "a39a62b6275d7e65e4e5ba62d1bb6c3e43edc2d20b627df04b74004d8d905614"
+      "bytes": 345676,
+      "sha256": "dbbbb909c8ce8f961f0174962398b3d7b6c6979587321e2b846a5e1f4788860c"
     },
     {
-      "file": "GTInterText18Medium-Italic.ttf",
-      "family": "GT Inter Text 18 Medium",
+      "file": "InterText18Medium-Italic.ttf",
+      "family": "Inter Text 18 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText18Medium-Italic",
+      "postScriptName": "InterText18Medium-Italic",
       "opsz": 18,
       "weight": 500,
       "display": false,
       "sizes": [
         18
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 346212,
-      "sha256": "4e4a8f25d6482a1e71c12fdd933d29f1ef348a567f53fa35eff9c573dd8e404e"
-    },
-    {
-      "file": "GTInterText15-Italic.ttf",
-      "family": "GT Inter Text 15",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText15-Italic",
-      "opsz": 15,
-      "weight": 400,
-      "display": false,
-      "sizes": [
-        15
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 345636,
-      "sha256": "e3a5c56a644ed1c4ddfd428dc5c0f8408fee9a7d62063a6b349e4a8ee1975e0b"
-    },
-    {
-      "file": "GTInterText15Medium-Italic.ttf",
-      "family": "GT Inter Text 15 Medium",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText15Medium-Italic",
-      "opsz": 15,
-      "weight": 500,
-      "display": false,
-      "sizes": [
-        15
       ],
       "frozen": [],
       "remappedCodepoints": 0,
@@ -759,14 +879,54 @@
         "exact"
       ],
       "bytes": 346208,
-      "sha256": "df0c88e7200af19ab5cb78818e66a45417801cf9059a14ff88c6098f127a795f"
+      "sha256": "3e73e0bf3937c6bc1009b4e17af3d1eec4246397c79e32160d31c6f87d4ab9cb"
     },
     {
-      "file": "GTInterText14-Italic.ttf",
-      "family": "GT Inter Text 14",
+      "file": "InterText15-Italic.ttf",
+      "family": "Inter Text 15",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText14-Italic",
+      "postScriptName": "InterText15-Italic",
+      "opsz": 15,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        15
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345628,
+      "sha256": "b63b33aa1e11f13a501d0ca2de8a28f0d4c8bc7fa7914a94158e9dc103be2d6f"
+    },
+    {
+      "file": "InterText15Medium-Italic.ttf",
+      "family": "Inter Text 15 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText15Medium-Italic",
+      "opsz": 15,
+      "weight": 500,
+      "display": false,
+      "sizes": [
+        15
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 346204,
+      "sha256": "fe322f00225d0afc0ca308bb71647899d3386eacabe266c975c2c22ecd5751a3"
+    },
+    {
+      "file": "InterText14-Italic.ttf",
+      "family": "Inter Text 14",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText14-Italic",
       "opsz": 14,
       "weight": 400,
       "display": false,
@@ -778,15 +938,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345456,
-      "sha256": "70a0d80bb046507c3fb7d11f4933a632813e94bef667f4f8d4861a08dee6180c"
+      "bytes": 345448,
+      "sha256": "1c80834c0ec8cc6e2e86ff8b1c6edbca749a5045891dd55c498bb3582253a3a2"
     },
     {
-      "file": "GTInterText14Medium-Italic.ttf",
-      "family": "GT Inter Text 14 Medium",
+      "file": "InterText14Medium-Italic.ttf",
+      "family": "Inter Text 14 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText14Medium-Italic",
+      "postScriptName": "InterText14Medium-Italic",
       "opsz": 14,
       "weight": 500,
       "display": false,
@@ -798,8 +958,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346080,
-      "sha256": "320177f5d2b5b9ef0d9f04ea9128a4fa93ab7b035424d0731c5f1c6ec8758d1b"
+      "bytes": 346076,
+      "sha256": "2c53a00c17cb34baf959ab001a4e37bc8ab1ecc015b81dafc2bb67aa320aef24"
     },
     {
       "file": "Inter-Italic.ttf",
@@ -824,8 +984,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 345340,
-      "sha256": "232ec9a7ff2fa059f1f781885c13879490bbea04bd89a763d65d3ed8ed1df114"
+      "bytes": 345364,
+      "sha256": "35fa97af0d03ea1899669fe819a36fd89bf6fb2810aa7bf94b4b73374f9d3ed2"
     },
     {
       "file": "InterMedium-Italic.ttf",
@@ -850,17 +1010,17 @@
       "sets": [
         "standard"
       ],
-      "bytes": 345968,
-      "sha256": "94ac8dbf928c93e00e180960e2ba6d625b5ebe5d5e0ffb1c56ba1c3f7a6bf511"
+      "bytes": 345992,
+      "sha256": "cad817521895d142cae3e2044a347826fe6f566c459513accc68d539fd390281"
     }
   ],
   "families": [
     {
-      "file": "GTInterDisplay-Regular.ttf",
-      "family": "GT Inter Display",
+      "file": "InterDisplayAlternates-Regular.ttf",
+      "family": "Inter Display Alternates",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterDisplay-Regular",
+      "postScriptName": "InterDisplayAlternates-Regular",
       "opsz": 32,
       "weight": 500,
       "display": true,
@@ -878,15 +1038,61 @@
         "exact",
         "standard"
       ],
-      "bytes": 342056,
-      "sha256": "6d599965fb9194eeed4cf82a46c97c1065c03c998db01402b6131a7eb9245591"
+      "bytes": 342152,
+      "sha256": "06791b3c9b36ea7b90b325154380b6975ef00cf24d04c4765ad260061000c227"
     },
     {
-      "file": "GTInterText26-Regular.ttf",
-      "family": "GT Inter Text 26",
+      "file": "InterDisplay-Regular.ttf",
+      "family": "Inter Display",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText26-Regular",
+      "postScriptName": "InterDisplay-Regular",
+      "opsz": 32,
+      "weight": 400,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
+      ],
+      "bytes": 340740,
+      "sha256": "4dc96eff311ec487ff3635519e822d7fa48f1668b8d7fe30d0c4bacfa21b83a1"
+    },
+    {
+      "file": "InterDisplayMedium-Regular.ttf",
+      "family": "Inter Display Medium",
+      "style": "Regular",
+      "italic": false,
+      "postScriptName": "InterDisplayMedium-Regular",
+      "opsz": 32,
+      "weight": 500,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
+      ],
+      "bytes": 341632,
+      "sha256": "bbbc608f87b2b304541735b4109670a4ec6362809a2115fc75fcbab70499dffd"
+    },
+    {
+      "file": "InterText26-Regular.ttf",
+      "family": "Inter Text 26",
+      "style": "Regular",
+      "italic": false,
+      "postScriptName": "InterText26-Regular",
       "opsz": 26,
       "weight": 400,
       "display": false,
@@ -899,14 +1105,14 @@
         "exact"
       ],
       "bytes": 341988,
-      "sha256": "913f62ee2874897f005c1b93dd39641e02ad4f8e4c412bd6977ec65a0db1626f"
+      "sha256": "947fb3b94faf53a0f14b9869e552db8d7b022997c61121309231ea5f490b464c"
     },
     {
-      "file": "GTInterText26Medium-Regular.ttf",
-      "family": "GT Inter Text 26 Medium",
+      "file": "InterText26Medium-Regular.ttf",
+      "family": "Inter Text 26 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText26Medium-Regular",
+      "postScriptName": "InterText26Medium-Regular",
       "opsz": 26,
       "weight": 500,
       "display": false,
@@ -918,15 +1124,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342292,
-      "sha256": "15d05dc4778438338898fed0b928b6efa3b1ff2e9970235ba154646ae1f8f331"
+      "bytes": 342296,
+      "sha256": "e68b7227254e992b021581ad33befb92a898775d0c0be81c9cf27614c50e80fe"
     },
     {
-      "file": "GTInterText24-Regular.ttf",
-      "family": "GT Inter Text 24",
+      "file": "InterText24-Regular.ttf",
+      "family": "Inter Text 24",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText24-Regular",
+      "postScriptName": "InterText24-Regular",
       "opsz": 24,
       "weight": 400,
       "display": false,
@@ -939,14 +1145,14 @@
         "exact"
       ],
       "bytes": 342060,
-      "sha256": "2e14ed860f06acdf23d6fca08823d9d1f7b7f1c36f3c869994a6b7e31754381a"
+      "sha256": "f599047ed5b047c6165317b39e919e010f30dc6b9070e3ce37405f8f804abab1"
     },
     {
-      "file": "GTInterText24Medium-Regular.ttf",
-      "family": "GT Inter Text 24 Medium",
+      "file": "InterText24Medium-Regular.ttf",
+      "family": "Inter Text 24 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText24Medium-Regular",
+      "postScriptName": "InterText24Medium-Regular",
       "opsz": 24,
       "weight": 500,
       "display": false,
@@ -958,15 +1164,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342496,
-      "sha256": "03aba80b951ec1654e55ff079c0b7eca9a33c182e32935da5513b2af4e606b0c"
+      "bytes": 342500,
+      "sha256": "6cf9cfa512105b1c7ef0570c1008fff17784b0aa093daf399d1c5ddaf3ae0518"
     },
     {
-      "file": "GTInterText22-Regular.ttf",
-      "family": "GT Inter Text 22",
+      "file": "InterText22-Regular.ttf",
+      "family": "Inter Text 22",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText22-Regular",
+      "postScriptName": "InterText22-Regular",
       "opsz": 22,
       "weight": 400,
       "display": false,
@@ -979,14 +1185,14 @@
         "exact"
       ],
       "bytes": 341852,
-      "sha256": "0ba2e8d30860d267aa588bb80b4aa91b2c4077aed56b38d4c12ae4569ce98d1d"
+      "sha256": "001f35496067452751bf1a9aa8714d600d92820c04de011b24cca745b1879562"
     },
     {
-      "file": "GTInterText22Medium-Regular.ttf",
-      "family": "GT Inter Text 22 Medium",
+      "file": "InterText22Medium-Regular.ttf",
+      "family": "Inter Text 22 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText22Medium-Regular",
+      "postScriptName": "InterText22Medium-Regular",
       "opsz": 22,
       "weight": 500,
       "display": false,
@@ -998,15 +1204,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342456,
-      "sha256": "65cb5c8e4fe3e4e65d7aeadffb92fb89408e9019ad8b2d74ea8da28ee52d7d27"
+      "bytes": 342460,
+      "sha256": "f8ff06bc32f791978b24243a5c29543bd0d12891b605ab564d6f8dcc9cc33c59"
     },
     {
-      "file": "GTInterText20-Regular.ttf",
-      "family": "GT Inter Text 20",
+      "file": "InterText20-Regular.ttf",
+      "family": "Inter Text 20",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText20-Regular",
+      "postScriptName": "InterText20-Regular",
       "opsz": 20,
       "weight": 400,
       "display": false,
@@ -1019,14 +1225,14 @@
         "exact"
       ],
       "bytes": 342132,
-      "sha256": "92c6681dd549ec15500fd566d657555d657655bedb11a84de667c2b7c892c179"
+      "sha256": "054a0c9da5a0e3baab83650166bed136835a6ea86d97be9c5c110df871967b41"
     },
     {
-      "file": "GTInterText20Medium-Regular.ttf",
-      "family": "GT Inter Text 20 Medium",
+      "file": "InterText20Medium-Regular.ttf",
+      "family": "Inter Text 20 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText20Medium-Regular",
+      "postScriptName": "InterText20Medium-Regular",
       "opsz": 20,
       "weight": 500,
       "display": false,
@@ -1038,15 +1244,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342660,
-      "sha256": "017430fa4d57ce5d1f6a84e65e7c2923621f87e076171b27da59c25aa519380e"
+      "bytes": 342664,
+      "sha256": "c8de137916b51ba9718b05198b742a5a26890b3469f176ff26b1b24018455983"
     },
     {
-      "file": "GTInterText18-Regular.ttf",
-      "family": "GT Inter Text 18",
+      "file": "InterText18-Regular.ttf",
+      "family": "Inter Text 18",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText18-Regular",
+      "postScriptName": "InterText18-Regular",
       "opsz": 18,
       "weight": 400,
       "display": false,
@@ -1059,14 +1265,14 @@
         "exact"
       ],
       "bytes": 341984,
-      "sha256": "7f7758c97629616358dcd8362512c5c73846b6244ae5e152669bae9663536fce"
+      "sha256": "4612e5b1191b8b214581f4eaf37aca2eea33c54c1675584ea8c36df4b42cd606"
     },
     {
-      "file": "GTInterText18Medium-Regular.ttf",
-      "family": "GT Inter Text 18 Medium",
+      "file": "InterText18Medium-Regular.ttf",
+      "family": "Inter Text 18 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText18Medium-Regular",
+      "postScriptName": "InterText18Medium-Regular",
       "opsz": 18,
       "weight": 500,
       "display": false,
@@ -1078,15 +1284,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342688,
-      "sha256": "e000ae6109e8ef077b64944ca074ea547e3f7ad1714f5f054cbc987d607005d6"
+      "bytes": 342692,
+      "sha256": "ff6fd3b4175e7601d3bce7428a5ec4800e352ba039a4708177c4f778a7b7e088"
     },
     {
-      "file": "GTInterText15-Regular.ttf",
-      "family": "GT Inter Text 15",
+      "file": "InterText15-Regular.ttf",
+      "family": "Inter Text 15",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText15-Regular",
+      "postScriptName": "InterText15-Regular",
       "opsz": 15,
       "weight": 400,
       "display": false,
@@ -1099,14 +1305,14 @@
         "exact"
       ],
       "bytes": 342016,
-      "sha256": "e9c3e7729708481c0f045901e3e03f275c56e80a6bb7e161eabe9b970062f3cc"
+      "sha256": "862cdf769f71cbc15cac94452157aad10286dfa905915fc2c8257520d294bb95"
     },
     {
-      "file": "GTInterText15Medium-Regular.ttf",
-      "family": "GT Inter Text 15 Medium",
+      "file": "InterText15Medium-Regular.ttf",
+      "family": "Inter Text 15 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText15Medium-Regular",
+      "postScriptName": "InterText15Medium-Regular",
       "opsz": 15,
       "weight": 500,
       "display": false,
@@ -1118,15 +1324,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342700,
-      "sha256": "4fed7aa4dfe9b22c6764f5a25954ea6056abfee949b900d311d8f6bbe91f8a2c"
+      "bytes": 342704,
+      "sha256": "9e8456e2827a405af4e69628c4868882010a09f2c74f1473de8bbdd189c83f33"
     },
     {
-      "file": "GTInterText14-Regular.ttf",
-      "family": "GT Inter Text 14",
+      "file": "InterText14-Regular.ttf",
+      "family": "Inter Text 14",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText14-Regular",
+      "postScriptName": "InterText14-Regular",
       "opsz": 14,
       "weight": 400,
       "display": false,
@@ -1139,14 +1345,14 @@
         "exact"
       ],
       "bytes": 342000,
-      "sha256": "a4b7ce19a5b1bfa8daad152083d4c6c515b413ed90f224f763134c0dd3b40e8a"
+      "sha256": "4e0b70e589faa92f1f82a3454a933e57eeca65d4d7df25e6482040154d0d524c"
     },
     {
-      "file": "GTInterText14Medium-Regular.ttf",
-      "family": "GT Inter Text 14 Medium",
+      "file": "InterText14Medium-Regular.ttf",
+      "family": "Inter Text 14 Medium",
       "style": "Regular",
       "italic": false,
-      "postScriptName": "GTInterText14Medium-Regular",
+      "postScriptName": "InterText14Medium-Regular",
       "opsz": 14,
       "weight": 500,
       "display": false,
@@ -1158,8 +1364,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 342628,
-      "sha256": "8af7a07659fc4e23fe6937efc0e8569af6cbc2eedac7ed13ae5f09f2655529dd"
+      "bytes": 342632,
+      "sha256": "19e3496041e849ad965e61d45abe357b9aef415f0ccd3a5852f6cbeaa71b3104"
     },
     {
       "file": "Inter-Regular.ttf",
@@ -1184,8 +1390,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 341916,
-      "sha256": "4fcc3b475f3c1d9830bb07f43a935af770381d77335e0b73ab40872570181516"
+      "bytes": 341940,
+      "sha256": "1932911fcc918e34fc569c24e65d861d31905d136bee4fecaf2b3ae4cb4424f2"
     },
     {
       "file": "InterMedium-Regular.ttf",
@@ -1210,15 +1416,15 @@
       "sets": [
         "standard"
       ],
-      "bytes": 342548,
-      "sha256": "f844bf667a853091dbae8831474480b2dfd8fcdf411586b933f488b3b670fdb3"
+      "bytes": 342572,
+      "sha256": "48a011f8411cfee8c1173d61c38840272c5ef5e7831f6ff4fe106ec831b24e08"
     },
     {
-      "file": "GTInterDisplay-Italic.ttf",
-      "family": "GT Inter Display",
+      "file": "InterDisplayAlternates-Italic.ttf",
+      "family": "Inter Display Alternates",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterDisplay-Italic",
+      "postScriptName": "InterDisplayAlternates-Italic",
       "opsz": 32,
       "weight": 500,
       "display": true,
@@ -1236,35 +1442,81 @@
         "exact",
         "standard"
       ],
-      "bytes": 346036,
-      "sha256": "1ac6768e37d3ae71ee75dc23b640a5ff16bcd4033191082d14009a42229a9475"
+      "bytes": 346156,
+      "sha256": "b08c7811c7ae5be3a9018d8af477613acaa07cbff01fa9f694b42d95db241238"
     },
     {
-      "file": "GTInterText26-Italic.ttf",
-      "family": "GT Inter Text 26",
+      "file": "InterDisplay-Italic.ttf",
+      "family": "Inter Display",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText26-Italic",
-      "opsz": 26,
+      "postScriptName": "InterDisplay-Italic",
+      "opsz": 32,
       "weight": 400,
-      "display": false,
+      "display": true,
       "sizes": [
-        26
+        44,
+        72,
+        88
       ],
       "frozen": [],
       "remappedCodepoints": 0,
       "sets": [
-        "exact"
+        "exact",
+        "standard"
+      ],
+      "bytes": 344956,
+      "sha256": "a98a49a7f5373678a0c183c460daed12cd6db068bcc25677c8f4e573024f8ed3"
+    },
+    {
+      "file": "InterDisplayMedium-Italic.ttf",
+      "family": "Inter Display Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterDisplayMedium-Italic",
+      "opsz": 32,
+      "weight": 500,
+      "display": true,
+      "sizes": [
+        44,
+        72,
+        88
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact",
+        "standard"
       ],
       "bytes": 345664,
-      "sha256": "bc54f24224b1a367514952c6c88040f97f63f979d7f9e92e05202fb9bd35b341"
+      "sha256": "8bef89c21af98ce018c6194ebe1cf55c13e56d33fa10159e34b4b397cf33a17c"
     },
     {
-      "file": "GTInterText26Medium-Italic.ttf",
-      "family": "GT Inter Text 26 Medium",
+      "file": "InterText26-Italic.ttf",
+      "family": "Inter Text 26",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText26Medium-Italic",
+      "postScriptName": "InterText26-Italic",
+      "opsz": 26,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        26
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345656,
+      "sha256": "72160ae6a6b7e4fbee5b41041fa3d2265d1681857fafe1b7169ebeb5b8d556c6"
+    },
+    {
+      "file": "InterText26Medium-Italic.ttf",
+      "family": "Inter Text 26 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText26Medium-Italic",
       "opsz": 26,
       "weight": 500,
       "display": false,
@@ -1276,60 +1528,20 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346136,
-      "sha256": "8f79eb4dde252b71ca87e2db36824c1dfd4d7a4932c5b62a64c23660d0b68963"
+      "bytes": 346132,
+      "sha256": "1c4c477817874887b6c757de77e66bf27ae30917173574132a05e91b2c974811"
     },
     {
-      "file": "GTInterText24-Italic.ttf",
-      "family": "GT Inter Text 24",
+      "file": "InterText24-Italic.ttf",
+      "family": "Inter Text 24",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText24-Italic",
+      "postScriptName": "InterText24-Italic",
       "opsz": 24,
       "weight": 400,
       "display": false,
       "sizes": [
         24
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 345788,
-      "sha256": "a740f1c7ab38a58a3eee4de25932734cc2ba4460bdb63d9f497730b5aee23319"
-    },
-    {
-      "file": "GTInterText24Medium-Italic.ttf",
-      "family": "GT Inter Text 24 Medium",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText24Medium-Italic",
-      "opsz": 24,
-      "weight": 500,
-      "display": false,
-      "sizes": [
-        24
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 346360,
-      "sha256": "b7dac8fe297d0b5366c7bb668789fecb36194d8667c5949bf69b60834af84c79"
-    },
-    {
-      "file": "GTInterText22-Italic.ttf",
-      "family": "GT Inter Text 22",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText22-Italic",
-      "opsz": 22,
-      "weight": 400,
-      "display": false,
-      "sizes": [
-        22
       ],
       "frozen": [],
       "remappedCodepoints": 0,
@@ -1337,14 +1549,54 @@
         "exact"
       ],
       "bytes": 345780,
-      "sha256": "9665673831dbe71a60eecb35df3b463342e9a153c4c9ec787164997e6658e018"
+      "sha256": "60f24214df04dcbe66717a6559ec5d1ef6a492b093dece1c363eb55a739b6915"
     },
     {
-      "file": "GTInterText22Medium-Italic.ttf",
-      "family": "GT Inter Text 22 Medium",
+      "file": "InterText24Medium-Italic.ttf",
+      "family": "Inter Text 24 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText22Medium-Italic",
+      "postScriptName": "InterText24Medium-Italic",
+      "opsz": 24,
+      "weight": 500,
+      "display": false,
+      "sizes": [
+        24
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 346356,
+      "sha256": "5d7fbaffd7cc52edd641ffda6a26866c0741d3312edc30e86f8b4641e8a50d61"
+    },
+    {
+      "file": "InterText22-Italic.ttf",
+      "family": "Inter Text 22",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText22-Italic",
+      "opsz": 22,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        22
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345772,
+      "sha256": "eb244705b986e98949104a2ab62b4cc908f9d06746647d8687442062e96eccfc"
+    },
+    {
+      "file": "InterText22Medium-Italic.ttf",
+      "family": "Inter Text 22 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText22Medium-Italic",
       "opsz": 22,
       "weight": 500,
       "display": false,
@@ -1356,15 +1608,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346284,
-      "sha256": "b9fb905be58f30f10a5199fa9ff43ba3fd2fcc430e30b00862459907399c1ed1"
+      "bytes": 346280,
+      "sha256": "051c5bdc950c1cd858008c41ec45e2170655d29392d360f3008579e6ce76723e"
     },
     {
-      "file": "GTInterText20-Italic.ttf",
-      "family": "GT Inter Text 20",
+      "file": "InterText20-Italic.ttf",
+      "family": "Inter Text 20",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText20-Italic",
+      "postScriptName": "InterText20-Italic",
       "opsz": 20,
       "weight": 400,
       "display": false,
@@ -1376,15 +1628,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345716,
-      "sha256": "24a64db26a99ddb0d4afa55ac9985ef94dcd88e4b6b75a64ee65c06a89d48064"
+      "bytes": 345708,
+      "sha256": "c36b011c07955687dcfa7628f1673fb9c868258717160dd620be88053bdb493b"
     },
     {
-      "file": "GTInterText20Medium-Italic.ttf",
-      "family": "GT Inter Text 20 Medium",
+      "file": "InterText20Medium-Italic.ttf",
+      "family": "Inter Text 20 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText20Medium-Italic",
+      "postScriptName": "InterText20Medium-Italic",
       "opsz": 20,
       "weight": 500,
       "display": false,
@@ -1396,15 +1648,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346268,
-      "sha256": "f3e283e017b07c1e1d6708e956ac24c5a1de97862cca8283457790b91cc677ab"
+      "bytes": 346264,
+      "sha256": "e18cb9ac580e60043e9a11936dbff8ba2715e4e5d41f295a945ba67781423a14"
     },
     {
-      "file": "GTInterText18-Italic.ttf",
-      "family": "GT Inter Text 18",
+      "file": "InterText18-Italic.ttf",
+      "family": "Inter Text 18",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText18-Italic",
+      "postScriptName": "InterText18-Italic",
       "opsz": 18,
       "weight": 400,
       "display": false,
@@ -1416,60 +1668,20 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345684,
-      "sha256": "a39a62b6275d7e65e4e5ba62d1bb6c3e43edc2d20b627df04b74004d8d905614"
+      "bytes": 345676,
+      "sha256": "dbbbb909c8ce8f961f0174962398b3d7b6c6979587321e2b846a5e1f4788860c"
     },
     {
-      "file": "GTInterText18Medium-Italic.ttf",
-      "family": "GT Inter Text 18 Medium",
+      "file": "InterText18Medium-Italic.ttf",
+      "family": "Inter Text 18 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText18Medium-Italic",
+      "postScriptName": "InterText18Medium-Italic",
       "opsz": 18,
       "weight": 500,
       "display": false,
       "sizes": [
         18
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 346212,
-      "sha256": "4e4a8f25d6482a1e71c12fdd933d29f1ef348a567f53fa35eff9c573dd8e404e"
-    },
-    {
-      "file": "GTInterText15-Italic.ttf",
-      "family": "GT Inter Text 15",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText15-Italic",
-      "opsz": 15,
-      "weight": 400,
-      "display": false,
-      "sizes": [
-        15
-      ],
-      "frozen": [],
-      "remappedCodepoints": 0,
-      "sets": [
-        "exact"
-      ],
-      "bytes": 345636,
-      "sha256": "e3a5c56a644ed1c4ddfd428dc5c0f8408fee9a7d62063a6b349e4a8ee1975e0b"
-    },
-    {
-      "file": "GTInterText15Medium-Italic.ttf",
-      "family": "GT Inter Text 15 Medium",
-      "style": "Italic",
-      "italic": true,
-      "postScriptName": "GTInterText15Medium-Italic",
-      "opsz": 15,
-      "weight": 500,
-      "display": false,
-      "sizes": [
-        15
       ],
       "frozen": [],
       "remappedCodepoints": 0,
@@ -1477,14 +1689,54 @@
         "exact"
       ],
       "bytes": 346208,
-      "sha256": "df0c88e7200af19ab5cb78818e66a45417801cf9059a14ff88c6098f127a795f"
+      "sha256": "3e73e0bf3937c6bc1009b4e17af3d1eec4246397c79e32160d31c6f87d4ab9cb"
     },
     {
-      "file": "GTInterText14-Italic.ttf",
-      "family": "GT Inter Text 14",
+      "file": "InterText15-Italic.ttf",
+      "family": "Inter Text 15",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText14-Italic",
+      "postScriptName": "InterText15-Italic",
+      "opsz": 15,
+      "weight": 400,
+      "display": false,
+      "sizes": [
+        15
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 345628,
+      "sha256": "b63b33aa1e11f13a501d0ca2de8a28f0d4c8bc7fa7914a94158e9dc103be2d6f"
+    },
+    {
+      "file": "InterText15Medium-Italic.ttf",
+      "family": "Inter Text 15 Medium",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText15Medium-Italic",
+      "opsz": 15,
+      "weight": 500,
+      "display": false,
+      "sizes": [
+        15
+      ],
+      "frozen": [],
+      "remappedCodepoints": 0,
+      "sets": [
+        "exact"
+      ],
+      "bytes": 346204,
+      "sha256": "fe322f00225d0afc0ca308bb71647899d3386eacabe266c975c2c22ecd5751a3"
+    },
+    {
+      "file": "InterText14-Italic.ttf",
+      "family": "Inter Text 14",
+      "style": "Italic",
+      "italic": true,
+      "postScriptName": "InterText14-Italic",
       "opsz": 14,
       "weight": 400,
       "display": false,
@@ -1496,15 +1748,15 @@
       "sets": [
         "exact"
       ],
-      "bytes": 345456,
-      "sha256": "70a0d80bb046507c3fb7d11f4933a632813e94bef667f4f8d4861a08dee6180c"
+      "bytes": 345448,
+      "sha256": "1c80834c0ec8cc6e2e86ff8b1c6edbca749a5045891dd55c498bb3582253a3a2"
     },
     {
-      "file": "GTInterText14Medium-Italic.ttf",
-      "family": "GT Inter Text 14 Medium",
+      "file": "InterText14Medium-Italic.ttf",
+      "family": "Inter Text 14 Medium",
       "style": "Italic",
       "italic": true,
-      "postScriptName": "GTInterText14Medium-Italic",
+      "postScriptName": "InterText14Medium-Italic",
       "opsz": 14,
       "weight": 500,
       "display": false,
@@ -1516,8 +1768,8 @@
       "sets": [
         "exact"
       ],
-      "bytes": 346080,
-      "sha256": "320177f5d2b5b9ef0d9f04ea9128a4fa93ab7b035424d0731c5f1c6ec8758d1b"
+      "bytes": 346076,
+      "sha256": "2c53a00c17cb34baf959ab001a4e37bc8ab1ecc015b81dafc2bb67aa320aef24"
     },
     {
       "file": "Inter-Italic.ttf",
@@ -1542,8 +1794,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 345340,
-      "sha256": "232ec9a7ff2fa059f1f781885c13879490bbea04bd89a763d65d3ed8ed1df114"
+      "bytes": 345364,
+      "sha256": "35fa97af0d03ea1899669fe819a36fd89bf6fb2810aa7bf94b4b73374f9d3ed2"
     },
     {
       "file": "InterMedium-Italic.ttf",
@@ -1568,8 +1820,8 @@
       "sets": [
         "standard"
       ],
-      "bytes": 345968,
-      "sha256": "94ac8dbf928c93e00e180960e2ba6d625b5ebe5d5e0ffb1c56ba1c3f7a6bf511"
+      "bytes": 345992,
+      "sha256": "cad817521895d142cae3e2044a347826fe6f566c459513accc68d539fd390281"
     }
   ],
   "web": [

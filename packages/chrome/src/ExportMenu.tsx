@@ -1,7 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import type { ExportFormat, ExportMode } from '@turboslide/schema/export';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
+import type { ExportFontSet, ExportFormat, ExportMode } from '@turboslide/schema/export';
 
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';
@@ -32,7 +33,7 @@ export type ExportMenuInput = {
   format: Extract<ExportFormat, 'pptx'>;
   mode: ExportMode;
   theme: ('light' | 'dark')[];
-  fonts: 'exact' | 'standard';
+  fonts: ExportFontSet;
   /** Editable text mode: embed the export faces as fntdata parts (docs/pptx.md) */
   embedFonts?: true;
   headings?: 'raster';
@@ -94,16 +95,16 @@ const THEMES: readonly SegOption<ExportTheme>[] = [
   { value: 'dark', label: 'Dark', title: 'The dark file only' },
 ];
 
-const FONTS: readonly SegOption<'exact' | 'standard'>[] = [
-  {
-    value: 'exact',
-    label: 'Exact',
-    title: 'Per-size Inter instances, twelve family names (SPEC 8.4)',
-  },
+const FONTS: readonly SegOption<ExportFontSet>[] = [
   {
     value: 'standard',
     label: 'Standard',
-    title: 'Three family names: GT Inter Display, Inter, Inter Medium (SPEC 8.4)',
+    title: 'The names Inter installs under: Inter, Inter Medium, Inter Display, Inter Display Medium',
+  },
+  {
+    value: 'exact',
+    label: 'Exact',
+    title: 'Inter cut at each text size, named Inter Text 14 to Inter Text 26',
   },
 ];
 
@@ -133,7 +134,7 @@ export function ExportMenu({
   const card = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<ExportMode>('flatten');
   const [theme, setTheme] = useState<ExportTheme>('both');
-  const [fonts, setFonts] = useState<'exact' | 'standard'>('exact');
+  const [fonts, setFonts] = useState<ExportFontSet>(DEFAULT_EXPORT_FONT_SET);
   const [embed, setEmbed] = useState(false);
   const [raster, setRaster] = useState(false);
   const [verify, setVerify] = useState(false);

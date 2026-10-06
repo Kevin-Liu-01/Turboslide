@@ -39,8 +39,12 @@ pictures are PNGs at 2x (icons and marks 3x, diagrams 1x). What it promises is l
 measured in the render worker image on the 85-slide deck in both themes, every one of the 624
 gated blocks lands within 3 px horizontally and 1 px vertically of the web render (the M5 gate,
 `docs/export-verification.md`), while glyph antialiasing, hinting and the exact face a viewer
-resolves are the viewer's. The GT Inter static faces are named in the runs; `--embed-fonts`
-(`embedFonts` in `export.run`) embeds them as fntdata parts for a viewer without them installed,
+resolves are the viewer's. The runs name the families the upstream Inter release installs under
+(docs/DESIGN.md 4.3): Inter and Inter Medium for text, with the width the opsz 14 faces add over
+the browser's optical size taken back as character spacing, Inter Display and Inter Display Medium
+at 44 px and over, and Inter Display Alternates for a heading that draws `cv11` and `ss01`;
+`--fonts exact` names Inter Text 14 to Inter Text 26 under 44 px instead. `--embed-fonts`
+(`embedFonts` in `export.run`) embeds the faces as fntdata parts for a viewer without them installed,
 off by default for the repair reason above. The set holds the Regular and Medium cuts only
 (`packages/fonts/export`, `fonts-map.ts EXPORT_WEIGHTS`), while the inspector's typography control
 offers 300 to 700 with the 500 cap as a lint: a run measured at 600 or 700 travels as the Medium

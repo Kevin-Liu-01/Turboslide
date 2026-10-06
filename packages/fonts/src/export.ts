@@ -1,17 +1,23 @@
-// The export font set (SPEC 8.4; MILESTONES M2 item 5; gslides-parity SPEC-2 7.1): the static
-// instances scripts/build-fonts.py cuts from InterVariable and InterVariable-Italic into export/,
-// described by export/fonts.json. The PPTX builder asks exportFace(sizePx, weight, { italic }) for
-// the family name a text run travels under (DrawingML has no weight 500, so the medium cut is its
-// own family, pptx report section 1 item 2; an italic run keeps the family and the file carries
-// the Italic style), the OOXML post-process embeds exportFaces(set) as .fntdata parts, and the
-// render worker's Docker image installs the same files so LibreOffice renders with them.
-// fontSetVersion() is what ExportReport.fontSetVersion records. License: SIL OFL 1.1 with no
-// Reserved Font Name declared by either source (fonts.json `license`).
+// The export font set (SPEC 8.4; MILESTONES M2 item 5; gslides-parity SPEC-2 7.1; docs/DESIGN.md
+// 4.3): the static instances scripts/build-fonts.py cuts from InterVariable and
+// InterVariable-Italic into export/, described by export/fonts.json, under the names the upstream
+// Inter release installs under (Inter, Inter Medium, Inter Display, Inter Display Medium), the per
+// size cuts Inter Text 14 to Inter Text 26, and Inter Display Alternates (cv11 and ss01 frozen).
+// The PPTX builder asks exportFace(sizePx, weight, { italic }) for the family name a text run
+// travels under (DrawingML has no weight 500, so the medium cut is its own family, pptx report
+// section 1 item 2; an italic run keeps the family and the file carries the Italic style), the
+// OOXML post-process embeds exportFaces(set) as .fntdata parts, and the render worker's Docker
+// image installs the same files so LibreOffice renders with them. fontSetVersion() is what
+// ExportReport.fontSetVersion records. License: SIL OFL 1.1 with no Reserved Font Name declared
+// by either source (fonts.json `license`).
 import { existsSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export type ExportFontSet = 'exact' | 'standard';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
+import type { ExportFontSet } from '@turboslide/schema/export';
+
+export type { ExportFontSet };
 
 export type ExportFace = {
   /** File name under export/. */
@@ -24,7 +30,7 @@ export type ExportFace = {
   postScriptName: string;
   opsz: number;
   weight: number;
-  /** The display instance (opsz 32 with cv11 and ss01 frozen) for headings. */
+  /** A display instance (opsz 32) for runs of 44 px and over; `frozen` names its frozen features. */
   display: boolean;
   /** The sheet pixel sizes this face serves. */
   sizes: number[];
@@ -48,7 +54,6 @@ export type ExportFontSource = {
 export type ExportFonts = {
   version: string;
   generatedBy: string;
-  prefix: string;
   source: ExportFontSource & {
     /** the italic source of the same release (SPEC-2 7.1, 0.66) */
     italic: ExportFontSource & { italicAngle: number; release: string; path: string };
@@ -64,7 +69,14 @@ export type ExportFonts = {
   weights: number[];
   displaySizes: number[];
   displayOpsz: number;
+  /** the standard set's text families by weight: Inter, Inter Medium */
   standard: Record<string, string>;
+  /** the display families by weight: Inter Display, Inter Display Medium */
+  display: Record<string, string>;
+  /** the display face with cv11 and ss01 frozen: Inter Display Alternates */
+  alternates: string;
+  /** the standard set's width over the browser per family and whole pixel size (DESIGN.md 4.3) */
+  spacing: Record<string, Record<string, number>>;
   faces: ExportFace[];
 };
 
@@ -113,12 +125,12 @@ export function exportFaceBytes(face: ExportFace): Buffer {
 }
 
 /** The faces of a set, in fonts.json order, the italic twins included. */
-export function exportFaces(set: ExportFontSet = 'exact'): ExportFace[] {
+export function exportFaces(set: ExportFontSet = DEFAULT_EXPORT_FONT_SET): ExportFace[] {
   return loadExportFonts().faces.filter((face) => face.sets.includes(set));
 }
 
-/** The version string ExportReport.fontSetVersion carries: `<inter version>+gt.<build>:<set>`. */
-export function fontSetVersion(set: ExportFontSet = 'exact'): string {
+/** The version string ExportReport.fontSetVersion carries: `<inter version>+build.<n>:<set>`. */
+export function fontSetVersion(set: ExportFontSet = DEFAULT_EXPORT_FONT_SET): string {
   return `${loadExportFonts().version}:${set}`;
 }
 
@@ -141,17 +153,20 @@ export function exportWeight(weight: number): 400 | 500 {
 
 export type ExportFaceQuery = {
   set?: ExportFontSet;
-  /** Force the display instance (a heading block) regardless of size. */
+  /** Force a display instance (a heading block) regardless of size. */
   display?: boolean;
   /** The italic twin of the face (gslides-parity SPEC-2 7.1): the same family, style Italic. */
   italic?: boolean;
+  /** A display run that draws cv11 and ss01 (General Translation's theme) at weight 500 or more. */
+  alternates?: boolean;
 };
 
 /**
- * The face a text run at `sizePx` and `weight` exports with. In the exact set a display run is
- * `GT Inter Display` and text runs map to the nearest ladder size and weight; in the standard set
- * headings keep the display face and every text run is `Inter` or `Inter Medium` (SPEC 8.4). An
- * italic run takes the italic twin of the same family (SPEC-2 7.1).
+ * The face a text run at `sizePx` and `weight` exports with. A run at 44 px and over (or a forced
+ * display run) takes Inter Display or Inter Display Medium, or Inter Display Alternates when it
+ * draws the alternates at weight 500 or more. Under 44 px the standard set takes Inter or Inter
+ * Medium and the exact set the nearest ladder size and weight (Inter Text 14 to Inter Text 26).
+ * An italic run takes the italic twin of the same family (SPEC-2 7.1).
  */
 export function exportFace(
   sizePx: number,
@@ -159,17 +174,20 @@ export function exportFace(
   query: ExportFaceQuery = {},
 ): ExportFace {
   const fonts = loadExportFonts();
-  const set = query.set ?? 'exact';
+  const set = query.set ?? DEFAULT_EXPORT_FONT_SET;
   const italic = query.italic === true;
   const faces = fonts.faces.filter(
     (face) => face.sets.includes(set) && (face.italic ?? face.style === 'Italic') === italic,
   );
+  const w = exportWeight(weight);
   const display = query.display ?? sizePx >= DISPLAY_MIN_PX;
   if (display) {
-    const face = faces.find((f) => f.display);
+    const alternates = query.alternates === true && w === 500;
+    const face = faces.find(
+      (f) => f.display && f.weight === w && (f.frozen.length > 0) === alternates,
+    );
     if (face) return face;
   }
-  const w = exportWeight(weight);
   if (set === 'standard') {
     const family = fonts.standard[String(w)];
     const face = faces.find((f) => f.family === family && !f.display);

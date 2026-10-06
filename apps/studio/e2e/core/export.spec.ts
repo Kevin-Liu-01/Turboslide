@@ -3573,6 +3573,92 @@ test(title('export.remove.copies-gone'), async () => {
   expect(after, 'every copy answers 404 within 5 s of the removal').toEqual(urls.map(() => 404));
 });
 
+/* the design round (docs/DESIGN.md 4.3, decision C8; DR-D1#4): the PowerPoint file names the
+   upstream Inter families, and General Translation's headings the one face with cv11 and ss01 */
+const UPSTREAM_FAMILIES = [
+  'Inter',
+  'Inter Medium',
+  'Inter Display',
+  'Inter Display Medium',
+  'Inter Display Alternates',
+];
+
+/** Each `a:latin` typeface of an Editable text PowerPoint with the size (sz) of its run. */
+function typefacesOf(bytes: Buffer): { typeface: string; sz: number }[] {
+  const out: { typeface: string; sz: number }[] = [];
+  /* an a:rPr with children (a self-closing one names no typeface) */
+  const runs = /<a:rPr\b((?:[^>/]|\/(?!>))*)>([\s\S]*?)<\/a:rPr>/g;
+  for (const run of pptxSlideXml(bytes).matchAll(runs)) {
+    const sz = Number(/\bsz="(\d+)"/.exec(run[1] ?? '')?.[1] ?? 0);
+    const typeface = /<a:latin typeface="([^"]+)"/.exec(run[2] ?? '')?.[1];
+    if (typeface !== undefined) out.push({ typeface, sz });
+  }
+  return out;
+}
+
+async function editablePptx(page: Page): Promise<Buffer> {
+  await openPptx(page);
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 90_000);
+  await closeDialogs(page);
+  return pptx.bytes;
+}
+
+test(title('export.fonts.upstream-names'), async () => {
+  test.setTimeout(300_000);
+  const { page, deck } = await withBudget(2);
+  await openEditor(page, deck);
+  const facts: string[] = [];
+  const failures: string[] = [];
+  /* the owner's deck is in General Translation's theme: its headings draw cv11 and ss01 */
+  const gt = typefacesOf(await editablePptx(page));
+  const inter = gt.filter((r) => /^(GT )?Inter\b/.test(r.typeface));
+  facts.push(`General Translation: ${[...new Set(gt.map((r) => r.typeface))].join(', ')}`);
+  for (const r of inter)
+    if (!UPSTREAM_FAMILIES.includes(r.typeface))
+      failures.push(`General Translation: a run names ${r.typeface}`);
+  /* 44 px is sz 2640 (13.2 pt per 22 px): every Inter run of 44 px and over is a heading */
+  const display = inter.filter((r) => r.sz >= 2640);
+  if (display.length === 0) failures.push('General Translation: no Inter run of 44 px or over');
+  if (!display.some((r) => r.typeface === 'Inter Display Alternates'))
+    failures.push(
+      `General Translation: the headings name ${[...new Set(display.map((r) => r.typeface))].join(', ')}`,
+    );
+  /* a theme whose headings use Inter's defaults (the theme library of DR-D3#1), when this build
+     has one: the same deck in it names the four upstream families and not the frozen face */
+  const library = await invoke<{ themes?: { id: string }[] }>(page, 'theme.list', {}).catch(
+    () => null,
+  );
+  const plain = library?.themes?.find((t) => t.id !== 'gt-ink-paper');
+  if (plain === undefined) {
+    facts.push('no theme with Inter\'s defaults on this build (theme.list, DR-D3#1)');
+  } else {
+    const before = await state(page);
+    await invoke(page, 'deck.set', {
+      baseRevision: before.revision,
+      path: '/theme',
+      value: plain.id,
+    });
+    await settled(page);
+    await openEditor(page, deck);
+    const runs = typefacesOf(await editablePptx(page));
+    const after = await state(page);
+    await invoke(page, 'deck.set', {
+      baseRevision: after.revision,
+      path: '/theme',
+      value: 'gt-ink-paper',
+    });
+    await settled(page);
+    const names = [...new Set(runs.map((r) => r.typeface))];
+    facts.push(`${plain.id}: ${names.join(', ')}`);
+    for (const r of runs.filter((x) => /^(GT )?Inter\b/.test(x.typeface)))
+      if (!UPSTREAM_FAMILIES.slice(0, 4).includes(r.typeface))
+        failures.push(`${plain.id}: a run names ${r.typeface}`);
+  }
+  test.info().annotations.push({ type: 'typefaces', description: facts.join('; ') });
+  expect(failures, facts.join('; ')).toEqual([]);
+});
+
 /* lane B of the Round 1 follow-up: its rows live in canvas-r1f.ts */
 const canvasR1fIds = canvasR1f(() => browserRef);
 
@@ -3640,4 +3726,6 @@ coverage(import.meta.filename, [
   'export.print.opens',
   'export.download.one-name-rule',
   'export.picture.progress-and-capture',
+  /* the design round (docs/DESIGN.md 4.3, 11; DR-D1#4) */
+  'export.fonts.upstream-names',
 ]);

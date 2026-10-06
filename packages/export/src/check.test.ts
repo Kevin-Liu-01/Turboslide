@@ -60,7 +60,7 @@ describe('checkPptx', () => {
               box: [137, 137, 600, 60],
               sizePx: 44,
               lineHeightPx: 48,
-              family: 'GT Inter Display',
+              family: 'Inter Display Alternates',
               color: '070707',
             },
           ],

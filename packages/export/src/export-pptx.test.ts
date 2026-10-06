@@ -268,7 +268,9 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     expect(audience.sz).toContain(szOf(20));
     expect(audience.sz).toContain(szOf(13));
     expect(audience.spc).toContain(spcOf(-1.1));
-    expect(audience.spc).toContain(spcOf(-0.2));
+    // the standard set takes the width its opsz 14 faces add back as spacing (fonts.json spacing,
+    // docs/DESIGN.md 4.3): a 22 px run tracked -0.2 px writes a little tighter than its tracking
+    expect(audience.spc.some((v) => v < spcOf(-0.2) && v >= spcOf(-0.2) - 30)).toBe(true);
     expect(audience.spc).toContain(spcOf(0.26));
     expect(audience.spcPts).toContain(spcPtsOf(48.4));
     expect(audience.spcPts).toContain(spcPtsOf(33));
@@ -276,7 +278,10 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     expect(audience.lineWidths.filter((w) => w === 7620).length).toBeGreaterThanOrEqual(5);
     expect(audience.kernZero).toBe(0);
     expect(audience.softBreaks).toBeGreaterThan(0);
-    expect(audience.typefaces).toContain(catalog.built ? 'GT Inter Display' : 'GT Inter Display');
+    // the standard set's upstream names (docs/DESIGN.md 4.3): the GT deck's headings draw cv11 and
+    // ss01, so they name the frozen face; no run names a family that carries GT
+    expect(audience.typefaces).toContain('Inter Display Alternates');
+    expect(audience.typefaces.filter((t) => /\bGT\b/.test(t))).toEqual([]);
     const xml = await readPart(zip, parts[1] ?? '');
     expect(countGroups(xml)).toBe(4);
     expect(xml).not.toContain('normAutofit');
@@ -341,10 +346,10 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     const fonts = native.reports[0]?.fonts;
     expect(fonts).toBeDefined();
     expect([...(fonts?.embedded ?? []), ...(fonts?.requiredOnViewer ?? [])]).toContain(
-      'GT Inter Display',
+      'Inter Display Alternates',
     );
     expect([...(fonts?.embedded ?? []), ...(fonts?.requiredOnViewer ?? [])]).toContain(
-      'GT Inter Text 22',
+      'Inter',
     );
   });
 

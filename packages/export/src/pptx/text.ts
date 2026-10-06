@@ -34,6 +34,7 @@ import {
   BOLD_FROM,
   MONO_FAMILY,
   catalogFamilyName,
+  drawsAlternates,
   pickFamily,
   weightSubstitution,
 } from './fonts-map.ts';
@@ -71,7 +72,11 @@ export type TextEmitOptions = {
   paperHex?: string;
 };
 
-/** The families the sheet's own theme draws, whose export names come from the font set (fonts-map.ts). */
+/**
+ * The families the sheet's own theme draws, whose export names come from the font set
+ * (fonts-map.ts). 'GT Inter' stays so a file exported before the design round, whose runs name
+ * the GT Inter cuts, still maps to Inter (docs/DESIGN.md 4.3).
+ */
 const SHEET_FAMILIES = new Set(['Inter', 'GT Inter', 'DejaVu Sans Mono', 'Menlo', 'monospace']);
 
 /**
@@ -99,7 +104,7 @@ export function familyFor(style: SceneStyle, set: FontSet): string {
   if (style.mono) return MONO_FAMILY;
   const face = catalogFace(style);
   if (face !== null) return face;
-  return pickFamily(style.size, style.weight, set).family;
+  return pickFamily(style.size, style.weight, set, drawsAlternates(style.features)).family;
 }
 
 /** The Unicode code point of a bullet glyph as pptxgenjs `characterCode` wants it: four hex digits. */
@@ -156,14 +161,20 @@ function runOptions(
     options.residual?.add(catalogFaceResidual(face));
   } else if (!run.style.mono) {
     // a weight the set has no cut for: 600 and 700 travel as Medium plus bold, 300 as Regular
-    const pick = pickFamily(run.style.size, run.style.weight, options.fontSet);
+    const pick = pickFamily(
+      run.style.size,
+      run.style.weight,
+      options.fontSet,
+      drawsAlternates(run.style.features),
+    );
     if (pick.bold) out.bold = true;
     const note = weightSubstitution(pick);
     if (note !== null) options.residual?.add(note);
   }
   if (run.style.letterSpacing !== 0) out.charSpacing = pxToPt(run.style.letterSpacing);
-  // A text face used off its cut size renders wider in LibreOffice (calibration.json faceAdvance):
-  // the measured excess of the run's width is taken back across its characters.
+  // A text face drawn wider than the browser draws the run (the standard set's opsz 14 faces above
+  // 14 px, fonts.json spacing; an exact cut off its size in LibreOffice, calibration.json
+  // faceAdvance): that share of the run's width is taken back across its characters.
   const excess = run.style.mono || face !== null ? 0 : faceAdvanceExcess(family, run.style.size);
   if (excess > 0 && run.text.length > 0 && !run.gt) {
     const perChar = (excess * run.box[2]) / run.text.length;

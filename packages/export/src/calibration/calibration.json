@@ -96,35 +96,35 @@
           "dx": 1,
           "dw": 0,
           "samples": 4,
-          "family": "GT Inter Text 15"
+          "family": "Inter Text 15"
         },
         "22": {
           "dy": 5,
           "dx": 1,
           "dw": 0,
           "samples": 4,
-          "family": "GT Inter Text 22"
+          "family": "Inter Text 22"
         },
         "26": {
           "dy": 5,
           "dx": 1,
           "dw": -1,
           "samples": 2,
-          "family": "GT Inter Text 26"
+          "family": "Inter Text 26"
         },
         "44": {
           "dy": 0,
           "dx": 1,
           "dw": 0,
           "samples": 8,
-          "family": "GT Inter Display"
+          "family": "Inter Display Alternates"
         },
         "88": {
           "dy": -2,
           "dx": 1,
           "dw": 0,
           "samples": 2,
-          "family": "GT Inter Display"
+          "family": "Inter Display Alternates"
         }
       },
       "firstBaselineNote": "dy is the ink box of a native text box in LibreOffice minus the Turboslide render, in sheet px, for one-line blocks written at the rendered box with sz, spcPts pitch and zero insets, measured on the calibration deck. The deck measurement in firstBaselineModel sits 1 to 1.5 px more negative at every size than this fixture table; the exporter follows the deck measurement.",
@@ -264,9 +264,9 @@
       },
       "faceAdvance": {
         "about": "A text face used at a size other than its cut optical size renders wider in LibreOffice than the browser draws InterVariable at that size (font-optical-sizing: auto). The excess is a fraction of the run width; the emitter spaces every character of such a run by minus the excess over the run length (pptx/text.ts faceAdvanceExcess). Measured on the deck in the M5 rounds; sizes not listed are not corrected.",
-        "measuredOn": "2026-09-11, the render worker image, LibreOffice 25.2.3.2, GT Inter set 4.001+gt.1",
+        "measuredOn": "2026-09-11, the render worker image, LibreOffice 25.2.3.2, the per size set 4.001+gt.1 (named GT Inter until the design round)",
         "excess": {
-          "GT Inter Text 26 Medium": {
+          "Inter Text 26 Medium": {
             "27": {
               "value": 0.0082,
               "block": "voice#say quotes, dw +4 over a 480 px line (round three)"

@@ -375,7 +375,7 @@ describe('fixture and geometry', () => {
               box: [137, 129, 1326, 48],
               sizePx: 44,
               lineHeightPx: 48.4,
-              family: 'GT Inter Display',
+              family: 'Inter Display Alternates',
               color: '070707',
               alpha: 0,
               letterSpacingPx: -1.1,

@@ -193,7 +193,7 @@ Commands
                                     renders, sheets with cell maps, lint.json with the gate, the document, the
                                     numerals per slide and the six lens instructions in one directory (SPEC 7.6)
   build --out <file> --budget 16    the standalone file under a byte budget; exit 1 over budget
-  export pptx [ids|all] --mode flatten|native --theme light,dark|both --fonts exact|standard|embed
+  export pptx [ids|all] --mode flatten|native --theme light,dark|both --fonts standard|exact|embed
                                     [--embed-fonts] [--headings raster] [--raster-scale auto|2|3] [--picture-scale 2|3]
                                     [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--no-svg-vector] [--verify] --out <dir>
                                     PPTX per theme (flatten is perfect, native is editable text), <deckId>-both.zip for both

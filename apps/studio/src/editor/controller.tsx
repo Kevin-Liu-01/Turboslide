@@ -213,6 +213,7 @@ import type { Comment as ThreadComment, Thread } from '@turboslide/schema/commen
 import type { Notification } from '@turboslide/store/inbox';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import { makeDiagram } from '@turboslide/schema/diagrams';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
 import {
   canvasObjects,
   isCanvasSlide,
@@ -957,7 +958,7 @@ function menuInputOf(input: ExportRunInput): ExportMenuInput {
     format: 'pptx',
     mode: input.mode ?? 'flatten',
     theme: input.theme ?? ['light', 'dark'],
-    fonts: input.fonts ?? 'exact',
+    fonts: input.fonts ?? DEFAULT_EXPORT_FONT_SET,
     ...(input.embedFonts === true ? { embedFonts: true as const } : {}),
     ...(input.headings === 'raster' ? { headings: 'raster' as const } : {}),
     verify: input.verify ?? false,

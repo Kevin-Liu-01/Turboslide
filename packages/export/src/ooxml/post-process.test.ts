@@ -57,7 +57,7 @@ describe('slide names and the hidden title', () => {
       off: [1043940, 1043940] as [number, number],
       ext: [3000000, 400000] as [number, number],
       sz: 2640,
-      family: 'GT Inter Display',
+      family: 'Inter Display Alternates',
       colorHex: '070707',
     };
     expect(hasTitlePlaceholder(SLIDE)).toBe(false);

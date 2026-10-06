@@ -35,6 +35,8 @@ import type { RenderRecord } from '@turboslide/schema/render';
 import type { RuleId } from '@turboslide/schema/rules';
 import { validateDeck } from '@turboslide/schema/validate';
 import { makeDiagram } from '@turboslide/schema/diagrams';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
+import type { ExportFontSet } from '@turboslide/schema/export';
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
 import { watchDeck } from '@turboslide/store/watch';
@@ -429,7 +431,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       format,
       mode = 'flatten',
       theme = ['light', 'dark'],
-      fonts = 'exact',
+      fonts = DEFAULT_EXPORT_FONT_SET,
       embedFonts = false,
       headings,
       rasterScale,
@@ -443,7 +445,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       format: 'pptx' | 'pdf';
       mode?: 'native' | 'flatten';
       theme?: Theme[];
-      fonts?: 'exact' | 'standard';
+      fonts?: ExportFontSet;
       embedFonts?: boolean;
       headings?: 'raster';
       rasterScale?: 'auto' | 2 | 3;

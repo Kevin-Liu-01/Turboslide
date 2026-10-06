@@ -15,7 +15,11 @@ import { basename, join, relative } from 'node:path';
 import JSZip from 'jszip';
 
 import type { ExportMode, ExportReport } from '@turboslide/schema/export';
-import { NATIVE_BLOCK_TYPES, exportReportSchema } from '@turboslide/schema/export';
+import {
+  DEFAULT_EXPORT_FONT_SET,
+  NATIVE_BLOCK_TYPES,
+  exportReportSchema,
+} from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 
 import { ENTRY_DATE } from '../ooxml/zip.ts';
@@ -201,7 +205,7 @@ export async function mergeParts(
   const build = deps.build ?? buildPptx;
   const catalog = deps.fontsCatalog ?? loadFontsCatalog();
   const mode: ExportMode = plan.mode;
-  const fontSet: FontSet = plan.input.fonts ?? 'exact';
+  const fontSet: FontSet = plan.input.fonts ?? DEFAULT_EXPORT_FONT_SET;
   await mkdir(deps.outDir, { recursive: true });
   let peak = process.memoryUsage().rss;
   const sampler = setInterval(() => {

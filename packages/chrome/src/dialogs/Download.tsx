@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { ExportMode } from '@turboslide/schema/export';
+import { DEFAULT_EXPORT_FONT_SET } from '@turboslide/schema/export';
+import type { ExportFontSet, ExportMode } from '@turboslide/schema/export';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { deckAppearance, slideBlocks, unskippedSlideOrder } from '@turboslide/schema/deck';
 
@@ -252,7 +253,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
   const [theme, setTheme] = useState<'light' | 'dark' | 'both'>(
     deckAppearance(input.document.deck),
   );
-  const [fonts, setFonts] = useState<'exact' | 'standard'>('exact');
+  const [fonts, setFonts] = useState<ExportFontSet>(DEFAULT_EXPORT_FONT_SET);
   const [embed, setEmbed] = useState(false);
   const [raster, setRaster] = useState(false);
   const [state, setState] = useState<'idle' | 'running' | 'done' | 'failed'>('idle');
@@ -283,7 +284,7 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
     theme: 'light' | 'dark' | 'both';
     notes: boolean;
     skipped: boolean;
-    fonts: 'exact' | 'standard';
+    fonts: ExportFontSet;
     embed: boolean;
     raster: boolean;
   }) => {
@@ -513,14 +514,14 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
                 value={fonts}
                 aria-label="Fonts"
                 data-control="dialog.download.fonts"
-                onChange={(event) => setFonts(event.target.value as 'exact' | 'standard')}
+                onChange={(event) => setFonts(event.target.value as ExportFontSet)}
                 {...tipProps({
                   name: 'Fonts',
-                  doc: 'Exact keeps one face per size; Standard uses three names',
+                  doc: 'Standard uses the names Inter installs under; Exact keeps one face per text size',
                 })}
               >
-                <option value="exact">Exact</option>
                 <option value="standard">Standard</option>
+                <option value="exact">Exact</option>
               </select>
             </label>
             <DialogCheck

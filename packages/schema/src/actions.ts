@@ -2736,7 +2736,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       fonts: z
         .enum(['exact', 'standard'])
         .optional()
-        .describe('The export font set (SPEC 8.4); defaults to exact'),
+        .describe(
+          'The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard',
+        ),
       embedFonts: z
         .boolean()
         .optional()
@@ -2819,7 +2821,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --no-svg-vector --verify --out <out>',
     },
     mcp: 'deck_export',
-    example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
+    example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'standard', verify: true },
   }),
   'export.check': action({
     id: 'export.check',

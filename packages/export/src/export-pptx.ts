@@ -22,7 +22,11 @@ import JSZip from 'jszip';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { ExportMode, ExportReport } from '@turboslide/schema/export';
-import { exportReportSchema, NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
+import {
+  DEFAULT_EXPORT_FONT_SET,
+  exportReportSchema,
+  NATIVE_BLOCK_TYPES,
+} from '@turboslide/schema/export';
 
 import { materializeForExport } from './dither-variants.ts';
 import type { Theme } from '@turboslide/schema/render';
@@ -129,7 +133,7 @@ export type ExportPptxResult = {
 };
 
 export const DEFAULT_MODE: ExportMode = 'flatten';
-export const DEFAULT_FONT_SET: FontSet = 'exact';
+export const DEFAULT_FONT_SET: FontSet = DEFAULT_EXPORT_FONT_SET;
 
 /** The zip of both theme files, stored (PPTX is a zip already), for one download of the pair. */
 export async function zipFiles(paths: readonly string[], out: string): Promise<number> {

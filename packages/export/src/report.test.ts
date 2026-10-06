@@ -10,8 +10,8 @@ import { NATIVE_BLOCK_TYPES, isNativeBlockType } from '@turboslide/schema/export
 
 import { familiesOfLadder } from './pptx/build.ts';
 import {
-  FAMILY_PREFIX,
   MONO_FAMILY,
+  drawsAlternates,
   loadFontsCatalog,
   nearestOpsz,
   pickFamily,
@@ -31,34 +31,53 @@ import {
 } from './report.ts';
 
 describe('the export font set (SPEC 8.4)', () => {
-  test('display text goes to the display instance, text to per-size instances', () => {
-    expect(pickFamily(88, 500, 'exact').family).toBe(`${FAMILY_PREFIX} Display`);
-    expect(pickFamily(44, 500, 'exact').family).toBe(`${FAMILY_PREFIX} Display`);
-    expect(pickFamily(72, 500, 'standard').family).toBe(`${FAMILY_PREFIX} Display`);
-    expect(pickFamily(22, 400, 'exact').family).toBe(`${FAMILY_PREFIX} Text 22`);
-    expect(pickFamily(20, 500, 'exact').family).toBe(`${FAMILY_PREFIX} Text 20 Medium`);
-    expect(pickFamily(24, 500, 'exact').family).toBe(`${FAMILY_PREFIX} Text 24 Medium`);
-    expect(pickFamily(15, 400, 'exact').family).toBe(`${FAMILY_PREFIX} Text 15`);
-    expect(pickFamily(13, 400, 'exact').family).toBe(`${FAMILY_PREFIX} Text 14`);
-    expect(pickFamily(16, 400, 'exact').family).toBe(`${FAMILY_PREFIX} Text 15`);
+  test('the upstream names: display faces from 44 px, text by set (docs/DESIGN.md 4.3)', () => {
+    // the standard set, the default
     expect(pickFamily(22, 400, 'standard').family).toBe('Inter');
     expect(pickFamily(20, 500, 'standard').family).toBe('Inter Medium');
+    expect(pickFamily(72, 500, 'standard').family).toBe('Inter Display Medium');
+    expect(pickFamily(88, 400, 'standard').family).toBe('Inter Display');
+    // a heading that draws cv11 and ss01 (General Translation's theme) names the frozen face
+    expect(pickFamily(88, 500, 'standard', true).family).toBe('Inter Display Alternates');
+    expect(pickFamily(44, 500, 'exact', true).family).toBe('Inter Display Alternates');
+    expect(pickFamily(88, 400, 'standard', true).family).toBe('Inter Display');
+    expect(pickFamily(26, 500, 'standard', true).family).toBe('Inter Medium');
+    // the exact set: the per size cuts under 44 px
+    expect(pickFamily(88, 500, 'exact').family).toBe('Inter Display Medium');
+    expect(pickFamily(22, 400, 'exact').family).toBe('Inter Text 22');
+    expect(pickFamily(20, 500, 'exact').family).toBe('Inter Text 20 Medium');
+    expect(pickFamily(24, 500, 'exact').family).toBe('Inter Text 24 Medium');
+    expect(pickFamily(15, 400, 'exact').family).toBe('Inter Text 15');
+    expect(pickFamily(13, 400, 'exact').family).toBe('Inter Text 14');
+    expect(pickFamily(16, 400, 'exact').family).toBe('Inter Text 15');
     expect(nearestOpsz(27)).toBe(26);
     expect(nearestOpsz(34)).toBe(26);
+    // no name carries GT
+    for (const set of ['standard', 'exact'] as const)
+      for (const [size, weight] of [
+        [88, 500],
+        [44, 400],
+        [26, 500],
+        [13, 400],
+      ] as const)
+        for (const alternates of [false, true])
+          expect(pickFamily(size, weight, set, alternates).family).not.toMatch(/GT/);
+    expect(drawsAlternates('"cv11", "ss01"')).toBe(true);
+    expect(drawsAlternates('normal')).toBe(false);
   });
 
   test('weights beyond the two cuts travel as Medium plus bold or as Regular, and are named', () => {
     const heavy = pickFamily(22, 700, 'exact');
-    expect(heavy.family).toBe(`${FAMILY_PREFIX} Text 22 Medium`);
+    expect(heavy.family).toBe('Inter Text 22 Medium');
     expect(heavy.bold).toBe(true);
     expect(weightSubstitution(heavy)).toMatch(
       /^fonts: weight 700 exported as the Medium cut plus bold/,
     );
     const semi = pickFamily(88, 600, 'standard');
-    expect(semi.family).toBe(`${FAMILY_PREFIX} Display`);
+    expect(semi.family).toBe('Inter Display Medium');
     expect(semi.bold).toBe(true);
     const light = pickFamily(22, 300, 'exact');
-    expect(light.family).toBe(`${FAMILY_PREFIX} Text 22`);
+    expect(light.family).toBe('Inter Text 22');
     expect(light.bold).toBe(false);
     expect(weightSubstitution(light)).toMatch(/^fonts: weight 300 exported as the Regular cut;/);
     expect(weightSubstitution(pickFamily(22, 400, 'exact'))).toBeNull();
@@ -67,7 +86,7 @@ describe('the export font set (SPEC 8.4)', () => {
 
     /* the run itself carries the bold flag and the report's residual the line, once per weight */
     const style = (weight: number) => ({
-      family: 'GT Inter Text 22',
+      family: 'Inter',
       mono: false,
       weight,
       size: 22,
@@ -107,7 +126,7 @@ describe('the export font set (SPEC 8.4)', () => {
     };
     const runs = textRuns(text, options);
     expect(runs[0]?.options?.bold).toBe(true);
-    expect(runs[0]?.options?.fontFace).toBe(`${FAMILY_PREFIX} Text 22 Medium`);
+    expect(runs[0]?.options?.fontFace).toBe('Inter Text 22 Medium');
     expect(runs[1]?.options?.bold).toBeUndefined();
     expect([...residual]).toHaveLength(1);
     expect([...residual][0]).toMatch(/weight 700 exported as the Medium cut plus bold/);
@@ -129,16 +148,12 @@ describe('the export font set (SPEC 8.4)', () => {
     expect(familyFor(style, 'exact')).toBe(MONO_FAMILY);
   });
 
-  test('the ladder names the twelve families of the exact set and three of the standard set', () => {
+  test('the ladder names the per size families of the exact set and three of the standard set', () => {
     const exact = familiesOfLadder('exact');
-    expect(exact).toContain(`${FAMILY_PREFIX} Display`);
-    expect(exact).toContain(`${FAMILY_PREFIX} Text 22`);
+    expect(exact).toContain('Inter Display Medium');
+    expect(exact).toContain('Inter Text 22');
     expect(exact.length).toBeGreaterThanOrEqual(8);
-    expect(familiesOfLadder('standard')).toEqual([
-      `${FAMILY_PREFIX} Display`,
-      'Inter',
-      'Inter Medium',
-    ]);
+    expect(familiesOfLadder('standard')).toEqual(['Inter Display Medium', 'Inter', 'Inter Medium']);
   });
 
   test('the catalog reads fonts.json or reports an unbuilt set', () => {
@@ -149,14 +164,14 @@ describe('the export font set (SPEC 8.4)', () => {
       JSON.stringify({
         version: 'inter-4.001-test',
         faces: [
-          { family: `${FAMILY_PREFIX} Text 22`, file: 'GTInterText22.ttf', weight: 400, opsz: 22 },
+          { family: 'Inter Text 22', file: 'InterText22-Regular.ttf', weight: 400, opsz: 22 },
         ],
       }),
     );
     const catalog = loadFontsCatalog(dir);
     expect(catalog.built).toBe(true);
     expect(catalog.version).toBe('inter-4.001-test');
-    expect(catalog.entries[0]?.family).toBe(`${FAMILY_PREFIX} Text 22`);
+    expect(catalog.entries[0]?.family).toBe('Inter Text 22');
   });
 });
 
@@ -199,7 +214,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     fontSet: 'exact' as const,
     fontSetVersion: 'unbuilt',
     files: [file],
-    families: ['GT Inter Display', 'GT Inter Text 22'],
+    families: ['Inter Display Medium', 'Inter'],
     embedded: [] as string[],
     slides: [{ slideId: 'site', native: ['h', 'p1'], raster: ['fig'] }],
     geometryInBounds: true,
@@ -212,7 +227,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     const report = buildReport({ ...base, theme: 'light' });
     expect(report.files[0]?.bytes).toBe(2);
     expect(report.files[0]?.sha256).toHaveLength(64);
-    expect(report.fonts.requiredOnViewer).toEqual(['GT Inter Display', 'GT Inter Text 22']);
+    expect(report.fonts.requiredOnViewer).toEqual(['Inter Display Medium', 'Inter']);
     expect(report.fonts.substitutedIn).toEqual(['every viewer']);
     expect(report.passed).toBe(true);
     expect(report.perfect).toBe(true);
@@ -238,7 +253,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     const report = buildReport({
       ...base,
       theme: 'dark',
-      embedded: ['GT Inter Display', 'GT Inter Text 22'],
+      embedded: ['Inter Display Medium', 'Inter'],
     });
     expect(report.fonts.requiredOnViewer).toEqual([]);
     expect(report.fonts.substitutedIn).toEqual(['Keynote', 'PowerPoint for the web']);

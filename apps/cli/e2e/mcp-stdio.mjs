@@ -472,7 +472,7 @@ async function main() {
       assert(report.deckId === CALIBRATION_DECK_ID, `report deckId ${report.deckId}`);
       assert(report.format === 'pptx' && report.mode === 'flatten', 'report format or mode');
       assert(report.theme === 'light', `report theme ${report.theme}`);
-      assert(report.fontSet === 'exact', `report fontSet ${report.fontSet}`);
+      assert(report.fontSet === 'standard', `report fontSet ${report.fontSet}`);
       assert(report.files.length === 1, `expected 1 file, got ${report.files.length}`);
       const [file] = report.files;
       assert(

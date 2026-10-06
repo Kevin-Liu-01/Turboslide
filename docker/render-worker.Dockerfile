@@ -6,7 +6,7 @@
 # inside. The default command is the job queue; any `turboslide` command runs in the same image:
 #
 #   docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker .
-#   docker run --rm turboslide-render-worker fc-list | grep -c "GT Inter"   (30 faces)
+#   docker run --rm turboslide-render-worker fc-list /usr/local/share/fonts/turboslide | wc -l   (38 faces)
 #   docker run --rm -v "$PWD:/work" turboslide-render-worker turboslide export pptx \
 #     --deck /work/decks/gt-brand --mode flatten --theme light,dark --fonts exact --verify \
 #     --out /work/.turboslide/export
@@ -115,13 +115,14 @@ RUN pnpm install ${PNPM_INSTALL_FLAGS} \
     && rm -rf /var/lib/apt/lists/*
 
 # The export font set (packages/fonts/export, built by scripts/build-fonts.py and committed):
-# installed system wide so LibreOffice resolves the GT Inter families the PPTX names. Round two
-# of the Google Slides parity (gslides-parity SPEC-2 7.1) added an italic twin of every face: 34
-# files, 30 of them named GT Inter (the four Inter and Inter Medium cuts are the rest).
+# installed system wide so LibreOffice resolves the Inter families the PPTX names (gslides-parity
+# SPEC-2 7.1 added an italic twin of every face; docs/DESIGN.md 4.3 the upstream names): 38 files,
+# Inter, Inter Medium, Inter Display, Inter Display Medium, Inter Display Alternates and Inter
+# Text 14 to Inter Text 26 in both weights, each upright and italic.
 RUN mkdir -p /usr/local/share/fonts/turboslide \
     && cp packages/fonts/export/*.ttf /usr/local/share/fonts/turboslide/ \
     && fc-cache -f \
-    && test "$(fc-list | grep -c 'GT Inter')" -ge 30
+    && test "$(fc-list | grep -c '/usr/local/share/fonts/turboslide/')" -ge 38
 
 # The CLI on PATH; the repo's own launcher runs the TypeScript source through Node's type stripping.
 RUN ln -s /app/apps/cli/bin/turboslide.mjs /usr/local/bin/turboslide \

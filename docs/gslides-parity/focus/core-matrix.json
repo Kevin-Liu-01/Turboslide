@@ -10959,6 +10959,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D5#2"
     },
     {
+      "id": "export.fonts.upstream-names",
+      "feature": "export",
+      "interaction": "File > Download > Microsoft PowerPoint (.pptx), Editable text: on a deck whose display text uses Inter's defaults every `a:latin` typeface is Inter, Inter Medium, Inter Display or Inter Display Medium; on a deck in the General Translation theme the display runs name Inter Display Alternates; no run names GT Inter; `turboslide export check` reads no font finding",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 1.1",
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#4; landed in lane D5's fix round of pass 1 (finding 4); the clause on Inter's defaults is read once theme.list (DR-D3#1) is on the build"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

@@ -74,19 +74,29 @@ const SLIDE5 = 'next-steps';
 /** The row V3's `paintNextSteps` writes on slide 5 (the chips' Rewrite a Row). */
 const CHIP_ROW = `rows/items/${HOME_NEXT_STEPS.row.index}/value`;
 
-/** A slide's text runs by `data-run`: the renderer's markup of each and its text. */
-type Runs = ReadonlyMap<string, { html: string; text: string }>;
+/**
+ * A slide's text runs by `data-run`: the renderer's markup of each and its text, and the same with
+ * no prompt (`bare`), which a slide the show or the print copied draws (show.ts `dropPrompts`).
+ */
+type Run = { html: string; text: string };
+type Runs = ReadonlyMap<string, Run & { bare: Run }>;
 
 const runsOf = (template: HTMLTemplateElement, html: string): Runs => {
   // the renderer's output rendered at build (bands/live.generated.ts, bands/deck.generated.ts)
   template.innerHTML = html;
+  const els = [...template.content.querySelectorAll<HTMLElement>('[data-run]')];
+  const runs = els.map((el) => ({ html: el.innerHTML, text: el.textContent ?? '' }));
+  for (const prompt of [...template.content.querySelectorAll('[data-prompt]')]) prompt.remove();
   return new Map(
-    [...template.content.querySelectorAll<HTMLElement>('[data-run]')].map((el) => [
+    els.map((el, i) => [
       el.dataset['run'] ?? '',
-      { html: el.innerHTML, text: el.textContent ?? '' },
+      { ...(runs[i] as Run), bare: { html: el.innerHTML, text: el.textContent ?? '' } },
     ]),
   );
 };
+
+/** A copy the show or the print made of a slide (show.ts `CLONE_ATTR`), which draws no prompt. */
+const CLONE = '[data-slide-clone]';
 
 /** Slide 5's runs after each step of the recorded run, read on the first paint that needs them. */
 let stepRuns: Readonly<Record<1 | 2 | 3, Runs>> | null = null;
@@ -109,16 +119,22 @@ const runsAt = (step: 1 | 2 | 3): Runs => {
  * out of the order). A run the visitor typed in, or types in now, is `paintTexts`'s, and the root
  * keeps its mark until that run is drawn too. On slide 5 itself the chips' row is V3's
  * `paintNextSteps`'s at rest and once rewritten. Registered after `paintNextSteps`, so it draws
- * last on every root; a run whose text already reads as wanted is left as it is.
+ * last on every root; a run whose text already reads as wanted is left as it is. A copy the show or
+ * the print made takes each run without its prompt, as the product's Slideshow and print draw an
+ * empty placeholder (verify-landing.md finding 2): the core's repaint and this band's `paintSteps`
+ * reach those copies too, in either order with the show's own repaint.
  */
-function paintStep(root: HTMLElement, state: HomeDeckState): void {
+export function paintStep(root: HTMLElement, state: HomeDeckState): void {
   const key = root.dataset['slide'] as SlideKey | undefined;
   if (key === undefined || sourceOf(state, key) !== SLIDE5) return;
   const step = state.agentStep;
   const early = step === 1 || step === 2;
   if (!early && root.dataset['liveStep'] === undefined) return;
   let held = false;
-  for (const [run, want] of runsAt(early ? step : 3)) {
+  // a shown or printed copy draws no prompt, whichever subscriber repaints it first
+  const bare = root.closest(CLONE) !== null;
+  for (const [run, runs] of runsAt(early ? step : 3)) {
+    const want = bare ? runs.bare : runs;
     if (key === SLIDE5 && run === CHIP_ROW && (!early || state.nextSteps.rewritten)) continue;
     const el = [...root.querySelectorAll<HTMLElement>(`[data-run="${run}"]`)].find(
       (x) => x.closest('[data-inserted]') === null,

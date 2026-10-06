@@ -59,6 +59,20 @@ const EDIT_ATTRS = [
   'data-sheet',
 ] as const;
 
+/**
+ * Removes the prompts of a slide's empty placeholders from a shown or printed copy. The renderer's
+ * `[data-prompt]` spans and plates ("Click to add title", "Click to add text", "Click to add a
+ * picture") are the editor stage's alone: the product's Slideshow and print render with prompts off
+ * (`packages/render` blocks/prompt.ts `wantsPrompts`), so an empty placeholder draws nothing there.
+ * A band's slide 5 after a restore of recorded version 2 or 3 holds them (versions.ts `paintStep`
+ * writes the recorded render of each step, verify-landing.md finding 2). The core's repaint of a
+ * store change reaches a clone before the show's own repaint replaces it with a fresh copy, so
+ * every copy the show and the print draw goes through here.
+ */
+export function dropPrompts(root: ParentNode): void {
+  for (const prompt of [...root.querySelectorAll('[data-prompt]')]) prompt.remove();
+}
+
 /** The page's own instances of a slide, largest first. */
 function sourceOf(root: HTMLElement, id: HomeSlideId): HTMLElement | null {
   const found = [
@@ -277,6 +291,7 @@ export function cloneSlide(root: HTMLElement, state: HomeDeckState, id: HomeSlid
     sheet.setAttribute('data-counter', counter);
     for (const el of sheet.querySelectorAll('[data-counter-text]')) el.textContent = counter;
   }
+  dropPrompts(wrapper);
   return wrapper;
 }
 
@@ -360,6 +375,7 @@ export function showSlide(root: HTMLElement, state: HomeDeckState, key: SlideKey
   if (key === 'field') setFieldStill(fresh);
   setPatternStill(fresh);
   holdStills(wrapper);
+  dropPrompts(wrapper);
   return wrapper;
 }
 

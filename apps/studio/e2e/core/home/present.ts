@@ -20,6 +20,7 @@ export const ROWS: readonly string[] = [
   'home.present.show',
   'home.present.focus',
   'home.present.print',
+  'home.present.no-prompts',
 ];
 
 const band = (page: Page) => page.locator('[data-band="present"]');
@@ -490,5 +491,70 @@ export function rows(): void {
     const hero = pdfPages(await bare.pdf({ preferCSSPageSize: true }));
     expect(hero.pages).toBe(1);
     await bare.context().close();
+  });
+
+  test(title('home.present.no-prompts'), async ({ browser }) => {
+    test.setTimeout(120_000);
+    /* recorded version 2 holds slide 5 as the run's first step inserted it: the layout's empty
+       placeholders, which the bands draw with the editor stage's prompts */
+    const page = await freshPage(browser);
+    await openHome(page);
+    await bandReady(page, 'agents');
+    const versionSlider = page.locator('[data-band="agents"] [data-version-slider][role="slider"]');
+    for (const version of [2, 3]) {
+      await versionSlider.focus();
+      await page.keyboard.press('Home');
+      for (let i = 1; i < version; i += 1) await page.keyboard.press('ArrowRight');
+      await expect(versionSlider).toHaveAttribute('aria-valuenow', String(version));
+      await page.locator('[data-band="agents"] [data-version-restore]').click();
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              (window as unknown as { tsHomeStore: { get(): { agentStep: number } } }).tsHomeStore.get()
+                .agentStep,
+          ),
+        )
+        .toBe(version - 1);
+      /* the band's slide 5 keeps its prompts (the editor stage's) */
+      expect(
+        await page
+          .locator('[data-band="agents"] [data-home-slides][data-slide="next-steps"] [data-prompt]')
+          .count(),
+      ).toBeGreaterThan(0);
+
+      /* the Present band's chosen slide and the show draw none, as the product's Slideshow */
+      await bandReady(page, 'present');
+      await band(page).locator('[data-slide-row="next-steps"]').click();
+      await expect(
+        band(page).locator('[data-home-slides][data-slide="next-steps"]').first(),
+      ).toBeVisible();
+      expect(
+        await band(page).locator('[data-present-display] [data-prompt]').count(),
+        `the chosen slide, version ${version}`,
+      ).toBe(0);
+      await presentButton(page).click();
+      await expect(stage(page)).toBeFocused();
+      await expect(stage(page)).toHaveAttribute(
+        'aria-label',
+        PRESENT.stageName(placeOf('next-steps'), N),
+      );
+      expect(await stage(page).locator('[data-prompt]').count(), `show, version ${version}`).toBe(0);
+      await expect(stage(page)).not.toContainText('Click to add');
+      await page.keyboard.press('Escape');
+      await expect(show(page)).toHaveCount(0);
+
+      /* the print, which Cmd or Ctrl+P fills as the button does: nine slides, no prompt */
+      await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+      const deck = page.locator('[data-print-deck]');
+      await expect(deck.locator(':scope > *')).toHaveCount(N);
+      await expect(deck.locator('[data-home-slides][data-slide="next-steps"]')).toHaveCount(1);
+      expect(await deck.locator('[data-prompt]').count(), `print, version ${version}`).toBe(0);
+      await expect(deck).not.toContainText('Click to add');
+      await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+      await expect(deck.locator(':scope > *')).toHaveCount(0);
+      await bandReady(page, 'agents');
+    }
+    await page.context().close();
   });
 }

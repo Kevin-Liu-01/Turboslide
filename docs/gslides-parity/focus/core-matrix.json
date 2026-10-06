@@ -10730,6 +10730,16 @@
       "severity": 1,
       "evidence": "verify-landing.md finding 1 (production 2026-10-05: \"Heading · x 0 · y 0 · 0°\" for slide 2's heading at rest, \"Shape · x 0 · y 0 · 0°\" for a rectangle at left 680, top 370; probe-readout.mjs)",
       "note": "Round 1 follow-up, lane E item 1: a layout slide holds no rest until its first freeing, so sheetLayout's pose (apps/studio/src/components/home/live/paint.ts) reads the place the layout draws the object in (boxIn), where it read a zero box; live/pose.test.ts pins it"
+    },
+    {
+      "id": "home.present.no-prompts",
+      "feature": "decks",
+      "interaction": "After Restore This Version on recorded version 2 and on version 3, the agents band's slide 5 keeps the layout's prompts, while the Present band's chosen slide 5, the show on slide 5 and the print of the nine slides draw no prompt (no `[data-prompt]`, no \"Click to add\"), as the product's Slideshow and print render with prompts off",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-landing.md finding 2 (production 2026-10-05: ps-show-version3-slide5.png and b-1440-light-12-print-sheet.png, seven \"Click to add text\" hints on slide 5 in the show and the print after a restore of version 3)",
+      "note": "Round 1 follow-up, lane E item 2: versions.ts paintStep draws slide 5's recorded render of the run's first or second step, prompts included, on every slide root, and the show's and the print's copies (show.ts showSlide and cloneSlide) now drop `[data-prompt]` (dropPrompts); live/show-prompts.test.ts pins it"
     }
   ]
 }

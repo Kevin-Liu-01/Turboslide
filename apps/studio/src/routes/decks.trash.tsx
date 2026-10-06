@@ -192,7 +192,7 @@ function TrashPage() {
     } catch (error) {
       // the refused card and the ones after it come back; the removed ones stay gone
       unhide(ids.slice(removed));
-      snackbar.show(`${HOME.deleteForever}: ${errorMessage(error)}`);
+      snackbar.show(HOME.deleteForeverRefused(errorMessage(error)));
     } finally {
       mark(ids, false);
     }
@@ -319,9 +319,9 @@ function TrashBody({
             to="/decks"
             className="pt-ib is-text"
             data-control="trash.back"
-            {...tipProps({ name: HOME.recent, doc: 'Back to your presentations.' })}
+            {...tipProps({ name: HOME.back, doc: 'Back to your presentations.' })}
           >
-            <span className="pt-lb">{HOME.recent}</span>
+            <span className="pt-lb">{HOME.back}</span>
           </Link>
           <button
             type="button"

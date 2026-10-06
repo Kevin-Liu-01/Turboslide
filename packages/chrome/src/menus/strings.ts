@@ -235,7 +235,8 @@ export const ACCOUNT = {
     title: 'How should others see you?',
     name: 'Name',
     continue: 'Continue',
-    signIn: 'Sign in',
+    /* the bar's button, Title Case as the title row's Sign In (design round request 7) */
+    signIn: 'Sign In',
   },
   signInDialog: {
     title: 'Sign in',
@@ -245,7 +246,7 @@ export const ACCOUNT = {
     sent: 'If that address can sign in, a message with a link and a six digit code is on its way',
     code: 'Six digit code',
     verify: 'Verify',
-    passkey: 'Use a passkey',
+    passkey: 'Use a Passkey',
     github: 'Continue with GitHub',
     google: 'Continue with Google',
     /* the library's own error redirect after a social sign in (`?error=<reason>`, docs/REALTIME.md
@@ -504,7 +505,7 @@ export const DIALOGS = {
   },
   deleteForever: {
     title: (name: string) => `Delete ${name} forever? This cannot be undone`,
-    ok: 'Delete forever',
+    ok: 'Delete Forever',
     cancel: 'Cancel',
   },
   findReplace: {
@@ -577,8 +578,10 @@ export const DIALOGS = {
     color: 'Color',
     image: 'Image',
     choose: 'Choose',
-    resetToTheme: 'Reset to theme',
-    addToTheme: 'Add to theme',
+    /* the dialog's buttons are Title Case, as every button is (DECK-GRAMMAR 22; design round pass 2
+       finding 6) */
+    resetToTheme: 'Reset to Theme',
+    addToTheme: 'Add to Theme',
     done: 'Done',
   },
   specialCharacters: {
@@ -992,7 +995,11 @@ export const HOME = {
   blank: 'Blank presentation',
   gtBrand: 'GT brand deck',
   gallery: 'Template gallery',
+  /* the list's heading and the page title; the button back to the list is `back` */
   recent: 'Recent presentations',
+  /* the trash's and the gallery's button back to the list: Title Case, as every button is
+     (DECK-GRAMMAR 22; design round pass 2 finding 6, request 7) */
+  back: 'Recent Presentations',
   search: 'Search presentations',
   opened: (ago: string) => `Opened ${ago}`,
   edited: (date: string) => `Edited ${date}`,
@@ -1007,8 +1014,10 @@ export const HOME = {
   empty: 'No presentations yet. Start one above',
   trashEmpty: 'Trash is empty',
   restore: 'Restore',
-  deleteForever: 'Delete forever',
-  emptyTrash: 'Empty trash',
+  deleteForever: 'Delete Forever',
+  /* the snackbar that names the act when the store refuses it keeps a sentence's case */
+  deleteForeverRefused: (reason: string) => `Delete forever: ${reason}`,
+  emptyTrash: 'Empty Trash',
   inTrash: 'This presentation is in the trash · Restore',
 } as const;
 

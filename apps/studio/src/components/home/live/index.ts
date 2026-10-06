@@ -136,12 +136,13 @@ function wireUndo(root: HTMLElement, store: HomeStore): void {
 
 /**
  * The recorded run's three Version history rows as the markup draws them at rest, oldest first
- * (each row's third cell holds its words, `HomeAgents.tsx`). Read from the page so the core does
- * not carry `run.generated.ts` for three sentences (l2.md Q9).
+ * (the rows marked `data-history-run`, each with its words in `[data-history-words]`,
+ * `HomeAgents.tsx`; the deck's first version beside them is not a row of the run). Read from the
+ * page so the core does not carry `run.generated.ts` for three sentences (l2.md Q9).
  */
 const restRows = (root: HTMLElement): string[] =>
-  [...root.querySelectorAll<HTMLElement>('[data-history-row]')]
-    .map((row) => row.children[2]?.textContent?.trim() ?? '')
+  [...root.querySelectorAll<HTMLElement>('[data-history-run] [data-history-words]')]
+    .map((words) => words.textContent?.trim() ?? '')
     .filter((words) => words !== '')
     .reverse();
 

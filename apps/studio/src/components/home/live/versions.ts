@@ -225,8 +225,17 @@ export function startVersions(ctx: LiveContext): void {
   if (!track.isConnected) sliderEl.append(track);
   if (!ticks.isConnected) sliderEl.append(ticks);
   if (!thumb.isConnected) track.append(thumb);
-  restoreEl.textContent = VERSIONS.restore;
+  // the markup's button carries its glyph and its words (HomeAgents.tsx); one made here, its words
+  if ((restoreEl.textContent ?? '').trim() === '') restoreEl.textContent = VERSIONS.restore;
   captionEl.setAttribute('aria-live', 'off');
+
+  /** The chosen version's row in Version history sits on the plate (DESIGN.md 8.8). */
+  const markRows = (n: number): void => {
+    for (const li of scope.querySelectorAll<HTMLElement>('[data-history-row]')) {
+      if (li.dataset['version'] === String(n)) li.setAttribute('aria-current', 'true');
+      else li.removeAttribute('aria-current');
+    }
+  };
 
   // ---- the slide above, and the view laid over it while an earlier version is chosen ----
   // the slide above's sheet, and the box the view is placed against: V3's stage around it (R11),
@@ -306,6 +315,7 @@ export function startVersions(ctx: LiveContext): void {
     });
     captionEl.textContent = text;
     restoreEl.setAttribute('aria-disabled', String(newest));
+    markRows(chosen);
     const el = viewOf();
     if (el === null) return;
     if (newest) {

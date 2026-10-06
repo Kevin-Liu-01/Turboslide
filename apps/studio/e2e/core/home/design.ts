@@ -12,7 +12,7 @@ import {
   HOME_TITLE_ROW,
   HOME_TOOLBAR,
 } from '../../../src/components/home/chrome.generated';
-import { CANVAS, EXPORT, HERO } from '../../../src/components/home/copy';
+import { AGENTS, CANVAS, EXPORT, HERO, VERSIONS } from '../../../src/components/home/copy';
 import {
   HOME_DECK,
   HOME_EXPORT_FACTS,
@@ -20,6 +20,7 @@ import {
   HOME_TAILOR_WORDS,
 } from '../../../src/components/home/deck.generated';
 import {
+  AGENTS_ROUND,
   BAND_CONTROLS,
   CANVAS_ROUND,
   DIAGRAM_WORDS,
@@ -74,6 +75,7 @@ export const ROWS: readonly string[] = [
   'home.export.dialog',
   'home.patterns.stills',
   'home.kits.themes',
+  'home.agents.history-panel',
 ];
 
 type Theme = 'light' | 'dark';
@@ -306,8 +308,8 @@ const NUMBER_SELECTORS = [
   '[data-hero-counter]',
   '[data-thumb-n]',
   '.ts-mini-thumb-n',
-  '.ts-home-history time',
-  '.ts-home-history [data-version]',
+  '.ts-home-history-time',
+  '[data-version-caption]',
 ] as const;
 
 async function defaultGlyphs(browser: Browser): Promise<void> {
@@ -1601,6 +1603,13 @@ const FLOWS = [
     words: DIAGRAM_WORDS.export,
     markers: 2,
   },
+  {
+    band: 'agents',
+    id: 'd-agents',
+    label: DIAGRAMS_ROUND.agents.label,
+    words: DIAGRAM_WORDS.agents,
+    markers: 4,
+  },
 ] as const;
 
 async function diagramsFlows(browser: Browser): Promise<void> {
@@ -1689,7 +1698,7 @@ async function diagramsFlows(browser: Browser): Promise<void> {
         });
         if (!buttons.play || buttons.keys < 2 || !buttons.printer)
           failures.push(`${label}: the Present band's buttons ${JSON.stringify(buttons)}`);
-        notes.push(`${label}: both diagrams drawn`);
+        notes.push(`${label}: ${FLOWS.length} diagrams drawn`);
       } finally {
         await context.close();
       }
@@ -1956,6 +1965,153 @@ async function patternsStills(browser: Browser): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// home.agents.history-panel
+
+/** The chips' glyphs in their order (DESIGN.md 8.8). */
+const CHIP_GLYPHS = ['command-line', 'arrow-path', 'pencil', 'eye-slash'] as const;
+
+async function historyPanel(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        await bandReady(page, 'agents');
+        const band = page.locator('[data-band="agents"]');
+        await band.locator('.ts-versions-thumb').waitFor({ timeout: 30_000 });
+        const read = () =>
+          band.evaluate((root) => {
+            const glyph = (el: Element | null) =>
+              el instanceof HTMLElement
+                ? {
+                    name: el.dataset['icon'] ?? '',
+                    mask: getComputedStyle(el).maskImage !== 'none',
+                    w: Math.round(el.getBoundingClientRect().width),
+                  }
+                : null;
+            const panel = root.querySelector<HTMLElement>('.ts-home-vh')!;
+            const restore = root.querySelector<HTMLElement>('[data-version-restore]')!;
+            const rows = (group: string) =>
+              [
+                ...root.querySelectorAll<HTMLElement>(
+                  `[data-history-group="${group}"] [data-history-row]`,
+                ),
+              ].map((li) => {
+                const chip = li.querySelector<HTMLElement>('.ts-home-history-icon')!;
+                const when = li.querySelector<HTMLElement>('.ts-home-history-time')!;
+                return {
+                  author: li.querySelector('.ts-home-history-author')?.textContent ?? '',
+                  words: li.querySelector('[data-history-words]')?.textContent ?? '',
+                  when: when.textContent ?? '',
+                  figures: getComputedStyle(when).fontVariantNumeric,
+                  current: li.getAttribute('aria-current') === 'true',
+                  plate: getComputedStyle(li).backgroundColor,
+                  chipRadius: getComputedStyle(chip).borderTopLeftRadius,
+                  glyph: glyph(chip.querySelector('.ts-icon')),
+                };
+              });
+            return {
+              radius: getComputedStyle(panel).borderTopLeftRadius,
+              title: panel.querySelector('.ts-home-vh-title')?.textContent ?? '',
+              clock: glyph(panel.querySelector('.ts-home-vh-head .ts-icon')),
+              slider: root.querySelector('[role="slider"]') !== null,
+              restore: {
+                words: restore.textContent?.trim() ?? '',
+                disabled: restore.getAttribute('aria-disabled'),
+                radius: getComputedStyle(restore).borderTopLeftRadius,
+                glyph: glyph(restore.querySelector('.ts-icon')),
+              },
+              days: [...root.querySelectorAll('.ts-home-history-day')].map((d) => d.textContent ?? ''),
+              empty: root.querySelector<HTMLElement>('[data-history-empty]')?.hidden ?? null,
+              today: rows('today'),
+              recorded: rows('recorded'),
+              chips: [...root.querySelectorAll<HTMLElement>('[data-chip]')].map((c) =>
+                glyph(c.querySelector('.ts-icon')),
+              ),
+            };
+          });
+        const rest = await read();
+        notes.push(
+          `${label}: ${rest.title}, ${rest.days.join(' / ')}; recorded ${rest.recorded.map((r) => `${r.when} ${r.words}`).join(', ')}; chips ${rest.chips.map((c) => c?.name).join(',')}`,
+        );
+        if (rest.radius !== '8px') failures.push(`${label}: the panel's corner is ${rest.radius}`);
+        if (rest.title !== AGENTS.historyLabel) failures.push(`${label}: the head reads ${rest.title}`);
+        if (rest.clock?.name !== 'clock' || !rest.clock.mask || rest.clock.w === 0)
+          failures.push(`${label}: the head's clock does not draw`);
+        if (!rest.slider) failures.push(`${label}: no scrubber`);
+        if (
+          rest.restore.words !== VERSIONS.restore ||
+          rest.restore.disabled !== 'true' ||
+          rest.restore.radius !== '6px' ||
+          rest.restore.glyph?.name !== 'arrow-uturn-left' ||
+          !rest.restore.glyph.mask
+        )
+          failures.push(`${label}: Restore This Version ${JSON.stringify(rest.restore)}`);
+        if (
+          JSON.stringify(rest.days) !==
+          JSON.stringify([AGENTS_ROUND.history.today, AGENTS_ROUND.history.recorded])
+        )
+          failures.push(`${label}: the groups read ${rest.days.join(', ')}`);
+        if (rest.today.length !== 0 || rest.empty !== false)
+          failures.push(`${label}: Today at rest holds ${rest.today.length} rows, sentence hidden ${rest.empty}`);
+        const wantRecorded = [...HOME_RUN.steps]
+          .reverse()
+          .map((s) => s.history)
+          .concat(HOME_DECK.title);
+        if (JSON.stringify(rest.recorded.map((r) => r.words)) !== JSON.stringify(wantRecorded))
+          failures.push(`${label}: the recorded rows read ${rest.recorded.map((r) => r.words).join(', ')}`);
+        rest.recorded.forEach((r, i) => {
+          if (r.when !== AGENTS_ROUND.history.version(4 - i) || !r.figures.includes('tabular-nums'))
+            failures.push(`${label}: recorded row ${i + 1} reads "${r.when}" in ${r.figures}`);
+          if (r.author !== AGENTS.author.agent || r.glyph?.name !== 'command-line' || !r.glyph.mask)
+            failures.push(`${label}: recorded row ${i + 1} by ${r.author} with ${r.glyph?.name}`);
+          if (r.chipRadius !== '0px') failures.push(`${label}: an identity chip at ${r.chipRadius}`);
+          if (r.current !== (i === 0)) failures.push(`${label}: recorded row ${i + 1} current ${r.current}`);
+        });
+        const plate = rest.recorded[0]?.plate ?? '';
+        if (plate === '' || plate === 'rgba(0, 0, 0, 0)')
+          failures.push(`${label}: the current row has no plate (${plate})`);
+        if (JSON.stringify(rest.chips.map((c) => c?.name)) !== JSON.stringify(CHIP_GLYPHS))
+          failures.push(`${label}: the chips draw ${rest.chips.map((c) => c?.name).join(',')}`);
+        if (rest.chips.some((c) => c === null || !c.mask || c.w === 0))
+          failures.push(`${label}: a chip glyph draws no mask`);
+        /* a chip's change enters Today with its time, on the plate */
+        await band.locator('[data-chip="turn"]').click();
+        await band
+          .locator('[data-history-group="today"] [data-history-row]')
+          .first()
+          .waitFor({ timeout: 30_000 });
+        await page.waitForFunction(
+          () =>
+            document.querySelector('[data-band="agents"] [data-chip][aria-disabled="true"]') === null,
+          undefined,
+          { timeout: 30_000 },
+        );
+        const after = await read();
+        const row = after.today[0];
+        notes.push(`${label}: after Turn the Title, Today ${row?.when} ${row?.words}`);
+        if (
+          after.today.length !== 1 ||
+          row === undefined ||
+          !/^\d{1,2}:\d{2}\s?(AM|PM)$/.test(row.when) ||
+          !row.figures.includes('tabular-nums') ||
+          !row.current ||
+          after.empty !== true ||
+          after.recorded.some((r) => r.current)
+        )
+          failures.push(`${label}: after a chip, Today ${JSON.stringify(after.today)}, sentence hidden ${after.empty}`);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'history', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
 // home.kits.themes (DESIGN.md 8.7)
 
 async function kitsThemes(browser: Browser): Promise<void> {
@@ -2130,6 +2286,11 @@ export function rows(): void {
     test(title('home.kits.themes'), async ({ browser }) => {
       test.setTimeout(360_000);
       await kitsThemes(browser);
+    });
+  if (entered('home.agents.history-panel'))
+    test(title('home.agents.history-panel'), async ({ browser }) => {
+      test.setTimeout(360_000);
+      await historyPanel(browser);
     });
   if (entered('home.patterns.stills'))
     test(title('home.patterns.stills'), async ({ browser }) => {

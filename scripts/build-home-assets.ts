@@ -2520,7 +2520,9 @@ const VISIT = [
  * footer's GT mark is the one glyph the editor's table does not hold, from the theme sprite.
  */
 /* the seam's labels name their files with the editor's glyphs (DESIGN.md 8.11): `photo` for the
-   Perfect file, `document` for Editable text */
+   Pictures file, `document` for Editable text; the agents band's chips carry `command-line`,
+   `arrow-path`, `pencil` and `eye-slash`, and Version history's head the `clock` and Restore This
+   Version the `arrow-uturn-left` (DESIGN.md 8.8) */
 const DOCUMENT_ICONS = [
   'next',
   'command-line',
@@ -2529,6 +2531,10 @@ const DOCUMENT_ICONS = [
   'printer',
   'photo',
   'document',
+  'arrow-path',
+  'pencil',
+  'clock',
+  'arrow-uturn-left',
 ] as const;
 const THEME_SPRITE_ICONS = ['gt-mark'] as const;
 /** A glyph a stylesheet draws on a pseudo element, as a custom property: the external link's. */

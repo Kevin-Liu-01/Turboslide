@@ -10647,9 +10647,9 @@
       "today": "broken",
       "id": "home.agents.rest",
       "severity": 2,
-      "interaction": "At the agents band's first paint: slide 5 as the run wrote it above the console; the console's resting screen is `turboslide version list` with the recorded answer (the save before the run and the run's three writes) in its slots at both widths (14 of 64 columns at 720 px and over, 22 of 44 under), no line cut or wider than the panel; Version history shows the run's three recorded Agent rows; every counter reads n / 9",
+      "interaction": "At the agents band's first paint: slide 5 as the run wrote it above the console; the console's resting screen is `turboslide version list` with the recorded answer (the save before the run and the run's three writes) in its slots at both widths (14 of 64 columns at 720 px and over, 22 of 44 under), no line cut or wider than the panel; Version history shows Today with its sentence and no row, and \"Recorded from the CLI\" with the run's three Agent rows as v4, v3 and v2 over v1, v4 on the plate; every counter reads n / 9",
       "evidence": "a-mid.png (avoided)",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3); restated in the design round, DR-D4#6"
     },
     {
       "feature": "decks",
@@ -10677,9 +10677,9 @@
       "today": "broken",
       "id": "home.agents.history",
       "severity": 1,
-      "interaction": "Every change on the page adds one Version history row within 200 ms naming You or Agent with its Heroicon, the change in words and the time in \"6:45 PM\" form, newest first in ten ruled rows of 44 px (five under 720 px) that move nothing outside the list; an Undo takes its row away",
+      "interaction": "Every change on the page adds one Version history row within 200 ms naming You or Agent with its Heroicon, the change in words and the time in \"6:45 PM\" form, newest first under Today in Version history's scroll region of fixed height (360 px, 312 px under 720 px) of 48 px rows that moves nothing outside the list; an Undo takes its row away",
       "evidence": "judge-2 6",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3). The 200 ms bound is an interaction bound, read at a one minute load under 24"
+      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3). The 200 ms bound is an interaction bound, read at a one minute load under 24; restated in the design round, DR-D4#6"
     },
     {
       "feature": "decks",
@@ -11321,12 +11321,12 @@
     {
       "id": "home.diagrams.flows",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, and the export band a slide to pitch.pdf and pitch.pptx under its lead: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
+      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, the export band a slide to pitch.pdf and pitch.pptx under its lead, and the agents band the CLI, the MCP server and the HTTP API into one action and the deck with Version history under its lead: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-landing F9 and F10: the Present band is half empty; the export band ends in three rows of text",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7, the agents flow in DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "home.present.figure",
@@ -11367,6 +11367,16 @@
       "severity": 2,
       "evidence": "research-landing F7: the kits band shows three kits and no theme; VERIFICATION.md design round pass 1 finding 3",
       "note": "Design round (docs/DESIGN.md 11), DR-D4#5; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.agents.history-panel",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the agents band's Version history is the editor's panel in an 8 px window: the head with the clock glyph, the scrubber, Restore This Version with its glyph at the 6 px corner (aria-disabled at rest); a Today group (its sentence while it has no row) and a \"Recorded from the CLI\" group with the run's three Agent rows and the deck's first version as v4 to v1 in tabular figures, each with its author's square chip and glyph, v4 on the plate; the four chips carry command-line, arrow-path, pencil and eye-slash; after Turn the Title one Today row with its time in tabular figures is on the plate and the sentence leaves",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F8: three \"Recorded\" cells and no group; VERIFICATION.md design round pass 2 finding 3",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "decks.pages.radius",

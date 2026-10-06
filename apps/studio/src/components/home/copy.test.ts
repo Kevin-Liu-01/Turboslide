@@ -169,6 +169,9 @@ const DESIGN_VIEW_EXEMPT: ReadonlyArray<string> = [
   'design.hero',
   'design.numbers',
   'design.agents',
+  /* the agents band's diagram names the transports, as the band's lead does (DESIGN.md 8.8) */
+  'design.diagrams.agents',
+  'design.diagramWords.agents',
 ];
 const isExempt = (path: string): boolean =>
   [...DEFAULT_VIEW_EXEMPT, ...DESIGN_VIEW_EXEMPT].some(

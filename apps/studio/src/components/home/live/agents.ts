@@ -270,7 +270,9 @@ export function startAgents(ctx: LiveContext): void {
               : on
                 ? WORDS.chips.skip
                 : WORDS.chips.unskip;
-      if (button.textContent !== label) button.textContent = label;
+      // the words beside the chip's glyph (DESIGN.md 8.8), else the chip's own text
+      const text = button.querySelector('.ts-chip-label') ?? button;
+      if (text.textContent !== label) text.textContent = label;
       if (playing?.chip === chip) button.setAttribute('aria-disabled', 'true');
       else button.removeAttribute('aria-disabled');
     }

@@ -80,6 +80,10 @@ export const DIAGRAMS_ROUND = {
       'The editor, presenter view and a phone with the show, joined by the S key and a present link.',
   },
   export: { label: 'A slide with a line to two files, pitch.pdf and pitch.pptx.' },
+  agents: {
+    label:
+      'The CLI, the MCP server and the HTTP API send one action, which the deck records in Version history.',
+  },
 } as const;
 
 /**
@@ -98,6 +102,14 @@ export const DIAGRAM_WORDS = {
     link: 'present link',
   },
   export: { slide: 'Slide', pdf: 'pitch.pdf', pptx: 'pitch.pptx' },
+  agents: {
+    cli: 'CLI',
+    mcp: 'MCP',
+    http: 'HTTP',
+    action: 'One action',
+    deck: 'Deck',
+    history: 'Version history',
+  },
 } as const;
 
 /**
@@ -129,6 +141,17 @@ export const KITS_ROUND = {
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
 export const AGENTS_ROUND = {
   lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
+  /**
+   * Version history as the editor's panel draws it (DESIGN.md 8.8): the changes made on this page
+   * under Today, newest first, and the recorded run under the CLI's group with each version's
+   * number; the first version is the deck as the CLI's version list names it
+   */
+  history: {
+    today: 'Today',
+    recorded: 'Recorded from the CLI',
+    empty: 'A change you make on this page is listed here.',
+    version: (n: number): string => `v${n}`,
+  },
 } as const;
 
 /** The close (DESIGN.md 8.14): the h2 and one line; replaces copy.ts `CLOSE.h2` and `CLOSE.lead`. */

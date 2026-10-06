@@ -1387,54 +1387,6 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   outline-offset: -2px;
 }
 
-.ts-home-history {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  min-height: calc(5 * 44px);
-}
-
-/* every row exactly 44 px whatever its author or its words (two lines of 18 px at most), so a row
-   entering never moves the bands below (l2.md Q12, l3.md R28; decks.home.layout-shift) */
-.ts-home-history-row {
-  display: grid;
-  grid-template-columns: 16px 52px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  box-sizing: border-box;
-  height: 44px;
-  border-bottom: 1px solid var(--pt-hair-soft);
-  font-size: 14px;
-  line-height: 18px;
-  color: var(--pt-ink-2);
-}
-
-.ts-home-history-words {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.ts-home-history-icon {
-  display: flex;
-  align-items: center;
-  width: 16px;
-  height: 16px;
-  color: var(--pt-ink);
-}
-
-.ts-home-history-author {
-  font-weight: 500;
-  color: var(--pt-ink);
-}
-
-.ts-home-history-time {
-  font-size: 13px;
-  color: var(--pt-ink-2);
-  font-variant-numeric: var(--pt-numerals);
-}
-
 /* the agent's ring and flag (l3.md R3), created by the live module while a step plays */
 .ts-agents-sheet {
   position: relative;
@@ -2900,10 +2852,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-home-panel {
     order: 2;
-  }
-
-  .ts-home-history {
-    order: 6;
   }
 
   .ts-home-panel-screen {

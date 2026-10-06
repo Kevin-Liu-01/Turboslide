@@ -5,7 +5,7 @@
 // band chunk draws below the first screen, one `<symbol>` each, read from the editor's icons.tsx.
 // `live/sprite.ts` names it in each `<use>`; the file is assets.json's `glyphs` role.
 
-export const HOME_SPRITE = '/home/glyphs-9b32b6f55a.svg';
+export const HOME_SPRITE = '/home/glyphs-4aa36aea47.svg';
 
 /** The symbol ids of the glyphs the band chunks name: the check, the submenu mark, the moves, the readout's sections. */
 export const HOME_GLYPHS = {

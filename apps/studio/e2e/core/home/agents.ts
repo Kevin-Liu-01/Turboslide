@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test';
 import type { Browser, Page } from '@playwright/test';
 
 import { AGENTS } from '../../../src/components/home/copy';
+import { AGENTS_ROUND } from '../../../src/components/home/design-copy';
 import { HOME_CHIPS } from '../../../src/components/home/chips.generated';
 import type { ChipCommand, ChipId } from '../../../src/components/home/chips.generated';
 import { HOME_DECK } from '../../../src/components/home/deck.generated';
@@ -278,13 +279,21 @@ export function rows(): void {
         );
       });
       expect(above, 'slide 5 above the console').toBe(true);
-      /* the run's three Agent rows, recorded */
-      const history = band(page).locator('[data-history-row]');
-      await expect(history).toHaveCount(3);
-      for (let i = 0; i < 3; i += 1) {
+      /* Version history (DESIGN.md 8.8): Today with its sentence and no row, then the run's three
+         Agent rows under "Recorded from the CLI" as versions 4, 3 and 2 over version 1, the
+         newest on the plate */
+      await expect(band(page).locator('[data-history-group="today"] [data-history-row]')).toHaveCount(0);
+      await expect(band(page).locator('[data-history-empty]')).toHaveText(AGENTS_ROUND.history.empty);
+      const history = band(page).locator('[data-history-group="recorded"] [data-history-row]');
+      await expect(history).toHaveCount(4);
+      for (let i = 0; i < 4; i += 1) {
         await expect(history.nth(i)).toContainText(AGENTS.author.agent);
-        await expect(history.nth(i)).toContainText(AGENTS.recorded);
+        await expect(history.nth(i).locator('.ts-home-history-time')).toHaveText(
+          AGENTS_ROUND.history.version(4 - i),
+        );
       }
+      await expect(band(page).locator('[data-history-run]')).toHaveCount(3);
+      await expect(history.first()).toHaveAttribute('aria-current', 'true');
       const total = HOME_DECK.order.length;
       for (const c of await counters(page)) expect(c).toMatch(new RegExp(`^\\d / ${total}$`));
       await page.context().close();
@@ -314,7 +323,8 @@ export function rows(): void {
           const rec = HOME_CHIPS.commands[id][dir];
           revision += 1;
           const rev = revision;
-          const before = await band(page).locator('[data-history-row]').count();
+          const today = band(page).locator('[data-history-group="today"] [data-history-row]');
+          const before = await today.count();
           const names =
             id === 'tailor'
               ? dir === 'on'
@@ -328,10 +338,8 @@ export function rows(): void {
           expect(lines.slice(-2), `${id} (${dir}) printed`).toEqual(
             expected(rec, rev, names, freeform),
           );
-          /* one Version history row, by Agent */
-          await expect(band(page).locator('[data-history-row]')).toHaveCount(
-            Math.min(before + 1, 10),
-          );
+          /* one Version history row under Today, by Agent */
+          await expect(today).toHaveCount(Math.min(before + 1, 30));
           await expect(band(page).locator('[data-history-row]').first()).toContainText(
             AGENTS.author.agent,
           );
@@ -542,7 +550,7 @@ export function rows(): void {
       await bandReady(page, 'agents');
       const list = band(page).locator('[data-history]');
       const reserved = await list.evaluate((el) => el.getBoundingClientRect().height);
-      expect(reserved).toBe(width === 'desktop' ? 440 : 220);
+      expect(reserved).toBe(width === 'desktop' ? 360 : 312);
       const below = await page
         .locator('[data-band="present"]')
         .evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
@@ -550,7 +558,7 @@ export function rows(): void {
       for (const id of CHIPS) {
         const t = await page.evaluate((which) => {
           const w = window as unknown as { __row?: Promise<number> };
-          const ol = document.querySelector('[data-band="agents"] [data-history]')!;
+          const ol = document.querySelector('[data-band="agents"] [data-history-group="today"]')!;
           w.__row = new Promise((done) => {
             let landed = 0;
             const ring = new MutationObserver(() => {
@@ -600,7 +608,7 @@ export function rows(): void {
       for (const h of await band(page)
         .locator('[data-history-row]')
         .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height)))
-        expect(h).toBe(44);
+        expect(h).toBe(48);
       /* a You row: the hero's title moved, and its Undo takes the row away */
       const hero = page
         .locator('[data-band="hero"] [data-hero-slide] [data-object="title#heading"]')

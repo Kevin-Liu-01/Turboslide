@@ -130,7 +130,7 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     role: 'glyphs',
     appearance: null,
     variant: null,
-    path: '/home/glyphs-9b32b6f55a.svg',
+    path: '/home/glyphs-4aa36aea47.svg',
     width: null,
     height: null,
   },

@@ -101,11 +101,15 @@ const line = (points: string, kind: 'edge' | 'hair' = 'edge') =>
   `<polyline points="${points}" style="${STROKE}var(--pt-${kind})"/>`;
 const marker = (x: number, y: number) =>
   `<rect x="${x - 5.5}" y="${y - 5.5}" width="11" height="11" style="fill:var(--pt-ink)"/>`;
-const label = (x: number, y: number, text: string, anchor: 'start' | 'middle' = 'start') =>
-  `<text x="${x}" y="${y}"${anchor === 'middle' ? ' text-anchor="middle"' : ''} style="fill:var(--pt-ink-2);font-size:20px">${esc(text)}</text>`;
+const label = (x: number, y: number, text: string, anchor: 'start' | 'middle' | 'end' = 'start') =>
+  `<text x="${x}" y="${y}"${anchor === 'start' ? '' : ` text-anchor="${anchor}"`} style="fill:var(--pt-ink-2);font-size:20px">${esc(text)}</text>`;
 
 /** The diagrams' viewBoxes, which the bands' `<svg>`s repeat. */
-export const DIAGRAM_VIEWBOX = { present: '0 0 612 400', export: '0 0 612 300' } as const;
+export const DIAGRAM_VIEWBOX = {
+  present: '0 0 612 400',
+  export: '0 0 612 300',
+  agents: '0 0 612 230',
+} as const;
 
 /** The Present band's flow: the editor to presenter view (the S key) and to a phone's show (the link). */
 function presentDiagram(): string {
@@ -164,11 +168,46 @@ function exportDiagram(): string {
   ].join('');
 }
 
-/** The diagrams as symbols: `d-present` and `d-export`. */
+/**
+ * The agents band's flow (DESIGN.md 8.0 "Diagrams", 8.8; the B2a source `Agents.tsx` with the
+ * deck's Version history beside its slide): the CLI, the MCP server and the HTTP API each draw a
+ * line into one action, and one line goes from the action to the deck, whose window holds the
+ * slide and Version history's rows.
+ */
+function agentsDiagram(): string {
+  const d = DIAGRAM_WORDS.agents;
+  const ins = [
+    [d.cli, 60],
+    [d.mcp, 110],
+    [d.http, 160],
+  ] as const;
+  return [
+    ...ins.flatMap(([word, y]) => [label(20, y + 7, word), line(`92,${y} 200,${y}`), marker(200, y)]),
+    box(200, 36, 120, 148, 'edge'),
+    line('212,80 308,80', 'hair'),
+    line('212,110 308,110', 'hair'),
+    line('212,140 308,140', 'hair'),
+    label(260, 212, d.action, 'middle'),
+    line('320,110 380,110'),
+    marker(380, 110),
+    box(380, 36, 212, 148, 'edge', 8),
+    line('380,56 592,56', 'hair'),
+    box(392, 68, 124, 70, 'plate'),
+    line('528,56 528,184', 'hair'),
+    line('536,84 584,84', 'hair'),
+    line('536,112 584,112', 'hair'),
+    line('536,140 584,140', 'hair'),
+    label(380, 212, d.deck),
+    label(592, 212, d.history, 'end'),
+  ].join('');
+}
+
+/** The diagrams as symbols: `d-present`, `d-export` and `d-agents`. */
 export function diagramSymbols(): string {
   return [
     `<symbol id="d-present" viewBox="${DIAGRAM_VIEWBOX.present}">${presentDiagram()}</symbol>`,
     `<symbol id="d-export" viewBox="${DIAGRAM_VIEWBOX.export}">${exportDiagram()}</symbol>`,
+    `<symbol id="d-agents" viewBox="${DIAGRAM_VIEWBOX.agents}">${agentsDiagram()}</symbol>`,
   ].join('');
 }
 

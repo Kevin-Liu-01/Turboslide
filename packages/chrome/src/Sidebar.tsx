@@ -23,6 +23,7 @@ import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
 import { mergeTipProps, tipProps } from './Tooltip';
 import { TurboslideMark } from './TurboslideMark';
+import { usePlate, useStart } from './usePlate';
 import { Filmstrip, makeFollow } from './Filmstrip';
 
 import './Sidebar.css';
@@ -340,7 +341,7 @@ function TreeRow({
   );
 }
 
-type MenuState = { item: ShellItem; section: ShellSection; x: number; y: number };
+type MenuState = { item: ShellItem; section: ShellSection; anchor: HTMLElement };
 
 type MenuProps = {
   menu: MenuState;
@@ -357,6 +358,13 @@ type MenuProps = {
 function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
   const box = useRef<HTMLDivElement>(null);
   const { item, section } = menu;
+  /* in the popover layer under the row's More button; the template entries make it tall, so it
+     takes its max height from its top to the window's bottom (`--ts-plate-top`, Sidebar.css) and
+     scrolls inside, under the button (docs/DESIGN.md 2.3, 2.4);
+     its first row takes the focus on mount, so it stands under the button until placed */
+  const start = useStart(menu.anchor);
+  const placed = usePlate(box, { layer: 'popover', anchor: menu.anchor, side: 'below', gap: 2 });
+  const top = placed?.top ?? start.top;
 
   useEffect(() => {
     const onDown = (event: globalThis.MouseEvent) => {
@@ -482,8 +490,7 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
       className="pt-orow-menu"
       role="menu"
       aria-label={`Slide ${item.id}`}
-      /* the template entries make the menu tall: it scrolls inside the viewport below its anchor */
-      style={{ left: menu.x, top: menu.y, maxHeight: `calc(100vh - ${menu.y + 8}px)` }}
+      style={{ ...start, ['--ts-plate-top' as string]: `${top}px` }}
       onKeyDown={onMenuKey}
     >
       <span className="pt-orow-menu-head">Insert after</span>
@@ -882,8 +889,7 @@ function TreeSidebar({
   };
 
   const openMenu = (item: ShellItem, section: ShellSection, anchor: HTMLElement) => {
-    const rect = anchor.getBoundingClientRect();
-    setMenu({ item, section, x: Math.min(rect.left, window.innerWidth - 232), y: rect.bottom + 2 });
+    setMenu({ item, section, anchor });
   };
 
   const onFilterKey = (event: KeyboardEvent<HTMLInputElement>) => {

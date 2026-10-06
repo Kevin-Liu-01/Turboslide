@@ -1,9 +1,9 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { cn } from '../lib/cn';
-import { placeMenu } from '../Menu';
 import type { MenuCloseReason } from '../Menu';
+import { usePlate, useStart } from '../usePlate';
 
 /**
  * A small anchored menu whose rows the caller draws (gslides-parity SPEC-3 4.5, 7.5; research 11
@@ -12,8 +12,9 @@ import type { MenuCloseReason } from '../Menu';
  * It follows the WAI-ARIA menu pattern the way `Menu` does: `role="menu"`, the rows the caller
  * marks `role="menuitem"`, roving focus with the arrows, Home and End, Enter or Space running a
  * row's click, Esc closing and returning focus to the anchor, Tab closing, a press outside
- * closing. The plate is placed under its anchor by `placeMenu` and clamped inside the viewport;
- * it is absolutely positioned, so it moves nothing (05 rule 4). A fixed width and a ten row
+ * closing. The plate sits in the popover layer of the stacking scale and is placed under its
+ * anchor by `place()`, kept inside the viewport and on its anchor while it is open (docs/DESIGN.md
+ * 2.3, 2.4); it is a fixed box, so it moves nothing (05 rule 4). A fixed width and a ten row
  * `.pt-scroll` region keep its box the same for one or twenty rows.
  */
 export type PlateMenuProps = {
@@ -49,21 +50,11 @@ export function PlateMenu({
   children,
 }: PlateMenuProps) {
   const root = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number; maxHeight: number } | null>(null);
-
-  useLayoutEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    const rect = anchor.getBoundingClientRect();
-    setPos(
-      placeMenu({
-        anchor: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
-        size: { width: el.offsetWidth || width, height: el.offsetHeight || 200 },
-        viewport: { width: window.innerWidth, height: window.innerHeight },
-        placement: 'below',
-      }),
-    );
-  }, [anchor, width]);
+  /* it stands under its anchor from its first render, so its first row takes the focus as it
+     mounts (a plate hidden until placed refused it and left focus on the opener or the menu title
+     Shift+Tab came from, VERIFICATION-3 finding 13) */
+  const start = useStart(anchor);
+  usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2 });
 
   const rows = (): HTMLElement[] =>
     root.current
@@ -72,12 +63,10 @@ export function PlateMenu({
         )
       : [];
 
-  /* the first row takes focus once the plate is placed, not on mount: until `pos` is set the
-     plate is `visibility: hidden` and the browser refuses to focus anything inside it, which left
-     focus on the opener or the menu title that Shift+Tab came from (VERIFICATION-3 finding 13) */
+  /* the first row takes the focus once, as the plate mounts */
   const focusedOnOpen = useRef(false);
   useEffect(() => {
-    if (pos === null || focusedOnOpen.current) return;
+    if (focusedOnOpen.current) return;
     focusedOnOpen.current = true;
     const el = root.current;
     if (!el) return;
@@ -85,7 +74,7 @@ export function PlateMenu({
       (row) => row.getAttribute('aria-disabled') !== 'true' || row.dataset.focusable === '',
     );
     (first ?? el).focus();
-  }, [pos]);
+  }, []);
 
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
@@ -156,11 +145,7 @@ export function PlateMenu({
       aria-label={label}
       tabIndex={-1}
       data-control={control}
-      style={
-        pos === null
-          ? { visibility: 'hidden', left: 0, top: 0, width }
-          : { left: pos.left, top: pos.top, width, maxHeight: pos.maxHeight }
-      }
+      style={{ ...start, width }}
       onKeyDown={onKeyDown}
     >
       {header}

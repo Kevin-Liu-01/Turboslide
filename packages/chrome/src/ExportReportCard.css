@@ -16,7 +16,7 @@
   color: var(--pt-ink);
   border: 1px solid var(--pt-ink);
   padding: 16px;
-  z-index: 20;
+  z-index: var(--ts-layer-dialog);
   font: 13px/1.5 var(--pt-text);
 }
 

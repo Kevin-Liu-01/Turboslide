@@ -1,17 +1,22 @@
 import type { FocusEvent, KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import { cloneElement, isValidElement } from 'react';
 
+import { closeLayer, openLayer } from './Layer';
+import { place } from './place';
+
 import './Tooltip.css';
 
 /**
  * The one tooltip of the chrome (Kevin's directive of this round: "have good tooltips in all
- * control surfaces"). A paper plate on the hair edge at 12.5 px carrying the control's name, one
+ * control surfaces"). A paper plate (`.pt-float`: the --pt-edge frame, the 6 px corner and the
+ * ring of docs/DESIGN.md 3.2) at 12.5 px carrying the control's name, one
  * sentence on what it does and its key as a kbd chip, 6 px from the control, shown after 350 ms
  * of hover and at once on keyboard focus, hidden on Escape, on a press, on scroll and when the
  * pointer leaves. One tooltip exists at a time: a module-level manager owns one `div.pt-tip` on
  * the body, so a second anchor replaces the first instead of stacking, and while one is up the
- * next anchor shows at once. It is never clipped: the plate sits below the control, moves above
- * it when the viewport ends first, and is clamped 8 px inside both edges. Reduced motion drops
+ * next anchor shows at once. It is never clipped: the plate sits in the tooltip layer of the
+ * stacking scale, in the browser's top layer (Layer.ts; docs/DESIGN.md 2.3), below the control,
+ * moves above it when the viewport ends first, and is kept 8 px inside both edges (place.ts). Reduced motion drops
  * the fade (tokens.css also zeroes the duration). The layer is imperative, not a portal, so any
  * component, ported or new, attaches it through `tipProps` without a provider, and the text is
  * written with textContent, never markup.
@@ -59,9 +64,6 @@ export const TIP_OFFSET_PX = 6;
 
 /** The id the one layer carries; anchors point at it with aria-describedby. */
 export const TIP_ID = 'pt-tip';
-
-/** The plate stays this far inside the viewport. */
-const VIEWPORT_MARGIN = 8;
 
 /**
  * A pointer that entered a control without moving within this window is a resting pointer: the
@@ -262,7 +264,9 @@ function reducedMotion(): boolean {
 function ensureLayer(): HTMLDivElement {
   if (layer !== null && layer.isConnected) return layer;
   const el = document.createElement('div');
-  el.className = 'pt-tip';
+  /* the small floating plate of tokens.css: paper, the --pt-edge frame, the 6 px corner and the
+     ring (docs/DESIGN.md 3.2) */
+  el.className = 'pt-tip pt-float';
   el.id = TIP_ID;
   el.setAttribute('role', 'tooltip');
   el.hidden = true;
@@ -281,7 +285,7 @@ function renderContent(el: HTMLElement, content: TipContent): void {
   head.appendChild(name);
   if (content.key !== undefined && content.key !== '') {
     const kbd = document.createElement('kbd');
-    kbd.className = 'pt-tip-key';
+    kbd.className = 'pt-tip-key pt-kbd';
     kbd.textContent = content.key;
     head.appendChild(kbd);
   }
@@ -306,35 +310,18 @@ function anchorBox(anchor: HTMLElement): DOMRect {
   return child instanceof HTMLElement ? child.getBoundingClientRect() : rect;
 }
 
-function clamp(value: number, low: number, high: number): number {
-  return Math.min(Math.max(value, low), Math.max(low, high));
-}
+/* the placement of the shown plate: below the control, centred, flipped above when the window
+   ends first and kept 8 px inside both edges, through the one place() of the chrome
+   (docs/DESIGN.md 2.4); the plate hides on a scroll or a resize, so it is placed once */
+let stopPlacing: (() => void) | null = null;
 
-/** Below the control, centered; above it when the viewport ends first; clamped inside both edges. */
-function place(el: HTMLElement, anchor: HTMLElement): void {
-  const rect = anchorBox(anchor);
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const width = el.offsetWidth;
-  const height = el.offsetHeight;
-  let top = rect.bottom + TIP_OFFSET_PX;
-  let placement: 'below' | 'above' = 'below';
-  if (
-    top + height > viewportHeight - VIEWPORT_MARGIN &&
-    rect.top - TIP_OFFSET_PX - height >= VIEWPORT_MARGIN
-  ) {
-    top = rect.top - TIP_OFFSET_PX - height;
-    placement = 'above';
-  }
-  top = clamp(top, VIEWPORT_MARGIN, viewportHeight - VIEWPORT_MARGIN - height);
-  const left = clamp(
-    rect.left + rect.width / 2 - width / 2,
-    VIEWPORT_MARGIN,
-    viewportWidth - VIEWPORT_MARGIN - width,
+function placeTip(el: HTMLElement, anchor: HTMLElement): void {
+  stopPlacing?.();
+  stopPlacing = place(
+    { getBoundingClientRect: () => anchorBox(anchor), contextElement: anchor },
+    el,
+    { side: 'below', align: 'center', gap: TIP_OFFSET_PX, follow: false },
   );
-  el.style.left = `${Math.round(left)}px`;
-  el.style.top = `${Math.round(top)}px`;
-  el.dataset.place = placement;
 }
 
 /* any key hides the tip (item 61): the seller has moved on from the control under the pointer */
@@ -382,7 +369,10 @@ export function showTooltip(anchor: HTMLElement, content: TipContent): void {
   renderContent(el, content);
   el.dataset.motion = reducedMotion() ? 'none' : 'fade';
   el.hidden = false;
-  place(el, anchor);
+  /* the tooltip layer of the stacking scale, in the top layer over every other surface but the
+     hover preview (docs/DESIGN.md 2.2, 2.3) */
+  openLayer(el, 'tooltip');
+  placeTip(el, anchor);
   anchor.setAttribute('aria-describedby', TIP_ID);
   listen();
 }
@@ -394,7 +384,12 @@ export function hideTooltip(anchor?: HTMLElement): void {
   if (anchor !== undefined && shown.anchor !== anchor) return;
   shown.anchor.removeAttribute('aria-describedby');
   shown = null;
-  if (layer !== null) layer.hidden = true;
+  stopPlacing?.();
+  stopPlacing = null;
+  if (layer !== null) {
+    closeLayer(layer);
+    layer.hidden = true;
+  }
   unlisten();
 }
 

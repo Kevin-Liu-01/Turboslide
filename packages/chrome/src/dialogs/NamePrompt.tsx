@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Dialog } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { useLayer } from '../Layer';
 import { ACCOUNT } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
@@ -99,9 +100,15 @@ function useNamePrompt(onDone: ((named: boolean) => void) | undefined) {
 export function NamePromptPlate() {
   const { shell, account, name, setName, error, setError, busy, close, submit, tip } =
     useNamePrompt(undefined);
+  /* the bar layer of the stacking scale, in the browser's top layer: under every dialog, menu,
+     toast and tooltip, so a tooltip of the title row paints over it with its own ring
+     (docs/DESIGN.md 2.2, 2.5; chrome.layers.tooltip-over-bar) */
+  const plate = useRef<HTMLFormElement>(null);
+  useLayer(plate, { layer: 'bar' });
   return (
     <form
-      className="ts-title-name-plate"
+      ref={plate}
+      className="ts-title-name-plate pt-float"
       data-control="dialog.namePrompt"
       role="group"
       aria-label={ACCOUNT.namePrompt.title}

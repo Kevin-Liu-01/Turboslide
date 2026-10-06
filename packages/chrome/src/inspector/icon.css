@@ -59,12 +59,11 @@
   color: var(--pt-titanium);
 }
 
-/* the picker card under the button, over the rows below */
+/* the picker card under the button, over the rows below and the panel's edge: a fixed plate in
+   the popover layer, placed under the button's right edge by place() (icon.tsx IconCard) */
 .ts-ctl-icon .ts-ctl-icon-card {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  z-index: 6;
+  position: fixed;
+  z-index: var(--ts-layer-popover);
 }
 
 @media (prefers-reduced-motion: reduce) {

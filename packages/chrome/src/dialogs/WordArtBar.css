@@ -6,7 +6,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 5;
+  z-index: var(--ts-layer-docked);
   display: flex;
   align-items: center;
   gap: 8px;

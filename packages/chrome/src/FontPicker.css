@@ -27,11 +27,13 @@
 }
 
 /* the plate while More fonts is open: out of the way of the dialog's clicks */
-.ts-font-plate.is-aside {
+.ts-font-plate.ts-plate-anchored.is-aside {
   display: none;
 }
 
-.ts-font-plate {
+/* the plate is at most 420 px tall, under its control or flipped above it when the window ends
+   first (place(); the two classes outrank .ts-plate-anchored's window bound) */
+.ts-font-plate.ts-plate-anchored {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;

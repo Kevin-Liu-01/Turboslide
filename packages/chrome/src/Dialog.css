@@ -10,7 +10,7 @@
 .ts-dialog-scrim {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: var(--ts-layer-dialog);
   display: grid;
   place-items: center;
   background: var(--pt-scrim);
@@ -23,7 +23,7 @@
   position: fixed;
   right: 16px;
   bottom: calc(var(--pt-status-h, 32px) + 16px);
-  z-index: 34;
+  z-index: var(--ts-layer-dialog);
   display: grid;
   pointer-events: none;
 }

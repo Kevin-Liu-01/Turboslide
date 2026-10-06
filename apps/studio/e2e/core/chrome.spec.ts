@@ -23,6 +23,7 @@ import { chromeFoundation } from './chrome-foundation';
 import { chromeMenus } from './chrome-menus';
 import { chromePages } from './chrome-pages';
 import { chromeRound1 } from './chrome-round1';
+import { chromeSurfaces } from './chrome-surfaces';
 
 // The chrome at two viewports, the spec rows (docs/archive/rounds/PRODUCT.md 3.3, 3.4, 8.1 `slides.layout.
 // plate-four-columns`, `share.dialog.more-row` and `chrome.toolbar.fold-any-width` with the driver
@@ -579,8 +580,12 @@ const ROUND1_ROWS = chromeRound1();
 /* lane D1 of the design round (docs/DESIGN.md 10.1, 11): its rows live in chrome-foundation.ts */
 const FOUNDATION_ROWS = chromeFoundation();
 
+/* lane D2 of the design round (docs/DESIGN.md 10.2, 11): its rows live in chrome-surfaces.ts */
+const SURFACE_ROWS = chromeSurfaces();
+
 coverage(import.meta.filename, [
   ...FOUNDATION_ROWS,
+  ...SURFACE_ROWS,
   ...ROUND1_ROWS,
   ...PAGE_ROWS,
   ...MENU_ROWS,

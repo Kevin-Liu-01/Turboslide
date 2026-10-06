@@ -209,7 +209,7 @@ html[data-boot-present='1'] .pt-viewer:not([data-settled]) > .pt-sb {
 .pt-sb-scrim {
   position: absolute;
   inset: 0;
-  z-index: 9;
+  z-index: var(--ts-layer-docked);
   margin: 0;
   padding: 0;
   border: 0;

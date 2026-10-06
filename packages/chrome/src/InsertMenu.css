@@ -12,7 +12,7 @@
 
 .ts-insert {
   position: fixed;
-  z-index: 30;
+  z-index: var(--ts-layer-popover);
   width: 344px;
   max-height: calc(100vh - var(--pt-bar-h) - 24px);
   overflow-y: auto;

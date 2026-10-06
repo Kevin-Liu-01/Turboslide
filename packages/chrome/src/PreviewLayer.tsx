@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { LiveClone } from '@turboslide/viewer/LiveClone';
 import { useTheme } from '@turboslide/viewer/theme';
 
+import { useLayer } from './Layer';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
 
@@ -131,6 +132,10 @@ export function PreviewLayer({ resolve }: PreviewLayerProps) {
   const moved = useRef(false);
   const openTimer = useRef(0);
   const hideTimer = useRef(0);
+  /* the preview layer of the stacking scale while the card shows, in the browser's top layer over
+     every other surface (docs/DESIGN.md 2.2, 2.3); it fades out in its own place */
+  const plate = useRef<HTMLDivElement>(null);
+  useLayer(plate, { layer: 'preview', open: card?.on === true });
 
   useMountEffect(() => {
     setHost(document.body);
@@ -309,6 +314,7 @@ export function PreviewLayer({ resolve }: PreviewLayerProps) {
 
   return createPortal(
     <div
+      ref={plate}
       className={cn('pt-preview', card?.on && 'is-on', card?.on && card.moved && 'is-moving')}
       style={card ? { transform: `translate3d(${card.x}px, ${card.y}px, 0)` } : undefined}
       aria-hidden="true"

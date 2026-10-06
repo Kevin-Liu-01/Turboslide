@@ -13,7 +13,7 @@
   height: 46%;
   min-height: 240px;
   max-height: calc(100% - 96px);
-  z-index: 5;
+  z-index: var(--ts-layer-docked);
   display: flex;
   flex-direction: column;
   min-width: 0;

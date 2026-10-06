@@ -25,7 +25,7 @@
     opacity var(--pt-dur-toast) var(--pt-ease-out),
     transform var(--pt-dur-toast) var(--pt-ease-out);
   pointer-events: none;
-  z-index: 21;
+  z-index: var(--ts-layer-toast);
   view-transition-name: pt-toast;
 }
 

@@ -7,6 +7,7 @@ import { setAt } from '@turboslide/schema/pointer';
 import type { EditorDispatch } from './dispatch';
 import { IconPicker } from './IconPicker';
 import { Icon } from './icons';
+import { useLayer } from './Layer';
 import { cn } from './lib/cn';
 import type { PaletteEntry, PaletteGroupId, PaletteGroupRows, PaletteRun } from './palette-data';
 import { filterPalette, paletteCount } from './palette-data';
@@ -98,6 +99,10 @@ export function Palette({
   const [iconPick, setIconPick] = useState<IconPick | null>(null);
   const [wasOpen, setWasOpen] = useState(open);
   const card = useRef<HTMLDivElement>(null);
+  /* the search card and its scrim in the dialog layer of the stacking scale, in the browser's top
+     layer (docs/DESIGN.md 2.2, 2.3) */
+  const scrim = useRef<HTMLDivElement>(null);
+  useLayer(scrim, { layer: 'dialog', open });
 
   /* a fresh open starts empty: the query, the row and the prompt reset as the card comes back
      (state adjusted during render from a prop change, the documented pattern) */
@@ -239,6 +244,7 @@ export function Palette({
 
   return (
     <div
+      ref={scrim}
       className={cn('pt-search ts-chrome', className)}
       role="presentation"
       onClick={(event) => {

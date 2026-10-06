@@ -13,7 +13,7 @@
   display: grid;
   place-items: center;
   background: var(--pt-scrim);
-  z-index: 20;
+  z-index: var(--ts-layer-dialog);
   view-transition-name: pt-help;
   animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
 }

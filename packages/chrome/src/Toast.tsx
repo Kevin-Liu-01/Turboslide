@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
+import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 
 import './Toast.css';
@@ -20,8 +21,17 @@ export type ToastProps = {
 };
 
 export function Toast({ message, on }: ToastProps) {
+  /* the toast layer of the stacking scale while it shows, in the browser's top layer over an open
+     dialog (docs/DESIGN.md 2.2, 2.3); it fades out in its own place */
+  const plate = useRef<HTMLDivElement>(null);
+  useLayer(plate, { layer: 'toast', open: on });
   return (
-    <div className={on ? 'pt-toast is-on' : 'pt-toast'} role="status" aria-live="polite">
+    <div
+      ref={plate}
+      className={on ? 'pt-toast is-on' : 'pt-toast'}
+      role="status"
+      aria-live="polite"
+    >
       {message}
     </div>
   );

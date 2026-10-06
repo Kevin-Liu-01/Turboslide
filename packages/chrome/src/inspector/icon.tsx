@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { ICON_COLORS, ICON_NAMES, isIconName } from '@turboslide/schema/icon-names';
 import type { IconColor, IconName } from '@turboslide/schema/icon-names';
 
 import { Glyph, IconPicker } from '../IconPicker';
 import { tipProps } from '../Tooltip';
+import { usePlate, useStart } from '../usePlate';
 import type { ControlProps } from './props';
 import { HIDDEN_NATIVE_CLASS } from './props';
 
@@ -39,10 +41,28 @@ function readValue(value: unknown): IconValue {
   return {};
 }
 
+/**
+ * The picker card under the button, in the popover layer of the stacking scale (docs/DESIGN.md
+ * 2.3, 2.4): over the panel's rows and its edge, and on the button while the panel scrolls. Its
+ * search field takes the focus as it mounts, so it stands under the button until placed.
+ */
+function IconCard({ anchor, children }: { anchor: HTMLElement; children: ReactNode }) {
+  const card = useRef<HTMLDivElement>(null);
+  const start = useStart(anchor, 'below', 4);
+  usePlate(card, { layer: 'popover', anchor, side: 'below', align: 'end', gap: 4 });
+  return (
+    <div ref={card} className="ts-ctl-icon-card" style={start}>
+      {children}
+    </div>
+  );
+}
+
 export function IconControl({ spec, onChange, disabled }: ControlProps) {
   const objectMode = spec.schema.def.type === 'object';
   const value = readValue(spec.value);
-  const [open, setOpen] = useState(false);
+  /* the button the card hangs from while it is open */
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const open = anchor !== null;
 
   const write = (next: IconValue) => {
     if (disabled) return;
@@ -85,7 +105,7 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
         aria-haspopup="dialog"
         data-control={`${spec.control}.picker`}
         disabled={disabled}
-        onClick={() => setOpen(!open)}
+        onClick={(event) => setAnchor(open ? null : event.currentTarget)}
         {...tipProps({
           name: spec.inspector.label,
           doc:
@@ -97,30 +117,31 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
         <span className="ts-ctl-icon-name">{value.name ?? 'none'}</span>
         {value.color ? <span className="ts-ctl-icon-tone">{value.color}</span> : null}
       </button>
-      {open ? (
-        <IconPicker
-          className="ts-ctl-icon-card"
-          label={spec.label}
-          value={value.name}
-          control={spec.control}
-          onPick={(name) => {
-            write({ ...value, name });
-            setOpen(false);
-          }}
-          onClose={() => setOpen(false)}
-          tone={
-            objectMode
-              ? {
-                  value: value.color,
-                  onChange: (tone) =>
-                    write({
-                      ...value,
-                      ...(tone === undefined ? { color: undefined } : { color: tone }),
-                    }),
-                }
-              : undefined
-          }
-        />
+      {anchor !== null ? (
+        <IconCard anchor={anchor}>
+          <IconPicker
+            label={spec.label}
+            value={value.name}
+            control={spec.control}
+            onPick={(name) => {
+              write({ ...value, name });
+              setAnchor(null);
+            }}
+            onClose={() => setAnchor(null)}
+            tone={
+              objectMode
+                ? {
+                    value: value.color,
+                    onChange: (tone) =>
+                      write({
+                        ...value,
+                        ...(tone === undefined ? { color: undefined } : { color: tone }),
+                      }),
+                  }
+                : undefined
+            }
+          />
+        </IconCard>
       ) : null}
     </span>
   );

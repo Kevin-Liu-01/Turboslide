@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import { PICKERS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
-import { anchoredAt } from './ColorPlate';
+import { usePlate, useStart } from '../usePlate';
 
 import './Pickers.css';
 
@@ -35,7 +35,10 @@ export function WeightList({
 }: WeightListProps) {
   const root = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(() => Math.max(0, weights.indexOf(current ?? 1)));
-  const at = anchoredAt(anchor, 140, 32 * weights.length + 16);
+  /* in the popover layer under its anchor (docs/DESIGN.md 2.3, 2.4); the list takes the focus as
+     it mounts, so it stands under the anchor until placed */
+  const start = useStart(anchor);
+  usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2 });
   const words = PICKERS.weights;
 
   useEffect(() => {
@@ -82,7 +85,7 @@ export function WeightList({
       aria-label={label}
       aria-activedescendant={active === undefined ? undefined : `${control}-${active}`}
       tabIndex={0}
-      style={{ left: at.left, top: at.top }}
+      style={start}
       data-control={`${control}.plate`}
       {...tip}
       onKeyDown={onKey}

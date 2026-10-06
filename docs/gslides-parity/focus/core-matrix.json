@@ -10721,6 +10721,55 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D1#3; DESIGN.md 4.4 keeps the italic prefetch on /edit, so the italic clause reads the face's status in document.fonts and the files requested"
     },
     {
+      "id": "chrome.layers.tooltip-over-bar",
+      "feature": "chrome",
+      "interaction": "With the name prompt bar open and the presence slot's tooltip shown, at 1440 in both appearances: the bar's top is at least 4 px under the title row's bottom; the two plates share no edge line; moved over the bar, elementsFromPoint at the overlap returns the tooltip first; both plates draw the 6 px corner, the --pt-edge frame and the ring",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "Kevin's screenshot 1 of 2026-10-05; research-surfaces 2",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#1; the driver is core/chrome-surfaces.ts, on a deck made from /new by its first write; the bar opens on an edit in the room by a browser with no chosen name, so the driver edits the title again until it shows"
+    },
+    {
+      "id": "chrome.layers.toast-over-dialog",
+      "feature": "chrome",
+      "interaction": "Share > Copy Link in both appearances: elementsFromPoint at the snackbar's centre returns the snackbar first with the Share dialog open",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-surfaces 2.4: the snackbar under the Share dialog's scrim on production in both appearances",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#1; the driver is core/chrome-surfaces.ts"
+    },
+    {
+      "id": "chrome.layers.menu-over-dialog",
+      "feature": "chrome",
+      "interaction": "A surface opened from a dialog paints above it and takes the pointer: with the Share dialog in the top layer, its General access select is the first element at its centre and takes a change, and the tooltip of the dialog's close button is the first element at its own centre",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "evidence": "research-surfaces 2.4",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#1; the driver is core/chrome-surfaces.ts. The editor's dialogs raise the browser's own select lists and their controls' tooltips; no dialog opens a menu of the chrome, so the row reads those two"
+    },
+    {
+      "id": "chrome.layers.top-layer",
+      "feature": "chrome",
+      "interaction": "Each open floating surface (the name prompt bar, the tooltip, a menu and its submenu, a context menu, the account plate menu, the layout plate, the search card, the hover preview, a dialog, the snackbar) matches :popover-open and carries data-layer with its scale name; no element outside the stage computes a z-index of 5 or more that is not a value of LAYERS",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-surfaces 2.4: 107 z-index declarations, 26 values from -1 to 120, two stacking contexts",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#1; the driver is core/chrome-surfaces.ts"
+    },
+    {
+      "id": "chrome.layers.follows-anchor",
+      "feature": "chrome",
+      "interaction": "With the font picker of the Theme panel's Display font open, scrolling the panel by 120 px keeps the picker's top within 2 px of its anchor's bottom in the next frame; a window resize from 1440 to 900 keeps the open Slideshow options menu inside the viewport with 8 px to spare",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 4.1: the three placement functions computed once at open",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#1; the driver is core/chrome-surfaces.ts. DESIGN.md 11 names the Format options panel: the editor's font picker in a scrolling panel is the Theme panel's (the same Panel body), so the row reads that one"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

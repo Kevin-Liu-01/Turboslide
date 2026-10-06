@@ -230,7 +230,7 @@
    row, at the pointer (rank 12) */
 .ts-chartgrid-menu {
   position: fixed;
-  z-index: 40;
+  z-index: var(--ts-layer-popover);
   min-width: 160px;
   padding: 4px;
   border: 1px solid var(--pt-hair);

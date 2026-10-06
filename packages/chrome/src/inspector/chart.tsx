@@ -47,6 +47,7 @@ import { PANELS } from '../menus/strings';
 import { Seg } from '../Seg';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
+import { usePlate, usePointOrElement } from '../usePlate';
 import { swatchPaint } from './palette';
 
 import './chart.css';
@@ -157,6 +158,16 @@ export function ChartSection({
   /* the right click menu of a series or category header: Add series or Add category, then Remove
      (docs/archive/rounds/FEATURES.md 2.2 rank 12; docs/archive/rounds/OBJECTS.md 4.2 item 1) */
   const [menu, setMenu] = useState<(Active & { x: number; y: number }) | null>(null);
+  /* the header's right click menu in the popover layer at the pointer, flipped left and up at the
+     window's edges (docs/DESIGN.md 2.3, 2.4) */
+  const menuPlate = useRef<HTMLDivElement>(null);
+  const menuAnchor = usePointOrElement(null, menu === null ? null : { x: menu.x, y: menu.y });
+  const menuPlaced = usePlate(menuPlate, {
+    layer: 'popover',
+    anchor: menuAnchor,
+    open: menu !== null,
+    side: 'point',
+  });
   const grid = useRef<HTMLTableElement>(null);
   const focusAfter = useRef<Active | null>(null);
 
@@ -625,11 +636,12 @@ export function ChartSection({
 
       {menu !== null && menuTarget !== null ? (
         <div
+          ref={menuPlate}
           className="ts-chartgrid-menu ts-chrome"
           role="menu"
           aria-label={`${menuTarget.name} options`}
           data-control={`${control}.menu`}
-          style={{ left: menu.x, top: menu.y }}
+          style={menuPlaced === null ? { visibility: 'hidden' } : undefined}
           onPointerDown={(event) => event.stopPropagation()}
         >
           <button

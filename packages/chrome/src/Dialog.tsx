@@ -7,6 +7,7 @@ import { useEffect, useId, useRef } from 'react';
 
 import { Icon } from './icons';
 import { cn } from './lib/cn';
+import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 import { hideTooltipUntilInput, tipProps } from './Tooltip';
 
@@ -165,6 +166,12 @@ export function Dialog({
   children,
 }: DialogProps) {
   const card = useRef<HTMLDivElement>(null);
+  /* the scrim with its card, or the floating card, in the dialog layer of the stacking scale: the
+     browser's top layer through popover="manual", never showModal(), so a menu, a select list or
+     a snackbar raised from the dialog stays above it and takes the pointer (docs/DESIGN.md 2.2,
+     2.3, decision C2); the Tab trap and aria-modal below stay the dialog's own */
+  const layer = useRef<HTMLDivElement>(null);
+  useLayer(layer, { layer: 'dialog' });
   const opener = useRef<HTMLElement | null>(null);
   /* the menu row that opened this dialog, when a menu did (item 65): the focus returns to its
      menubar button, since the row itself left with the menu */
@@ -310,6 +317,7 @@ export function Dialog({
 
   return (
     <div
+      ref={layer}
       className={cn(modal ? 'ts-dialog-scrim' : 'ts-dialog-float', 'ts-chrome')}
       role="presentation"
       onMouseDown={modal ? onScrim : undefined}

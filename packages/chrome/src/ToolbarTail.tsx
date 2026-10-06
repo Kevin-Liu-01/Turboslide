@@ -55,7 +55,7 @@ import { HIDE_MENUS_CONTROL, TOOLBAR_TAIL_END, tailEditable, tailFor } from './m
 import { FORMAT, PRESENCE } from './menus/strings';
 import type { TailControl, TailKind, TailOp } from './menus/toolbar-tails';
 import { FontField } from './FontPicker';
-import { ColorPlate, anchoredAt } from './pickers/ColorPlate';
+import { ColorPlate } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
 import { LineEndPicker } from './pickers/LineEndPicker';
 import { ShapePicker } from './pickers/ShapePicker';
@@ -63,6 +63,7 @@ import { chartTailPlan, chartWriteInput } from './chart-tools';
 import { tablePlan, tableWriteInput } from './table-tools';
 import { ToolbarButton, ToolbarDivider, controlTip } from './ToolbarHead';
 import { tipProps } from './Tooltip';
+import { usePlate, useStart } from './usePlate';
 
 /**
  * The toolbar's contextual tail (gslides-parity SPEC 3.1 rows 8 to 18, 3.2 to 3.8; SPEC-2 4.2;
@@ -1421,10 +1422,14 @@ function AnchoredPlate({
   children: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  /* the plate opens under its anchor and scrolls inside the viewport (docs/archive/rounds/POLISH.md 2.6 item
-     53): the height passed to anchoredAt is the room below the anchor, so a tall plate is never
-     placed above the toolbar off screen; Pickers.css caps it with `--ts-plate-top` */
-  const at = anchoredAt(anchor, 360, 0);
+  /* the plate opens under its anchor in the popover layer and scrolls inside the viewport
+     (docs/archive/rounds/POLISH.md 2.6 item 53; docs/DESIGN.md 2.3, 2.4): the plate and the picker
+     inside it take their max height from the plate's top through `--ts-plate-top` (Pickers.css),
+     so a tall picker scrolls inside under its button rather than covering it; it stands under the
+     anchor until placed, since the picker inside takes the focus as it mounts */
+  const start = useStart(anchor);
+  const placed = usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2 });
+  const top = placed?.top ?? start.top;
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
@@ -1440,7 +1445,7 @@ function AnchoredPlate({
       className="ts-plate-anchored ts-chrome"
       role="dialog"
       aria-label={label}
-      style={{ left: at.left, top: at.top, ['--ts-plate-top' as string]: `${at.top}px` }}
+      style={{ ...start, ['--ts-plate-top' as string]: `${top}px` }}
       data-control={`${control}.plate`}
       onKeyDown={(event) => {
         if (event.key === 'Escape' || event.key === 'ArrowLeft') {

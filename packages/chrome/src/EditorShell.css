@@ -152,7 +152,7 @@
 /* the layout grid's plate: the menu primitive's dynamic submenu or the toolbar's dropdown */
 .ts-layout-plate {
   position: fixed;
-  z-index: 32;
+  z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   padding: 8px 8px 12px;
   background: var(--pt-paper);
@@ -181,7 +181,7 @@
   grid-column: 1 / -1;
   grid-row: 4;
   align-self: start;
-  z-index: 5;
+  z-index: var(--ts-layer-docked);
   margin: 8px 16px;
   padding: 8px 12px;
   background: var(--pt-ink);
@@ -206,7 +206,7 @@
     width: min(var(--pt-panel-w, 320px), 100vw);
     grid-column: auto;
     grid-row: auto;
-    z-index: 6;
+    z-index: var(--ts-layer-docked);
   }
 
   .pt-viewer.is-editor > .pt-main > .ts-notes-slot {
@@ -226,7 +226,7 @@
   position: absolute;
   top: 40px;
   left: 50%;
-  z-index: 5;
+  z-index: 4;
   display: flex;
   align-items: center;
   gap: 8px;

@@ -42,9 +42,9 @@ import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { evaluate } from './menus/model';
 import type { TailControl } from './menus/toolbar-tails';
-import { anchoredAt } from './pickers/ColorPlate';
 import { controlTip } from './ToolbarHead';
 import { tipProps } from './Tooltip';
+import { usePlate, useStart } from './usePlate';
 
 import './FontPicker.css';
 
@@ -373,7 +373,11 @@ export function FontPickerPlate({
   const [more, setMore] = useState(false);
   /* the Recent group (FEATURES.md 3.5, P1): read on open, written on every pick, per browser */
   const [recent, setRecent] = useState<FontId[]>(() => readRecentFonts(storageOf()));
-  const at = anchoredAt(anchor, 280, 420);
+  /* in the popover layer under its control, following it while the panel scrolls (docs/DESIGN.md
+     2.3, 2.4; chrome.layers.follows-anchor); the search field takes the focus as the plate
+     mounts, so it stands under the control until placed */
+  const start = useStart(anchor);
+  usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2, open: !more });
   useEffect(() => {
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
@@ -407,7 +411,7 @@ export function FontPickerPlate({
         className={cn('ts-plate-anchored ts-chrome ts-font-plate', more && 'is-aside')}
         role="dialog"
         aria-label={FONT_PICKER.control}
-        style={{ left: at.left, top: at.top }}
+        style={start}
         data-control={`${control}.plate`}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {

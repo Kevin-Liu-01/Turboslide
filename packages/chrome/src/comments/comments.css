@@ -27,7 +27,7 @@
 /* ---- the card: a paper plate with an edge frame beside the anchored object ---- */
 .ts-comment-card {
   position: absolute;
-  z-index: 6;
+  z-index: 4;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

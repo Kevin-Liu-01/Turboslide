@@ -109,6 +109,7 @@ import { ToolbarHead } from './ToolbarHead';
 import { ToolbarTail } from './ToolbarTail';
 import { ToolFinder } from './ToolFinder';
 import { useEditorKeys } from './useEditorKeys';
+import { usePlate, useStart } from './usePlate';
 import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
@@ -2555,17 +2556,13 @@ function LayoutPlate({
   children: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  /* in the popover layer under its anchor, flipped above when the window ends first and kept on
+     the anchor while it is open (docs/DESIGN.md 2.3, 2.4); the grid inside takes the focus on a
+     keyboard open, so the plate stands under the anchor until placed */
+  const start = useStart(request.anchor);
+  usePlate(root, { layer: 'popover', anchor: request.anchor, side: 'below', gap: 2 });
 
   useEffect(() => {
-    const rect = request.anchor.getBoundingClientRect();
-    const width = root.current?.offsetWidth ?? 440;
-    const height = root.current?.offsetHeight ?? 480;
-    let left = rect.left;
-    let top = rect.bottom + 2;
-    if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - width);
-    if (top + height > window.innerHeight - 8) top = Math.max(8, rect.top - 2 - height);
-    setPos({ left, top });
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
       if (root.current?.contains(event.target) || request.anchor.contains(event.target)) return;
@@ -2596,9 +2593,7 @@ function LayoutPlate({
       className="ts-layout-plate"
       role="dialog"
       aria-label={request.purpose === 'new' ? 'New slide with layout' : 'Apply layout'}
-      style={
-        pos === null ? { visibility: 'hidden', left: 0, top: 0 } : { left: pos.left, top: pos.top }
-      }
+      style={start}
       data-control={request.purpose === 'new' ? 'layout.new.plate' : 'layout.apply.plate'}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {

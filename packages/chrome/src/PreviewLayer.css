@@ -18,7 +18,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 120;
+  z-index: var(--ts-layer-preview);
   width: 322px;
   height: 214px;
   box-sizing: border-box;

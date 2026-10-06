@@ -62,7 +62,7 @@
   top: 0;
   bottom: 0;
   width: min(84vw, 300px);
-  z-index: 10;
+  z-index: var(--ts-layer-docked);
   animation: pt-sb-in var(--pt-dur-sb) var(--pt-ease) both;
 }
 
@@ -629,12 +629,14 @@ a.pt-sb-mark:focus-visible {
    headings in titanium, items as 28px rows, rules between the groups in --pt-hair-soft */
 .pt-orow-menu {
   position: fixed;
-  z-index: 30;
+  z-index: var(--ts-layer-popover);
   width: 220px;
   display: flex;
   flex-direction: column;
   padding: 4px 0;
-  /* the template group makes the menu tall; Sidebar.tsx caps it at the viewport below the anchor */
+  /* the template group makes the menu tall: it scrolls inside, from its top (Sidebar.tsx writes
+     --ts-plate-top) to 8 px above the window's bottom */
+  max-height: calc(100vh - var(--ts-plate-top, 0px) - 8px);
   overflow-y: auto;
   background: var(--pt-paper);
   color: var(--pt-ink);

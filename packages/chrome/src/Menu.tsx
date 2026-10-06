@@ -3,7 +3,7 @@ import type {
   PointerEvent as ReactPointerEvent,
   ReactNode,
 } from 'react';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Icon } from './icons';
@@ -22,7 +22,10 @@ import {
 } from './menus/model.ts';
 import { openRoster } from './presence/roster-hook';
 import { noteMenuRowActivated } from './Dialog';
+import { pointAnchor } from './place';
+import type { PlaceAnchor } from './place';
 import { hideTooltip, hideTooltipUntilInput, sentence, tipProps } from './Tooltip';
+import { usePlate, useStart } from './usePlate';
 
 import './Menu.css';
 
@@ -40,7 +43,7 @@ import './Menu.css';
  * another submenu is open switches to it. Disabled rows (a Later stub or a predicate that says
  * no) stay in the tree with `aria-disabled` and are skipped by the arrows; every row carries the
  * Tooltip primitive with its name, its key and, on a stub, the sentence of the stub formula.
- * The plate is placed by `placeMenu` to stay inside the viewport: below its anchor for the bar,
+ * The plate is placed by `place()` to stay inside the viewport: below its anchor for the bar,
  * to the right of its parent row for a submenu (to the left when the viewport ends), at the
  * pointer for a context menu. New in Turboslide (no Prototemplate source).
  *
@@ -105,100 +108,28 @@ export const SUBMENU_HOVER_MS = 120;
 /** How long after a list opens an enter with no pointer movement is the browser's own (the list appeared under the pointer), not a person's. */
 const RESTING_POINTER_MS = 300;
 
-/** The plate stays this far inside the viewport. */
-const VIEWPORT_MARGIN = 8;
-
-/** A submenu overlaps its parent by this much, as Google's do. */
-const SUBMENU_OVERLAP = 4;
-
 /** The gap under a bar title. */
 const BELOW_GAP = 2;
-
-/** The phone editor's width (PhoneEditor.css's one breakpoint): under it a submenu with no room on either side drops under its row. */
-const PHONE_WIDTH = 720;
-
-/** How far a dropped submenu is indented from its row's left edge. */
-const SUBMENU_INDENT = 16;
-
-export type Rect = { left: number; top: number; right: number; bottom: number };
-export type Size = { width: number; height: number };
-
-export type MenuPosition = { left: number; top: number; maxHeight: number };
 
 /** How a plate below its anchor lines up with it: its left edge on the anchor's left, or its right edge on the anchor's right. */
 export type MenuAlign = 'start' | 'end';
 
 /**
- * Where the plate goes so it stays inside the viewport: below the anchor and left aligned for the
- * bar (right aligned with `align: 'end'`, so a plate under a control at the row's right edge meets
- * that edge rather than the viewport clamp, docs/archive/rounds/RETURN.md 4.1), moving above when the viewport
- * ends first; to the right of the parent row for a submenu, flipping to its left when the right
- * edge is out, and under its row on a phone when neither side has room; at the pointer for a
- * context menu, flipping left and up when it would overflow. Every result is clamped 8 px inside
- * both edges.
+ * Where the plate goes so it stays inside the viewport, through the one `place()` of the chrome
+ * (place.ts; docs/DESIGN.md 2.4): below the anchor and left aligned for the bar (right aligned
+ * with `align: 'end'`, so a plate under a control at the row's right edge meets that edge rather
+ * than the viewport clamp, docs/archive/rounds/RETURN.md 4.1), moving above when the viewport
+ * ends first; to the right of the parent row for a submenu, overlapping it by 4 px and flipping to
+ * its left when the right edge is out, and under its row on a phone when neither side has room
+ * (docs/NEXT.md 4.1.3 item 18); at the pointer for a context menu, flipping left and up when it
+ * would overflow. Every result keeps 8 px inside both edges and follows its anchor while open.
+ * The anchor `place()` reads is the element itself, or a zero size box at the pointer.
  */
-export function placeMenu(input: {
-  anchor: Rect;
-  size: Size;
-  viewport: Size;
-  placement: MenuPlacement;
-  align?: MenuAlign;
-}): MenuPosition {
-  const { anchor, size, viewport, placement, align = 'start' } = input;
-  const maxHeight = Math.max(56, viewport.height - VIEWPORT_MARGIN * 2);
-  const height = Math.min(size.height, maxHeight);
-  let left: number;
-  let top: number;
-  if (placement === 'below') {
-    left = align === 'end' ? anchor.right - size.width : anchor.left;
-    top = anchor.bottom + BELOW_GAP;
-    if (
-      top + height > viewport.height - VIEWPORT_MARGIN &&
-      anchor.top - BELOW_GAP - height >= VIEWPORT_MARGIN
-    ) {
-      top = anchor.top - BELOW_GAP - height;
-    }
-  } else if (placement === 'right') {
-    left = anchor.right - SUBMENU_OVERLAP;
-    top = anchor.top - SUBMENU_OVERLAP;
-    if (left + size.width > viewport.width - VIEWPORT_MARGIN) {
-      left = anchor.left - size.width + SUBMENU_OVERLAP;
-      /* On a phone neither side has room, and the clamp below laid the submenu over its own row
-         (the Menus key's Insert row at 390 was hidden under Insert's rows, docs/NEXT.md 4.1.3 item
-         18). The submenu drops under its row, indented, so the row that opened it stays in view. */
-      if (left < VIEWPORT_MARGIN && viewport.width < PHONE_WIDTH) {
-        left = anchor.left + SUBMENU_INDENT;
-        top = anchor.bottom;
-      }
-    }
-  } else {
-    left = anchor.left;
-    top = anchor.top;
-    if (left + size.width > viewport.width - VIEWPORT_MARGIN) left = anchor.left - size.width;
-    if (top + height > viewport.height - VIEWPORT_MARGIN) top = anchor.top - height;
-  }
-  left = clamp(
-    left,
-    VIEWPORT_MARGIN,
-    Math.max(VIEWPORT_MARGIN, viewport.width - VIEWPORT_MARGIN - size.width),
-  );
-  top = clamp(
-    top,
-    VIEWPORT_MARGIN,
-    Math.max(VIEWPORT_MARGIN, viewport.height - VIEWPORT_MARGIN - height),
-  );
-  return { left: Math.round(left), top: Math.round(top), maxHeight };
-}
-
-function clamp(value: number, low: number, high: number): number {
-  return Math.min(Math.max(value, low), Math.max(low, high));
-}
-
-function rectOf(anchor: MenuAnchor): Rect {
-  if (anchor.kind === 'point')
-    return { left: anchor.x, top: anchor.y, right: anchor.x, bottom: anchor.y };
-  const rect = anchor.element.getBoundingClientRect();
-  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+function useMenuAnchor(anchor: MenuAnchor): PlaceAnchor {
+  const element = anchor.kind === 'element' ? anchor.element : null;
+  const x = anchor.kind === 'point' ? anchor.x : 0;
+  const y = anchor.kind === 'point' ? anchor.y : 0;
+  return useMemo(() => element ?? pointAnchor(x, y), [element, x, y]);
 }
 
 /**
@@ -298,7 +229,22 @@ function MenuList({
 }: ListProps) {
   const root = useRef<HTMLDivElement>(null);
   const rows = useRef(new Map<string, HTMLElement>());
-  const [position, setPosition] = useState<MenuPosition | null>(null);
+  /* the plate in the popover layer (docs/DESIGN.md 2.3): a submenu opens after its parent, so it
+     sits over it with no `+ level`; placed and followed by place() (2.4) */
+  const reference = useMenuAnchor(anchor);
+  const gap = placement === 'below' ? BELOW_GAP : 0;
+  usePlate(root, {
+    layer: 'popover',
+    anchor: reference,
+    side: placement,
+    ...(align === undefined ? {} : { align }),
+    gap,
+    fit: true,
+  });
+  /* the list stands at its anchor until the first placement, never hidden: a keyboard opened list
+     focuses its first row and a pointer opened one focuses itself as it mounts, and a hidden
+     element refuses the focus (VERIFICATION-3 finding 13) */
+  const start = useStart(reference, placement, gap);
   const [focusId, setFocusId] = useState<string | null>(null);
   /* bumped to focus the row again when focusId does not change (a submenu closing back to its parent) */
   const [focusTick, setFocusTick] = useState(0);
@@ -335,20 +281,6 @@ function MenuList({
     [visible, context],
   );
 
-  useLayoutEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    setPosition(
-      placeMenu({
-        anchor: rectOf(anchor),
-        size: { width: el.offsetWidth || 220, height: el.offsetHeight },
-        viewport: { width: window.innerWidth, height: window.innerHeight },
-        placement,
-        ...(align === undefined ? {} : { align }),
-      }),
-    );
-  }, [anchor, placement, align, visible.length]);
-
   /* the first enabled row takes focus on open when asked; a pointer opened submenu leaves focus
      on its parent row */
   useMountEffect(() => {
@@ -362,15 +294,15 @@ function MenuList({
   });
 
   /* a pointer opened root list takes focus itself so keys land here (Shift+Tab to the roster,
-     Esc, the arrows), once it is placed: until `position` is set the list is visibility hidden
-     and the browser refuses to focus it, which left focus on the menu title (VERIFICATION-3
-     finding 13); a keyboard opened list has a row to focus instead */
+     Esc, the arrows); it stands at its anchor from its first render, so the browser takes the
+     focus (VERIFICATION-3 finding 13: a list hidden until placed left focus on the menu title);
+     a keyboard opened list has a row to focus instead */
   const tookFocus = useRef(false);
   useEffect(() => {
-    if (level !== 0 || position === null || tookFocus.current) return;
+    if (level !== 0 || tookFocus.current) return;
     tookFocus.current = true;
     if (focusId === null) root.current?.focus();
-  }, [position, level, focusId]);
+  }, [level, focusId]);
 
   useEffect(() => {
     if (focusId === null) return;
@@ -570,16 +502,7 @@ function MenuList({
       tabIndex={-1}
       className={cn('ts-menu', level > 0 && 'is-sub', altHeld && 'is-alt', className)}
       data-level={level}
-      style={
-        position
-          ? {
-              left: position.left,
-              top: position.top,
-              maxHeight: position.maxHeight,
-              zIndex: 30 + level,
-            }
-          : { visibility: 'hidden' }
-      }
+      style={start}
       onKeyDown={onKeyDown}
     >
       {visible.map((item, index) => {
@@ -707,7 +630,6 @@ function MenuList({
                       <DynamicPlate
                         label={text}
                         anchor={openRow}
-                        level={level}
                         onKeyDown={(event) => {
                           if (event.key === 'Escape' || event.key === 'ArrowLeft') {
                             event.preventDefault();
@@ -801,18 +723,15 @@ export function Menu({
     };
   }, [close, returnFocusTo]);
 
-  /* The root list is a fixed box at z-index 30, but z-index counts inside the nearest stacking
-     context, and the stage (`.pt-stagewrap`) is one: its `view-transition-name` makes it so. A
-     right click menu rendered under the stage was therefore painted under the notes slot
-     (z-index 5, a later sibling of the stage) wherever it ran past the stage's bottom edge, so
-     its lower rows could not be hovered or clicked: the matrix row `lines.context.line` failed
-     on every origin because Line end sat under "Click to add speaker notes" (docs/FOCUS.md 6.4;
-     VERIFICATION C2-F11; measured on the enforce preview of 2026-09-17: the row's hover raised
-     the notes pane's tooltip and `aria-expanded` stayed false). Every menu therefore renders
-     through a portal into `document.body`, at the root stacking context, above the panes (the
-     notes slot 5, the inspector 4 and 6, the palette 16, the snackbar 21) and under the dialogs
-     (34, 40), the tooltip (40) and the pickers (60). Placement reads the anchor's viewport box,
-     the outside press reads `container`, and the editor recognises a menu by its role and
+  /* Every menu renders through a portal into `document.body`, and every list of it enters the
+     browser's top layer in the popover layer (usePlate above; docs/DESIGN.md 2.3). Before the
+     design round the lists were fixed boxes at z-index 30 inside whichever stacking context held
+     them, and the stage (`.pt-stagewrap`, a context through its `view-transition-name`) painted
+     the notes slot over a right click menu's lower rows (docs/FOCUS.md 6.4; VERIFICATION C2-F11:
+     `lines.context.line`, Line end under "Click to add speaker notes"); the portal fixed that, and
+     the top layer now orders every open surface by the scale: over the dialogs and the panes,
+     under the toasts, the tooltip and the hover preview. Placement reads the anchor's viewport
+     box, the outside press reads `container`, and the editor recognises a menu by its role and
      classes (`[role="menu"]`, `.ts-context-menu`, `.ts-menu-root`), so nothing depends on the
      menu sitting inside its trigger's subtree. */
   const node = (
@@ -846,50 +765,34 @@ export function Menu({
 export { DIVIDER };
 
 /**
- * The plate of a dynamic submenu (the Apply layout list or grid): to the right of its row, and
- * clamped inside the viewport once its content is measured, the way placeMenu keeps every other
- * plate (measured: the 21 layout rows from a card low in the filmstrip ran past the bottom of a
- * 900 px window and the last rows could not be clicked; integrator, merge 2).
+ * The plate of a dynamic submenu (the Apply layout list or grid): to the right of its row in the
+ * popover layer, kept inside the viewport by place() once its content is measured (measured
+ * before the round: the 21 layout rows from a card low in the filmstrip ran past the bottom of a
+ * 900 px window and the last rows could not be clicked; integrator, merge 2). It stands at its
+ * row's right edge until the first placement and is never hidden, because the grid inside it may
+ * take the focus on mount and a hidden plate refuses it.
  */
 function DynamicPlate({
   label,
   anchor,
-  level,
   onKeyDown,
   children,
 }: {
   label: string;
   anchor: HTMLElement;
-  level: number;
   onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }) {
   const plate = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<MenuPosition | null>(null);
-  useLayoutEffect(() => {
-    const el = plate.current;
-    if (!el) return;
-    setPosition(
-      placeMenu({
-        anchor: anchor.getBoundingClientRect(),
-        size: { width: el.offsetWidth || 220, height: el.offsetHeight },
-        viewport: { width: window.innerWidth, height: window.innerHeight },
-        placement: 'right',
-      }),
-    );
-  }, [anchor]);
+  const start = useStart(anchor, 'right');
+  usePlate(plate, { layer: 'popover', anchor, side: 'right', fit: true });
   return (
     <div
       ref={plate}
       role="menu"
       aria-label={label}
       className="ts-menu is-sub is-dynamic"
-      style={{
-        left: position?.left ?? anchor.getBoundingClientRect().right - SUBMENU_OVERLAP,
-        top: position?.top ?? anchor.getBoundingClientRect().top - SUBMENU_OVERLAP,
-        ...(position?.maxHeight === undefined ? {} : { maxHeight: position.maxHeight }),
-        zIndex: 31 + level,
-      }}
+      style={start}
       onKeyDown={onKeyDown}
     >
       {children}

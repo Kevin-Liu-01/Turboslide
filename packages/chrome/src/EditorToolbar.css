@@ -201,7 +201,7 @@
 /* the colour plate under a swatch control: a 6 by 3 grid of 20 px swatches, then the hex field */
 .ts-tb-swatches {
   position: fixed;
-  z-index: 32;
+  z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   width: 196px;
   padding: 10px;

@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MenuCloseReason, MenuProps } from '../../Menu';
-import { Menu, SUBMENU_HOVER_MS, placeMenu } from '../../Menu';
+import { Menu, SUBMENU_HOVER_MS } from '../../Menu';
 import { TIP_DELAY_MS, TIP_ID, hideTooltip } from '../../Tooltip';
 import { assignAccessKeys } from '../keys.ts';
 import type { MenuContext, MenuItem } from '../model.ts';
@@ -15,7 +15,8 @@ import { DEFAULT_MENU_CONTEXT } from '../model.ts';
 // focus on its first row and Left closes it back to the parent row; Esc closes one level and
 // returns focus to the trigger at the root; Tab closes everything; a press outside closes; a
 // submenu row opens on hover after 120 ms; check rows carry aria-checked; a stub row is
-// aria-disabled with the stub sentence in its tooltip; placeMenu keeps the plate in the viewport.
+// aria-disabled with the stub sentence in its tooltip; the plate stands in the popover layer and
+// place() keeps it on its anchor inside the viewport (place.test.ts reads the placement rules).
 
 /* access keys as assignAccessKeys would give them, except Grid, which takes 'r' as if 'g' were taken, so type ahead on 'g' has a row to find */
 const ITEMS: MenuItem[] = assignAccessKeys([
@@ -381,139 +382,60 @@ describe('Menu pointer', () => {
   });
 });
 
-describe('placeMenu', () => {
-  const viewport = { width: 1440, height: 900 };
-  const size = { width: 220, height: 300 };
+/* the microtasks of one placement through place() (floating-ui's computePosition awaits each
+   measurement), flushed inside act so the state it writes lands */
+async function settlePlacement(): Promise<void> {
+  await act(async () => {
+    for (let i = 0; i < 20; i += 1) await Promise.resolve();
+  });
+}
 
-  it('sits under a bar title, left aligned, and moves above when the viewport ends first', () => {
-    expect(
-      placeMenu({
-        anchor: { left: 100, top: 44, right: 140, bottom: 72 },
-        size,
-        viewport,
-        placement: 'below',
-      }),
-    ).toEqual({ left: 100, top: 74, maxHeight: 884 });
-    expect(
-      placeMenu({
-        anchor: { left: 100, top: 800, right: 140, bottom: 828 },
-        size,
-        viewport,
-        placement: 'below',
-      }).top,
-    ).toBe(498);
+describe('the menu plate in its layer and on its anchor (docs/DESIGN.md 2.3, 2.4)', () => {
+  it('stands at its anchor from the first render, then place() writes the fixed position and the popover layer', async () => {
+    /* jsdom lays nothing out: the window's box stood in, as place.test.ts does */
+    for (const [key, value] of [
+      ['clientWidth', 1440],
+      ['clientHeight', 900],
+    ] as const)
+      Object.defineProperty(document.documentElement, key, { configurable: true, value });
+    const anchor = document.createElement('button');
+    anchor.getBoundingClientRect = () =>
+      ({
+        x: 100,
+        y: 44,
+        left: 100,
+        top: 44,
+        right: 140,
+        bottom: 72,
+        width: 40,
+        height: 28,
+      }) as DOMRect;
+    document.body.append(anchor);
+    render(<Harness anchor={{ kind: 'element', element: anchor }} placement="below" />);
+    /* the start: under the anchor's left edge with the 2 px gap, never hidden (a hidden list
+       refuses the focus, VERIFICATION-3 finding 13) */
+    expect(menu().style.visibility).toBe('');
+    expect(menu().style.left).toBe('100px');
+    expect(menu().style.top).toBe('74px');
+    /* the popover layer of the scale: jsdom has no Popover API, so the fallback writes the z-index */
+    expect(menu().dataset.layer).toBe('popover');
+    expect(menu().style.zIndex).toBe('50');
+    await settlePlacement();
+    expect(menu().style.position).toBe('fixed');
+    expect(menu().style.left).toBe('100px');
+    expect(menu().style.top).toBe('74px');
+    expect(menu().dataset.place).toBe('below');
+    anchor.remove();
   });
 
-  it('hangs a plate under the right edge of its anchor with the end alignment, so the Slideshow options meet the control instead of the viewport clamp (docs/archive/rounds/RETURN.md 4.1)', () => {
-    /* the split button at 1440: the wrapper 1209 to 1342, the menu 220 wide; the plate's right
-       edge lands on 1342 (left 1122) and its top at the control's bottom plus the 2 px gap */
-    expect(
-      placeMenu({
-        anchor: { left: 1209, top: 6, right: 1342, bottom: 38 },
-        size: { width: 220, height: 96 },
-        viewport,
-        placement: 'below',
-        align: 'end',
-      }),
-    ).toEqual({ left: 1122, top: 40, maxHeight: 884 });
-    /* the start alignment stays the default; anchored to the chevron alone (1312 to 1342) the plate
-       clamps 8 px inside the viewport at 1212, the placement audit-chrome row 12 measured */
-    expect(
-      placeMenu({
-        anchor: { left: 1312, top: 6, right: 1342, bottom: 38 },
-        size: { width: 220, height: 96 },
-        viewport,
-        placement: 'below',
-      }).left,
-    ).toBe(1212);
-    /* the end alignment never leaves the 8 px margin either */
-    expect(
-      placeMenu({
-        anchor: { left: 40, top: 6, right: 100, bottom: 38 },
-        size: { width: 220, height: 96 },
-        viewport,
-        placement: 'below',
-        align: 'end',
-      }).left,
-    ).toBe(8);
-  });
-
-  it('opens a submenu to the right of its row, overlapping by 4 px, and to the left at the edge', () => {
-    expect(
-      placeMenu({
-        anchor: { left: 100, top: 200, right: 320, bottom: 228 },
-        size,
-        viewport,
-        placement: 'right',
-      }),
-    ).toEqual({ left: 316, top: 196, maxHeight: 884 });
-    expect(
-      placeMenu({
-        anchor: { left: 1300, top: 200, right: 1430, bottom: 228 },
-        size,
-        viewport,
-        placement: 'right',
-      }).left,
-    ).toBe(1084);
-  });
-
-  it('drops a submenu under its row on a phone when neither side has room (docs/NEXT.md 4.1.3 item 18)', () => {
-    const phone = { width: 390, height: 844 };
-    /* the Menus key's Insert row at 390: the plate runs 8 to 228, the submenu is 220 wide */
-    expect(
-      placeMenu({
-        anchor: { left: 9, top: 172, right: 227, bottom: 200 },
-        size,
-        viewport: phone,
-        placement: 'right',
-      }),
-    ).toEqual({ left: 25, top: 200, maxHeight: 828 });
-    /* a row with room on its left still flips there, and a desktop window keeps the clamp */
-    expect(
-      placeMenu({
-        anchor: { left: 240, top: 172, right: 380, bottom: 200 },
-        size,
-        viewport: phone,
-        placement: 'right',
-      }),
-    ).toEqual({ left: 24, top: 168, maxHeight: 828 });
-    expect(
-      placeMenu({
-        anchor: { left: 300, top: 172, right: 600, bottom: 200 },
-        size: { width: 640, height: 300 },
-        viewport: { width: 1024, height: 768 },
-        placement: 'right',
-      }),
-    ).toEqual({ left: 8, top: 168, maxHeight: 752 });
-  });
-
-  it('opens a context menu at the pointer and flips left and up at the edges', () => {
-    expect(
-      placeMenu({
-        anchor: { left: 500, top: 400, right: 500, bottom: 400 },
-        size,
-        viewport,
-        placement: 'point',
-      }),
-    ).toEqual({ left: 500, top: 400, maxHeight: 884 });
-    const flipped = placeMenu({
-      anchor: { left: 1400, top: 800, right: 1400, bottom: 800 },
-      size,
-      viewport,
-      placement: 'point',
-    });
-    expect(flipped).toEqual({ left: 1180, top: 500, maxHeight: 884 });
-  });
-
-  it('never leaves the 8 px margin', () => {
-    const tiny = placeMenu({
-      anchor: { left: -20, top: -20, right: -20, bottom: -20 },
-      size,
-      viewport: { width: 200, height: 200 },
-      placement: 'point',
-    });
-    expect(tiny.left).toBe(8);
-    expect(tiny.top).toBe(8);
-    expect(tiny.maxHeight).toBe(184);
+  it('opens a submenu in the same layer, beside its row, with no z-index of its own', async () => {
+    render(<Harness />);
+    fireEvent.keyDown(menu(), { key: 'ArrowDown' });
+    fireEvent.keyDown(menu(), { key: 'ArrowRight' });
+    const sub = screen.getByRole('menu', { name: 'More' });
+    expect(sub.dataset.layer).toBe('popover');
+    expect(sub.style.zIndex).toBe(menu().style.zIndex);
+    await settlePlacement();
+    expect(sub.style.position).toBe('fixed');
   });
 });

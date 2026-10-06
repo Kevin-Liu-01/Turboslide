@@ -14,7 +14,7 @@
 
 .ts-export {
   position: fixed;
-  z-index: 30;
+  z-index: var(--ts-layer-popover);
   width: 336px;
   max-height: calc(100vh - var(--pt-bar-h) - 24px);
   overflow-y: auto;

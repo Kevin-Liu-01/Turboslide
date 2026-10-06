@@ -13,6 +13,7 @@ import type { PaletteEntry, PaletteRun } from './palette-data';
 import { LEGACY_SHAPE_VARIANTS } from './palette-data';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
+import { usePlate } from './usePlate';
 
 import './InsertMenu.css';
 
@@ -77,17 +78,31 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
   const anchor = useRef<HTMLSpanElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [at, setAt2] = useState<{ x: number; y: number } | null>(null);
+  /* the Insert button the card hangs from while it is open, and where the card stands until
+     place() writes its place (read once per open, so a later render never writes it over the
+     placement; the card's first row takes the focus as it mounts, which a hidden card refuses) */
+  const [hang, setHang] = useState<{ button: HTMLElement; left: number; top: number } | null>(null);
+  const button = hang?.button ?? null;
   const [iconPick, setIconPick] = useState<IconPick | null>(null);
   /* the last press on the anchor was a pointer, so the open that follows is the pointer's */
   const viaPointer = useRef(false);
 
-  /* the card sits under the button, in the viewport, like the Export menu */
+  /* the card sits under the button in the popover layer, in the viewport and on the button while
+     it is open (docs/DESIGN.md 2.3, 2.4) */
+  usePlate(card, {
+    layer: 'popover',
+    anchor: button,
+    open: open && button !== null,
+    side: 'below',
+    gap: 6,
+  });
   useEffect(() => {
     if (!open) return;
-    const button = triggerOf(anchor.current);
-    const rect = button?.getBoundingClientRect();
-    if (rect) setAt2({ x: Math.min(rect.left, window.innerWidth - 352), y: rect.bottom + 6 });
+    const trigger = triggerOf(anchor.current);
+    if (trigger !== null) {
+      const rect = trigger.getBoundingClientRect();
+      setHang({ button: trigger, left: Math.round(rect.left), top: Math.round(rect.bottom + 6) });
+    }
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
       if (card.current?.contains(event.target) || anchor.current?.contains(event.target)) return;
@@ -116,13 +131,14 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
 
   /* focus on open: the first row from the keyboard, the card itself from the pointer; the sprite
      picker manages its own focus while it has the card */
+  const hung = hang !== null;
   useEffect(() => {
-    if (!open || at === null || iconPick !== null) return;
+    if (!open || !hung || iconPick !== null) return;
     const el = card.current;
     if (!el) return;
     const first = viaPointer.current ? null : el.querySelector<HTMLElement>(MENU_ITEMS);
     (first ?? el).focus();
-  }, [open, at, iconPick]);
+  }, [open, hung, iconPick]);
 
   /* Up, Down, Home and End walk the rows (roving focus over the menu items) */
   const onCardKey = (event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -243,7 +259,7 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
         className="ts-insert-btn"
         onClick={() => (open ? close() : setOpen(true))}
       />
-      {open && at ? (
+      {open && button !== null ? (
         <div
           ref={card}
           className="ts-insert"
@@ -251,7 +267,7 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
           aria-label="Insert"
           data-control="insert.menu"
           tabIndex={-1}
-          style={{ left: at.x, top: at.y }}
+          style={hang === null ? undefined : { left: hang.left, top: hang.top }}
           onKeyDown={onCardKey}
         >
           {iconPick ? (

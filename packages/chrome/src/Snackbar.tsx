@@ -2,6 +2,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useCallback, useRef, useState } from 'react';
 
 import { Icon } from './icons';
+import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 import { tipProps } from './Tooltip';
 
@@ -62,6 +63,11 @@ export type SnackbarProps = {
 };
 
 export function Snackbar({ message, onDismiss }: SnackbarProps) {
+  /* the toast layer of the stacking scale while a message shows: in the browser's top layer, over
+     an open dialog, so Share's Copy Link confirmation reads and takes the pointer over the Share
+     dialog (docs/DESIGN.md 2.2, 2.3; chrome.layers.toast-over-dialog) */
+  const plate = useRef<HTMLDivElement>(null);
+  useLayer(plate, { layer: 'toast', open: message !== null });
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Escape') return;
     event.preventDefault();
@@ -70,6 +76,7 @@ export function Snackbar({ message, onDismiss }: SnackbarProps) {
   };
   return (
     <div
+      ref={plate}
       className={message === null ? 'ts-snackbar' : 'ts-snackbar is-on'}
       role="status"
       aria-live="polite"

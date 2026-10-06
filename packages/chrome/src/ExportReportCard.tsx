@@ -1,6 +1,9 @@
+import { useRef } from 'react';
+
 import type { ExportReport } from '@turboslide/schema/export';
 
 import type { ExportMenuInput } from './ExportMenu';
+import { useLayer } from './Layer';
 
 import './ExportReportCard.css';
 
@@ -144,6 +147,10 @@ export function runSentence(run: ArtifactRun): string {
 }
 
 export function ExportReportCard({ run, downloads, onDownload, onClose }: ExportReportCardProps) {
+  /* the report in the dialog layer of the stacking scale, in the browser's top layer
+     (docs/DESIGN.md 2.2, 2.3) */
+  const card = useRef<HTMLDivElement>(null);
+  useLayer(card, { layer: 'dialog' });
   const kind = runKindWord(run);
   const title = `Your ${kind}`;
   const passed =
@@ -161,6 +168,7 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
         ];
   return (
     <div
+      ref={card}
       className="ts-report ts-chrome"
       role="dialog"
       aria-label={title}

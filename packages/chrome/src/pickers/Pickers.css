@@ -141,7 +141,7 @@
    max height from its top to 16 px above the viewport's bottom and scrolls inside */
 .ts-plate-anchored {
   position: fixed;
-  z-index: 60;
+  z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   padding: 8px;
   border: 1px solid var(--pt-hair);

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
+import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 import { usePtShell } from './shell-context';
 import type { ShellKeys } from './shell-data';
@@ -46,6 +47,10 @@ export function HelpCard({ rows, note }: HelpCardProps) {
   const [closing, setClosing] = useState(false);
   const wasOpen = useRef(false);
   const timer = useRef(0);
+  /* the card and its scrim in the dialog layer of the stacking scale, in the browser's top layer
+     while it is open or fading out (docs/DESIGN.md 2.2, 2.3) */
+  const scrim = useRef<HTMLDivElement>(null);
+  useLayer(scrim, { layer: 'dialog', open: helpOpen || closing });
 
   useLayoutEffect(() => {
     window.clearTimeout(timer.current);
@@ -72,6 +77,7 @@ export function HelpCard({ rows, note }: HelpCardProps) {
   })).filter((entry) => entry.rows.length > 0);
   return (
     <div
+      ref={scrim}
       className={helpOpen ? 'pt-help' : 'pt-help is-closing'}
       aria-hidden={!helpOpen}
       onClick={() => shell.setHelp(false)}

@@ -13,6 +13,7 @@ import { cn } from '../lib/cn';
 import { useMountEffect } from '../lib/useMountEffect';
 import { PICKERS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
+import { usePlate, useStart } from '../usePlate';
 
 import './Pickers.css';
 
@@ -56,20 +57,6 @@ export function kitRoleHex(
   return typeof value === 'string' ? value : '';
 }
 
-/** Where an anchored plate opens: under the anchor, kept inside the viewport. */
-export function anchoredAt(
-  anchor: HTMLElement,
-  width = 160,
-  height = 200,
-): { left: number; top: number } {
-  const rect = anchor.getBoundingClientRect();
-  let left = rect.left;
-  let top = rect.bottom + 2;
-  if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - width);
-  if (top + height > window.innerHeight - 8) top = Math.max(8, rect.top - 2 - height);
-  return { left, top };
-}
-
 export function ColorPlate({
   anchor,
   label,
@@ -83,7 +70,10 @@ export function ColorPlate({
 }: ColorPlateProps) {
   const root = useRef<HTMLDivElement>(null);
   const [hex, setHex] = useState('');
-  const at = anchoredAt(anchor);
+  /* in the popover layer, under its anchor and kept there while it is open (docs/DESIGN.md 2.3,
+     2.4); it stands under the anchor until placed, since its first swatch takes the focus */
+  const start = useStart(anchor);
+  usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2 });
   const words = PICKERS.colors;
 
   /* the first swatch takes the focus once, on mount (the focus round, cycle 3 fix; b3 C3-R1,
@@ -143,7 +133,7 @@ export function ColorPlate({
       className="ts-plate-anchored ts-color-plate ts-chrome"
       role="dialog"
       aria-label={label}
-      style={{ left: at.left, top: at.top }}
+      style={start}
       data-control={`${control}.menu`}
       onKeyDown={onKey}
     >

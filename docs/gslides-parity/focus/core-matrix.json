@@ -10900,6 +10900,55 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts; a /new draft, which writes nothing"
     },
     {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "interaction": "On /decks, /decks/trash and /decks/templates at 1440 and 390 in both appearances: buttons, fields, the search pill, selects, the view switch and the card menus compute 6 px; dialogs 8 px; cards, thumbnails and rows 0",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-surfaces 3.2: the Trash link and the card frames square, the selects in dialogs 0",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#1; You need access, the refused page and Not found are read by decks.pages.access-plates (DR-D5#2)"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "interaction": "The slide counts, dates and times of the presentations list and the trash compute tabular-nums",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 2: decks.css 533 to 535 and 665 to 667 in proportional figures",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#1"
+    },
+    {
+      "id": "decks.pages.default-glyphs",
+      "feature": "decks",
+      "interaction": "No element of /decks, /decks/trash or /decks/templates outside a slide computes cv11 or ss01 in font-feature-settings",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 1.1",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#1"
+    },
+    {
+      "id": "decks.pages.scrollbar",
+      "feature": "decks",
+      "interaction": "Chromium with scrollbars shown: the documents of /decks, /decks/trash and /decks/templates draw the shared bar (an 8 px gutter, not the 15 px platform bar)",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-scroll 3.2: the platform bar on the three documents",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#1"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "interaction": "Every thumbnail, cover and mark on /decks, /decks/trash and /decks/templates has a natural width over 0 and answered 200; each template card names its theme",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "evidence": "docs/DESIGN.md 8.0",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#1; the theme name clause is read once theme.list (DR-D3#1) is on the build"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

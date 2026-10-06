@@ -13,7 +13,9 @@
    58 px bar with Sign In as text at its end, a full bleed seam under each band with a 9 px cross
    at each rail (.ts-seam), the hatch strip after Start a new presentation, and the recent list as
    ruled rows with a 64 by 36 framed thumbnail by default; the cards stay under Grid view. Corners
-   are square except --pt-radius on the search field, the view control and the sort field. The
+   follow the design round's ladder (docs/DESIGN.md 3.1): the search field, the view control,
+   the sort field, every button and the rename field at --pt-radius, the cards, thumbnails and
+   rows square; Inter's default glyphs, and every date, time and count in tabular figures. The
    Round 1 follow-up (lane C item 5) puts the trash on the same grammar and the same ruled rows
    (`.ts-decks-page.ts-trash-page`), its buttons drawn as text. */
 .ts-home-page {
@@ -265,7 +267,6 @@ html:has(.ts-home-page) {
 .ts-recent h2 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 16px;
   letter-spacing: -0.01em;
@@ -378,7 +379,6 @@ html:has(.ts-home-page) {
 
 .ts-template-label {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
 }
@@ -467,7 +467,6 @@ html:has(.ts-home-page) {
   padding: 16px;
   text-align: center;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
   background: #ffffff;
@@ -499,7 +498,6 @@ html:has(.ts-home-page) {
   color: var(--pt-ink);
   text-decoration: none;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: -0.01em;
@@ -534,6 +532,7 @@ html:has(.ts-home-page) {
 .ts-hm-card-when {
   grid-column: 1;
   font-size: 12px;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
   margin-top: 2px;
   white-space: nowrap;
@@ -562,11 +561,10 @@ html:has(.ts-home-page) {
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-ink);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13.5px var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   outline: none;
 }
@@ -646,6 +644,7 @@ html:has(.ts-home-page) {
   display: none;
   font-size: var(--ts-label, 13px);
   color: var(--pt-ink-2);
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -688,7 +687,7 @@ html:has(.ts-home-page) {
   padding: 0 12px;
   border-bottom: 1px solid var(--pt-hair-soft);
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 
@@ -760,7 +759,6 @@ html:has(.ts-home-page) {
 .ts-trash-head h1 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: var(--ts-title, 1.125rem);
   line-height: 1.35;

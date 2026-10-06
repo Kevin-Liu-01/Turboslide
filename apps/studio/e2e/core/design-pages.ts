@@ -590,10 +590,11 @@ export function designDecks(): string[] {
         /* the trash: its buttons, its rows and the Delete forever dialog */
         await page.goto('/decks/trash');
         await page.locator('.ts-home-page[data-hydrated]').waitFor({ timeout: 120_000 });
-        await page
-          .locator('.ts-trash .ts-rows tr, .ts-trash .ts-hm-card')
-          .first()
-          .waitFor({ timeout: 60_000 });
+        /* a trashed deck's row (the head row is hidden under 720 px) */
+        await expect(
+          page.locator('.ts-trash .ts-trash-row, .ts-trash .ts-hm-card').first(),
+          `${where} trash: the trashed deck's row`,
+        ).toBeVisible({ timeout: 60_000 });
         want(await cornersOf(page, 'buttons', '.ts-trash .pt-ib'), '6px', `${where} trash`);
         want(
           await cornersOf(page, 'rows', '.ts-trash .ts-rows tr, .ts-trash .ts-rows td'),
@@ -728,6 +729,12 @@ export function designDecks(): string[] {
     });
     const facts: string[] = [];
     const failures: string[] = [];
+    /* each template card names its theme once the build has the theme library (DR-D3#1) */
+    const library = await page.request
+      .post('/api/actions/theme.list', { data: {} })
+      .then((answer) => answer.ok())
+      .catch(() => false);
+    if (!library) facts.push('no theme library on this build (theme.list, DR-D3#1): theme names not read');
     for (const appearance of APPEARANCES) {
       await appearanceOf(person, baseURL, appearance);
       for (const each of DECK_PAGES) {
@@ -759,7 +766,7 @@ export function designDecks(): string[] {
         const broken = pictures.filter((p) => p.width === 0 && p.src !== '');
         const refused = answers.filter((a) => a.status !== 200 && a.status !== 304);
         const themes =
-          each.path === '/decks/templates'
+          library && each.path === '/decks/templates'
             ? await page.evaluate(() =>
                 [...document.querySelectorAll('.ts-gallery-card')].map(
                   (card) => card.querySelector('.ts-gallery-theme')?.textContent?.trim() ?? '',

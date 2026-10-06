@@ -1,3 +1,5 @@
+import { loadavg } from 'node:os';
+
 import { chromium, expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
@@ -32,6 +34,16 @@ type Person = { context: BrowserContext; page: Page; scratch: Scratch };
 const APPEARANCES: readonly Appearance[] = ['light', 'dark'];
 /** The width of the shared scrollbar's gutter (DESIGN.md 6.2, `--pt-scroll-w`). */
 const SHARED_BAR = 8;
+/** How long a page's pictures may take to load before the row reads them. A cold
+    `/api/render` thumbnail is one headless Chromium job, and one took 16.6 s and 21.3 s by curl
+    at a load of 180 (VERIFICATION.md, design round pass 3, finding 4), so the wait covers several
+    of them in a row. */
+const PICTURES_WAIT = 180_000;
+/** The time the pictures of a page must load in, a verdict only at a load of `QUIET_LOAD` or
+    less. */
+const PICTURES_BOUND = 30_000;
+/** The one minute load at or under which a timing is a verdict (docs/DESIGN.md 10.0, Load). */
+const QUIET_LOAD = 24;
 
 let bars: Browser | null = null;
 const people: Person[] = [];
@@ -472,7 +484,9 @@ export function isTitleCase(label: string): boolean {
   });
 }
 
-/** A deck made through /new by `person`, trashed through the window API when `trash` is set. */
+/** A deck made through /new by `person`; with `trash`, moved to the trash with File > Move to
+    trash (through the action route when that write has no stamp after 30 s) and returned once
+    the store holds its trash stamp. */
 async function listedDeck(person: Person, name: string, trash = false): Promise<string> {
   const { page } = person;
   const id = await newDeck(page, person.scratch, name);
@@ -481,6 +495,42 @@ async function listedDeck(person: Person, name: string, trash = false): Promise<
     await page.keyboard.press('Escape');
     await menuPath(page, 'file', 'file.moveToTrash');
     await page.waitForURL(/\/decks/, { timeout: 20_000 });
+    /* the editor goes to /decks before the trash write answers (EditorShell, POLISH.md item 81),
+       and a document navigation while it is in flight loses it; on a loaded dev server the write
+       also went unanswered for minutes while POST /api/actions/deck.trash answered in 27 ms
+       (d5.md, finishing round 2). A row reading the trash needs the deck there: the setup waits
+       for the store's trash stamp and, after 30 s without one, moves the deck through the action
+       route and says so in an annotation. */
+    const intervals = [500, 1000, 2000];
+    const stamp = async (): Promise<string> =>
+      page.request
+        .post(`/api/actions/deck.info?deck=${encodeURIComponent(id)}`, { data: {} })
+        .then(async (res) =>
+          res.ok() ? (((await res.json()) as { trashedAt?: string }).trashedAt ?? '') : '',
+        )
+        .catch(() => '');
+    const stamped = await expect
+      .poll(stamp, { timeout: 30_000, intervals })
+      .not.toBe('')
+      .then(() => true)
+      .catch(() => false);
+    if (!stamped) {
+      const started = Date.now();
+      const revision = await page.request
+        .post(`/api/actions/deck.info?deck=${encodeURIComponent(id)}`, { data: {} })
+        .then(async (res) => ((await res.json()) as { revision?: number }).revision);
+      const answer = await page.request.post(
+        `/api/actions/deck.trash?deck=${encodeURIComponent(id)}`,
+        { data: { id, baseRevision: revision } },
+      );
+      test.info().annotations.push({
+        type: 'trash',
+        description: `File > Move to trash of ${id}: no trash stamp after 30 s; POST /api/actions/deck.trash answered ${answer.status()} in ${Date.now() - started} ms (load ${(loadavg()[0] ?? 0).toFixed(1)})`,
+      });
+      await expect
+        .poll(stamp, { message: `the trash stamp of ${id}`, timeout: 60_000, intervals })
+        .not.toBe('');
+    }
   }
   return id;
 }
@@ -718,11 +768,19 @@ export function designDecks(): string[] {
   });
 
   row('decks.pages.pictures-load', async ({ baseURL }) => {
-    test.setTimeout(600_000);
+    /* the light pass may wait PICTURES_WAIT on each page while the first thumbnails render */
+    test.setTimeout(900_000);
     const person = await personAt(baseURL, 1440, 900, 'light');
     const { page } = person;
-    await listedDeck(person, 'Design round pictures');
-    await listedDeck(person, 'Design round pictures, trashed', true);
+    const deckId = await listedDeck(person, 'Design round pictures');
+    const trashedId = await listedDeck(person, 'Design round pictures, trashed', true);
+    /* the listing row of the deck this check made, on each page: its thumbnail is read once the
+       listing drew it, since a listing that arrives after hydration (the trash's) or a card drawn
+       as its plate before the listing confirms it holds no picture yet */
+    const own: Record<string, string> = {
+      '/decks': `home.card.${deckId}`,
+      '/decks/trash': `trash.card.${trashedId}`,
+    };
     const answers: { url: string; status: number }[] = [];
     page.on('response', (response) => {
       if (response.request().resourceType() === 'image')
@@ -755,6 +813,15 @@ export function designDecks(): string[] {
         answers.length = 0;
         await page.goto(each.path);
         await page.locator(each.ready).first().waitFor({ timeout: 120_000 });
+        const mine = own[each.path] ?? null;
+        const drawn =
+          mine === null ||
+          (await page
+            .locator(`[data-control="${mine}"]`)
+            .first()
+            .waitFor({ timeout: 120_000 })
+            .then(() => true)
+            .catch(() => false));
         /* every picture in the document, scrolled into view so a lazy one is requested */
         await page.evaluate(async () => {
           for (const img of document.querySelectorAll('img')) {
@@ -763,21 +830,48 @@ export function designDecks(): string[] {
           }
           window.scrollTo(0, 0);
         });
-        await page
+        /* every picture complete (decoded or failed) and the capture of the deck this check made
+           drawn and complete; the time runs from the end of the scroll. The capture is read by its
+           picture, not by the thumbnail's data-loaded, which the trash's row did not carry in
+           either appearance while its picture was decoded (d5.md, finishing round 2) */
+        const started = Date.now();
+        const loadedIn = await page
           .waitForFunction(
-            () => [...document.querySelectorAll('img')].every((img) => img.complete),
-            null,
-            { timeout: 30_000 },
+            (control) =>
+              [...document.querySelectorAll('img')].every((img) => img.complete) &&
+              (control === null ||
+                document.querySelector<HTMLImageElement>(
+                  `[data-control="${control}"] .ts-hm-card-thumb[data-thumb="capture"] img`,
+                )?.complete === true),
+            drawn ? mine : null,
+            { timeout: PICTURES_WAIT, polling: 250 },
           )
-          .catch(() => undefined);
+          .then(() => Date.now() - started)
+          .catch(() => null);
+        const load = loadavg()[0] ?? 0;
+        /* the thumbnail of the deck this check made: `capture` with a decoded picture, or `plate`
+           after a failed ask */
+        const thumb =
+          mine === null || !drawn
+            ? null
+            : await page.evaluate((control) => {
+                const box = document.querySelector(`[data-control="${control}"] .ts-hm-card-thumb`);
+                const img = box?.querySelector('img');
+                return {
+                  kind: box?.getAttribute('data-thumb') ?? 'none',
+                  width: img?.naturalWidth ?? 0,
+                };
+              }, mine);
         const pictures = await page.evaluate(() =>
           [...document.querySelectorAll('img')].map((img) => ({
             src: (img.currentSrc || img.src).slice(0, 120),
             width: img.naturalWidth,
+            complete: img.complete,
             hidden: img.getClientRects().length === 0,
           })),
         );
-        const broken = pictures.filter((p) => p.width === 0 && p.src !== '');
+        const loading = pictures.filter((p) => !p.complete && p.src !== '');
+        const broken = pictures.filter((p) => p.complete && p.width === 0 && p.src !== '');
         const refused = answers.filter((a) => a.status !== 200 && a.status !== 304);
         const cards =
           library.size > 0 && each.path === '/decks/templates'
@@ -789,12 +883,39 @@ export function designDecks(): string[] {
               )
             : [];
         const names = [...library.values()];
+        const time =
+          loadedIn === null
+            ? `not loaded within ${PICTURES_WAIT / 1000} s`
+            : `loaded in ${(loadedIn / 1000).toFixed(1)} s`;
+        const mineFact =
+          mine === null
+            ? ''
+            : thumb === null
+              ? `, no listing row for the deck this check made`
+              : `, the deck this check made ${thumb.kind} ${thumb.width} px wide`;
         facts.push(
-          `${appearance} ${each.name}: ${pictures.length} pictures, ${broken.length} not decoded, ${answers.length} answers, ${refused.length} not 200${cards.length > 0 ? `; themes ${cards.map((c) => `${c.id} ${c.theme || 'none'}`).join(', ')}` : ''}`,
+          `${appearance} ${each.name}: ${pictures.length} pictures ${time} (load ${load.toFixed(1)})${mineFact}, ${broken.length} not decoded, ${answers.length} answers, ${refused.length} not 200${cards.length > 0 ? `; themes ${cards.map((c) => `${c.id} ${c.theme || 'none'}`).join(', ')}` : ''}`,
         );
+        if (mine !== null && thumb === null)
+          failures.push(
+            `${appearance} ${each.name}: the listing drew no row for the deck this check made within 120 s`,
+          );
+        else if (thumb !== null && !(thumb.kind === 'capture' && thumb.width > 0))
+          failures.push(
+            `${appearance} ${each.name}: the deck this check made draws its ${thumb.kind} with a picture ${thumb.width} px wide, not a decoded capture`,
+          );
+        if (loading.length > 0)
+          failures.push(
+            `${appearance} ${each.name}: still loading after ${PICTURES_WAIT / 1000} s at load ${load.toFixed(1)}: ${loading.map((p) => p.src).join(', ')}`,
+          );
         if (broken.length > 0)
           failures.push(
             `${appearance} ${each.name}: not decoded ${broken.map((b) => b.src).join(', ')}`,
+          );
+        /* the 30 s bound is a verdict on a quiet machine only (docs/DESIGN.md 10.0, Load) */
+        if (loadedIn !== null && loadedIn > PICTURES_BOUND && load <= QUIET_LOAD)
+          failures.push(
+            `${appearance} ${each.name}: pictures loaded in ${(loadedIn / 1000).toFixed(1)} s at load ${load.toFixed(1)}, over the ${PICTURES_BOUND / 1000} s bound`,
           );
         if (refused.length > 0)
           failures.push(

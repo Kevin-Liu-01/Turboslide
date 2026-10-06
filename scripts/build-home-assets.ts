@@ -100,6 +100,7 @@ import { deriveMenus } from './home/menus.ts';
 import { derivePattern } from './home/pattern.ts';
 import { iconMaskRules, maskUri } from './home/icons.ts';
 import { deriveEditorChrome, firstScreenIcons } from './home/chrome.ts';
+import { deriveMenuGlyphsModule, deriveSprite, deriveSpriteModule } from './home/sprite.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = 'apps/studio/home-deck';
@@ -547,7 +548,8 @@ type AssetRole =
   | 'export-perfect'
   | 'export-editable'
   | 'export-browser'
-  | 'pdf';
+  | 'pdf'
+  | 'glyphs';
 type AssetVariant = 'wide' | 'narrow' | null;
 type ServedAsset = {
   role: AssetRole;
@@ -589,7 +591,8 @@ async function served(
   extra: { partSha256?: string | null; pages?: number | null } = {},
 ): Promise<{ asset: ServedAsset; bytes: Uint8Array }> {
   const name = servedName(role, appearance, variant, bytes, ext);
-  const picture = ext !== 'pdf';
+  /* a PDF and the glyph sprite are no pictures: no size and no pixels */
+  const picture = ext !== 'pdf' && ext !== 'svg';
   const meta = picture ? await sharp(bytes).metadata() : null;
   return {
     asset: {
@@ -2099,9 +2102,11 @@ function deriveDeckFacts(
     heroDisc: HERO_DISC,
   };
   const tailorWords = {
+    title: TAILOR.title,
     from: TAILOR.from,
     to: TAILOR.to,
     apply: TAILOR.apply,
+    cancel: TAILOR.cancel,
     undo: TAILOR.undo,
     countRest: TAILOR.count(0, 0),
   };
@@ -2208,8 +2213,9 @@ export const HOME_DECK: HomeDeckFacts = ${JSON.stringify(deck, null, 2)};
 
 /**
  * The Tailor dialog's own words, copied from @turboslide/chrome's TAILOR
- * (packages/chrome/src/panels/assist-strings.ts) for the band's resting rows until the package
- * exports the module; \`countRest\` is TAILOR.count over the CLI's recorded answer on the page deck.
+ * (packages/chrome/src/panels/assist-strings.ts) for the band's dialog (DESIGN.md 8.6: the title,
+ * Replace, With, the count, Cancel and Apply); \`countRest\` is TAILOR.count over the CLI's
+ * recorded answer on the page deck.
  */
 export const HOME_TAILOR_WORDS = ${JSON.stringify(tailorWords, null, 2)} as const;
 
@@ -2726,6 +2732,7 @@ async function deriveServed(
     ...(await Promise.all(
       loupeFiles.map((file) => served(file.role, file.appearance, null, file.bytes, 'webp')),
     )),
+    await served('glyphs', null, null, new TextEncoder().encode(deriveSprite()), 'svg'),
   ];
   const budgets: Partial<Record<AssetRole, number>> = {
     'lighthouse-still': 24_000,
@@ -2734,6 +2741,7 @@ async function deriveServed(
     'pattern-still': 48_000,
     'pattern-mask': 48_000,
     'export-browser': 60_000,
+    glyphs: 48_000,
   };
   for (const m of made) {
     const limit = budgets[m.asset.role];
@@ -2781,7 +2789,9 @@ export type HomeAssetRole =
   /** the CLI's browser render of slide 7 at scale 2, lossless WebP, at most 60 KB (the loupe, V3's) */
   | 'export-browser'
   /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
-  | 'pdf';
+  | 'pdf'
+  /** the glyphs below the first screen: one SVG sprite of icons.tsx's symbols (scripts/home/sprite.ts), at most 48 KB */
+  | 'glyphs';
 
 /** A still's grid: \`wide\` at 2 px cells on the 1,024 px sheet, \`narrow\` on the 358 px sheet. */
 export type HomeAssetVariant = 'wide' | 'narrow';
@@ -2797,7 +2807,7 @@ export type HomeAsset = {
   sha256: string;
   width: number | null;
   height: number | null;
-  /** sha256 of the decoded pixels (RGBA, row major); null for a PDF */
+  /** sha256 of the decoded pixels (RGBA, row major); null for a PDF and the glyph sprite */
   pixelsSha256: string | null;
   /** an export picture: sha256 of the part inside the file it was read from */
   partSha256: string | null;
@@ -2923,6 +2933,23 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
       content: await formatTs(
         `${HOME}/chrome.generated.ts`,
         deriveEditorChrome(GENERATED_HEADER('--slides', 'docs/DESIGN.md 8.2')),
+      ),
+    },
+    {
+      path: `${HOME}/sprite.generated.ts`,
+      content: await formatTs(
+        `${HOME}/sprite.generated.ts`,
+        deriveSpriteModule(
+          GENERATED_HEADER('--slides', 'docs/DESIGN.md 8.0, 8.4'),
+          assets.find((a) => a.role === 'glyphs')?.path ?? fail('the glyph sprite was not made'),
+        ),
+      ),
+    },
+    {
+      path: `${HOME}/menu-glyphs.generated.ts`,
+      content: await formatTs(
+        `${HOME}/menu-glyphs.generated.ts`,
+        deriveMenuGlyphsModule(GENERATED_HEADER('--slides', 'docs/DESIGN.md 8.4')),
       ),
     },
     {

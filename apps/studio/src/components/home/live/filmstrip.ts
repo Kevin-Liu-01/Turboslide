@@ -1,8 +1,10 @@
-import { ANNOUNCE, HISTORY } from '../copy';
+import { ANNOUNCE, HISTORY, TAILOR } from '../copy';
 import { cloneSlide } from './index';
 import type { LiveContext } from './index';
 import { ease, finishBand, ms, play } from './motion';
 import { paintSlide, renumber } from './paint';
+import { HOME_GLYPHS } from '../sprite.generated';
+import { glyph } from './sprite';
 import type { HomeDeckState, SlideKey } from './state';
 import type { Snackbar } from './tailor';
 
@@ -11,8 +13,9 @@ import type { Snackbar } from './tailor';
  * a click shows the slide on the stage by a cut (3.2 T6); a drag lifts a thumbnail with a 2 px
  * outline in `--pt-select`, the others make room over 200 ms and the dropped slide settles over
  * 240 ms (T4, T5); on touch a 350 ms press lifts it, so a swipe still scrolls; Cmd or Ctrl with Up
- * or Down moves the focused thumbnail; the selected thumbnail's Move Up and Move Down are the
- * single pointer path (WCAG 2.5.7). Every move is one change of the store's `order`, which Undo
+ * or Down moves the focused thumbnail; Move Up and Move Down, glyph buttons this module adds to
+ * each thumbnail (the model's `bars-arrow-up` and `bars-arrow-down` from the landing's sprite),
+ * shown on its hover and focus (docs/DESIGN.md 8.6), are the single pointer path (WCAG 2.5.7). Every move is one change of the store's `order`, which Undo
  * puts back, and every counter on the page renumbers from it (`renumber`, which the agents band's
  * Run Again also reaches through `index.ts`, l3.md R11). Slide 5 enters and leaves the filmstrip by
  * a cut with the order.
@@ -66,6 +69,22 @@ export function startFilmstrip(ctx: LiveContext, snack: Snackbar): void {
     });
   };
   for (const t of thumbs) if (t.tabIndex < 0) t.tabIndex = 0;
+  for (const t of thumbs) {
+    if (t.querySelector('[data-thumb-move]') !== null) continue;
+    const moves = document.createElement('span');
+    moves.className = 'ts-home-thumb-moves';
+    for (const dir of ['up', 'down'] as const) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pt-ib pt-icon ts-thumb-move';
+      b.dataset['thumbMove'] = dir;
+      b.tabIndex = -1;
+      b.setAttribute('aria-label', dir === 'up' ? TAILOR.moveUp : TAILOR.moveDown);
+      b.append(glyph(HOME_GLYPHS[dir === 'up' ? 'bars-arrow-up' : 'bars-arrow-down']));
+      moves.append(b);
+    }
+    t.append(moves);
+  }
 
   // ---- the stage shows the chosen slide (a cut) ----
   const stageSlide = stage?.querySelector<HTMLElement>('[data-home-slides]')?.dataset['slide'];

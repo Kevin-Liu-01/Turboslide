@@ -32,12 +32,12 @@ export function HomePeople() {
               <HomeSheet instance={`people-${who}-plan`} fill />
               <HomeSheet instance={`people-${who}-gets`} fill hidden />
             </div>
-            {who === 'maya' ? <div data-follow hidden /> : null}
+            {who === 'maya' ? <div data-follow="" hidden /> : null}
           </div>
         ))}
       </div>
       <p className="ts-caption ts-people-caption">{PEOPLE.caption(PEOPLE_LOOP_SECONDS)}</p>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

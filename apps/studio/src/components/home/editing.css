@@ -4,8 +4,8 @@
    paints styled) and by the route when V1 lists it. The grammar is the editor's: the frame, the
    plates and the dialog take the shared plate classes of tokens.css (`.pt-window` 8 px,
    `.pt-float` 6 px, docs/DESIGN.md 3.2), rows and the slides stay square, no drop shadow or
-   gradient; `--pt-select` only on what the visitor works on: an open menu row's ground,
-   the focus ring (LANDING.md 2.0 "Colour"). */
+   gradient; `--pt-select` only on what the visitor works on: the search's chosen row and the
+   focus ring (LANDING.md 2.0 "Colour"); the menu rows take the editor's plate ground. */
 
 /* ---- the miniature editor (2.5) ---- */
 
@@ -50,6 +50,11 @@
   color: var(--pt-titanium);
   white-space: nowrap;
   font-variant-numeric: var(--pt-numerals);
+}
+
+/* the band's Undo as the editor's glyph button at the title row's right (mock-03) */
+.ts-mini-undo {
+  margin: 0 -8px 0 auto;
 }
 
 .ts-mini-menubar {
@@ -101,6 +106,8 @@
   min-height: 0;
   overflow: hidden;
   background: var(--pt-plate);
+  /* the stage's selection layer orders inside the body, under the plates' layer before it */
+  isolation: isolate;
 }
 
 .ts-mini-filmstrip {
@@ -212,8 +219,8 @@
 .ts-mini-plates {
   position: absolute;
   inset: 0;
-  /* local order inside the miniature's own stacking context: over the stage's selection layer
-     (selection.css, 4), which comes before it in the frame */
+  /* local order inside the miniature's own stacking context: over the body, which isolates the
+     stage's selection layer (selection.css, 4) */
   z-index: 4;
   pointer-events: none;
 }
@@ -234,19 +241,20 @@
 
 .ts-mini-row {
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr) auto 14px;
+  grid-template-columns: 16px minmax(0, 1fr) auto 16px;
   align-items: center;
   column-gap: 10px;
   height: 32px;
   padding: 0 12px;
-  color: var(--pt-ink);
+  color: var(--pt-ink-2);
   cursor: default;
   user-select: none;
   outline: none;
 }
 
+/* a row the editor greys with nothing selected (Menu.css .ts-menu-item.is-disabled) */
 .ts-mini-row.is-off {
-  color: var(--pt-titanium);
+  color: var(--pt-disabled, var(--pt-titanium));
 }
 
 .ts-mini-row-label {
@@ -264,26 +272,19 @@
   padding-left: 8px;
 }
 
-/* an open row of a run row reads the live selection's blue (2.0 "Colour"); a row the page does
-   not run takes the plate ground, as the editor's unavailable rows take none */
-.ts-mini-row.is-run:hover,
-.ts-mini-row.is-run:focus,
-.ts-mini-row.is-run.is-open {
-  background: var(--pt-select);
-  color: var(--pt-select-text);
-}
-
-.ts-mini-row.is-run:hover .ts-mini-row-key,
-.ts-mini-row.is-run:focus .ts-mini-row-key,
-.ts-mini-row.is-run.is-open .ts-mini-row-key {
-  color: var(--pt-select-text);
-}
-
-.ts-mini-row.is-off:hover,
-.ts-mini-row.is-off:focus,
-.ts-mini-row.is-off.is-open {
+/* the editor's rows (Menu.css): the plate ground and ink on hover, on focus and on the open row,
+   the page's run rows and the rows that answer in the status row alike (DESIGN.md 8.4); a row the
+   editor greys takes no ground */
+.ts-mini-row:not(.is-off):hover,
+.ts-mini-row:not(.is-off):focus,
+.ts-mini-row:not(.is-off).is-open {
   background: var(--pt-plate);
-  color: var(--pt-ink-2);
+  color: var(--pt-ink);
+}
+
+.ts-mini-row.is-off:focus {
+  outline: 1px solid var(--pt-hair);
+  outline-offset: -1px;
 }
 
 .ts-mini-row.is-back {
@@ -291,30 +292,29 @@
   color: var(--pt-ink);
 }
 
-.ts-mini-row.is-back:hover,
-.ts-mini-row.is-back:focus {
-  background: var(--pt-plate);
+/* each row's glyph (the model's, the check of a checked row) and a submenu's next glyph: the
+   editor's icons.tsx drawn from the landing's sprite (live/sprite.ts), 16 px in the row's ink */
+.ts-glyph {
+  display: block;
+  flex: none;
+  width: 16px;
+  height: 16px;
 }
 
-/* the check of a check row and a submenu's chevron, drawn with borders (no artwork copied) */
-.ts-mini-row-check > i {
-  display: block;
-  width: 5px;
-  height: 9px;
-  margin: -2px 0 0 5px;
-  border: solid currentColor;
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(45deg);
+.ts-mini-row-check {
+  display: flex;
+  color: var(--pt-titanium);
+}
+
+.ts-mini-row.is-off .ts-mini-row-check,
+.ts-mini-row:not(.is-off):hover .ts-mini-row-check,
+.ts-mini-row:not(.is-off):focus .ts-mini-row-check,
+.ts-mini-row:not(.is-off).is-open .ts-mini-row-check {
+  color: inherit;
 }
 
 .ts-mini-chevron {
   justify-self: end;
-  width: 6px;
-  height: 6px;
-  border: solid currentColor;
-  border-width: 1.5px 1.5px 0 0;
-  transform: rotate(45deg);
-  opacity: 0.7;
 }
 
 .ts-mini-rule {
@@ -575,8 +575,9 @@
   /* the status row holds two lines, so the longest sentence reads whole at 390. The column's
      rails are the miniature's sides under 720 px (the gutter is 0), so it draws its top and bottom
      rules alone, as the hero frame does (check step 18's chrome lint: one owner a seam) */
+  /* the plates' layer is a row of its own under the Menus key, empty at rest */
   .ts-mini-editor {
-    grid-template-rows: 36px 44px auto 48px 56px;
+    grid-template-rows: 36px 44px auto auto 48px 56px;
     border-left: 0;
     border-right: 0;
   }
@@ -639,8 +640,17 @@
     height: 44px;
   }
 
+  /* the open menu in the flow under the Menus key (DESIGN.md 8.4): nothing is clipped */
+  .ts-mini-plates {
+    position: static;
+  }
+
   .ts-mini-plate {
-    max-width: calc(100% - 16px);
+    position: static;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    margin: 8px;
   }
 
   .ts-mini-status {

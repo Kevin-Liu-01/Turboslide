@@ -216,59 +216,55 @@ export function rows(): void {
       await expect(titles.first()).toHaveAttribute('aria-expanded', 'false');
       await page.keyboard.press('Escape');
 
-      // a row the page does not run: titanium, and the status says the editor runs it
-      const notRun = MINI_MENUS[0]?.rows.find((r) => r.run !== true && r.items === undefined);
+      // a row the page does not run is a working row (ink 2, not aria-disabled) whose press says
+      // the editor runs it; only a row the editor disables with nothing selected is grey
+      // (docs/DESIGN.md 8.4, restated by DR-D4#4: Insert > Link and Insert > Comment)
+      const notRun = MINI_MENUS[0]?.rows.find(
+        (r) => r.run !== true && r.off !== true && r.items === undefined,
+      );
       expect(notRun).toBeDefined();
+      const colourOf = (cssVar: string) =>
+        page.evaluate((v) => {
+          const probe = document.createElement('i');
+          probe.style.color = `var(${v}, var(--pt-titanium))`;
+          document.body.append(probe);
+          const c = getComputedStyle(probe).color;
+          probe.remove();
+          return c;
+        }, cssVar);
+      const ink2 = await colourOf('--pt-ink-2');
+      const disabled = await colourOf('--pt-disabled');
       await openPath(page, ['File', notRun?.label ?? ''], false);
-      const looks = await page.evaluate(() => {
-        const off = document.querySelector<HTMLElement>(
-          '[data-band="menus"] [data-mini-plate="0"] .ts-mini-row.is-off:not(:hover)',
+      await page.mouse.move(0, 0);
+      const working = band(page)
+        .locator('[data-mini-plate="0"] .ts-mini-row')
+        .filter({ has: page.locator('.ts-mini-row-label', { hasText: notRun?.label ?? '' }) })
+        .first();
+      expect(await working.getAttribute('aria-disabled')).toBeNull();
+      await page.keyboard.press('Escape');
+      const insert = MINI_MENUS.find((m) => m.id === 'insert');
+      const offRows = (insert?.rows ?? []).filter((r) => r.off === true).map((r) => r.label);
+      expect(offRows).toEqual(expect.arrayContaining(['Link', 'Comment']));
+      await openPath(page, ['Insert'], true);
+      await page.mouse.move(0, 0);
+      const drawn = await band(page)
+        .locator('[data-mini-plate="0"] .ts-mini-row')
+        .evaluateAll((els) =>
+          els.map((el) => ({
+            label: el.querySelector('.ts-mini-row-label')?.textContent ?? '',
+            off: el.classList.contains('is-off'),
+            color: getComputedStyle(el).color,
+            lit: el.matches(':hover, :focus, .is-open'),
+          })),
         );
-        const run = document.querySelector<HTMLElement>(
-          '[data-band="menus"] [data-mini-plate="0"] .ts-mini-row.is-run:not(:hover)',
+      expect(drawn.length).toBeGreaterThan(8);
+      for (const row of drawn.filter((r) => !r.lit)) {
+        expect(row.off, `Insert > ${row.label} grey`).toBe(offRows.includes(row.label));
+        expect(row.color, `Insert > ${row.label}`).toBe(
+          offRows.includes(row.label) ? disabled : ink2,
         );
-        const titanium = getComputedStyle(document.documentElement)
-          .getPropertyValue('--pt-titanium')
-          .trim();
-        const probe = document.createElement('i');
-        probe.style.color = titanium;
-        document.body.append(probe);
-        const want = getComputedStyle(probe).color;
-        probe.remove();
-        return {
-          off: off === null ? null : getComputedStyle(off).color,
-          run: run === null ? null : getComputedStyle(run).color,
-          titanium: want,
-        };
-      });
-      expect(looks.off).toBe(looks.titanium);
-      expect(looks.run).not.toBe(looks.titanium);
-      // a submenu that leads to a row the page runs reads in ink, as the rows it leads to (File >
-      // Download for PDF document, File > Version history for Name current version, Insert >
-      // Shape for the rectangle and the ellipse); a submenu with none under it reads titanium
-      const parents = MINI_MENUS.flatMap((m) =>
-        m.rows
-          .filter((r) => r.items !== undefined)
-          .map((r) => ({ menu: m.label, row: r.label, run: runsUnder(r) })),
-      );
-      expect(parents.filter((p) => p.run).map((p) => `${p.menu} > ${p.row}`)).toEqual(
-        expect.arrayContaining(['File > Download', 'File > Version history', 'Insert > Shape']),
-      );
-      for (const parent of [
-        ...parents.filter((p) => p.run).slice(0, 3),
-        ...parents.filter((p) => !p.run).slice(0, 1),
-      ]) {
-        await openPath(page, [parent.menu], true);
-        const color = await band(page)
-          .locator('[data-mini-plate="0"] .ts-mini-row.is-sub')
-          .filter({ has: page.locator('.ts-mini-row-label', { hasText: parent.row }) })
-          .first()
-          .evaluate((el) => getComputedStyle(el).color);
-        if (parent.run)
-          expect(color, `${parent.menu} > ${parent.row} in ink`).not.toBe(looks.titanium);
-        else expect(color, `${parent.menu} > ${parent.row} in titanium`).toBe(looks.titanium);
-        await page.keyboard.press('Escape');
       }
+      await page.keyboard.press('Escape');
       await openPath(page, ['File', notRun?.label ?? ''], true);
       await expect(band(page).locator('[data-mini-status]')).toHaveText(
         MENUS.editorRow(notRun?.doc ?? '').trim(),

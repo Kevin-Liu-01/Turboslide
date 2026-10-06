@@ -103,13 +103,18 @@ export function iconMaskRules(names: readonly string[]): string[] {
 }
 
 /**
- * The sprite: one `<symbol id="<name>" viewBox="0 0 20 20">` per name, in the order given. A
- * `<use href="<file>#<name>">` inside an `<svg fill="currentColor">` draws the glyph in the
- * text's colour; drawn strokes inherit `stroke` the same way.
+ * The sprite: one `<symbol id="<id>" viewBox="0 0 20 20">` per name, in the order given, its id
+ * the name or the one `idOf` gives. A `<use href="<file>#<id>">` inside an
+ * `<svg fill="currentColor">` draws the glyph in the text's colour; drawn strokes inherit
+ * `stroke` the same way.
  */
-export function spriteSvg(names: readonly string[]): string {
+export function spriteSvg(
+  names: readonly string[],
+  idOf: (name: string, index: number) => string = (name) => name,
+): string {
   const symbols = names.map(
-    (name) => `<symbol id="${name}" viewBox="0 0 20 20">${glyphBody(name, null)}</symbol>`,
+    (name, i) =>
+      `<symbol id="${idOf(name, i)}" viewBox="0 0 20 20">${glyphBody(name, null)}</symbol>`,
   );
   return `<svg xmlns="http://www.w3.org/2000/svg">${symbols.join('')}</svg>\n`;
 }

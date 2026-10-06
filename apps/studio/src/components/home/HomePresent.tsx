@@ -24,12 +24,12 @@ export function HomePresent() {
             <button
               type="button"
               className="pt-ib is-solid ts-button"
-              data-present
+              data-present=""
               aria-keyshortcuts="Meta+Enter Control+F5"
             >
               {PRESENT.present}
             </button>
-            <button type="button" className="pt-ib ts-button" data-print>
+            <button type="button" className="pt-ib ts-button" data-print="">
               {PRESENT.print}
             </button>
           </div>
@@ -38,7 +38,7 @@ export function HomePresent() {
           <Reserve band="present" className="ts-present-reserve">
             <HomeSheet instance="present" fill className="ts-present-sheet" />
           </Reserve>
-          <ol className="ts-home-slide-list" data-slide-list aria-label={PRESENT.listLabel}>
+          <ol className="ts-home-slide-list" data-slide-list="" aria-label={PRESENT.listLabel}>
             {HOME_DECK.order.map((id) => {
               const slide = HOME_DECK.slides[id];
               const chosen = id === CHOSEN;
@@ -59,7 +59,7 @@ export function HomePresent() {
           </ol>
         </div>
       </div>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

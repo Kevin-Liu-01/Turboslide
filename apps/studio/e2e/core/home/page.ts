@@ -9,7 +9,7 @@ import type { Browser, BrowserContext, Page, Request } from '@playwright/test';
 import { HOME_LOOP_FACTS } from '../../../src/components/home/deck.generated';
 import { FACTS_DATA } from '../../../src/components/home/facts-data';
 import { HOME_LOOP } from '../../../src/components/home/loop.generated';
-import { CLOSE_ROUND, HERO_ROUND } from '../../../src/components/home/design-copy';
+import { CLOSE_ROUND, HERO_ROUND, MENUS_ROUND } from '../../../src/components/home/design-copy';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { extraHTTPHeaders, title } from '../lib';
 
@@ -73,7 +73,7 @@ const SECTION_ORDER = [
   'footer',
 ] as const;
 const H2_OF: Readonly<Record<string, string>> = {
-  menus: 'Menus and keyboard shortcuts',
+  menus: MENUS_ROUND.h2,
   canvas: 'Everything on a slide moves',
   tailor: 'One name on every slide',
   kits: 'Brand kits restyle every slide',

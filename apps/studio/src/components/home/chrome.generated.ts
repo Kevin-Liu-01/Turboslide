@@ -146,3 +146,17 @@ export const HOME_STEP_ICONS = {
   done: 'check-circle',
   playing: 'play',
 } as const;
+
+/** The Format options panel's words, as FormatOptions.tsx draws them (the canvas band's readout). */
+export const HOME_FORMAT_PANEL = {
+  title: 'Format options',
+  size: 'Size & rotation',
+  position: 'Position',
+  layout: 'Layout',
+  width: 'Width',
+  height: 'Height',
+  rotate: 'Rotate',
+  x: 'X',
+  y: 'Y',
+  icons: ['arrows-pointing-in', 'move', 'columns', 'command-line'],
+} as const;

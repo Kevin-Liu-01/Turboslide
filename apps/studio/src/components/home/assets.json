@@ -119,6 +119,19 @@
       "pages": null
     },
     {
+      "role": "glyphs",
+      "appearance": null,
+      "variant": null,
+      "path": "/home/glyphs-ebf5421cf2.svg",
+      "bytes": 40131,
+      "sha256": "ebf5421cf2d85aa982db2ede5135af7b8ba2d3cf8304d83f3f78a4621227cc25",
+      "width": null,
+      "height": null,
+      "pixelsSha256": null,
+      "partSha256": null,
+      "pages": null
+    },
+    {
       "role": "export-perfect",
       "appearance": "light",
       "variant": null,

@@ -182,9 +182,21 @@ export function rows(): void {
       // the bands above it in: the miniature and the canvas draw the kit too
       for (const b of ['menus', 'canvas', 'tailor']) await bandReady(page, b);
       await bandReady(page, 'kits');
-      // at rest: the one colour outside paper and ink is Globex's swatch, and no #2f5ce0
+      // at rest: the one colour outside paper and ink is Globex's swatch, besides the status
+      // glyphs' hue (the hero's done glyph, docs/DESIGN.md 8.0 "Colour"; restated by DR-D4#4),
+      // and no #2f5ce0
       const rest = await hues(page);
-      expect(rest.filter((h) => !h.startsWith('rgb(10, 27, 56)'))).toEqual([]);
+      const done = await page.evaluate(() => {
+        const probe = document.createElement('i');
+        probe.style.color = 'var(--pt-status-done)';
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+      });
+      expect(
+        rest.filter((h) => !h.startsWith('rgb(10, 27, 56)') && !h.startsWith(`${done} `)),
+      ).toEqual([]);
       expect(rest.join(' ')).not.toContain(SELECT);
       for (const kit of ['gt', 'kestrel', 'globex'] as const)
         await expect(band(page).locator(`[data-kit="${kit}"]`)).toHaveAttribute(

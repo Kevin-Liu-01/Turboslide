@@ -43,7 +43,9 @@ export function HomeSection({ id, children, className }: HomeSectionProps) {
 
 /**
  * A band's heading and lead (docs/LANDING.md 2.0 "Type"): the h2 at 54 px (30 px at 390), weight
- * 500, -0.034 em, and the 19 px lead in ink 2, in the left 7 or 5 of the 12 columns.
+ * 500, -0.034 em, and the 19 px lead in ink 2, in the left 7 or 5 of the 12 columns; `split`
+ * (docs/DESIGN.md 8.4 to 8.6, the round's mocks) sets the h2 in the left half and the lead beside
+ * it in the right, one row over the band's figure (stacked under 1,024 px).
  */
 export function BandHead({
   id,
@@ -55,7 +57,7 @@ export function BandHead({
   id: HomeSectionProps['id'];
   heading: string;
   lead?: string;
-  span?: 5 | 7 | 12;
+  span?: 5 | 7 | 12 | 'split';
   children?: ReactNode;
 }) {
   return (

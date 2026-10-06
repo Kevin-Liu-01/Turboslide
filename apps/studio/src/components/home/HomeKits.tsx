@@ -56,7 +56,7 @@ export function HomeKits() {
               spellCheck={false}
               autoComplete="off"
               aria-describedby="ts-kit-color-help"
-              data-kit-color
+              data-kit-color=""
             />
             <button type="button" className="ts-text-button" data-undo="kits">
               {KITS.undo}
@@ -65,14 +65,14 @@ export function HomeKits() {
           <p className="ts-caption" id="ts-kit-color-help">
             {KITS.backgroundHelp}
           </p>
-          <p className="ts-kit-status" data-kit-status aria-live="polite" />
+          <p className="ts-kit-status" data-kit-status="" aria-live="polite" />
         </div>
       </div>
       <Reserve band="kits" className="ts-kits-reserve">
-        <ol className="ts-kit-grid" data-kit-grid aria-label={KITS.gridLabel}>
+        <ol className="ts-kit-grid" data-kit-grid="" aria-label={KITS.gridLabel}>
           {HOME_DECK.order.map((id) => (
             <li key={id} className="ts-kit-thumb" data-thumb={id}>
-              <span className="ts-kit-thumb-n pt-num" data-thumb-n aria-hidden="true">
+              <span className="ts-kit-thumb-n pt-num" data-thumb-n="" aria-hidden="true">
                 {HOME_DECK.slides[id].n}
               </span>
               <div className="ts-home-sheet is-thumb" data-sheet={`kits-${id}`} />
@@ -80,7 +80,7 @@ export function HomeKits() {
           ))}
         </ol>
       </Reserve>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

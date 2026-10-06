@@ -49,6 +49,27 @@ export const NUMBERS_ROUND = {
   chipsLabel: 'The actions each agent surface runs',
 } as const;
 
+/**
+ * The menus band (DESIGN.md 8.4): the h2 and one sentence; replaces copy.ts `MENUS.h2` and
+ * `MENUS.lead`, which named another company's menus.
+ */
+export const MENUS_ROUND = {
+  h2: 'Menus and keyboard shortcuts',
+  lead: 'It has menus and keyboard shortcuts for editing, arranging and presenting.',
+} as const;
+
+/**
+ * The canvas band's Format options readout (DESIGN.md 8.5): the section the page adds to the
+ * product's panel and the panel's accessible name.
+ */
+export const CANVAS_ROUND = {
+  command: 'Command',
+  panelLabel: 'Format options of the selected object',
+} as const;
+
+/** A band's Undo as a glyph button (the miniature's title row, the canvas panel's head). */
+export const BAND_CONTROLS = { undo: 'Undo' } as const;
+
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
 export const AGENTS_ROUND = {
   lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
@@ -65,6 +86,9 @@ export const DESIGN_COPY = {
   navIcons: NAV_ICONS,
   hero: HERO_ROUND,
   numbers: NUMBERS_ROUND,
+  menus: MENUS_ROUND,
+  canvas: CANVAS_ROUND,
+  controls: BAND_CONTROLS,
   agents: AGENTS_ROUND,
   close: CLOSE_ROUND,
 } as const;

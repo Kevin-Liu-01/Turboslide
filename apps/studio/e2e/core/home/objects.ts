@@ -671,8 +671,9 @@ export function rows(): void {
           face: getComputedStyle(el).fontFamily,
         }));
         expect(looks.tag).toBe('CODE');
+        // the resting sentence in the text face; a printed line in the code face on the Format
+        // options panel's code surface (docs/DESIGN.md 8.5, restated by DR-D4#4)
         expect(looks.face).toMatch(/^"?Inter/);
-        expect(looks.face).not.toMatch(/mono/i);
         const panels = await band.evaluate(
           (el) =>
             [...el.querySelectorAll('*')].filter(
@@ -699,6 +700,9 @@ export function rows(): void {
           },
         );
         expect(Date.now() - t0).toBeLessThanOrEqual(450);
+        expect(await code.evaluate((el) => getComputedStyle(el).fontFamily)).toMatch(
+          /mono|menlo|consolas/i,
+        );
         const line = (await code.innerText()).trim();
         const json = JSON.parse(line.slice(line.indexOf("'") + 1, line.lastIndexOf("'"))) as Record<
           string,

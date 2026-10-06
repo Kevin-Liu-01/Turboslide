@@ -1,4 +1,5 @@
 import type { BandId, BandModule, LiveContext } from './index';
+import type { ObjectsController } from './objects';
 
 /**
  * The band registry of the live core (docs/LANDING.md 4.2, 6.3 "The band loader"): each band
@@ -9,12 +10,13 @@ import type { BandId, BandModule, LiveContext } from './index';
  * core stays inside 20,480 B gzip with no net growth). The canvas band's two starts are the core's
  * objects and field printer and the export hint is the core's motion system: the core hands them
  * in (`bandEntries(core)`), so this chunk imports no module of the core and the bundler keeps every
- * one of them in the core's chunk.
+ * one of them in the core's chunk. The canvas band's Format options readout (`readout.ts`,
+ * docs/DESIGN.md 8.5) is a chunk of its own, started with the band's objects controller.
  */
 
 /** The core's own starts the registry names: handed in by index.ts. */
 export type CoreStarts = {
-  startObjects(ctx: LiveContext, band: 'canvas'): unknown;
+  startObjects(ctx: LiveContext, band: 'canvas'): ObjectsController | null;
   startCanvasField(ctx: LiveContext): void;
   hintInView(band: HTMLElement, arm: () => void, hint: () => void): void;
 };
@@ -28,7 +30,13 @@ export const bandEntries = (core: CoreStarts): ReadonlyMap<BandId, readonly Load
     [
       'canvas',
       [
-        async () => ({ start: (ctx) => void core.startObjects(ctx, 'canvas') }),
+        async () => ({
+          start: (ctx) => {
+            const objects = core.startObjects(ctx, 'canvas');
+            if (objects !== null)
+              void import('./readout').then((m) => m.startReadout(ctx, objects));
+          },
+        }),
         async () => ({ start: core.startCanvasField }),
       ],
     ],

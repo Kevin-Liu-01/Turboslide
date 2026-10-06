@@ -31,24 +31,29 @@ import type {
   ObjectKey,
   SlideKey,
 } from './state';
+import { HOME_GLYPHS } from '../sprite.generated';
+import { glyph } from './sprite';
 import { clearGround } from './theme';
 
 import '../editing.css';
 
 /**
- * The menus are Google's (docs/LANDING.md 2.5; prototype C's "The menus are Google's"): the editor
- * in miniature over the page deck. The menu bar is generated from the editor's own model
+ * Menus and keyboard shortcuts (docs/LANDING.md 2.5; docs/DESIGN.md 8.4): the editor in miniature
+ * over the page deck. The menu bar is generated from the editor's own model
  * (`menus.generated.ts`, written at build from `packages/chrome/src/menus/model.ts` and `keys.ts`),
  * so every label, rule, submenu and shortcut is the editor's. The rows 2.5's table lists run on the
  * page: each change goes through the store, shows wherever the page draws the slide (the hero
  * frame, every filmstrip, the kits grid, the show and the print, `paint.ts`) and writes its Version
  * history row; Edit > Undo, or Cmd or Ctrl+Z with focus in the band, takes the band's newest
- * change back. Every other row is drawn as the editor draws an unavailable row, keeps its shortcut,
- * and when pressed sets the status to "This row runs in the editor." with the row's own sentence.
+ * change back. Every other row is drawn as a working row with its shortcut and, when pressed, sets
+ * the status to "This row runs in the editor." with the row's own sentence; only the rows the
+ * editor itself disables with nothing selected are grey (the model's `off`, DESIGN.md 8.4). Each
+ * row draws the model's glyph from the landing's sprite (`menu-glyphs.generated.ts`, imported on
+ * its own when the band starts), a checked row the editor's check and a submenu the `next` glyph.
  *
  * The bar is a `menubar` with a roving tabindex: Left and Right move between menus, Down, Enter or
  * Space opens one, Up and Down move between rows, Right opens a submenu, Escape closes and returns
- * focus to the title, and with a menu open a pointer over another title opens it, as Google's do.
+ * focus to the title, and with a menu open a pointer over another title opens it, as the editor's do.
  * Menus open and close by cuts (3.6 M1). Under 720 px one Menus key lists the nine menus and drills
  * into one (C's phone editor). The stage takes the editor's selection (`objects.ts`); the
  * filmstrip shows a slide on a click and moves the focused one with Cmd or Ctrl and Up or Down; the
@@ -193,71 +198,32 @@ export function startMenus(ctx: LiveContext): void {
   const blankRoot = parse(MINI_BLANK);
   if (blankRoot !== null) registerSlide('blank', blankRoot);
 
-  // ---- the frame: title row, menu bar, filmstrip and stage, notes, status ----
-  const find = <T extends HTMLElement>(selector: string): T | null =>
-    box.querySelector<T>(selector);
-  const frame =
-    find<HTMLElement>('[data-mini-editor]') ??
-    h('div', { class: 'ts-mini-editor pt-window', 'data-mini-editor': true });
-  if (!frame.isConnected) box.append(frame);
-  const markSvg = (): SVGSVGElement => {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'ts-mini-mark');
-    svg.setAttribute('aria-hidden', 'true');
-    svg.setAttribute('viewBox', '0 0 28 18');
-    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    use.setAttribute('href', '#ts-mark');
-    svg.append(use);
-    return svg;
-  };
-  const titleText =
-    find('[data-mini-title]') ?? h('span', { class: 'ts-mini-name', 'data-mini-title': true });
-  const countText =
-    find('[data-mini-count]') ?? h('span', { class: 'ts-mini-count', 'data-mini-count': true });
-  if (!titleText.isConnected)
-    frame.append(h('div', { class: 'ts-mini-title' }, markSvg(), titleText, countText));
-  const bar =
-    find<HTMLElement>('[data-menubar]') ??
-    h('div', { class: 'ts-mini-menubar', 'data-menubar': true });
+  // ---- the frame: the document's (HomeMenus.tsx): the title row, the menu bar, the plates'
+  // layer, the filmstrip and the stage, the notes and the status row ----
+  const find = <T extends HTMLElement>(selector: string): T => box.querySelector<T>(selector) as T;
+  const frame = find('[data-mini-editor]');
+  const titleText = find('[data-mini-title]');
+  const countText = find('[data-mini-count]');
+  const bar = find('[data-menubar]');
   bar.setAttribute('role', 'menubar');
   bar.setAttribute('aria-label', WORDS.menusKey);
   bar.setAttribute('data-keeps-selection', '');
-  if (!bar.isConnected) frame.append(bar);
-  const body = find('.ts-mini-body') ?? h('div', { class: 'ts-mini-body' });
-  if (!body.isConnected) frame.append(body);
-  const strip =
-    find<HTMLOListElement>('[data-mini-filmstrip]') ??
-    h('ol', { class: 'ts-mini-filmstrip', 'data-mini-filmstrip': true });
+  const strip = find<HTMLOListElement>('[data-mini-filmstrip]');
   strip.setAttribute('aria-label', WORDS.filmstripLabel);
-  if (!strip.isConnected) body.append(strip);
-  const stage =
-    find<HTMLElement>('[data-mini-stage]') ??
-    h('div', { class: 'ts-mini-stage', 'data-mini-stage': true });
-  if (!stage.isConnected) body.append(stage);
+  const stage = find('[data-mini-stage]');
   const sheetBox =
     stage.querySelector<HTMLElement>('.ts-home-sheet') ??
     h('div', { class: 'ts-home-sheet ts-mini-sheet' });
   if (!sheetBox.isConnected) stage.append(sheetBox);
-  const notesRow = find('.ts-mini-notes') ?? h('div', { class: 'ts-mini-notes' });
-  const notes =
-    find<HTMLTextAreaElement>('[data-mini-notes]') ??
-    h('textarea', { 'data-mini-notes': true, rows: 1, spellcheck: false });
+  const notes = find<HTMLTextAreaElement>('[data-mini-notes]');
   notes.setAttribute('aria-label', WORDS.notesLabel);
   notes.placeholder = 'Click to add speaker notes';
-  if (!notes.isConnected) notesRow.append(notes);
-  if (!notesRow.isConnected) frame.append(notesRow);
-  const statusRow = find('.ts-mini-status') ?? h('div', { class: 'ts-mini-status' });
-  const status =
-    find('[data-mini-status]') ?? h('span', { 'data-mini-status': true, 'aria-live': 'polite' });
-  const readout =
-    find('[data-mini-readout]') ??
-    h('span', { class: 'ts-mini-readout', 'data-mini-readout': true });
-  if (!status.isConnected) statusRow.append(status);
-  if (!readout.isConnected) statusRow.append(readout);
-  if (!statusRow.isConnected) frame.append(statusRow);
+  const status = find('[data-mini-status]');
+  const readout = find('[data-mini-readout]');
   if ((status.textContent ?? '').trim() === '') status.textContent = WORDS.statusRest;
-  const plates = h('div', { class: 'ts-mini-plates', 'data-keeps-selection': true });
-  frame.append(plates);
+  // the plates' layer follows the menu bar: over the frame from 720 px, and in the flow under the
+  // Menus key under 720 px, so an open menu is never clipped (DESIGN.md 8.4)
+  const plates = find('.ts-mini-plates');
 
   const say = (text: string): void => {
     status.textContent = text;
@@ -1351,6 +1317,30 @@ export function startMenus(ctx: LiveContext): void {
     return true;
   };
 
+  // each row's glyph (DESIGN.md 8.4): the names arrive on a chunk of their own, paired with the
+  // rows depth first; a row drawn before they land takes its glyph when they do
+  const glyphOf = new Map<MiniRow, string>();
+  const rowGlyph = (row: MiniRow, checked: boolean): SVGSVGElement | null => {
+    const id = checked ? HOME_GLYPHS.check : glyphOf.get(row);
+    return id === undefined ? null : glyph(id);
+  };
+  void import('../menu-glyphs.generated').then(({ MENU_GLYPHS }) => {
+    let n = 0;
+    const pair = (rows: readonly MiniRow[]): void => {
+      for (const r of rows) {
+        const i = MENU_GLYPHS[n++] ?? -1;
+        if (i >= 0) glyphOf.set(r, `g${i}`);
+        if (r.items !== undefined) pair(r.items);
+      }
+    };
+    for (const m of MINI_MENUS) pair(m.rows);
+    for (const el of plates.querySelectorAll<HTMLElement & { miniRow?: MiniRow }>('.ts-mini-row')) {
+      const slot = el.firstElementChild;
+      const g = el.miniRow === undefined ? null : rowGlyph(el.miniRow, false);
+      if (slot !== null && slot.childElementCount === 0 && g !== null) slot.append(g);
+    }
+  });
+
   const plateAt = (depth: number): HTMLElement | null =>
     plates.querySelector<HTMLElement>(`[data-mini-plate="${depth}"]`);
 
@@ -1395,7 +1385,7 @@ export function startMenus(ctx: LiveContext): void {
           h('span', { class: 'ts-mini-row-check', 'aria-hidden': 'true' }),
           h('span', { class: 'ts-mini-row-label' }, m.label),
           h('span', { class: 'ts-mini-row-key' }),
-          h('i', { class: 'ts-mini-chevron', 'aria-hidden': 'true' }),
+          glyph(HOME_GLYPHS.next, 'ts-glyph ts-mini-chevron'),
         );
         plate.append(r);
         continue;
@@ -1404,18 +1394,20 @@ export function startMenus(ctx: LiveContext): void {
       if (row.rule === true && plate.childElementCount > 0)
         plate.append(h('div', { class: 'ts-mini-rule', role: 'separator' }));
       const check = checkOf(row);
-      const ok = available(row);
       const sub = row.items !== undefined;
-      // a submenu leading to a row the page runs reads in ink with the run rows (verify1 F10)
       const run = runsUnder(row);
+      // grey only where the editor greys (DESIGN.md 8.4): a run row the page cannot run now (it
+      // needs a selection), or a row the model disables with nothing selected; every other row is
+      // a working row, and one the page does not run answers in the status row
+      const off = row.run === true ? !available(row) : row.off === true;
       const el = h(
         'div',
         {
-          class: `ts-mini-row${run ? ' is-run' : ''}${ok || (sub && run) ? '' : ' is-off'}${sub ? ' is-sub' : ''}`,
+          class: `ts-mini-row${run ? ' is-run' : ''}${off ? ' is-off' : ''}${sub ? ' is-sub' : ''}`,
           role: check === undefined ? 'menuitem' : 'menuitemcheckbox',
           tabindex: -1,
           'data-menu-item': row.id === '' ? undefined : row.id,
-          'aria-disabled': ok || row.items !== undefined ? undefined : 'true',
+          'aria-disabled': off && !sub ? 'true' : undefined,
           'aria-haspopup': row.items !== undefined ? 'menu' : undefined,
           'aria-checked': check === undefined ? undefined : String(check),
           'data-tip': row.doc,
@@ -1423,7 +1415,7 @@ export function startMenus(ctx: LiveContext): void {
         h(
           'span',
           { class: 'ts-mini-row-check', 'aria-hidden': 'true' },
-          check === true ? h('i') : null,
+          rowGlyph(row, check === true),
         ),
         h('span', { class: 'ts-mini-row-label' }, labelOf(row)),
         h(
@@ -1431,9 +1423,7 @@ export function startMenus(ctx: LiveContext): void {
           { class: 'ts-mini-row-key' },
           row.items === undefined ? ((mac ? row.mac : row.win) ?? '') : '',
         ),
-        row.items !== undefined
-          ? h('i', { class: 'ts-mini-chevron', 'aria-hidden': 'true' })
-          : null,
+        sub ? glyph(HOME_GLYPHS.next, 'ts-glyph ts-mini-chevron') : null,
       );
       (el as HTMLElement & { miniRow?: MiniRow }).miniRow = row;
       plate.append(el);
@@ -1441,11 +1431,16 @@ export function startMenus(ctx: LiveContext): void {
     plates.append(plate);
     plate.style.left = `${pos.left}px`;
     plate.style.top = `${pos.top}px`;
-    // a plate stays inside the miniature's frame
+    // a plate stays inside the miniature's frame: a submenu that would cross its right edge opens
+    // on its parent's left, as the editor's do, and a menu slides left
     const fr = frame.getBoundingClientRect();
     const pr = plate.getBoundingClientRect();
-    if (pr.right > fr.right - 4)
-      plate.style.left = `${Math.max(4, pos.left - (pr.right - fr.right) - 8)}px`;
+    if (pr.right > fr.right - 4) {
+      const parent = plateAt(depth - 1)?.getBoundingClientRect().left ?? 0;
+      const flip = parent - fr.left - pr.width + 2;
+      const slid = Math.max(4, pos.left - (pr.right - fr.right) - 8);
+      plate.style.left = `${depth > 0 && flip >= 4 ? flip : slid}px`;
+    }
     // a plate that runs past the frame's bottom rises, never over the menu bar (a press on a menu
     // title must reach the title), and runs past the bottom when it is taller than the room
     const floor = bar.getBoundingClientRect().bottom - fr.top;

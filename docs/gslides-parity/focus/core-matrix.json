@@ -10554,12 +10554,12 @@
     {
       "id": "home.canvas.log",
       "feature": "decks",
-      "interaction": "Each gesture's end prints, within 450 ms, one line on the band's Command row (Inter, in a code element; no #101010 panel in the band) in a form of cli.json: turboslide slide to-canvas lighthouse before the first, then turboslide block set lighthouse#<block> /pos '<json>' or turboslide block rotate lighthouse#<block> --to <degrees> with <block> from canvasBlock and the gesture's values in whole slide units; no line breaks inside a token at 390; the live region reads it",
+      "interaction": "Each gesture's end prints, within 450 ms, one line in the Command section of the band's Format options panel (a code element: the resting sentence in Inter, a printed line in the code face on the panel's code surface; no #101010 panel in the band) in a form of cli.json: turboslide slide to-canvas lighthouse before the first, then turboslide block set lighthouse#<block> /pos '<json>' or turboslide block rotate lighthouse#<block> --to <degrees> with <block> from canvasBlock and the gesture's values in whole slide units; no line breaks inside a token at 390; the live region reads it",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "direction-a canvas-edit.png; direction-b b-strip-canvas-gestures.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
+      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
     },
     {
       "id": "home.objects.keyboard",
@@ -10574,12 +10574,12 @@
     {
       "id": "home.menus.bar",
       "feature": "decks",
-      "interaction": "The miniature's menu bar holds visibleMenus(DEFAULT_MENU_CONTEXT) in order with each menu's rows, rules, submenus and shortcuts equal to menus.generated.ts in the platform's form (a Mac and a Linux context); a menubar with a roving tabindex: Left and Right move between menus, Down, Enter or Space opens one, Up and Down move between rows, Right opens a submenu, Escape closes and returns focus to the title, and a pointer over another title opens it while one is open; at 390 one Menus key lists the nine menus and drills into one with a row back, rows 44 px; every row 2.5's table does not list is in titanium and sets \"This row runs in the editor.\" with its doc",
+      "interaction": "The miniature's menu bar holds visibleMenus(DEFAULT_MENU_CONTEXT) in order with each menu's rows, rules, submenus and shortcuts equal to menus.generated.ts in the platform's form (a Mac and a Linux context); a menubar with a roving tabindex: Left and Right move between menus, Down, Enter or Space opens one, Up and Down move between rows, Right opens a submenu, Escape closes and returns focus to the title, and a pointer over another title opens it while one is open; at 390 one Menus key lists the nine menus and drills into one with a row back, rows 44 px; every row 2.5's table does not list is a working row in ink 2 that sets \"This row runs in the editor.\" with its doc, and only a row the editor disables with nothing selected is grey (docs/DESIGN.md 8.4)",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "direction-c strip-menus.jpg; strip-phone.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass)"
+      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
     },
     {
       "id": "home.menus.rows",
@@ -10614,22 +10614,22 @@
     {
       "id": "home.tailor.filmstrip",
       "feature": "decks",
-      "interaction": "Dragging slide 2 to place 4 in the filmstrip of slides 1 to 5 lifts it with a 2 px outline, the others make room in 200 ms and it settles in 240 ms; every counter on the page renumbers; Cmd or Ctrl with Up or Down and Move Up or Move Down move the focused slide; Undo returns it; on touch a 350 ms press lifts it",
+      "interaction": "Dragging slide 2 to place 4 in the filmstrip of slides 1 to 5, across the top of the Tailor band, lifts it with a 2 px outline, the others make room in 200 ms and it settles in 240 ms; every counter on the page renumbers; Cmd or Ctrl with Up or Down and the Move Up and Move Down glyph buttons a thumbnail shows on its hover and focus move the slide; Undo returns it; on touch a 350 ms press lifts it",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "direction-a filmstrip-move.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
+      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
     },
     {
       "id": "home.kits.restyle",
       "feature": "decks",
-      "interaction": "Kestrel sets the six variables on every slide root on the page within 500 ms (the hero frame, the miniature, the grid, every band, the show); sampled every 40 ms no text falls under 4.5:1; Globex sets #0a1b38, #f4f1ea, #c9cbd3 and #8d97ab and the selection ring holds 3:1 on it; GT restores; Undo takes the kit back; at rest the one colour outside paper and ink is the Globex swatch's ground and no #2f5ce0 is drawn",
+      "interaction": "Kestrel sets the six variables on every slide root on the page within 500 ms (the hero frame, the miniature, the grid, every band, the show); sampled every 40 ms no text falls under 4.5:1; Globex sets #0a1b38, #f4f1ea, #c9cbd3 and #8d97ab and the selection ring holds 3:1 on it; GT restores; Undo takes the kit back; at rest the one colour outside paper and ink is the Globex swatch's ground, besides the status glyphs' hue (docs/DESIGN.md 8.0 \"Colour\": the hero's done glyph), and no #2f5ce0 is drawn",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "direction-c strip-hero-kit.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass)"
+      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
     },
     {
       "id": "home.kits.color",
@@ -11287,6 +11287,36 @@
       "severity": 2,
       "evidence": "research-surfaces 7: the editor stored gt-theme=light about 3.5 s after the load on a dark system",
       "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts; a /new draft, which writes nothing"
+    },
+    {
+      "id": "home.menus.icons",
+      "feature": "decks",
+      "interaction": "At 1440 in both appearances every row of the miniature's nine menus draws the menu model's glyph from the landing's sprite (a `<use>` of the content hashed `/home/glyphs-<hash>.svg`, which answers 200 and holds each symbol), a checked row the check and a submenu the next glyph, the rows of View > Live pointers excepted (their glyph stays off the page); a row the page does not run is a working row, not `aria-disabled`, whose press sets \"This row runs in the editor.\" with its sentence, and only the rows the editor disables with nothing selected are grey (Insert > Link and Comment); the h2 reads \"Menus and keyboard shortcuts\"; at 390 the Menus key's plate sits in the flow under the key, inside the frame, which grows",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F4: an empty glyph column in every row; 9 of 13 Insert rows drawn disabled",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.canvas.panel",
+      "feature": "decks",
+      "interaction": "Beside the lighthouse at 1440 (under it at 390), in both appearances, the product's Format options panel in an 8 px window: the title and the band's Undo, Size & rotation (Width, Height, Rotate), Position (X, Y), Layout and Command, each section head with the panel's glyph; at rest the fields read the plate's box in slide units in tabular figures; a drag of the heading writes its X, Y, Width and Height within one unit of the printed line, Layout reads Canvas, the line is in the code face, Option or Alt with Right reads 15 in Rotate, and Undo returns the heading's box and Mood; no row of text under the slide",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F5: two rows of text under the picture, the second a placeholder sentence",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.tailor.dialog",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the Tailor dialog as the editor draws it in an 8 px window: the title, Replace and With with their fields, the count, Cancel (the form's reset, which empties With and leaves the count) and Apply; beside it at 1440 the filmstrip of slides 1 to 5 in one row above the stage; Move Up and Move Down glyph buttons on each thumbnail shown on its hover and focus and hidden at rest; Apply shows the product's snackbar under the stage, ink at the 6 px corner, with TAILOR.result and Undo",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F6: the rows float without the dialog; Move Up and Move Down as bare text under thumbnail 2",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "decks.pages.radius",

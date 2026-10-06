@@ -1,7 +1,6 @@
 import { Fragment } from 'react';
 
 import { tipProps } from '@turboslide/chrome/Tooltip';
-import { MARK_PATH, MARK_VIEWBOX } from '@turboslide/theme/brand';
 
 import { HOME_STEP_ICONS, HOME_TITLE_ROW, HOME_TOOLBAR } from './chrome.generated';
 import { HERO } from './copy';
@@ -98,7 +97,7 @@ export function HomeHero() {
             {/* the visit sentence is the boot script's to set before the first paint (boot.ts), so
                 React renders it from the server's markup alone and never writes it back */}
             <p className="ts-lead ts-hero-lead">
-              <ServerHtml as="span" data-visit html={ssr ? escapeHtml(visit ?? '') : ''} />{' '}
+              <ServerHtml as="span" data-visit="" html={ssr ? escapeHtml(visit ?? '') : ''} />{' '}
               {HERO_ROUND.lead}
             </p>
             <div className="ts-buttons">
@@ -119,23 +118,18 @@ export function HomeHero() {
             </div>
           </div>
         </div>
-        <div className="ts-hero-stage" data-hero-stage>
+        <div className="ts-hero-stage" data-hero-stage="">
           <div
             className="ts-hero-frame pt-window"
-            data-hero-frame
+            data-hero-frame=""
             role="group"
             aria-label={HERO.stage.frameLabel}
           >
             <div className="ts-hero-frame-title">
-              <svg
-                className="ts-hero-frame-mark"
-                viewBox={MARK_VIEWBOX}
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d={MARK_PATH} />
+              <svg className="ts-hero-frame-mark" fill="currentColor" aria-hidden="true">
+                <use href="#ts-mark" />
               </svg>
-              <span className="ts-hero-frame-name" data-hero-title>
+              <span className="ts-hero-frame-name" data-hero-title="">
                 {HOME_DECK.title}
               </span>
               <span className="ts-hero-frame-saved" aria-hidden="true">
@@ -143,7 +137,7 @@ export function HomeHero() {
                 <span>{HOME_TITLE_ROW.saved}</span>
               </span>
               <span className="ts-hero-frame-r" aria-hidden="true">
-                <span className="ts-hero-frame-chip" data-hero-chip>
+                <span className="ts-hero-frame-chip" data-hero-chip="">
                   <Glyph name={HOME_TITLE_ROW.agentIcon} />
                 </span>
                 <span className="ts-hero-frame-ib">
@@ -173,7 +167,7 @@ export function HomeHero() {
               className="ts-hero-frame-tools"
               role="toolbar"
               aria-label={HERO_ROUND.frame.toolbarLabel}
-              data-hero-tools
+              data-hero-tools=""
             >
               <span className="ts-hero-tools-drawn" aria-hidden="true">
                 {HOME_TOOLBAR.slice(0, UNDO_AT).map(toolCell)}
@@ -194,7 +188,7 @@ export function HomeHero() {
             <div className="ts-hero-frame-body">
               <ol
                 className="ts-hero-filmstrip"
-                data-hero-filmstrip
+                data-hero-filmstrip=""
                 aria-label={HERO.stage.slidesLabel}
               >
                 {THUMBS.map((id) => {
@@ -208,7 +202,7 @@ export function HomeHero() {
                       aria-label={slide.title}
                       {...(id === 'title' ? { 'data-selected': '', 'aria-current': 'true' } : {})}
                     >
-                      <span className="ts-hero-thumb-n pt-num" data-thumb-n aria-hidden="true">
+                      <span className="ts-hero-thumb-n pt-num" data-thumb-n="" aria-hidden="true">
                         {slide.n}
                       </span>
                       <HomeSheet instance={`hero-thumb-${id}` as HomeInstanceId} />
@@ -216,36 +210,36 @@ export function HomeHero() {
                   );
                 })}
               </ol>
-              <div className="ts-hero-frame-stage" data-hero-slide>
+              <div className="ts-hero-frame-stage" data-hero-slide="">
                 <HomeSheet instance="hero" className="ts-hero-sheet" />
               </div>
             </div>
             <div className="ts-hero-frame-notes">
-              <span className="ts-hero-frame-notes-text" data-hero-notes>
+              <span className="ts-hero-frame-notes-text" data-hero-notes="">
                 {first.notes}
               </span>
-              <span className="ts-hero-frame-counter pt-num" data-hero-counter>
+              <span className="ts-hero-frame-counter pt-num" data-hero-counter="">
                 {`1 / ${HOME_DECK.order.length}`}
               </span>
             </div>
           </div>
           <div
             className="ts-home-panel pt-on-ink ts-hero-terminal"
-            data-hero-terminal
+            data-hero-terminal=""
             role="group"
             aria-label={HERO.stage.terminalLabel}
           >
             <div className="ts-hero-terminal-head">
               <Glyph name={HOME_TITLE_ROW.agentIcon} />
               <span className="ts-hero-terminal-who">{HERO_ROUND.terminal.agent}</span>
-              <span className="ts-hero-terminal-recorded pt-num" data-caption>
+              <span className="ts-hero-terminal-recorded pt-num" data-caption="">
                 {HERO_ROUND.terminal.recorded(HOME_LOOP_FACTS.captionSeconds)}
               </span>
               <MotionToggle control="home.hero.motion" className="ts-hero-terminal-pause" />
             </div>
             <ServerHtml
               className="ts-home-panel-text pt-scroll ts-hero-screen"
-              data-hero-screen
+              data-hero-screen=""
               data-keep="64"
               html={
                 ssr
@@ -260,7 +254,7 @@ export function HomeHero() {
               className="ts-hero-steps"
               role="group"
               aria-label={HERO_ROUND.terminal.stepsLabel}
-              data-hero-steps
+              data-hero-steps=""
             >
               {HERO.stage.steps.map((step) => (
                 <button
@@ -282,7 +276,7 @@ export function HomeHero() {
           </div>
         </div>
       </div>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </section>
   );
 }

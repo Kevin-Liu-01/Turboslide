@@ -43,6 +43,7 @@ const BUDGET: Readonly<Record<string, number>> = {
   'pattern-mask': 48_000,
   'export-perfect': 60_000,
   'export-editable': 32_000,
+  glyphs: 48_000,
 };
 
 describe('public/home', () => {
@@ -61,7 +62,7 @@ describe('public/home', () => {
       const bytes = new Uint8Array(readFileSync(file));
       expect(bytes.length, asset.path).toBe(asset.bytes);
       expect(sha256(bytes), asset.path).toBe(asset.sha256);
-      expect(asset.path, 'content hashed').toMatch(/-[0-9a-f]{10}\.(webp|png|jpg|pdf)$/);
+      expect(asset.path, 'content hashed').toMatch(/-[0-9a-f]{10}\.(webp|png|jpg|pdf|svg)$/);
       expect(asset.path.includes(sha256(bytes).slice(0, 10)), asset.path).toBe(true);
       const limit = BUDGET[asset.role];
       if (limit !== undefined)

@@ -404,6 +404,24 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   margin-top: 32px;
 }
 
+/* the split head (DESIGN.md 8.4 to 8.6): the h2 in the left half, the lead in the right from the
+   h2's first line, one row over the band's figure */
+.ts-band-head.is-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.ts-band-head.is-split .ts-lead {
+  margin: 8px 0 0;
+  max-width: 480px;
+}
+
+.ts-band-head.is-split + * {
+  margin-top: 32px;
+}
+
 /* ---- the rendered slides (LANDING.md 2.0 "Slides"): the renderer's 1,600 by 900 stage scaled
    into its wrapper by --k, the wrapper's width over 1,600 px as a number (`tan(atan2())` turns a
    ratio of lengths into a number), so one sheet unit is 1/1,600 of the wrapper; the wrapper is a
@@ -1523,21 +1541,79 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   }
 }
 
-/* ---- Tailor (LANDING.md 2.5): the head in 5 of 12 columns, the dialog in 7; under them the
-   filmstrip (144 px) and the stage (856 by 481) ---- */
-.ts-tailor-top {
+/* ---- Tailor (DESIGN.md 8.6; mock-05): the split head, then the Tailor dialog as the editor
+   draws it (Dialog.css: the 18 px title, the fields' 12 px labels over their boxes, the hint, the
+   actions on a rule) in a .pt-window, and beside it the filmstrip across the top, the stage and
+   the snackbar's row ---- */
+.ts-tailor-body {
   display: grid;
-  grid-template-columns: minmax(0, 412fr) minmax(0, 588fr);
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  margin-top: 32px;
 }
 
-.ts-tailor-dialog .ts-row {
-  min-height: 48px;
+.ts-tailor-dialog {
+  display: grid;
+  gap: 14px;
+  padding: 20px 20px 0;
+  font: 13px / 1.45 var(--pt-text);
 }
 
-.ts-tailor-dialog .ts-row-key {
-  flex-basis: 112px;
+.ts-tailor-dialog h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font: 500 18px / 1.25 var(--pt-text);
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-tailor-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-tailor-box,
+.ts-tailor-dialog .ts-field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-field, var(--pt-hair));
+  border-radius: var(--pt-radius);
+  font: 13px / 30px var(--pt-text);
+  color: var(--pt-ink);
+}
+
+/* Replace reads the deck's customer as the read only field does: ink 2, no caret */
+.ts-tailor-box {
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-tailor-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--pt-hair-soft);
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--pt-ink-2);
+}
+
+.ts-tailor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 -20px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--pt-hair);
 }
 
 .ts-field {
@@ -1633,118 +1709,237 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 
 .ts-tailor-editor {
   display: grid;
-  grid-template-columns: 144px minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
-  margin-top: 32px;
+  gap: 12px;
 }
 
+/* the filmstrip across the top: five thumbnails share the row, each under its number */
 .ts-home-filmstrip {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .ts-home-thumb {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   display: grid;
-  grid-template-columns: 144px;
+  gap: 6px;
   cursor: pointer;
 }
 
 .ts-home-thumb-n {
-  position: absolute;
-  left: -22px;
-  top: 0;
   font-size: 12px;
-  line-height: 1;
+  line-height: 14px;
   color: var(--pt-ink-2);
-  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-home-thumb[data-selected] .ts-home-sheet.is-thumb::after {
   border: 2px solid var(--pt-ink);
 }
 
-/* Move Up and Move Down: a row reserved under each thumbnail, shown for the chosen one only, so
-   showing them moves nothing (l2.md Q3) */
+/* Move Up and Move Down (live/filmstrip.ts adds them): two 24 px glyph squares over the
+   thumbnail's upper right, shown on its hover and focus (DESIGN.md 8.6) */
 .ts-home-thumb-moves {
+  position: absolute;
+  top: 24px;
+  right: 4px;
+  z-index: 2;
   display: flex;
-  justify-content: space-between;
-  height: 28px;
+  gap: 2px;
   visibility: hidden;
 }
 
-.ts-home-thumb[data-selected] .ts-home-thumb-moves {
+.ts-home-thumb:hover .ts-home-thumb-moves,
+.ts-home-thumb:focus-within .ts-home-thumb-moves {
   visibility: visible;
 }
 
-.ts-home-thumb-moves .ts-text-button {
-  height: 28px;
-  padding: 0 2px;
-  font-size: 13px;
+.ts-product .ts-thumb-move {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-paper);
+  box-shadow: 0 0 0 1px var(--pt-hair);
 }
 
 .ts-tailor-stage {
+  position: relative;
   min-width: 0;
 }
 
+/* the product's snackbar (Snackbar.css): paper text on an ink plate at the 6 px corner, its one
+   action at weight 500, in the row reserved under the stage; it takes the pointer only while on */
 .ts-home-snackbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px;
   height: 40px;
-  font-size: 14px;
-  color: var(--pt-ink);
-}
-
-.ts-home-snackbar > * {
+  padding: 0 4px 0 14px;
+  box-sizing: border-box;
+  border-radius: var(--pt-radius);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 13px / 1.4 var(--pt-text);
+  font-variant-numeric: var(--pt-numerals);
   visibility: hidden;
 }
 
-.ts-home-snackbar[data-on] > * {
+.ts-home-snackbar[data-on] {
   visibility: visible;
 }
 
-/* ---- the canvas (LANDING.md 2.6): slide 6 at the column's width, two ruled rows under it ---- */
-.ts-canvas-sheet {
+.ts-home-snackbar .ts-text-button {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--pt-radius-sm);
+  color: var(--pt-paper);
+  font-weight: 500;
+}
+
+/* ---- the canvas (DESIGN.md 8.5): slide 6 and, beside it, the product's Format options panel as
+   a live readout (FormatOptions.css's grammar: 13 px rows, the section names, the fields' boxes in
+   tabular figures); the panel a .pt-window, the slide square ---- */
+.ts-canvas-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
   margin-top: 32px;
 }
 
-/* 16 px under the slide: with the 24 px the page measured 7,500 px at 1440, the ceiling of Kevin's
-   answer 5 (decks.home.pictures-three-widths reads it under 7,500) */
-.ts-canvas-rows {
-  margin-top: 16px;
-}
-
-.ts-canvas-rows .ts-row-key {
-  flex-basis: 120px;
-}
-
-.ts-canvas-rows .ts-strong {
-  flex: 0 0 auto;
-  margin-right: auto;
-}
-
-/* the Command row's line: generated text in a code element set in Inter (no second panel) */
-.ts-command {
-  flex: 1 1 auto;
-  min-width: 0;
-  font: 14px / 20px var(--pt-text);
-  font-variant-numeric: var(--pt-numerals);
+.ts-fo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 12px;
+  align-content: start;
+  padding: 0 16px 16px;
+  font: 13px / 18px var(--pt-text);
   color: var(--pt-ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
 }
 
-/* the resting sentence, "Each gesture prints its CLI command.", in titanium until the first
-   gesture's line replaces it (LANDING.md 2.6; live/log.ts sets data-printed; l2.md Q5b) */
-.ts-command:not([data-printed]) {
+.ts-fo-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  margin: 0 -8px 0 0;
+}
+
+.ts-fo h3 {
+  margin: 0;
+  font: 500 14px / 20px var(--pt-text);
+  color: var(--pt-ink);
+}
+
+/* a section's head as the panel draws it: the section's glyph (live/readout.ts writes it into the
+   16 px the padding holds) and its name in ink, on the rule between sections */
+.ts-fo h4 {
+  position: relative;
+  grid-column: 1 / -1;
+  margin: 0 -16px;
+  padding: 12px 16px 0 42px;
+  border-top: 1px solid var(--pt-hair-soft);
+  font: 500 13px / 20px var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-fo h4 > .ts-glyph {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  color: var(--pt-ink-2);
+}
+
+.ts-fo-f {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* a field's box as the product draws a number field: the field boundary, the 6 px corner, the
+   value in tabular figures and its unit at the right in titanium */
+.ts-fo-f output {
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-field, var(--pt-hair));
+  border-radius: var(--pt-radius);
+  font: 13px / 30px var(--pt-text);
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--pt-ink);
+}
+
+.ts-fo-f output::after {
+  content: 'px';
+  color: var(--pt-titanium);
+}
+
+.ts-fo-f output[data-fo='r']::after {
+  content: '\00b0';
+}
+
+/* Layout: the section's head with the layout's name in a chip at the right */
+.ts-fo-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--pt-hair-soft);
+  margin: 0 -16px;
+  padding: 10px 16px 0 0;
+}
+
+.ts-fo-row h4 {
+  margin: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ts-fo-row h4 > .ts-glyph {
+  top: 2px;
+}
+
+.ts-fo-row output {
+  padding: 0 8px;
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-plate);
+  font-size: 12px;
+  line-height: 24px;
+  color: var(--pt-ink);
+}
+
+/* Command: the CLI line in the code face on the panel's code surface (DESIGN.md 8.5); the resting
+   sentence in the text face and titanium until the first gesture's line replaces it (live/log.ts
+   sets data-printed); the subject is the code element, the panel's code surface */
+/* the code surface runs the panel's full width along its foot, so the longest line the canvas
+   prints (a turn of the credit, 50 characters, 332 px at 11 px) stays on one line at 1440 and a
+   flag's hyphens never break */
+code.ts-command {
+  grid-column: 1 / -1;
+  box-sizing: border-box;
+  min-height: 56px;
+  margin: 4px -16px -16px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--pt-hair-soft);
+  border-radius: 0 0 calc(var(--pt-radius-lg) - 1px) calc(var(--pt-radius-lg) - 1px);
+  background: var(--pt-plate);
+  font: 11px / 17px var(--pt-mono);
+  color: var(--pt-ink);
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+code.ts-command:not([data-printed]) {
+  font-family: var(--pt-text);
   color: var(--pt-titanium);
 }
 
@@ -2294,6 +2489,28 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
 /* ---- between 720 and 1,023 px: the column narrows, the two column rows stay ---- */
 @media (max-width: 1023px) {
+  .ts-tailor-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-band-head.is-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .ts-band-head.is-split .ts-lead {
+    margin: 0;
+  }
+
+  /* the readout under the slide, its fields in four columns */
+  .ts-canvas-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-fo {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
   .ts-band {
     padding: 80px 0;
   }
@@ -2320,6 +2537,15 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
    slides at 358 by 201 with the landing's reading floor (titles at least 17 px, body at least
    12 px, credits at least 10 px), the panel at 44 columns ---- */
 @media (max-width: 719px) {
+  code.ts-command {
+    padding: 10px 12px;
+    font-size: 10.5px;
+  }
+
+  .ts-fo {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .ts-product {
     --ts-gutter: 0px;
   }
@@ -2538,7 +2764,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     max-width: 1000px;
   }
 
-  .ts-tailor-top,
   :where(.ts-product) .ts-present {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
@@ -2585,47 +2810,39 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     padding: 0 4px;
   }
 
-  .ts-tailor-dialog .ts-row {
-    flex-wrap: wrap;
-    padding: 8px 0;
+  .ts-tailor-dialog {
+    padding: 16px 16px 0;
   }
 
-  .ts-field {
+  .ts-tailor-actions {
+    margin: 0 -16px;
+  }
+
+  .ts-field,
+  .ts-tailor-box,
+  .ts-tailor-dialog .ts-field {
     width: 100%;
     height: 44px;
+    line-height: 42px;
   }
 
   .ts-row-foot .ts-button {
     width: 100%;
   }
 
-  .ts-tailor-editor {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 16px;
-    margin-top: 32px;
-  }
-
+  /* five thumbnails share the row */
   .ts-home-filmstrip {
-    flex-direction: row;
     gap: 6px;
   }
 
   .ts-home-thumb {
-    grid-template-columns: 80px;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ts-home-thumb-n {
     display: none;
   }
 
-  .ts-home-thumb-moves {
-    height: auto;
-    flex-direction: column;
-  }
-
-  .ts-canvas-sheet,
   .ts-seam-slide {
     margin-top: 32px;
   }
@@ -2637,17 +2854,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-seam-label {
     padding: 0;
-  }
-
-  .ts-command-row {
-    align-items: flex-start;
-    padding: 10px 0;
-  }
-
-  .ts-command {
-    min-height: 40px;
-    white-space: normal;
-    overflow-wrap: normal;
   }
 
   :where(.ts-product) .ts-present {
@@ -2666,11 +2872,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-row-key {
     flex-basis: 100%;
-  }
-
-  .ts-canvas-rows .ts-row-key,
-  .ts-tailor-dialog .ts-row-key {
-    flex-basis: auto;
   }
 
   .ts-row-link {

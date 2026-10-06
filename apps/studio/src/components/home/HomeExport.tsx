@@ -38,7 +38,7 @@ export function HomeExport() {
       <Reserve band="export" className="ts-export-reserve">
         <div
           className="ts-seam-slide"
-          data-seam-root
+          data-seam-root=""
           style={{ '--seam-cut': '50%' } as CSSProperties}
         >
           <div className="ts-seam-labels" aria-hidden="true">
@@ -75,7 +75,7 @@ export function HomeExport() {
               aria-valuemax={100}
               aria-valuenow={50}
               aria-valuetext={EXPORT.slider(50)}
-              data-seam
+              data-seam=""
             >
               <i className="ts-seam-knob" />
             </div>
@@ -106,7 +106,7 @@ export function HomeExport() {
             className="ts-row-link"
             href={pdf.light.path}
             download
-            data-pdf
+            data-pdf=""
             data-href-light={pdf.light.path}
             data-href-dark={pdf.dark.path}
             data-control="home.export.pdf"
@@ -115,7 +115,7 @@ export function HomeExport() {
           </a>
         </div>
       </div>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

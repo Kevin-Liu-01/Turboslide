@@ -44,15 +44,15 @@ export function HomeAgents() {
       <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS_ROUND.lead} span={7} />
       <Reserve band="agents" className="ts-agents-grid">
         <div className="ts-agents-left">
-          <div className="ts-agents-stage" data-agents-stage>
+          <div className="ts-agents-stage" data-agents-stage="">
             <HomeSheet instance="agents" fill className="ts-agents-sheet" />
           </div>
-          <div className="ts-home-panel pt-on-ink" data-panel-root>
+          <div className="ts-home-panel pt-on-ink" data-panel-root="">
             <div
               className="ts-home-panel-tabs"
               role="tablist"
               aria-label={AGENTS.tabsLabel}
-              data-transports
+              data-transports=""
             >
               {TABS.map((tab, i) => (
                 <button
@@ -87,7 +87,7 @@ export function HomeAgents() {
               </span>
               <input
                 type="text"
-                data-cmd
+                data-cmd=""
                 className="ts-home-panel-field"
                 placeholder={AGENTS.panel.placeholder}
                 aria-label={AGENTS.panel.inputLabel}
@@ -123,12 +123,12 @@ export function HomeAgents() {
             as="ol"
             className="ts-home-history"
             aria-labelledby="ts-agents-history"
-            data-history
+            data-history=""
             html={ssr ? historyHtml(iconMarkup('command-line')) : ''}
           />
         </div>
       </Reserve>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

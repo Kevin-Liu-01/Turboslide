@@ -1,4 +1,4 @@
-// The menus band's build module (docs/LANDING.md 2.5, 6.1, 6.4; the second pass). V2 owns this file
+// The menus band's build module (docs/LANDING.md 2.5, 6.1, 6.4; the second pass). D4 owns this file in the design round (V2 wrote it)
 // and the `menus.generated.ts` it writes. `scripts/build-home-assets.ts --slides` calls
 // `deriveMenus()` and writes the text it returns, formatted, to
 // apps/studio/src/components/home/menus.generated.ts; `--check` compares that text with the file.
@@ -113,6 +113,8 @@ export type GeneratedRow = {
   run?: true;
   /** the model's sentence while nothing is selected, for a run row that needs a selection */
   needs?: string;
+  /** a row the page does not run that the editor disables in the default context (greyed) */
+  off?: true;
   /** a check row and its state in the default context */
   check?: boolean;
   items?: GeneratedRow[];
@@ -141,7 +143,7 @@ function rowOf(item: MenuItem, ctx: MenuContext): GeneratedRow {
       const reason = sentence(tooltipDoc(item, ctx));
       if (reason !== undefined) row.needs = reason;
     }
-  }
+  } else if (!isEnabled(item, ctx)) row.off = true;
   const checked = isChecked(item, ctx);
   if (checked !== undefined) row.check = checked;
   if (item.items !== undefined) {
@@ -259,7 +261,8 @@ function pack(r: GeneratedRow): unknown[] {
     (r.rule === true ? 1 : 0) |
     (r.run === true ? 2 : 0) |
     (r.check !== undefined ? 4 : 0) |
-    (r.check === true ? 8 : 0);
+    (r.check === true ? 8 : 0) |
+    (r.off === true ? 16 : 0);
   const extra: Record<string, unknown> = {};
   if (r.alt !== undefined) extra['a'] = r.alt;
   if (r.bind !== undefined) extra['b'] = r.bind;
@@ -320,6 +323,8 @@ export type MiniRow = {
   readonly run?: true;
   /** the model's sentence while nothing is selected */
   readonly needs?: string;
+  /** the editor disables the row in the default context (a row the page does not run) */
+  readonly off?: true;
   /** a check row's state in the default context */
   readonly check?: boolean;
   readonly items?: readonly MiniRow[];
@@ -333,7 +338,7 @@ export const MINI_SOURCES = { model: '${sha256(model)}', keys: '${sha256(keys)}'
 /**
  * A row packed as a tuple, so the menus chunk carries no key names (LANDING.md 4.1: a band chunk at
  * most 16 KB gzip): id (a run row's; '' for the others), label, flags (1 a rule above, 2 the page runs it, 4 a check row, 8
- * checked), the Mac and the other shortcut, the sentence, the children, then a the alternate
+ * checked, 16 the editor disables it), the Mac and the other shortcut, the sentence, the children, then a the alternate
  * label, b the binding and n the sentence while nothing is selected; trailing empties dropped.
  */
 type Packed = readonly [
@@ -359,6 +364,7 @@ function unpack(p: Packed): MiniRow {
   if ((flags & 1) !== 0) row.rule = true;
   if ((flags & 2) !== 0) row.run = true;
   if ((flags & 4) !== 0) row.check = (flags & 8) !== 0;
+  if ((flags & 16) !== 0) row.off = true;
   if (mac !== '') row.mac = mac;
   if (win !== '') row.win = win;
   if (doc !== '') row.doc = doc;

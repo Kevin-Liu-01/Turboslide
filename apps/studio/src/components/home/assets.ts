@@ -23,7 +23,9 @@ export type HomeAssetRole =
   /** the CLI's browser render of slide 7 at scale 2, lossless WebP, at most 60 KB (the loupe, V3's) */
   | 'export-browser'
   /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
-  | 'pdf';
+  | 'pdf'
+  /** the glyphs below the first screen: one SVG sprite of icons.tsx's symbols (scripts/home/sprite.ts), at most 48 KB */
+  | 'glyphs';
 
 /** A still's grid: `wide` at 2 px cells on the 1,024 px sheet, `narrow` on the 358 px sheet. */
 export type HomeAssetVariant = 'wide' | 'narrow';
@@ -39,7 +41,7 @@ export type HomeAsset = {
   sha256: string;
   width: number | null;
   height: number | null;
-  /** sha256 of the decoded pixels (RGBA, row major); null for a PDF */
+  /** sha256 of the decoded pixels (RGBA, row major); null for a PDF and the glyph sprite */
   pixelsSha256: string | null;
   /** an export picture: sha256 of the part inside the file it was read from */
   partSha256: string | null;
@@ -162,6 +164,19 @@ export const HOME_ASSETS: readonly HomeAsset[] = [
     width: 3200,
     height: 1800,
     pixelsSha256: 'e0b3cb35906b92a61ce3bfd89c98098675166a65f28607b679cb0ebf937014ba',
+    partSha256: null,
+    pages: null,
+  },
+  {
+    role: 'glyphs',
+    appearance: null,
+    variant: null,
+    path: '/home/glyphs-ebf5421cf2.svg',
+    bytes: 40131,
+    sha256: 'ebf5421cf2d85aa982db2ede5135af7b8ba2d3cf8304d83f3f78a4621227cc25',
+    width: null,
+    height: null,
+    pixelsSha256: null,
     partSha256: null,
     pages: null,
   },

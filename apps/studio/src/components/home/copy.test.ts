@@ -41,9 +41,11 @@ import {
 import { HOME_DECK, HOME_EXPORT_FACTS, HOME_RUN_FACTS, HOME_TAILOR_WORDS } from './deck.generated';
 import {
   AGENTS_ROUND,
+  CANVAS_ROUND,
   CLOSE_ROUND,
   DESIGN_COPY,
   HERO_ROUND,
+  MENUS_ROUND,
   NAV_ICONS,
   NUMBERS_ROUND,
 } from './design-copy';
@@ -215,22 +217,20 @@ function restingStrings(): string[] {
     NUMBERS_ROUND.chips.cli,
     NUMBERS_ROUND.chips.mcp,
     NUMBERS_ROUND.chips.http,
-    MENUS.h2,
-    MENUS.lead,
+    /* the design round's menus head and canvas readout (design-copy.ts); the panel's own words
+       are the product's (chrome.generated.ts) */
+    MENUS_ROUND.h2,
+    MENUS_ROUND.lead,
     MENUS.slides(9),
     MENUS.statusRest,
     CANVAS.h2,
     CANVAS.lead,
-    CANVAS.layoutKey,
     CANVAS.layout.mood,
-    CANVAS.undo,
-    CANVAS.commandKey,
+    CANVAS_ROUND.command,
     CANVAS.commandRest,
     TAILOR.h2,
     TAILOR.lead,
     TAILOR.placeholder,
-    TAILOR.moveUp,
-    TAILOR.moveDown,
     KITS.h2,
     KITS.lead,
     KITS.kitsKey,
@@ -381,7 +381,7 @@ describe('every string of the page', () => {
 describe('headings and buttons', () => {
   const headings: string[] = [
     HERO.heading,
-    MENUS.h2,
+    MENUS_ROUND.h2,
     CANVAS.h2,
     TAILOR.h2,
     KITS.h2,

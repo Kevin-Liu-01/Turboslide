@@ -17,7 +17,7 @@ export function HomeFeatures() {
   return (
     <HomeSection id="features">
       <BandHead id="features" heading={FEATURES.h2} span={12} />
-      <ul className="ts-features" data-features>
+      <ul className="ts-features" data-features="">
         {FEATURES.rows.map((row) => {
           const facts = FACTS_DATA.features.find((f) => f.id === row.id);
           if (facts === undefined) return null;

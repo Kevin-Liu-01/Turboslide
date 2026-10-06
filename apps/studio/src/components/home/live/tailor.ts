@@ -153,6 +153,11 @@ export function startTailor(ctx: LiveContext): void {
     e.preventDefault();
     submit();
   });
+  // Cancel is the form's reset (DESIGN.md 8.6): With empties itself; the count reads the deck again
+  apply?.closest('form')?.addEventListener('reset', () => {
+    paintCount();
+    field?.focus();
+  });
   band.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') snack.hide();
   });

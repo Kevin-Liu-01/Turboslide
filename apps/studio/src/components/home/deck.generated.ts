@@ -512,13 +512,16 @@ export const HOME_DECK: HomeDeckFacts = {
 
 /**
  * The Tailor dialog's own words, copied from @turboslide/chrome's TAILOR
- * (packages/chrome/src/panels/assist-strings.ts) for the band's resting rows until the package
- * exports the module; `countRest` is TAILOR.count over the CLI's recorded answer on the page deck.
+ * (packages/chrome/src/panels/assist-strings.ts) for the band's dialog (DESIGN.md 8.6: the title,
+ * Replace, With, the count, Cancel and Apply); `countRest` is TAILOR.count over the CLI's
+ * recorded answer on the page deck.
  */
 export const HOME_TAILOR_WORDS = {
+  title: 'Tailor for a customer',
   from: 'Replace',
   to: 'With',
   apply: 'Apply',
+  cancel: 'Cancel',
   undo: 'Undo',
   countRest: '13 places on 6 slides',
 } as const;

@@ -63,7 +63,7 @@ export function MotionToggle({
     <button
       type="button"
       className={`pt-ib pt-icon ts-motion-toggle${className === undefined ? '' : ` ${className}`}`}
-      data-motion-toggle
+      data-motion-toggle=""
       data-control={control}
       aria-label={NAV_ICONS.motion.pause}
       aria-pressed="false"

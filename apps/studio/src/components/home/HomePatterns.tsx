@@ -25,7 +25,7 @@ export function HomePatterns() {
           <HomeSheet instance="patterns-still" fill />
         </div>
       </div>
-      <p className="ts-sr" aria-live="polite" data-announce />
+      <p className="ts-sr" aria-live="polite" data-announce="" />
     </HomeSection>
   );
 }

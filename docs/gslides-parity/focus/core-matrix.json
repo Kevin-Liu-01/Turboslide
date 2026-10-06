@@ -9955,12 +9955,12 @@
     {
       "id": "decks.home.pictures-three-widths",
       "feature": "decks",
-      "interaction": "At 1440, 1280, 390 and 320 in both appearances nothing is wider than the viewport, the slides sit at the widths of docs/LANDING.md section 2, and the page is under 14,000 px at 1440 and 15,000 at 390 (question 11)",
+      "interaction": "At 1440, 1280, 390 and 320 in both appearances nothing is wider than the viewport, the slides sit at the widths of docs/LANDING.md section 2 as docs/DESIGN.md 8.2, 8.5 and 8.6 redrew them, and the page is under 14,000 px at 1440 and 15,000 at 390 (question 11)",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-home items 1, 2, 11, 13, 22",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72; restated in the design round, DR-D4#4"
     },
     {
       "id": "decks.home.copy-rules",
@@ -11326,6 +11326,36 @@
       "today": "broken",
       "severity": 1,
       "evidence": "research-landing F9 and F10: the Present band is half empty; the export band ends in three rows of text",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.present.figure",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the Present band shows the product's presenter view of the page deck as scripts/home/capture.ts captured it from /present on the node-server build (assets.json `presenter`, 1024 by 640 at x1 and 2048 by 1280 at x2, at most 25,000 B and 60,000 B): in a .pt-window figure frame at the 8 px corner, the shown appearance's file by its srcset with width and height on the img, decoded with a natural width over 0 in an 8 by 5 box, answering 200, named by its alt and captioned in one sentence; nothing of it is requested at the top of the page and the hidden appearance's twin is never requested; the editor to presenter view to show diagram stays under the buttons",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F9: the Present band shows no presenter view; VERIFICATION.md design round pass 1 finding 3 (the one product picture Kevin asked for)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.export.dialog",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances, under the export band's seam where three ruled rows stood: the editor's Download dialog as scripts/home/capture.ts captured it on the page deck (File > Download > More formats > Download options; assets.json `download-dialog`, at most 20,000 B at x1 and 40,000 B at x2), the shown appearance's file by its srcset with width and height on the img, decoded and answering 200, named by its alt, nothing of it requested at the top and the hidden twin never requested; beside it the Perfect file's reading with the done glyph in --pt-status-done, Download the PDF and Read the record; the seam's labels carry the editor's photo and document glyphs; no ruled row is left",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F10: the export band ends in three rows of text; VERIFICATION.md design round pass 1 finding 3",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.patterns.stills",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances, under the patterns band's pair, Insert > Animated pattern's path as crumbs and the 17 stills the editor's gallery draws (assets.json `pattern-card`, packages/materials/previews byte for byte) in the gallery's order, each with its name: each img carries width 320 and height 200, decodes with a natural width over 0 and answers 200, none is requested at the top of the page; nine to a row at 1440 and one sideways scrolling row at 390; no layout shift while they load",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F11: the patterns band shows one pattern of 17",
       "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
     },
     {

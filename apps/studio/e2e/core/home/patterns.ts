@@ -4,7 +4,7 @@ import { gzipSync } from 'node:zlib';
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
-import { HOME_ASSETS } from '../../../src/components/home/assets';
+import { HOME_ASSETS } from './asset-records';
 import { MOTION_KEY } from '../../../src/components/home/boot';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';

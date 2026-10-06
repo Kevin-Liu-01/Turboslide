@@ -100,6 +100,21 @@ export const DIAGRAM_WORDS = {
   export: { slide: 'Slide', pdf: 'pitch.pdf', pptx: 'pitch.pptx' },
 } as const;
 
+/**
+ * The figures of the Present and patterns bands (DESIGN.md 8.10, 8.12): the presenter view's
+ * description and caption, and the name of the patterns gallery's list.
+ */
+export const FIGURES_ROUND = {
+  presenter: {
+    alt: "Presenter view of this page's deck on slide 2, with the timer, the next slide and the speaker notes.",
+    caption: 'Presenter view opens in a second window with the timer, the next slide and your notes.',
+  },
+  download: {
+    alt: "The editor's Download dialog with Microsoft PowerPoint (.pptx) in Perfect or Editable text, and PDF Document (.pdf)",
+  },
+  patterns: { label: 'The patterns of Insert > Animated pattern' },
+} as const;
+
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
 export const AGENTS_ROUND = {
   lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
@@ -121,6 +136,7 @@ export const DESIGN_COPY = {
   controls: BAND_CONTROLS,
   diagrams: DIAGRAMS_ROUND,
   diagramWords: DIAGRAM_WORDS,
+  figures: FIGURES_ROUND,
   agents: AGENTS_ROUND,
   close: CLOSE_ROUND,
 } as const;

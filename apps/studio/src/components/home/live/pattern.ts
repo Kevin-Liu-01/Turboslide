@@ -465,6 +465,10 @@ function leftSlide(moving: HTMLElement, right: HTMLElement): HTMLElement {
 export function start(ctx: LiveContext): void {
   installGuards();
   const band = ctx.band;
+  /* the gallery's stills (DESIGN.md 8.12) come with the band: a lazy picture in the sideways row
+     at 390 would wait for its own scroll, so the band's start asks for all of them */
+  for (const img of band.querySelectorAll<HTMLImageElement>('.ts-pattern-card > img'))
+    img.loading = 'eager';
   const still = band.querySelector<HTMLElement>('[data-pattern="still"]');
   const moving = band.querySelector<HTMLElement>('[data-pattern="moving"]');
   if (still == null || moving == null) return;

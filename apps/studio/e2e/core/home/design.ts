@@ -5,16 +5,17 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { TAILOR as PRODUCT_TAILOR } from '@turboslide/chrome/panels/assist-strings';
 
-import { HOME_ASSETS } from '../../../src/components/home/assets';
+import { HOME_ASSETS } from './asset-records';
 import {
   HOME_FORMAT_PANEL,
   HOME_STEP_ICONS,
   HOME_TITLE_ROW,
   HOME_TOOLBAR,
 } from '../../../src/components/home/chrome.generated';
-import { CANVAS, HERO } from '../../../src/components/home/copy';
+import { CANVAS, EXPORT, HERO } from '../../../src/components/home/copy';
 import {
   HOME_DECK,
+  HOME_EXPORT_FACTS,
   HOME_LOOP_FACTS,
   HOME_TAILOR_WORDS,
 } from '../../../src/components/home/deck.generated';
@@ -23,12 +24,15 @@ import {
   CANVAS_ROUND,
   DIAGRAM_WORDS,
   DIAGRAMS_ROUND,
+  FIGURES_ROUND,
   HERO_ROUND,
   MENUS_ROUND,
   NAV_ICONS,
 } from '../../../src/components/home/design-copy';
+import { HOME_FACTS } from '../../../src/components/home/facts';
 import { MENU_GLYPHS } from '../../../src/components/home/menu-glyphs.generated';
 import { MINI_MENUS } from '../../../src/components/home/menus.generated';
+import { HOME_PATTERN_CARDS } from '../../../src/components/home/pattern-cards.generated';
 import type { MiniRow } from '../../../src/components/home/menus.generated';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { HOME_GLYPH_IDS, HOME_SPRITE } from '../../../src/components/home/sprite.generated';
@@ -40,7 +44,8 @@ import { bandReady, geom } from './objects';
 // lane D4). DR-D4#1 enters the shared parts: the navigation's one row of icon controls, Inter's
 // default glyphs with tabular figures, the radius ladder, the shared scrollbar on every scroll
 // region and every picture loading. Each later push of D4 adds its rows here: DR-D4#2 the hero's,
-// DR-D4#4 the menus' glyphs, the canvas band's Format options readout and the Tailor dialog. Every observation is
+// DR-D4#4 the menus' glyphs, the canvas band's Format options readout and the Tailor dialog,
+// DR-D4#7 the diagrams, the captured presenter view and the patterns gallery. Every observation is
 // through the page and the network; the one file read is the page's own assets.json twin
 // (`assets.ts`), the list the build wrote of every file under /home/.
 //
@@ -60,6 +65,9 @@ export const ROWS: readonly string[] = [
   'home.canvas.panel',
   'home.tailor.dialog',
   'home.diagrams.flows',
+  'home.present.figure',
+  'home.export.dialog',
+  'home.patterns.stills',
 ];
 
 type Theme = 'light' | 'dark';
@@ -1624,6 +1632,263 @@ async function diagramsFlows(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.present.figure (DESIGN.md 8.0 "Figures", 8.10)
+
+async function presentFigure(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const files = HOME_ASSETS.filter((a) => a.role === 'presenter');
+  if (files.length !== 4) failures.push(`assets.json lists ${files.length} presenter files`);
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      const asked: string[] = [];
+      page.on('request', (r) => {
+        const path = new URL(r.url()).pathname;
+        if (path.startsWith('/home/presenter-')) asked.push(path);
+      });
+      try {
+        await openHome(page);
+        if (asked.length > 0) failures.push(`${label}: ${asked.join(', ')} requested at the top`);
+        const figure = page.locator('[data-band="present"] figure[data-figure="presenter"]');
+        await figure.scrollIntoViewIfNeeded();
+        const img = figure.locator(`img.ts-only-${theme}`);
+        await page
+          .waitForFunction(
+            (el) => el instanceof HTMLImageElement && el.complete && el.naturalWidth > 0,
+            await img.elementHandle(),
+            { timeout: 30_000 },
+          )
+          .catch(() => failures.push(`${label}: the presenter view did not decode`));
+        const read = await figure.evaluate((el, t) => {
+          const frame = el.querySelector('.pt-window');
+          const shown = el.querySelector<HTMLImageElement>(`img.ts-only-${t}`);
+          const box = shown?.getBoundingClientRect();
+          return {
+            radius: frame === null ? '' : getComputedStyle(frame).borderTopLeftRadius,
+            src: shown === null ? '' : new URL(shown.currentSrc || shown.src).pathname,
+            natural: shown?.naturalWidth ?? 0,
+            attrs: [shown?.getAttribute('width'), shown?.getAttribute('height')],
+            ratio: box === undefined || box.height === 0 ? 0 : box.width / box.height,
+            width: box?.width ?? 0,
+            alt: shown?.alt ?? '',
+            caption: el.querySelector('figcaption')?.textContent ?? '',
+          };
+        }, theme);
+        const shownFile = files.find((f) => f.path === read.src);
+        if (shownFile === undefined || shownFile.appearance !== theme)
+          failures.push(`${label}: the figure shows ${read.src}`);
+        if (read.radius !== '8px') failures.push(`${label}: the frame's corner ${read.radius}`);
+        if (read.natural === 0) failures.push(`${label}: natural width 0`);
+        if (read.attrs[0] !== '1024' || read.attrs[1] !== '640')
+          failures.push(`${label}: width and height ${read.attrs.join(' by ')}`);
+        if (Math.abs(read.ratio - 1.6) > 0.02) failures.push(`${label}: ratio ${read.ratio}`);
+        if (read.alt !== FIGURES_ROUND.presenter.alt) failures.push(`${label}: alt "${read.alt}"`);
+        if (read.caption !== FIGURES_ROUND.presenter.caption)
+          failures.push(`${label}: caption "${read.caption}"`);
+        const other = theme === 'light' ? 'dark' : 'light';
+        const twins = asked.filter((p) => p.startsWith(`/home/presenter-${other}-`));
+        if (twins.length > 0) failures.push(`${label}: the hidden twin ${twins.join(', ')}`);
+        const answer = await page.request.get(read.src, { headers: extraHTTPHeaders });
+        if (answer.status() !== 200) failures.push(`${label}: ${read.src} ${answer.status()}`);
+        notes.push(`${label}: ${read.src} at ${Math.round(read.width)} px, ${read.radius} frame`);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'figure', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// home.export.dialog (DESIGN.md 8.0 "Figures", 8.11)
+
+async function exportDialog(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const files = HOME_ASSETS.filter((a) => a.role === 'download-dialog');
+  if (files.length !== 4) failures.push(`assets.json lists ${files.length} Download dialog files`);
+  const sentence = EXPORT.rows.perfect.sentence(
+    { width: HOME_EXPORT_FACTS.perfectWidth, height: HOME_EXPORT_FACTS.perfectHeight },
+    HOME_FACTS,
+  );
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      const asked: string[] = [];
+      page.on('request', (r) => {
+        const path = new URL(r.url()).pathname;
+        if (path.startsWith('/home/download-dialog-')) asked.push(path);
+      });
+      try {
+        await openHome(page);
+        if (asked.length > 0) failures.push(`${label}: ${asked.join(', ')} requested at the top`);
+        const figure = page.locator('[data-band="export"] figure[data-figure="download"]');
+        await figure.scrollIntoViewIfNeeded();
+        await page
+          .waitForFunction(
+            (t) => {
+              const img = document.querySelector<HTMLImageElement>(
+                `[data-band="export"] figure[data-figure="download"] img.ts-only-${t}`,
+              );
+              return img !== null && img.complete && img.naturalWidth > 0;
+            },
+            theme,
+            { timeout: 30_000 },
+          )
+          .catch(() => failures.push(`${label}: the Download dialog did not decode`));
+        const read = await page.evaluate((t) => {
+          const band = document.querySelector('[data-band="export"]')!;
+          const img = band.querySelector<HTMLImageElement>(`figure[data-figure="download"] img.ts-only-${t}`);
+          const glyph = band.querySelector<HTMLElement>('.ts-export-readout > .ts-icon');
+          const probe = document.createElement('i');
+          probe.style.color = 'var(--pt-status-done)';
+          band.append(probe);
+          const done = getComputedStyle(probe).color;
+          probe.remove();
+          return {
+            src: img === null ? '' : new URL(img.currentSrc || img.src).pathname,
+            natural: img?.naturalWidth ?? 0,
+            attrs: [img?.getAttribute('width'), img?.getAttribute('height')],
+            alt: img?.alt ?? '',
+            readout: band.querySelector('.ts-export-readout')?.textContent ?? '',
+            glyph: glyph?.dataset['icon'] ?? '',
+            glyphColour: glyph === null ? '' : getComputedStyle(glyph).backgroundColor,
+            done,
+            pdf: band.querySelectorAll('a[data-pdf][download]').length,
+            record: band.querySelectorAll('[data-control="home.export.record"]').length,
+            labels: [...band.querySelectorAll('.ts-seam-label')].map(
+              (el) => el.querySelector<HTMLElement>('.ts-icon')?.dataset['icon'] ?? '',
+            ),
+            rows: band.querySelectorAll('.ts-row').length,
+          };
+        }, theme);
+        const shown = files.find((f) => f.path === read.src);
+        if (shown === undefined || shown.appearance !== theme)
+          failures.push(`${label}: the figure shows ${read.src}`);
+        const x1 = files.find((f) => f.appearance === theme && f.variant === 'x1');
+        if (read.attrs[0] !== String(x1?.width) || read.attrs[1] !== String(x1?.height))
+          failures.push(`${label}: width and height ${read.attrs.join(' by ')}`);
+        if (read.natural === 0) failures.push(`${label}: natural width 0`);
+        if (read.alt !== FIGURES_ROUND.download.alt) failures.push(`${label}: alt "${read.alt}"`);
+        if (!read.readout.includes(sentence)) failures.push(`${label}: the readout "${read.readout}"`);
+        if (read.glyph !== 'check-circle' || read.glyphColour !== read.done)
+          failures.push(`${label}: the readout's glyph ${read.glyph} in ${read.glyphColour}`);
+        if (read.pdf !== 1 || read.record !== 1)
+          failures.push(`${label}: ${read.pdf} PDF links, ${read.record} record links`);
+        if (read.labels.join(' ') !== 'photo document')
+          failures.push(`${label}: the seam's labels draw ${read.labels.join(', ')}`);
+        if (read.rows !== 0) failures.push(`${label}: ${read.rows} ruled rows left`);
+        const other = theme === 'light' ? 'dark' : 'light';
+        const twins = asked.filter((p) => p.startsWith(`/home/download-dialog-${other}-`));
+        if (twins.length > 0) failures.push(`${label}: the hidden twin ${twins.join(', ')}`);
+        const answer = await page.request.get(read.src, { headers: extraHTTPHeaders });
+        if (answer.status() !== 200) failures.push(`${label}: ${read.src} ${answer.status()}`);
+        notes.push(`${label}: ${read.src}, the readout's glyph in ${read.glyphColour}`);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'dialog', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// home.patterns.stills (DESIGN.md 8.12)
+
+async function patternsStills(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const cards = HOME_ASSETS.filter((a) => a.role === 'pattern-card');
+  if (cards.length !== 17) failures.push(`assets.json lists ${cards.length} pattern cards`);
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      const asked = new Map<string, number>();
+      page.on('response', (r) => {
+        const path = new URL(r.url()).pathname;
+        if (path.startsWith('/home/pattern-card-')) asked.set(path, r.status());
+      });
+      try {
+        await openHome(page);
+        await page.evaluate(() => {
+          (window as unknown as { __cls: number }).__cls = 0;
+          new PerformanceObserver((list) => {
+            for (const entry of list.getEntries() as unknown as {
+              value: number;
+              hadRecentInput: boolean;
+            }[])
+              if (!entry.hadRecentInput)
+                (window as unknown as { __cls: number }).__cls += entry.value;
+          }).observe({ type: 'layout-shift' });
+        });
+        if (asked.size > 0) failures.push(`${label}: ${asked.size} cards requested at the top`);
+        const list = page.locator('[data-band="patterns"] .ts-pattern-cards');
+        await list.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(500);
+        /* a sideways row loads the cards it shows; its end brings in the rest */
+        await list.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+        await page.waitForTimeout(800);
+        await list.evaluate((el) => el.scrollTo({ left: 0 }));
+        await page
+          .waitForFunction(
+            () =>
+              [...document.querySelectorAll<HTMLImageElement>('.ts-pattern-card > img')].every(
+                (img) => img.complete && img.naturalWidth > 0,
+              ),
+            undefined,
+            { timeout: 30_000 },
+          )
+          .catch(() => failures.push(`${label}: a card did not decode`));
+        const read = await list.evaluate((el) => {
+          const items = [...el.querySelectorAll('.ts-pattern-card')];
+          return {
+            names: items.map((li) => li.querySelector('.ts-pattern-card-name')?.textContent ?? ''),
+            paths: items.map((li) => li.querySelector('img')?.getAttribute('src') ?? ''),
+            sized: items.every((li) => {
+              const img = li.querySelector('img');
+              return img?.getAttribute('width') === '320' && img.getAttribute('height') === '200';
+            }),
+            tops: [...new Set(items.map((li) => Math.round(li.getBoundingClientRect().top)))]
+              .length,
+            scrolls: el.scrollWidth > el.clientWidth + 1,
+            overflow: getComputedStyle(el).overflowX,
+            crumbs:
+              el.parentElement?.querySelector('.ts-crumbs')?.textContent?.replace(/\s+/g, ' ') ??
+              '',
+          };
+        });
+        const names = HOME_PATTERN_CARDS.map((card) => card.name);
+        if (JSON.stringify(read.names) !== JSON.stringify(names))
+          failures.push(`${label}: the names ${read.names.join(', ')}`);
+        if (JSON.stringify(read.paths) !== JSON.stringify(cards.map((c) => c.path)))
+          failures.push(`${label}: the cards are not assets.json's in its order`);
+        if (!read.sized) failures.push(`${label}: a card's img without width and height`);
+        if (read.crumbs.replace(/\s/g, '') !== 'InsertAnimatedpattern')
+          failures.push(`${label}: the crumbs read "${read.crumbs}"`);
+        if (size.width >= 1024 && read.tops !== 2)
+          failures.push(`${label}: ${read.tops} rows of cards (nine to a row is 2)`);
+        if (size.width < 720 && (read.tops !== 1 || !read.scrolls || read.overflow !== 'auto'))
+          failures.push(
+            `${label}: ${read.tops} rows, scrolls ${read.scrolls}, overflow ${read.overflow}`,
+          );
+        for (const [path, status] of asked)
+          if (status !== 200) failures.push(`${label}: ${path} answered ${status}`);
+        const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+        if (cls > 0) failures.push(`${label}: CLS ${cls} while the cards loaded`);
+        notes.push(`${label}: ${read.names.length} cards in ${read.tops} rows, ${asked.size} requested, CLS ${cls}`);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'stills', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.icons'))
     test(title('home.nav.icons'), async ({ browser }) => {
@@ -1685,5 +1950,20 @@ export function rows(): void {
     test(title('home.diagrams.flows'), async ({ browser }) => {
       test.setTimeout(300_000);
       await diagramsFlows(browser);
+    });
+  if (entered('home.present.figure'))
+    test(title('home.present.figure'), async ({ browser }) => {
+      test.setTimeout(300_000);
+      await presentFigure(browser);
+    });
+  if (entered('home.export.dialog'))
+    test(title('home.export.dialog'), async ({ browser }) => {
+      test.setTimeout(300_000);
+      await exportDialog(browser);
+    });
+  if (entered('home.patterns.stills'))
+    test(title('home.patterns.stills'), async ({ browser }) => {
+      test.setTimeout(300_000);
+      await patternsStills(browser);
     });
 }

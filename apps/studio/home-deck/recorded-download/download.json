@@ -1,0 +1,21 @@
+{
+  "generator": "scripts/home/capture.ts --record --only download",
+  "route": "/edit/<the page deck>, File > Download > More formats > Download options",
+  "size": {
+    "width": 544,
+    "height": 499
+  },
+  "deviceScaleFactor": 2,
+  "files": [
+    {
+      "appearance": "light",
+      "file": "download-light.webp",
+      "sha256": "390f6585b5c606e5353615dcce8e7826dcb3a23644d44c7543d62ddbaedc896d"
+    },
+    {
+      "appearance": "dark",
+      "file": "download-dark.webp",
+      "sha256": "29f8caf24de72202174d03fe92605b471daf754072ca3a9c95d610bd4106c87a"
+    }
+  ]
+}

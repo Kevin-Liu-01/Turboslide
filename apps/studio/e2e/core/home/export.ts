@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
-import { HOME_ASSETS } from '../../../src/components/home/assets';
+import { HOME_ASSETS } from './asset-records';
 import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { EXPORT, formatPercentFigure } from '../../../src/components/home/copy';
 import { HOME_FACTS } from '../../../src/components/home/facts';

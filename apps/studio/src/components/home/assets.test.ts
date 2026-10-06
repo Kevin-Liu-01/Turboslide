@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { HOME_ASSETS, homeAsset } from './assets';
+import { HOME_ASSETS as PAGE_ASSETS, homeAsset } from './assets';
+import type { HomeAsset } from './assets';
 import { FILLS as AGENTS_FILLS } from './bands/agents.generated';
 import { FILLS as CANVAS_FILLS } from './bands/canvas.generated';
 import { FILLS as CLOSE_FILLS } from './bands/close.generated';
@@ -35,6 +36,25 @@ const PUBLIC = join(ROOT, 'apps/studio/public/home');
 
 const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
 
+/** Each file's whole record (assets.json); the page's assets.ts keeps the fields it draws with. */
+type AssetRecord = HomeAsset & {
+  bytes: number;
+  sha256: string;
+  pixelsSha256: string | null;
+  partSha256: string | null;
+  pages: number | null;
+};
+const HOME_ASSETS = (
+  JSON.parse(readFileSync(join(import.meta.dirname, 'assets.json'), 'utf8')) as {
+    assets: AssetRecord[];
+  }
+).assets;
+const recordOf = (path: string): AssetRecord => {
+  const found = HOME_ASSETS.find((a) => a.path === path);
+  if (found === undefined) throw new RangeError(`assets.json does not list ${path}`);
+  return found;
+};
+
 const BUDGET: Readonly<Record<string, number>> = {
   'lighthouse-still': 24_000,
   'lighthouse-tone': 26_000,
@@ -44,9 +64,32 @@ const BUDGET: Readonly<Record<string, number>> = {
   'export-perfect': 60_000,
   'export-editable': 32_000,
   glyphs: 48_000,
+  'pattern-card': 12_000,
 };
 
+/** The presenter view's files by variant (docs/DESIGN.md 8.10). */
+const PRESENTER_BUDGET: Readonly<Record<string, number>> = { x1: 25_000, x2: 60_000 };
+/** The Download dialog's files by variant (docs/DESIGN.md 8.11). */
+const DOWNLOAD_BUDGET: Readonly<Record<string, number>> = { x1: 20_000, x2: 40_000 };
+
 describe('public/home', () => {
+  it("lists in the page's assets.ts what assets.json lists, with the fields the page draws with", () => {
+    expect(
+      PAGE_ASSETS.map((a) => [a.role, a.appearance, a.variant, a.path, a.width, a.height]),
+    ).toEqual(
+      HOME_ASSETS.map((a) => [a.role, a.appearance, a.variant, a.path, a.width, a.height]),
+    );
+    for (const asset of PAGE_ASSETS) expect(Object.keys(asset), asset.path).toHaveLength(6);
+  });
+
+  it('holds the presenter view at 1x and 2x in both appearances and the 17 pattern cards', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      expect([homeAsset('presenter', theme, 'x1').width, homeAsset('presenter', theme, 'x1').height]).toEqual([1024, 640]);
+      expect([homeAsset('presenter', theme, 'x2').width, homeAsset('presenter', theme, 'x2').height]).toEqual([2048, 1280]);
+    }
+    expect(HOME_ASSETS.filter((a) => a.role === 'pattern-card')).toHaveLength(17);
+  });
+
   it('holds exactly the files of assets.json', () => {
     const present = readdirSync(PUBLIC)
       .filter((name) => !name.startsWith('.'))
@@ -64,7 +107,12 @@ describe('public/home', () => {
       expect(sha256(bytes), asset.path).toBe(asset.sha256);
       expect(asset.path, 'content hashed').toMatch(/-[0-9a-f]{10}\.(webp|png|jpg|pdf|svg)$/);
       expect(asset.path.includes(sha256(bytes).slice(0, 10)), asset.path).toBe(true);
-      const limit = BUDGET[asset.role];
+      const limit =
+        asset.role === 'presenter'
+          ? PRESENTER_BUDGET[asset.variant ?? '']
+          : asset.role === 'download-dialog'
+            ? DOWNLOAD_BUDGET[asset.variant ?? '']
+            : BUDGET[asset.role];
       if (limit !== undefined)
         expect(asset.bytes, `${asset.path} budget`).toBeLessThanOrEqual(limit);
       if (asset.pixelsSha256 !== null) {
@@ -80,10 +128,10 @@ describe('public/home', () => {
 
   it("carries the export band's files: both appearances, the Perfect picture at 3200 by 1800, PDFs of 9 pages", () => {
     for (const theme of ['light', 'dark'] as const) {
-      const perfect = homeAsset('export-perfect', theme);
+      const perfect = recordOf(homeAsset('export-perfect', theme).path);
       expect([perfect.width, perfect.height]).toEqual([3200, 1800]);
       expect(perfect.partSha256).toMatch(/^[0-9a-f]{64}$/);
-      const pdf = homeAsset('pdf', theme);
+      const pdf = recordOf(homeAsset('pdf', theme).path);
       expect(pdf.pages).toBe(9);
       const bytes = readFileSync(join(PUBLIC, pdf.path.replace(/^\/home\//, '')));
       expect(bytes.subarray(0, 5).toString('latin1')).toBe('%PDF-');

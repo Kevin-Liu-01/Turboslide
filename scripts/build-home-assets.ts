@@ -101,6 +101,13 @@ import { derivePattern } from './home/pattern.ts';
 import { iconMaskRules, maskUri } from './home/icons.ts';
 import { deriveEditorChrome, firstScreenIcons } from './home/chrome.ts';
 import { deriveMenuGlyphsModule, deriveSprite, deriveSpriteModule } from './home/sprite.ts';
+import {
+  deriveDownloadFiles,
+  derivePatternCardFiles,
+  derivePatternCardsModule,
+  derivePresenterFiles,
+} from './home/figures.ts';
+import type { FigureFile } from './home/figures.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = 'apps/studio/home-deck';
@@ -549,8 +556,11 @@ type AssetRole =
   | 'export-editable'
   | 'export-browser'
   | 'pdf'
-  | 'glyphs';
-type AssetVariant = 'wide' | 'narrow' | null;
+  | 'glyphs'
+  | 'presenter'
+  | 'download-dialog'
+  | 'pattern-card';
+type AssetVariant = 'wide' | 'narrow' | 'x1' | 'x2' | null;
 type ServedAsset = {
   role: AssetRole;
   appearance: 'light' | 'dark' | null;
@@ -2508,7 +2518,17 @@ const VISIT = [
  * skipped slide's mark, every one from the editor's table (packages/chrome/src/icons.tsx). The
  * footer's GT mark is the one glyph the editor's table does not hold, from the theme sprite.
  */
-const DOCUMENT_ICONS = ['next', 'command-line', 'user-circle', 'eye-slash', 'printer'] as const;
+/* the seam's labels name their files with the editor's glyphs (DESIGN.md 8.11): `photo` for the
+   Perfect file, `document` for Editable text */
+const DOCUMENT_ICONS = [
+  'next',
+  'command-line',
+  'user-circle',
+  'eye-slash',
+  'printer',
+  'photo',
+  'document',
+] as const;
 const THEME_SPRITE_ICONS = ['gt-mark'] as const;
 /** A glyph a stylesheet draws on a pseudo element, as a custom property: the external link's. */
 const GLYPH_PROPERTIES = { external: 'arrow-up-right' } as const;
@@ -2718,7 +2738,12 @@ async function deriveServed(
   exportRec: RecordedExport | null,
   patternFiles: Awaited<ReturnType<typeof derivePattern>>['files'],
   loupeFiles: Awaited<ReturnType<typeof deriveLoupe>>['files'],
-): Promise<{ assets: ServedAsset[]; files: { name: string; bytes: Uint8Array }[] }> {
+  figureFiles: readonly FigureFile[],
+): Promise<{
+  assets: ServedAsset[];
+  files: { name: string; bytes: Uint8Array }[];
+  cards: { material: string; path: string; width: number; height: number }[];
+}> {
   const made = [
     await served('lighthouse-still', null, 'wide', await bitsWebp(stills.canvas.wide), 'webp'),
     await served('lighthouse-still', null, 'narrow', await bitsWebp(stills.canvas.narrow), 'webp'),
@@ -2734,6 +2759,24 @@ async function deriveServed(
     )),
     await served('glyphs', null, null, new TextEncoder().encode(deriveSprite()), 'svg'),
   ];
+  /* the presenter view and the gallery's cards (scripts/home/figures.ts), in its order */
+  const figures = await Promise.all(
+    figureFiles.map((file) => served(file.role, file.appearance, file.variant, file.bytes, 'webp')),
+  );
+  made.push(...figures);
+  const cards = figureFiles.flatMap((file, i) => {
+    const asset = figures[i]?.asset;
+    return file.material === null || asset === undefined
+      ? []
+      : [
+          {
+            material: file.material,
+            path: asset.path,
+            width: asset.width ?? 0,
+            height: asset.height ?? 0,
+          },
+        ];
+  });
   const budgets: Partial<Record<AssetRole, number>> = {
     'lighthouse-still': 24_000,
     'lighthouse-tone': 26_000,
@@ -2742,6 +2785,7 @@ async function deriveServed(
     'pattern-mask': 48_000,
     'export-browser': 60_000,
     glyphs: 48_000,
+    'pattern-card': 12_000,
   };
   for (const m of made) {
     const limit = budgets[m.asset.role];
@@ -2752,6 +2796,7 @@ async function deriveServed(
   return {
     assets,
     files: made.map((m) => ({ name: m.asset.path.slice(URL_PREFIX.length + 1), bytes: m.bytes })),
+    cards,
   };
 }
 
@@ -2766,7 +2811,8 @@ function assetsSources(
     loupe,
   });
   const ts = `${GENERATED_HEADER('--stills and --export', 'docs/LANDING.md 2.6, 2.8, 4.1, 6.1')}
-// assets.json is its JSON twin; assets.test.ts checks every file under public/home/ against it.
+// assets.json holds every file's whole record; assets.test.ts and the check read every file under
+// public/home/ against it, and this module keeps what the page draws with.
 
 export type HomeAppearance = 'light' | 'dark';
 
@@ -2791,11 +2837,22 @@ export type HomeAssetRole =
   /** the page deck's PDF, 9 pages, requested only on the click of Download the PDF */
   | 'pdf'
   /** the glyphs below the first screen: one SVG sprite of icons.tsx's symbols (scripts/home/sprite.ts), at most 48 KB */
-  | 'glyphs';
+  | 'glyphs'
+  /** the Present band's figure: the product's presenter view of the page deck (scripts/home/capture.ts), at most 25 KB at x1 and 60 KB at x2 */
+  | 'presenter'
+  /** the export band's figure: the editor's Download dialog on the page deck (scripts/home/capture.ts), at most 20 KB at x1 and 40 KB at x2 */
+  | 'download-dialog'
+  /** a card of the patterns band: a still of the editor's Insert > Animated pattern gallery, at most 12 KB */
+  | 'pattern-card';
 
-/** A still's grid: \`wide\` at 2 px cells on the 1,024 px sheet, \`narrow\` on the 358 px sheet. */
-export type HomeAssetVariant = 'wide' | 'narrow';
+/** A still's grid: \`wide\` at 2 px cells on the 1,024 px sheet, \`narrow\` on the 358 px sheet; a figure's \`x1\` and \`x2\` files. */
+export type HomeAssetVariant = 'wide' | 'narrow' | 'x1' | 'x2';
 
+/**
+ * A served file as the page reads it. assets.json holds each file's whole record (its bytes,
+ * sha256, decoded pixels, part and pages), which the build's check, assets.test.ts and the rows
+ * read; the page's script carries only what it draws with.
+ */
 export type HomeAsset = {
   role: HomeAssetRole;
   /** null for a file both appearances share (a still is a mask in the sheet's ink) */
@@ -2803,19 +2860,22 @@ export type HomeAsset = {
   variant: HomeAssetVariant | null;
   /** the served path, content hashed: /home/<role>-<hash>.<ext> */
   path: string;
-  bytes: number;
-  sha256: string;
   width: number | null;
   height: number | null;
-  /** sha256 of the decoded pixels (RGBA, row major); null for a PDF and the glyph sprite */
-  pixelsSha256: string | null;
-  /** an export picture: sha256 of the part inside the file it was read from */
-  partSha256: string | null;
-  /** a PDF's page count */
-  pages: number | null;
 };
 
-export const HOME_ASSETS: readonly HomeAsset[] = ${JSON.stringify(assets, null, 2)};
+export const HOME_ASSETS: readonly HomeAsset[] = ${JSON.stringify(
+    assets.map(({ role, appearance, variant, path, width, height }) => ({
+      role,
+      appearance,
+      variant,
+      path,
+      width,
+      height,
+    })),
+    null,
+    2,
+  )};
 
 /** The file of a role in an appearance (and a variant); throws when the build has not written it. */
 export function homeAsset(
@@ -2866,7 +2926,18 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
   const pattern = await derivePattern();
   const chips = await deriveChips();
   const loupe = await deriveLoupe();
-  const { assets, files } = await deriveServed(stills, exportRec, pattern.files, loupe.files);
+  const figureFiles = [
+    ...(await derivePresenterFiles()),
+    ...(await deriveDownloadFiles()),
+    ...derivePatternCardFiles(),
+  ];
+  const { assets, files, cards } = await deriveServed(
+    stills,
+    exportRec,
+    pattern.files,
+    loupe.files,
+    figureFiles,
+  );
   const run = deriveRun({ pageDeck: page });
   const slideSources = await deriveSlidesSource(slides, stills, exportRec, assets, run.transcript);
   const assetSources = assetsSources(assets, loupe.loupe);
@@ -2950,6 +3021,13 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
       content: await formatTs(
         `${HOME}/menu-glyphs.generated.ts`,
         deriveMenuGlyphsModule(GENERATED_HEADER('--slides', 'docs/DESIGN.md 8.4')),
+      ),
+    },
+    {
+      path: `${HOME}/pattern-cards.generated.ts`,
+      content: await formatTs(
+        `${HOME}/pattern-cards.generated.ts`,
+        derivePatternCardsModule(GENERATED_HEADER('--stills', 'docs/DESIGN.md 8.12'), cards),
       ),
     },
     {

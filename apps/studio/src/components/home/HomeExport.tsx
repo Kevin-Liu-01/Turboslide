@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { homeAsset } from './assets';
 import { EXPORT } from './copy';
-import { DIAGRAMS_ROUND } from './design-copy';
+import { DIAGRAMS_ROUND, FIGURES_ROUND } from './design-copy';
 import { Diagram } from './HomeDiagram';
 import { HOME_EXPORT_FACTS } from './deck.generated';
 import { HOME_FACTS } from './facts';
@@ -21,8 +21,11 @@ import { ServerHtml } from './HomeSheet';
  * its own parts (each text frame at its `a:off` and `a:ext` with its runs, its picture parts and
  * its hairlines), its text
  * selectable. The cut is one CSS variable, `--seam-cut`, on a clip of the picture layer, at 50
- * percent at rest; the handle is a slider. Three ruled rows under it, the PDF a link with
- * `download` to the file in the page's appearance, requested only on the click: the markup names
+ * percent at rest; the handle is a slider. Under it (DESIGN.md 8.11), the editor's Download dialog
+ * as `scripts/home/capture.ts` captured it on the page deck (one picture per appearance at 1x and
+ * 2x), beside it the Perfect file's reading with the done glyph, the record's link and Download
+ * the PDF, a link with `download` to the file in the page's appearance, requested only on the
+ * click: the markup names
  * the light file, and the live module (`live/seam.ts`) names the shown appearance's from the band's
  * start and after every change of the appearance. The drag, the
  * keys and E1 are the live module's (L3, push 6; L4, push 7). Hooks: integrator.md 4.1, l3.md R8,
@@ -47,8 +50,14 @@ export function HomeExport() {
           style={{ '--seam-cut': '50%' } as CSSProperties}
         >
           <div className="ts-seam-labels" aria-hidden="true">
-            <span className="ts-seam-label">{EXPORT.labels.perfect}</span>
-            <span className="ts-seam-label">{EXPORT.labels.editable}</span>
+            <span className="ts-seam-label">
+              <i className="ts-icon" data-icon="photo" />
+              {EXPORT.labels.perfect}
+            </span>
+            <span className="ts-seam-label">
+              <i className="ts-icon" data-icon="document" />
+              {EXPORT.labels.editable}
+            </span>
           </div>
           <div className="ts-seam-box">
             {/* the Editable text side, written by the band's chunk after load (4.2) */}
@@ -87,37 +96,52 @@ export function HomeExport() {
           </div>
         </div>
       </Reserve>
-      <div className="ts-home-rows ts-export-rows">
-        <div className="ts-row">
-          <span className="ts-row-key">{EXPORT.rows.perfect.key}</span>
-          <span className="ts-row-value">{EXPORT.rows.perfect.sentence(size, HOME_FACTS)}</span>
-          <HomeLink
-            href={EXPORT.rows.perfect.link.href}
-            external
-            control={EXPORT.rows.perfect.link.id}
-            className="ts-row-link"
-          >
-            {EXPORT.rows.perfect.link.label}
-          </HomeLink>
-        </div>
-        <div className="ts-row">
-          <span className="ts-row-key">{EXPORT.rows.editable.key}</span>
-          <span className="ts-row-value">{EXPORT.rows.editable.sentence}</span>
-        </div>
-        <div className="ts-row">
-          <span className="ts-row-key">{EXPORT.rows.pdf.key}</span>
-          <span className="ts-row-value">{EXPORT.rows.pdf.sentence}</span>
-          <a
-            className="ts-row-link"
-            href={pdf.light.path}
-            download
-            data-pdf=""
-            data-href-light={pdf.light.path}
-            data-href-dark={pdf.dark.path}
-            data-control="home.export.pdf"
-          >
-            {EXPORT.rows.pdf.link}
-          </a>
+      <div className="ts-export-foot">
+        <figure className="ts-export-dialog" data-figure="download">
+          {(['light', 'dark'] as const).map((theme) => {
+            const x1 = homeAsset('download-dialog', theme, 'x1');
+            const x2 = homeAsset('download-dialog', theme, 'x2');
+            return (
+              <img
+                key={theme}
+                className={`ts-only-${theme}`}
+                src={x1.path}
+                srcSet={`${x1.path} 1x, ${x2.path} 2x`}
+                width={x1.width ?? undefined}
+                height={x1.height ?? undefined}
+                loading="lazy"
+                decoding="async"
+                alt={FIGURES_ROUND.download.alt}
+              />
+            );
+          })}
+        </figure>
+        <div className="ts-export-facts">
+          <p className="ts-export-readout">
+            <i className="ts-icon" data-icon="check-circle" />
+            <span>{EXPORT.rows.perfect.sentence(size, HOME_FACTS)}</span>
+          </p>
+          <p className="ts-export-links">
+            <a
+              className="pt-ib ts-button"
+              href={pdf.light.path}
+              download
+              data-pdf=""
+              data-href-light={pdf.light.path}
+              data-href-dark={pdf.dark.path}
+              data-control="home.export.pdf"
+            >
+              {EXPORT.rows.pdf.link}
+            </a>
+            <HomeLink
+              href={EXPORT.rows.perfect.link.href}
+              external
+              control={EXPORT.rows.perfect.link.id}
+              className="ts-row-link"
+            >
+              {EXPORT.rows.perfect.link.label}
+            </HomeLink>
+          </p>
         </div>
       </div>
       <p className="ts-sr" aria-live="polite" data-announce="" />

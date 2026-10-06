@@ -1957,6 +1957,26 @@ code.ts-command:not([data-printed]) {
   min-height: calc(576px + 56px);
 }
 
+/* the presenter view as the product draws it (DESIGN.md 8.10): a capture in a .pt-window figure
+   frame across the band, its picture in the shown appearance, its caption under it */
+.ts-present-figure {
+  margin: 40px 0 0;
+}
+
+.ts-figure-frame {
+  overflow: hidden;
+}
+
+.ts-figure-frame > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ts-present-figure > .ts-caption {
+  margin: 8px 0 0;
+}
+
 .ts-home-slide-list {
   list-style: none;
   margin: 16px 0 0;
@@ -2081,12 +2101,21 @@ code.ts-command:not([data-printed]) {
 }
 
 .ts-seam-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 8px;
   font-size: 13px;
   line-height: 16px;
   font-weight: 500;
   color: var(--pt-ink);
   background: var(--pt-paper);
+}
+
+.ts-seam-label > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--pt-ink-2);
 }
 
 .ts-seam-box {
@@ -2235,8 +2264,54 @@ code.ts-command:not([data-printed]) {
   outline-offset: 2px;
 }
 
-.ts-export-rows {
-  margin-top: 16px;
+/* under the seam (DESIGN.md 8.11): the editor's Download dialog as captured, at its own size with
+   its own corner and ring, and beside it the Perfect file's reading and the two links */
+.ts-export-foot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.ts-export-dialog {
+  margin: 0;
+}
+
+.ts-export-dialog > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.ts-export-readout {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+.ts-export-readout > .ts-icon {
+  flex: none;
+  margin-top: 3px;
+  color: var(--pt-status-done);
+}
+
+.ts-export-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0 0;
+}
+
+@media (max-width: 1023px) {
+  .ts-export-foot {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
 }
 
 /* the stored appearance shows one picture of each pair; the hidden one has no box and, being

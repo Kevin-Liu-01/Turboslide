@@ -2008,19 +2008,22 @@ async function homeScroll(p: Page): Promise<void> {
 }
 /**
  * The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358
- * (the second pass: the hero frame's slide 540 and 326; the agents band's slide 5 above the console
- * at 588 and 358 from V3#13, 2.9).
+ * (the second pass: the agents band's slide 5 above the console at 588 and 358 from V3#13, 2.9),
+ * as the design round redrew three bands (docs/DESIGN.md 8.2, 8.5, 8.6): the hero frame's slide
+ * 540 and 324 inside the editor frame's chrome, the lighthouse 648 beside the Format options
+ * panel, Tailor's stage 640 beside its dialog with its filmstrip of five across the top (118.4 and
+ * 66.8 each).
  */
 const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
-  hero: [540, 326],
+  hero: [540, 324],
   agents: [588, 358],
-  'tailor-stage': [856, 358],
-  'tailor-thumb-title': [144, 80],
-  'tailor-thumb-plan': [144, 80],
-  'tailor-thumb-gets': [144, 80],
-  'tailor-thumb-ships': [144, 80],
-  'tailor-thumb-next-steps': [144, 80],
-  canvas: [1024, 358],
+  'tailor-stage': [640, 358],
+  'tailor-thumb-title': [118.4, 66.8],
+  'tailor-thumb-plan': [118.4, 66.8],
+  'tailor-thumb-gets': [118.4, 66.8],
+  'tailor-thumb-ships': [118.4, 66.8],
+  'tailor-thumb-next-steps': [118.4, 66.8],
+  canvas: [648, 358],
   present: [588, 358],
   close: [1024, 358],
 };
@@ -2246,8 +2249,10 @@ test(title('decks.home.product-pictures'), async ({ browser }) => {
           failures.push(`${theme}: the instance ${instance} draws no slide of the page deck`);
       if (facts.themes > 0)
         failures.push(`${theme}: ${facts.themes} slides carry their own data-theme`);
+      /* role, appearance and variant, then the hash: the design round's figures name their 1x and
+         2x files x1 and x2 (scripts/home/figures.ts) */
       for (const src of facts.pictures)
-        if (!/^\/home\/[a-z-]+-[0-9a-f]{10}\.(webp|png|jpg)$/.test(src))
+        if (!/^\/home\/[a-z][a-z0-9-]*-[0-9a-f]{10}\.(webp|png|jpg)$/.test(src))
           failures.push(`${theme}: the picture ${src} is not a hashed file of assets.json`);
       if (facts.pictures.length === 0) failures.push(`${theme}: no picture shown`);
     } finally {

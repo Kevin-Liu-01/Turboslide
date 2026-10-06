@@ -352,10 +352,55 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   visibility: hidden;
 }
 
+/* Insert > Animated pattern under the pair (DESIGN.md 8.12): the path as crumbs, then the
+   gallery's stills with their names, nine to a row; the stills are square as thumbnails are */
+.ts-pattern-gallery {
+  margin-top: 40px;
+}
+
+.ts-pattern-cards {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 16px 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-pattern-card > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  background: var(--pt-plate);
+}
+
+.ts-pattern-card-name {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--pt-ink-2);
+}
+
+@media (max-width: 1023px) {
+  .ts-pattern-cards {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 719px) {
   .ts-patterns {
     grid-template-columns: minmax(0, 1fr);
     row-gap: 24px;
+  }
+
+  /* one row that scrolls sideways, its bar in the 8 px the shared rule reserves (6.3) */
+  .ts-pattern-cards {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 136px;
+    padding-bottom: 12px;
   }
 }
 

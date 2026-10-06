@@ -1,0 +1,22 @@
+{
+  "generator": "scripts/home/capture.ts --record",
+  "route": "/present/<the page deck>",
+  "viewport": {
+    "width": 1024,
+    "height": 640,
+    "deviceScaleFactor": 2
+  },
+  "slide": 2,
+  "files": [
+    {
+      "appearance": "light",
+      "file": "presenter-light.webp",
+      "sha256": "43916ba91c5cfa817a71aec0e2b3eee36b12f4ed6557c8483411be19cbe9f269"
+    },
+    {
+      "appearance": "dark",
+      "file": "presenter-dark.webp",
+      "sha256": "cb9fbbfa196621e91c0ddc07d5123f9d9c10c7193abcc7edebe42cf8961eacfc"
+    }
+  ]
+}

@@ -389,9 +389,13 @@ export const EXPORT = {
   lead: 'File > Download writes a PDF or a PowerPoint file. Drag the seam to see what each PowerPoint file holds.',
   /** the Download dialog's own mode names (packages/chrome/src/ExportMenu.tsx 85) */
   labels: { perfect: 'Perfect', editable: 'Editable text' },
+  /**
+   * Under the seam since the design round (docs/DESIGN.md 8.11): the editor's Download dialog as
+   * captured, the Perfect file's reading beside it with the done glyph, and the two links; the
+   * dialog's own words say what each file holds
+   */
   rows: {
     perfect: {
-      key: 'Perfect',
       sentence: (size: { width: number; height: number }, facts: HomeFacts): string =>
         `Each page is one picture, ${size.width} by ${size.height}. The worst GT deck page differs from its screenshot by ${formatPercentFigure(facts.mismatchPercent)}.`,
       link: {
@@ -400,8 +404,7 @@ export const EXPORT = {
         href: `${GITHUB_FILE}/docs/pptx.md`,
       },
     },
-    editable: { key: 'Editable text', sentence: 'Text boxes stay text boxes.' },
-    pdf: { key: 'PDF', sentence: 'Text stays text.', link: 'Download the PDF' },
+    pdf: { link: 'Download the PDF' },
   },
   slider: (percent: number): string =>
     `The Perfect file's picture fills ${Math.round(percent)} percent of the slide`,

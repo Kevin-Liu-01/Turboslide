@@ -359,11 +359,12 @@ export async function run(t) {
         const sheet = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
         const mark = sheet?.querySelector('.mark, [data-slot="mark"]');
         /* drawn means content in the slot, as the show read below requires: the kit's picture is
-           the img itself (render/slide.ts, renderMark), the default glyph an svg. The canvas
-           title's mark block for a kit whose mark is none is an empty div.mark-block.is-none that
-           keeps the block's box for the editor's selection and measure (render/blocks/misc.ts
-           renderMark, the fix round's R15), so a client rect alone is the placeholder, not a
-           logo (the features round, ship one: this read counted it drawn on the preview) */
+           the img itself (render/slide.ts, renderMark), the default glyph an svg. Since the Round 1
+           follow-up's lane B item 1 the renderer writes no element and no .free wrapper for the
+           canvas title's mark block of a kit whose mark is none (render/slide.ts
+           undrawnObjectIds, blocks/misc.ts titleMarkDrawsNothing), so the query finds nothing
+           there; the img or svg test still keeps any empty slot from reading as a logo (the
+           features round, ship one: a client rect alone was counted drawn on the preview) */
         const drawn =
           mark !== null &&
           mark !== undefined &&

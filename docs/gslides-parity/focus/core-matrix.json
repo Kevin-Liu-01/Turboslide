@@ -11366,12 +11366,12 @@
     {
       "id": "themes.picker.lists-library",
       "feature": "decks",
-      "interaction": "Slide > Change theme on a Simple deck from /new with two slides opens the Theme panel; its Themes section lists nine tiles named Simple, General Translation, Swiss, Mint, Coral, Night, Slate, Sand and Signal, each two live clones of the deck's own slides on that theme's paper; the Simple tile alone is checked and draws the 2 px ink border; In this presentation draws the deck's two slides, the name Simple and the row Brand kit: none",
+      "interaction": "Slide > Change theme on a Simple deck from /new with two slides opens the Theme panel; its Themes section lists nine tiles named Simple, General Translation, Swiss, Mint, Coral, Night, Slate, Sand and Signal, each two live clones of the deck's own slides on that theme's paper; the Simple tile alone is checked and draws the 2 px ink border; In this presentation draws the deck's two slides, the name Simple and the row Brand kit: none; every select, text field, hex field and the words field of the panel computes the 6 px control corner (--pt-radius) of its buttons",
       "driver": "core/brand.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "research-themes 5 (the panel offered GT light and GT dark and no other theme)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; ThemesPanel.tsx ThemeLibrary renders each tile's two slides through renderSlide with the tile's theme, a tile when it scrolls into the panel's view"
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; ThemesPanel.tsx ThemeLibrary renders each tile's two slides through renderSlide with the tile's theme, a tile when it scrolls into the panel's view; restated in the DR-D3 fix round for pass 1 finding 5 (the panel's 12 boxed controls read radius 0)"
     },
     {
       "id": "themes.picker.apply-one-commit",

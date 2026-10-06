@@ -100,7 +100,9 @@
 /* The Brand kit panel (ThemesPanel.tsx; docs/archive/rounds/PRODUCT.md 4.1): nine sections under 12 px titanium
    heads, the logo preview at 132 by 84 on the deck's appearance, six colour rows of a swatch,
    the role and a hex field, the Font dropdowns, the footer and counter fields, the frame checks
-   with one sentence each, the lexicon and the Reset button at the foot. Tokens only; radius 0. */
+   with one sentence each, the lexicon and the Reset button at the foot. Tokens only; the fields,
+   selects, hex fields and the words field at the control corner (--pt-radius, 6 px, DESIGN.md 3.1),
+   as the panel's buttons are. */
 .ts-brand-section {
   padding: 12px 16px 8px;
   border-bottom: 1px solid var(--pt-hair-soft);
@@ -213,7 +215,7 @@
   min-height: 30px;
   padding: 0 8px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);
@@ -292,7 +294,7 @@
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 12px/1 var(--pt-mono);

@@ -532,10 +532,22 @@ export function brandThemes(): string[] {
         '[data-control="panel.theme.current"] .ts-theme-clone .ts-sheet',
       ).length,
     }));
+    /* the panel's boxed controls (its selects, text and hex fields and the words field) take the
+       control corner its buttons take (DESIGN.md 3.1; pass 1 finding 5 read 12 of them at 0) */
+    const corners = await page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.ts-themes.ts-brand select, .ts-themes.ts-brand textarea, .ts-themes.ts-brand input:not([type="color"]):not([type="checkbox"]):not([type="file"])',
+        ),
+      ].map((el) => ({
+        control: el.getAttribute('data-control') ?? el.tagName.toLowerCase(),
+        radius: getComputedStyle(el).borderTopLeftRadius,
+      })),
+    );
     await page.keyboard.press('Escape');
     test.info().annotations.push({
       type: 'themes',
-      description: `tiles ${tiles.map((t) => `${t.name} (${t.clones} clones, papers ${t.papers.join(' ')}, current ${t.current}, border ${t.border})`).join('; ')}; In this presentation "${own.name}", "${own.kit}", ${own.clones} clones`,
+      description: `tiles ${tiles.map((t) => `${t.name} (${t.clones} clones, papers ${t.papers.join(' ')}, current ${t.current}, border ${t.border})`).join('; ')}; In this presentation "${own.name}", "${own.kit}", ${own.clones} clones; boxed controls ${corners.length}: ${corners.map((c) => `${c.control} ${c.radius}`).join(', ')}`,
     });
     expect(tiles.map((t) => t.name)).toEqual([
       'Simple',
@@ -559,6 +571,10 @@ export function brandThemes(): string[] {
     expect(own.name).toBe('Simple');
     expect(own.kit).toBe('Brand kit: none');
     expect(own.clones).toBe(2);
+    expect(corners.length, 'the panel draws its 12 selects and fields').toBeGreaterThanOrEqual(12);
+    expect(
+      corners.filter((c) => c.radius !== '6px').map((c) => `${c.control} ${c.radius}`),
+    ).toEqual([]);
   });
 
   /* DESIGN.md 7.6 item 3: a pick is one revision labelled "Theme: Swiss", one Undo step, and a

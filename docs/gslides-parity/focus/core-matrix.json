@@ -10760,6 +10760,16 @@
       "severity": 1,
       "evidence": "verify-landing.md finding 4 (production 2026-10-05: in the dark appearance the link carried /home/pdf-light-6f207f1381.pdf until a click rewrote it, probe-pdf.mjs)",
       "note": "Round 1 follow-up, lane E item 4: apps/studio/src/components/home/live/seam.ts names the file from the band's start, on every change of html[data-theme] and of the system appearance, and on the click; HomeExport.tsx's markup keeps the light file for a page without script"
+    },
+    {
+      "id": "home.export.one-mark",
+      "feature": "decks",
+      "interaction": "The export band draws one mark: the Perfect picture's footer logo corner (assets.json `export-perfect`, light) matches the Turboslide mark and not the GT monogram, and with the seam at 0 the Editable text side draws its footer logo picture over the paper plate the file puts behind it",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-landing.md finding 6 (production 2026-10-05: the Perfect side drew the GT monogram and \"07 / 09\" beside the page's Turboslide mark); build/ship.md 6 named it for Kevin",
+      "note": "Round 1 follow-up, lane E item 6: the exporter draws the theme's default logo, the GT monogram, for a deck whose kit names no footer logo, so the export's page deck takes the Turboslide mark as its footer logo (scripts/home/export.ts writeExportMark); the Perfect file lays that logo over its sheet picture a second time at 3x, and the build serves the sheet picture (scripts/build-home-assets.ts). The counter stays the exporter's \"07 / 09\" (the n / N format pads)"
     }
   ]
 }

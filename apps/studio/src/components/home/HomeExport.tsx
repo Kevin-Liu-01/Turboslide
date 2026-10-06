@@ -12,9 +12,11 @@ import { ServerHtml } from './HomeSheet';
  * Export to PDF and PowerPoint (docs/LANDING.md 2.12, Kevin's picks "C: Export seam" and "B:
  * Export loupe", the loupe V3#17's): slide 7 (the opener field's slide) at the column's width,
  * unframed, in the band's reserved box, as the two files the CLI writes meet at a
- * seam: left of the cut, the Perfect file's one picture (its part, served as lossless WebP of the
- * same pixels); right of it, the Editable text file's slide drawn from its own parts (each text
- * frame at its `a:off` and `a:ext` with its runs, its picture parts and its hairlines), its text
+ * seam: left of the cut, the Perfect file's picture of the whole slide (its part, served as
+ * lossless WebP of the same pixels; the file lays the deck's footer logo, the Turboslide mark the
+ * page draws, over it a second time at 3x); right of it, the Editable text file's slide drawn from
+ * its own parts (each text frame at its `a:off` and `a:ext` with its runs, its picture parts and
+ * its hairlines), its text
  * selectable. The cut is one CSS variable, `--seam-cut`, on a clip of the picture layer, at 50
  * percent at rest; the handle is a slider. Three ruled rows under it, the PDF a link with
  * `download` to the file in the page's appearance, requested only on the click: the markup names

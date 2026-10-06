@@ -38,13 +38,14 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 import { MAX_DELTA, colorDelta } from '../../apps/studio/src/components/home/live/loupe-delta.ts';
+import { MARK_LABEL, MARK_PATH, MARK_VIEWBOX } from '../../packages/theme/src/brand.ts';
+import { TOKENS } from '../../packages/theme/src/tokens.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const FIXTURE = 'apps/studio/home-deck';
 const RECORDED = `${FIXTURE}/recorded`;
 const OUT = `${FIXTURE}/recorded-loupe`;
 const CLI = 'apps/cli/bin/turboslide.mjs';
-const ASSETS_JSON = 'apps/studio/src/components/home/assets.json';
 const PUBLIC_DIR = 'apps/studio/public/home';
 /** Slide 7, the opener field's slide (LANDING.md 2.0). */
 const SLIDE = 'field';
@@ -60,6 +61,63 @@ function fail(message: string): never {
 
 const sha256 = (bytes: Uint8Array | string): string =>
   createHash('sha256').update(bytes).digest('hex');
+
+/** The asset id of the Turboslide mark the exported page deck draws in its footer. */
+export const EXPORT_MARK_ID = 'turboslide-mark';
+
+/** The mark's PNG twins: 18 px tall in the footer, at scale 3. */
+const MARK_TWIN_HEIGHT = 54;
+
+/**
+ * Gives a page deck written for the exporter the footer logo the page draws on every slide: the
+ * Turboslide mark (`MARK_PATH`), which the page's build writes in place of the theme's GT wordmark
+ * (`#ts-mark`, build-home-assets.ts). Without it the exporter draws the theme's default logo, the GT
+ * monogram, so the export band's Perfect and Editable text sides showed the GT monogram beside the
+ * page's Turboslide mark (verify-landing.md finding 6). The mark is a logo asset in the theme's
+ * titanium per appearance, as SVG with PNG twins, and the kit's footer names it.
+ */
+export async function writeExportMark(dir: string): Promise<void> {
+  const [, , w, h] = MARK_VIEWBOX.split(' ').map(Number) as [number, number, number, number];
+  const width = Math.round((MARK_TWIN_HEIGHT * w) / h);
+  const files: Record<'light' | 'dark', { svg: string; png: string }> = {
+    light: { svg: '', png: '' },
+    dark: { svg: '', png: '' },
+  };
+  mkdirSync(join(dir, 'assets'), { recursive: true });
+  for (const theme of THEMES) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_VIEWBOX}" fill="${TOKENS[theme].titanium}"><path d="${MARK_PATH}"/></svg>\n`;
+    const svgFile = `assets/${EXPORT_MARK_ID}-${theme}.svg`;
+    const pngFile = `assets/${EXPORT_MARK_ID}-${theme}.png`;
+    writeFileSync(join(dir, svgFile), svg);
+    writeFileSync(
+      join(dir, pngFile),
+      await sharp(Buffer.from(svg)).resize({ width, height: MARK_TWIN_HEIGHT }).png().toBuffer(),
+    );
+    files[theme] = { svg: svgFile, png: pngFile };
+  }
+  const path = join(dir, 'deck.json');
+  const deck = JSON.parse(readFileSync(path, 'utf8')) as {
+    brand?: Record<string, unknown>;
+    assets?: Record<string, unknown>;
+  };
+  deck.assets = {
+    ...deck.assets,
+    [EXPORT_MARK_ID]: {
+      id: EXPORT_MARK_ID,
+      role: 'logo',
+      alt: MARK_LABEL,
+      kind: 'svg',
+      vector: { light: files.light.svg, dark: files.dark.svg },
+      twins: { light: files.light.png, dark: files.dark.png },
+      size: [width, MARK_TWIN_HEIGHT],
+      scale: 3,
+      source: { kind: 'file' },
+      inline: 'pass-through',
+    },
+  };
+  deck.brand = { ...deck.brand, footer: { logo: 'picture', assetId: EXPORT_MARK_ID } };
+  writeFileSync(path, `${JSON.stringify(deck, null, 2)}\n`);
+}
 
 /** The page deck on disk: the fixture with the recorded slide 5 and sections (the entry's writePageDeck). */
 function writePageDeck(dir: string): void {
@@ -125,13 +183,15 @@ async function pixels(
 
 /** The Perfect picture of each appearance as `assets.json` serves it. */
 function perfectFile(theme: Theme): string {
+  /* the export's own record, which the entry's --export writes before assets.json is derived from
+     it, so a new export is read here before the entry writes assets.json again */
   const assets = (
-    JSON.parse(readFileSync(resolve(ROOT, ASSETS_JSON), 'utf8')) as {
+    JSON.parse(readFileSync(resolve(ROOT, RECORDED, 'export.json'), 'utf8')) as {
       assets: { role: string; appearance: string | null; path: string }[];
     }
   ).assets;
   const found = assets.find((a) => a.role === 'export-perfect' && a.appearance === theme);
-  if (found === undefined) fail(`assets.json has no export-perfect for ${theme}`);
+  if (found === undefined) fail(`${RECORDED}/export.json has no export-perfect for ${theme}`);
   return resolve(ROOT, PUBLIC_DIR, found.path.replace(/^\/home\//, ''));
 }
 
@@ -164,6 +224,7 @@ export async function recordLoupe(): Promise<void> {
   try {
     const deck = join(work, 'deck');
     writePageDeck(deck);
+    await writeExportMark(deck);
     const sha = deckSha(deck);
     const out = join(work, 'render');
     const result = spawnSync(

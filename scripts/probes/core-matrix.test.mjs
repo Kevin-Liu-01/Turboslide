@@ -1684,6 +1684,7 @@ const LANDING_FOLLOWUP = [
   'home.present.no-prompts',
   'home.hero.thumb-frames',
   'home.export.pdf-appearance',
+  'home.export.one-mark',
 ];
 const FOLLOWUP_NOTE = /^Round 1 follow-up, lane E item \d/;
 /* a first pass id and the second pass row that replaces it (LANDING.md 6.7) */

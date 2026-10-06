@@ -1,38 +1,33 @@
 {
   "generator": "scripts/home/export.ts --record",
-  "pageDeckSha256": "feec7490c43f3895fe8914ad7fb80ff238b348c8307db13fd7e9b75ba7ac69de",
+  "pageDeckSha256": "c8ed8f81d48f48d663b11cb3eda2bfc14a336fd9d032978664107487eae46c0d",
   "renderer": "Chrome for Testing 147.0.7727.15",
   "rasters": {
     "light": {
       "file": "browser-light.webp",
-      "bytes": 37844,
-      "sha256": "8694d3dfc84525b7c9493edcc61d660155b7f7d1a1ad75f3bfbf86cc30955b13",
-      "pixelsSha256": "c5753103dbe3198e016a1b50faaffacba3ec7b0e39bb2bfcd41abe4457f1baab"
+      "bytes": 37722,
+      "sha256": "85c4e76f033d7197be3a7c6c1045ee08e4c01e713355885974c5069d465a11ee",
+      "pixelsSha256": "2d04485ce74cfa3381d2335a36089c353b2da1add576a23c660d7b72c5b3fc0d"
     },
     "dark": {
       "file": "browser-dark.webp",
-      "bytes": 37964,
-      "sha256": "98372edb70992687a7ffd555d61b4f613457129084ae44f97dcdbc99fc284b00",
-      "pixelsSha256": "0d90bf811b20e6d9a32ef985af4ed24df33456acdfbd3b0862bf66ed2f187565"
+      "bytes": 37852,
+      "sha256": "a7902623250abea28ac2e0104888bf81c0d9f0c139b1bfe1eeb4e2aab3756989",
+      "pixelsSha256": "e0b3cb35906b92a61ce3bfd89c98098675166a65f28607b679cb0ebf937014ba"
     }
   },
   "loupe": {
     "light": {
       "differing": 0,
       "total": 5760000,
-      "perfect": "c2b3ddbf8d116a7cc9508a0fc851f3b8df67e7087a2edcfe6241f5cecf5f38ac",
+      "perfect": "3341fd84bbdf36f78633ac95381d29caa1655ed621920d7e6c243e35735cbfb2",
       "where": []
     },
     "dark": {
-      "differing": 1,
+      "differing": 0,
       "total": 5760000,
-      "perfect": "51b954599c6e1880013d20e87ee38cc5ed778c5328802053957693ea154bbf37",
-      "where": [
-        [
-          161,
-          1731
-        ]
-      ]
+      "perfect": "6c4bf7ea58edf3dc6302d0b7339bfde2f4dec2e0d953ebb72eda45b03c51f340",
+      "where": []
     }
   }
 }

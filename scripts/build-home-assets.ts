@@ -94,7 +94,7 @@ import type { PanelWidth } from '../apps/studio/src/components/home/panel-format
 /* the lanes' build modules (docs/LANDING.md 6.1, 6.4): V3's chips and loop, V4's boot script and
    slide 8's still frame; the entry calls them and writes what they return */
 import { deriveChips, recordChips } from './home/run.ts';
-import { deriveLoupe } from './home/export.ts';
+import { deriveLoupe, writeExportMark } from './home/export.ts';
 import { deriveBoot } from './home/boot.ts';
 import { deriveMenus } from './home/menus.ts';
 import { derivePattern } from './home/pattern.ts';
@@ -727,6 +727,8 @@ async function exportMode(): Promise<void> {
   try {
     const deckDir = join(work, 'deck');
     writePageDeck(deckDir);
+    /* the footer logo the page draws on every slide, so the files draw one mark with the page */
+    await writeExportMark(deckDir);
     const zipLib = loadJsZip();
     const assets: ServedAsset[] = [];
     const written: { name: string; bytes: Uint8Array }[] = [];
@@ -776,17 +778,26 @@ async function exportMode(): Promise<void> {
           fail(`turboslide ${argv.join(' ')} wrote ${found.join(', ') || 'nothing'} in ${dir}`);
         files[kind] = join(dir, found[0] as string);
       }
-      /* the Perfect file: slide 7's one picture */
+      /* the Perfect file: slide 7's one picture of the whole sheet; the footer logo the kit names
+         is a second picture laid over its own drawing in that picture, at 3x, so the mark stays
+         sharp (packages/export scene/kit-logos.ts), and no other picture is allowed */
       const flat = await zipLib.loadAsync(new Uint8Array(readFileSync(files['flatten'] as string)));
       const flatXml =
         (await flat.file('ppt/slides/slide7.xml')?.async('string')) ??
         fail('the Perfect file has no slide 7');
       const flatRels = await slideRels(flat, 7);
-      const embeds = [...flatXml.matchAll(/r:embed="([^"]+)"/g)].map((m) => m[1] as string);
-      if (embeds.length !== 1)
-        fail(`slide 7 of the Perfect file holds ${embeds.length} pictures, not one`);
+      const flatPics = [...flatXml.matchAll(/<p:pic>([\s\S]*?)<\/p:pic>/g)].map((m) => ({
+        name: /<p:cNvPr [^>]*name="([^"]*)"/.exec(m[1] as string)?.[1] ?? '',
+        embed: /<a:blip r:embed="([^"]+)"/.exec(m[1] as string)?.[1] ?? '',
+      }));
+      const sheets = flatPics.filter((pic) => pic.name.endsWith('#sheet'));
+      const others = flatPics.filter((pic) => !pic.name.endsWith('#sheet'));
+      if (sheets.length !== 1 || others.some((pic) => !/#footer-logo:\d+$/.test(pic.name)))
+        fail(
+          `slide 7 of the Perfect file holds ${flatPics.map((pic) => pic.name).join(', ')}, not one sheet picture and the footer logo`,
+        );
       const perfectPart =
-        flatRels.get(embeds[0] as string) ?? fail('the Perfect picture has no relationship');
+        flatRels.get(sheets[0]?.embed ?? '') ?? fail('the Perfect picture has no relationship');
       const perfectBytes =
         (await flat.file(perfectPart)?.async('uint8array')) ?? fail(`${perfectPart} is missing`);
       const perfectMeta = await sharp(perfectBytes).metadata();
@@ -2272,21 +2283,28 @@ async function deriveSlidesSource(
       t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const box = (b: { x: number; y: number; w: number; h: number }): string =>
       `left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px`;
-    const pictures = exportRec.editable.pictures
-      .map((p) =>
-        (['light', 'dark'] as const)
-          .map((theme) => {
-            const asset =
-              assets.filter((a) => a.role === 'export-editable' && a.appearance === theme)[
-                p.index
-              ] ?? fail('an Editable text picture is missing');
-            /* the slide's picture is named; the frame band's wordmark picture is decorative */
-            const alt = p.w >= 1600 && p.h >= 900 ? ALT.field : '';
-            return `<img class="ts-home-ed-pic ts-only-${theme}" src="${asset.path}" width="${asset.width}" height="${asset.height}" loading="lazy" decoding="async" alt="${alt}" style="${box(p)}">`;
-          })
-          .join(''),
-      )
-      .join('');
+    const picturesOf = (list: RecordedExport['editable']['pictures']): string =>
+      list
+        .map((p) =>
+          (['light', 'dark'] as const)
+            .map((theme) => {
+              const asset =
+                assets.filter((a) => a.role === 'export-editable' && a.appearance === theme)[
+                  p.index
+                ] ?? fail('an Editable text picture is missing');
+              /* the slide's picture is named; the frame band's wordmark picture is decorative */
+              const alt = p.w >= 1600 && p.h >= 900 ? ALT.field : '';
+              return `<img class="ts-home-ed-pic ts-only-${theme}" src="${asset.path}" width="${asset.width}" height="${asset.height}" loading="lazy" decoding="async" alt="${alt}" style="${box(p)}">`;
+            })
+            .join(''),
+        )
+        .join('');
+    /* the slide's own picture under the file's paper plates, and the footer logo's picture over
+       the plate the file draws behind it, as the file stacks them; drawn under the plates, the
+       logo was hidden on this side (verify-landing.md finding 6) */
+    const whole = (p: { w: number; h: number }): boolean => p.w >= 1600 && p.h >= 900;
+    const pictures = picturesOf(exportRec.editable.pictures.filter(whole));
+    const logos = picturesOf(exportRec.editable.pictures.filter((p) => !whole(p)));
     /* each line of the file a filled 1 px rectangle in sheet units, one path per role (the
        hairlines, the crosses) in one SVG over the slide, so twelve lines cost one element */
     const rect = (l: { x: number; y: number; w: number; h: number }): string =>
@@ -2321,7 +2339,7 @@ async function deriveSlidesSource(
           `<div class="ts-home-ed-frame" data-seam-text style="${box(f)}">${f.paragraphs.map(para).join('')}</div>`,
       )
       .join('');
-    editable = `<div class="ts-home-editable">${pictures}${fills}${lines}${frames}</div>`;
+    editable = `<div class="ts-home-editable">${pictures}${fills}${logos}${lines}${frames}</div>`;
   }
   const esc = (text: string): string =>
     text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

@@ -12,6 +12,8 @@ import { HOME_DECK } from '../../../src/components/home/deck.generated';
 import { EXPORT, formatPercentFigure } from '../../../src/components/home/copy';
 import { HOME_FACTS } from '../../../src/components/home/facts';
 import FACTS from '../../../../../packages/theme/brand/facts.json' with { type: 'json' };
+import { MARK_PATH, MARK_VIEWBOX } from '@turboslide/theme/brand';
+import { SPRITE } from '@turboslide/theme/sprite';
 import { extraHTTPHeaders, title } from '../lib';
 import { bandReady, freshPage, openHome } from './agents';
 
@@ -27,6 +29,7 @@ export const ROWS: readonly string[] = [
   'home.export.figure',
   'home.export.loupe',
   'home.export.pdf-appearance',
+  'home.export.one-mark',
 ];
 
 const ROOT = resolve(import.meta.dirname, '../../../../..');
@@ -384,5 +387,71 @@ export function rows(): void {
         expect(asked).toEqual([]);
         await page.context().close();
       }
+  });
+
+  test(title('home.export.one-mark'), async ({ browser }) => {
+    test.setTimeout(180_000);
+    /* the footer logo's corner of slide 7 at the Perfect picture's 2x: 72 by 52 px from x 136,
+       y 1720, which holds the frame band's logo slot (left 72, 18 px tall, its top at 864) */
+    const REGION = { left: 136, top: 1720, width: 72, height: 52 };
+    const require = createRequire(resolve(ROOT, 'package.json'));
+    const sharp = require('sharp') as (
+      b: Buffer,
+      o?: { density: number },
+    ) => {
+      extract(r: typeof REGION): { greyscale(): { raw(): { toBuffer(): Promise<Buffer> } } };
+      greyscale(): { raw(): { toBuffer(): Promise<Buffer> } };
+    };
+    /* ink: a pixel darker than the paper by more than a quarter */
+    const maskOf = (raw: Buffer): boolean[] => [...raw].map((v) => v < 192);
+    const markAt = (box: { w: number }, viewBox: string, body: string): string =>
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${REGION.width}" height="${REGION.height}"><rect width="100%" height="100%" fill="#ffffff"/><svg x="8" y="8" width="${box.w}" height="36" viewBox="${viewBox}" fill="#8a8f98">${body}</svg></svg>`;
+    const drawn = async (svg: string): Promise<boolean[]> =>
+      maskOf(await sharp(Buffer.from(svg), { density: 72 }).greyscale().raw().toBuffer());
+    const iou = (a: boolean[], b: boolean[]): number => {
+      let both = 0;
+      let either = 0;
+      for (let i = 0; i < a.length; i += 1) {
+        if (a[i] && b[i]) both += 1;
+        if (a[i] || b[i]) either += 1;
+      }
+      return either === 0 ? 0 : both / either;
+    };
+    /* the Turboslide mark as the kit's picture logo, 26 by 18; the GT monogram as the theme's
+       wordmark, 28 by 18 (packages/render stage.ts) */
+    const turboslide = await drawn(markAt({ w: 52 }, MARK_VIEWBOX, `<path d="${MARK_PATH}"/>`));
+    const gt = await drawn(markAt({ w: 56 }, SPRITE['gt-mark'].viewBox, SPRITE['gt-mark'].body));
+    const page = await freshPage(browser);
+    await openHome(page);
+    await bandReady(page, 'export');
+    const perfectPath = HOME_ASSETS.find(
+      (a) => a.role === 'export-perfect' && a.appearance === 'light',
+    )!.path;
+    const perfect = Buffer.from(await (await page.request.get(perfectPath)).body());
+    const corner = maskOf(await sharp(perfect).extract(REGION).greyscale().raw().toBuffer());
+    const readings = { turboslide: iou(corner, turboslide), gt: iou(corner, gt) };
+    test.info().annotations.push({
+      type: 'reading',
+      description: `the Perfect picture's logo corner against the Turboslide mark ${readings.turboslide.toFixed(2)}, against the GT monogram ${readings.gt.toFixed(2)}`,
+    });
+    expect(readings.turboslide, 'the Perfect picture draws the Turboslide mark').toBeGreaterThan(
+      0.6,
+    );
+    expect(readings.gt, 'and not the GT monogram').toBeLessThan(readings.turboslide);
+    /* the Editable text side draws its logo picture over the paper plate the file puts behind it */
+    await band(page).locator('[data-seam]').focus();
+    await page.keyboard.press('Home');
+    const logo = band(page).locator('.ts-home-ed-pic.ts-only-light[alt=""]').first();
+    await expect(logo).toBeVisible();
+    /* the stack at the logo's centre, top first: the logo above every paper plate */
+    const stack = await logo.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return document
+        .elementsFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+        .map((x) => (x === el ? 'logo' : x.classList.contains('ts-home-ed-fill') ? 'plate' : ''))
+        .filter((x) => x !== '');
+    });
+    expect(stack[0], 'the Editable text side draws its footer logo over its plate').toBe('logo');
+    await page.context().close();
   });
 }

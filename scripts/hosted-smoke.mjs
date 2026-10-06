@@ -348,7 +348,7 @@ const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
  */
 const HOME_MARKS = [
   'class="ts-product"',
-  'It has menus and keyboard shortcuts for editing, arranging and presenting.',
+  'It has menus and keyboard shortcuts. No account is needed.',
   '<script type="speculationrules"',
 ];
 

@@ -132,8 +132,11 @@ export const HERO = {
     'Turboslide puts one customer name on every slide.',
     'Turboslide downloads PDF and PowerPoint files.',
   ],
-  /** the lead after its first sentence */
-  lead: 'It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.',
+  /**
+   * the lead after its first sentence; at 390 its text must paint less area than the h1, which is
+   * the LCP element (home.budget.lcp; the longer sentence of 680bc8a9 made the lead the LCP element)
+   */
+  lead: 'It has menus and keyboard shortcuts. No account is needed.',
   buttons: {
     newPresentation: { label: 'New Presentation', href: '/new' },
     openDeck: { label: 'Open the Example Deck', deckId: 'gt-brand' },

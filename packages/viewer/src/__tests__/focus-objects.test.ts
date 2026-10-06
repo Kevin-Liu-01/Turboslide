@@ -16,7 +16,7 @@ import {
   toolBlock,
   toolInsertMutation,
 } from '../Gestures';
-import { stageOwnsClipboard } from '../Selection';
+import { pasteMovesFocus, stageOwnsClipboard } from '../Selection';
 import {
   FREE_SNAP_PX,
   boxSnapLines,
@@ -139,6 +139,21 @@ describe('the stage owns the clipboard (FOCUS.md rank 15: paste after New slide,
     expect(stageOwnsClipboard(document.querySelector('button'), stage, false)).toBe(true);
     expect(stageOwnsClipboard(document.querySelector('.ts-card'), stage, false)).toBe(true);
     expect(stageOwnsClipboard(null, stage, false)).toBe(true);
+  });
+
+  it('moves the focus to the stage after a paste of objects from a filmstrip card or a toolbar button, never after a paste of slides', () => {
+    const stage = build(`
+      <div class="ts-toolbar" role="toolbar"><button data-control="toolbar.newSlide">New</button></div>
+      <div role="listbox" class="ts-filmstrip"><div class="ts-card" role="option" tabindex="0">1</div></div>
+      <div class="ts-stage"><section class="slide"><div class="free"></div></section></div>
+    `);
+    const card = document.querySelector('.ts-card');
+    expect(pasteMovesFocus(card, stage, 'objects')).toBe(true);
+    expect(pasteMovesFocus(document.querySelector('button'), stage, 'objects')).toBe(true);
+    expect(pasteMovesFocus(card, stage, 'slides')).toBe(false);
+    expect(pasteMovesFocus(document.querySelector('.free'), stage, 'objects')).toBe(false);
+    expect(pasteMovesFocus(null, stage, 'objects')).toBe(false);
+    expect(pasteMovesFocus(card, null, 'objects')).toBe(false);
   });
 
   it('leaves the event to a field, an editable region, an open text session, a dialog, a menu and the Format options panel', () => {

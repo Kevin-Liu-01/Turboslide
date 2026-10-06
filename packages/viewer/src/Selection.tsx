@@ -230,6 +230,22 @@ export function stageOwnsClipboard(
   return target.closest(CLIPBOARD_KEEPERS) === null;
 }
 
+/**
+ * True when a paste the stage took moves the keyboard focus to the stage: the paste lands objects
+ * on the slide, which the stage draws selected, while the focus sits outside the stage on a
+ * filmstrip card or a toolbar button. Without the move the card kept the focus and the next
+ * Delete removed the card's slide, not the objects drawn selected (the Round 1 follow-up, lane
+ * D's request 5). A paste of slides leaves the focus where it is.
+ */
+export function pasteMovesFocus(
+  target: EventTarget | null,
+  stage: Element | null,
+  lands: 'objects' | 'slides',
+): boolean {
+  if (lands === 'slides' || stage === null || !(target instanceof Element)) return false;
+  return !stage.contains(target);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Multi-selection (this round's directive: Shift click and the marquee on a freeform slide)
 

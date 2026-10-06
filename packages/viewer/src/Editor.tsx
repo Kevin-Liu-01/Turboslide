@@ -276,6 +276,7 @@ import {
   selectedBlockId,
   selectedIds,
   selectionOf,
+  pasteMovesFocus,
   stageOwnsClipboard,
   toggleSelected,
 } from './Selection';
@@ -5947,6 +5948,12 @@ export function Editor({
       }
       if (e.type === 'cut') removeSelected();
     };
+    /* the pasted objects are drawn selected on the stage, so the keys after the paste are the
+       stage's (Selection.tsx pasteMovesFocus) */
+    const focusPasted = (e: ClipboardEvent, lands: 'objects' | 'slides'): void => {
+      if (pasteMovesFocus(e.target, root.current, lands))
+        root.current?.focus({ preventScroll: true });
+    };
     const onPaste = (e: ClipboardEvent) => {
       /* a paste a session, a grid or a field already took (its default prevented) is not the
          stage's, whatever the target reads as by the time the event reaches the document */
@@ -5956,6 +5963,7 @@ export function Editor({
       const files = imageFilesOf(e.clipboardData);
       if (files.length > 0) {
         e.preventDefault();
+        focusPasted(e, 'objects');
         const [first] = files;
         if (first) void insertPicture(first, { way: 'paste' });
         return;
@@ -5966,6 +5974,7 @@ export function Editor({
       if (plain) {
         if (text === '') return;
         e.preventDefault();
+        focusPasted(e, 'objects');
         void pastePayload({ kind: 'text', text }, true);
         return;
       }
@@ -5973,6 +5982,7 @@ export function Editor({
       const envelope = envelopeOf(e.clipboardData);
       if (envelope !== null) {
         e.preventDefault();
+        focusPasted(e, envelope.kind === 'slides' ? 'slides' : 'objects');
         void pastePayload(envelope, false);
         return;
       }
@@ -5980,12 +5990,14 @@ export function Editor({
       const markup = svgMarkupOf(e.clipboardData);
       if (markup !== null) {
         e.preventDefault();
+        focusPasted(e, 'objects');
         void insertPicture(svgFileOf(markup), { way: 'paste' });
         return;
       }
       const payload = decodeClipboard(text) ?? clipboardRef.current.last();
       if (payload === null) return;
       e.preventDefault();
+      focusPasted(e, payload.kind === 'slides' ? 'slides' : 'objects');
       void pastePayload(payload, false);
     };
     document.addEventListener('copy', onCopyOrCut);

@@ -14,7 +14,7 @@ export const MINI_DOCS: readonly string[] = [
   '',
   'Copies the address of this presentation; whoever opens it needs their own access.',
   '',
-  'Perfect by default, or Editable text.',
+  'Pictures by default, or Editable text.',
   'One slide per page.',
   '',
   '',

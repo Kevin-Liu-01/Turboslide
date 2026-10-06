@@ -17,7 +17,9 @@ import { ServerHtml } from './HomeSheet';
  * frame at its `a:off` and `a:ext` with its runs, its picture parts and its hairlines), its text
  * selectable. The cut is one CSS variable, `--seam-cut`, on a clip of the picture layer, at 50
  * percent at rest; the handle is a slider. Three ruled rows under it, the PDF a link with
- * `download` to the file in the page's appearance, requested only on the click. The drag, the
+ * `download` to the file in the page's appearance, requested only on the click: the markup names
+ * the light file, and the live module (`live/seam.ts`) names the shown appearance's from the band's
+ * start and after every change of the appearance. The drag, the
  * keys and E1 are the live module's (L3, push 6; L4, push 7). Hooks: integrator.md 4.1, l3.md R8,
  * R8b.
  */

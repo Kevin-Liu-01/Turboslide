@@ -171,11 +171,23 @@ export function startSeam(ctx: LiveContext): void {
     setCut(next);
   });
 
-  /* Download the PDF: the file in the shown appearance, requested only on the click (l3.md R8) */
+  /* Download the PDF: the file in the shown appearance, requested only on the click (l3.md R8).
+     The href names that file from the band's start and after every change of the appearance (the
+     nav's Light and Dark, or the system's while no choice is stored), so a copied link, a new tab
+     and a middle click take it too, where they took the light file the markup names
+     (verify-landing.md finding 4) */
   const pdf = band.querySelector<HTMLAnchorElement>('a[data-pdf]');
-  if (pdf !== null && pdf.dataset['hrefDark'] !== undefined)
-    pdf.addEventListener('click', () => {
+  if (pdf !== null && pdf.dataset['hrefDark'] !== undefined) {
+    const point = (): void => {
       const href = appearance() === 'dark' ? pdf.dataset['hrefDark'] : pdf.dataset['hrefLight'];
-      if (href !== undefined) pdf.href = href;
+      if (href !== undefined && pdf.getAttribute('href') !== href) pdf.setAttribute('href', href);
+    };
+    point();
+    new MutationObserver(point).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
     });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', point);
+    pdf.addEventListener('click', point);
+  }
 }

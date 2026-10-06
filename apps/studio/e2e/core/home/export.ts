@@ -26,6 +26,7 @@ export const ROWS: readonly string[] = [
   'home.export.seam',
   'home.export.figure',
   'home.export.loupe',
+  'home.export.pdf-appearance',
 ];
 
 const ROOT = resolve(import.meta.dirname, '../../../../..');
@@ -354,5 +355,34 @@ export function rows(): void {
       await expect(darkLoupe).toBeHidden();
     }
     await dark.context().close();
+  });
+
+  test(title('home.export.pdf-appearance'), async ({ browser }) => {
+    test.setTimeout(180_000);
+    const fileOf = (appearance: 'light' | 'dark'): string =>
+      HOME_ASSETS.find((a) => a.role === 'pdf' && a.appearance === appearance)?.path ?? '';
+    for (const width of ['desktop', 'phone'] as const)
+      for (const scheme of ['light', 'dark'] as const) {
+        const other = scheme === 'dark' ? 'light' : 'dark';
+        const page = await freshPage(browser);
+        const asked: string[] = [];
+        page.on('request', (r) => {
+          if (/\/home\/.*\.pdf/.test(r.url())) asked.push(new URL(r.url()).pathname);
+        });
+        await page.emulateMedia({ colorScheme: scheme });
+        await openHome(page, width);
+        await bandReady(page, 'export');
+        const link = band(page).locator('a[data-pdf]');
+        /* the shown appearance's file before any click, so a copied link or a new tab takes it */
+        await expect(link, `${width} ${scheme} at rest`).toHaveAttribute('href', fileOf(scheme));
+        /* the nav's other appearance, then back: the href follows each change */
+        await page.locator(`[data-theme-option="${other}"]`).click();
+        await expect(link, `${width} after ${other}`).toHaveAttribute('href', fileOf(other));
+        await page.locator(`[data-theme-option="${scheme}"]`).click();
+        await expect(link, `${width} after ${scheme}`).toHaveAttribute('href', fileOf(scheme));
+        /* naming the file requests nothing */
+        expect(asked).toEqual([]);
+        await page.context().close();
+      }
   });
 }

@@ -10750,6 +10750,16 @@
       "severity": 1,
       "evidence": "verify-landing.md finding 3 (production 2026-10-05: S-pt3.png against S-pt2.png, slide 1's thumbnail with no edge after Set the Title, its ::after still computing 2 px solid ink)",
       "note": "Round 1 follow-up, lane E item 3: nothing painted over the frame; Chromium's moveBefore left slide 1's thumbnail without its ::after box when a step reordered the strip several times in one task, so the strip reorders by insertBefore (apps/studio/src/components/home/live/hero-stage.ts reorder) and gives the focus back; live/hero-stage.test.ts pins the moves"
+    },
+    {
+      "id": "home.export.pdf-appearance",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in each appearance, Download the PDF's href names the shown appearance's file (assets.json `pdf`) once the export band has started, before any click, and follows the nav's Light and Dark presses both ways; naming the file requests nothing",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-landing.md finding 4 (production 2026-10-05: in the dark appearance the link carried /home/pdf-light-6f207f1381.pdf until a click rewrote it, probe-pdf.mjs)",
+      "note": "Round 1 follow-up, lane E item 4: apps/studio/src/components/home/live/seam.ts names the file from the band's start, on every change of html[data-theme] and of the system appearance, and on the click; HomeExport.tsx's markup keeps the light file for a page without script"
     }
   ]
 }

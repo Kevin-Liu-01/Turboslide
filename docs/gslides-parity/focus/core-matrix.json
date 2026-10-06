@@ -10449,7 +10449,7 @@
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#5"
     },
     {
       "id": "home.page.markup-final",
@@ -11357,6 +11357,16 @@
       "severity": 1,
       "evidence": "research-landing F11: the patterns band shows one pattern of 17",
       "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.kits.themes",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the kits band, now Themes and brand kits, shows the library's nine themes as tiles in one group in its order, General Translation pressed at rest, each its name and a swatch of its paper and ink in the shown appearance; a press on Swiss swaps in the renderer's stylesheet of that theme for the page deck (style[data-home-theme]) and within 500 ms every slide on the page computes Swiss's paper and ink of the shown appearance and draws no frame cross, Swiss is pressed and the status line names the theme; the Globex kit pressed after it sets its colours over Swiss; the GT kit and General Translation bring back the sheet's colours on every slide",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F7: the kits band shows three kits and no theme; VERIFICATION.md design round pass 1 finding 3",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#5; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "decks.pages.radius",

@@ -108,6 +108,7 @@ import {
   derivePresenterFiles,
 } from './home/figures.ts';
 import type { FigureFile } from './home/figures.ts';
+import { deriveThemeModules } from './home/themes.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = 'apps/studio/home-deck';
@@ -2939,6 +2940,10 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
     figureFiles,
   );
   const run = deriveRun({ pageDeck: page });
+  const themes = deriveThemeModules(
+    (spec) => GENERATED_HEADER('--slides', spec),
+    page.deck as unknown as Record<string, unknown>,
+  );
   const slideSources = await deriveSlidesSource(slides, stills, exportRec, assets, run.transcript);
   const assetSources = assetsSources(assets, loupe.loupe);
   const outputs: Output[] = [
@@ -3022,6 +3027,14 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
         `${HOME}/menu-glyphs.generated.ts`,
         deriveMenuGlyphsModule(GENERATED_HEADER('--slides', 'docs/DESIGN.md 8.4')),
       ),
+    },
+    {
+      path: `${HOME}/themes.generated.ts`,
+      content: await formatTs(`${HOME}/themes.generated.ts`, themes.css),
+    },
+    {
+      path: `${HOME}/theme-tiles.generated.ts`,
+      content: await formatTs(`${HOME}/theme-tiles.generated.ts`, themes.tiles),
     },
     {
       path: `${HOME}/pattern-cards.generated.ts`,

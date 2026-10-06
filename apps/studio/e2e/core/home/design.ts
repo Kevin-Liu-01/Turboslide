@@ -26,6 +26,7 @@ import {
   DIAGRAMS_ROUND,
   FIGURES_ROUND,
   HERO_ROUND,
+  KITS_ROUND,
   MENUS_ROUND,
   NAV_ICONS,
 } from '../../../src/components/home/design-copy';
@@ -33,6 +34,10 @@ import { HOME_FACTS } from '../../../src/components/home/facts';
 import { MENU_GLYPHS } from '../../../src/components/home/menu-glyphs.generated';
 import { MINI_MENUS } from '../../../src/components/home/menus.generated';
 import { HOME_PATTERN_CARDS } from '../../../src/components/home/pattern-cards.generated';
+import {
+  HOME_THEME_AT_REST,
+  HOME_THEME_TILES,
+} from '../../../src/components/home/theme-tiles.generated';
 import type { MiniRow } from '../../../src/components/home/menus.generated';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { HOME_GLYPH_IDS, HOME_SPRITE } from '../../../src/components/home/sprite.generated';
@@ -68,6 +73,7 @@ export const ROWS: readonly string[] = [
   'home.present.figure',
   'home.export.dialog',
   'home.patterns.stills',
+  'home.kits.themes',
 ];
 
 type Theme = 'light' | 'dark';
@@ -1889,6 +1895,105 @@ async function patternsStills(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.kits.themes (DESIGN.md 8.7)
+
+async function kitsThemes(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const swiss = HOME_THEME_TILES.find((t) => t.id === 'swiss');
+  if (swiss === undefined) throw new Error('no Swiss tile in theme-tiles.generated.ts');
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        await fillBands(page);
+        const band = page.locator('[data-band="kits"]');
+        const tiles = band.locator('[data-theme-id]');
+        const rest = await tiles.evaluateAll((els) =>
+          els.map((el) => ({
+            id: el.getAttribute('data-theme-id') ?? '',
+            name: el.textContent?.trim() ?? '',
+            pressed: el.getAttribute('aria-pressed'),
+            paper: getComputedStyle(el.querySelector('.ts-home-theme-swatch')!).backgroundColor,
+          })),
+        );
+        if (JSON.stringify(rest.map((t) => t.name)) !== JSON.stringify(HOME_THEME_TILES.map((t) => t.name)))
+          failures.push(`${label}: the tiles read ${rest.map((t) => t.name).join(', ')}`);
+        const pressed = rest.filter((t) => t.pressed === 'true').map((t) => t.id);
+        if (pressed.join() !== HOME_THEME_AT_REST)
+          failures.push(`${label}: pressed at rest ${pressed.join(', ')}`);
+        /* the slides' paper and ink, read from every slide root on the page */
+        const slides = () =>
+          page.evaluate(() =>
+            [...document.querySelectorAll<HTMLElement>('.ts-product [data-home-slides]')]
+              .filter((el) => el.getClientRects().length > 0)
+              .map((el) => {
+                const cs = getComputedStyle(el);
+                return {
+                  paper: cs.getPropertyValue('--paper').trim().toLowerCase(),
+                  ink: cs.getPropertyValue('--ink').trim().toLowerCase(),
+                  kit: el.style.getPropertyValue('--paper') !== '',
+                };
+              }),
+          );
+        const before = await slides();
+        const want = swiss[theme];
+        const swissTile = band.locator('[data-theme-id="swiss"]');
+        await swissTile.scrollIntoViewIfNeeded();
+        const pressedAt = Date.now();
+        await swissTile.click();
+        await page.waitForTimeout(500);
+        const after = (await slides()).filter((s) => !s.kit);
+        const off = after.filter((s) => s.paper !== want.paper || s.ink !== want.ink);
+        if (after.length < 10 || off.length > 0)
+          failures.push(
+            `${label}: ${off.length} of ${after.length} slides off Swiss's ${want.paper} and ${want.ink} (${off[0]?.paper} ${off[0]?.ink})`,
+          );
+        const sheet = await page.evaluate(
+          () => document.querySelector<HTMLStyleElement>('style[data-home-theme]')?.dataset['homeTheme'] ?? '',
+        );
+        if (sheet !== 'swiss') failures.push(`${label}: the theme sheet reads "${sheet}"`);
+        const cross = await page.evaluate(() => {
+          const el = document.querySelector('.ts-product [data-home-slides] .frame .cross');
+          return el === null ? 'none' : getComputedStyle(el).display;
+        });
+        if (cross !== 'none') failures.push(`${label}: Swiss draws the frame's crosses (${cross})`);
+        const status = (await band.locator('[data-kit-status]').textContent())?.trim() ?? '';
+        if (status !== KITS_ROUND.status.theme(swiss.name))
+          failures.push(`${label}: the status reads "${status}"`);
+        if ((await swissTile.getAttribute('aria-pressed')) !== 'true')
+          failures.push(`${label}: Swiss is not pressed after its press`);
+        /* a kit's colours stay over the theme */
+        await band.locator('[data-kit="globex"]').click();
+        await page.waitForTimeout(700);
+        const kitted = await slides();
+        if (kitted.some((s) => s.ink === want.ink && s.paper === want.paper))
+          failures.push(`${label}: a slide kept Swiss's colours under the Globex kit`);
+        /* the GT kit, then General Translation: the sheet's own colours again */
+        await band.locator('[data-kit="gt"]').click();
+        await page.waitForTimeout(700);
+        await band.locator(`[data-theme-id="${HOME_THEME_AT_REST}"]`).click();
+        await page.waitForTimeout(500);
+        const back = await slides();
+        const changed = back.filter(
+          (s, i) => s.paper !== before[i]?.paper || s.ink !== before[i]?.ink,
+        );
+        if (changed.length > 0)
+          failures.push(`${label}: ${changed.length} slides did not return to the sheet's colours`);
+        notes.push(
+          `${label}: ${rest.length} tiles, Swiss on ${after.length} slides in ${Date.now() - pressedAt} ms with its reads, back to General Translation on ${back.length}`,
+        );
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'themes', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.icons'))
     test(title('home.nav.icons'), async ({ browser }) => {
@@ -1960,6 +2065,11 @@ export function rows(): void {
     test(title('home.export.dialog'), async ({ browser }) => {
       test.setTimeout(300_000);
       await exportDialog(browser);
+    });
+  if (entered('home.kits.themes'))
+    test(title('home.kits.themes'), async ({ browser }) => {
+      test.setTimeout(360_000);
+      await kitsThemes(browser);
     });
   if (entered('home.patterns.stills'))
     test(title('home.patterns.stills'), async ({ browser }) => {

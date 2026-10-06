@@ -115,6 +115,17 @@ export const FIGURES_ROUND = {
   patterns: { label: 'The patterns of Insert > Animated pattern' },
 } as const;
 
+/**
+ * Themes and brand kits (DESIGN.md 8.7): the band's h2 and lead, which replace copy.ts `KITS.h2`
+ * and `KITS.lead`, the theme row's key and the status line after a pick.
+ */
+export const KITS_ROUND = {
+  h2: 'Themes and brand kits',
+  lead: 'Pick one of nine themes, then put your colors and logo over it.',
+  themeKey: 'Theme',
+  status: { theme: (name: string): string => `Every slide is in the ${name} theme now.` },
+} as const;
+
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
 export const AGENTS_ROUND = {
   lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
@@ -137,6 +148,7 @@ export const DESIGN_COPY = {
   diagrams: DIAGRAMS_ROUND,
   diagramWords: DIAGRAM_WORDS,
   figures: FIGURES_ROUND,
+  kits: KITS_ROUND,
   agents: AGENTS_ROUND,
   close: CLOSE_ROUND,
 } as const;

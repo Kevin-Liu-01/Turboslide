@@ -1,7 +1,11 @@
+import type { CSSProperties } from 'react';
+
 import { KITS } from './copy';
 import type { KitId } from './copy';
 import { HOME_DECK } from './deck.generated';
+import { KITS_ROUND } from './design-copy';
 import { BandHead, HomeSection, Reserve } from './HomeSection';
+import { HOME_THEME_AT_REST, HOME_THEME_TILES } from './theme-tiles.generated';
 
 /**
  * Brand kits restyle every slide (docs/LANDING.md 2.8, Kevin's pick "C: Brand kits restyle every
@@ -10,6 +14,11 @@ import { BandHead, HomeSection, Reserve } from './HomeSection';
  * with its description and Undo; the status line, empty at rest), then the whole deck as a grid
  * of nine thumbnails in the band's reserved box, written by its chunk after `load` (v2.md R5).
  * The swatches' behaviour, the typed colour and the grid's slides are V2's (`live/kits.ts`).
+ * Themes and brand kits (DESIGN.md 8.7): the first row is the library's nine themes as tiles, each
+ * its name and a swatch of its paper and ink in the shown appearance; a pick swaps in the
+ * stylesheet the renderer writes for that theme (`themes.generated.ts`, the band's chunk), so
+ * every slide on the page takes it, and a kit's colors stay over it. General Translation, the
+ * page deck's theme, is pressed at rest.
  */
 const SWATCHES: readonly { id: KitId; pressed: boolean }[] = [
   { id: 'gt', pressed: true },
@@ -21,8 +30,34 @@ export function HomeKits() {
   return (
     <HomeSection id="kits">
       <div className="ts-kits-top">
-        <BandHead id="kits" heading={KITS.h2} lead={KITS.lead} span={5} />
+        <BandHead id="kits" heading={KITS_ROUND.h2} lead={KITS_ROUND.lead} span={5} />
         <div className="ts-home-rows ts-kits-rows">
+          <div className="ts-row ts-kits-themes-row">
+            <span className="ts-row-key">{KITS_ROUND.themeKey}</span>
+            <span className="ts-home-themes" role="group" aria-label={KITS_ROUND.themeKey}>
+              {HOME_THEME_TILES.map((tile) => (
+                <button
+                  key={tile.id}
+                  type="button"
+                  className="ts-home-theme"
+                  data-theme-id={tile.id}
+                  aria-pressed={tile.id === HOME_THEME_AT_REST}
+                  data-tip={`${tile.name}. ${tile.sentence}`}
+                  style={
+                    {
+                      '--tl-paper': tile.light.paper,
+                      '--tl-ink': tile.light.ink,
+                      '--td-paper': tile.dark.paper,
+                      '--td-ink': tile.dark.ink,
+                    } as CSSProperties
+                  }
+                >
+                  <span className="ts-home-theme-swatch" aria-hidden="true" />
+                  {tile.name}
+                </button>
+              ))}
+            </span>
+          </div>
           <div className="ts-row">
             <span className="ts-row-key">{KITS.kitsKey}</span>
             <span className="ts-home-kits" role="group" aria-label={KITS.kitsKey}>

@@ -311,8 +311,7 @@ export type KitId = 'gt' | 'kestrel' | 'globex';
 
 export const KITS = {
   id: 'kits',
-  h2: 'Brand kits restyle every slide',
-  lead: 'Slide > Change theme opens the Brand kit. Its six colors apply to every slide at once.',
+  /* the h2 and the lead are design-copy.ts KITS_ROUND's since the design round (DESIGN.md 8.7) */
   kitsKey: 'Kits',
   kits: {
     gt: { name: 'GT', tip: "GT. The GT brand deck's own colors." },

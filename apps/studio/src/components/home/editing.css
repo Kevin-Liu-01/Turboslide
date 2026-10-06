@@ -692,3 +692,70 @@
     display: none;
   }
 }
+
+/* ---- the themes row (docs/DESIGN.md 8.7): nine tiles, each a 20 px swatch of the theme's paper
+   with its ink in the shown appearance, then its name; pressed, the tile takes an ink frame; the
+   accents stay on the slides, so nothing outside a slide is coloured at rest ---- */
+.ts-home-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.ts-home-theme {
+  --tile-paper: var(--tl-paper);
+  --tile-ink: var(--tl-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: none;
+  color: var(--pt-ink);
+  font: 13px / 1 var(--pt-text);
+  cursor: pointer;
+}
+
+:root[data-theme='dark'] .ts-home-theme {
+  --tile-paper: var(--td-paper);
+  --tile-ink: var(--td-ink);
+}
+
+.ts-home-theme:hover {
+  background: var(--pt-plate);
+}
+
+.ts-home-theme[aria-pressed='true'] {
+  border-color: var(--pt-ink);
+}
+
+.ts-home-theme-swatch {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--pt-edge);
+  background: var(--tile-paper);
+}
+
+.ts-home-theme-swatch::before,
+.ts-home-theme-swatch::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  height: 2px;
+  background: var(--tile-ink);
+}
+
+.ts-home-theme-swatch::before {
+  top: 5px;
+  width: 10px;
+  height: 3px;
+}
+
+.ts-home-theme-swatch::after {
+  top: 11px;
+  width: 7px;
+}

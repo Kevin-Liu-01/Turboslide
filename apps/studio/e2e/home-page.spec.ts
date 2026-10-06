@@ -9,14 +9,13 @@ import {
   EXPORT,
   FEATURES,
   HERO,
-  KITS,
   PATTERNS,
   PEOPLE,
   PRESENT,
   REPORT_WORDS,
   TAILOR,
 } from '../src/components/home/copy';
-import { CLOSE_ROUND, HERO_ROUND, MENUS_ROUND } from '../src/components/home/design-copy';
+import { CLOSE_ROUND, HERO_ROUND, KITS_ROUND, MENUS_ROUND } from '../src/components/home/design-copy';
 import { HOME_META } from '../src/components/home/home-meta';
 
 // The landing, /home (docs/LANDING.md section 2; V4's file, restated for the second pass in V4's
@@ -36,7 +35,7 @@ const BAND_H2: readonly (readonly [string, string])[] = [
   ['menus', MENUS_ROUND.h2],
   ['canvas', CANVAS.h2],
   ['tailor', TAILOR.h2],
-  ['kits', KITS.h2],
+  ['kits', KITS_ROUND.h2],
   ['agents', AGENTS.h2],
   ['people', PEOPLE.h2],
   ['present', PRESENT.h2],

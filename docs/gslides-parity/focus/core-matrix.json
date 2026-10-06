@@ -10685,7 +10685,7 @@
     {
       "id": "chrome.colors.pairs-at-floor",
       "feature": "chrome",
-      "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row read from the drawn elements included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",
+      "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row and every key chip of the tooltip (on Undo), the search card and the toolbar search pill read from the drawn elements over their composited grounds included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,

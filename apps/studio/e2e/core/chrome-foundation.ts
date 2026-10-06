@@ -98,6 +98,65 @@ async function hoveredMenuKey(page: Page) {
   return facts;
 }
 
+type DrawnChip = { where: string; text: string; color: string; grounds: string[] };
+
+/**
+ * The key chips as drawn, each with its text colour and the backgrounds from the chip up to the
+ * first opaque one (DR-V1.5 finding 7: the search card's chips read 4.27:1 in light and the
+ * pairs of PAIRS never named them): the tooltip's key on Undo, every chip of the search card and
+ * the toolbar search pill's chip where the pill draws it.
+ */
+async function drawnKeyChips(page: Page): Promise<DrawnChip[]> {
+  const read = (where: string, selector: string) =>
+    page.$$eval(
+      selector,
+      (els, place) =>
+        els
+          .filter((el) => el.getClientRects().length > 0)
+          .map((el) => {
+            const grounds: string[] = [];
+            for (let node: Element | null = el; node; node = node.parentElement) {
+              const bg = getComputedStyle(node).backgroundColor;
+              if (/^rgba\(.*,\s*0\)$/.test(bg) || bg === 'transparent') continue;
+              grounds.push(bg);
+              if (!/^rgba/.test(bg)) break;
+            }
+            return {
+              where: place,
+              text: (el.textContent ?? '').trim(),
+              color: getComputedStyle(el).color,
+              grounds,
+            };
+          }),
+      where,
+    );
+  const chips: DrawnChip[] = [];
+  await page.mouse.move(720, 640);
+  await page.locator('[data-control="toolbar.undo"]').first().hover();
+  await page.locator('.pt-tip:not([hidden]) .pt-tip-key').first().waitFor({ timeout: 8000 });
+  chips.push(...(await read('the tooltip', '.pt-tip:not([hidden]) .pt-tip-key')));
+  chips.push(...(await read('the toolbar search pill', '.pt-search-kbd')));
+  await page.mouse.move(720, 640);
+  await page.locator('[data-control="toolbar.search"]').first().click();
+  await page.locator('.pt-search-card').waitFor({ timeout: 8000 });
+  await page.waitForTimeout(300);
+  chips.push(...(await read('the search card', '.pt-search kbd')));
+  await page.keyboard.press('Escape');
+  await page.locator('.pt-search-card').waitFor({ state: 'hidden', timeout: 8000 });
+  return chips;
+}
+
+/** A drawn chip's ground: its backgrounds composited from the opaque one (or white) up. */
+function chipGround(grounds: readonly string[]): Rgba {
+  let ground = WHITE;
+  for (const css of [...grounds].reverse()) {
+    const layer = parseColor(css);
+    if (!layer) continue;
+    ground = layer.a < 1 ? composite(layer, ground) : layer;
+  }
+  return ground;
+}
+
 export function chromeFoundation(): string[] {
   const declared: string[] = [];
   const row = (id: string, body: Parameters<typeof test>[2]) => {
@@ -124,8 +183,8 @@ export function chromeFoundation(): string[] {
 
   /* DESIGN.md 5.3: every text pair of the generated table at 4.5:1, the boundaries, glyphs and
      the scrollbar thumb at 3:1, read from the computed tokens of /new in both appearances, and the
-     one pair research-type 3.1 found failing read from the drawn elements: a menu key on a hovered
-     row */
+     pairs read from the drawn elements: a menu key on a hovered row (research-type 3.1) and every
+     key chip of the tooltip, the search card and the toolbar search pill (DR-V1.5 finding 7) */
   row('chrome.colors.pairs-at-floor', async ({ browser }) => {
     test.setTimeout(240_000);
     const names = [
@@ -166,6 +225,41 @@ export function chromeFoundation(): string[] {
         `${appearance} the drawn menu key "${menu.text}" on a hovered row: ${toHex(drawn)} on ${toHex(ground)} ${ratio.toFixed(2)}`,
       );
       expect(ratio, `${appearance} a menu key on a hovered row`).toBeGreaterThanOrEqual(4.5);
+      /* the key chips as drawn: text on --pt-hair-soft over the plate (DR-V1.5 finding 7) */
+      const chips = await drawnKeyChips(page);
+      expect(
+        chips.filter((chip) => chip.where === 'the search card').length,
+        `${appearance} the search card draws its key chips`,
+      ).toBeGreaterThan(0);
+      expect(
+        chips.filter((chip) => chip.where === 'the tooltip').length,
+        `${appearance} the tooltip draws its key chip`,
+      ).toBe(1);
+      const lowest = new Map<string, { text: string; drawn: Rgba; ground: Rgba; ratio: number }>();
+      const counts = new Map<string, number>();
+      for (const chip of chips) {
+        const chipColor = parseColor(chip.color);
+        expect(
+          chipColor,
+          `${appearance} ${chip.where} "${chip.text}" computes a colour`,
+        ).not.toBeNull();
+        const ground = chipGround(chip.grounds);
+        const drawnChip =
+          (chipColor as Rgba).a < 1 ? composite(chipColor as Rgba, ground) : (chipColor as Rgba);
+        const chipRatio = contrastRatio(drawnChip, ground);
+        counts.set(chip.where, (counts.get(chip.where) ?? 0) + 1);
+        const seen = lowest.get(chip.where);
+        if (!seen || chipRatio < seen.ratio)
+          lowest.set(chip.where, { text: chip.text, drawn: drawnChip, ground, ratio: chipRatio });
+        expect(
+          chipRatio,
+          `${appearance} ${chip.where}'s key chip "${chip.text}"`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+      for (const [where, low] of lowest)
+        readings.push(
+          `${appearance} ${where}'s key chips (${counts.get(where)}), the lowest "${low.text}": ${toHex(low.drawn)} on ${toHex(low.ground)} ${low.ratio.toFixed(2)}`,
+        );
     }
     test.info().annotations.push({ type: 'pairs', description: readings.join('; ') });
   });

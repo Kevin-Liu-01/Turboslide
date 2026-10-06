@@ -173,9 +173,10 @@
   border-bottom: 1px solid var(--pt-hair);
 }
 
-/* the key chips: the prefix beside a group label, the key at a row's right; 18px on
-   --pt-hair-soft, 11px titanium, square (docs/NEXT.md 4.1.3 item 14: the chrome is square
-   outside --pt-radius and the named exceptions) */
+/* the key chips: the prefix beside a group label, the key at a row's right; 18 px on
+   --pt-hair-soft, 11 px in --pt-ink-2, the 4 px corner of .pt-kbd. Titanium read 4.27:1 on the
+   chip's ground in light, under the 4.5:1 floor (VERIFICATION.md DR-V1.5 finding 7); --pt-ink-2
+   holds the floor in both appearances (chrome.colors.pairs-at-floor reads the drawn chips) */
 .pt-search kbd {
   display: inline-flex;
   align-items: center;
@@ -187,7 +188,7 @@
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: var(--pt-titanium);
+  color: var(--pt-ink-2);
   white-space: nowrap;
 }
 

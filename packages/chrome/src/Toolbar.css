@@ -142,7 +142,8 @@
   color: var(--pt-ink);
 }
 
-/* the key chip: 18px tall on --pt-hair-soft, 11px titanium, at the pill's right end */
+/* the key chip: 18 px tall on --pt-hair-soft, 11 px in --pt-ink-2 (titanium read 4.27:1 on this
+   ground in light), at the pill's right end */
 .pt-search-kbd {
   margin-left: auto;
   display: inline-flex;
@@ -155,7 +156,7 @@
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: var(--pt-titanium);
+  color: var(--pt-ink-2);
   white-space: nowrap;
 }
 

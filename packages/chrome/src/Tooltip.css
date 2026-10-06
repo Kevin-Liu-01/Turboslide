@@ -1,13 +1,13 @@
 /* Tooltip (Tooltip.tsx): one small floating plate (.pt-float of tokens.css: paper, the --pt-edge
    frame, the 6 px corner and the ring with no blur or offset; docs/DESIGN.md 3.2), fixed, 6 px from
    its control, at 12.5 px in the text face; the name at weight 500 in Inter's default glyphs, the
-   key as an 18 px key chip (.pt-kbd, the 4 px corner) on --pt-hair-soft, the sentence in ink-2
-   under them. The plate sits in the tooltip layer of the stacking scale (Layer.ts writes the
-   z-index and puts it in the top layer; the custom property here holds the order where the
-   browser has no top layer), over every surface but the hover preview. Motion: the fade over the
-   fast duration when data-motion is fade; Tooltip.tsx writes none under reduced motion and
-   tokens.css zeroes the duration as well. pointer-events none, so the plate never takes the hover
-   that made it. */
+   key as an 18 px key chip (.pt-kbd, the 4 px corner) on --pt-hair-soft with its text in ink-2
+   (titanium read 4.27:1 there in light), the sentence in ink-2 under them. The plate sits in the
+   tooltip layer of the stacking scale (Layer.ts writes the z-index and puts it in the top layer;
+   the custom property here holds the order where the browser has no top layer), over every
+   surface but the hover preview. Motion: the fade over the fast duration when data-motion is fade;
+   Tooltip.tsx writes none under reduced motion and tokens.css zeroes the duration as well.
+   pointer-events none, so the plate never takes the hover that made it. */
 .pt-tip {
   position: fixed;
   z-index: var(--ts-layer-tooltip);
@@ -59,7 +59,7 @@
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: var(--pt-titanium);
+  color: var(--pt-ink-2);
   white-space: nowrap;
 }
 

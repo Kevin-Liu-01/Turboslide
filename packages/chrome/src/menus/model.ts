@@ -2578,7 +2578,9 @@ const TOOLS: Menu = {
        97): the title row's Assist and Cmd+J open the panel */
     now('tools.tailor', 'Tailor for a customer', dialog('Tailor for a customer'), {
       turboslide: true,
-      icon: 'chat',
+      /* the pencil, so Tailor and Insert > Comment draw two glyphs (docs/DESIGN.md 8.13, question
+         24); the landing's features row reads it from here at build */
+      icon: 'pencil',
       dividerBefore: true,
       when: 'write',
       doc: 'Replaces the customer name everywhere, swaps the pictures named after the old one and skips slides, as one change',

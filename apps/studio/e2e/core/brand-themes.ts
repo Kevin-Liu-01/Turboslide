@@ -66,8 +66,12 @@ export async function themeDrawn(page: Page): Promise<ThemeDrawn> {
   return page.evaluate(() => {
     const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
     const sheet = stage?.closest('.ts-sheet') ?? null;
-    const token = (el: Element | null, name: string) =>
-      el === null ? '' : getComputedStyle(el).getPropertyValue(name).trim().toLowerCase();
+    /* a token as the sheet writes it, a three digit hex in its six digit form: the node-server
+       build's minified sheet writes #ffffff as #fff */
+    const token = (el: Element | null, name: string) => {
+      const v = el === null ? '' : getComputedStyle(el).getPropertyValue(name).trim().toLowerCase();
+      return /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
+    };
     const shown = (el: Element, pseudo?: string) => {
       const cs = getComputedStyle(el, pseudo);
       if (cs.display === 'none' || cs.visibility === 'hidden') return false;
@@ -160,12 +164,11 @@ export async function setThemeTimed(
         );
         return [stage ?? null, ...cards];
       };
-      const drawn = () =>
-        sheets().every(
-          (el) =>
-            el !== null &&
-            getComputedStyle(el).getPropertyValue('--paper').trim().toLowerCase() === want,
-        );
+      const paperOf = (el: Element) => {
+        const v = getComputedStyle(el).getPropertyValue('--paper').trim().toLowerCase();
+        return /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
+      };
+      const drawn = () => sheets().every((el) => el !== null && paperOf(el) === want);
       const start = performance.now();
       const call = window.turboslide!.studio.invoke('deck.set', {
         path: '/theme',

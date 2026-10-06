@@ -437,6 +437,81 @@ export function brandThemes(): string[] {
     expect(named?.trim()).toBe('General Translation');
   });
 
+  /* DESIGN.md 7.5 (G4), 7.7: Closing on a Simple deck with no logo draws no GT mark and no picture */
+  row('themes.closing.no-gt-mark-on-simple', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Closing on Simple');
+    const s = await settled(page);
+    const made = await invoke<{ slide: { id: string; kind: string; template?: string } }>(
+      page,
+      'slide.new',
+      { layout: 'closing', baseRevision: s.revision },
+    );
+    await settled(page);
+    await clickCard(page, made.slide.id);
+    const drawn = await pictureFacts(page);
+    const info = await invoke<{ theme: string; brand?: unknown }>(page, 'deck.info');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `deck theme ${info.theme}, kit ${JSON.stringify(info.brand ?? null)}; Closing made a ${made.slide.kind} slide (template ${made.slide.template ?? 'none'}); on the stage GT marks ${drawn.marks}, pictures ${drawn.pictures}, credits ${drawn.credits}, recipes ${drawn.recipes}, heading prompt "${drawn.prompt}"`,
+    });
+    expect(info.theme).toBe('simple');
+    expect(drawn.marks, 'no #gt-mark use on the stage').toBe(0);
+    expect(drawn.pictures + drawn.recipes, 'no material on the stage').toBe(0);
+    expect(drawn.credits, 'no credit').toBe(0);
+    expect(drawn.prompt).toBe('Click to add title');
+  });
+
+  /* DESIGN.md 7.7 (G5): on a Simple deck Section header writes the title and its sentence on the
+     theme's ground with no picture and no credit, Caption asks for a picture first, and the
+     disclosure row reads More layouts (11) */
+  row('themes.layouts.no-gt-pictures-on-simple', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Layouts on Simple');
+    const s = await settled(page);
+    const made = await invoke<{ slide: { id: string; kind: string; template?: string } }>(
+      page,
+      'slide.new',
+      { layout: 'opener', baseRevision: s.revision },
+    );
+    await settled(page);
+    await clickCard(page, made.slide.id);
+    const drawn = await pictureFacts(page);
+    await page.locator('[data-control="toolbar.layout"]').first().click();
+    const plate = page.locator('[data-control="layout.apply.plate"]');
+    await plate.waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    const grid = await page.evaluate(() => {
+      const plateEl = document.querySelector('[data-control="layout.apply.plate"]');
+      const rule = plateEl?.querySelector('[data-control$=".gt"]');
+      const tile = (id: string) =>
+        plateEl
+          ?.querySelector(`[data-control$=".${id}"]`)
+          ?.textContent?.replace(/\s+/g, ' ')
+          .trim() ?? '';
+      return {
+        rule: rule?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+        mood: tile('mood'),
+        opener: tile('opener'),
+      };
+    });
+    await page.keyboard.press('Escape');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `Section header made a ${made.slide.kind} slide (template ${made.slide.template ?? 'none'}); on the stage pictures ${drawn.pictures}, recipes ${drawn.recipes}, credits ${drawn.credits}, heading prompt "${drawn.prompt}", ground ${drawn.ground}; the Caption tile reads "${grid.mood}"; the Section header tile "${grid.opener}"; the row "${grid.rule}"`,
+    });
+    expect(made.slide.kind).toBe('opener');
+    expect(drawn.pictures + drawn.recipes, 'no picture').toBe(0);
+    expect(drawn.credits, 'no credit').toBe(0);
+    expect(drawn.prompt).toBe('Click to add title');
+    expect(drawn.ground).toBe('#ffffff');
+    expect(grid.mood).toContain('Add a picture first');
+    expect(grid.opener).not.toContain('Add a picture first');
+    expect(grid.rule).toBe('More layouts (11)');
+  });
+
   return declared;
 }
 
@@ -456,4 +531,39 @@ async function deckFromBlankCard(page: Page, scratch: Scratch, text: string): Pr
   const close = page.locator('[data-control="dialog.namePrompt.close"]');
   if (await close.isVisible().catch(() => false)) await close.click().catch(() => undefined);
   return scratch.add(info.id);
+}
+
+/** What the stage draws of pictures on the current slide: GT marks, pictures, recipes, credits, the heading prompt, the ground. */
+async function pictureFacts(page: Page): Promise<{
+  marks: number;
+  pictures: number;
+  recipes: number;
+  credits: number;
+  prompt: string;
+  ground: string;
+}> {
+  return page.evaluate(() => {
+    const stage = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+    const slide = stage?.querySelector('.slide.is-on') ?? null;
+    const marks = [...(stage?.querySelectorAll('use') ?? [])].filter((use) => {
+      const href = use.getAttribute('href') ?? use.getAttribute('xlink:href') ?? '';
+      return href === '#gt-mark' && use.closest('symbol') === null;
+    }).length;
+    const pictures = slide === null ? 0 : slide.querySelectorAll('img, canvas').length;
+    const recipes = slide === null ? 0 : slide.querySelectorAll('[data-recipe]').length;
+    const credits =
+      slide === null ? 0 : slide.querySelectorAll('.credit, [data-type="credit"]').length;
+    const prompt =
+      slide
+        ?.querySelector('h1 [data-prompt], h2 [data-prompt], .big [data-prompt], [data-prompt]')
+        ?.textContent?.trim() ??
+      slide?.querySelector('[data-prompt]')?.getAttribute('data-prompt') ??
+      '';
+    const sheet = stage?.closest('.ts-sheet') ?? null;
+    const ground =
+      sheet === null
+        ? ''
+        : getComputedStyle(sheet).getPropertyValue('--paper').trim().toLowerCase();
+    return { marks, pictures, recipes, credits, prompt, ground };
+  });
 }

@@ -15,10 +15,20 @@ import { LAYOUT_IDS, slideBlocks } from './deck.ts';
 import { layoutEntry } from './layouts.ts';
 import { validateDeck } from './validate.ts';
 
-const DECKS = join(import.meta.dirname, '..', '..', '..', 'decks');
-const blankDeck = JSON.parse(
-  readFileSync(join(DECKS, 'templates', 'blank', 'deck.json'), 'utf8'),
-) as Deck;
+/**
+ * A General Translation deck with the four starter pictures (docs/DESIGN.md 7.7: the materials are
+ * that theme's): Blank's manifest before the design round, __fixtures__/theme-legacy/blank, on
+ * the GT id. Blank itself is Simple with no pictures since the round.
+ */
+const blankDeck = {
+  ...(JSON.parse(
+    readFileSync(
+      join(import.meta.dirname, '__fixtures__', 'theme-legacy', 'blank', 'deck.json'),
+      'utf8',
+    ),
+  ) as Deck),
+  theme: 'general-translation',
+} as Deck;
 
 /** Validates a slide alone in the blank deck; the severity 3 issues. */
 function blocking(slide: Slide) {

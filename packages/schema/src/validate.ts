@@ -7,6 +7,7 @@
 // on disk is deck.json plus slides/<id>.json (SPEC 4.1).
 import type { z } from 'zod';
 import type { Block, BlockType } from './blocks.ts';
+import { EMPTY_ASSET_REF } from './blocks.ts';
 import { chartProblem } from './blocks/chart.ts';
 import { tableSizeProblem } from './blocks/table.ts';
 import { CATALOG, SLIDE_KIND_CATALOG, blockAssetRefs, blockTextPaths } from './catalog.ts';
@@ -829,7 +830,11 @@ export function validateDeck(input: unknown): ValidationResult {
       }
       const file = slideFile(slide.id);
       if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
-        if (deck.assets[slide.picture.asset] === undefined) {
+        /* the empty reference is the theme's ground (docs/DESIGN.md 7.7), not a missing asset */
+        if (
+          slide.picture.asset !== EMPTY_ASSET_REF &&
+          deck.assets[slide.picture.asset] === undefined
+        ) {
           issues.push(
             issue(
               'reference',

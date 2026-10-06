@@ -35,6 +35,7 @@ import type {
   ParagraphBlock,
   PictureBlock,
 } from './blocks.ts';
+import { EMPTY_ASSET_REF } from './blocks.ts';
 import type {
   ContentSlide,
   DeckGuides,
@@ -349,7 +350,10 @@ export function toCanvas(slide: Slide, boxes: CanvasBoxes): ToCanvasResult | nul
         ...(slide.picture.position !== undefined ? { position: slide.picture.position } : {}),
         side: slide.plate.side,
       };
-      state.place(picture, [PICTURE_POS.x, PICTURE_POS.y, PICTURE_POS.w, PICTURE_POS.h]);
+      /* a picture kind on its theme's ground (the empty reference, docs/DESIGN.md 7.7) has no
+         photograph to become an object */
+      if (slide.picture.asset !== EMPTY_ASSET_REF)
+        state.place(picture, [PICTURE_POS.x, PICTURE_POS.y, PICTURE_POS.w, PICTURE_POS.h]);
       const plate: BoxBlock = {
         id: plateId,
         type: 'box',

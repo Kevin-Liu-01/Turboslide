@@ -77,30 +77,21 @@ describe.each(COMMITTED)('migrate on $name', ({ dir }) => {
 });
 
 describe('the blank template', () => {
-  it('carries the four starter pictures with their credits and one title slide with empty placeholders', () => {
+  it('is one title slide with empty placeholders in the Simple theme, light, with no kit and no pictures (docs/DESIGN.md 7.3, 7.7)', () => {
     const dir = join(DECKS, 'templates', 'blank');
     const manifest = readJson(join(dir, 'deck.json')) as {
       title: string;
-      assets: Record<string, { role: string; credit?: string; twins: Record<string, string> }>;
+      theme: string;
+      brand?: unknown;
+      defaults?: { appearance?: string };
+      assets: Record<string, unknown>;
     };
     expect(manifest.title).toBe('Untitled presentation');
-    expect(Object.keys(manifest.assets)).toEqual([
-      'opener-brand',
-      'opener-prototemplate',
-      'mood-earth',
-      'opener-closing',
-    ]);
-    expect(Object.values(manifest.assets).map((asset) => asset.role)).toEqual([
-      'opener',
-      'opener',
-      'mood',
-      'opener',
-    ]);
-    for (const asset of Object.values(manifest.assets)) {
-      expect(asset.credit).toBeTruthy();
-      for (const twin of Object.values(asset.twins))
-        expect(existsSync(join(dir, twin)), twin).toBe(true);
-    }
+    expect(manifest.theme).toBe('simple');
+    expect(manifest.brand).toBeUndefined();
+    expect(manifest.defaults?.appearance).toBe('light');
+    expect(manifest.assets).toEqual({});
+    expect(existsSync(join(dir, 'assets'))).toBe(false);
     const slide = readJson(join(dir, 'slides', 'title.json'));
     expect(slide).toMatchObject({ kind: 'title', heading: '', lead: '', template: 'title' });
     expect(slideFiles(dir)).toEqual(['title.json']);

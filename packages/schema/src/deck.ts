@@ -18,7 +18,7 @@ import {
   themeFactsOf,
   themeIdOf,
 } from './brand.ts';
-import { blockSchema, extSchema } from './blocks.ts';
+import { EMPTY_ASSET_REF, blockSchema, extSchema } from './blocks.ts';
 import type { Color } from './color.ts';
 import { colorSchema } from './color.ts';
 import type { AssetId, SectionId, SlideId } from './ids.ts';
@@ -418,7 +418,13 @@ export const layoutSchema = z.discriminatedUnion('type', [
 ]) satisfies z.ZodType<Layout>;
 
 export const pictureSchema = z.strictObject({
-  asset: annotate(slugSchema, { label: 'Picture', control: 'asset', group: 'Asset' }),
+  /* the empty reference '' is a picture kind on its theme's ground: Section header and Closing in a
+     theme without the GT pictures (docs/DESIGN.md 7.7) */
+  asset: annotate(z.union([slugSchema, z.literal(EMPTY_ASSET_REF)]), {
+    label: 'Picture',
+    control: 'asset',
+    group: 'Asset',
+  }),
   fit: z.literal('cover'),
   position: annotate(z.enum(['center', 'top', 'bottom']).optional(), {
     label: 'Position',

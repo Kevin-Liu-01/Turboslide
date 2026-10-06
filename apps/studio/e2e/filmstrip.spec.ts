@@ -324,7 +324,7 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     const radios = page.locator('[role="menuitemradio"][data-layout]');
     await expect(radios).toHaveCount(21);
     await expect(radios.first()).toHaveAttribute('data-layout', 'title');
-    await expect(page.locator('.ts-layout-rule')).toHaveText('GT layouts');
+    await expect(page.locator('.ts-layout-rule')).toHaveText('More layouts');
     await expect(page.locator('[role="menuitemradio"][aria-checked="true"]')).toHaveCount(1);
     await page.locator('[role="menuitemradio"][data-layout="big-number"]').click();
     await expect

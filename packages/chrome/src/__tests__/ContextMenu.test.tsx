@@ -233,7 +233,7 @@ describe('ContextMenu', () => {
     expect(radios.slice(0, groups.google.length).map((row) => row.dataset['layout'])).toEqual(
       groups.google.map((entry) => entry.id),
     );
-    expect(document.querySelector('.ts-layout-rule')?.textContent).toBe('GT layouts');
+    expect(document.querySelector('.ts-layout-rule')?.textContent).toBe('More layouts');
     const current = radios.find((row) => row.dataset['layout'] === 'big-number');
     expect(current?.getAttribute('aria-checked')).toBe('true');
     expect(radios.filter((row) => row.getAttribute('aria-checked') === 'true')).toHaveLength(1);

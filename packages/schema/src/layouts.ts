@@ -23,6 +23,7 @@ import type {
   SlotName,
 } from './deck.ts';
 import { LAYOUT_IDS, slotsForLayout } from './deck.ts';
+import { themeFactsOf } from './brand.ts';
 import type { IconName } from './icons.ts';
 import type { SlideId } from './ids.ts';
 
@@ -56,8 +57,11 @@ export type LayoutEntry = {
 
 /** How many entries carry Google's names; the rule sits after them (SPEC 5.2). */
 export const GOOGLE_LAYOUT_COUNT = 11;
-/** The label of the rule between Google's eleven and the GT layouts. */
-export const LAYOUT_RULE_LABEL = 'GT layouts';
+/**
+ * The label of the disclosure row after the first eleven layouts (docs/DESIGN.md 7.7): the
+ * layouts after it are every theme's, so the row names no theme.
+ */
+export const LAYOUT_RULE_LABEL = 'More layouts';
 
 // ---------------------------------------------------------------------------------------------
 // Prompt text (SPEC 5.4): what the editor draws in an empty placeholder; never content.
@@ -288,6 +292,48 @@ const SPLIT_4_8: Layout = {
 const SPLIT_SINGLE: Layout = { type: 'split', gap: 56, head: 'single', body: { align: 'center' } };
 const STACK: Layout = { type: 'stack', gap: 22 };
 
+/**
+ * True when the deck's theme carries the four GT pictures Section header, Caption and Closing
+ * take (docs/DESIGN.md 7.7): General Translation alone.
+ */
+export function themeTakesPictures(deck: Pick<Deck, 'theme'>): boolean {
+  return themeFactsOf(deck.theme).pictures;
+}
+
+/**
+ * Section header in a theme without pictures (docs/DESIGN.md 7.7): the section title and its
+ * sentence on the theme's ground, an opener that still heads its section, its picture the empty
+ * reference (no photograph, no credit) the renderer draws as the ground.
+ */
+function openerOnGround(id: SlideId, sectionId: string): Slide {
+  return {
+    ...base(id),
+    kind: 'opener',
+    sectionId,
+    picture: { asset: EMPTY_ASSET_REF, fit: 'cover' },
+    plate: {
+      side: 'lower-left',
+      maxWidth: 740,
+      blocks: [heading('', 'big'), paragraph('p1', { marginTop: 14, measure: 56 })],
+    },
+  };
+}
+
+/** Closing in a theme without pictures: the closing line and the addresses on the ground, the kit's logo. */
+function closingOnGround(id: SlideId): Slide {
+  return {
+    ...base(id),
+    kind: 'closing',
+    picture: { asset: EMPTY_ASSET_REF, fit: 'cover' },
+    plate: {
+      side: 'upper-left',
+      maxWidth: 720,
+      blocks: [heading('', 'big'), paragraph('p1', { marginTop: 14, measure: 56 })],
+    },
+    mark: { w: 138, h: 88 },
+  };
+}
+
 /** The head of a split archetype: the heading left, the paragraph right (slides 38, 49, 80). */
 function splitHead(): ContentSlide['slots'] {
   return { headLeft: [heading()], headRight: [paragraph('p1')] };
@@ -328,11 +374,12 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     label: 'Section header',
     google: true,
     kind: 'opener',
-    doc: 'A full-bleed two-tone picture with the plate lower left at 740 px: the section title, one sentence, the credit.',
-    sentence: 'Section header: a full picture with the section title, one sentence and the credit',
+    doc: 'The plate lower left at 740 px: the section title and one sentence; in General Translation over a full-bleed two-tone picture with its credit, in another theme on the theme’s ground.',
+    sentence: 'Section header: the section title and one sentence, over a full picture in General Translation',
     icon: 'rectangle-stack',
     needsPicture: true,
     make: (id, deck, sectionId) => {
+      if (!themeTakesPictures(deck)) return openerOnGround(id, sectionId);
       const asset = pickPicture(deck, 'opener');
       if (!asset) return null;
       return {
@@ -443,6 +490,8 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     icon: 'photo',
     needsPicture: true,
     make: (id, deck) => {
+      // Caption is a picture layout in every theme: without the GT pictures it asks for one
+      if (!themeTakesPictures(deck)) return null;
       const asset = pickPicture(deck, 'mood');
       if (!asset) return null;
       return {
@@ -741,11 +790,12 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     label: 'Closing',
     google: false,
     kind: 'closing',
-    doc: 'A two-tone render behind a plate upper left at 720 px carrying the mark, the thesis and the addresses.',
-    sentence: 'Closing: a picture behind your logo, a closing line and your addresses',
+    doc: 'A plate upper left at 720 px carrying the kit’s logo, the thesis and the addresses; in General Translation over a two-tone render, in another theme on the theme’s ground.',
+    sentence: 'Closing: your logo, a closing line and your addresses, over a picture in General Translation',
     icon: 'check-badge',
     needsPicture: true,
     make: (id, deck) => {
+      if (!themeTakesPictures(deck)) return closingOnGround(id);
       const asset = pickPicture(deck, 'closing');
       if (!asset) return null;
       return {

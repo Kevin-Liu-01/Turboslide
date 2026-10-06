@@ -1,5 +1,5 @@
 // renderSlide: one string function that emits the deck's own markup for one slide (SPEC 5.2).
-import { markSvg, sizeAttrs, twinAttrs } from './blocks/context.ts';
+import { isEmptyPicture, markSvg, sizeAttrs, twinAttrs } from './blocks/context.ts';
 import type { BlockContext, HtmlFrameSource, RasterRef, ResolvedImage } from './blocks/context.ts';
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
@@ -293,8 +293,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     case 'opener':
     case 'mood':
     case 'closing': {
-      const image = ctx.image(slide.picture.asset);
-      if (!image)
+      /* the empty reference is the theme's ground (docs/DESIGN.md 7.7): no photograph, no chips */
+      const onGround = isEmptyPicture(slide.picture.asset);
+      const image = onGround ? undefined : ctx.image(slide.picture.asset);
+      if (!image && !onGround)
         ctx.warnings.push(`${slide.id}: picture asset ${slide.picture.asset} is not in the deck`);
       const imgClass = slide.kind === 'mood' ? 'mood-img' : 'opener-img';
       const kindClass =
@@ -326,13 +328,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
               : ''
           }>`
         : '';
-      const mark =
-        slide.kind === 'closing' && slide.mark
-          ? `<svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg>`
-          : '';
+      const mark = slide.kind === 'closing' && slide.mark ? closingMark(deck, ctx) : '';
       const plate = renderPlate(slide.plate, ctx, mark);
       // the seats' chips over the photograph, each only under a seat the frame draws (chipsHtml)
-      const chips = options.chrome ? chipsHtml(deck, slide, options) : '';
+      const chips = options.chrome && !onGround ? chipsHtml(deck, slide, options) : '';
       html = el(
         'section',
         { class: classes('slide', kindClass, scopeClass, active), ...common },
@@ -520,6 +519,23 @@ export function titleMarkSlot(
       el('div', { class: classes('ts-kit-logo', 'is-mark', `pos-${position}`) }, logo),
     ),
   };
+}
+
+/**
+ * The Closing plate's logo (docs/DESIGN.md 7.5, G4): the kit's title logo slot, as the title slide
+ * draws it: the GT mark of a theme that has it (General Translation) byte for byte, the kit's
+ * picture, and nothing for an empty slot or a theme without a logo.
+ */
+function closingMark(deck: Deck, ctx: BlockContext): string {
+  const kit = deck.brand;
+  if (titleMarkEmpty(kit, deck.theme)) return '';
+  const assetId = kit?.mark?.kind === 'picture' ? kit.mark.assetId : undefined;
+  const image = assetId !== undefined ? ctx.image(assetId) : undefined;
+  if (image !== undefined)
+    return `<img class="mark mark-picture" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))} alt="${escapeAttr(image.alt)}">`;
+  return themeFactsOf(deck.theme).logo
+    ? `<svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg>`
+    : '';
 }
 
 function slotBoxesAsRecord(layout: Layout): Record<string, Box> {

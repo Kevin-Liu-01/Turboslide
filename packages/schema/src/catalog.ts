@@ -629,7 +629,7 @@ export const SLIDE_KIND_CATALOG: Readonly<Record<SlideKind, SlideKindCatalogEntr
   opener: {
     kind: 'opener',
     label: 'Section opener',
-    doc: 'A full-bleed two-tone picture with the plate lower left at 740 px: the section title, one sentence listing the section’s slide families in order, the credit.',
+    doc: 'The plate lower left at 740 px: the section title and one sentence listing the section’s slide families in order; in General Translation over a full-bleed two-tone picture with its credit, in another theme on the theme’s ground (the empty picture reference).',
     source: 'DECK-GRAMMAR.md:6; OPENERS.md:41-47',
     plate: { side: 'lower-left', maxWidth: 740 },
     textPaths: [],
@@ -647,7 +647,7 @@ export const SLIDE_KIND_CATALOG: Readonly<Record<SlideKind, SlideKindCatalogEntr
   closing: {
     kind: 'closing',
     label: 'Closing',
-    doc: 'The deck closes as it opens: a two-tone render behind a plate upper left at 720 px carrying the mark, the thesis and the three domains.',
+    doc: 'The deck closes as it opens: a plate upper left at 720 px carrying the kit’s logo, the thesis and the three domains; in General Translation over a two-tone render, in another theme on the theme’s ground (the empty picture reference).',
     source: 'slide 85',
     plate: { side: 'upper-left', maxWidth: 720 },
     textPaths: [],

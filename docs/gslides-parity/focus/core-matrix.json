@@ -4837,11 +4837,12 @@
     {
       "id": "slides.layout.plate-four-columns",
       "feature": "slides",
-      "interaction": "At 1280 by 800 the Apply layout plate shows four columns, Google's eleven layouts without scrolling, and the GT layouts as a collapsed group",
+      "interaction": "At 1280 by 800 the Apply layout plate shows four columns, the first eleven layouts without scrolling, and the other eleven as a collapsed group behind the row More layouts (11)",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "evidence": "audit-interface 34",
-      "severity": 1
+      "severity": 1,
+      "note": "The layout plate of audit-interface 34; restated in the design round, DR-D3#3 (the row names no theme, docs/DESIGN.md 7.7)"
     },
     {
       "id": "slides.import.none-preselected",
@@ -11348,6 +11349,26 @@
       "today": "not driven",
       "evidence": "this file 7.9",
       "note": "Design round (docs/DESIGN.md 11), DR-D3#2; the legacy id is mapped once by validateManifest (packages/schema/src/deck.ts migrateLegacyTheme), proved over the pre-round fixtures by validate-themes.test.ts and render's theme-migration.test.ts"
+    },
+    {
+      "id": "themes.closing.no-gt-mark-on-simple",
+      "feature": "decks",
+      "interaction": "slide.new with the Closing layout on a Simple deck from /new with no logo makes a slide whose stage draws no #gt-mark use, no picture, no shader recipe and no credit; its heading prompts Click to add title",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G4 (slide.ts drew #gt-mark on every Closing; Closing took GT's Singularity material)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#3; Closing in a theme without the GT pictures takes the empty picture reference, and slide.ts draws a Closing plate's logo from the kit's title slot (closingMark)"
+    },
+    {
+      "id": "themes.layouts.no-gt-pictures-on-simple",
+      "feature": "decks",
+      "interaction": "On a Simple deck from /new, slide.new with the Section header layout makes an opener slide (it heads its own section) whose stage draws the title and sentence prompts on the theme's white ground with no picture and no credit; the Apply layout plate's Caption tile reads Add a picture first, the Section header tile does not, and the disclosure row reads More layouts (11)",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G5 (Section header and Caption put GT's dithered pictures into a deck from Blank)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#3; the four materials are General Translation's (layouts.ts themeTakesPictures): Section header and Closing in another theme take the empty picture reference, which the renderer draws as the theme's ground, and Blank's assets folder is gone"
     },
     {
       "id": "accounts.sign-in-fits",

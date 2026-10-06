@@ -3,7 +3,7 @@
     "id": "blank",
     "name": "Blank",
     "category": "personal",
-    "description": "One title slide with empty placeholders and the theme's four starter pictures, so Section header, Caption and Closing work on a new presentation.",
+    "description": "One title slide with empty placeholders in the Simple theme.",
     "cover": "title",
     "slides": 1,
     "theme": "simple",

@@ -172,7 +172,8 @@ describe('deck.create --from <index id> (SPEC-5 4.6)', () => {
     expect(manifest.title).toBe('Globex pitch');
     expect(manifest.revision).toBe(0);
     expect(manifest.brand).toEqual(kit);
-    expect(existsSync(join(created.dir, 'assets', 'opener-brand-light.jpg'))).toBe(true);
+    /* Blank carries no pictures since the design round (docs/DESIGN.md 7.7): the folder comes over empty */
+    expect(existsSync(join(created.dir, 'assets'))).toBe(true);
     expect(() => createDeck(decks, { name: 'x', from: 'sales-pitch' }, NOW)).toThrow(
       /No template "sales-pitch"/,
     );
@@ -215,7 +216,7 @@ describe('Save as template (template.create, template.update)', () => {
       assets: 'assets',
     });
     expect(existsSync(join(dir, 'slides', 'title.json'))).toBe(true);
-    expect(existsSync(join(dir, 'assets', 'mood-earth-dark.jpg'))).toBe(true);
+    expect(existsSync(join(dir, 'assets'))).toBe(true);
     const manifest = JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')) as Record<
       string,
       unknown

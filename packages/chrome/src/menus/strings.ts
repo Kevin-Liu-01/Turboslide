@@ -968,7 +968,7 @@ export const DOWNLOAD_PROGRESS = {
 export const FILMSTRIP = {
   skipped: 'Skipped: not shown when presenting or in downloads',
   empty: 'Click + to add a slide',
-  gtLayouts: 'GT layouts',
+  gtLayouts: 'More layouts',
 } as const;
 
 /** The home page and the trash (SPEC 12 "Home"). */

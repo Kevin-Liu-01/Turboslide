@@ -98,7 +98,9 @@ async function plateFacts(page: Page) {
         el.scrollHeight > el.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(el).overflowY),
     );
     const r = plate.getBoundingClientRect();
+    const rule = plate.querySelector('[data-control="layout.apply.gt"], .ts-layout-rule');
     return {
+      rule: rule?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
       tiles: tiles.length,
       google: google.length,
       columns,
@@ -128,6 +130,8 @@ test(title('slides.layout.plate-four-columns'), async () => {
   expect(facts!.disclosure && facts!.gtShown === 0, 'the GT layouts are a collapsed group').toBe(
     true,
   );
+  /* the design round (docs/DESIGN.md 7.7, DR-D3#3): the row names no theme */
+  expect(facts!.rule, 'the disclosure row').toBe('More layouts (11)');
 });
 
 /** The Share dialog's geometry and what its first stage shows. */

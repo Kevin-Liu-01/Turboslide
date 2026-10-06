@@ -17,6 +17,7 @@ import { ICON_NAMES } from './icons.ts';
 import {
   GOOGLE_LAYOUT_COUNT,
   LAYOUTS,
+  LAYOUT_RULE_LABEL,
   PROMPTS,
   derivedLayout,
   freeLayoutSlideId,
@@ -44,9 +45,19 @@ const SUBTITLE_ID = 'subtitle-body' as LayoutId;
 /** Whether that id has landed in LAYOUT_IDS. */
 const SUBTITLE_BODY = isLayoutId(SUBTITLE_ID);
 
-/** The blank template's manifest: the four starter pictures and one title slide. */
-const blankDeck = readJson<Deck>(join(BLANK_TEMPLATE, 'deck.json'));
+/** The blank template's manifest: one title slide in the Simple theme, no pictures (docs/DESIGN.md 7.7). */
+const simpleDeck = readJson<Deck>(join(BLANK_TEMPLATE, 'deck.json'));
 const blankTitle = readJson<Slide>(join(BLANK_TEMPLATE, 'slides', 'title.json'));
+/**
+ * A General Translation deck with the four starter pictures: Blank's manifest before the design
+ * round (__fixtures__/theme-legacy/blank, the materials the GT theme carries) on the GT id.
+ */
+const blankDeck: Deck = {
+  ...readJson<Deck>(
+    join(import.meta.dirname, '__fixtures__', 'theme-legacy', 'blank', 'deck.json'),
+  ),
+  theme: 'general-translation',
+};
 
 /** Google's eleven in Google's order (R03 b.2, the PredefinedLayout reference). */
 const GOOGLE_ELEVEN: [string, string][] = [
@@ -286,6 +297,41 @@ describe('LAYOUTS', () => {
       type: 'credit',
       text: 'Material: Event Horizon, a Prototemplate direction',
     });
+  });
+
+  it('takes no GT picture in a theme without them: Section header and Closing on the ground, Caption asks for a picture (docs/DESIGN.md 7.7)', () => {
+    expect(simpleDeck.theme).toBe('simple');
+    expect(simpleDeck.assets).toEqual({});
+    expect(LAYOUT_RULE_LABEL).toBe('More layouts');
+    const opener = layoutEntry('opener').make('x', simpleDeck, 'deck');
+    expect(opener?.kind).toBe('opener');
+    expect(opener?.kind === 'opener' && opener.sectionId).toBe('deck');
+    const closing = layoutEntry('closing').make('x', simpleDeck, 'deck');
+    expect(closing?.kind).toBe('closing');
+    for (const made of [opener, closing]) {
+      if (made === null || (made.kind !== 'opener' && made.kind !== 'closing')) continue;
+      expect(made.picture.asset, made.kind).toBe('');
+      expect(
+        made.plate.blocks.map((block) => block.type),
+        made.kind,
+      ).toEqual(['heading', 'paragraph']);
+      const result = validateDeck({
+        deck: { ...simpleDeck, sections: [{ id: 'deck', name: 'Deck', slideIds: [made.id] }] },
+        slides: { [made.id]: made },
+      });
+      expect(
+        result.issues.filter((issue) => issue.severity === 3),
+        made.kind,
+      ).toEqual([]);
+      const heading = made.plate.blocks[0];
+      expect(promptFor({ slide: made, block: heading!, path: '/text' })).toBe(PROMPTS.title);
+    }
+    expect(layoutEntry('mood').make('x', simpleDeck, 'deck')).toBeNull();
+    // the same layouts on a General Translation deck with the starter set take its pictures
+    const gt = layoutEntry('opener').make('x', blankDeck, 'deck');
+    expect(gt?.kind === 'opener' && gt.picture.asset).toBe('opener-brand');
+    expect(layoutEntry('mood').make('x', blankDeck, 'deck')?.kind).toBe('mood');
+    expect(layoutEntry('closing').make('x', blankDeck, 'deck')?.kind).toBe('closing');
   });
 
   it('picks assets by role in order of preference (the chrome test’s intent)', () => {

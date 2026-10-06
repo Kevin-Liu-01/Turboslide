@@ -334,7 +334,7 @@ describe('the committed GT template is the 95 slide import', () => {
 });
 
 describe('the committed blank template (gslides-parity SPEC 5.2, 6.1)', () => {
-  it('deck.create --from blank copies one title slide with empty placeholders and the four starter pictures', () => {
+  it('deck.create --from blank copies one title slide with empty placeholders in the Simple theme, no pictures and an empty assets folder (docs/DESIGN.md 7.3, 7.7)', () => {
     const scratch = mkdtempSync(join(tmpdir(), 'turboslide-blank-template-'));
     const decks = join(scratch, 'decks');
     mkdirSync(join(decks, 'templates'), { recursive: true });
@@ -349,20 +349,15 @@ describe('the committed blank template (gslides-parity SPEC 5.2, 6.1)', () => {
         deckId: 'untitled-presentation',
         title: 'Untitled presentation',
         revision: 0,
-        counts: { slides: 1, sections: 1, assets: 4 },
+        counts: { slides: 1, sections: 1, assets: 0 },
       });
-      const manifest = readJsonFile<Manifest>(join(result.dir, 'deck.json'));
-      expect(Object.keys(manifest.assets)).toEqual([
-        'opener-brand',
-        'opener-prototemplate',
-        'mood-earth',
-        'opener-closing',
-      ]);
-      for (const asset of Object.values(manifest.assets)) {
-        for (const twin of Object.values(asset.twins)) {
-          expect(existsSync(join(result.dir, twin)), twin).toBe(true);
-        }
-      }
+      const manifest = readJsonFile<
+        Manifest & { theme: string; defaults?: { appearance?: string } }
+      >(join(result.dir, 'deck.json'));
+      expect(manifest.assets).toEqual({});
+      expect(manifest.theme).toBe('simple');
+      expect(manifest.defaults?.appearance).toBe('light');
+      expect(existsSync(join(result.dir, 'assets'))).toBe(true);
       const slide = readJsonFile<Record<string, unknown>>(join(result.dir, 'slides', 'title.json'));
       expect(slide).toMatchObject({ kind: 'title', heading: '', lead: '', template: 'title' });
     } finally {

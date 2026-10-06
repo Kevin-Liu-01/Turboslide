@@ -1,6 +1,6 @@
 // The Google Slides parity round's CLI (docs/archive/gslides-parity/MILESTONES.md, B1 acceptance): in a
-// temp deck created with `turboslide deck create --from blank` (the committed blank template with
-// its four starter pictures), `slide new --layout big-number`, `slide apply-layout <id> title`,
+// temp deck created with `turboslide deck create --from blank` (the committed blank template, one
+// title slide in the Simple theme since the design round), `slide new --layout big-number`, `slide apply-layout <id> title`,
 // `text replace Acme Globex`, `slide skip <id>`, `deck copy <id> --name Copy`, `deck trash <id>`,
 // `deck list`, `deck restore <id>` and `deck remove <id> --confirm` each exit 0 with --json and
 // the deck validates after each step. The other new actions (slide.duplicate, slide.import,
@@ -91,6 +91,7 @@ async function validates(dir = deckDir): Promise<void> {
 
 function manifest(dir = deckDir): {
   revision: number;
+  theme?: string;
   sections: { id: string; slideIds: string[] }[];
   trashedAt?: string;
   title: string;
@@ -133,7 +134,7 @@ describe('the Google Slides parity actions on a local decks folder', () => {
     root = mkdtempSync(join(tmpdir(), 'turboslide-gslides-'));
     decksDir = join(root, 'decks');
     mkdirSync(join(decksDir, 'templates'), { recursive: true });
-    // the committed blank template, with its starter pictures
+    // the committed blank template: one title slide in the Simple theme, no pictures (docs/DESIGN.md 7.7)
     symlinkSync(join(REPO_DECKS, 'templates', 'blank'), join(decksDir, 'templates', 'blank'));
     writeFileSync(join(root, 'pnpm-workspace.yaml'), 'packages: []\n');
     writeWorkedDeck('worked');
@@ -145,14 +146,14 @@ describe('the Google Slides parity actions on a local decks folder', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  test('deck create --from blank makes Untitled presentation with one empty title slide and the four starter pictures', async () => {
+  test('deck create --from blank makes Untitled presentation with one empty title slide in the Simple theme and no pictures', async () => {
     const created = await run(['deck', 'create', 'Untitled presentation', '--from', 'blank']);
     expect(created.code, created.stderr).toBe(0);
     expect(created.json).toMatchObject({
       deckId: 'untitled-presentation',
       title: 'Untitled presentation',
       revision: 0,
-      counts: { slides: 1, sections: 1, assets: 4 },
+      counts: { slides: 1, sections: 1, assets: 0 },
     });
     expect(slideFile('title')).toMatchObject({
       kind: 'title',
@@ -160,7 +161,8 @@ describe('the Google Slides parity actions on a local decks folder', () => {
       lead: '',
       template: 'title',
     });
-    expect(existsSync(join(deckDir, 'assets', 'opener-brand-dark.jpg'))).toBe(true);
+    expect(existsSync(join(deckDir, 'assets'))).toBe(true);
+    expect(manifest().theme).toBe('simple');
     await validates();
   });
 
@@ -195,9 +197,13 @@ describe('the Google Slides parity actions on a local decks folder', () => {
       text: '',
     });
     await validates();
-    // every layout inserts on the blank deck, the picture layouts included; the Section header
-    // is the next test's, since it starts a section
-    for (const layout of LAYOUT_IDS.filter((id) => id !== 'opener')) {
+    // every layout inserts on the blank deck but Caption, which asks for a picture in a theme
+    // without the GT pictures (docs/DESIGN.md 7.7); the Section header is the next test's, since
+    // it starts a section
+    const caption = await run(['slide', 'new', '--layout', 'mood', '--deck', deckDir]);
+    expect(caption.code).not.toBe(0);
+    expect(caption.stderr).toMatch(/needs a picture/);
+    for (const layout of LAYOUT_IDS.filter((id) => id !== 'opener' && id !== 'mood')) {
       const again = await run([
         'slide',
         'new',
@@ -503,9 +509,10 @@ describe('the Google Slides parity actions on a local decks folder', () => {
       renamed: { from: string; to: string }[];
       revision: number;
     };
-    // the worked deck's mood-earth asset shares its id with the starter picture and is reused; title collides and is renamed
+    // the worked deck's mood-earth asset comes over with the slide (Blank carries no starter
+    // picture since the design round, docs/DESIGN.md 7.7); title collides and is renamed
     expect(body.slides.map((slide) => slide.id)).toEqual(['thesis', 'mood-earth', 'title-2']);
-    expect(body.assets).toEqual([]);
+    expect(body.assets).toEqual(['mood-earth']);
     expect(body.renamed).toEqual([{ from: 'title', to: 'title-2' }]);
     expect(manifest().sections[1]?.slideIds).toEqual([
       'opener-1',

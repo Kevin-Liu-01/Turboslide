@@ -1044,11 +1044,17 @@ export function createDeck(
     const manifest = parseJson(readFileSync(manifestPath, 'utf8'), manifestPath);
     if (!isRecord(manifest)) throw new TypeError(`${manifestPath} must hold a deck manifest`);
     const assetsDir = resolve(template.dir, record.assets);
-    if (!existsSync(assetsDir) || !statSync(assetsDir).isDirectory())
+    const hasFolder = existsSync(assetsDir) && statSync(assetsDir).isDirectory();
+    // a template whose manifest names no asset (Blank since the design round, docs/DESIGN.md 7.7)
+    // carries no assets folder in git, which keeps no empty folder: the deck gets an empty one
+    const namesAssets =
+      isRecord(manifest.assets) && Object.keys(manifest.assets as object).length > 0;
+    if (!hasFolder && namesAssets)
       throw new RangeError(`The template names an assets folder that is missing: ${assetsDir}`);
     mkdirSync(dir, { recursive: true });
     copySlides(join(template.dir, record.slides), join(dir, 'slides'));
-    cpSync(assetsDir, join(dir, 'assets'), { recursive: true, dereference: true });
+    if (hasFolder) cpSync(assetsDir, join(dir, 'assets'), { recursive: true, dereference: true });
+    else mkdirSync(join(dir, 'assets'), { recursive: true });
     const base = manifest as Deck;
     // B5a's R8 (docs/archive/rounds/PRODUCT.md 4.1, section 1's decision): a template whose manifest names no
     // appearance opens in the one its record names (templateAppearance: the record's, its kit's),

@@ -524,6 +524,33 @@ describe('the theme library', () => {
     expect(frameBandOf(deck(undefined, 'general-translation'), 'light')).toBe(GT_BAND);
   });
 
+  it('draws the Closing plate’s logo from the kit’s title slot: the GT mark in General Translation alone', () => {
+    const closing = {
+      schemaVersion: 1 as const,
+      id: 'closing',
+      kind: 'closing' as const,
+      picture: { asset: 'acme-mark', fit: 'cover' as const },
+      plate: { side: 'upper-left' as const, maxWidth: 720 as const, blocks: [] },
+      mark: { w: 138, h: 88 },
+    };
+    const gt = renderSlide(deck(undefined, 'general-translation'), closing, options).html;
+    expect(gt).toContain('<svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg>');
+    expect(renderSlide(deck(undefined, 'gt-ink-paper'), closing, options).html).toBe(gt);
+    const none = renderSlide(
+      deck({ mark: { kind: 'none' } }, 'general-translation'),
+      closing,
+      options,
+    );
+    expect(none.html).not.toContain('#gt-mark');
+    expect(renderSlide(deck(undefined, 'simple'), closing, options).html).not.toContain('#gt-mark');
+    const picture = renderSlide(
+      deck({ mark: { kind: 'picture', assetId: 'acme-mark' } }, 'simple'),
+      closing,
+      options,
+    ).html;
+    expect(picture).toContain('class="mark mark-picture"');
+  });
+
   it('reads the counter format of the theme where the kit names none', () => {
     expect(frameBandOf(deck(undefined, 'swiss'), 'light').counterFormat).toBe('n');
     expect(frameBandOf(deck(undefined, 'night'), 'dark').counterFormat).toBe('n');

@@ -3611,7 +3611,16 @@ test(title('export.fonts.upstream-names'), async () => {
   await openEditor(page, deck);
   const facts: string[] = [];
   const failures: string[] = [];
-  /* the owner's deck is in General Translation's theme: its headings draw cv11 and ss01 */
+  /* a deck from /new is in the Simple theme since DR-D3#2 (docs/DESIGN.md 7.3): the deck is set
+     to General Translation, whose headings draw cv11 and ss01, and put back at the end */
+  const setTheme = async (value: string) => {
+    const before = await state(page);
+    await invoke(page, 'deck.set', { baseRevision: before.revision, path: '/theme', value });
+    await settled(page);
+    await openEditor(page, deck);
+  };
+  const own = (await invoke<{ theme: string }>(page, 'deck.info', {})).theme;
+  if (own !== 'general-translation') await setTheme('general-translation');
   const gt = typefacesOf(await editablePptx(page));
   const inter = gt.filter((r) => /^(GT )?Inter\b/.test(r.typeface));
   facts.push(`General Translation: ${[...new Set(gt.map((r) => r.typeface))].join(', ')}`);
@@ -3625,37 +3634,17 @@ test(title('export.fonts.upstream-names'), async () => {
     failures.push(
       `General Translation: the headings name ${[...new Set(display.map((r) => r.typeface))].join(', ')}`,
     );
-  /* a theme whose headings use Inter's defaults (the theme library of DR-D3#1), when this build
-     has one: the same deck in it names the four upstream families and not the frozen face */
-  const library = await invoke<{ themes?: { id: string }[] }>(page, 'theme.list', {}).catch(
-    () => null,
-  );
-  const plain = library?.themes?.find((t) => t.id !== 'gt-ink-paper');
-  if (plain === undefined) {
-    facts.push('no theme with Inter\'s defaults on this build (theme.list, DR-D3#1)');
-  } else {
-    const before = await state(page);
-    await invoke(page, 'deck.set', {
-      baseRevision: before.revision,
-      path: '/theme',
-      value: plain.id,
-    });
-    await settled(page);
-    await openEditor(page, deck);
-    const runs = typefacesOf(await editablePptx(page));
-    const after = await state(page);
-    await invoke(page, 'deck.set', {
-      baseRevision: after.revision,
-      path: '/theme',
-      value: 'gt-ink-paper',
-    });
-    await settled(page);
-    const names = [...new Set(runs.map((r) => r.typeface))];
-    facts.push(`${plain.id}: ${names.join(', ')}`);
-    for (const r of runs.filter((x) => /^(GT )?Inter\b/.test(x.typeface)))
-      if (!UPSTREAM_FAMILIES.slice(0, 4).includes(r.typeface))
-        failures.push(`${plain.id}: a run names ${r.typeface}`);
-  }
+  /* Simple, a theme whose headings use Inter's defaults (the theme library of DR-D3#1): the same
+     deck in it names the four upstream families and not the face with the alternates */
+  await setTheme('simple');
+  const runs = typefacesOf(await editablePptx(page));
+  await setTheme(own);
+  const names = [...new Set(runs.map((r) => r.typeface))];
+  facts.push(`simple: ${names.join(', ')}`);
+  for (const r of runs.filter((x) => /^(GT )?Inter\b/.test(x.typeface)))
+    if (!UPSTREAM_FAMILIES.slice(0, 4).includes(r.typeface))
+      failures.push(`simple: a run names ${r.typeface}`);
+  if (!runs.some((r) => /^Inter\b/.test(r.typeface))) failures.push('simple: no Inter run');
   test.info().annotations.push({ type: 'typefaces', description: facts.join('; ') });
   expect(failures, facts.join('; ')).toEqual([]);
 });

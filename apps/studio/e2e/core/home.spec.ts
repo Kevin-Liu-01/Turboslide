@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 
 import { coverage } from './lib';
 import * as agents from './home/agents';
+import * as design from './home/design';
 import * as exportBand from './home/export';
 import * as kits from './home/kits';
 import * as menus from './home/menus';
@@ -31,6 +32,7 @@ import * as versions from './home/versions';
 //   versions.ts  V2, push 14           the scrubber and Restore
 //   patterns.ts  V4, push 19           the animated patterns band
 //   people.ts    V4, push 20           the two people band
+//   design.ts    D4, DR-D4#1 to #7     the design round's landing rows (docs/DESIGN.md 8, 11)
 //
 // Each module exports `ROWS`, the ids it drives, and `rows()`, which declares one test per row with
 // `test(title(id), ...)`. A module declares a row's test only in the push that enters the row,
@@ -57,6 +59,7 @@ const MODULES = [
   versions,
   patterns,
   people,
+  design,
 ] as const;
 
 /* the runner's trace keeps its actions, network and console but not its DOM snapshots or its

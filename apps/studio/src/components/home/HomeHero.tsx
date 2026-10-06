@@ -142,7 +142,7 @@ export function HomeHero() {
             </div>
           </div>
           <div
-            className="ts-home-panel ts-hero-terminal"
+            className="ts-home-panel pt-on-ink ts-hero-terminal"
             data-hero-terminal
             role="group"
             aria-label={HERO.stage.terminalLabel}
@@ -152,7 +152,7 @@ export function HomeHero() {
               <span>{HERO.stage.terminal.author}</span>
             </div>
             <ServerHtml
-              className="ts-home-panel-text ts-hero-screen"
+              className="ts-home-panel-text pt-scroll ts-hero-screen"
               data-hero-screen
               html={
                 ssr

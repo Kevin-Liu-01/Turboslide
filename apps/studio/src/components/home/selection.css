@@ -14,7 +14,9 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 5;
+  /* local order over the sheet (the slide 1, a thumbnail's edge 2, a version's view 3), under 5
+     (docs/DESIGN.md 2.6) */
+  z-index: 4;
 }
 
 .ts-home-sel {
@@ -154,7 +156,7 @@
   color: var(--pt-select-text);
   font: 500 13px / 1 var(--pt-text, 'Inter', 'Inter Fallback', sans-serif);
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-home-sel-chip:empty {

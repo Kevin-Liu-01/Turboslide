@@ -10904,12 +10904,12 @@
     {
       "id": "home.motion.pause",
       "feature": "decks",
-      "interaction": "Pause Motion sits after Dark in the nav as a button with `aria-pressed`; pressing it, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; it reads \"Play Motion\"; the choice is in `localStorage` `ts-home-motion` and a reload paints with the button pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the button works for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
+      "interaction": "The motion toggle sits right after the theme button in the nav as a 32 px icon button with `aria-pressed`, named \"Pause motion\"; pressing it, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; its tooltip reads \"Play motion\" and it draws the play glyph; the choice is in `localStorage` `ts-home-motion` and a reload paints with the button pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the button works for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-first.png (the control); judge-1 (121 to 0 frame callbacks a second in B)",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in the design round, DR-D4#1"
     },
     {
       "id": "home.motion.develop",
@@ -11019,6 +11019,56 @@
       "today": "not driven",
       "evidence": "research-type 1.2",
       "note": "Design round (docs/DESIGN.md 11), DR-D1#3; DESIGN.md 4.4 keeps the italic prefetch on /edit, so the italic clause reads the face's status in document.fonts and the files requested"
+    },
+    {
+      "id": "home.nav.icons",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the nav is one 58 px row: the lockup, Documentation at 1440 only (the footer holds it under 720 px), the shared theme button and the motion toggle as 32 px icon buttons with the shared tooltip, Sign In and New Presentation; no boxed text button but New Presentation; the toggle flips `aria-pressed` and its glyph between pause and play",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F1: six text controls, four kinds of button, two rows at 390",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.type.default-glyphs",
+      "feature": "decks",
+      "interaction": "No element of /home outside a slide computes `cv11` or `ss01`; every number of docs/DESIGN.md 8.0 the page draws (the numbers row, the counters, the filmstrip numbers, the times and versions, the key chips) computes tabular-nums",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F14: the h1, every h2 and the lockup compute \"cv11\", \"ss01\"",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.radius.ladder",
+      "feature": "decks",
+      "interaction": "On /home at 1440 and 390 in both appearances: buttons, fields, menus and tooltips 6 px; figure frames and dialogs 8 px; key chips 4 px; slides, thumbnails, rails and seams 0",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F15: no element on production /home draws a radius",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.scroll.regions",
+      "feature": "decks",
+      "interaction": "Chromium with scrollbars shown: the document, the hero terminal, the miniature filmstrip, the hero filmstrip and the patterns row at 390 draw the shared bar (8 px, the terminals the ink thumb); the miniature's notes field draws no bar at rest",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F16; research-scroll scroll/landing-notes.png",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.pictures.all-load",
+      "feature": "decks",
+      "interaction": "After a full scroll at 1440 and 390 in both appearances every `img` and `picture` source on /home has a natural width over 0 and answered 200; every file the page references is in `assets.json`; the hidden appearance's twins are not requested",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "Kevin's screenshot 4: a picture on /home that failed to load",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "present.presenter.surfaces",

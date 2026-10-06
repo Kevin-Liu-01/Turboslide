@@ -39,7 +39,11 @@ export function HomeFeatures() {
                 <td className="ts-feature-where">{facts.where}</td>
                 <td className="ts-feature-shortcut">
                   {facts.mac !== '' ? (
-                    <kbd data-shortcut-mac={facts.mac} data-shortcut-other={facts.other}>
+                    <kbd
+                      className="pt-kbd"
+                      data-shortcut-mac={facts.mac}
+                      data-shortcut-other={facts.other}
+                    >
                       {facts.mac}
                     </kbd>
                   ) : null}

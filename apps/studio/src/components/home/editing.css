@@ -1,9 +1,10 @@
 /* The editing instruments of /home (docs/LANDING.md 2.5 to 2.9; V2's file, 6.4): the miniature
    editor of the menus band, the kits band's grid and the Version history scrubber. Imported by the
    menus, kits and versions chunks (Vite loads it before the chunk runs, so an inserted instrument
-   paints styled) and by the route when V1 lists it. The grammar is the editor's: square corners,
-   ruled rows, paper plates with the frame weight's 1 px edge (packages/chrome/src/Menu.css), no
-   shadow or gradient; `--pt-select` only on what the visitor works on: an open menu row's ground,
+   paints styled) and by the route when V1 lists it. The grammar is the editor's: the frame, the
+   plates and the dialog take the shared plate classes of tokens.css (`.pt-window` 8 px,
+   `.pt-float` 6 px, docs/DESIGN.md 3.2), rows and the slides stay square, no drop shadow or
+   gradient; `--pt-select` only on what the visitor works on: an open menu row's ground,
    the focus ring (LANDING.md 2.0 "Colour"). */
 
 /* ---- the miniature editor (2.5) ---- */
@@ -16,9 +17,9 @@
   grid-template-rows: 40px 36px 500px 48px 40px;
   box-sizing: border-box;
   width: 100%;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
+  /* its own stacking context over the page that follows, so a long menu that runs past the
+     frame's bottom edge paints over the next band (local order, docs/DESIGN.md 2.6) */
+  z-index: 2;
   font: 14px / 1 var(--pt-text);
 }
 
@@ -48,7 +49,7 @@
   font-size: 13px;
   color: var(--pt-titanium);
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-mini-menubar {
@@ -64,7 +65,7 @@
 .ts-mini-menus-key {
   appearance: none;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: none;
   height: 100%;
   padding: 0 10px;
@@ -107,7 +108,6 @@
   padding: 12px 12px 12px 8px;
   list-style: none;
   overflow-y: auto;
-  scrollbar-width: thin;
   background: var(--pt-paper);
   border-right: 1px solid var(--pt-hair);
 }
@@ -125,7 +125,7 @@
   padding-top: 2px;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
   padding-right: 6px;
 }
@@ -161,13 +161,15 @@
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 14px 16px;
+  /* one 20 px line in the 47 px row (48 less its rule), so the field neither scrolls nor draws a
+     bar at rest (docs/DESIGN.md 6.4) */
+  padding: 13px 16px;
   border: 0;
   border-radius: 0;
   resize: none;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  font: 14px / 1.4 var(--pt-text);
+  font: 14px / 20px var(--pt-text);
 }
 
 .ts-mini-notes textarea::placeholder {
@@ -201,7 +203,7 @@
 .ts-mini-readout {
   flex: none;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 
@@ -210,7 +212,9 @@
 .ts-mini-plates {
   position: absolute;
   inset: 0;
-  z-index: 6;
+  /* local order inside the miniature's own stacking context: over the stage's selection layer
+     (selection.css, 4), which comes before it in the frame */
+  z-index: 4;
   pointer-events: none;
 }
 
@@ -225,9 +229,6 @@
   min-width: 220px;
   max-width: 320px;
   padding: 4px 0;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
   font: 13px / 1.3 var(--pt-text);
 }
 
@@ -258,7 +259,7 @@
 .ts-mini-row-key {
   color: var(--pt-titanium);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   padding-left: 8px;
 }
@@ -332,9 +333,6 @@
   overflow-y: auto;
   transform: translateX(-50%);
   padding: 20px;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
   font: 14px / 1.45 var(--pt-text);
 }
 
@@ -402,7 +400,7 @@
 
 .ts-mini-key {
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 
@@ -474,7 +472,7 @@
   margin: 0 0 6px;
   font-size: 13px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* ---- the Version history scrubber (2.9) ---- */
@@ -561,7 +559,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-home-sheet.ts-version-view[data-version-view] {

@@ -3,27 +3,17 @@
    people band and the patterns band. Imported after home.css, so the reduced motion block sits
    last. */
 
-/* ---- Pause Motion (3.2): a 32 px text button with a 1 px hairline in the navigation; the word
-   follows html[data-motion], which the boot script sets before the first paint. Both words hold
-   one grid cell, so the button keeps the longer word's width and nothing in the bar moves when
-   it is pressed (3.7); pressed, its hairline is the ink, as the pressed appearance button's ---- */
+/* ---- the motion toggle (3.2; docs/DESIGN.md 8.1): a 32 px icon square of the shell beside the
+   theme button, drawing the editor's `pause` glyph while the page moves and `play` while it is
+   paused, both masks of icons.generated.css in one grid cell, so nothing in the bar moves when it
+   is pressed (3.7). The glyph follows html[data-motion], which the boot script sets before the
+   first paint ---- */
 header .ts-motion-toggle.pt-ib {
   display: inline-grid;
   place-items: center;
-  height: 32px;
-  padding: 0 11px;
-  border: 1px solid var(--pt-edge);
-  border-radius: 0;
-  color: var(--pt-ink);
-  white-space: nowrap;
 }
 
-header .ts-motion-toggle.pt-ib[aria-pressed='true'] {
-  border-color: var(--pt-ink);
-  background: transparent;
-}
-
-.ts-motion-toggle > .pt-lb {
+.ts-motion-toggle > .ts-icon {
   grid-area: 1 / 1;
 }
 

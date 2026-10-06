@@ -1,53 +1,70 @@
-import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
-import { applyTheme, useTheme } from '@turboslide/viewer/theme';
-import type { Theme } from '@turboslide/viewer/theme';
+import { useState } from 'react';
 
+import { ThemeButton } from '@turboslide/chrome/ThemeButton';
+import { tipProps } from '@turboslide/chrome/Tooltip';
+import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
+
+import { useMountEffect } from '../useMountEffect';
 import { NAV } from './copy';
 import { HomeLink } from './HomeLink';
 import { SignInButton } from './sign-in';
 
 /**
- * The navigation of /home (docs/archive/rounds/POLISH.md 3.2 item 0; the page grammar of docs/NEXT.md 4.1.2 and
- * 4.1.3 item 9): the 58 px bar in the 1104 px column with the seam under it and a cross where the
- * seam meets each rail, the lockup (the 24 px mark beside the 22 px word, B1's request 2) as one
- * link to this page, then Documentation, the appearance group, Pause Motion, Sign In and the one
- * solid button (docs/LANDING.md 2.1). GitHub moved to the footer. Sign In is drawn for an anonymous visitor once the deployment
- * answers that it offers a method (sign-in.tsx), in a slot drawn at its width from the first
- * paint, so its arrival moves nothing that was already drawn (the layout shift rows). The skip
- * link comes first in the Tab order and is shown on focus (docs/LANDING.md 2.1); it moves focus to
- * the hero section. The appearance group
- * is a `role="group"` of two `aria-pressed` buttons, Light and Dark, that write `gt-theme`
- * through `applyTheme` (the key the boot script reads), never a toggle whose label has to be read
- * to know the state. The page is prerendered, so the server's markup cannot know the stored
- * appearance: the pressed look comes from `home.css` keyed on the `data-theme` attribute the boot
- * script stamps before first paint, and the small inline script after the group sets
- * `aria-pressed` from the same attribute as the document parses, so the pressed state at 150 ms
- * equals the hydrated state (audit-collab item 20); the same script sets Pause Motion's
- * `aria-pressed` from `html[data-motion]`, which the boot script stamps (V4's). Pause Motion is the
- * page's button, not React's: the boot script answers its click from the first paint. Under
- * 1023 px the bar is two rows: the lockup, Sign In and the button, then Documentation, the group
- * and Pause Motion; under 400 px the lockup shows the mark alone.
+ * The navigation of /home (docs/DESIGN.md 8.1; docs/LANDING.md 2.1): one 58 px row in the 1104 px
+ * column at every width, with the seam under it and a cross where the seam meets each rail. The
+ * lockup (the 24 px mark beside the 22 px word) links to this page; then Documentation as a text
+ * link (from 720 px; under it the link is the footer's), a hairline, the editor's own theme button
+ * (`ThemeButton`, the ◐ glyph and the shared tooltip, one control in place of a Light and Dark
+ * pair, so the page draws the shared component and no copy of it), the motion toggle, a hairline,
+ * Sign In as a text button and New Presentation solid. The two icon controls are 32 px `.pt-ib
+ * .pt-icon` squares with the 6 px corner of the ladder on their hover ground.
+ *
+ * Sign In is drawn for an anonymous visitor once the deployment answers that it offers a method
+ * (sign-in.tsx), in a slot drawn at its width from the first paint, so its arrival moves nothing
+ * already drawn (the layout shift rows). The skip link comes first in the Tab order and is shown on
+ * focus; it moves focus to the hero section.
+ *
+ * The motion toggle (LANDING.md 3.2) is the page's button, not React's: the boot script answers its
+ * click from the first paint, flips `html[data-motion]` and `aria-pressed` and stores the choice;
+ * React only names it. Its two glyphs are the editor's `pause` and `play` drawn as masks of
+ * `icons.generated.css`, and motion.css shows the one that names the next press. The page is
+ * prerendered, so the server's markup cannot know a stored choice: the small inline script after
+ * the toggle sets `aria-pressed` from `html[data-motion]` as the document parses, and the tooltip's
+ * name follows the same attribute once the page hydrates.
  */
 const PRESSED_SCRIPT =
-  "(function(){try{var t=document.documentElement.getAttribute('data-theme');var b=document.querySelectorAll('[data-theme-option]');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',String(b[i].getAttribute('data-theme-option')===t));var m=document.querySelector('[data-motion-toggle]');if(m)m.setAttribute('aria-pressed',String(document.documentElement.getAttribute('data-motion')==='paused'))}catch(e){}})();";
+  "(function(){try{var m=document.querySelector('[data-motion-toggle]');if(m)m.setAttribute('aria-pressed',String(document.documentElement.getAttribute('data-motion')==='paused'))}catch(e){}})();";
 
-export function HomeNav({ nonce }: { nonce?: string }) {
-  const theme = useTheme();
-  const choose = (next: Theme) => {
-    if (next !== theme) applyTheme(next);
-  };
-  const option = (value: Theme, label: string) => (
+function MotionToggle() {
+  const [paused, setPaused] = useState(false);
+  useMountEffect(() => {
+    const read = () => setPaused(document.documentElement.getAttribute('data-motion') === 'paused');
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-motion'],
+    });
+    return () => observer.disconnect();
+  });
+  return (
     <button
       type="button"
-      className="pt-ib"
-      aria-pressed={value === theme}
-      data-control={`home.theme.${value}`}
-      data-theme-option={value}
-      onClick={() => choose(value)}
+      className="pt-ib pt-icon ts-motion-toggle"
+      data-motion-toggle
+      data-control="home.motion"
+      aria-label={NAV.motion.pause}
+      aria-pressed="false"
+      suppressHydrationWarning
+      {...tipProps(paused ? NAV.motion.play : NAV.motion.pause)}
     >
-      <span className="pt-lb">{label}</span>
+      <i className="ts-icon is-pause" data-icon="pause" aria-hidden="true" />
+      <i className="ts-icon is-play" data-icon="play" aria-hidden="true" />
     </button>
   );
+}
+
+export function HomeNav({ nonce }: { nonce?: string }) {
   return (
     <header className="ts-product-nav ts-seam">
       <a className="ts-skip" href="#hero" data-control="home.nav.skip">
@@ -70,36 +87,22 @@ export function HomeNav({ nonce }: { nonce?: string }) {
               href={link.href}
               external={link.external}
               control={link.id}
-              className="pt-ib ts-product-nav-link"
+              className="ts-product-nav-link"
             >
-              <span className="pt-lb">{link.label}</span>
+              {link.label}
             </HomeLink>
           ))}
-          <span
-            className="ts-product-appearance"
-            role="group"
-            aria-label={NAV.appearance.label}
-            data-control="home.theme"
-          >
-            {option('light', NAV.appearance.light.label)}
-            {option('dark', NAV.appearance.dark.label)}
+          <span className="ts-product-nav-rule is-links" aria-hidden="true" />
+          <span className="ts-product-nav-icons" data-control="home.theme">
+            <ThemeButton className="ts-product-nav-icon" />
+            {/* the motion toggle (LANDING.md 2.1, 3.2): the boot script holds its click from the
+                first paint and motion.css its two glyphs */}
+            <MotionToggle />
           </span>
-          {/* Pause Motion (LANDING.md 2.1, 3.2): the page's button, not React's; the boot script
-              holds its click from the first paint and motion.css its look and its two words */}
-          <button
-            type="button"
-            className="pt-ib ts-motion-toggle"
-            data-motion-toggle
-            data-control="home.motion"
-            aria-pressed="false"
-            suppressHydrationWarning
-          >
-            <span className="pt-lb is-pause">{NAV.motion.pause}</span>
-            <span className="pt-lb is-play">{NAV.motion.play}</span>
-          </button>
           <script nonce={nonce} suppressHydrationWarning>
             {PRESSED_SCRIPT}
           </script>
+          <span className="ts-product-nav-rule" aria-hidden="true" />
         </nav>
         <span className="ts-product-nav-signin">
           <SignInButton control="home.nav.signIn" className="pt-ib" />

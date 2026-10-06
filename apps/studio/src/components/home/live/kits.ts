@@ -85,7 +85,7 @@ export function startKits(ctx: LiveContext): void {
         li.className = 'ts-kit-thumb';
         li.dataset['thumb'] = key;
         const n = document.createElement('span');
-        n.className = 'ts-home-thumb-n';
+        n.className = 'ts-kit-thumb-n pt-num';
         n.dataset['thumbN'] = '';
         n.setAttribute('aria-hidden', 'true');
         li.append(n);

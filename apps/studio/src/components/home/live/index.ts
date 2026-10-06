@@ -66,40 +66,18 @@ const REGISTRATIONS: readonly Registration[] = [
   { band: 'hero', start: (ctx) => startInterludes(ctx.root) },
 ];
 
-const entries = new Map<BandId, (() => Promise<BandModule>)[]>();
-
 /**
- * Registers one entry of a band below the first screen (6.3). The loader imports every entry of a
- * band together when the band nears and starts them in the order they were registered.
+ * The band registry and each band's markup (`bands.ts`): a chunk of its own, imported once when
+ * the core starts watching the bands, so the core carries one dynamic import for the bands below
+ * the first screen in place of one for each band entry and each band's markup (docs/DESIGN.md
+ * 8.16: the live core's 20,480 B gzip with no net growth; the design round's first screen adds
+ * the editor's theme button to the route, whose files every band import lists to preload).
  */
-export function registerBand(band: BandId, load: () => Promise<BandModule>): void {
-  const list = entries.get(band) ?? [];
-  list.push(load);
-  entries.set(band, list);
-}
-
-/* The bands below the first screen, in the page's order (2.0). The core holds only the first
-   screen's code (4.1: the store, the motion system, the frame's selection, H5, the field printer,
-   the loader): every band's own code is a chunk of its own, imported when the band nears, and the
-   canvas band's two starts are the core's objects and field printer (6.4: V3 and V4 add theirs). */
-registerBand('menus', () => import('./menus'));
-registerBand('canvas', async () => ({ start: (ctx) => void startObjects(ctx, 'canvas') }));
-registerBand('canvas', async () => ({ start: startCanvasField }));
-registerBand('tailor', () => import('./tailor'));
-registerBand('kits', () => import('./kits'));
-registerBand('agents', () => import('./history').then((m) => ({ start: m.startHistory })));
-registerBand('agents', () => import('./agents').then((m) => ({ start: m.startAgents })));
-registerBand('agents', () => import('./versions'));
-registerBand('people', () => import('./people'));
-registerBand('present', () => import('./show').then((m) => ({ start: m.startShow })));
-registerBand('present', () => import('./print').then((m) => ({ start: m.startPrint })));
-registerBand('export', () => import('./seam').then((m) => ({ start: m.startSeam })));
-registerBand('export', () =>
-  import('./seam').then((m) => ({ start: (ctx) => hintInView(ctx.band, m.armHint, m.hint) })),
-);
-registerBand('export', () => import('./loupe').then((m) => ({ start: m.startLoupe })));
-registerBand('patterns', () => import('./pattern'));
-registerBand('close', () => import('./mark').then((m) => ({ start: m.startMark })));
+type Registry = typeof import('./bands');
+/** The core's starts the registry names (the canvas band's two, the export band's hint). */
+const CORE_STARTS = { startObjects, startCanvasField, hintInView };
+let registry: Promise<Registry> | null = null;
+const bands = (): Promise<Registry> => (registry ??= import('./bands'));
 
 /** How far ahead of the viewport a band's chunk is requested (4.2: two viewport heights). */
 const BAND_MARGIN = '200% 0px';
@@ -218,32 +196,6 @@ export { paintSlide, paintSlides };
 // ---------------------------------------------------------------------------------------------
 // The band loader
 
-type FillsModule = { FILLS: Readonly<Record<string, string>> };
-
-/**
- * Each band's markup (V1's `bands/<band>.generated.ts`, one module a band so each travels in its
- * band's chunk alone, v2.md R2), imported when the band nears; V4 adds its bands' lines.
- */
-const FILL_MODULES: Partial<Record<BandId, () => Promise<FillsModule>>> = {
-  canvas: () => import('../bands/canvas.generated'),
-  tailor: () => import('../bands/tailor.generated'),
-  agents: () => import('../bands/agents.generated'),
-  people: () => import('../bands/people.generated'),
-  present: () => import('../bands/present.generated'),
-  export: () => import('../bands/export.generated'),
-  patterns: () => import('../bands/patterns.generated'),
-  close: () => import('../bands/close.generated'),
-};
-
-const fills = (band: BandId): Promise<FillsModule | null> => {
-  const load = FILL_MODULES[band];
-  if (load === undefined) return Promise.resolve(null);
-  return load().catch((error: unknown) => {
-    console.error(`the ${band} band's markup did not load`, error);
-    return null;
-  });
-};
-
 /**
  * Registers the nine slides at rest (V1's `bands/deck.generated.ts` `HOME_SLIDE_MARKUP`), which a
  * band chunk that draws its own copies imports and hands here, so `cloneSlide` has every slide
@@ -282,7 +234,14 @@ async function loadBand(
   live.loaded.add(id);
   const store = live.store;
   if (store === null) return;
-  const list = entries.get(id) ?? [];
+  const registry = await bands().catch((error: unknown) => {
+    console.error('the band registry did not load', error);
+    return null;
+  });
+  if (registry === null) return;
+  const { fills } = registry;
+  const BAND_ENTRIES = registry.bandEntries(CORE_STARTS);
+  const list = BAND_ENTRIES.get(id) ?? [];
   const [markup, modules] = await Promise.all([
     box === null ? Promise.resolve(null) : fills(id),
     Promise.all(
@@ -329,11 +288,13 @@ function watchBands(root: HTMLElement): void {
     started.add(band.dataset['band'] ?? '');
   }
   // a band with entries and no reserved box (the first pass's markup in the document) starts now
-  for (const id of entries.keys()) {
-    if (started.has(id)) continue;
-    const band = root.querySelector<HTMLElement>(`[data-band="${id}"]`);
-    if (band !== null) void loadBand(root, band, null);
-  }
+  void bands().then(({ bandEntries }) => {
+    for (const id of bandEntries(CORE_STARTS).keys()) {
+      if (started.has(id)) continue;
+      const band = root.querySelector<HTMLElement>(`[data-band="${id}"]`);
+      if (band !== null) void loadBand(root, band, null);
+    }
+  });
   if (boxes.size === 0) return;
   if (typeof IntersectionObserver !== 'function') {
     for (const [box, band] of boxes) void loadBand(root, band, box as HTMLElement);

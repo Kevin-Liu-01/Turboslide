@@ -72,7 +72,7 @@ export function HomeKits() {
         <ol className="ts-kit-grid" data-kit-grid aria-label={KITS.gridLabel}>
           {HOME_DECK.order.map((id) => (
             <li key={id} className="ts-kit-thumb" data-thumb={id}>
-              <span className="ts-home-thumb-n" data-thumb-n aria-hidden="true">
+              <span className="ts-kit-thumb-n pt-num" data-thumb-n aria-hidden="true">
                 {HOME_DECK.slides[id].n}
               </span>
               <div className="ts-home-sheet is-thumb" data-sheet={`kits-${id}`} />

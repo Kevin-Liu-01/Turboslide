@@ -59,7 +59,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 500 13px / 1 var(--pt-text);
@@ -272,7 +272,7 @@
   [data-band='present'] > .ts-home-show {
     --ts-show-width: min(100%, (100svh - 96px) * 16 / 9);
     position: fixed;
-    z-index: 20;
+    z-index: var(--ts-layer-show);
   }
 
   [data-band='present'] > .ts-home-show > .ts-home-show-stage {
@@ -361,7 +361,7 @@
   margin: 6px 0 0;
   font: 13px / 16px var(--pt-text);
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 

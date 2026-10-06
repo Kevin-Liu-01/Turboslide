@@ -198,7 +198,7 @@ export function startMenus(ctx: LiveContext): void {
     box.querySelector<T>(selector);
   const frame =
     find<HTMLElement>('[data-mini-editor]') ??
-    h('div', { class: 'ts-mini-editor', 'data-mini-editor': true });
+    h('div', { class: 'ts-mini-editor pt-window', 'data-mini-editor': true });
   if (!frame.isConnected) box.append(frame);
   const markSvg = (): SVGSVGElement => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1024,7 +1024,12 @@ export function startMenus(ctx: LiveContext): void {
     plates.querySelector('[data-mini-dialog]')?.remove();
     const el = h(
       'div',
-      { class: 'ts-mini-dialog', role: 'dialog', 'aria-label': title, 'data-mini-dialog': true },
+      {
+        class: 'ts-mini-dialog pt-window',
+        role: 'dialog',
+        'aria-label': title,
+        'data-mini-dialog': true,
+      },
       h('p', { class: 'ts-mini-dialog-title' }, title),
       lead === null ? null : h('p', { class: 'ts-mini-dialog-lead' }, lead),
       ...content,
@@ -1358,7 +1363,11 @@ export function startMenus(ctx: LiveContext): void {
   ): HTMLElement => {
     for (const p of [...plates.querySelectorAll<HTMLElement>('[data-mini-plate]')])
       if (Number(p.dataset['miniPlate']) >= depth) p.remove();
-    const plate = h('div', { class: 'ts-mini-plate', role: 'menu', 'data-mini-plate': depth });
+    const plate = h('div', {
+      class: 'ts-mini-plate pt-float',
+      role: 'menu',
+      'data-mini-plate': depth,
+    });
     plate.setAttribute('aria-label', menu >= 0 ? (MINI_MENUS[menu]?.label ?? '') : WORDS.menusKey);
     for (const item of rows) {
       if ('back' in item) {

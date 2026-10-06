@@ -63,7 +63,6 @@
 
 .ts-mood-title {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: var(--ts-label, 13px);
   letter-spacing: -0.005em;

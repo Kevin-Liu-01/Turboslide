@@ -47,7 +47,7 @@ export function HomeAgents() {
           <div className="ts-agents-stage" data-agents-stage>
             <HomeSheet instance="agents" fill className="ts-agents-sheet" />
           </div>
-          <div className="ts-home-panel" data-panel-root>
+          <div className="ts-home-panel pt-on-ink" data-panel-root>
             <div
               className="ts-home-panel-tabs"
               role="tablist"

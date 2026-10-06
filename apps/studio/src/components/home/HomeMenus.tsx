@@ -21,7 +21,7 @@ export function HomeMenus() {
       <BandHead id="menus" heading={MENUS.h2} lead={MENUS.lead} span={7} />
       <Reserve band="menus" className="ts-mini">
         <div
-          className="ts-mini-editor"
+          className="ts-mini-editor pt-window"
           role="group"
           aria-label={MENUS.editorLabel}
           data-mini-editor

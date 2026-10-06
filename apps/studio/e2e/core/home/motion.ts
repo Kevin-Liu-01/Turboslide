@@ -736,19 +736,21 @@ export function rows(): void {
       const { context, page } = await open(browser, { height: 700 });
       try {
         await visit(page, '?slow=10');
-        /* the button: after Dark in the navigation, a toggle reading Pause Motion */
-        await expect(toggle(page)).toHaveText(NAV.motion.pause, { useInnerText: true });
+        /* the button (restated in the design round, DR-D4#1; docs/DESIGN.md 8.1): the icon
+           toggle right after the editor's theme button in the navigation, named Pause motion, its
+           tooltip naming the next press */
+        await expect(toggle(page)).toHaveAttribute('aria-label', NAV.motion.pause);
         await expect(toggle(page)).toHaveAttribute('aria-pressed', 'false');
+        await liveReady(page);
+        await expect(toggle(page)).toHaveAttribute('data-tip', NAV.motion.pause);
         const order = await page.evaluate(() => {
-          const dark = document.querySelector('[data-theme-option="dark"]');
+          const theme = document.querySelector('header [data-control="view.theme"]');
           const button = document.querySelector('[data-motion-toggle]');
-          return dark !== null && button !== null
-            ? Boolean(dark.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING) &&
-                button.closest('header') !== null
+          return theme !== null && button !== null
+            ? theme.nextElementSibling === button && button.closest('header') !== null
             : false;
         });
-        expect(order, 'after Dark, in the navigation').toBe(true);
-        await liveReady(page);
+        expect(order, 'right after the theme button, in the navigation').toBe(true);
         /* a running one shot motion lands at its end state within one frame: C1 at a tenth of
            speed, pressed mid develop */
         await loadBelow(page, 'canvas');
@@ -781,7 +783,7 @@ export function rows(): void {
         note('C1 at its end state after the press', (landed?.[0] ?? NaN) - pressedAt);
         if (!unread)
           expect((landed?.[0] ?? Infinity) - pressedAt).toBeLessThanOrEqual(FRAME_SLACK_MS);
-        await expect(toggle(page)).toHaveText(NAV.motion.play, { useInnerText: true });
+        await expect(toggle(page)).toHaveAttribute('data-tip', NAV.motion.play);
         await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
         expect(await page.evaluate((key) => localStorage.getItem(key), MOTION_KEY)).toBe('paused');
         /* 0 frame callbacks in the next 2 s without input, at the top, the middle and the bottom */
@@ -840,7 +842,18 @@ export function rows(): void {
           'never played',
         ).toEqual([]);
         await expect(toggle(again.page)).toHaveAttribute('aria-pressed', 'true');
-        await expect(toggle(again.page)).toHaveText(NAV.motion.play, { useInnerText: true });
+        /* the play glyph shows and the pause glyph is hidden from the first paint (motion.css) */
+        expect(
+          await again.page.evaluate(() =>
+            ['pause', 'play'].map(
+              (glyph) =>
+                getComputedStyle(
+                  document.querySelector(`[data-motion-toggle] [data-icon="${glyph}"]`)!,
+                ).visibility,
+            ),
+          ),
+        ).toEqual(['hidden', 'visible']);
+        await expect(toggle(again.page)).toHaveAttribute('data-tip', NAV.motion.play);
         await readNoDevelop(again.page);
         await again.page.waitForTimeout(1_000);
         const quietReading = await idle(again.page, again.context);

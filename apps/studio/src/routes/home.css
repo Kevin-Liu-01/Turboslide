@@ -78,7 +78,7 @@ html:has(.ts-product) {
   position: absolute;
   left: 16px;
   top: 12px;
-  z-index: 10;
+  z-index: var(--ts-layer-skip);
   padding: 8px 12px;
   font-size: 14px;
   color: var(--pt-ink);
@@ -104,7 +104,6 @@ html:has(.ts-product) {
 .ts-h2 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: clamp(30px, 3.9vw, 54px);
   line-height: 1.04;
@@ -164,13 +163,19 @@ html:has(.ts-product) {
   text-decoration: none;
   color: var(--pt-ink);
   border-color: var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   justify-content: center;
   transition:
     color var(--ts-d-fast) var(--ts-ease-fade),
     background-color var(--ts-d-fast) var(--ts-ease-fade),
     border-color var(--ts-d-fast) var(--ts-ease-fade),
     transform var(--ts-d-fast) var(--ts-ease-fade);
+}
+
+/* every solid button on the page takes the control corner of the ladder (docs/DESIGN.md 3.1),
+   over the editor's square solid button (ToolButton.css, until DR-D2#2 moves it to the ladder) */
+.ts-product .pt-ib.is-solid {
+  border-radius: var(--pt-radius);
 }
 
 .ts-product .ts-button.is-solid {
@@ -193,7 +198,7 @@ html:has(.ts-product) {
   height: 32px;
   padding: 0 6px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: none;
   font: 14px / 1 var(--pt-text);
   color: var(--pt-ink-2);
@@ -287,7 +292,6 @@ html:has(.ts-product) {
 
 .ts-product-lockup-word {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 22px;
   line-height: 1;
@@ -309,54 +313,73 @@ html:has(.ts-product) {
   min-width: 0;
 }
 
-.ts-product-nav-links .pt-ib,
+.ts-product-nav-links a,
 .ts-product-nav-new {
   text-decoration: none;
 }
 
-.ts-product-nav-links .pt-ib {
+/* Documentation is a text link in ink with the control's 6 px ground on hover (docs/DESIGN.md
+   8.1); under 720 px it is the footer's (HomeFooter.tsx) */
+.ts-product-nav-link {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
   font-size: 14px;
-  height: 36px;
   color: var(--pt-ink);
+  border-radius: var(--pt-radius);
 }
 
-/* Sign In arrives after hydration in a slot drawn at its width from the first paint (sign-in.tsx) */
+.ts-product-nav-link:hover {
+  background: var(--pt-plate);
+}
+
+/* the two hairlines: after the link, and between the icon controls and Sign In */
+.ts-product-nav-rule {
+  flex: 0 0 1px;
+  height: 20px;
+  margin: 0 8px;
+  background: var(--pt-hair);
+}
+
+/* the theme button and the motion toggle: 32 px icon squares of the shell (.pt-ib .pt-icon), the
+   6 px corner on their hover ground, in ink */
+.ts-product-nav-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-product-nav-icons .pt-ib {
+  color: var(--pt-ink);
+  border-radius: var(--pt-radius);
+}
+
+/* the theme button's glyph is the shared component's text half disc, which only the client knows:
+   it shows once the page has hydrated, so a light visit never paints the dark glyph first */
+main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
+  visibility: hidden;
+}
+
+/* Sign In arrives after hydration in a slot drawn at its width from the first paint (sign-in.tsx),
+   68 px for the word at 14 px and its 10 px sides; a text button with no frame at rest */
 .ts-product-nav-signin {
   display: inline-flex;
-  flex: 0 0 64px;
+  flex: 0 0 68px;
   justify-content: flex-end;
 }
 
 .ts-product-nav-signin .pt-ib {
+  font-size: 14px;
   color: var(--pt-ink);
 }
 
+/* New Presentation, the one boxed text control: solid, 36 px, the control corner */
 .ts-product-nav .ts-product-nav-new {
   height: 36px;
   padding: 0 14px;
   font-size: 14px;
-}
-
-/* the appearance group: two aria-pressed buttons; the pressed look comes from the data-theme
-   attribute the boot script stamps before first paint (HomeNav.tsx) */
-.ts-product-appearance {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0 8px;
-}
-
-:root[data-theme='light'] .ts-product-appearance [data-theme-option='light'],
-:root[data-theme='dark'] .ts-product-appearance [data-theme-option='dark'] {
-  color: var(--pt-ink);
-  border-color: var(--pt-ink);
-}
-
-/* Light, Dark and Pause Motion are 32 px text buttons (2.1, B's b-1440-light-first.png); Pause
-   Motion's hairline, its two words and its absence under reduced motion are motion.css's */
-.ts-product-appearance .pt-ib,
-.ts-product-nav-links .ts-motion-toggle {
-  height: 32px;
+  border-radius: var(--pt-radius);
 }
 
 /* ---- the bands (LANDING.md 2.0 "The column"): 96 px above and below at 1,024 px and over, 80
@@ -543,7 +566,6 @@ html:has(.ts-product) {
 .ts-h1 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: clamp(40px, 6.67vw, 96px);
   line-height: 0.98;
@@ -585,6 +607,7 @@ html:has(.ts-product) {
   min-width: 0;
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
+  border-radius: var(--pt-radius-lg);
   overflow: hidden;
 }
 
@@ -617,7 +640,7 @@ html:has(.ts-product) {
 .ts-hero-frame-counter {
   margin-left: auto;
   font-size: 13px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   color: var(--pt-titanium);
 }
@@ -677,7 +700,7 @@ html:has(.ts-product) {
   font-weight: 500;
   line-height: 1;
   text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-titanium);
 }
 
@@ -760,6 +783,7 @@ html:has(.ts-product) {
   display: grid;
   grid-template-rows: 32px minmax(0, 1fr);
   min-width: 0;
+  border-radius: var(--pt-radius-lg);
   overflow: hidden;
 }
 
@@ -780,7 +804,8 @@ html:has(.ts-product) {
   display: block;
   min-height: 0;
   padding: 12px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-size: 12px;
   line-height: 16px;
 }
@@ -879,7 +904,7 @@ html:has(.ts-product) {
   font-weight: 500;
   line-height: 1.1;
   letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   color: var(--pt-ink);
 }
@@ -911,6 +936,9 @@ html:has(.ts-product) {
   color: var(--pt-panel-text);
   background: var(--pt-panel-ink);
   font-family: var(--pt-mono);
+  /* a figure frame on /home takes the window corner (docs/DESIGN.md 3.1, 8.0) */
+  border-radius: var(--pt-radius-lg);
+  overflow: hidden;
 }
 
 .ts-home-panel-tabs {
@@ -1064,7 +1092,7 @@ html:has(.ts-product) {
 .ts-home-history-time {
   font-size: 13px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* the agent's ring and flag (l3.md R3), created by the live module while a step plays */
@@ -1202,7 +1230,7 @@ html:has(.ts-product) {
   height: 36px;
   padding: 0 10px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   font: 15px / 1 var(--pt-text);
   color: var(--pt-ink);
@@ -1239,7 +1267,7 @@ html:has(.ts-product) {
   height: 36px;
   padding: 0 8px 0 0;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: none;
   font: 14px / 1 var(--pt-text);
   color: var(--pt-ink-2);
@@ -1318,7 +1346,7 @@ html:has(.ts-product) {
   font-size: 12px;
   line-height: 1;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-home-thumb[data-selected] .ts-home-sheet.is-thumb::after {
@@ -1391,7 +1419,7 @@ html:has(.ts-product) {
   flex: 1 1 auto;
   min-width: 0;
   font: 14px / 20px var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
   white-space: nowrap;
   overflow: hidden;
@@ -1449,7 +1477,7 @@ html:has(.ts-product) {
 
 .ts-slide-row-n {
   flex: 0 0 32px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-slide-row[aria-current='true'] {
@@ -1508,14 +1536,14 @@ html:has(.ts-product) {
 }
 
 .ts-home-show-time {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-home-show-bar button {
   height: 40px;
   padding: 0 14px;
   border: 1px solid color-mix(in srgb, var(--pt-paper) 40%, transparent);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: transparent;
   color: var(--pt-paper);
   font: inherit;
@@ -1794,7 +1822,7 @@ html:has(.ts-product) {
 .ts-feature-shortcut kbd {
   font-family: var(--pt-text);
   font-size: 14px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
 }
 
@@ -1952,42 +1980,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     padding: 80px 0;
   }
 
-  .ts-product-nav-row {
-    flex-wrap: wrap;
-    gap: 0 12px;
-  }
-
-  /* the first row: the lockup, then Sign In and New Presentation at the right */
-  .ts-product-nav-signin {
-    order: 2;
-    margin-left: auto;
-  }
-
-  .ts-product-nav-new {
-    order: 2;
-  }
-
-  /* the second row: Documentation, then the Light and Dark pair and Pause Motion at the right */
-  .ts-product-nav-links {
-    order: 3;
-    flex-basis: 100%;
-    margin-left: 0;
-    padding-bottom: 12px;
-  }
-
-  .ts-product-nav-link {
-    order: 1;
-  }
-
-  .ts-product-appearance {
-    order: 3;
-    margin: 0 0 0 auto;
-  }
-
-  .ts-product-nav-links .ts-motion-toggle {
-    order: 4;
-  }
-
   .ts-features thead th:first-child {
     width: 34%;
   }
@@ -2011,10 +2003,28 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     --ts-gutter: 0px;
   }
 
-  /* the second row wraps Pause Motion to a row of its own where the three do not fit (320 px) */
-  .ts-product-nav-links {
-    flex-wrap: wrap;
-    row-gap: 8px;
+  /* the navigation stays one 58 px row (docs/DESIGN.md 8.1): Documentation and its hairline
+     leave for the footer, and the row holds the lockup, the two icon controls, a hairline, Sign In
+     and New Presentation */
+  .ts-product-nav-row {
+    gap: 8px;
+  }
+
+  .ts-product-nav-link,
+  .ts-product-nav-rule.is-links {
+    display: none;
+  }
+
+  .ts-product-nav-rule {
+    margin: 0 4px;
+  }
+
+  .ts-product-nav-signin .pt-ib {
+    padding: 0 8px;
+  }
+
+  .ts-product-nav .ts-product-nav-new {
+    padding: 0 12px;
   }
 
   .ts-band {
@@ -2097,11 +2107,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     overflow-y: hidden;
     border-right: 0;
     border-top: 1px solid var(--pt-hair);
-    scrollbar-width: none;
-  }
-
-  .ts-hero-filmstrip::-webkit-scrollbar {
-    display: none;
   }
 
   .ts-hero-thumb {
@@ -2364,10 +2369,17 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     box-shadow: inset 0 -1px 0 var(--pt-hair-soft);
   }
 
+  /* the cells draw no rule of their own under 720 px, the last row's cells included (that rule's
+     selector outranks a plain cell rule), so each row draws one line (research-landing F12) */
   .ts-features tbody th,
-  .ts-features tbody td {
+  .ts-features tbody td,
+  .ts-features tbody tr:last-child > * {
     height: auto;
     box-shadow: none;
+  }
+
+  .ts-features tbody tr:last-child {
+    box-shadow: inset 0 -1px 0 var(--pt-hair);
   }
 
   .ts-feature-key {
@@ -2388,9 +2400,9 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 }
 
-/* ---- under 400 px the lockup shows the mark alone, named "Turboslide" by its link (2.1), so the
-   first row holds the mark, Sign In and New Presentation and nothing is wider than 320 px ---- */
-@media (max-width: 399px) {
+/* ---- under 480 px the lockup shows the mark alone, named "Turboslide" by its link (2.1), so the
+   one row holds the mark, the two icon controls, Sign In and New Presentation at 390 ---- */
+@media (max-width: 479px) {
   .ts-product-lockup-word {
     display: none;
   }

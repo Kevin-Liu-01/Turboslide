@@ -1,0 +1,365 @@
+{
+  "base": "https://turboslide-rmh40rynx-kl01s-projects.vercel.app",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "no bearer",
+    "reset": false
+  },
+  "startedAt": "2026-10-04T08:25:40.701Z",
+  "ms": 197844,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 197838,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/integ2/preview/rows/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "home.budget.bytes-first",
+      "home.budget.bytes-page",
+      "home.budget.live-module",
+      "home.budget.shared",
+      "home.budget.lcp",
+      "home.budget.frame",
+      "home.budget.main-thread",
+      "home.page.bands-after-load",
+      "home.patterns.pair",
+      "decks.home.load-budget",
+      "decks.home.links-and-card"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 11,
+  "passed": 6,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: first byte 154 ms (line 150)",
+      "measures": [
+        "first byte 154 ms (line 150)",
+        "LCP 320 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 461 ms (line 500)",
+        "pictures before the first scroll 0 B in 0 requests (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 95311 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1",
+        "JavaScript decoded 1378179 B (reported against 600000)",
+        "first byte 154 ms (line 150)",
+        "LCP 320 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 461 ms (line 500)",
+        "pictures before the first scroll 0 B in 0 requests (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 95311 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1",
+        "JavaScript decoded 1378179 B (reported against 600000)"
+      ]
+    },
+    {
+      "id": "home.budget.shared",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "shared entry chunk /assets/index-BHh3SX4f.js 1183913 B decoded (reported against 600000); all shared script 1336809 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)",
+        "shared entry chunk /assets/index-BHh3SX4f.js 1183913 B decoded (reported against 600000); all shared script 1336809 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)"
+      ]
+    },
+    {
+      "id": "home.budget.lcp",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "1440 x1: LCP cold 272 ms on h1#ts-product-h1, warm 108 ms on h1#ts-product-h1 (lines 400 and 200) at load 12",
+        "1440 x2: LCP cold 288 ms on h1#ts-product-h1, warm 112 ms on h1#ts-product-h1 (lines 400 and 200) at load 12",
+        "390 x1: LCP cold 264 ms on h1#ts-product-h1, warm 84 ms on h1#ts-product-h1 (lines 400 and 200) at load 12.8",
+        "1440 x1: LCP cold 272 ms on h1#ts-product-h1, warm 108 ms on h1#ts-product-h1 (lines 400 and 200) at load 12",
+        "1440 x2: LCP cold 288 ms on h1#ts-product-h1, warm 112 ms on h1#ts-product-h1 (lines 400 and 200) at load 12",
+        "390 x1: LCP cold 264 ms on h1#ts-product-h1, warm 84 ms on h1#ts-product-h1 (lines 400 and 200) at load 12.8"
+      ]
+    },
+    {
+      "id": "home.budget.frame",
+      "result": "passed",
+      "reason": "",
+      "measures": []
+    },
+    {
+      "id": "home.budget.main-thread",
+      "result": "passed",
+      "reason": "",
+      "measures": []
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "5e08fe48",
+  "origin": "https://turboslide-rmh40rynx-kl01s-projects.vercel.app",
+  "date": "2026-10-04",
+  "results": {
+    "decks.home.links-and-card": "passed",
+    "decks.home.load-budget": "failed",
+    "home.page.bands-after-load": "passed",
+    "home.budget.bytes-first": "failed",
+    "home.budget.bytes-page": "failed",
+    "home.budget.live-module": "failed",
+    "home.budget.shared": "passed",
+    "home.budget.lcp": "passed",
+    "home.budget.frame": "passed",
+    "home.budget.main-thread": "passed",
+    "home.patterns.pair": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.budget.bytes-first",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.bytes-page",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.live-module",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.patterns.pair",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.budget.live-module",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.patterns.pair",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.links-and-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: first byte 154 ms (line 150)"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.shared",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.lcp",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.live-module",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the core with its imports: 61111 B decoded, 21713 B gzip (/assets/motion-Bazm5IXu.js, /assets/live-DovVbVBC.js, /assets/paint-C0gLS3MP.js; lines 65536 and 20480)"
+    },
+    {
+      "id": "home.budget.frame",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.main-thread",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.bands-after-load",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.patterns.pair",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    }
+  ]
+}

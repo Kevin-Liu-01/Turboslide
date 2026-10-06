@@ -2702,12 +2702,18 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
           const active = document.activeElement;
           return {
             blues,
-            /* drawn ones: the version view waits hidden in the agents band until a row is shown */
+            /* drawn ones: the version view waits hidden in the agents band until a row is shown.
+               The two people band's presence marks (`.ts-people-marks`, one layer a screen) are the
+               staged sequence's ink outline and flag, which 2.10 draws at rest as B's still; they
+               are the other person's, never the visitor's selection, and the blue check above
+               still reads them */
             overlays: [
               ...document.querySelectorAll(
                 '.ts-home-sel-layer, [data-live-overlay], .ts-home-guide, .ts-home-ring, .ts-home-flag',
               ),
-            ].filter((el) => el.getClientRects().length > 0).length,
+            ].filter(
+              (el) => el.getClientRects().length > 0 && el.closest('.ts-people-marks') === null,
+            ).length,
             focused: active && active !== document.body ? active.tagName.toLowerCase() : 'none',
           };
         }, SELECTION_BLUE);

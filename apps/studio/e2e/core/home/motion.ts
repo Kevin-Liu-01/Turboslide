@@ -384,14 +384,23 @@ function stillShown(page: Page, field: string): Promise<boolean> {
 
 /** Scrolls by the wheel, natively, in steps, with a pause after each (no smooth scrolling). */
 async function wheelTo(page: Page, y: number, step = 400, pause = 120): Promise<void> {
+  /* a wheel the page has not scrolled for yet (a busy main thread: at load 41 on 2026-10-03 the
+     loops row stayed at the page's foot with the hero's stage out of view) is waited for, and
+     five such wheels in a row are the page's end */
+  let stalls = 0;
   for (;;) {
     const at = await page.evaluate(() => scrollY);
     const left = y - at;
     if (Math.abs(left) < 2) return;
-    const before = at;
     await page.mouse.wheel(0, Math.sign(left) * Math.min(step, Math.abs(left)));
     await page.waitForTimeout(pause);
-    if ((await page.evaluate(() => scrollY)) === before) return;
+    if ((await page.evaluate(() => scrollY)) !== at) {
+      stalls = 0;
+      continue;
+    }
+    stalls += 1;
+    if (stalls >= 5) return;
+    await page.waitForTimeout(pause * 2);
   }
 }
 
@@ -530,6 +539,8 @@ const motionState = (page: Page) =>
     paused: window.tsHomeMotion?.paused ?? null,
     running: window.tsHomeMotion?.running() ?? [],
     registered: window.tsHomeMotion?.registered() ?? [],
+    stopped: window.tsHomeMotion?.stopped?.() ?? [],
+    visible: window.tsHomeMotion?.visible?.() ?? {},
   }));
 
 const toggle = (page: Page) => page.locator('[data-motion-toggle]');
@@ -1460,8 +1471,11 @@ export function rows(): void {
             )
             .then(() => true)
             .catch(() => false);
-          expect(started, `${id} plays in view`).toBe(true);
           const state = await motionState(page);
+          expect(
+            started,
+            `${id} plays in view (running ${state.running.join(' ')}; stopped ${state.stopped.join(' ')}; in view ${JSON.stringify(state.visible)})`,
+          ).toBe(true);
           const demos = state.running.filter((r) => !r.startsWith('I1:'));
           const fields = state.running.filter((r) => r.startsWith('I1:'));
           expect(demos.length, `demonstrations at ${id}`).toBeLessThanOrEqual(1);

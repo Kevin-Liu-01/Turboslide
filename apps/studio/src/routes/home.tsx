@@ -19,6 +19,7 @@ import { HomeMenus } from '../components/home/HomeMenus';
 import { HomeNav } from '../components/home/HomeNav';
 import { HomeNumbers } from '../components/home/HomeNumbers';
 import { HomePatterns } from '../components/home/HomePatterns';
+import { HomePeople } from '../components/home/HomePeople';
 import { HomePresent } from '../components/home/HomePresent';
 import { HomeTailor } from '../components/home/HomeTailor';
 import { HOME_META } from '../components/home/home-meta';
@@ -135,6 +136,8 @@ function HomePage() {
       <HomeKits />
       <HomeInterlude next="agents" />
       <HomeAgents />
+      <HomeInterlude next="people" />
+      <HomePeople />
       <HomeInterlude next="present" />
       <HomePresent />
       <HomeInterlude next="export" />

@@ -208,7 +208,7 @@ export const deck: Deck = {
   schemaVersion: 1,
   id: 'rendered-fixture',
   title: 'Rendered rules fixture',
-  theme: 'gt-ink-paper',
+  theme: 'general-translation',
   sections: [{ id: 'all', name: 'All', slideIds: slides.map((s) => s.id) }],
   assets,
   revision: 1,

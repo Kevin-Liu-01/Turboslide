@@ -12,7 +12,14 @@ import { tableSizeProblem } from './blocks/table.ts';
 import { CATALOG, SLIDE_KIND_CATALOG, blockAssetRefs, blockTextPaths } from './catalog.ts';
 import { attachedEndsOnSites, canAttach, isConnector, siteCount } from './connect.ts';
 import type { Deck, DeckDocument, Slide, SlotName } from './deck.ts';
-import { deckSchema, normalizeLayout, slideBlocks, slideSchema, slotsForLayout } from './deck.ts';
+import {
+  deckSchema,
+  migrateLegacyTheme,
+  normalizeLayout,
+  slideBlocks,
+  slideSchema,
+  slotsForLayout,
+} from './deck.ts';
 import type { Severity } from './findings.ts';
 import type { SlideId } from './ids.ts';
 import { isRecord, migrate } from './migrations.ts';
@@ -588,6 +595,19 @@ export function validateManifest(input: unknown): {
     return { ok: false, deck: null, issues: issues.sort(compareIssues) };
   }
   const deck = parsed.data;
+  // the design round's theme migration (docs/DESIGN.md 7.9): the legacy id is mapped once and the
+  // deck carries the new id from its next save
+  const theme = migrateLegacyTheme(deck);
+  if (theme !== null)
+    issues.push(
+      issue(
+        'migrated',
+        1,
+        DECK_FILE,
+        '/theme',
+        `Theme gt-ink-paper read as ${theme.theme}${theme.appearance !== undefined ? `, appearance ${theme.appearance} written` : ''}${theme.dropped.length > 0 ? `, kit fields equal to the theme dropped (${theme.dropped.join(', ')})` : ''}${theme.written.length > 0 ? `, kit fields the deck drew written (${theme.written.join(', ')})` : ''}; the file changes on save`,
+      ),
+    );
   const seen = new Map<string, string>();
   deck.sections.forEach((section, si) => {
     section.slideIds.forEach((slideId, ii) => {

@@ -123,7 +123,7 @@ export function importDeck(options: ImportOptions): ImportReport {
     schemaVersion: 1,
     id: options.into,
     title: options.title ?? 'GT brand deck',
-    theme: 'gt-ink-paper',
+    theme: 'general-translation',
     sections,
     assets: sortedAssets(carryDeckAssets(previousDeck?.assets, assets.registry.assets)),
     revision: previousDeck?.revision ?? 0,

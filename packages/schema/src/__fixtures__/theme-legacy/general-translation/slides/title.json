@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "General Translation",
+  "lead": "This deck covers the brand, the design system, the current state of the site, and the plans for the next quarter. It was prepared in September 2026."
+}

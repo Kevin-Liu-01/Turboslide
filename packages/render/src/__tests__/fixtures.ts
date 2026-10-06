@@ -47,7 +47,7 @@ export const deck: Deck = {
   schemaVersion: 1,
   id: 'test-deck',
   title: 'Test deck',
-  theme: 'gt-ink-paper',
+  theme: 'general-translation',
   sections: [
     { id: 'brand', name: 'Brand', slideIds: ['opener-brand', 'content-rule'] },
     { id: 'website', name: 'Website', slideIds: ['site'] },

@@ -839,7 +839,7 @@ const PROBE_DECK: Deck = {
   schemaVersion: 1,
   id: 'probe',
   title: 'Probe',
-  theme: 'gt-ink-paper',
+  theme: 'general-translation',
   sections: [{ id: 'probe', name: 'Probe', slideIds: [] }],
   assets: {
     probe: {

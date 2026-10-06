@@ -2,17 +2,28 @@
   "schemaVersion": 1,
   "id": "blank",
   "title": "Untitled presentation",
-  "theme": "simple",
-  "defaults": {
-    "appearance": "light"
+  "theme": "gt-ink-paper",
+  "brand": {
+    "mark": {
+      "kind": "none"
+    },
+    "footer": {
+      "logo": "none"
+    },
+    "counter": {
+      "show": false
+    },
+    "frame": {
+      "rails": false,
+      "rules": false,
+      "crosses": false
+    }
   },
   "sections": [
     {
       "id": "deck",
       "name": "Deck",
-      "slideIds": [
-        "title"
-      ]
+      "slideIds": ["title"]
     }
   ],
   "assets": {
@@ -24,22 +35,14 @@
         "light": "assets/opener-brand-light.jpg",
         "dark": "assets/opener-brand-dark.jpg"
       },
-      "size": [
-        1600,
-        900
-      ],
+      "size": [1600, 900],
       "scale": 1,
       "source": {
         "kind": "file"
       },
       "treatment": {
         "kind": "two-tone",
-        "crop": [
-          640,
-          128,
-          960,
-          308
-        ],
+        "crop": [640, 128, 960, 308],
         "autocontrast": 0.5,
         "gamma": 0.85,
         "polarity": "dark-ground",
@@ -52,12 +55,7 @@
       "metrics": {
         "litFraction": 0.2038,
         "plateClear": {
-          "plate": [
-            137,
-            500,
-            740,
-            271
-          ],
+          "plate": [137, 500, 740, 271],
           "nearestLitPx": 0,
           "litUnder": 1237,
           "litInBand": 564
@@ -72,10 +70,7 @@
         "light": "assets/opener-prototemplate-light.jpg",
         "dark": "assets/opener-prototemplate-dark.jpg"
       },
-      "size": [
-        1600,
-        900
-      ],
+      "size": [1600, 900],
       "scale": 1,
       "source": {
         "kind": "material",
@@ -94,10 +89,7 @@
           "u_scale": 0.5,
           "u_shape": 1
         },
-        "size": [
-          3200,
-          1800
-        ],
+        "size": [3200, 1800],
         "timeMs": 0,
         "backend": "angle-metal",
         "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
@@ -105,12 +97,7 @@
       },
       "treatment": {
         "kind": "two-tone",
-        "crop": [
-          -1325,
-          105,
-          2709,
-          2374
-        ],
+        "crop": [-1325, 105, 2709, 2374],
         "autocontrast": 0.5,
         "black": 20,
         "gamma": 1,
@@ -124,12 +111,7 @@
       "metrics": {
         "litFraction": 0.083,
         "plateClear": {
-          "plate": [
-            137,
-            500,
-            740,
-            271
-          ],
+          "plate": [137, 500, 740, 271],
           "nearestLitPx": 108,
           "litUnder": 0,
           "litInBand": 0
@@ -144,10 +126,7 @@
         "light": "assets/mood-earth-light.jpg",
         "dark": "assets/mood-earth-dark.jpg"
       },
-      "size": [
-        1600,
-        900
-      ],
+      "size": [1600, 900],
       "scale": 1,
       "source": {
         "kind": "photo",
@@ -158,12 +137,7 @@
       },
       "treatment": {
         "kind": "two-tone",
-        "crop": [
-          49,
-          -7,
-          3279,
-          1809
-        ],
+        "crop": [49, -7, 3279, 1809],
         "channel": "r",
         "blur": 0.6,
         "autocontrast": 0.5,
@@ -180,12 +154,7 @@
       "metrics": {
         "litFraction": 0.0916,
         "plateClear": {
-          "plate": [
-            851,
-            539,
-            612,
-            232
-          ],
+          "plate": [851, 539, 612, 232],
           "nearestLitPx": 111,
           "litUnder": 0,
           "litInBand": 0
@@ -200,10 +169,7 @@
         "light": "assets/opener-closing-light.jpg",
         "dark": "assets/opener-closing-dark.jpg"
       },
-      "size": [
-        1600,
-        900
-      ],
+      "size": [1600, 900],
       "scale": 1,
       "source": {
         "kind": "file"

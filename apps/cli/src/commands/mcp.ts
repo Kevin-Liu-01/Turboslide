@@ -628,7 +628,7 @@ function fileDeckSource(env: HandlerEnv, deckId: string, dispatcher: Dispatcher)
         : undefined;
     },
     theme: () => ({
-      theme: 'gt-ink-paper',
+      theme: 'general-translation',
       tokens: TOKENS,
       composite: COMPOSITE,
       semantic: SEMANTIC,

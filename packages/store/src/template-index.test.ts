@@ -106,7 +106,7 @@ describe('decks/templates/templates.json (docs/archive/rounds/PRODUCT.md 4.3)', 
       organisation: true,
       cover: 'opener-brand',
       slides: 95,
-      theme: 'gt-ink-paper',
+      theme: 'general-translation',
     });
     expect(gt?.name).not.toContain('GT brand deck');
     expect(gt?.name).not.toBe('General presentation');

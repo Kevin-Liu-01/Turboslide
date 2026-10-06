@@ -83,7 +83,7 @@ const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore
                                     the checkpoints and comment entries since a revision (deck.watch)
   deck follow <id> --from <studio> [--push] [--comments] [--once]
                                     mirror a hosted deck's records into decks/<id> (deck.follow)
-  deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
+  deck create <name> [--from blank|gt-brand] [--id <id>] [--decks <dir>]
                                     decks/<id> from decks/templates/<from> (gt-brand: the GT brand deck, 95 slides; blank: one title slide with the starter pictures)
   deck rename <name>                set the deck title (--deck, --base-revision, --author, --note, --json)
   deck set <path> <value> | deck set <path> --unset
@@ -244,9 +244,16 @@ export function registerDeckActions(
   dispatcher: Dispatcher,
   deps: StoreActionDeps & { decksDir: string },
 ): void {
-  dispatcher.register('deck.create', (input) =>
-    createDeck(deps.decksDir, input as CreateDeckInput),
-  );
+  /* without `from` the deployment default, the template /new starts from (docs/DESIGN.md 7.3,
+     G10): Blank, one title slide in the Simple theme, unless Use for new presentations names
+     another */
+  dispatcher.register('deck.create', (input) => {
+    const given = input as Omit<CreateDeckInput, 'from'> & { from?: string };
+    return createDeck(deps.decksDir, {
+      ...given,
+      from: given.from ?? readDefaultTemplateId(deps.decksDir),
+    });
+  });
   dispatcher.register('deck.rename', (input, context: ActionContext) =>
     deckRename(deps, context, input as DeckRenameInput),
   );
@@ -360,11 +367,14 @@ export async function deck(ctx: CommandContext): Promise<number> {
 
 async function create(ctx: CommandContext): Promise<number> {
   const name = requirePositional(ctx, 0, USAGE);
-  const from = flagString(ctx.args, 'from') ?? 'gt-brand';
-  if (!isTemplateId(from))
-    throw new UsageError(`--from wants ${DECK_TEMPLATES.join(' or ')}, got ${from}\n${USAGE}`);
   const id = flagString(ctx.args, 'id');
   const decksDir = decksDirFor(ctx);
+  /* the deployment default when --from is absent, the template /new starts from (docs/DESIGN.md
+     7.3, G9): Blank, one title slide in the Simple theme, unless Use for new presentations names
+     another */
+  const from = flagString(ctx.args, 'from') ?? readDefaultTemplateId(decksDir);
+  if (!isTemplateId(from))
+    throw new UsageError(`--from wants ${DECK_TEMPLATES.join(' or ')}, got ${from}\n${USAGE}`);
   const result: CreateDeckResult = await runAction(ctx, async () =>
     createDeck(decksDir, { name, from, ...(id !== undefined ? { id } : {}) }),
   );

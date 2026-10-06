@@ -1220,16 +1220,18 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.create': action({
     id: 'deck.create',
     label: 'New deck',
-    doc: 'Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts.',
+    doc: 'Creates a deck under decks/ from a template of the index (template.list), the deployment default when `from` is absent (Blank: one title slide in the Simple theme, light), and returns its id, revision and counts.',
     group: 'deck',
     mutates: true,
     transports: A,
     milestone: 'M4',
     input: z.strictObject({
       name: z.string().min(1).describe('The deck title; the id is its slug unless `id` is given'),
-      from: slugSchema.describe(
-        "A template id of the index (template.list): 'gt-brand' copies decks/templates/gt-brand (95 slides, 8 sections, the assets); 'blank' writes one title slide; a saved template copies its folder",
-      ),
+      from: slugSchema
+        .optional()
+        .describe(
+          "A template id of the index (template.list): 'blank' writes one title slide in the Simple theme; 'gt-brand' copies the General Translation brand deck (95 slides, 8 sections, the assets); a saved template copies its folder. The deployment default (template.list `default`) when absent",
+        ),
       id: slugSchema
         .optional()
         .describe('The deck id under decks/; derived from the name when absent'),
@@ -1248,7 +1250,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: { usage: 'turboslide deck create <name> --from <from> --id <id>' },
     mcp: 'deck_create',
-    example: { name: 'Q4 review', from: 'gt-brand' },
+    example: { name: 'Q4 review', from: 'blank' },
   }),
   'deck.rename': action({
     id: 'deck.rename',
@@ -4030,7 +4032,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'brand.get': action({
     id: 'brand.get',
     label: 'Brand kit',
-    doc: 'The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate; an empty object for a deck that reads the deployment’s default kit.',
+    doc: 'The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate, drawn over the deck’s theme; an empty object for a deck that draws its theme alone.',
     group: 'deck',
     mutates: false,
     transports: A,
@@ -4077,7 +4079,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'brand.reset': action({
     id: 'brand.reset',
     label: 'Reset the brand kit',
-    doc: 'Removes the brand kit record, so the deck reads the deployment’s default kit, or one field of it when a pointer is given; a deck with nothing to remove writes no revision.',
+    doc: 'Removes the brand kit record, so the deck draws its theme alone (theme.list), or one field of it when a pointer is given, which then reads the theme’s value; a deck with nothing to remove writes no revision.',
     group: 'deck',
     mutates: true,
     transports: A,

@@ -9,7 +9,15 @@ import type { Asset } from './assets.ts';
 import { assetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
 import type { BrandKit, CounterFormat, StoredThemeId, ThemeId } from './brand.ts';
-import { STORED_THEME_IDS, THEME_IDS, brandKitSchema, themeFactsOf, themeIdOf } from './brand.ts';
+import {
+  GT_THEME_ID,
+  LEGACY_THEME_ID,
+  STORED_THEME_IDS,
+  THEME_IDS,
+  brandKitSchema,
+  themeFactsOf,
+  themeIdOf,
+} from './brand.ts';
 import { blockSchema, extSchema } from './blocks.ts';
 import type { Color } from './color.ts';
 import { colorSchema } from './color.ts';
@@ -94,7 +102,7 @@ export type Deck = {
   assets: Record<AssetId, Asset>;
   defaults?: {
     notes?: string;
-    /** the theme appearance every surface defaults to; dark when absent (gslides-parity SPEC 7.2.3) */
+    /** the theme appearance every surface defaults to; the theme's default when absent (docs/DESIGN.md 7.3) */
     appearance?: Appearance;
     /** the frame's slide counter; on when absent (gslides-parity SPEC 7.2.4) */
     counter?: CounterMode;
@@ -641,7 +649,7 @@ export const deckSchema = z.strictObject({
         control: 'select',
         snap: APPEARANCES,
         group: 'Slide',
-        help: 'Light or dark; every surface defaults to it. Dark when absent.',
+        help: 'Light or dark; every surface defaults to it. The theme’s default appearance when absent (theme.list).',
       }),
       counter: annotate(z.enum(COUNTER_MODES).optional(), {
         label: 'Slide numbers',
@@ -668,7 +676,7 @@ export const deckSchema = z.strictObject({
     label: 'Brand kit',
     control: 'json',
     group: 'Slide',
-    help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation; the Brand kit panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The default kit when absent.',
+    help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The theme alone when absent.',
   }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,
@@ -677,13 +685,97 @@ export const deckSchema = z.strictObject({
 }) satisfies z.ZodType<Deck>;
 
 /**
- * The appearance a deck defaults to (gslides-parity SPEC 7.2.3): the Themes tiles' choice, else
+ * The appearance a deck defaults to (gslides-parity SPEC 7.2.3): the Theme panel's choice, else
  * the kit's default appearance (docs/archive/rounds/PRODUCT.md 4.1, the appearance a deck created from a template
- * opens in), else dark, the value every deck stored before the kit existed opens in. A new deck
- * takes the deployment kit's appearance (DEFAULT_APPEARANCE when the kit is silent) at creation.
+ * opens in), else the theme's default appearance (docs/DESIGN.md 7.3: Simple light, General
+ * Translation dark). A deck stored before the design round that named none is written dark by
+ * the theme migration (`migrateLegacyTheme`), the appearance it drew then.
  */
-export function deckAppearance(deck: Deck): Appearance {
-  return deck.defaults?.appearance ?? deck.brand?.appearance ?? 'dark';
+export function deckAppearance(deck: Pick<Deck, 'defaults' | 'brand' | 'theme'>): Appearance {
+  return deck.defaults?.appearance ?? deck.brand?.appearance ?? themeFactsOf(deck.theme).appearance;
+}
+
+/** What `migrateLegacyTheme` did to a deck stored under the legacy theme id. */
+export type ThemeMigration = {
+  theme: ThemeId;
+  appearance?: Appearance;
+  dropped: string[];
+  written: string[];
+};
+
+/**
+ * The design round's theme migration (docs/DESIGN.md 7.9), run once by validateManifest on a deck
+ * that still stores `gt-ink-paper`; null for any other deck, so it never runs twice. In place:
+ * 1. a deck whose kit draws the GT title mark or the GT wordmark band (no kit, an empty kit, a
+ *    kit silent about either slot, a picture logo) becomes General Translation;
+ * 2. a deck whose kit turns both off (Blank's record and every deck made from it) becomes Simple:
+ *    the kit fields equal to Simple's parts are dropped (`mark: none`, `footer.logo: none`,
+ *    `counter.show: false`, a frame toggle at false), and a part the deck drew because its kit
+ *    was silent (a frame toggle, the counter) is written on, so the deck draws what it drew;
+ * 3. a deck without `defaults.appearance` gets the appearance it drew, written explicitly.
+ */
+export function migrateLegacyTheme(deck: Deck): ThemeMigration | null {
+  if (deck.theme !== LEGACY_THEME_ID) return null;
+  const kit = deck.brand;
+  const drew: Appearance = deck.defaults?.appearance ?? kit?.appearance ?? 'dark';
+  const out: ThemeMigration = { theme: GT_THEME_ID, dropped: [], written: [] };
+  if (deck.defaults?.appearance === undefined) {
+    deck.defaults = { ...deck.defaults, appearance: drew };
+    out.appearance = drew;
+  }
+  const markOff =
+    kit !== undefined && (kit.positions?.mark === 'hidden' || kit.mark?.kind === 'none');
+  const bandOff =
+    kit !== undefined && (kit.positions?.footerLogo === 'hidden' || kit.footer?.logo === 'none');
+  if (kit === undefined || !markOff || !bandOff) {
+    deck.theme = GT_THEME_ID;
+    return out;
+  }
+  const next: BrandKit = structuredClone(kit);
+  if (
+    next.mark?.kind === 'none' &&
+    next.mark.assetId === undefined &&
+    next.mark.box === undefined
+  ) {
+    delete next.mark;
+    out.dropped.push('/mark');
+  }
+  if (next.footer?.logo === 'none') {
+    delete next.footer.logo;
+    out.dropped.push('/footer/logo');
+    if (Object.keys(next.footer).length === 0) delete next.footer;
+  }
+  const counter = next.counter ?? {};
+  if (counter.show === false) {
+    delete counter.show;
+    out.dropped.push('/counter/show');
+  } else if (
+    counter.show === undefined &&
+    counter.skipTitle === undefined &&
+    deck.defaults?.counter === undefined
+  ) {
+    counter.show = true;
+    out.written.push('/counter/show');
+  }
+  if (Object.keys(counter).length > 0) next.counter = counter;
+  else delete next.counter;
+  const frame = next.frame ?? {};
+  for (const part of ['rails', 'rules', 'crosses'] as const) {
+    if (frame[part] === false) {
+      delete frame[part];
+      out.dropped.push(`/frame/${part}`);
+    } else if (frame[part] === undefined) {
+      frame[part] = true;
+      out.written.push(`/frame/${part}`);
+    }
+  }
+  if (Object.keys(frame).length > 0) next.frame = frame;
+  else delete next.frame;
+  if (Object.keys(next).length > 0) deck.brand = next;
+  else delete deck.brand;
+  deck.theme = 'simple';
+  out.theme = 'simple';
+  return out;
 }
 
 /**

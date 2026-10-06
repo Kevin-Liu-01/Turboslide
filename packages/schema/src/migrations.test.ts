@@ -67,7 +67,12 @@ describe.each(COMMITTED)('migrate on $name', ({ dir }) => {
       slides[file.slice(0, -'.json'.length)] = readJson(join(dir, 'slides', file));
     const result = validateDeck({ deck: manifest, slides });
     expect(result.ok, result.issues.map((issue) => issue.message).join('; ')).toBe(true);
-    expect(result.issues.filter((issue) => issue.code === 'migrated')).toEqual([]);
+    /* the design round's theme migration (docs/DESIGN.md 7.9) maps the fixture's gt-ink-paper once;
+       no schemaVersion migration runs */
+    expect(
+      result.issues.filter((issue) => issue.code === 'migrated' && issue.pointer !== '/theme'),
+    ).toEqual([]);
+    expect(result.deck?.theme).not.toBe('gt-ink-paper');
   });
 });
 

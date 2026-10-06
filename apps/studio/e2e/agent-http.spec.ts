@@ -686,4 +686,76 @@ test.describe('the design round: the theme library on the agent surface', () => 
       }
     }
   });
+  /* DESIGN.md 7.3 (G9, G10): deck.create with a name and no `from` makes a deck from the
+     deployment default in Simple, light; the contract's example and the `from` description lead
+     with blank */
+  test(coreTitle('themes.agent.create-default'), async ({ baseURL }) => {
+    test.setTimeout(240_000);
+    const base = (baseURL ?? 'http://localhost:4321').replace(/\/$/, '');
+    const headers = agentHeaders(base, { 'x-turboslide-author': 'agent:theme-row' });
+    test.skip(
+      headers === null,
+      `not driven: no bearer for ${base} (TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json)`,
+    );
+    if (headers === null) return;
+    const api = await request.newContext();
+    const name = `Theme default deck ${Date.now().toString(36)}`;
+    let made = '';
+    try {
+      const contract = (await (
+        await api.get(`${base}/api/actions/deck.create`, { headers })
+      ).json()) as {
+        example?: { from?: string };
+        input?: { required?: string[]; properties?: { from?: { description?: string } } };
+      };
+      const created = await post(api, `${base}/api/actions/deck.create`, headers, { name });
+      made = String(created.body['deckId'] ?? '');
+      const info = await post(
+        api,
+        `${base}/api/actions/deck.info?deck=${encodeURIComponent(made)}`,
+        headers,
+        {},
+      );
+      const defaults = info.body['defaults'] as { appearance?: string } | undefined;
+      const description = contract.input?.properties?.from?.description ?? '';
+      test.info().annotations.push({
+        type: 'themes',
+        description: `deck.create without from ${created.status} (${made}, from ${String(created.body['from'])}); deck.info theme ${String(info.body['theme'])}, appearance ${defaults?.appearance ?? 'none'}; the contract's example from ${contract.example?.from ?? 'none'}, from required ${String(contract.input?.required?.includes('from'))}, the description begins "${description.slice(0, 70)}"`,
+      });
+      expect(created.status).toBe(200);
+      expect(created.body['from']).toBe('blank');
+      expect(info.body['theme']).toBe('simple');
+      expect(defaults?.appearance).toBe('light');
+      expect(contract.example?.from).toBe('blank');
+      expect(contract.input?.required ?? []).not.toContain('from');
+      expect(description.indexOf("'blank'")).toBeGreaterThanOrEqual(0);
+      expect(description.indexOf("'blank'")).toBeLessThan(description.indexOf("'gt-brand'"));
+    } finally {
+      if (made !== '') {
+        const info = await post(
+          api,
+          `${base}/api/actions/deck.info?deck=${encodeURIComponent(made)}`,
+          headers,
+          {},
+        ).catch(() => null);
+        const revision = Number(info?.body['revision'] ?? 0);
+        await post(api, `${base}/api/actions/deck.trash`, headers, {
+          id: made,
+          baseRevision: revision,
+        }).catch(() => undefined);
+        const after = await post(
+          api,
+          `${base}/api/actions/deck.info?deck=${encodeURIComponent(made)}`,
+          headers,
+          {},
+        ).catch(() => null);
+        await post(api, `${base}/api/actions/deck.remove`, headers, {
+          id: made,
+          confirm: true,
+          baseRevision: Number(after?.body['revision'] ?? revision),
+        }).catch(() => undefined);
+      }
+      await api.dispose().catch(() => undefined);
+    }
+  });
 });

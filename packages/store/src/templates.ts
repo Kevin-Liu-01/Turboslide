@@ -60,10 +60,16 @@ import {
   templateIndexEntrySchema,
 } from '@turboslide/schema/actions';
 import type { Appearance, Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { APPEARANCES, THEMES, isTrashed, slideOrder, slideTitle } from '@turboslide/schema/deck';
+import { APPEARANCES, isTrashed, slideOrder, slideTitle } from '@turboslide/schema/deck';
 import { SLUG_PATTERN, slugify } from '@turboslide/schema/ids';
 import type { BrandKit, DefaultKit as KitDefaults } from '@turboslide/schema/brand';
-import { brandKitSchema, defaultKitOf } from '@turboslide/schema/brand';
+import {
+  DEFAULT_THEME_ID,
+  THEME_FACTS,
+  brandKitSchema,
+  defaultKitOf,
+  themeIdOf,
+} from '@turboslide/schema/brand';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
 import { validateDeck } from '@turboslide/schema/validate';
 
@@ -149,7 +155,10 @@ export type Template = { record: TemplateRecord; dir: string };
 
 export type CreateDeckInput = {
   name: string;
-  /** a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3) */
+  /**
+   * a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3); a caller
+   * whose input names none passes `readDefaultTemplateId` (docs/DESIGN.md 7.3, G9, G10)
+   */
   from: DeckTemplateId | string;
   /** the deck id; the slug of the name when absent */
   id?: string;
@@ -381,9 +390,9 @@ export function templateIndexEntry(
   prior?: TemplateIndexEntry,
 ): TemplateIndexEntry {
   const { record } = template;
-  const theme = (THEMES as ReadonlyArray<string>).includes(record.theme)
-    ? (record.theme as (typeof THEMES)[number])
-    : 'gt-ink-paper';
+  // the index names one of the nine themes; a record of the legacy id, or of none the library
+  // holds, is General Translation (docs/DESIGN.md 7.9)
+  const theme = themeIdOf(record.theme);
   const carried = record.organisation === true ? undefined : prior;
   const description =
     carried?.description ?? (record.description === '' ? undefined : record.description);
@@ -952,7 +961,10 @@ export function deckIdFor(input: CreateDeckInput): string {
   return id;
 }
 
-/** The blank deck: one section, one title slide, no assets. */
+/**
+ * The blank deck: one section, one title slide, no assets, in the Simple theme and light (docs/
+ * DESIGN.md 7.3, G8), what Blank's folder holds, for a decks folder without the Blank template.
+ */
 export function blankDeckDocument(
   id: string,
   title: string,
@@ -962,9 +974,10 @@ export function blankDeckDocument(
     schemaVersion: 1,
     id,
     title,
-    theme: 'gt-ink-paper',
+    theme: DEFAULT_THEME_ID,
     sections: [{ id: 'deck', name: 'Deck', slideIds: ['title'] }],
     assets: {},
+    defaults: { appearance: THEME_FACTS[DEFAULT_THEME_ID].appearance },
     revision: 0,
     createdAt: now,
     updatedAt: now,
@@ -1010,11 +1023,11 @@ export function createDeck(
   const dir = resolve(decksDir, deckId);
   if (existsSync(dir)) throw new TypeError(`decks/${deckId} exists already; pick another name`);
   const now = (options.now ?? (() => new Date().toISOString()))();
+  const from = input.from;
 
-  if (!isTemplateSlug(input.from))
-    throw new TypeError(`"${input.from}" is not a template id (a slug)`);
-  const templateDir = join(templatesDir(decksDir), input.from);
-  if (input.from === 'blank' && !existsSync(join(templateDir, 'template.json'))) {
+  if (!isTemplateSlug(from)) throw new TypeError(`"${from}" is not a template id (a slug)`);
+  const templateDir = join(templatesDir(decksDir), from);
+  if (from === 'blank' && !existsSync(join(templateDir, 'template.json'))) {
     // a decks folder without the blank template: one title slide, no starter pictures
     const { deck, slides } = blankDeckDocument(deckId, title, now);
     mkdirSync(join(dir, 'slides'), { recursive: true });
@@ -1023,7 +1036,7 @@ export function createDeck(
   } else {
     if (!existsSync(join(templateDir, 'template.json')))
       throw new RangeError(
-        `No template "${input.from}" under decks/templates; the index lists ${templateIds(decksDir).join(', ')}`,
+        `No template "${from}" under decks/templates; the index lists ${templateIds(decksDir).join(', ')}`,
       );
     const template = readTemplate(templateDir);
     const { record } = template;
@@ -1072,7 +1085,7 @@ export function createDeck(
   return {
     deckId,
     title: deck.title,
-    from: input.from,
+    from,
     revision: deck.revision,
     dir,
     counts: {

@@ -23,6 +23,8 @@ import {
   brandWriteLabel,
   brandWriteMutation,
   frameOf,
+  themeFactsOf,
+  themeIdOf,
 } from '@turboslide/schema/brand';
 import type { HexColor } from '@turboslide/schema/color';
 import { isHexColor } from '@turboslide/schema/color';
@@ -36,7 +38,7 @@ import {
 import type { FontId } from '@turboslide/schema/fonts';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { THEME_CSS_STYLE_ID, themeCss } from '@turboslide/render/theme-css';
-import { themeRecord } from '@turboslide/theme/themes';
+import { themeName, themeRecord } from '@turboslide/theme/themes';
 import type { TokenName } from '@turboslide/theme/tokens';
 import { LiveClone } from '@turboslide/viewer/LiveClone';
 
@@ -216,6 +218,9 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   const current = deckAppearance(deck);
   /* the frame the sheet draws: the kit's toggles over the deck theme's parts (docs/DESIGN.md 7.5) */
   const drawnFrame = frameOf(deck.theme, kit);
+  /* the deck's theme, its id and its name (docs/DESIGN.md 7.2) */
+  const themeId = themeIdOf(deck.theme);
+  const themeTitle = themeName(themeId);
   const [colorAppearance, setColorAppearance] = useState<Appearance>(current);
   /* the Colors tab follows the appearance the seller picks (docs/archive/rounds/POLISH.md item 49; audit-media
      item 20: the Dark tile left the tab on Light): the tab resets when the deck's appearance
@@ -352,7 +357,11 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   };
 
   /* the logo slot: the title slide's mark and the footer's logo together */
-  const markKind: LogoKind = kit?.mark?.kind ?? 'default';
+  /* the theme's logo is General Translation's alone (docs/DESIGN.md 7.5): a slot that names the
+     default logo, or a silent kit, draws nothing in any other theme */
+  const themeHasLogo = themeFactsOf(deck.theme).logo;
+  const storedMark: LogoKind = kit?.mark?.kind ?? 'default';
+  const markKind: LogoKind = storedMark === 'default' && !themeHasLogo ? 'none' : storedMark;
   const logoAsset = kit?.mark?.assetId !== undefined ? deck.assets[kit.mark.assetId] : undefined;
   const logoSrc =
     logoAsset === undefined
@@ -575,17 +584,18 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     if (next.join('\n') === (kit?.lexicon ?? []).join('\n')) return;
     void writeKit('/lexicon', next.length === 0 ? undefined : next);
   };
+  /* Reset removes the kit and the deck shows its theme (docs/DESIGN.md 7.5) */
   const reset = () => {
     if (commit === undefined) {
       onNotice?.(words.noKitYet);
       return;
     }
     if (kit === undefined) {
-      shell.say(words.resetDone(defaultKit.name));
+      shell.say(words.resetDone(themeTitle));
       return;
     }
-    commit([{ op: 'deck.set', path: '/brand' }], words.reset(defaultKit.name))
-      .then(() => shell.say(words.resetDone(defaultKit.name), undoAction()))
+    commit([{ op: 'deck.set', path: '/brand' }], words.reset(themeTitle))
+      .then(() => shell.say(words.resetDone(themeTitle), undoAction()))
       .catch(fail);
   };
   const stopEnter = (event: ReactKeyboardEvent<HTMLElement>) => {
@@ -599,6 +609,19 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       control="panel.brand"
       className="ts-themes ts-brand"
     >
+      <section
+        className="ts-brand-section"
+        aria-labelledby="ts-theme-current"
+        data-control="panel.theme.current"
+      >
+        <h3 id="ts-theme-current" className="ts-brand-head">
+          {words.inThisPresentation}
+        </h3>
+        <p className="ts-theme-current-name" data-theme-id={themeId}>
+          {themeTitle}
+        </p>
+      </section>
+
       <section
         className="ts-brand-section"
         aria-labelledby="ts-brand-appearance"
@@ -918,11 +941,11 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
           disabled={commit === undefined}
           onClick={reset}
           {...tipProps({
-            name: words.reset(defaultKit.name),
-            doc: words.resetDoc(defaultKit.name),
+            name: words.reset(themeTitle),
+            doc: words.resetDoc(themeTitle),
           })}
         >
-          <span className="pt-lb">{words.reset(defaultKit.name)}</span>
+          <span className="pt-lb">{words.reset(themeTitle)}</span>
         </button>
       </div>
     </Panel>

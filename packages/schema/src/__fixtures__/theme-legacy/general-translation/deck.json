@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "gt-brand",
+  "title": "GT brand deck",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slideIds": ["opener-brand", "title", "thesis"]
+    }
+  ],
+  "assets": {
+    "opener-brand": {
+      "id": "opener-brand",
+      "role": "opener",
+      "alt": "The top arc of the event horizon ring from the careers page horizon field shader, dithered",
+      "twins": {
+        "light": "assets/opener-brand-light.jpg",
+        "dark": "assets/opener-brand-dark.jpg"
+      },
+      "size": [1600, 900],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "treatment": {
+        "kind": "two-tone",
+        "crop": [640, 128, 960, 308],
+        "autocontrast": 0.5,
+        "gamma": 0.85,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "credit": "Material: Event Horizon, a Prototemplate direction",
+      "inline": "two-color",
+      "metrics": {
+        "litFraction": 0.2038,
+        "plateClear": {
+          "plate": [137, 500, 740, 271],
+          "nearestLitPx": 0,
+          "litUnder": 1237,
+          "litInBand": 564
+        }
+      },
+      "ext": {
+        "provenance": {
+          "heading": "Brand",
+          "image": "Event Horizon, the ring's top arc, two-tone",
+          "source": "`event-horizon-dark-2.jpg`, the careers page horizon field shader.",
+          "crop": "640, 128, 960, 308 (320 by 180). The top arc of the ring between the orbiting locale labels and the hero text, scaled 5x. The ring's glow fills the upper third and the field below it is solid ink, where the title plate sits.",
+          "processing": "gamma 0.85, no black point.",
+          "sentence": "This section covers the company, its values, its voice, the name, and the mark."
+        }
+      }
+    }
+  },
+  "revision": 25,
+  "createdAt": "2026-09-10T21:29:42.282Z",
+  "updatedAt": "2026-09-13T03:49:55.295Z"
+}

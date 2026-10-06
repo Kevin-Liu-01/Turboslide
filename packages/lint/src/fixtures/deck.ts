@@ -621,7 +621,7 @@ export const deck: Deck = {
   schemaVersion: 1,
   id: 'lint-fixture',
   title: 'Lint fixture deck',
-  theme: 'gt-ink-paper',
+  theme: 'general-translation',
   sections: [
     {
       id: 'prototemplate-and-glyphfield',

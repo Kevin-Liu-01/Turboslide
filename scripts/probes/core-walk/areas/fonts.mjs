@@ -656,8 +656,8 @@ async function featuresRound(t, h) {
 
   await t.step(
     'fonts.display-features.inter-only',
-    'the title heading to Playfair Display through the window API, then back to Inter; the kit display face to Fraunces',
-    'the heading computes font-feature-settings normal on Playfair Display, "cv11", "ss01" on Inter, and normal on every heading with the kit on Fraunces',
+    'the title heading to Playfair Display through the window API, then back to Inter; the deck to the General Translation theme and back; the kit display face to Fraunces',
+    'the heading computes font-feature-settings normal on Playfair Display; on Inter "cv11", "ss01" in the General Translation theme and normal in every other theme (the deck from /new is Simple); normal on every heading with the kit on Fraunces',
     async () => {
       /* the family is written through the window API (block.set /typography/family, a setup
          write): the row measures the renderer's gate on the face (FEATURES.md 3.1 item 5), not
@@ -694,6 +694,26 @@ async function featuresRound(t, h) {
           )
           .catch(() => featuresOf(head.selector));
         const back = await setFamily(undefined);
+        /* the design round (docs/DESIGN.md 4.2, 7.2): Inter draws General Translation's alternates
+           in that theme alone; the deck from /new is Simple, so Inter reads normal there, and the
+           theme is set to General Translation for the alternates, then put back */
+        const info = await t.invoke('deck.info', {}).catch(() => ({}));
+        const theme = typeof info.theme === 'string' ? info.theme : 'simple';
+        const onInterHere = await t
+          .pollUntil(
+            () => featuresOf(head.selector),
+            (x) => x === 'normal' || (/cv11/.test(x ?? '') && /ss01/.test(x ?? '')),
+            8000,
+          )
+          .catch(() => featuresOf(head.selector));
+        const themeSet = async (value) => {
+          const s = await t.settled();
+          await t
+            .invoke('deck.set', { path: '/theme', value, baseRevision: s.revision })
+            .catch(() => undefined);
+          await t.settled();
+        };
+        if (theme !== 'general-translation') await themeSet('general-translation');
         const onInter = await t
           .pollUntil(
             () => featuresOf(head.selector),
@@ -701,6 +721,9 @@ async function featuresRound(t, h) {
             8000,
           )
           .catch(() => featuresOf(head.selector));
+        if (theme !== 'general-translation') await themeSet(theme);
+        const interElsewhere =
+          theme === 'general-translation' ? 'normal' : (onInterHere ?? 'unread');
         /* the kit half: brand.set /fonts/display fraunces (a setup write), read, and restored */
         const actions = await t.windowActions();
         let kit = 'brand.set is not on the window transport';
@@ -736,10 +759,11 @@ async function featuresRound(t, h) {
             wrote === true &&
             onPlayfair === 'normal' &&
             back === true &&
+            interElsewhere === 'normal' &&
             /cv11/.test(onInter ?? '') &&
             /ss01/.test(onInter ?? '') &&
             onFraunces === 'normal',
-          observed: `before "${before}"; Playfair Display ${wrote === true ? 'written' : `refused: ${wrote}`}: "${onPlayfair}"; back to Inter ${back === true ? 'written' : `refused: ${back}`}: "${onInter}"; the kit: ${kit}${onPlayfair === 'normal' ? '' : ` (FEATURES.md 3.1 item 5, ${ROW})`}`,
+          observed: `before "${before}"; Playfair Display ${wrote === true ? 'written' : `refused: ${wrote}`}: "${onPlayfair}"; back to Inter ${back === true ? 'written' : `refused: ${back}`}: "${interElsewhere}" in ${theme}, "${onInter}" in general-translation; the kit: ${kit}${onPlayfair === 'normal' ? '' : ` (FEATURES.md 3.1 item 5, ${ROW})`}`,
         };
       } finally {
         await t.clickCard(F);

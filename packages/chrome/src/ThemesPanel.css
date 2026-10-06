@@ -331,3 +331,10 @@
 .ts-brand-reset {
   height: 28px;
 }
+
+/* the deck's theme by name (docs/DESIGN.md 7.6 item 2) */
+.ts-theme-current-name {
+  margin: 0;
+  font: 500 14px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+}

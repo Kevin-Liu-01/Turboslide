@@ -7,7 +7,7 @@
   "appearance": "dark",
   "cover": "opener-brand",
   "description": "The General Translation brand deck in 95 slides: the company and its marks, the design system, the website, the docs, the blog, the developer experience, Prototemplate and Glyphfield, and the plan.",
-  "theme": "gt-ink-paper",
+  "theme": "general-translation",
   "deck": "deck.json",
   "slides": "slides",
   "assets": "../../gt-brand/assets",

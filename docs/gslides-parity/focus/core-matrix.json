@@ -6883,12 +6883,12 @@
     {
       "id": "fonts.display-features.inter-only",
       "feature": "fonts",
-      "interaction": "A heading set to Playfair Display computes font-feature-settings: normal; set back to Inter it computes \"cv11\", \"ss01\"; the kit's display face set to Fraunces computes normal on every heading",
+      "interaction": "A heading set to Playfair Display computes font-feature-settings: normal; set back to Inter it computes normal in a Simple deck from /new and \"cv11\", \"ss01\" once the deck is in the General Translation theme; the kit's display face set to Fraunces computes normal on every heading",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-fonts 7 (catalog-features.txt: 17 of the 25 families carry an ss01 of their own)",
       "setup": "brand.set /fonts/display through the window API for the kit half",
-      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 3.1 item 5 (B2: --display-features in theme-css.ts and typographyDeclarations); the Fraunces half needs B2's catalog row fonts.catalog.six-families"
+      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 3.1 item 5 (B2: --display-features in theme-css.ts and typographyDeclarations); the Fraunces half needs B2's catalog row fonts.catalog.six-families; restated in the design round, DR-D3#2 (Inter draws General Translation's alternates in that theme alone, docs/DESIGN.md 4.2)"
     },
     {
       "id": "tables.cells.tabular-figures",
@@ -11309,6 +11309,45 @@
       "severity": 1,
       "evidence": "research-themes G12 (packages/export/src/scene/enrich.ts colorHexFor read GT's TOKENS and GT's paper)",
       "note": "Design round (docs/DESIGN.md 11), DR-D3#1; enrich.ts colorHexFor reads render/theme-css.ts deckTokens, the deck's theme under its kit"
+    },
+    {
+      "id": "themes.default.new-is-simple",
+      "feature": "decks",
+      "interaction": "/new and the Blank card on /decks each make a deck whose deck.info reads theme simple and appearance light; its title slide draws no GT mark, no wordmark, no counter and no rails, rules or crosses on white; the Theme panel (Slide > Change theme) names Simple under In this presentation",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G11 (production's Blank: gt-ink-paper with a kit that turns the GT parts off)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#2; decks/templates/blank/deck.json names simple and light with no kit; the driver lives in apps/studio/e2e/core/brand-themes.ts"
+    },
+    {
+      "id": "themes.appearance.theme-default",
+      "feature": "decks",
+      "interaction": "On a deck from /new, deck.set /defaults/appearance with no value leaves no stored appearance and the stage's sheet draws light (Simple's default); deck.set /theme general-translation then draws it dark (General Translation's default)",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G7 (deckAppearance fell back to dark for every deck)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#2; packages/schema/src/deck.ts deckAppearance falls back to the theme's default appearance"
+    },
+    {
+      "id": "themes.agent.create-default",
+      "feature": "decks",
+      "interaction": "POST /api/actions/deck.create with a name and no from answers 200 with from blank and makes a deck whose deck.info reads theme simple and appearance light; GET /api/actions/deck.create names from blank in its example, leaves from out of the required fields and its from description names blank before gt-brand",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G9, G10 (from required, the example from gt-brand, the CLI's default gt-brand)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#2; registerDeckActions and the studio's hosted deck.create read readDefaultTemplateId when from is absent"
+    },
+    {
+      "id": "themes.migration.gt-unchanged",
+      "feature": "decks",
+      "interaction": "A deck made from the General Translation brand deck card on /decks (a copy of the template) reads theme general-translation in deck.info, draws the GT wordmark, the counter n / N, the rails, both rules and the four crosses on its first slide and the GT mark with \"cv11\", \"ss01\" on its title slide, and the Theme panel names General Translation",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "this file 7.9",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#2; the legacy id is mapped once by validateManifest (packages/schema/src/deck.ts migrateLegacyTheme), proved over the pre-round fixtures by validate-themes.test.ts and render's theme-migration.test.ts"
     },
     {
       "id": "accounts.sign-in-fits",

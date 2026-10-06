@@ -6,7 +6,7 @@
     "description": "One title slide with empty placeholders and the theme's four starter pictures, so Section header, Caption and Closing work on a new presentation.",
     "cover": "title",
     "slides": 1,
-    "theme": "gt-ink-paper",
+    "theme": "simple",
     "appearance": "light",
     "brand": {
       "name": "General Translation",
@@ -20,7 +20,7 @@
     "description": "The General Translation brand deck in 95 slides: the company and its marks, the design system, the website, the docs, the blog, the developer experience, Prototemplate and Glyphfield, and the plan.",
     "cover": "opener-brand",
     "slides": 95,
-    "theme": "gt-ink-paper",
+    "theme": "general-translation",
     "appearance": "dark",
     "organisation": true
   }

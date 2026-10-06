@@ -325,7 +325,7 @@ export const WORKED_DECK: Deck = {
   schemaVersion: 1,
   id: 'gt-brand',
   title: 'GT brand deck',
-  theme: 'gt-ink-paper',
+  theme: 'general-translation',
   sections: [
     {
       id: 'brand',

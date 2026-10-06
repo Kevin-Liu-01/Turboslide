@@ -10,12 +10,18 @@ import {
   addSlide,
   clickCard,
   extraHTTPHeaders,
+  headingRun,
   invoke,
+  menuPath,
   newDeck,
+  openGtBrandCopy,
   settled,
   slideOrder,
   teardownAll,
   title,
+  typeInto,
+  waitEditor,
+  waitRevision,
 } from './lib';
 import { isCoreId } from './matrix';
 
@@ -305,5 +311,149 @@ export function brandThemes(): string[] {
     expect(failures, readings.join('\n')).toEqual([]);
   });
 
+  /* DESIGN.md 7.3: /new and the Blank card on /decks make a Simple deck, light, with no GT part,
+     and the Theme panel names Simple */
+  row('themes.default.new-is-simple', async ({ browser }) => {
+    test.setTimeout(480_000);
+    const { page, scratch } = await personAt(browser);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const via of ['/new', 'the Blank card on /decks'] as const) {
+      if (via === '/new') await newDeck(page, scratch, 'Simple from new');
+      else await deckFromBlankCard(page, scratch, 'Simple from the Blank card');
+      const info = await invoke<{ theme: string; defaults?: { appearance?: string } }>(
+        page,
+        'deck.info',
+      );
+      const [first] = await slideOrder(page);
+      await clickCard(page, first!);
+      const drawn = await themeDrawn(page);
+      await menuPath(page, 'slide', 'slide.changeTheme');
+      const named = await page
+        .locator('[data-control="panel.theme.current"] .ts-theme-current-name')
+        .first()
+        .textContent({ timeout: 10_000 })
+        .catch(() => null);
+      await page.keyboard.press('Escape');
+      readings.push(
+        `${via}: theme ${info.theme}, appearance ${info.defaults?.appearance ?? 'none'}, paper ${drawn.paper}, marks ${drawn.marks}, wordmark ${drawn.wordmark}, counter "${drawn.counter}", rails ${drawn.rails}, rules ${drawn.rules.top || drawn.rules.bottom ? 'drawn' : 'none'}, crosses ${drawn.crosses}, the panel names "${named?.trim() ?? 'nothing'}"`,
+      );
+      const check = (ok: boolean, what: string) => {
+        if (!ok) failures.push(`${via}: ${what}`);
+      };
+      check(info.theme === 'simple', `theme ${info.theme}`);
+      check(info.defaults?.appearance === 'light', `appearance ${info.defaults?.appearance}`);
+      check(drawn.paper === '#ffffff', `paper ${drawn.paper}`);
+      check(drawn.marks === 0 && drawn.wordmark === 0, 'no GT mark and no wordmark');
+      check(drawn.counter === '', `counter "${drawn.counter}"`);
+      check(
+        drawn.rails === 0 && !drawn.rules.top && !drawn.rules.bottom && drawn.crosses === 0,
+        'no frame',
+      );
+      check(named?.trim() === 'Simple', `the panel names "${named?.trim()}"`);
+    }
+    test.info().annotations.push({ type: 'themes', description: readings.join('; ') });
+    expect(failures, readings.join('\n')).toEqual([]);
+  });
+
+  /* DESIGN.md 7.3 (G7): with no stored appearance a deck draws its theme's: Simple light, General
+     Translation dark */
+  row('themes.appearance.theme-default', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Appearance default deck');
+    const sheetTheme = () =>
+      page.evaluate(
+        () =>
+          document
+            .querySelector('.ts-stagewrap.ts-editor .ts-stage')
+            ?.closest('.ts-sheet')
+            ?.getAttribute('data-theme') ?? '',
+      );
+    let s = await settled(page);
+    await invoke(page, 'deck.set', { path: '/defaults/appearance', baseRevision: s.revision });
+    await settled(page);
+    await page.waitForTimeout(300);
+    const info = await invoke<{ theme: string; defaults?: { appearance?: string } }>(
+      page,
+      'deck.info',
+    );
+    const simple = await sheetTheme();
+    s = await settled(page);
+    await invoke(page, 'deck.set', {
+      path: '/theme',
+      value: 'general-translation',
+      baseRevision: s.revision,
+    });
+    await settled(page);
+    await page.waitForTimeout(300);
+    const gt = await sheetTheme();
+    test.info().annotations.push({
+      type: 'themes',
+      description: `appearance removed: ${info.defaults?.appearance ?? 'none stored'}; Simple draws ${simple}, General Translation draws ${gt}`,
+    });
+    expect(info.theme).toBe('simple');
+    expect(info.defaults?.appearance).toBeUndefined();
+    expect(simple).toBe('light');
+    expect(gt).toBe('dark');
+  });
+
+  /* DESIGN.md 7.9 rule 1: a deck made from the General Translation brand deck reads
+     general-translation and draws every GT part; the Theme panel names General Translation */
+  row('themes.migration.gt-unchanged', async ({ browser }) => {
+    test.setTimeout(600_000);
+    const { page, scratch } = await personAt(browser);
+    await page.goto('/decks');
+    await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 120_000 });
+    const id = scratch.add(await openGtBrandCopy(page, 240_000));
+    await waitEditor(page);
+    await settled(page, 60_000);
+    const info = await invoke<{ theme: string }>(page, 'deck.info');
+    const order = await slideOrder(page);
+    await clickCard(page, order[0]!);
+    const first = await themeDrawn(page);
+    const titleId = order.find((slide) => slide === 'title') ?? order[1]!;
+    await clickCard(page, titleId);
+    const title = await themeDrawn(page);
+    await menuPath(page, 'slide', 'slide.changeTheme');
+    const named = await page
+      .locator('[data-control="panel.theme.current"] .ts-theme-current-name')
+      .first()
+      .textContent({ timeout: 10_000 })
+      .catch(() => null);
+    await page.keyboard.press('Escape');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `deck ${id}: theme ${info.theme}; first slide ${order[0]}: wordmark ${first.wordmark}, counter "${first.counter}", rails ${first.rails}, rules ${first.rules.top && first.rules.bottom ? 'both' : 'not both'}, crosses ${first.crosses}; title slide ${titleId}: GT marks ${title.marks}, features ${title.features}; the panel names "${named?.trim() ?? 'nothing'}"`,
+    });
+    expect(info.theme).toBe('general-translation');
+    expect(first.wordmark).toBe(1);
+    expect(first.counter).toBe(`01 / ${String(order.length).padStart(2, '0')}`);
+    expect(first.rails).toBe(2);
+    expect(first.rules).toEqual({ top: true, bottom: true });
+    expect(first.crosses).toBe(4);
+    expect(title.marks).toBeGreaterThan(0);
+    expect(title.features).toBe('"cv11", "ss01"');
+    expect(named?.trim()).toBe('General Translation');
+  });
+
   return declared;
+}
+
+/** A deck from the Blank card on /decks (a link to /new), its title typed so the first write saves it. */
+async function deckFromBlankCard(page: Page, scratch: Scratch, text: string): Promise<string> {
+  await page.goto('/decks');
+  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 120_000 });
+  await page.locator('[data-control="home.blank"]').first().click();
+  await page.waitForURL(/\/new/, { timeout: 60_000 });
+  await waitEditor(page);
+  const info = await invoke<{ id: string }>(page, 'deck.info');
+  const run = await headingRun(page);
+  await typeInto(page, run, text);
+  await waitRevision(page, 1, 30_000);
+  await page.waitForURL(/\/edit\//, { timeout: 30_000 });
+  await settled(page);
+  const close = page.locator('[data-control="dialog.namePrompt.close"]');
+  if (await close.isVisible().catch(() => false)) await close.click().catch(() => undefined);
+  return scratch.add(info.id);
 }

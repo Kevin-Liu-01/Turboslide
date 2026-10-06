@@ -409,7 +409,7 @@
     },
     "deck.create": {
       "label": "New deck",
-      "doc": "Creates a deck under decks/ from a template of the index (template.list), the GT brand template or one title slide, and returns its id, revision and counts.",
+      "doc": "Creates a deck under decks/ from a template of the index (template.list), the deployment default when `from` is absent (Blank: one title slide in the Simple theme, light), and returns its id, revision and counts.",
       "mutates": true,
       "milestone": "M4",
       "group": "deck"
@@ -1144,7 +1144,7 @@
     },
     "brand.get": {
       "label": "Brand kit",
-      "doc": "The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate; an empty object for a deck that reads the deployment’s default kit.",
+      "doc": "The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate, drawn over the deck’s theme; an empty object for a deck that draws its theme alone.",
       "mutates": false,
       "milestone": "P1",
       "group": "deck"
@@ -1158,7 +1158,7 @@
     },
     "brand.reset": {
       "label": "Reset the brand kit",
-      "doc": "Removes the brand kit record, so the deck reads the deployment’s default kit, or one field of it when a pointer is given; a deck with nothing to remove writes no revision.",
+      "doc": "Removes the brand kit record, so the deck draws its theme alone (theme.list), or one field of it when a pointer is given, which then reads the theme’s value; a deck with nothing to remove writes no revision.",
       "mutates": true,
       "milestone": "P1",
       "group": "deck"

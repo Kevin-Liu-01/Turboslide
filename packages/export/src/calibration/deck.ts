@@ -202,7 +202,7 @@ export function calibrationDeck(): DeckDocument {
     schemaVersion: 1,
     id: CALIBRATION_DECK_ID,
     title: 'Turboslide calibration deck',
-    theme: 'gt-ink-paper',
+    theme: 'general-translation',
     sections: [{ id: 'calibration', name: 'Calibration', slideIds: [...CALIBRATION_SLIDE_IDS] }],
     assets: { [PICTURE.id]: PICTURE, [SHOT.id]: SHOT },
     revision: 1,

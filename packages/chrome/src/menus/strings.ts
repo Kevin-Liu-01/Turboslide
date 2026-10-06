@@ -833,6 +833,7 @@ export const PANELS = {
     /* question 10's default (docs/NEXT.md 4.1.3 item 21): one noun for the toolbar button, the
        Slide row and the panel */
     title: 'Theme',
+    inThisPresentation: 'In this presentation',
     appearance: 'Appearance',
     logo: 'Logo',
     logoLine: 'Shown on the title slide and in the corner of every slide',
@@ -879,7 +880,8 @@ export const PANELS = {
     lexiconLine: 'Kept as written when this presentation is translated',
     lexiconPlaceholder: 'One name per line',
     reset: (kit: string) => `Reset to ${kit}`,
-    resetDoc: (kit: string) => `Removes this presentation’s own kit; every slide reads ${kit}’s`,
+    resetDoc: (theme: string) =>
+      `Removes this presentation’s brand kit; every slide draws the ${theme} theme`,
     resetDone: (kit: string) => `Reset to ${kit}`,
     logoEverySlide: 'Your logo is on every slide',
     logoRemoved: 'The logo is off every slide',

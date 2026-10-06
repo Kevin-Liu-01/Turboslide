@@ -969,9 +969,17 @@ function registerHostedDeckActions(
   };
   // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
   // the instance's overlay the folder handler wrote to (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10)
-  dispatcher.register('deck.create', async (input) =>
-    record(await decks.create(input as CreateDeckInput)),
-  );
+  /* without `from` the deployment default /new starts from (docs/DESIGN.md 7.3, G10), read after
+     the collection's templates are pulled */
+  dispatcher.register('deck.create', async (input) => {
+    const given = input as Omit<CreateDeckInput, 'from'> & { from?: string };
+    let from = given.from;
+    if (from === undefined) {
+      await decks.templates.pull();
+      from = readDefaultTemplateId(decks.decksDir);
+    }
+    return record(await decks.create({ ...given, from }));
+  });
   // the listing scoped to the caller (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the admin
   // bearer and a checkout list the store, anyone else their own and shared decks; the collection
   // the store selection built is the one `listScoped` lists
@@ -1427,7 +1435,7 @@ export async function deckDispatcher(
     },
     latestSheet: async (theme) => latestSheets().get(`${deckId}:${theme}`),
     theme: () => ({
-      theme: 'gt-ink-paper',
+      theme: 'general-translation',
       tokens: TOKENS,
       composite: COMPOSITE,
       semantic: SEMANTIC,

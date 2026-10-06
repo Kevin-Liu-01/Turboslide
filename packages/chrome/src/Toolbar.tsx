@@ -614,8 +614,8 @@ export function Toolbar({
         />
         <ToolButton
           icon="link"
-          label="Copy link"
-          title="Copy link"
+          label="Copy Link"
+          title="Copy Link"
           doc="Copies the address of this view, slide and mode included, to the clipboard."
           className="pt-copy"
           control="view.copyLink"

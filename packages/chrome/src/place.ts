@@ -148,7 +148,11 @@ function middlewareOf(options: PlaceOptions): Middleware[] {
     flip({ padding: margin, fallbackPlacements: fallbacksOf(side, align) }),
   ];
   if (side === 'right') list.push(phoneSubmenuMiddleware(margin));
-  list.push(shift({ padding: margin, crossAxis: true }));
+  /* `size` before `shift`: floating-ui's `size` reads the whole clipping height once `shift` has
+     run on that axis, so a fitted plate taller than the room on its side was moved over its anchor
+     (the font picker at 884 px from top 8, over its control; build/d2.md request 1). Before
+     `shift` it writes the room on the side the plate took, the plate scrolls inside it, and
+     `shift` then finds nothing to move on that axis. */
   if (options.fit === true)
     list.push(
       size({
@@ -158,6 +162,7 @@ function middlewareOf(options: PlaceOptions): Middleware[] {
         },
       }),
     );
+  list.push(shift({ padding: margin, crossAxis: true }));
   return list;
 }
 

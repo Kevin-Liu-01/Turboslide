@@ -140,19 +140,18 @@ describe('the brand lint run', () => {
   });
 
   test('a run narrowed to named files weighs only the acceptances of those files', () => {
-    // 2108dad4 is the tree B5b#20 read: Toolbar.tsx holds two accepted labels, TitleRow.css none
+    // 2108dad4 is the tree B5b#20 read: Toolbar.tsx holds two sentence case labels, TitleRow.css
+    // none. "Exit fullscreen" is still accepted; "Copy link" left the list when the toolbar's label
+    // became "Copy Link" in the design round, so on that tree it is an open finding, not a stale one
     const toolbar = runBrandLint({
       root: ROOT,
       mode: 'enforce',
       ref: '2108dad4',
       files: ['packages/chrome/src/Toolbar.tsx'],
     });
-    expect(toolbar.accepted.map((f) => f.rule)).toEqual([
-      'gt-ui/cta-title-case',
-      'gt-ui/cta-title-case',
-    ]);
+    expect(toolbar.accepted.map((f) => f.rule)).toEqual(['gt-ui/cta-title-case']);
+    expect(toolbar.open.map((f) => f.text)).toEqual([expect.stringContaining('Copy link')]);
     expect(toolbar.stale).toEqual([]);
-    expect(toolbar.failed).toBe(false);
     const clean = runBrandLint({
       root: ROOT,
       mode: 'enforce',

@@ -698,7 +698,7 @@ export function Overlay({ view }: OverlayProps) {
           stay its own so the stage neither clears the selection nor starts a drag */}
       {view.linkChip !== null && !view.editing ? (
         <div
-          className="ts-link-chip is-overlay"
+          className="ts-link-chip is-overlay pt-float"
           role="group"
           aria-label="Link"
           data-control="chip.link"

@@ -181,6 +181,21 @@ describe('placeOnce', () => {
     expect(placed.top).toBeGreaterThanOrEqual(VIEWPORT_MARGIN);
     expect(placed.top + (placed.maxHeight ?? 0)).toBeLessThanOrEqual(360 - VIEWPORT_MARGIN);
   });
+
+  it('keeps a fitted plate taller than the room under its anchor under the anchor, scrolling inside', async () => {
+    setViewport(900, 360);
+    /* a plate whose box follows the max-height `fit` writes, as a browser's does */
+    const plate = plateOf(240, 600);
+    Object.defineProperty(plate, 'offsetHeight', {
+      configurable: true,
+      get: () => Math.min(600, parseFloat(plate.style.maxHeight) || 600),
+    });
+    const placed = await placeOnce(anchorAt({ x: 100, y: 40, width: 80, height: 28 }), plate, {
+      fit: true,
+    });
+    /* the room under the anchor: 360 less the anchor's bottom (68), the 2 px gap and the margin */
+    expect(placed).toMatchObject({ top: 70, side: 'below', maxHeight: 360 - 70 - VIEWPORT_MARGIN });
+  });
 });
 
 describe('place', () => {

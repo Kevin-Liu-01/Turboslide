@@ -1,7 +1,9 @@
 /* The link popover of an editing session (InlineText.tsx, Cmd K; gslides-parity SPEC 10.2): a
-   32px paper plate over the run in the chrome's vocabulary, holding the one field. Line law (SPEC
-   2.2): the plate draws its one 1px --pt-hair ring; nothing else in it draws a line. Placed in CSS
-   pixels inside the overlay layer by InlineText.tsx. The run toolbar of the editor depth round is
+   32px paper plate over the run in the chrome's vocabulary, holding the one field. The plate and
+   the link chip are small floating plates (.pt-float in tokens.css: paper, the --pt-edge frame,
+   the 6 px corner and the ring; docs/DESIGN.md 3.1, 3.4) and keep the stage's local order (z 4);
+   the field, the select and the buttons inside take the 4 px chip corner, the plate's corner less
+   its inset. Placed in CSS pixels inside the overlay layer by InlineText.tsx. The run toolbar of the editor depth round is
    gone: Google's text controls sit on the toolbar tail (SPEC 3.2). */
 .ts-link-pop {
   position: absolute;
@@ -10,8 +12,6 @@
   align-items: center;
   height: 32px;
   padding: 0;
-  background: var(--pt-paper);
-  border: 1px solid var(--pt-hair);
   color: var(--pt-ink-2);
   font: 13px/1 var(--pt-text);
   pointer-events: auto;
@@ -25,7 +25,7 @@
   margin: 0;
   padding: 0 8px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--pt-radius-sm);
   background: none;
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);
@@ -84,7 +84,7 @@
 .ts-link-pop .ts-run-link {
   width: 200px;
   height: 32px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
 }
 
 /* as wide as "Slides in this presentation" (docs/archive/rounds/POLISH.md 2.6 item 70; audit-chrome item 22 read
@@ -94,8 +94,8 @@
   height: 32px;
   width: 196px;
   padding: 0 24px 0 8px;
-  border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius-sm);
   background: var(--pt-paper)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.2'/%3E%3C/svg%3E")
     no-repeat right 8px center;
@@ -114,7 +114,7 @@
   height: 32px;
   padding: 0 12px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius-sm);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);
@@ -141,8 +141,6 @@
   height: 32px;
   padding: 0 4px 0 10px;
   max-width: 520px;
-  background: var(--pt-paper);
-  border: 1px solid var(--pt-hair);
   color: var(--pt-ink-2);
   font: 13px/1 var(--pt-text);
   pointer-events: auto;

@@ -2800,7 +2800,7 @@ export function InlineText({
     return (
       <div
         ref={popover}
-        className="ts-link-pop"
+        className="ts-link-pop pt-float"
         role="dialog"
         aria-label="Link"
         data-control="popover.link"
@@ -2886,7 +2886,7 @@ export function InlineText({
     const style = place(32, 420);
     return (
       <div
-        className="ts-link-chip"
+        className="ts-link-chip pt-float"
         role="group"
         aria-label="Link"
         data-control="chip.link"

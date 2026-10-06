@@ -407,14 +407,6 @@ export const ACCEPTED: readonly Acceptance[] = [
   },
   {
     rule: 'gt-ui/cta-title-case',
-    file: 'packages/chrome/src/Toolbar.tsx',
-    match: 'Copy link',
-    reason:
-      'A sentence case button label in the /deck viewer toolbar, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 5.',
-    owner: 'B3b',
-  },
-  {
-    rule: 'gt-ui/cta-title-case',
     file: 'packages/chrome/src/inspector/table.tsx',
     match: 'Distribute rows',
     reason:
@@ -547,14 +539,6 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: '.ts-report-residual',
     reason:
       'The residual list of the export report is set in monospace. From before Round 1, outside every item; build/b5.md request 6.',
-    owner: 'the integrator',
-  },
-  {
-    rule: 'css/no-eyebrow',
-    file: 'packages/chrome/src/pickers/Pickers.css',
-    match: '.ts-picker-title',
-    reason:
-      'The picker titles are uppercase with 0.02 em tracking. From before Round 1, outside every item; build/b5.md request 6.',
     owner: 'the integrator',
   },
   {

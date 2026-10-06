@@ -77,7 +77,7 @@ export function Snackbar({ message, onDismiss }: SnackbarProps) {
   return (
     <div
       ref={plate}
-      className={message === null ? 'ts-snackbar' : 'ts-snackbar is-on'}
+      className={message === null ? 'ts-snackbar pt-float' : 'ts-snackbar pt-float is-on'}
       role="status"
       aria-live="polite"
       data-control="snackbar"

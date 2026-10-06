@@ -194,7 +194,7 @@
   max-height: 120px;
   padding: 6px 10px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);

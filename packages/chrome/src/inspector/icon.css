@@ -60,10 +60,16 @@
 }
 
 /* the picker card under the button, over the rows below and the panel's edge: a fixed plate in
-   the popover layer, placed under the button's right edge by place() (icon.tsx IconCard) */
+   the popover layer, placed under the button's right edge by place() (icon.tsx IconCard), the
+   .pt-float plate of tokens.css; the picker inside draws no second frame */
 .ts-ctl-icon .ts-ctl-icon-card {
   position: fixed;
   z-index: var(--ts-layer-popover);
+  overflow: hidden;
+}
+
+.ts-ctl-icon-card > .ts-iconpicker {
+  border: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -23,7 +23,11 @@
   padding: 6px 0 8px;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
+  /* the small floating plate of docs/DESIGN.md 3.2, written here because ExportMenu.tsx is not
+     this sheet's lane's; .pt-float carries the same four declarations */
+  border: 1px solid var(--pt-edge);
+  border-radius: var(--pt-radius);
+  box-shadow: var(--pt-ring);
   font: 12.5px/1.4 var(--pt-text);
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
 }
@@ -89,6 +93,7 @@
   height: 16px;
   box-sizing: border-box;
   border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius-sm);
   background: var(--pt-paper);
   flex: 0 0 auto;
   transition:

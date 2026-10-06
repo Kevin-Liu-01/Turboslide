@@ -241,10 +241,6 @@
   display: flex;
   flex-direction: column;
   padding: 4px 0;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
-  border-radius: 0;
   font: 13px/1.3 var(--pt-text);
   outline: none;
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
@@ -370,7 +366,8 @@
   text-overflow: ellipsis;
 }
 
-/* ---- the Following plate (11 6.3, 8 P4): 240 by 24, ink, over the stage ---- */
+/* ---- the Following plate (11 6.3, 8 P4): 240 by 24, ink, over the stage; the .pt-float corner
+   and ring with the ink ground and paper text of a toast ---- */
 .ts-following-plate {
   position: absolute;
   top: var(--ts-following-top, 8px);
@@ -386,7 +383,6 @@
   padding: 0 8px;
   background: var(--pt-ink);
   color: var(--pt-paper);
-  border: 1px solid var(--pt-paper);
   font: 500 13px/1 var(--pt-text);
   animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
   pointer-events: auto;

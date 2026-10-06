@@ -12,9 +12,7 @@
   width: min(640px, calc(100vw - 48px));
   max-height: calc(100vh - var(--pt-bar-h) - 48px);
   overflow: auto;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-ink);
+  /* the card is tokens.css's .pt-window: the --pt-edge frame, the 8 px corner, the ring */
   padding: 16px;
   z-index: var(--ts-layer-dialog);
   font: 13px/1.5 var(--pt-text);

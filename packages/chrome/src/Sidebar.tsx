@@ -487,7 +487,7 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
   return (
     <div
       ref={box}
-      className="pt-orow-menu"
+      className="pt-orow-menu pt-float"
       role="menu"
       aria-label={`Slide ${item.id}`}
       style={{ ...start, ['--ts-plate-top' as string]: `${top}px` }}

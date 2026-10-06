@@ -1,7 +1,9 @@
 /* Dialog (Dialog.tsx): a centred paper card over the scrim (gslides-parity SPEC 13.3; R08 B9).
    The card keeps the frame weight (--pt-edge) because it floats over a scrim, where the hairline
    would vanish (SPEC 2.2, the help card's rule); rows inside it are ruled in --pt-hair-soft and
-   the actions row draws --pt-hair above itself. 13 px Inter, 24 px padding, radius 0, no shadow;
+   the actions row draws --pt-hair above itself. 13 px Inter, 24 px padding; the card is tokens.css's
+   .pt-window (the design round, docs/DESIGN.md 3.2: paper, the --pt-edge frame, the 8 px corner,
+   the ring), fields and controls with a box take the 6 px corner, the checkbox 4 px, no shadow;
    the scrim fades over the toast duration and the card rises 8 px over the enter duration; off
    under reduced motion. The product round (docs/archive/rounds/PRODUCT.md 3.1): every field is ruled in
    --pt-field (3:1), every control's focus ring is the one inset ring of tokens.css, the X takes
@@ -30,7 +32,6 @@
 
 .ts-dialog-float > .ts-dialog {
   pointer-events: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .ts-dialog {
@@ -38,9 +39,6 @@
   max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-edge);
   font: 13px/1.45 var(--pt-text);
   outline: none;
   animation: ts-dialog-in var(--pt-dur-enter) var(--pt-ease-out) both;
@@ -78,7 +76,7 @@
   appearance: none;
   background: none;
   border: 1px solid transparent;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   width: 32px;
   height: 32px;
   margin: -6px -4px 0 0;
@@ -169,7 +167,7 @@
   min-height: 32px;
   padding: 0 10px;
   border: 1px solid var(--pt-field);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);
@@ -240,6 +238,7 @@
   height: 16px;
   box-sizing: border-box;
   border: 1px solid var(--pt-edge);
+  border-radius: var(--pt-radius-sm);
   background: var(--pt-paper);
   /* the drawn box and dot sit over the native input that carries data-control; a click aimed at
      the input's box must reach the input, not the drawing (return/build/b5.md request 11) */
@@ -500,7 +499,7 @@
   text-align: left;
   padding: 10px 12px;
   border: 1px solid var(--pt-field);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink-2);
   font: 13px/1.4 var(--pt-text);

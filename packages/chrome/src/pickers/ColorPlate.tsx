@@ -130,7 +130,7 @@ export function ColorPlate({
   return (
     <div
       ref={root}
-      className="ts-plate-anchored ts-color-plate ts-chrome"
+      className="ts-plate-anchored pt-float ts-color-plate ts-chrome"
       role="dialog"
       aria-label={label}
       style={start}

@@ -155,10 +155,8 @@
   z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   padding: 8px 8px 12px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  /* a plate that floats over the stage takes the frame weight (docs/archive/rounds/PRODUCT.md 3.1) */
-  border: 1px solid var(--pt-edge);
+  /* the plate is .pt-float (EditorShell.tsx LayoutPlate; docs/DESIGN.md 3.2); inside a menu's
+     dynamic plate it draws no frame of its own */
   max-height: calc(100vh - 16px);
   overflow-y: auto;
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
@@ -234,9 +232,6 @@
   height: 32px;
   padding: 0 4px 0 12px;
   transform: translateX(-50%);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-ink);
   font: 13px/1 var(--pt-text);
   white-space: nowrap;
 }

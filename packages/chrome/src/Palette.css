@@ -34,8 +34,6 @@
   max-height: min(70vh, 640px);
   display: flex;
   flex-direction: column;
-  background: var(--pt-paper);
-  border: 1px solid var(--pt-hair);
   animation: pt-search-in var(--pt-dur-enter) var(--pt-ease-out) both;
 }
 
@@ -184,7 +182,6 @@
   align-items: center;
   height: 18px;
   padding: 0 5px;
-  border-radius: 0;
   background: var(--pt-hair-soft);
   font-family: var(--pt-text);
   font-size: 11px;

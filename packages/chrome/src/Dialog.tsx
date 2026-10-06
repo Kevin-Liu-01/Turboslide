@@ -324,7 +324,7 @@ export function Dialog({
     >
       <div
         ref={card}
-        className={cn('ts-dialog', !modal && 'is-float', className)}
+        className={cn('ts-dialog pt-window', !modal && 'is-float', className)}
         role="dialog"
         aria-modal={modal ? 'true' : undefined}
         aria-labelledby={titleId}

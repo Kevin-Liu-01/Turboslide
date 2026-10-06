@@ -253,7 +253,7 @@ export function Palette({
     >
       <div
         ref={card}
-        className="pt-search-card"
+        className="pt-search-card pt-window"
         role="dialog"
         aria-modal="true"
         aria-label={label}
@@ -347,7 +347,11 @@ export function Palette({
               <div className="pt-search-group" key={group.group.id} data-group={group.group.id}>
                 <h4>
                   {group.group.label}
-                  {group.group.prefix ? <kbd aria-hidden="true">{group.group.prefix}</kbd> : null}
+                  {group.group.prefix ? (
+                    <kbd className="pt-kbd" aria-hidden="true">
+                      {group.group.prefix}
+                    </kbd>
+                  ) : null}
                 </h4>
                 {group.rows.map((row) => {
                   index += 1;
@@ -382,7 +386,7 @@ export function Palette({
                         <Icon name={row.icon} />
                       </span>
                       <span className="pt-search-t">{row.title}</span>
-                      {row.keys ? <kbd className="pt-search-keys">{row.keys}</kbd> : null}
+                      {row.keys ? <kbd className="pt-search-keys pt-kbd">{row.keys}</kbd> : null}
                       <span className="pt-search-m">{row.meta}</span>
                       {row.hint ? <span className="pt-search-hint">{row.hint}</span> : null}
                     </div>
@@ -399,7 +403,8 @@ export function Palette({
           <span>Escape closes</span>
           {shownGroups === undefined ? (
             <span className="pt-search-foot-prefixes">
-              <kbd>#</kbd> slides <kbd>+</kbd> insert <kbd>&gt;</kbd> actions
+              <kbd className="pt-kbd">#</kbd> slides <kbd className="pt-kbd">+</kbd> insert{' '}
+              <kbd className="pt-kbd">&gt;</kbd> actions
             </span>
           ) : null}
         </p>

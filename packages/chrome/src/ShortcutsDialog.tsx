@@ -198,7 +198,9 @@ export function ShortcutsDialog({ platform, context, onClose }: ShortcutsDialogP
                     </td>
                     <td className="ts-shortcuts-keys">
                       {row.keys.map((key) => (
-                        <kbd key={key}>{key}</kbd>
+                        <kbd key={key} className="pt-kbd">
+                          {key}
+                        </kbd>
                       ))}
                     </td>
                   </tr>

@@ -9,7 +9,9 @@
    drawn with borders, so no artwork is copied. The access key underline draws on Windows and
    Linux while Alt is held (`.is-alt`, Menu.tsx) and never on macOS, where the platform has no Alt
    mnemonics (3.1.1). Radius 0, no shadow, the fade over the fast duration; reduced motion drops
-   it. Colors are tokens only. */
+   it. The plate itself is tokens.css's .pt-float (the design round, docs/DESIGN.md 3.1, 3.2): paper,
+   the --pt-edge frame, the 6 px corner and the ring with no blur or offset; the rows stay square,
+   the 4 px of padding above and below keeping them clear of the corners. Colors are tokens only. */
 .ts-menu-root {
   display: contents;
 }
@@ -23,10 +25,6 @@
   padding: 4px 0;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-edge);
-  border-radius: 0;
   font: 13px/1.3 var(--pt-text);
   outline: none;
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;

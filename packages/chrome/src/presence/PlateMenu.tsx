@@ -140,7 +140,7 @@ export function PlateMenu({
     <div
       ref={root}
       id={id}
-      className={cn('ts-plate-menu ts-chrome', className)}
+      className={cn('ts-plate-menu pt-float ts-chrome', className)}
       role="menu"
       aria-label={label}
       tabIndex={-1}

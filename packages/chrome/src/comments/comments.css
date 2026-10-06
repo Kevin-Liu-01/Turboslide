@@ -33,9 +33,6 @@
   flex-direction: column;
   width: 300px;
   max-height: 420px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-edge);
   font: 13px/1.4 var(--pt-text);
   outline: none;
   pointer-events: auto;
@@ -279,7 +276,7 @@
   resize: vertical;
   padding: 6px 8px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);

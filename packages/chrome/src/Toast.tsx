@@ -28,7 +28,7 @@ export function Toast({ message, on }: ToastProps) {
   return (
     <div
       ref={plate}
-      className={on ? 'pt-toast is-on' : 'pt-toast'}
+      className={on ? 'pt-toast pt-float is-on' : 'pt-toast pt-float'}
       role="status"
       aria-live="polite"
     >

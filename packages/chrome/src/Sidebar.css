@@ -593,7 +593,7 @@ a.pt-sb-mark:focus-visible {
   margin: 0;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: none;
   color: var(--pt-titanium);
   font: 14px/1 var(--pt-display);
@@ -638,9 +638,6 @@ a.pt-sb-mark:focus-visible {
      --ts-plate-top) to 8 px above the window's bottom */
   max-height: calc(100vh - var(--ts-plate-top, 0px) - 8px);
   overflow-y: auto;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
   font-family: var(--pt-text);
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
 }

@@ -2466,7 +2466,11 @@ export function EditorShell({
             />
           ) : null}
           {input.sync?.persisted !== undefined && input.sync.persisted.count > 0 ? (
-            <div className="ts-queue-plate ts-chrome" role="status" data-control="sync.persisted">
+            <div
+              className="ts-queue-plate pt-float ts-chrome"
+              role="status"
+              data-control="sync.persisted"
+            >
               <span>{REFUSALS.unsavedChanges(input.sync.persisted.count)}</span>
               <button
                 type="button"
@@ -2590,7 +2594,7 @@ function LayoutPlate({
   return (
     <div
       ref={root}
-      className="ts-layout-plate"
+      className="ts-layout-plate pt-float"
       role="dialog"
       aria-label={request.purpose === 'new' ? 'New slide with layout' : 'Apply layout'}
       style={start}

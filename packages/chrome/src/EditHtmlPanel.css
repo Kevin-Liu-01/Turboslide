@@ -26,7 +26,7 @@
   min-height: 160px;
   padding: 6px 8px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 12px/1.45 var(--pt-mono);

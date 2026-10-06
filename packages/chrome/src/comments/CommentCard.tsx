@@ -531,7 +531,7 @@ export function CommentCard({
     <div
       ref={root}
       className={cn(
-        'ts-comment-card ts-chrome',
+        'ts-comment-card pt-window ts-chrome',
         thread === null && 'is-new',
         thread !== null && resolved && 'is-resolved',
       )}

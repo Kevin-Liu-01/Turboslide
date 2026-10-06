@@ -15,7 +15,8 @@ export const IDS = [
   'versions.show-changes-marks',
   /* the product round (docs/archive/rounds/PRODUCT.md 8.1) */
   'versions.panel.author-you',
-  'versions.field.square',
+  /* the design round (docs/DESIGN.md 3.1, 11; DR-D2#2): versions.field.square retired for this */
+  'versions.field.corner',
   'comments.panel.empty-gesture',
   /* the people round (docs/archive/rounds/PEOPLE.md 3.1, 3.2, 3.19, 6.1): the window row's mark column and
      Restore in the row's More menu */
@@ -513,9 +514,9 @@ async function productRound(t) {
     },
   );
   await t.step(
-    'versions.field.square',
+    'versions.field.corner',
     'Name this version; read the field',
-    'the field is square',
+    'the field draws the 6 px field corner and the field boundary (--pt-field)',
     async () => {
       await openHistory();
       await t.clickControl('versionHistory.nameCurrent');
@@ -528,12 +529,34 @@ async function productRound(t) {
         .first();
       await field.waitFor({ state: 'visible', timeout: 6000 });
       const fieldControl = await field.getAttribute('data-control');
-      const radius = await t.styleOf(`[data-control="${fieldControl}"]`, ['border-radius']);
+      /* the corner, the frame and what --pt-field computes to where the field sits */
+      const read = await page.evaluate((control) => {
+        const el = document.querySelector(`[data-control="${control}"]`);
+        if (!el) return null;
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;left:-20px;top:-20px;border:1px solid var(--pt-field)';
+        (el.parentElement ?? document.body).append(probe);
+        const field = getComputedStyle(probe).borderTopColor;
+        probe.remove();
+        const cs = getComputedStyle(el);
+        return {
+          radius: cs.borderTopLeftRadius,
+          border: cs.borderTopColor,
+          width: cs.borderTopWidth,
+          field,
+        };
+      }, fieldControl);
       await t.press('Escape');
       await closeHistory();
       return {
-        ok: radius !== null && /^0px( 0px)*$/.test(radius['border-radius']),
-        observed: `border-radius ${radius?.['border-radius'] ?? 'not read'}`,
+        ok:
+          read !== null &&
+          read.radius === '6px' &&
+          read.width === '1px' &&
+          read.border === read.field,
+        observed: read
+          ? `border-radius ${read.radius}; frame ${read.width} ${read.border} (--pt-field ${read.field})`
+          : 'the field was not read',
       };
     },
   );

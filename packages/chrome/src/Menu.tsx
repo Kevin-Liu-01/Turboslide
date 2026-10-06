@@ -500,7 +500,7 @@ function MenuList({
       role="menu"
       aria-label={label}
       tabIndex={-1}
-      className={cn('ts-menu', level > 0 && 'is-sub', altHeld && 'is-alt', className)}
+      className={cn('ts-menu pt-float', level > 0 && 'is-sub', altHeld && 'is-alt', className)}
       data-level={level}
       style={start}
       onKeyDown={onKeyDown}
@@ -791,7 +791,7 @@ function DynamicPlate({
       ref={plate}
       role="menu"
       aria-label={label}
-      className="ts-menu is-sub is-dynamic"
+      className="ts-menu pt-float is-sub is-dynamic"
       style={start}
       onKeyDown={onKeyDown}
     >

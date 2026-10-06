@@ -169,7 +169,7 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
   return (
     <div
       ref={card}
-      className="ts-report ts-chrome"
+      className="ts-report pt-window ts-chrome"
       role="dialog"
       aria-label={title}
       data-control="export.report"

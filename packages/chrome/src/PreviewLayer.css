@@ -1,9 +1,8 @@
 /* PreviewLayer: the one card beside a hovered or focused row (directive
-   8.6). A 322px column: a 1px paper mat with a --pt-hair-soft outline (the
-   sheet ring, one stroke each; scripts/lint-lines.mjs allows pt-preview for
-   the pair), the 320x180 frame with its --pt-edge border holding the live
-   clone, and the 32px title row. Rounded on --pt-radius; the frame takes the
-   radius less the mat's 1px and clips its clone to that less its own border.
+   8.6). A 322px column, the window of tokens.css (.pt-window: paper, the
+   --pt-edge frame, the 8 px corner and the ring; docs/DESIGN.md 3.1): the
+   320x180 frame holding the live clone, ruled from the 32px title row under
+   it; the frame takes the card's corner less its 1px frame at the top.
    Fixed at the viewport origin and moved with translate3d alone, so opening
    it lays nothing out.
 
@@ -22,12 +21,8 @@
   width: 322px;
   height: 214px;
   box-sizing: border-box;
-  padding: 1px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
+  padding: 0;
   font-family: var(--pt-text);
-  outline: 1px solid var(--pt-hair-soft);
-  border-radius: var(--pt-radius, 6px);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -59,8 +54,8 @@
   box-sizing: border-box;
   width: 320px;
   height: 180px;
-  border: 1px solid var(--pt-edge);
-  border-radius: calc(var(--pt-radius, 6px) - 1px);
+  border-bottom: 1px solid var(--pt-hair);
+  border-radius: calc(var(--pt-radius-lg) - 1px) calc(var(--pt-radius-lg) - 1px) 0 0;
   background: var(--pt-plate);
   overflow: hidden;
 }

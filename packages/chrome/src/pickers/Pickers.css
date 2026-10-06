@@ -102,9 +102,13 @@
   display: flex;
   flex-direction: column;
   padding: 4px;
+  outline: none;
+}
+
+/* a list drawn inside a plate or a menu keeps its own hairline; the weight list is the plate */
+.ts-picker-list:not(.pt-float) {
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
-  outline: none;
 }
 
 .ts-picker-list:focus-visible {
@@ -144,9 +148,6 @@
   z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   padding: 8px;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
   max-height: calc(100vh - var(--ts-plate-top, 0px) - 16px);
   overflow: hidden;
 }
@@ -212,7 +213,7 @@
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-hair);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 12px/1 var(--pt-mono);

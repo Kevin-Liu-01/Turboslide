@@ -115,7 +115,7 @@
   height: 32px;
   padding: 0 9px;
   border: 1px solid var(--pt-field);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);

@@ -23,7 +23,7 @@ export type FollowingPlateProps = {
 export function FollowingPlate({ followed, name, onStop }: FollowingPlateProps) {
   return (
     <div
-      className={`${COLLAB_CLASSES.following} ts-following-plate ts-chrome`}
+      className={`${COLLAB_CLASSES.following} ts-following-plate pt-float ts-chrome`}
       role="status"
       data-control="presence.following"
       data-client={followed.clientId}

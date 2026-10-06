@@ -18,10 +18,8 @@
   animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
 }
 
+/* the card is tokens.css's .pt-window: paper, the --pt-edge frame, the 8 px corner, the ring */
 .pt-help-card {
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-edge);
   padding: 26px 30px 22px;
   min-width: 400px;
   max-width: 92vw;

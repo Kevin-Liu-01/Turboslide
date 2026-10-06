@@ -315,7 +315,11 @@ export function PreviewLayer({ resolve }: PreviewLayerProps) {
   return createPortal(
     <div
       ref={plate}
-      className={cn('pt-preview', card?.on && 'is-on', card?.on && card.moved && 'is-moving')}
+      className={cn(
+        'pt-preview pt-window',
+        card?.on && 'is-on',
+        card?.on && card.moved && 'is-moving',
+      )}
       style={card ? { transform: `translate3d(${card.x}px, ${card.y}px, 0)` } : undefined}
       aria-hidden="true"
     >

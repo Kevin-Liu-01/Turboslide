@@ -89,11 +89,15 @@ async function buttonFacts(page: Page): Promise<ButtonFacts> {
          a template's or a presentation's name on its card (DECK-GRAMMAR 22 rules the words a
          button says, not the names of things) */
       const names = el.matches(
-        '[data-control="deck.name"], [data-control^="home.template."], [data-control="home.blank"], [data-control^="home.title."], [data-control^="home.open."], [data-control^="templates.card."]',
+        '[data-control="deck.name"], [data-control^="home.template."], [data-control="home.blank"], [data-control^="home.title."], [data-control^="home.open."], [data-control^="templates.card."], .ts-slide-row',
       );
       if (!names && (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button')) {
-        /* the label is the words the button shows, never an aria name of an icon button */
-        const label = (el.innerText ?? '').replace(/\s+/g, ' ').trim();
+        /* the label is the words the button shows, never an aria name of an icon button; a
+           measure after the words (a step's length, "Restore 2.5 s") is a number, not a word */
+        const label = (el.innerText ?? '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/\s+\d+(?:\.\d+)?\s?(?:s|ms|px|%)$/, '');
         if (
           label !== '' &&
           /[A-Za-z]/.test(label) &&
@@ -139,11 +143,14 @@ export function chromePages(): string[] {
           await page.waitForTimeout(800);
           const facts = await buttonFacts(page);
           const wrong = facts.labels.filter((l) => !isTitleCase(l.label));
-          const allowed = new Set(['0px', facts.ptRadius]);
+          /* the design round's ladder (docs/DESIGN.md 3.1; DR-D2#2): a control is square, a
+             button inside a 6 px plate takes the 4 px chip corner, every other button with a box
+             the 6 px control corner (--pt-radius), Slideshow included; 8 px is a window's */
+          const allowed = new Set(['0px', '4px', facts.ptRadius]);
           const corners = facts.radii.filter((r) =>
-            r.slideshow ? r.radius !== '8px' && !allowed.has(r.radius) : !allowed.has(r.radius),
+            r.slideshow ? r.radius !== facts.ptRadius && r.radius !== '0px' : !allowed.has(r.radius),
           );
-          const slideshow = facts.radii.filter((r) => r.slideshow && r.radius === '8px');
+          const slideshow = facts.radii.filter((r) => r.slideshow && r.radius === facts.ptRadius);
           const notFirst = slideshow.filter((r) => !r.labelFirst);
           notes.push(
             `${surface.name}: ${facts.labels.length} labels (${facts.labels.map((l) => l.label).join(', ')}); ${facts.radii.length} corners, the radius token ${facts.ptRadius}${wrong.length ? `; not Title Case: ${wrong.map((w) => `${w.control} "${w.label}"`).join(', ')}` : ''}${corners.length ? `; corners: ${corners.map((c) => `${c.control} ${c.radius}`).join(', ')}` : ''}`,

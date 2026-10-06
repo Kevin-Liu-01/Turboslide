@@ -19,9 +19,6 @@
   display: flex;
   flex-direction: column;
   padding: 6px 0 8px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
   font: 12.5px/1.4 var(--pt-text);
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
 }
@@ -130,7 +127,7 @@
   margin: 0;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 0;
+  border-radius: var(--pt-radius-sm);
   background: none;
   color: var(--pt-ink-2);
   cursor: pointer;

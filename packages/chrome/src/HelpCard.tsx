@@ -82,7 +82,12 @@ export function HelpCard({ rows, note }: HelpCardProps) {
       aria-hidden={!helpOpen}
       onClick={() => shell.setHelp(false)}
     >
-      <div className="pt-help-card" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+      <div
+        className="pt-help-card pt-window"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
+      >
         <h3>Keyboard shortcuts</h3>
         <table>
           {groups.map((entry) => (

@@ -184,7 +184,7 @@ function SearchPill({ onOpen, open }: { onOpen: () => void; open: boolean }) {
     >
       <Icon name="search" />
       <span className="pt-lb">Search</span>
-      <kbd className="pt-search-kbd" aria-hidden="true">
+      <kbd className="pt-search-kbd pt-kbd" aria-hidden="true">
         {chip}
       </kbd>
     </button>

@@ -39,12 +39,13 @@ async function personIn(
   browser: Browser,
   appearance: Appearance,
   key: string = appearance,
+  width = 1440,
 ): Promise<Person> {
   const known = people.get(key);
   if (known) return known;
   const context = await browser.newContext({
     extraHTTPHeaders,
-    viewport: { width: 1440, height: 900 },
+    viewport: { width, height: width < 720 ? 844 : 900 },
     colorScheme: appearance,
     permissions: ['clipboard-read', 'clipboard-write'],
   });
@@ -213,6 +214,296 @@ async function topAt(page: Page, x: number, y: number) {
     },
     [x, y],
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// DR-D2#2: the walk of the editor's surfaces at one width and appearance, read once and shared by
+// the corner and plate rows (docs/DESIGN.md 3.1 to 3.4).
+
+/** One element's corner, frame and shadow, with the tokens resolved where it sits. */
+type SurfaceFacts = {
+  name: string;
+  radius: string;
+  border: string;
+  borderWidth: string;
+  shadow: string;
+  edge: string;
+  ring: string;
+};
+
+type Walk = {
+  combo: string;
+  floating: SurfaceFacts[];
+  windows: SurfaceFacts[];
+  chips: SurfaceFacts[];
+  controls: SurfaceFacts[];
+  checkboxes: SurfaceFacts[];
+  structure: SurfaceFacts[];
+  /** elements whose box-shadow has a layer with a blur or an offset that is not an inset line */
+  shadows: string[];
+  /** surfaces this width does not draw, with the reason */
+  absent: string[];
+};
+
+const walks = new Map<string, Promise<Walk>>();
+
+/** The facts of the first visible element a selector names, or null. */
+async function surface(page: Page, name: string, selector: string): Promise<SurfaceFacts | null> {
+  return page.evaluate(
+    ([label, sel]) => {
+      const el = [...document.querySelectorAll<HTMLElement>(sel as string)].find((each) => {
+        const r = each.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      const probe = document.createElement('div');
+      probe.style.cssText =
+        'position:fixed;left:-50px;top:-50px;width:10px;height:10px;border:1px solid var(--pt-edge);box-shadow:var(--pt-ring)';
+      (el.parentElement ?? document.body).append(probe);
+      const want = getComputedStyle(probe);
+      const facts = {
+        name: label as string,
+        radius: cs.borderTopLeftRadius,
+        border: cs.borderTopColor,
+        borderWidth: cs.borderTopWidth,
+        shadow: cs.boxShadow,
+        edge: want.borderTopColor,
+        ring: want.boxShadow,
+      };
+      probe.remove();
+      return facts;
+    },
+    [name, selector],
+  );
+}
+
+/** Every element of the page whose box-shadow has a blur or an offset on a layer that is not inset. */
+async function blurredShadows(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const out: string[] = [];
+    for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+      const value = getComputedStyle(el).boxShadow;
+      if (value === 'none' || value === '') continue;
+      /* the layers, split at the commas outside a colour's parentheses */
+      const layers: string[] = [];
+      let depth = 0;
+      let from = 0;
+      for (let i = 0; i < value.length; i += 1) {
+        const ch = value[i];
+        if (ch === '(') depth += 1;
+        else if (ch === ')') depth -= 1;
+        else if (ch === ',' && depth === 0) {
+          layers.push(value.slice(from, i));
+          from = i + 1;
+        }
+      }
+      layers.push(value.slice(from));
+      for (const layer of layers) {
+        if (/\binset\b/.test(layer)) continue;
+        const lengths = (layer.replace(/(rgba?|oklch|color|hsla?)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).map(
+          (n) => Number.parseFloat(n),
+        );
+        const [x = 0, y = 0, blur = 0] = lengths;
+        if (x !== 0 || y !== 0 || blur !== 0) {
+          out.push(`${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}: ${layer.trim()}`);
+          break;
+        }
+      }
+    }
+    return out;
+  });
+}
+
+async function closeAll(page: Page): Promise<void> {
+  for (let i = 0; i < 3; i += 1) await page.keyboard.press('Escape');
+  await page.mouse.move(5, 300);
+  await page.waitForTimeout(250);
+}
+
+async function walkOf(browser: Browser, width: number, appearance: Appearance): Promise<Walk> {
+  const combo = `${width} ${appearance}`;
+  const known = walks.get(combo);
+  if (known) return known;
+  const run = (async (): Promise<Walk> => {
+    const person = await personIn(browser, appearance, `walk ${combo}`, width);
+    const { page } = person;
+    const walk: Walk = {
+      combo,
+      floating: [],
+      windows: [],
+      chips: [],
+      controls: [],
+      checkboxes: [],
+      structure: [],
+      shadows: [],
+      absent: [],
+    };
+    const take = async (list: SurfaceFacts[], name: string, selector: string) => {
+      const facts = await surface(page, name, selector);
+      if (facts) list.push(facts);
+      else walk.absent.push(name);
+    };
+    const visible = async (control: string) =>
+      (await ctl(page, control).count()) > 0 && (await ctl(page, control).isVisible());
+    const phone = width < 720;
+    /* the bar the first write opened, and the controls and structure at rest */
+    await take(walk.floating, 'the name prompt bar', '.ts-title-name-plate');
+    await take(walk.controls, 'Share', '[data-control="share.open"]');
+    await take(walk.controls, 'Slideshow', '[data-control="present.split"]');
+    await take(walk.controls, 'a toolbar button', '[data-control="toolbar.undo"]');
+    await take(walk.controls, 'the font size field', '.ts-tb-size-field');
+    await take(walk.structure, 'the title row', '.ts-title-row');
+    if (!phone) await take(walk.structure, 'the menu bar', '.ts-menubar');
+    await take(walk.structure, 'the filmstrip column', '.pt-sb');
+    await take(walk.structure, 'a thumbnail', '.ts-thumb');
+    await take(walk.structure, 'the sheet', '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    await take(walk.structure, 'the speaker notes', '.ts-notes-field');
+    if (!phone) await take(walk.structure, 'an identity chip', '.ts-presence-me');
+    walk.shadows.push(...(await blurredShadows(page)));
+    /* the tooltip of a toolbar button with a key */
+    const undo = await ctl(page, 'toolbar.undo').boundingBox();
+    if (undo) {
+      await page.mouse.move(undo.x + 2, undo.y + 2, { steps: 2 });
+      await page.waitForTimeout(150);
+      await page.mouse.move(undo.x + undo.width / 2, undo.y + undo.height / 2, { steps: 2 });
+      await page.locator('#pt-tip:not([hidden])').waitFor({ timeout: 8000 }).catch(() => undefined);
+      await take(walk.floating, 'the tooltip', '#pt-tip');
+      await take(walk.chips, "the tooltip's key", '#pt-tip .pt-tip-key');
+      await page.mouse.move(5, 300);
+    }
+    /* a menu and its submenu */
+    await ctl(page, phone ? 'toolbar.menus' : 'menubar.insert').click();
+    await page.locator('.ts-menu').first().waitFor({ timeout: 8000 });
+    await page.waitForTimeout(300);
+    await take(walk.floating, 'a menu', '.ts-menu');
+    const subRow = page.locator('.ts-menu .ts-menu-item[aria-haspopup="menu"]').first();
+    if ((await subRow.count()) > 0) {
+      await subRow.hover();
+      await page.waitForTimeout(500);
+      if (phone) await subRow.click().catch(() => undefined);
+      await page.locator('.ts-menu.is-sub').first().waitFor({ timeout: 5000 }).catch(() => undefined);
+      await take(walk.floating, 'a submenu', '.ts-menu.is-sub');
+    }
+    walk.shadows.push(...(await blurredShadows(page)));
+    await closeAll(page);
+    /* a context menu on the sheet */
+    const sheet = await page
+      .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)')
+      .first()
+      .boundingBox();
+    if (sheet) {
+      await page.mouse.click(sheet.x + sheet.width - 20, sheet.y + sheet.height - 20, {
+        button: 'right',
+      });
+      await page.locator('.ts-context-menu').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await take(walk.floating, 'a context menu', '.ts-context-menu');
+      await closeAll(page);
+    }
+    /* the account plate menu (the title row hides the presence slot under 720 px) */
+    if (!phone && (await visible('title.account'))) {
+      await ctl(page, 'title.account').click();
+      await page.locator('.ts-plate-menu').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await take(walk.floating, 'the account plate menu', '.ts-plate-menu');
+      walk.shadows.push(...(await blurredShadows(page)));
+      await closeAll(page);
+    } else walk.absent.push('the account plate menu (no presence slot at this width)');
+    /* the layout plate */
+    if (await visible('toolbar.layout')) {
+      await ctl(page, 'toolbar.layout').click();
+      await page.locator('.ts-layout-plate').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await take(walk.floating, 'the layout plate', '.ts-layout-plate');
+      await closeAll(page);
+    } else walk.absent.push('the layout plate (the Layout button folds at this width)');
+    /* the title selected: the selection, its chip, a block; the colour and font pickers */
+    const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]').first();
+    await heading.click();
+    await page.waitForTimeout(400);
+    await take(walk.structure, 'a block on the slide', '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]');
+    await take(walk.structure, 'the selection ring', '.ts-select.is-selected');
+    await take(walk.structure, 'the selection chip', '.ts-select-chip');
+    for (const [control, name, plate] of [
+      ['toolbar.textColor', 'the colour plate', '.ts-color-plate'],
+      ['toolbar.font', 'the font picker', '.ts-font-plate'],
+    ] as const) {
+      if (await visible(control)) {
+        await ctl(page, control).click();
+        await page.locator(plate).first().waitFor({ timeout: 8000 }).catch(() => undefined);
+        await take(walk.floating, name, plate);
+        walk.shadows.push(...(await blurredShadows(page)));
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(250);
+      } else walk.absent.push(`${name} (its control folds at this width)`);
+    }
+    /* Format options for the selected title: its segmented control (Position) and a docked panel */
+    await heading.click();
+    await page.waitForTimeout(300);
+    if (await visible('toolbar.formatOptions')) {
+      await ctl(page, 'toolbar.formatOptions').click();
+      await page.locator('.ts-panel').first().waitFor({ timeout: 10_000 }).catch(() => undefined);
+      await take(walk.controls, 'a segmented control', '.ts-panel .pt-seg');
+      await take(walk.structure, 'a docked panel', '.ts-panel');
+    } else walk.absent.push('Format options (its button folds at this width)');
+    await closeAll(page);
+    /* the search card, its key chips and the hover preview of a slide row */
+    await ctl(page, 'toolbar.search').click();
+    await page.locator('.pt-search-card').waitFor({ timeout: 8000 });
+    await take(walk.windows, 'the search card', '.pt-search-card');
+    await page.keyboard.type('#');
+    await page.waitForTimeout(400);
+    await take(walk.chips, "the search card's key chip", '.pt-search .pt-kbd');
+    const slideRow = page.locator('.pt-search [data-preview]').first();
+    if (!phone && (await slideRow.count()) > 0) {
+      const rb = await slideRow.boundingBox();
+      if (rb) {
+        await page.mouse.move(rb.x + 10, rb.y + rb.height / 2, { steps: 3 });
+        await page.mouse.move(rb.x + 30, rb.y + rb.height / 2, { steps: 3 });
+        await page.locator('.pt-preview.is-on').waitFor({ timeout: 8000 }).catch(() => undefined);
+        await take(walk.windows, 'the hover preview', '.pt-preview.is-on');
+      }
+    } else if (phone) walk.absent.push('the hover preview (no hover on a phone layout)');
+    await closeAll(page);
+    /* the Share dialog: the window, its select, field, checkbox and solid button; the snackbar */
+    await openShare(page);
+    await take(walk.windows, 'the Share dialog', '[data-control="dialog.share"]');
+    await take(walk.controls, "the dialog's select", '[data-control="dialog.share"] select');
+    await take(walk.controls, "the dialog's field", '[data-control="dialog.share.address"]');
+    await take(walk.controls, 'the solid button', '[data-control="dialog.share"] .pt-ib.is-solid');
+    await take(walk.checkboxes, "the dialog's checkbox", '[data-control="dialog.share"] .ts-dialog-check-box');
+    walk.shadows.push(...(await blurredShadows(page)));
+    await ctl(page, 'dialog.share.copy').click();
+    await page.locator('[data-control="snackbar"].is-on').waitFor({ timeout: 10_000 });
+    await take(walk.floating, 'the snackbar', '[data-control="snackbar"]');
+    await closeShare(page);
+    /* the shortcuts dialog's key chips */
+    await page.keyboard.press('Meta+/');
+    if (
+      await page
+        .locator('.ts-shortcuts')
+        .first()
+        .waitFor({ timeout: 6000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      await take(walk.chips, "the shortcuts dialog's key chip", '.ts-shortcuts .pt-kbd');
+      await closeAll(page);
+    } else walk.absent.push('the shortcuts dialog (Cmd+/ did not open it)');
+    return walk;
+  })();
+  walks.set(combo, run);
+  return run;
+}
+
+const COMBOS = [
+  [1440, 'light'],
+  [1440, 'dark'],
+  [390, 'light'],
+  [390, 'dark'],
+] as const;
+
+/** Each surface's facts as one line for the row's annotation. */
+function line(list: SurfaceFacts[]): string {
+  return list.map((f) => `${f.name} ${f.radius}`).join(', ');
 }
 
 export function chromeSurfaces(): string[] {
@@ -622,6 +913,103 @@ export function chromeSurfaces(): string[] {
     expect(inside, 'the menu stayed open').not.toBeNull();
     for (const side of ['left', 'top', 'right', 'bottom'] as const)
       expect(inside![side], `8 px to spare on the ${side}`).toBeGreaterThanOrEqual(8);
+  });
+
+  /* DESIGN.md 3.1: the small floating plates at the 6 px corner and every key chip at 4 px */
+  row('chrome.radius.floating', async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const [width, appearance] of COMBOS) {
+      const walk = await walkOf(browser, width, appearance);
+      readings.push(`${walk.combo}: ${line(walk.floating)}; chips ${line(walk.chips)}`);
+      for (const f of walk.floating)
+        if (f.radius !== '6px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      for (const f of walk.chips)
+        if (f.radius !== '4px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      /* a phone folds the account plate, the layout plate and the toolbar's pickers */
+      const least = width < 720 ? 5 : 9;
+      if (walk.floating.length < least)
+        failures.push(`${walk.combo}: ${walk.floating.length} plates read`);
+    }
+    test.info().annotations.push({ type: 'radius', description: readings.join('; ') });
+    expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 3.1: the windows at 8 px */
+  row('chrome.radius.windows', async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const [width, appearance] of COMBOS) {
+      const walk = await walkOf(browser, width, appearance);
+      readings.push(`${walk.combo}: ${line(walk.windows)}`);
+      for (const f of walk.windows)
+        if (f.radius !== '8px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      if (walk.windows.length < 2) failures.push(`${walk.combo}: ${walk.windows.length} windows read`);
+    }
+    test.info().annotations.push({ type: 'radius', description: readings.join('; ') });
+    expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 3.1: Share, Slideshow, the buttons, fields, selects and segmented controls at 6 px,
+     the checkbox at 4 px */
+  row('chrome.radius.controls', async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const [width, appearance] of COMBOS) {
+      const walk = await walkOf(browser, width, appearance);
+      readings.push(`${walk.combo}: ${line(walk.controls)}; checkboxes ${line(walk.checkboxes)}`);
+      for (const f of walk.controls)
+        if (f.radius !== '6px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      for (const f of walk.checkboxes)
+        if (f.radius !== '4px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      for (const name of ['Share', 'Slideshow'])
+        if (!walk.controls.some((f) => f.name === name)) failures.push(`${walk.combo}: no ${name}`);
+    }
+    test.info().annotations.push({ type: 'radius', description: readings.join('; ') });
+    expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 3.1: structure, the sheet, thumbnails, blocks, the selection and identity chips square */
+  row('chrome.radius.structure-square', async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const [width, appearance] of COMBOS) {
+      const walk = await walkOf(browser, width, appearance);
+      readings.push(`${walk.combo}: ${line(walk.structure)}`);
+      for (const f of walk.structure)
+        if (f.radius !== '0px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
+      if (walk.structure.length < 7) failures.push(`${walk.combo}: ${walk.structure.length} read`);
+    }
+    test.info().annotations.push({ type: 'radius', description: readings.join('; ') });
+    expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 3.4: every floating plate and window draws the --pt-edge frame and the ring; no
+     element draws a shadow with a blur or an offset (an inset line drawn inside a box, the table
+     seams, is a rule and not a shadow, the brand lint's reading) */
+  row('chrome.plates.separation', async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const [width, appearance] of COMBOS) {
+      const walk = await walkOf(browser, width, appearance);
+      for (const f of [...walk.floating, ...walk.windows]) {
+        if (f.borderWidth !== '1px' || f.border !== f.edge)
+          failures.push(`${walk.combo}: ${f.name} frame ${f.borderWidth} ${f.border} (want ${f.edge})`);
+        if (f.shadow !== f.ring) failures.push(`${walk.combo}: ${f.name} ring ${f.shadow}`);
+      }
+      const shadows = [...new Set(walk.shadows)];
+      for (const each of shadows) failures.push(`${walk.combo}: ${each}`);
+      readings.push(
+        `${walk.combo}: ${walk.floating.length + walk.windows.length} plates with frame and ring; shadows with a blur or an offset ${shadows.length}; not drawn at this width: ${walk.absent.join(', ') || 'none'}`,
+      );
+    }
+    test.info().annotations.push({ type: 'plates', description: readings.join('; ') });
+    expect(failures).toEqual([]);
   });
 
   return declared;

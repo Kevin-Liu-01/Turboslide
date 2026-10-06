@@ -262,7 +262,7 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
       {open && button !== null ? (
         <div
           ref={card}
-          className="ts-insert"
+          className="ts-insert pt-float"
           role="menu"
           aria-label="Insert"
           data-control="insert.menu"

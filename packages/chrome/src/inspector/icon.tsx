@@ -51,7 +51,7 @@ function IconCard({ anchor, children }: { anchor: HTMLElement; children: ReactNo
   const start = useStart(anchor, 'below', 4);
   usePlate(card, { layer: 'popover', anchor, side: 'below', align: 'end', gap: 4 });
   return (
-    <div ref={card} className="ts-ctl-icon-card" style={start}>
+    <div ref={card} className="ts-ctl-icon-card pt-float" style={start}>
       {children}
     </div>
   );

@@ -637,7 +637,7 @@ export function ChartSection({
       {menu !== null && menuTarget !== null ? (
         <div
           ref={menuPlate}
-          className="ts-chartgrid-menu ts-chrome"
+          className="ts-chartgrid-menu pt-float ts-chrome"
           role="menu"
           aria-label={`${menuTarget.name} options`}
           data-control={`${control}.menu`}

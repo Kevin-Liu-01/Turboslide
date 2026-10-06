@@ -80,7 +80,7 @@ export function WeightList({
   return (
     <div
       ref={root}
-      className="ts-plate-anchored ts-picker-list ts-weights ts-chrome"
+      className="ts-plate-anchored pt-float ts-picker-list ts-weights ts-chrome"
       role="listbox"
       aria-label={label}
       aria-activedescendant={active === undefined ? undefined : `${control}-${active}`}

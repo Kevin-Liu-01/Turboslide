@@ -408,7 +408,7 @@ export function FontPickerPlate({
         // the plate steps aside while More fonts is open (is-aside: display none, since the
         // plate's own display rule would beat the hidden attribute): the dialog is the one layer
         // a click reaches, and the plate returns with the list focused when the dialog closes
-        className={cn('ts-plate-anchored ts-chrome ts-font-plate', more && 'is-aside')}
+        className={cn('ts-plate-anchored pt-float ts-chrome ts-font-plate', more && 'is-aside')}
         role="dialog"
         aria-label={FONT_PICKER.control}
         style={start}

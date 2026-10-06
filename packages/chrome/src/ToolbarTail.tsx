@@ -1442,7 +1442,7 @@ function AnchoredPlate({
   return (
     <div
       ref={root}
-      className="ts-plate-anchored ts-chrome"
+      className="ts-plate-anchored pt-float ts-chrome"
       role="dialog"
       aria-label={label}
       style={{ ...start, ['--ts-plate-top' as string]: `${top}px` }}

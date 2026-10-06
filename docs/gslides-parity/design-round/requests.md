@@ -4,6 +4,39 @@ Each lane's requests for a file outside its list (docs/DESIGN.md 10), under the 
 integrator or the owning lane to make. A request names the file, the change, the reason and the row
 it serves.
 
+## D5
+
+1. **The integrator, `apps/studio/src/components/Slideshow.tsx`** (DR-D5#3): hand the chrome's
+   Layer hook to the show's two viewer surfaces, the way the file already hands in the icons and the
+   tooltip: `import { useLayer } from '@turboslide/chrome/Layer';` and `layer={useLayer}` on
+   `<PresentShortcuts>` and on the show's `<SlideList placement="up">`. Both components take the
+   prop since DR-D5#3 (`PresentLayer` in `packages/viewer/src/present/ui.tsx`); with it the
+   shortcuts card's scrim enters the `dialog` layer and the slide list the `popover` layer in the
+   top layer (DESIGN.md 2.3). Without it each keeps its DOM place and its sheet draws the scale's
+   z-index (`var(--ts-layer-dialog)`, `var(--ts-layer-popover)`), which already paints both over the
+   show: `present.presenter.surfaces` passes either way and its annotation names the layer it read.
+   In the same file, the show's root (`.ts-slideshow`, the `root` ref) belongs in the `show` layer
+   (`useLayer(root, { layer: 'show' })`, DESIGN.md 2.3 "the slideshow layer"): once the `bar`
+   layer's surfaces (the name prompt bar, the conflict and edit banners) enter the top layer
+   through D2, a show left in its DOM place paints under them. In the top layer the root's
+   `inset: 0` resolves against the window, so on a phone without full screen the toolbar moves
+   from the stage's box to the window's bottom left; the show's list already pins itself to the
+   window (DR-D5#3).
+2. **D1, `packages/lint/src/brand/source.ts` and `config.ts`** (DR-D5#3): the standalone deck's copy
+   (`packages/viewer/standalone/chrome.ts`) declares its own numerals token once in its `:root`
+   (`--numerals: tabular-nums`, the copy of `--pt-numerals`) and reads `var(--numerals)` in its six
+   rules, as it owns its scrollbar copy (`SCROLLBAR_OWNERS`). The source check reads the whole
+   template string, so the one declaration reports `css/numerals` once; a `NUMERALS_OWNERS` list
+   with the standalone copy beside `tokens.css` clears it before DR-D1#5 enforces the rule.
+3. **D1 or the integrator, `packages/chrome/package.json`** (DR-D5#2): the export line
+   `"./dialogs/SignIn": "./src/dialogs/SignIn.tsx"`, so the pages' Sign in
+   (`apps/studio/src/components/home/sign-in-dialog.tsx`, loaded on the first click) draws the one
+   Sign in dialog component the editor draws (`accounts.signin.one-dialog`).
+4. **The integrator, `packages/lint/src/brand/config.ts`** (optional): the accepted
+   `css/no-eyebrow` finding of `.ts-present-card h3` (the shortcuts card's "PRESENTING" in capitals
+   with tracking) can leave with the heading's change to sentence case in one push; changed alone,
+   either half fails the lint (an open finding, or a stale acceptance).
+
 ## D2
 
 1. **D1 or the integrator, `packages/chrome/src/place.ts`** (DR-D2#1; `chrome.layers.follows-anchor`,

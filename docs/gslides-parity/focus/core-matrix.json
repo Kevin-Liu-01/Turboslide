@@ -10712,6 +10712,26 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D1#3; DESIGN.md 4.4 keeps the italic prefetch on /edit, so the italic clause reads the face's status in document.fonts and the files requested"
     },
     {
+      "id": "present.presenter.surfaces",
+      "feature": "present",
+      "interaction": "The presenter view's timer and counter compute tabular-nums; its notes and slide list draw the shared bar; the slideshow's shortcuts card is an 8 px window above the show; its toolbar menus paint above the show",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-scroll 3.2: the presenter notes and slide list on the 15 px platform bar",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#3; the driver reads the bars in a Chromium without --hide-scrollbars, the slide list in a 600 px tall presenter window where eight slides scroll"
+    },
+    {
+      "id": "view.deck.surfaces",
+      "feature": "view",
+      "interaction": "/deck/:id: the sidebar, the grid view and the book view draw the shared bar; the slide numbers compute tabular-nums",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-scroll 3.2",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#3; read on /deck/gt-brand, which every base serves to anyone"
+    },
+    {
       "id": "chrome.layers.tooltip-over-bar",
       "feature": "chrome",
       "interaction": "With the name prompt bar open and the presence slot's tooltip shown, at 1440 in both appearances: the bar's top is at least 4 px under the title row's bottom; the two plates share no edge line; moved over the bar, elementsFromPoint at the overlap returns the tooltip first; both plates draw the 6 px corner, the --pt-edge frame and the ring",

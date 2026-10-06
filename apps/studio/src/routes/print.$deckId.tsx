@@ -238,9 +238,9 @@ function PrintPage() {
           viewTransition={false}
           className="pt-ib is-text"
           data-control="print.close"
-          {...tipProps({ name: 'Close preview', doc: 'Back to the editor.', key: 'Esc' })}
+          {...tipProps({ name: 'Close Preview', doc: 'Back to the editor.', key: 'Esc' })}
         >
-          <span className="pt-lb">Close preview</span>
+          <span className="pt-lb">Close Preview</span>
         </Link>
         <span className="ts-print-title">
           {/* the Turboslide mark at 20 px before the title (gslides-parity SPEC-4 1.10); the GT mark stays the theme's, on the sheet */}

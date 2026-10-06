@@ -409,7 +409,7 @@ export function PresenterConsole({
             id="ts-presenter-notes"
             role="tabpanel"
             aria-labelledby="ts-presenter-tab-notes"
-            className="ts-presenter-notes"
+            className="ts-presenter-notes pt-scroll"
           >
             <div className="ts-presenter-notes-tools">
               <button

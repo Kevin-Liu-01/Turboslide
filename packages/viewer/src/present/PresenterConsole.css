@@ -4,7 +4,10 @@
    with the current slide between the two step buttons, the counter dropdown under it and the
    previous and next previews at 0.3 of the current frame, and the side column with the tabs and
    the notes. Frames are 16:9 boxes with the hair line; the current one keeps the edge ring. Text
-   buttons take the shell's button grammar (32 px, hair on hover, ink ring on focus). */
+   buttons take the shell's button grammar (32 px, hair on hover, ink ring on focus) at the 6 px
+   control corner of docs/DESIGN.md 3.1; the tabs stay square, ruled by their underline. Every
+   number (the timer, the clock, the counter, the notes size) is in tabular figures through
+   --pt-numerals, and the notes scroll on the shared scrollbar (.pt-scroll). */
 .ts-presenter {
   position: fixed;
   inset: 0;
@@ -42,8 +45,7 @@
 .ts-presenter-elapsed {
   min-width: 56px;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   font-size: 20px;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -56,7 +58,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-size: 14px;
   font-weight: 500;
   text-align: center;
@@ -96,7 +97,7 @@
 }
 
 .ts-presenter-clock {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 
@@ -108,7 +109,7 @@
   appearance: none;
   background: none;
   border: 1px solid transparent;
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   color: var(--pt-ink-2);
   font: 13px/1 var(--pt-text);
   height: 32px;
@@ -207,9 +208,7 @@
 
 .ts-presenter-frame.is-current {
   border-color: var(--pt-edge);
-  box-shadow:
-    0 0 0 1px var(--pt-paper),
-    0 0 0 2px var(--pt-hair-soft);
+  box-shadow: var(--pt-ring);
 }
 
 .ts-presenter-empty {
@@ -230,7 +229,7 @@
   justify-content: flex-start;
   padding: 0 10px;
   border-color: var(--pt-hair);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-presenter-counter.is-on {
@@ -298,8 +297,14 @@
 
 .ts-presenter-tab {
   height: 36px;
+  border-radius: 0;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+}
+
+/* a tab answers the pointer with its ink alone; the underline is its only rule */
+.ts-presenter-tab:hover {
+  border-color: transparent;
 }
 
 .ts-presenter-tab.is-on {
@@ -323,7 +328,6 @@
   gap: 12px;
   min-height: 0;
   padding: 12px 16px 16px;
-  overflow-y: auto;
 }
 
 .ts-presenter-notes-tools {
@@ -336,7 +340,7 @@
   min-width: 44px;
   text-align: center;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-presenter-notes-text {
@@ -389,5 +393,16 @@
     justify-content: space-between;
     flex-wrap: wrap;
     row-gap: 4px;
+  }
+
+  /* the two previews share the column's width, so the stage column never scrolls sideways */
+  .ts-presenter-previews {
+    padding-left: 0;
+  }
+
+  .ts-presenter-preview {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
   }
 }

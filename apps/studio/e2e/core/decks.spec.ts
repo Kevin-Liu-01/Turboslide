@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { designDecks } from './design-pages';
 import {
   OIDC,
   Scratch,
@@ -68,6 +69,9 @@ let context: BrowserContext;
 let page: Page;
 let deck = '';
 let deckName = 'Northwind renewal v2';
+
+/* lane D5 of the design round (docs/DESIGN.md 10.5, 11): its rows live in design-pages.ts */
+const DESIGN_D5_ROWS = designDecks();
 
 test.beforeAll(async ({ browser }) => {
   ({ context, page } = await ownerContext(browser));
@@ -3798,6 +3802,7 @@ coverage(import.meta.filename, [
   'decks.list.open-thumbnail',
   'decks.list.open-title',
   'decks.list.open-recent',
+  ...DESIGN_D5_ROWS,
   'decks.card.menu-open-escape',
   'decks.card.rename-enter',
   'decks.card.rename-escape',

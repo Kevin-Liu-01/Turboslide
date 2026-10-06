@@ -1,10 +1,13 @@
-/* Print settings and preview (/print/:deckId), gslides-parity SPEC 6.8. On screen: Google's one
-   toolbar across the top (--pt-bar-h, one --pt-hair rule under it) and the sheets stacked on the
+/* Print settings and preview (/print/:deckId), gslides-parity SPEC 6.8. On screen: one toolbar
+   across the top (--pt-bar-h, one --pt-hair rule under it) and the sheets stacked on the
    plate, each in a 16:9 box scaled by --k = width / 1600 (the route measures it). In print: one
    sheet per 13.333 by 7.5 inch page with no margin, the toolbar gone, --k fixed at 0.8 because a
    13.333 inch page is 1280 CSS pixels wide; the "1 slide with notes" layout gives the sheet the
    upper part of the page and the notes the rest. Colors are the chrome's tokens on screen; the
-   sheet keeps the theme's own tokens (sheet.css) so the paper prints as the deck draws it. */
+   sheet keeps the theme's own tokens (sheet.css) so the paper prints as the deck draws it. The
+   design round (docs/DESIGN.md 3.1, 4, 6): the bar's buttons and the select at the 6 px control
+   corner, Inter's default glyphs, the progress in tabular figures, the bar on the docked layer,
+   and the document on the shared scrollbar of tokens.css. */
 .ts-print {
   min-height: 100vh;
   background: var(--pt-plate);
@@ -14,7 +17,7 @@
 .ts-print-bar {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: var(--ts-layer-docked);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -49,7 +52,6 @@
   gap: 8px;
   min-width: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
   white-space: nowrap;
@@ -96,52 +98,33 @@
   outline-offset: -1px;
 }
 
-.ts-print-check {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.ts-print-check input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-}
-
-.ts-print-check .ts-hm-dialog-box {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-}
-
-.ts-print-check input:checked ~ .ts-hm-dialog-box {
-  background: var(--pt-ink);
-  border-color: var(--pt-ink);
-}
-
-.ts-print-check input:focus-visible ~ .ts-hm-dialog-box {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
-}
-
 .ts-print-spacer {
   flex: 1;
 }
 
+/* a phone: the bar wraps onto rows (Close Preview and the title, the layout and the check, then
+   the two acts), so the document never scrolls sideways and the title keeps its words */
+@media (max-width: 720px) {
+  .ts-print-bar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--pt-bar-h, 48px);
+    padding: 8px 12px;
+    row-gap: 8px;
+  }
+
+  .ts-print-title {
+    flex: 1 1 160px;
+  }
+
+  .ts-print-spacer {
+    display: none;
+  }
+}
+
 .ts-print-progress {
   font-size: 12.5px;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
   white-space: nowrap;
 }
@@ -215,7 +198,6 @@ html:has(.ts-print) {
 
 .ts-print-notes b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
   color: var(--pt-ink-2);

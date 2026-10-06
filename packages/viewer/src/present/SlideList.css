@@ -1,20 +1,20 @@
 /* The slide list of a show and of the presenter console (SlideList.tsx; gslides-parity SPEC 9.2,
-   9.3). A paper plate with a hair frame, 320 px wide, at most 60 percent of the viewport tall and
-   scrolling inside; one 56 px row per slide with the number, a 16:9 live thumbnail 96 px wide and
-   the title on one line. The current slide carries the ink ring; the focused row takes the plate
-   ground. .is-up sits above the show's toolbar at the bottom left; .is-down hangs under the
-   console's counter button. */
+   9.3). A .pt-float plate (tokens.css: paper, the edge frame, the ring, the 6 px corner of
+   docs/DESIGN.md 3.1), 320 px wide, at most 60 percent of the viewport tall and scrolling inside
+   on the shared scrollbar (.pt-scroll); one 56 px row per slide with the number in tabular
+   figures, a 16:9 live thumbnail 96 px wide and the title on one line. The rows stay square; the
+   4 px padding above and below keeps them clear of the plate's corners. The current slide carries
+   the ink ring; the focused row takes the plate ground. .is-up sits above the show's toolbar at
+   the bottom left and takes the popover layer (DESIGN.md 2.2: SlideList.tsx pins it to the
+   viewport where this sheet placed it, then the handed in Layer hook puts it in the top layer);
+   .is-down hangs under the console's counter button in its DOM place. */
 .ts-slide-list {
   position: absolute;
-  z-index: 7;
+  z-index: var(--ts-layer-popover);
   box-sizing: border-box;
   width: 320px;
   max-height: min(60vh, 520px);
-  overflow-y: auto;
   padding: 4px 0;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-hair);
   font: 13px/1.3 var(--pt-text);
   outline: none;
   animation: ts-present-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
@@ -53,7 +53,7 @@
 
 .ts-slide-list-n {
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
 }
 

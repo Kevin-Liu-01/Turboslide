@@ -2,11 +2,12 @@
    The blank layer is a flat black or white sheet over the whole window; the laser is a 14 px ink
    dot with a 2 px paper ring (docs/archive/rounds/POLISH.md 2.7 item 94: the 12 px dot read as a speck at 1440),
    placed by transform so it follows the pointer without layout. The dot's colours are the panel
-   tokens, the same in both themes. */
+   tokens, the same in both themes. Their z-index is local order inside the show (under 5,
+   docs/DESIGN.md 2.6): the toolbar 1, the end plate 2, the blank slide 3, the laser 4. */
 .ts-present-blank {
   position: fixed;
   inset: 0;
-  z-index: 25;
+  z-index: 3;
   cursor: default;
 }
 
@@ -22,7 +23,7 @@
   position: fixed;
   left: -7px;
   top: -7px;
-  z-index: 26;
+  z-index: 4;
   width: 14px;
   height: 14px;
   border-radius: 50%;

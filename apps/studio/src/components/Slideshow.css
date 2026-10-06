@@ -2,11 +2,14 @@
    box that lets the pointer through to the sheet (a click on the slide advances) and holds the
    toolbar, the slide list, the options menu, the blank slides, the laser and the snackbar. While
    the laser is on the pointer itself is hidden over the stage and the blank slide. The snackbar
-   moves up above the toolbar's row here; the bottom bar it usually clears is not on screen. */
+   moves up above the toolbar's row here; the bottom bar it usually clears is not on screen. The
+   show takes the show layer of the scale (docs/DESIGN.md 2.2), over the editor's docked surfaces
+   and its name prompt bar and under every dialog, menu, toast and tooltip; inside it the order is
+   local (under 5): the toolbar 1, the end plate 2, the blank slide 3, the laser 4. */
 .ts-slideshow {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: var(--ts-layer-show);
   pointer-events: none;
 }
 
@@ -66,13 +69,12 @@
 .ts-present-end {
   position: absolute;
   inset: 0;
-  z-index: 24;
+  z-index: 2;
   display: grid;
   place-items: center;
   background: var(--pt-panel-ink, #101010);
   color: var(--pt-panel-text, rgba(255, 255, 255, 0.87));
   font: 500 18px/1.4 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   cursor: pointer;
 }
 
@@ -80,7 +82,7 @@
   display: block;
   margin-top: 8px;
   font: 400 13px/1.4 var(--pt-text);
-  color: var(--pt-panel-text-2, rgba(255, 255, 255, 0.6));
+  color: var(--pt-panel-text-2);
   text-align: center;
 }
 

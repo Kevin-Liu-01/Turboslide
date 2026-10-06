@@ -1,11 +1,13 @@
 /* The Keyboard shortcuts card of a show (PresentShortcuts.tsx). The help card's grammar: a scrim
-   over the viewport, a paper card with the edge frame (the one card that keeps the frame weight
-   because it floats over a scrim), 26 px padding, the presenting table with the keys in the first
-   column. Fades over the toast duration; still under reduced motion. */
+   over the viewport, the card a .pt-window (tokens.css: paper, the edge frame, the ring, the 8 px
+   window corner of docs/DESIGN.md 3.1), 26 px padding, the presenting table with the keys in the
+   first column. The scrim takes the dialog layer (DESIGN.md 2.2): through the handed in Layer hook
+   it enters the top layer; without it the z-index below orders it over the show. Fades over the
+   toast duration; still under reduced motion. */
 .ts-present-scrim {
   position: fixed;
   inset: 0;
-  z-index: 28;
+  z-index: var(--ts-layer-dialog);
   display: grid;
   place-items: center;
   background: var(--pt-scrim);
@@ -18,9 +20,6 @@
   max-height: 92vh;
   overflow-y: auto;
   padding: 22px 26px 24px;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  border: 1px solid var(--pt-edge);
   font: 13px/1.45 var(--pt-text);
 }
 
@@ -34,7 +33,6 @@
 .ts-present-card h2 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-size: 17px;
   font-weight: 500;
   line-height: 1.2;
@@ -54,6 +52,7 @@
   appearance: none;
   background: none;
   border: 1px solid transparent;
+  border-radius: var(--pt-radius);
   color: var(--pt-ink-2);
   width: 32px;
   height: 32px;

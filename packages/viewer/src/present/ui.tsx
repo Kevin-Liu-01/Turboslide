@@ -1,11 +1,30 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
+
+import type { LayerName } from '@turboslide/theme/scale';
 
 /**
  * What the present components borrow from the chrome without importing it (SPEC 3.3: the chrome
  * depends on the viewer, never the reverse). The studio's composition hands in the Tooltip
- * primitive's anchor props and the chrome's Heroicons; the defaults below keep every control
- * named and drawn when nothing is handed in (the viewer's own tests, a bare mount).
+ * primitive's anchor props, the chrome's Heroicons and the Layer primitive's hook; the defaults
+ * below keep every control named and drawn when nothing is handed in (the viewer's own tests, a
+ * bare mount).
  */
+
+/**
+ * The Layer primitive's hook (`useLayer` of packages/chrome/src/Layer.ts, docs/DESIGN.md 2.3):
+ * while `open` is true the element enters the browser's top layer at its layer of the scale.
+ */
+export type PresentLayer = (
+  ref: RefObject<HTMLElement | null>,
+  options: { layer: LayerName; open?: boolean },
+) => void;
+
+/**
+ * The fallback when no hook is handed in: the element keeps its DOM place, and its own sheet
+ * draws the scale's z-index through `var(--ts-layer-<name>)`, the order the Layer primitive keeps
+ * where the top layer is absent.
+ */
+export const noLayer: PresentLayer = () => undefined;
 
 export type TipContent = {
   /** the control's name */

@@ -5,6 +5,8 @@ import { LiveClone } from '../LiveClone';
 import type { ViewerSlide } from '../model';
 import type { Theme } from '../theme';
 import { PRESENT_TEXT } from './strings';
+import { noLayer } from './ui';
+import type { PresentLayer } from './ui';
 
 import './SlideList.css';
 
@@ -30,6 +32,12 @@ export type SlideListProps = {
   onSelect: (index: number) => void;
   onClose: () => void;
   id?: string;
+  /**
+   * the chrome's `useLayer`: the show's list (`up`) enters the popover layer through it, so it
+   * paints over the show and every surface under that layer; the console's list (`down`) hangs
+   * under its button in its DOM place and never takes it
+   */
+  layer?: PresentLayer;
 };
 
 export function SlideList({
@@ -41,8 +49,26 @@ export function SlideList({
   onSelect,
   onClose,
   id = 'ts-slide-list',
+  layer = noLayer,
 }: SlideListProps) {
   const root = useRef<HTMLDivElement>(null);
+  /* the show's list is pinned to the viewport where its sheet placed it (above the toolbar, inside
+     the show's box, which on a phone without full screen is the stage's box and not the window),
+     its top kept 8 px inside the window and its height fitted under that, before it enters the
+     top layer, whose boxes are placed against the window */
+  useLayoutEffect(() => {
+    const el = root.current;
+    if (el === null || placement !== 'up') return;
+    const box = el.getBoundingClientRect();
+    const top = Math.max(8, box.top);
+    el.style.position = 'fixed';
+    el.style.left = `${box.left}px`;
+    el.style.top = `${top}px`;
+    el.style.bottom = 'auto';
+    el.style.maxHeight = `${Math.max(56, box.bottom - top)}px`;
+  }, [placement]);
+  const useListLayer = layer;
+  useListLayer(root, { layer: 'popover', open: placement === 'up' });
   const [focused, setFocused] = useState(Math.max(0, Math.min(slides.length - 1, index)));
 
   /* the current slide's option takes focus on open and on every move */
@@ -110,7 +136,7 @@ export function SlideList({
     <div
       ref={root}
       id={id}
-      className={`ts-slide-list is-${placement}`}
+      className={`ts-slide-list pt-float pt-scroll is-${placement}`}
       role="listbox"
       aria-label={label}
       aria-activedescendant={`${id}-${focused}`}
@@ -131,7 +157,7 @@ export function SlideList({
           onPointerEnter={() => setFocused(at)}
           onClick={() => onSelect(at)}
         >
-          <span className="ts-slide-list-n">{at + 1}</span>
+          <span className="ts-slide-list-n pt-num">{at + 1}</span>
           <span className="ts-slide-list-frame">
             <LiveClone html={slide.html} theme={theme} />
           </span>

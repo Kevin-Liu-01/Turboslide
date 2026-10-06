@@ -35,7 +35,6 @@
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: -0.005em;
-  font-feature-settings: 'cv11', 'ss01';
   color: var(--pt-ink);
 }
 
@@ -71,9 +70,8 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 12.5px;
-  font-feature-settings: 'cv11', 'ss01';
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
   padding-top: 3px;
 }
@@ -212,7 +210,8 @@
 }
 
 /* the minus and plus at the bottom left (R02 section 5): a 32px paper bar with the shell's icon
-   squares, pinned over the region's corner */
+   buttons, pinned over the region's corner; a small plate at the 6 px corner of docs/DESIGN.md
+   3.1, its buttons at that corner less the 1 px frame */
 .pt-grid-size {
   position: sticky;
   bottom: 12px;
@@ -223,12 +222,14 @@
   margin: 0 0 12px 12px;
   background: var(--pt-paper);
   border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
   z-index: 1;
 }
 
 .pt-grid-size .pt-ib {
   width: 30px;
   height: 30px;
+  border-radius: calc(var(--pt-radius) - 1px);
 }
 
 .pt-grid-size .pt-ib:disabled {

@@ -5646,13 +5646,14 @@
     {
       "id": "brand.panel.opens",
       "feature": "brand",
-      "interaction": "Slide > Change theme and the toolbar Theme button open the Brand kit panel with Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to General Translation",
+      "interaction": "Slide > Change theme and the toolbar Theme button open the Theme panel with Appearance, In this presentation, Themes, Brand kit, Logo, Colors, Fonts, Footer, Slide numbers, Frame (each row with its sentence), Words that never translate and Reset to the deck theme name",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-brand 4, 8; audit-seller 6",
       "parks": [
         "slide.changeTheme"
-      ]
+      ],
+      "note": "The panel of audit-brand 4; restated in the design round, DR-D3#4 (docs/DESIGN.md 7.6: the theme sections, and Reset reads the deck theme)"
     },
     {
       "id": "brand.logo.replace-every-slide",
@@ -5734,12 +5735,12 @@
     {
       "id": "brand.background.enter-keeps-open",
       "feature": "brand",
-      "interaction": "Change background, #0b3d91, Enter previews and the dialog stays; Done applies; Add to theme writes the kit's background and every slide follows; the wordmark and counter read on the new ground",
+      "interaction": "Change background, #0b3d91, Enter previews and the dialog stays; Done applies; Add to theme writes the kit's background and every slide follows; the counter, and the wordmark where the deck's theme draws one, read on the new ground",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-brand 17",
       "severity": 2,
-      "note": "Round 1 follow-up, lane D (verify-r1.md finding 1): production read \"Add to theme: locator.boundingBox: Timeout 30000ms\" and group 3's walk \"locator.waitFor: Timeout 8000ms\". Done closed the dialog when its write answered, and the shell's closeDialog closes whatever dialog is open then: on a deployment the write answered after the walk's Escape at 400 ms and after the second Change background had opened, and it closed that second dialog. dialogs/Background.tsx closes on a write's answer only while its own dialog is mounted (dialogs-round-two.test.tsx). By hand with every POST held 2.5 s (lane D's background-race.mjs) the reopened dialog closed between 3 s and 5 s before the fix and stayed open at 5 s after it, at 1440 and 390 in both appearances; the local walk, whose writes answer at once, read the row green before the fix."
+      "note": "Round 1 follow-up, lane D (verify-r1.md finding 1): production read \"Add to theme: locator.boundingBox: Timeout 30000ms\" and group 3's walk \"locator.waitFor: Timeout 8000ms\". Done closed the dialog when its write answered, and the shell's closeDialog closes whatever dialog is open then: on a deployment the write answered after the walk's Escape at 400 ms and after the second Change background had opened, and it closed that second dialog. dialogs/Background.tsx closes on a write's answer only while its own dialog is mounted (dialogs-round-two.test.tsx). By hand with every POST held 2.5 s (lane D's background-race.mjs) the reopened dialog closed between 3 s and 5 s before the fix and stayed open at 5 s after it, at 1440 and 390 in both appearances; the local walk, whose writes answer at once, read the row green before the fix.; restated in the design round, DR-D3#4 (a deck from /new is Simple, which draws no wordmark, docs/DESIGN.md 7.2)"
     },
     {
       "id": "brand.fonts.roles",
@@ -5781,14 +5782,6 @@
       "today": "broken",
       "evidence": "audit-seller 20",
       "severity": 2
-    },
-    {
-      "id": "brand.reset.default-kit",
-      "feature": "brand",
-      "interaction": "The foot button reads \"Reset to General Translation\" on this deployment; pressing it clears the record; the sheet reads the deployment's default kit; the snackbar carries Undo",
-      "driver": "probe --core",
-      "today": "not driven",
-      "evidence": "audit-brand 4"
     },
     {
       "id": "brand.export.pdf-logo",
@@ -11369,6 +11362,76 @@
       "severity": 2,
       "evidence": "research-themes G5 (Section header and Caption put GT's dithered pictures into a deck from Blank)",
       "note": "Design round (docs/DESIGN.md 11), DR-D3#3; the four materials are General Translation's (layouts.ts themeTakesPictures): Section header and Closing in another theme take the empty picture reference, which the renderer draws as the theme's ground, and Blank's assets folder is gone"
+    },
+    {
+      "id": "themes.picker.lists-library",
+      "feature": "decks",
+      "interaction": "Slide > Change theme on a Simple deck from /new with two slides opens the Theme panel; its Themes section lists nine tiles named Simple, General Translation, Swiss, Mint, Coral, Night, Slate, Sand and Signal, each two live clones of the deck's own slides on that theme's paper; the Simple tile alone is checked and draws the 2 px ink border; In this presentation draws the deck's two slides, the name Simple and the row Brand kit: none",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes 5 (the panel offered GT light and GT dark and no other theme)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; ThemesPanel.tsx ThemeLibrary renders each tile's two slides through renderSlide with the tile's theme, a tile when it scrolls into the panel's view"
+    },
+    {
+      "id": "themes.picker.apply-one-commit",
+      "feature": "decks",
+      "interaction": "A click on the Swiss tile writes one revision whose history label reads Theme: Swiss; the stage draws Swiss's ink within 500 ms of the click (a verdict at a load of 24 or less); Version history lists Theme: Swiss; one Cmd or Ctrl+Z then returns the deck to Simple",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes 5 (no theme could be picked)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; one commit of deck.set /theme with PANELS.themes.label"
+    },
+    {
+      "id": "themes.picker.keyboard",
+      "feature": "decks",
+      "interaction": "The nine tiles are one radio group with one tab stop; ArrowRight and ArrowLeft move the focus between tiles without applying; Enter applies the focused theme; hovering a tile shows the tooltip with the theme's name and the sentence Applies <name> to every slide. Your content stays.",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes 5",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4"
+    },
+    {
+      "id": "themes.gt.selectable",
+      "feature": "decks",
+      "interaction": "On a Simple deck with two slides, the General Translation tile draws the GT mark on the title slide, the wordmark, the counter 01 / 02, both rails, both rules and four crosses; the Simple tile then removes every one of them",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "Kevin 2026-10-05 item 2 (themes reset to GT); research-themes G1",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4"
+    },
+    {
+      "id": "themes.reset.returns-to-theme",
+      "feature": "decks",
+      "interaction": "On a Simple deck with a kit colour and the rails turned on, the panel's foot button reads Reset to Simple; pressing it removes the kit, the snackbar says Reset to Simple with Undo, the deck still reads simple, and the stage draws no GT mark, wordmark, counter, rail or cross",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G1, G2 (Reset wrote the deployment's GT kit back)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; replaces brand.reset.default-kit, which this push retires"
+    },
+    {
+      "id": "themes.reset.field-returns-to-theme",
+      "feature": "decks",
+      "interaction": "On a Simple deck whose kit turns on the frame, the default mark, the default footer logo with the text Confidential and the counter, brand.reset of /frame, /mark, /footer and /counter in turn returns each field to Simple's value: no rail, rule or cross, no GT mark, no wordmark or footer text, no counter, and an empty kit",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G3 (a field reset returned the field to GT's value)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4"
+    },
+    {
+      "id": "themes.logo.theme-logo-only",
+      "feature": "decks",
+      "interaction": "The Logo row's Use the theme's logo button is absent on a Simple deck and present on a General Translation deck, where pressing it draws the GT mark on the title slide",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-themes G6 (Use the default logo drew the GT mark on any deck)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4"
     },
     {
       "id": "accounts.sign-in-fits",

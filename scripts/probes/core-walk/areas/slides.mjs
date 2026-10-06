@@ -1027,6 +1027,24 @@ export async function run(t) {
       };
     },
   );
+  /* Caption is a picture layout: a deck from /new is Simple and carries no picture since the
+     design round (docs/DESIGN.md 7.7), so the walk gives it one before the apply rows */
+  await t.setup(
+    'a picture for Caption',
+    'asset.add of a 96 by 64 PNG with the mood role through the window API',
+    async () => {
+      const s = await t.state();
+      const asset = await t.invoke('asset.add', {
+        id: 'core-walk-mood',
+        url: await t.pngDataUrl(96, 64),
+        role: 'mood',
+        alt: 'core walk picture',
+        baseRevision: s.revision,
+      });
+      await t.settled();
+      return { ok: Boolean(asset?.id), observed: asset?.id ?? 'no asset' };
+    },
+  );
   for (const layout of LAYOUTS) {
     await t.step(
       `slides.layout.apply.${layout}`,

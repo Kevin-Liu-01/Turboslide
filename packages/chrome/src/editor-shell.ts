@@ -766,8 +766,9 @@ export type EditorShellInput = {
    */
   onSettingsChange?: (settings: ShellSettings) => void;
   /**
-   * The deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1, 4.3): the name every Reset reads and the
-   * default logo; the blank template's `brand` fields when no default template names another.
+   * The deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1, 4.3): the brand the Logo
+   * picker offers under Your brand; the blank template's `brand` fields when no default template
+   * names another. Reset and the theme's logo read the deck's theme (docs/DESIGN.md 7.5).
    */
   defaultKit?: DefaultKit;
   /** the current slide's findings, for Check slides; every finding when the route passes them */

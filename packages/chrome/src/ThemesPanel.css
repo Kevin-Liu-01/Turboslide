@@ -338,3 +338,111 @@
   font: 500 14px/1.3 var(--pt-text);
   color: var(--pt-ink);
 }
+
+/* The theme library (ThemesPanel.tsx ThemeLibrary; docs/DESIGN.md 7.6): the deck's own tile and
+   nine tiles, each two live clones at 140 by 79 side by side in a --pt-edge frame with the name
+   under them; the current theme's pair draws the layout tiles' 2 px ink border. Thumbnails keep
+   the square corner of structure (DESIGN.md 3.1). */
+.ts-theme-library {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ts-theme-tile {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12px/1.3 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.ts-theme-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  box-sizing: border-box;
+  padding: 2px;
+  border: 2px solid transparent;
+}
+
+.ts-theme-clone {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-plate);
+  overflow: hidden;
+}
+
+.ts-theme-clone .ts-sheet.is-clone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-theme-tile:hover .ts-theme-clone {
+  border-color: var(--pt-ink);
+}
+
+.ts-theme-tile.is-current .ts-theme-pair {
+  border-color: var(--pt-ink);
+}
+
+.ts-theme-tile:focus-visible {
+  outline: none;
+}
+
+.ts-theme-tile:focus-visible .ts-theme-pair {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-theme-name {
+  color: var(--pt-ink-2);
+}
+
+.ts-theme-tile.is-current .ts-theme-name {
+  color: var(--pt-ink);
+}
+
+.ts-theme-own {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-theme-own .ts-theme-pair {
+  padding: 0;
+  border: 0;
+}
+
+.ts-theme-kit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  font: 13px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-theme-kit-start {
+  padding: 16px 16px 0;
+}
+
+.ts-theme-kit-head {
+  margin: 0;
+  font: 500 14px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+}

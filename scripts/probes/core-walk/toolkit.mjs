@@ -552,13 +552,17 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       return m ? { n: Number(m[1]), total: Number(m[2]), text: text.trim() } : null;
     });
   /**
-   * Turns the deck's slide numbers on through `brand.set` when its kit has them off. A deck from
-   * the Blank template draws no counter since Round 1's B4a (docs/NEXT.md 4.1.3 item 23), and the
-   * rows that read the counter need one. Answers what it found and what it did.
+   * Turns the deck's slide numbers on through `brand.set` when the stage draws none. A deck from
+   * /new is Simple, which draws no counter (docs/DESIGN.md 7.2; before the design round, Blank's
+   * kit turned it off, docs/NEXT.md 4.1.3 item 23), and the rows that read the counter need one.
+   * Answers what it found and what it did.
    */
   t.counterOn = async () => {
-    const info = await t.invoke('deck.info').catch(() => null);
-    if (info?.brand?.counter?.show !== false) return 'the kit draws the counter already';
+    const drawn = await page.evaluate(() => {
+      const el = document.querySelector('.ts-stagewrap.ts-editor .counter');
+      return el !== null && el.getClientRects().length > 0 && (el.textContent ?? '').trim() !== '';
+    });
+    if (drawn) return 'the stage draws the counter already';
     const s = await t.settled();
     await t.invoke('brand.set', { path: '/counter/show', value: true, baseRevision: s.revision });
     await t.settled();

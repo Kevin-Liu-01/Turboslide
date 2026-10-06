@@ -411,6 +411,8 @@ export const DIALOGS = {
     none: 'None',
     back: 'Back',
     ok: 'Import slides',
+    /* one theme per deck (docs/DESIGN.md question 18): the copies draw this presentation's theme */
+    theme: 'The copies take this presentation’s theme',
   },
   download: {
     title: 'Download',
@@ -430,7 +432,7 @@ export const DIALOGS = {
     viewLink: 'View link',
     presentLink: 'Present link',
     editLink: 'Edit link',
-    copyLink: 'Copy link',
+    copyLink: 'Copy Link',
     anyoneCanEdit: 'Anyone with this link can edit',
     noAccounts: 'Turboslide has no accounts yet. Anyone who has a link can open it',
     stripped: 'Skipped slides and speaker notes are not included in the view and present links',
@@ -820,12 +822,19 @@ export const CANVAS_NOTICES = {
 export const PANELS = {
   themes: {
     title: 'Themes',
-    gt: 'GT',
     light: 'Light',
     dark: 'Dark',
+    appearance: 'Appearance',
     inThisPresentation: 'In this presentation',
-    importTheme: 'Import theme',
-    importStub: 'Turboslide has one theme, GT',
+    importTheme: 'Import Theme',
+    importDoc: 'Copies another presentation’s theme and brand kit into this one',
+    importTitle: 'Import a theme',
+    importDone: (name: string) => `Theme imported: ${name}`,
+    /* the history label of a pick (docs/DESIGN.md 7.6 item 3), what Version history lists */
+    label: (name: string) => `Theme: ${name}`,
+    /* the tile's tooltip: the theme's name and one sentence, no key */
+    tip: (name: string) => `Applies ${name} to every slide. Your content stays.`,
+    current: 'The presentation uses this theme',
   },
   /* the Brand kit panel (docs/archive/rounds/PRODUCT.md 4.1; B5a): the section names, the one line under each
      control and the snackbar sentences, in the marketer's words */
@@ -834,6 +843,12 @@ export const PANELS = {
        Slide row and the panel */
     title: 'Theme',
     inThisPresentation: 'In this presentation',
+    themes: 'Themes',
+    kit: 'Brand kit',
+    kitNone: 'Brand kit: none',
+    kitOf: (parts: string) => `Brand kit: ${parts}`,
+    editKit: 'Edit Kit',
+    editKitDoc: 'Your colors, fonts and logo over the theme',
     appearance: 'Appearance',
     logo: 'Logo',
     logoLine: 'Shown on the title slide and in the corner of every slide',
@@ -842,8 +857,8 @@ export const PANELS = {
       'Picks a picture file for the logo; it draws on the title slide and in the footer of every slide',
     remove: 'Remove',
     removeDoc: 'Takes the logo off the title slide and the footer of every slide',
-    useDefault: 'Use the default logo',
-    useDefaultDoc: (kit: string) => `Draws ${kit}’s logo again`,
+    useDefault: 'Use the theme’s logo',
+    useDefaultDoc: (theme: string) => `Draws the ${theme} theme’s logo again`,
     position: 'Position',
     titlePosition: 'On the title slide',
     footerPosition: 'In the footer',
@@ -864,7 +879,7 @@ export const PANELS = {
     footerTextDoc:
       'A line in the footer of every slide but the title, such as Confidential or the company name',
     footerTextPlaceholder: 'Confidential',
-    logoKinds: { default: 'Default logo', none: 'None', picture: 'Picture' },
+    logoKinds: { default: 'Theme’s logo', none: 'None', picture: 'Picture' },
     counter: 'Slide numbers',
     counterShow: 'Show',
     counterFormat: 'Format',
@@ -885,7 +900,7 @@ export const PANELS = {
     resetDone: (kit: string) => `Reset to ${kit}`,
     logoEverySlide: 'Your logo is on every slide',
     logoRemoved: 'The logo is off every slide',
-    logoDefault: (kit: string) => `${kit}’s logo is on every slide`,
+    logoDefault: (theme: string) => `The ${theme} theme’s logo is on every slide`,
     uploadFailed: (reason: string) => `The logo could not be uploaded: ${reason}`,
     useOnEverySlide: 'Use on every slide',
     useOnEverySlideDoc:

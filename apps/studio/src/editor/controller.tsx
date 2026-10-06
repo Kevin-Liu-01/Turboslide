@@ -2585,13 +2585,14 @@ export function createEditorController(init: {
 
   /*
    * The history label a write carries into Version history (b7.md FR3; docs/archive/rounds/PRODUCT.md 4.1, 6.1):
-   * the brand kit's writes ("Brand kit: Primary", from the panel, the dialogs and `brand.set`) and
-   * the assist's accept ("Assist: <sentence>") are their own named rows in the panel, so Restore
-   * of the row before takes the colour back and the assistant's change reads by its sentence. An
-   * ordinary edit carries none, because a noted record is a named version in the panel's filter.
+   * the brand kit's writes ("Brand kit: Primary", from the panel, the dialogs and `brand.set`),
+   * a theme pick ("Theme: Swiss", docs/DESIGN.md 7.6 item 3) and the assist's accept ("Assist:
+   * <sentence>") are their own named rows in the panel, so Restore of the row before takes the
+   * colour or the theme back and the assistant's change reads by its sentence. An ordinary edit
+   * carries none, because a noted record is a named version in the panel's filter.
    */
   const historyNoteOf = (label: string): string | undefined =>
-    /^(Brand kit|Assist):/.test(label) ? label : undefined;
+    /^(Brand kit|Theme|Assist):/.test(label) ? label : undefined;
 
   /* the auto-title (gslides-parity SPEC 6.3; docs/archive/rounds/RETURN.md 2.18): a write that changes the title
      slide's heading renames the deck in the same write while the name still follows the heading

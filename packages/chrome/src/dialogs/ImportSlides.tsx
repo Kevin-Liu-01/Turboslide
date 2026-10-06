@@ -55,7 +55,8 @@ export function togglePick(
  * File > Import slides (gslides-parity SPEC 2.1, 6.5, 12 "Dialogs"): step 1 picks a presentation
  * of this studio (deck.list) or a bundle upload; step 2 lists its slides with All, None, Back and
  * Import slides. One `slide.import` copies the chosen slides with fresh ids and their assets
- * after the current slide. Keep original theme is omitted: one theme. Nothing is picked when the
+ * after the current slide; the copies take this presentation's theme (docs/DESIGN.md question 18), as
+ * the dialog says under the slides. Nothing is picked when the
  * list opens (the product round, docs/archive/rounds/PRODUCT.md `slides.import.none-preselected`; audit-brand 19
  * measured 84 slides coming over after one click on a tile meant to pick one); the button counts
  * the picks and a Shift click picks a range.
@@ -233,7 +234,7 @@ export function ImportSlidesDialog() {
               ) : null}
               {decks !== null && decks.length > 0 ? (
                 <ul
-                  className="ts-dialog-list"
+                  className="ts-dialog-list pt-scroll"
                   role="listbox"
                   aria-label={DIALOGS.importSlides.presentations}
                   aria-busy={listing ? 'true' : undefined}
@@ -328,6 +329,9 @@ export function ImportSlidesDialog() {
             </button>
           </div>
           <SlideTiles key={source.id} source={source} picked={picked} onToggle={toggle} />
+          <p className="ts-dialog-hint" data-control="dialog.importSlides.theme">
+            {DIALOGS.importSlides.theme}
+          </p>
         </>
       )}
       {error !== null ? (
@@ -368,7 +372,7 @@ function SlideTiles({
   return (
     <div
       ref={list}
-      className="ts-dialog-slides"
+      className="ts-dialog-slides pt-scroll"
       role="listbox"
       aria-label="Slides"
       aria-multiselectable="true"

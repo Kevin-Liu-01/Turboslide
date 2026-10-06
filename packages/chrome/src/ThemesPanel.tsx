@@ -4,15 +4,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   BrandKit,
   CounterFormat,
-  DefaultKit,
   KitColor,
   LogoKind,
   SlotPosition,
   StoredThemeId,
+  ThemeId,
 } from '@turboslide/schema/brand';
 import {
   COUNTER_FORMATS,
-  FALLBACK_DEFAULT_KIT,
   KIT_COLORS,
   KIT_COLOR_TOKENS,
   KIT_COLOR_WORDS,
@@ -28,7 +27,7 @@ import {
 } from '@turboslide/schema/brand';
 import type { HexColor } from '@turboslide/schema/color';
 import { isHexColor } from '@turboslide/schema/color';
-import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
+import type { Appearance, Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
 import {
   deckAppearance,
   deckCounter,
@@ -37,13 +36,15 @@ import {
 } from '@turboslide/schema/deck';
 import type { FontId } from '@turboslide/schema/fonts';
 import type { Mutation } from '@turboslide/schema/mutations';
+import { renderSlide } from '@turboslide/render/slide';
 import { THEME_CSS_STYLE_ID, themeCss } from '@turboslide/render/theme-css';
-import { themeName, themeRecord } from '@turboslide/theme/themes';
+import { layoutEntry } from '@turboslide/schema/layouts';
+import type { ThemeRecord } from '@turboslide/theme/themes';
+import { THEME_RECORDS, themeName, themeRecord } from '@turboslide/theme/themes';
 import type { TokenName } from '@turboslide/theme/tokens';
 import { LiveClone } from '@turboslide/viewer/LiveClone';
 
 import { useEditorShell } from './editor-shell-context';
-import type { EditorShellInput } from './editor-shell';
 import { FontDropdown } from './FontPicker';
 import type { SlideRenderer } from './LayoutGrid';
 import { cn } from './lib/cn';
@@ -82,12 +83,6 @@ export type ThemesPanelProps = {
   onNotice?: (message: string) => void;
   onClose: () => void;
 };
-
-/** The shell input's default kit (the deployment's, by request to the integrator); the fallback names none. */
-function defaultKitOfInput(input: EditorShellInput): DefaultKit {
-  const kit = (input as { defaultKit?: DefaultKit }).defaultKit;
-  return kit ?? FALLBACK_DEFAULT_KIT;
-}
 
 /** The hex a role shows: the kit's value in the appearance, else the deck theme's token value. */
 function roleHex(
@@ -208,13 +203,206 @@ function HexField({
   );
 }
 
+/**
+ * The two slides a theme tile draws (docs/DESIGN.md 7.6): the deck's first title slide and its
+ * first body slide; a deck without one of them draws the layout's empty placeholders there.
+ */
+export function tileSlides(document: DeckDocument): Slide[] {
+  const order = slideOrder(document.deck)
+    .map((id) => document.slides[id])
+    .filter((slide): slide is Slide => slide !== undefined);
+  const title =
+    order.find((slide) => slide.kind === 'title' || slide.template === 'title') ??
+    layoutEntry('title').make('ts-theme-title', document.deck, 'deck');
+  const body =
+    order.find((slide) => slide.kind === 'content' && slide !== title) ??
+    layoutEntry('one-column').make('ts-theme-body', document.deck, 'deck');
+  return [title, body].filter((slide): slide is Slide => slide !== null && slide !== undefined);
+}
+
+/** One slide drawn in a theme for a tile: the renderer's markup with the theme's rules and the prompts. */
+function tileHtml(
+  deck: Deck,
+  slide: Slide,
+  appearance: Appearance,
+  theme: ThemeId,
+  assetUrl: (path: string) => string,
+  slides: Slide[],
+): string | null {
+  try {
+    return renderSlide({ ...deck, theme }, slide, {
+      theme: appearance,
+      chrome: false,
+      assetBase: '',
+      assetSrc: (_id, _theme, path) => assetUrl(path),
+      blockAttrs: false,
+      gtWord: true,
+      prompts: true,
+      deckSlides: slides,
+    }).html;
+  } catch {
+    return null;
+  }
+}
+
+/** A pair of live clones at 140 by 79 each, the theme's two slides; a plate until it renders. */
+function TilePair({ html, appearance }: { html: (string | null)[] | null; appearance: Appearance }) {
+  return (
+    <span className="ts-theme-pair" aria-hidden="true">
+      {[0, 1].map((index) => (
+        <span key={index} className="ts-theme-clone" data-theme={appearance}>
+          {html?.[index] ? (
+            <LiveClone html={html[index] ?? ''} theme={appearance} frame />
+          ) : null}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** A short line of what the kit sets: "3 colors, logo, fonts", or null for an empty kit. */
+export function kitSummary(kit: BrandKit | undefined): string | null {
+  if (kit === undefined) return null;
+  const parts: string[] = [];
+  const roles = new Set<string>();
+  for (const appearance of ['light', 'dark'] as const)
+    for (const role of Object.keys(kit.colors?.[appearance] ?? {})) roles.add(role);
+  if (roles.size > 0) parts.push(`${roles.size} color${roles.size === 1 ? '' : 's'}`);
+  if (kit.mark !== undefined || kit.footer?.logo !== undefined) parts.push('logo');
+  if (kit.fonts !== undefined) parts.push('fonts');
+  if (kit.footer?.text !== undefined) parts.push('footer text');
+  if (kit.counter !== undefined) parts.push('slide numbers');
+  if (kit.frame !== undefined) parts.push('frame');
+  if ((kit.lexicon ?? []).length > 0) parts.push('words');
+  return parts.length === 0 ? null : parts.join(', ');
+}
+
+/**
+ * The theme library (docs/DESIGN.md 7.6 item 3): one tile per theme in the schema's order, each two
+ * live clones of the deck's own slides in that theme and the current appearance with the name
+ * under them; the current theme's tile draws the 2 px ink border. The tiles are one radio group:
+ * the arrow keys and Home and End move the focus, Enter and Space apply, and a click applies; each
+ * tile carries the tooltip with the theme's name and one sentence. A tile renders when it comes
+ * into the panel's view.
+ */
+function ThemeLibrary({
+  document,
+  appearance,
+  current,
+  assetUrl,
+  onPick,
+}: {
+  document: DeckDocument;
+  appearance: Appearance;
+  current: ThemeId;
+  assetUrl: (path: string) => string;
+  onPick: (theme: ThemeRecord) => void;
+}) {
+  const words = PANELS.themes;
+  const root = useRef<HTMLDivElement>(null);
+  const [focusId, setFocusId] = useState<ThemeId>(current);
+  const [seen, setSeen] = useState<ReadonlySet<ThemeId>>(() =>
+    typeof IntersectionObserver === 'undefined'
+      ? new Set(THEME_RECORDS.map((theme) => theme.id))
+      : new Set([current]),
+  );
+  useEffect(() => {
+    const el = root.current;
+    if (el === null || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .map((entry) => (entry.target as HTMLElement).dataset.themeId as ThemeId);
+        if (visible.length > 0)
+          setSeen((held) => {
+            if (visible.every((id) => held.has(id))) return held;
+            return new Set([...held, ...visible]);
+          });
+      },
+      { root: el.closest('.pt-panel-body') ?? null, rootMargin: '120px 0px' },
+    );
+    for (const tile of el.querySelectorAll('[data-theme-id]')) observer.observe(tile);
+    return () => observer.disconnect();
+  }, []);
+  const slides = useMemo(() => tileSlides(document), [document]);
+  const html = useMemo(() => {
+    const out = new Map<ThemeId, (string | null)[]>();
+    for (const theme of THEME_RECORDS)
+      if (seen.has(theme.id))
+        out.set(
+          theme.id,
+          slides.map((slide) =>
+            tileHtml(document.deck, slide, appearance, theme.id, assetUrl, slides),
+          ),
+        );
+    return out;
+  }, [document.deck, slides, appearance, assetUrl, seen]);
+  const move = (from: ThemeId, step: number | 'first' | 'last') => {
+    const ids = THEME_RECORDS.map((theme) => theme.id);
+    const at = ids.indexOf(from);
+    const next =
+      step === 'first'
+        ? 0
+        : step === 'last'
+          ? ids.length - 1
+          : (at + step + ids.length) % ids.length;
+    const id = ids[next] ?? from;
+    setFocusId(id);
+    root.current?.querySelector<HTMLElement>(`[data-theme-id="${id}"]`)?.focus();
+  };
+  return (
+    <div
+      ref={root}
+      className="ts-theme-library"
+      role="radiogroup"
+      aria-label={words.title}
+      data-control="panel.theme.library"
+    >
+      {THEME_RECORDS.map((theme) => {
+        const on = theme.id === current;
+        const tip = tipProps({ name: theme.name, doc: on ? words.current : words.tip(theme.name) });
+        return (
+          <button
+            key={theme.id}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={theme.id === focusId ? 0 : -1}
+            className={cn('ts-theme-tile', on && 'is-current')}
+            data-control={`panel.theme.${theme.id}`}
+            data-theme-id={theme.id}
+            {...tip}
+            onClick={() => onPick(theme)}
+            onFocus={(event) => {
+              setFocusId(theme.id);
+              tip.onFocus(event);
+            }}
+            onKeyDown={(event) => {
+              tip.onKeyDown(event);
+              if (event.key === 'ArrowRight' || event.key === 'ArrowDown') move(theme.id, 1);
+              else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') move(theme.id, -1);
+              else if (event.key === 'Home') move(theme.id, 'first');
+              else if (event.key === 'End') move(theme.id, 'last');
+              else return;
+              event.preventDefault();
+            }}
+          >
+            <TilePair html={html.get(theme.id) ?? null} appearance={appearance} />
+            <span className="ts-theme-name">{theme.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ThemesPanel({ document, render, commit, onNotice, onClose }: ThemesPanelProps) {
   const shell = useEditorShell();
   const { input } = shell;
   const { deck } = document;
   const kit = deck.brand;
   const words = PANELS.brand;
-  const defaultKit = defaultKitOfInput(input);
   const current = deckAppearance(deck);
   /* the frame the sheet draws: the kit's toggles over the deck theme's parts (docs/DESIGN.md 7.5) */
   const drawnFrame = frameOf(deck.theme, kit);
@@ -232,21 +420,23 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   }
   /* the hex being typed per role, so the swatch follows the field before Enter (item 49) */
   const [typedHex, setTypedHex] = useState<Partial<Record<KitColor, HexColor>>>({});
-  const firstId = slideOrder(deck)[0];
-  const first = firstId === undefined ? undefined : document.slides[firstId];
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const thumbs = useMemo(() => {
-    const make = (theme: Appearance): string | null => {
-      if (first === undefined || render === undefined) return null;
-      try {
-        return render(first, theme);
-      } catch {
-        return null;
-      }
-    };
-    return { light: make('light'), dark: make('dark') };
-  }, [first, render]);
+  void render;
+  /* the asset URL rule the tiles and the logo preview draw pictures with */
+  const assetUrl = useMemo(
+    () => input.assetUrl ?? ((path: string) => path),
+    [input.assetUrl],
+  );
+  /* the deck's own tile: its theme on its two slides (docs/DESIGN.md 7.6 item 2) */
+  const ownSlides = useMemo(() => tileSlides(document), [document]);
+  const ownHtml = useMemo(
+    () =>
+      ownSlides.map((slide) => tileHtml(deck, slide, current, themeId, assetUrl, ownSlides)),
+    [deck, ownSlides, current, themeId, assetUrl],
+  );
+  const kitParts = kitSummary(kit);
+  const kitStart = useRef<HTMLDivElement>(null);
   useEffect(() => () => clearPreview(), []);
 
   const fail = (error: unknown) =>
@@ -313,8 +503,22 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     ).catch(fail);
   };
 
+  /* one pick, one commit: `deck.set /theme` with the history label "Theme: <name>", so Cmd or
+     Ctrl+Z takes it back in one step and Version history lists it (docs/DESIGN.md 7.6 item 3) */
+  const pickTheme = (theme: ThemeRecord) => {
+    if (theme.id === themeId) return;
+    if (commit === undefined) {
+      onNotice?.(words.noKitYet);
+      return;
+    }
+    commit(
+      [{ op: 'deck.set', path: '/theme', value: theme.id }],
+      PANELS.themes.label(theme.name),
+    ).catch(fail);
+  };
+
+  /* Appearance as a segmented control, Light and Dark; the ids of the two tiles before it stay */
   const tile = (appearance: Appearance) => {
-    const html = thumbs[appearance];
     const label = appearance === 'light' ? PANELS.themes.light : PANELS.themes.dark;
     const on = current === appearance;
     return (
@@ -325,32 +529,20 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       >
         <button
           type="button"
-          className={cn('ts-themes-tile', on && 'is-current')}
+          className={cn('pt-ib ts-fo-button is-small', on && 'is-on')}
           role="radio"
           aria-checked={on}
           data-control={`themes.gt.${appearance}`}
           data-appearance={appearance}
           onClick={() => pickAppearance(appearance)}
           {...tipProps({
-            name: `${PANELS.themes.gt} ${label.toLowerCase()}`,
+            name: label,
             doc: on
               ? 'The presentation uses this appearance'
               : `Switches the presentation to ${label.toLowerCase()}`,
           })}
         >
-          <span
-            className="ts-themes-frame"
-            data-theme={appearance}
-            aria-hidden="true"
-            data-selected={on ? 'true' : undefined}
-          >
-            {html === null ? (
-              <span className="ts-themes-plate">{PANELS.themes.gt}</span>
-            ) : (
-              <LiveClone html={html} theme={appearance} frame={false} />
-            )}
-          </span>
-          <span className="ts-themes-name">{label}</span>
+          <span className="pt-lb">{label}</span>
         </button>
       </span>
     );
@@ -428,7 +620,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         ['/footer/assetId', undefined],
       ],
       'Brand kit: Logo',
-    ).then(() => shell.say(words.logoDefault(defaultKit.name), undoAction()));
+    ).then(() => shell.say(words.logoDefault(themeTitle), undoAction()));
 
   /* the two Position selects name what is drawn (item 49): the title slide's mark sits above the
      heading while the record names no position, so its select reads "Above the title" then and
@@ -556,7 +748,9 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     </label>
   );
 
-  const footerLogo: LogoKind = kit?.footer?.logo ?? 'default';
+  /* the footer's default logo is the theme's: none in a theme without one (docs/DESIGN.md 7.5) */
+  const storedFooter: LogoKind = kit?.footer?.logo ?? 'default';
+  const footerLogo: LogoKind = storedFooter === 'default' && !themeHasLogo ? 'none' : storedFooter;
   const footerAsset = kit?.footer?.assetId ?? kit?.mark?.assetId;
   /* the counter the sheet draws: the kit's, the Slide numbers dialog's, else the theme's (docs/DESIGN.md 7.5) */
   const format: CounterFormat = deckCounterFormat(deck);
@@ -611,34 +805,71 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     >
       <section
         className="ts-brand-section"
+        aria-labelledby="ts-brand-appearance"
+        data-control="panel.themes"
+      >
+        <div className="ts-brand-head-row">
+          <h3 id="ts-brand-appearance" className="ts-brand-head">
+            {words.appearance}
+          </h3>
+          <div className="ts-brand-switch" role="radiogroup" aria-label={PANELS.themes.appearance}>
+            {tile('light')}
+            {tile('dark')}
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="ts-brand-section"
         aria-labelledby="ts-theme-current"
         data-control="panel.theme.current"
       >
         <h3 id="ts-theme-current" className="ts-brand-head">
           {words.inThisPresentation}
         </h3>
-        <p className="ts-theme-current-name" data-theme-id={themeId}>
-          {themeTitle}
-        </p>
+        <div className="ts-theme-own" data-theme-id={themeId}>
+          <TilePair html={ownHtml} appearance={current} />
+          <p className="ts-theme-current-name">{themeTitle}</p>
+        </div>
+        <div className="ts-theme-kit-row">
+          <span data-control="panel.theme.kit">
+            {kitParts === null ? words.kitNone : words.kitOf(kitParts)}
+          </span>
+          <button
+            type="button"
+            className="pt-ib ts-fo-button"
+            data-control="panel.theme.editKit"
+            onClick={() => {
+              kitStart.current?.scrollIntoView({ block: 'start' });
+              kitStart.current?.querySelector<HTMLElement>('button, input, select')?.focus();
+            }}
+            {...tipProps({ name: words.editKit, doc: words.editKitDoc })}
+          >
+            <span className="pt-lb">{words.editKit}</span>
+          </button>
+        </div>
       </section>
 
       <section
         className="ts-brand-section"
-        aria-labelledby="ts-brand-appearance"
-        data-control="panel.themes"
+        aria-labelledby="ts-theme-library"
+        data-control="panel.theme.themes"
       >
-        <h3 id="ts-brand-appearance" className="ts-brand-head">
-          {words.appearance}
+        <h3 id="ts-theme-library" className="ts-brand-head">
+          {words.themes}
         </h3>
-        <div
-          className="ts-themes-tiles"
-          role="radiogroup"
-          aria-label={`${PANELS.themes.gt} appearance`}
-        >
-          {tile('light')}
-          {tile('dark')}
-        </div>
+        <ThemeLibrary
+          document={document}
+          appearance={current}
+          current={themeId}
+          assetUrl={assetUrl}
+          onPick={pickTheme}
+        />
       </section>
+
+      <div ref={kitStart} className="ts-theme-kit-start" data-control="panel.theme.kitStart">
+        <h3 className="ts-theme-kit-head">{words.kit}</h3>
+      </div>
 
       <section className="ts-brand-section" aria-labelledby="ts-brand-logo">
         <h3 id="ts-brand-logo" className="ts-brand-head">
@@ -655,7 +886,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
                 ? 'No logo'
                 : markKind === 'picture'
                   ? (logoAsset?.alt ?? 'The logo')
-                  : `${defaultKit.name}’s logo`
+                  : `${themeTitle}’s logo`
             }
             {...tipProps({ name: words.logo, doc: words.logoLine })}
           >
@@ -695,16 +926,18 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
             >
               <span className="pt-lb">{words.remove}</span>
             </button>
-            <button
-              type="button"
-              className="pt-ib ts-fo-button"
-              data-control="panel.brand.logo.default"
-              disabled={commit === undefined}
-              onClick={() => void defaultLogo()}
-              {...tipProps({ name: words.useDefault, doc: words.useDefaultDoc(defaultKit.name) })}
-            >
-              <span className="pt-lb">{words.useDefault}</span>
-            </button>
+            {themeHasLogo ? (
+              <button
+                type="button"
+                className="pt-ib ts-fo-button"
+                data-control="panel.brand.logo.default"
+                disabled={commit === undefined}
+                onClick={() => void defaultLogo()}
+                {...tipProps({ name: words.useDefault, doc: words.useDefaultDoc(themeTitle) })}
+              >
+                <span className="pt-lb">{words.useDefault}</span>
+              </button>
+            ) : null}
           </div>
         </div>
         <div className="ts-brand-two">
@@ -813,7 +1046,10 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
               void writeKit('/footer/logo', next);
             }}
           >
-            {(['default', 'none', 'picture'] as const).map((kind) => (
+            {(themeHasLogo
+              ? (['default', 'none', 'picture'] as const)
+              : (['none', 'picture'] as const)
+            ).map((kind) => (
               <option key={kind} value={kind}>
                 {words.logoKinds[kind]}
               </option>

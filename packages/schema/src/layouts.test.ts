@@ -327,6 +327,13 @@ describe('LAYOUTS', () => {
       expect(promptFor({ slide: made, block: heading!, path: '/text' })).toBe(PROMPTS.title);
     }
     expect(layoutEntry('mood').make('x', simpleDeck, 'deck')).toBeNull();
+    // a picture the Simple deck carries (one imported from another deck): Caption takes it, and
+    // Section header stays on the ground
+    const carried = { ...simpleDeck, assets: { 'mood-earth': blankDeck.assets['mood-earth']! } };
+    const caption = layoutEntry('mood').make('x', carried, 'deck');
+    expect(caption?.kind === 'mood' && caption.picture.asset).toBe('mood-earth');
+    const header = layoutEntry('opener').make('x', carried, 'deck');
+    expect(header?.kind === 'opener' && header.picture.asset).toBe('');
     // the same layouts on a General Translation deck with the starter set take its pictures
     const gt = layoutEntry('opener').make('x', blankDeck, 'deck');
     expect(gt?.kind === 'opener' && gt.picture.asset).toBe('opener-brand');

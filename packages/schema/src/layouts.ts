@@ -490,8 +490,8 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     icon: 'photo',
     needsPicture: true,
     make: (id, deck) => {
-      // Caption is a picture layout in every theme: without the GT pictures it asks for one
-      if (!themeTakesPictures(deck)) return null;
+      // Caption is a picture layout in every theme: it takes a picture the deck carries and asks
+      // for one when the deck has none (a deck from Blank, docs/DESIGN.md 7.7)
       const asset = pickPicture(deck, 'mood');
       if (!asset) return null;
       return {

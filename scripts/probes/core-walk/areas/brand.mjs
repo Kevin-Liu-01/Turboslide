@@ -26,7 +26,6 @@ export const IDS = [
   'brand.background.enter-keeps-open',
   'brand.fonts.roles',
   'brand.counter.format',
-  'brand.reset.default-kit',
   'brand.layout.tiles-in-kit',
   'brand.agent.set-get',
   /* the features round, ship one (docs/archive/rounds/FEATURES.md 2.3 item 4, P1 of B3): the kit's six roles lead every object plate */
@@ -196,7 +195,7 @@ export async function run(t) {
   await t.step(
     'brand.panel.opens',
     'Slide > Change theme and the toolbar Theme button; the Slide menu read for its theme rows',
-    'the Brand kit panel opens each time with its nine sections and the frame rows carry their sentences',
+    'the Theme panel opens each time with Appearance, In this presentation, Themes, Brand kit and the kit sections; the frame rows carry their sentences; the foot reads Reset to the deck theme (docs/DESIGN.md 7.6)',
     async () => {
       await t.clearAll();
       const missing = await brandPanel();
@@ -219,6 +218,9 @@ export async function run(t) {
       const first = await readPanel();
       const sections = [
         'Appearance',
+        'In this presentation',
+        'Themes',
+        'Brand kit',
         'Logo',
         'Colors',
         'Fonts',
@@ -233,7 +235,20 @@ export async function run(t) {
         'Rules: the thin lines that frame the slide',
         'Crosses: the small marks at the frame',
       ].filter((s) => !first.text.includes(s));
-      const resetOk = /^Reset to .+/.test(first.reset ?? '');
+      /* Reset returns to the deck's theme (docs/DESIGN.md 7.5): the deck from /new is Simple */
+      const info = await t.invoke('deck.info', {}).catch(() => ({}));
+      const themeNames = {
+        simple: 'Simple',
+        'general-translation': 'General Translation',
+        swiss: 'Swiss',
+        mint: 'Mint',
+        coral: 'Coral',
+        night: 'Night',
+        slate: 'Slate',
+        sand: 'Sand',
+        signal: 'Signal',
+      };
+      const resetOk = first.reset === `Reset to ${themeNames[info.theme] ?? 'Simple'}`;
       await closePanel();
       /* the toolbar Theme button */
       await t.clickControl('toolbar.theme');
@@ -796,15 +811,19 @@ export async function run(t) {
           /* the wordmark and the counter read on the body slide: the title slide draws no
              wordmark by design (Frame.tsx), and the kit's background is every slide's ground */
           await t.clickCard(B);
+          /* the wordmark only where the deck's theme draws one: a deck from /new is Simple, which
+             has no logo (docs/DESIGN.md 7.2) */
           const wordmark = await page.evaluate(() => {
+            const shown = (el) => el !== null && el.getClientRects().length > 0;
             const w = document.querySelector('.ts-stagewrap.ts-editor .wordmark');
             const c = document.querySelector('.ts-stagewrap.ts-editor .counter');
             return {
-              wordmark: w ? getComputedStyle(w).color : null,
-              counter: c ? getComputedStyle(c).color : null,
+              wordmark: shown(w) ? getComputedStyle(w).color : null,
+              counter: shown(c) ? getComputedStyle(c).color : null,
             };
           });
           contrast = {
+            wordmarkDrawn: wordmark.wordmark !== null,
             wordmark: t.contrastOf(wordmark.wordmark, otherBg),
             counter: t.contrastOf(wordmark.counter, otherBg),
           };
@@ -838,9 +857,10 @@ export async function run(t) {
             kitBg === PRIMARY &&
             otherBg !== null &&
             otherBg !== bgBefore &&
-            (contrast?.wordmark ?? 0) >= 3 &&
-            (contrast?.counter ?? 0) >= 3,
-          observed: `dialog open after Enter ${stillOpen}; sheet ${bgBefore} -> ${previewed} on Enter (revision ${revBefore}); Done closed the dialog ${doneClosed}; slide background after Done ${applied}; Add to theme drawn ${addToTheme}, kit background ${kitBg || (kit === null ? 'not readable on this build' : 'none')}; the title slide's ground ${otherBg ?? 'not read'}; wordmark contrast ${contrast?.wordmark ?? 'not read'}, counter ${contrast?.counter ?? 'not read'}`,
+            contrast !== null &&
+            (!contrast.wordmarkDrawn || (contrast.wordmark ?? 0) >= 3) &&
+            (contrast.counter ?? 0) >= 3,
+          observed: `dialog open after Enter ${stillOpen}; sheet ${bgBefore} -> ${previewed} on Enter (revision ${revBefore}); Done closed the dialog ${doneClosed}; slide background after Done ${applied}; Add to theme drawn ${addToTheme}, kit background ${kitBg || (kit === null ? 'not readable on this build' : 'none')}; the title slide's ground ${otherBg ?? 'not read'}; wordmark contrast ${contrast?.wordmarkDrawn === false ? 'none drawn' : (contrast?.wordmark ?? 'not read')}, counter ${contrast?.counter ?? 'not read'}`,
         };
       } catch (error) {
         await closeBackground().catch(() => undefined);
@@ -1037,49 +1057,8 @@ export async function run(t) {
     },
   );
 
-  await t.step(
-    'brand.reset.default-kit',
-    'read the foot button, press it, read the record and the snackbar',
-    'the button reads Reset to <the default kit>, the record clears, the sheet reads the default kit, the snackbar carries Undo',
-    async () => {
-      await t.clearAll();
-      await t.clickCard(B);
-      const missing = await brandPanel();
-      if (missing) return missing;
-      if (!(await t.visible('panel.brand.reset'))) {
-        await closePanel();
-        return t.notBuilt('panel.brand.reset', LANE);
-      }
-      /* something to reset: the primary colour */
-      if (await t.visible('panel.brand.color.primary.hex'))
-        await typeHex('panel.brand.color.primary.hex', PRIMARY, true);
-      await t.settled();
-      const label = await t.textOf('panel.brand.reset');
-      const blueBefore = await token('blue');
-      await t.clickControl('panel.brand.reset');
-      const { said, undo } = await snackbarUndo();
-      /* the sheet reads the default kit: the primary leaves the typed colour */
-      const blueAfter = await t
-        .pollUntil(
-          () => token('blue'),
-          (v) => v !== null && v !== blueBefore,
-          8000,
-        )
-        .catch(() => token('blue'));
-      await t.settled();
-      const rec = await record();
-      await closePanel();
-      return {
-        ok:
-          /^Reset to .+/.test(label ?? '') &&
-          (!rec || !rec.colors) &&
-          blueAfter !== null &&
-          blueAfter !== blueBefore &&
-          undo,
-        observed: `button "${label ?? 'none'}"; record after ${rec ? JSON.stringify(rec) : 'none or not readable'}; --blue ${blueBefore} -> ${blueAfter}; snackbar "${said ?? 'none'}" with Undo ${undo}`,
-      };
-    },
-  );
+  /* brand.reset.default-kit retired in the design round (DR-D3#4): Reset returns to the deck's
+     theme, the row themes.reset.returns-to-theme of core/brand.spec.ts (brand-themes.ts) */
 
   await t.step(
     'brand.layout.tiles-in-kit',

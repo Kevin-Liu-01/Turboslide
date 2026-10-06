@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
+import { loadavg } from 'node:os';
 
 import { THEME_IDS } from '@turboslide/schema/brand';
 import type { ThemeId } from '@turboslide/schema/brand';
@@ -512,6 +513,397 @@ export function brandThemes(): string[] {
     expect(grid.rule).toBe('More layouts (11)');
   });
 
+  /* DESIGN.md 7.6 items 2 and 3: nine named tiles of the deck's own slides in each theme, the
+     current tile's 2 px ink border, In this presentation with the theme and the kit row */
+  row('themes.picker.lists-library', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Library deck');
+    await addSlide(page);
+    await openThemePanel(page);
+    const tiles = await libraryFacts(page);
+    const own = await page.evaluate(() => ({
+      name:
+        document
+          .querySelector('[data-control="panel.theme.current"] .ts-theme-current-name')
+          ?.textContent?.trim() ?? '',
+      kit: document.querySelector('[data-control="panel.theme.kit"]')?.textContent?.trim() ?? '',
+      clones: document.querySelectorAll(
+        '[data-control="panel.theme.current"] .ts-theme-clone .ts-sheet',
+      ).length,
+    }));
+    await page.keyboard.press('Escape');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `tiles ${tiles.map((t) => `${t.name} (${t.clones} clones, papers ${t.papers.join(' ')}, current ${t.current}, border ${t.border})`).join('; ')}; In this presentation "${own.name}", "${own.kit}", ${own.clones} clones`,
+    });
+    expect(tiles.map((t) => t.name)).toEqual([
+      'Simple',
+      'General Translation',
+      'Swiss',
+      'Mint',
+      'Coral',
+      'Night',
+      'Slate',
+      'Sand',
+      'Signal',
+    ]);
+    for (const t of tiles) {
+      expect(t.clones, t.name).toBe(2);
+      const paper = themeRecord(t.id).tokens.light.paper.toLowerCase();
+      expect(t.papers, t.name).toEqual([paper, paper]);
+    }
+    const current = tiles.filter((t) => t.current);
+    expect(current.map((t) => t.id)).toEqual(['simple']);
+    expect(current[0]?.border).toBe('2px');
+    expect(own.name).toBe('Simple');
+    expect(own.kit).toBe('Brand kit: none');
+    expect(own.clones).toBe(2);
+  });
+
+  /* DESIGN.md 7.6 item 3: a pick is one revision labelled "Theme: Swiss", one Undo step, and a
+     Version history row */
+  row('themes.picker.apply-one-commit', async ({ browser }) => {
+    test.setTimeout(360_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Pick deck');
+    await openThemePanel(page);
+    const before = (await settled(page)).revision;
+    const ink = themeRecord('swiss').tokens.light.ink.toLowerCase();
+    const start = Date.now();
+    await page.locator('[data-control="panel.theme.swiss"]').click();
+    const ms = await expect
+      .poll(() => stageToken(page, '--ink'), { timeout: 5000, intervals: [25] })
+      .toBe(ink)
+      .then(() => Date.now() - start)
+      .catch(() => null);
+    const after = (await settled(page)).revision;
+    const picked = await invoke<{ theme: string }>(page, 'deck.info');
+    await page.keyboard.press('Escape');
+    /* Version history lists the pick while it stands (an undone entry leaves the list) */
+    await menuPath(page, 'file', 'file.versionHistory', 'file.versionHistory.see');
+    await page.locator('[data-control="panel.versionHistory"]').waitFor({ timeout: 10_000 });
+    const readRows = () =>
+      page.evaluate(() =>
+        [
+          ...document.querySelectorAll('[data-control^="versionHistory."][data-control$=".pick"]'),
+        ].map((el) => el.textContent?.replace(/\s+/g, ' ').trim() ?? ''),
+      );
+    let rows: string[] = [];
+    await expect
+      .poll(
+        async () => {
+          for (const w of await page.locator('[data-control^="versionHistory.window."]').all())
+            if ((await w.getAttribute('aria-expanded')) !== 'true')
+              await w.click().catch(() => undefined);
+          rows = await readRows();
+          return rows.some((text) => text.includes('Theme: Swiss'));
+        },
+        { timeout: 20_000, intervals: [500] },
+      )
+      .toBe(true)
+      .catch(() => undefined);
+    await page.keyboard.press('Escape');
+    await page.locator('.ts-stagewrap.ts-editor').click({ position: { x: 20, y: 20 } });
+    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z');
+    await expect
+      .poll(async () => (await invoke<{ theme: string }>(page, 'deck.info')).theme, {
+        timeout: 10_000,
+      })
+      .toBe('simple')
+      .catch(() => undefined);
+    const undone = await invoke<{ theme: string }>(page, 'deck.info');
+    await settled(page);
+    /* a timing is a verdict only at a load of 24 or less (docs/DESIGN.md 11) */
+    const load = loadavg()[0] ?? 0;
+    test.info().annotations.push({
+      type: 'themes',
+      description: `revision ${before} to ${after}; theme ${picked.theme}; every slide drew Swiss's ink ${ms === null ? 'not within 5 s' : `${ms} ms`} after the click (as read by the test's poll, load ${load.toFixed(1)}); Version history rows ${rows.slice(0, 6).join(' | ')}; Cmd+Z: ${undone.theme}`,
+    });
+    expect(picked.theme).toBe('swiss');
+    expect(after).toBe(before + 1);
+    expect(ms, 'every slide redrawn within 5 s').not.toBeNull();
+    if (load <= 24) expect(ms!, 'every slide redrawn within 500 ms').toBeLessThanOrEqual(500);
+    expect(rows.some((text) => text.includes('Theme: Swiss'))).toBe(true);
+    expect(undone.theme, 'one Undo step returns Simple').toBe('simple');
+  });
+
+  /* DESIGN.md 7.6 item 3: the tiles are a radio group; the arrows move, Enter applies; each tile's
+     tooltip names its theme with one sentence */
+  row('themes.picker.keyboard', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Keyboard deck');
+    await openThemePanel(page);
+    const group = await page.evaluate(() => {
+      const g = document.querySelector('[data-control="panel.theme.library"]');
+      return {
+        role: g?.getAttribute('role') ?? '',
+        radios: g?.querySelectorAll('[role="radio"]').length ?? 0,
+        tabbable: [...(g?.querySelectorAll('[role="radio"]') ?? [])].filter(
+          (el) => el.getAttribute('tabindex') === '0',
+        ).length,
+      };
+    });
+    await page.locator('[data-control="panel.theme.simple"]').focus();
+    const focused = () =>
+      page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.themeId ?? '');
+    await page.keyboard.press('ArrowRight');
+    const one = await focused();
+    await page.keyboard.press('ArrowRight');
+    const two = await focused();
+    await page.keyboard.press('ArrowLeft');
+    const back = await focused();
+    await page.keyboard.press('ArrowRight');
+    const notYet = (await invoke<{ theme: string }>(page, 'deck.info')).theme;
+    await page.keyboard.press('Enter');
+    await expect
+      .poll(async () => (await invoke<{ theme: string }>(page, 'deck.info')).theme, {
+        timeout: 10_000,
+      })
+      .toBe('swiss')
+      .catch(() => undefined);
+    const applied = (await invoke<{ theme: string }>(page, 'deck.info')).theme;
+    const tips: string[] = [];
+    for (const id of ['simple', 'mint']) {
+      const tile = page.locator(`[data-control="panel.theme.${id}"]`);
+      await tile.scrollIntoViewIfNeeded();
+      await page.mouse.move(0, 0);
+      await tile.hover();
+      await page
+        .locator('.pt-tip')
+        .first()
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .catch(() => undefined);
+      await page.waitForTimeout(300);
+      tips.push(
+        await page.evaluate(
+          () => document.querySelector('.pt-tip')?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+        ),
+      );
+    }
+    await page.keyboard.press('Escape');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `group ${group.role} with ${group.radios} radios, ${group.tabbable} tabbable; ArrowRight to ${one}, again to ${two}, ArrowLeft to ${back}; before Enter the theme was ${notYet}, after ${applied}; tooltips ${tips.map((t) => `"${t}"`).join(', ')}`,
+    });
+    expect(group).toEqual({ role: 'radiogroup', radios: 9, tabbable: 1 });
+    expect([one, two, back]).toEqual(['general-translation', 'swiss', 'general-translation']);
+    expect(notYet).toBe('simple');
+    expect(applied).toBe('swiss');
+    expect(tips[0]).toContain('Simple');
+    expect(tips[1]).toContain('Mint');
+    expect(tips[1]).toContain('Applies Mint to every slide. Your content stays.');
+  });
+
+  /* Kevin's item 2: General Translation is a theme to pick; picking it draws every GT part and
+     picking Simple again removes every one */
+  row('themes.gt.selectable', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Theme pick deck');
+    await addSlide(page);
+    const [first] = await slideOrder(page);
+    await clickCard(page, first!);
+    await openThemePanel(page);
+    await page.locator('[data-control="panel.theme.general-translation"]').click();
+    await expect
+      .poll(async () => (await invoke<{ theme: string }>(page, 'deck.info')).theme, {
+        timeout: 10_000,
+      })
+      .toBe('general-translation');
+    await settled(page);
+    let gt = await themeDrawn(page);
+    await expect
+      .poll(
+        async () => {
+          gt = await themeDrawn(page);
+          return gt.wordmark === 1 && gt.marks > 0 && gt.crosses === 4;
+        },
+        { timeout: 10_000, intervals: [100] },
+      )
+      .toBe(true)
+      .catch(() => undefined);
+    await page.locator('[data-control="panel.theme.simple"]').scrollIntoViewIfNeeded();
+    await page.locator('[data-control="panel.theme.simple"]').click();
+    await expect
+      .poll(async () => (await invoke<{ theme: string }>(page, 'deck.info')).theme, {
+        timeout: 10_000,
+      })
+      .toBe('simple');
+    await settled(page);
+    let simple = await themeDrawn(page);
+    await expect
+      .poll(
+        async () => {
+          simple = await themeDrawn(page);
+          return simple.marks + simple.wordmark + simple.rails + simple.crosses === 0;
+        },
+        { timeout: 10_000, intervals: [100] },
+      )
+      .toBe(true)
+      .catch(() => undefined);
+    await page.keyboard.press('Escape');
+    test.info().annotations.push({
+      type: 'themes',
+      description: `General Translation: marks ${gt.marks}, wordmark ${gt.wordmark}, counter "${gt.counter}", rails ${gt.rails}, rules ${gt.rules.top && gt.rules.bottom}, crosses ${gt.crosses}; Simple again: marks ${simple.marks}, wordmark ${simple.wordmark}, counter "${simple.counter}", rails ${simple.rails}, crosses ${simple.crosses}`,
+    });
+    expect(gt.marks).toBeGreaterThan(0);
+    expect(gt.wordmark).toBe(1);
+    expect(gt.counter).toBe('01 / 02');
+    expect(gt.rails).toBe(2);
+    expect(gt.rules).toEqual({ top: true, bottom: true });
+    expect(gt.crosses).toBe(4);
+    expect(simple).toMatchObject({ marks: 0, wordmark: 0, counter: '', rails: 0, crosses: 0 });
+    expect(simple.rules).toEqual({ top: false, bottom: false });
+  });
+
+  /* DESIGN.md 7.5 (G1): Reset to Simple removes the kit, draws no GT part, and says so with Undo */
+  row('themes.reset.returns-to-theme', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Reset deck');
+    let s = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/colors/light/primary',
+      value: '#0b3d91',
+      baseRevision: s.revision,
+    });
+    s = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/frame/rails',
+      value: true,
+      baseRevision: s.revision,
+    });
+    await settled(page);
+    await openThemePanel(page);
+    const label =
+      (await page.locator('[data-control="panel.brand.reset"]').textContent())?.trim() ?? '';
+    await page.locator('[data-control="panel.brand.reset"]').click();
+    const said = await expect
+      .poll(
+        async () =>
+          (await page
+            .locator('[data-control="snackbar"]')
+            .textContent()
+            .catch(() => '')) ?? '',
+        { timeout: 8000 },
+      )
+      .toContain('Reset to Simple')
+      .then(() => page.locator('[data-control="snackbar"]').textContent())
+      .catch(() => null);
+    const undo = await page
+      .locator('[data-control="snackbar.action"]')
+      .textContent({ timeout: 3000 })
+      .catch(() => null);
+    await settled(page);
+    const info = await invoke<{ brand?: unknown; theme: string }>(page, 'deck.info');
+    await page.keyboard.press('Escape');
+    const drawn = await themeDrawn(page);
+    test.info().annotations.push({
+      type: 'themes',
+      description: `the foot read "${label}"; the snackbar "${said?.trim() ?? 'none'}" with "${undo?.trim() ?? 'no action'}"; the kit after ${JSON.stringify(info.brand ?? null)}, theme ${info.theme}; marks ${drawn.marks}, wordmark ${drawn.wordmark}, counter "${drawn.counter}", rails ${drawn.rails}, crosses ${drawn.crosses}`,
+    });
+    expect(label).toBe('Reset to Simple');
+    expect(said).not.toBeNull();
+    expect(undo?.trim()).toBe('Undo');
+    expect(info.brand).toBeUndefined();
+    expect(info.theme).toBe('simple');
+    expect(drawn).toMatchObject({ marks: 0, wordmark: 0, counter: '', rails: 0, crosses: 0 });
+  });
+
+  /* DESIGN.md 7.5 (G2, G3): brand.reset of one field returns that field to Simple's value */
+  row('themes.reset.field-returns-to-theme', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Field reset deck');
+    await addSlide(page);
+    const [first] = await slideOrder(page);
+    await clickCard(page, first!);
+    const set = async (path: string, value: unknown) => {
+      const s = await settled(page);
+      await invoke(page, 'brand.set', { path, value, baseRevision: s.revision });
+      await settled(page);
+    };
+    const reset = async (path: string) => {
+      const s = await settled(page);
+      await invoke(page, 'brand.reset', { path, baseRevision: s.revision });
+      await settled(page);
+      await page.waitForTimeout(300);
+    };
+    await set('/frame', { rails: true, rules: true, crosses: true });
+    await set('/mark', { kind: 'default' });
+    await set('/footer', { logo: 'default', text: 'Confidential' });
+    await set('/counter', { show: true });
+    await page.waitForTimeout(300);
+    const on = await themeDrawn(page);
+    const footerOn = await footerText(page);
+    const readings: string[] = [
+      `with the kit: rails ${on.rails}, crosses ${on.crosses}, marks ${on.marks}, wordmark ${on.wordmark}, footer "${footerOn}", counter "${on.counter}"`,
+    ];
+    const after: Record<string, ThemeDrawn & { footer: string }> = {};
+    for (const path of ['/frame', '/mark', '/footer', '/counter']) {
+      await reset(path);
+      after[path] = { ...(await themeDrawn(page)), footer: await footerText(page) };
+      const d = after[path]!;
+      readings.push(
+        `after brand.reset ${path}: rails ${d.rails}, rules ${d.rules.top || d.rules.bottom}, crosses ${d.crosses}, marks ${d.marks}, wordmark ${d.wordmark}, footer "${d.footer}", counter "${d.counter}"`,
+      );
+    }
+    const info = await invoke<{ brand?: unknown }>(page, 'deck.info');
+    test.info().annotations.push({ type: 'themes', description: readings.join('; ') });
+    expect(on.rails).toBe(2);
+    expect(on.counter).toBe('01 / 02');
+    expect(footerOn).toBe('Confidential');
+    expect(after['/frame']).toMatchObject({ rails: 0, crosses: 0 });
+    expect(after['/frame']!.rules).toEqual({ top: false, bottom: false });
+    expect(after['/mark']!.marks).toBe(0);
+    expect(after['/footer']).toMatchObject({ wordmark: 0, footer: '' });
+    expect(after['/counter']!.counter).toBe('');
+    expect(info.brand ?? {}).toEqual({});
+  });
+
+  /* DESIGN.md 7.5 (G6): "Use the theme's logo" on General Translation alone, and it draws the mark */
+  row('themes.logo.theme-logo-only', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Theme logo deck');
+    let s = await settled(page);
+    await invoke(page, 'brand.set', {
+      path: '/mark',
+      value: { kind: 'none' },
+      baseRevision: s.revision,
+    });
+    await settled(page);
+    await openThemePanel(page);
+    const onSimple = await page.locator('[data-control="panel.brand.logo.default"]').count();
+    s = await settled(page);
+    await invoke(page, 'deck.set', {
+      path: '/theme',
+      value: 'general-translation',
+      baseRevision: s.revision,
+    });
+    await settled(page);
+    const button = page.locator('[data-control="panel.brand.logo.default"]');
+    await button.waitFor({ timeout: 10_000 }).catch(() => undefined);
+    const onGt = await button.count();
+    const words = (await button.textContent().catch(() => null))?.trim() ?? '';
+    if (onGt > 0) await button.click();
+    await settled(page);
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Escape');
+    const drawn = await themeDrawn(page);
+    const kit = (await invoke<{ brand?: { mark?: unknown } }>(page, 'deck.info')).brand;
+    test.info().annotations.push({
+      type: 'themes',
+      description: `Simple: ${onSimple} theme logo buttons; General Translation: ${onGt} ("${words}"); after it the kit's mark ${JSON.stringify(kit?.mark ?? null)} and ${drawn.marks} GT marks on the title slide`,
+    });
+    expect(onSimple).toBe(0);
+    expect(onGt).toBe(1);
+    expect(words).toBe('Use the theme’s logo');
+    expect(drawn.marks).toBeGreaterThan(0);
+  });
+
   return declared;
 }
 
@@ -560,10 +952,77 @@ async function pictureFacts(page: Page): Promise<{
       slide?.querySelector('[data-prompt]')?.getAttribute('data-prompt') ??
       '';
     const sheet = stage?.closest('.ts-sheet') ?? null;
+    /* the build's minified sheet writes #ffffff as #fff: the six digit form compares */
+    const six = (v: string) =>
+      /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
     const ground =
       sheet === null
         ? ''
-        : getComputedStyle(sheet).getPropertyValue('--paper').trim().toLowerCase();
+        : six(getComputedStyle(sheet).getPropertyValue('--paper').trim().toLowerCase());
     return { marks, pictures, recipes, credits, prompt, ground };
   });
+}
+
+/** Opens the Theme panel through Slide > Change theme and waits for its library. */
+async function openThemePanel(page: Page): Promise<void> {
+  await menuPath(page, 'slide', 'slide.changeTheme');
+  await page.locator('[data-control="panel.theme.library"]').waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(300);
+}
+
+/** A custom property of the stage's sheet, lowercased, a three digit hex in its six digit form. */
+function stageToken(page: Page, name: string): Promise<string> {
+  return page.evaluate((property) => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .ts-stage')?.closest('.ts-sheet');
+    const v = sheet ? getComputedStyle(sheet).getPropertyValue(property).trim().toLowerCase() : '';
+    return /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
+  }, name);
+}
+
+/** The footer text the stage draws, or an empty string. */
+function footerText(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const el = document.querySelector('.ts-stagewrap.ts-editor .ts-stage .ts-kit-footer');
+    return el && el.getClientRects().length > 0 ? (el.textContent?.trim() ?? '') : '';
+  });
+}
+
+/** Every library tile scrolled into view in turn: its id, name, clones, their papers, current and border. */
+async function libraryFacts(
+  page: Page,
+): Promise<
+  { id: string; name: string; clones: number; papers: string[]; current: boolean; border: string }[]
+> {
+  const ids = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-control="panel.theme.library"] [data-theme-id]')].map(
+      (el) => (el as HTMLElement).dataset.themeId ?? '',
+    ),
+  );
+  const out = [];
+  for (const id of ids) {
+    const tile = page.locator(`[data-control="panel.theme.library"] [data-theme-id="${id}"]`);
+    await tile.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => tile.locator('.ts-theme-clone .ts-sheet').count(), { timeout: 5000 })
+      .toBe(2)
+      .catch(() => undefined);
+    out.push(
+      await tile.evaluate((el) => {
+        const sheets = [...el.querySelectorAll('.ts-theme-clone .ts-sheet')];
+        const pair = el.querySelector('.ts-theme-pair');
+        return {
+          id: (el as HTMLElement).dataset.themeId ?? '',
+          name: el.querySelector('.ts-theme-name')?.textContent?.trim() ?? '',
+          clones: sheets.length,
+          papers: sheets.map((s) => {
+            const v = getComputedStyle(s).getPropertyValue('--paper').trim().toLowerCase();
+            return /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
+          }),
+          current: el.getAttribute('aria-checked') === 'true',
+          border: pair ? getComputedStyle(pair).borderTopWidth : '',
+        };
+      }),
+    );
+  }
+  return out;
 }
